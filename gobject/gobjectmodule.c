@@ -3043,6 +3043,11 @@ initgobject(void)
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
+#ifdef ENABLE_PYGTK_THREADING
+    if (!g_threads_got_initialized)
+	g_thread_init(NULL);
+#endif
+
     g_type_init();
 
     pygobject_class_key = g_quark_from_static_string("PyGObject::class");
