@@ -170,7 +170,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	return PyInt_FromLong(self->pspec->flags);
     } else if (!strcmp(attr, "value_type")) {
 	return pyg_type_wrapper_new(self->pspec->value_type);
-    } else if (!strcmp(attr, "owener_type")) {
+    } else if (!strcmp(attr, "owner_type")) {
 	return pyg_type_wrapper_new(self->pspec->owner_type);
     }
     PyErr_SetString(PyExc_AttributeError, attr);
