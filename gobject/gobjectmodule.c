@@ -785,15 +785,36 @@ static PyObject *
 pygobject__class_init__(PyObject *something, PyObject *args)
 {
     PyExtensionClass *subclass;
+    GTypeInfo type_info = {
+	0,     /* class_size */
+	(GBaseInitFunc) 0,
+	(GBaseFinalizeFunc) 0,
+	(GClassInitFunc) 0,
+	(GClassFinalizeFunc) 0,
+	NULL,  /* class_data */
+
+	0,     /* instance_size */
+	0,     /* n_preallocs */
+	(GInstanceInitFunc) 0
+    };
 
     if (!PyArg_ParseTuple(args, "O:GObject.__class_init__", &subclass))
 	return NULL;
+
     g_message("__class_init__ called for %s", subclass->tp_name);
+
+    /* make sure ExtensionClass doesn't screw up our dealloc hack */
     if ((subclass->class_flags & EXTENSIONCLASS_PYSUBCLASS_FLAG) &&
 	subclass->tp_dealloc != (destructor)pygobject_subclass_dealloc) {
 	real_subclass_dealloc = subclass->tp_dealloc;
 	subclass->tp_dealloc = (destructor)pygobject_subclass_dealloc;
     }
+
+    /* put code in here to create a new GType for this subclass, using
+     * __module__.__name__ as the name for the type.  Then we can add
+     * the code needed for adding signals to the subclass.  The actual
+     * implementation will have to wait for a g_type_query function */
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1225,13 +1246,9 @@ static PyMethodDef pygobject_methods[] = {
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
     { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { "connect", (PyCFunction)pygobject_connect, METH_VARARGS },
-    { "signal_connect", (PyCFunction)pygobject_connect, METH_VARARGS },
     { "connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
-    { "signal_connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
     { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
-    { "signal_connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
     { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
-    { "signal_connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
     { "disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
     { "handler_disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
     { "handler_block", (PyCFunction)pygobject_handler_block, METH_VARARGS },
@@ -1272,7 +1289,116 @@ static PyExtensionClass PyGObject_Type = {
 
 /* ---------------- gobject module functions -------------------- */
 
+static PyObject *
+pyg_type_name (PyObject *self, PyObject *args)
+{
+    GType type;
+    const gchar *name;
+
+    if (!PyArg_ParseTuple(args, "i:gobject.type_name", &type))
+	return NULL;
+    name = g_type_name(type);
+    if (name)
+	return PyString_FromString(name);
+    PyErr_SetString(PyExc_RuntimeError, "unknown typecode");
+    return NULL;
+}
+
+static PyObject *
+pyg_type_from_name (PyObject *self, PyObject *args)
+{
+    const gchar *name;
+    GType type;
+
+    if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
+	return NULL;
+    type = g_type_from_name(name);
+    if (type != 0)
+	return PyInt_FromLong(type);
+    PyErr_SetString(PyExc_RuntimeError, "unknown type name");
+    return NULL;
+}
+
+static PyObject *
+pyg_type_parent (PyObject *self, PyObject *args)
+{
+    GType type, parent;
+
+    if (!PyArg_ParseTuple(args, "i:gobject.type_parent", &type))
+	return NULL;
+    parent = g_type_parent(type);
+    if (parent != 0)
+	return PyInt_FromLong(parent);
+    PyErr_SetString(PyExc_RuntimeError, "no parent for type");
+    return NULL;
+}
+
+static PyObject *
+pyg_type_is_a (PyObject *self, PyObject *args)
+{
+    GType type, parent;
+
+    if (!PyArg_ParseTuple(args, "ii:gobject.type_is_a", &type, &parent))
+	return NULL;
+    return PyInt_FromLong(g_type_is_a(type, parent));
+}
+
+static PyObject *
+pyg_type_children (PyObject *self, PyObject *args)
+{
+    GType type, *children;
+    guint n_children, i;
+    PyObject *list;
+
+    if (!PyArg_ParseTuple(args, "i:gobject.type_children", &type))
+	return NULL;
+    children = g_type_children(type, &n_children);
+    if (children) {
+        list = PyList_New(0);
+	for (i = 0; i < n_children; i++) {
+	    PyObject *o;
+	    PyList_Append(list, o=PyInt_FromLong(children[i]));
+	    Py_DECREF(o);
+	}
+	g_free(children);
+	return list;
+    }
+    PyErr_SetString(PyExc_RuntimeError, "invalid type, or no children");
+    return NULL;
+}
+
+static PyObject *
+pyg_type_interfaces (PyObject *self, PyObject *args)
+{
+    GType type, *interfaces;
+    guint n_interfaces, i;
+    PyObject *list;
+
+    if (!PyArg_ParseTuple(args, "i:gobject.type_interfaces", &type))
+	return NULL;
+    interfaces = g_type_interfaces(type, &n_interfaces);
+    if (interfaces) {
+        list = PyList_New(0);
+	for (i = 0; i < n_interfaces; i++) {
+	    PyObject *o;
+	    PyList_Append(list, o=PyInt_FromLong(interfaces[i]));
+	    Py_DECREF(o);
+	}
+	g_free(interfaces);
+	return list;
+    }
+    PyErr_SetString(PyExc_RuntimeError, "invalid type, or no interfaces");
+    return NULL;
+}
+
+
 static PyMethodDef pygobject_functions[] = {
+    { "type_name", pyg_type_name, METH_VARARGS },
+    { "type_from_name", pyg_type_from_name, METH_VARARGS },
+    { "type_parent", pyg_type_parent, METH_VARARGS },
+    { "type_is_a", pyg_type_is_a, METH_VARARGS },
+    { "type_children", pyg_type_children, METH_VARARGS },
+    { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
