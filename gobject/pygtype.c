@@ -1,0 +1,558 @@
+/* -*- mode: C; c-basic-offset: 4 -*- */
+
+#include "pygobject-private.h"
+
+/* -------------- __gtype__ objects ---------------------------- */
+
+typedef struct {
+    PyObject_HEAD
+    GType type;
+} PyGTypeWrapper;
+
+static int
+pyg_type_wrapper_compare(PyGTypeWrapper *self, PyGTypeWrapper *v)
+{
+    if (self->type == v->type) return 0;
+    if (self->type > v->type) return -1;
+    return 1;
+}
+
+static long
+pyg_type_wrapper_hash(PyGTypeWrapper *self)
+{
+    return (long)self->type;
+}
+
+static PyObject *
+pyg_type_wrapper_repr(PyGTypeWrapper *self)
+{
+    char buf[80];
+    const gchar *name = g_type_name(self->type);
+
+    g_snprintf(buf, sizeof(buf), "<GType %s (%p)>",
+	       name?name:"invalid", self->type);
+    return PyString_FromString(buf);
+}
+
+static void
+pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
+{
+    PyObject_DEL(self);
+}
+
+PyTypeObject PyGTypeWrapper_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,
+    "gobject.GType",
+    sizeof(PyGTypeWrapper),
+    0,
+    (destructor)pyg_type_wrapper_dealloc,
+    (printfunc)0,
+    (getattrfunc)0,
+    (setattrfunc)0,
+    (cmpfunc)pyg_type_wrapper_compare,
+    (reprfunc)pyg_type_wrapper_repr,
+    0,
+    0,
+    0,
+    (hashfunc)pyg_type_wrapper_hash,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    0L,0L,0L,0L,
+    NULL
+};
+
+PyObject *
+pyg_type_wrapper_new(GType type)
+{
+    PyGTypeWrapper *self;
+
+    self = (PyGTypeWrapper *)PyObject_NEW(PyGTypeWrapper,
+					  &PyGTypeWrapper_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->type = type;
+    return (PyObject *)self;
+}
+
+GType
+pyg_type_from_object(PyObject *obj)
+{
+    PyObject *gtype;
+    GType type;
+
+    /* NULL check */
+    if (!obj) {
+	PyErr_SetString(PyExc_TypeError, "can't get type from NULL object");
+	return 0;
+    }
+
+    /* map some standard types to primitive GTypes ... */
+    if (obj == Py_None)
+	return G_TYPE_NONE;
+    if (PyType_Check(obj)) {
+	PyTypeObject *tp = (PyTypeObject *)obj;
+
+	if (tp == &PyInt_Type)
+	    return G_TYPE_INT;
+	else if (tp == &PyLong_Type)
+	    return G_TYPE_LONG;
+	else if (tp == &PyFloat_Type)
+	    return G_TYPE_DOUBLE;
+	else if (tp == &PyString_Type)
+	    return G_TYPE_STRING;
+	else if (tp == &PyBaseObject_Type)
+	    return PY_TYPE_OBJECT;
+    }
+
+    if (obj->ob_type == &PyGTypeWrapper_Type) {
+	return ((PyGTypeWrapper *)obj)->type;
+    }
+
+    /* handle strings */
+    if (PyString_Check(obj)) {
+	type = g_type_from_name(PyString_AsString(obj));
+	if (type == 0)
+	    PyErr_SetString(PyExc_TypeError, "could not find named typecode");
+	return type;
+    }
+
+    /* finally, look for a __gtype__ attribute on the object */
+    gtype = PyObject_GetAttrString(obj, "__gtype__");
+    if (gtype) {
+	if (gtype->ob_type == &PyGTypeWrapper_Type) {
+	    type = ((PyGTypeWrapper *)gtype)->type;
+	    Py_DECREF(gtype);
+	    return type;
+	}
+	Py_DECREF(gtype);
+    }
+
+    PyErr_Clear();
+    PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
+    return 0;
+}
+
+/* -------------- GValue marshalling ------------------ */
+
+gint
+pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
+{
+    GEnumClass *eclass = NULL;
+    gint res = -1;
+
+    g_return_val_if_fail(val != NULL, -1);
+    if (!obj) {
+	*val = 0;
+	res = 0;
+    } else if (PyInt_Check(obj)) {
+	*val = PyInt_AsLong(obj);
+	res = 0;
+    } else if (PyString_Check(obj)) {
+	GEnumValue *info;
+	char *str = PyString_AsString(obj);
+	
+	if (enum_type != G_TYPE_NONE)
+	    eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to enum because there is no GType associated to look up the value");
+	    res = -1;
+	}
+	info = g_enum_get_value_by_name(eclass, str);
+	g_type_class_unref(eclass);
+
+	if (!info)
+	    info = g_enum_get_value_by_nick(eclass, str);
+	if (info) {
+	    *val = info->value;
+	    res = 0;
+	} else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string");
+	    res = -1;
+	}
+    } else {
+	PyErr_SetString(PyExc_TypeError,"enum values must be strings or ints");
+	res = -1;
+    }
+    return res;
+}
+
+gint
+pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
+{
+    GFlagsClass *fclass = NULL;
+    gint res = -1;
+
+    g_return_val_if_fail(val != NULL, -1);
+    if (!obj) {
+	*val = 0;
+	res = 0;
+    } else if (PyInt_Check(obj)) {
+	*val = PyInt_AsLong(obj);
+	res = 0;
+    } else if (PyString_Check(obj)) {
+	GFlagsValue *info;
+	char *str = PyString_AsString(obj);
+
+	if (flag_type != G_TYPE_NONE)
+	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to flag because there is no GType associated to look up the value");
+	    res = -1;
+	}
+	info = g_flags_get_value_by_name(fclass, str);
+	g_type_class_unref(fclass);
+	
+	if (!info)
+	    info = g_flags_get_value_by_nick(fclass, str);
+	if (info) {
+	    *val = info->value;
+	    res = 0;
+	} else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string");
+	    res = -1;
+	}
+    } else if (PyTuple_Check(obj)) {
+	int i, len;
+
+	len = PyTuple_Size(obj);
+	*val = 0;
+	res = 0;
+
+	if (flag_type != G_TYPE_NONE)
+	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to flag because there is no GType associated to look up the value");
+	    res = -1;
+	}
+
+	for (i = 0; i < len; i++) {
+	    PyObject *item = PyTuple_GetItem(obj, i);
+	    char *str = PyString_AsString(item);
+	    GFlagsValue *info = g_flags_get_value_by_name(fclass, str);
+
+	    if (!info)
+		info = g_flags_get_value_by_nick(fclass, str);
+	    if (info) {
+		*val |= info->value;
+	    } else {
+		PyErr_SetString(PyExc_TypeError, "could not convert string");
+		res = -1;
+		break;
+	    }
+	}
+	g_type_class_unref(fclass);
+    } else {
+	PyErr_SetString(PyExc_TypeError,
+			"flag values must be strings, ints or tuples");
+	res = -1;
+    }
+    return res;
+}
+
+typedef struct {
+    fromvaluefunc fromvalue;
+    tovaluefunc tovalue;
+} PyGBoxedMarshal;
+static GQuark pyg_boxed_marshal_key = 0;
+
+#define pyg_boxed_lookup(boxed_type) \
+  ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pyg_boxed_marshal_key))
+
+void
+pyg_register_boxed_custom(GType boxed_type,
+			  fromvaluefunc from_func,
+			  tovaluefunc to_func)
+{
+    PyGBoxedMarshal *bm;
+
+    if (!pyg_boxed_marshal_key)
+      pyg_boxed_marshal_key = g_quark_from_static_string("PyGBoxed::marshal");
+
+    bm = g_new(PyGBoxedMarshal, 1);
+    bm->fromvalue = from_func;
+    bm->tovalue = to_func;
+    g_type_set_qdata(boxed_type, pyg_boxed_marshal_key, bm);
+}
+
+int
+pyg_value_from_pyobject(GValue *value, PyObject *obj)
+{
+    PyObject *tmp;
+
+    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_CHAR:
+	if ((tmp = PyObject_Str(obj)))
+	    g_value_set_char(value, PyString_AsString(tmp)[0]);
+	else {
+	    PyErr_Clear();
+	    return -1;
+	}
+	Py_DECREF(tmp);
+	break;
+    case G_TYPE_UCHAR:
+	if ((tmp = PyObject_Str(obj)))
+	    g_value_set_char(value, PyString_AsString(tmp)[0]);
+	else {
+	    PyErr_Clear();
+	    return -1;
+	}
+	Py_DECREF(tmp);
+	break;
+    case G_TYPE_BOOLEAN:
+	g_value_set_boolean(value, PyObject_IsTrue(obj));
+	break;
+    case G_TYPE_INT:
+	g_value_set_int(value, PyInt_AsLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_UINT:
+	{
+	    if (PyInt_Check(obj)) {
+		glong val;
+
+		val = PyInt_AsLong(obj);
+		if (val >= 0 && val <= G_MAXUINT)
+		    g_value_set_uint(value, (guint)val);
+		else
+		    return -1;
+	    } else {
+		g_value_set_uint(value, PyLong_AsUnsignedLong(obj));
+		if (PyErr_Occurred()) {
+		    g_value_unset(value);
+		    PyErr_Clear();
+		    return -1;
+		}
+	    }
+	}
+	break;
+    case G_TYPE_LONG:
+	g_value_set_long(value, PyInt_AsLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_ULONG:
+	{
+	    if (PyInt_Check(obj)) {
+		glong val;
+
+		val = PyInt_AsLong(obj);
+		if (val >= 0)
+		    g_value_set_ulong(value, (gulong)val);
+		else
+		    return -1;
+	    } else {
+		g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
+		if (PyErr_Occurred()) {
+		    g_value_unset(value);
+		    PyErr_Clear();
+		    return -1;
+		}
+	    }
+	}
+	break;
+    case G_TYPE_INT64:
+	g_value_set_int64(value, PyLong_AsLongLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_UINT64:
+	g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_FLOAT:
+	g_value_set_float(value, PyFloat_AsDouble(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_DOUBLE:
+	g_value_set_double(value, PyFloat_AsDouble(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
+	break;
+    case G_TYPE_STRING:
+	if ((tmp = PyObject_Str(obj)))
+	    g_value_set_string(value, PyString_AsString(tmp));
+	else {
+	    PyErr_Clear();
+	    return -1;
+	}
+	Py_DECREF(tmp);
+	break;
+    case G_TYPE_OBJECT:
+	{
+	    PyTypeObject *type = pygobject_lookup_class(G_VALUE_TYPE(value));
+	    if (!PyObject_TypeCheck(obj, type)) {
+		return -1;
+	    }
+	    g_value_set_object(value, pygobject_get(obj));
+	}
+	break;
+    case G_TYPE_ENUM:
+	{
+	    gint val = 0;
+	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_enum(value, val);
+	}
+	break;
+    case G_TYPE_FLAGS:
+	{
+	    guint val = 0;
+	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_flags(value, val);
+	}
+	break;
+    case G_TYPE_BOXED:
+	{
+	    PyGBoxedMarshal *bm;
+
+	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
+		g_value_set_boxed(value, obj);
+	    } else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
+		       G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
+		g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
+	    } else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
+		return bm->tovalue(value, obj);
+	    } else if (PyCObject_Check(obj)) {
+		g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
+	    } else
+		return -1;
+	}
+	break;
+    case G_TYPE_POINTER:
+	if (PyCObject_Check(obj))
+	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
+	else
+	    return -1;
+	break;
+    default:
+	break;
+    }
+    return 0;
+}
+
+PyObject *
+pyg_value_as_pyobject(const GValue *value)
+{
+    gchar buf[128];
+
+    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_CHAR:
+	{
+	    gint8 val = g_value_get_char(value);
+	    return PyString_FromStringAndSize((char *)&val, 1);
+	}
+    case G_TYPE_UCHAR:
+	{
+	    guint8 val = g_value_get_uchar(value);
+	    return PyString_FromStringAndSize((char *)&val, 1);
+	}
+    case G_TYPE_BOOLEAN:
+	return PyInt_FromLong(g_value_get_boolean(value));
+    case G_TYPE_INT:
+	return PyInt_FromLong(g_value_get_int(value));
+    case G_TYPE_UINT:
+	{
+	    gulong val = (gulong) g_value_get_uint(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLong(val);
+	}
+    case G_TYPE_LONG:
+	return PyInt_FromLong(g_value_get_long(value));
+    case G_TYPE_ULONG:
+	{
+	    gulong val = g_value_get_ulong(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLong(val);
+	}
+    case G_TYPE_INT64:
+	{
+	    gint64 val = g_value_get_int64(value);
+
+	    if (G_MINLONG <= val && val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromLongLong(val);
+	}
+    case G_TYPE_UINT64:
+	{
+	    guint64 val = g_value_get_uint64(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLongLong(val);
+	}
+    case G_TYPE_FLOAT:
+	return PyFloat_FromDouble(g_value_get_float(value));
+    case G_TYPE_DOUBLE:
+	return PyFloat_FromDouble(g_value_get_double(value));
+    case G_TYPE_STRING:
+	{
+	    const gchar *str = g_value_get_string(value);
+
+	    if (str)
+		return PyString_FromString(str);
+	    Py_INCREF(Py_None);
+	    return Py_None;
+	}
+    case G_TYPE_OBJECT:
+	return pygobject_new(g_value_get_object(value));
+    case G_TYPE_ENUM:
+	return PyInt_FromLong(g_value_get_enum(value));
+    case G_TYPE_FLAGS:
+	return PyInt_FromLong(g_value_get_flags(value));
+    case G_TYPE_BOXED:
+	{
+	    PyGBoxedMarshal *bm;
+
+	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
+		return (PyObject *)g_value_dup_boxed(value);
+
+	    bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+	    if (bm)
+		return bm->fromvalue(value);
+	    else
+		return pyg_boxed_new(G_VALUE_TYPE(value),
+				     g_value_get_boxed(value), TRUE, TRUE);
+	}
+    case G_TYPE_POINTER:
+	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
+    default:
+	break;
+    }
+    g_snprintf(buf, sizeof(buf), "unknown type %s",
+	       g_type_name(G_VALUE_TYPE(value)));
+    PyErr_SetString(PyExc_TypeError, buf);
+    return NULL;
+}
+

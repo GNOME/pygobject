@@ -10,9 +10,29 @@
 
 
 /* from gobjectmodule.c */
+GType PY_TYPE_OBJECT;
+
+PyObject *    pygobject_new          (GObject *obj);
+PyTypeObject *pygobject_lookup_class (GType gtype);
+
+
+/* from pygtype.h */
+extern PyTypeObject PyGTypeWrapper_Type;
+
 PyObject *pyg_type_wrapper_new (GType type);
 GType     pyg_type_from_object (PyObject *obj);
 
+gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
+gint pyg_flags_get_value (GType flag_type, PyObject *obj, gint *val);
+
+typedef PyObject *(* fromvaluefunc)(const GValue *value);
+typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
+
+void      pyg_register_boxed_custom(GType boxed_type,
+				    fromvaluefunc from_func,
+				    tovaluefunc to_func);
+int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
+PyObject *pyg_value_as_pyobject(const GValue *value);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;
