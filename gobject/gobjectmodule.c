@@ -119,6 +119,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 
     class_name = type->tp_name;
 
+    type->ob_type = &PyType_Type;
     if (bases) {
 	type->tp_bases = bases;
 	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
@@ -334,6 +335,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 
     if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
 
+    type->ob_type = &PyType_Type;
     type->tp_base = &PyGBoxed_Type;
 
     if (PyType_Ready(type) < 0) {
@@ -1538,6 +1540,7 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 {
     PyObject *o;
 
+    type->ob_type = &PyType_Type;
     type->tp_base = &PyGInterface_Type;
 
     if (PyType_Ready(type) < 0) {
@@ -2033,6 +2036,7 @@ initgobject(void)
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
 
+    PyGInterface_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGInterface_Type))
 	return;
     PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
@@ -2041,6 +2045,7 @@ initgobject(void)
     PyDict_SetItemString(PyGInterface_Type.tp_defined, "__gtype__", o);
     Py_DECREF(o);
 
+    PyGBoxed_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGBoxed_Type))
 	return;
     PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
