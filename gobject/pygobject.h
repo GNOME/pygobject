@@ -7,6 +7,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#if PY_VERSION_HEX < 0x02030000
+  typedef destructor freefunc;
+#endif
+
 typedef struct {
     PyObject_HEAD
     GObject *obj;

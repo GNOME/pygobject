@@ -141,7 +141,7 @@ PyTypeObject PyGBoxed_Type = {
     (initproc)pyg_boxed_init,		/* tp_init */
     (allocfunc)0,			/* tp_alloc */
     (newfunc)0,				/* tp_new */
-    pyg_boxed_free,			/* tp_free */
+    (freefunc)pyg_boxed_free,		/* tp_free */
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
@@ -340,7 +340,7 @@ PyTypeObject PyGPointer_Type = {
     (initproc)pyg_pointer_init,		/* tp_init */
     (allocfunc)0,			/* tp_alloc */
     (newfunc)0,				/* tp_new */
-    pyg_pointer_free,			/* tp_free */
+    (freefunc)pyg_pointer_free,		/* tp_free */
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };

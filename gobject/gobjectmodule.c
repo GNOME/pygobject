@@ -277,7 +277,7 @@ PyTypeObject PyGInterface_Type = {
     (initproc)pyg_interface_init,	/* tp_init */
     (allocfunc)0,			/* tp_alloc */
     (newfunc)0,				/* tp_new */
-    object_free,			/* tp_free */
+    (freefunc)object_free,		/* tp_free */
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
