@@ -1948,6 +1948,93 @@ pyg_signal_new(PyObject *self, PyObject *args)
     return NULL;
 }
 
+static PyObject *
+pyg_signal_list_names (PyObject *self, PyObject *args)
+{
+    PyObject *py_itype, *list;
+    GObjectClass *class;
+    GType itype;
+    guint n;
+    guint *ids;
+    guint i;
+
+    if (!PyArg_ParseTuple(args, "O:gobject.signal_list_names", &py_itype))
+	return NULL;
+    if ((itype = pyg_type_from_object(py_itype)) == 0)
+	return NULL;
+
+    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+	PyErr_SetString(PyExc_TypeError,
+			"type must be instantiable or an interface");
+	return NULL;
+    }
+
+    class = g_type_class_ref(itype);
+    if (!class) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"could not get a reference to type class");
+	return NULL;
+    }
+    ids = g_signal_list_ids(itype, &n);
+
+    list = PyTuple_New((gint)n);
+    if (list == NULL) {
+	g_free(ids);
+	g_type_class_unref(class);
+	return NULL;
+    }
+
+    for (i = 0; i < n; i++)
+	PyTuple_SetItem(list, i, PyString_FromString(g_signal_name(ids[i])));
+    g_free(ids);
+    g_type_class_unref(class);
+    return list;
+}
+
+static PyObject *
+pyg_object_class_list_properties (PyObject *self, PyObject *args)
+{
+    GParamSpec **specs;
+    PyObject *py_itype, *list;
+    GType itype;
+    GObjectClass *class;
+    guint nprops;
+    guint i;
+
+    if (!PyArg_ParseTuple(args, "O:gobject.object_class_list_properties",
+			  &py_itype))
+	return NULL;
+    if ((itype = pyg_type_from_object(py_itype)) == 0)
+	return NULL;
+
+    if (!g_type_is_a(itype, G_TYPE_OBJECT)) {
+	PyErr_SetString(PyExc_TypeError, "type must be derived from GObject");
+	return NULL;
+    }
+
+    class = g_type_class_ref(itype);
+    if (!class) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"could not get a reference to type class");
+	return NULL;
+    }
+
+    specs = g_object_class_list_properties(class, &nprops);
+    list = PyTuple_New(nprops);
+    if (list == NULL) {
+	g_free(specs);
+	g_type_class_unref(class);
+	return NULL;
+    }
+    for (i = 0; i < nprops; i++) {
+	PyTuple_SetItem(list, i, PyString_FromString(specs[i]->name));
+    }
+    g_free(specs);
+    g_type_class_unref(class);
+
+    return list;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1957,6 +2044,8 @@ static PyMethodDef pygobject_functions[] = {
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
     { "type_register", pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
+    { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
+    { "object_class_list_properties", pyg_object_class_list_properties, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
