@@ -950,11 +950,9 @@ pyg_type_register(PyObject *self, PyObject *args)
 	if (!PyDict_Check(gsignals)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ attribute not a dict!");
-	    Py_DECREF(gsignals);
 	    return NULL;
 	}
 	if (!add_signals(instance_type, gsignals)) {
-	    Py_DECREF(gsignals);
 	    return NULL;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gsignals__");
@@ -970,11 +968,9 @@ pyg_type_register(PyObject *self, PyObject *args)
 	if (!PyDict_Check(gproperties)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ attribute not a dict!");
-	    Py_DECREF(gproperties);
 	    return NULL;
 	}
 	if (!add_properties(instance_type, gproperties)) {
-	    Py_DECREF(gproperties);
 	    return NULL;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gproperties__");
