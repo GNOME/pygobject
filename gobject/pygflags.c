@@ -204,6 +204,7 @@ pyg_flags_add (PyObject *   module,
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
 	pyg_gil_state_release(state);
+        return NULL;
     }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
