@@ -1,5 +1,6 @@
 # -*- Mode: Python -*-
 
+import gc
 import unittest
 
 from common import gobject
@@ -41,6 +42,34 @@ class TestChaining(unittest.TestCase):
         inst2.emit("my_signal", 44)
         assert inst2.arg == 44
         assert inst2.arg2 == 44
+
+# This is for bug 153718
+class TestGSignalsError(unittest.TestCase):
+    def testInvalidType(self, *args):
+        class Foo(gobject.GObject):
+            __gsignals__ = None
+        self.assertRaises(TypeError, gobject.type_register, Foo)
+        gc.collect()
+        
+    def testInvalidName(self, *args):
+        class Foo(gobject.GObject):
+            __gsignals__ = {'not-exists' : 'override'}
+        self.assertRaises(TypeError, gobject.type_register, Foo)
+        gc.collect()
+
+class TestGPropertyError(unittest.TestCase):
+    def testInvalidType(self, *args):
+        class Foo(gobject.GObject):
+            __gproperties__ = None
+        self.assertRaises(TypeError, gobject.type_register, Foo)
+        gc.collect()
+        
+    def testInvalidName(self, *args):
+        class Foo(gobject.GObject):
+            __gproperties__ = { None: None }
+            
+        self.assertRaises(TypeError, gobject.type_register, Foo)
+        gc.collect()
 
 if __name__ == '__main__':
     unittest.main()

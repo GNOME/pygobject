@@ -50,12 +50,6 @@ class GTypeTest(unittest.TestCase):
     def testObject(self):
         self.checkType(gobject.TYPE_OBJECT, 'PyObject')
 
-    def testGObjectInvalidSignalOverride(self):
-        class Foo(gobject.GObject):
-            __gsignals__ = {}
-            __gsignals__['monkey'] = 'override'
-        self.assertRaises(TypeError, gobject.type_register, Foo)
-    
     # XXX: Flags, Enums
     
 if __name__ == '__main__':
