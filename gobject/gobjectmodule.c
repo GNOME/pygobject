@@ -675,7 +675,6 @@ pyg_object_set_property (GObject *object, guint property_id,
 	Py_DECREF(retval);
     } else {
 	PyErr_Print();
-	PyErr_Clear();
     }
 
     Py_DECREF(object_wrapper);
@@ -706,7 +705,6 @@ pyg_object_get_property (GObject *object, guint property_id,
 				 "O", py_pspec);
     if (retval == NULL || pyg_value_from_pyobject(value, retval) < 0) {
 	PyErr_Print();
-	PyErr_Clear();
     }
     Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);

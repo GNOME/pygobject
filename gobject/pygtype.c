@@ -748,7 +748,6 @@ pyg_closure_marshal(GClosure *closure,
     ret = PyObject_CallObject(pc->callback, params);
     if (ret == NULL) {
 	PyErr_Print();
-	PyErr_Clear();
 	Py_DECREF(params);
 	pyg_unblock_threads();
 	return;
@@ -875,7 +874,6 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     ret = PyObject_CallObject(method, params);
     if (ret == NULL) {
 	PyErr_Print();
-	PyErr_Clear();
 	Py_DECREF(method);
 	Py_DECREF(params);
 	pyg_unblock_threads();
