@@ -2082,8 +2082,7 @@ pyg_parse_constructor_args(GType        obj_type,
                            char       **prop_names,
                            GParameter  *params,
                            guint       *nparams,
-                           PyObject   **pos_args,
-			   PyObject    *kw_args)
+                           PyObject   **py_args)
 {
     guint arg_i, param_i;
     GObjectClass *oclass;
