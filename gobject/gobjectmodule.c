@@ -676,6 +676,24 @@ pyg_type_from_object(PyObject *obj)
 	return 0;
     }
 
+    /* map some standard types to primitive GTypes ... */
+    if (obj == Py_None)
+	return G_TYPE_NONE;
+    if (PyType_Check(obj)) {
+	PyTypeObject *tp = (PyTypeObject *)obj;
+
+	if (tp == &PyInt_Type)
+	    return G_TYPE_INT;
+	else if (tp == &PyLong_Type)
+	    return G_TYPE_LONG;
+	else if (tp == &PyFloat_Type)
+	    return G_TYPE_DOUBLE;
+	else if (tp == &PyString_Type)
+	    return G_TYPE_STRING;
+	else if (tp == &PyBaseObject_Type)
+	    return PY_TYPE_OBJECT;
+    }
+
     if (obj->ob_type == &PyGTypeWrapper_Type) {
 	return ((PyGTypeWrapper *)obj)->type;
     }
