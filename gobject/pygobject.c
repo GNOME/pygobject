@@ -958,7 +958,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 
     ihint = g_signal_get_invocation_hint(self->obj);
     if (!ihint) {
-	PyErr_SetString(PyExc_TypeError, "could not find signa invocation "
+	PyErr_SetString(PyExc_TypeError, "could not find signal invocation "
 			"information for this object.");
 	return NULL;
     }
