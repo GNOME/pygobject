@@ -521,6 +521,11 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 			"the object does not support the given parameter");
 	return NULL;
     }
+    if (!(pspec->flags & G_PARAM_READABLE)) {
+	PyErr_Format(PyExc_TypeError, "property %s is not readable",
+		     param_name);
+	return NULL;
+    }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     g_object_get_property(self->obj, param_name, &value);
     ret = pyg_value_as_pyobject(&value, TRUE);
@@ -544,6 +549,11 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     if (!pspec) {
 	PyErr_SetString(PyExc_TypeError,
 			"the object does not support the given parameter");
+	return NULL;
+    }
+    if (!(pspec->flags & G_PARAM_WRITABLE)) {
+	PyErr_Format(PyExc_TypeError, "property %s is not writable",
+		     param_name);
 	return NULL;
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
