@@ -2059,6 +2059,58 @@ _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
     return 0;
 }
 
+/**
+ * pyg_parse_constructor_args: helper function for PyGObject constructors
+ * @obj_type: GType of the GObject, for parameter introspection
+ * @arg_names: %NULL-terminated array of constructor argument names
+ * @prop_names: %NULL-terminated array of property names, with direct
+ * correspondence to @arg_names
+ * @params: GParameter array where parameters will be placed; length
+ * of this array must be at least equal to the number of
+ * arguments/properties
+ * @nparams: output parameter to contain actual number of arguments found
+ * @py_args: array of PyObject* containing the actual constructor arguments
+ * 
+ * Parses an array of PyObject's and creates a GParameter array
+ * 
+ * Return value: %TRUE if all is successful, otherwise %FALSE and
+ * python exception set.
+ **/
+static gboolean
+pyg_parse_constructor_args(GType        obj_type,
+                           char       **arg_names,
+                           char       **prop_names,
+                           GParameter  *params,
+                           guint       *nparams,
+                           PyObject   **py_args)
+{
+    guint arg_i, param_i;
+    GObjectClass *oclass;
+
+    oclass = g_type_class_ref(obj_type);
+    g_return_val_if_fail(oclass, FALSE);
+
+    for (param_i = arg_i = 0; arg_names[arg_i]; ++arg_i) {
+        if (!py_args[arg_i])
+            continue;
+        GParamSpec *spec = g_object_class_find_property(oclass, prop_names[arg_i]);
+        params[param_i].name = prop_names[arg_i];
+        g_value_init(&params[param_i].value, spec->value_type);
+        if (pyg_value_from_pyobject(&params[param_i].value, py_args[arg_i]) == -1) {
+            int i;
+            PyErr_Format(PyExc_TypeError, "could not convert parameter '%s' of type '%s'",
+                         arg_names[arg_i], g_type_name(spec->value_type));
+            g_type_class_unref(oclass);
+            for (i = 0; i < param_i; ++i)
+                g_value_unset(&params[i].value);
+            return FALSE;
+        }
+        ++param_i;
+    }
+    g_type_class_unref(oclass);
+    *nparams = param_i;
+    return TRUE;
+}
 
 /* ----------------- gobject module initialisation -------------- */
 
@@ -2105,7 +2157,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   &PyGParamSpec_Type,
   pyg_param_spec_new,
   pyg_param_spec_from_object,
-  pyg_pyobj_to_unichar_conv
+  pyg_pyobj_to_unichar_conv,
+  pyg_parse_constructor_args
 };
 
 DL_EXPORT(void)

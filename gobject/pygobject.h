@@ -111,6 +111,12 @@ struct _PyGObject_Functions {
     PyObject *(* paramspec_new)(GParamSpec *spec);
     GParamSpec *(*paramspec_get)(PyObject *tuple);
     int (*pyobj_to_unichar_conv)(PyObject *pyobj, void* ptr);
+    gboolean (*parse_constructor_args)(GType        obj_type,
+                                       char       **arg_names,
+                                       char       **prop_names,
+                                       GParameter  *params,
+                                       guint       *nparams,
+                                       PyObject   **py_args);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -152,6 +158,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_param_spec_new          (_PyGObject_API->paramspec_new)
 #define pyg_param_spec_from_object  (_PyGObject_API->paramspec_get)
 #define pyg_pyobj_to_unichar_conv   (_PyGObject_API->pyobj_to_unichar_conv)
+#define pyg_parse_constructor_args  (_PyGObject_API->parse_constructor_args)
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
       (* _PyGObject_API->block_threads)();     \
