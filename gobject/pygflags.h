@@ -34,16 +34,16 @@ typedef struct {
     GType gtype;
 } PyGFlags;
 
-PyTypeObject PyGFlags_Type;
+extern PyTypeObject PyGFlags_Type;
 
 #define PyGFlags_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_FLAGS))
 			   
-PyObject * pyg_flags_add        (PyObject *   module,
-				 const char * typename,
-				 const char * strip_prefix,
-				 GType        gtype);
-PyObject * pyg_flags_from_gtype (GType        gtype,
-				 int          value);
+extern PyObject * pyg_flags_add        (PyObject *   module,
+					const char * typename,
+					const char * strip_prefix,
+					GType        gtype);
+extern PyObject * pyg_flags_from_gtype (GType        gtype,
+					int          value);
 
 #ifdef __cplusplus
 }

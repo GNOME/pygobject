@@ -193,7 +193,30 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	 */
 	Py_INCREF(Py_None);
 	return Py_None;
+    } else if (!strcmp(attr, "enum_class")) {
+	if (G_IS_PARAM_SPEC_ENUM(self->pspec)) {
+	    GQuark quark;
+	    PyObject *pyclass;
+
+	    quark = g_quark_from_static_string("PyGEnum::class");
+	    pyclass = (PyObject*)g_type_get_qdata(G_ENUM_CLASS_TYPE(G_PARAM_SPEC_ENUM(self->pspec)->enum_class), quark);
+	    g_assert(pyclass != NULL);
+
+	    return pyclass;
+	}
+    } else if (!strcmp(attr, "flags_class")) {
+	if (G_IS_PARAM_SPEC_FLAGS(self->pspec)) {
+	    GQuark quark;
+	    PyObject *pyclass;
+
+	    quark = g_quark_from_static_string("PyGFlags::class");
+	    pyclass = (PyObject*)g_type_get_qdata(G_FLAGS_CLASS_TYPE(G_PARAM_SPEC_FLAGS(self->pspec)->flags_class), quark);
+	    g_assert(pyclass != NULL);
+
+	    return pyclass;
+	}
     }
+    
     PyErr_SetString(PyExc_AttributeError, attr);
     return NULL;
 }

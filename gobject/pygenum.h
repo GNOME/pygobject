@@ -38,14 +38,14 @@ typedef struct {
     GType gtype;
 } PyGEnum;
 
-PyTypeObject PyGEnum_Type;
+extern PyTypeObject PyGEnum_Type;
 
-PyObject * pyg_enum_add        (PyObject *   module,
-				const char * typename,
-				const char * strip_prefix,
-				GType        gtype);
-PyObject * pyg_enum_from_gtype (GType        gtype,
-				int          value);
+extern PyObject * pyg_enum_add        (PyObject *   module,
+				       const char * typename,
+				       const char * strip_prefix,
+				       GType        gtype);
+extern PyObject * pyg_enum_from_gtype (GType        gtype,
+				       int          value);
 
 #ifdef __cplusplus
 }

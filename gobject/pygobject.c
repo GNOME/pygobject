@@ -255,9 +255,8 @@ pygobject_new_with_interfaces(GType gtype)
 	return NULL;
     }
 
-#if 1
       /* Workaround python tp_(get|set)attr slot inheritance bug.
-       * Fixes pygtk bug #144135. */
+       * Fixes bug #144135. */
     if (!type->tp_getattr && py_parent_type->tp_getattr) {
         type->tp_getattro = NULL;
         type->tp_getattr = py_parent_type->tp_getattr;
@@ -266,19 +265,12 @@ pygobject_new_with_interfaces(GType gtype)
         type->tp_setattro = NULL;
         type->tp_setattr = py_parent_type->tp_setattr;
     }
-#endif
 
-#if 0
-    type->tp_dealloc  = (destructor)pygobject_dealloc;
-    type->tp_traverse = (traverseproc)pygobject_traverse;
-    type->tp_clear = (inquiry)pygobject_clear;
-    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
-#endif
-    
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
 	return NULL;
     }
+    
     /* insert type name in module dict */
     modules = PyImport_GetModuleDict();
     if ((module = PyDict_GetItemString(modules, mod_name)) != NULL) {

@@ -283,6 +283,50 @@ pyg_flags_warn (PyObject *self, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+pyg_flags_get_value_names(PyGFlags *self, void *closure)
+{
+  GFlagsClass *flags_class;
+  PyObject *retval;
+  int i;
+  
+  flags_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_FLAGS_CLASS(flags_class));
+  
+  retval = PyTuple_New(flags_class->n_values);
+  for (i = 0; i < flags_class->n_values; i++)
+      PyTuple_SetItem(retval, i, PyString_FromString(flags_class->values[i].value_name));
+
+  g_type_class_unref(flags_class);
+
+  return retval;
+}
+
+static PyObject *
+pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
+{
+  GFlagsClass *flags_class;
+  PyObject *retval;
+  int i;
+  
+  flags_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_FLAGS_CLASS(flags_class));
+  
+  retval = PyTuple_New(flags_class->n_values);
+  for (i = 0; i < flags_class->n_values; i++)
+      PyTuple_SetItem(retval, i, PyString_FromString(flags_class->values[i].value_nick));
+
+  g_type_class_unref(flags_class);
+
+  return retval;
+}
+
+static PyGetSetDef pyg_flags_getsets[] = {
+    { "value_names", (getter)pyg_flags_get_value_names, (setter)0 },
+    { "value_nicks", (getter)pyg_flags_get_value_nicks, (setter)0 },
+    { NULL, 0, 0 }
+};
+
 static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_warn,		/* nb_add */
 	(binaryfunc)pyg_flags_warn,		/* nb_subtract */
@@ -355,7 +399,7 @@ PyTypeObject PyGFlags_Type = {
 	0,					  /* tp_iternext */
 	0,					  /* tp_methods */
 	0,					  /* tp_members */
-	0,					  /* tp_getset */
+	pyg_flags_getsets,			  /* tp_getset */
 	&PyInt_Type,  				  /* tp_base */
 	0,					  /* tp_dict */
 	0,					  /* tp_descr_get */

@@ -208,6 +208,48 @@ pyg_enum_add (PyObject *   module,
   return stub;
 }
 
+static PyObject *
+pyg_enum_get_value_name(PyGEnum *self, void *closure)
+{
+  GEnumClass *enum_class;
+  GEnumValue *enum_value;
+  PyObject *retval;
+  
+  enum_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_ENUM_CLASS(enum_class));
+  
+  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+
+  retval = PyString_FromString(enum_value->value_name);
+  g_type_class_unref(enum_class);
+
+  return retval;
+}
+
+static PyObject *
+pyg_enum_get_value_nick(PyGEnum *self, void *closure)
+{
+  GEnumClass *enum_class;
+  GEnumValue *enum_value;
+  PyObject *retval;
+  
+  enum_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_ENUM_CLASS(enum_class));
+  
+  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+
+  retval = PyString_FromString(enum_value->value_nick);
+  g_type_class_unref(enum_class);
+
+  return retval;
+}
+
+static PyGetSetDef pyg_enum_getsets[] = {
+    { "value_name", (getter)pyg_enum_get_value_name, (setter)0 },
+    { "value_nick", (getter)pyg_enum_get_value_nick, (setter)0 },
+    { NULL, 0, 0 }
+};
+
 PyTypeObject PyGEnum_Type = {
 	PyObject_HEAD_INIT(NULL)
 	0,
@@ -239,7 +281,7 @@ PyTypeObject PyGEnum_Type = {
 	0,					  /* tp_iternext */
 	0,					  /* tp_methods */
 	0,					  /* tp_members */
-	0,					  /* tp_getset */
+	pyg_enum_getsets,			  /* tp_getset */
 	&PyInt_Type,  				  /* tp_base */
 	0,					  /* tp_dict */
 	0,					  /* tp_descr_get */
