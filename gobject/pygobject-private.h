@@ -45,6 +45,8 @@ PyObject *pyg_value_as_pyobject(const GValue *value);
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get(void);
 
+PyObject *pyg_object_descr_doc_get(void);
+
 
 /* from pygobject.h */
 extern PyTypeObject PyGObject_Type;

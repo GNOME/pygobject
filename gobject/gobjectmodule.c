@@ -1353,6 +1353,10 @@ initgobject(void)
 
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "__doc__",
+			 pyg_object_descr_doc_get());
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
+			 pyg_object_descr_doc_get());
 
     PyGInterface_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGInterface_Type))
@@ -1361,6 +1365,10 @@ initgobject(void)
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_INTERFACE));
     Py_DECREF(o);
+    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",
+			 pyg_object_descr_doc_get());
+    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
+			 pyg_object_descr_doc_get());
 
     PyGBoxed_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGBoxed_Type))

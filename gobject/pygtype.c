@@ -29,7 +29,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
     char buf[80];
     const gchar *name = g_type_name(self->type);
 
-    g_snprintf(buf, sizeof(buf), "<GType %s (%p)>",
+    g_snprintf(buf, sizeof(buf), "<GType %s (%lu)>",
 	       name?name:"invalid", self->type);
     return PyString_FromString(buf);
 }
@@ -761,3 +761,192 @@ pyg_signal_class_closure_get(void)
     return closure;
 }
 
+/* ----- __doc__ descriptor for GObject and GInterface ----- */
+
+static void
+object_doc_dealloc(PyObject *self)
+{
+    PyObject_FREE(self);
+}
+
+/* append information about signals of a particular gtype */
+static void
+add_signal_docs(GType gtype, GString *string)
+{
+    GTypeClass *class;
+    guint *signal_ids, n_ids = 0, i;
+
+    class = g_type_class_ref(gtype);
+    signal_ids = g_signal_list_ids(gtype, &n_ids);
+
+    if (n_ids > 0) {
+	g_string_append(string, "Signals from ");
+	g_string_append(string, g_type_name(gtype));
+	g_string_append(string, ":\n");
+
+	for (i = 0; i < n_ids; i++) {
+	    GSignalQuery query;
+	    guint j;
+
+	    g_signal_query(signal_ids[i], &query);
+
+	    g_string_append(string, "  ");
+	    g_string_append(string, query.signal_name);
+	    g_string_append(string, " (");
+	    for (j = 0; j < query.n_params; j++) {
+		g_string_append(string, g_type_name(query.param_types[j]));
+		if (j != query.n_params - 1)
+		    g_string_append(string, ", ");
+	    }
+	    g_string_append(string, ")");
+	    if (query.return_type && query.return_type != G_TYPE_NONE) {
+		g_string_append(string, " -> ");
+		g_string_append(string, g_type_name(query.return_type));
+	    }
+	    g_string_append(string, "\n");
+	}
+	g_free(signal_ids);
+	g_string_append(string, "\n");
+    }
+    g_type_class_unref(class);
+}
+
+static void
+add_property_docs(GType gtype, GString *string)
+{
+    GObjectClass *class;
+    GParamSpec **props;
+    guint *n_props = 0, i;
+
+    class = g_type_class_ref(gtype);
+    props = g_object_class_list_properties(class, &n_props);
+
+    if (n_props > 0) {
+	g_string_append(string, "Properties from ");
+	g_string_append(string, g_type_name(gtype));
+	g_string_append(string, ":\n");
+
+	for (i = 0; i < n_props; i++) {
+	    g_string_append(string, "  ");
+	    g_string_append(string, g_param_spec_get_name(props[i]));
+	    g_string_append(string, " -> ");
+	    g_string_append(string, g_type_name(props[i]->value_type));
+	    g_string_append(string, ": ");
+	    g_string_append(string, g_param_spec_get_nick(props[i]));
+	    g_string_append(string, "\n    ");
+	    g_string_append(string, g_param_spec_get_blurb(props[i]));
+	    g_string_append(string, "\n");
+	}
+	g_free(props);
+	g_string_append(string, "\n");
+    }
+    g_type_class_unref(class);
+}
+
+static PyObject *
+object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
+{
+    GType gtype = 0;
+    GString *string;
+    PyObject *pystring;
+
+    if (obj && pygobject_check(obj, &PyGObject_Type)) {
+	gtype = G_OBJECT_TYPE(pygobject_get(obj));
+	if (!gtype)
+	    PyErr_SetString(PyExc_RuntimeError, "could not get object type");
+    } else {
+	gtype = pyg_type_from_object(type);
+    }
+    if (!gtype)
+	return NULL;
+
+    string = g_string_new_len(NULL, 512);
+
+    if (g_type_is_a(gtype, G_TYPE_INTERFACE))
+	g_string_append(string, "Interface ");
+    else if (g_type_is_a(gtype, G_TYPE_OBJECT))
+	g_string_append(string, "Object ");
+    g_string_append(string, g_type_name(gtype));
+    g_string_append(string, "\n\n");
+
+    if (g_type_is_a(gtype, G_TYPE_OBJECT)) {
+	GType parent = G_TYPE_OBJECT;
+
+	while (parent) {
+	    GType *interfaces;
+	    guint n_interfaces, i;
+
+	    add_signal_docs(parent, string);
+
+	    /* add docs for implemented interfaces */
+	    interfaces = g_type_interfaces(parent, &n_interfaces);
+	    for (i = 0; i < n_interfaces; i++)
+		add_signal_docs(interfaces[i], string);
+	    g_free(interfaces);
+
+	    parent = g_type_next_base(gtype, parent);
+	}
+	parent = G_TYPE_OBJECT;
+	while (parent) {
+	    add_property_docs(parent, string);
+	    parent = g_type_next_base(gtype, parent);
+	}
+    } else if (g_type_is_a(gtype, G_TYPE_OBJECT)) {
+	add_signal_docs(gtype, string);
+    }
+
+    pystring = PyString_FromStringAndSize(string->str, string->len);
+    g_string_free(string, TRUE);
+    return pystring;
+}
+
+static PyTypeObject PyGObjectDoc_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,
+    "gobject.GObject__doc__",
+    sizeof(PyObject),
+    0,
+    (destructor)object_doc_dealloc,
+    (printfunc)0,
+    (getattrfunc)0,
+    (setattrfunc)0,
+    (cmpfunc)0,
+    (reprfunc)0,
+    0,
+    0,
+    0,
+    (hashfunc)0,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    (getattrofunc)0,
+    (setattrofunc)0,
+    0,
+    Py_TPFLAGS_DEFAULT,
+    NULL,
+    (traverseproc)0,
+    (inquiry)0,
+    (richcmpfunc)0,
+    0,
+    (getiterfunc)0,
+    (iternextfunc)0,
+    0,
+    0,
+    0,
+    (PyTypeObject *)0,
+    (PyObject *)0,
+    (descrgetfunc)object_doc_descr_get,
+    (descrsetfunc)0
+};
+
+PyObject *
+pyg_object_descr_doc_get(void)
+{
+    static PyObject *doc_descr = NULL;
+
+    if (!doc_descr) {
+	doc_descr = PyObject_NEW(PyObject, &PyGObjectDoc_Type);
+	if (doc_descr == NULL)
+	    return NULL;
+    }
+    return doc_descr;
+}
