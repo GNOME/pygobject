@@ -15,6 +15,159 @@ static int       pygobject_compare(PyGObject *self, PyGObject *v);
 static long      pygobject_hash(PyGObject *self);
 static PyObject *pygobject_repr(PyGObject *self);
 
+/* -------------- __gtype__ objects ---------------------------- */
+
+typedef struct {
+    PyObject_HEAD
+    GType type;
+    GType (* get_type)(void);
+} PyGTypeThingee;
+
+static int
+pyg_type_thingee_compare(PyGTypeThingee *self, PyGTypeThingee *v)
+{
+    if (!self->type)
+	self->type = self->get_type();
+    if (!v->type)
+	v->type = v->get_type();
+    if (self->type == v->type) return 0;
+    if (self->type > v->type) return -1;
+    return 1;
+}
+
+static long
+pyg_type_thingee_hash(PyGTypeThingee *self)
+{
+    if (!self->type)
+	self->type = self->get_type();
+    return (long)self->type;
+}
+
+static PyObject *
+pyg_type_thingee_repr(PyGTypeThingee *self)
+{
+    char buf[20];
+
+    if (!self->type)
+	self->type = self->get_type();
+
+    g_snprintf(buf, sizeof(buf), "%lu", self->type);
+    return PyString_FromString(buf);
+}
+
+static int
+pyg_type_thingee_coerce(PyObject **self, PyObject **other)
+{
+    PyGTypeThingee *old = (PyGTypeThingee *)*self;
+
+    if (!old->type)
+	old->type = old->get_type();
+
+    if (PyInt_Check(*other)) {
+        *self = PyInt_FromLong(old->type);
+        Py_INCREF(*other);
+        return 0;
+    } else if (PyFloat_Check(*other)) {
+        *self = PyFloat_FromDouble((double)old->type);
+        Py_INCREF(*other);
+        return 0;
+    } else if (PyLong_Check(*other)) {
+        *self = PyLong_FromUnsignedLong(old->type);
+        Py_INCREF(*other);
+        return 0;
+    }
+    return 1;  /* don't know how to convert */
+}
+static PyObject *
+pyg_type_thingee_int(PyGTypeThingee *self)
+{
+    if (!self->type)
+	self->type = self->get_type();
+
+    return PyInt_FromLong(self->type);
+}
+
+static PyObject *
+pyg_type_thingee_long(PyGTypeThingee *self)
+{
+    if (!self->type)
+	self->type = self->get_type();
+
+    return PyLong_FromUnsignedLong(self->type);
+}
+
+static PyObject *
+pyg_type_thingee_float(PyGTypeThingee *self)
+{
+    if (!self->type)
+	self->type = self->get_type();
+
+    return PyFloat_FromDouble(self->type);
+}
+
+static PyNumberMethods pyg_type_thingee_number = {
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (ternaryfunc)0,
+    (unaryfunc)0,
+    (unaryfunc)0,
+    (unaryfunc)0,
+    (inquiry)0,
+    (unaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (binaryfunc)0,
+    (coercion)pyg_type_thingee_coerce,
+    (unaryfunc)pyg_type_thingee_int,
+    (unaryfunc)pyg_type_thingee_long,
+    (unaryfunc)pyg_type_thingee_float,
+    (unaryfunc)0,
+    (unaryfunc)0
+};
+
+PyTypeObject pyg_type_thingee_type = {
+    PyObject_HEAD_INIT(NULL)
+    0,
+    "GType",
+    sizeof(PyGTypeThingee),
+    0,
+    (destructor)0,
+    (printfunc)0,
+    (getattrfunc)0,
+    (setattrfunc)0,
+    (cmpfunc)pyg_type_thingee_compare,
+    (reprfunc)pyg_type_thingee_repr,
+    &pyg_type_thingee_number,
+    0,
+    0,
+    (hashfunc)pyg_type_thingee_hash,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    0L,0L,0L,0L,
+    NULL
+};
+
+static PyObject *
+pyg_type_thingee_new(GType (* get_type)(void))
+{
+    PyGTypeThingee *self;
+
+    self = (PyGTypeThingee *)PyObject_NEW(PyGTypeThingee,
+					  &pyg_type_thingee_type);
+    if (self == NULL)
+	return NULL;
+
+    self->type = 0;
+    self->get_type = get_type;
+    return (PyObject *)self;
+}
+
 /* -------------- class <-> wrapper manipulation --------------- */
 
 void
@@ -29,8 +182,11 @@ pygobject_destroy_notify(gpointer user_data)
 
 static void
 pygobject_register_class(PyObject *dict, const gchar *class_name,
-			 PyExtensionClass *ec, PyObject *bases)
+			 GType (* get_type)(void), PyExtensionClass *ec,
+			 PyObject *bases)
 {
+    PyObject *o;
+
     if (!class_hash)
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
 
@@ -49,6 +205,11 @@ pygobject_register_class(PyObject *dict, const gchar *class_name,
         PyExtensionClass_Export(dict, (char *)class_name, *ec);
     }
 
+    if (get_type) {
+	o = pyg_type_thingee_new(get_type);
+	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
+	Py_DECREF(o);
+    }
     g_hash_table_insert(class_hash, g_strdup(class_name), ec);
 }
 
@@ -231,7 +392,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 {
     PyObject *tmp;
 
-    if (G_IS_VALUE_CHAR(value)) {
+    if (G_VALUE_HOLDS_CHAR(value)) {
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_char(value, PyString_AsString(tmp)[0]);
 	else {
@@ -239,7 +400,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_UCHAR(value)) {
+    } else if (G_VALUE_HOLDS_UCHAR(value)) {
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_char(value, PyString_AsString(tmp)[0]);
 	else {
@@ -247,9 +408,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_BOOLEAN(value)) {
+    } else if (G_VALUE_HOLDS_BOOLEAN(value)) {
 	g_value_set_boolean(value, PyObject_IsTrue(obj));
-    } else if (G_IS_VALUE_INT(value)) {
+    } else if (G_VALUE_HOLDS_INT(value)) {
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_int(value, PyInt_AsLong(tmp));
 	else {
@@ -257,7 +418,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_UINT(value)) {
+    } else if (G_VALUE_HOLDS_UINT(value)) {
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_uint(value, PyInt_AsLong(tmp));
 	else {
@@ -265,7 +426,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_LONG(value)) {
+    } else if (G_VALUE_HOLDS_LONG(value)) {
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_long(value, PyInt_AsLong(tmp));
 	else {
@@ -273,7 +434,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_ULONG(value)) {
+    } else if (G_VALUE_HOLDS_ULONG(value)) {
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_ulong(value, PyInt_AsLong(tmp));
 	else {
@@ -281,7 +442,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_FLOAT(value)) {
+    } else if (G_VALUE_HOLDS_FLOAT(value)) {
 	if ((tmp = PyNumber_Float(obj)))
 	    g_value_set_float(value, PyFloat_AsDouble(tmp));
 	else {
@@ -289,7 +450,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_DOUBLE(value)) {
+    } else if (G_VALUE_HOLDS_DOUBLE(value)) {
 	if ((tmp = PyNumber_Float(obj)))
 	    g_value_set_double(value, PyFloat_AsDouble(tmp));
 	else {
@@ -297,7 +458,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_STRING(value)) {
+    } else if (G_VALUE_HOLDS_STRING(value)) {
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_string(value, PyString_AsString(tmp));
 	else {
@@ -305,23 +466,23 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_IS_VALUE_OBJECT(value)) {
+    } else if (G_VALUE_HOLDS_OBJECT(value)) {
 	PyExtensionClass *ec =pygobject_lookup_class(G_VALUE_TYPE(value));
 	if (!ExtensionClassSubclassInstance_Check(obj, ec)) {
 	    return -1;
 	}
 	g_value_set_object(value, pygobject_get(obj));
-    } else if (G_IS_VALUE_ENUM(value)) {
+    } else if (G_VALUE_HOLDS_ENUM(value)) {
 	gint val = 0;
 	if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
 	    return -1;
 	g_value_set_enum(value, val);
-    } else if (G_IS_VALUE_FLAGS(value)) {
+    } else if (G_VALUE_HOLDS_FLAGS(value)) {
 	gint val = 0;
 	if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
 	    return -1;
 	g_value_set_flags(value, val);
-    } else if (G_IS_VALUE_BOXED(value)) {
+    } else if (G_VALUE_HOLDS_BOXED(value)) {
 	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
 
 	if (bm)
@@ -330,7 +491,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
 	else
 	    return -1;
-    } else if (G_IS_VALUE_POINTER(value)) {
+    } else if (G_VALUE_HOLDS_POINTER(value)) {
 	if (PyCObject_Check(obj))
 	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
 	else
@@ -344,40 +505,40 @@ pyg_value_as_pyobject(const GValue *value)
 {
     gchar buf[128];
 
-    if (G_IS_VALUE_CHAR(value)) {
+    if (G_VALUE_HOLDS_CHAR(value)) {
 	gint8 val = g_value_get_char(value);
 	return PyString_FromStringAndSize((char *)&val, 1);
-    } else if (G_IS_VALUE_UCHAR(value)) {
+    } else if (G_VALUE_HOLDS_UCHAR(value)) {
 	guint8 val = g_value_get_uchar(value);
 	return PyString_FromStringAndSize((char *)&val, 1);
-    } else if (G_IS_VALUE_INT(value)) {
+    } else if (G_VALUE_HOLDS_INT(value)) {
 	return PyInt_FromLong(g_value_get_int(value));
-    } else if (G_IS_VALUE_UINT(value)) {
+    } else if (G_VALUE_HOLDS_UINT(value)) {
 	return PyInt_FromLong(g_value_get_uint(value));
-    } else if (G_IS_VALUE_LONG(value)) {
+    } else if (G_VALUE_HOLDS_LONG(value)) {
 	return PyInt_FromLong(g_value_get_long(value));
-    } else if (G_IS_VALUE_ULONG(value)) {
+    } else if (G_VALUE_HOLDS_ULONG(value)) {
 	return PyInt_FromLong(g_value_get_ulong(value));
-    } else if (G_IS_VALUE_FLOAT(value)) {
+    } else if (G_VALUE_HOLDS_FLOAT(value)) {
 	return PyFloat_FromDouble(g_value_get_float(value));
-    } else if (G_IS_VALUE_DOUBLE(value)) {
+    } else if (G_VALUE_HOLDS_DOUBLE(value)) {
 	return PyFloat_FromDouble(g_value_get_double(value));
-    } else if (G_IS_VALUE_STRING(value)) {
+    } else if (G_VALUE_HOLDS_STRING(value)) {
 	return PyString_FromString(g_value_get_string(value));
-    } else if (G_IS_VALUE_OBJECT(value)) {
+    } else if (G_VALUE_HOLDS_OBJECT(value)) {
 	return pygobject_new(g_value_get_object(value));
-    } else if (G_IS_VALUE_ENUM(value)) {
+    } else if (G_VALUE_HOLDS_ENUM(value)) {
 	return PyInt_FromLong(g_value_get_enum(value));
-    } else if (G_IS_VALUE_FLAGS(value)) {
+    } else if (G_VALUE_HOLDS_FLAGS(value)) {
 	return PyInt_FromLong(g_value_get_flags(value));
-    } else if (G_IS_VALUE_BOXED(value)) {
+    } else if (G_VALUE_HOLDS_BOXED(value)) {
 	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
 
 	if (bm)
 	    return bm->fromvalue(value);
 	else
 	    return PyCObject_FromVoidPtr(g_value_get_boxed(value), NULL);
-    } else if (G_IS_VALUE_POINTER(value)) {
+    } else if (G_VALUE_HOLDS_POINTER(value)) {
 	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
     }
     g_snprintf(buf, sizeof(buf), "unknown type %s",
@@ -1133,13 +1294,16 @@ static struct _PyGObject_Functions functions = {
 DL_EXPORT(void)
 initgobject(void)
 {
-    PyObject *m, *d;
+    PyObject *m, *d, *o;
 
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
-    g_type_init();
-    pygobject_register_class(d, "GObject", &PyGObject_Type, NULL);
+    g_type_init(G_TYPE_DEBUG_NONE);
+    pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
+    PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
+			 o=PyInt_FromLong(G_TYPE_OBJECT));
+    Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
 
@@ -1149,6 +1313,27 @@ initgobject(void)
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGObject_API",
 			 PyCObject_FromVoidPtr(&functions, NULL));
+
+    /* some constants */
+    PyModule_AddIntConstant(m, "TYPE_INVALID", G_TYPE_INVALID);
+    PyModule_AddIntConstant(m, "TYPE_NONE", G_TYPE_NONE);
+    PyModule_AddIntConstant(m, "TYPE_INTERFACE", G_TYPE_INTERFACE);
+    PyModule_AddIntConstant(m, "TYPE_CHAR", G_TYPE_CHAR);
+    PyModule_AddIntConstant(m, "TYPE_UCHAR", G_TYPE_UCHAR);
+    PyModule_AddIntConstant(m, "TYPE_BOOLEAN", G_TYPE_BOOLEAN);
+    PyModule_AddIntConstant(m, "TYPE_INT", G_TYPE_INT);
+    PyModule_AddIntConstant(m, "TYPE_UINT", G_TYPE_UINT);
+    PyModule_AddIntConstant(m, "TYPE_LONG", G_TYPE_LONG);
+    PyModule_AddIntConstant(m, "TYPE_ULONG", G_TYPE_ULONG);
+    PyModule_AddIntConstant(m, "TYPE_ENUM", G_TYPE_ENUM);
+    PyModule_AddIntConstant(m, "TYPE_FLAGS", G_TYPE_FLAGS);
+    PyModule_AddIntConstant(m, "TYPE_FLOAT", G_TYPE_FLOAT);
+    PyModule_AddIntConstant(m, "TYPE_DOUBLE", G_TYPE_DOUBLE);
+    PyModule_AddIntConstant(m, "TYPE_STRING", G_TYPE_STRING);
+    PyModule_AddIntConstant(m, "TYPE_POINTER", G_TYPE_POINTER);
+    PyModule_AddIntConstant(m, "TYPE_BOXED", G_TYPE_BOXED);
+    PyModule_AddIntConstant(m, "TYPE_PARAM", G_TYPE_PARAM);
+    PyModule_AddIntConstant(m, "TYPE_OBJECT", G_TYPE_OBJECT);
 
     if (PyErr_Occurred()) {
 	PyErr_Print();
