@@ -133,6 +133,10 @@ pyg_type_from_object(PyObject *obj)
 
 	if (tp == &PyInt_Type)
 	    return G_TYPE_INT;
+#if PY_VERSION_HEX >= 0x020300f0
+	else if (tp == &PyBool_Type)
+	    return G_TYPE_BOOLEAN;
+#endif	
 	else if (tp == &PyLong_Type)
 	    return G_TYPE_LONG;
 	else if (tp == &PyFloat_Type)

@@ -1,6 +1,7 @@
 tests =  \
 	conversion.py \
 	enum.py \
+	gtype.py \
 	signal.py
 
 PYTHONPATH = $(top_builddir):$(top_builddir)/gobject:$(top_srcdir):$(top_srcdir)/gtk
