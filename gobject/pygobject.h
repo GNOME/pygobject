@@ -29,6 +29,7 @@ typedef struct {
 #define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
 typedef void (*PyGFatalExceptionFunc) (void);
+typedef void (*PyGThreadBlockFunc) (void);
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
@@ -68,6 +69,13 @@ struct _PyGObject_Functions {
 				     const gchar *strip_prefix);
 
     gboolean (* error_check)(GError **error);
+
+    /* hooks to register handlers for getting GDK threads to cooperate
+     * with python threading */
+    void (* set_thread_block_funcs) (PyGThreadBlockFunc block_threads_func,
+				     PyGThreadBlockFunc unblock_threads_func);
+    PyGThreadBlockFunc block_threads;
+    PyGThreadBlockFunc unblock_threads;
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -98,6 +106,17 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
 #define pyg_constant_strip_prefix (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check            (_PyGObject_API->error_check)
+#define pyg_set_thread_block_funcs (_PyGObject_API->set_thread_block_funcs)
+
+#define pyg_block_threads()   G_STMT_START {   \
+    if (_PyGObject_API->block_threads != NULL) \
+      (* _PyGObject_API->block_threads)();     \
+  } G_STMT_END
+#define pyg_unblock_threads() G_STMT_START {     \
+    if (_PyGObject_API->unblock_threads != NULL) \
+      (* _PyGObject_API->unblock_threads)();     \
+  } G_STMT_END
+
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \

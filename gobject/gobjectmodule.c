@@ -1,4 +1,9 @@
 /* -*- Mode: C; c-basic-offset: 4 -*- */
+
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
@@ -15,6 +20,29 @@ static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 
 static int  pyg_fatal_exceptions_notify(void);
+
+
+/* -------------- GDK threading hooks ---------------------------- */
+
+staticforward struct _PyGObject_Functions functions;
+#define pyg_block_threads()   G_STMT_START { \
+    if (functions.block_threads != NULL)    \
+      (* functions.block_threads)();        \
+  } G_STMT_END
+#define pyg_unblock_threads() G_STMT_START { \
+    if (functions.unblock_threads != NULL)  \
+      (* functions.unblock_threads)();      \
+  } G_STMT_END
+
+static void
+pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
+			    PyGThreadBlockFunc unblock_threads_func)
+{
+    g_return_if_fail(functions.block_threads == NULL && functions.unblock_threads == NULL);
+
+    functions.block_threads   = block_threads_func;
+    functions.unblock_threads = unblock_threads_func;
+}
 
 static void
 object_free(PyObject *op)
@@ -226,9 +254,9 @@ pygobject_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
 
-    /* PyGTK_BLOCK_THREADS */
+    pyg_block_threads();
     Py_DECREF(obj);
-    /* PyGTK_UNBLOCK_THREADS */
+    pyg_unblock_threads();
 }
 
 static void
@@ -989,15 +1017,16 @@ struct _PyGClosure {
     PyObject *swap_data; /* other object for gtk_signal_connect_object */
 };
 
-/* XXXX - must handle multithreadedness here */
 static void
 pyg_closure_destroy(gpointer data, GClosure *closure)
 {
     PyGClosure *pc = (PyGClosure *)closure;
 
+    pyg_block_threads();
     Py_DECREF(pc->callback);
     Py_XDECREF(pc->extra_args);
     Py_XDECREF(pc->swap_data);
+    pyg_unblock_threads();
 }
 
 /* XXXX - need to handle python thread context stuff */
@@ -1013,6 +1042,7 @@ pyg_closure_marshal(GClosure *closure,
     PyObject *params, *ret;
     guint i;
 
+    pyg_block_threads();
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values);
     for (i = 0; i < n_param_values; i++) {
@@ -1027,7 +1057,7 @@ pyg_closure_marshal(GClosure *closure,
 	    /* error condition */
 	    if (!item) {
 		Py_DECREF(params);
-		/* XXXX - clean up if threading was used */
+		pyg_unblock_threads();
 		return;
 	    }
 	    PyTuple_SetItem(params, i, item);
@@ -1043,12 +1073,13 @@ pyg_closure_marshal(GClosure *closure,
     if (ret == NULL) {
 	PyErr_Print();
 	PyErr_Clear();
+	pyg_unblock_threads();
 	return;
     }
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
-    /* XXXX - clean up if threading was used */
+    pyg_unblock_threads();
 }
 
 static GClosure *
@@ -1062,7 +1093,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     g_closure_set_marshal(closure, pyg_closure_marshal);
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
-    if (extra_args) {
+    if (extra_args && extra_args != Py_None) {
 	if (!PyTuple_Check(extra_args)) {
 	    PyObject *tmp = PyTuple_New(1);
 	    PySequence_SetItem(tmp, 0, extra_args);
@@ -1109,6 +1140,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 
     g_return_if_fail(invocation_hint != NULL);
 
+    pyg_block_threads();
     /* get the object passed as the first argument to the closure */
     object = g_value_get_object(&param_values[0]);
     g_return_if_fail(object != NULL && G_IS_OBJECT(object));
@@ -1132,6 +1164,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (!method) {
 	PyErr_Clear();
 	Py_DECREF(object_wrapper);
+	pyg_unblock_threads();
 	return;
     }
     Py_DECREF(object_wrapper);
@@ -1144,7 +1177,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	/* error condition */
 	if (!item) {
 	    Py_DECREF(params);
-	    /* XXXX - clean up if threading was used */
+	    pyg_unblock_threads();
 	    return;
 	}
 	PyTuple_SetItem(params, i - 1, item);
@@ -1154,15 +1187,15 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (ret == NULL) {
 	PyErr_Print();
 	PyErr_Clear();
-	/* XXXX - clean up if threading was used */
 	Py_DECREF(method);
+	pyg_unblock_threads();
 	return;
     }
     Py_DECREF(method);
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
-    /* XXXX - clean up if threading was used */
+    pyg_unblock_threads();
 }
 
 static GClosure *
@@ -1662,6 +1695,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     }
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
+    
     g_signal_emitv(params, signal_id, detail, &ret);
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
@@ -1701,7 +1735,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     GSignalInvocationHint *ihint;
     guint signal_id, i, len;
     PyObject *first, *py_ret;
-    gchar *name;
+    const gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
 
@@ -2989,6 +3023,10 @@ static struct _PyGObject_Functions functions = {
   pyg_constant_strip_prefix,
 
   pyg_error_check,
+
+  pyg_set_thread_block_funcs,
+  (PyGThreadBlockFunc)0, /* block_threads */
+  (PyGThreadBlockFunc)0, /* unblock_threads */
 };
 
 DL_EXPORT(void)
