@@ -375,7 +375,6 @@ pygobject_dealloc(PyGObject *self)
 static PyObject *
 check_bases(PyGObject *self, PyExtensionClass *class, char *attr)
 {
-    guint i, len;
     PyObject *ret;
 
     if (class->tp_getattr) {
@@ -385,14 +384,17 @@ check_bases(PyGObject *self, PyExtensionClass *class, char *attr)
 	else
 	    PyErr_Clear();
     }
-    len = PyList_Size(class->bases);
-    for (i = 0; i < len; i++) {
-	PyExtensionClass *base = (PyExtensionClass *)PyList_GetItem(
+    if (class->bases) {
+	guint i, len = PyTuple_Size(class->bases);
+
+	for (i = 0; i < len; i++) {
+	    PyExtensionClass *base = (PyExtensionClass *)PyTuple_GetItem(
 							class->bases, i);
 
-	ret = check_bases(self, base, attr);
-	if (ret)
-	    return ret;
+	    ret = check_bases(self, base, attr);
+	    if (ret)
+		return ret;
+	}
     }
     return NULL;
 }
