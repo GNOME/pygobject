@@ -147,6 +147,49 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	return pyg_type_wrapper_new(self->pspec->value_type);
     } else if (!strcmp(attr, "owner_type")) {
 	return pyg_type_wrapper_new(self->pspec->owner_type);
+    } else if (!strcmp(attr, "default_value")) {
+	GParamSpec *pspec = self->pspec;
+	if (G_IS_PARAM_SPEC_CHAR(pspec)) {
+	    return PyString_FromFormat("%c", G_PARAM_SPEC_CHAR(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_UCHAR(pspec)) {
+	    return PyString_FromFormat("%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_BOOLEAN(pspec)) {
+	    PyObject *retval = G_PARAM_SPEC_BOOLEAN(pspec)->default_value ? Py_True : Py_False;
+	    Py_INCREF(retval);
+	    return retval;
+	} else if (G_IS_PARAM_SPEC_INT(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_UINT(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_UINT(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_LONG(pspec)) {
+	    return PyLong_FromLong(G_PARAM_SPEC_LONG(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_ULONG(pspec)) {
+	    return PyLong_FromLong(G_PARAM_SPEC_ULONG(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_INT64(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_INT64(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_UINT64(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_UINT64(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
+	    return PyString_FromFormat("%c", G_PARAM_SPEC_UNICHAR(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_ENUM(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_ENUM(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_FLAGS(pspec)) {
+	    return PyInt_FromLong(G_PARAM_SPEC_FLAGS(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_FLOAT(pspec)) {
+	    return PyFloat_FromDouble(G_PARAM_SPEC_FLOAT(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_DOUBLE(pspec)) {
+	    return PyFloat_FromDouble(G_PARAM_SPEC_DOUBLE(pspec)->default_value);
+	} else if (G_IS_PARAM_SPEC_STRING(pspec)) {
+	    if (G_PARAM_SPEC_STRING(pspec)->default_value) {
+		return PyString_FromString(G_PARAM_SPEC_STRING(pspec)->default_value);
+	    }
+	}
+	
+	/* If we don't know how to convert it, just set it to None
+	 * for consistency
+	 */
+	Py_INCREF(Py_None);
+	return Py_None;
     }
     PyErr_SetString(PyExc_AttributeError, attr);
     return NULL;
