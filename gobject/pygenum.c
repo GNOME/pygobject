@@ -149,6 +149,7 @@ pyg_enum_add (PyObject *   module,
 	      const char * strip_prefix,
 	      GType        gtype)
 {
+    PyGILState_STATE state;
     PyObject *instance_dict, *stub, *values;
     GEnumClass *eclass;
     int i;
@@ -157,6 +158,8 @@ pyg_enum_add (PyObject *   module,
     g_return_val_if_fail(typename != NULL, NULL);
     g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_ENUM), NULL);
     
+    state = PyGILState_Ensure();
+
     instance_dict = PyDict_New();
     stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
                                  typename, (PyObject *)&PyGEnum_Type,
@@ -164,6 +167,7 @@ pyg_enum_add (PyObject *   module,
     Py_DECREF(instance_dict);
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
+	PyGILState_Release(state);
 	return NULL;
     }
     
@@ -205,8 +209,9 @@ pyg_enum_add (PyObject *   module,
     Py_DECREF(values);
 
     g_type_class_unref(eclass);
-
-  return stub;
+    
+    PyGILState_Release(state);
+    return stub;
 }
 
 static PyObject *

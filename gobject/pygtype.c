@@ -133,10 +133,8 @@ pyg_type_from_object(PyObject *obj)
 
 	if (tp == &PyInt_Type)
 	    return G_TYPE_INT;
-#if PY_VERSION_HEX >= 0x020300f0
 	else if (tp == &PyBool_Type)
 	    return G_TYPE_BOOLEAN;
-#endif	
 	else if (tp == &PyLong_Type)
 	    return G_TYPE_LONG;
 	else if (tp == &PyFloat_Type)
@@ -736,7 +734,6 @@ pyg_closure_invalidate(gpointer data, GClosure *closure)
     pyg_unblock_threads();
 }
 
-/* XXXX - need to handle python thread context stuff */
 static void
 pyg_closure_marshal(GClosure *closure,
 		    GValue *return_value,
@@ -745,11 +742,14 @@ pyg_closure_marshal(GClosure *closure,
 		    gpointer invocation_hint,
 		    gpointer marshal_data)
 {
+    PyGILState_STATE state;
     PyGClosure *pc = (PyGClosure *)closure;
     PyObject *params, *ret;
     guint i;
 
     pyg_block_threads();
+    state = PyGILState_Ensure();
+
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values);
     for (i = 0; i < n_param_values; i++) {
@@ -763,9 +763,7 @@ pyg_closure_marshal(GClosure *closure,
 
 	    /* error condition */
 	    if (!item) {
-		Py_DECREF(params);
-		pyg_unblock_threads();
-		return;
+		goto out;
 	    }
 	    PyTuple_SetItem(params, i, item);
 	}
@@ -779,14 +777,16 @@ pyg_closure_marshal(GClosure *closure,
     ret = PyObject_CallObject(pc->callback, params);
     if (ret == NULL) {
 	PyErr_Print();
-	Py_DECREF(params);
-	pyg_unblock_threads();
-	return;
+	goto out;
     }
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
-    Py_DECREF(params);
     Py_DECREF(ret);
+    
+ out:
+    Py_DECREF(params);
+    
+    PyGILState_Release(state);
     pyg_unblock_threads();
 }
 

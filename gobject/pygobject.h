@@ -7,8 +7,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#if PY_VERSION_HEX < 0x02030000
-  typedef destructor freefunc;
+#if !(defined ENABLE_PYGTK_THREADING)
+# define PyGILState_STATE int
+# define PyGILState_Ensure() (0)
+# define PyGILState_Release(x) 
 #endif
 
 typedef struct {

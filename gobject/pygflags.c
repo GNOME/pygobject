@@ -182,6 +182,7 @@ pyg_flags_add (PyObject *   module,
 	       const char * strip_prefix,
 	       GType        gtype)
 {
+    PyGILState_STATE state;
     PyObject *instance_dict, *stub, *values;
     GFlagsClass *eclass;
     int i;
@@ -190,6 +191,8 @@ pyg_flags_add (PyObject *   module,
     g_return_val_if_fail(typename != NULL, NULL);
     g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_FLAGS), NULL);
     
+    state = PyGILState_Ensure();
+
     instance_dict = PyDict_New();
     stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
                                  typename, (PyObject *)&PyGFlags_Type,
@@ -197,7 +200,7 @@ pyg_flags_add (PyObject *   module,
     Py_DECREF(instance_dict);
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
-	return NULL;
+	PyGILState_Release(state);
     }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
@@ -231,13 +234,15 @@ pyg_flags_add (PyObject *   module,
 						   strip_prefix),
 			 item);
       Py_INCREF(item);
-  }
+    }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
 			 "__flags_values__", values);
     Py_DECREF(values);
 
     g_type_class_unref(eclass);
+
+    PyGILState_Release(state);
 
     return stub;
 }

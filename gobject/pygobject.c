@@ -181,6 +181,7 @@ pygobject_register_wrapper(PyObject *self)
 PyTypeObject *
 pygobject_new_with_interfaces(GType gtype)
 {
+    PyGILState_STATE state;
     PyObject *o;
     PyTypeObject *type;
     PyObject *dict;
@@ -246,10 +247,14 @@ pygobject_new_with_interfaces(GType gtype)
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
 
+    state = PyGILState_Ensure();
+
     type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type, "sOO",
 						type_name, bases, dict);
     g_free(type_name);
 
+    PyGILState_Release(state);
+    
     if (type == NULL) {
 	PyErr_Print();
 	return NULL;

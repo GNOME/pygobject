@@ -328,8 +328,10 @@ pyg_object_set_property (GObject *object, guint property_id,
 {
     PyObject *object_wrapper, *retval;
     PyObject *py_pspec, *py_value;
+    PyGILState_STATE state;
 
     pyg_block_threads();
+    state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
@@ -353,6 +355,7 @@ pyg_object_set_property (GObject *object, guint property_id,
     Py_DECREF(py_pspec);
     Py_DECREF(py_value);
 
+    PyGILState_Release(state);
     pyg_unblock_threads();
 }
 
@@ -362,8 +365,10 @@ pyg_object_get_property (GObject *object, guint property_id,
 {
     PyObject *object_wrapper, *retval;
     PyObject *py_pspec;
+    PyGILState_STATE state;
 
     pyg_block_threads();
+    state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
@@ -382,6 +387,7 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_DECREF(py_pspec);
     Py_XDECREF(retval);
     
+    PyGILState_Release(state);
     pyg_unblock_threads();        
 }
 
@@ -1249,10 +1255,12 @@ handler_marshal(gpointer user_data)
 {
     PyObject *tuple, *ret;
     gboolean res;
+    PyGILState_STATE state;
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
     pyg_block_threads();
+    state = PyGILState_Ensure();
 
     tuple = (PyObject *)user_data;
     ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
@@ -1264,6 +1272,8 @@ handler_marshal(gpointer user_data)
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
+    
+    PyGILState_Release(state);
     pyg_unblock_threads();
 
     return res;
@@ -1348,12 +1358,14 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 static gboolean
 iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 {
+    PyGILState_STATE state;
     PyObject *tuple, *func, *firstargs, *args, *ret;
     gboolean res;
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
     pyg_block_threads();
+    state = PyGILState_Ensure();
 
     tuple = (PyObject *)user_data;
     func = PyTuple_GetItem(tuple, 0);
@@ -1373,6 +1385,7 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 	Py_DECREF(ret);
     }
 
+    PyGILState_Release(state);
     pyg_unblock_threads();
 
     return res;
@@ -1599,6 +1612,8 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
 static gboolean
 pyg_error_check(GError **error)
 {
+    PyGILState_STATE state;
+
     g_return_val_if_fail(error != NULL, FALSE);
 
     if (*error != NULL) {
@@ -1606,6 +1621,7 @@ pyg_error_check(GError **error)
 	PyObject *d;
 	
 	pyg_block_threads();
+	state = PyGILState_Ensure();
 	
 	exc_instance = PyObject_CallFunction(gerror_exc, "z",
 					     (*error)->message);
@@ -1627,6 +1643,7 @@ pyg_error_check(GError **error)
 	Py_DECREF(exc_instance);
 	g_clear_error(error);
 	
+	PyGILState_Release(state);
 	pyg_unblock_threads();
 	
 	return TRUE;
@@ -1809,6 +1826,7 @@ initgobject(void)
     d = PyModule_GetDict(m);
 
 #ifdef ENABLE_PYGTK_THREADING
+    PyEval_InitThreads();
     if (!g_threads_got_initialized)
 	g_thread_init(NULL);
 #endif
