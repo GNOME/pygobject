@@ -642,13 +642,16 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	g_value_set_flags(value, val);
     } else if (G_VALUE_HOLDS_BOXED(value)) {
-	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+	PyGBoxedMarshal *bm;
 
-	if (bm)
+	if (pyg_boxed_check(obj, &PyGBoxed_Type) &&
+	    G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
+	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
+	} else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
 	    return bm->tovalue(value, obj);
-	if (PyCObject_Check(obj))
+	} else if (PyCObject_Check(obj)) {
 	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
-	else
+	} else
 	    return -1;
     } else if (G_VALUE_HOLDS_POINTER(value)) {
 	if (PyCObject_Check(obj))
@@ -696,7 +699,8 @@ pyg_value_as_pyobject(const GValue *value)
 	if (bm)
 	    return bm->fromvalue(value);
 	else
-	    return PyCObject_FromVoidPtr(g_value_get_boxed(value), NULL);
+	    return pyg_boxed_new(G_VALUE_TYPE(value), g_value_get_boxed(value),
+				 TRUE, TRUE);
     } else if (G_VALUE_HOLDS_POINTER(value)) {
 	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
     }
