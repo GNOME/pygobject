@@ -1102,6 +1102,12 @@ pygobject_dealloc(PyGObject *self)
 	g_object_set_qdata_full(obj, pygobject_ownedref_key,
 				self, pygobject_destroy_notify);
 	g_object_unref(obj);
+
+	/* we ref the type, so subtype_dealloc() doesn't kill off our
+         * instance's type. */
+	if (self->ob_type->tp_flags & Py_TPFLAGS_HEAPTYPE)
+	    Py_INCREF(self->ob_type);
+
 	return;
     }
     if (obj && !self->hasref) /* don't unref the GObject if it owns us */
