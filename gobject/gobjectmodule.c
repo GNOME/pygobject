@@ -1603,7 +1603,7 @@ pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     len = PyTuple_Size(args);
     if (len < 3) {
 	PyErr_SetString(PyExc_TypeError,
-			"timeout_add requires at least 3 args");
+			"io_add_watch requires at least 3 args");
 	return NULL;
     }
     first = PySequence_GetSlice(args, 0, 3);
