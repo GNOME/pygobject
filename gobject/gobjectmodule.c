@@ -7,13 +7,21 @@ static GHashTable *class_hash;
 static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
 
-staticforward PyExtensionClass PyGObject_Type;
-static void      pygobject_dealloc(PyGObject *self);
-static PyObject *pygobject_getattro(PyGObject *self, PyObject *attro);
-static int       pygobject_setattr(PyGObject *self, char *attr, PyObject *val);
-static int       pygobject_compare(PyGObject *self, PyGObject *v);
-static long      pygobject_hash(PyGObject *self);
-static PyObject *pygobject_repr(PyGObject *self);
+staticforward PyTypeObject PyGObject_Type;
+static void pygobject_dealloc(PyGObject *self);
+static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
+
+static void
+object_free(PyObject *op)
+{
+    PyObject_FREE(op);
+}
+
+static void
+object_gc_free(PyObject *op)
+{
+    PyObject_GC_Del(op);
+}
 
 /* -------------- __gtype__ objects ---------------------------- */
 
@@ -103,7 +111,7 @@ pygobject_destroy_notify(gpointer user_data)
 
 static void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
-			 GType type, PyExtensionClass *ec,
+			 GType gtype, PyTypeObject *type,
 			 PyObject *bases)
 {
     PyObject *o;
@@ -112,28 +120,35 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     if (!class_hash)
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
 
-    class_name = ec->tp_name;
-    /* set standard pyobject class functions if they aren't already set */
-    if (!ec->tp_dealloc)  ec->tp_dealloc  = (destructor)pygobject_dealloc;
-    if (!ec->tp_getattro) ec->tp_getattro = (getattrofunc)pygobject_getattro;
-    if (!ec->tp_setattr)  ec->tp_setattr  = (setattrfunc)pygobject_setattr;
-    if (!ec->tp_compare)  ec->tp_compare  = (cmpfunc)pygobject_compare;
-    if (!ec->tp_repr)     ec->tp_repr     = (reprfunc)pygobject_repr;
-    if (!ec->tp_hash)     ec->tp_hash     = (hashfunc)pygobject_hash;
+    class_name = type->tp_name;
 
+    type->ob_type = &PyType_Type;
     if (bases) {
-        PyExtensionClass_ExportSubclass(dict, (char *)class_name,
-					*ec, bases);
-    } else {
-        PyExtensionClass_Export(dict, (char *)class_name, *ec);
+	type->tp_bases = bases;
+	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
     }
 
-    if (type) {
-	o = pyg_type_wrapper_new(type);
-	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
+    type->tp_dealloc  = (destructor)pygobject_dealloc;
+    type->tp_traverse = (traverseproc)pygobject_traverse;
+    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+    type->tp_weaklistoffset = offsetof(PyGObject, weakreflist);
+    type->tp_dictoffset = offsetof(PyGObject, inst_dict);
+
+    if (PyType_Ready(type) < 0) {
+	g_warning ("couldn't make the type `%s' ready", type->tp_name);
+	return;
+    }
+
+    if (gtype) {
+	o = pyg_type_wrapper_new(gtype);
+	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
+	PyDict_SetItemString(type->tp_defined, "__gtype__", o);
 	Py_DECREF(o);
     }
-    g_hash_table_insert(class_hash, g_strdup(type_name), ec);
+
+    g_hash_table_insert(class_hash, g_strdup(type_name), type);
+
+    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
 void
@@ -145,17 +160,17 @@ pygobject_register_wrapper(PyObject *self)
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 }
 
-static PyExtensionClass *
-pygobject_lookup_class(GType type)
+static PyTypeObject *
+pygobject_lookup_class(GType gtype)
 {
-    PyExtensionClass *ec;
+    PyTypeObject *type;
 
     /* find the python type for this object.  If not found, use parent. */
-    while ((ec = g_hash_table_lookup(class_hash, g_type_name(type))) == NULL
-           && type != 0)
-        type = g_type_parent(type);
-    g_assert(ec != NULL);
-    return ec;
+    while ((type = g_hash_table_lookup(class_hash, g_type_name(gtype))) == NULL
+           && gtype != 0)
+        gtype = g_type_parent(gtype);
+    g_assert(type != NULL);
+    return type;
 }
 
 static PyObject *
@@ -181,8 +196,8 @@ pygobject_new(GObject *obj)
 	return (PyObject *)self;
     }
 
-    tp = (PyTypeObject *)pygobject_lookup_class(G_TYPE_FROM_INSTANCE(obj));
-    self = PyObject_NEW(PyGObject, tp);
+    tp = pygobject_lookup_class(G_TYPE_FROM_INSTANCE(obj));
+    self = PyObject_GC_New(PyGObject, tp);
 
     if (self == NULL)
 	return NULL;
@@ -190,7 +205,6 @@ pygobject_new(GObject *obj)
     g_object_ref(obj);
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
-    self->inst_dict = PyDict_New();
 
     return (PyObject *)self;
 }
@@ -221,7 +235,8 @@ pyg_boxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && self->boxed)
 	g_boxed_free(self->gtype, self->boxed);
-    PyMem_DEL(self);
+
+    self->ob_type->tp_free((PyObject *)self);
 }
 
 static int
@@ -248,46 +263,13 @@ pyg_boxed_repr(PyGBoxed *self)
     return PyString_FromString(buf);
 }
 
-static PyObject *
-pyg_boxed_getattro(PyGBoxed *self, PyObject *attro)
-{
-    char *attr;
-    PyObject *ret;
-
-    attr = PyString_AsString(attro);
-
-    ret = Py_FindAttrString((PyObject *)self, attr);
-    if (ret)
-	return ret;
-    PyErr_Clear();
-
-    if (self->ob_type->tp_getattr)
-	return (* self->ob_type->tp_getattr)((PyObject *)self, attr);
-
-    PyErr_SetString(PyExc_AttributeError, attr);
-    return NULL;
-}
-
-static PyObject *
-pyg_boxed__class_init__(PyObject *self, PyObject *args)
-{
-    PyExtensionClass *subclass;
-
-    if (!PyArg_ParseTuple(args, "O:GBoxed.__class_init__", &subclass))
-	return NULL;
-
-    g_message("subclassing GBoxed types is bad m'kay");
-    PyErr_SetString(PyExc_TypeError, "attempt to subclass a boxed type");
-    return NULL;
-}
-
-static PyObject *
-pyg_boxed_init(PyGBoxed *self, PyObject *args)
+static int
+pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
     if (!PyArg_ParseTuple(args, ":GBoxed.__init__"))
-	return NULL;
+	return -1;
 
     self->boxed = NULL;
     self->gtype = 0;
@@ -295,16 +277,10 @@ pyg_boxed_init(PyGBoxed *self, PyObject *args)
 
     g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
     PyErr_SetString(PyExc_NotImplementedError, buf);
-    return NULL;
+    return -1;
 }
 
-static PyMethodDef pyg_boxed_methods[] = {
-    {"__class_init__",pyg_boxed__class_init__, METH_VARARGS|METH_CLASS_METHOD},
-    {"__init__",  (PyCFunction)pyg_boxed_init, METH_VARARGS},
-    {NULL,NULL,0}
-};
-
-static PyExtensionClass PyGBoxed_Type = {
+static PyTypeObject PyGBoxed_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
     "GBoxed",                          /* tp_name */
@@ -323,43 +299,64 @@ static PyExtensionClass PyGBoxed_Type = {
     (hashfunc)pyg_boxed_hash,           /* tp_hash */
     (ternaryfunc)0,                     /* tp_call */
     (reprfunc)0,                        /* tp_str */
-    (getattrofunc)pyg_boxed_getattro,   /* tp_getattro */
+    (getattrofunc)0,			/* tp_getattro */
     (setattrofunc)0,                    /* tp_setattro */
-    /* Space for future expansion */
-    0L, 0L,
+    0,					/* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
     NULL, /* Documentation string */
-    METHOD_CHAIN(pyg_boxed_methods),
-    0,
+    (traverseproc)0,			/* tp_traverse */
+    (inquiry)0,				/* tp_clear */
+    (richcmpfunc)0,			/* tp_richcompare */
+    0,					/* tp_weaklistoffset */
+    (getiterfunc)0,			/* tp_iter */
+    (iternextfunc)0,			/* tp_iternext */
+    0,					/* tp_methods */
+    0,					/* tp_members */
+    0,					/* tp_getset */
+    (PyTypeObject *)0,			/* tp_base */
+    (PyObject *)0,			/* tp_dict */
+    0,					/* tp_descr_get */
+    0,					/* tp_descr_set */
+    0,					/* tp_dictoffset */
+    (initproc)pyg_boxed_init,		/* tp_init */
+    PyType_GenericAlloc,		/* tp_alloc */
+    PyType_GenericNew,			/* tp_new */
+    object_free,			/* tp_free */
+    (PyObject *)0,			/* tp_bases */
 };
 
 static GHashTable *boxed_types = NULL;
 
 static void
 pyg_register_boxed(PyObject *dict, const gchar *class_name,
-		   GType boxed_type, PyExtensionClass *ec)
+		   GType boxed_type, PyTypeObject *type)
 {
     PyObject *o;
 
     g_return_if_fail(dict != NULL);
     g_return_if_fail(class_name != NULL);
     g_return_if_fail(boxed_type != 0);
-    g_return_if_fail(ec != NULL);
 
     if (!boxed_types)
 	boxed_types = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-    if (!ec->tp_dealloc)  ec->tp_dealloc  = (destructor)pyg_boxed_dealloc;
-    if (!ec->tp_compare)  ec->tp_compare  = (cmpfunc)pyg_boxed_compare;
-    if (!ec->tp_hash)     ec->tp_hash     = (hashfunc)pyg_boxed_hash;
-    if (!ec->tp_repr)     ec->tp_repr     = (reprfunc)pyg_boxed_repr;
-    if (!ec->tp_getattro) ec->tp_getattro = (getattrofunc)pyg_boxed_getattro;
+    if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
 
-    PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name, *ec,
-					  PyGBoxed_Type);
-    PyDict_SetItemString(ec->class_dictionary, "__gtype__",
+    type->ob_type = &PyType_Type;
+    type->tp_base = &PyGBoxed_Type;
+
+    if (PyType_Ready(type) < 0) {
+	g_warning("could not get type `%s' ready", type->tp_name);
+	return;
+    }
+
+    PyDict_SetItemString(type->tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(boxed_type));
+    PyDict_SetItemString(type->tp_defined, "__gtype__", o);
     Py_DECREF(o);
-    g_hash_table_insert(boxed_types, GUINT_TO_POINTER(boxed_type), ec);
+    g_hash_table_insert(boxed_types, GUINT_TO_POINTER(boxed_type), type);
+
+    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
 static PyObject *
@@ -641,8 +638,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_OBJECT:
 	{
-	    PyExtensionClass *ec =pygobject_lookup_class(G_VALUE_TYPE(value));
-	    if (!ExtensionClassSubclassInstance_Check(obj, ec)) {
+	    PyTypeObject *type =pygobject_lookup_class(G_VALUE_TYPE(value));
+	    if (!PyObject_TypeCheck(obj, type)) {
 		return -1;
 	    }
 	    g_value_set_object(value, pygobject_get(obj));
@@ -670,7 +667,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 
 	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
 		g_value_set_boxed(value, obj);
-	    } else if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
+	    } else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
 		       G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
 		g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
 	    } else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
@@ -955,89 +952,36 @@ pyg_signal_class_closure_get(void)
 }
 
 /* -------------- PyGObject behaviour ----------------- */
+
 static void
 pygobject_dealloc(PyGObject *self)
 {
     GObject *obj = self->obj;
 
-    if (obj && !(((PyExtensionClass *)self->ob_type)->class_flags &
-		 EXTENSIONCLASS_PYSUBCLASS_FLAG)) {
-	/* save reference to python wrapper if there are still
-         * references to the GObject in such a way that it will be
-         * freed when the GObject is destroyed, so is the python
-         * wrapper, but if a python wrapper can be */
-        if (obj->ref_count > 1) {
-            Py_INCREF(self); /* grab a reference on the wrapper */
-            self->hasref = TRUE;
-            g_object_set_qdata_full(obj, pygobject_ownedref_key,
-				    self, pygobject_destroy_notify);
-            g_object_unref(obj);
-            return;
-        }
-        if (!self->hasref) /* don't unref the GObject if it owns us */
-            g_object_unref(obj);
+    /* save reference to python wrapper if there are still
+     * references to the GObject in such a way that it will be
+     * freed when the GObject is destroyed, so is the python
+     * wrapper, but if a python wrapper can be */
+    if (obj && obj->ref_count > 1) {
+	Py_INCREF(self); /* grab a reference on the wrapper */
+	self->hasref = TRUE;
+	g_object_set_qdata_full(obj, pygobject_ownedref_key,
+				self, pygobject_destroy_notify);
+	g_object_unref(obj);
+	return;
     }
-    /* subclass_dealloc (ExtensionClass.c) does this for us for python
-     * subclasses */
-    if (self->inst_dict &&
-        !(((PyExtensionClass *)self->ob_type)->class_flags &
-          EXTENSIONCLASS_PYSUBCLASS_FLAG)) {
-        Py_DECREF(self->inst_dict);
-    }
-    PyMem_DEL(self);
-}
+    if (obj && !self->hasref) /* don't unref the GObject if it owns us */
+	g_object_unref(obj);
 
-/* standard getattr method */
-static PyObject *
-check_bases(PyGObject *self, PyExtensionClass *class, char *attr)
-{
-    PyObject *ret;
+    PyObject_ClearWeakRefs((PyObject *)self);
 
-    if (class->tp_getattr) {
-	ret = (* class->tp_getattr)((PyObject *)self, attr);
-	if (ret)
-	    return ret;
-	else
-	    PyErr_Clear();
-    }
-    if (PyExtensionClass_Check(class) && class->bases) {
-	guint i, len = PyTuple_Size(class->bases);
+    PyObject_GC_UnTrack((PyObject *)self);
 
-	for (i = 0; i < len; i++) {
-	    PyExtensionClass *base = (PyExtensionClass *)PyTuple_GetItem(
-							class->bases, i);
+    if (self->inst_dict)
+	Py_DECREF(self->inst_dict);
+    self->inst_dict = NULL;
 
-	    ret = check_bases(self, base, attr);
-	    if (ret)
-		return ret;
-	}
-    }
-    return NULL;
-}
-static PyObject *
-pygobject_getattro(PyGObject *self, PyObject *attro)
-{
-    char *attr;
-    PyObject *ret;
-
-    attr = PyString_AsString(attro);
-
-    ret = Py_FindAttrString((PyObject *)self, attr);
-    if (ret)
-	return ret;
-    PyErr_Clear();
-    ret = check_bases(self, (PyExtensionClass *)self->ob_type, attr);
-    if (ret)
-	return ret;
-    PyErr_SetString(PyExc_AttributeError, attr);
-    return NULL;
-}
-
-static int
-pygobject_setattr(PyGObject *self, char *attr, PyObject *value)
-{
-    PyDict_SetItemString(INSTANCE_DICT(self), attr, value);
-    return 0;
+    self->ob_type->tp_free((PyObject *)self);
 }
 
 static int
@@ -1064,90 +1008,43 @@ pygobject_repr(PyGObject *self)
     return PyString_FromString(buf);
 }
 
+static int
+pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
+{
+    if (self->inst_dict)
+	return visit(self->inst_dict, arg);
+    return 0;
+}
+
 /* ---------------- PyGObject methods ----------------- */
-static destructor real_subclass_dealloc = NULL;
-static void
-pygobject_subclass_dealloc(PyGObject *self)
-{
-    GObject *obj = self->obj;
 
-    if (obj) {
-	/* save reference to python wrapper if there are still
-	 * references to the GObject in such a way that it will be
-	 * freed when the GObject is destroyed, so is the python
-	 * wrapper, but if a python wrapper can be */
-	if (obj->ref_count > 1) {
-	    Py_INCREF(self); /* grab a reference on the wrapper */
-	    self->hasref = TRUE;
-	    g_object_set_qdata_full(obj, pygobject_ownedref_key,
-				    self, pygobject_destroy_notify);
-	    g_object_unref(obj);
-	    return;
-	}
-	if (!self->hasref) /* don't unref the GObject if it owns us */
-	    g_object_unref(obj);
-    }
-    if (real_subclass_dealloc)
-	(* real_subclass_dealloc)((PyObject *)self);
-}
-/* more hackery to stop segfaults caused by multi deallocs on a subclass
- * (which happens quite regularly in pygobject) */
-static PyObject *
-pygobject__class_init__(PyObject *something, PyObject *args)
-{
-    PyExtensionClass *subclass;
-    GTypeInfo type_info = {
-	0,     /* class_size */
-	(GBaseInitFunc) 0,
-	(GBaseFinalizeFunc) 0,
-	(GClassInitFunc) 0,
-	(GClassFinalizeFunc) 0,
-	NULL,  /* class_data */
-
-	0,     /* instance_size */
-	0,     /* n_preallocs */
-	(GInstanceInitFunc) 0
-    };
-
-    if (!PyArg_ParseTuple(args, "O:GObject.__class_init__", &subclass))
-	return NULL;
-
-    g_message("__class_init__ called for %s", subclass->tp_name);
-
-    /* make sure ExtensionClass doesn't screw up our dealloc hack */
-    if ((subclass->class_flags & EXTENSIONCLASS_PYSUBCLASS_FLAG) &&
-	subclass->tp_dealloc != (destructor)pygobject_subclass_dealloc) {
-	real_subclass_dealloc = subclass->tp_dealloc;
-	subclass->tp_dealloc = (destructor)pygobject_subclass_dealloc;
-    }
-
-    /* put code in here to create a new GType for this subclass, using
-     * __module__.__name__ as the name for the type.  Then we can add
-     * the code needed for adding signals to the subclass.  The actual
-     * implementation will have to wait for a g_type_query function */
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-pygobject__init__(PyGObject *self, PyObject *args)
+static int
+pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     GType object_type;
 
     if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
-	return NULL;
+	return -1;
 
     object_type = pyg_type_from_object((PyObject *)self);
     if (!object_type)
-	return NULL;
+	return -1;
 
     self->obj = g_object_new(object_type, NULL);
     if (!self->obj) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
-	return NULL;
+	return -1;
     }
     pygobject_register_wrapper((PyObject *)self);
+
+    return 0;
+}
+
+static PyObject *
+pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    if (pygobject_init(self, args, kwargs) < 0)
+	return NULL;
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1552,9 +1449,8 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 }
 
 static PyMethodDef pygobject_methods[] = {
-    { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
-    { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
-    { "__gobject_init__", (PyCFunction)pygobject__init__, METH_VARARGS },
+    { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
+      METH_VARARGS|METH_KEYWORDS },
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
@@ -1576,7 +1472,24 @@ static PyMethodDef pygobject_methods[] = {
     { NULL, NULL, 0 }
 };
 
-static PyExtensionClass PyGObject_Type = {
+static PyObject *
+pygobject_get_dict(PyGObject *self, void *closure)
+{
+    if (self->inst_dict == NULL) {
+	self->inst_dict = PyDict_New();
+	if (self->inst_dict == NULL)
+	    return NULL;
+    }
+    Py_INCREF(self->inst_dict);
+    return self->inst_dict;
+}
+
+static PyGetSetDef pygobject_getsets[] = {
+    { "__dict__", (getter)pygobject_get_dict, (setter)0 },
+    { NULL, 0, 0 }
+};
+
+static PyTypeObject PyGObject_Type = {
     PyObject_HEAD_INIT(NULL)
     0,					/* ob_size */
     "GObject",				/* tp_name */
@@ -1586,7 +1499,7 @@ static PyExtensionClass PyGObject_Type = {
     (destructor)pygobject_dealloc,	/* tp_dealloc */
     (printfunc)0,			/* tp_print */
     (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)pygobject_setattr,	/* tp_setattr */
+    (setattrfunc)0,			/* tp_setattr */
     (cmpfunc)pygobject_compare,		/* tp_compare */
     (reprfunc)pygobject_repr,		/* tp_repr */
     0,					/* tp_as_number */
@@ -1597,53 +1510,51 @@ static PyExtensionClass PyGObject_Type = {
     (reprfunc)0,			/* tp_str */
     (getattrofunc)0,			/* tp_getattro */
     (setattrofunc)0,			/* tp_setattro */
-    /* Space for future expansion */
-    0L, 0L,
+    0,					/* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
+    	Py_TPFLAGS_HAVE_GC,		/* tp_flags */
     NULL, /* Documentation string */
-    METHOD_CHAIN(pygobject_methods),
-    EXTENSIONCLASS_INSTDICT_FLAG,
+    (traverseproc)pygobject_traverse,	/* tp_traverse */
+    (inquiry)0,				/* tp_clear */
+    (richcmpfunc)0,			/* tp_richcompare */
+    offsetof(PyGObject, weakreflist),	/* tp_weaklistoffset */
+    (getiterfunc)0,			/* tp_iter */
+    (iternextfunc)0,			/* tp_iternext */
+    pygobject_methods,			/* tp_methods */
+    0,					/* tp_members */
+    pygobject_getsets,			/* tp_getset */
+    (PyTypeObject *)0,			/* tp_base */
+    (PyObject *)0,			/* tp_dict */
+    0,					/* tp_descr_get */
+    0,					/* tp_descr_set */
+    offsetof(PyGObject, inst_dict),	/* tp_dictoffset */
+    (initproc)pygobject_init,		/* tp_init */
+    PyType_GenericAlloc,		/* tp_alloc */
+    PyType_GenericNew,			/* tp_new */
+    object_gc_free,			/* tp_free */
+    (PyObject *)0,			/* tp_bases */
 };
 
 /* ---------------- GInterface functions -------------------- */
 
-static PyObject *
-pyg_interface__class_init__(PyObject *self, PyObject *args)
-{
-    PyExtensionClass *subclass;
-
-    if (!PyArg_ParseTuple(args, "O:GInterface.__class_init__", &subclass))
-	return NULL;
-
-    g_message("subclassing GInterface types is bad m'kay");
-    PyErr_SetString(PyExc_TypeError, "attempt to subclass an interface");
-    return NULL;
-}
-
-static PyObject *
-pyg_interface_init(PyObject *self, PyObject *args)
+static int
+pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     gchar buf[512];
 
     if (!PyArg_ParseTuple(args, ":GInterface.__init__"))
-	return NULL;
+	return -1;
 
     g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
     PyErr_SetString(PyExc_NotImplementedError, buf);
-    return NULL;
+    return -1;
 }
 
-static PyMethodDef pyg_interface_methods[] = {
-    {"__class_init__", pyg_interface__class_init__,
-     METH_VARARGS|METH_CLASS_METHOD},
-    {"__init__",       pyg_interface_init, METH_VARARGS},
-    {NULL,NULL,0}
-};
-
-static PyExtensionClass PyGInterface_Type = {
+static PyTypeObject PyGInterface_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
     "GInterface",                       /* tp_name */
-    sizeof(PyPureMixinObject),          /* tp_basicsize */
+    sizeof(PyObject),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
     /* methods */
     (destructor)0,                      /* tp_dealloc */
@@ -1660,27 +1571,52 @@ static PyExtensionClass PyGInterface_Type = {
     (reprfunc)0,                        /* tp_str */
     (getattrofunc)0,                    /* tp_getattro */
     (setattrofunc)0,                    /* tp_setattro */
-    /* Space for future expansion */
-    0L, 0L,
+    0,					/* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
     NULL, /* Documentation string */
-    METHOD_CHAIN(pyg_interface_methods),
-    0,
+    (traverseproc)0,			/* tp_traverse */
+    (inquiry)0,				/* tp_clear */
+    (richcmpfunc)0,			/* tp_richcompare */
+    0,					/* tp_weaklistoffset */
+    (getiterfunc)0,			/* tp_iter */
+    (iternextfunc)0,			/* tp_iternext */
+    0,					/* tp_methods */
+    0,					/* tp_members */
+    0,					/* tp_getset */
+    (PyTypeObject *)0,			/* tp_base */
+    (PyObject *)0,			/* tp_dict */
+    0,					/* tp_descr_get */
+    0,					/* tp_descr_set */
+    0,					/* tp_dictoffset */
+    (initproc)pyg_interface_init,	/* tp_init */
+    PyType_GenericAlloc,		/* tp_alloc */
+    PyType_GenericNew,			/* tp_new */
+    object_free,			/* tp_free */
+    (PyObject *)0,			/* tp_bases */
 };
 
 static void
 pyg_register_interface(PyObject *dict, const gchar *class_name,
-		       GType type, PyExtensionClass *ec)
+		       GType gtype, PyTypeObject *type)
 {
     PyObject *o;
 
-    PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name,
-					  *ec, PyGInterface_Type);
+    type->ob_type = &PyType_Type;
+    type->tp_base = &PyGInterface_Type;
 
-    if (type) {
-	o = pyg_type_wrapper_new(type);
-	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
+    if (PyType_Ready(type) < 0) {
+	g_warning("could not ready `%s'", type->tp_name);
+	return;
+    }
+
+    if (gtype) {
+	o = pyg_type_wrapper_new(gtype);
+	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
+	PyDict_SetItemString(type->tp_defined, "__gtype__", o);
 	Py_DECREF(o);
     }
+
+    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
 
@@ -1806,7 +1742,8 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
 static PyObject *
 pyg_type_register(PyObject *self, PyObject *args)
 {
-    PyObject *class, *gtype, *module;
+    PyObject *gtype, *module;
+    PyTypeObject *class;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
     gint i;
@@ -1828,28 +1765,28 @@ pyg_type_register(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
 	return NULL;
-    if (!ExtensionClassSubclass_Check(class, &PyGObject_Type)) {
+    if (!PyType_IsSubtype(class, &PyGObject_Type)) {
 	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
 	return NULL;
     }
 
     /* find the GType of the parent */
-    parent_type = pyg_type_from_object(class);
+    parent_type = pyg_type_from_object((PyObject *)class);
     if (!parent_type) {
 	return NULL;
     }
 
     /* make name for new widget */
-    module = PyObject_GetAttrString(class, "__module__");
+    module = PyObject_GetAttrString((PyObject *)class, "__module__");
     if (module && PyString_Check(module)) {
 	type_name = g_strconcat(PyString_AsString(module), ".",
-				((PyExtensionClass *)class)->tp_name, NULL);
+				class->tp_name, NULL);
     } else {
 	if (module)
 	    Py_DECREF(module);
 	else
 	    PyErr_Clear();
-	type_name = g_strdup(((PyExtensionClass *)class)->tp_name);
+	type_name = g_strdup(class->tp_name);
     }
     /* convert '.' in type name to '+', which isn't banned (grumble) */
     for (i = 0; type_name[i] != '\0'; i++)
@@ -1872,7 +1809,8 @@ pyg_type_register(PyObject *self, PyObject *args)
 
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
-    PyObject_SetAttrString(class, "__gtype__", gtype);
+    PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
+    PyDict_SetItemString(class->tp_defined, "__gtype__", gtype);
     Py_DECREF(gtype);
 
     Py_INCREF(Py_None);
@@ -2159,14 +2097,22 @@ initgobject(void)
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
 
-    PyExtensionClass_Export(d, "GInterface", PyGInterface_Type);
-    PyDict_SetItemString(PyGInterface_Type.class_dictionary, "__gtype__",
+    PyGInterface_Type.ob_type = &PyType_Type;
+    if (PyType_Ready(&PyGInterface_Type))
+	return;
+    PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
+    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_INTERFACE));
+    PyDict_SetItemString(PyGInterface_Type.tp_defined, "__gtype__", o);
     Py_DECREF(o);
 
-    PyExtensionClass_Export(d, "GBoxed", PyGBoxed_Type);
-    PyDict_SetItemString(PyGBoxed_Type.class_dictionary, "__gtype__",
+    PyGBoxed_Type.ob_type = &PyType_Type;
+    if (PyType_Ready(&PyGBoxed_Type))
+	return;
+    PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
+    PyDict_SetItemString(PyGBoxed_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
+    PyDict_SetItemString(PyGBoxed_Type.tp_defined, "__gtype__", o);
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
