@@ -58,7 +58,13 @@ generate_repr(GType gtype, int value)
     g_assert(G_IS_FLAGS_CLASS(flags_class));
   
     for (i = 0; i < flags_class->n_values; i++) {
-	if ((value & flags_class->values[i].value) == flags_class->values[i].value) {
+	/* Some types (eg GstElementState in GStreamer 0.8) has flags with 0 values,
+         * we're just ignore them for now otherwise they'll always show up
+         */
+        if (flags_class->values[i].value == 0)
+            continue;
+
+        if ((value & flags_class->values[i].value) == flags_class->values[i].value) {
 	    if (retval) {
 		tmp = g_strdup_printf("%s | %s", retval, flags_class->values[i].value_name);
 		g_free(retval);
