@@ -2143,7 +2143,7 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
 	/* strip off prefix from value name, while keeping it a valid
          * identifier */
 	for (j = prefix_len; j >= 0; j--) {
-	    if (g_ascii_isalpha(name[j])) {
+	    if (g_ascii_isalpha(name[j]) || name[j] == '_') {
 		name = &name[j];
 		break;
 	    }
@@ -2179,7 +2179,7 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
 	/* strip off prefix from value name, while keeping it a valid
          * identifier */
 	for (j = prefix_len; j >= 0; j--) {
-	    if (g_ascii_isalpha(name[j])) {
+	    if (g_ascii_isalpha(name[j]) || name[j] == '_') {
 		name = &name[j];
 		break;
 	    }
