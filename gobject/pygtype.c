@@ -505,18 +505,19 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    return pygobject_new(g_value_get_object(value));
 	else
 	    break;
-    case G_TYPE_CHAR:
-	{
-	    gint8 val = g_value_get_char(value);
-	    return PyString_FromStringAndSize((char *)&val, 1);
-	}
-    case G_TYPE_UCHAR:
-	{
-	    guint8 val = g_value_get_uchar(value);
-	    return PyString_FromStringAndSize((char *)&val, 1);
-	}
-    case G_TYPE_BOOLEAN:
-	return PyInt_FromLong(g_value_get_boolean(value));
+    case G_TYPE_CHAR: {
+	gint8 val = g_value_get_char(value);
+	return PyString_FromStringAndSize((char *)&val, 1);
+    }
+    case G_TYPE_UCHAR: {
+	guint8 val = g_value_get_uchar(value);
+	return PyString_FromStringAndSize((char *)&val, 1);
+    }
+    case G_TYPE_BOOLEAN: {
+	PyObject *val = g_value_get_boolean(value) ? Py_True : Py_False;
+	Py_INCREF(val);
+	return val;
+    }
     case G_TYPE_INT:
 	return PyInt_FromLong(g_value_get_int(value));
     case G_TYPE_UINT:
