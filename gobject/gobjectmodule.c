@@ -11,6 +11,8 @@ staticforward PyTypeObject PyGObject_Type;
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 
+
+
 static void
 object_free(PyObject *op)
 {
@@ -64,7 +66,7 @@ pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
 PyTypeObject PyGTypeWrapper_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
-    "GType",
+    "gobject.GType",
     sizeof(PyGTypeWrapper),
     0,
     (destructor)pyg_type_wrapper_dealloc,
@@ -180,7 +182,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 PyTypeObject PyGParamSpec_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
-    "GParamSpec",
+    "gobject.GParamSpec",
     sizeof(PyGParamSpec),
     0,
     (destructor)pyg_param_spec_dealloc,
@@ -232,12 +234,15 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 			 PyObject *bases)
 {
     PyObject *o;
-    const char *class_name;
+    const char *class_name, *s;
 
     if (!class_hash)
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
 
     class_name = type->tp_name;
+    s = strrchr(class_name, '.');
+    if (s != NULL)
+	class_name = s + 1;
 
     type->ob_type = &PyType_Type;
     if (bases) {
@@ -259,7 +264,6 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     if (gtype) {
 	o = pyg_type_wrapper_new(gtype);
 	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
-	PyDict_SetItemString(type->tp_defined, "__gtype__", o);
 	Py_DECREF(o);
     }
 
@@ -404,8 +408,8 @@ pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
 static PyTypeObject PyGBoxed_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
-    "GBoxed",                          /* tp_name */
-    sizeof(PyGBoxed),                  /* tp_basicsize */
+    "gobject.GBoxed",                   /* tp_name */
+    sizeof(PyGBoxed),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
     /* methods */
     (destructor)pyg_boxed_dealloc,      /* tp_dealloc */
@@ -443,6 +447,7 @@ static PyTypeObject PyGBoxed_Type = {
     PyType_GenericAlloc,		/* tp_alloc */
     PyType_GenericNew,			/* tp_new */
     object_free,			/* tp_free */
+    (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
 
@@ -473,8 +478,8 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 
     PyDict_SetItemString(type->tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(boxed_type));
-    PyDict_SetItemString(type->tp_defined, "__gtype__", o);
     Py_DECREF(o);
+
     g_hash_table_insert(boxed_types, GUINT_TO_POINTER(boxed_type), type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
@@ -1644,7 +1649,7 @@ static PyGetSetDef pygobject_getsets[] = {
 static PyTypeObject PyGObject_Type = {
     PyObject_HEAD_INIT(NULL)
     0,					/* ob_size */
-    "GObject",				/* tp_name */
+    "gobject.GObject",			/* tp_name */
     sizeof(PyGObject),			/* tp_basicsize */
     0,					/* tp_itemsize */
     /* methods */
@@ -1684,6 +1689,7 @@ static PyTypeObject PyGObject_Type = {
     PyType_GenericAlloc,		/* tp_alloc */
     PyType_GenericNew,			/* tp_new */
     object_gc_free,			/* tp_free */
+    (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
 
@@ -1705,7 +1711,7 @@ pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
 static PyTypeObject PyGInterface_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
-    "GInterface",                       /* tp_name */
+    "gobject.GInterface",               /* tp_name */
     sizeof(PyObject),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
     /* methods */
@@ -1744,6 +1750,7 @@ static PyTypeObject PyGInterface_Type = {
     PyType_GenericAlloc,		/* tp_alloc */
     PyType_GenericNew,			/* tp_new */
     object_free,			/* tp_free */
+    (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
 
@@ -1764,7 +1771,6 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     if (gtype) {
 	o = pyg_type_wrapper_new(gtype);
 	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
-	PyDict_SetItemString(type->tp_defined, "__gtype__", o);
 	Py_DECREF(o);
     }
 
@@ -1962,7 +1968,6 @@ pyg_type_register(PyObject *self, PyObject *args)
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
     PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
-    PyDict_SetItemString(class->tp_defined, "__gtype__", gtype);
     Py_DECREF(gtype);
 
     Py_INCREF(Py_None);
@@ -2328,7 +2333,6 @@ initgobject(void)
     PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_INTERFACE));
-    PyDict_SetItemString(PyGInterface_Type.tp_defined, "__gtype__", o);
     Py_DECREF(o);
 
     PyGBoxed_Type.ob_type = &PyType_Type;
@@ -2337,7 +2341,6 @@ initgobject(void)
     PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
     PyDict_SetItemString(PyGBoxed_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
-    PyDict_SetItemString(PyGBoxed_Type.tp_defined, "__gtype__", o);
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
