@@ -1472,6 +1472,23 @@ static PyMethodDef pygobject_methods[] = {
     { NULL, NULL, 0 }
 };
 
+static PyObject *
+pygobject_get_dict(PyGObject *self, void *closure)
+{
+    if (self->inst_dict == NULL) {
+	self->inst_dict = PyDict_New();
+	if (self->inst_dict == NULL)
+	    return NULL;
+    }
+    Py_INCREF(self->inst_dict);
+    return self->inst_dict;
+}
+
+static PyGetSetDef pygobject_getsets[] = {
+    { "__dict__", (getter)pygobject_get_dict, (setter)0 },
+    { NULL, 0, 0 }
+};
+
 static PyTypeObject PyGObject_Type = {
     PyObject_HEAD_INIT(NULL)
     0,					/* ob_size */
@@ -1505,13 +1522,13 @@ static PyTypeObject PyGObject_Type = {
     (iternextfunc)0,			/* tp_iternext */
     pygobject_methods,			/* tp_methods */
     0,					/* tp_members */
-    0,					/* tp_getset */
+    pygobject_getsets,			/* tp_getset */
     (PyTypeObject *)0,			/* tp_base */
     (PyObject *)0,			/* tp_dict */
     0,					/* tp_descr_get */
     0,					/* tp_descr_set */
     offsetof(PyGObject, inst_dict),	/* tp_dictoffset */
-    (initproc)pygobject_init,			/* tp_init */
+    (initproc)pygobject_init,		/* tp_init */
     PyType_GenericAlloc,		/* tp_alloc */
     PyType_GenericNew,			/* tp_new */
     object_gc_free,			/* tp_free */
