@@ -14,9 +14,14 @@ static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 static void
 object_free(PyObject *op)
 {
-    PyObject_GC_Del(op);
+    PyObject_FREE(op);
 }
 
+static void
+object_gc_free(PyObject *op)
+{
+    PyObject_GC_Del(op);
+}
 
 /* -------------- __gtype__ objects ---------------------------- */
 
@@ -947,6 +952,7 @@ pyg_signal_class_closure_get(void)
 }
 
 /* -------------- PyGObject behaviour ----------------- */
+
 static void
 pygobject_dealloc(PyGObject *self)
 {
@@ -956,7 +962,7 @@ pygobject_dealloc(PyGObject *self)
      * references to the GObject in such a way that it will be
      * freed when the GObject is destroyed, so is the python
      * wrapper, but if a python wrapper can be */
-    if (obj->ref_count > 1) {
+    if (obj && obj->ref_count > 1) {
 	Py_INCREF(self); /* grab a reference on the wrapper */
 	self->hasref = TRUE;
 	g_object_set_qdata_full(obj, pygobject_ownedref_key,
@@ -964,7 +970,7 @@ pygobject_dealloc(PyGObject *self)
 	g_object_unref(obj);
 	return;
     }
-    if (!self->hasref) /* don't unref the GObject if it owns us */
+    if (obj && !self->hasref) /* don't unref the GObject if it owns us */
 	g_object_unref(obj);
 
     PyObject_ClearWeakRefs((PyObject *)self);
@@ -1508,7 +1514,7 @@ static PyTypeObject PyGObject_Type = {
     (initproc)pygobject_init,			/* tp_init */
     PyType_GenericAlloc,		/* tp_alloc */
     PyType_GenericNew,			/* tp_new */
-    object_free,			/* tp_free */
+    object_gc_free,			/* tp_free */
     (PyObject *)0,			/* tp_bases */
 };
 
