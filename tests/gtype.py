@@ -1,19 +1,19 @@
 import unittest
 
-from common import gobject, gtk
+from common import gobject
 
 class GTypeTest(unittest.TestCase):
     def checkType(self, expected, *objects):
-        # Silly method to check pyg_type_from_object
-        
-        store = gtk.ListStore(expected)
-        val = store.get_column_type(0)
+        # First, double check so we get back what we sent
+        str = gobject.type_name(expected) # pyg_type_from_object
+        val = gobject.type_from_name(str) # pyg_type_wrapper_new
         assert val == expected, \
                'got %r while %r was expected' % (val, expected)
 
+        # Then test the objects
         for object in objects:
-            store = gtk.ListStore(object)
-            val = store.get_column_type(0)
+            str = gobject.type_name(expected)
+            val = gobject.type_from_name(str)
             assert val == expected, \
                    'got %r while %r was expected' % (val, expected)
         
@@ -45,10 +45,10 @@ class GTypeTest(unittest.TestCase):
         self.checkType(gobject.TYPE_FLOAT, 'gfloat')
 
     def testPyObject(self):
-        self.checkType(gobject.TYPE_PYOBJECT, object)
+        self.checkType(gobject.TYPE_PYOBJECT, 'GObject', object)
         
     def testObject(self):
-        self.checkType(gobject.TYPE_OBJECT)
+        self.checkType(gobject.TYPE_OBJECT, 'PyObject')
         
     # XXX: Flags, Enums
     
