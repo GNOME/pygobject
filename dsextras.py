@@ -76,15 +76,49 @@ def pkgc_version_check(name, longname, req_version):
     else:
         print "Warning: Too old version of %s" % longname
         print "         Need %s, but %s is installed" % \
-              (self.pkc_version, orig_version)
+              (pkc_version, orig_version)
         self.can_build_ok = 0
         return 0
 
 class BuildExt(build_ext):
+    def init_extra_compile_args(self):
+        self.extra_compile_args = []
+        if sys.platform == 'win32' and \
+           self.compiler.compiler_type == 'mingw32':
+            # MSVC compatible struct packing is required.
+            # Note gcc2 uses -fnative-struct while gcc3 
+            # uses -mms-bitfields. Based on the version
+            # the proper flag is used below.
+            msnative_struct = { '2' : '-fnative-struct',
+                                '3' : '-mms-bitfields' }
+            gcc_version = getoutput('gcc -dumpversion')
+            print 'using MinGW GCC version %s with %s option' % \
+                  (gcc_version, msnative_struct[gcc_version[0]])
+            self.extra_compile_args.append(msnative_struct[gcc_version[0]])
+    
+    def modify_compiler(self):
+        if sys.platform == 'win32' and \
+           self.compiler.compiler_type == 'mingw32':
+            # Remove '-static' linker option to prevent MinGW ld
+            # from trying to link with MSVC import libraries.
+            if self.compiler.linker_so.count('-static'):
+                self.compiler.linker_so.remove('-static')
+    
+    def build_extensions(self):
+        # Init self.extra_compile_args
+        self.init_extra_compile_args()
+        # Modify default compiler settings
+        self.modify_compiler()
+        # Invoke base build_extensions()
+        build_ext.build_extensions(self)
+        
     def build_extension(self, ext):
+        # Add self.extra_compile_args to ext.extra_compile_args
+        ext.extra_compile_args += self.extra_compile_args
         # Generate eventual templates before building
         if hasattr(ext, 'generate'):
             ext.generate()
+        # Invoke base build_extension()
         build_ext.build_extension(self, ext)
 
 class InstallLib(install_lib):
@@ -92,7 +126,12 @@ class InstallLib(install_lib):
     local_inputs = []
     template_options = {}
     def prepare(self):
-        self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-4])
+        if os.name == "nt":
+            self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-3])
+        else:
+            # default: os.name == "posix"
+            self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-4])
+        
         self.exec_prefix = os.path.join(self.prefix, 'bin')
         self.includedir = os.path.join(self.prefix, 'include')
         self.libdir = os.path.join(self.prefix, 'lib')
