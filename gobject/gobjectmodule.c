@@ -2291,7 +2291,7 @@ pyg_fatal_exceptions_notify(void)
 	return 0;
     while (tmp_list != NULL) {
 	PyGFatalExceptionFunc notifier = tmp_list->data;
-	(*notifier)();
+	(* notifier)();
 	tmp_list = g_list_next (tmp_list);
     }
     return 1;
@@ -2300,14 +2300,14 @@ static void
 pyg_fatal_exceptions_notify_add(PyGFatalExceptionFunc func)
 {
     pygobject_exception_notifiers = 
-	g_list_append(pygobject_exception_notifiers, &func);
+	g_list_append(pygobject_exception_notifiers, func);
 }
 
 static void
 pyg_fatal_exceptions_notify_remove(PyGFatalExceptionFunc func)
 {
     pygobject_exception_notifiers = 
-	g_list_remove(pygobject_exception_notifiers, &func);
+	g_list_remove(pygobject_exception_notifiers, func);
 }
 
 /* ----------------- gobject module initialisation -------------- */
