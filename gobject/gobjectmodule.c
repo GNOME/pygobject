@@ -970,7 +970,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 	if (!PyTuple_Check(extra_args)) {
 	    PyObject *tmp = PyTuple_New(1);
 	    PySequence_SetItem(tmp, 0, extra_args);
-	    extra_args = Py_BuildValue("(O)", tmp);
+	    extra_args = tmp;
 	} else {
             Py_INCREF(extra_args);
 	}
