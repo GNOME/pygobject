@@ -16,6 +16,7 @@ typedef struct {
 } PyGObject;
 
 #define pygobject_get(v) (((PyGObject *)v)->obj)
+#define pygobject_check(v,base) (ExtensionClassSubclassInstance(v,base))
 
 struct _PyGObject_Functions {
   void (* register_class)(PyObject *dict, const gchar *class_name,
