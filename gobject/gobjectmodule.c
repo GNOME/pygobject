@@ -97,6 +97,123 @@ pyg_type_wrapper_new(GType type)
     return (PyObject *)self;
 }
 
+/* -------------- GParamSpec objects ---------------------------- */
+
+typedef struct {
+    PyObject_HEAD
+    GParamSpec *pspec;
+} PyGParamSpec;
+
+static int
+pyg_param_spec_compare(PyGParamSpec *self, PyGParamSpec *v)
+{
+    if (self->pspec == v->pspec) return 0;
+    if (self->pspec > v->pspec) return -1;
+    return 1;
+}
+
+static long
+pyg_param_spec_hash(PyGParamSpec *self)
+{
+    return (long)self->pspec;
+}
+
+static PyObject *
+pyg_param_spec_repr(PyGParamSpec *self)
+{
+    char buf[80];
+
+    g_snprintf(buf, sizeof(buf), "<%s '%s'>",
+	       G_PARAM_SPEC_TYPE_NAME(self->pspec),
+	       g_param_get_name(self->pspec));
+    return PyString_FromString(buf);
+}
+
+static void
+pyg_param_spec_dealloc(PyGParamSpec *self)
+{
+    g_param_spec_unref(self->pspec);
+    PyMem_DEL(self);
+}
+
+static PyObject *
+pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
+{
+    if (!strcmp(attr, "__members__")) {
+	return Py_BuildValue("[ssssssss]", "__doc__", "__gtype__", "blurb",
+			     "flags", "name", "nick", "owner_type",
+			     "value_type");
+    } else if (!strcmp(attr, "__gtype__")) {
+	return pyg_type_wrapper_new(G_PARAM_SPEC_TYPE(self->pspec));
+    } else if (!strcmp(attr, "name")) {
+	const gchar *name = g_param_get_name(self->pspec);
+
+	if (name)
+	    return PyString_FromString(name);
+	Py_INCREF(Py_None);
+	return Py_None;
+    } else if (!strcmp(attr, "nick")) {
+	const gchar *nick = g_param_get_nick(self->pspec);
+
+	if (nick)
+	    return PyString_FromString(nick);
+	Py_INCREF(Py_None);
+	return Py_None;
+    } else if (!strcmp(attr, "blurb") || !strcmp(attr, "__doc__")) {
+	const gchar *blurb = g_param_get_blurb(self->pspec);
+
+	if (blurb)
+	    return PyString_FromString(blurb);
+	Py_INCREF(Py_None);
+	return Py_None;
+    } else if (!strcmp(attr, "flags")) {
+	return PyInt_FromLong(self->pspec->flags);
+    } else if (!strcmp(attr, "value_type")) {
+	return pyg_type_wrapper_new(self->pspec->value_type);
+    } else if (!strcmp(attr, "owener_type")) {
+	return pyg_type_wrapper_new(self->pspec->owner_type);
+    }
+    PyErr_SetString(PyExc_AttributeError, attr);
+    return NULL;
+}
+
+PyTypeObject PyGParamSpec_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,
+    "GParamSpec",
+    sizeof(PyGParamSpec),
+    0,
+    (destructor)pyg_param_spec_dealloc,
+    (printfunc)0,
+    (getattrfunc)pyg_param_spec_getattr,
+    (setattrfunc)0,
+    (cmpfunc)pyg_param_spec_compare,
+    (reprfunc)pyg_param_spec_repr,
+    0,
+    0,
+    0,
+    (hashfunc)pyg_param_spec_hash,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    0L,0L,0L,0L,
+    NULL
+};
+
+static PyObject *
+pyg_param_spec_new(GParamSpec *pspec)
+{
+    PyGParamSpec *self;
+
+    self = (PyGParamSpec *)PyObject_NEW(PyGParamSpec,
+					&PyGParamSpec_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->pspec = g_param_spec_ref(pspec);
+    return (PyObject *)self;
+}
+
+
 /* -------------- class <-> wrapper manipulation --------------- */
 
 static void
@@ -721,7 +838,14 @@ pyg_value_as_pyobject(const GValue *value)
     case G_TYPE_DOUBLE:
 	return PyFloat_FromDouble(g_value_get_double(value));
     case G_TYPE_STRING:
-	return PyString_FromString(g_value_get_string(value));
+	{
+	    const gchar *str = g_value_get_string(value);
+
+	    if (str)
+		return PyString_FromString(str);
+	    Py_INCREF(Py_None);
+	    return Py_None;
+	}
     case G_TYPE_OBJECT:
 	return pygobject_new(g_value_get_object(value));
     case G_TYPE_ENUM:
@@ -1954,7 +2078,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
 	return NULL;
     }
     for (i = 0; i < nprops; i++) {
-	PyTuple_SetItem(list, i, PyString_FromString(specs[i]->name));
+	PyTuple_SetItem(list, i, pyg_param_spec_new(specs[i]));
     }
     g_free(specs);
     g_type_class_unref(class);
@@ -2084,6 +2208,7 @@ initgobject(void)
     PyObject *m, *d, *o;
 
     PyGTypeWrapper_Type.ob_type = &PyType_Type;
+    PyGParamSpec_Type.ob_type = &PyType_Type;
 
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
