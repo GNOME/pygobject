@@ -145,6 +145,7 @@ extern PyObject * pyg_enum_from_gtype (GType        gtype,
 typedef struct {
     PyObject_HEAD
     GMainLoop *loop;
+    GSource *signal_source;
 } PyGMainLoop;
 
 extern PyTypeObject PyGMainLoop_Type;

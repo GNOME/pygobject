@@ -13,6 +13,7 @@ if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
 
+gobject_la_CFLAGS = $(GLIB_CFLAGS)
 gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex initgobject
 gobject_la_LIBADD = $(GLIB_LIBS)
 gobject_la_SOURCES = \
@@ -28,3 +29,7 @@ gobject_la_SOURCES = \
 	pygparamspec.c \
 	pygpointer.c \
 	pygtype.c
+
+if PLATFORM_WIN32
+gobject_la_CFLAGS += -DPLATFORM_WIN32
+endif
