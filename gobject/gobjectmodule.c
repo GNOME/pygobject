@@ -406,10 +406,10 @@ pyg_closure_destroy(gpointer data, GClosure *closure)
 /* XXXX - need to handle python thread context stuff */
 static void
 pyg_closure_marshal(GClosure *closure,
-		    guint invocation_hint,
 		    GValue *return_value,
 		    guint n_param_values,
 		    const GValue *param_values,
+		    gpointer invocation_hint,
 		    gpointer marshal_data)
 {
     PyGClosure *pc = (PyGClosure *)closure;
@@ -778,7 +778,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid,
+    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, NULL), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -815,7 +815,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid,
+    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, NULL), TRUE);
     return PyInt_FromLong(handlerid);
 }
@@ -852,7 +852,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid,
+    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, object), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -889,7 +889,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid,
+    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, object), TRUE);
     return PyInt_FromLong(handlerid);
 }
@@ -990,7 +990,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     }
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type);
-    g_signal_emitv(params, signal_id, &ret);
+    g_signal_emitv(params, signal_id, 0, &ret);
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     g_free(params);
@@ -1017,7 +1017,7 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
-    g_signal_stop_emission(self->obj, signal_id);
+    g_signal_stop_emission(self->obj, signal_id, 0);
     Py_INCREF(Py_None);
     return Py_None;
 }
