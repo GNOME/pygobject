@@ -400,7 +400,7 @@ PyTypeObject PyGFlags_Type = {
 	0,					  /* tp_methods */
 	0,					  /* tp_members */
 	pyg_flags_getsets,			  /* tp_getset */
-	&PyInt_Type,  				  /* tp_base */
+	0,	  				  /* tp_base */
 	0,					  /* tp_dict */
 	0,					  /* tp_descr_get */
 	0,					  /* tp_descr_set */

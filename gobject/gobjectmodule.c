@@ -2254,10 +2254,10 @@ initgobject(void)
 
     REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
     REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
-    REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
     PyGEnum_Type.tp_base = &PyInt_Type;
-    REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
+    REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
     PyGFlags_Type.tp_base = &PyInt_Type;
+    REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 
     REGISTER_TYPE(d, PyGMainLoop_Type, "GMainLoop"); 
     REGISTER_TYPE(d, PyGMainContext_Type, "GMainContext"); 
