@@ -1534,7 +1534,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
     g_value_set_object(&params[0], G_OBJECT(self->obj));
 
     for (i = 0; i < query.n_params; i++)
-	g_value_init(&params[i + 1], query.param_types[i]);
+	g_value_init(&params[i + 1],
+		     query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     for (i = 0; i < query.n_params; i++) {
 	PyObject *item = PyTuple_GetItem(args, i+1);
 
@@ -1553,12 +1554,12 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	}
     }
     if (query.return_type != G_TYPE_NONE)
-	g_value_init(&ret, query.return_type);
+	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     g_signal_emitv(params, signal_id, detail, &ret);
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     g_free(params);
-    if (query.return_type != G_TYPE_NONE) {
+    if (query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE != G_TYPE_NONE) {
 	py_ret = pyg_value_as_pyobject(&ret);
 	g_value_unset(&ret);
     } else {
