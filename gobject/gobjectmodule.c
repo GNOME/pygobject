@@ -1990,7 +1990,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     guint nprops;
     guint i;
 
-    if (!PyArg_ParseTuple(args, "O:gobject.object_class_list_properties",
+    if (!PyArg_ParseTuple(args, "O:gobject.list_properties",
 			  &py_itype))
 	return NULL;
     if ((itype = pyg_type_from_object(py_itype)) == 0)
@@ -2034,7 +2034,7 @@ static PyMethodDef pygobject_functions[] = {
     { "type_register", pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
-    { "object_class_list_properties", pyg_object_class_list_properties, METH_VARARGS },
+    { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
