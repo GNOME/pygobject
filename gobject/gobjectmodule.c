@@ -2098,32 +2098,31 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *pytype;
     GType type;
-    GObject *obj;
+    GObject *obj = NULL;
     GObjectClass *class;
     PyObject *value;
     PyObject *key;
-    int pos=0;
-    
+    int pos=0, num_params=0, i;
+    GParameter *params;
+
     if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
 	return NULL;
     }
-    type = pyg_type_from_object (pytype);
-    obj = g_object_new(type, NULL);
 
-    if (!obj) {
-	PyErr_SetString (PyExc_RuntimeError,
-			 "could not create object");
+    if ((type = pyg_type_from_object (pytype)) == 0)
+	return NULL;
+    
+    if ((class = g_type_class_ref (type)) == NULL) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not get a reference to type class");
 	return NULL;
     }
 
-    class = G_OBJECT_GET_CLASS(obj);
-    g_object_freeze_notify (G_OBJECT(obj));
-
+    params = g_new0(GParameter, PyDict_Size(kwargs));
+    
     while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
-	gchar *key_str = PyString_AsString (key);
 	GParamSpec *pspec;
-	GValue gvalue ={ 0, };
-
+	gchar *key_str = g_strdup(PyString_AsString (key));
 	pspec = g_object_class_find_property (class, key_str);
 	if (!pspec) {
 	    gchar buf[512];
@@ -2132,27 +2131,37 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 		       "gobject `%s' doesn't support property `%s'",
 		       g_type_name(type), key_str);
 	    PyErr_SetString(PyExc_TypeError, buf);
-	    g_object_unref(G_OBJECT(obj));
-	    return NULL;
+	    goto cleanup;
 	}
-
-	g_value_init(&gvalue, G_PARAM_SPEC_VALUE_TYPE(pspec));
-	if (pyg_value_from_pyobject(&gvalue, value)) {
+	g_value_init(&params[num_params].value,
+		     G_PARAM_SPEC_VALUE_TYPE(pspec));
+	if (pyg_value_from_pyobject(&params[num_params].value, value)) {
 	    gchar buf[512];
 
 	    g_snprintf(buf, sizeof(buf),
 		       "could not convert value for property `%s'", key_str);
 	    PyErr_SetString(PyExc_TypeError, buf);
-	    g_object_unref(G_OBJECT(obj));
-	    return NULL;
+	    goto cleanup;
 	}
-	g_object_set_property(G_OBJECT(obj), key_str, &gvalue);
-	g_value_unset(&gvalue);
+	params[num_params].name = key_str;
+	num_params++;
     }
 
-    g_object_thaw_notify (G_OBJECT(obj));
-
-    return pygobject_new ((GObject *)obj);
+    obj = g_object_newv(type, num_params, params);
+    if (!obj)
+	PyErr_SetString (PyExc_RuntimeError, "could not create object");
+	   
+ cleanup:
+    for (i = 0; i < num_params; i++) {
+	g_free((gchar *) params[i].name);
+	g_value_unset(&params[i].value);
+    }
+    g_free(params);
+    g_type_class_unref(class);
+    
+    if (obj)
+	return pygobject_new ((GObject *)obj);
+    return NULL;
 }
 
 static PyMethodDef pygobject_functions[] = {
@@ -2166,7 +2175,7 @@ static PyMethodDef pygobject_functions[] = {
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
     { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
-    { "new", pyg_object_new, METH_VARARGS|METH_KEYWORDS },
+    { "new", (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
