@@ -13,7 +13,10 @@ import pango
 
 import gtk
 from gtk import gdk
-from gtk import glade
+try:
+  from gtk import glade
+except ImportError:
+  glade = None
 
 import testhelper
 
