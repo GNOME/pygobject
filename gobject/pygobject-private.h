@@ -22,9 +22,7 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 
 GType PY_TYPE_OBJECT;
 
-PyObject *    pygobject_new          (GObject *obj);
-PyTypeObject *pygobject_lookup_class (GType gtype);
-
+void  pyg_destroy_notify (gpointer user_data);
 
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
@@ -46,6 +44,18 @@ PyObject *pyg_value_as_pyobject(const GValue *value);
 
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get(void);
+
+
+/* from pygobject.h */
+extern PyTypeObject PyGObject_Type;
+
+void          pygobject_register_class   (PyObject *dict,
+					  const gchar *type_name,
+					  GType gtype, PyTypeObject *type,
+					  PyObject *bases);
+void          pygobject_register_wrapper (PyObject *self);
+PyObject *    pygobject_new              (GObject *obj);
+PyTypeObject *pygobject_lookup_class     (GType gtype);
 
 
 /* from pygboxed.c */
