@@ -1163,6 +1163,45 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     return NULL;
 }
 
+static gint
+get_handler_priority(gint *priority, PyObject *kwargs)
+{
+    gint len, pos;
+    PyObject *key, *val;
+
+    /* no keyword args? leave as default */
+    if (kwargs == NULL)	return 0;
+
+    len = PyDict_Size(kwargs);
+    if (len == 0) return 0;
+
+    if (len != 1) {
+	PyErr_SetString(PyExc_TypeError,
+			"expecting at most one keyword argument");
+	return -1;
+    }
+    pos = 0;
+    PyDict_Next(kwargs, &pos, &key, &val);
+    if (!PyString_Check(key)) {
+	PyErr_SetString(PyExc_TypeError,
+			"keyword argument name is not a string");
+	return -1;
+    }
+    if (!strcmp(PyString_AsString(key), "priority")) {
+	PyErr_SetString(PyExc_TypeError,
+			"only 'priority' keyword argument accepted");
+	return -1;
+    }
+
+    *priority = PyInt_AsLong(val);
+    if (PyErr_Occurred()) {
+	PyErr_Clear();
+	PyErr_SetString(PyExc_ValueError, "could not get priority value");
+	return -1;
+    }
+    return 0;
+}
+
 static gboolean
 handler_marshal(gpointer user_data)
 {
@@ -1189,20 +1228,20 @@ handler_marshal(gpointer user_data)
 }
 
 static PyObject *
-pyg_idle_add(PyObject *self, PyObject *args)
+pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority;
+    gint len, priority = G_PRIORITY_DEFAULT_IDLE;
     guint handler_id;
 
     len = PyTuple_Size(args);
-    if (len < 2) {
+    if (len < 1) {
 	PyErr_SetString(PyExc_TypeError,
 			"idle_add requires at least 1 argument");
 	return NULL;
     }
-    first = PySequence_GetSlice(args, 0, 2);
-    if (!PyArg_ParseTuple(first, "iO:idle_add", &priority, &callback)) {
+    first = PySequence_GetSlice(args, 0, 1);
+    if (!PyArg_ParseTuple(first, "O:idle_add", &callback)) {
 	Py_DECREF(first);
         return NULL;
     }
@@ -1211,10 +1250,13 @@ pyg_idle_add(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "first argument not callable");
         return NULL;
     }
-    cbargs = PySequence_GetSlice(args, 2, len);
+    if (get_handler_priority(&priority, kwargs) < 0)
+	return NULL;
 
+    cbargs = PySequence_GetSlice(args, 1, len);
     if (cbargs == NULL)
       return NULL;
+
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
       return NULL;
@@ -1224,21 +1266,20 @@ pyg_idle_add(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_timeout_add(PyObject *self, PyObject *args)
+pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority, interval;
+    gint len, priority = G_PRIORITY_DEFAULT, interval;
     guint handler_id;
 
     len = PyTuple_Size(args);
-    if (len < 3) {
+    if (len < 2) {
 	PyErr_SetString(PyExc_TypeError,
 			"timeout_add requires at least 2 args");
 	return NULL;
     }
-    first = PySequence_GetSlice(args, 0, 3);
-    if (!PyArg_ParseTuple(first, "iiO:timeout_add", &priority, &interval,
-			  &callback)) {
+    first = PySequence_GetSlice(args, 0, 2);
+    if (!PyArg_ParseTuple(first, "iO:timeout_add", &interval, &callback)) {
 	Py_DECREF(first);
         return NULL;
     }
@@ -1247,10 +1288,13 @@ pyg_timeout_add(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "second argument not callable");
         return NULL;
     }
-    cbargs = PySequence_GetSlice(args, 3, len);
+    if (get_handler_priority(&priority, kwargs) < 0)
+	return NULL;
 
+    cbargs = PySequence_GetSlice(args, 2, len);
     if (cbargs == NULL)
       return NULL;
+
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
       return NULL;
@@ -1292,22 +1336,22 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 }
 
 static PyObject *
-pyg_io_add_watch(PyObject *self, PyObject *args)
+pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
-    gint fd, priority, condition, len;
+    gint fd, priority = G_PRIORITY_DEFAULT, condition, len;
     GIOChannel *iochannel;
     guint handler_id;
 
     len = PyTuple_Size(args);
-    if (len < 4) {
+    if (len < 3) {
 	PyErr_SetString(PyExc_TypeError,
-			"timeout_add requires at least 2 args");
+			"timeout_add requires at least 3 args");
 	return NULL;
     }
-    first = PySequence_GetSlice(args, 0, 4);
-    if (!PyArg_ParseTuple(first, "OiiO:io_add_watch", &pyfd, &priority,
-			  &condition, &callback)) {
+    first = PySequence_GetSlice(args, 0, 3);
+    if (!PyArg_ParseTuple(first, "OiO:io_add_watch", &pyfd, &condition,
+			  &callback)) {
 	Py_DECREF(first);
         return NULL;
     }
@@ -1320,8 +1364,10 @@ pyg_io_add_watch(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "second argument not callable");
         return NULL;
     }
-    cbargs = PySequence_GetSlice(args, 4, len);
+    if (get_handler_priority(&priority, kwargs) < 0)
+	return NULL;
 
+    cbargs = PySequence_GetSlice(args, 3, len);
     if (cbargs == NULL)
       return NULL;
     data = Py_BuildValue("(OON)", callback, pyfd, cbargs);
@@ -1336,6 +1382,20 @@ pyg_io_add_watch(PyObject *self, PyObject *args)
     return PyInt_FromLong(handler_id);
 }
 
+static PyObject *
+pyg_source_remove(PyObject *self, PyObject *args)
+{
+    guint tag;
+    PyObject *ret;
+
+    if (!PyArg_ParseTuple(args, "i:source_remove", &tag))
+	return NULL;
+
+    ret = g_source_remove(tag) ? Py_True : Py_False;
+    Py_INCREF(ret);
+    return ret;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1348,9 +1408,10 @@ static PyMethodDef pygobject_functions[] = {
     { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
     { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
     { "new", (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "idle_add", pyg_idle_add, METH_VARARGS },
-    { "timeout_add", pyg_timeout_add, METH_VARARGS },
-    { "io_add_watch", pyg_io_add_watch, METH_VARARGS },
+    { "idle_add", (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
+    { "timeout_add", (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
+    { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
+    { "source_remove", pyg_source_remove, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
