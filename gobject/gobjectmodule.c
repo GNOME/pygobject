@@ -2514,7 +2514,7 @@ static struct _PyGObject_Functions functions = {
 DL_EXPORT(void)
 initgobject(void)
 {
-    PyObject *m, *d, *o;
+    PyObject *m, *d, *o, *tuple;
 
     PyGTypeWrapper_Type.ob_type = &PyType_Type;
     PyGParamSpec_Type.ob_type = &PyType_Type;
@@ -2555,6 +2555,11 @@ initgobject(void)
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
+
+    tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
+			   glib_micro_version);
+    PyDict_SetItemString(d, "glib_version", tuple);    
+    Py_DECREF(tuple);
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGObject_API",
