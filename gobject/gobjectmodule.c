@@ -922,10 +922,28 @@ pygobject__class_init__(PyObject *something, PyObject *args)
 static PyObject *
 pygobject__init__(PyGObject *self, PyObject *args)
 {
-    GType object_type = G_TYPE_OBJECT;
+    PyObject *gtype;
+    GType object_type;
 
-    if (!PyArg_ParseTuple(args, "|i:GObject.__init__", &object_type))
+    if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
 	return NULL;
+
+    gtype = PyObject_GetAttrString((PyObject *)self, "__gtype__");
+    if (!gtype) {
+	PyErr_Clear();
+	PyErr_SetString(PyExc_TypeError,
+			"required __gtype__ attribute missing");
+	return NULL;
+    }
+    object_type = (GType) PyInt_AsLong(gtype);
+    if (PyErr_Occurred()) {
+	PyErr_Clear();
+	Py_DECREF(gtype);
+	PyErr_SetString(PyExc_TypeError,
+			"__gtype__ attribute not an integer");
+	return NULL;
+    }
+    Py_DECREF(gtype);
     self->obj = g_object_new(object_type, NULL);
     if (!self->obj) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
@@ -1338,6 +1356,7 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
     { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
+    { "__gobject_init__", (PyCFunction)pygobject__init__, METH_VARARGS },
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
@@ -1491,6 +1510,88 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
     return NULL;
 }
 
+static PyObject *
+pyg_type_register(PyObject *self, PyObject *args)
+{
+    PyObject *class, *gtype, *module;
+    GType parent_type, instance_type;
+    gchar *type_name = NULL;
+    GTypeQuery query;
+    GTypeInfo type_info = {
+	0,    /* class_size */
+
+	(GBaseInitFunc) NULL,
+	(GBaseFinalizeFunc) NULL,
+
+	(GClassInitFunc) NULL,
+	(GClassFinalizeFunc) NULL,
+	NULL, /* class_data */
+
+	0,    /* instance_size */
+	0,    /* n_preallocs */
+	(GInstanceInitFunc) NULL
+    };
+
+    if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
+	return NULL;
+    if (!ExtensionClassSubclass_Check(class, &PyGObject_Type)) {
+	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
+	return NULL;
+    }
+
+    /* find the GType of the parent */
+    gtype = PyObject_GetAttrString(class, "__gtype__");
+    if (!gtype) {
+	PyErr_Clear();
+	PyErr_SetString(PyExc_TypeError,
+			"required __gtype__ attribute missing");
+	return NULL;
+    }
+    parent_type = (GType) PyInt_AsLong(gtype);
+    if (PyErr_Occurred()) {
+	PyErr_Clear();
+	Py_DECREF(gtype);
+	PyErr_SetString(PyExc_TypeError,
+			"__gtype__ attribute not an integer");
+	return NULL;
+    }
+    Py_DECREF(gtype);
+
+    /* make name for new widget */
+    module = PyObject_GetAttrString(class, "__module__");
+    if (module && PyString_Check(module)) {
+	type_name = g_strconcat(PyString_AsString(module), "+",
+				((PyExtensionClass *)class)->tp_name, NULL);
+    } else {
+	if (module)
+	    Py_DECREF(module);
+	else
+	    PyErr_Clear();
+	type_name = g_strdup(((PyExtensionClass *)class)->tp_name);
+    }
+
+    /* fill in missing values of GTypeInfo struct */
+    g_type_query(parent_type, &query);
+    type_info.class_size = query.class_size;
+    type_info.instance_size = query.instance_size;
+
+    /* create new typecode */
+    instance_type = g_type_register_static(parent_type, type_name,
+					   &type_info, 0);
+    g_free(type_name);
+    if (instance_type == 0) {
+	PyErr_SetString(PyExc_RuntimeError, "could not create new GType");
+	return NULL;
+    }
+
+    /* set new value of __gtype__ on class */
+    gtype = PyInt_FromLong(instance_type);
+    PyObject_SetAttrString(class, "__gtype__", gtype);
+    Py_DECREF(gtype);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 static PyObject *
 pyg_signal_new(PyObject *self, PyObject *args)
@@ -1578,6 +1679,7 @@ static PyMethodDef pygobject_functions[] = {
     { "type_is_a", pyg_type_is_a, METH_VARARGS },
     { "type_children", pyg_type_children, METH_VARARGS },
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
+    { "type_register", pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { NULL, NULL, 0 }
 };
