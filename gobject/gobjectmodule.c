@@ -210,7 +210,9 @@ pyobject_free(gpointer boxed)
 {
     PyObject *object = boxed;
 
+    pyg_block_threads();
     Py_DECREF(object);
+    pyg_unblock_threads();
 }
 
 
