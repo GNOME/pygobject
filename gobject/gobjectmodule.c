@@ -324,7 +324,16 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     } else if (G_IS_VALUE_BOXED(value)) {
 	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
 
-	if (!bm || bm->tovalue(value, obj) < 0)
+	if (bm)
+	    return bm->tovalue(value, obj);
+	if (PyCObject_Check(obj))
+	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
+	else
+	    return -1;
+    } else if (G_IS_VALUE_POINTER(value)) {
+	if (PyCObject_Check(obj))
+	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
+	else
 	    return -1;
     }
     return 0;
@@ -364,7 +373,10 @@ pyg_value_as_pyobject(const GValue *value)
 
 	if (bm)
 	    return bm->fromvalue(value);
-	/* fall through if unknown boxed type */
+	else
+	    return PyCObject_FromVoidPtr(g_value_get_boxed(value), NULL);
+    } else if (G_IS_VALUE_POINTER(value)) {
+	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
     }
     PyErr_SetString(PyExc_TypeError, "unknown type");
     return NULL;
@@ -463,6 +475,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 	((PyGClosure *)closure)->swap_data;
 	closure->derivative_flag = TRUE;
     }
+    return closure;
 }
 
 /* -------------- PyGObject behaviour ----------------- */
@@ -734,6 +747,153 @@ pygobject_set_data(PyGObject *self, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+pygobject_connect(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args;
+    gchar *name;
+    guint handlerid, sigid, len;
+
+    len = PyTuple_Size(args);
+    if (len < 2) {
+	PyErr_SetString(PyExc_TypeError,
+			"GObject.connect requires at least 2 arguments");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 2);
+    if (!PyArg_ParseTuple(first, "sO:GObject.connect", &name, &callback)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
+	return NULL;
+    }
+    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (sigid == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    extra_args = PySequence_GetSlice(args, 2, len);
+    if (extra_args == NULL)
+	return NULL;
+    handlerid = g_signal_connect_closure(self->obj, sigid,
+			pyg_closure_new(callback, extra_args, NULL), FALSE);
+    return PyInt_FromLong(handlerid);
+}
+
+static PyObject *
+pygobject_connect_after(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args;
+    gchar *name;
+    guint handlerid, sigid, len;
+
+    len = PyTuple_Size(args);
+    if (len < 2) {
+	PyErr_SetString(PyExc_TypeError,
+			"GObject.connect_after requires at least 2 arguments");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 2);
+    if (!PyArg_ParseTuple(first, "sO:GObject.connect_after",
+			  &name, &callback)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
+	return NULL;
+    }
+    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (sigid == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    extra_args = PySequence_GetSlice(args, 2, len);
+    if (extra_args == NULL)
+	return NULL;
+    handlerid = g_signal_connect_closure(self->obj, sigid,
+			pyg_closure_new(callback, extra_args, NULL), TRUE);
+    return PyInt_FromLong(handlerid);
+}
+
+static PyObject *
+pygobject_connect_object(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args, *object;
+    gchar *name;
+    guint handlerid, sigid, len;
+
+    len = PyTuple_Size(args);
+    if (len < 3) {
+	PyErr_SetString(PyExc_TypeError,
+		"GObject.connect_object requires at least 3 arguments");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 3);
+    if (!PyArg_ParseTuple(first, "sOO:GObject.connect_object",
+			  &name, &callback, &object)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
+	return NULL;
+    }
+    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (sigid == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    extra_args = PySequence_GetSlice(args, 3, len);
+    if (extra_args == NULL)
+	return NULL;
+    handlerid = g_signal_connect_closure(self->obj, sigid,
+			pyg_closure_new(callback, extra_args, object), FALSE);
+    return PyInt_FromLong(handlerid);
+}
+
+static PyObject *
+pygobject_connect_object_after(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args, *object;
+    gchar *name;
+    guint handlerid, sigid, len;
+
+    len = PyTuple_Size(args);
+    if (len < 3) {
+	PyErr_SetString(PyExc_TypeError,
+		"GObject.connect_object_after requires at least 3 arguments");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 3);
+    if (!PyArg_ParseTuple(first, "sOO:GObject.connect_object_after",
+			  &name, &callback, &object)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
+	return NULL;
+    }
+    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (sigid == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    extra_args = PySequence_GetSlice(args, 3, len);
+    if (extra_args == NULL)
+	return NULL;
+    handlerid = g_signal_connect_closure(self->obj, sigid,
+			pyg_closure_new(callback, extra_args, object), TRUE);
+    return PyInt_FromLong(handlerid);
+}
+
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
     { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
@@ -742,6 +902,10 @@ static PyMethodDef pygobject_methods[] = {
     { "queue_param_changed", (PyCFunction)pygobject_queue_param_changed, METH_VARARGS },
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
     { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
+    { "connect", (PyCFunction)pygobject_connect, METH_VARARGS },
+    { "connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
+    { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
+    { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
