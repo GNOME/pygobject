@@ -151,11 +151,13 @@ struct _PyGObject_Functions *_PyGObject_API;
         if (PyCObject_Check(cobject)) \
             _PyGObject_API = (struct _PyGObject_Functions *)PyCObject_AsVoidPtr(cobject); \
         else { \
-	    Py_FatalError("could not find _PyGObject_API object"); \
+            PyErr_SetString(PyExc_RuntimeError, \
+                            "could not find _PyGObject_API object"); \
 	    return; \
         } \
     } else { \
-        Py_FatalError("could not import gobject"); \
+        PyErr_SetString(PyExc_ImportError, \
+                        "could not import gobject"); \
         return; \
     } \
 }

@@ -2075,9 +2075,4 @@ initgobject(void)
     PyModule_AddObject(m, "TYPE_PARAM", pyg_type_wrapper_new(G_TYPE_PARAM));
     PyModule_AddObject(m, "TYPE_OBJECT", pyg_type_wrapper_new(G_TYPE_OBJECT));
     PyModule_AddObject(m, "TYPE_PYOBJECT", pyg_type_wrapper_new(PY_TYPE_OBJECT));
-
-    if (PyErr_Occurred()) {
-	PyErr_Print();
-	Py_FatalError("can't initialise module gobject");
-    }
 }
