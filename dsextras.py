@@ -4,7 +4,7 @@
 # TODO:
 # Make it possible to import codegen from another dir
 #
-from commands import getoutput, getstatusoutput
+
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.extension import Extension
@@ -15,6 +15,77 @@ import sys
 
 GLOBAL_INC = []
 GLOBAL_MACROS = []
+
+def getoutput(cmd):
+    """Return output (stdout or stderr) of executing cmd in a shell."""
+    return getstatusoutput(cmd)[1]
+
+def getstatusoutput(cmd):
+    """Return (status, output) of executing cmd in a shell."""
+    if sys.platform == 'win32':
+        pipe = os.popen(cmd, 'r')
+        text = pipe.read()
+        sts = pipe.close() or 0
+        if text[-1] == '\n':
+            text = text[:-1]
+        return sts, text
+    else:
+        from commands import getstatusoutput
+        return getstatusoutput(cmd)
+
+def have_pkgconfig():
+    """Checks for the existence of pkg-config"""
+    if (sys.platform == 'win32' and
+        os.system('pkg-config --version > NUL') == 0):
+        return 1
+    else:
+        if getstatusoutput('pkg-config')[0] == 256:
+            return 1
+
+def list_files(dir):
+    """List all files in a dir, with filename match support:
+    for example: glade/*.glade will return all files in the glade directory
+    that matches *.glade. It also looks up the full path"""
+    if dir.find(os.sep) != -1:
+        parts = dir.split(os.sep)
+        dir = string.join(parts[:-1], os.sep)
+        pattern = parts[-1]
+    else:
+        pattern = dir
+        dir = '.'
+
+    dir = os.path.abspath(dir)
+    retval = []
+    for file in os.listdir(dir):
+        if fnmatch.fnmatch(file, pattern):
+            retval.append(os.path.join(dir, file))
+    return retval
+
+def pkgc_version_check(name, longname, req_version):
+    is_installed = not os.system('pkg-config --exists %s' % name)
+    if not is_installed:
+        print "Could not find %s" % longname
+        return 0
+    
+    orig_version = getoutput('pkg-config --modversion %s' % name)
+    version = map(int, orig_version.split('.'))
+    pkc_version = map(int, req_version.split('.'))
+                      
+    if version >= pkc_version:
+        return 1
+    else:
+        print "Warning: Too old version of %s" % longname
+        print "         Need %s, but %s is installed" % \
+              (self.pkc_version, orig_version)
+        self.can_build_ok = 0
+        return 0
+
+class BuildExt(build_ext):
+    def build_extension(self, ext):
+        # Generate eventual templates before building
+        if hasattr(ext, 'generate'):
+            ext.generate()
+        build_ext.build_extension(self, ext)
 
 class InstallLib(install_lib):
     local_outputs = []
@@ -61,25 +132,6 @@ class InstallLib(install_lib):
     def get_inputs(self):
         return install_lib.get_inputs(self) + self.local_inputs
     
-def pkgc_version_check(name, longname, req_version):
-    is_installed = not os.system('pkg-config --exists %s' % name)
-    if not is_installed:
-        print "Could not find %s" % longname
-        return 0
-    
-    orig_version = getoutput('pkg-config --modversion %s' % name)
-    version = map(int, orig_version.split('.'))
-    pkc_version = map(int, req_version.split('.'))
-                      
-    if version >= pkc_version:
-        return 1
-    else:
-        print "Warning: Too old version of %s" % longname
-        print "         Need %s, but %s is installed" % \
-              (self.pkc_version, orig_version)
-        self.can_build_ok = 0
-        return 0
-
 class PkgConfigExtension(Extension):
     can_build_ok = None
     def __init__(self, **kwargs):
@@ -220,34 +272,5 @@ class TemplateExtension(PkgConfigExtension):
     def generate(self):
         map(lambda x: x.generate(), self.templates)
         
-class BuildExt(build_ext):
-    def build_extension(self, ext):
-        # Generate eventual templates before building
-        if hasattr(ext, 'generate'):
-            ext.generate()
-        build_ext.build_extension(self, ext)
         
-def list_files(dir):
-    """List all files in a dir, with filename match support:
-    for example: glade/*.glade will return all files in the glade directory
-    that matches *.glade. It also looks up the full path"""
-    if dir.find(os.sep) != -1:
-        parts = dir.split(os.sep)
-        dir = string.join(parts[:-1], os.sep)
-        pattern = parts[-1]
-    else:
-        pattern = dir
-        dir = '.'
 
-    dir = os.path.abspath(dir)
-    retval = []
-    for file in os.listdir(dir):
-        if fnmatch.fnmatch(file, pattern):
-            retval.append(os.path.join(dir, file))
-    return retval
-
-def have_pkgconfig():
-    """Checks for the existence of pkg-config"""
-    status = getstatusoutput('pkg-config')[0]
-    if status == 256:
-        return 1
