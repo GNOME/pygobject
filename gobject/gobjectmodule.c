@@ -1629,6 +1629,81 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
+{
+    guint signal_id, i, len;
+    PyObject *first, *py_ret;
+    gchar *name;
+    GSignalQuery query;
+    GValue *params, ret = { 0, };
+
+    len = PyTuple_Size(args);
+    if (len < 1) {
+	PyErr_SetString(PyExc_TypeError,"GObject.chain_from_overridden needs at least one arg");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 1);
+    if (!PyArg_ParseTuple(first, "s:GObject.emit", &name)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    signal_id = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (signal_id == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    g_signal_query(signal_id, &query);
+    if (len != query.n_params + 1) {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf),
+		   "%d parameters needed for signal %s; %d given",
+		   query.n_params, name, len - 1);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return NULL;
+    }
+    params = g_new0(GValue, query.n_params + 1);
+    g_value_init(&params[0], G_OBJECT_TYPE(self->obj));
+    g_value_set_object(&params[0], G_OBJECT(self->obj));
+
+    for (i = 0; i < query.n_params; i++)
+	g_value_init(&params[i + 1],
+		     query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE);
+    for (i = 0; i < query.n_params; i++) {
+	PyObject *item = PyTuple_GetItem(args, i+1);
+
+	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
+	    gchar buf[128];
+
+	    g_snprintf(buf, sizeof(buf),
+		"could not convert type %s to %s required for parameter %d",
+		item->ob_type->tp_name,
+		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    for (i = 0; i < query.n_params + 1; i++)
+		g_value_unset(&params[i]);
+	    g_free(params);
+	    return NULL;
+	}
+    }
+    if (query.return_type != G_TYPE_NONE)
+	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
+    g_signal_chain_from_overridden(params, signal_id, &ret);
+    for (i = 0; i < query.n_params + 1; i++)
+	g_value_unset(&params[i]);
+    g_free(params);
+    if (query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE != G_TYPE_NONE) {
+	py_ret = pyg_value_as_pyobject(&ret);
+	g_value_unset(&ret);
+    } else {
+	Py_INCREF(Py_None);
+	py_ret = Py_None;
+    }
+    return py_ret;
+}
+
 static PyMethodDef pygobject_methods[] = {
     { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
       METH_VARARGS|METH_KEYWORDS },
@@ -1650,6 +1725,7 @@ static PyMethodDef pygobject_methods[] = {
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
     { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
+    { "chain_from_overridden", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1993,12 +2069,9 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 static gboolean
 override_signal(GType instance_type, const gchar *signal_name)
 {
-    GObjectClass *oclass;
     guint signal_id;
 
-    oclass = g_type_class_ref(instance_type);
     signal_id = g_signal_lookup(signal_name, instance_type);
-    g_type_class_unref(oclass);
     if (!signal_id) {
 	gchar buf[128];
 
@@ -2014,15 +2087,19 @@ override_signal(GType instance_type, const gchar *signal_name)
 static gboolean
 add_signals (GType instance_type, PyObject *signals)
 {
+    GObjectClass *oclass;
     int pos = 0;
     PyObject *key, *value;
 
+    oclass = g_type_class_ref(instance_type);
     while (PyDict_Next(signals, &pos, &key, &value)) {
 	const gchar *signal_name;
+	gboolean retval = TRUE;
 
 	if (!PyString_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ keys must be strings");
+	    g_type_class_unref(oclass);
 	    return FALSE;
 	}
 	signal_name = PyString_AsString (key);
@@ -2030,13 +2107,17 @@ add_signals (GType instance_type, PyObject *signals)
 	if (value == Py_None ||
 	    (PyString_Check(value) &&
 	     !strcmp(PyString_AsString(value), "override"))) {
-	    if (!override_signal(instance_type, signal_name))
-		return FALSE;
+	    retval = override_signal(instance_type, signal_name);
 	} else {
-	    if (!create_signal(instance_type, signal_name, value))
-		return FALSE;
+	    retval = create_signal(instance_type, signal_name, value);
+	}
+
+	if (!retval) {
+	    g_type_class_unref(oclass);
+	    return FALSE;
 	}
     }
+    g_type_class_unref(oclass);
     return TRUE;
 }
 
