@@ -22,6 +22,10 @@ class GTypeTest(unittest.TestCase):
 
     def testInt(self):
         self.checkType(gobject.TYPE_INT, 'gint', int)
+        import gtk
+        model = gtk.ListStore(str, int)
+        iter = model.append()
+        model.set(iter, 1, 100000000)
         
     def testInt64(self):
         self.checkType(gobject.TYPE_INT64, 'gint64')

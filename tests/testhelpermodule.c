@@ -1,119 +1,10 @@
 #include "pygobject.h"
 #include <gobject/gmarshal.h>
+#include <gtk/gtk.h>
 
-typedef struct {
-  GObject parent;
-  GThread *thread;
-} TestThread;
+#include "test-thread.h"
+#include "test-unknown.h"
 
-typedef struct {
-  GObjectClass parent_class;
-  void (*emit_signal) (TestThread *sink);
-  void (*from_thread)	(TestThread *sink);
-} TestThreadClass;
-
-static void  test_thread_init       (TestThread *self);
-static void  test_thread_class_init (TestThreadClass *class);
-GType        test_thread_get_type   (void);
-
-#define TEST_TYPE_THREAD            (test_thread_get_type())
-#define TEST_THREAD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_THREAD, TestTHREAD))
-#define TEST_THREAD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_THREAD, TestTHREADClass))
-#define TEST_IS_THREAD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_THREAD))
-#define TEST_IS_THREAD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_THREAD))
-#define TEST_THREAD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), TEST_TYPE_THREAD, TestTHREADClass))
-
-enum
-{
-  /* methods */
-  SIGNAL_EMIT_SIGNAL,
-  SIGNAL_FROM_THREAD,
-  LAST_SIGNAL
-};
-
-static GObjectClass *parent_class = NULL;
-
-static guint test_thread_signals[LAST_SIGNAL] = { 0 };
-
-typedef enum {
-  TEST_THREAD_A,
-  TEST_THREAD_B
-} ThreadEnumType;
-
-static GType
-test_thread_enum_get_type (void)
-{
-  static GType enum_type = 0;
-  static GEnumValue enum_values[] = {
-    {TEST_THREAD_A, "TEST_THREAD_A", "a as in apple"},
-    {0, NULL, NULL},
-  };
-
-  if (!enum_type) {
-    enum_type =
-        g_enum_register_static ("TestThreadEnum", enum_values);
-  }
-  return enum_type;
-}
-
-GType
-test_thread_get_type (void)
-{
-    static GType thread_type = 0;
-
-    if (!thread_type) {
-	static const GTypeInfo thread_info = {
-	    sizeof(TestThreadClass),
-	    (GBaseInitFunc) NULL,
-	    (GBaseFinalizeFunc) NULL,
-	    (GClassInitFunc) test_thread_class_init,
-	    (GClassFinalizeFunc) NULL,
-	    NULL,
-
-	    sizeof (TestThread),
-	    0, /* n_preallocs */
-	    (GInstanceInitFunc) test_thread_init,
-	};
-
-	thread_type = g_type_register_static(G_TYPE_OBJECT, "TestThread",
-					     &thread_info, 0);
-    }
-    
-    return thread_type;
-
-}
-
-static void
-other_thread_cb (TestThread *self)
-{
-  g_signal_emit_by_name (self, "from-thread", 0, NULL);
-  g_thread_exit (0);
-}
-
-static void
-test_thread_emit_signal (TestThread *self)
-{
-  self->thread = g_thread_create ((GThreadFunc)other_thread_cb,
-				  self, TRUE, NULL);
-}
-
-static void test_thread_init (TestThread *self) {}
-static void test_thread_class_init (TestThreadClass *klass)
-{
-  parent_class = g_type_class_ref (G_TYPE_OBJECT);
-
-  test_thread_signals[SIGNAL_EMIT_SIGNAL] =
-    g_signal_new ("emit-signal", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
-		  G_STRUCT_OFFSET (TestThreadClass, emit_signal),
-		  NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
-  test_thread_signals[SIGNAL_FROM_THREAD] =
-    g_signal_new ("from-thread", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
-		  G_STRUCT_OFFSET (TestThreadClass, from_thread),
-		  NULL, NULL, g_cclosure_marshal_VOID__BOXED, G_TYPE_NONE, 1,
-		  test_thread_enum_get_type ());
-
-  klass->emit_signal = test_thread_emit_signal;
-}
 
 static PyObject *
 _wrap_get_tp_basicsize (PyObject * self, PyObject * args)
@@ -135,17 +26,79 @@ _wrap_get_test_thread (PyObject * self)
   return pygobject_new(obj);
 }
 
+static PyObject *
+_wrap_get_unknown (PyObject * self)
+{
+  GObject *obj;
+  obj = g_object_new (TEST_TYPE_UNKNOWN, NULL);
+  return pygobject_new(obj);
+  
+}
+
 static PyMethodDef testhelper_methods[] = {
     { "get_tp_basicsize", _wrap_get_tp_basicsize, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
+    { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
     { NULL, NULL }
+};
+
+PyTypeObject PyTestInterface_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,					/* ob_size */
+    "test.Interface",			/* tp_name */
+    sizeof(PyObject),	        /* tp_basicsize */
+    0,					/* tp_itemsize */
+    /* methods */
+    (destructor)0,	/* tp_dealloc */
+    (printfunc)0,			/* tp_print */
+    (getattrfunc)0,	/* tp_getattr */
+    (setattrfunc)0,	/* tp_setattr */
+    (cmpfunc)0,		/* tp_compare */
+    (reprfunc)0,		/* tp_repr */
+    (PyNumberMethods*)0,     /* tp_as_number */
+    (PySequenceMethods*)0, /* tp_as_sequence */
+    (PyMappingMethods*)0,   /* tp_as_mapping */
+    (hashfunc)0,		/* tp_hash */
+    (ternaryfunc)0,		/* tp_call */
+    (reprfunc)0,		/* tp_str */
+    (getattrofunc)0,			/* tp_getattro */
+    (setattrofunc)0,			/* tp_setattro */
+    (PyBufferProcs*)0,	/* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                      /* tp_flags */
+    NULL, 				/* Documentation string */
+    (traverseproc)0,	/* tp_traverse */
+    (inquiry)0,		/* tp_clear */
+    (richcmpfunc)0,	/* tp_richcompare */
+    0,             /* tp_weaklistoffset */
+    (getiterfunc)0,		/* tp_iter */
+    (iternextfunc)0,	/* tp_iternext */
+    0,			/* tp_methods */
+    0,					/* tp_members */
+    0,		       	/* tp_getset */
+    NULL,				/* tp_base */
+    NULL,				/* tp_dict */
+    (descrgetfunc)0,	/* tp_descr_get */
+    (descrsetfunc)0,	/* tp_descr_set */
+    0,                 /* tp_dictoffset */
+    (initproc)0,		/* tp_init */
+    (allocfunc)0,           /* tp_alloc */
+    (newfunc)0,               /* tp_new */
+    (freefunc)0,             /* tp_free */
+    (inquiry)0              /* tp_is_gc */
 };
 
 void 
 inittesthelper ()
 {
+  PyObject *m, *d;
+  
   init_pygobject();
   g_thread_init(NULL);
-  Py_InitModule ("testhelper", testhelper_methods);
+  m = Py_InitModule ("testhelper", testhelper_methods);
+
+  d = PyModule_GetDict(m);
+  
+  pyg_register_interface(d, "Interface", TEST_TYPE_INTERFACE, &PyTestInterface_Type);
+
 }
 
