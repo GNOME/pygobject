@@ -503,12 +503,15 @@ pyg_value_as_pyobject(const GValue *value)
 	return PyInt_FromLong(g_value_get_int(value));
     case G_TYPE_UINT:
 	{
-	    gulong val = (gulong) g_value_get_uint(value);
-
-	    if (val <= G_MAXLONG)
-		return PyInt_FromLong((glong) val);
-	    else
-		return PyLong_FromUnsignedLong(val);
+	    /* in Python, the Int object is backed by a long.  If a
+	       long can hold the whole value of an unsigned int, use
+	       an Int.  Otherwise, use a Long object to avoid overflow.
+	       This matches the ULongArg behavior in codegen/argtypes.h */
+#if (G_MAXUINT <= G_MAXLONG)
+	    return PyInt_FromLong((glong) g_value_get_uint(value));
+#else
+	    return PyLong_FromUnsignedLong((gulong) g_value_get_uint(value));
+#endif
 	}
     case G_TYPE_LONG:
 	return PyInt_FromLong(g_value_get_long(value));
