@@ -2116,6 +2116,73 @@ static PyMethodDef pygobject_functions[] = {
 };
 
 
+/* ----------------- Constant extraction ------------------------ */
+
+static void
+pyg_enum_add_constants(PyObject *module, GType enum_type,
+		       const gchar *strip_prefix)
+{
+    GEnumClass *eclass;
+    guint i, j;
+    gint prefix_len;
+
+    g_return_if_fail (G_TYPE_IS_ENUM (enum_type));
+    g_return_if_fail (strip_prefix != NULL);
+
+    prefix_len = strlen(strip_prefix);
+    eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
+
+    for (i = 0; i < eclass->n_values; i++) {
+	gchar *name = eclass->values[i].value_name;
+	gint value = eclass->values[i].value;
+
+	/* strip off prefix from value name, while keeping it a valid
+         * identifier */
+	for (j = prefix_len; j >= 0; j--) {
+	    if (g_ascii_isalpha(name[j])) {
+		name = &name[j];
+		break;
+	    }
+	}
+	PyModule_AddIntConstant(module, name, (long) value);
+    }
+
+    g_type_class_unref(eclass);
+}
+
+static void
+pyg_flags_add_constants(PyObject *module, GType flags_type,
+			const gchar *strip_prefix)
+{
+    GFlagsClass *fclass;
+    guint i, j;
+    gint prefix_len;
+
+    g_return_if_fail (G_TYPE_IS_FLAGS (flags_type));
+    g_return_if_fail (strip_prefix != NULL);
+
+    prefix_len = strlen(strip_prefix);
+    fclass = G_FLAGS_CLASS(g_type_class_ref(flags_type));
+
+    for (i = 0; i < fclass->n_values; i++) {
+	gchar *name = fclass->values[i].value_name;
+	guint value = fclass->values[i].value;
+
+	/* strip off prefix from value name, while keeping it a valid
+         * identifier */
+	for (j = prefix_len; j >= 0; j--) {
+	    if (g_ascii_isalpha(name[j])) {
+		name = &name[j];
+		break;
+	    }
+	}
+	PyModule_AddIntConstant(module, name, (long) value);
+    }
+
+    g_type_class_unref(fclass);
+}
+
+
 /* ----------------- gobject module initialisation -------------- */
 
 static struct _PyGObject_Functions functions = {
@@ -2136,6 +2203,9 @@ static struct _PyGObject_Functions functions = {
   &PyGBoxed_Type,
   pyg_register_boxed,
   pyg_boxed_new,
+
+  pyg_enum_add_constants,
+  pyg_flags_add_constants,
 };
 
 DL_EXPORT(void)

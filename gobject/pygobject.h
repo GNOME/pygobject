@@ -55,6 +55,11 @@ struct _PyGObject_Functions {
 			    GType boxed_type, PyExtensionClass *ec);
     PyObject *(* boxed_new)(GType boxed_type, gpointer boxed,
 			    gboolean copy_boxed, gboolean own_ref);
+
+    void (* enum_add_constants)(PyObject *module, GType enum_type,
+				const gchar *strip_prefix);
+    void (* flags_add_constants)(PyObject *module, GType flags_type,
+				 const gchar *strip_prefix);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -80,6 +85,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define PyGBoxed_Type              (*_PyGObject_API->boxed_type)
 #define pyg_register_boxed         (_PyGObject_API->register_boxed)
 #define pyg_boxed_new              (_PyGObject_API->boxed_new)
+#define pyg_enum_add_constants     (_PyGObject_API->enum_add_constants)
+#define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \
