@@ -1698,35 +1698,29 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 {
+    GSignalInvocationHint *ihint;
     guint signal_id, i, len;
     PyObject *first, *py_ret;
     gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
 
+    ihint = g_signal_get_invocation_hint(self->obj);
+    signal_id = ihint->signal_id;
+    name = g_signal_name(signal_id);
+
     len = PyTuple_Size(args);
-    if (len < 1) {
-	PyErr_SetString(PyExc_TypeError,"GObject.chain_from_overridden needs at least one arg");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 1);
-    if (!PyArg_ParseTuple(first, "s:GObject.emit", &name)) {
-	Py_DECREF(first);
-	return NULL;
-    }
-    Py_DECREF(first);
-    signal_id = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
     if (signal_id == 0) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
     g_signal_query(signal_id, &query);
-    if (len != query.n_params + 1) {
+    if (len != query.n_params) {
 	gchar buf[128];
 
 	g_snprintf(buf, sizeof(buf),
 		   "%d parameters needed for signal %s; %d given",
-		   query.n_params, name, len - 1);
+		   query.n_params, name, len);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
@@ -1738,7 +1732,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	g_value_init(&params[i + 1],
 		     query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     for (i = 0; i < query.n_params; i++) {
-	PyObject *item = PyTuple_GetItem(args, i+1);
+	PyObject *item = PyTuple_GetItem(args, i);
 
 	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
 	    gchar buf[128];
@@ -1756,7 +1750,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     }
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
-    g_signal_chain_from_overridden(params, signal_id, &ret);
+    g_signal_chain_from_overridden(params, &ret);
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     g_free(params);
@@ -1791,7 +1785,7 @@ static PyMethodDef pygobject_methods[] = {
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
     { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
-    { "chain_from_overridden", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
+    { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
