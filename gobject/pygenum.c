@@ -131,10 +131,10 @@ pyg_enum_from_gtype (GType gtype, int value)
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
     
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygenum_class_key);
-    /* Fall back to int */
-    if (pyclass == NULL)
-	return PyInt_FromLong(value);
-
+    if (pyclass == NULL) {
+	pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
+    }
+    
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
     retval = PyDict_GetItem(values, PyInt_FromLong(value));
@@ -154,7 +154,6 @@ pyg_enum_add (PyObject *   module,
     GEnumClass *eclass;
     int i;
     
-    g_return_val_if_fail(module != NULL, NULL);
     g_return_val_if_fail(typename != NULL, NULL);
     g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_ENUM), NULL);
     
@@ -170,19 +169,22 @@ pyg_enum_add (PyObject *   module,
 	PyGILState_Release(state);
 	return NULL;
     }
-    
-    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
-			 "__module__",
-			 PyString_FromString(PyModule_GetName(module)));
+
+    if (module)
+	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
+			     "__module__",
+			     PyString_FromString(PyModule_GetName(module)));
     
     if (!pygenum_class_key)
         pygenum_class_key = g_quark_from_static_string(pygenum_class_id);
 
     g_type_set_qdata(gtype, pygenum_class_key, stub);
 
-    /* Add it to the module name space */
-    PyModule_AddObject(module, (char*)typename, stub);
-    Py_INCREF(stub);
+    if (module) {
+	/* Add it to the module name space */
+	PyModule_AddObject(module, (char*)typename, stub);
+	Py_INCREF(stub);
+    }
 
     /* Register enum values */
     eclass = G_ENUM_CLASS(g_type_class_ref(gtype));
@@ -196,12 +198,14 @@ pyg_enum_add (PyObject *   module,
 	((PyGEnum*)item)->gtype = gtype;
 	
 	PyDict_SetItem(values, PyInt_FromLong(eclass->values[i].value), item);
-      
-	PyModule_AddObject(module,
-			   pyg_constant_strip_prefix(eclass->values[i].value_name,
-						     strip_prefix),
-			   item);
-	Py_INCREF(item);
+	
+	if (module) {
+	    PyModule_AddObject(module,
+			       pyg_constant_strip_prefix(eclass->values[i].value_name,
+							 strip_prefix),
+			       item);
+	    Py_INCREF(item);
+	}
     }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
