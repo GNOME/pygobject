@@ -30,6 +30,8 @@
 static PyObject *gerror_exc = NULL;
 static const gchar *pyginterface_type_id   = "PyGInterface::type";
 GQuark pyginterface_type_key  = 0;
+static const gchar *pygobject_class_init_id   = "PyGObject::class-init";
+GQuark pygobject_class_init_key  = 0;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -847,6 +849,31 @@ add_properties (GType instance_type, PyObject *properties)
     return ret;
 }
 
+static void
+pyg_register_class_init(GType gtype, PyGClassInitFunc class_init)
+{
+    g_type_set_qdata(gtype, pygobject_class_init_key, class_init);
+}
+
+static int
+pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
+{
+    PyGClassInitFunc class_init;
+    GType parent_type;
+    int rv;
+
+    parent_type = g_type_parent(gtype);
+    if (parent_type) {
+        rv = pyg_run_class_init(parent_type, gclass, pyclass);
+        if (rv) return rv;
+    }
+    class_init = g_type_get_qdata(gtype, pygobject_class_init_key);
+    if (class_init)
+        return class_init(gclass, pyclass);
+    return 0;
+}
+
+
 static PyObject *
 pyg_type_register(PyObject *self, PyObject *args)
 {
@@ -856,6 +883,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     gchar *type_name = NULL;
     gint i, name_serial;
     GTypeQuery query;
+    gpointer gclass;
     GTypeInfo type_info = {
 	0,    /* class_size */
 
@@ -982,6 +1010,12 @@ pyg_type_register(PyObject *self, PyObject *args)
 	PyErr_Clear();
     }
 
+    gclass = g_type_class_ref(instance_type);
+    if (pyg_run_class_init(instance_type, gclass, class)) {
+        g_type_class_unref(gclass);
+        return NULL;
+    }
+    g_type_class_unref(gclass);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2074,7 +2108,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   FALSE, /* threads_enabled */
   pyg_enable_threads,
   pyg_gil_state_ensure_py23,
-  pyg_gil_state_release_py23
+  pyg_gil_state_release_py23,
+  pyg_register_class_init,
 };
 
 #define REGISTER_TYPE(d, type, name) \
@@ -2124,6 +2159,8 @@ initgobject(void)
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
     pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
+
+    pygobject_class_init_key = g_quark_from_static_string(pygobject_class_init_id);
 
     REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
     REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 

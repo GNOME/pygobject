@@ -66,6 +66,9 @@ typedef struct {
 #define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
 #define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
 
+typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
+
+
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
@@ -155,6 +158,7 @@ struct _PyGObject_Functions {
     int       (*enable_threads) (void);
     int       (*gil_state_ensure) (void);
     void      (*gil_state_release) (int flag);
+    void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -206,6 +210,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add               (_PyGObject_API->flags_add)
 #define pyg_flags_from_gtype        (_PyGObject_API->flags_from_gtype)
 #define pyg_enable_threads          (_PyGObject_API->enable_threads)
+#define pyg_register_class_init     (_PyGObject_API->register_class_init)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
