@@ -4,6 +4,13 @@ import os
 import sys
 import unittest
 
+import common
+
+buildDir = sys.argv[1]
+srcDir = sys.argv[2]
+common.importModules(buildDir=buildDir,
+                     srcDir=srcDir)
+
 SKIP_FILES = ['common', 'runtests']
 
 dir = os.path.split(os.path.abspath(__file__))[0]

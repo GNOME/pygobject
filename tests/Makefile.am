@@ -32,10 +32,14 @@ tests =  \
 testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 	$(LINK) -rpath $(pkgpyexecdir) $(testhelper_la_LDFLAGS) $(testhelper_la_OBJECTS) $(testhelper_la_LIBADD) $(LIBS)
 
-PYTHONPATH = $(top_builddir):$(top_builddir)/gobject:$(top_srcdir):$(top_srcdir)/gtk
-
 check-local: $(top_srcdir)/gtk/__init__.py
-	@if ! test -e $(top_builddir)/gtk/__init__.py; then cp $(top_srcdir)/gtk/__init__.py $(top_builddir)/gtk/__init__.py; fi
-	@PYTHONPATH=$(PYTHONPATH) DIST_CHECK=1 $(PYTHON) $(srcdir)/runtests.py
-	@if test "$(top_builddir)" != "$(top_srcdir)"; then rm -f $(top_builddir)/gtk/__init__.py*; fi
+	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
+	   cp $(top_srcdir)/gtk/__init__.py $(top_builddir)/gtk/__init__.py; \
+	   cp $(top_srcdir)/gtk/keysyms.py $(top_builddir)/gtk/keysyms.py; \
+	fi
+	@$(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir)
+	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
+	   rm -f $(top_builddir)/gtk/__init__.py*; \
+	   rm -f $(top_builddir)/gtk/keysyms.py*; \
+	fi
 	@rm -fr *.pyc 
