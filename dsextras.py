@@ -61,6 +61,25 @@ class InstallLib(install_lib):
     def get_inputs(self):
         return install_lib.get_inputs(self) + self.local_inputs
     
+def pkgc_version_check(name, longname, req_version):
+    is_installed = not os.system('pkg-config --exists %s' % name)
+    if not is_installed:
+        print "Could not find %s" % longname
+        return 0
+    
+    orig_version = getoutput('pkg-config --modversion %s' % name)
+    version = map(int, orig_version.split('.'))
+    pkc_version = map(int, req_version.split('.'))
+                      
+    if version >= pkc_version:
+        return 1
+    else:
+        print "Warning: Too old version of %s" % longname
+        print "         Need %s, but %s is installed" % \
+              (self.pkc_version, orig_version)
+        self.can_build_ok = 0
+        return 0
+
 class PkgConfigExtension(Extension):
     can_build_ok = None
     def __init__(self, **kwargs):
@@ -68,7 +87,8 @@ class PkgConfigExtension(Extension):
         kwargs['include_dirs'] = self.get_include_dirs(name) + GLOBAL_INC
         kwargs['define_macros'] = GLOBAL_MACROS
         kwargs['libraries'] = self.get_libraries(name)
-        kwargs['library_dirs'] = self.get_library_dirs(name) 
+        kwargs['library_dirs'] = self.get_library_dirs(name)
+        self.name = kwargs['name']
         self.pkc_name = kwargs['pkc_name']
         self.pkc_version = kwargs['pkc_version']
         del kwargs['pkc_name'], kwargs['pkc_version']
@@ -93,7 +113,8 @@ class PkgConfigExtension(Extension):
 
         retval = os.system('pkg-config --exists %s' % self.pkc_name)
         if retval:
-            print "* Could not find %s." % self.pkc_name
+            print ("* %s.pc could not be found, bindings for %s"
+                   " will not be built." % (self.pkc_name, self.name))
             self.can_build_ok = 0
             return 0
 
@@ -115,13 +136,15 @@ class PkgConfigExtension(Extension):
         pass
        
 class Template:
-    def __init__(self, override, output, defs, prefix, register=[]):
+    def __init__(self, override, output, defs, prefix,
+                 register=[], load_types=None):
         self.override = override
         self.defs = defs
         self.register = register
         self.output = output
         self.prefix = prefix
-
+        self.load_types = load_types
+        
     def check_dates(self):
         if not os.path.exists(self.output):
             return 0
@@ -158,6 +181,10 @@ class Template:
             dp.startParsing()
             register_types(dp)
 
+        if self.load_types:
+            globals = {}
+            execfile(self.load_types, globals)
+            
         dp = DefsParser(self.defs)
         dp.startParsing()
         register_types(dp)
@@ -175,12 +202,15 @@ class TemplateExtension(PkgConfigExtension):
         defs = kwargs['defs']
         output = defs[:-5] + '.c'
         override = kwargs['override']
+        load_types = kwargs.get('load_types')
         self.templates = []
         self.templates.append(Template(override, output, defs, 'py' + name,
-                                       kwargs['register']))
+                                       kwargs['register'], load_types))
         
         del kwargs['register'], kwargs['override'], kwargs['defs']
-
+        if load_types:
+           del kwargs['load_types']
+           
         if kwargs.has_key('output'):
             kwargs['name'] = kwargs['output']
             del kwargs['output']
