@@ -89,7 +89,8 @@ pyg_restore_current_main_loop (GMainLoop *main_loop)
     if (prev != NULL)
 	g_main_loop_unref(prev);
     PyThread_delete_key_value(pyg_current_main_loop_key);
-    PyThread_set_key_value(pyg_current_main_loop_key, main_loop);
+    if (main_loop != NULL)
+	PyThread_set_key_value(pyg_current_main_loop_key, main_loop);
 }
 
 static inline GMainLoop *
