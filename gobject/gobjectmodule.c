@@ -3077,6 +3077,8 @@ initgobject(void)
     PyModule_AddObject(m, "TYPE_UINT", pyg_type_wrapper_new(G_TYPE_UINT));
     PyModule_AddObject(m, "TYPE_LONG", pyg_type_wrapper_new(G_TYPE_LONG));
     PyModule_AddObject(m, "TYPE_ULONG", pyg_type_wrapper_new(G_TYPE_ULONG));
+    PyModule_AddObject(m, "TYPE_INT64", pyg_type_wrapper_new(G_TYPE_INT64));
+    PyModule_AddObject(m, "TYPE_UINT64", pyg_type_wrapper_new(G_TYPE_UINT64));
     PyModule_AddObject(m, "TYPE_ENUM", pyg_type_wrapper_new(G_TYPE_ENUM));
     PyModule_AddObject(m, "TYPE_FLAGS", pyg_type_wrapper_new(G_TYPE_FLAGS));
     PyModule_AddObject(m, "TYPE_FLOAT", pyg_type_wrapper_new(G_TYPE_FLOAT));
