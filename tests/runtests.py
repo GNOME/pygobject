@@ -6,8 +6,19 @@ import unittest
 
 import common
 
-buildDir = sys.argv[1]
-srcDir = sys.argv[2]
+if len(sys.argv) == 3:
+  buildDir = sys.argv[1]
+  srcDir = sys.argv[2]
+else:
+  if len(sys.argv) == 2:
+    program = sys.argv[1]
+    if program.endswith('.py'):
+       program = program[:-3]
+  else:
+    program = None
+    
+  buildDir = '..'
+  srcDir = '.'
 common.importModules(buildDir=buildDir,
                      srcDir=srcDir)
 
@@ -26,6 +37,8 @@ suite = unittest.TestSuite()
 loader = unittest.TestLoader()
 
 for name in gettestnames():
+    if program and program not in name:
+       continue
     suite.addTest(loader.loadTestsFromName(name))
     
 testRunner = unittest.TextTestRunner()

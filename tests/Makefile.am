@@ -19,12 +19,13 @@ testhelper_la_SOURCES = \
 	test-unknown.c 
 
 tests =  \
-	test_subprocess.py \
-	conversion.py \
-	enum.py \
-	gtype.py \
+	test_conversion.py \
 	test_dialog.py \
+	test_enum.py \
+	test_gtype.py \
+	test_radiobutton.py \
 	test_signal.py \
+	test_subprocess.py \
 	test_subtype.py \
 	test_unknown.py
 
