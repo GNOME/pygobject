@@ -907,7 +907,8 @@ pyg_closure_marshal(GClosure *closure,
 	/* XXXX - clean up if threading was used */
 	return;
     }
-    pyg_value_from_pyobject(return_value, ret);
+    if (return_value)
+	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
     /* XXXX - clean up if threading was used */
 }
@@ -1015,7 +1016,8 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	return;
     }
     Py_DECREF(method);
-    pyg_value_from_pyobject(return_value, ret);
+    if (return_value)
+	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
     /* XXXX - clean up if threading was used */
 }
