@@ -2,9 +2,9 @@ import os
 import sys
 
 # Don't insert before . (first in list)
-sys.path.insert(1, os.path.join('..'))
+sys.path.insert(1, os.path.join('../gobject/.libs'))
+sys.path.insert(1, os.path.join('../gtk/.libs'))
 
-path = os.path.abspath(os.path.join('..', 'gtk'))
 import gobject
 import atk
 import pango
