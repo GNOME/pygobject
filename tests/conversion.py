@@ -39,5 +39,21 @@ class Tests(unittest.TestCase):
           else:
               raise AssertionError('exception not raised on invalid value w/ set_property: %s' 
                                    % invalid_value)
+
+  def testColorCreation(self):
+      """ Test GdkColor creation """
+
+      c = gtk.gdk.Color(1, 2, 3)
+      assert c.red == 1 and c.green == 2 and c.blue == 3
+
+      c = gtk.gdk.Color(pixel = 0xffff)
+      assert c.pixel == 0xffff
+
+      c = gtk.gdk.Color(pixel = 0xffffL)
+      assert c.pixel == 0xffff
+
+      c = gtk.gdk.Color(pixel = 0xffffffffL)
+      assert c.pixel == 0xffffffffL
+
 if __name__ == '__main__':
     unittest.main()
