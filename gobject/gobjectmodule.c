@@ -27,6 +27,8 @@
 #include "pygobject-private.h"
 
 static PyObject *gerror_exc = NULL;
+static const gchar *pyginterface_type_id   = "PyGInterface::type";
+GQuark pyginterface_type_key  = 0;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -234,7 +236,7 @@ pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
     return -1;
 }
 
-static PyTypeObject PyGInterface_Type = {
+PyTypeObject PyGInterface_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
     "gobject.GInterface",               /* tp_name */
@@ -300,6 +302,9 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     type->ob_type = &PyType_Type;
     type->tp_base = &PyGInterface_Type;
 
+    if (!pyginterface_type_key)
+	pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
+    
     if (PyType_Ready(type) < 0) {
         g_warning("could not ready `%s'", type->tp_name);
         return;
@@ -311,7 +316,10 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
         Py_DECREF(o);
     }
 
+    g_type_set_qdata(gtype, pyginterface_type_key, type);
+    
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
+    
 }
 
 /* -------------- GMainContext objects ---------------------------- */

@@ -108,7 +108,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     s = strrchr(class_name, '.');
     if (s != NULL)
 	class_name = s + 1;
-
+	
     type->ob_type = &PyType_Type;
     if (bases) {
 	type->tp_bases = bases;
@@ -169,28 +169,110 @@ pygobject_register_wrapper(PyObject *self)
 }
 
 /**
+ * pygobject_new_with_interfaces
+ * @gtype: the GType of the GObject subclass.
+ *
+ * Creates a new PyTypeObject from the given GType with interfaces attached in
+ * bases. It will currently not filter out interfaces already implemented by
+ * it parents.
+ *
+ * Returns: a PyTypeObject for the new type of NULL if it couldn't be created
+ */
+PyTypeObject *
+pygobject_new_with_interfaces(GType gtype)
+{
+    PyObject *o;
+    PyTypeObject *type;
+    PyObject *dict;
+    PyTypeObject *py_parent_type, *py_interface_type;
+    GType *interfaces;
+    guint n_interfaces;
+    int i;
+    PyObject *bases;
+    GType parent_type, interface_type;
+
+    interfaces = g_type_interfaces (gtype, &n_interfaces);
+    bases = PyTuple_New(n_interfaces+1);
+    
+    /* Lookup the parent type */
+    parent_type = g_type_parent(gtype);
+    py_parent_type = pygobject_lookup_class(parent_type);
+
+    /* We will always put the parent at the first position in bases */
+    PyTuple_SetItem(bases, 0, (PyObject*)py_parent_type);
+
+    /* And traverse interfaces */
+    if (n_interfaces) {
+	for (i = 0; i < n_interfaces; i++) {
+	    interface_type = interfaces[i];
+	    py_interface_type = pygobject_lookup_class(interface_type);
+	    PyTuple_SetItem(bases, i+1, (PyObject*)py_interface_type);
+	}
+	
+	g_free(interfaces);
+    }
+	
+    dict = PyDict_New();
+    
+    o = pyg_type_wrapper_new(gtype);
+    PyDict_SetItemString(dict, "__gtype__", o);
+    Py_DECREF(o);
+
+    /* set up __doc__ descriptor on type */
+    PyDict_SetItemString(dict, "__doc__", pyg_object_descr_doc_get());
+
+    type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type,
+						"sOO", g_type_name(gtype), bases, dict);
+    if (type == NULL) {
+	PyErr_Print();
+	return NULL;
+    }
+    
+    if (PyType_Ready(type) < 0) {
+	g_warning ("couldn't make the type `%s' ready", type->tp_name);
+	return NULL;
+    }
+
+    if (!pygobject_class_key)
+	pygobject_class_key = g_quark_from_static_string(pygobject_class_id);
+
+    /* stash a pointer to the python class with the GType */
+    Py_INCREF(type);
+    g_type_set_qdata(gtype, pygobject_class_key, type);
+
+    return type;
+}
+
+/**
  * pygobject_lookup_class:
  * @gtype: the GType of the GObject subclass.
  *
  * This function looks up the wrapper class used to represent
  * instances of a GObject represented by @gtype.  If no wrapper class
- * has been registered for the given GType, then the parent GType will
- * be checked.  Since a wrapper has been registered for "GObject",
- * this function will always succeed.
+ * or interface has been registered for the given GType, then a new
+ * type will be created.
  *
- * Returns: The wrapper class for the GObject.
+ * Returns: The wrapper class for the GObject or NULL if the
+ *          GType has no registered type and a new type couldn't be created
  */
 PyTypeObject *
 pygobject_lookup_class(GType gtype)
 {
-    PyTypeObject *type = NULL;
+    PyTypeObject *py_type;
 
-    /* find the python type for this object.  If not found, use parent. */
-    while (gtype != G_TYPE_INVALID &&
-	   (type = g_type_get_qdata(gtype, pygobject_class_key)) == NULL)
-        gtype = g_type_parent(gtype);
-    g_assert(type != NULL);
-    return type;
+    if (gtype == G_TYPE_INTERFACE)
+	return &PyGInterface_Type;
+
+    py_type = g_type_get_qdata(gtype, pygobject_class_key);
+    if (py_type == NULL) {
+	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
+	if (py_type == NULL) {
+	    py_type = pygobject_new_with_interfaces(gtype);
+	    g_type_set_qdata(gtype, pyginterface_type_key, py_type);
+	}
+    }
+    
+    return py_type;
 }
 
 /**
@@ -210,13 +292,13 @@ pygobject_new(GObject *obj)
     PyGObject *self;
 
     if (!pygobject_wrapper_key)
-	pygobject_wrapper_key=g_quark_from_static_string(pygobject_wrapper_id);
+	pygobject_wrapper_key = g_quark_from_static_string(pygobject_wrapper_id);
 
     if (obj == NULL) {
 	Py_INCREF(Py_None);
 	return Py_None;
     }
-
+    
     /* we already have a wrapper for this object -- return it. */
     self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key);
     if (self != NULL) {

@@ -70,6 +70,8 @@ PyObject *pyg_object_descr_doc_get(void);
 
 /* from pygobject.h */
 extern PyTypeObject PyGObject_Type;
+extern PyTypeObject PyGInterface_Type;
+extern GQuark pyginterface_type_key;
 
 void          pygobject_register_class   (PyObject *dict,
 					  const gchar *type_name,
