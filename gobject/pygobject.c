@@ -802,6 +802,21 @@ pygobject_disconnect(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
+pygobject_handler_is_connected(PyGObject *self, PyObject *args)
+{
+    guint handler_id;
+    PyObject *ret;
+
+    if (!PyArg_ParseTuple(args, "i:GObject.handler_is_connected", &handler_id))
+	return NULL;
+
+    ret = g_signal_handler_is_connected(self->obj, handler_id)
+	? Py_True : Py_False;
+    Py_INCREF(ret);
+    return ret;
+}
+
+static PyObject *
 pygobject_handler_block(PyGObject *self, PyObject *args)
 {
     guint handler_id;
@@ -1012,6 +1027,7 @@ static PyMethodDef pygobject_methods[] = {
     { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
     { "disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
     { "handler_disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
+    { "handler_is_connected", (PyCFunction)pygobject_handler_is_connected, METH_VARARGS },
     { "handler_block", (PyCFunction)pygobject_handler_block, METH_VARARGS },
     { "handler_unblock", (PyCFunction)pygobject_handler_unblock,METH_VARARGS },
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
