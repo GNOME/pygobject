@@ -1163,6 +1163,179 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     return NULL;
 }
 
+static gboolean
+handler_marshal(gpointer user_data)
+{
+    PyObject *tuple, *ret;
+    gboolean res;
+
+    g_return_val_if_fail(user_data != NULL, FALSE);
+
+    pyg_block_threads();
+
+    tuple = (PyObject *)user_data;
+    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
+			      PyTuple_GetItem(tuple, 1));
+    if (!ret) {
+	PyErr_Print();
+	res = FALSE;
+    } else {
+	res = PyObject_IsTrue(ret);
+	Py_DECREF(ret);
+    }
+    pyg_unblock_threads();
+
+    return res;
+}
+
+static PyObject *
+pyg_idle_add(PyObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *cbargs = NULL, *data;
+    gint len, priority;
+    guint handler_id;
+
+    len = PyTuple_Size(args);
+    if (len < 2) {
+	PyErr_SetString(PyExc_TypeError,
+			"idle_add requires at least 1 argument");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 2);
+    if (!PyArg_ParseTuple(first, "iO:idle_add", &priority, &callback)) {
+	Py_DECREF(first);
+        return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "first argument not callable");
+        return NULL;
+    }
+    cbargs = PySequence_GetSlice(args, 2, len);
+
+    if (cbargs == NULL)
+      return NULL;
+    data = Py_BuildValue("(ON)", callback, cbargs);
+    if (data == NULL)
+      return NULL;
+    handler_id = g_idle_add_full(priority, handler_marshal, data,
+				 (GDestroyNotify)pyg_destroy_notify);
+    return PyInt_FromLong(handler_id);
+}
+
+static PyObject *
+pyg_timeout_add(PyObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *cbargs = NULL, *data;
+    gint len, priority, interval;
+    guint handler_id;
+
+    len = PyTuple_Size(args);
+    if (len < 3) {
+	PyErr_SetString(PyExc_TypeError,
+			"timeout_add requires at least 2 args");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 3);
+    if (!PyArg_ParseTuple(first, "iiO:timeout_add", &priority, &interval,
+			  &callback)) {
+	Py_DECREF(first);
+        return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "second argument not callable");
+        return NULL;
+    }
+    cbargs = PySequence_GetSlice(args, 3, len);
+
+    if (cbargs == NULL)
+      return NULL;
+    data = Py_BuildValue("(ON)", callback, cbargs);
+    if (data == NULL)
+      return NULL;
+    handler_id = g_timeout_add_full(priority, interval, handler_marshal, data,
+				    (GDestroyNotify)pyg_destroy_notify);
+    return PyInt_FromLong(handler_id);
+}
+
+static gboolean
+iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
+{
+    PyObject *tuple, *func, *firstargs, *args, *ret;
+    gboolean res;
+
+    g_return_val_if_fail(user_data != NULL, FALSE);
+
+    pyg_block_threads();
+
+    tuple = (PyObject *)user_data;
+    func = PyTuple_GetItem(tuple, 0);
+
+    /* arg vector is (fd, condtion, *args) */
+    firstargs = Py_BuildValue("(Oi)", PyTuple_GetItem(tuple, 1), condition);
+    args = PySequence_Concat(firstargs, PyTuple_GetItem(tuple, 2));
+    Py_DECREF(firstargs);
+
+    ret = PyObject_CallObject(func, args);
+    Py_DECREF(args);
+    if (!ret) {
+	PyErr_Print();
+	res = FALSE;
+    } else {
+	res = PyObject_IsTrue(ret);
+	Py_DECREF(ret);
+    }
+    pyg_unblock_threads();
+
+    return res;
+}
+
+static PyObject *
+pyg_io_add_watch(PyObject *self, PyObject *args)
+{
+    PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
+    gint fd, priority, condition, len;
+    GIOChannel *iochannel;
+    guint handler_id;
+
+    len = PyTuple_Size(args);
+    if (len < 4) {
+	PyErr_SetString(PyExc_TypeError,
+			"timeout_add requires at least 2 args");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 4);
+    if (!PyArg_ParseTuple(first, "OiiO:io_add_watch", &pyfd, &priority,
+			  &condition, &callback)) {
+	Py_DECREF(first);
+        return NULL;
+    }
+    Py_DECREF(first);
+    fd = PyObject_AsFileDescriptor(pyfd);
+    if (fd < 0) {
+	return NULL;
+    }
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "second argument not callable");
+        return NULL;
+    }
+    cbargs = PySequence_GetSlice(args, 4, len);
+
+    if (cbargs == NULL)
+      return NULL;
+    data = Py_BuildValue("(OON)", callback, pyfd, cbargs);
+    if (data == NULL)
+      return NULL;
+    iochannel = g_io_channel_unix_new(fd);
+    handler_id = g_io_add_watch_full(iochannel, priority, condition,
+				     iowatch_marshal, data,
+				    (GDestroyNotify)pyg_destroy_notify);
+    g_io_channel_unref(iochannel);
+    
+    return PyInt_FromLong(handler_id);
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1175,6 +1348,9 @@ static PyMethodDef pygobject_functions[] = {
     { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
     { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
     { "new", (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
+    { "idle_add", pyg_idle_add, METH_VARARGS },
+    { "timeout_add", pyg_timeout_add, METH_VARARGS },
+    { "io_add_watch", pyg_io_add_watch, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1422,6 +1598,19 @@ initgobject(void)
     PyModule_AddIntConstant(m, "PARAM_CONSTRUCT_ONLY", G_PARAM_CONSTRUCT_ONLY);
     PyModule_AddIntConstant(m, "PARAM_LAX_VALIDATION", G_PARAM_LAX_VALIDATION);
     PyModule_AddIntConstant(m, "PARAM_READWRITE", G_PARAM_READWRITE);
+
+    PyModule_AddIntConstant(m, "PRIORITY_HIGH", G_PRIORITY_HIGH);
+    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT", G_PRIORITY_DEFAULT);
+    PyModule_AddIntConstant(m, "PRIORITY_HIGH_IDLE", G_PRIORITY_HIGH_IDLE);
+    PyModule_AddIntConstant(m,"PRIORITY_DEFAULT_IDLE",G_PRIORITY_DEFAULT_IDLE);
+    PyModule_AddIntConstant(m, "PRIORITY_LOW", G_PRIORITY_LOW);
+
+    PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);
+    PyModule_AddIntConstant(m, "IO_OUT",  G_IO_OUT);
+    PyModule_AddIntConstant(m, "IO_PRI",  G_IO_PRI);
+    PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
+    PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
+    PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
 
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
     PyModule_AddObject(m, "TYPE_NONE", pyg_type_wrapper_new(G_TYPE_NONE));
