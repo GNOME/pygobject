@@ -2147,10 +2147,8 @@ initgobject(void)
     g_type_init();
 
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
-						  NULL,
 						  pyobject_copy,
-						  pyobject_free,
-						  TRUE);
+						  pyobject_free);
 
     pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
