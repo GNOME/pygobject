@@ -1485,6 +1485,85 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
 }
 
 
+static PyObject *
+pyg_signal_new(PyObject *self, PyObject *args)
+{
+    gchar *signal_name;
+    PyObject *py_type;
+    GSignalFlags signal_flags;
+    GType return_type;
+    PyObject *py_param_types;
+
+    GType instance_type = 0;
+    guint n_params, i;
+    GType *param_types;
+
+    guint signal_id;
+
+    if (!PyArg_ParseTuple(args, "sOiiO:gobject.signal_new", &signal_name,
+			  &py_type, &signal_flags, &return_type,
+			  &py_param_types))
+	return NULL;
+    if (pygobject_check(py_type, &PyGObject_Type)) {
+	PyObject *gtype = PyObject_GetAttrString(py_type, "__gtype__");
+
+	if (!gtype) {
+	    PyErr_Clear();
+	    PyErr_SetString(PyExc_TypeError,
+			    "argument 2 must be a GObject or a GType code");
+	    return NULL;
+	}
+	instance_type = (GType) PyInt_AsLong(gtype);
+	if (PyErr_Occurred()) {
+	    PyErr_Clear();
+	    Py_DECREF(gtype);
+	    PyErr_SetString(PyExc_TypeError,
+			    "argument 2 must be a GObject or a GType code");
+	    return NULL;
+	}
+	Py_DECREF(gtype);
+    } else {
+	instance_type = (GType)PyInt_AsLong(py_type);
+	if (PyErr_Occurred()) {
+	    PyErr_Clear();
+	    PyErr_SetString(PyExc_TypeError,
+			    "argument 2 must be a GObject or a GType code");
+	    return NULL;
+	}
+    }
+    if (!PySequence_Check(py_param_types)) {
+	PyErr_SetString(PyExc_TypeError,
+			"argument 5 must be a sequence of GType codes");
+	return NULL;
+    }
+    n_params = PySequence_Length(py_param_types);
+    param_types = g_new(GType, n_params);
+    for (i = 0; i < n_params; i++) {
+	PyObject *item = PySequence_GetItem(py_param_types, i);
+
+	param_types[i] = (GType) PyInt_AsLong(item);
+	if (PyErr_Occurred()) {
+	    PyErr_Clear();
+	    Py_DECREF(item);
+	    PyErr_SetString(PyExc_TypeError,
+			    "argument 5 must be a sequence of GType codes");
+	    return NULL;
+	}
+	Py_DECREF(item);
+    }
+
+    signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
+			      pyg_signal_class_closure_get(),
+			      (GSignalAccumulator)0, NULL,
+			      (GSignalCMarshaller)0,
+			      return_type, n_params, param_types);
+    g_free(param_types);
+    if (signal_id != 0)
+	return PyInt_FromLong(signal_id);
+    PyErr_SetString(PyExc_RuntimeError, "could not create signal");
+    return NULL;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1492,6 +1571,7 @@ static PyMethodDef pygobject_functions[] = {
     { "type_is_a", pyg_type_is_a, METH_VARARGS },
     { "type_children", pyg_type_children, METH_VARARGS },
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
+    { "signal_new", pyg_signal_new, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
