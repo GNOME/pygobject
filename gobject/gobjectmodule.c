@@ -1862,7 +1862,7 @@ pyg_error_check(GError **error)
 	PyObject *exc_instance;
 	PyObject *d;
 	
-	pyg_unblock_threads();
+	pyg_block_threads();
 	
 	exc_instance = PyObject_CallFunction(gerror_exc, "z",
 					     (*error)->message);
