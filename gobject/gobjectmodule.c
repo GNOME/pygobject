@@ -2085,7 +2085,7 @@ pyg_error_check(GError **error)
 
 /* ----------------- gobject module initialisation -------------- */
 
-static struct _PyGObject_Functions pygobject_api_functions = {
+struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_register_class,
   pygobject_register_wrapper,
   pygobject_lookup_class,

@@ -10,7 +10,7 @@
 
 
 /* from gobjectmodule.c */
-staticforward struct _PyGObject_Functions pygobject_api_functions;
+extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_block_threads()   G_STMT_START { \
     if (pygobject_api_functions.block_threads != NULL)    \
       (* pygobject_api_functions.block_threads)();        \
