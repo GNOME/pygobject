@@ -778,7 +778,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, NULL), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -815,7 +815,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, NULL), TRUE);
     return PyInt_FromLong(handlerid);
 }
@@ -852,7 +852,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, object), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -889,7 +889,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
 			pyg_closure_new(callback, extra_args, object), TRUE);
     return PyInt_FromLong(handlerid);
 }
