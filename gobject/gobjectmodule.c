@@ -1401,8 +1401,9 @@ initgobject(void)
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGObject_API",
-			 PyCObject_FromVoidPtr(&pygobject_api_functions,NULL));
-
+			 o=PyCObject_FromVoidPtr(&pygobject_api_functions,NULL));
+    Py_DECREF(o);
+	
     /* some constants */
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
