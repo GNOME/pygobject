@@ -356,6 +356,70 @@ pyg_register_boxed_custom(GType boxed_type,
     g_type_set_qdata(boxed_type, pyg_boxed_marshal_key, bm);
 }
 
+static int
+pyg_value_array_from_pyobject(GValue *value,
+			      PyObject *obj,
+			      const GParamSpecValueArray *pspec)
+{
+    int len;
+    GValueArray *value_array;
+    int i;
+
+    len = PySequence_Length(obj);
+    if (len == -1) {
+	PyErr_Clear();
+	return -1;
+    }
+
+    if (pspec && pspec->fixed_n_elements > 0 && len != pspec->fixed_n_elements)
+	return -1;
+	    
+    value_array = g_value_array_new(len);
+
+    for (i = 0; i < len; ++i) {
+	PyObject *item = PySequence_GetItem(obj, i);
+	GType type;
+	GValue item_value = { 0, };
+	int status;
+
+	if (! item) {
+	    PyErr_Clear();
+	    g_value_array_free(value_array);
+	    return -1;
+	}
+
+	if (pspec && pspec->element_spec)
+	    type = G_PARAM_SPEC_VALUE_TYPE(pspec->element_spec);
+	else {
+	    type = pyg_type_from_object((PyObject *) item->ob_type);
+	    if (! type) {
+		PyErr_Clear();
+		g_value_array_free(value_array);
+		Py_DECREF(item);
+		return -1;
+	    }
+	}
+
+	g_value_init(&item_value, type);
+	status = (pspec && pspec->element_spec)
+	    ? pyg_param_gvalue_from_pyobject(&item_value, item, pspec->element_spec)
+	    : pyg_value_from_pyobject(&item_value, item);
+	Py_DECREF(item);
+
+	if (status == -1) {
+	    g_value_array_free(value_array);
+	    g_value_unset(&item_value);
+	    return -1;
+	}
+
+	g_value_array_append(value_array, &item_value);
+	g_value_unset(&item_value);
+    }
+
+    g_value_take_boxed(value, value_array);
+    return 0;
+}
+
 /**
  * pyg_value_from_pyobject:
  * @value: the GValue object to store the converted value in.
@@ -550,6 +614,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
 		   G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype))
 	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
+	else if (PySequence_Check(obj) &&
+		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
+	    return pyg_value_array_from_pyobject(value, obj, NULL);
 	else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL)
 	    return bm->tovalue(value, obj);
 	else if (PyCObject_Check(obj))
@@ -1229,6 +1296,9 @@ pyg_param_gvalue_from_pyobject(GValue* value,
         g_value_set_uint(value, u);
 	return 0;
     }
+    else if (G_IS_PARAM_SPEC_VALUE_ARRAY(pspec))
+	return pyg_value_array_from_pyobject(value, py_obj,
+					     G_PARAM_SPEC_VALUE_ARRAY(pspec));
     else {
 	return pyg_value_from_pyobject(value, py_obj);
     }
