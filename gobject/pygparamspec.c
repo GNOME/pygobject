@@ -149,23 +149,34 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	if (G_IS_PARAM_SPEC_ENUM(self->pspec)) {
 	    GQuark quark;
 	    PyObject *pyclass;
-
+	    GParamSpecEnum *pspec;
+	    GType enum_type;
+	    
 	    quark = g_quark_from_static_string("PyGEnum::class");
-	    pyclass = (PyObject*)g_type_get_qdata(G_ENUM_CLASS_TYPE(G_PARAM_SPEC_ENUM(self->pspec)->enum_class), quark);
-	    g_assert(pyclass != NULL);
-
+	    pspec = G_PARAM_SPEC_ENUM(self->pspec);
+	    enum_type = G_ENUM_CLASS_TYPE(pspec->enum_class);
+	    pyclass = (PyObject*)g_type_get_qdata(enum_type, quark);
+	    if (pyclass == NULL) {
+		pyclass = Py_None;
+	    }
 	    Py_INCREF(pyclass);
 	    return pyclass;
+	    
 	}
     } else if (!strcmp(attr, "flags_class")) {
 	if (G_IS_PARAM_SPEC_FLAGS(self->pspec)) {
 	    GQuark quark;
 	    PyObject *pyclass;
+	    GParamSpecFlags *pspec;
+	    GType flag_type;
 
 	    quark = g_quark_from_static_string("PyGFlags::class");
-	    pyclass = (PyObject*)g_type_get_qdata(G_FLAGS_CLASS_TYPE(G_PARAM_SPEC_FLAGS(self->pspec)->flags_class), quark);
-	    g_assert(pyclass != NULL);
-	    
+	    pspec = G_PARAM_SPEC_FLAGS(self->pspec);
+	    flag_type = G_FLAGS_CLASS_TYPE(pspec->flags_class);
+	    pyclass = (PyObject*)g_type_get_qdata(flag_type, quark);
+	    if (pyclass == NULL) {
+		pyclass = Py_None;
+	    }
 	    Py_INCREF(pyclass);
 	    return pyclass;
 	}
