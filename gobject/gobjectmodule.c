@@ -1099,10 +1099,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     GType type;
     GObject *obj = NULL;
     GObjectClass *class;
-    PyObject *value;
-    PyObject *key;
-    int pos=0, num_params=0, i;
-    GParameter *params;
+    int n_params = 0, i;
+    GParameter *params = NULL;
 
     if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
 	return NULL;
@@ -1110,48 +1108,55 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 
     if ((type = pyg_type_from_object (pytype)) == 0)
 	return NULL;
-    
+
+    if (G_TYPE_IS_ABSTRACT(type)) {
+	PyErr_Format(PyExc_TypeError, "cannot create instance of abstract "
+		     "(non-instantiable) type `%s'", g_type_name(type));
+	return NULL;
+    }
+
     if ((class = g_type_class_ref (type)) == NULL) {
 	PyErr_SetString(PyExc_TypeError,
 			"could not get a reference to type class");
 	return NULL;
     }
 
-    params = g_new0(GParameter, PyDict_Size(kwargs));
-    
-    while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
-	GParamSpec *pspec;
-	gchar *key_str = g_strdup(PyString_AsString (key));
-	pspec = g_object_class_find_property (class, key_str);
-	if (!pspec) {
-	    gchar buf[512];
+    if (kwargs) {
+	int pos = 0;
+	PyObject *key;
+	PyObject *value;
 
-	    g_snprintf(buf, sizeof(buf),
-		       "gobject `%s' doesn't support property `%s'",
-		       g_type_name(type), key_str);
-	    PyErr_SetString(PyExc_TypeError, buf);
-	    goto cleanup;
-	}
-	g_value_init(&params[num_params].value,
-		     G_PARAM_SPEC_VALUE_TYPE(pspec));
-	if (pyg_value_from_pyobject(&params[num_params].value, value)) {
-	    gchar buf[512];
+	params = g_new0(GParameter, PyDict_Size(kwargs));
+	while (PyDict_Next (kwargs, &pos, &key, &value)) {
+	    GParamSpec *pspec;
+	    const gchar *key_str = PyString_AsString (key);
 
-	    g_snprintf(buf, sizeof(buf),
-		       "could not convert value for property `%s'", key_str);
-	    PyErr_SetString(PyExc_TypeError, buf);
-	    goto cleanup;
+	    pspec = g_object_class_find_property (class, key_str);
+	    if (!pspec) {
+		PyErr_Format(PyExc_TypeError,
+			     "gobject `%s' doesn't support property `%s'",
+			     g_type_name(type), key_str);
+		goto cleanup;
+	    }
+	    g_value_init(&params[n_params].value,
+			 G_PARAM_SPEC_VALUE_TYPE(pspec));
+	    if (pyg_value_from_pyobject(&params[n_params].value, value)) {
+		PyErr_Format(PyExc_TypeError,
+			     "could not convert value for property `%s'",
+			     key_str);
+		goto cleanup;
+	    }
+	    params[n_params].name = g_strdup(key_str);
+	    n_params++;
 	}
-	params[num_params].name = key_str;
-	num_params++;
     }
 
-    obj = g_object_newv(type, num_params, params);
+    obj = g_object_newv(type, n_params, params);
     if (!obj)
 	PyErr_SetString (PyExc_RuntimeError, "could not create object");
 	   
  cleanup:
-    for (i = 0; i < num_params; i++) {
+    for (i = 0; i < n_params; i++) {
 	g_free((gchar *) params[i].name);
 	g_value_unset(&params[i].value);
     }
