@@ -918,7 +918,7 @@ pyg_type_register(PyObject *self, PyObject *args)
 	    return NULL;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gsignals__");
-	Py_DECREF(gsignals);
+	/* Borrowed reference. Py_DECREF(gsignals); */
     } else {
 	PyErr_Clear();
     }
@@ -938,7 +938,7 @@ pyg_type_register(PyObject *self, PyObject *args)
 	    return NULL;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gproperties__");
-	Py_DECREF(gproperties);
+	/* Borrowed reference. Py_DECREF(gproperties); */
     } else {
 	PyErr_Clear();
     }
