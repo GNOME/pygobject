@@ -216,10 +216,10 @@ pygobject_dealloc(PyGObject *self)
 	self->hasref = TRUE;
 	g_object_set_qdata_full(obj, pygobject_ownedref_key,
 				self, pyg_destroy_notify);
-
-	Py_BEGIN_ALLOW_THREADS;
+	
+	pyg_unblock_threads();
 	g_object_unref(obj);
-	Py_END_ALLOW_THREADS;
+	pyg_block_threads();
 
 	/* we ref the type, so subtype_dealloc() doesn't kill off our
          * instance's type. */
@@ -235,9 +235,9 @@ pygobject_dealloc(PyGObject *self)
 	return;
     }
     if (obj && !self->hasref) { /* don't unref the GObject if it owns us */
-	Py_BEGIN_ALLOW_THREADS;
+	pyg_unblock_threads();
 	g_object_unref(obj);
-	Py_END_ALLOW_THREADS;
+	pyg_block_threads();
     }
 
     PyObject_ClearWeakRefs((PyObject *)self);
