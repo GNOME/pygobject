@@ -1131,10 +1131,13 @@ pygobject_hash(PyGObject *self)
 static PyObject *
 pygobject_repr(PyGObject *self)
 {
-    gchar buf[128];
+    gchar buf[256];
 
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", G_OBJECT_TYPE_NAME(self->obj),
-	       (long)self->obj);
+    g_snprintf(buf, sizeof(buf),
+	       "<%s object (%s) at 0x%lx>",
+	       self->ob_type->tp_name,
+	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
+	       (long)self);
     return PyString_FromString(buf);
 }
 
