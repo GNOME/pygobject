@@ -2165,6 +2165,7 @@ initgobject(void)
     PyModule_AddIntConstant(m, "TYPE_BOXED", G_TYPE_BOXED);
     PyModule_AddIntConstant(m, "TYPE_PARAM", G_TYPE_PARAM);
     PyModule_AddIntConstant(m, "TYPE_OBJECT", G_TYPE_OBJECT);
+    PyModule_AddIntConstant(m, "TYPE_PYOBJECT", PY_TYPE_OBJECT);
 
     if (PyErr_Occurred()) {
 	PyErr_Print();
