@@ -1,3 +1,4 @@
+/* -*- Mode: C; c-basic-offset: 4 -*- */
 #include "pygobject-private.h"
 
 static const gchar *pygobject_class_id     = "PyGObject::class";
@@ -249,7 +250,6 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     PyObject *key, *item;
     gint pos = 0;
     GObjectClass *class;
-    gint retval = 0;
 
     if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
 	return -1;
@@ -833,8 +833,15 @@ pygobject_get_dict(PyGObject *self, void *closure)
     return self->inst_dict;
 }
 
+static PyObject *
+pygobject_get_refcount(PyGObject *self, void *closure)
+{
+    return PyInt_FromLong(self->obj->ref_count);
+}
+
 static PyGetSetDef pygobject_getsets[] = {
     { "__dict__", (getter)pygobject_get_dict, (setter)0 },
+    { "__grefcount__", (getter)pygobject_get_refcount, (setter)0, },
     { NULL, 0, 0 }
 };
 
