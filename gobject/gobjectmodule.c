@@ -1738,10 +1738,13 @@ static PyObject *
 _pyg_strv_from_gvalue(const GValue *value)
 {
     gchar    **argv = (gchar **) g_value_get_boxed(value);
-    int        argc, i;
+    int        argc = 0, i;
     PyObject  *py_argv;
 
-    for (argc = -1; argv[++argc];);
+    if (argv) {
+        while (argv[argc])
+            argc++;
+    }
     py_argv = PyList_New(argc);
     for (i = 0; i < argc; ++i)
 	PyList_SET_ITEM(py_argv, i, PyString_FromString(argv[i]));
