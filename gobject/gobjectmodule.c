@@ -1843,8 +1843,8 @@ initgobject(void)
     PyGFlags_Type.tp_base = &PyInt_Type;
     REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 
-    REGISTER_TYPE(d, PyGMainLoop_Type, "GMainLoop"); 
-    REGISTER_TYPE(d, PyGMainContext_Type, "GMainContext"); 
+    REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
+    REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
     
     /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,

@@ -156,7 +156,8 @@ pyg_flags_from_gtype (GType gtype, int value)
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
     
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygflags_class_key);
-    g_assert(pyclass != NULL);
+    if (pyclass == NULL)
+	return PyInt_FromLong(value);
 
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__flags_values__");

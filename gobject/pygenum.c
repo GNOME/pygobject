@@ -131,7 +131,9 @@ pyg_enum_from_gtype (GType gtype, int value)
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
     
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygenum_class_key);
-    g_assert(pyclass != NULL);
+    /* Fall back to int */
+    if (pyclass == NULL)
+	return PyInt_FromLong(value);
 
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
