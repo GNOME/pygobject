@@ -1905,7 +1905,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 
     guint signal_id;
 
-    if (!PyArg_ParseTuple(args, "sOiiO:gobject.signal_new", &signal_name,
+    if (!PyArg_ParseTuple(args, "sOiOO:gobject.signal_new", &signal_name,
 			  &py_type, &signal_flags, &py_return_type,
 			  &py_param_types))
 	return NULL;
