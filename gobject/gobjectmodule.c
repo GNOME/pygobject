@@ -2126,7 +2126,11 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
     guint i, j;
     gint prefix_len;
 
-    g_return_if_fail (G_TYPE_IS_ENUM (enum_type));
+    /* a more useful warning */
+    if (!G_TYPE_IS_ENUM(enum_type)) {
+	g_warning("`%s' is not an enum type", g_type_name(enum_type));
+	return;
+    }
     g_return_if_fail (strip_prefix != NULL);
 
     prefix_len = strlen(strip_prefix);
@@ -2158,7 +2162,11 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     guint i, j;
     gint prefix_len;
 
-    g_return_if_fail (G_TYPE_IS_FLAGS (flags_type));
+    /* a more useful warning */
+    if (!G_TYPE_IS_FLAGS(flags_type)) {
+	g_warning("`%s' is not an flags type", g_type_name(flags_type));
+	return;
+    }
     g_return_if_fail (strip_prefix != NULL);
 
     prefix_len = strlen(strip_prefix);
