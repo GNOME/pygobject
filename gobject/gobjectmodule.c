@@ -1484,7 +1484,8 @@ get_handler_priority(gint *priority, PyObject *kwargs)
 			"keyword argument name is not a string");
 	return -1;
     }
-    if (!strcmp(PyString_AsString(key), "priority")) {
+
+    if (strcmp(PyString_AsString(key), "priority") != 0) {
 	PyErr_SetString(PyExc_TypeError,
 			"only 'priority' keyword argument accepted");
 	return -1;
