@@ -1,8 +1,6 @@
 /* -*- Mode: C; c-basic-offset: 4 -*- */
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
-#include <gobject/gvaluetypes.h>
-#include <gobject/genums.h>
 
 static GHashTable *class_hash;
 

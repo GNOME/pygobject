@@ -6,7 +6,7 @@
 #include <ExtensionClass.h>
 
 #include <glib.h>
-#include <gobject/gobject.h>
+#include <glib-object.h>
 
 typedef struct {
     PyObject_HEAD
