@@ -1993,9 +1993,12 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 static gboolean
 override_signal(GType instance_type, const gchar *signal_name)
 {
+    GObjectClass *oclass;
     guint signal_id;
 
+    oclass = g_type_class_ref(instance_type);
     signal_id = g_signal_lookup(signal_name, instance_type);
+    g_type_class_unref(oclass);
     if (!signal_id) {
 	gchar buf[128];
 
