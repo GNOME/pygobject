@@ -40,7 +40,7 @@ struct _PyGObject_Functions {
     GType (* type_from_object)(PyObject *obj);
     gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
     gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
-    void (* boxed_register)(GType boxed_type,
+    void (* register_boxed_custom)(GType boxed_type,
 			    PyObject *(* from_func)(const GValue *value),
 			    int (* to_func)(GValue *value, PyObject *obj));
     int (* value_from_pyobject)(GValue *value, PyObject *obj);
@@ -73,7 +73,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_type_from_object       (_PyGObject_API->type_from_object)
 #define pyg_enum_get_value         (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value        (_PyGObject_API->flags_get_value)
-#define pyg_boxed_register         (_PyGObject_API->boxed_register)
+#define pyg_register_boxed_custom  (_PyGObject_API->register_boxed_custom)
 #define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
 #define pyg_register_interface     (_PyGObject_API->register_interface)

@@ -623,9 +623,9 @@ static GHashTable *boxed_marshalers;
                                           GUINT_TO_POINTER(boxed_type)))
 
 static void
-pyg_boxed_register(GType boxed_type,
-		   PyObject *(* from_func)(const GValue *value),
-		   int (* to_func)(GValue *value, PyObject *obj))
+pyg_register_boxed_custom(GType boxed_type,
+			  PyObject *(* from_func)(const GValue *value),
+			  int (* to_func)(GValue *value, PyObject *obj))
 {
     PyGBoxedMarshal *bm = g_new(PyGBoxedMarshal, 1);
 
@@ -2127,7 +2127,7 @@ static struct _PyGObject_Functions functions = {
   pyg_type_from_object,
   pyg_enum_get_value,
   pyg_flags_get_value,
-  pyg_boxed_register,
+  pyg_register_boxed_custom,
   pyg_value_from_pyobject,
   pyg_value_as_pyobject,
 
