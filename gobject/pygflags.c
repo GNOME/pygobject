@@ -83,7 +83,7 @@ pyg_flags_repr(PyGFlags *self)
     tmp = generate_repr(self->gtype,
 			   self->parent.ob_ival);
 
-    retval = g_strdup_printf("<flag %s of type %s>", tmp,
+    retval = g_strdup_printf("<flags %s of type %s>", tmp,
 			     g_type_name(self->gtype));
     g_free(tmp);
     
