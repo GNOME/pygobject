@@ -8,11 +8,6 @@
 
 static PyObject *gerror_exc = NULL;
 
-static GList *pygobject_exception_notifiers = NULL;
-
-static int  pyg_fatal_exceptions_notify(void);
-
-
 /* -------------- GDK threading hooks ---------------------------- */
 
 static void
