@@ -190,6 +190,8 @@ pygobject_new_with_interfaces(GType gtype)
     int i;
     PyObject *bases;
     GType parent_type, interface_type;
+    PyObject *modules, *module;
+    gchar *type_name, *mod_name, *gtype_name;
 
     interfaces = g_type_interfaces (gtype, &n_interfaces);
     bases = PyTuple_New(n_interfaces+1);
@@ -221,8 +223,33 @@ pygobject_new_with_interfaces(GType gtype)
     /* set up __doc__ descriptor on type */
     PyDict_SetItemString(dict, "__doc__", pyg_object_descr_doc_get());
 
-    type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type,
-						"sOO", g_type_name(gtype), bases, dict);
+    /* generate the pygtk module name and extract the base type name */
+    gtype_name = (gchar *)g_type_name(gtype);
+    if (g_str_has_prefix(gtype_name, "Gtk")) {
+	mod_name = "gtk";
+	gtype_name += 3;
+	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
+    } else if (g_str_has_prefix(gtype_name, "Gdk")) {
+	mod_name = "gtk.gdk";
+	gtype_name += 3;
+	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
+    } else if (g_str_has_prefix(gtype_name, "Atk")) {
+	mod_name = "atk";
+	gtype_name += 3;
+	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
+    } else if (g_str_has_prefix(gtype_name, "Pango")) {
+	mod_name = "pango";
+	gtype_name += 5;
+	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
+    } else {
+	mod_name = "__main__";
+	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
+    }
+
+    type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type, "sOO",
+						type_name, bases, dict);
+    g_free(type_name);
+
     if (type == NULL) {
 	PyErr_Print();
 	return NULL;
@@ -231,6 +258,13 @@ pygobject_new_with_interfaces(GType gtype)
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
 	return NULL;
+    }
+    /* insert type name in module dict */
+    modules = PyImport_GetModuleDict();
+    if ((module = PyDict_GetItemString(modules, mod_name)) != NULL) {
+	PyObject *mod_dict = PyModule_GetDict(module);
+	if (mod_dict != NULL)
+	    PyDict_SetItemString(mod_dict, gtype_name, (PyObject *)type);
     }
 
     if (!pygobject_class_key)
