@@ -2239,7 +2239,7 @@ initgobject(void)
     PyModule_AddObject(m, "TYPE_INTERFACE", pyg_type_wrapper_new(G_TYPE_INTERFACE));
     PyModule_AddObject(m, "TYPE_CHAR", pyg_type_wrapper_new(G_TYPE_CHAR));
     PyModule_AddObject(m, "TYPE_UCHAR", pyg_type_wrapper_new(G_TYPE_UCHAR));
-    PyModule_AddObject(m, "TYPE_UNICHAR", pyg_type_wrapper_new(G_TYPE_UNICHAR));
+    PyModule_AddObject(m, "TYPE_UNICHAR", pyg_type_wrapper_new(G_TYPE_UINT));
     PyModule_AddObject(m, "TYPE_BOOLEAN", pyg_type_wrapper_new(G_TYPE_BOOLEAN));
     PyModule_AddObject(m, "TYPE_INT", pyg_type_wrapper_new(G_TYPE_INT));
     PyModule_AddObject(m, "TYPE_UINT", pyg_type_wrapper_new(G_TYPE_UINT));
