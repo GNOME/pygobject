@@ -318,8 +318,10 @@ pygobject_new(GObject *obj)
 
     if (self == NULL)
 	return NULL;
-    self->obj = obj;
-    g_object_ref(obj);
+    self->obj = g_object_ref(obj);
+    self->hasref = FALSE;
+    self->inst_dict = NULL;
+    self->weakreflist = NULL;
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 
