@@ -905,6 +905,12 @@ pyg_type_register(PyObject *self, PyObject *args)
     PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
     Py_DECREF(gtype);
 
+    /* if no __doc__, set it to the auto doc descriptor */
+    if (PyDict_GetItemString(class->tp_dict, "__doc__") == NULL) {
+	PyDict_SetItemString(class->tp_dict, "__doc__",
+			     pyg_object_descr_doc_get());
+    }
+
     /* we look this up in the instance dictionary, so we don't
      * accidentally get a parent type's __gsignals__ attribute. */
     gsignals = PyDict_GetItemString(class->tp_dict, "__gsignals__");
@@ -1353,8 +1359,6 @@ initgobject(void)
 
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
-    PyDict_SetItemString(PyGObject_Type.tp_dict, "__doc__",
-			 pyg_object_descr_doc_get());
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
 

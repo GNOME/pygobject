@@ -56,6 +56,10 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	g_type_set_qdata(gtype, pygobject_class_key, type);
     }
 
+    /* set up __doc__ descriptor on type */
+    PyDict_SetItemString(type->tp_dict, "__doc__",
+			 pyg_object_descr_doc_get());
+
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
