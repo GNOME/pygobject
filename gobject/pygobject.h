@@ -3,7 +3,6 @@
 #define _PYGOBJECT_H_
 
 #include <Python.h>
-#include <ExtensionClass.h>
 
 #include <glib.h>
 #include <glib-object.h>
@@ -105,7 +104,6 @@ struct _PyGObject_Functions *_PyGObject_API;
         Py_FatalError("could not import gobject"); \
         return; \
     } \
-    ExtensionClassImported; \
 }
 
 #endif /* !_INSIDE_PYGOBJECT_ */
