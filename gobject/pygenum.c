@@ -159,7 +159,7 @@ pyg_enum_add (PyObject *   module,
     g_return_val_if_fail(typename != NULL, NULL);
     g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_ENUM), NULL);
     
-    state = PyGILState_Ensure();
+    state = pyg_gil_state_ensure();
 
     instance_dict = PyDict_New();
     stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
@@ -168,7 +168,7 @@ pyg_enum_add (PyObject *   module,
     Py_DECREF(instance_dict);
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
-	PyGILState_Release(state);
+	pyg_gil_state_release(state);
 	return NULL;
     }
 
@@ -216,7 +216,7 @@ pyg_enum_add (PyObject *   module,
 
     g_type_class_unref(eclass);
     
-    PyGILState_Release(state);
+    pyg_gil_state_release(state);
     return stub;
 }
 

@@ -190,11 +190,11 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     PyTypeObject *tp;
     g_return_val_if_fail(pointer_type != 0, NULL);
 
-    state = PyGILState_Ensure();
+    state = pyg_gil_state_ensure();
 
     if (!pointer) {
 	Py_INCREF(Py_None);
-	PyGILState_Release(state);
+	pyg_gil_state_release(state);
 	return Py_None;
     }
 
@@ -203,7 +203,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);
 
-    PyGILState_Release(state);
+    pyg_gil_state_release(state);
 
     if (self == NULL)
 	return NULL;

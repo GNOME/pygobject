@@ -50,9 +50,9 @@ _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 			  &may_block))
 	return NULL;
 	
-    Py_BEGIN_ALLOW_THREADS;
+    pyg_begin_allow_threads;
     ret = g_main_context_iteration(self->context, may_block);
-    Py_END_ALLOW_THREADS;
+    pyg_end_allow_threads;
     
     return PyBool_FromLong(ret);
 }

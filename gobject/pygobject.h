@@ -7,12 +7,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#ifdef DISABLE_THREADING
-# define PyGILState_STATE int
-# define PyGILState_Ensure() (0)
-# define PyGILState_Release(x) 
-#endif
-
 typedef struct {
     PyObject_HEAD
     GObject *obj;
@@ -138,6 +132,9 @@ struct _PyGObject_Functions {
 			   const char *strip_prefix,
 			   GType gtype);
     PyObject* (*flags_from_gtype)(GType gtype, int value);
+
+    gboolean threads_enabled;
+    int       (*enable_threads) (void);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -188,6 +185,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define PyGFlags_Type               (*_PyGObject_API->flags_type)
 #define pyg_flags_add               (_PyGObject_API->flags_add)
 #define pyg_flags_from_gtype        (_PyGObject_API->flags_from_gtype)
+#define pyg_enable_threads          (_PyGObject_API->enable_threads)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
@@ -198,6 +196,21 @@ struct _PyGObject_Functions *_PyGObject_API;
       (* _PyGObject_API->unblock_threads)();     \
   } G_STMT_END
 
+#define pyg_threads_enabled (_PyGObject_API->threads_enabled)
+#define pyg_gil_state_ensure() (_PyGObject_API->threads_enabled? (PyGILState_Ensure()) : 0)
+#define pyg_gil_state_release(state) G_STMT_START {     \
+    if (_PyGObject_API->threads_enabled)                \
+        PyGILState_Release(state);                      \
+    } G_STMT_END
+#define pyg_begin_allow_threads                 \
+    G_STMT_START {                              \
+        PyThreadState *_save = NULL;            \
+        if (_PyGObject_API->threads_enabled)    \
+            _save = PyEval_SaveThread();
+#define pyg_end_allow_threads                   \
+        if (_PyGObject_API->threads_enabled)    \
+            PyEval_RestoreThread(_save);        \
+    } G_STMT_END
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \

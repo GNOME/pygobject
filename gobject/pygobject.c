@@ -247,13 +247,13 @@ pygobject_new_with_interfaces(GType gtype)
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
 
-    state = PyGILState_Ensure();
+    state = pyg_gil_state_ensure();
 
     type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type, "sOO",
 						type_name, bases, dict);
     g_free(type_name);
 
-    PyGILState_Release(state);
+    pyg_gil_state_release(state);
     
     if (type == NULL) {
 	PyErr_Print();
@@ -364,9 +364,9 @@ pygobject_new(GObject *obj)
 	self = PyObject_GC_New(PyGObject, tp);
 	if (self == NULL)
 	    return NULL;
-        Py_BEGIN_ALLOW_THREADS;
+        pyg_begin_allow_threads;
 	self->obj = g_object_ref(obj);
-	Py_END_ALLOW_THREADS;
+	pyg_end_allow_threads;
 	sink_object(self->obj);
 
 	self->inst_dict = NULL;
@@ -430,9 +430,9 @@ pygobject_dealloc(PyGObject *self)
     PyObject_GC_UnTrack((PyObject *)self);
 
     if (self->obj) {
-	Py_BEGIN_ALLOW_THREADS;
+	pyg_begin_allow_threads;
 	g_object_unref(self->obj);
-	Py_END_ALLOW_THREADS;
+	pyg_end_allow_threads;
     }
     self->obj = NULL;
 
@@ -441,7 +441,7 @@ pygobject_dealloc(PyGObject *self)
     }
     self->inst_dict = NULL;
 
-    Py_BEGIN_ALLOW_THREADS;
+    pyg_begin_allow_threads;
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -452,7 +452,7 @@ pygobject_dealloc(PyGObject *self)
 	g_closure_invalidate(closure);
     }
     self->closures = NULL;
-    Py_END_ALLOW_THREADS;
+    pyg_end_allow_threads;
 
     /* the following causes problems with subclassed types */
     /* self->ob_type->tp_free((PyObject *)self); */
@@ -525,7 +525,7 @@ pygobject_clear(PyGObject *self)
     }
     self->inst_dict = NULL;
 
-    Py_BEGIN_ALLOW_THREADS;
+    pyg_begin_allow_threads;
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -535,15 +535,15 @@ pygobject_clear(PyGObject *self)
 	tmp = tmp->next;
 	g_closure_invalidate(closure);
     }
-    Py_END_ALLOW_THREADS;
+    pyg_end_allow_threads;
 
     if (self->closures != NULL)
 	g_message("invalidated all closures, but self->closures != NULL !");
 
     if (self->obj) {
-	Py_BEGIN_ALLOW_THREADS;
+	pyg_begin_allow_threads;
 	g_object_unref(self->obj);
-	Py_END_ALLOW_THREADS;
+	pyg_end_allow_threads;
     }
     self->obj = NULL;
 
