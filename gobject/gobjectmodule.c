@@ -28,6 +28,9 @@
 
 static PyObject *gerror_exc = NULL;
 
+static void pyg_flags_add_constants(PyObject *module, GType flags_type,
+				    const gchar *strip_prefix);
+
 /* -------------- GDK threading hooks ---------------------------- */
 
 /**
@@ -1787,9 +1790,11 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
     GEnumClass *eclass;
     guint i;
 
-    /* a more useful warning */
     if (!G_TYPE_IS_ENUM(enum_type)) {
-	g_warning("`%s' is not an enum type", g_type_name(enum_type));
+	if (G_TYPE_IS_FLAGS(enum_type))	/* See bug #136204 */
+	    pyg_flags_add_constants(module, enum_type, strip_prefix);
+	else
+	    g_warning("`%s' is not an enum type", g_type_name(enum_type));
 	return;
     }
     g_return_if_fail (strip_prefix != NULL);
@@ -1824,9 +1829,11 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     GFlagsClass *fclass;
     guint i;
 
-    /* a more useful warning */
     if (!G_TYPE_IS_FLAGS(flags_type)) {
-	g_warning("`%s' is not an flags type", g_type_name(flags_type));
+	if (G_TYPE_IS_ENUM(flags_type))	/* See bug #136204 */
+	    pyg_enum_add_constants(module, flags_type, strip_prefix);
+	else
+	    g_warning("`%s' is not an flags type", g_type_name(flags_type));
 	return;
     }
     g_return_if_fail (strip_prefix != NULL);
