@@ -404,16 +404,17 @@ pygobject_getattro(PyGObject *self, PyObject *attro)
     char *attr;
     PyObject *ret;
 
-    ExtensionClassImported;
     attr = PyString_AsString(attro);
 
     ret = Py_FindAttrString((PyObject *)self, attr);
     if (ret)
 	return ret;
+    PyErr_Clear();
     ret = check_bases(self, (PyExtensionClass *)self->ob_type, attr);
     if (ret)
 	return ret;
     PyErr_SetString(PyExc_AttributeError, attr);
+    return NULL;
 }
 
 static int
