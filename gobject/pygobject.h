@@ -37,8 +37,10 @@ struct _PyGObject_Functions {
     void (* register_wrapper)(PyObject *self);
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
+
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
+    GDestroyNotify destroy_notify;
 
     GType (* type_from_object)(PyObject *obj);
     PyObject *(* type_wrapper_new)(GType type);
@@ -91,6 +93,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_lookup_class     (_PyGObject_API->lookup_class)
 #define pygobject_new              (_PyGObject_API->newgobj)
 #define pyg_closure_new            (_PyGObject_API->closure_new)
+#define pyg_destroy_notify         (_PyGObject_API->destroy_notify)
 #define pyg_type_from_object       (_PyGObject_API->type_from_object)
 #define pyg_type_wrapper_new       (_PyGObject_API->type_wrapper_new)
 #define pyg_enum_get_value         (_PyGObject_API->enum_get_value)

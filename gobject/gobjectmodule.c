@@ -250,7 +250,7 @@ pyg_param_spec_new(GParamSpec *pspec)
 /* -------------- class <-> wrapper manipulation --------------- */
 
 static void
-pygobject_destroy_notify(gpointer user_data)
+pyg_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
 
@@ -1228,7 +1228,7 @@ pygobject_dealloc(PyGObject *self)
 	Py_INCREF(self); /* grab a reference on the wrapper */
 	self->hasref = TRUE;
 	g_object_set_qdata_full(obj, pygobject_ownedref_key,
-				self, pygobject_destroy_notify);
+				self, pyg_destroy_notify);
 	g_object_unref(obj);
 
 	/* we ref the type, so subtype_dealloc() doesn't kill off our
@@ -1441,7 +1441,7 @@ pygobject_set_data(PyGObject *self, PyObject *args)
 	return NULL;
     quark = g_quark_from_string(key);
     Py_INCREF(data);
-    g_object_set_qdata_full(self->obj, quark, data, pygobject_destroy_notify);
+    g_object_set_qdata_full(self->obj, quark, data, pyg_destroy_notify);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -3002,7 +3002,10 @@ static struct _PyGObject_Functions functions = {
   pygobject_register_wrapper,
   pygobject_lookup_class,
   pygobject_new,
+
   pyg_closure_new,
+  pyg_destroy_notify,
+
   pyg_type_from_object,
   pyg_type_wrapper_new,
   pyg_enum_get_value,
