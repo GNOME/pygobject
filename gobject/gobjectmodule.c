@@ -302,9 +302,6 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     type->ob_type = &PyType_Type;
     type->tp_base = &PyGInterface_Type;
 
-    if (!pyginterface_type_key)
-	pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
-    
     if (PyType_Ready(type) < 0) {
         g_warning("could not ready `%s'", type->tp_name);
         return;
@@ -2035,6 +2032,7 @@ initgobject(void)
 			 pyg_object_descr_doc_get());
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
+    pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
 
     PyGBoxed_Type.ob_type = &PyType_Type;
     PyGBoxed_Type.tp_alloc = PyType_GenericAlloc;
