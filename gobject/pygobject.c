@@ -115,13 +115,6 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
     }
 
-    type->tp_dealloc  = (destructor)pygobject_dealloc;
-    type->tp_traverse = (traverseproc)pygobject_traverse;
-    type->tp_clear = (inquiry)pygobject_clear;
-    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
-    type->tp_weaklistoffset = offsetof(PyGObject, weakreflist);
-    type->tp_dictoffset = offsetof(PyGObject, inst_dict);
-
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
 	return;
