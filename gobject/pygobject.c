@@ -34,6 +34,19 @@ sink_object(GObject *obj)
     }
 }
 
+/**
+ * pygobject_register_sinkfunc:
+ * type: the GType the sink function applies to.
+ * sinkfunc: a function to remove the floating reference on an object.
+ *
+ * As Python handles reference counting for us, the "floating
+ * reference" code in GTK is not all that useful.  In fact, it can
+ * cause leaks.  For this reason, PyGTK removes the floating
+ * references on objects on construction.
+ *
+ * The sinkfunc should be able to remove the floating reference on
+ * instances of the given type, or any subclasses.
+ */
 void
 pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
 {
@@ -47,6 +60,19 @@ pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
     g_array_append_val(sink_funcs, sf);
 }
 
+/**
+ * pygobject_register_class:
+ * @dict: the module dictionary.  A reference to the type will be stored here.
+ * @type_name: not used ?
+ * @gtype: the GType of the GObject subclass.
+ * @type: the Python type object for this wrapper.
+ * @bases: a tuple of Python type objects that are the bases of this type.
+ *
+ * This function is used to register a Python type as the wrapper for
+ * a particular GObject subclass.  It will also insert a reference to
+ * the wrapper class into the module dictionary passed as a reference,
+ * which simplifies initialisation.
+ */
 void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
 			 GType gtype, PyTypeObject *type,
@@ -98,6 +124,16 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+/**
+ * pygobject_register_wrapper:
+ * @self: the wrapper instance
+ *
+ * In the constructor of PyGTK wrappers, this function should be
+ * called after setting the obj member.  It will tie the wrapper
+ * instance to the GObject so that the same wrapper instance will
+ * always be used for this GObject instance.  It will also sink any
+ * floating references on the GObject.
+ */
 void
 pygobject_register_wrapper(PyObject *self)
 {
@@ -112,6 +148,18 @@ pygobject_register_wrapper(PyObject *self)
 			    pyg_destroy_notify);
 }
 
+/**
+ * pygobject_lookup_class:
+ * @gtype: the GType of the GObject subclass.
+ *
+ * This function looks up the wrapper class used to represent
+ * instances of a GObject represented by @gtype.  If no wrapper class
+ * has been registered for the given GType, then the parent GType will
+ * be checked.  Since a wrapper has been registered for "GObject",
+ * this function will always succeed.
+ *
+ * Returns: The wrapper class for the GObject.
+ */
 PyTypeObject *
 pygobject_lookup_class(GType gtype)
 {
@@ -125,6 +173,17 @@ pygobject_lookup_class(GType gtype)
     return type;
 }
 
+/**
+ * pygobject_new:
+ * @obj: a GObject instance.
+ *
+ * This function gets a reference to a wrapper for the given GObject
+ * instance.  If a wrapper has already been created, a new reference
+ * to that wrapper will be returned.  Otherwise, a wrapper instance
+ * will be created.
+ *
+ * Returns: a reference to the wrapper for the GObject.
+ */
 PyObject *
 pygobject_new(GObject *obj)
 {
@@ -174,6 +233,18 @@ pygobject_unwatch_closure(gpointer data, GClosure *closure)
     self->closures = g_slist_remove (self->closures, closure);
 }
 
+/**
+ * pygobject_watch_closure:
+ * @self: a GObject wrapper instance
+ * @closure: a GClosure to watch
+ *
+ * Adds a closure to the list of watched closures for the wrapper.
+ * The closure must be one returned by pyg_closure_new().  When the
+ * cycle GC traverses the wrapper instance, it will enumerate the
+ * references to Python objects stored in watched closures.  If the
+ * cycle GC tells the wrapper to clear itself, the watched closures
+ * will be invalidated.
+ */
 void
 pygobject_watch_closure(PyObject *self, GClosure *closure)
 {

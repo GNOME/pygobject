@@ -10,6 +10,15 @@ static PyObject *gerror_exc = NULL;
 
 /* -------------- GDK threading hooks ---------------------------- */
 
+/**
+ * pyg_set_thread_block_funcs:
+ * @block_threads_func: a function to block Python threads.
+ * @unblock_threads_func: a function to unblock Python threads.
+ *
+ * an interface to allow pygtk to add hooks to handle threading
+ * similar to the old PyGTK 0.6.x releases.  May not work quite right
+ * anymore.
+ */
 static void
 pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
 			    PyGThreadBlockFunc unblock_threads_func)
@@ -26,6 +35,13 @@ object_free(PyObject *op)
     PyObject_FREE(op);
 }
 
+/**
+ * pyg_destroy_notify:
+ * @user_data: a PyObject pointer.
+ *
+ * A function that can be used as a GDestroyNotify callback that will
+ * call Py_DECREF on the data.
+ */
 void
 pyg_destroy_notify(gpointer user_data)
 {
@@ -133,6 +149,14 @@ PyTypeObject PyGParamSpec_Type = {
     NULL
 };
 
+/**
+ * pyg_param_spec_new:
+ * @pspec: a GParamSpec.
+ *
+ * Creates a wrapper for a GParamSpec.
+ *
+ * Returns: the GParamSpec wrapper.
+ */
 PyObject *
 pyg_param_spec_new(GParamSpec *pspec)
 {
@@ -231,6 +255,17 @@ static PyTypeObject PyGInterface_Type = {
     (PyObject *)0,			/* tp_bases */
 };
 
+/**
+ * pyg_register_interface:
+ * @dict: a module dictionary.
+ * @class_name: the class name for the wrapper class.
+ * @gtype: the GType of the interface.
+ * @type: the wrapper class for the interface.
+ *
+ * Registers a Python class as the wrapper for a GInterface.  As a
+ * convenience it will also place a reference to the wrapper class in
+ * the provided module dictionary.
+ */
 static void
 pyg_register_interface(PyObject *dict, const gchar *class_name,
                        GType gtype, PyTypeObject *type)
@@ -1684,6 +1719,19 @@ static PyMethodDef pygobject_functions[] = {
 
 /* ----------------- Constant extraction ------------------------ */
 
+/**
+ * pyg_constant_strip_prefix:
+ * @name: the constant name.
+ * @strip_prefix: the prefix to strip.
+ *
+ * Advances the pointer @name by strlen(@strip_prefix) characters.  If
+ * the resulting name does not start with a letter or underscore, the
+ * @name pointer will be rewound.  This is to ensure that the
+ * resulting name is a valid identifier.  Hence the returned string is
+ * a pointer into the string @name.
+ *
+ * Returns: the stripped constant name.
+ */
 static char *
 pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix)
 {
@@ -1702,6 +1750,15 @@ pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix)
     return name;
 }
 
+/**
+ * pyg_enum_add_constants:
+ * @module: a Python module
+ * @enum_type: the GType of the enumeration.
+ * @strip_prefix: the prefix to strip from the constant names.
+ *
+ * Adds constants to the given Python module for each value name of
+ * the enumeration.  A prefix will be stripped from each enum name.
+ */
 static void
 pyg_enum_add_constants(PyObject *module, GType enum_type,
 		       const gchar *strip_prefix)
@@ -1730,6 +1787,15 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
     g_type_class_unref(eclass);
 }
 
+/**
+ * pyg_flags_add_constants:
+ * @module: a Python module
+ * @flags_type: the GType of the flags type.
+ * @strip_prefix: the prefix to strip from the constant names.
+ *
+ * Adds constants to the given Python module for each value name of
+ * the flags set.  A prefix will be stripped from each flag name.
+ */
 static void
 pyg_flags_add_constants(PyObject *module, GType flags_type,
 			const gchar *strip_prefix)
@@ -1758,6 +1824,16 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     g_type_class_unref(fclass);
 }
 
+/**
+ * pyg_error_check:
+ * @error: a pointer to the GError.
+ *
+ * Checks to see if the GError has been set.  If the error has been
+ * set, then the gobject.GError Python exception will be raised, and
+ * the GError cleared.
+ *
+ * Returns: True if an error was set.
+ */
 static gboolean
 pyg_error_check(GError **error)
 {

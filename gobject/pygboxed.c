@@ -127,6 +127,17 @@ PyTypeObject PyGBoxed_Type = {
 
 static GQuark boxed_type_id = 0;
 
+/**
+ * pyg_register_boxed:
+ * @dict: the module dictionary to store the wrapper class.
+ * @class_name: the Python name for the wrapper class.
+ * @boxed_type: the GType of the boxed type being wrapped.
+ * @type: the wrapper class.
+ *
+ * Registers a wrapper for a boxed type.  The wrapper class will be a
+ * subclass of gobject.GBoxed, and a reference to the wrapper class
+ * will be stored in the provided module dictionary.
+ */
 void
 pyg_register_boxed(PyObject *dict, const gchar *class_name,
 		   GType boxed_type, PyTypeObject *type)
@@ -159,6 +170,21 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+/**
+ * pyg_boxed_new:
+ * @boxed_type: the GType of the boxed value.
+ * @boxed: the boxed value.
+ * @copy_boxed: whether the new boxed wrapper should hold a copy of the value.
+ * @own_ref: whether the boxed wrapper should own the boxed value.
+ *
+ * Creates a wrapper for a boxed value.  If @copy_boxed is set to
+ * True, the wrapper will hold a copy of the value, instead of the
+ * value itself.  If @own_ref is True, then the value held by the
+ * wrapper will be freed when the wrapper is deallocated.  If
+ * @copy_boxed is True, then @own_ref must also be True.
+ *
+ * Returns: the boxed wrapper.
+ */
 PyObject *
 pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 	      gboolean own_ref)
@@ -300,6 +326,17 @@ PyTypeObject PyGPointer_Type = {
 
 static GQuark pointer_type_id = 0;
 
+/**
+ * pyg_register_pointer:
+ * @dict: the module dictionary to store the wrapper class.
+ * @class_name: the Python name for the wrapper class.
+ * @pointer_type: the GType of the pointer type being wrapped.
+ * @type: the wrapper class.
+ *
+ * Registers a wrapper for a pointer type.  The wrapper class will be
+ * a subclass of gobject.GPointer, and a reference to the wrapper
+ * class will be stored in the provided module dictionary.
+ */
 void
 pyg_register_pointer(PyObject *dict, const gchar *class_name,
 		     GType pointer_type, PyTypeObject *type)
@@ -332,6 +369,19 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+/**
+ * pyg_pointer_new:
+ * @pointer_type: the GType of the pointer value.
+ * @pointer: the pointer value.
+ *
+ * Creates a wrapper for a pointer value.  Since G_TYPE_POINTER types
+ * don't register any information about how to copy/free them, there
+ * is no guarantee that the pointer will remain valid, and there is
+ * nothing registered to release the pointer when the pointer goes out
+ * of scope.  This is why we don't recommend people use these types.
+ *
+ * Returns: the boxed wrapper.
+ */
 PyObject *
 pyg_pointer_new(GType pointer_type, gpointer pointer)
 {
