@@ -1107,6 +1107,12 @@ pygobject_dealloc(PyGObject *self)
          * instance's type. */
 	if (self->ob_type->tp_flags & Py_TPFLAGS_HEAPTYPE)
 	    Py_INCREF(self->ob_type);
+	
+#ifdef Py_TRACE_REFS
+	/* if we're tracing refs, set up the reflist again, as it was just
+	 * torn down */
+        _Py_NewReference((PyObject *) self);
+#endif
 
 	return;
     }
