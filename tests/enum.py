@@ -72,6 +72,9 @@ class EnumTest(unittest.TestCase):
         assert isinstance(klass.__enum_values__, dict)
         assert len(klass.__enum_values__) >= 2
 
+    def testOutofBounds(self):
+        gtk.icon_size_register('fake', 24, 24)
+        
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
         assert issubclass(gobject.GFlags, int)

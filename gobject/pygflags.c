@@ -168,12 +168,16 @@ pyg_flags_from_gtype (GType gtype, int value)
     retval = PyDict_GetItem(values, PyInt_FromLong(value));
     if (!retval) {
 	PyErr_Clear();
-	
+
+	return PyInt_FromLong(value);
+#if 0
+	/* This breaks repr */
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
 	((PyIntObject*)retval)->ob_ival = value;
 	((PyGFlags*)retval)->gtype = gtype;
+#endif	
     } 
 
     Py_INCREF(retval);

@@ -140,8 +140,12 @@ pyg_enum_from_gtype (GType gtype, int value)
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
     retval = PyDict_GetItem(values, PyInt_FromLong(value));
+    if (!retval) {
+	PyErr_Clear();
+	return PyInt_FromLong(value);
+    }
+    
     Py_INCREF(retval);
-
     return retval;
 }
 
