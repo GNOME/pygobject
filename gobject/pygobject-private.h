@@ -44,6 +44,7 @@ GType     pyg_type_from_object (PyObject *obj);
 
 gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
 gint pyg_flags_get_value (GType flag_type, PyObject *obj, gint *val);
+int pyg_pyobj_to_unichar_conv (PyObject* py_obj, void* ptr);
 
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
 typedef int (*tovaluefunc)(GValue *value, PyObject *obj);

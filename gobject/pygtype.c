@@ -1160,3 +1160,48 @@ pyg_object_descr_doc_get(void)
     }
     return doc_descr;
 }
+
+
+/**
+ * pyg_pyobj_to_unichar_conv:
+ *
+ * Converts PyObject value to a unichar and write result to memory
+ * pointed to by ptr.  Follows the calling convention of a ParseArgs
+ * converter (O& format specifier) so it may be used to convert function
+ * arguments.
+ *
+ * Returns: 1 if the conversion succeeds and 0 otherwise.  If the conversion
+ *          did not succeesd, a Python exception is raised
+ */
+int pyg_pyobj_to_unichar_conv(PyObject* py_obj, void* ptr)
+{
+    gunichar* u = ptr;
+    const Py_UNICODE* uni_buffer;
+    PyObject* tmp_uni = NULL;
+    
+    if (PyUnicode_Check(py_obj)) {
+	tmp_uni = py_obj;
+	Py_INCREF(tmp_uni);
+    }
+    else {
+	tmp_uni = PyUnicode_FromObject(py_obj);
+	if (tmp_uni == NULL)
+	    goto failure;
+    }
+    
+    if ( PyUnicode_GetSize(tmp_uni) != 1) {
+	PyErr_SetString(PyExc_ValueError, "unicode character value must be 1 character uniode string");
+	goto failure;
+    }
+    uni_buffer = PyUnicode_AsUnicode(tmp_uni);
+    if ( uni_buffer == NULL)
+	goto failure;
+    *u = uni_buffer[0];
+    
+    Py_DECREF(tmp_uni);
+    return 1;
+    
+  failure:
+    Py_XDECREF(tmp_uni);
+    return 0;
+}

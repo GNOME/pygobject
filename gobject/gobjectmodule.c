@@ -2104,7 +2104,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   &PyGParamSpec_Type,
   pyg_param_spec_new,
-  pyg_param_spec_from_object
+  pyg_param_spec_from_object,
+  pyg_pyobj_to_unichar_conv
 };
 
 DL_EXPORT(void)
