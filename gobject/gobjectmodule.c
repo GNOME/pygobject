@@ -975,10 +975,8 @@ pyg_closure_marshal(GClosure *closure,
     }
     ret = PyObject_CallObject(pc->callback, params);
     if (ret == NULL) {
-	if (!pyg_fatal_exceptions_notify()) {
-	    PyErr_Print();
-	    PyErr_Clear();
-	}
+	PyErr_Print();
+	PyErr_Clear();
 	return;
     }
     if (return_value)
@@ -1088,10 +1086,8 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 
     ret = PyObject_CallObject(method, params);
     if (ret == NULL) {
-	if (!pyg_fatal_exceptions_notify()) {
-	    PyErr_Print();
-	    PyErr_Clear();
-	}
+	PyErr_Print();
+	PyErr_Clear();
 	/* XXXX - clean up if threading was used */
 	Py_DECREF(method);
 	return;
@@ -2324,33 +2320,6 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     g_type_class_unref(fclass);
 }
 
-static int
-pyg_fatal_exceptions_notify(void)
-{
-    GList *tmp_list = pygobject_exception_notifiers;
-    if (!tmp_list)
-	return 0;
-    while (tmp_list != NULL) {
-	PyGFatalExceptionFunc notifier = tmp_list->data;
-	(* notifier)();
-	tmp_list = g_list_next (tmp_list);
-    }
-    return 1;
-}
-static void
-pyg_fatal_exceptions_notify_add(PyGFatalExceptionFunc func)
-{
-    pygobject_exception_notifiers = 
-	g_list_append(pygobject_exception_notifiers, func);
-}
-
-static void
-pyg_fatal_exceptions_notify_remove(PyGFatalExceptionFunc func)
-{
-    pygobject_exception_notifiers = 
-	g_list_remove(pygobject_exception_notifiers, func);
-}
-
 static gboolean
 pyg_error_check(GError **error)
 {
@@ -2408,9 +2377,6 @@ static struct _PyGObject_Functions functions = {
   pyg_enum_add_constants,
   pyg_flags_add_constants,
   
-  pyg_fatal_exceptions_notify_add,
-  pyg_fatal_exceptions_notify_remove,
-
   pyg_constant_strip_prefix,
 
   pyg_error_check,

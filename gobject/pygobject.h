@@ -64,9 +64,6 @@ struct _PyGObject_Functions {
     void (* flags_add_constants)(PyObject *module, GType flags_type,
 				 const gchar *strip_prefix);
 
-    void (* fatal_exceptions_notify_add)(PyGFatalExceptionFunc func);
-    void (* fatal_exceptions_notify_remove)(PyGFatalExceptionFunc func);
-    
     gchar *(* constant_strip_prefix)(gchar *name,
 				     const gchar *strip_prefix);
 
@@ -99,8 +96,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_boxed_new              (_PyGObject_API->boxed_new)
 #define pyg_enum_add_constants     (_PyGObject_API->enum_add_constants)
 #define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
-#define pyg_fatal_exceptions_notify_add (_PyGObject_API->fatal_exceptions_notify_add)
-#define pyg_fatal_exceptions_notify_remove (_PyGObject_API->fatal_exceptions_notify_remove)
 #define pyg_constant_strip_prefix (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check            (_PyGObject_API->error_check)
 
