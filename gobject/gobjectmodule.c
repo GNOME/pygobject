@@ -1145,7 +1145,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     PyTypeObject *class;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
-    gint i;
+    gint i, name_serial;
     GTypeQuery query;
     GTypeInfo type_info = {
 	0,    /* class_size */
@@ -1175,22 +1175,34 @@ pyg_type_register(PyObject *self, PyObject *args)
 	return NULL;
     }
 
-    /* make name for new widget */
-    module = PyObject_GetAttrString((PyObject *)class, "__module__");
-    if (module && PyString_Check(module)) {
-	type_name = g_strconcat(PyString_AsString(module), ".",
-				class->tp_name, NULL);
-    } else {
-	if (module)
-	    Py_DECREF(module);
-	else
-	    PyErr_Clear();
-	type_name = g_strdup(class->tp_name);
+      /* make name for new GType */
+    name_serial = 1;
+    while (name_serial < 1000) /* give up after 1000 tries, just in case.. */
+    {
+        char name_serial_str[16];
+
+        snprintf(name_serial_str, 16, "-v%i", name_serial);
+        module = PyObject_GetAttrString((PyObject *)class, "__module__");
+        if (module && PyString_Check(module)) {
+            type_name = g_strconcat(PyString_AsString(module), ".",
+                                    class->tp_name,
+                                    name_serial > 1? name_serial_str : NULL,
+                                    NULL);
+        } else {
+            if (module)
+                Py_DECREF(module);
+            else
+                PyErr_Clear();
+            type_name = g_strdup(class->tp_name);
+        }
+          /* convert '.' in type name to '+', which isn't banned (grumble) */
+        for (i = 0; type_name[i] != '\0'; i++)
+            if (type_name[i] == '.')
+                type_name[i] = '+';
+        if (g_type_from_name(type_name) == 0)
+            break;              /* we now have a unique name */
+        ++name_serial;
     }
-    /* convert '.' in type name to '+', which isn't banned (grumble) */
-    for (i = 0; type_name[i] != '\0'; i++)
-	if (type_name[i] == '.')
-	    type_name[i] = '+';
 
     /* set class_data that will be passed to the class_init function. */
     type_info.class_data = class;
