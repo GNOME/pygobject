@@ -159,6 +159,7 @@ struct _PyGObject_Functions {
     int       (*gil_state_ensure) (void);
     void      (*gil_state_release) (int flag);
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
+    void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -211,6 +212,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_from_gtype        (_PyGObject_API->flags_from_gtype)
 #define pyg_enable_threads          (_PyGObject_API->enable_threads)
 #define pyg_register_class_init     (_PyGObject_API->register_class_init)
+#define pyg_register_interface_info (_PyGObject_API->register_interface_info)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

@@ -32,6 +32,9 @@ static const gchar *pyginterface_type_id   = "PyGInterface::type";
 GQuark pyginterface_type_key  = 0;
 static const gchar *pygobject_class_init_id   = "PyGObject::class-init";
 GQuark pygobject_class_init_key  = 0;
+static const gchar *pyginterface_info_id   = "PyGInterface::info";
+GQuark pyginterface_info_key  = 0;
+
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -205,6 +208,18 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
     
+}
+
+static void
+pyg_register_interface_info(GType gtype, const GInterfaceInfo *info)
+{
+    g_type_set_qdata(gtype, pyginterface_info_key, (gpointer) info);
+}
+
+static const GInterfaceInfo *
+pyg_lookup_interface_info(GType gtype)
+{
+    return g_type_get_qdata(gtype, pyginterface_info_key);
 }
 
 /* -------------- GMainContext objects ---------------------------- */
@@ -1016,6 +1031,30 @@ pyg_type_register(PyObject *self, PyObject *args)
         return NULL;
     }
     g_type_class_unref(gclass);
+
+      /* Register interface implementations  */
+    if (class->tp_bases) {
+        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
+        {
+            PyTypeObject *base = (PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
+            GType itype;
+            const GInterfaceInfo *iinfo;
+            
+            if (PyObject_IsSubclass((PyObject *) base,
+                                    (PyObject *) &PyGInterface_Type) != 1)
+                continue;
+            itype = pyg_type_from_object((PyObject *) base);
+            iinfo = pyg_lookup_interface_info(itype);
+            if (!iinfo) {
+                PyErr_Format(PyExc_NotImplementedError, "Interface type %s "
+                             "has no python implementation support", base->tp_name);
+                return NULL;
+            }
+            g_type_add_interface_static(instance_type, itype, iinfo);
+        }
+    } else
+        g_warning("type has no tp_bases");
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2110,6 +2149,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_gil_state_ensure_py23,
   pyg_gil_state_release_py23,
   pyg_register_class_init,
+  pyg_register_interface_info
 };
 
 #define REGISTER_TYPE(d, type, name) \
@@ -2159,6 +2199,7 @@ initgobject(void)
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
     pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
+    pyginterface_info_key = g_quark_from_static_string(pyginterface_info_id);
 
     pygobject_class_init_key = g_quark_from_static_string(pygobject_class_init_id);
 
