@@ -282,6 +282,21 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     PyObject *tmp;
 
     switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_INTERFACE:
+	/* we only handle interface types that have a GObject prereq */
+	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT)) {
+	    if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
+		return -1;
+	    }
+	    if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
+					    G_VALUE_TYPE(value))) {
+		return -1;
+	    }
+	    g_value_set_object(value, pygobject_get(obj));
+	} else {
+	    return -1;
+	}
+	break;
     case G_TYPE_CHAR:
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_char(value, PyString_AsString(tmp)[0]);
@@ -446,13 +461,14 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	break;
     case G_TYPE_OBJECT:
-	{
-	    PyTypeObject *type = pygobject_lookup_class(G_VALUE_TYPE(value));
-	    if (!PyObject_TypeCheck(obj, type)) {
-		return -1;
-	    }
-	    g_value_set_object(value, pygobject_get(obj));
+	if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
+	    return -1;
 	}
+	if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
+					G_VALUE_TYPE(value))) {
+	    return -1;
+	}
+	g_value_set_object(value, pygobject_get(obj));
 	break;
     default:
 	break;
@@ -466,6 +482,11 @@ pyg_value_as_pyobject(const GValue *value)
     gchar buf[128];
 
     switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_INTERFACE:
+	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
+	    return pygobject_new(g_value_get_object(value));
+	else
+	    break;
     case G_TYPE_CHAR:
 	{
 	    gint8 val = g_value_get_char(value);
