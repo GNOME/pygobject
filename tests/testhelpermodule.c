@@ -1,6 +1,5 @@
 #include "pygobject.h"
 #include <gobject/gmarshal.h>
-#include <gtk/gtk.h>
 
 #include "test-thread.h"
 #include "test-unknown.h"

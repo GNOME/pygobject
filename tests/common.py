@@ -41,6 +41,7 @@ def importModules(buildDir, srcDir):
 def importModule(module, directory, name=None):
     global isDistCheck
 
+    origName = module
     if '.' in module:
         fromlist = '.'.join(module.split('.')[:-1])
     else:
@@ -49,7 +50,12 @@ def importModule(module, directory, name=None):
     if not name:
         name = module + '.la'
 
-    obj = __import__(module, {}, {}, fromlist)
+    try:
+        obj = __import__(module, {}, {}, fromlist)
+    except ImportError:
+        print 'WARNING: %s could not be imported' % origName
+        return 
+    
     if hasattr(obj, '__file__'):
         location = obj.__file__
     else:
