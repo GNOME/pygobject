@@ -181,15 +181,17 @@ pygobject_destroy_notify(gpointer user_data)
 }
 
 static void
-pygobject_register_class(PyObject *dict, const gchar *class_name,
+pygobject_register_class(PyObject *dict, const gchar *type_name,
 			 GType (* get_type)(void), PyExtensionClass *ec,
 			 PyObject *bases)
 {
     PyObject *o;
+    const char *class_name;
 
     if (!class_hash)
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
 
+    class_name = ec->tp_name;
     /* set standard pyobject class functions if they aren't already set */
     if (!ec->tp_dealloc)  ec->tp_dealloc  = (destructor)pygobject_dealloc;
     if (!ec->tp_getattro) ec->tp_getattro = (getattrofunc)pygobject_getattro;
@@ -210,7 +212,7 @@ pygobject_register_class(PyObject *dict, const gchar *class_name,
 	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
 	Py_DECREF(o);
     }
-    g_hash_table_insert(class_hash, g_strdup(class_name), ec);
+    g_hash_table_insert(class_hash, g_strdup(type_name), ec);
 }
 
 void
