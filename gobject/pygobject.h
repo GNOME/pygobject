@@ -40,6 +40,14 @@ typedef struct {
 typedef void (*PyGFatalExceptionFunc) (void);
 typedef void (*PyGThreadBlockFunc) (void);
 
+typedef struct {
+    PyObject_HEAD
+    GParamSpec *pspec;
+} PyGParamSpec;
+
+#define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
+#define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
+
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
@@ -95,6 +103,8 @@ struct _PyGObject_Functions {
 				     PyGThreadBlockFunc unblock_threads_func);
     PyGThreadBlockFunc block_threads;
     PyGThreadBlockFunc unblock_threads;
+    PyTypeObject *paramspec_type;
+    PyObject *(* paramspec_new)(GParamSpec *spec);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -132,6 +142,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_constant_strip_prefix   (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check             (_PyGObject_API->error_check)
 #define pyg_set_thread_block_funcs  (_PyGObject_API->set_thread_block_funcs)
+#define PyGParamSpec_Type           (*_PyGObject_API->paramspec_type)
+#define pyg_param_spec_new          (_PyGObject_API->paramspec_new)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
