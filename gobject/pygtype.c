@@ -425,13 +425,13 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     case G_TYPE_STRING:
 	if (obj == Py_None)
 	    g_value_set_string(value, NULL);
-	else if ((tmp = PyObject_Str(obj)))
+	else if ((tmp = PyObject_Str(obj))) {
 	    g_value_set_string(value, PyString_AsString(tmp));
-	else {
+	    Py_DECREF(tmp);
+	} else {
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_POINTER:
 	if (PyCObject_Check(obj))
