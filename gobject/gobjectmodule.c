@@ -308,8 +308,8 @@ pygobject_new(GObject *obj)
 	    self->hasref = FALSE;
 	    g_object_steal_qdata(obj, pygobject_ownedref_key);
 	    g_object_ref(obj);
-	}
-	Py_INCREF(self);
+	} else
+	    Py_INCREF(self);
 	return (PyObject *)self;
     }
 
@@ -1095,6 +1095,7 @@ pygobject_dealloc(PyGObject *self)
 	self->hasref = TRUE;
 	g_object_set_qdata_full(obj, pygobject_ownedref_key,
 				self, pygobject_destroy_notify);
+	g_message("ref count = %d", self->ob_refcnt);
 	g_object_unref(obj);
 	return;
     }
