@@ -23,18 +23,6 @@ extern GType PY_TYPE_OBJECT;
 
 void  pyg_destroy_notify (gpointer user_data);
 
-typedef struct {
-    PyObject_HEAD
-    GMainLoop *loop;
-} PyGMainLoop;
-extern PyTypeObject PyGMainLoop_Type;
-
-typedef struct {
-    PyObject_HEAD
-    GMainContext *context;
-} PyGMainContext;
-extern PyTypeObject PyGMainContext_Type;
-
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 
@@ -104,9 +92,65 @@ void       pyg_register_pointer (PyObject *dict, const gchar *class_name,
 				 GType pointer_type, PyTypeObject *type);
 PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
 
-extern PyTypeObject PyGParamSpec_Type;
-PyObject *pyg_param_spec_new    (GParamSpec *pspec);
-
 extern char * pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix);
+
+/* pygflags */
+typedef struct {
+    PyIntObject parent;
+    GType gtype;
+} PyGFlags;
+
+extern PyTypeObject PyGFlags_Type;
+
+#define PyGFlags_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_FLAGS))
+			   
+extern PyObject * pyg_flags_add        (PyObject *   module,
+					const char * typename,
+					const char * strip_prefix,
+					GType        gtype);
+extern PyObject * pyg_flags_from_gtype (GType        gtype,
+					int          value);
+
+/* pygenum */
+#define PyGEnum_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
+
+typedef struct {
+    PyIntObject parent;
+    GType gtype;
+} PyGEnum;
+
+extern PyTypeObject PyGEnum_Type;
+
+extern PyObject * pyg_enum_add        (PyObject *   module,
+				       const char * typename,
+				       const char * strip_prefix,
+				       GType        gtype);
+extern PyObject * pyg_enum_from_gtype (GType        gtype,
+				       int          value);
+
+/* pygmainloop */
+
+typedef struct {
+    PyObject_HEAD
+    GMainLoop *loop;
+} PyGMainLoop;
+
+extern PyTypeObject PyGMainLoop_Type;
+
+/* pygmaincontext */
+
+typedef struct {
+    PyObject_HEAD
+    GMainContext *context;
+} PyGMainContext;
+
+extern PyTypeObject PyGMainContext_Type;
+
+/* pygparamspec */
+
+extern PyTypeObject PyGParamSpec_Type;
+PyObject * pyg_param_spec_new (GParamSpec *pspec);
+
+
 
 #endif

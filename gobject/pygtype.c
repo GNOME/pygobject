@@ -22,9 +22,6 @@
 
 #include "pygobject-private.h"
 
-#include "pygenum.h"
-#include "pygflags.h"
-
 /* -------------- __gtype__ objects ---------------------------- */
 
 typedef struct {

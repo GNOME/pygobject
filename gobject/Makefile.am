@@ -18,10 +18,12 @@ gobject_la_SOURCES = \
 	gobjectmodule.c \
 	pygboxed.c \
 	pygenum.c \
-	pygenum.h \
 	pygflags.c \
-	pygflags.h \
 	pygobject.c \
 	pygobject.h \
 	pygobject-private.h \
+	pygmaincontext.c \
+	pygmainloop.c \
+	pygparamspec.c \
+	pygpointer.c \
 	pygtype.c

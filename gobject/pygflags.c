@@ -3,6 +3,8 @@
  * Copyright (C) 1998-2003  James Henstridge
  * Copyright (C) 2004       Johan Dahlin
  *
+ *   pygenum.c: GFlags wrapper
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +26,6 @@
 #endif
 
 #include "pygobject-private.h"
-#include "pygflags.h"
 
 static const gchar *pygflags_class_id     = "PyGFlags::class";
 static GQuark       pygflags_class_key    = 0;

@@ -3,7 +3,7 @@
  * Copyright (C) 1998-2003  James Henstridge
  * Copyright (C) 2004       Johan Dahlin
  *
- *   pygenum.c: GEnum and GFlag wrappers
+ *   pygenum.c: GEnum wrapper
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,6 @@
 #endif
 
 #include "pygobject-private.h"
-#include "pygenum.h"
 
 static const gchar *pygenum_class_id     = "PyGEnum::class";
 static GQuark       pygenum_class_key    = 0;

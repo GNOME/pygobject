@@ -44,6 +44,15 @@ class EnumTest(unittest.TestCase):
         obj = atk.NoOpObject(gobject.GObject())
         assert obj.get_role() == atk.ROLE_INVALID
 
+    def testGParam(self):
+        win = gtk.Window()
+        enums = filter(lambda x: gobject.type_is_a(x.value_type, gobject.GEnum),
+                       gobject.list_properties(win))
+        assert enums
+        enum = enums[0]
+        assert hasattr(enum, 'enum_class')
+        assert issubclass(enum.enum_class, gobject.GEnum)
+                  
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
         assert issubclass(gobject.GFlags, int)
