@@ -34,6 +34,12 @@ PyObject *pyg_param_spec_new(GParamSpec *pspec);
 #define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
 #define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
 
+typedef struct {
+    PyObject_HEAD
+    GMainLoop *loop;
+} PyGMainLoop;
+extern PyTypeObject PyGMainLoop_Type;
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

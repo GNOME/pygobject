@@ -233,7 +233,7 @@ static PyTypeObject PyGInterface_Type = {
 
 static void
 pyg_register_interface(PyObject *dict, const gchar *class_name,
-		       GType gtype, PyTypeObject *type)
+                       GType gtype, PyTypeObject *type)
 {
     PyObject *o;
 
@@ -241,19 +241,113 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     type->tp_base = &PyGInterface_Type;
 
     if (PyType_Ready(type) < 0) {
-	g_warning("could not ready `%s'", type->tp_name);
-	return;
+        g_warning("could not ready `%s'", type->tp_name);
+        return;
     }
 
     if (gtype) {
-	o = pyg_type_wrapper_new(gtype);
-	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
-	Py_DECREF(o);
+        o = pyg_type_wrapper_new(gtype);
+        PyDict_SetItemString(type->tp_dict, "__gtype__", o);
+        Py_DECREF(o);
     }
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+/* -------------- GMainLoop objects ---------------------------- */
+
+static int
+_wrap_g_main_loop_new(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
+{
+
+    static char *kwlist[] = { "is_running", NULL };
+    int is_running;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|b:GMainLoop.__init__",
+				     kwlist, &is_running))
+        return -1;
+
+    self->loop = g_main_loop_new(NULL, is_running);
+    return 0;
+}
+
+static PyObject *
+_wrap_g_main_loop_quit (PyGMainLoop *self)
+{
+    g_main_loop_quit(self->loop);
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+_wrap_g_main_loop_is_running (PyGMainLoop *self)
+{
+    PyObject *py_ret;
+    
+    py_ret = g_main_loop_is_running(self->loop) ? Py_True : Py_False;
+    Py_INCREF(py_ret);
+    return py_ret;
+    
+}
+
+static PyObject *
+_wrap_g_main_loop_run (PyGMainLoop *self)
+{
+    g_main_loop_run(self->loop);
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef _PyGMainLoop_methods[] = {
+    { "is_running", (PyCFunction)_wrap_g_main_loop_is_running, METH_NOARGS },
+    { "quit", (PyCFunction)_wrap_g_main_loop_quit, METH_NOARGS },
+    { "run", (PyCFunction)_wrap_g_main_loop_run, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
+PyTypeObject PyGMainLoop_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,			
+    "gobject.MainLoop",	
+    sizeof(PyGMainLoop),	
+    0,			
+    /* methods */
+    (destructor)0,	
+    (printfunc)0,	
+    (getattrfunc)0,	
+    (setattrfunc)0,	
+    (cmpfunc)0,		
+    (reprfunc)0,	
+    0,			
+    0,		
+    0,		
+    (hashfunc)0,		
+    (ternaryfunc)0,		
+    (reprfunc)0,		
+    (getattrofunc)0,		
+    (setattrofunc)0,		
+    0,				
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, 
+    NULL,
+    (traverseproc)0,		
+    (inquiry)0,
+    (richcmpfunc)0,	
+    0,             
+    (getiterfunc)0,
+    (iternextfunc)0,
+    _PyGMainLoop_methods,
+    0,				
+    0,		       	
+    NULL,		
+    NULL,		
+    (descrgetfunc)0,	
+    (descrsetfunc)0,	
+    0,                 
+    (initproc)_wrap_g_main_loop_new,
+};
 
 /* ---------------- gobject module functions -------------------- */
 
@@ -1645,6 +1739,13 @@ initgobject(void)
 			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
     Py_DECREF(o);
 
+    PyGMainLoop_Type.ob_type = &PyType_Type;
+    PyGMainLoop_Type.tp_alloc = PyType_GenericAlloc;
+    PyGMainLoop_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGMainLoop_Type))
+	return;
+    PyDict_SetItemString(d, "MainLoop", (PyObject *)&PyGMainLoop_Type);
+    
     PyGPointer_Type.ob_type = &PyType_Type;
     PyGPointer_Type.tp_alloc = PyType_GenericAlloc;
     PyGPointer_Type.tp_new = PyType_GenericNew;
