@@ -384,8 +384,11 @@ pyg_object_set_property (GObject *object, guint property_id,
     object_wrapper = pygobject_new(object);
     g_return_if_fail(object_wrapper != NULL);
 
+    pyg_block_threads();
+
     py_pspec = pyg_param_spec_new(pspec);
     py_value = pyg_value_as_pyobject (value, TRUE);
+
     retval = PyObject_CallMethod(object_wrapper, "do_set_property",
 				 "OO", py_pspec, py_value);
     if (retval) {
@@ -394,9 +397,12 @@ pyg_object_set_property (GObject *object, guint property_id,
 	PyErr_Print();
 	PyErr_Clear();
     }
+
     Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);
     Py_DECREF(py_value);
+
+    pyg_unblock_threads();
 }
 
 static void
@@ -409,6 +415,8 @@ pyg_object_get_property (GObject *object, guint property_id,
     object_wrapper = pygobject_new(object);
     g_return_if_fail(object_wrapper != NULL);
 
+    pyg_block_threads();
+
     py_pspec = pyg_param_spec_new(pspec);
     retval = PyObject_CallMethod(object_wrapper, "do_get_property",
 				 "O", py_pspec);
@@ -419,6 +427,8 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);
     Py_XDECREF(retval);
+    
+    pyg_unblock_threads();        
 }
 
 static void
@@ -1335,6 +1345,7 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
+
     pyg_unblock_threads();
 
     return res;
@@ -1505,7 +1516,9 @@ pyg_error_check(GError **error)
     if (*error != NULL) {
 	PyObject *exc_instance;
 	PyObject *d;
-
+	
+	pyg_unblock_threads();
+	
 	exc_instance = PyObject_CallFunction(gerror_exc, "z",
 					     (*error)->message);
 	PyObject_SetAttrString(exc_instance, "domain",
@@ -1525,6 +1538,9 @@ pyg_error_check(GError **error)
 	PyErr_SetObject(gerror_exc, exc_instance);
 	Py_DECREF(exc_instance);
 	g_clear_error(error);
+	
+	pyg_unblock_threads();
+	
 	return TRUE;
     }
     return FALSE;
