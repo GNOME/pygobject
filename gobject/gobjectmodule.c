@@ -2,6 +2,8 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
+static PyObject *gerror_exc = NULL;
+
 static GQuark pygobject_class_key = 0;
 static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
@@ -2349,6 +2351,38 @@ pyg_fatal_exceptions_notify_remove(PyGFatalExceptionFunc func)
 	g_list_remove(pygobject_exception_notifiers, func);
 }
 
+static gboolean
+pyg_error_check(GError **error)
+{
+    g_return_val_if_fail(error != NULL, FALSE);
+
+    if (*error != NULL) {
+	PyObject *exc_instance;
+	PyObject *d;
+
+	exc_instance = PyObject_CallFunction(gerror_exc, "z",
+					     (*error)->message);
+	PyObject_SetAttrString(exc_instance, "domain",
+			       d=PyString_FromString(g_quark_to_string((*error)->domain)));
+	Py_DECREF(d);
+	PyObject_SetAttrString(exc_instance, "code",
+			       d=PyInt_FromLong((*error)->code));
+	Py_DECREF(d);
+	if ((*error)->message) {
+	    PyObject_SetAttrString(exc_instance, "message",
+				   d=PyString_FromString((*error)->message));
+	    Py_DECREF(d);
+	} else {
+	    PyObject_SetAttrString(exc_instance, "message", Py_None);
+	}
+
+	PyErr_SetObject(gerror_exc, exc_instance);
+	g_clear_error(error);
+	return TRUE;
+    }
+    return FALSE;
+}
+
 /* ----------------- gobject module initialisation -------------- */
 
 static struct _PyGObject_Functions functions = {
@@ -2378,6 +2412,8 @@ static struct _PyGObject_Functions functions = {
   pyg_fatal_exceptions_notify_remove,
 
   pyg_constant_strip_prefix,
+
+  pyg_error_check,
 };
 
 DL_EXPORT(void)
@@ -2400,6 +2436,9 @@ initgobject(void)
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,
 						  pyobject_free);
+
+    gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
+    PyDict_SetItemString(d, "GError", gerror_exc);
 
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);

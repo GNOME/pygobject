@@ -69,6 +69,8 @@ struct _PyGObject_Functions {
     
     gchar *(* constant_strip_prefix)(gchar *name,
 				     const gchar *strip_prefix);
+
+    gboolean (* error_check)(GError **error);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -100,6 +102,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_fatal_exceptions_notify_add (_PyGObject_API->fatal_exceptions_notify_add)
 #define pyg_fatal_exceptions_notify_remove (_PyGObject_API->fatal_exceptions_notify_remove)
 #define pyg_constant_strip_prefix (_PyGObject_API->constant_strip_prefix)
+#define pyg_error_check            (_PyGObject_API->error_check)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \
