@@ -7,14 +7,26 @@
 
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
+from distutils.command.install_data import install_data
 from distutils.extension import Extension
 import fnmatch
 import os
+import re
 import string
 import sys
 
 GLOBAL_INC = []
 GLOBAL_MACROS = []
+
+def get_m4_define(varname):
+    """Return the value of a m4_define variable as set in configure.in."""
+    pattern=re.compile("m4_define\("+varname+"\,\s*(.+)\)")
+    for line in open("configure.in").readlines():
+        match_obj=pattern.match(line)
+        if match_obj:
+            return match_obj.group(1)
+
+    return None
 
 def getoutput(cmd):
     """Return output (stdout or stderr) of executing cmd in a shell."""
@@ -122,20 +134,36 @@ class BuildExt(build_ext):
         build_ext.build_extension(self, ext)
 
 class InstallLib(install_lib):
+
+    local_outputs = []
+    local_inputs = []
+        
+    def set_install_dir(self, install_dir):
+        self.install_dir = install_dir
+    
+    def get_outputs(self):
+        return install_lib.get_outputs(self) + self.local_outputs
+
+    def get_inputs(self):
+        return install_lib.get_inputs(self) + self.local_inputs
+
+class InstallData(install_data):
+    
     local_outputs = []
     local_inputs = []
     template_options = {}
+
     def prepare(self):
         if os.name == "nt":
             self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-3])
         else:
             # default: os.name == "posix"
             self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-4])
-        
-        self.exec_prefix = os.path.join(self.prefix, 'bin')
-        self.includedir = os.path.join(self.prefix, 'include')
-        self.libdir = os.path.join(self.prefix, 'lib')
-        self.datadir = os.path.join(self.prefix, 'share')
+
+        self.exec_prefix = '${prefix}/bin'
+        self.includedir = '${prefix}/include'
+        self.libdir = '${prefix}/lib'
+        self.datadir = '${prefix}/share'
         
         self.add_template_option('prefix', self.prefix)        
         self.add_template_option('exec_prefix', self.exec_prefix)        
@@ -143,6 +171,7 @@ class InstallLib(install_lib):
         self.add_template_option('libdir', self.libdir)
         self.add_template_option('datadir', self.datadir)
         self.add_template_option('PYTHON', sys.executable)
+        self.add_template_option('THREADING_CFLAGS', '')
         
     def set_install_dir(self, install_dir):
         self.install_dir = install_dir
