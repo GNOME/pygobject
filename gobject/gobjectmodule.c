@@ -96,7 +96,9 @@ static void
 pyobject_free(gpointer boxed)
 {
     PyObject *object = boxed;
-    PyGILState_STATE state = PyGILState_Ensure();
+    PyGILState_STATE state;
+
+    state = PyGILState_Ensure();
     Py_DECREF(object);
     PyGILState_Release(state);
 }
@@ -1456,23 +1458,6 @@ pyg_main_context_default (PyObject *unused)
 
 }
 
-static PyObject *
-pyg_thread_init (PyObject *unused)
-{
-    /* FIXME: Should we raise an exception if we don't
-              have threading enabled. This will make
-	      the import/initialize code quite ugly */
-#ifdef ENABLE_PYGTK_THREADING
-    PyEval_InitThreads();
-    
-    if (!g_threads_got_initialized)
-	g_thread_init(NULL);
-#endif
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1490,7 +1475,6 @@ static PyMethodDef pygobject_functions[] = {
     { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove", pyg_source_remove, METH_VARARGS },
     { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
-    { "thread_init", (PyCFunction)pyg_thread_init, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1826,10 +1810,17 @@ initgobject(void)
 
     PyGTypeWrapper_Type.ob_type = &PyType_Type;
     PyGParamSpec_Type.ob_type = &PyType_Type;
-
+    
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
+#ifndef DISABLE_THREADING
+    PyEval_InitThreads();
+    if (!g_threads_got_initialized)
+	g_thread_init(NULL);
+#else
+    
+#endif
     g_type_init();
 
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",

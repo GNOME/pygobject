@@ -7,6 +7,12 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#ifdef DISABLE_THREADING
+# define PyGILState_STATE int
+# define PyGILState_Ensure() (0)
+# define PyGILState_Release(x) 
+#endif
+
 typedef struct {
     PyObject_HEAD
     GObject *obj;
