@@ -70,7 +70,7 @@ pygobject_register_wrapper(PyObject *self)
 {
     GObject *obj = ((PyGObject *)self)->obj;
 
-    g_object_ref(obj);
+    /* g_object_ref(obj); -- not needed because no floating reference */
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 }
 
@@ -468,6 +468,23 @@ pygobject__class_init__(PyObject *something, PyObject *args)
 }
 
 static PyObject *
+pygobject__init__(PyGObject *self, PyObject *args)
+{
+    GType object_type = G_TYPE_OBJECT;
+
+    if (!PyArg_ParseTuple(args, "|i:GObject.__init__", &object_type))
+	return NULL;
+    self->obj = g_object_new(object_type, NULL);
+    if (!self->obj) {
+	PyErr_SetString(PyExc_RuntimeError, "could not create object");
+	return NULL;
+    }
+    pygobject_register_wrapper((PyObject *)self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
 pygobject_get_param(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
@@ -550,6 +567,7 @@ pygobject_set_data(PyGObject *self, PyObject *args)
 
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
+    { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
     { "get_param", (PyCFunction)pygobject_get_param, METH_VARARGS },
     { "set_param", (PyCFunction)pygobject_set_param, METH_VARARGS },
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
