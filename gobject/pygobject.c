@@ -5,11 +5,10 @@ static const gchar *pygobject_class_id     = "PyGObject::class";
 static GQuark       pygobject_class_key    = 0;
 static const gchar *pygobject_wrapper_id   = "PyGObject::wrapper";
 static GQuark       pygobject_wrapper_key  = 0;
-static const gchar *pygobject_ownedref_id  = "PyGObject::ownedref";
-static GQuark       pygobject_ownedref_key = 0;
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
+static int  pygobject_clear(PyGObject *self);
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
@@ -72,6 +71,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 
     type->tp_dealloc  = (destructor)pygobject_dealloc;
     type->tp_traverse = (traverseproc)pygobject_traverse;
+    type->tp_clear = (inquiry)pygobject_clear;
     type->tp_flags |= Py_TPFLAGS_HAVE_GC;
     type->tp_weaklistoffset = offsetof(PyGObject, weakreflist);
     type->tp_dictoffset = offsetof(PyGObject, inst_dict);
@@ -107,7 +107,9 @@ pygobject_register_wrapper(PyObject *self)
 	pygobject_wrapper_key=g_quark_from_static_string(pygobject_wrapper_id);
 
     sink_object(obj);
-    g_object_set_qdata(obj, pygobject_wrapper_key, self);
+    Py_INCREF(self);
+    g_object_set_qdata_full(obj, pygobject_wrapper_key, self,
+			    pyg_destroy_notify);
 }
 
 PyTypeObject *
@@ -127,13 +129,9 @@ PyObject *
 pygobject_new(GObject *obj)
 {
     PyGObject *self;
-    PyTypeObject *tp;
 
     if (!pygobject_wrapper_key)
 	pygobject_wrapper_key=g_quark_from_static_string(pygobject_wrapper_id);
-    if (!pygobject_ownedref_key)
-	pygobject_ownedref_key =
-	    g_quark_from_static_string(pygobject_ownedref_id);
 
     if (obj == NULL) {
 	Py_INCREF(Py_None);
@@ -141,33 +139,29 @@ pygobject_new(GObject *obj)
     }
 
     /* we already have a wrapper for this object -- return it. */
-    if ((self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key))) {
-	/* if the GObject currently owns the wrapper reference ... */
-	if (self->hasref) {
-	    self->hasref = FALSE;
-	    g_object_steal_qdata(obj, pygobject_ownedref_key);
-	    g_object_ref(obj);
-	} else
-	    Py_INCREF(self);
-	return (PyObject *)self;
+    self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key);
+    if (self != NULL) {
+	Py_INCREF(self);
+    } else {
+	/* create wrapper */
+	PyTypeObject *tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+	self = PyObject_GC_New(PyGObject, tp);
+
+	if (self == NULL)
+	    return NULL;
+	self->obj = g_object_ref(obj);
+	sink_object(self->obj);
+
+	self->inst_dict = NULL;
+	self->weakreflist = NULL;
+	self->closures = NULL;
+	/* save wrapper pointer so we can access it later */
+	Py_INCREF(self);
+	g_object_set_qdata_full(obj, pygobject_wrapper_key, self,
+				pyg_destroy_notify);
+
+	PyObject_GC_Track((PyObject *)self);
     }
-
-    tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
-    self = PyObject_GC_New(PyGObject, tp);
-
-    if (self == NULL)
-	return NULL;
-    self->obj = g_object_ref(obj);
-    sink_object(self->obj);
-
-    self->hasref = FALSE;
-    self->inst_dict = NULL;
-    self->weakreflist = NULL;
-    self->closures = NULL;
-    /* save wrapper pointer so we can access it later */
-    g_object_set_qdata(obj, pygobject_wrapper_key, self);
-
-    PyObject_GC_Track((PyObject *)self);
 
     return (PyObject *)self;
 }
@@ -200,49 +194,18 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 static void
 pygobject_dealloc(PyGObject *self)
 {
-    GObject *obj = self->obj;
     GSList *tmp;
-
-    if (!pygobject_ownedref_key)
-	pygobject_ownedref_key =
-	    g_quark_from_static_string(pygobject_ownedref_id);
-
-    /* save reference to python wrapper if there are still
-     * references to the GObject in such a way that it will be
-     * freed when the GObject is destroyed, so is the python
-     * wrapper, but if a python wrapper can be */
-    if (obj && obj->ref_count > 1) {
-	Py_INCREF(self); /* grab a reference on the wrapper */
-	self->hasref = TRUE;
-	g_object_set_qdata_full(obj, pygobject_ownedref_key,
-				self, pyg_destroy_notify);
-	
-	pyg_unblock_threads();
-	g_object_unref(obj);
-	pyg_block_threads();
-
-	/* we ref the type, so subtype_dealloc() doesn't kill off our
-         * instance's type. */
-	if (self->ob_type->tp_flags & Py_TPFLAGS_HEAPTYPE)
-	    Py_INCREF(self->ob_type);
-	
-#ifdef Py_TRACE_REFS
-	/* if we're tracing refs, set up the reflist again, as it was just
-	 * torn down */
-        _Py_NewReference((PyObject *) self);
-#endif
-
-	return;
-    }
-    if (obj && !self->hasref) { /* don't unref the GObject if it owns us */
-	pyg_unblock_threads();
-	g_object_unref(obj);
-	pyg_block_threads();
-    }
 
     PyObject_ClearWeakRefs((PyObject *)self);
 
     PyObject_GC_UnTrack((PyObject *)self);
+
+    if (self->obj) {
+	pyg_unblock_threads();
+	g_object_unref(self->obj);
+	pyg_block_threads();
+    }
+    self->obj = NULL;
 
     if (self->inst_dict) {
 	Py_DECREF(self->inst_dict);
@@ -263,7 +226,7 @@ pygobject_dealloc(PyGObject *self)
     pyg_block_threads();
 
     /* the following causes problems with subclassed types */
-    /*self->ob_type->tp_free((PyObject *)self); */
+    /* self->ob_type->tp_free((PyObject *)self); */
     PyObject_GC_Del(self);
 }
 
@@ -315,6 +278,11 @@ pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
 	if (closure->swap_data) ret = visit(closure->swap_data, arg);
 	if (ret != 0) return ret;
     }
+
+    if (self->obj && self->obj->ref_count == 1)
+	ret = visit((PyObject *)self, arg);
+    if (ret != 0) return ret;
+
     return 0;
 }
 
@@ -322,6 +290,11 @@ static int
 pygobject_clear(PyGObject *self)
 {
     GSList *tmp;
+
+    if (self->inst_dict) {
+	Py_DECREF(self->inst_dict);
+    }
+    self->inst_dict = NULL;
 
     pyg_unblock_threads();
     tmp = self->closures;
@@ -334,8 +307,16 @@ pygobject_clear(PyGObject *self)
 	g_closure_invalidate(closure);
     }
     pyg_block_threads();
+
     if (self->closures != NULL)
 	g_message("invalidated all closures, but self->closures != NULL !");
+
+    if (self->obj) {
+	pyg_unblock_threads();
+	g_object_unref(self->obj);
+	pyg_block_threads();
+    }
+    self->obj = NULL;
 
     return 0;
 }

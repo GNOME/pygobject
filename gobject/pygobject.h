@@ -10,7 +10,6 @@
 typedef struct {
     PyObject_HEAD
     GObject *obj;
-    gboolean hasref;     /* the GObject owns this reference */
     PyObject *inst_dict; /* the instance dictionary -- must be last */
     PyObject *weakreflist; /* list of weak references */
     GSList *closures;
