@@ -46,13 +46,13 @@ def _get_available_versions():
 def require(version):
     global _pygtk_required_version
 
-    assert not sys.modules.has_key('gtk'), \
-           "pygtk.require() must be called before importing gtk"
-
     if _pygtk_required_version != None:
         assert _pygtk_required_version == version, \
                "a different version of gtk was already required"
         return
+
+    assert not sys.modules.has_key('gtk'), \
+           "pygtk.require() must be called before importing gtk"
 
     versions = _get_available_versions()
     assert versions.has_key(version), \
