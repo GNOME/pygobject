@@ -61,6 +61,21 @@ pyg_boxed_free(PyObject *op)
   PyObject_FREE(op);
 }
 
+static PyObject *
+pyg_boxed_copy(PyGBoxed *self)
+{
+    return pyg_boxed_new (self->gtype, self->boxed, TRUE, TRUE);
+}
+
+
+
+static PyMethodDef pygboxed_methods[] = {
+    { "copy", (PyCFunction) pyg_boxed_copy, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
+
+
 PyTypeObject PyGBoxed_Type = {
     PyObject_HEAD_INIT(NULL)
     0,                                  /* ob_size */
@@ -91,7 +106,7 @@ PyTypeObject PyGBoxed_Type = {
     0,					/* tp_weaklistoffset */
     (getiterfunc)0,			/* tp_iter */
     (iternextfunc)0,			/* tp_iternext */
-    0,					/* tp_methods */
+    pygboxed_methods,                   /* tp_methods */
     0,					/* tp_members */
     0,					/* tp_getset */
     (PyTypeObject *)0,			/* tp_base */

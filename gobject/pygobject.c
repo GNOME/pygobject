@@ -229,10 +229,27 @@ pygobject_free(PyObject *op)
 
 /* ---------------- PyGObject methods ----------------- */
 
+static void
+parameter_list_free (GParameter *parameters, guint n_parameters)
+{
+	gint i;
+	for (i = 0; i < n_parameters; i ++){
+		g_free ((char *)parameters[i].name);
+		g_value_unset (&(parameters[i].value));
+	}
+	g_free (parameters);
+}
+
 static int
 pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     GType object_type;
+    guint n_parameters = 0;
+    GParameter *parameters = NULL;
+    PyObject *key, *item;
+    gint pos = 0;
+    GObjectClass *class;
+    gint retval = 0;
 
     if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
 	return -1;
@@ -241,7 +258,56 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!object_type)
 	return -1;
 
-    self->obj = g_object_new(object_type, NULL);
+    if ((class = g_type_class_ref (object_type)) == NULL) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not get a reference to type class");
+	return -1;
+    }
+
+
+    while (kwargs && PyDict_Next(kwargs, &pos, &key, &item)) {
+	    gchar *param_name;
+	    GParamSpec *pspec;
+	    GValue value = { 0, };
+
+	    param_name = PyString_AsString(key);
+	    pspec = g_object_class_find_property(class, param_name);
+
+	    if (pspec == NULL) {
+		    gchar buf[128];
+		    
+		    g_snprintf(buf, sizeof(buf),
+			       "Unknown parameter '%s' used in type initialization arguments",
+			       param_name);
+		    PyErr_SetString(PyExc_AttributeError, buf);
+		    parameter_list_free (parameters, n_parameters);
+		    g_type_class_unref(class);
+		    return -1;
+	    }
+	    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+	    if (pyg_value_from_pyobject(&value, item) < 0) {
+		    PyErr_SetString(PyExc_TypeError,
+			"could not convert argument to correct param type");
+		    parameter_list_free (parameters, n_parameters);
+		    g_type_class_unref(class);
+		    return -1;
+	    }
+
+	    n_parameters ++;
+	    if (parameters == NULL) {
+		    parameters = g_new (GParameter, 1);
+	    } else {
+		    parameters = g_renew (GParameter, parameters, n_parameters);
+	    }
+	    parameters[n_parameters - 1].name = g_strdup (param_name);
+	    parameters[n_parameters - 1].value = value;
+	}
+
+    self->obj = g_object_newv(object_type, n_parameters, parameters);
+    parameter_list_free (parameters, n_parameters);
+
+    g_type_class_unref(class);
+
     if (!self->obj) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
 	return -1;
