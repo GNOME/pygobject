@@ -1991,7 +1991,7 @@ initgobject(void)
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
-    g_type_init(G_TYPE_DEBUG_NONE);
+    g_type_init();
     pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
 			 o=PyInt_FromLong(G_TYPE_OBJECT));
