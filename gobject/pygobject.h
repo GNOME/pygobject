@@ -28,6 +28,8 @@ typedef struct {
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
 #define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
+typedef void (*PyGFatalExceptionFunc) (void);
+
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
@@ -61,6 +63,9 @@ struct _PyGObject_Functions {
 				const gchar *strip_prefix);
     void (* flags_add_constants)(PyObject *module, GType flags_type,
 				 const gchar *strip_prefix);
+
+    void (* fatal_exceptions_notify_add)(PyGFatalExceptionFunc func);
+    void (* fatal_exceptions_notify_remove)(PyGFatalExceptionFunc func);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -89,6 +94,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_boxed_new              (_PyGObject_API->boxed_new)
 #define pyg_enum_add_constants     (_PyGObject_API->enum_add_constants)
 #define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
+#define pyg_fatal_exceptions_notify_add (_PyGObject_API->fatal_exceptions_notify_add)
+#define pyg_fatal_exceptions_notify_remove (_PyGObject_API->fatal_exceptions_notify_remove)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \

@@ -7,11 +7,13 @@ static GHashTable *class_hash;
 static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
 
+static GList *pygobject_exception_notifiers = NULL;
+
 staticforward PyTypeObject PyGObject_Type;
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 
-
+static int  pyg_fatal_exceptions_notify(void);
 
 static void
 object_free(PyObject *op)
@@ -492,8 +494,8 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     PyGBoxed *self;
     PyTypeObject *tp;
 
-    g_return_if_fail(boxed_type != 0);
-    g_return_if_fail(!copy_boxed || (copy_boxed && own_ref));
+    g_return_val_if_fail(boxed_type != 0, NULL);
+    g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
 
     if (!boxed) {
 	Py_INCREF(Py_None);
@@ -948,10 +950,10 @@ pyg_closure_marshal(GClosure *closure,
     }
     ret = PyObject_CallObject(pc->callback, params);
     if (ret == NULL) {
-	/* XXXX - do fatal exceptions thing here */
-	PyErr_Print();
-	PyErr_Clear();
-	/* XXXX - clean up if threading was used */
+	if (!pyg_fatal_exceptions_notify()) {
+	    PyErr_Print();
+	    PyErr_Clear();
+	}
 	return;
     }
     if (return_value)
@@ -983,7 +985,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     }
     if (swap_data) {
 	Py_INCREF(swap_data);
-	((PyGClosure *)closure)->swap_data;
+	((PyGClosure *)closure)->swap_data = swap_data;
 	closure->derivative_flag = TRUE;
     }
     return closure;
@@ -1061,9 +1063,10 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 
     ret = PyObject_CallObject(method, params);
     if (ret == NULL) {
-	/* XXXX - do fatal exceptions thing here */
-	PyErr_Print();
-	PyErr_Clear();
+	if (!pyg_fatal_exceptions_notify()) {
+	    PyErr_Print();
+	    PyErr_Clear();
+	}
 	/* XXXX - clean up if threading was used */
 	Py_DECREF(method);
 	return;
@@ -2280,6 +2283,32 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     g_type_class_unref(fclass);
 }
 
+static int
+pyg_fatal_exceptions_notify(void)
+{
+    GList *tmp_list = pygobject_exception_notifiers;
+    if (!tmp_list)
+	return 0;
+    while (tmp_list != NULL) {
+	PyGFatalExceptionFunc notifier = tmp_list->data;
+	(*notifier)();
+	tmp_list = g_list_next (tmp_list);
+    }
+    return 1;
+}
+static void
+pyg_fatal_exceptions_notify_add(PyGFatalExceptionFunc func)
+{
+    pygobject_exception_notifiers = 
+	g_list_append(pygobject_exception_notifiers, &func);
+}
+
+static int
+pyg_fatal_exceptions_notify_remove(PyGFatalExceptionFunc func)
+{
+    pygobject_exception_notifiers = 
+	g_list_remove(pygobject_exception_notifiers, &func);
+}
 
 /* ----------------- gobject module initialisation -------------- */
 
@@ -2305,6 +2334,9 @@ static struct _PyGObject_Functions functions = {
 
   pyg_enum_add_constants,
   pyg_flags_add_constants,
+  
+  pyg_fatal_exceptions_notify_add,
+  pyg_fatal_exceptions_notify_remove,
 };
 
 DL_EXPORT(void)
