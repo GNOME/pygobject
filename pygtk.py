@@ -26,6 +26,8 @@ import sys
 
 __all__ = ['require']
 
+_pygtk_dir_pat = 'gtk-[0-9].[0-9]'
+
 _pygtk_required_version = None
 
 def _get_available_versions():
@@ -36,10 +38,10 @@ def _get_available_versions():
         if not os.path.isdir(dir):
             continue
         
-        if fnmatch.fnmatchcase(os.path.basename(dir), DIR_PAT):
+        if fnmatch.fnmatchcase(os.path.basename(dir), _pygtk_dir_pat):
             continue  # if the dir is a pygtk dir, skip it
         
-        for filename in glob.glob(os.path.join(dir, DIR_PAT)):
+        for filename in glob.glob(os.path.join(dir, _pygtk_dir_pat)):
             pathname = os.path.join(dir, filename)
             if not os.path.isdir(pathname):
                 continue  # skip non directories
@@ -65,7 +67,7 @@ def require(version):
 
     # remove any pygtk dirs first ...
     for dir in sys.path:
-        if _pygtk_dir_pat.match(os.path.basename(dir)):
+        if fnmatch.fnmatchcase(os.path.basename(dir), _pygtk_dir_pat):
             sys.path.remove(dir)
 
     # prepend the pygtk path ...
