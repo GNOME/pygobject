@@ -1459,6 +1459,8 @@ pyg_main_context_default (PyObject *unused)
 
 static int pyg_thread_state_tls_key = -1;
 
+/* Enable threading; note that the GIL must be held by the current
+   thread when this function is called */
 static int
 pyg_enable_threads ()
 {
@@ -1475,7 +1477,7 @@ pyg_enable_threads ()
     }
     if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
 	PyThreadState* state;
-	state = PyGILState_GetThisThreadState();
+	state = PyThreadState_Get();
 	if ( state != NULL )
 	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
     }
