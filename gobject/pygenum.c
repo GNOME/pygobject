@@ -108,7 +108,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
     
-    if (!PyTuple_Check(values) || PyTuple_Size(values) != eclass->n_values) {
+    if (!PyDict_Check(values) || PyDict_Size(values) != eclass->n_values) {
 	PyErr_SetString(PyExc_TypeError, "__enum_values__ badly formed");
 	Py_DECREF(values);
 	g_type_class_unref(eclass);
@@ -117,7 +117,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    ret = PyTuple_GetItem(values, value);
+    ret = PyDict_GetItem(values, PyInt_FromLong(value));
     Py_INCREF(ret);
     Py_DECREF(values);
     return ret;
@@ -135,9 +135,9 @@ pyg_enum_from_gtype (GType gtype, int value)
 
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
-    retval = PyTuple_GetItem(values, value);
+    retval = PyDict_GetItem(values, PyInt_FromLong(value));
     Py_INCREF(retval);
-    
+
     return retval;
 }
 
@@ -181,28 +181,28 @@ pyg_enum_add (PyObject *   module,
     /* Register enum values */
     eclass = G_ENUM_CLASS(g_type_class_ref(gtype));
 
-    values = PyTuple_New(eclass->n_values);
+    values = PyDict_New();
     for (i = 0; i < eclass->n_values; i++) {
-      PyObject *item;
+	PyObject *item;
       
-      item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-      ((PyIntObject*)item)->ob_ival = eclass->values[i].value;
-      ((PyGEnum*)item)->gtype = gtype;
-            
-      PyTuple_SetItem(values, i, item);
-
-      PyModule_AddObject(module,
-			 pyg_constant_strip_prefix(eclass->values[i].value_name,
-						   strip_prefix),
-			 item);
-      Py_INCREF(item);
-  }
+	item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
+	((PyIntObject*)item)->ob_ival = eclass->values[i].value;
+	((PyGEnum*)item)->gtype = gtype;
+	
+	PyDict_SetItem(values, PyInt_FromLong(eclass->values[i].value), item);
+      
+	PyModule_AddObject(module,
+			   pyg_constant_strip_prefix(eclass->values[i].value_name,
+						     strip_prefix),
+			   item);
+	Py_INCREF(item);
+    }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
 			 "__enum_values__", values);
-  Py_DECREF(values);
+    Py_DECREF(values);
 
-  g_type_class_unref(eclass);
+    g_type_class_unref(eclass);
 
   return stub;
 }

@@ -156,6 +156,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	    pyclass = (PyObject*)g_type_get_qdata(G_ENUM_CLASS_TYPE(G_PARAM_SPEC_ENUM(self->pspec)->enum_class), quark);
 	    g_assert(pyclass != NULL);
 
+	    Py_INCREF(pyclass);
 	    return pyclass;
 	}
     } else if (!strcmp(attr, "flags_class")) {
@@ -167,6 +168,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	    pyclass = (PyObject*)g_type_get_qdata(G_FLAGS_CLASS_TYPE(G_PARAM_SPEC_FLAGS(self->pspec)->flags_class), quark);
 	    g_assert(pyclass != NULL);
 	    
+	    Py_INCREF(pyclass);
 	    return pyclass;
 	}
     }

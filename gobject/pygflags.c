@@ -133,7 +133,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
     
-    if (!PyTuple_Check(values) || PyTuple_Size(values) != eclass->n_values) {
+    if (!PyDict_Check(values) || PyDict_Size(values) != eclass->n_values) {
 	PyErr_SetString(PyExc_TypeError, "__flags_values__ badly formed");
 	Py_DECREF(values);
 	g_type_class_unref(eclass);
@@ -142,7 +142,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    ret = PyTuple_GetItem(values, value);
+    ret = PyDict_GetItem(values, PyInt_FromLong(value));
     Py_INCREF(ret);
     Py_DECREF(values);
     return ret;
@@ -160,7 +160,7 @@ pyg_flags_from_gtype (GType gtype, int value)
 
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__flags_values__");
-    retval = PyTuple_GetItem(values, value);
+    retval = PyDict_GetItem(values, PyInt_FromLong(value));
     if (!retval) {
 	PyErr_Clear();
 	
@@ -215,7 +215,7 @@ pyg_flags_add (PyObject *   module,
     /* Register flag values */
     eclass = G_FLAGS_CLASS(g_type_class_ref(gtype));
 
-    values = PyTuple_New(eclass->n_values);
+    values = PyDict_New();
     for (i = 0; i < eclass->n_values; i++) {
       PyObject *item;
       
@@ -223,7 +223,7 @@ pyg_flags_add (PyObject *   module,
       ((PyIntObject*)item)->ob_ival = eclass->values[i].value;
       ((PyGFlags*)item)->gtype = gtype;
             
-      PyTuple_SetItem(values, i, item);
+      PyDict_SetItem(values, PyInt_FromLong(eclass->values[i].value), item);
 
       PyModule_AddObject(module,
 			 pyg_constant_strip_prefix(eclass->values[i].value_name,

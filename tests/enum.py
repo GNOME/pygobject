@@ -28,9 +28,9 @@ class EnumTest(unittest.TestCase):
         win.realize()
 
         state = win.window.get_state()
-        assert state == gdk.WINDOW_STATE_ICONIFIED
+        assert state == gdk.WINDOW_STATE_WITHDRAWN
         assert isinstance(state, gdk.WindowState)
-        assert 'WINDOW_STATE_ICONIFIED' in repr(state)
+        assert 'WINDOW_STATE_WITHDRAWN' in repr(state)
 
     def testProperty(self):
         win = gtk.Window()
@@ -52,7 +52,11 @@ class EnumTest(unittest.TestCase):
         enum = enums[0]
         assert hasattr(enum, 'enum_class')
         assert issubclass(enum.enum_class, gobject.GEnum)
-                  
+
+    def testWeirdEnumValues(self):
+        assert int(gdk.NOTHING) == -1
+        assert int(gdk.BUTTON_PRESS) == 4
+        
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
         assert issubclass(gobject.GFlags, int)

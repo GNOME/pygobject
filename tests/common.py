@@ -1,3 +1,10 @@
+import os
+import sys
+
+if not os.environ.has_key('DIST_CHECK'):
+  sys.path.insert(0, '..')
+  sys.path.insert(0, '../gobject')
+
 import ltihooks
 
 import gobject
