@@ -485,16 +485,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     case G_TYPE_ENUM:
 	{
 	    gint val = 0;
-	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
+		PyErr_Clear();
 		return -1;
+	    }
 	    g_value_set_enum(value, val);
 	}
 	break;
     case G_TYPE_FLAGS:
 	{
 	    guint val = 0;
-	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
+		PyErr_Clear();
 		return -1;
+	    }
 	    g_value_set_flags(value, val);
 	}
 	break;
