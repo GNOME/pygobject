@@ -29,6 +29,7 @@ def _get_available_versions():
     versions = {}
     for dir in sys.path:
         if not dir: dir = os.getcwd()
+        if not os.path.exists(dir): continue
         if _pygtk_dir_pat.match(os.path.basename(dir)):
             continue  # if the dir is a pygtk dir, skip it
         for filename in os.listdir(dir):
