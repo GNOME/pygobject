@@ -1055,8 +1055,8 @@ pyg_type_register(PyObject *self, PyObject *args)
     } else
         g_warning("type has no tp_bases");
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_INCREF(class);
+    return class;
 }
 
 static PyObject *

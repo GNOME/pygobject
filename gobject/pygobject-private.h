@@ -19,24 +19,20 @@ extern struct _PyGObject_Functions pygobject_api_functions;
       (* pygobject_api_functions.unblock_threads)();      \
   } G_STMT_END
 
-#define pyg_threads_enabled (pygobject_api_functions.threads_enabled)
+#if PY_VERSION_HEX < 0x020400F0
+# define pyg_threads_enabled (pygobject_api_functions.threads_enabled)
+#else
+# define pyg_threads_enabled (PyEval_ThreadsInitialized())
+#endif
 
-
-#define pyg_gil_state_ensure() (pygobject_api_functions.threads_enabled? (pygobject_api_functions.gil_state_ensure()) : 0)
-#define pyg_gil_state_release(state) G_STMT_START {     \
-    if (pygobject_api_functions.threads_enabled)                \
+#define pyg_gil_state_ensure() (pyg_threads_enabled? (pygobject_api_functions.gil_state_ensure()) : 0)
+#define pyg_gil_state_release(state) G_STMT_START {             \
+    if (pyg_threads_enabled)                                    \
         pygobject_api_functions.gil_state_release(state);       \
     } G_STMT_END
 
-#define pyg_begin_allow_threads                         \
-    G_STMT_START {                                      \
-        PyThreadState *_save = NULL;                    \
-        if (pygobject_api_functions.threads_enabled)    \
-            _save = PyEval_SaveThread();
-#define pyg_end_allow_threads                           \
-        if (pygobject_api_functions.threads_enabled)    \
-            PyEval_RestoreThread(_save);                \
-    } G_STMT_END
+#define pyg_begin_allow_threads Py_BEGIN_ALLOW_THREADS
+#define pyg_end_allow_threads Py_END_ALLOW_THREADS
 
 
 extern GType PY_TYPE_OBJECT;
