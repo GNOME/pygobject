@@ -1900,6 +1900,42 @@ pyg_error_check(GError **error)
     return FALSE;
 }
 
+
+static PyObject *
+_pyg_strv_from_gvalue(const GValue *value)
+{
+    gchar    **argv = (gchar **) g_value_get_boxed(value);
+    int        argc, i;
+    PyObject  *py_argv;
+
+    for (argc = -1; argv[++argc];);
+    py_argv = PyList_New(argc);
+    for (i = 0; i < argc; ++i)
+	PyList_SET_ITEM(py_argv, i, PyString_FromString(argv[i]));
+    return py_argv;
+}
+
+static int
+_pyg_strv_to_gvalue(GValue *value, PyObject *obj)
+{
+    int     argc, i;
+    gchar **argv;
+
+    if (!PySequence_Check(obj)) return -1;
+    argc = PySequence_Length(obj);
+    for (i = 0; i < argc; ++i)
+	if (!PyString_Check(PySequence_Fast_GET_ITEM(obj, i)))
+	    return -1;
+    argv = g_new(gchar *, argc + 1);
+    for (i = 0; i < argc; ++i)
+	argv[i] = g_strdup(PyString_AsString(PySequence_Fast_GET_ITEM(obj, i)));
+    argv[i] = NULL;
+    g_value_init(value, G_TYPE_STRV);
+    g_value_take_boxed(value, argv);
+    return 0;
+}
+
+
 /* ----------------- gobject module initialisation -------------- */
 
 struct _PyGObject_Functions pygobject_api_functions = {
@@ -2087,4 +2123,8 @@ initgobject(void)
     PyModule_AddObject(m, "TYPE_PARAM", pyg_type_wrapper_new(G_TYPE_PARAM));
     PyModule_AddObject(m, "TYPE_OBJECT", pyg_type_wrapper_new(G_TYPE_OBJECT));
     PyModule_AddObject(m, "TYPE_PYOBJECT", pyg_type_wrapper_new(PY_TYPE_OBJECT));
+
+    pyg_register_boxed_custom(G_TYPE_STRV,
+			      _pyg_strv_from_gvalue,
+			      _pyg_strv_to_gvalue);
 }

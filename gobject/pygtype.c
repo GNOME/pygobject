@@ -683,10 +683,11 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    return ret;
 	} else if (G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY)) {
 	    GValueArray *array = (GValueArray *) g_value_get_boxed(value);
-	    PyObject *ret = PyTuple_New(array->n_values);
+	    PyObject *ret = PyList_New(array->n_values);
 	    int i;
 	    for (i = 0; i < array->n_values; ++i)
-		PyTuple_SET_ITEM(ret, i, pyg_value_as_pyobject(array->values + i, copy_boxed));
+		PyList_SET_ITEM(ret, i, pyg_value_as_pyobject
+                                (array->values + i, copy_boxed));
 	    return ret;
 	}	    
 	bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
