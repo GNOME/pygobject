@@ -53,12 +53,16 @@ pyg_enum_repr(PyGEnum *self)
 {
   GEnumClass *enum_class;
   char *value;
+  guint index;
   static char tmp[256];
   
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
-  value = enum_class->values[self->parent.ob_ival].value_name;
+  for (index = 0; index < enum_class->n_values; index++)
+      if (self->parent.ob_ival == enum_class->values[index].value)
+          break;
+  value = enum_class->values[index].value_name;
   if (value)
       sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
   else
