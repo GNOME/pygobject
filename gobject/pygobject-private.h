@@ -10,6 +10,16 @@
 
 
 /* from gobjectmodule.c */
+staticforward struct _PyGObject_Functions pygobject_api_functions;
+#define pyg_block_threads()   G_STMT_START { \
+    if (pygobject_api_functions.block_threads != NULL)    \
+      (* pygobject_api_functions.block_threads)();        \
+  } G_STMT_END
+#define pyg_unblock_threads() G_STMT_START { \
+    if (pygobject_api_functions.unblock_threads != NULL)  \
+      (* pygobject_api_functions.unblock_threads)();      \
+  } G_STMT_END
+
 GType PY_TYPE_OBJECT;
 
 PyObject *    pygobject_new          (GObject *obj);
