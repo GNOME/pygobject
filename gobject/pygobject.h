@@ -20,7 +20,7 @@ typedef struct {
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
-			    PyExtensionClass *ec, PyExtensionClass *parent);
+			    PyExtensionClass *ec, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
     PyExtensionClass *(* lookup_class)(GType type);
     PyObject *(* new)(GObject *obj);

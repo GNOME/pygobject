@@ -29,7 +29,7 @@ pygobject_destroy_notify(gpointer user_data)
 
 static void
 pygobject_register_class(PyObject *dict, const gchar *class_name,
-			 PyExtensionClass *ec, PyExtensionClass *parent)
+			 PyExtensionClass *ec, PyObject *bases)
 {
     if (!class_hash)
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
@@ -42,9 +42,9 @@ pygobject_register_class(PyObject *dict, const gchar *class_name,
     if (!ec->tp_repr)     ec->tp_repr     = (reprfunc)pygobject_repr;
     if (!ec->tp_hash)     ec->tp_hash     = (hashfunc)pygobject_hash;
 
-    if (parent) {
-        PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name,
-                                              *ec, *parent);
+    if (bases) {
+        PyExtensionClass_ExportSubclass(dict, (char *)class_name,
+					*ec, bases);
     } else {
         PyExtensionClass_Export(dict, (char *)class_name, *ec);
     }
