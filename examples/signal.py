@@ -1,14 +1,15 @@
 import gobject
 
 class C(gobject.GObject):
+    __gsignals__ = {
+        'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                      (gobject.TYPE_INT,))
+    }
     def __init__(self):
         self.__gobject_init__() # default constructor using our new GType
     def do_my_signal(self, arg):
 	print "C: class closure for `my_signal' called with argument", arg
-
 gobject.type_register(C)
-gobject.signal_new("my_signal", C, gobject.SIGNAL_RUN_FIRST,
-		   gobject.TYPE_NONE, (gobject.TYPE_INT, ))
 
 class D(C):
     def do_my_signal(self, arg):

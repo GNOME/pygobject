@@ -1928,10 +1928,94 @@ pyg_object_class_init(GObjectClass *class, PyObject *py_class)
 	      G_OBJECT_CLASS_NAME(class), py_class);
 }
 
+static gboolean
+create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
+{
+    GSignalFlags signal_flags;
+    PyObject *py_return_type, *py_param_types;
+    GType return_type;
+    guint n_params, i;
+    GType *param_types;
+    guint signal_id;
+
+    if (!PyArg_ParseTuple(tuple, "iOO", &signal_flags, &py_return_type,
+			  &py_param_types)) {
+	gchar buf[128];
+
+	PyErr_Clear();
+	g_snprintf(buf, sizeof(buf), "value for __gsignals__['%s'] not in correct format", signal_name);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return FALSE;
+    }
+
+    return_type = pyg_type_from_object(py_return_type);
+    if (!return_type)
+	return FALSE;
+    if (!PySequence_Check(py_param_types)) {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf), "third element of __gsignals__['%s'] tuple must be a sequence", signal_name);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return FALSE;
+    }
+    n_params = PySequence_Length(py_param_types);
+    param_types = g_new(GType, n_params);
+    for (i = 0; i < n_params; i++) {
+	PyObject *item = PySequence_GetItem(py_param_types, i);
+
+	param_types[i] = pyg_type_from_object(item);
+	if (param_types[i] == 0) {
+	    Py_DECREF(item);
+	    g_free(param_types);
+	    return FALSE;
+	}
+	Py_DECREF(item);
+    }
+
+    signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
+			      pyg_signal_class_closure_get(),
+			      (GSignalAccumulator)0, NULL,
+			      (GSignalCMarshaller)0,
+			      return_type, n_params, param_types);
+    g_free(param_types);
+
+    if (signal_id == 0) {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf), "could not create signal for %s",
+		   signal_name);
+	PyErr_SetString(PyExc_RuntimeError, buf);
+	return FALSE;
+    }
+    return TRUE;
+}
+
+static gboolean
+add_signals (PyTypeObject *class, GType instance_type, PyObject *signals)
+{
+    int pos = 0;
+    PyObject *key, *value;
+
+    while (PyDict_Next(signals, &pos, &key, &value)) {
+	const gchar *signal_name;
+
+	if (!PyString_Check(key)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gsignals__ keys must be strings");
+	    return FALSE;
+	}
+	signal_name = PyString_AsString (key);
+
+	if (!create_signal(instance_type, signal_name, value))
+	    return FALSE;
+    }
+    return TRUE;
+}
+
 static PyObject *
 pyg_type_register(PyObject *self, PyObject *args)
 {
-    PyObject *gtype, *module;
+    PyObject *gtype, *module, *gsignals;
     PyTypeObject *class;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
@@ -2007,6 +2091,26 @@ pyg_type_register(PyObject *self, PyObject *args)
     gtype = pyg_type_wrapper_new(instance_type);
     PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
     Py_DECREF(gtype);
+
+    /* we look this up in the instance dictionary, so we don't
+     * accidentally get a parent type's __gsignals__ attribute. */
+    gsignals = PyDict_GetItemString(class->tp_dict, "__gsignals__");
+    if (gsignals) {
+	if (!PyDict_Check(gsignals)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gsignals__ attribute not a dict!");
+	    Py_DECREF(gsignals);
+	    return NULL;
+	}
+	if (!add_signals(class, instance_type, gsignals)) {
+	    Py_DECREF(gsignals);
+	    return NULL;
+	}
+	PyDict_DelItemString(class->tp_dict, "__gsignals__");
+	Py_DECREF(gsignals);
+    } else {
+	PyErr_Clear();
+    }
 
     Py_INCREF(Py_None);
     return Py_None;
