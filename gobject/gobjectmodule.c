@@ -1,24 +1,13 @@
 /* -*- Mode: C; c-basic-offset: 4 -*- */
-#include <glib.h>
-#include <gobject/gobject.h>
+#define _INSIDE_PYGOBJECT_
+#include "pygobject.h"
 #include <gobject/gvaluetypes.h>
 #include <gobject/genums.h>
-#include <Python.h>
-#include "ExtensionClass.h"
 
 static GHashTable *class_hash;
 
 static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
-
-typedef struct {
-    PyObject_HEAD
-    GObject *obj;
-    gboolean hasref;     /* the GObject owns this reference */
-    PyObject *inst_dict; /* the instance dictionary -- must be last */
-} PyGObject;
-
-#define pygobject_get(v) (((PyGObject *)v)->obj)
 
 staticforward PyExtensionClass PyGObject_Type;
 static void      pygobject_dealloc(PyGObject *self);
@@ -625,6 +614,17 @@ static PyMethodDef pygobject_functions[] = {
 
 /* ----------------- gobject module initialisation -------------- */
 
+static struct _PyGObject_Functions functions = {
+  pygobject_register_class,
+  pygobject_register_wrapper,
+  pygobject_lookup_class,
+  pygobject_new,
+  pyg_enum_get_value,
+  pyg_flags_get_value,
+  pyg_value_from_pyobject,
+  pyg_value_as_pyobject,
+};
+
 DL_EXPORT(void)
 initgobject(void)
 {
@@ -638,6 +638,10 @@ initgobject(void)
 
     pygobject_wrapper_key = g_quark_from_static_string("py-gobject-wrapper");
     pygobject_ownedref_key = g_quark_from_static_string("py-gobject-ownedref");
+
+    /* for addon libraries ... */
+    PyDict_SetItemString(d, "_PyGObject_API",
+			 PyCObject_FromVoidPtr(&functions, NULL));
 
     if (PyErr_Occurred())
 	Py_FatalError("can't initialise module gobject");
