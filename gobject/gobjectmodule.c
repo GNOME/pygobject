@@ -627,7 +627,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 
     g_return_val_if_fail(callback != NULL, NULL);
     closure = g_closure_new_simple(sizeof(PyGClosure), NULL);
-    g_closure_add_fnotify(closure, NULL, pyg_closure_destroy);
+    g_closure_add_finalize_notifier(closure, NULL, pyg_closure_destroy);
     g_closure_set_marshal(closure, pyg_closure_marshal);
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
