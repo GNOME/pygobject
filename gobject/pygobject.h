@@ -7,6 +7,15 @@
 #include <glib.h>
 #include <glib-object.h>
 
+  /* PyGClosure is a _private_ structure */
+typedef struct _PyGClosure PyGClosure;
+struct _PyGClosure {
+    GClosure closure;
+    PyObject *callback;
+    PyObject *extra_args; /* tuple of extra args to pass to callback */
+    PyObject *swap_data; /* other object for gtk_signal_connect_object */
+};
+
 typedef struct {
     PyObject_HEAD
     GObject *obj;

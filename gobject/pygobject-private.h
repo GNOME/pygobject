@@ -65,14 +65,6 @@ PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
                                        gboolean copy_boxed, 
                                        const GParamSpec* pspec);
 
-typedef struct _PyGClosure PyGClosure;
-struct _PyGClosure {
-    GClosure closure;
-    PyObject *callback;
-    PyObject *extra_args; /* tuple of extra args to pass to callback */
-    PyObject *swap_data; /* other object for gtk_signal_connect_object */
-};
-
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get(void);
 
