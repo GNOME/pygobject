@@ -583,7 +583,7 @@ pygobject_repr(PyGObject *self)
 {
     gchar buf[128];
 
-    g_snprintf(buf, sizeof(buf), "<%s at %lx>", G_OBJECT_TYPE_NAME(self->obj),
+    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", G_OBJECT_TYPE_NAME(self->obj),
 	       (long)self->obj);
     return PyString_FromString(buf);
 }
@@ -894,6 +894,134 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     return PyInt_FromLong(handlerid);
 }
 
+static PyObject *
+pygobject_disconnect(PyGObject *self, PyObject *args)
+{
+    guint handler_id;
+
+    if (!PyArg_ParseTuple(args, "i:GObject.disconnect", &handler_id))
+	return NULL;
+    g_signal_handler_disconnect(self->obj, handler_id);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_handler_block(PyGObject *self, PyObject *args)
+{
+    guint handler_id;
+
+    if (!PyArg_ParseTuple(args, "i:GObject.handler_block", &handler_id))
+	return NULL;
+    g_signal_handler_block(self->obj, handler_id);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_handler_unblock(PyGObject *self, PyObject *args)
+{
+    guint handler_id;
+
+    if (!PyArg_ParseTuple(args, "i:GObject.handler_unblock", &handler_id))
+	return NULL;
+    g_signal_handler_unblock(self->obj, handler_id);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_emit(PyGObject *self, PyObject *args)
+{
+    guint signal_id, i, len;
+    PyObject *first, *py_ret;
+    gchar *name;
+    GSignalQuery query;
+    GValue *params, ret = { 0, };
+
+    len = PyTuple_Size(args);
+    if (len < 1) {
+	PyErr_SetString(PyExc_TypeError,"GObject.emit needs at least one arg");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 1);
+    if (!PyArg_ParseTuple(first, "s:GObject.emit", &name)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    signal_id = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
+    if (signal_id == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    g_signal_query(signal_id, &query);
+    if (len != query.n_params + 1) {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf),
+		   "%d parameters needed for signal %s; %d given",
+		   query.n_params, name, len - 1);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return NULL;
+    }
+    params = g_new0(GValue, query.n_params + 1);
+    g_value_init(&params[0], G_OBJECT_TYPE(self->obj));
+    g_value_set_object(&params[0], G_OBJECT(self->obj));
+
+    for (i = 0; i < query.n_params; i++)
+	g_value_init(&params[i + 1], query.param_types[i]);
+    for (i = 0; i < query.n_params; i++) {
+	PyObject *item = PyTuple_GetItem(args, i+1);
+
+	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
+	    gchar buf[128];
+
+	    g_snprintf(buf, sizeof(buf),
+		"could not convert type %s to %s required for parameter %d",
+		item->ob_type->tp_name,
+		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    for (i = 0; i < query.n_params + 1; i++)
+		g_value_unset(&params[i]);
+	    g_free(params);
+	    return NULL;
+	}
+    }
+    if (query.return_type != G_TYPE_NONE)
+	g_value_init(&ret, query.return_type);
+    g_signal_emitv(params, signal_id, &ret);
+    for (i = 0; i < query.n_params + 1; i++)
+	g_value_unset(&params[i]);
+    g_free(params);
+    if (query.return_type != G_TYPE_NONE) {
+	py_ret = pyg_value_as_pyobject(&ret);
+	g_value_unset(&ret);
+    } else {
+	Py_INCREF(Py_None);
+	py_ret = Py_None;
+    }
+    return py_ret;
+}
+
+static PyObject *
+pygobject_stop_emission(PyGObject *self, PyObject *args)
+{
+    gchar *signal;
+    guint signal_id;
+
+    if (!PyArg_ParseTuple(args, "s:GObject.stop_emission", &signal))
+	return NULL;
+    signal_id = g_signal_lookup(signal, G_OBJECT_TYPE(self->obj));
+    if (signal_id == 0) {
+	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	return NULL;
+    }
+    g_signal_stop_emission(self->obj, signal_id);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
     { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
@@ -903,9 +1031,20 @@ static PyMethodDef pygobject_methods[] = {
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
     { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { "connect", (PyCFunction)pygobject_connect, METH_VARARGS },
+    { "signal_connect", (PyCFunction)pygobject_connect, METH_VARARGS },
     { "connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
+    { "signal_connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
     { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
+    { "signal_connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
     { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
+    { "signal_connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
+    { "disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
+    { "handler_disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
+    { "handler_block", (PyCFunction)pygobject_handler_block, METH_VARARGS },
+    { "handler_unblock", (PyCFunction)pygobject_handler_unblock,METH_VARARGS },
+    { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
+    { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
+    { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
