@@ -675,11 +675,13 @@ pyg_closure_marshal(GClosure *closure,
     if (ret == NULL) {
 	PyErr_Print();
 	PyErr_Clear();
+	Py_DECREF(params);
 	pyg_unblock_threads();
 	return;
     }
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
+    Py_DECREF(params);
     Py_DECREF(ret);
     pyg_unblock_threads();
 }
@@ -789,10 +791,12 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	PyErr_Print();
 	PyErr_Clear();
 	Py_DECREF(method);
+	Py_DECREF(params);
 	pyg_unblock_threads();
 	return;
     }
     Py_DECREF(method);
+    Py_DECREF(params);
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
