@@ -534,6 +534,18 @@ pygobject_set_param(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
+pygobject_queue_param_changed(PyGObject *self, PyObject *args)
+{
+    char *param_name;
+
+    if (!PyArg_ParseTuple(args, "s:GObject.queue_param_changed", &param_name))
+	return NULL;
+    g_object_queue_param_changed(self->obj, param_name);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
 pygobject_get_data(PyGObject *self, PyObject *args)
 {
     char *key;
@@ -570,6 +582,7 @@ static PyMethodDef pygobject_methods[] = {
     { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
     { "get_param", (PyCFunction)pygobject_get_param, METH_VARARGS },
     { "set_param", (PyCFunction)pygobject_set_param, METH_VARARGS },
+    { "queue_param_changed", (PyCFunction)pygobject_queue_param_changed, METH_VARARGS },
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
     { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { NULL, NULL, 0 }
