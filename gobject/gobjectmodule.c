@@ -170,7 +170,7 @@ pyg_type_thingee_new(GType (* get_type)(void))
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
-void
+static void
 pygobject_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
@@ -273,6 +273,25 @@ pygobject_new(GObject *obj)
 }
 
 /* ---------------- GBoxed functions -------------------- */
+
+static GType PY_TYPE_OBJECT = 0;
+
+static gpointer
+pyobject_copy(gpointer boxed)
+{
+    PyObject *object = boxed;
+
+    Py_INCREF(object);
+    return object;
+}
+
+static void
+pyobject_free(gpointer boxed)
+{
+    PyObject *object = boxed;
+
+    Py_DECREF(object);
+}
 
 static void
 pyg_boxed_dealloc(PyGBoxed *self)
@@ -711,7 +730,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     } else if (G_VALUE_HOLDS_BOXED(value)) {
 	PyGBoxedMarshal *bm;
 
-	if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
+	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
+	    g_value_set_boxed(value, obj);
+	} else if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
 	    G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
 	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
 	} else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
@@ -761,8 +782,12 @@ pyg_value_as_pyobject(const GValue *value)
     } else if (G_VALUE_HOLDS_FLAGS(value)) {
 	return PyInt_FromLong(g_value_get_flags(value));
     } else if (G_VALUE_HOLDS_BOXED(value)) {
-	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+	PyGBoxedMarshal *bm;
 
+	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
+	    return (PyObject *)g_value_dup_boxed(value);
+
+	bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
 	if (bm)
 	    return bm->fromvalue(value);
 	else
@@ -2081,6 +2106,13 @@ initgobject(void)
     d = PyModule_GetDict(m);
 
     g_type_init();
+
+    PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
+						  NULL,
+						  pyobject_copy,
+						  pyobject_free,
+						  TRUE);
+
     pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
 			 o=PyInt_FromLong(G_TYPE_OBJECT));
