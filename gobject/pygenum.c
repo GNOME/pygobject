@@ -133,6 +133,8 @@ pyg_enum_from_gtype (GType gtype, int value)
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygenum_class_key);
     if (pyclass == NULL) {
 	pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
+	if (!pyclass)
+	    return PyInt_FromLong(value);
     }
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
