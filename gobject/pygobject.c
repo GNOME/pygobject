@@ -72,6 +72,9 @@ pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
 {
     SinkFunc sf;
 
+    g_return_if_fail(G_IS_TYPE(type));
+    g_return_if_fail(sinkfunc != NULL);
+    
     if (!sink_funcs)
 	sink_funcs = g_array_new(FALSE, FALSE, sizeof(SinkFunc));
 
@@ -342,7 +345,7 @@ pygobject_new(GObject *obj)
 	Py_INCREF(Py_None);
 	return Py_None;
     }
-    
+
     /* we already have a wrapper for this object -- return it. */
     self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key);
     if (self != NULL) {
