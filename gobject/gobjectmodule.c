@@ -479,6 +479,7 @@ pygobject_get_param(PyGObject *self, PyObject *args)
     gchar *param_name;
     GParamSpec *pspec;
     GValue value;
+    PyObject *ret;
 
     if (!PyArg_ParseTuple(args, "s:GObject.get_param", &param_name))
 	return NULL;
@@ -491,7 +492,9 @@ pygobject_get_param(PyGObject *self, PyObject *args)
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     g_object_get_param(self->obj, param_name, &value);
-    return pyg_value_as_pyobject(&value);
+    ret = pyg_value_as_pyobject(&value);
+    g_value_unset(&value);
+    return ret;
 }
 
 static PyObject *
@@ -518,6 +521,7 @@ pygobject_set_param(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_object_set_param(self->obj, param_name, &value);
+    g_value_unset(&value);
     Py_INCREF(Py_None);
     return Py_None;
 }
