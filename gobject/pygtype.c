@@ -818,25 +818,31 @@ add_property_docs(GType gtype, GString *string)
     GObjectClass *class;
     GParamSpec **props;
     guint n_props = 0, i;
+    gboolean has_prop = FALSE;
 
     class = g_type_class_ref(gtype);
     props = g_object_class_list_properties(class, &n_props);
 
-    if (n_props > 0) {
-	g_string_append_printf(string, "Properties from %s:\n",
-			       g_type_name(gtype));
+    for (i = 0; i < n_props; i++) {
+	if (props[i]->owner_type != gtype)
+	    continue; /* these are from a parent type */
 
-	for (i = 0; i < n_props; i++) {
-	    g_string_append_printf(string, "  %s -> %s: %s\n",
-				   g_param_spec_get_name(props[i]),
-				   g_type_name(props[i]->value_type),
-				   g_param_spec_get_nick(props[i]));
-	    g_string_append_printf(string, "    %s\n",
-				   g_param_spec_get_blurb(props[i]));
+	/* print out the heading first */
+	if (!has_prop) {
+	    g_string_append_printf(string, "Properties from %s:\n",
+				   g_type_name(gtype));
+	    has_prop = TRUE;
 	}
-	g_free(props);
-	g_string_append(string, "\n");
+	g_string_append_printf(string, "  %s -> %s: %s\n",
+			       g_param_spec_get_name(props[i]),
+			       g_type_name(props[i]->value_type),
+			       g_param_spec_get_nick(props[i]));
+	g_string_append_printf(string, "    %s\n",
+			       g_param_spec_get_blurb(props[i]));
     }
+    g_free(props);
+    if (has_prop)
+	g_string_append(string, "\n");
     g_type_class_unref(class);
 }
 
