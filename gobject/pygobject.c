@@ -850,6 +850,12 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     GValue *params, ret = { 0, };
 
     ihint = g_signal_get_invocation_hint(self->obj);
+    if (!ihint) {
+	PyErr_SetString(PyExc_TypeError, "could not find signa invocation "
+			"information for this object.");
+	return NULL;
+    }
+
     signal_id = ihint->signal_id;
     name = g_signal_name(signal_id);
 
