@@ -637,7 +637,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 {
     PyObject *tmp;
 
-    if (G_VALUE_HOLDS_CHAR(value)) {
+    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_CHAR:
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_char(value, PyString_AsString(tmp)[0]);
 	else {
@@ -645,7 +646,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_UCHAR(value)) {
+	break;
+    case G_TYPE_UCHAR:
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_char(value, PyString_AsString(tmp)[0]);
 	else {
@@ -653,9 +655,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_BOOLEAN(value)) {
+	break;
+    case G_TYPE_BOOLEAN:
 	g_value_set_boolean(value, PyObject_IsTrue(obj));
-    } else if (G_VALUE_HOLDS_INT(value)) {
+	break;
+    case G_TYPE_INT:
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_int(value, PyInt_AsLong(tmp));
 	else {
@@ -663,7 +667,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_UINT(value)) {
+	break;
+    case G_TYPE_UINT:
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_uint(value, PyInt_AsLong(tmp));
 	else {
@@ -671,7 +676,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_LONG(value)) {
+	break;
+    case G_TYPE_LONG:
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_long(value, PyInt_AsLong(tmp));
 	else {
@@ -679,7 +685,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_ULONG(value)) {
+	break;
+    case G_TYPE_ULONG:
 	if ((tmp = PyNumber_Int(obj)))
 	    g_value_set_ulong(value, PyInt_AsLong(tmp));
 	else {
@@ -687,7 +694,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_FLOAT(value)) {
+	break;
+    case G_TYPE_FLOAT:
 	if ((tmp = PyNumber_Float(obj)))
 	    g_value_set_float(value, PyFloat_AsDouble(tmp));
 	else {
@@ -695,7 +703,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_DOUBLE(value)) {
+	break;
+    case G_TYPE_DOUBLE:
 	if ((tmp = PyNumber_Float(obj)))
 	    g_value_set_double(value, PyFloat_AsDouble(tmp));
 	else {
@@ -703,7 +712,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_STRING(value)) {
+	break;
+    case G_TYPE_STRING:
 	if ((tmp = PyObject_Str(obj)))
 	    g_value_set_string(value, PyString_AsString(tmp));
 	else {
@@ -711,41 +721,57 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	Py_DECREF(tmp);
-    } else if (G_VALUE_HOLDS_OBJECT(value)) {
-	PyExtensionClass *ec =pygobject_lookup_class(G_VALUE_TYPE(value));
-	if (!ExtensionClassSubclassInstance_Check(obj, ec)) {
-	    return -1;
+	break;
+    case G_TYPE_OBJECT:
+	{
+	    PyExtensionClass *ec =pygobject_lookup_class(G_VALUE_TYPE(value));
+	    if (!ExtensionClassSubclassInstance_Check(obj, ec)) {
+		return -1;
+	    }
+	    g_value_set_object(value, pygobject_get(obj));
 	}
-	g_value_set_object(value, pygobject_get(obj));
-    } else if (G_VALUE_HOLDS_ENUM(value)) {
-	gint val = 0;
-	if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
-	    return -1;
-	g_value_set_enum(value, val);
-    } else if (G_VALUE_HOLDS_FLAGS(value)) {
-	gint val = 0;
-	if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
-	    return -1;
-	g_value_set_flags(value, val);
-    } else if (G_VALUE_HOLDS_BOXED(value)) {
-	PyGBoxedMarshal *bm;
+	break;
+    case G_TYPE_ENUM:
+	{
+	    gint val = 0;
+	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_enum(value, val);
+	}
+	break;
+    case G_TYPE_FLAGS:
+	{
+	    guint val = 0;
+	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_flags(value, val);
+	}
+	break;
+    case G_TYPE_BOXED:
+	{
+	    PyGBoxedMarshal *bm;
 
-	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
-	    g_value_set_boxed(value, obj);
-	} else if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
-	    G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
-	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
-	} else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
-	    return bm->tovalue(value, obj);
-	} else if (PyCObject_Check(obj)) {
-	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
-	} else
-	    return -1;
-    } else if (G_VALUE_HOLDS_POINTER(value)) {
+	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
+		g_value_set_boxed(value, obj);
+	    } else if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
+		       G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
+		g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
+	    } else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
+		return bm->tovalue(value, obj);
+	    } else if (PyCObject_Check(obj)) {
+		g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
+	    } else
+		return -1;
+	}
+	break;
+    case G_TYPE_POINTER:
 	if (PyCObject_Check(obj))
 	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
 	else
 	    return -1;
+	break;
+    default:
+	break;
     }
     return 0;
 }
@@ -755,46 +781,57 @@ pyg_value_as_pyobject(const GValue *value)
 {
     gchar buf[128];
 
-    if (G_VALUE_HOLDS_CHAR(value)) {
-	gint8 val = g_value_get_char(value);
-	return PyString_FromStringAndSize((char *)&val, 1);
-    } else if (G_VALUE_HOLDS_UCHAR(value)) {
-	guint8 val = g_value_get_uchar(value);
-	return PyString_FromStringAndSize((char *)&val, 1);
-    } else if (G_VALUE_HOLDS_INT(value)) {
+    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    case G_TYPE_CHAR:
+	{
+	    gint8 val = g_value_get_char(value);
+	    return PyString_FromStringAndSize((char *)&val, 1);
+	}
+    case G_TYPE_UCHAR:
+	{
+	    guint8 val = g_value_get_uchar(value);
+	    return PyString_FromStringAndSize((char *)&val, 1);
+	}
+    case G_TYPE_BOOLEAN:
+	return PyInt_FromLong(g_value_get_boolean(value));
+    case G_TYPE_INT:
 	return PyInt_FromLong(g_value_get_int(value));
-    } else if (G_VALUE_HOLDS_UINT(value)) {
+    case G_TYPE_UINT:
 	return PyInt_FromLong(g_value_get_uint(value));
-    } else if (G_VALUE_HOLDS_LONG(value)) {
+    case G_TYPE_LONG:
 	return PyInt_FromLong(g_value_get_long(value));
-    } else if (G_VALUE_HOLDS_ULONG(value)) {
+    case G_TYPE_ULONG:
 	return PyInt_FromLong(g_value_get_ulong(value));
-    } else if (G_VALUE_HOLDS_FLOAT(value)) {
+    case G_TYPE_FLOAT:
 	return PyFloat_FromDouble(g_value_get_float(value));
-    } else if (G_VALUE_HOLDS_DOUBLE(value)) {
+    case G_TYPE_DOUBLE:
 	return PyFloat_FromDouble(g_value_get_double(value));
-    } else if (G_VALUE_HOLDS_STRING(value)) {
+    case G_TYPE_STRING:
 	return PyString_FromString(g_value_get_string(value));
-    } else if (G_VALUE_HOLDS_OBJECT(value)) {
+    case G_TYPE_OBJECT:
 	return pygobject_new(g_value_get_object(value));
-    } else if (G_VALUE_HOLDS_ENUM(value)) {
+    case G_TYPE_ENUM:
 	return PyInt_FromLong(g_value_get_enum(value));
-    } else if (G_VALUE_HOLDS_FLAGS(value)) {
+    case G_TYPE_FLAGS:
 	return PyInt_FromLong(g_value_get_flags(value));
-    } else if (G_VALUE_HOLDS_BOXED(value)) {
-	PyGBoxedMarshal *bm;
+    case G_TYPE_BOXED:
+	{
+	    PyGBoxedMarshal *bm;
 
-	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
-	    return (PyObject *)g_value_dup_boxed(value);
+	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
+		return (PyObject *)g_value_dup_boxed(value);
 
-	bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
-	if (bm)
-	    return bm->fromvalue(value);
-	else
-	    return pyg_boxed_new(G_VALUE_TYPE(value), g_value_get_boxed(value),
-				 TRUE, TRUE);
-    } else if (G_VALUE_HOLDS_POINTER(value)) {
+	    bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+	    if (bm)
+		return bm->fromvalue(value);
+	    else
+		return pyg_boxed_new(G_VALUE_TYPE(value),
+				     g_value_get_boxed(value), TRUE, TRUE);
+	}
+    case G_TYPE_POINTER:
 	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
+    default:
+	break;
     }
     g_snprintf(buf, sizeof(buf), "unknown type %s",
 	       g_type_name(G_VALUE_TYPE(value)));
