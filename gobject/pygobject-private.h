@@ -26,16 +26,6 @@ void  pyg_destroy_notify (gpointer user_data);
 
 typedef struct {
     PyObject_HEAD
-    GParamSpec *pspec;
-} PyGParamSpec;
-extern PyTypeObject PyGParamSpec_Type;
-PyObject *pyg_param_spec_new(GParamSpec *pspec);
-
-#define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
-#define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
-
-typedef struct {
-    PyObject_HEAD
     GMainLoop *loop;
 } PyGMainLoop;
 extern PyTypeObject PyGMainLoop_Type;
@@ -105,5 +95,8 @@ extern PyTypeObject PyGPointer_Type;
 void       pyg_register_pointer (PyObject *dict, const gchar *class_name,
 				 GType pointer_type, PyTypeObject *type);
 PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
+
+extern PyTypeObject PyGParamSpec_Type;
+PyObject *pyg_param_spec_new    (GParamSpec *pspec);
 
 #endif

@@ -1941,6 +1941,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_set_thread_block_funcs,
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
+
+  &PyGParamSpec_Type,
+  pyg_param_spec_new,
 };
 
 DL_EXPORT(void)
