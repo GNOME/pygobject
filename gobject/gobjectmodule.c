@@ -941,7 +941,7 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
     GParamSpec *pspec;
-    GValue value;
+    GValue value = { 0, };
     PyObject *ret;
 
     if (!PyArg_ParseTuple(args, "s:GObject.get_property", &param_name))
@@ -965,7 +965,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
     GParamSpec *pspec;
-    GValue value;
+    GValue value = { 0, };
     PyObject *pvalue;
 
     if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
