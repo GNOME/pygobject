@@ -773,10 +773,11 @@ object_doc_dealloc(PyObject *self)
 static void
 add_signal_docs(GType gtype, GString *string)
 {
-    GTypeClass *class;
+    GTypeClass *class = NULL;
     guint *signal_ids, n_ids = 0, i;
 
-    class = g_type_class_ref(gtype);
+    if (G_TYPE_IS_CLASSED(gtype))
+	class = g_type_class_ref(gtype);
     signal_ids = g_signal_list_ids(gtype, &n_ids);
 
     if (n_ids > 0) {
@@ -808,7 +809,8 @@ add_signal_docs(GType gtype, GString *string)
 	g_free(signal_ids);
 	g_string_append(string, "\n");
     }
-    g_type_class_unref(class);
+    if (class)
+	g_type_class_unref(class);
 }
 
 static void
