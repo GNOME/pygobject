@@ -19,15 +19,18 @@ typedef struct {
 #define pygobject_check(v,base) (ExtensionClassSubclassInstance_Check(v,base))
 
 struct _PyGObject_Functions {
-  void (* register_class)(PyObject *dict, const gchar *class_name,
-			  PyExtensionClass *ec, PyExtensionClass *parent);
-  void (* register_wrapper)(PyObject *self);
-  PyExtensionClass *(* lookup_class)(GType type);
-  PyObject *(* new)(GObject *obj);
-  gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
-  gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
-  int (* value_from_pyobject)(GValue *value, PyObject *obj);
-  PyObject *(* value_as_pyobject)(GValue *value);
+    void (* register_class)(PyObject *dict, const gchar *class_name,
+			    PyExtensionClass *ec, PyExtensionClass *parent);
+    void (* register_wrapper)(PyObject *self);
+    PyExtensionClass *(* lookup_class)(GType type);
+    PyObject *(* new)(GObject *obj);
+    gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
+    gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
+    void (* boxed_register)(GType boxed_type,
+			    PyObject *(* from_func)(const GValue *value),
+			    int (* to_func)(GValue *value, PyObject *obj));
+    int (* value_from_pyobject)(GValue *value, PyObject *obj);
+    PyObject *(* value_as_pyobject)(const GValue *value);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -44,6 +47,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_new              (_PyGObject_API->new)
 #define pyg_enum_get_value         (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value        (_PyGObject_API->flags_get_value)
+#define pyg_boxed_register         (_PyGObject_API->boxed_register)
 #define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
 

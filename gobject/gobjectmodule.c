@@ -203,6 +203,29 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
     return res;
 }
 
+typedef PyObject *(* fromvaluefunc)(const GValue *value);
+typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
+typedef struct {
+    fromvaluefunc fromvalue;
+    tovaluefunc tovalue;
+} PyGBoxedMarshal;
+static GHashTable *boxed_marshalers;
+#define pyg_boxed_lookup(boxed_type) \
+  ((PyGBoxedMarshal *)g_hash_table_lookup(boxed_marshalers, \
+                                          GUINT_TO_POINTER(boxed_type)))
+
+static void
+pyg_boxed_register(GType boxed_type,
+		   PyObject *(* from_func)(const GValue *value),
+		   int (* to_func)(GValue *value, PyObject *obj))
+{
+    PyGBoxedMarshal *bm = g_new(PyGBoxedMarshal, 1);
+
+    bm->fromvalue = from_func;
+    bm->tovalue = to_func;
+    g_hash_table_insert(boxed_marshalers, GUINT_TO_POINTER(boxed_type), bm);
+}
+
 static int
 pyg_value_from_pyobject(GValue *value, PyObject *obj)
 {
@@ -298,12 +321,17 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
 	    return -1;
 	g_value_set_flags(value, val);
+    } else if (G_IS_VALUE_BOXED(value)) {
+	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+
+	if (!bm || bm->tovalue(value, obj) < 0)
+	    return -1;
     }
     return 0;
 }
 
 static PyObject *
-pyg_value_as_pyobject(GValue *value)
+pyg_value_as_pyobject(const GValue *value)
 {
     if (G_IS_VALUE_CHAR(value)) {
 	gint8 val = g_value_get_char(value);
@@ -331,9 +359,110 @@ pyg_value_as_pyobject(GValue *value)
 	return PyInt_FromLong(g_value_get_enum(value));
     } else if (G_IS_VALUE_FLAGS(value)) {
 	return PyInt_FromLong(g_value_get_flags(value));
+    } else if (G_IS_VALUE_BOXED(value)) {
+	PyGBoxedMarshal *bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+
+	if (bm)
+	    return bm->fromvalue(value);
+	/* fall through if unknown boxed type */
     }
     PyErr_SetString(PyExc_TypeError, "unknown type");
     return NULL;
+}
+
+/* -------------- PyGClosure ----------------- */
+
+typedef struct _PyGClosure PyGClosure;
+struct _PyGClosure {
+    GClosure closure;
+    PyObject *callback;
+    PyObject *extra_args; /* tuple of extra args to pass to callback */
+    PyObject *swap_data; /* other object for gtk_signal_connect_object */
+};
+
+/* XXXX - must handle multithreadedness here */
+static void
+pyg_closure_destroy(gpointer data, GClosure *closure)
+{
+    PyGClosure *pc = (PyGClosure *)closure;
+
+    Py_DECREF(pc->callback);
+    Py_XDECREF(pc->extra_args);
+    Py_XDECREF(pc->swap_data);
+}
+
+/* XXXX - need to handle python thread context stuff */
+static void
+pyg_closure_marshal(GClosure *closure,
+		    guint invocation_hint,
+		    GValue *return_value,
+		    guint n_param_values,
+		    const GValue *param_values,
+		    gpointer marshal_data)
+{
+    PyGClosure *pc = (PyGClosure *)closure;
+    PyObject *params, *ret;
+    guint i;
+
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(n_param_values);
+    for (i = 0; i < n_param_values; i++) {
+	/* swap in a different initial data for connect_object() */
+	if (i == 0 && G_CCLOSURE_SWAP_DATA(closure)) {
+	    g_return_if_fail(pc->swap_data != NULL);
+	    Py_INCREF(pc->swap_data);
+	    PyTuple_SetItem(params, 0, pc->swap_data);
+	} else {
+	    PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+
+	    /* error condition */
+	    if (!item) {
+		Py_DECREF(params);
+		/* XXXX - clean up if threading was used */
+		return;
+	    }
+	    PyTuple_SetItem(params, i, item);
+	}
+    }
+    /* params passed to function may have extra arguments */
+    if (pc->extra_args) {
+	PyObject *tuple = params;
+	params = PySequence_Concat(tuple, pc->extra_args);
+	Py_DECREF(tuple);
+    }
+    ret = PyObject_CallObject(pc->callback, params);
+    if (ret == NULL) {
+	/* XXXX - do fatal exceptions thing here */
+	PyErr_Print();
+	PyErr_Clear();
+	/* XXXX - clean up if threading was used */
+	return;
+    }
+    pyg_value_from_pyobject(return_value, ret);
+    Py_DECREF(ret);
+    /* XXXX - clean up if threading was used */
+}
+
+static GClosure *
+pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
+{
+    GClosure *closure;
+
+    g_return_val_if_fail(callback != NULL, NULL);
+    closure = g_closure_new_simple(sizeof(PyGClosure), NULL);
+    g_closure_add_fnotify(closure, NULL, pyg_closure_destroy);
+    g_closure_set_marshal(closure, pyg_closure_marshal);
+    Py_INCREF(callback);
+    ((PyGClosure *)closure)->callback = callback;
+    if (extra_args) {
+	Py_INCREF(extra_args);
+	((PyGClosure *)closure)->extra_args = extra_args;
+    }
+    if (swap_data) {
+	Py_INCREF(swap_data);
+	((PyGClosure *)closure)->swap_data;
+	closure->derivative_flag = TRUE;
+    }
 }
 
 /* -------------- PyGObject behaviour ----------------- */
@@ -660,6 +789,7 @@ static struct _PyGObject_Functions functions = {
   pygobject_new,
   pyg_enum_get_value,
   pyg_flags_get_value,
+  pyg_boxed_register,
   pyg_value_from_pyobject,
   pyg_value_as_pyobject,
 };
@@ -674,6 +804,8 @@ initgobject(void)
 
     g_type_init();
     pygobject_register_class(d, "GObject", &PyGObject_Type, NULL);
+
+    boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
 
     pygobject_wrapper_key = g_quark_from_static_string("py-gobject-wrapper");
     pygobject_ownedref_key = g_quark_from_static_string("py-gobject-ownedref");
