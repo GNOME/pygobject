@@ -111,9 +111,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	} else if (G_IS_PARAM_SPEC_UCHAR(pspec)) {
 	    return PyString_FromFormat("%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
 	} else if (G_IS_PARAM_SPEC_BOOLEAN(pspec)) {
-	    PyObject *retval = G_PARAM_SPEC_BOOLEAN(pspec)->default_value ? Py_True : Py_False;
-	    Py_INCREF(retval);
-	    return retval;
+	    return PyBool_FromLong(G_PARAM_SPEC_BOOLEAN(pspec)->default_value);
 	} else if (G_IS_PARAM_SPEC_INT(pspec)) {
 	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->default_value);
 	} else if (G_IS_PARAM_SPEC_UINT(pspec)) {

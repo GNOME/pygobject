@@ -606,9 +606,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	return PyString_FromStringAndSize((char *)&val, 1);
     }
     case G_TYPE_BOOLEAN: {
-	PyObject *val = g_value_get_boolean(value) ? Py_True : Py_False;
-	Py_INCREF(val);
-	return val;
+	return PyBool_FromLong(g_value_get_boolean(value));
     }
     case G_TYPE_INT:
 	return PyInt_FromLong(g_value_get_int(value));

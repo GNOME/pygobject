@@ -85,12 +85,7 @@ _wrap_g_main_loop_get_context (PyGMainLoop *loop)
 static PyObject *
 _wrap_g_main_loop_is_running (PyGMainLoop *self)
 {
-    PyObject *py_ret;
-    
-    py_ret = g_main_loop_is_running(self->loop) ? Py_True : Py_False;
-    Py_INCREF(py_ret);
-    return py_ret;
-    
+    return PyBool_FromLong(g_main_loop_is_running(self->loop));
 }
 
 static PyObject *

@@ -953,15 +953,11 @@ static PyObject *
 pygobject_handler_is_connected(PyGObject *self, PyObject *args)
 {
     guint handler_id;
-    PyObject *ret;
 
     if (!PyArg_ParseTuple(args, "i:GObject.handler_is_connected", &handler_id))
 	return NULL;
 
-    ret = g_signal_handler_is_connected(self->obj, handler_id)
-	? Py_True : Py_False;
-    Py_INCREF(ret);
-    return ret;
+    return PyBool_FromLong(g_signal_handler_is_connected(self->obj, handler_id));
 }
 
 static PyObject *

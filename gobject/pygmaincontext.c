@@ -44,31 +44,23 @@ pyg_main_context_compare(PyGMainContext *self, PyGMainContext *v)
 static PyObject *
 _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 {
-    PyObject *py_ret;
-    gboolean may_block = TRUE;
+    gboolean ret, may_block = TRUE;
     
     if (!PyArg_ParseTuple(args, "|b:GMainContext.iteration",
 			  &may_block))
 	return NULL;
 	
     Py_BEGIN_ALLOW_THREADS;
-    py_ret = g_main_context_iteration(self->context, may_block)
-	? Py_True : Py_False;
+    ret = g_main_context_iteration(self->context, may_block);
     Py_END_ALLOW_THREADS;
     
-    Py_INCREF(py_ret);
-    return py_ret;
+    return PyBool_FromLong(ret);
 }
 
 static PyObject *
 _wrap_g_main_context_pending (PyGMainContext *self)
 {
-    PyObject *py_ret;
-
-    py_ret = g_main_context_pending(self->context) ? Py_True : Py_False;
-    
-    Py_INCREF(py_ret);
-    return py_ret;
+    return PyBool_FromLong(g_main_context_pending(self->context));
 }
 
 static PyMethodDef _PyGMainContext_methods[] = {

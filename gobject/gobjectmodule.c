@@ -1434,14 +1434,11 @@ static PyObject *
 pyg_source_remove(PyObject *self, PyObject *args)
 {
     guint tag;
-    PyObject *ret;
 
     if (!PyArg_ParseTuple(args, "i:source_remove", &tag))
 	return NULL;
 
-    ret = g_source_remove(tag) ? Py_True : Py_False;
-    Py_INCREF(ret);
-    return ret;
+    return PyBool_FromLong(g_source_remove(tag));
 }
 
 static PyObject *
