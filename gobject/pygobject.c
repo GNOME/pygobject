@@ -8,11 +8,45 @@ static GQuark       pygobject_wrapper_key  = 0;
 static const gchar *pygobject_ownedref_id  = "PyGObject::ownedref";
 static GQuark       pygobject_ownedref_key = 0;
 
-
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 
 /* -------------- class <-> wrapper manipulation --------------- */
+
+typedef struct {
+    GType type;
+    void (* sinkfunc)(GObject *object);
+} SinkFunc;
+static GArray *sink_funcs = NULL;
+
+static inline void
+sink_object(GObject *obj)
+{
+    if (sink_funcs) {
+	gint i;
+
+	for (i = 0; i < sink_funcs->len; i++) {
+	    if (g_type_is_a(G_OBJECT_TYPE(obj),
+			    g_array_index(sink_funcs, SinkFunc, i).type)) {
+		g_array_index(sink_funcs, SinkFunc, i).sinkfunc(obj);
+		break;
+	    }
+	}
+    }
+}
+
+void
+pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
+{
+    SinkFunc sf;
+
+    if (!sink_funcs)
+	sink_funcs = g_array_new(FALSE, FALSE, sizeof(SinkFunc));
+
+    sf.type = type;
+    sf.sinkfunc = sinkfunc;
+    g_array_append_val(sink_funcs, sf);
+}
 
 void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
@@ -72,7 +106,7 @@ pygobject_register_wrapper(PyObject *self)
     if (!pygobject_wrapper_key)
 	pygobject_wrapper_key=g_quark_from_static_string(pygobject_wrapper_id);
 
-    /* g_object_ref(obj); -- not needed because no floating reference */
+    sink_object(obj);
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 }
 
@@ -118,12 +152,14 @@ pygobject_new(GObject *obj)
 	return (PyObject *)self;
     }
 
-    tp = pygobject_lookup_class(G_TYPE_FROM_INSTANCE(obj));
+    tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
     self = PyObject_GC_New(PyGObject, tp);
 
     if (self == NULL)
 	return NULL;
     self->obj = g_object_ref(obj);
+    sink_object(self->obj);
+
     self->hasref = FALSE;
     self->inst_dict = NULL;
     self->weakreflist = NULL;

@@ -45,6 +45,8 @@ struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
+    void (* register_sinkfunc)(GType type,
+			       void (* sinkfunc)(GObject *object));
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
 
@@ -104,32 +106,33 @@ extern struct _PyGObject_Functions *_PyGObject_API;
 struct _PyGObject_Functions *_PyGObject_API;
 #endif
 
-#define pygobject_register_class   (_PyGObject_API->register_class)
-#define pygobject_register_wrapper (_PyGObject_API->register_wrapper)
-#define pygobject_lookup_class     (_PyGObject_API->lookup_class)
-#define pygobject_new              (_PyGObject_API->newgobj)
-#define pyg_closure_new            (_PyGObject_API->closure_new)
-#define pygobject_watch_closure    (_PyGObject_API->object_watch_closure)
-#define pyg_destroy_notify         (_PyGObject_API->destroy_notify)
-#define pyg_type_from_object       (_PyGObject_API->type_from_object)
-#define pyg_type_wrapper_new       (_PyGObject_API->type_wrapper_new)
-#define pyg_enum_get_value         (_PyGObject_API->enum_get_value)
-#define pyg_flags_get_value        (_PyGObject_API->flags_get_value)
-#define pyg_register_boxed_custom  (_PyGObject_API->register_boxed_custom)
-#define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
-#define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
-#define pyg_register_interface     (_PyGObject_API->register_interface)
-#define PyGBoxed_Type              (*_PyGObject_API->boxed_type)
-#define pyg_register_boxed         (_PyGObject_API->register_boxed)
-#define pyg_boxed_new              (_PyGObject_API->boxed_new)
-#define PyGPointer_Type            (*_PyGObject_API->pointer_type)
-#define pyg_register_pointer       (_PyGObject_API->register_pointer)
-#define pyg_pointer_new            (_PyGObject_API->pointer_new)
-#define pyg_enum_add_constants     (_PyGObject_API->enum_add_constants)
-#define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
-#define pyg_constant_strip_prefix  (_PyGObject_API->constant_strip_prefix)
-#define pyg_error_check            (_PyGObject_API->error_check)
-#define pyg_set_thread_block_funcs (_PyGObject_API->set_thread_block_funcs)
+#define pygobject_register_class    (_PyGObject_API->register_class)
+#define pygobject_register_wrapper  (_PyGObject_API->register_wrapper)
+#define pygobject_register_sinkfunc (_PyGObject_API->register_sinkfunc)
+#define pygobject_lookup_class      (_PyGObject_API->lookup_class)
+#define pygobject_new               (_PyGObject_API->newgobj)
+#define pyg_closure_new             (_PyGObject_API->closure_new)
+#define pygobject_watch_closure     (_PyGObject_API->object_watch_closure)
+#define pyg_destroy_notify          (_PyGObject_API->destroy_notify)
+#define pyg_type_from_object        (_PyGObject_API->type_from_object)
+#define pyg_type_wrapper_new        (_PyGObject_API->type_wrapper_new)
+#define pyg_enum_get_value          (_PyGObject_API->enum_get_value)
+#define pyg_flags_get_value         (_PyGObject_API->flags_get_value)
+#define pyg_register_boxed_custom   (_PyGObject_API->register_boxed_custom)
+#define pyg_value_from_pyobject     (_PyGObject_API->value_from_pyobject)
+#define pyg_value_as_pyobject       (_PyGObject_API->value_as_pyobject)
+#define pyg_register_interface      (_PyGObject_API->register_interface)
+#define PyGBoxed_Type               (*_PyGObject_API->boxed_type)
+#define pyg_register_boxed          (_PyGObject_API->register_boxed)
+#define pyg_boxed_new               (_PyGObject_API->boxed_new)
+#define PyGPointer_Type             (*_PyGObject_API->pointer_type)
+#define pyg_register_pointer        (_PyGObject_API->register_pointer)
+#define pyg_pointer_new             (_PyGObject_API->pointer_new)
+#define pyg_enum_add_constants      (_PyGObject_API->enum_add_constants)
+#define pyg_flags_add_constants     (_PyGObject_API->flags_add_constants)
+#define pyg_constant_strip_prefix   (_PyGObject_API->constant_strip_prefix)
+#define pyg_error_check             (_PyGObject_API->error_check)
+#define pyg_set_thread_block_funcs  (_PyGObject_API->set_thread_block_funcs)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

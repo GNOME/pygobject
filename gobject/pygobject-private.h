@@ -77,6 +77,8 @@ void          pygobject_register_wrapper (PyObject *self);
 PyObject *    pygobject_new              (GObject *obj);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
+void          pygobject_register_sinkfunc(GType type,
+					  void (* sinkfunc)(GObject *object));
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;
