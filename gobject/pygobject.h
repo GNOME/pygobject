@@ -55,11 +55,11 @@ struct _PyGObject_Functions *_PyGObject_API;
         if (PyCObject_Check(cobject)) \
             _PyGObject_API = PyCObject_AsVoidPtr(cobject); \
         else { \
-	    Py_FatalException("could not find _PyGObject_API object"); \
+	    Py_FatalError("could not find _PyGObject_API object"); \
 	    return; \
         } \
     } else { \
-        Py_FatalException("could not import gobject"); \
+        Py_FatalError("could not import gobject"); \
         return; \
     } \
     ExtensionClassImported; \
