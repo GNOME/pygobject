@@ -15,4 +15,6 @@ import gtk
 from gtk import gdk
 from gtk import glade
 
+import testhelper
+
 ltihooks.uninstall()
