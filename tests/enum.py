@@ -142,6 +142,36 @@ class FlagsTest(unittest.TestCase):
         assert hasattr(klass, '__flags_values__')
         assert isinstance(klass.__flags_values__, dict)
         assert len(klass.__flags_values__) >= 3
+
+    def testComparision(self):
+        e = gtk.TREE_VIEW_DROP_BEFORE
+        assert e == 0
+        assert not e == 10
+        assert not e != 0
+        assert e != 10
+        assert not e < 0
+        assert e < 10
+        assert not e > 0
+        assert not e > 10
+        assert e >= 0
+        assert not e >= 10
+        assert e <= 0
+        assert e <= 10
         
+    def testComparision(self):
+        flag = gdk.EXPOSURE_MASK
+        assert flag == 2
+        assert not flag == 10
+        assert not flag != 2
+        assert flag != 10
+        assert not flag < 2
+        assert flag < 10
+        assert not flag > 2
+        assert not flag > 10
+        assert flag >= 2
+        assert not flag >= 10
+        assert flag <= 2
+        assert flag <= 10
+
 if __name__ == '__main__':
     unittest.main()

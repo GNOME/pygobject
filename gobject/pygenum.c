@@ -41,7 +41,7 @@ pyg_enum_compare(PyGEnum *self, PyObject *other)
     
     if (GET_INT(self) == GET_INT(other))
       return 0;
-    else if (GET_INT(self) > GET_INT(other))
+    else if (GET_INT(self) < GET_INT(other))
       return -1;
     else
       return 1;

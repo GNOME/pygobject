@@ -41,7 +41,7 @@ pyg_flags_compare(PyGFlags *self, PyObject *other)
 
     if (GET_INT_VALUE(self) == GET_INT_VALUE(other))
       return 0;
-    else if (GET_INT_VALUE(self) > GET_INT_VALUE(other))
+    else if (GET_INT_VALUE(self) < GET_INT_VALUE(other))
       return -1;
     else
       return 1;
