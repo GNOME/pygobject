@@ -622,10 +622,14 @@ pyg_object_set_property (GObject *object, guint property_id,
     PyObject *object_wrapper, *retval;
     PyObject *py_pspec, *py_value;
 
-    object_wrapper = pygobject_new(object);
-    g_return_if_fail(object_wrapper != NULL);
-
     pyg_block_threads();
+
+    object_wrapper = pygobject_new(object);
+
+    if (object_wrapper == NULL) {
+	pyg_unblock_threads();
+	g_return_if_fail(object_wrapper != NULL);
+    }
 
     py_pspec = pyg_param_spec_new(pspec);
     py_value = pyg_value_as_pyobject (value, TRUE);
@@ -653,10 +657,14 @@ pyg_object_get_property (GObject *object, guint property_id,
     PyObject *object_wrapper, *retval;
     PyObject *py_pspec;
 
-    object_wrapper = pygobject_new(object);
-    g_return_if_fail(object_wrapper != NULL);
-
     pyg_block_threads();
+
+    object_wrapper = pygobject_new(object);
+
+    if (object_wrapper == NULL) {
+	pyg_unblock_threads();
+	g_return_if_fail(object_wrapper != NULL);
+    }
 
     py_pspec = pyg_param_spec_new(pspec);
     retval = PyObject_CallMethod(object_wrapper, "do_get_property",

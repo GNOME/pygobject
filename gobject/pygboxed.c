@@ -8,8 +8,11 @@
 static void
 pyg_boxed_dealloc(PyGBoxed *self)
 {
-    if (self->free_on_dealloc && self->boxed)
+    if (self->free_on_dealloc && self->boxed) {
+        pyg_unblock_threads();
 	g_boxed_free(self->gtype, self->boxed);
+	pyg_block_threads();
+    }
 
     self->ob_type->tp_free((PyObject *)self);
 }
@@ -166,8 +169,11 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     g_return_val_if_fail(boxed_type != 0, NULL);
     g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
 
+    pyg_block_threads();
+
     if (!boxed) {
 	Py_INCREF(Py_None);
+	pyg_unblock_threads();
 	return Py_None;
     }
 
@@ -176,14 +182,18 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
     self = PyObject_NEW(PyGBoxed, tp);
 
-    if (self == NULL)
-	return NULL;
+    if (self == NULL) {
+        pyg_unblock_threads();
+        return NULL;
+    }
 
     if (copy_boxed)
 	boxed = g_boxed_copy(boxed_type, boxed);
     self->boxed = boxed;
     self->gtype = boxed_type;
     self->free_on_dealloc = own_ref;
+
+    pyg_unblock_threads();
 
     return (PyObject *)self;
 }
@@ -330,8 +340,11 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 
     g_return_val_if_fail(pointer_type != 0, NULL);
 
+    pyg_block_threads();
+
     if (!pointer) {
 	Py_INCREF(Py_None);
+	pyg_unblock_threads();
 	return Py_None;
     }
 
@@ -339,6 +352,8 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     if (!tp)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);
+
+    pyg_unblock_threads();
 
     if (self == NULL)
 	return NULL;

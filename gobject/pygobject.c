@@ -249,6 +249,7 @@ pygobject_dealloc(PyGObject *self)
     }
     self->inst_dict = NULL;
 
+    pyg_unblock_threads();
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -259,6 +260,7 @@ pygobject_dealloc(PyGObject *self)
 	g_closure_invalidate(closure);
     }
     self->closures = NULL;
+    pyg_block_threads();
 
     /* the following causes problems with subclassed types */
     /*self->ob_type->tp_free((PyObject *)self); */
@@ -321,6 +323,7 @@ pygobject_clear(PyGObject *self)
 {
     GSList *tmp;
 
+    pyg_unblock_threads();
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -330,6 +333,7 @@ pygobject_clear(PyGObject *self)
 	tmp = tmp->next;
 	g_closure_invalidate(closure);
     }
+    pyg_block_threads();
     if (self->closures != NULL)
 	g_message("invalidated all closures, but self->closures != NULL !");
 
