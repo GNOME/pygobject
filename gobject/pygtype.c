@@ -1205,3 +1205,42 @@ int pyg_pyobj_to_unichar_conv(PyObject* py_obj, void* ptr)
     Py_XDECREF(tmp_uni);
     return 0;
 }
+
+
+int 
+pyg_param_gvalue_from_pyobject(GValue* value, 
+                               PyObject* py_obj, 
+			       const GParamSpec* pspec)
+{
+    if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
+	gunichar u;
+	
+	if (!pyg_pyobj_to_unichar_conv(py_obj, &u)) {
+	    PyErr_Clear();
+	    return -1;
+	}
+        g_value_set_uint(value, u);
+	return 0;
+    }
+    else {
+	return pyg_value_from_pyobject(value, py_obj);
+    }
+}
+
+PyObject* 
+pyg_param_gvalue_as_pyobject(const GValue* gvalue,
+                             gboolean copy_boxed, 
+			     const GParamSpec* pspec)
+{
+    if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
+	gunichar u;
+	Py_UNICODE uni_buffer[2] = { 0, 0 };
+	
+	u = g_value_get_uint(gvalue);
+	uni_buffer[0] = u;
+	return PyUnicode_FromUnicode(uni_buffer, 1);
+    }
+    else {
+	return pyg_value_as_pyobject(gvalue, copy_boxed);
+    }
+}

@@ -24,8 +24,8 @@ class Tests(unittest.TestCase):
         raise AssertionError('exception not raised on invalid value w/ set_invisible_char: %s' 
                              % invalid_value)
       
-  def failtestUnicharProperty(self):
-    """ Test unichar values when used as arguments. """
+  def testUnicharProperty(self):
+    """ Test unichar values when used as properties. """
 
     entry = gtk.Entry()
     for valid_value in ['a', u'b', u'\ufff0', u'\ufff0'.encode()]:

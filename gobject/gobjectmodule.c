@@ -2082,7 +2082,8 @@ pyg_parse_constructor_args(GType        obj_type,
                            char       **prop_names,
                            GParameter  *params,
                            guint       *nparams,
-                           PyObject   **py_args)
+                           PyObject   **pos_args,
+			   PyObject    *kw_args)
 {
     guint arg_i, param_i;
     GObjectClass *oclass;
@@ -2091,9 +2092,10 @@ pyg_parse_constructor_args(GType        obj_type,
     g_return_val_if_fail(oclass, FALSE);
 
     for (param_i = arg_i = 0; arg_names[arg_i]; ++arg_i) {
+        GParamSpec *spec;
         if (!py_args[arg_i])
             continue;
-        GParamSpec *spec = g_object_class_find_property(oclass, prop_names[arg_i]);
+        spec = g_object_class_find_property(oclass, prop_names[arg_i]);
         params[param_i].name = prop_names[arg_i];
         g_value_init(&params[param_i].value, spec->value_type);
         if (pyg_value_from_pyobject(&params[param_i].value, py_args[arg_i]) == -1) {
@@ -2158,7 +2160,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_param_spec_new,
   pyg_param_spec_from_object,
   pyg_pyobj_to_unichar_conv,
-  pyg_parse_constructor_args
+  pyg_parse_constructor_args,
+  pyg_param_gvalue_as_pyobject,
+  pyg_param_gvalue_from_pyobject
 };
 
 DL_EXPORT(void)

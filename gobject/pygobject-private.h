@@ -54,6 +54,12 @@ void      pyg_register_boxed_custom(GType boxed_type,
 				    tovaluefunc to_func);
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
 PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
+int       pyg_param_gvalue_from_pyobject(GValue* value,
+                                         PyObject* py_obj, 
+                                         const GParamSpec* pspec);
+PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
+                                       gboolean copy_boxed, 
+                                       const GParamSpec* pspec);
 
 typedef struct _PyGClosure PyGClosure;
 struct _PyGClosure {

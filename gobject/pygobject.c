@@ -669,7 +669,7 @@ pygobject_get_property(PyGObject *self, PyObject *args)
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     g_object_get_property(self->obj, param_name, &value);
-    ret = pyg_value_as_pyobject(&value, TRUE);
+    ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
     return ret;
 }
@@ -698,7 +698,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    if (pyg_value_from_pyobject(&value, pvalue) < 0) {
+    if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
 	PyErr_SetString(PyExc_TypeError,
 			"could not convert argument to correct param type");
 	return NULL;
