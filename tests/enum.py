@@ -73,7 +73,7 @@ class EnumTest(unittest.TestCase):
         assert len(klass.__enum_values__) >= 2
 
     def testOutofBounds(self):
-        gtk.icon_size_register('fake', 24, 24)
+        assert gtk.icon_size_register('fake', 24, 24) == 7
         
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
