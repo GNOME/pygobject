@@ -1991,7 +1991,25 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 }
 
 static gboolean
-add_signals (PyTypeObject *class, GType instance_type, PyObject *signals)
+override_signal(GType instance_type, const gchar *signal_name)
+{
+    guint signal_id;
+
+    signal_id = g_signal_lookup(signal_name, instance_type);
+    if (!signal_id) {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf), "could not look up %s", signal_name);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return FALSE;
+    }
+    g_signal_override_class_closure(signal_id, instance_type,
+				    pyg_signal_class_closure_get());
+    return TRUE;
+}
+
+static gboolean
+add_signals (GType instance_type, PyObject *signals)
 {
     int pos = 0;
     PyObject *key, *value;
@@ -2006,8 +2024,15 @@ add_signals (PyTypeObject *class, GType instance_type, PyObject *signals)
 	}
 	signal_name = PyString_AsString (key);
 
-	if (!create_signal(instance_type, signal_name, value))
-	    return FALSE;
+	if (value == Py_None ||
+	    (PyString_Check(value) &&
+	     !strcmp(PyString_AsString(value), "override"))) {
+	    if (!override_signal(instance_type, signal_name))
+		return FALSE;
+	} else {
+	    if (!create_signal(instance_type, signal_name, value))
+		return FALSE;
+	}
     }
     return TRUE;
 }
@@ -2102,7 +2127,7 @@ pyg_type_register(PyObject *self, PyObject *args)
 	    Py_DECREF(gsignals);
 	    return NULL;
 	}
-	if (!add_signals(class, instance_type, gsignals)) {
+	if (!add_signals(instance_type, gsignals)) {
 	    Py_DECREF(gsignals);
 	    return NULL;
 	}
