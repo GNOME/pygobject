@@ -565,9 +565,15 @@ pyg_value_as_pyobject(const GValue *value)
 	{
 	    PyGBoxedMarshal *bm;
 
-	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
-		return (PyObject *)g_value_dup_boxed(value);
-
+	    if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
+		PyObject *ret = (PyObject *)g_value_dup_boxed(value);
+		if (ret == NULL) {
+		    Py_INCREF(Py_None);
+		    return Py_None;
+		}
+		return ret;
+	    }
+	    
 	    bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
 	    if (bm)
 		return bm->fromvalue(value);
