@@ -991,7 +991,10 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     for (i = 0; i < query.n_params; i++) {
 	PyObject *item = PyTuple_GetItem(args, i);
 
-	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
+	if (pyg_boxed_check(item, (query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE))) {
+	    g_value_set_static_boxed(&params[i+1], pyg_boxed_get(item, void));
+	}
+	else if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
 	    gchar buf[128];
 
 	    g_snprintf(buf, sizeof(buf),
@@ -1011,7 +1014,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     g_free(params);
-    if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
+    if (query.return_type != G_TYPE_NONE) {
 	py_ret = pyg_value_as_pyobject(&ret, TRUE);
 	g_value_unset(&ret);
     } else {

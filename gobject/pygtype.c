@@ -850,7 +850,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     gchar *method_name, *tmp;
     PyObject *method;
     PyObject *params, *ret;
-    guint i;
+    guint i, len;
 
     g_return_if_fail(invocation_hint != NULL);
 
@@ -883,10 +883,11 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     }
     Py_DECREF(object_wrapper);
 
-    /* construct Python tuple for the parameter values */
+    /* construct Python tuple for the parameter values; don't copy boxed values
+       initially because we'll check after the call to see if a copy is needed. */
     params = PyTuple_New(n_param_values - 1);
     for (i = 1; i < n_param_values; i++) {
-	PyObject *item = pyg_value_as_pyobject(&param_values[i], TRUE);
+	PyObject *item = pyg_value_as_pyobject(&param_values[i], FALSE);
 
 	/* error condition */
 	if (!item) {
@@ -898,6 +899,22 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     }
 
     ret = PyObject_CallObject(method, params);
+    
+    /* Copy boxed values if others ref them, this needs to be done regardless of
+       exception status. */
+    len = PyTuple_Size(params);    
+    for (i = 0; i < len; i++) {
+	PyObject *item = PyTuple_GetItem(params, i);
+	if (item != NULL && PyObject_TypeCheck(item, &PyGBoxed_Type)
+	    && item->ob_refcnt != 1) {
+	    PyGBoxed* boxed_item = (PyGBoxed*)item;
+	    if (!boxed_item->free_on_dealloc) {
+		boxed_item->boxed = g_boxed_copy(boxed_item->gtype, boxed_item->boxed);
+		boxed_item->free_on_dealloc = TRUE;
+	    }
+	}
+    }
+
     if (ret == NULL) {
 	PyErr_Print();
 	Py_DECREF(method);
