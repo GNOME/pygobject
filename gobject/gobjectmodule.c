@@ -361,8 +361,10 @@ _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 			  &may_block))
 	return NULL;
 	
+    pyg_unblock_threads();
     py_ret = g_main_context_iteration(self->context, may_block)
 	? Py_True : Py_False;
+    pyg_block_threads();
     
     Py_INCREF(py_ret);
     return py_ret;
@@ -506,7 +508,9 @@ _wrap_g_main_loop_quit (PyGMainLoop *self)
 static PyObject *
 _wrap_g_main_loop_run (PyGMainLoop *self)
 {
+    pyg_unblock_threads();
     g_main_loop_run(self->loop);
+    pyg_block_threads();
     
     Py_INCREF(Py_None);
     return Py_None;
@@ -2080,9 +2084,16 @@ initgobject(void)
 			 o=pyg_type_wrapper_new(G_TYPE_POINTER));
     Py_DECREF(o);
 
+    /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
 			   glib_micro_version);
     PyDict_SetItemString(d, "glib_version", tuple);    
+    Py_DECREF(tuple);
+
+    /* pygtk version */
+    tuple = Py_BuildValue ("(iii)", PYGTK_MAJOR_VERSION, PYGTK_MINOR_VERSION,
+			   PYGTK_MICRO_VERSION);
+    PyDict_SetItemString(d, "pygtk_version", tuple);
     Py_DECREF(tuple);
 
     /* for addon libraries ... */
