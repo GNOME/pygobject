@@ -1045,8 +1045,9 @@ pyg_signal_new(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_signal_list_names (PyObject *self, PyObject *args)
+pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
 {
+    static char *kwlist[] = { "type", NULL };
     PyObject *py_itype, *list;
     GObjectClass *class;
     GType itype;
@@ -1054,7 +1055,9 @@ pyg_signal_list_names (PyObject *self, PyObject *args)
     guint *ids;
     guint i;
 
-    if (!PyArg_ParseTuple(args, "O:gobject.signal_list_names", &py_itype))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O:gobject.signal_list_names",
+                                     kwlist, &py_itype))
 	return NULL;
     if ((itype = pyg_type_from_object(py_itype)) == 0)
 	return NULL;
@@ -1085,6 +1088,186 @@ pyg_signal_list_names (PyObject *self, PyObject *args)
     g_free(ids);
     g_type_class_unref(class);
     return list;
+}
+
+static PyObject *
+pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "type", NULL };
+    PyObject *py_itype, *list;
+    GObjectClass *class;
+    GType itype;
+    guint n;
+    guint *ids;
+    guint i;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O:gobject.signal_list_ids",
+                                     kwlist, &py_itype))
+	return NULL;
+    if ((itype = pyg_type_from_object(py_itype)) == 0)
+	return NULL;
+
+    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+	PyErr_SetString(PyExc_TypeError,
+			"type must be instantiable or an interface");
+	return NULL;
+    }
+
+    class = g_type_class_ref(itype);
+    if (!class) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"could not get a reference to type class");
+	return NULL;
+    }
+    ids = g_signal_list_ids(itype, &n);
+
+    list = PyTuple_New((gint)n);
+    if (list == NULL) {
+	g_free(ids);
+	g_type_class_unref(class);
+	return NULL;
+    }
+
+    for (i = 0; i < n; i++)
+	PyTuple_SetItem(list, i, PyInt_FromLong(ids[i]));
+    g_free(ids);
+    g_type_class_unref(class);
+    return list;
+}
+
+static PyObject *
+pyg_signal_lookup (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "name", "type", NULL };
+    PyObject *py_itype;
+    GObjectClass *class;
+    GType itype;
+    gchar *signal_name;
+    guint id;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO:gobject.signal_lookup",
+                                     kwlist, &signal_name, &py_itype))
+	return NULL;
+    if ((itype = pyg_type_from_object(py_itype)) == 0)
+	return NULL;
+
+    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+	PyErr_SetString(PyExc_TypeError,
+			"type must be instantiable or an interface");
+	return NULL;
+    }
+
+    class = g_type_class_ref(itype);
+    if (!class) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"could not get a reference to type class");
+	return NULL;
+    }
+    id = g_signal_lookup(signal_name, itype);
+
+    g_type_class_unref(class);
+    return PyInt_FromLong(id);
+}
+
+static PyObject *
+pyg_signal_name (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "signal_id", NULL };
+    const gchar *signal_name;
+    guint id;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:gobject.signal_name",
+                                     kwlist, &id))
+	return NULL;
+    signal_name = g_signal_name(id);
+    if (signal_name)
+        return PyString_FromString(signal_name);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist1[] = { "name", "type", NULL };
+    static char *kwlist2[] = { "signal_id", NULL };
+    PyObject *py_query, *params_list, *py_itype;
+    GObjectClass *class = NULL;
+    GType itype;
+    gchar *signal_name;
+    guint i;
+    GSignalQuery query;
+    guint id;
+
+    if (PyArg_ParseTupleAndKeywords(args, kwargs, "sO:gobject.signal_query",
+                                     kwlist1, &signal_name, &py_itype)) {
+        if ((itype = pyg_type_from_object(py_itype)) == 0)
+            return NULL;
+
+        if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "type must be instantiable or an interface");
+            return NULL;
+        }
+
+        class = g_type_class_ref(itype);
+        if (!class) {
+            PyErr_SetString(PyExc_RuntimeError,
+                            "could not get a reference to type class");
+            return NULL;
+        }
+        id = g_signal_lookup(signal_name, itype);
+    } else {
+	PyErr_Clear();
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                         "i:gobject.signal_query",
+                                         kwlist2, &id)) {
+            PyErr_Clear();
+            PyErr_SetString(PyExc_TypeError,
+                            "Usage: one of:\n"
+                            "  gobject.signal_query(name, type)\n"
+                            "  gobject.signal_query(signal_id)");
+             
+	return NULL;
+        }
+    }
+
+    g_signal_query(id, &query);
+
+    if (query.signal_id == 0) {
+        Py_INCREF(Py_None);
+        py_query = Py_None;
+        goto done;
+    }
+    py_query = PyTuple_New(6);
+    if (py_query == NULL) {
+        goto done;
+    }
+    params_list = PyTuple_New(query.n_params);
+    if (params_list == NULL) {
+        Py_DECREF(py_query);
+        py_query = NULL;
+        goto done;
+    }
+
+    PyTuple_SET_ITEM(py_query, 0, PyInt_FromLong(query.signal_id));
+    PyTuple_SET_ITEM(py_query, 1, PyString_FromString(query.signal_name));
+    PyTuple_SET_ITEM(py_query, 2, pyg_type_wrapper_new(query.itype));
+    PyTuple_SET_ITEM(py_query, 3, PyInt_FromLong(query.signal_flags));
+    PyTuple_SET_ITEM(py_query, 4, pyg_type_wrapper_new(query.return_type));
+    for (i = 0; i < query.n_params; i++) {
+        PyTuple_SET_ITEM(params_list, i,
+                         pyg_type_wrapper_new(query.param_types[i]));
+    }
+    PyTuple_SET_ITEM(py_query, 5, params_list);
+
+ done:
+    if (class)
+        g_type_class_unref(class);
+
+    return py_query;
 }
 
 static PyObject *
@@ -1559,7 +1742,11 @@ static PyMethodDef pygobject_functions[] = {
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
     { "type_register", pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
-    { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
+    { "signal_list_names", (PyCFunction)pyg_signal_list_names, METH_VARARGS|METH_KEYWORDS },
+    { "signal_list_ids", (PyCFunction)pyg_signal_list_ids, METH_VARARGS|METH_KEYWORDS },
+    { "signal_lookup", (PyCFunction)pyg_signal_lookup, METH_VARARGS|METH_KEYWORDS },
+    { "signal_name", (PyCFunction)pyg_signal_name, METH_VARARGS|METH_KEYWORDS },
+    { "signal_query", (PyCFunction)pyg_signal_query, METH_VARARGS|METH_KEYWORDS },
     { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
     { "new", (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
     { "idle_add", (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
