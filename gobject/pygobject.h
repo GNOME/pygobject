@@ -9,7 +9,9 @@
 
 /* Work around bugs in PyGILState api fixed in 2.4.0a4 */
 #if PY_HEXVERSION < 0x020400A4
-#define PYGIL_API_IS_BUGGY
+#define PYGIL_API_IS_BUGGY TRUE
+#else
+#define PYGIL_API_IS_BUGGY FALSE
 #endif
 
   /* PyGClosure is a _private_ structure */
@@ -214,20 +216,11 @@ struct _PyGObject_Functions *_PyGObject_API;
 
 #define pyg_threads_enabled (_PyGObject_API->threads_enabled)
 
-#ifndef PYGIL_API_IS_BUGGY
-#define pyg_gil_state_ensure() (_PyGObject_API->threads_enabled? (PyGILState_Ensure()) : 0)
-#define pyg_gil_state_release(state) G_STMT_START {     \
-    if (_PyGObject_API->threads_enabled)                \
-        PyGILState_Release(state);                      \
-    } G_STMT_END
-#else
 #define pyg_gil_state_ensure() (_PyGObject_API->threads_enabled? (_PyGObject_API->gil_state_ensure()) : 0)
 #define pyg_gil_state_release(state) G_STMT_START {     \
     if (_PyGObject_API->threads_enabled)                \
         _PyGObject_API->gil_state_release(state);       \
     } G_STMT_END
-
-#endif
 
 #define pyg_begin_allow_threads                 \
     G_STMT_START {                              \

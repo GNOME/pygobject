@@ -34,6 +34,8 @@ GQuark pyginterface_type_key  = 0;
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
 
+static gboolean use_gil_state_api = FALSE;
+    
 /* -------------- GDK threading hooks ---------------------------- */
 
 /**
@@ -1458,8 +1460,11 @@ pyg_main_context_default (PyObject *unused)
 static int pyg_thread_state_tls_key = -1;
 
 static int
-pyg_enable_threads (void)
+pyg_enable_threads ()
 {
+    if (getenv ("PYGTK_USE_GIL_STATE_API"))
+	use_gil_state_api = TRUE;
+
 #ifndef DISABLE_THREADING
     if (!pygobject_api_functions.threads_enabled) {
 	PyEval_InitThreads();
@@ -1468,15 +1473,12 @@ pyg_enable_threads (void)
 	pygobject_api_functions.threads_enabled = TRUE;
 	pyg_thread_state_tls_key = PyThread_create_key();
     }
-
-#ifdef PYGIL_API_IS_BUGGY
-    {
+    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
 	PyThreadState* state;
 	state = PyGILState_GetThisThreadState();
 	if ( state != NULL )
 	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
     }
-#endif
 
     return 0;
 #else
@@ -1490,13 +1492,13 @@ static PyThreadState *
 pyg_find_thread_state (void)
 {
     PyThreadState* state;
-
+    
     if (pyg_thread_state_tls_key == -1)
 	return NULL;
     state = PyThread_get_key_value(pyg_thread_state_tls_key);
-    if ( state == NULL ) {
+    if (state == NULL) {
 	state = PyGILState_GetThisThreadState();
-	if ( state != NULL )
+	if (state != NULL)
 	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
     }
     return state;
@@ -1505,42 +1507,43 @@ pyg_find_thread_state (void)
 static int
 pyg_gil_state_ensure_py23 (void)
 {
-#ifndef PYGIL_API_IS_BUGGY
-    return PyGILState_Ensure();
-#else
-    PyThreadState* state = pyg_find_thread_state();
+    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
+	PyThreadState* state = pyg_find_thread_state();
 
-    if ( state == NULL )
-	return PyGILState_LOCKED;
-
-    if ( state == _PyThreadState_Current )
-	return PyGILState_LOCKED;
-    else {
-	PyEval_RestoreThread(state);
-	return PyGILState_UNLOCKED;
+	if (state == NULL)
+	    return PyGILState_LOCKED;
+    
+	if (state == _PyThreadState_Current)
+	    return PyGILState_LOCKED;
+	else {
+	    PyEval_RestoreThread(state);
+	    return PyGILState_UNLOCKED;
+	}
+    } else {
+	return PyGILState_Ensure();
     }
-#endif
 }
 
 static void
 pyg_gil_state_release_py23 (int flag)
 {
-#ifndef PYGIL_API_IS_BUGGY
-    PyGILState_Release(flag);
-#else
-    if (flag == PyGILState_UNLOCKED) {
-	PyThreadState* state = pyg_find_thread_state();
-	if ( state != NULL )
-	    PyEval_ReleaseThread(state);
+    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
+	if (flag == PyGILState_UNLOCKED) {
+	    PyThreadState* state = pyg_find_thread_state();
+	    if (state != NULL)
+		PyEval_ReleaseThread(state);
+	}
+    } else {
+	PyGILState_Release(flag);
     }
-#endif
 }
 
 static PyObject *
-pyg_threads_init (PyObject *unused)
+pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 {
     if (pyg_enable_threads())
         return NULL;
+    
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1562,7 +1565,7 @@ static PyMethodDef pygobject_functions[] = {
     { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove", pyg_source_remove, METH_VARARGS },
     { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
-    { "threads_init", (PyCFunction)pyg_threads_init, METH_NOARGS },
+    { "threads_init", (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 

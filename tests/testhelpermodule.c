@@ -110,7 +110,7 @@ static void test_thread_class_init (TestThreadClass *klass)
     g_signal_new ("from-thread", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (TestThreadClass, from_thread),
 		  NULL, NULL, g_cclosure_marshal_VOID__BOXED, G_TYPE_NONE, 1,
-		  test_thread_enum_get_type());
+		  test_thread_enum_get_type ());
 
   klass->emit_signal = test_thread_emit_signal;
 }

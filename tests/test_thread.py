@@ -1,6 +1,10 @@
+import os
 import unittest
 
 from common import gobject, gtk, testhelper
+
+# Enable PyGILState API
+os.environ['PYGTK_USE_GIL_STATE_API'] = ''
 
 gobject.threads_init()
 
