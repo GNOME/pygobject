@@ -91,7 +91,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
 static void
 pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
 {
-    PyMem_DEL(self);
+    PyObject_DEL(self);
 }
 
 PyTypeObject PyGTypeWrapper_Type = {
@@ -166,7 +166,7 @@ static void
 pyg_param_spec_dealloc(PyGParamSpec *self)
 {
     g_param_spec_unref(self->pspec);
-    PyMem_DEL(self);
+    PyObject_DEL(self);
 }
 
 static PyObject *
