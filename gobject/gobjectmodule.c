@@ -1998,10 +1998,55 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
 }
 
 static void
+pyg_object_set_property (GObject *object, guint property_id,
+			 const GValue *value, GParamSpec *pspec)
+{
+    PyObject *object_wrapper, *retval;
+    PyObject *py_pspec, *py_value;
+
+    object_wrapper = pygobject_new(object);
+    g_return_if_fail(object_wrapper != NULL);
+
+    py_pspec = pyg_param_spec_new(pspec);
+    py_value = pyg_value_as_pyobject (value);
+    retval = PyObject_CallMethod(object_wrapper, "do_set_property",
+				 "OO", py_pspec, py_value);
+    if (retval) {
+	Py_DECREF(retval);
+    } else {
+	PyErr_Print();
+	PyErr_Clear();
+    }
+    Py_DECREF(py_pspec);
+    Py_DECREF(py_value);
+}
+
+static void
+pyg_object_get_property (GObject *object, guint property_id,
+			 GValue *value, GParamSpec *pspec)
+{
+    PyObject *object_wrapper, *retval;
+    PyObject *py_pspec;
+
+    object_wrapper = pygobject_new(object);
+    g_return_if_fail(object_wrapper != NULL);
+
+    py_pspec = pyg_param_spec_new(pspec);
+    retval = PyObject_CallMethod(object_wrapper, "do_get_property",
+				 "O", py_pspec);
+    if (retval == NULL || pyg_value_from_pyobject(value, retval) < 0) {
+	PyErr_Print();
+	PyErr_Clear();
+    }
+    Py_XDECREF(retval);
+    Py_DECREF(py_pspec);
+}
+
+static void
 pyg_object_class_init(GObjectClass *class, PyObject *py_class)
 {
-    g_message("GType class init for `%s' with python class %p",
-	      G_OBJECT_CLASS_NAME(class), py_class);
+    class->set_property = pyg_object_set_property;
+    class->get_property = pyg_object_get_property;
 }
 
 static gboolean
@@ -2087,6 +2132,7 @@ override_signal(GType instance_type, const gchar *signal_name)
 static gboolean
 add_signals (GType instance_type, PyObject *signals)
 {
+    gboolean ret = TRUE;
     GObjectClass *oclass;
     int pos = 0;
     PyObject *key, *value;
@@ -2094,37 +2140,307 @@ add_signals (GType instance_type, PyObject *signals)
     oclass = g_type_class_ref(instance_type);
     while (PyDict_Next(signals, &pos, &key, &value)) {
 	const gchar *signal_name;
-	gboolean retval = TRUE;
 
 	if (!PyString_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ keys must be strings");
-	    g_type_class_unref(oclass);
-	    return FALSE;
+	    ret = FALSE;
+	    break;
 	}
 	signal_name = PyString_AsString (key);
 
 	if (value == Py_None ||
 	    (PyString_Check(value) &&
 	     !strcmp(PyString_AsString(value), "override"))) {
-	    retval = override_signal(instance_type, signal_name);
+	    ret = override_signal(instance_type, signal_name);
 	} else {
-	    retval = create_signal(instance_type, signal_name, value);
+	    ret = create_signal(instance_type, signal_name, value);
 	}
 
-	if (!retval) {
-	    g_type_class_unref(oclass);
-	    return FALSE;
-	}
+	if (!ret)
+	    break;
     }
     g_type_class_unref(oclass);
+    return ret;
+}
+
+static gboolean
+create_property (GObjectClass *oclass, const gchar *prop_name,
+		 GType prop_type, const gchar *nick, const gchar *blurb,
+		 PyObject *args, GParamFlags flags)
+{
+    GParamSpec *pspec = NULL;
+
+    switch (G_TYPE_FUNDAMENTAL(prop_type)) {
+    case G_TYPE_CHAR:
+	{
+	    gchar minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "ccc", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_char (prop_name, nick, blurb, minimum,
+				       maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_UCHAR:
+	{
+	    gchar minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "ccc", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_uchar (prop_name, nick, blurb, minimum,
+					maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_BOOLEAN:
+	{
+	    gboolean default_value;
+
+	    if (!PyArg_ParseTuple(args, "i", &default_value))
+		return FALSE;
+	    pspec = g_param_spec_boolean (prop_name, nick, blurb,
+					  default_value, flags);
+	}
+	break;
+    case G_TYPE_INT:
+	{
+	    gint minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "iii", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_int (prop_name, nick, blurb, minimum,
+				      maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_UINT:
+	{
+	    guint minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "iii", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_uint (prop_name, nick, blurb, minimum,
+				       maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_LONG:
+	{
+	    glong minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "lll", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_long (prop_name, nick, blurb, minimum,
+				       maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_ULONG:
+	{
+	    gulong minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "lll", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_ulong (prop_name, nick, blurb, minimum,
+					maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_INT64:
+	{
+	    gint64 minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "LLL", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_int64 (prop_name, nick, blurb, minimum,
+					maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_UINT64:
+	{
+	    guint64 minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "LLL", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_uint64 (prop_name, nick, blurb, minimum,
+					 maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_ENUM:
+	{
+	    gint default_value;
+
+	    if (!PyArg_ParseTuple(args, "i", &default_value))
+		return FALSE;
+	    pspec = g_param_spec_enum (prop_name, nick, blurb,
+				       prop_type, default_value, flags);
+	}
+	break;
+    case G_TYPE_FLAGS:
+	{
+	    guint default_value;
+
+	    if (!PyArg_ParseTuple(args, "i", &default_value))
+		return FALSE;
+	    pspec = g_param_spec_flags (prop_name, nick, blurb,
+					prop_type, default_value, flags);
+	}
+	break;
+    case G_TYPE_FLOAT:
+	{
+	    gfloat minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "fff", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_float (prop_name, nick, blurb, minimum,
+					maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_DOUBLE:
+	{
+	    gdouble minimum, maximum, default_value;
+
+	    if (!PyArg_ParseTuple(args, "ddd", &minimum, &maximum,
+				  &default_value))
+		return FALSE;
+	    pspec = g_param_spec_double (prop_name, nick, blurb, minimum,
+					 maximum, default_value, flags);
+	}
+	break;
+    case G_TYPE_STRING:
+	{
+	    const gchar *default_value;
+
+	    if (!PyArg_ParseTuple(args, "z", &default_value))
+		return FALSE;
+	    pspec = g_param_spec_string (prop_name, nick, blurb,
+					 default_value, flags);
+	}
+	break;
+    case G_TYPE_PARAM:
+	if (!PyArg_ParseTuple(args, ""))
+	    return FALSE;
+	pspec = g_param_spec_param (prop_name, nick, blurb, prop_type, flags);
+	break;
+    case G_TYPE_BOXED:
+	if (!PyArg_ParseTuple(args, ""))
+	    return FALSE;
+	pspec = g_param_spec_boxed (prop_name, nick, blurb, prop_type, flags);
+	break;
+    case G_TYPE_POINTER:
+	if (!PyArg_ParseTuple(args, ""))
+	    return FALSE;
+	pspec = g_param_spec_pointer (prop_name, nick, blurb, flags);
+	break;
+    case G_TYPE_OBJECT:
+	if (!PyArg_ParseTuple(args, ""))
+	    return FALSE;
+	pspec = g_param_spec_object (prop_name, nick, blurb, prop_type, flags);
+	break;
+    default:
+	/* unhandled pspec type ... */
+	break;
+    }
+
+    if (!pspec) {
+	char buf[128];
+
+	g_snprintf(buf, sizeof(buf), "could not create param spec for type %s",
+		   g_type_name(prop_type));
+	PyErr_SetString(PyExc_TypeError, buf);
+	return FALSE;
+    }
+    g_object_class_install_property(oclass, 1, pspec);
     return TRUE;
+}
+
+static gboolean
+add_properties (GType instance_type, PyObject *properties)
+{
+    gboolean ret = TRUE;
+    GObjectClass *oclass;
+    int pos = 0;
+    PyObject *key, *value;
+
+    oclass = g_type_class_ref(instance_type);
+    while (PyDict_Next(properties, &pos, &key, &value)) {
+	const gchar *prop_name;
+	GType prop_type;
+	const gchar *nick, *blurb;
+	GParamFlags flags;
+	gint val_length;
+	PyObject *slice, *item, *py_prop_type;
+	/* values are of format (type,nick,blurb, type_specific_args, flags) */
+	
+	if (!PyString_Check(key)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gproperties__ keys must be strings");
+	    ret = FALSE;
+	    break;
+	}
+	prop_name = PyString_AsString (key);
+
+	if (!PyTuple_Check(value)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gproperties__ values must be tuples");
+	    ret = FALSE;
+	    break;
+	}
+	val_length = PyTuple_Size(value);
+	if (val_length < 4) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gproperties__ values must be at least 4 elements long");
+	    ret = FALSE;
+	    break;
+	}	    
+
+	slice = PySequence_GetSlice(value, 0, 3);
+	if (!slice) {
+	    ret = FALSE;
+	    break;
+	}
+	if (!PyArg_ParseTuple(slice, "Ozz", &py_prop_type, &nick, &blurb)) {
+	    Py_DECREF(slice);
+	    ret = FALSE;
+	    break;
+	}
+	Py_DECREF(slice);
+	prop_type = pyg_type_from_object(py_prop_type);
+	if (!prop_type) {
+	    ret = FALSE;
+	    break;
+	}
+	item = PyTuple_GetItem(value, val_length-1);
+	if (!PyInt_Check(item)) {
+	    PyErr_SetString(PyExc_TypeError,
+		"last element in __gproperties__ value tuple must be an int");
+	    ret = FALSE;
+	    break;
+	}
+	flags = PyInt_AsLong(item);
+
+	/* slice is the extra items in the tuple */
+	slice = PySequence_GetSlice(value, 3, val_length-1);
+	ret = create_property(oclass, prop_name, prop_type, nick, blurb,
+			      slice, flags);
+	Py_DECREF(slice);
+
+	if (!ret)
+	    break;
+    }
+    g_type_class_unref(oclass);
+    return ret;
 }
 
 static PyObject *
 pyg_type_register(PyObject *self, PyObject *args)
 {
-    PyObject *gtype, *module, *gsignals;
+    PyObject *gtype, *module, *gsignals, *gproperties;
     PyTypeObject *class;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
@@ -2217,6 +2533,26 @@ pyg_type_register(PyObject *self, PyObject *args)
 	}
 	PyDict_DelItemString(class->tp_dict, "__gsignals__");
 	Py_DECREF(gsignals);
+    } else {
+	PyErr_Clear();
+    }
+
+    /* we look this up in the instance dictionary, so we don't
+     * accidentally get a parent type's __gsignals__ attribute. */
+    gproperties = PyDict_GetItemString(class->tp_dict, "__gproperties__");
+    if (gproperties) {
+	if (!PyDict_Check(gproperties)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gproperties__ attribute not a dict!");
+	    Py_DECREF(gproperties);
+	    return NULL;
+	}
+	if (!add_properties(instance_type, gproperties)) {
+	    Py_DECREF(gproperties);
+	    return NULL;
+	}
+	PyDict_DelItemString(class->tp_dict, "__gproperties__");
+	Py_DECREF(gproperties);
     } else {
 	PyErr_Clear();
     }
@@ -2657,6 +2993,13 @@ initgobject(void)
     PyModule_AddIntConstant(m, "SIGNAL_DETAILED", G_SIGNAL_DETAILED);
     PyModule_AddIntConstant(m, "SIGNAL_ACTION", G_SIGNAL_ACTION);
     PyModule_AddIntConstant(m, "SIGNAL_NO_HOOKS", G_SIGNAL_NO_HOOKS);
+
+    PyModule_AddIntConstant(m, "PARAM_READABLE", G_PARAM_READABLE);
+    PyModule_AddIntConstant(m, "PARAM_WRITABLE", G_PARAM_WRITABLE);
+    PyModule_AddIntConstant(m, "PARAM_CONSTRUCT", G_PARAM_CONSTRUCT);
+    PyModule_AddIntConstant(m, "PARAM_CONSTRUCT_ONLY", G_PARAM_CONSTRUCT_ONLY);
+    PyModule_AddIntConstant(m, "PARAM_LAX_VALIDATION", G_PARAM_LAX_VALIDATION);
+    PyModule_AddIntConstant(m, "PARAM_READWRITE", G_PARAM_READWRITE);
 
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
     PyModule_AddObject(m, "TYPE_NONE", pyg_type_wrapper_new(G_TYPE_NONE));
