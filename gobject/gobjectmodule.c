@@ -869,10 +869,13 @@ add_signals (GType instance_type, PyObject *signals)
     return ret;
 }
 
-static gboolean
-create_property (GObjectClass *oclass, const gchar *prop_name,
-		 GType prop_type, const gchar *nick, const gchar *blurb,
-		 PyObject *args, GParamFlags flags)
+static GParamSpec *
+create_property (const gchar  *prop_name,
+		 GType         prop_type,
+		 const gchar  *nick,
+		 const gchar  *blurb,
+		 PyObject     *args,
+		 GParamFlags   flags)
 {
     GParamSpec *pspec = NULL;
 
@@ -883,7 +886,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "ccc", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_char (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
 	}
@@ -894,7 +897,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "ccc", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_uchar (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
 	}
@@ -904,7 +907,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 	    gboolean default_value;
 
 	    if (!PyArg_ParseTuple(args, "i", &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_boolean (prop_name, nick, blurb,
 					  default_value, flags);
 	}
@@ -915,7 +918,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "iii", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_int (prop_name, nick, blurb, minimum,
 				      maximum, default_value, flags);
 	}
@@ -926,7 +929,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "iii", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_uint (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
 	}
@@ -937,7 +940,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "lll", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_long (prop_name, nick, blurb, minimum,
 				       maximum, default_value, flags);
 	}
@@ -948,7 +951,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "lll", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_ulong (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
 	}
@@ -959,7 +962,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "LLL", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_int64 (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
 	}
@@ -970,7 +973,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "LLL", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_uint64 (prop_name, nick, blurb, minimum,
 					 maximum, default_value, flags);
 	}
@@ -980,7 +983,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 	    gint default_value;
 
 	    if (!PyArg_ParseTuple(args, "i", &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_enum (prop_name, nick, blurb,
 				       prop_type, default_value, flags);
 	}
@@ -990,7 +993,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 	    guint default_value;
 
 	    if (!PyArg_ParseTuple(args, "i", &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_flags (prop_name, nick, blurb,
 					prop_type, default_value, flags);
 	}
@@ -1001,7 +1004,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "fff", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_float (prop_name, nick, blurb, minimum,
 					maximum, default_value, flags);
 	}
@@ -1012,7 +1015,7 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "ddd", &minimum, &maximum,
 				  &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_double (prop_name, nick, blurb, minimum,
 					 maximum, default_value, flags);
 	}
@@ -1022,29 +1025,29 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 	    const gchar *default_value;
 
 	    if (!PyArg_ParseTuple(args, "z", &default_value))
-		return FALSE;
+		return NULL;
 	    pspec = g_param_spec_string (prop_name, nick, blurb,
 					 default_value, flags);
 	}
 	break;
     case G_TYPE_PARAM:
 	if (!PyArg_ParseTuple(args, ""))
-	    return FALSE;
+	    return NULL;
 	pspec = g_param_spec_param (prop_name, nick, blurb, prop_type, flags);
 	break;
     case G_TYPE_BOXED:
 	if (!PyArg_ParseTuple(args, ""))
-	    return FALSE;
+	    return NULL;
 	pspec = g_param_spec_boxed (prop_name, nick, blurb, prop_type, flags);
 	break;
     case G_TYPE_POINTER:
 	if (!PyArg_ParseTuple(args, ""))
-	    return FALSE;
+	    return NULL;
 	pspec = g_param_spec_pointer (prop_name, nick, blurb, flags);
 	break;
     case G_TYPE_OBJECT:
 	if (!PyArg_ParseTuple(args, ""))
-	    return FALSE;
+	    return NULL;
 	pspec = g_param_spec_object (prop_name, nick, blurb, prop_type, flags);
 	break;
     default:
@@ -1058,10 +1061,60 @@ create_property (GObjectClass *oclass, const gchar *prop_name,
 	g_snprintf(buf, sizeof(buf), "could not create param spec for type %s",
 		   g_type_name(prop_type));
 	PyErr_SetString(PyExc_TypeError, buf);
-	return FALSE;
+	return NULL;
     }
-    g_object_class_install_property(oclass, 1, pspec);
-    return TRUE;
+    
+    return pspec;
+}
+
+GParamSpec *
+pyg_param_spec_from_object (PyObject *tuple)
+{
+    gint val_length;
+    const gchar *prop_name;
+    GType prop_type;
+    const gchar *nick, *blurb;
+    PyObject *slice, *item, *py_prop_type;
+    GParamSpec *pspec;
+
+    val_length = PyTuple_Size(tuple);
+    if (val_length < 4) {
+	PyErr_SetString(PyExc_TypeError,
+			"paramspec tuples must be at least 4 elements long");
+	return NULL;
+    }	    
+
+    slice = PySequence_GetSlice(tuple, 0, 4);
+    if (!slice) {
+	return NULL;
+    }
+    
+    if (!PyArg_ParseTuple(slice, "sOzz", &prop_name, &py_prop_type, &nick, &blurb)) {
+	Py_DECREF(slice);
+	return NULL;
+    }
+    
+    Py_DECREF(slice);
+    
+    prop_type = pyg_type_from_object(py_prop_type);
+    if (!prop_type) {
+	return NULL;
+    }
+    
+    item = PyTuple_GetItem(tuple, val_length-1);
+    if (!PyInt_Check(item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"last element in tuple must be an int");
+	return NULL;
+    }
+
+    /* slice is the extra items in the tuple */
+    slice = PySequence_GetSlice(tuple, 4, val_length-1);
+    pspec = create_property(prop_name, prop_type,
+			    nick, blurb, slice,
+			    PyInt_AsLong(item));
+
+    return pspec;
 }
 
 static gboolean
@@ -1080,6 +1133,8 @@ add_properties (GType instance_type, PyObject *properties)
 	GParamFlags flags;
 	gint val_length;
 	PyObject *slice, *item, *py_prop_type;
+	GParamSpec *pspec;
+	
 	/* values are of format (type,nick,blurb, type_specific_args, flags) */
 	
 	if (!PyString_Check(key)) {
@@ -1131,13 +1186,18 @@ add_properties (GType instance_type, PyObject *properties)
 
 	/* slice is the extra items in the tuple */
 	slice = PySequence_GetSlice(value, 3, val_length-1);
-	ret = create_property(oclass, prop_name, prop_type, nick, blurb,
-			      slice, flags);
+	pspec = create_property(prop_name, prop_type, nick, blurb,
+				slice, flags);
 	Py_DECREF(slice);
-
-	if (!ret)
+	
+	if (pspec) {
+	    g_object_class_install_property(oclass, 1, pspec);
+	} else {
+	    ret = FALSE;
 	    break;
+	}
     }
+    
     g_type_class_unref(oclass);
     return ret;
 }
@@ -2001,6 +2061,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   &PyGParamSpec_Type,
   pyg_param_spec_new,
+  pyg_param_spec_from_object
 };
 
 DL_EXPORT(void)

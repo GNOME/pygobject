@@ -109,6 +109,7 @@ struct _PyGObject_Functions {
     PyGThreadBlockFunc unblock_threads;
     PyTypeObject *paramspec_type;
     PyObject *(* paramspec_new)(GParamSpec *spec);
+    GParamSpec *(*paramspec_get)(PyObject *tuple);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -148,7 +149,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_set_thread_block_funcs  (_PyGObject_API->set_thread_block_funcs)
 #define PyGParamSpec_Type           (*_PyGObject_API->paramspec_type)
 #define pyg_param_spec_new          (_PyGObject_API->paramspec_new)
-
+#define pyg_param_spec_from_object  (_PyGObject_API->paramspec_get)
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
       (* _PyGObject_API->block_threads)();     \
