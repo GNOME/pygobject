@@ -1053,7 +1053,7 @@ pyg_type_register(PyObject *self, PyObject *args)
                                       base->tp_name);
                 PyErr_Warn(PyExc_RuntimeWarning, msg);
                 g_free(msg);
-                return NULL;
+                continue;
             }
             g_type_add_interface_static(instance_type, itype, iinfo);
         }
