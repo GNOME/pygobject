@@ -48,7 +48,7 @@ pyg_flags_compare(PyGFlags *self, PyObject *other)
 }
 
 static char *
-generate_repr(GType gtype, int value)
+generate_repr(GType gtype, long value)
 {
     GFlagsClass *flags_class;
     char *retval = NULL, *tmp;
@@ -88,8 +88,12 @@ pyg_flags_repr(PyGFlags *self)
   
     tmp = generate_repr(self->gtype, self->parent.ob_ival);
 
-    retval = g_strdup_printf("<flags %s of type %s>", tmp,
-			     g_type_name(self->gtype));
+    if (tmp)
+        retval = g_strdup_printf("<flags %s of type %s>", tmp,
+                                 g_type_name(self->gtype));
+    else
+        retval = g_strdup_printf("<flags %ld of type %s>", self->parent.ob_ival,
+                                 g_type_name(self->gtype));
     g_free(tmp);
     
     pyretval = PyString_FromString(retval);
