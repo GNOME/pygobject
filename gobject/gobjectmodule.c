@@ -1085,7 +1085,7 @@ check_bases(PyGObject *self, PyExtensionClass *class, char *attr)
 	else
 	    PyErr_Clear();
     }
-    if (class->bases) {
+    if (PyExtensionClass_Check(class) && class->bases) {
 	guint i, len = PyTuple_Size(class->bases);
 
 	for (i = 0; i < len; i++) {
