@@ -643,6 +643,99 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     return closure;
 }
 
+/* -------------- PySignalClassClosure ----------------- */
+/* a closure used for the `class closure' of a signal.  As this gets
+ * all the info from the first argument to the closure and the
+ * invocation hint, we can have a single closure that handles all
+ * class closure cases.  We call a method by the name of the signal
+ * with "do_" prepended.
+ *
+ *  We also remove the first argument from the * param list, as it is
+ *  the instance object, which is passed * implicitly to the method
+ *  object. */
+
+static void
+pyg_signal_class_closure_marshal(GClosure *closure,
+				 GValue *return_value,
+				 guint n_param_values,
+				 const GValue *param_values,
+				 gpointer invocation_hint,
+				 gpointer marshal_data)
+{
+    GObject *object;
+    PyObject *object_wrapper;
+    GSignalInvocationHint *hint = (GSignalInvocationHint *)invocation_hint;
+    gchar *method_name;
+    PyObject *method;
+    PyObject *params, *ret;
+    guint i;
+
+    g_return_if_fail(invocation_hint != NULL);
+
+    /* get the object passed as the first argument to the closure */
+    object = g_value_get_object(&param_values[0]);
+    g_return_if_fail(object != NULL && G_IS_OBJECT(object));
+
+    /* get the wrapper for this object */
+    object_wrapper = pygobject_new(object);
+    g_return_if_fail(object_wrapper != NULL);
+
+    /* construct method name for this class closure */
+    method_name = g_strconcat("do_", g_signal_name(hint->signal_id), NULL);
+    method = PyObject_GetAttrString(object_wrapper, method_name);
+    g_free(method_name);
+    if (!method) {
+	PyErr_Clear();
+	Py_DECREF(object_wrapper);
+	g_message("no class closure to call");
+	return;
+    }
+    Py_DECREF(object_wrapper);
+
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(n_param_values - 1);
+    for (i = 1; i < n_param_values; i++) {
+	PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+
+	/* error condition */
+	if (!item) {
+	    Py_DECREF(params);
+	    /* XXXX - clean up if threading was used */
+	    return;
+	}
+	PyTuple_SetItem(params, i, item);
+    }
+
+    ret = PyObject_CallObject(method, params);
+    if (ret == NULL) {
+	/* XXXX - do fatal exceptions thing here */
+	PyErr_Print();
+	PyErr_Clear();
+	/* XXXX - clean up if threading was used */
+	Py_DECREF(method);
+	return;
+    }
+    Py_DECREF(method);
+    pyg_value_from_pyobject(return_value, ret);
+    Py_DECREF(ret);
+    /* XXXX - clean up if threading was used */
+}
+
+static GClosure *
+pyg_signal_class_closure_get(void)
+{
+    static GClosure *closure;
+
+    if (closure == NULL) {
+	closure = g_closure_new_simple(sizeof(GClosure), NULL);
+	g_closure_set_marshal(closure, pyg_signal_class_closure_marshal);
+
+	g_closure_ref(closure);
+	g_closure_sink(closure);
+    }
+    return closure;
+}
+
 /* -------------- PyGObject behaviour ----------------- */
 static void
 pygobject_dealloc(PyGObject *self)
