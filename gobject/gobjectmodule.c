@@ -307,6 +307,26 @@ pyg_boxed_repr(PyGBoxed *self)
 }
 
 static PyObject *
+pyg_boxed_getattro(PyGBoxed *self, PyObject *attro)
+{
+    char *attr;
+    PyObject *ret;
+
+    attr = PyString_AsString(attro);
+
+    ret = Py_FindAttrString((PyObject *)self, attr);
+    if (ret)
+	return ret;
+    PyErr_Clear();
+
+    if (self->ob_type->tp_getattr)
+	return (* self->ob_type->tp_getattr)((PyObject *)self, attr);
+
+    PyErr_SetString(PyExc_AttributeError, attr);
+    return NULL;
+}
+
+static PyObject *
 pyg_boxed__class_init__(PyObject *self, PyObject *args)
 {
     PyExtensionClass *subclass;
@@ -361,7 +381,7 @@ static PyExtensionClass PyGBoxed_Type = {
     (hashfunc)pyg_boxed_hash,           /* tp_hash */
     (ternaryfunc)0,                     /* tp_call */
     (reprfunc)0,                        /* tp_str */
-    (getattrofunc)0,                    /* tp_getattro */
+    (getattrofunc)pyg_boxed_getattro,   /* tp_getattro */
     (setattrofunc)0,                    /* tp_setattro */
     /* Space for future expansion */
     0L, 0L,
@@ -386,10 +406,11 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     if (!boxed_types)
 	boxed_types = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-    if (!ec->tp_dealloc) ec->tp_dealloc = (destructor)pyg_boxed_dealloc;
-    if (!ec->tp_compare) ec->tp_compare = (cmpfunc)pyg_boxed_compare;
-    if (!ec->tp_hash)    ec->tp_hash    = (hashfunc)pyg_boxed_hash;
-    if (!ec->tp_repr)    ec->tp_repr    = (reprfunc)pyg_boxed_repr;
+    if (!ec->tp_dealloc)  ec->tp_dealloc  = (destructor)pyg_boxed_dealloc;
+    if (!ec->tp_compare)  ec->tp_compare  = (cmpfunc)pyg_boxed_compare;
+    if (!ec->tp_hash)     ec->tp_hash     = (hashfunc)pyg_boxed_hash;
+    if (!ec->tp_repr)     ec->tp_repr     = (reprfunc)pyg_boxed_repr;
+    if (!ec->tp_getattro) ec->tp_getattro = (getattrofunc)pyg_boxed_getattro;
 
     PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name, *ec,
 					  PyGBoxed_Type);
@@ -521,6 +542,52 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
     }
     g_type_class_unref(fclass);
     return res;
+}
+
+static GType
+pyg_type_from_object(PyObject *obj)
+{
+    PyObject *gtype;
+    GType type;
+
+    /* NULL check */
+    if (!obj) {
+	PyErr_SetString(PyExc_TypeError, "can't get type from NULL object");
+	return 0;
+    }
+
+    /* handle int like objects */
+    type = (GType) PyInt_AsLong(obj);
+    if (!PyErr_Occurred() && type != 0)
+	return type;
+    PyErr_Clear();
+
+    /* handle strings */
+    if (PyString_Check(obj)) {
+	type = g_type_from_name(PyString_AsString(obj));
+	if (type == 0)
+	    PyErr_SetString(PyExc_TypeError, "could not find named typecode");
+	return type;
+    }
+
+    /* finally, look for a __gtype__ attribute on the object */
+    gtype = PyObject_GetAttrString(obj, "__gtype__");
+    if (!gtype) {
+	PyErr_Clear();
+	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
+	return 0;
+    }
+    type = (GType) PyInt_AsLong(gtype);
+    if (PyErr_Occurred()) {
+	PyErr_Clear();
+	Py_DECREF(gtype);
+	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
+	return 0;
+    }
+    Py_DECREF(gtype);
+    if (type == 0)
+	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
+    return type;
 }
 
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
@@ -1085,28 +1152,15 @@ pygobject__class_init__(PyObject *something, PyObject *args)
 static PyObject *
 pygobject__init__(PyGObject *self, PyObject *args)
 {
-    PyObject *gtype;
     GType object_type;
 
     if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
 	return NULL;
 
-    gtype = PyObject_GetAttrString((PyObject *)self, "__gtype__");
-    if (!gtype) {
-	PyErr_Clear();
-	PyErr_SetString(PyExc_TypeError,
-			"required __gtype__ attribute missing");
+    object_type = pyg_type_from_object((PyObject *)self);
+    if (!object_type)
 	return NULL;
-    }
-    object_type = (GType) PyInt_AsLong(gtype);
-    if (PyErr_Occurred()) {
-	PyErr_Clear();
-	Py_DECREF(gtype);
-	PyErr_SetString(PyExc_TypeError,
-			"__gtype__ attribute not an integer");
-	return NULL;
-    }
-    Py_DECREF(gtype);
+
     self->obj = g_object_new(object_type, NULL);
     if (!self->obj) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
@@ -1855,33 +1909,9 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			  &py_type, &signal_flags, &return_type,
 			  &py_param_types))
 	return NULL;
-    if (ExtensionClassSubclass_Check(py_type, &PyGObject_Type)) {
-	PyObject *gtype = PyObject_GetAttrString(py_type, "__gtype__");
-
-	if (!gtype) {
-	    PyErr_Clear();
-	    PyErr_SetString(PyExc_TypeError,
-			    "argument 2 must be a GObject or a GType code");
-	    return NULL;
-	}
-	instance_type = (GType) PyInt_AsLong(gtype);
-	if (PyErr_Occurred()) {
-	    PyErr_Clear();
-	    Py_DECREF(gtype);
-	    PyErr_SetString(PyExc_TypeError,
-			    "argument 2 must be a GObject or a GType code");
-	    return NULL;
-	}
-	Py_DECREF(gtype);
-    } else {
-	instance_type = (GType)PyInt_AsLong(py_type);
-	if (PyErr_Occurred()) {
-	    PyErr_Clear();
-	    PyErr_SetString(PyExc_TypeError,
-			    "argument 2 must be a GObject or a GType code");
-	    return NULL;
-	}
-    }
+    instance_type = pyg_type_from_object(py_type);
+    if (!instance_type)
+	return NULL;
     if (!PySequence_Check(py_param_types)) {
 	PyErr_SetString(PyExc_TypeError,
 			"argument 5 must be a sequence of GType codes");
@@ -1935,6 +1965,7 @@ static struct _PyGObject_Functions functions = {
   pygobject_register_wrapper,
   pygobject_lookup_class,
   pygobject_new,
+  pyg_type_from_object,
   pyg_enum_get_value,
   pyg_flags_get_value,
   pyg_boxed_register,

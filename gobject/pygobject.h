@@ -35,6 +35,7 @@ struct _PyGObject_Functions {
     void (* register_wrapper)(PyObject *self);
     PyExtensionClass *(* lookup_class)(GType type);
     PyObject *(* new)(GObject *obj);
+    GType (* type_from_object)(PyObject *obj);
     gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
     gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
     void (* boxed_register)(GType boxed_type,
@@ -64,12 +65,15 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_register_wrapper (_PyGObject_API->register_wrapper)
 #define pygobject_lookup_class     (_PyGObject_API->lookup_class)
 #define pygobject_new              (_PyGObject_API->new)
+#define pyg_type_from_object       (_PyGObject_API->type_from_object)
 #define pyg_enum_get_value         (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value        (_PyGObject_API->flags_get_value)
 #define pyg_boxed_register         (_PyGObject_API->boxed_register)
 #define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
 #define pyg_register_interface     (_PyGObject_API->register_interface)
+#define pyg_register_boxed         (_PyGObject_API->register_boxed)
+#define pyg_boxed_new              (_PyGObject_API->boxed_new)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \
