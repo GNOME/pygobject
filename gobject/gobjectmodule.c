@@ -1107,7 +1107,9 @@ pygobject_dealloc(PyGObject *self)
 	Py_DECREF(self->inst_dict);
     self->inst_dict = NULL;
 
-    self->ob_type->tp_free((PyObject *)self);
+    /* the following causes problems with subclassed types */
+    /*self->ob_type->tp_free((PyObject *)self); */
+    PyObject_GC_Del(self);
 }
 
 static int
