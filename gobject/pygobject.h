@@ -13,6 +13,7 @@ typedef struct {
     gboolean hasref;     /* the GObject owns this reference */
     PyObject *inst_dict; /* the instance dictionary -- must be last */
     PyObject *weakreflist; /* list of weak references */
+    GSList *closures;
 } PyGObject;
 
 #define pygobject_get(v) (((PyGObject *)(v))->obj)
@@ -49,6 +50,7 @@ struct _PyGObject_Functions {
 
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
+    void      (* object_watch_closure)(PyObject *self, GClosure *closure);
     GDestroyNotify destroy_notify;
 
     GType (* type_from_object)(PyObject *obj);
@@ -107,6 +109,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_lookup_class     (_PyGObject_API->lookup_class)
 #define pygobject_new              (_PyGObject_API->newgobj)
 #define pyg_closure_new            (_PyGObject_API->closure_new)
+#define pygobject_watch_closure    (_PyGObject_API->object_watch_closure)
 #define pyg_destroy_notify         (_PyGObject_API->destroy_notify)
 #define pyg_type_from_object       (_PyGObject_API->type_from_object)
 #define pyg_type_wrapper_new       (_PyGObject_API->type_wrapper_new)

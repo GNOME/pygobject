@@ -52,6 +52,14 @@ void      pyg_register_boxed_custom(GType boxed_type,
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
 PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
 
+typedef struct _PyGClosure PyGClosure;
+struct _PyGClosure {
+    GClosure closure;
+    PyObject *callback;
+    PyObject *extra_args; /* tuple of extra args to pass to callback */
+    PyObject *swap_data; /* other object for gtk_signal_connect_object */
+};
+
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get(void);
 
@@ -68,7 +76,7 @@ void          pygobject_register_class   (PyObject *dict,
 void          pygobject_register_wrapper (PyObject *self);
 PyObject *    pygobject_new              (GObject *obj);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
-
+void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;

@@ -1295,6 +1295,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_new,
 
   pyg_closure_new,
+  pygobject_watch_closure,
   pyg_destroy_notify,
 
   pyg_type_from_object,

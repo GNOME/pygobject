@@ -127,6 +127,7 @@ pygobject_new(GObject *obj)
     self->hasref = FALSE;
     self->inst_dict = NULL;
     self->weakreflist = NULL;
+    self->closures = NULL;
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 
@@ -135,12 +136,36 @@ pygobject_new(GObject *obj)
     return (PyObject *)self;
 }
 
+static void
+pygobject_unwatch_closure(gpointer data, GClosure *closure)
+{
+    PyGObject *self = (PyGObject *)data;
+
+    self->closures = g_slist_remove (self->closures, closure);
+}
+
+void
+pygobject_watch_closure(PyObject *self, GClosure *closure)
+{
+    PyGObject *gself;
+
+    g_return_if_fail(self != NULL);
+    g_return_if_fail(PyObject_TypeCheck(self, &PyGObject_Type));
+    g_return_if_fail(closure != NULL);
+    g_return_if_fail(g_slist_find(((PyGObject *)self)->closures, closure) == NULL);
+
+    gself = (PyGObject *)self;
+    gself->closures = g_slist_prepend(gself->closures, closure);
+    g_closure_add_invalidate_notifier(closure,self, pygobject_unwatch_closure);
+}
+
 /* -------------- PyGObject behaviour ----------------- */
 
 static void
 pygobject_dealloc(PyGObject *self)
 {
     GObject *obj = self->obj;
+    GSList *tmp;
 
     if (!pygobject_ownedref_key)
 	pygobject_ownedref_key =
@@ -182,6 +207,17 @@ pygobject_dealloc(PyGObject *self)
     }
     self->inst_dict = NULL;
 
+    tmp = self->closures;
+    while (tmp) {
+	GClosure *closure = tmp->data;
+
+	/* we get next item first, because the current link gets
+	 * invalidated by pygobject_unwatch_closure */
+	tmp = tmp->next;
+	g_closure_invalidate(closure);
+    }
+    self->closures = NULL;
+
     /* the following causes problems with subclassed types */
     /*self->ob_type->tp_free((PyObject *)self); */
     PyObject_GC_Del(self);
@@ -217,8 +253,44 @@ pygobject_repr(PyGObject *self)
 static int
 pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
 {
-    if (self->inst_dict)
-	return visit(self->inst_dict, arg);
+    int ret = 0;
+    GSList *tmp;
+
+    if (self->inst_dict) ret = visit(self->inst_dict, arg);
+    if (ret != 0) return ret;
+
+    for (tmp = self->closures; tmp != NULL; tmp = tmp->next) {
+	PyGClosure *closure = tmp->data;
+
+	if (closure->callback) ret = visit(closure->callback, arg);
+	if (ret != 0) return ret;
+
+	if (closure->extra_args) ret = visit(closure->extra_args, arg);
+	if (ret != 0) return ret;
+
+	if (closure->swap_data) ret = visit(closure->swap_data, arg);
+	if (ret != 0) return ret;
+    }
+    return 0;
+}
+
+static int
+pygobject_clear(PyGObject *self)
+{
+    GSList *tmp;
+
+    tmp = self->closures;
+    while (tmp) {
+	GClosure *closure = tmp->data;
+
+	/* we get next item first, because the current link gets
+	 * invalidated by pygobject_unwatch_closure */
+	tmp = tmp->next;
+	g_closure_invalidate(closure);
+    }
+    if (self->closures != NULL)
+	g_message("invalidated all closures, but self->closures != NULL !");
+
     return 0;
 }
 
@@ -227,6 +299,7 @@ pygobject_free(PyObject *op)
 {
     PyObject_GC_Del(op);
 }
+
 
 /* ---------------- PyGObject methods ----------------- */
 
@@ -451,6 +524,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     gchar *name;
     guint handlerid, sigid, len;
     GQuark detail = 0;
+    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -476,8 +550,10 @@ pygobject_connect(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
+    closure = pyg_closure_new(callback, extra_args, NULL);
+    pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-			pyg_closure_new(callback, extra_args, NULL), FALSE);
+					       closure, FALSE);
     Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
@@ -489,6 +565,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     gchar *name;
     guint handlerid, sigid, len;
     GQuark detail;
+    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -515,8 +592,10 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
+    closure = pyg_closure_new(callback, extra_args, NULL);
+    pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-			pyg_closure_new(callback, extra_args, NULL), TRUE);
+					       closure, TRUE);
     Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
@@ -528,6 +607,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     gchar *name;
     guint handlerid, sigid, len;
     GQuark detail;
+    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -554,8 +634,10 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
+    closure = pyg_closure_new(callback, extra_args, NULL);
+    pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-			pyg_closure_new(callback, extra_args, object), FALSE);
+					       closure, FALSE);
     Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
@@ -567,6 +649,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     gchar *name;
     guint handlerid, sigid, len;
     GQuark detail;
+    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -593,8 +676,10 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
+    closure = pyg_closure_new(callback, extra_args, NULL);
+    pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-			pyg_closure_new(callback, extra_args, object), TRUE);
+					       closure, TRUE);
     Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
@@ -875,7 +960,7 @@ PyTypeObject PyGObject_Type = {
     	Py_TPFLAGS_HAVE_GC,		/* tp_flags */
     NULL, /* Documentation string */
     (traverseproc)pygobject_traverse,	/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
+    (inquiry)pygobject_clear,		/* tp_clear */
     (richcmpfunc)0,			/* tp_richcompare */
     offsetof(PyGObject, weakreflist),	/* tp_weaklistoffset */
     (getiterfunc)0,			/* tp_iter */

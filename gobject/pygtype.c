@@ -611,23 +611,18 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 
 /* -------------- PyGClosure ----------------- */
 
-typedef struct _PyGClosure PyGClosure;
-struct _PyGClosure {
-    GClosure closure;
-    PyObject *callback;
-    PyObject *extra_args; /* tuple of extra args to pass to callback */
-    PyObject *swap_data; /* other object for gtk_signal_connect_object */
-};
-
 static void
-pyg_closure_destroy(gpointer data, GClosure *closure)
+pyg_closure_invalidate(gpointer data, GClosure *closure)
 {
     PyGClosure *pc = (PyGClosure *)closure;
 
     pyg_block_threads();
-    Py_DECREF(pc->callback);
+    Py_XDECREF(pc->callback);
     Py_XDECREF(pc->extra_args);
     Py_XDECREF(pc->swap_data);
+    pc->callback = NULL;
+    pc->extra_args = NULL;
+    pc->swap_data = NULL;
     pyg_unblock_threads();
 }
 
@@ -693,7 +688,7 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 
     g_return_val_if_fail(callback != NULL, NULL);
     closure = g_closure_new_simple(sizeof(PyGClosure), NULL);
-    g_closure_add_finalize_notifier(closure, NULL, pyg_closure_destroy);
+    g_closure_add_invalidate_notifier(closure, NULL, pyg_closure_invalidate);
     g_closure_set_marshal(closure, pyg_closure_marshal);
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
