@@ -1041,14 +1041,18 @@ pyg_type_register(PyObject *self, PyObject *args)
             GType itype;
             const GInterfaceInfo *iinfo;
             
-            if (PyObject_IsSubclass((PyObject *) base,
-                                    (PyObject *) &PyGInterface_Type) != 1)
+            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
                 continue;
+
             itype = pyg_type_from_object((PyObject *) base);
             iinfo = pyg_lookup_interface_info(itype);
             if (!iinfo) {
-                PyErr_Format(PyExc_NotImplementedError, "Interface type %s "
-                             "has no python implementation support", base->tp_name);
+                char *msg;
+                msg = g_strdup_printf("Interface type %s "
+                                      "has no python implementation support",
+                                      base->tp_name);
+                PyErr_Warn(PyExc_RuntimeWarning, msg);
+                g_free(msg);
                 return NULL;
             }
             g_type_add_interface_static(instance_type, itype, iinfo);
