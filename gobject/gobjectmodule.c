@@ -342,6 +342,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 static PyObject *
 pyg_value_as_pyobject(const GValue *value)
 {
+    gchar buf[128];
+
     if (G_IS_VALUE_CHAR(value)) {
 	gint8 val = g_value_get_char(value);
 	return PyString_FromStringAndSize((char *)&val, 1);
@@ -378,7 +380,9 @@ pyg_value_as_pyobject(const GValue *value)
     } else if (G_IS_VALUE_POINTER(value)) {
 	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
     }
-    PyErr_SetString(PyExc_TypeError, "unknown type");
+    g_snprintf(buf, sizeof(buf), "unknown type %s",
+	       g_type_name(G_VALUE_TYPE(value)));
+    PyErr_SetString(PyExc_TypeError, buf);
     return NULL;
 }
 
