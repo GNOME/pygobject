@@ -24,8 +24,10 @@ import sys, os, re
 __all__ = ['require']
 
 _pygtk_dir_pat = re.compile(r'^gtk-([\d]+[\d\.]+)$')
+_pygtk_required_version = None
 
 def _get_available_versions():
+    global _pygtk_dir_pat
     versions = {}
     for dir in sys.path:
         if not dir: dir = os.getcwd()
@@ -42,8 +44,15 @@ def _get_available_versions():
     return versions
 
 def require(version):
+    global _pygtk_required_version
+
     assert not sys.modules.has_key('gtk'), \
            "pygtk.require() must be called before importing gtk"
+
+    if _pygtk_required_version != None:
+        assert _pygtk_required_version == version, \
+               "a different version of gtk was already required"
+        return
 
     versions = _get_available_versions()
     assert versions.has_key(version), \
@@ -56,3 +65,5 @@ def require(version):
 
     # prepend the pygtk path ...
     sys.path.insert(0, versions[version])
+    
+    _pygtk_required_version = version
