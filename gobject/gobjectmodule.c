@@ -8,15 +8,13 @@ static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
 
 staticforward PyTypeObject PyGObject_Type;
-static void      pygobject_dealloc(PyGObject *self);
-static int       pygobject_compare(PyGObject *self, PyGObject *v);
-static long      pygobject_hash(PyGObject *self);
-static PyObject *pygobject_repr(PyGObject *self);
+static void pygobject_dealloc(PyGObject *self);
+static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 
 static void
 object_free(PyObject *op)
 {
-    PyObject_FREE(op);
+    PyObject_GC_Del(op);
 }
 
 
@@ -125,7 +123,11 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
     }
 
-    if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pygobject_dealloc;
+    type->tp_dealloc  = (destructor)pygobject_dealloc;
+    type->tp_traverse = (traverseproc)pygobject_traverse;
+    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+    type->tp_weaklistoffset = offsetof(PyGObject, weakreflist);
+    type->tp_dictoffset = offsetof(PyGObject, inst_dict);
 
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
@@ -190,7 +192,7 @@ pygobject_new(GObject *obj)
     }
 
     tp = pygobject_lookup_class(G_TYPE_FROM_INSTANCE(obj));
-    self = PyObject_NEW(PyGObject, tp);
+    self = PyObject_GC_New(PyGObject, tp);
 
     if (self == NULL)
 	return NULL;
@@ -950,7 +952,24 @@ pygobject_dealloc(PyGObject *self)
 {
     GObject *obj = self->obj;
 
+    /* save reference to python wrapper if there are still
+     * references to the GObject in such a way that it will be
+     * freed when the GObject is destroyed, so is the python
+     * wrapper, but if a python wrapper can be */
+    if (obj->ref_count > 1) {
+	Py_INCREF(self); /* grab a reference on the wrapper */
+	self->hasref = TRUE;
+	g_object_set_qdata_full(obj, pygobject_ownedref_key,
+				self, pygobject_destroy_notify);
+	g_object_unref(obj);
+	return;
+    }
+    if (!self->hasref) /* don't unref the GObject if it owns us */
+	g_object_unref(obj);
+
     PyObject_ClearWeakRefs((PyObject *)self);
+
+    PyObject_GC_UnTrack((PyObject *)self);
 
     if (self->inst_dict)
 	Py_DECREF(self->inst_dict);
@@ -981,6 +1000,14 @@ pygobject_repr(PyGObject *self)
     g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", G_OBJECT_TYPE_NAME(self->obj),
 	       (long)self->obj);
     return PyString_FromString(buf);
+}
+
+static int
+pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
+{
+    if (self->inst_dict)
+	return visit(self->inst_dict, arg);
+    return 0;
 }
 
 /* ---------------- PyGObject methods ----------------- */
@@ -1461,9 +1488,10 @@ static PyTypeObject PyGObject_Type = {
     (getattrofunc)0,			/* tp_getattro */
     (setattrofunc)0,			/* tp_setattro */
     0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
+    	Py_TPFLAGS_HAVE_GC,		/* tp_flags */
     NULL, /* Documentation string */
-    (traverseproc)0,			/* tp_traverse */
+    (traverseproc)pygobject_traverse,	/* tp_traverse */
     (inquiry)0,				/* tp_clear */
     (richcmpfunc)0,			/* tp_richcompare */
     offsetof(PyGObject, weakreflist),	/* tp_weaklistoffset */
