@@ -1279,6 +1279,7 @@ pyg_error_check(GError **error)
 	}
 
 	PyErr_SetObject(gerror_exc, exc_instance);
+	Py_DECREF(exc_instance);
 	g_clear_error(error);
 	return TRUE;
     }
