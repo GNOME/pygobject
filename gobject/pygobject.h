@@ -66,6 +66,9 @@ struct _PyGObject_Functions {
 
     void (* fatal_exceptions_notify_add)(PyGFatalExceptionFunc func);
     void (* fatal_exceptions_notify_remove)(PyGFatalExceptionFunc func);
+    
+    gchar *(* constant_strip_prefix)(gchar *name,
+				     const gchar *strip_prefix);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -96,6 +99,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
 #define pyg_fatal_exceptions_notify_add (_PyGObject_API->fatal_exceptions_notify_add)
 #define pyg_fatal_exceptions_notify_remove (_PyGObject_API->fatal_exceptions_notify_remove)
+#define pyg_constant_strip_prefix (_PyGObject_API->constant_strip_prefix)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \

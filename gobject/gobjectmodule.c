@@ -524,7 +524,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 static gint
 pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 {
-    GEnumClass *eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
+    GEnumClass *eclass = NULL;
     gint res = -1;
 
     g_return_val_if_fail(val != NULL, -1);
@@ -535,8 +535,17 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 	*val = PyInt_AsLong(obj);
 	res = 0;
     } else if (PyString_Check(obj)) {
+	GEnumValue *info;
 	char *str = PyString_AsString(obj);
-	GEnumValue *info = g_enum_get_value_by_name(eclass, str);
+	
+	if (enum_type != G_TYPE_NONE)
+	    eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to enum because there is no GType associated to look up the value");
+	    res = -1;
+	}
+	info = g_enum_get_value_by_name(eclass, str);
+	g_type_class_unref(eclass);
 
 	if (!info)
 	    info = g_enum_get_value_by_nick(eclass, str);
@@ -551,14 +560,13 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 	PyErr_SetString(PyExc_TypeError,"enum values must be strings or ints");
 	res = -1;
     }
-    g_type_class_unref(eclass);
     return res;
 }
 
 static gint
 pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 {
-    GFlagsClass *fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
+    GFlagsClass *fclass = NULL;
     gint res = -1;
 
     g_return_val_if_fail(val != NULL, -1);
@@ -569,9 +577,18 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 	*val = PyInt_AsLong(obj);
 	res = 0;
     } else if (PyString_Check(obj)) {
+	GFlagsValue *info;
 	char *str = PyString_AsString(obj);
-	GFlagsValue *info = g_flags_get_value_by_name(fclass, str);
 
+	if (flag_type != G_TYPE_NONE)
+	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to flag because there is no GType associated to look up the value");
+	    res = -1;
+	}
+	info = g_flags_get_value_by_name(fclass, str);
+	g_type_class_unref(fclass);
+	
 	if (!info)
 	    info = g_flags_get_value_by_nick(fclass, str);
 	if (info) {
@@ -587,6 +604,14 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 	len = PyTuple_Size(obj);
 	*val = 0;
 	res = 0;
+
+	if (flag_type != G_TYPE_NONE)
+	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
+	else {
+	    PyErr_SetString(PyExc_TypeError, "could not convert string to flag because there is no GType associated to look up the value");
+	    res = -1;
+	}
+
 	for (i = 0; i < len; i++) {
 	    PyObject *item = PyTuple_GetItem(obj, i);
 	    char *str = PyString_AsString(item);
@@ -602,12 +627,12 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 		break;
 	    }
 	}
+	g_type_class_unref(fclass);
     } else {
 	PyErr_SetString(PyExc_TypeError,
 			"flag values must be strings, ints or tuples");
 	res = -1;
     }
-    g_type_class_unref(fclass);
     return res;
 }
 
@@ -2211,13 +2236,30 @@ static PyMethodDef pygobject_functions[] = {
 
 /* ----------------- Constant extraction ------------------------ */
 
+static char *
+pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix)
+{
+    gint prefix_len;
+    guint j;
+    
+    prefix_len = strlen(strip_prefix);
+    
+    /* strip off prefix from value name, while keeping it a valid
+     * identifier */
+    for (j = prefix_len; j >= 0; j--) {
+	if (g_ascii_isalpha(name[j]) || name[j] == '_') {
+	    return &name[j];
+	}
+    }
+    return name;
+}
+
 static void
 pyg_enum_add_constants(PyObject *module, GType enum_type,
 		       const gchar *strip_prefix)
 {
     GEnumClass *eclass;
-    guint i, j;
-    gint prefix_len;
+    guint i;
 
     /* a more useful warning */
     if (!G_TYPE_IS_ENUM(enum_type)) {
@@ -2226,22 +2268,15 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
     }
     g_return_if_fail (strip_prefix != NULL);
 
-    prefix_len = strlen(strip_prefix);
     eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
 
     for (i = 0; i < eclass->n_values; i++) {
 	gchar *name = eclass->values[i].value_name;
 	gint value = eclass->values[i].value;
 
-	/* strip off prefix from value name, while keeping it a valid
-         * identifier */
-	for (j = prefix_len; j >= 0; j--) {
-	    if (g_ascii_isalpha(name[j]) || name[j] == '_') {
-		name = &name[j];
-		break;
-	    }
-	}
-	PyModule_AddIntConstant(module, name, (long) value);
+	PyModule_AddIntConstant(module,
+				pyg_constant_strip_prefix(name, strip_prefix),
+				(long) value);
     }
 
     g_type_class_unref(eclass);
@@ -2252,8 +2287,7 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
 			const gchar *strip_prefix)
 {
     GFlagsClass *fclass;
-    guint i, j;
-    gint prefix_len;
+    guint i;
 
     /* a more useful warning */
     if (!G_TYPE_IS_FLAGS(flags_type)) {
@@ -2262,22 +2296,15 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     }
     g_return_if_fail (strip_prefix != NULL);
 
-    prefix_len = strlen(strip_prefix);
     fclass = G_FLAGS_CLASS(g_type_class_ref(flags_type));
 
     for (i = 0; i < fclass->n_values; i++) {
 	gchar *name = fclass->values[i].value_name;
 	guint value = fclass->values[i].value;
 
-	/* strip off prefix from value name, while keeping it a valid
-         * identifier */
-	for (j = prefix_len; j >= 0; j--) {
-	    if (g_ascii_isalpha(name[j]) || name[j] == '_') {
-		name = &name[j];
-		break;
-	    }
-	}
-	PyModule_AddIntConstant(module, name, (long) value);
+	PyModule_AddIntConstant(module,
+				pyg_constant_strip_prefix(name, strip_prefix),
+				(long) value);
     }
 
     g_type_class_unref(fclass);
@@ -2337,6 +2364,8 @@ static struct _PyGObject_Functions functions = {
   
   pyg_fatal_exceptions_notify_add,
   pyg_fatal_exceptions_notify_remove,
+
+  pyg_constant_strip_prefix,
 };
 
 DL_EXPORT(void)
