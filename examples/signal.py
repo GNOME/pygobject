@@ -1,0 +1,20 @@
+import ltihooks, ExtensionClass
+import gobject
+
+class C(gobject.GObject):
+    def do_my_signal(self, arg):
+	print "class closure for `my_signal' called with argument", arg
+
+gobject.signal_new("my_signal", C, gobject.SIGNAL_RUN_FIRST,
+		   gobject.TYPE_NONE, (gobject.TYPE_INT, ))
+
+def my_signal_handler(object, arg, *extra):
+    print "handler for `my_signal' called with argument", arg, \
+	  "and extra args", extra
+
+inst = C()
+
+print "instance id 0x%x" % id(inst)
+
+inst.connect("my_signal", my_signal_handler, 1, 2, 3)
+inst.emit("my_signal", 42)

@@ -665,7 +665,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     GObject *object;
     PyObject *object_wrapper;
     GSignalInvocationHint *hint = (GSignalInvocationHint *)invocation_hint;
-    gchar *method_name;
+    gchar *method_name, *tmp;
     PyObject *method;
     PyObject *params, *ret;
     guint i;
@@ -682,12 +682,19 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 
     /* construct method name for this class closure */
     method_name = g_strconcat("do_", g_signal_name(hint->signal_id), NULL);
+
+    /* convert dashes to underscores.  For some reason, g_signal_name
+     * seems to convert all the underscores in the signal name to
+       dashes??? */
+    for (tmp = method_name; *tmp != '\0'; tmp++)
+	if (*tmp == '-') *tmp = '_';
+
     method = PyObject_GetAttrString(object_wrapper, method_name);
     g_free(method_name);
+
     if (!method) {
 	PyErr_Clear();
 	Py_DECREF(object_wrapper);
-	g_message("no class closure to call");
 	return;
     }
     Py_DECREF(object_wrapper);
@@ -703,7 +710,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	    /* XXXX - clean up if threading was used */
 	    return;
 	}
-	PyTuple_SetItem(params, i, item);
+	PyTuple_SetItem(params, i - 1, item);
     }
 
     ret = PyObject_CallObject(method, params);
@@ -1504,7 +1511,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			  &py_type, &signal_flags, &return_type,
 			  &py_param_types))
 	return NULL;
-    if (pygobject_check(py_type, &PyGObject_Type)) {
+    if (ExtensionClassSubclass_Check(py_type, &PyGObject_Type)) {
 	PyObject *gtype = PyObject_GetAttrString(py_type, "__gtype__");
 
 	if (!gtype) {
@@ -1614,6 +1621,14 @@ initgobject(void)
 			 PyCObject_FromVoidPtr(&functions, NULL));
 
     /* some constants */
+    PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
+    PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
+    PyModule_AddIntConstant(m, "SIGNAL_RUN_CLEANUP", G_SIGNAL_RUN_CLEANUP);
+    PyModule_AddIntConstant(m, "SIGNAL_NO_RECURSE", G_SIGNAL_NO_RECURSE);
+    PyModule_AddIntConstant(m, "SIGNAL_DETAILED", G_SIGNAL_DETAILED);
+    PyModule_AddIntConstant(m, "SIGNAL_ACTION", G_SIGNAL_ACTION);
+    PyModule_AddIntConstant(m, "SIGNAL_NO_HOOKS", G_SIGNAL_NO_HOOKS);
+
     PyModule_AddIntConstant(m, "TYPE_INVALID", G_TYPE_INVALID);
     PyModule_AddIntConstant(m, "TYPE_NONE", G_TYPE_NONE);
     PyModule_AddIntConstant(m, "TYPE_INTERFACE", G_TYPE_INTERFACE);
