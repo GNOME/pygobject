@@ -80,8 +80,7 @@ pyg_flags_repr(PyGFlags *self)
     char *tmp, *retval;
     PyObject *pyretval;
   
-    tmp = generate_repr(self->gtype,
-			   self->parent.ob_ival);
+    tmp = generate_repr(self->gtype, self->parent.ob_ival);
 
     retval = g_strdup_printf("<flags %s of type %s>", tmp,
 			     g_type_name(self->gtype));
@@ -169,15 +168,11 @@ pyg_flags_from_gtype (GType gtype, int value)
     if (!retval) {
 	PyErr_Clear();
 
-	return PyInt_FromLong(value);
-#if 0
-	/* This breaks repr */
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
 	((PyIntObject*)retval)->ob_ival = value;
 	((PyGFlags*)retval)->gtype = gtype;
-#endif	
     } 
 
     Py_INCREF(retval);

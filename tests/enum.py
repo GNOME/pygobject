@@ -73,8 +73,12 @@ class EnumTest(unittest.TestCase):
         assert len(klass.__enum_values__) >= 2
 
     def testOutofBounds(self):
-        assert gtk.icon_size_register('fake', 24, 24) == 7
-        
+        val = gtk.icon_size_register('fake', 24, 24)
+        assert isinstance(val, gobject.GEnum)
+        assert int(val) == 7
+        assert '7' in repr(val)
+        assert 'GtkIconSize' in repr(val)
+
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
         assert issubclass(gobject.GFlags, int)
@@ -100,16 +104,19 @@ class FlagsTest(unittest.TestCase):
         
     def testFlagOperations(self):
         a = gdk.BUTTON_PRESS_MASK
+        assert isinstance(a, gobject.GFlags)
         assert a.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert a.first_value_nick == 'button-press-mask'
         assert a.value_names == ['GDK_BUTTON_PRESS_MASK'], a.value_names
         assert a.value_nicks == ['button-press-mask'], a.value_names
         b = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK
+        assert isinstance(b, gobject.GFlags)
         assert b.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert b.first_value_nick == 'button-press-mask'
         assert b.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK']
         assert b.value_nicks == ['button-press-mask', 'button-release-mask']
         c = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK | gdk.ENTER_NOTIFY_MASK
+        assert isinstance(c, gobject.GFlags)
         assert c.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert c.first_value_nick == 'button-press-mask'
         assert c.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK',

@@ -52,16 +52,17 @@ static PyObject *
 pyg_enum_repr(PyGEnum *self)
 {
   GEnumClass *enum_class;
-  GEnumValue *enum_value;
+  char *value;
   static char tmp[256];
   
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
-  
-  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
-  g_assert(enum_value != 0);
-  
-  sprintf(tmp, "<enum %s of type %s>", enum_value->value_name, g_type_name(self->gtype));
+
+  value = enum_class->values[self->parent.ob_ival].value_name;
+  if (value)
+      sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
+  else
+      sprintf(tmp, "<enum %ld of type %s>", self->parent.ob_ival, g_type_name(self->gtype));
 
   g_type_class_unref(enum_class);
 
@@ -142,7 +143,12 @@ pyg_enum_from_gtype (GType gtype, int value)
     retval = PyDict_GetItem(values, PyInt_FromLong(value));
     if (!retval) {
 	PyErr_Clear();
-	return PyInt_FromLong(value);
+	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
+	g_assert(retval != NULL);
+	
+	((PyIntObject*)retval)->ob_ival = value;
+	((PyGFlags*)retval)->gtype = gtype;
+	//return PyInt_FromLong(value);
     }
     
     Py_INCREF(retval);
