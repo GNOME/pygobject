@@ -3,8 +3,12 @@ tests =  \
 	enum.py \
 	signal.py
 
-check-local:
-	@PYTHONPATH=$(top_builddir):$(top_builddir)/.libs:$(top_builddir)/gtk/.libs $(PYTHON) $(srcdir)/runtests.py
-	@rm -fr *.pyc
+PYTHONPATH = $(top_builddir):$(top_builddir)/gobject:$(top_srcdir):$(top_srcdir)/gtk
 
-EXTRA_DIST = $(tests) runtests.py
+check-local: $(top_srcdir)/gtk/__init__.py
+	@if ! test -e $(top_builddir)/gtk/__init__.py; then cp $(top_srcdir)/gtk/__init__.py $(top_builddir)/gtk/__init__.py; fi
+	@PYTHONPATH=$(PYTHONPATH) $(PYTHON) $(srcdir)/runtests.py
+	@if test "$(top_builddir)" != "$(top_srcdir)"; then rm -f $(top_builddir)/gtk/__init__.py*; fi
+	@rm -fr *.pyc 
+
+EXTRA_DIST = $(tests) common.py runtests.py

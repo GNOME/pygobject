@@ -24,7 +24,6 @@ class EnumTest(unittest.TestCase):
         assert atk.LAYER_INVALID != atk.LAYER_BACKGROUND
 
     def testWindowGetState(self):
-        # Usage through properties/external methods
         win = gtk.Window()
         win.realize()
 
