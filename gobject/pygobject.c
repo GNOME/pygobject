@@ -478,6 +478,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
 	return NULL;
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, NULL), FALSE);
+    Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
 
@@ -516,6 +517,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 	return NULL;
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, NULL), TRUE);
+    Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
 
@@ -554,6 +556,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 	return NULL;
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, object), FALSE);
+    Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
 
@@ -592,6 +595,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 	return NULL;
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, object), TRUE);
+    Py_DECREF(extra_args);
     return PyInt_FromLong(handlerid);
 }
 
