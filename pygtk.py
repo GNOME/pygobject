@@ -19,29 +19,45 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import sys, os, re
+import fnmatch
+import glob
+import os
+import sys
 
 __all__ = ['require']
 
-_pygtk_dir_pat = re.compile(r'^gtk-([\d]+[\d\.]+)$')
+_pygtk_dir_pat = 'gtk-[0-9].[0-9]'
+
+_pygtk_required_version = None
 
 def _get_available_versions():
     versions = {}
     for dir in sys.path:
-        if not dir: dir = os.getcwd()
-        if not os.path.isdir(dir): continue
-        if _pygtk_dir_pat.match(os.path.basename(dir)):
+        if not dir: 
+  	    dir = os.getcwd()
+        if not os.path.isdir(dir):
+            continue
+        
+        if fnmatch.fnmatchcase(os.path.basename(dir), _pygtk_dir_pat):
             continue  # if the dir is a pygtk dir, skip it
-        for filename in os.listdir(dir):
+        
+        for filename in glob.glob(os.path.join(dir, _pygtk_dir_pat)):
             pathname = os.path.join(dir, filename)
             if not os.path.isdir(pathname):
                 continue  # skip non directories
-            match = _pygtk_dir_pat.match(filename)
-            if match and not versions.has_key(match.group(1)):
-                versions[match.group(1)] = pathname
+            
+	    if not versions.has_key(filename[-3:]):
+            	versions[filename[-3:]] = pathname
     return versions
 
 def require(version):
+    global _pygtk_required_version
+
+    if _pygtk_required_version != None:
+        assert _pygtk_required_version == version, \
+               "a different version of gtk was already required"
+        return
+
     assert not sys.modules.has_key('gtk'), \
            "pygtk.require() must be called before importing gtk"
 
@@ -51,8 +67,10 @@ def require(version):
 
     # remove any pygtk dirs first ...
     for dir in sys.path:
-        if _pygtk_dir_pat.match(os.path.basename(dir)):
+        if fnmatch.fnmatchcase(os.path.basename(dir), _pygtk_dir_pat):
             sys.path.remove(dir)
 
     # prepend the pygtk path ...
     sys.path.insert(0, versions[version])
+    
+    _pygtk_required_version = version
