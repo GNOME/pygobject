@@ -2093,6 +2093,68 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     return list;
 }
 
+static PyObject *
+pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *pytype;
+    GType type;
+    GObject *obj;
+    GObjectClass *class;
+    PyObject *value;
+    PyObject *key;
+    int pos=0;
+    
+    if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
+	return NULL;
+    }
+    type = pyg_type_from_object (pytype);
+    obj = g_object_new(type, NULL);
+
+    if (!obj) {
+	PyErr_SetString (PyExc_RuntimeError,
+			 "could not create object");
+	return NULL;
+    }
+
+    class = G_OBJECT_GET_CLASS(obj);
+    g_object_freeze_notify (G_OBJECT(obj));
+
+    while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
+	gchar *key_str = PyString_AsString (key);
+	GParamSpec *pspec;
+	GValue gvalue ={ 0, };
+
+	pspec = g_object_class_find_property (class, key_str);
+	if (!pspec) {
+	    gchar buf[512];
+
+	    g_snprintf(buf, sizeof(buf),
+		       "gobject `%s' doesn't support property `%s'",
+		       g_type_name(type), key_str);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    g_object_unref(G_OBJECT(obj));
+	    return NULL;
+	}
+
+	g_value_init(&gvalue, G_PARAM_SPEC_VALUE_TYPE(pspec));
+	if (pyg_value_from_pyobject(&gvalue, value)) {
+	    gchar buf[512];
+
+	    g_snprintf(buf, sizeof(buf),
+		       "could not convert value for property `%s'", key_str);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    g_object_unref(G_OBJECT(obj));
+	    return NULL;
+	}
+	g_object_set_property(G_OBJECT(obj), key_str, &gvalue);
+	g_value_unset(&gvalue);
+    }
+
+    g_object_thaw_notify (G_OBJECT(obj));
+
+    return pygobject_new ((GObject *)obj);
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2104,6 +2166,7 @@ static PyMethodDef pygobject_functions[] = {
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "signal_list_names", pyg_signal_list_names, METH_VARARGS },
     { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
+    { "new", pyg_object_new, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
