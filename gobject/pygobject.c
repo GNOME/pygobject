@@ -72,7 +72,9 @@ pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
 {
     SinkFunc sf;
 
-    g_return_if_fail(G_IS_TYPE(type));
+#if 0
+    g_return_if_fail(G_TYPE_IS_OBJECT(type));
+#endif
     g_return_if_fail(sinkfunc != NULL);
     
     if (!sink_funcs)
