@@ -306,6 +306,11 @@ pygobject_new(GObject *obj)
     } else {
 	/* create wrapper */
 	PyTypeObject *tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+        /* need to bump type refcount if created with
+           pygobject_new_with_interfaces(). fixes bug #141042 */
+        if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
+            Py_INCREF(tp);
+ 
 	self = PyObject_GC_New(PyGObject, tp);
 
 	if (self == NULL)
