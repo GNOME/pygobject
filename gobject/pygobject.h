@@ -25,8 +25,17 @@ typedef struct {
     gboolean free_on_dealloc;
 } PyGBoxed;
 
+typedef struct {
+    PyObject_HEAD
+    gpointer pointer;
+    GType gtype;
+} PyGPointer;
+
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
 #define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
+
+#define pyg_pointer_get(v,t)      ((t *)((PyGPointer *)(v))->pointer)
+#define pyg_pointer_check(v,typecode) (PyObject_TypeCheck(v, &PyGPointer_Type) && ((PyGPointer *)(v))->gtype == typecode)
 
 typedef void (*PyGFatalExceptionFunc) (void);
 typedef void (*PyGThreadBlockFunc) (void);
@@ -61,6 +70,11 @@ struct _PyGObject_Functions {
 			    GType boxed_type, PyTypeObject *type);
     PyObject *(* boxed_new)(GType boxed_type, gpointer boxed,
 			    gboolean copy_boxed, gboolean own_ref);
+
+    PyTypeObject *pointer_type;
+    void (* register_pointer)(PyObject *dict, const gchar *class_name,
+			      GType pointer_type, PyTypeObject *type);
+    PyObject *(* pointer_new)(GType boxed_type, gpointer pointer);
 
     void (* enum_add_constants)(PyObject *module, GType enum_type,
 				const gchar *strip_prefix);
@@ -105,9 +119,12 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define PyGBoxed_Type              (*_PyGObject_API->boxed_type)
 #define pyg_register_boxed         (_PyGObject_API->register_boxed)
 #define pyg_boxed_new              (_PyGObject_API->boxed_new)
+#define PyGPointer_Type            (*_PyGObject_API->pointer_type)
+#define pyg_register_pointer       (_PyGObject_API->register_pointer)
+#define pyg_pointer_new            (_PyGObject_API->pointer_new)
 #define pyg_enum_add_constants     (_PyGObject_API->enum_add_constants)
 #define pyg_flags_add_constants    (_PyGObject_API->flags_add_constants)
-#define pyg_constant_strip_prefix (_PyGObject_API->constant_strip_prefix)
+#define pyg_constant_strip_prefix  (_PyGObject_API->constant_strip_prefix)
 #define pyg_error_check            (_PyGObject_API->error_check)
 #define pyg_set_thread_block_funcs (_PyGObject_API->set_thread_block_funcs)
 

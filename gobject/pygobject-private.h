@@ -68,5 +68,10 @@ void       pyg_register_boxed (PyObject *dict, const gchar *class_name,
 PyObject * pyg_boxed_new      (GType boxed_type, gpointer boxed,
 			       gboolean copy_boxed, gboolean own_ref);
 
+extern PyTypeObject PyGPointer_Type;
+
+void       pyg_register_pointer (PyObject *dict, const gchar *class_name,
+				 GType pointer_type, PyTypeObject *type);
+PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
 
 #endif

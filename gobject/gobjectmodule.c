@@ -1320,6 +1320,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_register_boxed,
   pyg_boxed_new,
 
+  &PyGPointer_Type,
+  pyg_register_pointer,
+  pyg_pointer_new,
+
   pyg_enum_add_constants,
   pyg_flags_add_constants,
   
@@ -1380,6 +1384,14 @@ initgobject(void)
     PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
     PyDict_SetItemString(PyGBoxed_Type.tp_dict, "__gtype__",
 			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
+    Py_DECREF(o);
+
+    PyGPointer_Type.ob_type = &PyType_Type;
+    if (PyType_Ready(&PyGPointer_Type))
+	return;
+    PyDict_SetItemString(d, "GPointer", (PyObject *)&PyGPointer_Type);
+    PyDict_SetItemString(PyGPointer_Type.tp_dict, "__gtype__",
+			 o=pyg_type_wrapper_new(G_TYPE_POINTER));
     Py_DECREF(o);
 
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
