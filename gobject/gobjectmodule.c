@@ -11,7 +11,7 @@ static GQuark pygobject_ownedref_key = 0;
 
 staticforward PyExtensionClass PyGObject_Type;
 static void      pygobject_dealloc(PyGObject *self);
-static PyObject *pygobject_getattr(PyGObject *self, char *attr);
+static PyObject *pygobject_getattro(PyGObject *self, PyObject *attro);
 static int       pygobject_setattr(PyGObject *self, char *attr, PyObject *val);
 static int       pygobject_compare(PyGObject *self, PyGObject *v);
 static long      pygobject_hash(PyGObject *self);
@@ -37,12 +37,12 @@ pygobject_register_class(PyObject *dict, const gchar *class_name,
 	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
 
     /* set standard pyobject class functions if they aren't already set */
-    if (!ec->tp_dealloc) ec->tp_dealloc = (destructor)pygobject_dealloc;
-    if (!ec->tp_getattr) ec->tp_getattr = (getattrfunc)pygobject_getattr;
-    if (!ec->tp_setattr) ec->tp_setattr = (setattrfunc)pygobject_setattr;
-    if (!ec->tp_compare) ec->tp_compare = (cmpfunc)pygobject_compare;
-    if (!ec->tp_repr)    ec->tp_repr    = (reprfunc)pygobject_repr;
-    if (!ec->tp_hash)    ec->tp_hash    = (hashfunc)pygobject_hash;
+    if (!ec->tp_dealloc)  ec->tp_dealloc  = (destructor)pygobject_dealloc;
+    if (!ec->tp_getattro) ec->tp_getattro = (getattrofunc)pygobject_getattro;
+    if (!ec->tp_setattr)  ec->tp_setattr  = (setattrfunc)pygobject_setattr;
+    if (!ec->tp_compare)  ec->tp_compare  = (cmpfunc)pygobject_compare;
+    if (!ec->tp_repr)     ec->tp_repr     = (reprfunc)pygobject_repr;
+    if (!ec->tp_hash)     ec->tp_hash     = (hashfunc)pygobject_hash;
 
     if (parent) {
         PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name,
@@ -373,11 +373,45 @@ pygobject_dealloc(PyGObject *self)
 
 /* standard getattr method */
 static PyObject *
-pygobject_getattr(PyGObject *self, char *attr)
+check_bases(PyGObject *self, PyExtensionClass *class, char *attr)
 {
-    ExtensionClassImported;
+    guint i, len;
+    PyObject *ret;
 
-    return Py_FindAttrString((PyObject *)self, attr);
+    if (class->tp_getattr) {
+	ret = (* class->tp_getattr)((PyObject *)self, attr);
+	if (ret)
+	    return ret;
+	else
+	    PyErr_Clear();
+    }
+    len = PyList_Size(class->bases);
+    for (i = 0; i < len; i++) {
+	PyExtensionClass *base = (PyExtensionClass *)PyList_GetItem(
+							class->bases, i);
+
+	ret = check_bases(self, base, attr);
+	if (ret)
+	    return ret;
+    }
+    return NULL;
+}
+static PyObject *
+pygobject_getattro(PyGObject *self, PyObject *attro)
+{
+    char *attr;
+    PyObject *ret;
+
+    ExtensionClassImported;
+    attr = PyString_AsString(attro);
+
+    ret = Py_FindAttrString((PyObject *)self, attr);
+    if (ret)
+	return ret;
+    ret = check_bases(self, (PyExtensionClass *)self->ob_type, attr);
+    if (ret)
+	return ret;
+    PyErr_SetString(PyExc_AttributeError, attr);
 }
 
 static int
@@ -590,7 +624,7 @@ static PyExtensionClass PyGObject_Type = {
     /* methods */
     (destructor)pygobject_dealloc,	/* tp_dealloc */
     (printfunc)0,			/* tp_print */
-    (getattrfunc)pygobject_getattr,	/* tp_getattr */
+    (getattrfunc)0,			/* tp_getattr */
     (setattrfunc)pygobject_setattr,	/* tp_setattr */
     (cmpfunc)pygobject_compare,		/* tp_compare */
     (reprfunc)pygobject_repr,		/* tp_repr */
@@ -647,6 +681,8 @@ initgobject(void)
     PyDict_SetItemString(d, "_PyGObject_API",
 			 PyCObject_FromVoidPtr(&functions, NULL));
 
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) {
+	PyErr_Print();
 	Py_FatalError("can't initialise module gobject");
+    }
 }
