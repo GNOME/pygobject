@@ -185,16 +185,16 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
 PyObject *
 pyg_pointer_new(GType pointer_type, gpointer pointer)
 {
+    PyGILState_STATE state;
     PyGPointer *self;
     PyTypeObject *tp;
-
     g_return_val_if_fail(pointer_type != 0, NULL);
 
-    pyg_block_threads();
+    state = PyGILState_Ensure();
 
     if (!pointer) {
 	Py_INCREF(Py_None);
-	pyg_unblock_threads();
+	PyGILState_Release(state);
 	return Py_None;
     }
 
@@ -203,7 +203,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);
 
-    pyg_unblock_threads();
+    PyGILState_Release(state);
 
     if (self == NULL)
 	return NULL;

@@ -105,9 +105,9 @@ _wrap_g_main_loop_quit (PyGMainLoop *self)
 static PyObject *
 _wrap_g_main_loop_run (PyGMainLoop *self)
 {
-    pyg_unblock_threads();
+    Py_BEGIN_ALLOW_THREADS;
     g_main_loop_run(self->loop);
-    pyg_block_threads();
+    Py_END_ALLOW_THREADS;
     
     Py_INCREF(Py_None);
     return Py_None;

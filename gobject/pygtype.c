@@ -723,15 +723,17 @@ static void
 pyg_closure_invalidate(gpointer data, GClosure *closure)
 {
     PyGClosure *pc = (PyGClosure *)closure;
+    PyGILState_STATE state;
 
-    pyg_block_threads();
+    state = PyGILState_Ensure();
     Py_XDECREF(pc->callback);
     Py_XDECREF(pc->extra_args);
     Py_XDECREF(pc->swap_data);
+    PyGILState_Release(state);
+
     pc->callback = NULL;
     pc->extra_args = NULL;
     pc->swap_data = NULL;
-    pyg_unblock_threads();
 }
 
 static void
@@ -747,7 +749,6 @@ pyg_closure_marshal(GClosure *closure,
     PyObject *params, *ret;
     guint i;
 
-    pyg_block_threads();
     state = PyGILState_Ensure();
 
     /* construct Python tuple for the parameter values */
@@ -787,7 +788,6 @@ pyg_closure_marshal(GClosure *closure,
     Py_DECREF(params);
     
     PyGILState_Release(state);
-    pyg_unblock_threads();
 }
 
 /**
@@ -849,6 +849,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 				 gpointer invocation_hint,
 				 gpointer marshal_data)
 {
+    PyGILState_STATE state;
     GObject *object;
     PyObject *object_wrapper;
     GSignalInvocationHint *hint = (GSignalInvocationHint *)invocation_hint;
@@ -857,9 +858,9 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     PyObject *params, *ret;
     guint i, len;
 
+    state = PyGILState_Ensure();
+    
     g_return_if_fail(invocation_hint != NULL);
-
-    pyg_block_threads();
     /* get the object passed as the first argument to the closure */
     object = g_value_get_object(&param_values[0]);
     g_return_if_fail(object != NULL && G_IS_OBJECT(object));
@@ -883,7 +884,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (!method) {
 	PyErr_Clear();
 	Py_DECREF(object_wrapper);
-	pyg_unblock_threads();
+	PyGILState_Release(state);
 	return;
     }
     Py_DECREF(object_wrapper);
@@ -897,7 +898,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	/* error condition */
 	if (!item) {
 	    Py_DECREF(params);
-	    pyg_unblock_threads();
+	    PyGILState_Release(state);
 	    return;
 	}
 	PyTuple_SetItem(params, i - 1, item);
@@ -924,7 +925,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	PyErr_Print();
 	Py_DECREF(method);
 	Py_DECREF(params);
-	pyg_unblock_threads();
+	PyGILState_Release(state);
 	return;
     }
     Py_DECREF(method);
@@ -932,7 +933,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     if (return_value)
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
-    pyg_unblock_threads();
+    PyGILState_Release(state);
 }
 
 /**

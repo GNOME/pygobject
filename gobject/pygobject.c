@@ -364,9 +364,9 @@ pygobject_new(GObject *obj)
 	self = PyObject_GC_New(PyGObject, tp);
 	if (self == NULL)
 	    return NULL;
-	pyg_unblock_threads();
+        Py_BEGIN_ALLOW_THREADS;
 	self->obj = g_object_ref(obj);
-	pyg_block_threads();
+	Py_END_ALLOW_THREADS;
 	sink_object(self->obj);
 
 	self->inst_dict = NULL;
@@ -430,9 +430,9 @@ pygobject_dealloc(PyGObject *self)
     PyObject_GC_UnTrack((PyObject *)self);
 
     if (self->obj) {
-	pyg_unblock_threads();
+	Py_BEGIN_ALLOW_THREADS;
 	g_object_unref(self->obj);
-	pyg_block_threads();
+	Py_END_ALLOW_THREADS;
     }
     self->obj = NULL;
 
@@ -441,7 +441,7 @@ pygobject_dealloc(PyGObject *self)
     }
     self->inst_dict = NULL;
 
-    pyg_unblock_threads();
+    Py_BEGIN_ALLOW_THREADS;
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -452,7 +452,7 @@ pygobject_dealloc(PyGObject *self)
 	g_closure_invalidate(closure);
     }
     self->closures = NULL;
-    pyg_block_threads();
+    Py_END_ALLOW_THREADS;
 
     /* the following causes problems with subclassed types */
     /* self->ob_type->tp_free((PyObject *)self); */
@@ -525,7 +525,7 @@ pygobject_clear(PyGObject *self)
     }
     self->inst_dict = NULL;
 
-    pyg_unblock_threads();
+    Py_BEGIN_ALLOW_THREADS;
     tmp = self->closures;
     while (tmp) {
 	GClosure *closure = tmp->data;
@@ -535,15 +535,15 @@ pygobject_clear(PyGObject *self)
 	tmp = tmp->next;
 	g_closure_invalidate(closure);
     }
-    pyg_block_threads();
+    Py_END_ALLOW_THREADS;
 
     if (self->closures != NULL)
 	g_message("invalidated all closures, but self->closures != NULL !");
 
     if (self->obj) {
-	pyg_unblock_threads();
+	Py_BEGIN_ALLOW_THREADS;
 	g_object_unref(self->obj);
-	pyg_block_threads();
+	Py_END_ALLOW_THREADS;
     }
     self->obj = NULL;
 
@@ -997,7 +997,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
     gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
-
+    PyThreadState *_save;
+    
     len = PyTuple_Size(args);
     if (len < 1) {
 	PyErr_SetString(PyExc_TypeError,"GObject.emit needs at least one arg");
@@ -1024,6 +1025,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
+
     params = g_new0(GValue, query.n_params + 1);
     g_value_init(&params[0], G_OBJECT_TYPE(self->obj));
     g_value_set_object(&params[0], G_OBJECT(self->obj));
@@ -1036,14 +1038,15 @@ pygobject_emit(PyGObject *self, PyObject *args)
 
 	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
 	    gchar buf[128];
-
 	    g_snprintf(buf, sizeof(buf),
 		"could not convert type %s to %s required for parameter %d",
 		item->ob_type->tp_name,
 		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
 	    PyErr_SetString(PyExc_TypeError, buf);
+	    Py_UNBLOCK_THREADS;
 	    for (i = 0; i < query.n_params + 1; i++)
 		g_value_unset(&params[i]);
+	    Py_BLOCK_THREADS;
 	    g_free(params);
 	    return NULL;
 	}
@@ -1052,8 +1055,10 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     
     g_signal_emitv(params, signal_id, detail, &ret);
+    Py_UNBLOCK_THREADS;
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
+    
     g_free(params);
     if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
 	py_ret = pyg_value_as_pyobject(&ret, TRUE);
@@ -1062,6 +1067,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	Py_INCREF(Py_None);
 	py_ret = Py_None;
     }
+    Py_BLOCK_THREADS;
+
     return py_ret;
 }
 

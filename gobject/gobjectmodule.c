@@ -71,10 +71,11 @@ void
 pyg_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
+    PyGILState_STATE state;
 
-    pyg_block_threads();
+    state = PyGILState_Ensure();
     Py_DECREF(obj);
-    pyg_unblock_threads();
+    PyGILState_Release(state);
 }
 
 
@@ -95,10 +96,9 @@ static void
 pyobject_free(gpointer boxed)
 {
     PyObject *object = boxed;
-
-    pyg_block_threads();
+    PyGILState_STATE state = PyGILState_Ensure();
     Py_DECREF(object);
-    pyg_unblock_threads();
+    PyGILState_Release(state);
 }
 
 
@@ -330,14 +330,13 @@ pyg_object_set_property (GObject *object, guint property_id,
     PyObject *py_pspec, *py_value;
     PyGILState_STATE state;
 
-    pyg_block_threads();
     state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyg_unblock_threads();
-	g_return_if_fail(object_wrapper != NULL);
+	PyGILState_Release(state);
+	return;
     }
 
     py_pspec = pyg_param_spec_new(pspec);
@@ -356,7 +355,6 @@ pyg_object_set_property (GObject *object, guint property_id,
     Py_DECREF(py_value);
 
     PyGILState_Release(state);
-    pyg_unblock_threads();
 }
 
 static void
@@ -367,14 +365,13 @@ pyg_object_get_property (GObject *object, guint property_id,
     PyObject *py_pspec;
     PyGILState_STATE state;
 
-    pyg_block_threads();
     state = PyGILState_Ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyg_unblock_threads();
-	g_return_if_fail(object_wrapper != NULL);
+	PyGILState_Release(state);
+	return;
     }
 
     py_pspec = pyg_param_spec_new(pspec);
@@ -388,7 +385,6 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_XDECREF(retval);
     
     PyGILState_Release(state);
-    pyg_unblock_threads();        
 }
 
 static void
@@ -1259,7 +1255,6 @@ handler_marshal(gpointer user_data)
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
-    pyg_block_threads();
     state = PyGILState_Ensure();
 
     tuple = (PyObject *)user_data;
@@ -1274,7 +1269,6 @@ handler_marshal(gpointer user_data)
     }
     
     PyGILState_Release(state);
-    pyg_unblock_threads();
 
     return res;
 }
@@ -1364,7 +1358,6 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
-    pyg_block_threads();
     state = PyGILState_Ensure();
 
     tuple = (PyObject *)user_data;
@@ -1386,7 +1379,6 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
     }
 
     PyGILState_Release(state);
-    pyg_unblock_threads();
 
     return res;
 }
@@ -1467,6 +1459,23 @@ pyg_main_context_default (PyObject *unused)
 
 }
 
+static PyObject *
+pyg_thread_init (PyObject *unused)
+{
+    /* FIXME: Should we raise an exception if we don't
+              have threading enabled. This will make
+	      the import/initialize code quite ugly */
+#ifdef ENABLE_PYGTK_THREADING
+    g_print ("calling InitThreads\n");
+    PyEval_InitThreads();
+    if (!g_threads_got_initialized)
+	g_thread_init(NULL);
+#endif
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1484,6 +1493,7 @@ static PyMethodDef pygobject_functions[] = {
     { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove", pyg_source_remove, METH_VARARGS },
     { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
+    { "thread_init", (PyCFunction)pyg_thread_init, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1620,7 +1630,6 @@ pyg_error_check(GError **error)
 	PyObject *exc_instance;
 	PyObject *d;
 	
-	pyg_block_threads();
 	state = PyGILState_Ensure();
 	
 	exc_instance = PyObject_CallFunction(gerror_exc, "z",
@@ -1644,7 +1653,6 @@ pyg_error_check(GError **error)
 	g_clear_error(error);
 	
 	PyGILState_Release(state);
-	pyg_unblock_threads();
 	
 	return TRUE;
     }
@@ -1826,7 +1834,6 @@ initgobject(void)
     d = PyModule_GetDict(m);
 
 #ifdef ENABLE_PYGTK_THREADING
-    PyEval_InitThreads();
     if (!g_threads_got_initialized)
 	g_thread_init(NULL);
 #endif

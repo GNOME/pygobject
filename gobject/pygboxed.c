@@ -30,9 +30,9 @@ static void
 pyg_boxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && self->boxed) {
-        pyg_unblock_threads();
+	PyGILState_STATE state = PyGILState_Ensure();
 	g_boxed_free(self->gtype, self->boxed);
-	pyg_block_threads();
+	PyGILState_Release(state);
     }
 
     self->ob_type->tp_free((PyObject *)self);
@@ -210,17 +210,18 @@ PyObject *
 pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 	      gboolean own_ref)
 {
+    PyGILState_STATE state;
     PyGBoxed *self;
     PyTypeObject *tp;
 
     g_return_val_if_fail(boxed_type != 0, NULL);
     g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
 
-    pyg_block_threads();
+    state = PyGILState_Ensure();
 
     if (!boxed) {
 	Py_INCREF(Py_None);
-	pyg_unblock_threads();
+	PyGILState_Release(state);
 	return Py_None;
     }
 
@@ -230,7 +231,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self = PyObject_NEW(PyGBoxed, tp);
 
     if (self == NULL) {
-        pyg_unblock_threads();
+	PyGILState_Release(state);
         return NULL;
     }
 
@@ -240,8 +241,8 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self->gtype = boxed_type;
     self->free_on_dealloc = own_ref;
 
-    pyg_unblock_threads();
-
+    PyGILState_Release(state);
+    
     return (PyObject *)self;
 }
 

@@ -51,10 +51,10 @@ _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 			  &may_block))
 	return NULL;
 	
-    pyg_unblock_threads();
+    Py_BEGIN_ALLOW_THREADS;
     py_ret = g_main_context_iteration(self->context, may_block)
 	? Py_True : Py_False;
-    pyg_block_threads();
+    Py_END_ALLOW_THREADS;
     
     Py_INCREF(py_ret);
     return py_ret;
