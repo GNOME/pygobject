@@ -26,7 +26,7 @@ typedef struct {
 } PyGBoxed;
 
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
-#define pyg_boxed_check(v,base) (ExtensionClassSubclassInstance_Check(v,base))
+#define pyg_boxed_check(v,typecode) (ExtensionClassSubclassInstance_Check(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
@@ -43,10 +43,12 @@ struct _PyGObject_Functions {
 			    int (* to_func)(GValue *value, PyObject *obj));
     int (* value_from_pyobject)(GValue *value, PyObject *obj);
     PyObject *(* value_as_pyobject)(const GValue *value);
+
     void (* register_interface)(PyObject *dict, const gchar *class_name,
 				GType (* get_type)(void),
 				PyExtensionClass *ec);
 
+    PyExtensionClass *boxed_type;
     void (* register_boxed)(PyObject *dict, const gchar *class_name,
 			    GType boxed_type, PyExtensionClass *ec);
     PyObject *(* boxed_new)(GType boxed_type, gpointer boxed,
@@ -72,6 +74,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
 #define pyg_register_interface     (_PyGObject_API->register_interface)
+#define PyGBoxed_Type              (*_PyGObject_API->boxed_type)
 #define pyg_register_boxed         (_PyGObject_API->register_boxed)
 #define pyg_boxed_new              (_PyGObject_API->boxed_new)
 

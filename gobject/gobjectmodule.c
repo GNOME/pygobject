@@ -1897,7 +1897,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
     PyObject *py_type;
     GSignalFlags signal_flags;
     GType return_type;
-    PyObject *py_param_types;
+    PyObject *py_return_type, *py_param_types;
 
     GType instance_type = 0;
     guint n_params, i;
@@ -1906,11 +1906,14 @@ pyg_signal_new(PyObject *self, PyObject *args)
     guint signal_id;
 
     if (!PyArg_ParseTuple(args, "sOiiO:gobject.signal_new", &signal_name,
-			  &py_type, &signal_flags, &return_type,
+			  &py_type, &signal_flags, &py_return_type,
 			  &py_param_types))
 	return NULL;
     instance_type = pyg_type_from_object(py_type);
     if (!instance_type)
+	return NULL;
+    return_type = pyg_type_from_object(py_return_type);
+    if (!return_type)
 	return NULL;
     if (!PySequence_Check(py_param_types)) {
 	PyErr_SetString(PyExc_TypeError,
@@ -1922,8 +1925,8 @@ pyg_signal_new(PyObject *self, PyObject *args)
     for (i = 0; i < n_params; i++) {
 	PyObject *item = PySequence_GetItem(py_param_types, i);
 
-	param_types[i] = (GType) PyInt_AsLong(item);
-	if (PyErr_Occurred()) {
+	param_types[i] = pyg_type_from_object(item);
+	if (param_types[i] == 0) {
 	    PyErr_Clear();
 	    Py_DECREF(item);
 	    PyErr_SetString(PyExc_TypeError,
@@ -1974,6 +1977,7 @@ static struct _PyGObject_Functions functions = {
 
   pyg_register_interface,
 
+  &PyGBoxed_Type,
   pyg_register_boxed,
   pyg_boxed_new,
 };
