@@ -1126,6 +1126,10 @@ pyg_object_descr_doc_get(void)
     static PyObject *doc_descr = NULL;
 
     if (!doc_descr) {
+	PyGObjectDoc_Type.ob_type = &PyType_Type;
+	if (PyType_Ready(&PyGObjectDoc_Type))
+	    return NULL;
+
 	doc_descr = PyObject_NEW(PyObject, &PyGObjectDoc_Type);
 	if (doc_descr == NULL)
 	    return NULL;
