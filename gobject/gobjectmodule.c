@@ -655,41 +655,42 @@ pygobject__init__(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
-pygobject_get_param(PyGObject *self, PyObject *args)
+pygobject_get_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
     GParamSpec *pspec;
     GValue value;
     PyObject *ret;
 
-    if (!PyArg_ParseTuple(args, "s:GObject.get_param", &param_name))
+    if (!PyArg_ParseTuple(args, "s:GObject.get_property", &param_name))
 	return NULL;
-    pspec = g_object_class_find_param_spec(G_OBJECT_GET_CLASS(self->obj),
-					   param_name);
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
+					 param_name);
     if (!pspec) {
 	PyErr_SetString(PyExc_TypeError,
 			"the object does not support the given parameter");
 	return NULL;
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    g_object_get_param(self->obj, param_name, &value);
+    g_object_get_property(self->obj, param_name, &value);
     ret = pyg_value_as_pyobject(&value);
     g_value_unset(&value);
     return ret;
 }
 
 static PyObject *
-pygobject_set_param(PyGObject *self, PyObject *args)
+pygobject_set_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
     GParamSpec *pspec;
     GValue value;
     PyObject *pvalue;
 
-    if (!PyArg_ParseTuple(args, "sO:GObject.set_param", &param_name, &pvalue))
+    if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
+			  &pvalue))
 	return NULL;
-    pspec = g_object_class_find_param_spec(G_OBJECT_GET_CLASS(self->obj),
-					   param_name);
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
+					 param_name);
     if (!pspec) {
 	PyErr_SetString(PyExc_TypeError,
 			"the object does not support the given parameter");
@@ -701,20 +702,40 @@ pygobject_set_param(PyGObject *self, PyObject *args)
 			"could not convert argument to correct param type");
 	return NULL;
     }
-    g_object_set_param(self->obj, param_name, &value);
+    g_object_set_property(self->obj, param_name, &value);
     g_value_unset(&value);
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 static PyObject *
-pygobject_queue_param_changed(PyGObject *self, PyObject *args)
+pygobject_freeze_notify(PyGObject *self, PyObject *args)
 {
-    char *param_name;
-
-    if (!PyArg_ParseTuple(args, "s:GObject.queue_param_changed", &param_name))
+    if (!PyArg_ParseTuple(args, ":GObject.freeze_notify"))
 	return NULL;
-    g_object_queue_param_changed(self->obj, param_name);
+    g_object_freeze_notify(self->obj);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_notify(PyGObject *self, PyObject *args)
+{
+    char *property_name;
+
+    if (!PyArg_ParseTuple(args, "s:GObject.notify", &property_name))
+	return NULL;
+    g_object_notify(self->obj, property_name);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_thaw_notify(PyGObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GObject.thaw_notify"))
+	return NULL;
+    g_object_thaw_notify(self->obj);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -757,6 +778,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     PyObject *first, *callback, *extra_args;
     gchar *name;
     guint handlerid, sigid, len;
+    GQuark detail = 0;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -774,15 +796,15 @@ pygobject_connect(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
-    if (sigid == 0) {
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &sigid, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, NULL), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -793,6 +815,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     PyObject *first, *callback, *extra_args;
     gchar *name;
     guint handlerid, sigid, len;
+    GQuark detail;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -811,15 +834,15 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
-    if (sigid == 0) {
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &sigid, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, NULL), TRUE);
     return PyInt_FromLong(handlerid);
 }
@@ -830,6 +853,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     PyObject *first, *callback, *extra_args, *object;
     gchar *name;
     guint handlerid, sigid, len;
+    GQuark detail;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -848,15 +872,15 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
-    if (sigid == 0) {
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &sigid, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, object), FALSE);
     return PyInt_FromLong(handlerid);
 }
@@ -867,6 +891,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     PyObject *first, *callback, *extra_args, *object;
     gchar *name;
     guint handlerid, sigid, len;
+    GQuark detail;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -885,15 +910,15 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
-    sigid = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
-    if (sigid == 0) {
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &sigid, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, 0,
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 			pyg_closure_new(callback, extra_args, object), TRUE);
     return PyInt_FromLong(handlerid);
 }
@@ -938,6 +963,7 @@ static PyObject *
 pygobject_emit(PyGObject *self, PyObject *args)
 {
     guint signal_id, i, len;
+    GQuark detail;
     PyObject *first, *py_ret;
     gchar *name;
     GSignalQuery query;
@@ -954,8 +980,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	return NULL;
     }
     Py_DECREF(first);
-    signal_id = g_signal_lookup(name, G_OBJECT_TYPE(self->obj));
-    if (signal_id == 0) {
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &signal_id, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
@@ -994,7 +1020,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     }
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type);
-    g_signal_emitv(params, signal_id, 0, &ret);
+    g_signal_emitv(params, signal_id, detail, &ret);
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     g_free(params);
@@ -1013,15 +1039,16 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 {
     gchar *signal;
     guint signal_id;
+    GQuark detail;
 
     if (!PyArg_ParseTuple(args, "s:GObject.stop_emission", &signal))
 	return NULL;
-    signal_id = g_signal_lookup(signal, G_OBJECT_TYPE(self->obj));
-    if (signal_id == 0) {
+    if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
+			     &signal_id, &detail, TRUE)) {
 	PyErr_SetString(PyExc_TypeError, "unknown signal name");
 	return NULL;
     }
-    g_signal_stop_emission(self->obj, signal_id, 0);
+    g_signal_stop_emission(self->obj, signal_id, detail);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1029,9 +1056,11 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
     { "__init__", (PyCFunction)pygobject__init__, METH_VARARGS },
-    { "get_param", (PyCFunction)pygobject_get_param, METH_VARARGS },
-    { "set_param", (PyCFunction)pygobject_set_param, METH_VARARGS },
-    { "queue_param_changed", (PyCFunction)pygobject_queue_param_changed, METH_VARARGS },
+    { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
+    { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
+    { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
+    { "notify", (PyCFunction)pygobject_notify, METH_VARARGS },
+    { "thaw_notify", (PyCFunction)pygobject_thaw_notify, METH_VARARGS },
     { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
     { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { "connect", (PyCFunction)pygobject_connect, METH_VARARGS },
