@@ -1094,12 +1094,11 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     Py_INCREF(callback);
     ((PyGClosure *)closure)->callback = callback;
     if (extra_args && extra_args != Py_None) {
+	Py_INCREF(extra_args);
 	if (!PyTuple_Check(extra_args)) {
 	    PyObject *tmp = PyTuple_New(1);
-	    PySequence_SetItem(tmp, 0, extra_args);
+	    PyTuple_SetItem(tmp, 0, extra_args);
 	    extra_args = tmp;
-	} else {
-            Py_INCREF(extra_args);
 	}
 	((PyGClosure *)closure)->extra_args = extra_args;
     }
