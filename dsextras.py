@@ -1,3 +1,9 @@
+#
+# dsextras.py - Extra classes and utilities
+#
+# TODO:
+# Make it possible to import codegen from another dir
+#
 from commands import getoutput, getstatusoutput
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
@@ -6,10 +12,6 @@ import fnmatch
 import os
 import string
 import sys
-
-from codegen.override import Overrides
-from codegen.defsparser import DefsParser
-from codegen.codegen import register_types, write_source, FileOutput
 
 GLOBAL_INC = []
 GLOBAL_MACROS = []
@@ -140,6 +142,14 @@ class Template:
         return 0
     
     def generate(self):
+        # We must insert it first, otherwise python will try '.' first,
+        # in which it exist a "bogus" codegen (the third import line
+        # here will fail)
+        sys.path.insert(0, 'codegen')
+        from override import Overrides
+        from defsparser import DefsParser
+        from codegen import register_types, write_source, FileOutput
+        
         if self.check_dates():
             return
 
