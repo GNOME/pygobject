@@ -12,10 +12,11 @@ typedef struct {
     GObject *obj;
     gboolean hasref;     /* the GObject owns this reference */
     PyObject *inst_dict; /* the instance dictionary -- must be last */
+    PyObject *weakreflist; /* list of weak references */
 } PyGObject;
 
 #define pygobject_get(v) (((PyGObject *)(v))->obj)
-#define pygobject_check(v,base) (ExtensionClassSubclassInstance_Check(v,base))
+#define pygobject_check(v,base) (PyObject_TypeCheck(v,base))
 
 typedef struct {
     PyObject_HEAD
@@ -25,13 +26,13 @@ typedef struct {
 } PyGBoxed;
 
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
-#define pyg_boxed_check(v,typecode) (ExtensionClassSubclassInstance_Check(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
+#define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
-			    GType type, PyExtensionClass *ec, PyObject *bases);
+			    GType gtype, PyTypeObject *type, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
-    PyExtensionClass *(* lookup_class)(GType type);
+    PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
@@ -48,11 +49,11 @@ struct _PyGObject_Functions {
     PyObject *(* value_as_pyobject)(const GValue *value);
 
     void (* register_interface)(PyObject *dict, const gchar *class_name,
-				GType type, PyExtensionClass *ec);
+				GType gtype, PyTypeObject *type);
 
-    PyExtensionClass *boxed_type;
+    PyTypeObject *boxed_type;
     void (* register_boxed)(PyObject *dict, const gchar *class_name,
-			    GType boxed_type, PyExtensionClass *ec);
+			    GType boxed_type, PyTypeObject *type);
     PyObject *(* boxed_new)(GType boxed_type, gpointer boxed,
 			    gboolean copy_boxed, gboolean own_ref);
 
