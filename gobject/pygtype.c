@@ -1087,6 +1087,7 @@ add_property_docs(GType gtype, GString *string)
     GParamSpec **props;
     guint n_props = 0, i;
     gboolean has_prop = FALSE;
+    gchar *blurb=NULL;
 
     class = g_type_class_ref(gtype);
     props = g_object_class_list_properties(class, &n_props);
@@ -1105,8 +1106,12 @@ add_property_docs(GType gtype, GString *string)
 			       g_param_spec_get_name(props[i]),
 			       g_type_name(props[i]->value_type),
 			       g_param_spec_get_nick(props[i]));
-	g_string_append_printf(string, "    %s\n",
-			       g_param_spec_get_blurb(props[i]));
+
+	/* g_string_append_printf crashes on win32 if the third 
+	   argument is NULL. */
+	blurb=g_param_spec_get_blurb(props[i]);
+	if (blurb)
+	    g_string_append_printf(string, "    %s\n",blurb);
     }
     g_free(props);
     if (has_prop)
