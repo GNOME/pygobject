@@ -1,7 +1,8 @@
 AUTOMAKE_OPTIONS = 1.7
+PLATFORM_VERSION = 2.0
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 
-pkgincludedir = $(includedir)/pygtk-2.0
+pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
 
 pkgpyexecdir = $(pyexecdir)/gtk-2.0
