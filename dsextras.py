@@ -38,7 +38,7 @@ class InstallLib(install_lib):
         self.install_dir = install_dir
         
     def add_template_option(self, name, value):
-        self.template_options['@%s@'] = value
+        self.template_options['@%s@' % name] = value
         
     def install_template(self, filename, install_dir):
         """Install template filename into target directory install_dir."""
