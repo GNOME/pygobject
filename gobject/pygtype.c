@@ -781,9 +781,8 @@ add_signal_docs(GType gtype, GString *string)
     signal_ids = g_signal_list_ids(gtype, &n_ids);
 
     if (n_ids > 0) {
-	g_string_append(string, "Signals from ");
-	g_string_append(string, g_type_name(gtype));
-	g_string_append(string, ":\n");
+	g_string_append_printf(string, "Signals from %s:\n",
+			       g_type_name(gtype));
 
 	for (i = 0; i < n_ids; i++) {
 	    GSignalQuery query;
@@ -824,20 +823,16 @@ add_property_docs(GType gtype, GString *string)
     props = g_object_class_list_properties(class, &n_props);
 
     if (n_props > 0) {
-	g_string_append(string, "Properties from ");
-	g_string_append(string, g_type_name(gtype));
-	g_string_append(string, ":\n");
+	g_string_append_printf(string, "Properties from %s:\n",
+			       g_type_name(gtype));
 
 	for (i = 0; i < n_props; i++) {
-	    g_string_append(string, "  ");
-	    g_string_append(string, g_param_spec_get_name(props[i]));
-	    g_string_append(string, " -> ");
-	    g_string_append(string, g_type_name(props[i]->value_type));
-	    g_string_append(string, ": ");
-	    g_string_append(string, g_param_spec_get_nick(props[i]));
-	    g_string_append(string, "\n    ");
-	    g_string_append(string, g_param_spec_get_blurb(props[i]));
-	    g_string_append(string, "\n");
+	    g_string_append_printf(string, "  %s -> %s: %s\n",
+				   g_param_spec_get_name(props[i]),
+				   g_type_name(props[i]->value_type),
+				   g_param_spec_get_nick(props[i]));
+	    g_string_append_printf(string, "    %s\n",
+				   g_param_spec_get_blurb(props[i]));
 	}
 	g_free(props);
 	g_string_append(string, "\n");
@@ -865,11 +860,11 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
     string = g_string_new_len(NULL, 512);
 
     if (g_type_is_a(gtype, G_TYPE_INTERFACE))
-	g_string_append(string, "Interface ");
+	g_string_append_printf(string, "Interface %s\n\n", g_type_name(gtype));
     else if (g_type_is_a(gtype, G_TYPE_OBJECT))
-	g_string_append(string, "Object ");
-    g_string_append(string, g_type_name(gtype));
-    g_string_append(string, "\n\n");
+	g_string_append_printf(string, "Object %s\n\n", g_type_name(gtype));
+    else
+	g_string_append_printf(string, "%s\n\n", g_type_name(gtype));
 
     if (g_type_is_a(gtype, G_TYPE_OBJECT)) {
 	GType parent = G_TYPE_OBJECT;
