@@ -89,7 +89,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     if (!pytc)
 	return NULL;
     
-    if (!PyObject_TypeCheck(pytc, &PyGEnum_Type)) {
+    if (!PyObject_TypeCheck(pytc, &PyGTypeWrapper_Type)) {
 	Py_DECREF(pytc);
 	PyErr_SetString(PyExc_TypeError,
 			"__gtype__ attribute not a typecode");
@@ -166,7 +166,7 @@ pyg_enum_add (PyObject *   module,
 	      GType        gtype)
 {
     PyGILState_STATE state;
-    PyObject *instance_dict, *stub, *values;
+    PyObject *instance_dict, *stub, *values, *o;
     GEnumClass *eclass;
     int i;
     
@@ -186,6 +186,9 @@ pyg_enum_add (PyObject *   module,
 	return NULL;
     }
 
+    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
+    ((PyTypeObject *)stub)->tp_new = pyg_enum_new;
+
     if (module)
 	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
 			     "__module__",
@@ -195,6 +198,10 @@ pyg_enum_add (PyObject *   module,
         pygenum_class_key = g_quark_from_static_string(pygenum_class_id);
 
     g_type_set_qdata(gtype, pygenum_class_key, stub);
+
+    o = pyg_type_wrapper_new(gtype);
+    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
+    Py_DECREF(o);
 
     if (module) {
 	/* Add it to the module name space */
@@ -270,6 +277,7 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   return retval;
 }
 
+
 static PyGetSetDef pyg_enum_getsets[] = {
     { "value_name", (getter)pyg_enum_get_value_name, (setter)0 },
     { "value_nick", (getter)pyg_enum_get_value_nick, (setter)0 },
@@ -313,7 +321,7 @@ PyTypeObject PyGEnum_Type = {
 	0,					  /* tp_descr_get */
 	0,					  /* tp_descr_set */
 	0,					  /* tp_dictoffset */
-	0,					  /* tp_init */
+	0,				  	  /* tp_init */
 	0,					  /* tp_alloc */
 	pyg_enum_new,				  /* tp_new */
 };

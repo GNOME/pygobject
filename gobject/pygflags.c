@@ -118,7 +118,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     if (!pytc)
 	return NULL;
     
-    if (!PyObject_TypeCheck(pytc, &PyGFlags_Type)) {
+    if (!PyObject_TypeCheck(pytc, &PyGTypeWrapper_Type)) {
 	Py_DECREF(pytc);
 	PyErr_SetString(PyExc_TypeError,
 			"__gtype__ attribute not a typecode");
@@ -129,12 +129,6 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     Py_DECREF(pytc);
 
     eclass = G_FLAGS_CLASS(g_type_class_ref(gtype));
-
-    if (value < 0 || value > eclass->n_values) {
-	PyErr_SetString(PyExc_ValueError, "value out of range");
-	g_type_class_unref(eclass);
-	return NULL;
-    }
 
     values = PyObject_GetAttrString((PyObject *)type, "__flags_values__");
     if (!values) {
@@ -152,8 +146,11 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     g_type_class_unref(eclass);
     
     ret = PyDict_GetItem(values, PyInt_FromLong(value));
-    Py_INCREF(ret);
     Py_DECREF(values);
+    if (ret)
+        Py_INCREF(ret);
+    else
+        PyErr_SetString(PyExc_ValueError, "invalid flag value");
     return ret;
 }
 
@@ -196,7 +193,7 @@ pyg_flags_add (PyObject *   module,
 	       GType        gtype)
 {
     PyGILState_STATE state;
-    PyObject *instance_dict, *stub, *values;
+    PyObject *instance_dict, *stub, *values, *o;
     GFlagsClass *eclass;
     int i;
 
@@ -217,6 +214,9 @@ pyg_flags_add (PyObject *   module,
         return NULL;
     }
     
+    ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
+    ((PyTypeObject *)stub)->tp_new = pyg_flags_new;
+
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
 			 "__module__",
 			 PyString_FromString(PyModule_GetName(module)));
@@ -229,6 +229,10 @@ pyg_flags_add (PyObject *   module,
         pygflags_class_key = g_quark_from_static_string(pygflags_class_id);
 
     g_type_set_qdata(gtype, pygflags_class_key, stub);
+
+    o = pyg_type_wrapper_new(gtype);
+    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict, "__gtype__", o);
+    Py_DECREF(o);
     
     /* Register flag values */
     eclass = G_FLAGS_CLASS(g_type_class_ref(gtype));
