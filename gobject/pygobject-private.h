@@ -40,6 +40,12 @@ typedef struct {
 } PyGMainLoop;
 extern PyTypeObject PyGMainLoop_Type;
 
+typedef struct {
+    PyObject_HEAD
+    GMainContext *context;
+} PyGMainContext;
+extern PyTypeObject PyGMainContext_Type;
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

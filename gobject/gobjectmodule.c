@@ -254,31 +254,168 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
-/* -------------- GMainLoop objects ---------------------------- */
+/* -------------- GMainContext objects ---------------------------- */
 
 static int
-_wrap_g_main_loop_new(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
+pyg_main_context_new(PyGMainContext *self)
 {
-
-    static char *kwlist[] = { "is_running", NULL };
-    int is_running;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "|b:GMainLoop.__init__",
-				     kwlist, &is_running))
-        return -1;
-
-    self->loop = g_main_loop_new(NULL, is_running);
+    self->context = g_main_context_new();
     return 0;
 }
 
-static PyObject *
-_wrap_g_main_loop_quit (PyGMainLoop *self)
+static int
+pyg_main_context_compare(PyGMainContext *self, PyGMainContext *v)
 {
-    g_main_loop_quit(self->loop);
+    if (self->context == v->context) return 0;
+    if (self->context > v->context) return -1;
+    return 1;
+}
+
+static PyObject *
+pyg_main_context_default (PyObject *unused)
+{
+    PyGMainContext *self;
+
+    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
+					  &PyGMainContext_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->context = g_main_context_default();
+    return (PyObject *)self;
+
+}
+
+static PyObject *
+_wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
+{
+    PyObject *py_ret;
+    gboolean may_block = TRUE;
     
-    Py_INCREF(Py_None);
-    return Py_None;
+    if (!PyArg_ParseTuple(args, "|b:GMainContext.iteration",
+			  &may_block))
+	return NULL;
+	
+    py_ret = g_main_context_iteration(self->context, may_block)
+	? Py_True : Py_False;
+    
+    Py_INCREF(py_ret);
+    return py_ret;
+}
+
+static PyObject *
+_wrap_g_main_context_pending (PyGMainContext *self)
+{
+    PyObject *py_ret;
+
+    py_ret = g_main_context_pending(self->context) ? Py_True : Py_False;
+    
+    Py_INCREF(py_ret);
+    return py_ret;
+}
+
+static PyMethodDef _PyGMainContext_methods[] = {
+    { "iteration", (PyCFunction)_wrap_g_main_context_iteration, METH_VARARGS },
+    { "pending", (PyCFunction)_wrap_g_main_context_pending, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
+PyTypeObject PyGMainContext_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,			
+    "gobject.MainContext",	
+    sizeof(PyGMainContext),	
+    0,			
+    /* methods */
+    (destructor)0,	
+    (printfunc)0,	
+    (getattrfunc)0,	
+    (setattrfunc)0,	
+    (cmpfunc)pyg_main_context_compare,		
+    (reprfunc)0,	
+    0,			
+    0,		
+    0,		
+    (hashfunc)0,		
+    (ternaryfunc)0,		
+    (reprfunc)0,		
+    (getattrofunc)0,		
+    (setattrofunc)0,		
+    0,				
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, 
+    NULL,
+    (traverseproc)0,		
+    (inquiry)0,
+    (richcmpfunc)0,	
+    0,             
+    (getiterfunc)0,
+    (iternextfunc)0,
+    _PyGMainContext_methods,
+    0,				
+    0,		       	
+    NULL,		
+    NULL,		
+    (descrgetfunc)0,	
+    (descrsetfunc)0,	
+    0,                 
+    (initproc)pyg_main_context_new,
+};
+
+/* -------------- GMainLoop objects ---------------------------- */
+
+static int
+pyg_main_loop_new(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
+{
+
+    static char *kwlist[] = { "context", "is_running", NULL };
+    PyObject *py_context = Py_None;
+    int is_running;
+    GMainContext *context;
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|Ob:GMainLoop.__init__",
+				     kwlist, &py_context, &is_running))
+        return -1;
+
+    if (!PyObject_TypeCheck(py_context, &PyGMainContext_Type) &&
+	py_context != Py_None) {
+	PyErr_SetString(PyExc_TypeError,
+			"context must be a gobject.GMainContext or None");
+	return -1;
+    }
+
+    if (py_context != Py_None) {
+	context = ((PyGMainContext*)py_context)->context;
+    } else {
+	context = NULL;
+    }
+
+    self->loop = g_main_loop_new(context, is_running);
+    return 0;
+}
+
+static int
+pyg_main_loop_compare(PyGMainLoop *self, PyGMainLoop *v)
+{
+    if (self->loop == v->loop) return 0;
+    if (self->loop > v->loop) return -1;
+    return 1;
+}
+
+static PyObject *
+_wrap_g_main_loop_get_context (PyGMainLoop *loop)
+{
+    PyGMainContext *self;
+
+    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
+					  &PyGMainContext_Type);
+    
+    self->context = g_main_loop_get_context(loop->loop);
+    
+    if (self->context == NULL)
+	return NULL;
+
+    return (PyObject *)self;
 }
 
 static PyObject *
@@ -293,6 +430,15 @@ _wrap_g_main_loop_is_running (PyGMainLoop *self)
 }
 
 static PyObject *
+_wrap_g_main_loop_quit (PyGMainLoop *self)
+{
+    g_main_loop_quit(self->loop);
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
 _wrap_g_main_loop_run (PyGMainLoop *self)
 {
     g_main_loop_run(self->loop);
@@ -302,6 +448,7 @@ _wrap_g_main_loop_run (PyGMainLoop *self)
 }
 
 static PyMethodDef _PyGMainLoop_methods[] = {
+    { "get_context", (PyCFunction)_wrap_g_main_loop_get_context, METH_NOARGS },
     { "is_running", (PyCFunction)_wrap_g_main_loop_is_running, METH_NOARGS },
     { "quit", (PyCFunction)_wrap_g_main_loop_quit, METH_NOARGS },
     { "run", (PyCFunction)_wrap_g_main_loop_run, METH_NOARGS },
@@ -319,7 +466,7 @@ PyTypeObject PyGMainLoop_Type = {
     (printfunc)0,	
     (getattrfunc)0,	
     (setattrfunc)0,	
-    (cmpfunc)0,		
+    (cmpfunc)pyg_main_loop_compare,
     (reprfunc)0,	
     0,			
     0,		
@@ -346,7 +493,7 @@ PyTypeObject PyGMainLoop_Type = {
     (descrgetfunc)0,	
     (descrsetfunc)0,	
     0,                 
-    (initproc)_wrap_g_main_loop_new,
+    (initproc)pyg_main_loop_new,
 };
 
 /* ---------------- gobject module functions -------------------- */
@@ -1522,6 +1669,7 @@ static PyMethodDef pygobject_functions[] = {
     { "timeout_add", (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
     { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove", pyg_source_remove, METH_VARARGS },
+    { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1746,6 +1894,13 @@ initgobject(void)
 	return;
     PyDict_SetItemString(d, "MainLoop", (PyObject *)&PyGMainLoop_Type);
     
+    PyGMainContext_Type.ob_type = &PyType_Type;
+    PyGMainContext_Type.tp_alloc = PyType_GenericAlloc;
+    PyGMainContext_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGMainContext_Type))
+	return;
+    PyDict_SetItemString(d, "MainContext", (PyObject *)&PyGMainContext_Type);
+
     PyGPointer_Type.ob_type = &PyType_Type;
     PyGPointer_Type.tp_alloc = PyType_GenericAlloc;
     PyGPointer_Type.tp_new = PyType_GenericNew;
