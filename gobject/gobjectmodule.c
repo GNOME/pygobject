@@ -467,8 +467,93 @@ pygobject__class_init__(PyObject *something, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+pygobject_get_param(PyGObject *self, PyObject *args)
+{
+    gchar *param_name;
+    GParamSpec *pspec;
+    GValue value;
+
+    if (!PyArg_ParseTuple(args, "s:GObject.get_param", &param_name))
+	return NULL;
+    pspec = g_object_class_find_param_spec(G_OBJECT_GET_CLASS(self->obj),
+					   param_name);
+    if (!pspec) {
+	PyErr_SetString(PyExc_TypeError,
+			"the object does not support the given parameter");
+	return NULL;
+    }
+    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    g_object_get_param(self->obj, param_name, &value);
+    return pyg_value_as_pyobject(&value);
+}
+
+static PyObject *
+pygobject_set_param(PyGObject *self, PyObject *args)
+{
+    gchar *param_name;
+    GParamSpec *pspec;
+    GValue value;
+    PyObject *pvalue;
+
+    if (!PyArg_ParseTuple(args, "sO:GObject.set_param", &param_name, &pvalue))
+	return NULL;
+    pspec = g_object_class_find_param_spec(G_OBJECT_GET_CLASS(self->obj),
+					   param_name);
+    if (!pspec) {
+	PyErr_SetString(PyExc_TypeError,
+			"the object does not support the given parameter");
+	return NULL;
+    }
+    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    if (pyg_value_from_pyobject(&value, pvalue) < 0) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not convert argument to correct param type");
+	return NULL;
+    }
+    g_object_set_param(self->obj, param_name, &value);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_get_data(PyGObject *self, PyObject *args)
+{
+    char *key;
+    GQuark quark;
+    PyObject *data;
+
+    if (!PyArg_ParseTuple(args, "s:GObject.get_data", &key))
+	return NULL;
+    quark = g_quark_from_string(key);
+    data = g_object_get_qdata(self->obj, quark);
+    if (!data) data = Py_None;
+    Py_INCREF(data);
+    return data;
+}
+
+static PyObject *
+pygobject_set_data(PyGObject *self, PyObject *args)
+{
+    char *key;
+    GQuark quark;
+    PyObject *data;
+
+    if (!PyArg_ParseTuple(args, "sO:GObject.get_data", &key, &data))
+	return NULL;
+    quark = g_quark_from_string(key);
+    Py_INCREF(data);
+    g_object_set_qdata_full(self->obj, quark, data, pygobject_destroy_notify);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyMethodDef pygobject_methods[] = {
     { "__class_init__", (PyCFunction)pygobject__class_init__, METH_VARARGS|METH_CLASS_METHOD },
+    { "get_param", (PyCFunction)pygobject_get_param, METH_VARARGS },
+    { "set_param", (PyCFunction)pygobject_set_param, METH_VARARGS },
+    { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
+    { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
