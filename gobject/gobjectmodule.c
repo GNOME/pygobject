@@ -941,12 +941,15 @@ pyg_type_register(PyObject *self, PyObject *args)
                                     class->tp_name,
                                     name_serial > 1? name_serial_str : NULL,
                                     NULL);
+	    Py_DECREF(module);
         } else {
             if (module)
                 Py_DECREF(module);
             else
                 PyErr_Clear();
-            type_name = g_strdup(class->tp_name);
+            type_name = g_strconcat(class->tp_name,
+                                    name_serial > 1? name_serial_str : NULL,
+                                    NULL);
         }
           /* convert '.' in type name to '+', which isn't banned (grumble) */
         for (i = 0; type_name[i] != '\0'; i++)
