@@ -394,6 +394,7 @@ pyg_object_set_property (GObject *object, guint property_id,
 	PyErr_Print();
 	PyErr_Clear();
     }
+    Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);
     Py_DECREF(py_value);
 }
@@ -415,8 +416,9 @@ pyg_object_get_property (GObject *object, guint property_id,
 	PyErr_Print();
 	PyErr_Clear();
     }
-    Py_XDECREF(retval);
+    Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);
+    Py_XDECREF(retval);
 }
 
 static void
