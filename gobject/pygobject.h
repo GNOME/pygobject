@@ -60,7 +60,7 @@ struct _PyGObject_Functions {
 			    PyObject *(* from_func)(const GValue *value),
 			    int (* to_func)(GValue *value, PyObject *obj));
     int (* value_from_pyobject)(GValue *value, PyObject *obj);
-    PyObject *(* value_as_pyobject)(const GValue *value);
+    PyObject *(* value_as_pyobject)(const GValue *value, gboolean copy_boxed);
 
     void (* register_interface)(PyObject *dict, const gchar *class_name,
 				GType gtype, PyTypeObject *type);

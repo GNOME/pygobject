@@ -385,7 +385,7 @@ pyg_object_set_property (GObject *object, guint property_id,
     g_return_if_fail(object_wrapper != NULL);
 
     py_pspec = pyg_param_spec_new(pspec);
-    py_value = pyg_value_as_pyobject (value);
+    py_value = pyg_value_as_pyobject (value, TRUE);
     retval = PyObject_CallMethod(object_wrapper, "do_set_property",
 				 "OO", py_pspec, py_value);
     if (retval) {

@@ -50,7 +50,7 @@ void      pyg_register_boxed_custom(GType boxed_type,
 				    fromvaluefunc from_func,
 				    tovaluefunc to_func);
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
-PyObject *pyg_value_as_pyobject(const GValue *value);
+PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
 
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 GClosure *pyg_signal_class_closure_get(void);

@@ -279,7 +279,7 @@ pygobject_get_property(PyGObject *self, PyObject *args)
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     g_object_get_property(self->obj, param_name, &value);
-    ret = pyg_value_as_pyobject(&value);
+    ret = pyg_value_as_pyobject(&value, TRUE);
     g_value_unset(&value);
     return ret;
 }
@@ -633,7 +633,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	g_value_unset(&params[i]);
     g_free(params);
     if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
-	py_ret = pyg_value_as_pyobject(&ret);
+	py_ret = pyg_value_as_pyobject(&ret, TRUE);
 	g_value_unset(&ret);
     } else {
 	Py_INCREF(Py_None);
@@ -721,7 +721,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	g_value_unset(&params[i]);
     g_free(params);
     if ((query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE) != G_TYPE_NONE) {
-	py_ret = pyg_value_as_pyobject(&ret);
+	py_ret = pyg_value_as_pyobject(&ret, TRUE);
 	g_value_unset(&ret);
     } else {
 	Py_INCREF(Py_None);

@@ -476,8 +476,18 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     return 0;
 }
 
+/**
+ * pyg_value_as_pyobject:
+ * @value: the GValue object.
+ * @copy_boxed: true if boxed values should be copied.
+ *
+ * This function creates/returns a Python wrapper object that
+ * represents the GValue passed as an argument.
+ *
+ * Returns: a PyObject representing the value.
+ */
 PyObject *
-pyg_value_as_pyobject(const GValue *value)
+pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 {
     gchar buf[128];
 
@@ -575,11 +585,16 @@ pyg_value_as_pyobject(const GValue *value)
 	    }
 	    
 	    bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
-	    if (bm)
+	    if (bm) {
 		return bm->fromvalue(value);
-	    else
-		return pyg_boxed_new(G_VALUE_TYPE(value),
-				     g_value_get_boxed(value), TRUE, TRUE);
+	    } else {
+		if (copy_boxed)
+		    return pyg_boxed_new(G_VALUE_TYPE(value),
+					 g_value_get_boxed(value), TRUE, TRUE);
+		else
+		    return pyg_boxed_new(G_VALUE_TYPE(value),
+					 g_value_get_boxed(value),FALSE,FALSE);
+	    }
 	}
     case G_TYPE_PARAM:
 	return pyg_param_spec_new(g_value_get_param(value));
@@ -639,7 +654,7 @@ pyg_closure_marshal(GClosure *closure,
 	    Py_INCREF(pc->swap_data);
 	    PyTuple_SetItem(params, 0, pc->swap_data);
 	} else {
-	    PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+	    PyObject *item = pyg_value_as_pyobject(&param_values[i], FALSE);
 
 	    /* error condition */
 	    if (!item) {
@@ -758,7 +773,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values - 1);
     for (i = 1; i < n_param_values; i++) {
-	PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+	PyObject *item = pyg_value_as_pyobject(&param_values[i], TRUE);
 
 	/* error condition */
 	if (!item) {
