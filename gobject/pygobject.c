@@ -254,6 +254,13 @@ pygobject_new_with_interfaces(GType gtype)
 	PyErr_Print();
 	return NULL;
     }
+
+#if 0
+    type->tp_dealloc  = (destructor)pygobject_dealloc;
+    type->tp_traverse = (traverseproc)pygobject_traverse;
+    type->tp_clear = (inquiry)pygobject_clear;
+    type->tp_flags |= Py_TPFLAGS_HAVE_GC;
+#endif
     
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
@@ -344,12 +351,12 @@ pygobject_new(GObject *obj)
            pygobject_new_with_interfaces(). fixes bug #141042 */
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
             Py_INCREF(tp);
- 
 	self = PyObject_GC_New(PyGObject, tp);
-
 	if (self == NULL)
 	    return NULL;
+	pyg_unblock_threads();
 	self->obj = g_object_ref(obj);
+	pyg_block_threads();
 	sink_object(self->obj);
 
 	self->inst_dict = NULL;
