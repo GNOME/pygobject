@@ -38,6 +38,7 @@ GQuark pyginterface_info_key  = 0;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
+static gboolean pyg_error_check(GError **error);
 
 static gboolean use_gil_state_api = FALSE;
     
@@ -1056,7 +1057,7 @@ pyg_type_register(PyObject *self, PyObject *args)
         g_warning("type has no tp_bases");
 
     Py_INCREF(class);
-    return class;
+    return (PyObject *) class;
 }
 
 static PyObject *
@@ -1806,6 +1807,232 @@ pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
+struct _PyGChildData {
+    PyObject *func;
+    PyObject *data;
+};
+
+static void
+child_watch_func(GPid pid, gint status, gpointer data)
+{
+    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
+    PyObject *retval;
+    PyGILState_STATE gil;
+
+    gil = pyg_gil_state_ensure();
+    if (child_data->data)
+        retval = PyObject_CallFunction(child_data->func, "iiO", pid, status,
+                                       child_data->data);
+    else
+        retval = PyObject_CallFunction(child_data->func, "ii", pid, status);
+    Py_XDECREF(retval);
+    pyg_gil_state_release(gil);
+}
+
+static void
+child_watch_dnotify(gpointer data)
+{
+    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
+    Py_DECREF(child_data->func);
+    Py_XDECREF(child_data->data);
+    g_free(child_data);
+}
+
+
+static PyObject *
+pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "pid", "function", "data", "priority", NULL };
+    guint id;
+    gint priority = G_PRIORITY_DEFAULT;
+    int pid;
+    PyObject *func, *user_data = NULL;
+    struct _PyGChildData *child_data;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iO|Oi:gobject.child_watch_add", kwlist,
+                                     &pid, &func, &user_data, &priority))
+        return NULL;
+    if (!PyCallable_Check(func)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "gobject.child_watch_add: second argument must be callable");
+        return NULL;
+    }
+
+    child_data = g_new(struct _PyGChildData, 1);
+    child_data->func = func;
+    child_data->data = user_data;
+    Py_INCREF(child_data->func);
+    if (child_data->data)
+        Py_INCREF(child_data->data);
+    id = g_child_watch_add_full(priority, pid, child_watch_func,
+                                child_data, child_watch_dnotify);
+    return PyInt_FromLong(id);
+}
+
+struct _PyGChildSetupData {
+    PyObject *func;
+    PyObject *data;
+};
+
+static void
+_pyg_spawn_async_callback(gpointer user_data)
+{
+    struct _PyGChildSetupData *data;
+    PyObject *retval;
+    PyGILState_STATE gil;
+
+    data = (struct _PyGChildSetupData *) user_data;
+    gil = pyg_gil_state_ensure();
+    if (data->data)
+        retval = PyObject_CallFunction(data->func, "O", data->data);
+    else
+        retval = PyObject_CallFunction(data->func, NULL);
+    Py_XDECREF(retval);
+    Py_DECREF(data->func);
+    Py_XDECREF(data->data);
+    g_free(data);
+    pyg_gil_state_release(gil);
+}
+
+static PyObject *
+pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "argv", "envp", "working_directory", "flags",
+                              "child_setup", "user_data", "standard_input",
+                              "standard_output", "standard_error", NULL };
+    PyObject *pyargv, *pyenvp = NULL;
+    char **argv, **envp = NULL;
+    PyObject *func = NULL, *user_data = NULL;
+    char *working_directory = NULL;
+    int flags = 0, _stdin = -1, _stdout = -1, _stderr = -1;
+    PyObject *pystdin = NULL, *pystdout = NULL, *pystderr = NULL;
+    gint *standard_input, *standard_output, *standard_error;
+    struct _PyGChildSetupData *callback_data = NULL;
+    GError *error = NULL;
+    GPid child_pid = -1;
+    int len, i;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:gobject.spawn_async",
+                                     kwlist,
+                                     &pyargv, &pyenvp, &working_directory, &flags,
+                                     &func, &user_data,
+                                     &pystdin, &pystdout, &pystderr))
+        return NULL;
+
+    if (pystdin && PyObject_IsTrue(pystdin))
+        standard_input = &_stdin;
+    else
+        standard_input = NULL;
+
+    if (pystdout && PyObject_IsTrue(pystdout))
+        standard_output = &_stdout;
+    else
+        standard_output = NULL;
+
+    if (pystderr && PyObject_IsTrue(pystderr))
+        standard_error = &_stderr;
+    else
+        standard_error = NULL;
+
+      /* parse argv */
+    if (!PySequence_Check(pyargv)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "gobject.spawn_async: first argument must be a sequence of strings");
+        return NULL;
+    }
+    len = PySequence_Length(pyargv);
+    argv = g_new0(char *, len + 1);
+    for (i = 0; i < len; ++i) {
+        PyObject *tmp = PySequence_ITEM(pyargv, i);
+        if (!PyString_Check(tmp)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "gobject.spawn_async: first argument must be a sequence of strings");
+            g_free(argv);
+            Py_XDECREF(tmp);
+            return NULL;
+        }
+        argv[i] = PyString_AsString(tmp);
+        Py_DECREF(tmp);
+    }
+
+      /* parse envp */
+    if (pyenvp) {
+        if (!PySequence_Check(pyenvp)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "gobject.spawn_async: second argument must be a sequence of strings");
+            g_free(argv);
+            return NULL;
+        }
+        len = PySequence_Length(pyenvp);
+        envp = g_new0(char *, len + 1);
+        for (i = 0; i < len; ++i) {
+            PyObject *tmp = PySequence_ITEM(pyenvp, i);
+            if (!PyString_Check(tmp)) {
+                PyErr_SetString(PyExc_TypeError,
+                                "gobject.spawn_async: second argument must be a sequence of strings");
+                g_free(envp);
+                Py_XDECREF(tmp);
+                return NULL;
+            }
+            envp[i] = PyString_AsString(tmp);
+            Py_DECREF(tmp);
+        }
+    }
+
+    if (func) {
+        callback_data = g_new(struct _PyGChildSetupData, 1);
+        callback_data->func = func;
+        callback_data->data = user_data;
+        Py_INCREF(callback_data->func);
+        if (callback_data->data)
+            Py_INCREF(callback_data->data);
+    }
+
+    if (!g_spawn_async_with_pipes(working_directory, argv, envp, flags,
+                                  func? _pyg_spawn_async_callback : NULL,
+                                  callback_data, &child_pid,
+                                  standard_input,
+                                  standard_output,
+                                  standard_error,
+                                  &error))
+    {
+        g_free(argv);
+        if (envp) g_free(envp);
+        if (callback_data) {
+            Py_DECREF(callback_data->func);
+            Py_XDECREF(callback_data->data);
+            g_free(callback_data);
+        }
+        pyg_error_check(&error);
+        return NULL;
+    }
+    g_free(argv);
+    if (envp) g_free(envp);
+
+    if (standard_input)
+        pystdin = PyInt_FromLong(*standard_input);
+    else {
+        Py_INCREF(Py_None);
+        pystdin = Py_None;
+    }
+
+    if (standard_output)
+        pystdout = PyInt_FromLong(*standard_output);
+    else {
+        Py_INCREF(Py_None);
+        pystdout = Py_None;
+    }
+
+    if (standard_error)
+        pystderr = PyInt_FromLong(*standard_error);
+    else {
+        Py_INCREF(Py_None);
+        pystderr = Py_None;
+    }
+
+    return Py_BuildValue("iNNN", child_pid, pystdin, pystdout, pystderr);
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1828,6 +2055,9 @@ static PyMethodDef pygobject_functions[] = {
     { "source_remove", pyg_source_remove, METH_VARARGS },
     { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
     { "threads_init", (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
+    { "child_watch_add", (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
+    { "spawn_async", (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
+
     { NULL, NULL, 0 }
 };
 
@@ -2258,6 +2488,15 @@ initgobject(void)
     PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
     PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
     PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
+
+    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN", G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
+    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD", G_SPAWN_DO_NOT_REAP_CHILD);
+    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH", G_SPAWN_SEARCH_PATH);
+    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL", G_SPAWN_STDOUT_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL", G_SPAWN_STDERR_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN", G_SPAWN_CHILD_INHERITS_STDIN);
+    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO", G_SPAWN_FILE_AND_ARGV_ZERO);
+
 
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
     PyModule_AddObject(m, "TYPE_NONE", pyg_type_wrapper_new(G_TYPE_NONE));

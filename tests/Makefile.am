@@ -19,6 +19,7 @@ testhelper_la_SOURCES = \
 	test-unknown.c 
 
 tests =  \
+	test_subprocess.py \
 	conversion.py \
 	enum.py \
 	gtype.py \
