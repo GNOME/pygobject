@@ -25,6 +25,7 @@
 #endif
 
 #include "pygobject-private.h"
+#include "pythread.h"
 
 static PyObject *gerror_exc = NULL;
 static const gchar *pyginterface_type_id   = "PyGInterface::type";
@@ -1454,19 +1455,84 @@ pyg_main_context_default (PyObject *unused)
 
 }
 
+static int pyg_thread_state_tls_key = -1;
+
 static int
 pyg_enable_threads (void)
 {
 #ifndef DISABLE_THREADING
-    PyEval_InitThreads();
-    if (!g_threads_got_initialized)
-	g_thread_init(NULL);
-    pygobject_api_functions.threads_enabled = TRUE;
+    if (!pygobject_api_functions.threads_enabled) {
+	PyEval_InitThreads();
+	if (!g_threads_got_initialized)
+	    g_thread_init(NULL);
+	pygobject_api_functions.threads_enabled = TRUE;
+	pyg_thread_state_tls_key = PyThread_create_key();
+    }
+
+#ifdef PYGIL_API_IS_BUGGY
+    {
+	PyThreadState* state;
+	state = PyGILState_GetThisThreadState();
+	if ( state != NULL )
+	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
+    }
+#endif
+
     return 0;
 #else
     PyErr_SetString(PyExc_RuntimeError,
                     "pygtk threading disabled at compile time");
     return -1;
+#endif
+}
+
+static PyThreadState *
+pyg_find_thread_state (void)
+{
+    PyThreadState* state;
+
+    if (pyg_thread_state_tls_key == -1)
+	return NULL;
+    state = PyThread_get_key_value(pyg_thread_state_tls_key);
+    if ( state == NULL ) {
+	state = PyGILState_GetThisThreadState();
+	if ( state != NULL )
+	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
+    }
+    return state;
+}
+
+static int
+pyg_gil_state_ensure_py23 (void)
+{
+#ifndef PYGIL_API_IS_BUGGY
+    return PyGILState_Ensure();
+#else
+    PyThreadState* state = pyg_find_thread_state();
+
+    if ( state == NULL )
+	return PyGILState_LOCKED;
+
+    if ( state == _PyThreadState_Current )
+	return PyGILState_LOCKED;
+    else {
+	PyEval_RestoreThread(state);
+	return PyGILState_UNLOCKED;
+    }
+#endif
+}
+
+static void
+pyg_gil_state_release_py23 (int flag)
+{
+#ifndef PYGIL_API_IS_BUGGY
+    PyGILState_Release(flag);
+#else
+    if (flag == PyGILState_UNLOCKED) {
+	PyThreadState* state = pyg_find_thread_state();
+	if ( state != NULL )
+	    PyEval_ReleaseThread(state);
+    }
 #endif
 }
 
@@ -1811,7 +1877,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_flags_from_gtype,
 
   FALSE, /* threads_enabled */
-  pyg_enable_threads
+  pyg_enable_threads,
+  pyg_gil_state_ensure_py23,
+  pyg_gil_state_release_py23
 };
 
 #define REGISTER_TYPE(d, type, name) \
