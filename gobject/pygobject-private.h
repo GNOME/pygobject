@@ -20,7 +20,7 @@ extern struct _PyGObject_Functions pygobject_api_functions;
       (* pygobject_api_functions.unblock_threads)();      \
   } G_STMT_END
 
-GType PY_TYPE_OBJECT;
+extern GType PY_TYPE_OBJECT;
 
 void  pyg_destroy_notify (gpointer user_data);
 
