@@ -129,7 +129,7 @@ pyg_param_spec_repr(PyGParamSpec *self)
 
     g_snprintf(buf, sizeof(buf), "<%s '%s'>",
 	       G_PARAM_SPEC_TYPE_NAME(self->pspec),
-	       g_param_get_name(self->pspec));
+	       g_param_spec_get_name(self->pspec));
     return PyString_FromString(buf);
 }
 
@@ -150,21 +150,21 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (!strcmp(attr, "__gtype__")) {
 	return pyg_type_wrapper_new(G_PARAM_SPEC_TYPE(self->pspec));
     } else if (!strcmp(attr, "name")) {
-	const gchar *name = g_param_get_name(self->pspec);
+	const gchar *name = g_param_spec_get_name(self->pspec);
 
 	if (name)
 	    return PyString_FromString(name);
 	Py_INCREF(Py_None);
 	return Py_None;
     } else if (!strcmp(attr, "nick")) {
-	const gchar *nick = g_param_get_nick(self->pspec);
+	const gchar *nick = g_param_spec_get_nick(self->pspec);
 
 	if (nick)
 	    return PyString_FromString(nick);
 	Py_INCREF(Py_None);
 	return Py_None;
     } else if (!strcmp(attr, "blurb") || !strcmp(attr, "__doc__")) {
-	const gchar *blurb = g_param_get_blurb(self->pspec);
+	const gchar *blurb = g_param_spec_get_blurb(self->pspec);
 
 	if (blurb)
 	    return PyString_FromString(blurb);
@@ -2303,7 +2303,7 @@ pyg_fatal_exceptions_notify_add(PyGFatalExceptionFunc func)
 	g_list_append(pygobject_exception_notifiers, &func);
 }
 
-static int
+static void
 pyg_fatal_exceptions_notify_remove(PyGFatalExceptionFunc func)
 {
     pygobject_exception_notifiers = 
