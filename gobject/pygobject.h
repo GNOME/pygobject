@@ -30,14 +30,16 @@ typedef struct {
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
-			    GType (* get_type)(void),
-			    PyExtensionClass *ec, PyObject *bases);
+			    GType type, PyExtensionClass *ec, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
     PyExtensionClass *(* lookup_class)(GType type);
     PyObject *(* new)(GObject *obj);
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
+
     GType (* type_from_object)(PyObject *obj);
+    PyObject *(* type_wrapper_new)(GType type);
+
     gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
     gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
     void (* register_boxed_custom)(GType boxed_type,
@@ -47,8 +49,7 @@ struct _PyGObject_Functions {
     PyObject *(* value_as_pyobject)(const GValue *value);
 
     void (* register_interface)(PyObject *dict, const gchar *class_name,
-				GType (* get_type)(void),
-				PyExtensionClass *ec);
+				GType type, PyExtensionClass *ec);
 
     PyExtensionClass *boxed_type;
     void (* register_boxed)(PyObject *dict, const gchar *class_name,
@@ -76,6 +77,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_new              (_PyGObject_API->new)
 #define pyg_closure_new            (_PyGObject_API->closure_new)
 #define pyg_type_from_object       (_PyGObject_API->type_from_object)
+#define pyg_type_wrapper_new       (_PyGObject_API->type_wrapper_new)
 #define pyg_enum_get_value         (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value        (_PyGObject_API->flags_get_value)
 #define pyg_register_boxed_custom  (_PyGObject_API->register_boxed_custom)

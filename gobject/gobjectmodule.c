@@ -20,133 +20,55 @@ static PyObject *pygobject_repr(PyGObject *self);
 typedef struct {
     PyObject_HEAD
     GType type;
-    GType (* get_type)(void);
-} PyGTypeThingee;
+} PyGTypeWrapper;
 
 static int
-pyg_type_thingee_compare(PyGTypeThingee *self, PyGTypeThingee *v)
+pyg_type_wrapper_compare(PyGTypeWrapper *self, PyGTypeWrapper *v)
 {
-    if (!self->type)
-	self->type = self->get_type();
-    if (!v->type)
-	v->type = v->get_type();
     if (self->type == v->type) return 0;
     if (self->type > v->type) return -1;
     return 1;
 }
 
 static long
-pyg_type_thingee_hash(PyGTypeThingee *self)
+pyg_type_wrapper_hash(PyGTypeWrapper *self)
 {
-    if (!self->type)
-	self->type = self->get_type();
     return (long)self->type;
 }
 
 static PyObject *
-pyg_type_thingee_repr(PyGTypeThingee *self)
+pyg_type_wrapper_repr(PyGTypeWrapper *self)
 {
-    char buf[20];
+    char buf[80];
+    const gchar *name = g_type_name(self->type);
 
-    if (!self->type)
-	self->type = self->get_type();
-
-    g_snprintf(buf, sizeof(buf), "%lu", self->type);
+    g_snprintf(buf, sizeof(buf), "<GType %s>",
+	       name?name:"invalid", self->type);
     return PyString_FromString(buf);
 }
 
-static int
-pyg_type_thingee_coerce(PyObject **self, PyObject **other)
+static void
+pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
 {
-    PyGTypeThingee *old = (PyGTypeThingee *)*self;
-
-    if (!old->type)
-	old->type = old->get_type();
-
-    if (PyInt_Check(*other)) {
-        *self = PyInt_FromLong(old->type);
-        Py_INCREF(*other);
-        return 0;
-    } else if (PyFloat_Check(*other)) {
-        *self = PyFloat_FromDouble((double)old->type);
-        Py_INCREF(*other);
-        return 0;
-    } else if (PyLong_Check(*other)) {
-        *self = PyLong_FromUnsignedLong(old->type);
-        Py_INCREF(*other);
-        return 0;
-    }
-    return 1;  /* don't know how to convert */
-}
-static PyObject *
-pyg_type_thingee_int(PyGTypeThingee *self)
-{
-    if (!self->type)
-	self->type = self->get_type();
-
-    return PyInt_FromLong(self->type);
+    PyMem_DEL(self);
 }
 
-static PyObject *
-pyg_type_thingee_long(PyGTypeThingee *self)
-{
-    if (!self->type)
-	self->type = self->get_type();
-
-    return PyLong_FromUnsignedLong(self->type);
-}
-
-static PyObject *
-pyg_type_thingee_float(PyGTypeThingee *self)
-{
-    if (!self->type)
-	self->type = self->get_type();
-
-    return PyFloat_FromDouble(self->type);
-}
-
-static PyNumberMethods pyg_type_thingee_number = {
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (ternaryfunc)0,
-    (unaryfunc)0,
-    (unaryfunc)0,
-    (unaryfunc)0,
-    (inquiry)0,
-    (unaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (binaryfunc)0,
-    (coercion)pyg_type_thingee_coerce,
-    (unaryfunc)pyg_type_thingee_int,
-    (unaryfunc)pyg_type_thingee_long,
-    (unaryfunc)pyg_type_thingee_float,
-    (unaryfunc)0,
-    (unaryfunc)0
-};
-
-PyTypeObject pyg_type_thingee_type = {
+PyTypeObject PyGTypeWrapper_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
     "GType",
-    sizeof(PyGTypeThingee),
+    sizeof(PyGTypeWrapper),
     0,
-    (destructor)0,
+    (destructor)pyg_type_wrapper_dealloc,
     (printfunc)0,
     (getattrfunc)0,
     (setattrfunc)0,
-    (cmpfunc)pyg_type_thingee_compare,
-    (reprfunc)pyg_type_thingee_repr,
-    &pyg_type_thingee_number,
+    (cmpfunc)pyg_type_wrapper_compare,
+    (reprfunc)pyg_type_wrapper_repr,
     0,
     0,
-    (hashfunc)pyg_type_thingee_hash,
+    0,
+    (hashfunc)pyg_type_wrapper_hash,
     (ternaryfunc)0,
     (reprfunc)0,
     0L,0L,0L,0L,
@@ -154,17 +76,16 @@ PyTypeObject pyg_type_thingee_type = {
 };
 
 static PyObject *
-pyg_type_thingee_new(GType (* get_type)(void))
+pyg_type_wrapper_new(GType type)
 {
-    PyGTypeThingee *self;
+    PyGTypeWrapper *self;
 
-    self = (PyGTypeThingee *)PyObject_NEW(PyGTypeThingee,
-					  &pyg_type_thingee_type);
+    self = (PyGTypeWrapper *)PyObject_NEW(PyGTypeWrapper,
+					  &PyGTypeWrapper_Type);
     if (self == NULL)
 	return NULL;
 
-    self->type = 0;
-    self->get_type = get_type;
+    self->type = type;
     return (PyObject *)self;
 }
 
@@ -182,7 +103,7 @@ pygobject_destroy_notify(gpointer user_data)
 
 static void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
-			 GType (* get_type)(void), PyExtensionClass *ec,
+			 GType type, PyExtensionClass *ec,
 			 PyObject *bases)
 {
     PyObject *o;
@@ -207,8 +128,8 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
         PyExtensionClass_Export(dict, (char *)class_name, *ec);
     }
 
-    if (get_type) {
-	o = pyg_type_thingee_new(get_type);
+    if (type) {
+	o = pyg_type_wrapper_new(type);
 	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
 	Py_DECREF(o);
     }
@@ -436,7 +357,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name, *ec,
 					  PyGBoxed_Type);
     PyDict_SetItemString(ec->class_dictionary, "__gtype__",
-			 o=PyInt_FromLong(boxed_type));
+			 o=pyg_type_wrapper_new(boxed_type));
     Py_DECREF(o);
     g_hash_table_insert(boxed_types, GUINT_TO_POINTER(boxed_type), ec);
 }
@@ -577,11 +498,9 @@ pyg_type_from_object(PyObject *obj)
 	return 0;
     }
 
-    /* handle int like objects */
-    type = (GType) PyInt_AsLong(obj);
-    if (!PyErr_Occurred() && type != 0)
-	return type;
-    PyErr_Clear();
+    if (obj->ob_type == &PyGTypeWrapper_Type) {
+	return ((PyGTypeWrapper *)obj)->type;
+    }
 
     /* handle strings */
     if (PyString_Check(obj)) {
@@ -593,22 +512,18 @@ pyg_type_from_object(PyObject *obj)
 
     /* finally, look for a __gtype__ attribute on the object */
     gtype = PyObject_GetAttrString(obj, "__gtype__");
-    if (!gtype) {
-	PyErr_Clear();
-	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
-	return 0;
-    }
-    type = (GType) PyInt_AsLong(gtype);
-    if (PyErr_Occurred()) {
-	PyErr_Clear();
+    if (gtype) {
+	if (gtype->ob_type == &PyGTypeWrapper_Type) {
+	    type = ((PyGTypeWrapper *)gtype)->type;
+	    Py_DECREF(gtype);
+	    return type;
+	}
 	Py_DECREF(gtype);
-	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
-	return 0;
     }
-    Py_DECREF(gtype);
-    if (type == 0)
-	PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
-    return type;
+
+    PyErr_Clear();
+    PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
+    return 0;
 }
 
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
@@ -1754,15 +1669,15 @@ static PyExtensionClass PyGInterface_Type = {
 
 static void
 pyg_register_interface(PyObject *dict, const gchar *class_name,
-		       GType (* get_type)(void), PyExtensionClass *ec)
+		       GType type, PyExtensionClass *ec)
 {
     PyObject *o;
 
     PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name,
 					  *ec, PyGInterface_Type);
 
-    if (get_type) {
-	o = pyg_type_thingee_new(get_type);
+    if (type) {
+	o = pyg_type_wrapper_new(type);
 	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
 	Py_DECREF(o);
     }
@@ -1774,10 +1689,13 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 static PyObject *
 pyg_type_name (PyObject *self, PyObject *args)
 {
+    PyObject *gtype;
     GType type;
     const gchar *name;
 
-    if (!PyArg_ParseTuple(args, "i:gobject.type_name", &type))
+    if (!PyArg_ParseTuple(args, "O:gobject.type_name", &gtype))
+	return NULL;
+    if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     name = g_type_name(type);
     if (name)
@@ -1796,7 +1714,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 	return NULL;
     type = g_type_from_name(name);
     if (type != 0)
-	return PyInt_FromLong(type);
+	return pyg_type_wrapper_new(type);
     PyErr_SetString(PyExc_RuntimeError, "unknown type name");
     return NULL;
 }
@@ -1804,13 +1722,16 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 static PyObject *
 pyg_type_parent (PyObject *self, PyObject *args)
 {
+    PyObject *gtype;
     GType type, parent;
 
-    if (!PyArg_ParseTuple(args, "i:gobject.type_parent", &type))
+    if (!PyArg_ParseTuple(args, "O:gobject.type_parent", &gtype))
+	return NULL;
+    if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     parent = g_type_parent(type);
     if (parent != 0)
-	return PyInt_FromLong(parent);
+	return pyg_type_wrapper_new(parent);
     PyErr_SetString(PyExc_RuntimeError, "no parent for type");
     return NULL;
 }
@@ -1818,9 +1739,14 @@ pyg_type_parent (PyObject *self, PyObject *args)
 static PyObject *
 pyg_type_is_a (PyObject *self, PyObject *args)
 {
+    PyObject *gtype, *gparent;
     GType type, parent;
 
-    if (!PyArg_ParseTuple(args, "ii:gobject.type_is_a", &type, &parent))
+    if (!PyArg_ParseTuple(args, "OO:gobject.type_is_a", &gtype, &gparent))
+	return NULL;
+    if ((type = pyg_type_from_object(gtype)) == 0)
+	return NULL;
+    if ((parent = pyg_type_from_object(gparent)) == 0)
 	return NULL;
     return PyInt_FromLong(g_type_is_a(type, parent));
 }
@@ -1828,18 +1754,20 @@ pyg_type_is_a (PyObject *self, PyObject *args)
 static PyObject *
 pyg_type_children (PyObject *self, PyObject *args)
 {
+    PyObject *gtype, *list;
     GType type, *children;
     guint n_children, i;
-    PyObject *list;
 
-    if (!PyArg_ParseTuple(args, "i:gobject.type_children", &type))
+    if (!PyArg_ParseTuple(args, "O:gobject.type_children", &gtype))
+	return NULL;
+    if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     children = g_type_children(type, &n_children);
     if (children) {
         list = PyList_New(0);
 	for (i = 0; i < n_children; i++) {
 	    PyObject *o;
-	    PyList_Append(list, o=PyInt_FromLong(children[i]));
+	    PyList_Append(list, o=pyg_type_wrapper_new(children[i]));
 	    Py_DECREF(o);
 	}
 	g_free(children);
@@ -1852,18 +1780,20 @@ pyg_type_children (PyObject *self, PyObject *args)
 static PyObject *
 pyg_type_interfaces (PyObject *self, PyObject *args)
 {
+    PyObject *gtype, *list;
     GType type, *interfaces;
     guint n_interfaces, i;
-    PyObject *list;
 
-    if (!PyArg_ParseTuple(args, "i:gobject.type_interfaces", &type))
+    if (!PyArg_ParseTuple(args, "O:gobject.type_interfaces", &gtype))
+	return NULL;
+    if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     interfaces = g_type_interfaces(type, &n_interfaces);
     if (interfaces) {
         list = PyList_New(0);
 	for (i = 0; i < n_interfaces; i++) {
 	    PyObject *o;
-	    PyList_Append(list, o=PyInt_FromLong(interfaces[i]));
+	    PyList_Append(list, o=pyg_type_wrapper_new(interfaces[i]));
 	    Py_DECREF(o);
 	}
 	g_free(interfaces);
@@ -1879,6 +1809,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     PyObject *class, *gtype, *module;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
+    gint i;
     GTypeQuery query;
     GTypeInfo type_info = {
 	0,    /* class_size */
@@ -1903,27 +1834,15 @@ pyg_type_register(PyObject *self, PyObject *args)
     }
 
     /* find the GType of the parent */
-    gtype = PyObject_GetAttrString(class, "__gtype__");
-    if (!gtype) {
-	PyErr_Clear();
-	PyErr_SetString(PyExc_TypeError,
-			"required __gtype__ attribute missing");
+    parent_type = pyg_type_from_object(class);
+    if (!parent_type) {
 	return NULL;
     }
-    parent_type = (GType) PyInt_AsLong(gtype);
-    if (PyErr_Occurred()) {
-	PyErr_Clear();
-	Py_DECREF(gtype);
-	PyErr_SetString(PyExc_TypeError,
-			"__gtype__ attribute not an integer");
-	return NULL;
-    }
-    Py_DECREF(gtype);
 
     /* make name for new widget */
     module = PyObject_GetAttrString(class, "__module__");
     if (module && PyString_Check(module)) {
-	type_name = g_strconcat(PyString_AsString(module), "+",
+	type_name = g_strconcat(PyString_AsString(module), ".",
 				((PyExtensionClass *)class)->tp_name, NULL);
     } else {
 	if (module)
@@ -1932,6 +1851,10 @@ pyg_type_register(PyObject *self, PyObject *args)
 	    PyErr_Clear();
 	type_name = g_strdup(((PyExtensionClass *)class)->tp_name);
     }
+    /* convert '.' in type name to '+', which isn't banned (grumble) */
+    for (i = 0; type_name[i] != '\0'; i++)
+	if (type_name[i] == '.')
+	    type_name[i] = '+';
 
     /* fill in missing values of GTypeInfo struct */
     g_type_query(parent_type, &query);
@@ -1948,7 +1871,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     }
 
     /* set new value of __gtype__ on class */
-    gtype = PyInt_FromLong(instance_type);
+    gtype = pyg_type_wrapper_new(instance_type);
     PyObject_SetAttrString(class, "__gtype__", gtype);
     Py_DECREF(gtype);
 
@@ -2200,6 +2123,7 @@ static struct _PyGObject_Functions functions = {
   pygobject_new,
   pyg_closure_new,
   pyg_type_from_object,
+  pyg_type_wrapper_new,
   pyg_enum_get_value,
   pyg_flags_get_value,
   pyg_register_boxed_custom,
@@ -2221,6 +2145,8 @@ initgobject(void)
 {
     PyObject *m, *d, *o;
 
+    PyGTypeWrapper_Type.ob_type = &PyType_Type;
+
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
@@ -2230,19 +2156,17 @@ initgobject(void)
 						  pyobject_copy,
 						  pyobject_free);
 
-    pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
-    PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
-			 o=PyInt_FromLong(G_TYPE_OBJECT));
-    Py_DECREF(o);
+    pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
+			     &PyGObject_Type, NULL);
 
     PyExtensionClass_Export(d, "GInterface", PyGInterface_Type);
     PyDict_SetItemString(PyGInterface_Type.class_dictionary, "__gtype__",
-			 o=PyInt_FromLong(G_TYPE_INTERFACE));
+			 o=pyg_type_wrapper_new(G_TYPE_INTERFACE));
     Py_DECREF(o);
 
     PyExtensionClass_Export(d, "GBoxed", PyGBoxed_Type);
     PyDict_SetItemString(PyGBoxed_Type.class_dictionary, "__gtype__",
-			 o=PyInt_FromLong(G_TYPE_BOXED));
+			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -2263,26 +2187,26 @@ initgobject(void)
     PyModule_AddIntConstant(m, "SIGNAL_ACTION", G_SIGNAL_ACTION);
     PyModule_AddIntConstant(m, "SIGNAL_NO_HOOKS", G_SIGNAL_NO_HOOKS);
 
-    PyModule_AddIntConstant(m, "TYPE_INVALID", G_TYPE_INVALID);
-    PyModule_AddIntConstant(m, "TYPE_NONE", G_TYPE_NONE);
-    PyModule_AddIntConstant(m, "TYPE_INTERFACE", G_TYPE_INTERFACE);
-    PyModule_AddIntConstant(m, "TYPE_CHAR", G_TYPE_CHAR);
-    PyModule_AddIntConstant(m, "TYPE_UCHAR", G_TYPE_UCHAR);
-    PyModule_AddIntConstant(m, "TYPE_BOOLEAN", G_TYPE_BOOLEAN);
-    PyModule_AddIntConstant(m, "TYPE_INT", G_TYPE_INT);
-    PyModule_AddIntConstant(m, "TYPE_UINT", G_TYPE_UINT);
-    PyModule_AddIntConstant(m, "TYPE_LONG", G_TYPE_LONG);
-    PyModule_AddIntConstant(m, "TYPE_ULONG", G_TYPE_ULONG);
-    PyModule_AddIntConstant(m, "TYPE_ENUM", G_TYPE_ENUM);
-    PyModule_AddIntConstant(m, "TYPE_FLAGS", G_TYPE_FLAGS);
-    PyModule_AddIntConstant(m, "TYPE_FLOAT", G_TYPE_FLOAT);
-    PyModule_AddIntConstant(m, "TYPE_DOUBLE", G_TYPE_DOUBLE);
-    PyModule_AddIntConstant(m, "TYPE_STRING", G_TYPE_STRING);
-    PyModule_AddIntConstant(m, "TYPE_POINTER", G_TYPE_POINTER);
-    PyModule_AddIntConstant(m, "TYPE_BOXED", G_TYPE_BOXED);
-    PyModule_AddIntConstant(m, "TYPE_PARAM", G_TYPE_PARAM);
-    PyModule_AddIntConstant(m, "TYPE_OBJECT", G_TYPE_OBJECT);
-    PyModule_AddIntConstant(m, "TYPE_PYOBJECT", PY_TYPE_OBJECT);
+    PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
+    PyModule_AddObject(m, "TYPE_NONE", pyg_type_wrapper_new(G_TYPE_NONE));
+    PyModule_AddObject(m, "TYPE_INTERFACE", pyg_type_wrapper_new(G_TYPE_INTERFACE));
+    PyModule_AddObject(m, "TYPE_CHAR", pyg_type_wrapper_new(G_TYPE_CHAR));
+    PyModule_AddObject(m, "TYPE_UCHAR", pyg_type_wrapper_new(G_TYPE_UCHAR));
+    PyModule_AddObject(m, "TYPE_BOOLEAN", pyg_type_wrapper_new(G_TYPE_BOOLEAN));
+    PyModule_AddObject(m, "TYPE_INT", pyg_type_wrapper_new(G_TYPE_INT));
+    PyModule_AddObject(m, "TYPE_UINT", pyg_type_wrapper_new(G_TYPE_UINT));
+    PyModule_AddObject(m, "TYPE_LONG", pyg_type_wrapper_new(G_TYPE_LONG));
+    PyModule_AddObject(m, "TYPE_ULONG", pyg_type_wrapper_new(G_TYPE_ULONG));
+    PyModule_AddObject(m, "TYPE_ENUM", pyg_type_wrapper_new(G_TYPE_ENUM));
+    PyModule_AddObject(m, "TYPE_FLAGS", pyg_type_wrapper_new(G_TYPE_FLAGS));
+    PyModule_AddObject(m, "TYPE_FLOAT", pyg_type_wrapper_new(G_TYPE_FLOAT));
+    PyModule_AddObject(m, "TYPE_DOUBLE", pyg_type_wrapper_new(G_TYPE_DOUBLE));
+    PyModule_AddObject(m, "TYPE_STRING", pyg_type_wrapper_new(G_TYPE_STRING));
+    PyModule_AddObject(m, "TYPE_POINTER", pyg_type_wrapper_new(G_TYPE_POINTER));
+    PyModule_AddObject(m, "TYPE_BOXED", pyg_type_wrapper_new(G_TYPE_BOXED));
+    PyModule_AddObject(m, "TYPE_PARAM", pyg_type_wrapper_new(G_TYPE_PARAM));
+    PyModule_AddObject(m, "TYPE_OBJECT", pyg_type_wrapper_new(G_TYPE_OBJECT));
+    PyModule_AddObject(m, "TYPE_PYOBJECT", pyg_type_wrapper_new(PY_TYPE_OBJECT));
 
     if (PyErr_Occurred()) {
 	PyErr_Print();
