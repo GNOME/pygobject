@@ -2,8 +2,7 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
-static GHashTable *class_hash;
-
+static GQuark pygobject_class_key = 0;
 static GQuark pygobject_wrapper_key = 0;
 static GQuark pygobject_ownedref_key = 0;
 
@@ -238,9 +237,6 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyObject *o;
     const char *class_name, *s;
 
-    if (!class_hash)
-	class_hash = g_hash_table_new(g_str_hash, g_str_equal);
-
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
     if (s != NULL)
@@ -267,9 +263,11 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	o = pyg_type_wrapper_new(gtype);
 	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
 	Py_DECREF(o);
-    }
 
-    g_hash_table_insert(class_hash, g_strdup(type_name), type);
+	/* stash a pointer to the python class with the GType */
+	Py_INCREF(type);
+	g_type_set_qdata(gtype, pygobject_class_key, type);
+    }
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
@@ -289,8 +287,8 @@ pygobject_lookup_class(GType gtype)
     PyTypeObject *type;
 
     /* find the python type for this object.  If not found, use parent. */
-    while ((type = g_hash_table_lookup(class_hash, g_type_name(gtype))) == NULL
-           && gtype != 0)
+    while (gtype != G_TYPE_INVALID &&
+	   (type = g_type_get_qdata(gtype, pygobject_class_key)) == NULL)
         gtype = g_type_parent(gtype);
     g_assert(type != NULL);
     return type;
@@ -1925,6 +1923,13 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
     return NULL;
 }
 
+static void
+pyg_object_class_init(GObjectClass *class, PyObject *py_class)
+{
+    g_message("GType class init for `%s' with python class %p",
+	      G_OBJECT_CLASS_NAME(class), py_class);
+}
+
 static PyObject *
 pyg_type_register(PyObject *self, PyObject *args)
 {
@@ -1940,7 +1945,7 @@ pyg_type_register(PyObject *self, PyObject *args)
 	(GBaseInitFunc) NULL,
 	(GBaseFinalizeFunc) NULL,
 
-	(GClassInitFunc) NULL,
+	(GClassInitFunc) pyg_object_class_init,
 	(GClassFinalizeFunc) NULL,
 	NULL, /* class_data */
 
@@ -1979,6 +1984,9 @@ pyg_type_register(PyObject *self, PyObject *args)
 	if (type_name[i] == '.')
 	    type_name[i] = '+';
 
+    /* set class_data that will be passed to the class_init function. */
+    type_info.class_data = class;
+
     /* fill in missing values of GTypeInfo struct */
     g_type_query(parent_type, &query);
     type_info.class_size = query.class_size;
@@ -1992,6 +2000,10 @@ pyg_type_register(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_RuntimeError, "could not create new GType");
 	return NULL;
     }
+
+    /* store pointer to the class with the GType */
+    Py_INCREF(class);
+    g_type_set_qdata(instance_type, pygobject_class_key, class);
 
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
@@ -2381,6 +2393,10 @@ initgobject(void)
 
     g_type_init();
 
+    pygobject_class_key = g_quark_from_static_string("PyGObject::class");
+    pygobject_wrapper_key = g_quark_from_static_string("PyGObject::wrapper");
+    pygobject_ownedref_key = g_quark_from_static_string("PyGObject::ownedref");
+
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,
 						  pyobject_free);
@@ -2405,9 +2421,6 @@ initgobject(void)
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);
-
-    pygobject_wrapper_key = g_quark_from_static_string("py-gobject-wrapper");
-    pygobject_ownedref_key = g_quark_from_static_string("py-gobject-ownedref");
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGObject_API",
