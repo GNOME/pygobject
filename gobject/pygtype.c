@@ -556,3 +556,208 @@ pyg_value_as_pyobject(const GValue *value)
     return NULL;
 }
 
+/* -------------- PyGClosure ----------------- */
+
+typedef struct _PyGClosure PyGClosure;
+struct _PyGClosure {
+    GClosure closure;
+    PyObject *callback;
+    PyObject *extra_args; /* tuple of extra args to pass to callback */
+    PyObject *swap_data; /* other object for gtk_signal_connect_object */
+};
+
+static void
+pyg_closure_destroy(gpointer data, GClosure *closure)
+{
+    PyGClosure *pc = (PyGClosure *)closure;
+
+    pyg_block_threads();
+    Py_DECREF(pc->callback);
+    Py_XDECREF(pc->extra_args);
+    Py_XDECREF(pc->swap_data);
+    pyg_unblock_threads();
+}
+
+/* XXXX - need to handle python thread context stuff */
+static void
+pyg_closure_marshal(GClosure *closure,
+		    GValue *return_value,
+		    guint n_param_values,
+		    const GValue *param_values,
+		    gpointer invocation_hint,
+		    gpointer marshal_data)
+{
+    PyGClosure *pc = (PyGClosure *)closure;
+    PyObject *params, *ret;
+    guint i;
+
+    pyg_block_threads();
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(n_param_values);
+    for (i = 0; i < n_param_values; i++) {
+	/* swap in a different initial data for connect_object() */
+	if (i == 0 && G_CCLOSURE_SWAP_DATA(closure)) {
+	    g_return_if_fail(pc->swap_data != NULL);
+	    Py_INCREF(pc->swap_data);
+	    PyTuple_SetItem(params, 0, pc->swap_data);
+	} else {
+	    PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+
+	    /* error condition */
+	    if (!item) {
+		Py_DECREF(params);
+		pyg_unblock_threads();
+		return;
+	    }
+	    PyTuple_SetItem(params, i, item);
+	}
+    }
+    /* params passed to function may have extra arguments */
+    if (pc->extra_args) {
+	PyObject *tuple = params;
+	params = PySequence_Concat(tuple, pc->extra_args);
+	Py_DECREF(tuple);
+    }
+    ret = PyObject_CallObject(pc->callback, params);
+    if (ret == NULL) {
+	PyErr_Print();
+	PyErr_Clear();
+	pyg_unblock_threads();
+	return;
+    }
+    if (return_value)
+	pyg_value_from_pyobject(return_value, ret);
+    Py_DECREF(ret);
+    pyg_unblock_threads();
+}
+
+GClosure *
+pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
+{
+    GClosure *closure;
+
+    g_return_val_if_fail(callback != NULL, NULL);
+    closure = g_closure_new_simple(sizeof(PyGClosure), NULL);
+    g_closure_add_finalize_notifier(closure, NULL, pyg_closure_destroy);
+    g_closure_set_marshal(closure, pyg_closure_marshal);
+    Py_INCREF(callback);
+    ((PyGClosure *)closure)->callback = callback;
+    if (extra_args && extra_args != Py_None) {
+	Py_INCREF(extra_args);
+	if (!PyTuple_Check(extra_args)) {
+	    PyObject *tmp = PyTuple_New(1);
+	    PyTuple_SetItem(tmp, 0, extra_args);
+	    extra_args = tmp;
+	}
+	((PyGClosure *)closure)->extra_args = extra_args;
+    }
+    if (swap_data) {
+	Py_INCREF(swap_data);
+	((PyGClosure *)closure)->swap_data = swap_data;
+	closure->derivative_flag = TRUE;
+    }
+    return closure;
+}
+
+/* -------------- PySignalClassClosure ----------------- */
+/* a closure used for the `class closure' of a signal.  As this gets
+ * all the info from the first argument to the closure and the
+ * invocation hint, we can have a single closure that handles all
+ * class closure cases.  We call a method by the name of the signal
+ * with "do_" prepended.
+ *
+ *  We also remove the first argument from the * param list, as it is
+ *  the instance object, which is passed * implicitly to the method
+ *  object. */
+
+static void
+pyg_signal_class_closure_marshal(GClosure *closure,
+				 GValue *return_value,
+				 guint n_param_values,
+				 const GValue *param_values,
+				 gpointer invocation_hint,
+				 gpointer marshal_data)
+{
+    GObject *object;
+    PyObject *object_wrapper;
+    GSignalInvocationHint *hint = (GSignalInvocationHint *)invocation_hint;
+    gchar *method_name, *tmp;
+    PyObject *method;
+    PyObject *params, *ret;
+    guint i;
+
+    g_return_if_fail(invocation_hint != NULL);
+
+    pyg_block_threads();
+    /* get the object passed as the first argument to the closure */
+    object = g_value_get_object(&param_values[0]);
+    g_return_if_fail(object != NULL && G_IS_OBJECT(object));
+
+    /* get the wrapper for this object */
+    object_wrapper = pygobject_new(object);
+    g_return_if_fail(object_wrapper != NULL);
+
+    /* construct method name for this class closure */
+    method_name = g_strconcat("do_", g_signal_name(hint->signal_id), NULL);
+
+    /* convert dashes to underscores.  For some reason, g_signal_name
+     * seems to convert all the underscores in the signal name to
+       dashes??? */
+    for (tmp = method_name; *tmp != '\0'; tmp++)
+	if (*tmp == '-') *tmp = '_';
+
+    method = PyObject_GetAttrString(object_wrapper, method_name);
+    g_free(method_name);
+
+    if (!method) {
+	PyErr_Clear();
+	Py_DECREF(object_wrapper);
+	pyg_unblock_threads();
+	return;
+    }
+    Py_DECREF(object_wrapper);
+
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(n_param_values - 1);
+    for (i = 1; i < n_param_values; i++) {
+	PyObject *item = pyg_value_as_pyobject(&param_values[i]);
+
+	/* error condition */
+	if (!item) {
+	    Py_DECREF(params);
+	    pyg_unblock_threads();
+	    return;
+	}
+	PyTuple_SetItem(params, i - 1, item);
+    }
+
+    ret = PyObject_CallObject(method, params);
+    if (ret == NULL) {
+	PyErr_Print();
+	PyErr_Clear();
+	Py_DECREF(method);
+	pyg_unblock_threads();
+	return;
+    }
+    Py_DECREF(method);
+    if (return_value)
+	pyg_value_from_pyobject(return_value, ret);
+    Py_DECREF(ret);
+    pyg_unblock_threads();
+}
+
+GClosure *
+pyg_signal_class_closure_get(void)
+{
+    static GClosure *closure;
+
+    if (closure == NULL) {
+	closure = g_closure_new_simple(sizeof(GClosure), NULL);
+	g_closure_set_marshal(closure, pyg_signal_class_closure_marshal);
+
+	g_closure_ref(closure);
+	g_closure_sink(closure);
+    }
+    return closure;
+}
+
