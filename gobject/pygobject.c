@@ -993,7 +993,6 @@ pygobject_emit(PyGObject *self, PyObject *args)
     gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
-    PyThreadState *_save;
     
     len = PyTuple_Size(args);
     if (len < 1) {
