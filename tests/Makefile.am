@@ -2,7 +2,8 @@ tests =  \
 	conversion.py \
 	enum.py \
 	gtype.py \
-	test_signal.py
+	test_signal.py \
+	test_subtype.py
 
 PYTHONPATH = $(top_builddir):$(top_builddir)/gobject:$(top_srcdir):$(top_srcdir)/gtk
 
