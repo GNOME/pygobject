@@ -144,19 +144,19 @@ class FlagsTest(unittest.TestCase):
         assert len(klass.__flags_values__) >= 3
 
     def testComparision(self):
-        e = gtk.TREE_VIEW_DROP_BEFORE
-        assert e == 0
-        assert not e == 10
-        assert not e != 0
-        assert e != 10
-        assert not e < 0
-        assert e < 10
-        assert not e > 0
-        assert not e > 10
-        assert e >= 0
-        assert not e >= 10
-        assert e <= 0
-        assert e <= 10
+        enum = gtk.TREE_VIEW_DROP_BEFORE
+        assert enum == 0
+        assert not enum == 10
+        assert not enum != 0
+        assert enum != 10
+        assert not enum < 0
+        assert enum < 10
+        assert not enum > 0
+        assert not enum > 10
+        assert enum >= 0
+        assert not enum >= 10
+        assert enum <= 0
+        assert enum <= 10
         
     def testComparision(self):
         flag = gdk.EXPOSURE_MASK
