@@ -1008,6 +1008,15 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
+pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    if (pygobject_init(self, args, kwargs) < 0)
+	return NULL;
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
 pygobject_get_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
@@ -1407,7 +1416,8 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 }
 
 static PyMethodDef pygobject_methods[] = {
-    /*{ "__gobject_init__", (PyCFunction)pygobject__init__, METH_VARARGS },*/
+    { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
+      METH_VARARGS|METH_KEYWORDS },
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
