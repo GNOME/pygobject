@@ -272,6 +272,165 @@ pygobject_new(GObject *obj)
     return (PyObject *)self;
 }
 
+/* ---------------- GBoxed functions -------------------- */
+
+static void
+pyg_boxed_dealloc(PyGBoxed *self)
+{
+    if (self->free_on_dealloc && self->boxed)
+	g_boxed_free(self->gtype, self->boxed);
+    PyMem_DEL(self);
+}
+
+static int
+pyg_boxed_compare(PyGBoxed *self, PyGBoxed *v)
+{
+    if (self->boxed == v->boxed) return 0;
+    if (self->boxed > v->boxed)  return -1;
+    return 1;
+}
+
+static long
+pyg_boxed_hash(PyGBoxed *self)
+{
+    return (long)self->boxed;
+}
+
+static PyObject *
+pyg_boxed_repr(PyGBoxed *self)
+{
+    gchar buf[128];
+
+    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
+	       (long)self->boxed);
+    return PyString_FromString(buf);
+}
+
+static PyObject *
+pyg_boxed__class_init__(PyObject *self, PyObject *args)
+{
+    PyExtensionClass *subclass;
+
+    if (!PyArg_ParseTuple(args, "O:GBoxed.__class_init__", &subclass))
+	return NULL;
+
+    g_message("subclassing GBoxed types is bad m'kay");
+    PyErr_SetString(PyExc_TypeError, "attempt to subclass a boxed type");
+    return NULL;
+}
+
+static PyObject *
+pyg_boxed_init(PyGBoxed *self, PyObject *args)
+{
+    gchar buf[512];
+
+    if (!PyArg_ParseTuple(args, ":GBoxed.__init__"))
+	return NULL;
+
+    self->boxed = NULL;
+    self->gtype = 0;
+    self->free_on_dealloc = FALSE;
+
+    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
+    PyErr_SetString(PyExc_NotImplementedError, buf);
+    return NULL;
+}
+
+static PyMethodDef pyg_boxed_methods[] = {
+    {"__class_init__",pyg_boxed__class_init__, METH_VARARGS|METH_CLASS_METHOD},
+    {"__init__",  (PyCFunction)pyg_boxed_init, METH_VARARGS},
+    {NULL,NULL,0}
+};
+
+static PyExtensionClass PyGBoxed_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                  /* ob_size */
+    "GBoxed",                          /* tp_name */
+    sizeof(PyGBoxed),                  /* tp_basicsize */
+    0,                                  /* tp_itemsize */
+    /* methods */
+    (destructor)pyg_boxed_dealloc,      /* tp_dealloc */
+    (printfunc)0,                       /* tp_print */
+    (getattrfunc)0,                     /* tp_getattr */
+    (setattrfunc)0,                     /* tp_setattr */
+    (cmpfunc)pyg_boxed_compare,         /* tp_compare */
+    (reprfunc)pyg_boxed_repr,           /* tp_repr */
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
+    (hashfunc)pyg_boxed_hash,           /* tp_hash */
+    (ternaryfunc)0,                     /* tp_call */
+    (reprfunc)0,                        /* tp_str */
+    (getattrofunc)0,                    /* tp_getattro */
+    (setattrofunc)0,                    /* tp_setattro */
+    /* Space for future expansion */
+    0L, 0L,
+    NULL, /* Documentation string */
+    METHOD_CHAIN(pyg_boxed_methods),
+    0,
+};
+
+static GHashTable *boxed_types = NULL;
+
+static void
+pyg_register_boxed(PyObject *dict, const gchar *class_name,
+		   GType boxed_type, PyExtensionClass *ec)
+{
+    PyObject *o;
+
+    g_return_if_fail(dict != NULL);
+    g_return_if_fail(class_name != NULL);
+    g_return_if_fail(boxed_type != 0);
+    g_return_if_fail(ec != NULL);
+
+    if (!boxed_types)
+	boxed_types = g_hash_table_new(g_direct_hash, g_direct_equal);
+
+    if (!ec->tp_dealloc) ec->tp_dealloc = (destructor)pyg_boxed_dealloc;
+    if (!ec->tp_compare) ec->tp_compare = (cmpfunc)pyg_boxed_compare;
+    if (!ec->tp_hash)    ec->tp_hash    = (hashfunc)pyg_boxed_hash;
+    if (!ec->tp_repr)    ec->tp_repr    = (reprfunc)pyg_boxed_repr;
+
+    PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name, *ec,
+					  PyGBoxed_Type);
+    PyDict_SetItemString(ec->class_dictionary, "__gtype__",
+			 o=PyInt_FromLong(boxed_type));
+    Py_DECREF(o);
+    g_hash_table_insert(boxed_types, GUINT_TO_POINTER(boxed_type), ec);
+}
+
+static PyObject *
+pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
+	      gboolean own_ref)
+{
+    PyGBoxed *self;
+    PyTypeObject *tp;
+
+    g_return_if_fail(boxed_type != 0);
+    g_return_if_fail(!copy_boxed || (copy_boxed && own_ref));
+
+    if (!boxed) {
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+
+    tp = g_hash_table_lookup(boxed_types, GUINT_TO_POINTER(boxed_type));
+    if (!tp)
+	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
+    self = PyObject_NEW(PyGBoxed, tp);
+
+    if (self == NULL)
+	return NULL;
+
+    if (copy_boxed)
+	boxed = g_boxed_copy(boxed_type, boxed);
+    self->boxed = boxed;
+    self->gtype = boxed_type;
+    self->free_on_dealloc = own_ref;
+
+    return (PyObject *)self;
+}
+
 /* -------------- GValue marshalling ------------------ */
 
 static gint
@@ -1406,6 +1565,24 @@ static PyExtensionClass PyGObject_Type = {
     EXTENSIONCLASS_INSTDICT_FLAG,
 };
 
+/* ---------------- GInterface functions -------------------- */
+
+static void
+pyg_register_interface(PyObject *dict, const gchar *class_name,
+		       GType (* get_type)(void), PyExtensionClass *ec)
+{
+    PyObject *o;
+
+    PyExtensionClass_Export(dict, (char *)class_name, *ec);
+
+    if (get_type) {
+	o = pyg_type_thingee_new(get_type);
+	PyDict_SetItemString(ec->class_dictionary, "__gtype__", o);
+	Py_DECREF(o);
+    }
+}
+
+
 /* ---------------- gobject module functions -------------------- */
 
 static PyObject *
@@ -1697,6 +1874,11 @@ static struct _PyGObject_Functions functions = {
   pyg_boxed_register,
   pyg_value_from_pyobject,
   pyg_value_as_pyobject,
+
+  pyg_register_interface,
+
+  pyg_register_boxed,
+  pyg_boxed_new,
 };
 
 DL_EXPORT(void)
@@ -1711,6 +1893,11 @@ initgobject(void)
     pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
 			 o=PyInt_FromLong(G_TYPE_OBJECT));
+    Py_DECREF(o);
+
+    PyExtensionClass_Export(d, "GBoxed", PyGBoxed_Type);
+    PyDict_SetItemString(PyGBoxed_Type.class_dictionary, "__gtype__",
+			 o=PyInt_FromLong(G_TYPE_BOXED));
     Py_DECREF(o);
 
     boxed_marshalers = g_hash_table_new(g_direct_hash, g_direct_equal);

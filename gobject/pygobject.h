@@ -15,8 +15,18 @@ typedef struct {
     PyObject *inst_dict; /* the instance dictionary -- must be last */
 } PyGObject;
 
-#define pygobject_get(v) (((PyGObject *)v)->obj)
+#define pygobject_get(v) (((PyGObject *)(v))->obj)
 #define pygobject_check(v,base) (ExtensionClassSubclassInstance_Check(v,base))
+
+typedef struct {
+    PyObject_HEAD
+    gpointer boxed;
+    GType gtype;
+    gboolean free_on_dealloc;
+} PyGBoxed;
+
+#define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
+#define pyg_boxed_check(v,base) (ExtensionClassSubclassInstance_Check(v,base))
 
 struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
@@ -32,6 +42,14 @@ struct _PyGObject_Functions {
 			    int (* to_func)(GValue *value, PyObject *obj));
     int (* value_from_pyobject)(GValue *value, PyObject *obj);
     PyObject *(* value_as_pyobject)(const GValue *value);
+    void (* register_interface)(PyObject *dict, const gchar *class_name,
+				GType (* get_type)(void),
+				PyExtensionClass *ec);
+
+    void (* register_boxed)(PyObject *dict, const gchar *class_name,
+			    GType boxed_type, PyExtensionClass *ec);
+    PyObject *(* boxed_new)(GType boxed_type, gpointer boxed,
+			    gboolean copy_boxed, gboolean own_ref);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -51,6 +69,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_boxed_register         (_PyGObject_API->boxed_register)
 #define pyg_value_from_pyobject    (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject      (_PyGObject_API->value_as_pyobject)
+#define pyg_register_interface     (_PyGObject_API->register_interface)
 
 #define init_pygobject() { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \
