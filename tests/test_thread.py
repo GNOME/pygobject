@@ -20,8 +20,8 @@ class TestThread(unittest.TestCase):
         self.obj.emit('emit-signal')
 
     def testExtensionModule(self):
-        gtk.idle_add(self.idle_cb)
-        gtk.timeout_add(50, self.timeout_cb)
+        gobject.idle_add(self.idle_cb)
+        gobject.timeout_add(50, self.timeout_cb)
         gtk.main()
 
     def timeout_cb(self):
