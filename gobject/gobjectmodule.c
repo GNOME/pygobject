@@ -727,58 +727,92 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_boolean(value, PyObject_IsTrue(obj));
 	break;
     case G_TYPE_INT:
-	if ((tmp = PyNumber_Int(obj)))
-	    g_value_set_int(value, PyInt_AsLong(tmp));
-	else {
+	g_value_set_int(value, PyInt_AsLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_UINT:
-	if ((tmp = PyNumber_Int(obj)))
-	    g_value_set_uint(value, PyInt_AsLong(tmp));
-	else {
-	    PyErr_Clear();
-	    return -1;
+	{
+	    if (PyInt_Check(obj)) {
+		glong val;
+
+		val = PyInt_AsLong(obj);
+		if (val >= 0 && val <= G_MAXUINT)
+		    g_value_set_uint(value, (guint)val);
+		else
+		    return -1;
+	    } else {
+		g_value_set_uint(value, PyLong_AsUnsignedLong(obj));
+		if (PyErr_Occurred()) {
+		    g_value_unset(value);
+		    PyErr_Clear();
+		    return -1;
+		}
+	    }
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_LONG:
-	if ((tmp = PyNumber_Int(obj)))
-	    g_value_set_long(value, PyInt_AsLong(tmp));
-	else {
+	g_value_set_long(value, PyInt_AsLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_ULONG:
-	if ((tmp = PyNumber_Int(obj)))
-	    g_value_set_ulong(value, PyInt_AsLong(tmp));
-	else {
+	{
+	    if (PyInt_Check(obj)) {
+		glong val;
+
+		val = PyInt_AsLong(obj);
+		if (val >= 0)
+		    g_value_set_ulong(value, (gulong)val);
+		else
+		    return -1;
+	    } else {
+		g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
+		if (PyErr_Occurred()) {
+		    g_value_unset(value);
+		    PyErr_Clear();
+		    return -1;
+		}
+	    }
+	}
+	break;
+    case G_TYPE_INT64:
+	g_value_set_int64(value, PyLong_AsLongLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
+	break;
+    case G_TYPE_UINT64:
+	g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
+	    PyErr_Clear();
+	    return -1;
+	}
 	break;
     case G_TYPE_FLOAT:
-	if ((tmp = PyNumber_Float(obj)))
-	    g_value_set_float(value, PyFloat_AsDouble(tmp));
-	else {
+	g_value_set_float(value, PyFloat_AsDouble(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_DOUBLE:
-	if ((tmp = PyNumber_Float(obj)))
-	    g_value_set_double(value, PyFloat_AsDouble(tmp));
-	else {
+	g_value_set_double(value, PyFloat_AsDouble(obj));
+	if (PyErr_Occurred()) {
+	    g_value_unset(value);
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_STRING:
 	if ((tmp = PyObject_Str(obj)))
@@ -864,11 +898,43 @@ pyg_value_as_pyobject(const GValue *value)
     case G_TYPE_INT:
 	return PyInt_FromLong(g_value_get_int(value));
     case G_TYPE_UINT:
-	return PyInt_FromLong(g_value_get_uint(value));
+	{
+	    gulong val = (gulong) g_value_get_uint(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLong(val);
+	}
     case G_TYPE_LONG:
 	return PyInt_FromLong(g_value_get_long(value));
     case G_TYPE_ULONG:
-	return PyInt_FromLong(g_value_get_ulong(value));
+	{
+	    gulong val = g_value_get_ulong(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLong(val);
+	}
+    case G_TYPE_INT64:
+	{
+	    gint64 val = g_value_get_int64(value);
+
+	    if (G_MINLONG <= val && val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromLongLong(val);
+	}
+    case G_TYPE_UINT64:
+	{
+	    guint64 val = g_value_get_uint64(value);
+
+	    if (val <= G_MAXLONG)
+		return PyInt_FromLong((glong) val);
+	    else
+		return PyLong_FromUnsignedLongLong(val);
+	}
     case G_TYPE_FLOAT:
 	return PyFloat_FromDouble(g_value_get_float(value));
     case G_TYPE_DOUBLE:
