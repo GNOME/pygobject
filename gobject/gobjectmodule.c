@@ -1463,8 +1463,8 @@ pyg_thread_init (PyObject *unused)
               have threading enabled. This will make
 	      the import/initialize code quite ugly */
 #ifdef ENABLE_PYGTK_THREADING
-    g_print ("calling InitThreads\n");
     PyEval_InitThreads();
+    
     if (!g_threads_got_initialized)
 	g_thread_init(NULL);
 #endif
@@ -1829,11 +1829,6 @@ initgobject(void)
 
     m = Py_InitModule("gobject", pygobject_functions);
     d = PyModule_GetDict(m);
-
-#ifdef ENABLE_PYGTK_THREADING
-    if (!g_threads_got_initialized)
-	g_thread_init(NULL);
-#endif
 
     g_type_init();
 

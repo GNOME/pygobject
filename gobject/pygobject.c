@@ -1039,10 +1039,10 @@ pygobject_emit(PyGObject *self, PyObject *args)
 		item->ob_type->tp_name,
 		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
 	    PyErr_SetString(PyExc_TypeError, buf);
-	    Py_UNBLOCK_THREADS;
+
 	    for (i = 0; i < query.n_params + 1; i++)
 		g_value_unset(&params[i]);
-	    Py_BLOCK_THREADS;
+
 	    g_free(params);
 	    return NULL;
 	}
@@ -1051,7 +1051,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     
     g_signal_emitv(params, signal_id, detail, &ret);
-    Py_UNBLOCK_THREADS;
+
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
     
@@ -1063,7 +1063,6 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	Py_INCREF(Py_None);
 	py_ret = Py_None;
     }
-    Py_BLOCK_THREADS;
 
     return py_ret;
 }
