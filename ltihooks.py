@@ -29,7 +29,6 @@ class LibtoolHooks(ihooks.Hooks):
     def load_dynamic(self, name, filename, file=None):
         """Like normal load_dynamic, but treat .la files specially"""
 	if len(filename) > 3 and filename[-3:] == '.la':
-	    print filename
 	    fp = open(filename, 'r')
 	    dlname = ''
 	    installed = 1
@@ -48,7 +47,6 @@ class LibtoolHooks(ihooks.Hooks):
 		else:
 		    filename = os.path.join(os.path.dirname(filename),
 					    '.libs', dlname)
-	    print filename
 	return ihooks.Hooks.load_dynamic(self, name, filename, file)
 
 importer = ihooks.ModuleImporter()
