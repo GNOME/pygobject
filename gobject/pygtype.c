@@ -423,7 +423,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_STRING:
-	if ((tmp = PyObject_Str(obj)))
+	if (obj == Py_None)
+	    g_value_set_string(value, NULL);
+	else if ((tmp = PyObject_Str(obj)))
 	    g_value_set_string(value, PyString_AsString(tmp));
 	else {
 	    PyErr_Clear();
