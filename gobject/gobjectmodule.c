@@ -711,7 +711,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     } else if (G_VALUE_HOLDS_BOXED(value)) {
 	PyGBoxedMarshal *bm;
 
-	if (pyg_boxed_check(obj, &PyGBoxed_Type) &&
+	if (ExtensionClassSubclassInstance_Check(obj, &PyGBoxed_Type) &&
 	    G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype)) {
 	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
 	} else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL) {
@@ -1968,6 +1968,7 @@ static struct _PyGObject_Functions functions = {
   pygobject_register_wrapper,
   pygobject_lookup_class,
   pygobject_new,
+  pyg_closure_new,
   pyg_type_from_object,
   pyg_enum_get_value,
   pyg_flags_get_value,
