@@ -286,6 +286,40 @@ pyg_flags_warn (PyObject *self, PyObject *args)
 }
 
 static PyObject *
+pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
+{
+  GFlagsClass *flags_class;
+  GFlagsValue *flags_value;
+  PyObject *retval;
+  
+  flags_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_FLAGS_CLASS(flags_class));
+  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  retval = PyString_FromString(flags_value->value_name);
+
+  g_type_class_unref(flags_class);
+
+  return retval;
+}
+
+static PyObject *
+pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
+{
+  GFlagsClass *flags_class;
+  GFlagsValue *flags_value;
+  PyObject *retval;
+  
+  flags_class = g_type_class_ref(self->gtype);
+  g_assert(G_IS_FLAGS_CLASS(flags_class));
+
+  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  retval = PyString_FromString(flags_value->value_nick);
+  g_type_class_unref(flags_class);
+
+  return retval;
+}
+
+static PyObject *
 pyg_flags_get_value_names(PyGFlags *self, void *closure)
 {
   GFlagsClass *flags_class;
@@ -295,9 +329,10 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
   
-  retval = PyTuple_New(flags_class->n_values);
+  retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      PyTuple_SetItem(retval, i, PyString_FromString(flags_class->values[i].value_name));
+      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_name));
 
   g_type_class_unref(flags_class);
 
@@ -314,9 +349,10 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
   
-  retval = PyTuple_New(flags_class->n_values);
+  retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      PyTuple_SetItem(retval, i, PyString_FromString(flags_class->values[i].value_nick));
+      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_nick));
 
   g_type_class_unref(flags_class);
 
@@ -324,6 +360,8 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
 }
 
 static PyGetSetDef pyg_flags_getsets[] = {
+    { "first_value_name", (getter)pyg_flags_get_first_value_name, (setter)0 },
+    { "first_value_nick", (getter)pyg_flags_get_first_value_nick, (setter)0 },
     { "value_names", (getter)pyg_flags_get_value_names, (setter)0 },
     { "value_nicks", (getter)pyg_flags_get_value_nicks, (setter)0 },
     { NULL, 0, 0 }

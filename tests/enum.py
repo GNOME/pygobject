@@ -10,6 +10,12 @@ class EnumTest(unittest.TestCase):
         assert isinstance(atk.LAYER_OVERLAY, int)
         assert 'LAYER_OVERLAY' in repr(atk.LAYER_OVERLAY)
         assert int(atk.LAYER_OVERLAY)
+        assert atk.LAYER_INVALID == 0
+        assert atk.LAYER_INVALID != 1
+        assert atk.LAYER_INVALID != -1
+        assert atk.LAYER_INVALID != atk.LAYER_BACKGROUND
+
+    def testComparisionWarning(self):
         warnings.filterwarnings("error", "", Warning, "", 0)
         try:
             assert atk.LAYER_INVALID != atk.RELATION_NULL
@@ -18,10 +24,6 @@ class EnumTest(unittest.TestCase):
         else:
             raise AssertionError
         warnings.resetwarnings()
-        assert atk.LAYER_INVALID == 0
-        assert atk.LAYER_INVALID != 1
-        assert atk.LAYER_INVALID != -1
-        assert atk.LAYER_INVALID != atk.LAYER_BACKGROUND
 
     def testWindowGetState(self):
         win = gtk.Window()
@@ -56,12 +58,34 @@ class EnumTest(unittest.TestCase):
     def testWeirdEnumValues(self):
         assert int(gdk.NOTHING) == -1
         assert int(gdk.BUTTON_PRESS) == 4
-        
+
+    def testParamSpec(self):
+        props = filter(lambda prop: gobject.type_is_a(prop.value_type, gobject.GEnum),
+                       gobject.list_properties(gtk.Window))
+        assert len(props)>= 6
+        props = filter(lambda prop: prop.name == 'type', props)
+        assert props
+        prop = props[0]
+        klass = prop.enum_class
+        assert klass == gtk.WindowType
+        assert hasattr(klass, '__enum_values__')
+        assert isinstance(klass.__enum_values__, dict)
+        assert len(klass.__enum_values__) >= 2
+
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
         assert issubclass(gobject.GFlags, int)
         assert isinstance(gdk.BUTTON_PRESS_MASK, gdk.EventMask)
         assert isinstance(gdk.BUTTON_PRESS_MASK, int)
+        assert gdk.BUTTON_PRESS_MASK == 256
+        assert gdk.BUTTON_PRESS_MASK != 0
+        assert gdk.BUTTON_PRESS_MASK != -256
+        assert gdk.BUTTON_PRESS_MASK != gdk.BUTTON_RELEASE_MASK
+
+        assert gdk.EventMask.__bases__[0] == gobject.GFlags
+        assert len(gdk.EventMask.__flags_values__) == 22
+
+    def testComparisionWarning(self):
         warnings.filterwarnings("error", "", Warning, "", 0)
         try:
             assert gtk.ACCEL_VISIBLE != gtk.EXPAND
@@ -70,16 +94,25 @@ class FlagsTest(unittest.TestCase):
         else:
             raise AssertionError
         warnings.resetwarnings()
-        assert gdk.BUTTON_PRESS_MASK == 256
-        assert gdk.BUTTON_PRESS_MASK != 0
-        assert gdk.BUTTON_PRESS_MASK != -256
-        assert gdk.BUTTON_PRESS_MASK != gdk.BUTTON_RELEASE_MASK
-
-        assert gdk.EventMask.__bases__[0] == gobject.GFlags
-        assert len(gdk.EventMask.__flags_values__) == 22
+        
+    def testFlagOperations(self):
         a = gdk.BUTTON_PRESS_MASK
+        assert a.first_value_name == 'GDK_BUTTON_PRESS_MASK'
+        assert a.first_value_nick == 'button-press-mask'
+        assert a.value_names == ['GDK_BUTTON_PRESS_MASK'], a.value_names
+        assert a.value_nicks == ['button-press-mask'], a.value_names
         b = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK
+        assert b.first_value_name == 'GDK_BUTTON_PRESS_MASK'
+        assert b.first_value_nick == 'button-press-mask'
+        assert b.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK']
+        assert b.value_nicks == ['button-press-mask', 'button-release-mask']
         c = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK | gdk.ENTER_NOTIFY_MASK
+        assert c.first_value_name == 'GDK_BUTTON_PRESS_MASK'
+        assert c.first_value_nick == 'button-press-mask'
+        assert c.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK',
+                                 'GDK_ENTER_NOTIFY_MASK']
+        assert c.value_nicks == ['button-press-mask', 'button-release-mask',
+                                 'enter-notify-mask']
         assert int(a)
         assert int(a) == int(gdk.BUTTON_PRESS_MASK)
         assert int(b)
@@ -90,6 +123,7 @@ class FlagsTest(unittest.TestCase):
                           int(gdk.BUTTON_RELEASE_MASK) |
                           int(gdk.ENTER_NOTIFY_MASK))
 
+    def testUnsupportedOpertionWarning(self):
         warnings.filterwarnings("error", "", Warning, "", 0)
         try:
             value = gdk.BUTTON_PRESS_MASK + gdk.BUTTON_RELEASE_MASK
@@ -99,5 +133,15 @@ class FlagsTest(unittest.TestCase):
             raise AssertionError
         warnings.resetwarnings()
 
+    def testParamSpec(self):
+        props = filter(lambda x: gobject.type_is_a(x.value_type, gobject.GFlags),
+                       gtk.container_class_list_child_properties(gtk.Table))
+        assert len(props) >= 2
+        klass = props[0].flags_class 
+        assert klass == gtk.AttachOptions
+        assert hasattr(klass, '__flags_values__')
+        assert isinstance(klass.__flags_values__, dict)
+        assert len(klass.__flags_values__) >= 3
+        
 if __name__ == '__main__':
     unittest.main()
