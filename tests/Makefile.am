@@ -1,5 +1,6 @@
 tests =  \
 	conversion.py \
+	enum.py \
 	signal.py
 
 check-local:

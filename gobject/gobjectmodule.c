@@ -26,6 +26,9 @@
 
 #include "pygobject-private.h"
 
+#include "pygenum.h"
+#include "pygflags.h"
+
 static PyObject *gerror_exc = NULL;
 static const gchar *pyginterface_type_id   = "PyGInterface::type";
 GQuark pyginterface_type_key  = 0;
@@ -1880,7 +1883,7 @@ static PyMethodDef pygobject_functions[] = {
  *
  * Returns: the stripped constant name.
  */
-static char *
+char *
 pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix)
 {
     gint prefix_len;
@@ -2158,11 +2161,34 @@ struct _PyGObject_Functions pygobject_api_functions = {
   &PyGParamSpec_Type,
   pyg_param_spec_new,
   pyg_param_spec_from_object,
+
   pyg_pyobj_to_unichar_conv,
   pyg_parse_constructor_args,
   pyg_param_gvalue_as_pyobject,
-  pyg_param_gvalue_from_pyobject
+  pyg_param_gvalue_from_pyobject,
+
+  &PyGEnum_Type,
+  pyg_enum_add,
+  pyg_enum_from_gtype,
+  
+  &PyGFlags_Type,
+  pyg_flags_add,
+  pyg_flags_from_gtype
 };
+
+#define REGISTER_TYPE(d, type, name) \
+    type.ob_type = &PyType_Type; \
+    type.tp_alloc = PyType_GenericAlloc; \
+    type.tp_new = PyType_GenericNew; \
+    if (PyType_Ready(&type)) \
+	return; \
+    PyDict_SetItemString(d, name, (PyObject *)&type);
+
+#define REGISTER_GTYPE(d, type, name, gtype) \
+    REGISTER_TYPE(d, type, name); \
+    PyDict_SetItemString(type.tp_dict, "__gtype__", \
+			 o=pyg_type_wrapper_new(gtype)); \
+    Py_DECREF(o);
 
 DL_EXPORT(void)
 initgobject(void)
@@ -2188,7 +2214,7 @@ initgobject(void)
 
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
-
+    
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
@@ -2196,55 +2222,23 @@ initgobject(void)
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
 
-    PyGInterface_Type.ob_type = &PyType_Type;
-    PyGInterface_Type.tp_alloc = PyType_GenericAlloc;
-    PyGInterface_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGInterface_Type))
-	return;
-    PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
-    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gtype__",
-			 o=pyg_type_wrapper_new(G_TYPE_INTERFACE));
-    Py_DECREF(o);
+    REGISTER_GTYPE(d, PyGInterface_Type, "GInterface", G_TYPE_INTERFACE);
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",
 			 pyg_object_descr_doc_get());
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
     pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
 
-    PyGBoxed_Type.ob_type = &PyType_Type;
-    PyGBoxed_Type.tp_alloc = PyType_GenericAlloc;
-    PyGBoxed_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGBoxed_Type))
-	return;
-    PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
-    PyDict_SetItemString(PyGBoxed_Type.tp_dict, "__gtype__",
-			 o=pyg_type_wrapper_new(G_TYPE_BOXED));
-    Py_DECREF(o);
+    REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
+    REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
+    REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
+    PyGEnum_Type.tp_base = &PyInt_Type;
+    REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
+    PyGFlags_Type.tp_base = &PyInt_Type;
 
-    PyGMainLoop_Type.ob_type = &PyType_Type;
-    PyGMainLoop_Type.tp_alloc = PyType_GenericAlloc;
-    PyGMainLoop_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGMainLoop_Type))
-	return;
-    PyDict_SetItemString(d, "MainLoop", (PyObject *)&PyGMainLoop_Type);
+    REGISTER_TYPE(d, PyGMainLoop_Type, "GMainLoop"); 
+    REGISTER_TYPE(d, PyGMainContext_Type, "GMainContext"); 
     
-    PyGMainContext_Type.ob_type = &PyType_Type;
-    PyGMainContext_Type.tp_alloc = PyType_GenericAlloc;
-    PyGMainContext_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGMainContext_Type))
-	return;
-    PyDict_SetItemString(d, "MainContext", (PyObject *)&PyGMainContext_Type);
-
-    PyGPointer_Type.ob_type = &PyType_Type;
-    PyGPointer_Type.tp_alloc = PyType_GenericAlloc;
-    PyGPointer_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&PyGPointer_Type))
-	return;
-    PyDict_SetItemString(d, "GPointer", (PyObject *)&PyGPointer_Type);
-    PyDict_SetItemString(PyGPointer_Type.tp_dict, "__gtype__",
-			 o=pyg_type_wrapper_new(G_TYPE_POINTER));
-    Py_DECREF(o);
-
     /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
 			   glib_micro_version);
@@ -2281,7 +2275,7 @@ initgobject(void)
     PyModule_AddIntConstant(m, "PRIORITY_HIGH", G_PRIORITY_HIGH);
     PyModule_AddIntConstant(m, "PRIORITY_DEFAULT", G_PRIORITY_DEFAULT);
     PyModule_AddIntConstant(m, "PRIORITY_HIGH_IDLE", G_PRIORITY_HIGH_IDLE);
-    PyModule_AddIntConstant(m,"PRIORITY_DEFAULT_IDLE",G_PRIORITY_DEFAULT_IDLE);
+    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT_IDLE",G_PRIORITY_DEFAULT_IDLE);
     PyModule_AddIntConstant(m, "PRIORITY_LOW", G_PRIORITY_LOW);
 
     PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);

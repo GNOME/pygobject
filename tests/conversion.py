@@ -2,7 +2,7 @@
 
 import unittest
 
-import gtk
+from common import gtk
 
 class Tests(unittest.TestCase):
   

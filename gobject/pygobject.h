@@ -29,14 +29,14 @@ typedef struct {
     gboolean free_on_dealloc;
 } PyGBoxed;
 
+#define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
+#define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
+
 typedef struct {
     PyObject_HEAD
     gpointer pointer;
     GType gtype;
 } PyGPointer;
-
-#define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
-#define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
 #define pyg_pointer_get(v,t)      ((t *)((PyGPointer *)(v))->pointer)
 #define pyg_pointer_check(v,typecode) (PyObject_TypeCheck(v, &PyGPointer_Type) && ((PyGPointer *)(v))->gtype == typecode)
@@ -117,13 +117,25 @@ struct _PyGObject_Functions {
                                        GParameter  *params,
                                        guint       *nparams,
                                        PyObject   **py_args);
-    PyObject* (* param_gvalue_as_pyobject) (const GValue* gvalue, 
+    PyObject *(* param_gvalue_as_pyobject) (const GValue* gvalue, 
                                             gboolean copy_boxed,
 					    const GParamSpec* pspec);
     int (* gvalue_from_param_pyobject) (GValue* value, 
                                         PyObject* py_obj, 
 					const GParamSpec* pspec);
-					    
+    PyTypeObject *enum_type;
+    PyObject *(*enum_add)(PyObject *module,
+			  const char *typename,
+			  const char *strip_prefix,
+			  GType gtype);
+    PyObject* (*enum_from_gtype)(GType gtype, int value);
+    
+    PyTypeObject *flags_type;
+    PyObject *(*flags_add)(PyObject *module,
+			   const char *typename,
+			   const char *strip_prefix,
+			   GType gtype);
+    PyObject* (*flags_from_gtype)(GType gtype, int value);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -168,6 +180,13 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_parse_constructor_args  (_PyGObject_API->parse_constructor_args)
 #define pyg_param_gvalue_from_pyobject (_PyGObject_API->value_from_pyobject)
 #define pyg_param_gvalue_as_pyobject   (_PyGObject_API->value_as_pyobject)
+#define PyGEnum_Type                (*_PyGObject_API->enum_type)
+#define pyg_enum_add                (_PyGObject_API->enum_add)
+#define pyg_enum_from_gtype         (_PyGObject_API->enum_from_gtype)
+#define PyGFlags_Type               (*_PyGObject_API->flags_type)
+#define pyg_flags_add               (_PyGObject_API->flags_add)
+#define pyg_flags_from_gtype        (_PyGObject_API->flags_from_gtype)
+
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
       (* _PyGObject_API->block_threads)();     \

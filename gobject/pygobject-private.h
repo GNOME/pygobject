@@ -8,7 +8,6 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
-
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_block_threads()   G_STMT_START { \
@@ -107,5 +106,7 @@ PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
 
 extern PyTypeObject PyGParamSpec_Type;
 PyObject *pyg_param_spec_new    (GParamSpec *pspec);
+
+extern char * pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix);
 
 #endif

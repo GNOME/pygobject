@@ -2,7 +2,7 @@
 
 import unittest
 
-import gobject
+from common import gobject
 
 class C(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,

@@ -22,6 +22,9 @@
 
 #include "pygobject-private.h"
 
+#include "pygenum.h"
+#include "pygflags.h"
+
 /* -------------- __gtype__ objects ---------------------------- */
 
 typedef struct {
@@ -652,9 +655,9 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 		return PyLong_FromUnsignedLongLong(val);
 	}
     case G_TYPE_ENUM:
-	return PyInt_FromLong(g_value_get_enum(value));
+	return pyg_enum_from_gtype(G_VALUE_TYPE(value), g_value_get_enum(value));
     case G_TYPE_FLAGS:
-	return PyInt_FromLong(g_value_get_flags(value));
+	return pyg_flags_from_gtype(G_VALUE_TYPE(value), g_value_get_flags(value));
     case G_TYPE_FLOAT:
 	return PyFloat_FromDouble(g_value_get_float(value));
     case G_TYPE_DOUBLE:
