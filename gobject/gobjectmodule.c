@@ -325,6 +325,8 @@ pygobject_new(GObject *obj)
     /* save wrapper pointer so we can access it later */
     g_object_set_qdata(obj, pygobject_wrapper_key, self);
 
+    PyObject_GC_Track((PyObject *)self);
+
     return (PyObject *)self;
 }
 
