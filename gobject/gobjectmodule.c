@@ -1567,13 +1567,75 @@ static PyExtensionClass PyGObject_Type = {
 
 /* ---------------- GInterface functions -------------------- */
 
+static PyObject *
+pyg_interface__class_init__(PyObject *self, PyObject *args)
+{
+    PyExtensionClass *subclass;
+
+    if (!PyArg_ParseTuple(args, "O:GInterface.__class_init__", &subclass))
+	return NULL;
+
+    g_message("subclassing GInterface types is bad m'kay");
+    PyErr_SetString(PyExc_TypeError, "attempt to subclass an interface");
+    return NULL;
+}
+
+static PyObject *
+pyg_interface_init(PyObject *self, PyObject *args)
+{
+    gchar buf[512];
+
+    if (!PyArg_ParseTuple(args, ":GInterface.__init__"))
+	return NULL;
+
+    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
+    PyErr_SetString(PyExc_NotImplementedError, buf);
+    return NULL;
+}
+
+static PyMethodDef pyg_interface_methods[] = {
+    {"__class_init__", pyg_interface__class_init__,
+     METH_VARARGS|METH_CLASS_METHOD},
+    {"__init__",       pyg_interface_init, METH_VARARGS},
+    {NULL,NULL,0}
+};
+
+static PyExtensionClass PyGInterface_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                  /* ob_size */
+    "GInterface",                       /* tp_name */
+    sizeof(PyPureMixinObject),          /* tp_basicsize */
+    0,                                  /* tp_itemsize */
+    /* methods */
+    (destructor)0,                      /* tp_dealloc */
+    (printfunc)0,                       /* tp_print */
+    (getattrfunc)0,                     /* tp_getattr */
+    (setattrfunc)0,                     /* tp_setattr */
+    (cmpfunc)0,                         /* tp_compare */
+    (reprfunc)0,                        /* tp_repr */
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
+    (hashfunc)0,                        /* tp_hash */
+    (ternaryfunc)0,                     /* tp_call */
+    (reprfunc)0,                        /* tp_str */
+    (getattrofunc)0,                    /* tp_getattro */
+    (setattrofunc)0,                    /* tp_setattro */
+    /* Space for future expansion */
+    0L, 0L,
+    NULL, /* Documentation string */
+    METHOD_CHAIN(pyg_interface_methods),
+    0,
+};
+
 static void
 pyg_register_interface(PyObject *dict, const gchar *class_name,
 		       GType (* get_type)(void), PyExtensionClass *ec)
 {
     PyObject *o;
 
-    PyExtensionClass_Export(dict, (char *)class_name, *ec);
+    PyExtensionClass_ExportSubclassSingle(dict, (char *)class_name,
+					  *ec, PyGInterface_Type);
 
     if (get_type) {
 	o = pyg_type_thingee_new(get_type);
@@ -1893,6 +1955,11 @@ initgobject(void)
     pygobject_register_class(d, "GObject", 0, &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.class_dictionary, "__gtype__",
 			 o=PyInt_FromLong(G_TYPE_OBJECT));
+    Py_DECREF(o);
+
+    PyExtensionClass_Export(d, "GInterface", PyGInterface_Type);
+    PyDict_SetItemString(PyGInterface_Type.class_dictionary, "__gtype__",
+			 o=PyInt_FromLong(G_TYPE_INTERFACE));
     Py_DECREF(o);
 
     PyExtensionClass_Export(d, "GBoxed", PyGBoxed_Type);
