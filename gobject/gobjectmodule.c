@@ -224,8 +224,8 @@ static PyTypeObject PyGInterface_Type = {
     0,					/* tp_descr_set */
     0,					/* tp_dictoffset */
     (initproc)pyg_interface_init,	/* tp_init */
-    PyType_GenericAlloc,		/* tp_alloc */
-    PyType_GenericNew,			/* tp_new */
+    (allocfunc)0,			/* tp_alloc */
+    (newfunc)0,				/* tp_new */
     object_free,			/* tp_free */
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
@@ -1353,12 +1353,16 @@ initgobject(void)
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
 
+    PyGObject_Type.tp_alloc = PyType_GenericAlloc;
+    PyGObject_Type.tp_new = PyType_GenericNew;
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
 
     PyGInterface_Type.ob_type = &PyType_Type;
+    PyGInterface_Type.tp_alloc = PyType_GenericAlloc;
+    PyGInterface_Type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&PyGInterface_Type))
 	return;
     PyDict_SetItemString(d, "GInterface", (PyObject *)&PyGInterface_Type);
@@ -1371,6 +1375,8 @@ initgobject(void)
 			 pyg_object_descr_doc_get());
 
     PyGBoxed_Type.ob_type = &PyType_Type;
+    PyGBoxed_Type.tp_alloc = PyType_GenericAlloc;
+    PyGBoxed_Type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&PyGBoxed_Type))
 	return;
     PyDict_SetItemString(d, "GBoxed", (PyObject *)&PyGBoxed_Type);
@@ -1379,6 +1385,8 @@ initgobject(void)
     Py_DECREF(o);
 
     PyGPointer_Type.ob_type = &PyType_Type;
+    PyGPointer_Type.tp_alloc = PyType_GenericAlloc;
+    PyGPointer_Type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&PyGPointer_Type))
 	return;
     PyDict_SetItemString(d, "GPointer", (PyObject *)&PyGPointer_Type);

@@ -974,8 +974,8 @@ PyTypeObject PyGObject_Type = {
     0,					/* tp_descr_set */
     offsetof(PyGObject, inst_dict),	/* tp_dictoffset */
     (initproc)pygobject_init,		/* tp_init */
-    PyType_GenericAlloc,		/* tp_alloc */
-    PyType_GenericNew,			/* tp_new */
+    (allocfunc)0,			/* tp_alloc */
+    (newfunc)0,				/* tp_new */
     pygobject_free,			/* tp_free */
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
