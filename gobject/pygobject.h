@@ -33,7 +33,7 @@ struct _PyGObject_Functions {
 			    GType type, PyExtensionClass *ec, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
     PyExtensionClass *(* lookup_class)(GType type);
-    PyObject *(* new)(GObject *obj);
+    PyObject *(* newgobj)(GObject *obj);
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
 
@@ -74,7 +74,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_register_class   (_PyGObject_API->register_class)
 #define pygobject_register_wrapper (_PyGObject_API->register_wrapper)
 #define pygobject_lookup_class     (_PyGObject_API->lookup_class)
-#define pygobject_new              (_PyGObject_API->new)
+#define pygobject_new              (_PyGObject_API->newgobj)
 #define pyg_closure_new            (_PyGObject_API->closure_new)
 #define pyg_type_from_object       (_PyGObject_API->type_from_object)
 #define pyg_type_wrapper_new       (_PyGObject_API->type_wrapper_new)
