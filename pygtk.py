@@ -19,28 +19,33 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import sys, os, re
+import fnmatch
+import glob
+import os
+import sys
 
 __all__ = ['require']
 
-_pygtk_dir_pat = re.compile(r'^gtk-([\d]+[\d\.]+)$')
 _pygtk_required_version = None
 
 def _get_available_versions():
-    global _pygtk_dir_pat
     versions = {}
     for dir in sys.path:
-        if not dir: dir = os.getcwd()
-        if not os.path.isdir(dir): continue
-        if _pygtk_dir_pat.match(os.path.basename(dir)):
+        if not dir: 
+  	    dir = os.getcwd()
+        if not os.path.isdir(dir):
+            continue
+        
+        if fnmatch.fnmatchcase(os.path.basename(dir), DIR_PAT):
             continue  # if the dir is a pygtk dir, skip it
-        for filename in os.listdir(dir):
+        
+        for filename in glob.glob(os.path.join(dir, DIR_PAT)):
             pathname = os.path.join(dir, filename)
             if not os.path.isdir(pathname):
                 continue  # skip non directories
-            match = _pygtk_dir_pat.match(filename)
-            if match and not versions.has_key(match.group(1)):
-                versions[match.group(1)] = pathname
+            
+	    if not versions.has_key(filename[-3:]):
+            	versions[filename[-3:]] = pathname
     return versions
 
 def require(version):
