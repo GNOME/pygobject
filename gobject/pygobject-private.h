@@ -24,6 +24,16 @@ GType PY_TYPE_OBJECT;
 
 void  pyg_destroy_notify (gpointer user_data);
 
+typedef struct {
+    PyObject_HEAD
+    GParamSpec *pspec;
+} PyGParamSpec;
+extern PyTypeObject PyGParamSpec_Type;
+PyObject *pyg_param_spec_new(GParamSpec *pspec);
+
+#define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
+#define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

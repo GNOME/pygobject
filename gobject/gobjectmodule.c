@@ -38,11 +38,6 @@ pyg_destroy_notify(gpointer user_data)
 
 /* -------------- GParamSpec objects ---------------------------- */
 
-typedef struct {
-    PyObject_HEAD
-    GParamSpec *pspec;
-} PyGParamSpec;
-
 static int
 pyg_param_spec_compare(PyGParamSpec *self, PyGParamSpec *v)
 {
@@ -138,7 +133,7 @@ PyTypeObject PyGParamSpec_Type = {
     NULL
 };
 
-static PyObject *
+PyObject *
 pyg_param_spec_new(GParamSpec *pspec)
 {
     PyGParamSpec *self;

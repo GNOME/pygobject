@@ -375,6 +375,22 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	}
 	break;
+    case G_TYPE_ENUM:
+	{
+	    gint val = 0;
+	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_enum(value, val);
+	}
+	break;
+    case G_TYPE_FLAGS:
+	{
+	    guint val = 0;
+	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
+		return -1;
+	    g_value_set_flags(value, val);
+	}
+	break;
     case G_TYPE_FLOAT:
 	g_value_set_float(value, PyFloat_AsDouble(obj));
 	if (PyErr_Occurred()) {
@@ -400,30 +416,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	Py_DECREF(tmp);
 	break;
-    case G_TYPE_OBJECT:
-	{
-	    PyTypeObject *type = pygobject_lookup_class(G_VALUE_TYPE(value));
-	    if (!PyObject_TypeCheck(obj, type)) {
-		return -1;
-	    }
-	    g_value_set_object(value, pygobject_get(obj));
-	}
-	break;
-    case G_TYPE_ENUM:
-	{
-	    gint val = 0;
-	    if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
-		return -1;
-	    g_value_set_enum(value, val);
-	}
-	break;
-    case G_TYPE_FLAGS:
-	{
-	    guint val = 0;
-	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0)
-		return -1;
-	    g_value_set_flags(value, val);
-	}
+    case G_TYPE_POINTER:
+	if (PyCObject_Check(obj))
+	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
+	else
+	    return -1;
 	break;
     case G_TYPE_BOXED:
 	{
@@ -442,11 +439,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 		return -1;
 	}
 	break;
-    case G_TYPE_POINTER:
-	if (PyCObject_Check(obj))
-	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
+    case G_TYPE_PARAM:
+	if (PyGParamSpec_Check(obj))
+	    g_value_set_param(value, PyCObject_AsVoidPtr(obj));
 	else
 	    return -1;
+	break;
+    case G_TYPE_OBJECT:
+	{
+	    PyTypeObject *type = pygobject_lookup_class(G_VALUE_TYPE(value));
+	    if (!PyObject_TypeCheck(obj, type)) {
+		return -1;
+	    }
+	    g_value_set_object(value, pygobject_get(obj));
+	}
 	break;
     default:
 	break;
@@ -512,6 +518,10 @@ pyg_value_as_pyobject(const GValue *value)
 	    else
 		return PyLong_FromUnsignedLongLong(val);
 	}
+    case G_TYPE_ENUM:
+	return PyInt_FromLong(g_value_get_enum(value));
+    case G_TYPE_FLAGS:
+	return PyInt_FromLong(g_value_get_flags(value));
     case G_TYPE_FLOAT:
 	return PyFloat_FromDouble(g_value_get_float(value));
     case G_TYPE_DOUBLE:
@@ -525,12 +535,8 @@ pyg_value_as_pyobject(const GValue *value)
 	    Py_INCREF(Py_None);
 	    return Py_None;
 	}
-    case G_TYPE_OBJECT:
-	return pygobject_new(g_value_get_object(value));
-    case G_TYPE_ENUM:
-	return PyInt_FromLong(g_value_get_enum(value));
-    case G_TYPE_FLAGS:
-	return PyInt_FromLong(g_value_get_flags(value));
+    case G_TYPE_POINTER:
+	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
     case G_TYPE_BOXED:
 	{
 	    PyGBoxedMarshal *bm;
@@ -545,8 +551,10 @@ pyg_value_as_pyobject(const GValue *value)
 		return pyg_boxed_new(G_VALUE_TYPE(value),
 				     g_value_get_boxed(value), TRUE, TRUE);
 	}
-    case G_TYPE_POINTER:
-	return PyCObject_FromVoidPtr(g_value_get_pointer(value), NULL);
+    case G_TYPE_PARAM:
+	return pyg_param_spec_new(g_value_get_param(value));
+    case G_TYPE_OBJECT:
+	return pygobject_new(g_value_get_object(value));
     default:
 	break;
     }
