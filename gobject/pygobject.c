@@ -255,6 +255,19 @@ pygobject_new_with_interfaces(GType gtype)
 	return NULL;
     }
 
+#if 1
+      /* Workaround python tp_(get|set)attr slot inheritance bug.
+       * Fixes pygtk bug #144135. */
+    if (!type->tp_getattr && py_parent_type->tp_getattr) {
+        type->tp_getattro = NULL;
+        type->tp_getattr = py_parent_type->tp_getattr;
+    }
+    if (!type->tp_setattr && py_parent_type->tp_setattr) {
+        type->tp_setattro = NULL;
+        type->tp_setattr = py_parent_type->tp_setattr;
+    }
+#endif
+
 #if 0
     type->tp_dealloc  = (destructor)pygobject_dealloc;
     type->tp_traverse = (traverseproc)pygobject_traverse;
