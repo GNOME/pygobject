@@ -816,7 +816,7 @@ add_property_docs(GType gtype, GString *string)
 {
     GObjectClass *class;
     GParamSpec **props;
-    guint *n_props = 0, i;
+    guint n_props = 0, i;
 
     class = g_type_class_ref(gtype);
     props = g_object_class_list_properties(class, &n_props);
