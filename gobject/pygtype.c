@@ -62,6 +62,14 @@ PyTypeObject PyGTypeWrapper_Type = {
     NULL
 };
 
+/**
+ * pyg_type_wrapper_new:
+ * type: a GType
+ *
+ * Creates a Python wrapper for a GType.
+ *
+ * Returns: the Python wrapper.
+ */
 PyObject *
 pyg_type_wrapper_new(GType type)
 {
@@ -76,6 +84,15 @@ pyg_type_wrapper_new(GType type)
     return (PyObject *)self;
 }
 
+/**
+ * pyg_type_from_object:
+ * obj: a Python object
+ *
+ * converts a python object to a GType.  Raises an exception if it
+ * can't perform the conversion.
+ *
+ * Returns: the corresponding GType, or 0 on error.
+ */
 GType
 pyg_type_from_object(PyObject *obj)
 {
@@ -136,6 +153,19 @@ pyg_type_from_object(PyObject *obj)
 
 /* -------------- GValue marshalling ------------------ */
 
+/**
+ * pyg_enum_get_value:
+ * @enum_type: the GType of the flag.
+ * @obj: a Python object representing the flag value
+ * @val: a pointer to the location to store the integer representation of the flag.
+ *
+ * Converts a Python object to the integer equivalent.  The conversion
+ * will depend on the type of the Python object.  If the object is an
+ * integer, it is passed through directly.  If it is a string, it will
+ * be treated as a full or short enum name as defined in the GType.
+ *
+ * Returns: 0 on success or -1 on failure
+ */
 gint
 pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 {
@@ -178,6 +208,21 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
     return res;
 }
 
+/**
+ * pyg_flags_get_value:
+ * @flag_type: the GType of the flag.
+ * @obj: a Python object representing the flag value
+ * @val: a pointer to the location to store the integer representation of the flag.
+ *
+ * Converts a Python object to the integer equivalent.  The conversion
+ * will depend on the type of the Python object.  If the object is an
+ * integer, it is passed through directly.  If it is a string, it will
+ * be treated as a full or short flag name as defined in the GType.
+ * If it is a tuple, then the items are treated as strings and ORed
+ * together.
+ *
+ * Returns: 0 on success or -1 on failure
+ */
 gint
 pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 {
@@ -260,6 +305,19 @@ static GQuark pyg_boxed_marshal_key = 0;
 #define pyg_boxed_lookup(boxed_type) \
   ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pyg_boxed_marshal_key))
 
+
+/**
+ * pyg_register_boxed_custom:
+ * @boxed_type: the GType for boxed type
+ * @from_func: a function to convert GValues to Python objects
+ * @to_func: a function to convert Python objects to GValues
+ *
+ * The standard way of wrapping boxed types in PyGTK is to create a
+ * subclass of gobject.GBoxed and register it with
+ * pyg_register_boxed().  In some cases however, it is useful to have
+ * fine grained control over how a particular type is represented in
+ * Python.  This function allows you to register such a handler.
+ */
 void
 pyg_register_boxed_custom(GType boxed_type,
 			  fromvaluefunc from_func,
@@ -276,6 +334,18 @@ pyg_register_boxed_custom(GType boxed_type,
     g_type_set_qdata(boxed_type, pyg_boxed_marshal_key, bm);
 }
 
+/**
+ * pyg_value_from_pyobject:
+ * @value: the GValue object to store the converted value in.
+ * @obj: the Python object to convert.
+ *
+ * This function converts a Python object and stores the result in a
+ * GValue.  The GValue must be initialised in advance with
+ * g_value_init().  If the Python object can't be converted to the
+ * type of the GValue, then an error is returned.
+ *
+ * Returns: 0 on success, -1 on error.
+ */
 int
 pyg_value_from_pyobject(GValue *value, PyObject *obj)
 {
@@ -690,6 +760,18 @@ pyg_closure_marshal(GClosure *closure,
     pyg_unblock_threads();
 }
 
+/**
+ * pyg_closure_new:
+ * callback: a Python callable object
+ * extra_args: a tuple of extra arguments, or None/NULL.
+ * swap_data: an alternative python object to pass first.
+ *
+ * Creates a GClosure wrapping a Python callable and optionally a set
+ * of additional function arguments.  This is needed to attach python
+ * handlers to signals, for instance.
+ *
+ * Returns: the new closure.
+ */
 GClosure *
 pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
 {
@@ -807,6 +889,15 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     pyg_unblock_threads();
 }
 
+/**
+ * pyg_signal_class_closure_get:
+ *
+ * Returns the GClosure used for the class closure of signals.  When
+ * called, it will invoke the method do_signalname (for the signal
+ * "signalname").
+ *
+ * Returns: the closure.
+ */
 GClosure *
 pyg_signal_class_closure_get(void)
 {
@@ -1002,6 +1093,15 @@ static PyTypeObject PyGObjectDoc_Type = {
     (descrsetfunc)0
 };
 
+/**
+ * pyg_object_descr_doc_get:
+ *
+ * Returns an object intended to be the __doc__ attribute of GObject
+ * wrappers.  When read in the context of the object it will return
+ * some documentation about the signals and properties of the object.
+ *
+ * Returns: the descriptor.
+ */
 PyObject *
 pyg_object_descr_doc_get(void)
 {
