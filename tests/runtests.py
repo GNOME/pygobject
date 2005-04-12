@@ -6,19 +6,18 @@ import unittest
 
 import common
 
+program = None
 if len(sys.argv) == 3:
-  buildDir = sys.argv[1]
-  srcDir = sys.argv[2]
+    buildDir = sys.argv[1]
+    srcDir = sys.argv[2]
 else:
-  if len(sys.argv) == 2:
-    program = sys.argv[1]
-    if program.endswith('.py'):
-       program = program[:-3]
-  else:
-    program = None
-    
-  buildDir = '..'
-  srcDir = '.'
+    if len(sys.argv) == 2:
+        program = sys.argv[1]
+        if program.endswith('.py'):
+            program = program[:-3]
+    buildDir = '..'
+    srcDir = '.'
+
 common.importModules(buildDir=buildDir,
                      srcDir=srcDir)
 
