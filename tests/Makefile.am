@@ -27,6 +27,7 @@ tests =  \
 	test_signal.py \
 	test_subprocess.py \
 	test_subtype.py \
+	test_gdkevent.py \
 	test_unknown.py
 
 # This is a hack to make sure a shared library is built
