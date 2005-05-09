@@ -9,13 +9,13 @@ class RadioTest(unittest.TestCase):
     def new(self):
         return self.widget_type(*self.constructor_args)
 
-    def new_with_label(self, label):
+    def newLabel(self, label):
         return self.widget_type(None, label)
 
-    def new_with_group(self, group):
+    def newGroup(self, group):
         return self.widget_type(group)
 
-    def get_label(self, obj):
+    def getLabel(self, obj):
         return obj.get_property('label')
     
     def compareGroups(self, group1, group2):
@@ -30,14 +30,14 @@ class RadioTest(unittest.TestCase):
     def testLabel(self):
         if self.widget_type is None:
             return
-        radio = self.new_with_label('test-radio')
-        self.assertEqual(self.get_label(radio), 'test-radio')
+        radio = self.newLabel('test-radio')
+        self.assertEqual(self.getLabel(radio), 'test-radio')
 
     def testGroup(self):
         if self.widget_type is None:
             return
         radio = self.new()
-        radio2 = self.new_with_group(radio)
+        radio2 = self.newGroup(radio)
         self.compareGroups(radio.get_group(), radio2.get_group())
         self.compareGroups(radio2.get_group(), radio.get_group())
         
@@ -62,22 +62,26 @@ class RadioActionTest(RadioTest):
     widget_type = gtk.RadioAction
     constructor_args = ('RadioAction', 'test-radio-action', '', '', 0)
     
-    def new_with_group(self, radio):
+    def newGroup(self, radio):
+        # No constructor, so set it manually
         obj = self.new()
         obj.set_group(radio)
         return obj
 
-    def new_with_label(self, label):
+    def newLabel(self, label):
         return gtk.RadioAction('RadioAction', label, '', '', 0)
 
 class RadioToolButtonTest(RadioTest):
     widget_type = gtk.RadioToolButton
-    
-    def compareGroups(self, group1, group2):
-        return cmp(map(id, group1),
-                   map(id, group2))
 
-    def new_with_label(self, label):
+    def compareGroups(self, group1, group2):
+        # GtkRadioToolButton.set/get_groups return GtkRadioButtons,
+        # so instead of doing a normal cmp, compare ids
+        return cmp(map(id, group1), map(id, group2))
+
+    def newLabel(self, label):
+        # We don't have a constructor for which we can pass in a label
+        # for, so just call set_label instead
         radio = gtk.RadioToolButton(None)
         radio.set_label(label)
         return radio
@@ -85,8 +89,10 @@ class RadioToolButtonTest(RadioTest):
 class RadioMenuItem(RadioTest):
     widget_type = gtk.RadioMenuItem
 
-    def get_label(self, obj):
-        return obj.get_children()[0].get_text()
+    def getLabel(self, obj):
+        # The label is stored in a gtk.AccelLabel, which is the only
+        # child of the RadioMenuItem.
+        return obj.get_child().get_text()
 
 if __name__ == '__main__':
     unittest.main()
