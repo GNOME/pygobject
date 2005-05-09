@@ -1832,7 +1832,12 @@ child_watch_func(GPid pid, gint status, gpointer data)
                                        child_data->data);
     else
         retval = PyObject_CallFunction(child_data->func, "ii", pid, status);
-    Py_XDECREF(retval);
+
+    if (retval)
+	Py_DECREF(retval);
+    else
+	PyErr_Print();
+
     pyg_gil_state_release(gil);
 }
 
@@ -1894,7 +1899,10 @@ _pyg_spawn_async_callback(gpointer user_data)
         retval = PyObject_CallFunction(data->func, "O", data->data);
     else
         retval = PyObject_CallFunction(data->func, NULL);
-    Py_XDECREF(retval);
+    if (retval)
+	Py_DECREF(retval);
+    else
+	PyErr_Print();
     Py_DECREF(data->func);
     Py_XDECREF(data->data);
     g_free(data);

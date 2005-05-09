@@ -23,6 +23,7 @@ tests =  \
 	test_dialog.py \
 	test_enum.py \
 	test_gtype.py \
+	test_mainloop.py \
 	test_radiobutton.py \
 	test_signal.py \
 	test_subprocess.py \
