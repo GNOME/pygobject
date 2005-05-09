@@ -1,8 +1,6 @@
 # -*- Mode: Python -*-
 
-import gc
 import unittest
-import sys
 
 from common import gtk
 
@@ -19,7 +17,6 @@ class TestGdkEvent(unittest.TestCase):
         win2.realize()
         event.window = win2.window
         self.assertEqual(event.window, win2.window)
-
 
 if __name__ == '__main__':
     unittest.main()
