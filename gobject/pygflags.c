@@ -150,7 +150,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     if (ret)
         Py_INCREF(ret);
     else
-        PyErr_SetString(PyExc_ValueError, "invalid flag value");
+        PyErr_Format(PyExc_ValueError, "invalid flag value: %ld", value);
     return ret;
 }
 

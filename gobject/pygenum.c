@@ -123,8 +123,12 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     g_type_class_unref(eclass);
     
     ret = PyDict_GetItem(values, PyInt_FromLong(value));
-    Py_INCREF(ret);
     Py_DECREF(values);
+    if (ret)
+        Py_INCREF(ret);
+    else
+	PyErr_Format(PyExc_ValueError, "invalid enum value: %ld", value);
+    
     return ret;
 }
 
