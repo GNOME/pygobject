@@ -868,12 +868,17 @@ add_properties (GType instance_type, PyObject *properties)
 static void
 pyg_register_class_init(GType gtype, PyGClassInitFunc class_init)
 {
-    g_type_set_qdata(gtype, pygobject_class_init_key, class_init);
+    GSList *list;
+
+    list = g_type_get_qdata(gtype, pygobject_class_init_key);
+    list = g_slist_prepend(list, class_init);
+    g_type_set_qdata(gtype, pygobject_class_init_key, list);
 }
 
 static int
 pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
 {
+    GSList *list;
     PyGClassInitFunc class_init;
     GType parent_type;
     int rv;
@@ -881,11 +886,18 @@ pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
     parent_type = g_type_parent(gtype);
     if (parent_type) {
         rv = pyg_run_class_init(parent_type, gclass, pyclass);
-        if (rv) return rv;
+        if (rv)
+	    return rv;
     }
-    class_init = g_type_get_qdata(gtype, pygobject_class_init_key);
-    if (class_init)
-        return class_init(gclass, pyclass);
+    
+    list = g_type_get_qdata(gtype, pygobject_class_init_key);
+    for (; list; list = list->next) {
+	class_init = list->data;
+        rv = class_init(gclass, pyclass);
+        if (rv)
+	    return rv;
+    }
+    
     return 0;
 }
 
