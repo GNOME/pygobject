@@ -69,6 +69,8 @@ PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
                                        const GParamSpec* pspec);
 
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
+void	  pyg_closure_set_exception_handler(GClosure *closure,
+					    PyClosureExceptionHandler handler);
 GClosure *pyg_signal_class_closure_get(void);
 
 PyObject *pyg_object_descr_doc_get(void);

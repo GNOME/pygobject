@@ -17,12 +17,14 @@ G_BEGIN_DECLS
 #endif
 
   /* PyGClosure is a _private_ structure */
+typedef void (* PyClosureExceptionHandler) (GValue *ret, guint n_param_values, const GValue *params);
 typedef struct _PyGClosure PyGClosure;
 struct _PyGClosure {
     GClosure closure;
     PyObject *callback;
     PyObject *extra_args; /* tuple of extra args to pass to callback */
     PyObject *swap_data; /* other object for gtk_signal_connect_object */
+    PyClosureExceptionHandler exception_handler;
 };
 
 typedef struct {
@@ -160,6 +162,7 @@ struct _PyGObject_Functions {
     void      (*gil_state_release) (int flag);
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
+    void      (*closure_set_exception_handler) (GClosure *closure, PyClosureExceptionHandler handler);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -177,6 +180,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_new               (_PyGObject_API->newgobj)
 #define pyg_closure_new             (_PyGObject_API->closure_new)
 #define pygobject_watch_closure     (_PyGObject_API->object_watch_closure)
+#define pyg_closure_set_exception_handler (_PyGObject_API->closure_set_exception_handler)
 #define pyg_destroy_notify          (_PyGObject_API->destroy_notify)
 #define pyg_type_from_object        (_PyGObject_API->type_from_object)
 #define pyg_type_wrapper_new        (_PyGObject_API->type_wrapper_new)

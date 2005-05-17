@@ -846,16 +846,26 @@ pyg_closure_marshal(GClosure *closure,
     }
     ret = PyObject_CallObject(pc->callback, params);
     if (ret == NULL) {
-	PyErr_Print();
+	if (pc->exception_handler)
+	    pc->exception_handler(return_value, n_param_values, param_values);
+	else
+	    PyErr_Print();
 	goto out;
     }
-    if (return_value)
-	pyg_value_from_pyobject(return_value, ret);
+    
+    if (return_value && pyg_value_from_pyobject(return_value, ret) != 0) {
+	PyErr_SetString(PyExc_TypeError,
+			"can't convert return value to desired type");
+	
+	if (pc->exception_handler)
+	    pc->exception_handler(return_value, n_param_values, param_values);
+	else
+	    PyErr_Print();
+    }
     Py_DECREF(ret);
     
  out:
     Py_DECREF(params);
-    
     pyg_gil_state_release(state);
 }
 
@@ -899,6 +909,28 @@ pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data)
     return closure;
 }
 
+/**
+ * pyg_closure_set_exception_handler:
+ * @closure: a closure created with pyg_closure_new()
+ * @handler: the handler to call when an exception occurs or NULL for none
+ *
+ * Sets the handler to call when an exception occurs during closure invocation.
+ * The handler is responsible for providing a proper return value to the 
+ * closure invocation. If @handler is %NULL, the default handler will be used.
+ * The default handler prints the exception to stderr and doesn't touch the
+ * closure's return value.
+ */
+void
+pyg_closure_set_exception_handler(GClosure *closure,
+				  PyClosureExceptionHandler handler)
+{
+    PyGClosure *pygclosure;
+    
+    g_return_if_fail(closure != NULL);
+
+    pygclosure = (PyGClosure *)closure;
+    pygclosure->exception_handler = handler;
+}
 /* -------------- PySignalClassClosure ----------------- */
 /* a closure used for the `class closure' of a signal.  As this gets
  * all the info from the first argument to the closure and the

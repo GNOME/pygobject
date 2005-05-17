@@ -2394,7 +2394,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_gil_state_ensure_py23,
   pyg_gil_state_release_py23,
   pyg_register_class_init,
-  pyg_register_interface_info
+  pyg_register_interface_info,
+
+  pyg_closure_set_exception_handler
 };
 
 #define REGISTER_TYPE(d, type, name) \
