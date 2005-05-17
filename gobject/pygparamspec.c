@@ -332,6 +332,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	    return Py_BuildValue("[ssssssss]", "__doc__", "__gtype__", "blurb",
 				 "flags", "name", "nick", "owner_type",
 				 "value_type");
+	}
     }
 
     PyErr_SetString(PyExc_AttributeError, attr);
