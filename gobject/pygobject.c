@@ -484,11 +484,44 @@ pygobject_repr(PyGObject *self)
     return PyString_FromString(buf);
 }
 
+typedef struct {
+    visitproc visit;
+    void *arg;
+    int retval;
+} gobject_visit_data_t;
+
+static void
+_pygobject_visit_func(GObject  *object,
+                      gpointer  _data)
+{
+    gobject_visit_data_t *data = _data;
+    PyObject *wrapper;
+
+    if (data->retval)
+        return;
+
+      /* FIXME: this should be moved into module initialization */
+    if (!pygobject_wrapper_key)
+	pygobject_wrapper_key = g_quark_from_static_string(pygobject_wrapper_id);
+
+    wrapper = (PyObject *) g_object_get_qdata(object, pygobject_wrapper_key);
+    if (wrapper) {
+        data->retval = data->visit(wrapper, data->arg);
+        if (data->retval)
+            return;
+    } else {
+          /* recursively visit children */
+        g_object_traverse(object, _pygobject_visit_func, data);
+    }
+}
+
+
 static int
 pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
 {
     int ret = 0;
     GSList *tmp;
+    gobject_visit_data_t gobjvisitdata;
 
     if (self->inst_dict) ret = visit(self->inst_dict, arg);
     if (ret != 0) return ret;
@@ -510,7 +543,12 @@ pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
 	ret = visit((PyObject *)self, arg);
     if (ret != 0) return ret;
 
-    return 0;
+    gobjvisitdata.visit = visit;
+    gobjvisitdata.arg = arg;
+    gobjvisitdata.retval = 0;
+    g_object_traverse(self->obj, _pygobject_visit_func, &gobjvisitdata);
+
+    return gobjvisitdata.retval;
 }
 
 static int
