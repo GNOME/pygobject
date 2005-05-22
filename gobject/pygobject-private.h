@@ -77,6 +77,8 @@ GClosure *pyg_signal_class_closure_get(void);
 PyObject *pyg_object_descr_doc_get(void);
 
 
+extern PyTypeObject PyGObject_MetaType;
+
 /* from pygobject.h */
 extern PyTypeObject PyGObject_Type;
 extern PyTypeObject PyGInterface_Type;
@@ -92,6 +94,7 @@ PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
 void          pygobject_register_sinkfunc(GType type,
 					  void (* sinkfunc)(GObject *object));
+int           pyg_type_register          (PyTypeObject *class);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;

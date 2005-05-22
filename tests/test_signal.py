@@ -10,13 +10,11 @@ class C(gobject.GObject):
                                    (gobject.TYPE_INT,)) }
     def do_my_signal(self, arg):
         self.arg = arg
-gobject.type_register(C)
 
 class D(C):
     def do_my_signal(self, arg2):
         self.arg2 = arg2
 	C.do_my_signal(self, arg2)
-gobject.type_register(D)
 
 class TestChaining(unittest.TestCase):
     def setUp(self):
@@ -46,29 +44,33 @@ class TestChaining(unittest.TestCase):
 # This is for bug 153718
 class TestGSignalsError(unittest.TestCase):
     def testInvalidType(self, *args):
-        class Foo(gobject.GObject):
-            __gsignals__ = None
-        self.assertRaises(TypeError, gobject.type_register, Foo)
+        def foo():
+            class Foo(gobject.GObject):
+                __gsignals__ = None
+        self.assertRaises(TypeError, foo)
         gc.collect()
         
     def testInvalidName(self, *args):
-        class Foo(gobject.GObject):
-            __gsignals__ = {'not-exists' : 'override'}
-        self.assertRaises(TypeError, gobject.type_register, Foo)
+        def foo():
+            class Foo(gobject.GObject):
+                __gsignals__ = {'not-exists' : 'override'}
+        self.assertRaises(TypeError, foo)
         gc.collect()
 
 class TestGPropertyError(unittest.TestCase):
     def testInvalidType(self, *args):
-        class Foo(gobject.GObject):
-            __gproperties__ = None
-        self.assertRaises(TypeError, gobject.type_register, Foo)
+        def foo():
+            class Foo(gobject.GObject):
+                __gproperties__ = None
+        self.assertRaises(TypeError, foo)
         gc.collect()
         
     def testInvalidName(self, *args):
-        class Foo(gobject.GObject):
-            __gproperties__ = { None: None }
+        def foo():
+            class Foo(gobject.GObject):
+                __gproperties__ = { None: None }
             
-        self.assertRaises(TypeError, gobject.type_register, Foo)
+        self.assertRaises(TypeError, foo)
         gc.collect()
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+import pygtk; pygtk.require("2.0")
 import gobject
 
 class C(gobject.GObject):
@@ -9,14 +10,11 @@ class C(gobject.GObject):
         self.__gobject_init__() # default constructor using our new GType
     def do_my_signal(self, arg):
 	print "C: class closure for `my_signal' called with argument", arg
-gobject.type_register(C)
 
 class D(C):
     def do_my_signal(self, arg):
 	print "D: class closure for `my_signal' called.  Chaining up to C"
 	C.do_my_signal(self, arg)
-
-gobject.type_register(D)
 
 def my_signal_handler(object, arg, *extra):
     print "handler for `my_signal' called with argument", arg, \

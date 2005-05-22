@@ -114,7 +114,8 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     if (s != NULL)
 	class_name = s + 1;
 	
-    type->ob_type = &PyType_Type;
+    type->ob_type = &PyGObject_MetaType;
+
     if (bases) {
 	type->tp_bases = bases;
 	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
@@ -1257,4 +1258,64 @@ PyTypeObject PyGObject_Type = {
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
+
+
+
+    /* -------- GObject MetaClass -----------*/
+static int
+pygobjectmeta_init(PyTypeObject *subtype, PyObject *args, PyObject *kwargs)
+{
+    if (PyType_Type.tp_init((PyObject *) subtype, args, kwargs))
+        return -1;
+    return pyg_type_register(subtype);
+}
+
+
+PyTypeObject PyGObject_MetaType = {
+    PyObject_HEAD_INIT(NULL)
+    0,					/* ob_size */
+    "gobject.GObjectMeta",		/* tp_name */
+    0,					/* tp_basicsize */
+    0,					/* tp_itemsize */
+    /* methods */
+    (destructor)0,			/* tp_dealloc */
+    (printfunc)0,			/* tp_print */
+    (getattrfunc)0,			/* tp_getattr */
+    (setattrfunc)0,			/* tp_setattr */
+    (cmpfunc)0,				/* tp_compare */
+    (reprfunc)0,			/* tp_repr */
+    0,					/* tp_as_number */
+    0,					/* tp_as_sequence */
+    0,					/* tp_as_mapping */
+    (hashfunc)0,			/* tp_hash */
+    (ternaryfunc)0,			/* tp_call */
+    (reprfunc)0,			/* tp_str */
+    (getattrofunc)0,			/* tp_getattro */
+    (setattrofunc)0,			/* tp_setattro */
+    0,					/* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE, /* tp_flags */
+    "GObject Metaclass -- automatically registers GObject subclasses "
+    "as new GType's", /* Documentation string */
+    (traverseproc)0,			/* tp_traverse */
+    (inquiry)0,				/* tp_clear */
+    (richcmpfunc)0,			/* tp_richcompare */
+    0,					/* tp_weaklistoffset */
+    (getiterfunc)0,			/* tp_iter */
+    (iternextfunc)0,			/* tp_iternext */
+    0,                                  /* tp_methods */
+    0,					/* tp_members */
+    0,					/* tp_getset */
+    &PyType_Type,			/* tp_base */
+    (PyObject *)0,			/* tp_dict */
+    0,					/* tp_descr_get */
+    0,					/* tp_descr_set */
+    0,					/* tp_dictoffset */
+    (initproc)pygobjectmeta_init,	/* tp_init */
+    (allocfunc)0,			/* tp_alloc */
+    (newfunc)0,				/* tp_new */
+    0,					/* tp_free */
+    (inquiry)0,				/* tp_is_gc */
+    NULL,				/* tp_bases */
+};
+
 

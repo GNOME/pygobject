@@ -900,12 +900,42 @@ pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
     return 0;
 }
 
-
 static PyObject *
-pyg_type_register(PyObject *self, PyObject *args)
+_wrap_pyg_type_register(PyObject *self, PyObject *args)
+{
+    PyTypeObject *class;
+    PyObject *gtype;
+
+    if (PyErr_Warn(PyExc_DeprecationWarning, "gobject.type_register is deprecated;"
+                   " now types are automatically registered"))
+        return NULL;
+
+    if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
+	return NULL;
+    if (!PyType_IsSubtype(class, &PyGObject_Type)) {
+	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
+	return NULL;
+    }
+
+      /* Check if type already registered */
+    gtype = PyObject_GetAttrString((PyObject *)class, "__gtype__");
+    if (gtype == NULL) {
+        PyErr_Clear();
+          /* not registered */
+        if (pyg_type_register(class))
+            return NULL;
+    } else
+          /* already registered */
+        Py_DECREF(gtype);
+
+    Py_INCREF(class);
+    return (PyObject *) class;
+}
+
+int
+pyg_type_register(PyTypeObject *class)
 {
     PyObject *gtype, *module, *gsignals, *gproperties;
-    PyTypeObject *class;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
     gint i, name_serial;
@@ -926,17 +956,11 @@ pyg_type_register(PyObject *self, PyObject *args)
 	(GInstanceInitFunc) NULL
     };
 
-    if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
-	return NULL;
-    if (!PyType_IsSubtype(class, &PyGObject_Type)) {
-	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
-	return NULL;
-    }
 
     /* find the GType of the parent */
     parent_type = pyg_type_from_object((PyObject *)class);
     if (!parent_type) {
-	return NULL;
+	return -1;
     }
 
       /* make name for new GType */
@@ -985,7 +1009,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     g_free(type_name);
     if (instance_type == 0) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create new GType");
-	return NULL;
+	return -1;
     }
 
     /* store pointer to the class with the GType */
@@ -1011,10 +1035,10 @@ pyg_type_register(PyObject *self, PyObject *args)
 	if (!PyDict_Check(gsignals)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ attribute not a dict!");
-	    return NULL;
+	    return -1;
 	}
 	if (!add_signals(instance_type, gsignals)) {
-	    return NULL;
+	    return -1;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gsignals__");
 	/* Borrowed reference. Py_DECREF(gsignals); */
@@ -1029,10 +1053,10 @@ pyg_type_register(PyObject *self, PyObject *args)
 	if (!PyDict_Check(gproperties)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ attribute not a dict!");
-	    return NULL;
+	    return -1;
 	}
 	if (!add_properties(instance_type, gproperties)) {
-	    return NULL;
+	    return -1;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gproperties__");
 	/* Borrowed reference. Py_DECREF(gproperties); */
@@ -1043,7 +1067,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     gclass = g_type_class_ref(instance_type);
     if (pyg_run_class_init(instance_type, gclass, class)) {
         g_type_class_unref(gclass);
-        return NULL;
+        return -1;
     }
     g_type_class_unref(gclass);
 
@@ -1074,8 +1098,7 @@ pyg_type_register(PyObject *self, PyObject *args)
     } else
         g_warning("type has no tp_bases");
 
-    Py_INCREF(class);
-    return (PyObject *) class;
+    return 0;
 }
 
 static PyObject *
@@ -2085,7 +2108,7 @@ static PyMethodDef pygobject_functions[] = {
     { "type_is_a", pyg_type_is_a, METH_VARARGS },
     { "type_children", pyg_type_children, METH_VARARGS },
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
-    { "type_register", pyg_type_register, METH_VARARGS },
+    { "type_register", _wrap_pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
     { "signal_list_names", (PyCFunction)pyg_signal_list_names, METH_VARARGS|METH_KEYWORDS },
     { "signal_list_ids", (PyCFunction)pyg_signal_list_ids, METH_VARARGS|METH_KEYWORDS },
@@ -2463,6 +2486,12 @@ initgobject(void)
 
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
+
+    PyGObject_MetaType.tp_traverse = PyType_Type.tp_traverse;
+    PyGObject_MetaType.tp_clear = PyType_Type.tp_clear;
+    PyGObject_MetaType.tp_is_gc = PyType_Type.tp_is_gc;
+    PyType_Ready(&PyGObject_MetaType);
+    PyDict_SetItemString(d, "GObjectMeta", (PyObject *) &PyGObject_MetaType);
     
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;
