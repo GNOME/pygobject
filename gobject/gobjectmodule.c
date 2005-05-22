@@ -2059,6 +2059,25 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
     return Py_BuildValue("iNNN", child_pid, pystdin, pystdout, pystderr);
 }
 
+
+static PyObject *
+pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "text", NULL };
+    char *text_in, *text_out;
+    int text_size;
+    PyObject *retval;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s:gobject.markup_escape_text", kwlist,
+                                     &text_in, &text_size))
+        return NULL;
+
+    text_out = g_markup_escape_text(text_in, text_size);
+    retval = PyString_FromString(text_out);
+    g_free(retval);
+    return retval;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2083,6 +2102,7 @@ static PyMethodDef pygobject_functions[] = {
     { "threads_init", (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
     { "child_watch_add", (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
     { "spawn_async", (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
+    { "markup_escape_text", (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
 
     { NULL, NULL, 0 }
 };
