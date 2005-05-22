@@ -42,6 +42,7 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 extern GType PY_TYPE_OBJECT;
 
 void  pyg_destroy_notify (gpointer user_data);
+gboolean pyg_error_check(GError **error);
 
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
@@ -166,6 +167,8 @@ extern PyTypeObject PyGMainContext_Type;
 extern PyTypeObject PyGParamSpec_Type;
 PyObject * pyg_param_spec_new (GParamSpec *pspec);
 
+/* pygiochannel.c */
+extern PyTypeObject PyGIOChannel_Type;
 
 
 #endif

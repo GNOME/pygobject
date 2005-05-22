@@ -38,7 +38,6 @@ GQuark pyginterface_info_key  = 0;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
-static gboolean pyg_error_check(GError **error);
 
 static gboolean use_gil_state_api = FALSE;
     
@@ -2210,7 +2209,7 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
  *
  * Returns: True if an error was set.
  */
-static gboolean
+gboolean
 pyg_error_check(GError **error)
 {
     PyGILState_STATE state;
@@ -2471,6 +2470,8 @@ initgobject(void)
 
     REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
     REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
+
+    REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
     
     /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
@@ -2517,6 +2518,24 @@ initgobject(void)
     PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
     PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
     PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
+
+#define addint(x) PyModule_AddIntConstant(m, #x, G_##x)
+
+    addint(IO_STATUS_ERROR);
+    addint(IO_STATUS_NORMAL);
+    addint(IO_STATUS_EOF);
+    addint(IO_STATUS_AGAIN);
+
+    addint(IO_FLAG_APPEND);
+    addint(IO_FLAG_NONBLOCK);
+    addint(IO_FLAG_IS_READABLE);
+    addint(IO_FLAG_IS_WRITEABLE);
+    addint(IO_FLAG_IS_SEEKABLE);
+    addint(IO_FLAG_MASK);
+    addint(IO_FLAG_GET_MASK);
+    addint(IO_FLAG_SET_MASK);
+
+#undef addint
 
     PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN", G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
     PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD", G_SPAWN_DO_NOT_REAP_CHILD);

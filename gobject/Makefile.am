@@ -28,6 +28,7 @@ gobject_la_SOURCES = \
 	pygmainloop.c \
 	pygparamspec.c \
 	pygpointer.c \
+	pygiochannel.c \
 	pygtype.c
 
 if PLATFORM_WIN32
