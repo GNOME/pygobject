@@ -2091,13 +2091,13 @@ pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
     int text_size;
     PyObject *retval;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s:gobject.markup_escape_text", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#:gobject.markup_escape_text", kwlist,
                                      &text_in, &text_size))
         return NULL;
 
     text_out = g_markup_escape_text(text_in, text_size);
     retval = PyString_FromString(text_out);
-    g_free(retval);
+    g_free(text_out);
     return retval;
 }
 
