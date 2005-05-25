@@ -193,7 +193,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     static char *kwlist[] = { "max_count", NULL };
     int max_count = -1;
     PyObject* ret_obj = NULL;
-    int total_read = 0;
+    gsize total_read = 0;
     GError* error = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
 
@@ -205,7 +205,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
-	int single_read;
+	gsize single_read;
 	char* buf;
 	gsize buf_size;
 	
@@ -256,7 +256,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     static char *kwlist[] = { "buf", NULL };
     const char* buf;
     int buf_len;
-    int count;
+    gsize count;
     GError* error = NULL;
     GIOStatus status;
 
@@ -279,7 +279,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     static char *kwlist[] = { "lines", NULL };
     char *buf;
     int buf_len;
-    int count;
+    gsize count;
     GError* error = NULL;
     GIOStatus status;
     PyObject *iter, *value, *pylines;
