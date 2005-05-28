@@ -2484,18 +2484,16 @@ initgobject(void)
 
     g_type_init();
 
-    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
-    pygobject_wrapper_key    = g_quark_from_static_string("PyGObject::wrapper");
-    pygobject_class_key      = g_quark_from_static_string("PyGObject::class");
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
-    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
-    pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
-    pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
-    pyg_boxed_marshal_key    = g_quark_from_static_string("PyGBoxed::marshal");
+    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
     pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
+    pygobject_class_key      = g_quark_from_static_string("PyGObject::class");
+    pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
+    pygobject_wrapper_key    = g_quark_from_static_string("PyGObject::wrapper");
+    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
+    pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
-
 
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,

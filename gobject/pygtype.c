@@ -324,7 +324,7 @@ typedef struct {
 } PyGBoxedMarshal;
 
 #define pyg_boxed_lookup(boxed_type) \
-  ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pyg_boxed_marshal_key))
+  ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pygboxed_marshal_key))
 
 
 /**
@@ -349,7 +349,7 @@ pyg_register_boxed_custom(GType boxed_type,
     bm = g_new(PyGBoxedMarshal, 1);
     bm->fromvalue = from_func;
     bm->tovalue = to_func;
-    g_type_set_qdata(boxed_type, pyg_boxed_marshal_key, bm);
+    g_type_set_qdata(boxed_type, pygboxed_marshal_key, bm);
 }
 
 static int

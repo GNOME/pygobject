@@ -41,15 +41,15 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 
 extern GType PY_TYPE_OBJECT;
 
-extern GQuark pyginterface_type_key;
-extern GQuark pygobject_class_init_key;
-extern GQuark pyginterface_info_key;
 extern GQuark pygboxed_type_key;
-extern GQuark pygobject_class_key;
-extern GQuark pygobject_wrapper_key;
-extern GQuark pyg_boxed_marshal_key;
+extern GQuark pygboxed_marshal_key;
 extern GQuark pygenum_class_key;
 extern GQuark pygflags_class_key;
+extern GQuark pyginterface_type_key;
+extern GQuark pyginterface_info_key;
+extern GQuark pygobject_class_init_key;
+extern GQuark pygobject_class_key;
+extern GQuark pygobject_wrapper_key;
 extern GQuark pygpointer_class_key;
 
 void  pyg_destroy_notify (gpointer user_data);
