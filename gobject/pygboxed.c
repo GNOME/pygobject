@@ -146,7 +146,6 @@ PyTypeObject PyGBoxed_Type = {
     (PyObject *)0,			/* tp_bases */
 };
 
-static GQuark boxed_type_id = 0;
 
 /**
  * pyg_register_boxed:
@@ -169,9 +168,6 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
     g_return_if_fail(class_name != NULL);
     g_return_if_fail(boxed_type != 0);
 
-    if (!boxed_type_id)
-      boxed_type_id = g_quark_from_static_string("PyGBoxed::class");
-
     if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
 
     type->ob_type = &PyType_Type;
@@ -186,7 +182,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 			 o=pyg_type_wrapper_new(boxed_type));
     Py_DECREF(o);
 
-    g_type_set_qdata(boxed_type, boxed_type_id, type);
+    g_type_set_qdata(boxed_type, pygboxed_type_key, type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
@@ -225,7 +221,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 	return Py_None;
     }
 
-    tp = g_type_get_qdata(boxed_type, boxed_type_id);
+    tp = g_type_get_qdata(boxed_type, pygboxed_type_key);
     if (!tp)
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
     self = PyObject_NEW(PyGBoxed, tp);

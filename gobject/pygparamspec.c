@@ -63,15 +63,13 @@ pyg_param_spec_dealloc(PyGParamSpec *self)
 static PyObject *
 pygenum_from_pspec(GParamSpec *pspec)
 {
-    GQuark quark;
     PyObject *pyclass;
     GParamSpecEnum *enum_pspec;
     GType enum_type;
     
-    quark = g_quark_from_static_string("PyGEnum::class");
     enum_pspec = G_PARAM_SPEC_ENUM(pspec);
     enum_type = G_ENUM_CLASS_TYPE(enum_pspec->enum_class);
-    pyclass = (PyObject*)g_type_get_qdata(enum_type, quark);
+    pyclass = (PyObject*)g_type_get_qdata(enum_type, pygenum_class_key);
     if (pyclass == NULL) {
 	pyclass = Py_None;
     }
@@ -83,15 +81,13 @@ pygenum_from_pspec(GParamSpec *pspec)
 static PyObject *
 pygflags_from_pspec(GParamSpec *pspec)
 {
-    GQuark quark;
     PyObject *pyclass;
     GParamSpecFlags *flag_pspec;
     GType flag_type;
 
-    quark = g_quark_from_static_string("PyGFlags::class");
     flag_pspec = G_PARAM_SPEC_FLAGS(pspec);
     flag_type = G_FLAGS_CLASS_TYPE(flag_pspec->flags_class);
-    pyclass = (PyObject*)g_type_get_qdata(flag_type, quark);
+    pyclass = (PyObject*)g_type_get_qdata(flag_type, pygflags_class_key);
     if (pyclass == NULL) {
 	pyclass = Py_None;
     }

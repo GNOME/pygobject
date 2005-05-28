@@ -27,8 +27,6 @@
 
 #include "pygobject-private.h"
 
-static const gchar *pygenum_class_id     = "PyGEnum::class";
-static GQuark       pygenum_class_key    = 0;
 
 #define GET_INT(x) (((PyIntObject*)x)->ob_ival)
 static int
@@ -198,9 +196,6 @@ pyg_enum_add (PyObject *   module,
 			     "__module__",
 			     PyString_FromString(PyModule_GetName(module)));
     
-    if (!pygenum_class_key)
-        pygenum_class_key = g_quark_from_static_string(pygenum_class_id);
-
     g_type_set_qdata(gtype, pygenum_class_key, stub);
 
     o = pyg_type_wrapper_new(gtype);

@@ -28,18 +28,22 @@
 #include "pythread.h"
 
 static PyObject *gerror_exc = NULL;
-static const gchar *pyginterface_type_id   = "PyGInterface::type";
-GQuark pyginterface_type_key  = 0;
-static const gchar *pygobject_class_init_id   = "PyGObject::class-init";
-GQuark pygobject_class_init_key  = 0;
-static const gchar *pyginterface_info_id   = "PyGInterface::info";
-GQuark pyginterface_info_key  = 0;
+static gboolean use_gil_state_api = FALSE;
 
+GQuark pyginterface_type_key;
+GQuark pygobject_class_init_key;
+GQuark pyginterface_info_key;
+GQuark pygboxed_type_key;
+GQuark pygobject_class_key;
+GQuark pygobject_wrapper_key;
+GQuark pyg_boxed_marshal_key;
+GQuark pygenum_class_key;
+GQuark pygflags_class_key;
+GQuark pygpointer_class_key;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
 
-static gboolean use_gil_state_api = FALSE;
     
 /* -------------- GDK threading hooks ---------------------------- */
 
@@ -2480,6 +2484,19 @@ initgobject(void)
 
     g_type_init();
 
+    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
+    pygobject_wrapper_key    = g_quark_from_static_string("PyGObject::wrapper");
+    pygobject_class_key      = g_quark_from_static_string("PyGObject::class");
+    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
+    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
+    pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
+    pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
+    pyg_boxed_marshal_key    = g_quark_from_static_string("PyGBoxed::marshal");
+    pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
+    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
+    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
+
+
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,
 						  pyobject_free);
@@ -2505,10 +2522,6 @@ initgobject(void)
 			 pyg_object_descr_doc_get());
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
-    pyginterface_type_key = g_quark_from_static_string(pyginterface_type_id);
-    pyginterface_info_key = g_quark_from_static_string(pyginterface_info_id);
-
-    pygobject_class_init_key = g_quark_from_static_string(pygobject_class_init_id);
 
     REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
     REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 

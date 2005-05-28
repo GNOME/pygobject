@@ -21,11 +21,6 @@
  */
 #include "pygobject-private.h"
 
-static const gchar *pygobject_class_id     = "PyGObject::class";
-static GQuark       pygobject_class_key    = 0;
-static const gchar *pygobject_wrapper_id   = "PyGObject::wrapper";
-static GQuark       pygobject_wrapper_key  = 0;
-
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 static int  pygobject_clear(PyGObject *self);
@@ -106,8 +101,6 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyObject *o;
     const char *class_name, *s;
 
-    if (!pygobject_class_key)
-	pygobject_class_key = g_quark_from_static_string(pygobject_class_id);
 
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
@@ -157,9 +150,6 @@ void
 pygobject_register_wrapper(PyObject *self)
 {
     GObject *obj = ((PyGObject *)self)->obj;
-
-    if (!pygobject_wrapper_key)
-	pygobject_wrapper_key=g_quark_from_static_string(pygobject_wrapper_id);
 
     sink_object(obj);
     Py_INCREF(self);
@@ -283,9 +273,6 @@ pygobject_new_with_interfaces(GType gtype)
 	    PyDict_SetItemString(mod_dict, gtype_name, (PyObject *)type);
     }
 
-    if (!pygobject_class_key)
-	pygobject_class_key = g_quark_from_static_string(pygobject_class_id);
-
     /* stash a pointer to the python class with the GType */
     Py_INCREF(type);
     g_type_set_qdata(gtype, pygobject_class_key, type);
@@ -340,9 +327,6 @@ PyObject *
 pygobject_new(GObject *obj)
 {
     PyGObject *self;
-
-    if (!pygobject_wrapper_key)
-	pygobject_wrapper_key = g_quark_from_static_string(pygobject_wrapper_id);
 
     if (obj == NULL) {
 	Py_INCREF(Py_None);

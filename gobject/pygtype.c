@@ -322,7 +322,6 @@ typedef struct {
     fromvaluefunc fromvalue;
     tovaluefunc tovalue;
 } PyGBoxedMarshal;
-static GQuark pyg_boxed_marshal_key = 0;
 
 #define pyg_boxed_lookup(boxed_type) \
   ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pyg_boxed_marshal_key))
@@ -346,9 +345,6 @@ pyg_register_boxed_custom(GType boxed_type,
 			  tovaluefunc to_func)
 {
     PyGBoxedMarshal *bm;
-
-    if (!pyg_boxed_marshal_key)
-      pyg_boxed_marshal_key = g_quark_from_static_string("PyGBoxed::marshal");
 
     bm = g_new(PyGBoxedMarshal, 1);
     bm->fromvalue = from_func;

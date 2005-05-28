@@ -124,8 +124,6 @@ PyTypeObject PyGPointer_Type = {
     (PyObject *)0,			/* tp_bases */
 };
 
-static GQuark pointer_type_id = 0;
-
 /**
  * pyg_register_pointer:
  * @dict: the module dictionary to store the wrapper class.
@@ -147,9 +145,6 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
     g_return_if_fail(class_name != NULL);
     g_return_if_fail(pointer_type != 0);
 
-    if (!pointer_type_id)
-      pointer_type_id = g_quark_from_static_string("PyGPointer::class");
-
     if (!type->tp_dealloc) type->tp_dealloc = (destructor)pyg_pointer_dealloc;
 
     type->ob_type = &PyType_Type;
@@ -164,7 +159,7 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
 			 o=pyg_type_wrapper_new(pointer_type));
     Py_DECREF(o);
 
-    g_type_set_qdata(pointer_type, pointer_type_id, type);
+    g_type_set_qdata(pointer_type, pygpointer_class_key, type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
@@ -198,7 +193,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 	return Py_None;
     }
 
-    tp = g_type_get_qdata(pointer_type, pointer_type_id);
+    tp = g_type_get_qdata(pointer_type, pygpointer_class_key);
     if (!tp)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);

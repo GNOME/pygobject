@@ -27,9 +27,6 @@
 
 #include "pygobject-private.h"
 
-static const gchar *pygflags_class_id     = "PyGFlags::class";
-static GQuark       pygflags_class_key    = 0;
-
 #define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
 static int
 pyg_flags_compare(PyGFlags *self, PyObject *other)
@@ -224,9 +221,6 @@ pyg_flags_add (PyObject *   module,
     /* Add it to the module name space */
     PyModule_AddObject(module, (char*)typename, stub);
     Py_INCREF(stub);
-
-    if (!pygflags_class_key)
-        pygflags_class_key = g_quark_from_static_string(pygflags_class_id);
 
     g_type_set_qdata(gtype, pygflags_class_key, stub);
 
