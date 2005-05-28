@@ -36,7 +36,7 @@ GQuark pyginterface_info_key;
 GQuark pygboxed_type_key;
 GQuark pygobject_class_key;
 GQuark pygobject_wrapper_key;
-GQuark pyg_boxed_marshal_key;
+GQuark pygboxed_marshal_key;
 GQuark pygenum_class_key;
 GQuark pygflags_class_key;
 GQuark pygpointer_class_key;
