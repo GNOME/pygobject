@@ -443,9 +443,10 @@ pyg_iowatch_marshal(GIOChannel *source,
     pyg_block_threads();
     if (data->user_data)
         ret = PyObject_CallFunction(data->callback, "OiO", data->iochannel,
-                                    data->user_data);
+                                    condition, data->user_data);
     else
-        ret = PyObject_CallFunction(data->callback, "Oi", data->iochannel);
+        ret = PyObject_CallFunction(data->callback, "Oi", data->iochannel,
+                                    condition);
 
     if (!ret) {
 	PyErr_Print();
