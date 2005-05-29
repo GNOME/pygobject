@@ -1249,9 +1249,16 @@ PyTypeObject PyGObject_Type = {
 static int
 pygobjectmeta_init(PyTypeObject *subtype, PyObject *args, PyObject *kwargs)
 {
+    PyObject *instance_dict;
     if (PyType_Type.tp_init((PyObject *) subtype, args, kwargs))
         return -1;
-    return pyg_type_register(subtype);
+    instance_dict = PyTuple_GetItem(args, 2);
+    if (instance_dict) {
+        if (PyDict_GetItemString(instance_dict, "__gtype__") == NULL)
+            return pyg_type_register(subtype);
+    } else
+        PyErr_Clear();
+    return 0;
 }
 
 
