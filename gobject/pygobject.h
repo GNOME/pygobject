@@ -245,7 +245,7 @@ struct _PyGObject_Functions *_PyGObject_API;
             PyEval_RestoreThread(_save);        \
     } G_STMT_END
 
-#define init_pygobject() { \
+#define init_pygobject() G_STMT_START { \
     PyObject *gobject = PyImport_ImportModule("gobject"); \
     if (gobject != NULL) { \
         PyObject *mdict = PyModule_GetDict(gobject); \
@@ -262,7 +262,7 @@ struct _PyGObject_Functions *_PyGObject_API;
                         "could not import gobject"); \
         return; \
     } \
-}
+} G_STMT_END
 
 #endif /* !_INSIDE_PYGOBJECT_ */
 
