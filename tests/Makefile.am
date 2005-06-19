@@ -4,7 +4,7 @@ INCLUDES = \
 	$(PANGO_CFLAGS) \
 	$(ATK_CFLAGS) \
 	$(GTK_CFLAGS) \
-	-I$(top_srcdir)/gobject
+	-I$(top_srcdir)/gobject  -I$(top_srcdir)/../gobject-introspection/src
 
 EXTRA_DIST = $(tests) common.py runtests.py test-thread.h test-unknown.h
 

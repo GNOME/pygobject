@@ -7,6 +7,7 @@
 
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
+#include <girepository.h>
 
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
@@ -182,6 +183,21 @@ PyObject * pyg_param_spec_new (GParamSpec *pspec);
 
 /* pygiochannel.c */
 extern PyTypeObject PyGIOChannel_Type;
+
+/* pygiargument.c */
+int        pyg_argument_from_pyobject (PyObject   *object,
+                                       GIArgInfo  *info,
+                                       GArgument  *arg);
+PyObject * pyg_argument_to_pyobject   (GArgument  *arg,
+                                       GITypeInfo *type_info);
+
+/* pyifunction.c */
+extern PyTypeObject PyGIFunction_Type;
+extern PyTypeObject PyGIFunctionDescr_Type;
+PyObject * pyg_ifunction_new       (GIFunctionInfo *info,
+                                    PyObject       *self);
+PyObject * pyg_ifunction_descr_new (GIFunctionInfo *info);
+
 
 
 #endif

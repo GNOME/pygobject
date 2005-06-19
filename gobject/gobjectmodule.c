@@ -2454,7 +2454,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_register_class_init,
   pyg_register_interface_info,
 
-  pyg_closure_set_exception_handler
+  pyg_closure_set_exception_handler,
+
+  pyg_ifunction_new,
+  pyg_ifunction_descr_new
 };
 
 #define REGISTER_TYPE(d, type, name) \
@@ -2483,6 +2486,11 @@ initgobject(void)
     d = PyModule_GetDict(m);
 
     g_type_init();
+
+    if (PyType_Ready(&PyGIFunction_Type))
+        return;
+    if (PyType_Ready(&PyGIFunctionDescr_Type))
+        return;
 
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
