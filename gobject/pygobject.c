@@ -165,7 +165,7 @@ pygobject_register_wrapper(PyObject *self)
  * bases. It will currently not filter out interfaces already implemented by
  * it parents.
  *
- * Returns: a PyTypeObject for the new type of NULL if it couldn't be created
+ * Returns: a PyTypeObject for the new type or NULL if it couldn't be created
  */
 PyTypeObject *
 pygobject_new_with_interfaces(GType gtype)
