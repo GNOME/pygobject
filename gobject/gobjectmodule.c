@@ -500,17 +500,19 @@ override_signal(GType instance_type, const gchar *signal_name)
     return TRUE;
 }
 
-static gboolean
+static PyObject *
 add_signals (GType instance_type, PyObject *signals)
 {
     gboolean ret = TRUE;
     GObjectClass *oclass;
     int pos = 0;
-    PyObject *key, *value;
+    PyObject *key, *value, *overridden_signals = NULL;
 
+    overridden_signals = PyDict_New();
     oclass = g_type_class_ref(instance_type);
     while (PyDict_Next(signals, &pos, &key, &value)) {
 	const gchar *signal_name;
+        gchar *signal_name_canon, *c;
 
 	if (!PyString_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
@@ -522,7 +524,20 @@ add_signals (GType instance_type, PyObject *signals)
 
 	if (value == Py_None ||
 	    (PyString_Check(value) &&
-	     !strcmp(PyString_AsString(value), "override"))) {
+	     !strcmp(PyString_AsString(value), "override")))
+        {
+              /* canonicalize signal name, replacing '-' with '_' */
+            signal_name_canon = g_strdup(signal_name);
+            for (c = signal_name_canon; *c; ++c)
+                if (*c == '-')
+                    *c = '_';
+            if (PyDict_SetItemString(overridden_signals, signal_name_canon, key)) {
+                g_free(signal_name_canon);
+                ret = FALSE;
+                break;
+            }
+            g_free(signal_name_canon);
+
 	    ret = override_signal(instance_type, signal_name);
 	} else {
 	    ret = create_signal(instance_type, signal_name, value);
@@ -532,7 +547,12 @@ add_signals (GType instance_type, PyObject *signals)
 	    break;
     }
     g_type_class_unref(oclass);
-    return ret;
+    if (ret)
+        return overridden_signals;
+    else {
+        Py_XDECREF(overridden_signals);
+        return NULL;
+    }
 }
 
 static GParamSpec *
@@ -939,7 +959,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
 int
 pyg_type_register(PyTypeObject *class)
 {
-    PyObject *gtype, *module, *gsignals, *gproperties;
+    PyObject *gtype, *module, *gsignals, *gproperties, *overridden_signals;
     GType parent_type, instance_type;
     gchar *type_name = NULL;
     gint i, name_serial;
@@ -1041,11 +1061,12 @@ pyg_type_register(PyTypeObject *class)
 			    "__gsignals__ attribute not a dict!");
 	    return -1;
 	}
-	if (!add_signals(instance_type, gsignals)) {
+	if (!(overridden_signals = add_signals(instance_type, gsignals))) {
 	    return -1;
 	}
-	PyDict_DelItemString(class->tp_dict, "__gsignals__");
-	/* Borrowed reference. Py_DECREF(gsignals); */
+        if (PyDict_SetItemString(class->tp_dict, "__gsignals__", overridden_signals))
+            return -1;
+        Py_DECREF(overridden_signals);
     } else {
 	PyErr_Clear();
     }
@@ -1074,6 +1095,9 @@ pyg_type_register(PyTypeObject *class)
         return -1;
     }
     g_type_class_unref(gclass);
+
+    if (gsignals)
+        PyDict_DelItemString(class->tp_dict, "__gsignals__");
 
       /* Register interface implementations  */
     if (class->tp_bases) {
