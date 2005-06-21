@@ -194,7 +194,6 @@ pyg_flags_add (PyObject *   module,
     GFlagsClass *eclass;
     int i;
 
-    g_return_val_if_fail(module != NULL, NULL);
     g_return_val_if_fail(typename != NULL, NULL);
     g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_FLAGS), NULL);
     

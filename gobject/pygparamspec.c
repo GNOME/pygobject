@@ -71,7 +71,9 @@ pygenum_from_pspec(GParamSpec *pspec)
     enum_type = G_ENUM_CLASS_TYPE(enum_pspec->enum_class);
     pyclass = (PyObject*)g_type_get_qdata(enum_type, pygenum_class_key);
     if (pyclass == NULL) {
-	pyclass = Py_None;
+	pyclass = pyg_enum_add(NULL, g_type_name(enum_type), NULL, enum_type);
+	if (pyclass == NULL)
+	    pyclass = Py_None;
     }
     
     Py_INCREF(pyclass);
@@ -89,7 +91,9 @@ pygflags_from_pspec(GParamSpec *pspec)
     flag_type = G_FLAGS_CLASS_TYPE(flag_pspec->flags_class);
     pyclass = (PyObject*)g_type_get_qdata(flag_type, pygflags_class_key);
     if (pyclass == NULL) {
-	pyclass = Py_None;
+	pyclass = pyg_flags_add(NULL, g_type_name(flag_type), NULL, flag_type);
+	if (pyclass == NULL)
+	    pyclass = Py_None;
     }
     Py_INCREF(pyclass);
     return pyclass;
