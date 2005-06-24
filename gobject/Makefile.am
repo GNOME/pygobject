@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.7
 PLATFORM_VERSION = 2.0
-INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/../gobject-introspection/src
+INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
@@ -15,7 +15,7 @@ endif
 
 gobject_la_CFLAGS = $(GLIB_CFLAGS)
 gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex initgobject
-gobject_la_LIBADD = $(GLIB_LIBS) -L$(top_srcdir)/../gobject-introspection/src -lirepository
+gobject_la_LIBADD = $(GLIB_LIBS)
 gobject_la_SOURCES = \
 	pygiargument.c \
 	pygifunction.c \
