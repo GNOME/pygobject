@@ -2519,6 +2519,8 @@ initgobject(void)
     pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
+    PyType_Ready(&PyGTypeWrapper_Type);
+
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,
 						  pyobject_free);

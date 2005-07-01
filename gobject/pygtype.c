@@ -60,6 +60,21 @@ pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
     PyObject_DEL(self);
 }
 
+static PyObject *
+_wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
+{
+    PyObject *py_type = Py_None;
+    
+    py_type = g_type_get_qdata(self->type, pygobject_class_key);
+    Py_INCREF(py_type);
+    return py_type;
+}
+
+static PyGetSetDef _PyGTypeWrapper_getsets[] = {
+    { "pytype", (getter)_wrap_g_type_wrapper__get_pytype, (setter)0 },
+    { NULL, 0, 0 },
+};
+
 PyTypeObject PyGTypeWrapper_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
@@ -78,8 +93,20 @@ PyTypeObject PyGTypeWrapper_Type = {
     (hashfunc)pyg_type_wrapper_hash,
     (ternaryfunc)0,
     (reprfunc)0,
-    0L,0L,0L,0L,
-    NULL
+    (getattrofunc)0,		
+    (setattrofunc)0,		
+    0,				
+    Py_TPFLAGS_DEFAULT, 
+    NULL,
+    (traverseproc)0,		
+    (inquiry)0,
+    (richcmpfunc)0,	
+    0,             
+    (getiterfunc)0,
+    (iternextfunc)0,
+    0,
+    0,
+    _PyGTypeWrapper_getsets
 };
 
 /**
