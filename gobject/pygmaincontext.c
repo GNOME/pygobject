@@ -2,7 +2,7 @@
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 1998-2003  James Henstridge
  *
- *   pygmainloop.c: GMainContext wrapper
+ *   pygmaincontext.c: GMainContext wrapper
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,17 @@ pyg_main_context_new(PyGMainContext *self)
     return 0;
 }
 
+static void
+pyg_main_context_dealloc(PyGMainContext *self)
+{
+    if (self->context != NULL) {
+	g_main_context_unref(self->context);
+	self->context = NULL;
+    }
+
+    PyObject_Del(self);
+}
+
 static int
 pyg_main_context_compare(PyGMainContext *self, PyGMainContext *v)
 {
@@ -46,10 +57,10 @@ _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 {
     gboolean ret, may_block = TRUE;
     
-    if (!PyArg_ParseTuple(args, "|b:GMainContext.iteration",
+    if (!PyArg_ParseTuple(args, "|i:GMainContext.iteration",
 			  &may_block))
 	return NULL;
-	
+
     pyg_begin_allow_threads;
     ret = g_main_context_iteration(self->context, may_block);
     pyg_end_allow_threads;
@@ -71,41 +82,41 @@ static PyMethodDef _PyGMainContext_methods[] = {
 
 PyTypeObject PyGMainContext_Type = {
     PyObject_HEAD_INIT(NULL)
-    0,			
-    "gobject.MainContext",	
-    sizeof(PyGMainContext),	
-    0,			
+    0,
+    "gobject.MainContext",
+    sizeof(PyGMainContext),
+    0,
     /* methods */
-    (destructor)0,	
-    (printfunc)0,	
-    (getattrfunc)0,	
-    (setattrfunc)0,	
-    (cmpfunc)pyg_main_context_compare,		
-    (reprfunc)0,	
-    0,			
-    0,		
-    0,		
-    (hashfunc)0,		
-    (ternaryfunc)0,		
-    (reprfunc)0,		
-    (getattrofunc)0,		
-    (setattrofunc)0,		
-    0,				
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, 
+    (destructor)pyg_main_context_dealloc,
+    (printfunc)0,
+    (getattrfunc)0,
+    (setattrfunc)0,
+    (cmpfunc)pyg_main_context_compare,
+    (reprfunc)0,
+    0,
+    0,
+    0,
+    (hashfunc)0,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    (getattrofunc)0,
+    (setattrofunc)0,
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     NULL,
-    (traverseproc)0,		
+    (traverseproc)0,
     (inquiry)0,
-    (richcmpfunc)0,	
-    0,             
+    (richcmpfunc)0,
+    0,
     (getiterfunc)0,
     (iternextfunc)0,
     _PyGMainContext_methods,
-    0,				
-    0,		       	
-    NULL,		
-    NULL,		
-    (descrgetfunc)0,	
-    (descrsetfunc)0,	
-    0,                 
+    0,
+    0,
+    NULL,
+    NULL,
+    (descrgetfunc)0,
+    (descrsetfunc)0,
+    0,
     (initproc)pyg_main_context_new,
 };
