@@ -2521,6 +2521,7 @@ initgobject(void)
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
     PyType_Ready(&PyGTypeWrapper_Type);
+    PyDict_SetItemString(d, "GType", (PyObject *)&PyGTypeWrapper_Type);
 
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,

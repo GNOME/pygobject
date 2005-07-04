@@ -63,18 +63,172 @@ pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
 static PyObject *
 _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
 {
-    PyObject *py_type = Py_None;
+    PyObject *py_type;
     
     py_type = g_type_get_qdata(self->type, pygobject_class_key);
+    if (!py_type)
+      py_type = Py_None;
+
     Py_INCREF(py_type);
     return py_type;
 }
 
+static PyObject *
+_wrap_g_type_wrapper__get_name(PyGTypeWrapper *self, void *closure)
+{
+   const char *name = g_type_name(self->type);
+   return PyString_FromString(g_strdup(name ? name : "invalid"));
+}
+
+static PyObject *
+_wrap_g_type_wrapper__get_parent(PyGTypeWrapper *self, void *closure)
+{
+   return pyg_type_wrapper_new(g_type_parent(self->type));
+}
+
+static PyObject *
+_wrap_g_type_wrapper__get_fundamental(PyGTypeWrapper *self, void *closure)
+{
+   return pyg_type_wrapper_new(g_type_fundamental(self->type));
+}
+
+static PyObject *
+_wrap_g_type_wrapper__get_children(PyGTypeWrapper *self, void *closure)
+{
+  int n_children, i;
+  GType *children;
+  PyObject *retval;
+    
+  children = g_type_children(self->type, &n_children);
+
+  retval = PyList_New(n_children);
+  for (i = 0; i < n_children; i++)
+      PyList_SetItem(retval, i, pyg_type_wrapper_new(children[i]));
+  g_free(children);
+  
+  return retval;
+}
+
+static PyObject *
+_wrap_g_type_wrapper__get_interfaces(PyGTypeWrapper *self, void *closure)
+{
+  int n_interfaces, i;
+  GType *interfaces;
+  PyObject *retval;
+    
+  interfaces = g_type_interfaces(self->type, &n_interfaces);
+
+  retval = PyList_New(n_interfaces);
+  for (i = 0; i < n_interfaces; i++)
+      PyList_SetItem(retval, i, pyg_type_wrapper_new(interfaces[i]));
+  g_free(interfaces);
+  
+  return retval;
+}
+
+static PyObject *
+_wrap_g_type_wrapper__get_depth(PyGTypeWrapper *self, void *closure)
+{
+  return PyInt_FromLong(g_type_depth(self->type));
+}
+
 static PyGetSetDef _PyGTypeWrapper_getsets[] = {
     { "pytype", (getter)_wrap_g_type_wrapper__get_pytype, (setter)0 },
-    { NULL, 0, 0 },
+    { "name",  (getter)_wrap_g_type_wrapper__get_name, (setter)0 },
+    { "fundamental",  (getter)_wrap_g_type_wrapper__get_fundamental, (setter)0 },
+    { "parent",  (getter)_wrap_g_type_wrapper__get_parent, (setter)0 },
+    { "children",  (getter)_wrap_g_type_wrapper__get_children, (setter)0 },
+    { "interfaces",  (getter)_wrap_g_type_wrapper__get_interfaces, (setter)0 },
+    { "depth",  (getter)_wrap_g_type_wrapper__get_depth, (setter)0 },
+    { NULL, (getter)0, (setter)0 }
 };
 
+static PyObject*
+_wrap_g_type_is_interface(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_INTERFACE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_classed(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_CLASSED(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_instantiatable(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_INSTANTIATABLE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_derivable(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_DERIVABLE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_deep_derivable(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_DEEP_DERIVABLE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_abstract(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_ABSTRACT(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_value_abstract(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_VALUE_ABSTRACT(self->type));
+}
+
+static PyObject*
+_wrap_g_type_is_value_type(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_IS_VALUE_TYPE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_has_value_table(PyGTypeWrapper *self)
+{
+    return PyBool_FromLong(G_TYPE_HAS_VALUE_TABLE(self->type));
+}
+
+static PyObject*
+_wrap_g_type_from_name(PyGTypeWrapper *_, PyObject *args)
+{
+    char *type_name;
+    GType type;
+    
+    if (!PyArg_ParseTuple(args, "s:GType.from_name", &type_name))
+	return NULL;
+
+    type = g_type_from_name(type_name);
+    if (type == 0) {
+	PyErr_SetString(PyExc_RuntimeError, "unknown type name");
+	return NULL;
+    }
+
+    return pyg_type_wrapper_new(type);
+}
+
+static PyMethodDef _PyGTypeWrapper_methods[] = {
+    { "is_interface", (PyCFunction)_wrap_g_type_is_interface, METH_NOARGS },
+    { "is_classed", (PyCFunction)_wrap_g_type_is_classed, METH_NOARGS },
+    { "is_instantiatable", (PyCFunction)_wrap_g_type_is_instantiatable, METH_NOARGS },
+    { "is_derivable", (PyCFunction)_wrap_g_type_is_derivable, METH_NOARGS },
+    { "is_deep_derivable", (PyCFunction)_wrap_g_type_is_deep_derivable, METH_NOARGS },
+    { "is_abstract", (PyCFunction)_wrap_g_type_is_abstract, METH_NOARGS },
+    { "is_value_abstract", (PyCFunction)_wrap_g_type_is_value_abstract, METH_NOARGS },
+    { "is_value_type", (PyCFunction)_wrap_g_type_is_value_type, METH_NOARGS },
+    { "has_value_table", (PyCFunction)_wrap_g_type_has_value_table, METH_NOARGS },
+    { "from_name", (PyCFunction)_wrap_g_type_from_name, METH_VARARGS | METH_STATIC },
+    { NULL,  0, 0 }
+};
+    
 PyTypeObject PyGTypeWrapper_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
@@ -104,7 +258,7 @@ PyTypeObject PyGTypeWrapper_Type = {
     0,             
     (getiterfunc)0,
     (iternextfunc)0,
-    0,
+    _PyGTypeWrapper_methods,
     0,
     _PyGTypeWrapper_getsets
 };
