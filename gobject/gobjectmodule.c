@@ -1505,7 +1505,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	    }
 	    g_value_init(&params[n_params].value,
 			 G_PARAM_SPEC_VALUE_TYPE(pspec));
-	    if (pyg_value_from_pyobject(&params[n_params].value, value)) {
+	    if (pyg_param_gvalue_from_pyobject(&params[n_params].value,
+					       value, pspec) < 0) {
 		PyErr_Format(PyExc_TypeError,
 			     "could not convert value for property `%s'",
 			     key_str);
