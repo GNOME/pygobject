@@ -744,7 +744,7 @@ pygobject_set_data(PyGObject *self, PyObject *args)
     GQuark quark;
     PyObject *data;
 
-    if (!PyArg_ParseTuple(args, "sO:GObject.get_data", &key, &data))
+    if (!PyArg_ParseTuple(args, "sO:GObject.set_data", &key, &data))
 	return NULL;
     quark = g_quark_from_string(key);
     Py_INCREF(data);
