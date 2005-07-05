@@ -238,6 +238,11 @@ pyg_type_name (PyObject *self, PyObject *args)
     GType type;
     const gchar *name;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_name is deprecated; "
+		   "use GType.name instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "O:gobject.type_name", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -255,6 +260,11 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     const gchar *name;
     GType type;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_from_name is deprecated; "
+		   "use GType.from_name instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
 	return NULL;
     type = g_type_from_name(name);
@@ -270,6 +280,11 @@ pyg_type_parent (PyObject *self, PyObject *args)
     PyObject *gtype;
     GType type, parent;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_parent is deprecated; "
+		   "use GType.parent instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "O:gobject.type_parent", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -287,13 +302,18 @@ pyg_type_is_a (PyObject *self, PyObject *args)
     PyObject *gtype, *gparent;
     GType type, parent;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_is_a is deprecated; "
+		   "use GType.is_a instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "OO:gobject.type_is_a", &gtype, &gparent))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     if ((parent = pyg_type_from_object(gparent)) == 0)
 	return NULL;
-    return PyInt_FromLong(g_type_is_a(type, parent));
+    return PyBool_FromLong(g_type_is_a(type, parent));
 }
 
 static PyObject *
@@ -303,6 +323,11 @@ pyg_type_children (PyObject *self, PyObject *args)
     GType type, *children;
     guint n_children, i;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_children is deprecated; "
+		   "use GType.children instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "O:gobject.type_children", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -329,6 +354,11 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
     GType type, *interfaces;
     guint n_interfaces, i;
 
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "gobject.type_interfaces is deprecated; "
+		   "use GType.interfaces instead"))
+        return NULL;
+    
     if (!PyArg_ParseTuple(args, "O:gobject.type_interfaces", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -962,7 +992,7 @@ get_type_name_for_class(PyTypeObject *class)
     gint i, name_serial;
     char name_serial_str[16];
     PyObject *module;
-    char *type_name = NULL;
+    char *type_name;
     
     /* make name for new GType */
     name_serial = 1;
@@ -2512,8 +2542,6 @@ DL_EXPORT(void)
 initgobject(void)
 {
     PyObject *m, *d, *o, *tuple;
-
-    PyGTypeWrapper_Type.ob_type = &PyType_Type;
     PyGParamSpec_Type.ob_type = &PyType_Type;
     
     m = Py_InitModule("gobject", pygobject_functions);
@@ -2532,8 +2560,7 @@ initgobject(void)
     pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
-    PyType_Ready(&PyGTypeWrapper_Type);
-    PyDict_SetItemString(d, "GType", (PyObject *)&PyGTypeWrapper_Type);
+    REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
 
     PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						  pyobject_copy,

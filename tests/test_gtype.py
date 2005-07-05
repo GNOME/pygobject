@@ -1,28 +1,28 @@
 import unittest
 
-from common import gobject
+from gobject import GType
+from common import gobject, gtk
 
 class GTypeTest(unittest.TestCase):
     def checkType(self, expected, *objects):
         # First, double check so we get back what we sent
-        str = gobject.type_name(expected) # pyg_type_from_object
-        val = gobject.type_from_name(str) # pyg_type_wrapper_new
-        assert val == expected, \
-               'got %r while %r was expected' % (val, expected)
+        str = GType(expected).name # pyg_type_from_object
+        val = GType.from_name(str) # pyg_type_wrapper_new
+        self.assertEqual(val, expected, 
+                         'got %r while %r was expected' % (val, expected))
 
         # Then test the objects
         for object in objects:
-            str = gobject.type_name(expected)
-            val = gobject.type_from_name(str)
-            assert val == expected, \
-                   'got %r while %r was expected' % (val, expected)
+            val = GType.from_name(GType(expected).name)
+            self.assertEqual(val, expected, 
+                             'got %r while %r was expected' %
+                             (val, expected))
         
     def testBool(self):
         self.checkType(gobject.TYPE_BOOLEAN, 'gboolean', bool)
 
     def testInt(self):
         self.checkType(gobject.TYPE_INT, 'gint', int)
-        import gtk
         model = gtk.ListStore(str, int)
         iter = model.append()
         model.set(iter, 1, 100000000)
@@ -61,7 +61,7 @@ class MyObject(gobject.GObject):
 
 class TypeNameTest(unittest.TestCase):
     def testTypeName(self):
-        self.assertEqual(gobject.type_name(MyObject), 'MyObject')
+        self.assertEqual(GType(MyObject).name, 'MyObject')
         
 if __name__ == '__main__':
     unittest.main()

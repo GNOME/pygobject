@@ -1,11 +1,12 @@
 import unittest
 import warnings
 
+from gobject import GEnum, GFlags, GObject, GType
 from common import gobject, atk, pango, gtk, gdk
 
 class EnumTest(unittest.TestCase):
     def testEnums(self):
-        assert issubclass(gobject.GEnum, int)
+        assert issubclass(GEnum, int)
         assert isinstance(atk.LAYER_OVERLAY, atk.Layer)
         assert isinstance(atk.LAYER_OVERLAY, int)
         assert 'LAYER_OVERLAY' in repr(atk.LAYER_OVERLAY)
@@ -43,24 +44,24 @@ class EnumTest(unittest.TestCase):
         assert 'WINDOW_TOPLEVEL' in repr(wtype)
 
     def testAtkObj(self):
-        obj = atk.NoOpObject(gobject.GObject())
+        obj = atk.NoOpObject(GObject())
         assert obj.get_role() == atk.ROLE_INVALID
 
     def testGParam(self):
         win = gtk.Window()
-        enums = filter(lambda x: gobject.type_is_a(x.value_type, gobject.GEnum),
+        enums = filter(lambda x: GType.is_a(x.value_type, GEnum),
                        gobject.list_properties(win))
         assert enums
         enum = enums[0]
         assert hasattr(enum, 'enum_class')
-        assert issubclass(enum.enum_class, gobject.GEnum)
+        assert issubclass(enum.enum_class, GEnum)
 
     def testWeirdEnumValues(self):
         assert int(gdk.NOTHING) == -1
         assert int(gdk.BUTTON_PRESS) == 4
 
     def testParamSpec(self):
-        props = filter(lambda prop: gobject.type_is_a(prop.value_type, gobject.GEnum),
+        props = filter(lambda prop: GType.is_a(prop.value_type, GEnum),
                        gobject.list_properties(gtk.Window))
         assert len(props)>= 6
         props = filter(lambda prop: prop.name == 'type', props)
@@ -81,7 +82,7 @@ class EnumTest(unittest.TestCase):
 
 class FlagsTest(unittest.TestCase):
     def testFlags(self):
-        assert issubclass(gobject.GFlags, int)
+        assert issubclass(GFlags, int)
         assert isinstance(gdk.BUTTON_PRESS_MASK, gdk.EventMask)
         assert isinstance(gdk.BUTTON_PRESS_MASK, int)
         assert gdk.BUTTON_PRESS_MASK == 256
@@ -89,7 +90,7 @@ class FlagsTest(unittest.TestCase):
         assert gdk.BUTTON_PRESS_MASK != -256
         assert gdk.BUTTON_PRESS_MASK != gdk.BUTTON_RELEASE_MASK
 
-        assert gdk.EventMask.__bases__[0] == gobject.GFlags
+        assert gdk.EventMask.__bases__[0] == GFlags
         assert len(gdk.EventMask.__flags_values__) == 22
 
     def testComparisionWarning(self):
@@ -104,19 +105,19 @@ class FlagsTest(unittest.TestCase):
         
     def testFlagOperations(self):
         a = gdk.BUTTON_PRESS_MASK
-        assert isinstance(a, gobject.GFlags)
+        assert isinstance(a, GFlags)
         assert a.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert a.first_value_nick == 'button-press-mask'
         assert a.value_names == ['GDK_BUTTON_PRESS_MASK'], a.value_names
         assert a.value_nicks == ['button-press-mask'], a.value_names
         b = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK
-        assert isinstance(b, gobject.GFlags)
+        assert isinstance(b, GFlags)
         assert b.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert b.first_value_nick == 'button-press-mask'
         assert b.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK']
         assert b.value_nicks == ['button-press-mask', 'button-release-mask']
         c = gdk.BUTTON_PRESS_MASK | gdk.BUTTON_RELEASE_MASK | gdk.ENTER_NOTIFY_MASK
-        assert isinstance(c, gobject.GFlags)
+        assert isinstance(c, GFlags)
         assert c.first_value_name == 'GDK_BUTTON_PRESS_MASK'
         assert c.first_value_nick == 'button-press-mask'
         assert c.value_names == ['GDK_BUTTON_PRESS_MASK', 'GDK_BUTTON_RELEASE_MASK',
@@ -144,7 +145,7 @@ class FlagsTest(unittest.TestCase):
         warnings.resetwarnings()
 
     def testParamSpec(self):
-        props = filter(lambda x: gobject.type_is_a(x.value_type, gobject.GFlags),
+        props = filter(lambda x: GType.is_a(x.value_type, GFlags),
                        gtk.container_class_list_child_properties(gtk.Table))
         assert len(props) >= 2
         klass = props[0].flags_class 

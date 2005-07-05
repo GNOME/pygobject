@@ -215,6 +215,20 @@ _wrap_g_type_from_name(PyGTypeWrapper *_, PyObject *args)
     return pyg_type_wrapper_new(type);
 }
 
+static PyObject*
+_wrap_g_type_is_a(PyGTypeWrapper *self, PyObject *args)
+{
+    PyObject *gparent;
+    GType parent;
+
+    if (!PyArg_ParseTuple(args, "O:GType.is_a", &gparent))
+	return NULL;
+    else if ((parent = pyg_type_from_object(gparent)) == 0)
+	return NULL;
+    
+    return PyBool_FromLong(g_type_is_a(self->type, parent));
+}
+
 static PyMethodDef _PyGTypeWrapper_methods[] = {
     { "is_interface", (PyCFunction)_wrap_g_type_is_interface, METH_NOARGS },
     { "is_classed", (PyCFunction)_wrap_g_type_is_classed, METH_NOARGS },
@@ -226,9 +240,30 @@ static PyMethodDef _PyGTypeWrapper_methods[] = {
     { "is_value_type", (PyCFunction)_wrap_g_type_is_value_type, METH_NOARGS },
     { "has_value_table", (PyCFunction)_wrap_g_type_has_value_table, METH_NOARGS },
     { "from_name", (PyCFunction)_wrap_g_type_from_name, METH_VARARGS | METH_STATIC },
+    { "is_a", (PyCFunction)_wrap_g_type_is_a, METH_VARARGS },
     { NULL,  0, 0 }
 };
     
+static int
+pyg_type_wrapper_init(PyGTypeWrapper *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "object", NULL };
+    PyObject *py_object;
+    GType type;
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GType.__init__",
+				     kwlist, &py_object))
+        return -1;
+
+    if (!(type = pyg_type_from_object(py_object)))
+	return -1;
+
+    self->type = type;
+
+    return 0;
+}
+
 PyTypeObject PyGTypeWrapper_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
@@ -260,7 +295,13 @@ PyTypeObject PyGTypeWrapper_Type = {
     (iternextfunc)0,
     _PyGTypeWrapper_methods,
     0,
-    _PyGTypeWrapper_getsets
+    _PyGTypeWrapper_getsets,
+    NULL,		
+    NULL,		
+    (descrgetfunc)0,	
+    (descrsetfunc)0,	
+    0,                 
+    (initproc)pyg_type_wrapper_init
 };
 
 /**
