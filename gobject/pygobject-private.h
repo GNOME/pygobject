@@ -104,7 +104,8 @@ PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
 void          pygobject_register_sinkfunc(GType type,
 					  void (* sinkfunc)(GObject *object));
-int           pyg_type_register          (PyTypeObject *class);
+int           pyg_type_register          (PyTypeObject *class,
+					  char *typename);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;

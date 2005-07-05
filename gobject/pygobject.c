@@ -1244,21 +1244,42 @@ PyTypeObject PyGObject_Type = {
 };
 
 
+static int
+pygobjectmeta_register(PyTypeObject *subtype, PyObject *instance_dict)
+{
+    PyObject *pytype_name;
+    char *type_name = NULL;
+    int retval = 0;
+    
+    if (!instance_dict) {
+        PyErr_Clear();
+	goto out;
+    }
 
-    /* -------- GObject MetaClass -----------*/
+    /* If it's already registered, skip registration */
+    if (PyDict_GetItemString(instance_dict, "__gtype__"))
+	goto out;
+
+    pytype_name = PyDict_GetItemString(instance_dict, "__gtype_name__");
+    if (pytype_name)
+	type_name = g_strdup(PyString_AsString(pytype_name));
+    retval = pyg_type_register(subtype, type_name);
+
+out:
+    return retval;
+}
+
+/* -------- GObject MetaClass -----------*/
 static int
 pygobjectmeta_init(PyTypeObject *subtype, PyObject *args, PyObject *kwargs)
 {
     PyObject *instance_dict;
+    
     if (PyType_Type.tp_init((PyObject *) subtype, args, kwargs))
         return -1;
+    
     instance_dict = PyTuple_GetItem(args, 2);
-    if (instance_dict) {
-        if (PyDict_GetItemString(instance_dict, "__gtype__") == NULL)
-            return pyg_type_register(subtype);
-    } else
-        PyErr_Clear();
-    return 0;
+    return pygobjectmeta_register(subtype, instance_dict);
 }
 
 

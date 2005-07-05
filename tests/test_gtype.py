@@ -55,6 +55,13 @@ class GTypeTest(unittest.TestCase):
         self.checkType(gobject.TYPE_OBJECT, 'PyObject')
 
     # XXX: Flags, Enums
-    
+
+class MyObject(gobject.GObject):
+    __gtype_name__ = 'MyObject'
+
+class TypeNameTest(unittest.TestCase):
+    def testTypeName(self):
+        self.assertEqual(gobject.type_name(MyObject), 'MyObject')
+        
 if __name__ == '__main__':
     unittest.main()

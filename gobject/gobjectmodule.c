@@ -946,7 +946,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     if (gtype == NULL) {
         PyErr_Clear();
           /* not registered */
-        if (pyg_type_register(class))
+        if (pyg_type_register(class, NULL))
             return NULL;
     } else
           /* already registered */
@@ -956,13 +956,54 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     return (PyObject *) class;
 }
 
-int
-pyg_type_register(PyTypeObject *class)
+static char *
+get_type_name_for_class(PyTypeObject *class)
 {
-    PyObject *gtype, *module, *gsignals, *gproperties, *overridden_signals;
-    GType parent_type, instance_type;
-    gchar *type_name = NULL;
     gint i, name_serial;
+    char name_serial_str[16];
+    PyObject *module;
+    char *type_name = NULL;
+    
+    /* make name for new GType */
+    name_serial = 1;
+    /* give up after 1000 tries, just in case.. */
+    while (name_serial < 1000) 
+    {
+	snprintf(name_serial_str, 16, "-v%i", name_serial);
+	module = PyObject_GetAttrString((PyObject *)class, "__module__");
+	if (module && PyString_Check(module)) {
+	    type_name = g_strconcat(PyString_AsString(module), ".",
+				    class->tp_name,
+				    name_serial > 1 ? name_serial_str : NULL,
+				    NULL);
+	    Py_DECREF(module);
+	} else {
+	    if (module)
+		Py_DECREF(module);
+	    else
+		PyErr_Clear();
+	    type_name = g_strconcat(class->tp_name,
+				    name_serial > 1 ? name_serial_str : NULL,
+				    NULL);
+	}
+	/* convert '.' in type name to '+', which isn't banned (grumble) */
+	for (i = 0; type_name[i] != '\0'; i++)
+	    if (type_name[i] == '.')
+		type_name[i] = '+';
+	if (g_type_from_name(type_name) == 0)
+	    break;              /* we now have a unique name */
+	++name_serial;
+    }
+
+    return type_name;
+}
+
+int
+pyg_type_register(PyTypeObject *class, char *type_name)
+{
+    PyObject *gtype, *gsignals, *gproperties, *overridden_signals;
+    GType parent_type, instance_type;
+    gint i;
     GTypeQuery query;
     gpointer gclass;
     GTypeInfo type_info = {
@@ -987,38 +1028,9 @@ pyg_type_register(PyTypeObject *class)
 	return -1;
     }
 
-      /* make name for new GType */
-    name_serial = 1;
-    while (name_serial < 1000) /* give up after 1000 tries, just in case.. */
-    {
-        char name_serial_str[16];
-
-        snprintf(name_serial_str, 16, "-v%i", name_serial);
-        module = PyObject_GetAttrString((PyObject *)class, "__module__");
-        if (module && PyString_Check(module)) {
-            type_name = g_strconcat(PyString_AsString(module), ".",
-                                    class->tp_name,
-                                    name_serial > 1? name_serial_str : NULL,
-                                    NULL);
-	    Py_DECREF(module);
-        } else {
-            if (module)
-                Py_DECREF(module);
-            else
-                PyErr_Clear();
-            type_name = g_strconcat(class->tp_name,
-                                    name_serial > 1? name_serial_str : NULL,
-                                    NULL);
-        }
-          /* convert '.' in type name to '+', which isn't banned (grumble) */
-        for (i = 0; type_name[i] != '\0'; i++)
-            if (type_name[i] == '.')
-                type_name[i] = '+';
-        if (g_type_from_name(type_name) == 0)
-            break;              /* we now have a unique name */
-        ++name_serial;
-    }
-
+    if (!type_name)
+	type_name = get_type_name_for_class(class);
+    
     /* set class_data that will be passed to the class_init function. */
     type_info.class_data = class;
 
