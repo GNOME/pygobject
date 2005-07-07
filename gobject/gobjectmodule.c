@@ -2472,7 +2472,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_type_wrapper_new,
   pyg_enum_get_value,
   pyg_flags_get_value,
-  pyg_register_boxed_custom,
+  pyg_register_gtype_custom,
   pyg_value_from_pyobject,
   pyg_value_as_pyobject,
 
@@ -2697,7 +2697,7 @@ initgobject(void)
     PyModule_AddObject(m, "TYPE_OBJECT", pyg_type_wrapper_new(G_TYPE_OBJECT));
     PyModule_AddObject(m, "TYPE_PYOBJECT", pyg_type_wrapper_new(PY_TYPE_OBJECT));
 
-    pyg_register_boxed_custom(G_TYPE_STRV,
+    pyg_register_gtype_custom(G_TYPE_STRV,
 			      _pyg_strv_from_gvalue,
 			      _pyg_strv_to_gvalue);
 }

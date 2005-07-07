@@ -68,9 +68,9 @@ int pyg_pyobj_to_unichar_conv (PyObject* py_obj, void* ptr);
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
 typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
 
-void      pyg_register_boxed_custom(GType boxed_type,
-				    fromvaluefunc from_func,
-				    tovaluefunc to_func);
+void      pyg_register_gtype_custom(GType gtype,
+			     fromvaluefunc from_func,
+			     tovaluefunc to_func);
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
 PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
 int       pyg_param_gvalue_from_pyobject(GValue* value,

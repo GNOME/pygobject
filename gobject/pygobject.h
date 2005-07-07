@@ -70,8 +70,11 @@ typedef struct {
 
 typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
 
-
 struct _PyGObject_Functions {
+    /* 
+     * All field names in here are considered private,
+     * use the macros below instead, which provides stability
+     */
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
@@ -90,7 +93,7 @@ struct _PyGObject_Functions {
 
     gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
     gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
-    void (* register_boxed_custom)(GType boxed_type,
+    void (* register_gtype_custom)(GType gtype,
 			    PyObject *(* from_func)(const GValue *value),
 			    int (* to_func)(GValue *value, PyObject *obj));
     int (* value_from_pyobject)(GValue *value, PyObject *obj);
@@ -186,7 +189,9 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_type_wrapper_new        (_PyGObject_API->type_wrapper_new)
 #define pyg_enum_get_value          (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value         (_PyGObject_API->flags_get_value)
-#define pyg_register_boxed_custom   (_PyGObject_API->register_boxed_custom)
+/* This is deprecated, call pyg_register_gtype_custom directly instead */
+#define pyg_register_boxed_custom   pyg_register_gtype_custom
+#define pyg_register_gtype_custom   (_PyGObject_API->register_gtype_custom)
 #define pyg_value_from_pyobject     (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject       (_PyGObject_API->value_as_pyobject)
 #define pyg_register_interface      (_PyGObject_API->register_interface)
