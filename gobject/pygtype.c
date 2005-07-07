@@ -321,12 +321,50 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 typedef struct {
     fromvaluefunc fromvalue;
     tovaluefunc tovalue;
-} PyGBoxedMarshal;
-static GQuark pyg_boxed_marshal_key = 0;
+} PyGTypeMarshal;
+static GQuark pyg_type_marshal_key = 0;
 
-#define pyg_boxed_lookup(boxed_type) \
-  ((PyGBoxedMarshal *)g_type_get_qdata((boxed_type), pyg_boxed_marshal_key))
+PyGTypeMarshal *
+pyg_type_lookup(GType type)
+{
+    GType	ptype = type;
+    PyGTypeMarshal	*tm = NULL;
 
+    /* recursively lookup types */
+    while (ptype) {
+	if ((tm = g_type_get_qdata(ptype, pyg_type_marshal_key)) != NULL)
+	    break;
+	ptype = g_type_parent(ptype);
+    }
+    return tm;
+}
+
+/**
+ * pyg_register_type:
+ * @boxed_type: the GType for the new type
+ * @from_func: a function to convert GValues to Python objects
+ * @to_func: a function to convert Python objects to GValues
+ *
+ * In order to handle specific conversion of gboxed types or new
+ * fundamental types, you may use this function to register conversion
+ * handlers.
+ */
+
+static void
+pyg_register_gtype(GType type,
+		   fromvaluefunc from_func,
+		   tovaluefunc to_func)
+{
+    PyGTypeMarshal *tm;
+
+    if (!pyg_type_marshal_key)
+	pyg_type_marshal_key = g_quark_from_static_string("PyGType::marshal");
+
+    tm = g_new(PyGTypeMarshal, 1);
+    tm->fromvalue = from_func;
+    tm->tovalue = to_func;
+    g_type_set_qdata(type, pyg_type_marshal_key, tm);
+}
 
 /**
  * pyg_register_boxed_custom:
@@ -345,15 +383,7 @@ pyg_register_boxed_custom(GType boxed_type,
 			  fromvaluefunc from_func,
 			  tovaluefunc to_func)
 {
-    PyGBoxedMarshal *bm;
-
-    if (!pyg_boxed_marshal_key)
-      pyg_boxed_marshal_key = g_quark_from_static_string("PyGBoxed::marshal");
-
-    bm = g_new(PyGBoxedMarshal, 1);
-    bm->fromvalue = from_func;
-    bm->tovalue = to_func;
-    g_type_set_qdata(boxed_type, pyg_boxed_marshal_key, bm);
+    pyg_register_gtype(boxed_type, from_func, to_func);
 }
 
 static int
@@ -605,7 +635,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	break;
     case G_TYPE_BOXED: {
-	PyGBoxedMarshal *bm;
+	PyGTypeMarshal *bm;
 
 	if (obj == Py_None)
 	    g_value_set_boxed(value, NULL);
@@ -617,7 +647,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	else if (PySequence_Check(obj) &&
 		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
 	    return pyg_value_array_from_pyobject(value, obj, NULL);
-	else if ((bm = pyg_boxed_lookup(G_VALUE_TYPE(value))) != NULL)
+	else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
 	    return bm->tovalue(value, obj);
 	else if (PyCObject_Check(obj))
 	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
@@ -642,7 +672,12 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    return -1;
 	break;
     default:
-	break;
+	{
+	    PyGTypeMarshal *bm;
+	    if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
+		return bm->tovalue(value, obj);
+	    break;
+	}
     }
     return 0;
 }
@@ -743,7 +778,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	return pyg_pointer_new(G_VALUE_TYPE(value),
 			       g_value_get_pointer(value));
     case G_TYPE_BOXED: {
-	PyGBoxedMarshal *bm;
+	PyGTypeMarshal *bm;
 
 	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
 	    PyObject *ret = (PyObject *)g_value_dup_boxed(value);
@@ -761,7 +796,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
                                 (array->values + i, copy_boxed));
 	    return ret;
 	}	    
-	bm = pyg_boxed_lookup(G_VALUE_TYPE(value));
+	bm = pyg_type_lookup(G_VALUE_TYPE(value));
 	if (bm) {
 	    return bm->fromvalue(value);
 	} else {
@@ -778,7 +813,12 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     case G_TYPE_OBJECT:
 	return pygobject_new(g_value_get_object(value));
     default:
-	break;
+	{
+	    PyGTypeMarshal *bm;
+	    if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))))
+		return bm->fromvalue(value);
+	    break;
+	}
     }
     g_snprintf(buf, sizeof(buf), "unknown type %s",
 	       g_type_name(G_VALUE_TYPE(value)));
