@@ -25,6 +25,7 @@ tests =  \
 	test_gtype.py \
 	test_mainloop.py \
 	test_radiobutton.py \
+	test_properties.py \
 	test_signal.py \
 	test_subprocess.py \
 	test_subtype.py \

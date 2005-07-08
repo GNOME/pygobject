@@ -2542,6 +2542,7 @@ DL_EXPORT(void)
 initgobject(void)
 {
     PyObject *m, *d, *o, *tuple;
+    PyObject *descr;
     PyGParamSpec_Type.ob_type = &PyType_Type;
     
     m = Py_InitModule("gobject", pygobject_functions);
@@ -2574,13 +2575,23 @@ initgobject(void)
     PyGObject_MetaType.tp_is_gc = PyType_Type.tp_is_gc;
     PyType_Ready(&PyGObject_MetaType);
     PyDict_SetItemString(d, "GObjectMeta", (PyObject *) &PyGObject_MetaType);
-    
+
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
 			     &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
+
+      /* GObject properties descriptor */
+    if (PyType_Ready(&PyGProps_Type) < 0)
+        return;
+    if (PyType_Ready(&PyGPropsDescr_Type) < 0)
+        return;
+    if (PyType_Ready(&PyGPropsIter_Type) < 0)
+        return;
+    descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
 
     REGISTER_GTYPE(d, PyGInterface_Type, "GInterface", G_TYPE_INTERFACE);
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",

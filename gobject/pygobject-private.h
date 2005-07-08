@@ -93,6 +93,9 @@ extern PyTypeObject PyGObject_MetaType;
 /* from pygobject.h */
 extern PyTypeObject PyGObject_Type;
 extern PyTypeObject PyGInterface_Type;
+extern PyTypeObject PyGProps_Type;
+extern PyTypeObject PyGPropsDescr_Type;
+extern PyTypeObject PyGPropsIter_Type;
 
 void          pygobject_register_class   (PyObject *dict,
 					  const gchar *type_name,

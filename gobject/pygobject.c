@@ -80,6 +80,351 @@ pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
     g_array_append_val(sink_funcs, sf);
 }
 
+typedef struct {
+    PyObject_HEAD
+    GParamSpec **props;
+    guint n_props;
+    guint index;
+} PyGPropsIter;
+
+static void
+pyg_props_iter_dealloc(PyGPropsIter *self)
+{
+    g_free(self->props);
+    PyObject_Del((PyObject*) self);
+}
+
+static PyObject*
+pygobject_props_iter_next(PyGPropsIter *iter)
+{
+    if (iter->index < iter->n_props)
+        return pyg_param_spec_new(iter->props[iter->index++]);
+    else {
+        PyErr_SetNone(PyExc_StopIteration);
+        return NULL;
+    }
+}
+
+
+PyTypeObject PyGPropsIter_Type = {
+	PyObject_HEAD_INIT(NULL)
+	sizeof(PyObject),			/* ob_size */
+	"gobject.GPropsIter",			/* tp_name */
+	0,					/* tp_basicsize */
+	0,					/* tp_itemsize */
+	(destructor)pyg_props_iter_dealloc,	/* tp_dealloc */
+	0,					/* tp_print */
+	0,					/* tp_getattr */
+	0,					/* tp_setattr */
+	0,					/* tp_compare */
+	0,					/* tp_repr */
+	0,					/* tp_as_number */
+	0,					/* tp_as_sequence */
+	0,		       			/* tp_as_mapping */
+	0,					/* tp_hash */
+	0,					/* tp_call */
+	0,					/* tp_str */
+	0,					/* tp_getattro */
+	0,					/* tp_setattro */
+	0,					/* tp_as_buffer */
+	Py_TPFLAGS_DEFAULT,			/* tp_flags */
+ 	"GObject properties iterator",		/* tp_doc */
+	0,					/* tp_traverse */
+ 	0,					/* tp_clear */
+	0,					/* tp_richcompare */
+	0,					/* tp_weaklistoffset */
+	0,					/* tp_iter */
+	(iternextfunc)pygobject_props_iter_next, /* tp_iternext */
+};
+
+typedef struct {
+    PyObject_HEAD
+    /* a reference to the object containing the properties */
+    PyGObject *pygobject;
+    GType      gtype;
+} PyGProps;
+
+static void
+PyGProps_dealloc(PyGProps* self)
+{
+    PyGObject *tmp;
+
+    PyObject_GC_UnTrack((PyObject*)self);
+
+    tmp = self->pygobject;
+    self->pygobject = NULL;
+    Py_XDECREF(tmp);
+
+    PyObject_GC_Del((PyObject*)self);
+}
+
+static PyObject*
+build_parameter_list(GObjectClass *class)
+{
+    GParamSpec **props;
+    guint n_props = 0, i;
+    PyObject *prop_str;
+    char *name;
+    PyObject *props_list;
+
+    props = g_object_class_list_properties(class, &n_props);
+    props_list = PyList_New(n_props);
+    for (i = 0; i < n_props; i++) {
+	name = g_strdup(g_param_spec_get_name(props[i]));
+	/* hyphens cannot belong in identifiers */
+	g_strdelimit(name, "-", '_');
+	prop_str = PyString_FromString(name);
+	
+	PyList_SetItem(props_list, i, prop_str);
+    }
+
+    if (props)
+        g_free(props);
+    
+    return props_list;
+}
+
+static PyObject*
+PyGProps_getattro(PyGProps *self, PyObject *attr)
+{
+    char *attr_name;
+    GObjectClass *class;
+    GParamSpec *pspec;
+    GValue value = { 0, };
+    PyObject *ret;
+
+    attr_name = PyString_AsString(attr);
+    if (!attr_name) {
+        PyErr_Clear();
+        return PyObject_GenericGetAttr((PyObject *)self, attr);
+    }
+
+    class = g_type_class_ref(self->gtype);
+    
+    if (!strcmp(attr_name, "__members__")) {
+	return build_parameter_list(class);
+    }
+
+    pspec = g_object_class_find_property(class, attr_name);
+    g_type_class_unref(class);
+
+    if (!pspec) {
+	return PyObject_GenericGetAttr((PyObject *)self, attr);
+    }
+
+    if (!(pspec->flags & G_PARAM_READABLE)) {
+	PyErr_Format(PyExc_TypeError,
+		     "property '%s' is not readable", attr_name);
+	return NULL;
+    }
+
+    /* If we're doing it without an instance, return a GParamSpec */
+    if (!self->pygobject) {
+        return pyg_param_spec_new(pspec);
+    }
+    
+    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    g_object_get_property(self->pygobject->obj, attr_name, &value);
+    ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
+    g_value_unset(&value);
+    
+    return ret;
+}
+
+static int
+PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
+{
+    GParamSpec *pspec;
+    GValue value = { 0, };
+    char *attr_name;
+    GObject *obj;
+    
+    if (pvalue == NULL) {
+	PyErr_SetString(PyExc_TypeError, "properties cannot be "
+			"deleted");
+	return -1;
+    }
+
+    attr_name = PyString_AsString(attr);
+    if (!attr_name) {
+        PyErr_Clear();
+        return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
+    }
+
+    if (!self->pygobject) {
+        PyErr_SetString(PyExc_TypeError,
+			"cannot set GOject properties without an instance");
+        return -1;
+    }
+
+    obj = self->pygobject->obj;
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), attr_name);
+    if (!pspec) {
+	return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
+    }
+
+    if (!(pspec->flags & G_PARAM_WRITABLE)) {
+	PyErr_Format(PyExc_TypeError,
+		     "property '%s' is not writable", attr_name);
+	return -1;
+    }	
+
+    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not convert argument to correct param type");
+	return -1;
+    }
+
+    g_object_set_property(obj, attr_name, &value);
+    g_value_unset(&value);
+    return 0;
+}
+
+static int
+pygobject_props_traverse(PyGProps *self, visitproc visit, void *arg)
+{
+    if (self->pygobject && visit((PyObject *) self->pygobject, arg) < 0)
+        return -1;
+    return 0;
+}
+
+static PyObject*
+pygobject_props_get_iter(PyGProps *self)
+{
+    PyGPropsIter *iter;
+    GObjectClass *class;
+
+    iter = PyObject_NEW(PyGPropsIter, &PyGPropsIter_Type);
+    class = g_type_class_ref(self->gtype);
+    iter->props = g_object_class_list_properties(class, &iter->n_props);
+    iter->index = 0;
+    g_type_class_unref(class);
+    return (PyObject *) iter;
+}
+
+static int
+PyGProps_length(PyGProps *self)
+{
+    GObjectClass *class;
+    int n_props;
+    
+    class = g_type_class_ref(self->gtype);
+    g_object_class_list_properties(class, &n_props);
+    g_type_class_unref(class);
+    
+    return n_props;
+}
+
+static PySequenceMethods _PyGProps_as_sequence = {
+    (inquiry)PyGProps_length,
+    (binaryfunc)0,
+    (intargfunc)0,
+    (intargfunc)0,
+    (intintargfunc)0,
+    (intobjargproc)0,
+    (intintobjargproc)0
+};
+
+PyTypeObject PyGProps_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                          /* ob_size */
+    "gobject.GProps",                           /* tp_name */
+    sizeof(PyGProps),                           /* tp_basicsize */
+    0,                                          /* tp_itemsize */
+    (destructor)PyGProps_dealloc,               /* tp_dealloc */
+    0,                                          /* tp_print */
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
+    0,                                          /* tp_repr */
+    0,                                          /* tp_as_number */
+    (PySequenceMethods*)&_PyGProps_as_sequence, /* tp_as_sequence */
+    0,                                          /* tp_as_mapping */
+    0,                                          /* tp_hash */
+    0,                                          /* tp_call */
+    0,                                          /* tp_str */
+    (getattrofunc)PyGProps_getattro,            /* tp_getattro */
+    (setattrofunc)PyGProps_setattro,            /* tp_setattro */
+    0,                                          /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,      /* tp_flags */
+    "The properties of the GObject accessible as "
+    "Python attributes.",                       /* tp_doc */
+    (traverseproc)pygobject_props_traverse,     /* tp_traverse */
+    0,                                          /* tp_clear */
+    0,                                          /* tp_richcompare */
+    0,                                          /* tp_weaklistoffset */
+    (getiterfunc)pygobject_props_get_iter,      /* tp_iter */
+    0,                                          /* tp_iternext */
+};
+
+
+static PyObject *
+pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
+{
+    PyGProps *gprops;
+
+    gprops = PyObject_GC_New(PyGProps, &PyGProps_Type);
+    if (obj == NULL || obj == Py_None) {
+        gprops->pygobject = NULL;
+        gprops->gtype = pyg_type_from_object(type);
+    } else {
+        if (!PyObject_IsInstance(obj, (PyObject *) &PyGObject_Type)) {
+            PyErr_SetString(PyExc_TypeError, "cannot use GObject property"
+                            " descriptor on non-GObject instances");
+            return NULL;
+        }
+        Py_INCREF(obj);
+        gprops->pygobject = (PyGObject *) obj;
+        gprops->gtype = pyg_type_from_object(obj);
+    }
+    return (PyObject *) gprops;
+}
+
+PyTypeObject PyGPropsDescr_Type = {
+	PyObject_HEAD_INIT(NULL)
+	sizeof(PyObject),			/* ob_size */
+	"gobject.GPropsDescr",			/* tp_name */
+	0,					/* tp_basicsize */
+	0,					/* tp_itemsize */
+	0,	 				/* tp_dealloc */
+	0,					/* tp_print */
+	0,					/* tp_getattr */
+	0,					/* tp_setattr */
+	0,					/* tp_compare */
+	0,					/* tp_repr */
+	0,					/* tp_as_number */
+	0,					/* tp_as_sequence */
+	0,		       			/* tp_as_mapping */
+	0,					/* tp_hash */
+	0,					/* tp_call */
+	0,					/* tp_str */
+	0,					/* tp_getattro */
+	0,					/* tp_setattro */
+	0,					/* tp_as_buffer */
+	Py_TPFLAGS_DEFAULT,			/* tp_flags */
+ 	0,					/* tp_doc */
+	0,					/* tp_traverse */
+ 	0,					/* tp_clear */
+	0,					/* tp_richcompare */
+	0,					/* tp_weaklistoffset */
+	0,					/* tp_iter */
+	0,					/* tp_iternext */
+	0,					/* tp_methods */
+	0,					/* tp_members */
+	0,					/* tp_getset */
+	0,					/* tp_base */
+	0,					/* tp_dict */
+	pyg_props_descr_descr_get,		/* tp_descr_get */
+	0,					/* tp_descr_set */
+	0,					/* tp_dictoffset */
+	0,					/* tp_init */
+	0,					/* tp_alloc */
+	0,					/* tp_new */
+	0,               			/* tp_free */
+};
+
+
 /**
  * pygobject_register_class:
  * @dict: the module dictionary.  A reference to the type will be stored here.
