@@ -31,7 +31,7 @@ def gettestnames():
     names = map(lambda x: x[:-3], files)
     map(names.remove, SKIP_FILES)
     return names
-        
+
 suite = unittest.TestSuite()
 loader = unittest.TestLoader()
 

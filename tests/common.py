@@ -15,7 +15,7 @@ def importModules(buildDir, srcDir):
     sys.path.insert(0, os.path.join(buildDir, 'gtk'))
     # testhelper
     sys.path.insert(0, os.path.join(buildDir, 'tests'))
-
+    sys.argv.append('--g-fatal-warnings')
     import ltihooks
     
     gobject = importModule('gobject', buildDir, 'gobject/gobject.la')

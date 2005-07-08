@@ -1,6 +1,9 @@
 import unittest
 
+import sys
+sys.argv.append('--g-fatal-warnings')
 from common import gtk
+print gtk.gtk_version
 
 class RadioTest(unittest.TestCase):
     widget_type = None
