@@ -108,9 +108,9 @@ pygobject_props_iter_next(PyGPropsIter *iter)
 
 PyTypeObject PyGPropsIter_Type = {
 	PyObject_HEAD_INIT(NULL)
-	sizeof(PyObject),			/* ob_size */
+	0,					/* ob_size */
 	"gobject.GPropsIter",			/* tp_name */
-	0,					/* tp_basicsize */
+	sizeof(PyGPropsIter),			/* tp_basicsize */
 	0,					/* tp_itemsize */
 	(destructor)pyg_props_iter_dealloc,	/* tp_dealloc */
 	0,					/* tp_print */
@@ -383,7 +383,7 @@ pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
 
 PyTypeObject PyGPropsDescr_Type = {
 	PyObject_HEAD_INIT(NULL)
-	sizeof(PyObject),			/* ob_size */
+	0,					/* ob_size */
 	"gobject.GPropsDescr",			/* tp_name */
 	0,					/* tp_basicsize */
 	0,					/* tp_itemsize */
