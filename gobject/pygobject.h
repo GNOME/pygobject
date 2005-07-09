@@ -166,6 +166,13 @@ struct _PyGObject_Functions {
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
     void      (*closure_set_exception_handler) (GClosure *closure, PyClosureExceptionHandler handler);
+    int       (*pygobject_constructv) (PyGObject  *self,
+                                       guint       n_parameters,
+                                       GParameter *parameters);
+    int       (*pygobject_construct) (PyGObject  *self,
+                                      const char *first_property_name,
+                                      ...);
+    void      (*set_object_has_new_constructor) (GType type);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -222,6 +229,10 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_enable_threads          (_PyGObject_API->enable_threads)
 #define pyg_register_class_init     (_PyGObject_API->register_class_init)
 #define pyg_register_interface_info (_PyGObject_API->register_interface_info)
+#define pygobject_construct         (_PyGObject_API->pygobject_construct)
+#define pygobject_constructv        (_PyGObject_API->pygobject_constructv)
+#define pyg_set_object_has_new_constructor (_PyGObject_API->set_object_has_new_constructor)
+
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

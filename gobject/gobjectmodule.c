@@ -26,6 +26,7 @@
 
 #include "pygobject-private.h"
 #include "pythread.h"
+#include <gobject/gvaluecollector.h>
 
 static PyObject *gerror_exc = NULL;
 static gboolean use_gil_state_api = FALSE;
@@ -40,6 +41,9 @@ GQuark pygboxed_marshal_key;
 GQuark pygenum_class_key;
 GQuark pygflags_class_key;
 GQuark pygpointer_class_key;
+GQuark pygobject_has_updated_constructor_key;
+
+
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -1028,6 +1032,56 @@ get_type_name_for_class(PyTypeObject *class)
     return type_name;
 }
 
+
+static GStaticPrivate pygobject_contruction_wrapper = G_STATIC_PRIVATE_INIT;
+
+static inline void
+pygobject_init_wrapper_set(PyObject *wrapper)
+{
+    g_static_private_set(&pygobject_contruction_wrapper, wrapper, NULL);
+}
+
+static inline PyObject *
+pygobject_init_wrapper_get(void)
+{
+    return (PyObject *) g_static_private_get(&pygobject_contruction_wrapper);
+}
+
+static void
+pygobject__g_instance_init(GTypeInstance   *instance,
+                           gpointer         g_class)
+{
+    GObject *object = (GObject *) instance;
+    PyObject *wrapper, *args, *kwargs;
+
+    if (!g_type_get_qdata(G_OBJECT_TYPE(object), pygobject_has_updated_constructor_key))
+        return;
+
+    wrapper = g_object_get_qdata(object, pygobject_wrapper_key); 
+    if (wrapper == NULL) {
+        wrapper = pygobject_init_wrapper_get();
+        if (wrapper) {
+            g_object_set_qdata(object, pygobject_wrapper_key, wrapper);
+        }
+    }
+    pygobject_init_wrapper_set(NULL);
+    if (wrapper == NULL) {
+          /* this looks like a python object created through
+           * g_object_new -> we have no python wrapper, so create it
+           * now */
+        PyGILState_STATE state;
+        state = pyg_gil_state_ensure();
+        wrapper = pygobject_new_full(object, FALSE);
+        args = PyTuple_New(0);
+        kwargs = PyDict_New();
+        if (wrapper->ob_type->tp_init(wrapper, args, kwargs))
+            PyErr_Print();
+        Py_DECREF(args);
+        Py_DECREF(kwargs);
+        pyg_gil_state_release(state);
+    }
+}
+
 int
 pyg_type_register(PyTypeObject *class, char *type_name)
 {
@@ -1036,6 +1090,7 @@ pyg_type_register(PyTypeObject *class, char *type_name)
     gint i;
     GTypeQuery query;
     gpointer gclass;
+    gpointer has_new_constructor_api;
     GTypeInfo type_info = {
 	0,    /* class_size */
 
@@ -1048,7 +1103,7 @@ pyg_type_register(PyTypeObject *class, char *type_name)
 
 	0,    /* instance_size */
 	0,    /* n_preallocs */
-	(GInstanceInitFunc) NULL
+	(GInstanceInitFunc) pygobject__g_instance_init
     };
 
 
@@ -1087,6 +1142,16 @@ pyg_type_register(PyTypeObject *class, char *type_name)
     gtype = pyg_type_wrapper_new(instance_type);
     PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
     Py_DECREF(gtype);
+
+      /* propagate new constructor API compatility flag from parent to child type */
+    has_new_constructor_api = g_type_get_qdata(parent_type,
+                                               pygobject_has_updated_constructor_key);
+    if (has_new_constructor_api == NULL)
+        g_warning("Constructor wrapper for %s needs to be updated to the new API",
+                  g_type_name(parent_type));
+    else
+        g_type_set_qdata(instance_type, pygobject_has_updated_constructor_key,
+                         has_new_constructor_api);
 
     /* if no __doc__, set it to the auto doc descriptor */
     if (PyDict_GetItemString(class->tp_dict, "__doc__") == NULL) {
@@ -1572,8 +1637,12 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
     
     if (obj)
-	return pygobject_new ((GObject *)obj);
-    return NULL;
+	self = (PyGObject *) pygobject_new ((GObject *)obj);
+    else
+        self = NULL;
+    g_object_unref(obj);
+
+    return (PyObject *) self;
 }
 
 static gint
@@ -2455,6 +2524,95 @@ pyg_parse_constructor_args(GType        obj_type,
     return TRUE;
 }
 
+int
+pygobject_constructv(PyGObject  *self,
+                     guint       n_parameters,
+                     GParameter *parameters)
+{
+    if (self->obj == NULL) {
+        pygobject_init_wrapper_set((PyObject *) self);
+        self->obj = g_object_newv(pyg_type_from_object((PyObject *) self),
+                                  n_parameters, parameters);
+        pygobject_init_wrapper_set(NULL);
+        pygobject_register_wrapper((PyObject *) self);
+    } else {
+        int i;
+        for (i = 0; i < n_parameters; ++i)
+            g_object_set_property(self->obj, parameters[i].name, &parameters[i].value);
+    }
+    return 0;
+}
+
+/* This function is mostly juste copy-paste from g_object_new, but
+ * calls pygobject_constructv instead of g_object_newv */
+int
+pygobject_construct(PyGObject *self, const char *first_property_name, ...)
+{
+    va_list var_args;
+    GObjectClass *class;
+    GParameter *params;
+    const gchar *name;
+    guint n_params = 0, n_alloced_params = 16;
+    GType object_type = pyg_type_from_object((PyObject *) self);
+    int retval;
+
+    if (!first_property_name)
+        return pygobject_constructv(self, 0, NULL);
+
+    va_start(var_args, first_property_name);
+    class = g_type_class_ref(object_type);
+
+    params = g_new(GParameter, n_alloced_params);
+    name = first_property_name;
+    while (name)
+    {
+        gchar *error = NULL;
+        GParamSpec *pspec = g_object_class_find_property(class, name);
+
+        if (!pspec)
+	{
+            g_warning("%s: object class `%s' has no property named `%s'", 
+                      G_STRFUNC, 
+                      g_type_name(object_type), 
+                      name);
+            break;
+	}
+        if (n_params >= n_alloced_params)
+	{
+            n_alloced_params += 16;
+            params = g_renew(GParameter, params, n_alloced_params);
+	}
+        params[n_params].name = name;
+        params[n_params].value.g_type = 0;
+        g_value_init(&params[n_params].value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+        G_VALUE_COLLECT(&params[n_params].value, var_args, 0, &error);
+        if (error)
+	{
+            g_warning("%s: %s", G_STRFUNC, error);
+            g_free(error);
+            g_value_unset(&params[n_params].value);
+            break;
+	}
+        n_params++;
+        name = va_arg(var_args, gchar*);
+    }
+
+    retval = pygobject_constructv(self, n_params, params);
+
+    while (n_params--)
+        g_value_unset(&params[n_params].value);
+    g_free(params);
+    va_end(var_args);
+    g_type_class_unref(class);
+    return retval;
+}
+
+void
+pyg_set_object_has_new_constructor(GType type)
+{
+    g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
+}
+
 /* ----------------- gobject module initialisation -------------- */
 
 struct _PyGObject_Functions pygobject_api_functions = {
@@ -2521,7 +2679,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_register_class_init,
   pyg_register_interface_info,
 
-  pyg_closure_set_exception_handler
+  pyg_closure_set_exception_handler,
+  pygobject_constructv,
+  pygobject_construct,
+  pyg_set_object_has_new_constructor
 };
 
 #define REGISTER_TYPE(d, type, name) \
@@ -2560,6 +2721,8 @@ initgobject(void)
     pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
     pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
+    pygobject_has_updated_constructor_key =\
+        g_quark_from_static_string("PyGObject::has-updated-constructor");
 
     REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
 
@@ -2582,6 +2745,7 @@ initgobject(void)
 			     &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
+    pyg_set_object_has_new_constructor(G_TYPE_OBJECT);
 
       /* GObject properties descriptor */
     if (PyType_Ready(&PyGProps_Type) < 0)

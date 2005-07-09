@@ -1,6 +1,7 @@
 import unittest
 
 from common import gobject, gtk, testhelper
+import testmodule
 
 class TestSubType(unittest.TestCase):
     def testSubType(self):
@@ -20,3 +21,35 @@ class TestSubType(unittest.TestCase):
 
         treemodel = testhelper.get_tp_basicsize(gtk.TreeModel)
         self.assert_(iface == treemodel)
+
+    def testBuiltinContructorRefcount(self):
+        foo = gtk.Label()
+        self.assertEqual(foo.__grefcount__, 1)
+
+    def testPyContructorRefcount(self):
+        foo = testmodule.PyLabel()
+        self.assertEqual(foo.__grefcount__, 1)
+
+    def testBuiltinObjNewRefcount(self):
+        foo = gobject.new(gtk.Label)
+        self.assertEqual(foo.__grefcount__, 1)
+
+    def testPyObjNewRefcount(self):
+        foo = gobject.new(testmodule.PyLabel)
+        self.assertEqual(foo.__grefcount__, 1)
+
+    def testPyContructorPropertyChaining(self):
+        foo = testmodule.PyLabel()
+        self.assertEqual(foo.__grefcount__, 1)
+
+    def testPyObjNewPropertyChaining(self):
+        foo = gobject.new(testmodule.PyLabel)
+        self.assertEqual(foo.props.label, "hello")
+
+    def testCPyCSubclassing1(self):
+        obj = testhelper.create_test_type()
+        self.assertEqual(obj.__grefcount__, 1)
+
+    def testCPyCSubclassing1(self):
+        refcount = testhelper.test_g_object_new()
+        self.assertEqual(refcount, 2)

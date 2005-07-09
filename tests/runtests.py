@@ -21,7 +21,7 @@ else:
 common.importModules(buildDir=buildDir,
                      srcDir=srcDir)
 
-SKIP_FILES = ['common', 'runtests']
+SKIP_FILES = ['common', 'runtests', 'testmodule']
 
 dir = os.path.split(os.path.abspath(__file__))[0]
 os.chdir(dir)

@@ -660,6 +660,7 @@ pygobject_lookup_class(GType gtype)
 /**
  * pygobject_new:
  * @obj: a GObject instance.
+ * @sink: whether to sink any floating reference found on the GObject.
  *
  * This function gets a reference to a wrapper for the given GObject
  * instance.  If a wrapper has already been created, a new reference
@@ -669,7 +670,7 @@ pygobject_lookup_class(GType gtype)
  * Returns: a reference to the wrapper for the GObject.
  */
 PyObject *
-pygobject_new(GObject *obj)
+pygobject_new_full(GObject *obj, gboolean sink)
 {
     PyGObject *self;
 
@@ -695,7 +696,8 @@ pygobject_new(GObject *obj)
         pyg_begin_allow_threads;
 	self->obj = g_object_ref(obj);
 	pyg_end_allow_threads;
-	sink_object(self->obj);
+        if (sink)
+            sink_object(self->obj);
 
 	self->inst_dict = NULL;
 	self->weakreflist = NULL;
@@ -709,6 +711,12 @@ pygobject_new(GObject *obj)
     }
 
     return (PyObject *)self;
+}
+
+PyObject *
+pygobject_new(GObject *obj)
+{
+    return pygobject_new_full(obj, TRUE);
 }
 
 static void
@@ -943,11 +951,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	    n_params++;
 	}
     }
-
-    self->obj = g_object_newv(object_type, n_params, params);
-    if (self->obj)
-	pygobject_register_wrapper((PyObject *)self);
-    else
+    if (pygobject_constructv(self, n_params, params))
 	PyErr_SetString (PyExc_RuntimeError, "could not create object");
 	   
  cleanup:

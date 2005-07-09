@@ -5,6 +5,56 @@
 #include "test-unknown.h"
 
 
+static GType
+py_label_get_type(void)
+{
+    static GType gtype = 0;
+    if (gtype == 0) {
+        PyObject *module;
+        if ((module = PyImport_ImportModule("testmodule")) != NULL) {
+            PyObject *moddict = PyModule_GetDict(module);
+            PyObject *py_label_type = PyDict_GetItemString(moddict, "PyLabel");
+            if (py_label_type != NULL)
+                gtype = pyg_type_from_object(py_label_type);
+        }
+    }
+    if (gtype == 0)
+        g_warning("could not get PyLabel from testmodule");
+    return gtype;
+}
+
+GType
+test_type_get_type(void)
+{
+    static GType gtype = 0;
+
+    if (gtype == 0)
+    {
+        GTypeQuery q;
+        GTypeInfo type_info = {
+            0,    /* class_size */
+            
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            
+            (GClassInitFunc) NULL,
+            (GClassFinalizeFunc) NULL,
+            NULL, /* class_data */
+            
+            0,    /* instance_size */
+            0,    /* n_preallocs */
+            (GInstanceInitFunc) NULL
+        };
+        g_type_query(py_label_get_type(), &q);
+        type_info.class_size = q.class_size;
+        type_info.instance_size = q.instance_size;
+        gtype = g_type_register_static(py_label_get_type(), "TestType", &type_info, 0);
+    }
+    return gtype;
+}
+
+#define TYPE_TEST (test_type_get_type())
+
 static PyObject *
 _wrap_get_tp_basicsize (PyObject * self, PyObject * args)
 {
@@ -34,10 +84,35 @@ _wrap_get_unknown (PyObject * self)
   
 }
 
+static PyObject *
+_wrap_create_test_type (PyObject * self)
+{
+    GObject *obj;
+    PyObject *rv;
+    obj = g_object_new(TYPE_TEST, NULL);
+    rv = pygobject_new(obj);
+    g_object_unref(obj);
+    return rv;
+}
+
+static PyObject *
+_wrap_test_g_object_new (PyObject * self)
+{
+    GObject *obj;
+    PyObject *rv;
+
+    obj = g_object_new(py_label_get_type(), NULL);
+    rv = PyInt_FromLong(obj->ref_count); /* should be == 2 at this point */
+    g_object_unref(obj);
+    return rv;
+}
+
 static PyMethodDef testhelper_methods[] = {
     { "get_tp_basicsize", _wrap_get_tp_basicsize, METH_VARARGS },
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
+    { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
+    { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { NULL, NULL }
 };
 

@@ -51,9 +51,17 @@ extern GQuark pygobject_class_init_key;
 extern GQuark pygobject_class_key;
 extern GQuark pygobject_wrapper_key;
 extern GQuark pygpointer_class_key;
+extern GQuark pygobject_has_updated_constructor_key;
 
-void  pyg_destroy_notify (gpointer user_data);
-gboolean pyg_error_check(GError **error);
+void     pyg_destroy_notify   (gpointer     user_data);
+gboolean pyg_error_check      (GError     **error);
+int      pygobject_constructv (PyGObject   *self,
+                               guint        n_parameters,
+                               GParameter  *parameters);
+int      pygobject_construct  (PyGObject   *self,
+                               const char  *first_property_name,
+                               ...);
+void     pyg_set_object_has_new_constructor (GType gtype);
 
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
@@ -103,6 +111,7 @@ void          pygobject_register_class   (PyObject *dict,
 					  PyObject *bases);
 void          pygobject_register_wrapper (PyObject *self);
 PyObject *    pygobject_new              (GObject *obj);
+PyObject *    pygobject_new_full         (GObject *obj, gboolean sink);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
 void          pygobject_register_sinkfunc(GType type,
