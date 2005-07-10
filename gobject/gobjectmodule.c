@@ -2558,7 +2558,9 @@ pygobject_constructv(PyGObject  *self,
     } else {
         int i;
         for (i = 0; i < n_parameters; ++i)
-            g_object_set_property(self->obj, parameters[i].name, &parameters[i].value);
+            g_object_set_property(self->obj,
+				  parameters[i].name,
+				  &parameters[i].value);
     }
     return 0;
 }

@@ -231,11 +231,44 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     return ret;
 }
 
+static gboolean
+set_property_from_pspec(GObject *obj,
+			char *attr_name,
+			GParamSpec *pspec,
+			PyObject *pvalue)
+{
+    GValue value = { 0, };
+
+    if (pspec->flags & G_PARAM_CONSTRUCT_ONLY) {
+	PyErr_Format(PyExc_TypeError,
+		     "property '%s' can only be set in constructor",
+		     attr_name);
+	return FALSE;
+    }	
+
+    if (!(pspec->flags & G_PARAM_WRITABLE)) {
+	PyErr_Format(PyExc_TypeError,
+		     "property '%s' is not writable", attr_name);
+	return FALSE;
+    }	
+
+    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
+	PyErr_SetString(PyExc_TypeError,
+			"could not convert argument to correct param type");
+	return FALSE;
+    }
+
+    g_object_set_property(obj, attr_name, &value);
+    g_value_unset(&value);
+    
+    return TRUE;
+}
+
 static int
 PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 {
     GParamSpec *pspec;
-    GValue value = { 0, };
     char *attr_name;
     GObject *obj;
     
@@ -263,21 +296,9 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 	return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
     }
 
-    if (!(pspec->flags & G_PARAM_WRITABLE)) {
-	PyErr_Format(PyExc_TypeError,
-		     "property '%s' is not writable", attr_name);
+    if (!set_property_from_pspec(obj, attr_name, pspec, pvalue))
 	return -1;
-    }	
-
-    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
-	PyErr_SetString(PyExc_TypeError,
-			"could not convert argument to correct param type");
-	return -1;
-    }
-
-    g_object_set_property(obj, attr_name, &value);
-    g_value_unset(&value);
+				  
     return 0;
 }
 
@@ -952,7 +973,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	}
     }
     if (pygobject_constructv(self, n_params, params))
-	PyErr_SetString (PyExc_RuntimeError, "could not create object");
+	PyErr_SetString(PyExc_RuntimeError, "could not create object");
 	   
  cleanup:
     for (i = 0; i < n_params; i++) {
@@ -1008,7 +1029,6 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
     GParamSpec *pspec;
-    GValue value = { 0, };
     PyObject *pvalue;
 
     if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
@@ -1021,19 +1041,10 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 			"the object does not support the given parameter");
 	return NULL;
     }
-    if (!(pspec->flags & G_PARAM_WRITABLE)) {
-	PyErr_Format(PyExc_TypeError, "property %s is not writable",
-		     param_name);
+    
+    if (!set_property_from_pspec(self->obj, param_name, pspec, pvalue))
 	return NULL;
-    }
-    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
-	PyErr_SetString(PyExc_TypeError,
-			"could not convert argument to correct param type");
-	return NULL;
-    }
-    g_object_set_property(self->obj, param_name, &value);
-    g_value_unset(&value);
+    
     Py_INCREF(Py_None);
     return Py_None;
 }
