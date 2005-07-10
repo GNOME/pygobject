@@ -1685,8 +1685,8 @@ get_handler_priority(gint *priority, PyObject *kwargs)
     return 0;
 }
 
-static gboolean
-handler_marshal(gpointer user_data)
+gboolean
+pyg_handler_marshal(gpointer user_data)
 {
     PyObject *tuple, *ret;
     gboolean res;
@@ -1740,13 +1740,13 @@ pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 
     cbargs = PySequence_GetSlice(args, 1, len);
     if (cbargs == NULL)
-      return NULL;
+	return NULL;
 
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
-      return NULL;
-    handler_id = g_idle_add_full(priority, handler_marshal, data,
-				 (GDestroyNotify)pyg_destroy_notify);
+	return NULL;
+    handler_id = g_idle_add_full(priority, pyg_handler_marshal, data,
+				 pyg_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -1754,8 +1754,8 @@ static PyObject *
 pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority = G_PRIORITY_DEFAULT, interval;
-    guint handler_id;
+    gint len, priority = G_PRIORITY_DEFAULT;
+    guint interval, handler_id;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -1764,7 +1764,7 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
     first = PySequence_GetSlice(args, 0, 2);
-    if (!PyArg_ParseTuple(first, "iO:timeout_add", &interval, &callback)) {
+    if (!PyArg_ParseTuple(first, "IO:timeout_add", &interval, &callback)) {
 	Py_DECREF(first);
         return NULL;
     }
@@ -1778,13 +1778,14 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 
     cbargs = PySequence_GetSlice(args, 2, len);
     if (cbargs == NULL)
-      return NULL;
+	return NULL;
 
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
-      return NULL;
-    handler_id = g_timeout_add_full(priority, interval, handler_marshal, data,
-				    (GDestroyNotify)pyg_destroy_notify);
+	return NULL;
+    handler_id = g_timeout_add_full(priority, interval,
+				    pyg_handler_marshal, data,
+				    pyg_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -2241,6 +2242,23 @@ pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
     return retval;
 }
 
+static PyObject *
+pyg_get_current_time(PyObject *unused)
+{
+    GTimeVal timeval;
+    double ret;
+
+    g_get_current_time(&timeval);
+    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
+    return PyFloat_FromDouble(ret);
+}
+
+static PyObject *
+pyg_main_depth(PyObject *unused)
+{
+    return PyInt_FromLong(g_main_depth());
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2266,6 +2284,8 @@ static PyMethodDef pygobject_functions[] = {
     { "child_watch_add", (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
     { "spawn_async", (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
     { "markup_escape_text", (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
+    { "get_current_time", (PyCFunction)pyg_get_current_time, METH_NOARGS },
+    { "main_depth", (PyCFunction)pyg_main_depth, METH_NOARGS },
 
     { NULL, NULL, 0 }
 };
@@ -2774,7 +2794,12 @@ initgobject(void)
     REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
 
     REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
-    
+
+    REGISTER_TYPE(d, PyGSource_Type, "Source");
+    REGISTER_TYPE(d, PyGIdle_Type, "Idle");
+    REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
+    REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
+
     /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
 			   glib_micro_version);

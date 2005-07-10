@@ -54,6 +54,7 @@ extern GQuark pygpointer_class_key;
 extern GQuark pygobject_has_updated_constructor_key;
 
 void     pyg_destroy_notify   (gpointer     user_data);
+gboolean pyg_handler_marshal  (gpointer     user_data);
 gboolean pyg_error_check      (GError     **error);
 int      pygobject_constructv (PyGObject   *self,
                                guint        n_parameters,
@@ -195,6 +196,12 @@ PyObject * pyg_param_spec_new (GParamSpec *pspec);
 
 /* pygiochannel.c */
 extern PyTypeObject PyGIOChannel_Type;
+
+/* pygsource.c */
+extern PyTypeObject PyGSource_Type;
+extern PyTypeObject PyGIdle_Type;
+extern PyTypeObject PyGTimeout_Type;
+extern PyTypeObject PyGPollFD_Type;
 
 
 #endif

@@ -266,7 +266,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	
     pyg_unblock_threads();
     status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
-    pyg_unblock_threads();
+    pyg_block_threads();
     if (pyg_error_check(&error))
 	return NULL;
 	
