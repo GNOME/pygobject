@@ -203,5 +203,12 @@ extern PyTypeObject PyGIdle_Type;
 extern PyTypeObject PyGTimeout_Type;
 extern PyTypeObject PyGPollFD_Type;
 
+typedef struct
+{
+    PyObject_HEAD
+    GPollFD pollfd;
+    PyObject *fd_obj;
+} PyGPollFD;
+
 
 #endif

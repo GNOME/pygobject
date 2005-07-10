@@ -518,17 +518,18 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
     pollfd = g_newa(GPollFD, len);
     for (i = 0; i < len; ++i) {
         pyfd = PyList_GET_ITEM(pyfds, i);
-        if (!PyArg_ParseTuple(pyfd, "iii", &pollfd[i].fd, &pollfd[i].events,
-                              &pollfd[i].revents))
+        if (!PyObject_TypeCheck(pyfd, &PyGPollFD_Type)) {
+            PyErr_SetString(PyExc_TypeError, "'fds' must be a list of gobject.PollFD objects");
             return NULL;
+        }
+        pollfd[i] = ((PyGPollFD *) pyfd)->pollfd;
     }
 
     result = g_io_channel_win32_poll(pollfd, len, timeout);
-    pyfds = PyList_New(len);
-    for (i = 0; i < len; ++i)
-        PyList_SET_ITEM(pyfds, i, Py_BuildValue("(iii)", pollfd[i].fd,
-                                                pollfd[i].events,
-                                                pollfd[i].revents));
+    for (i = 0; i < len; ++i) {
+        pyfd = PyList_GET_ITEM(pyfds, i);
+        ((PyGPollFD *) pyfd)->pollfd = pollfd[i];
+    }
     return PyInt_FromLong(result);
 }
 
@@ -538,6 +539,7 @@ py_io_channel_win32_make_pollfd(PyObject *self, PyObject *args, PyObject *kwargs
     static char *kwlist[] = { "condition", NULL };
     int condition;
     GPollFD pollfd;
+    PyGPollFD *pypollfd;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "i:gobject.IOChannel.win32_make_pollfd",
@@ -546,7 +548,9 @@ py_io_channel_win32_make_pollfd(PyObject *self, PyObject *args, PyObject *kwargs
 
     g_io_channel_win32_make_pollfd(((PyGIOChannel *) self)->channel,
                                    condition, &pollfd);
-    return Py_BuildValue("[iii]", pollfd.fd, pollfd.events, pollfd.revents);
+    pypollfd = PyObject_NEW(PyGPollFD, &PyGPollFD_Type);
+    pypollfd->pollfd = pollfd;
+    return (PyObject *) pypollfd;
 }
 #endif /* def G_OS_WIN32 */
 

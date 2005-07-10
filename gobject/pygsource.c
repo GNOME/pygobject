@@ -54,14 +54,6 @@ typedef struct
     PyObject *obj;
 } PyGRealSource;
 
-typedef struct
-{
-    PyObject_HEAD
-    GPollFD pollfd;
-    PyObject *fd_obj;
-} PyGPollFD;
-
-
 static PyObject *
 source_repr(PyGSource *self, const char *type)
 {
@@ -780,7 +772,7 @@ static PyMemberDef pyg_poll_fd_members[] = {
 static void
 pyg_poll_fd_dealloc(PyGPollFD *self)
 {
-    Py_DECREF(self->fd_obj);
+    Py_XDECREF(self->fd_obj);
     PyObject_DEL(self);
 }
 
