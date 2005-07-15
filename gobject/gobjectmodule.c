@@ -701,9 +701,15 @@ create_property (const gchar  *prop_name,
     case G_TYPE_ENUM:
 	{
 	    gint default_value;
-
-	    if (!PyArg_ParseTuple(args, "i", &default_value))
+	    PyObject *pydefault;
+	    
+	    if (!PyArg_ParseTuple(args, "O", &pydefault))
 		return NULL;
+	    
+	    if (pyg_enum_get_value(prop_type, pydefault,
+				   (gint *)&default_value))
+		return NULL;
+	    
 	    pspec = g_param_spec_enum (prop_name, nick, blurb,
 				       prop_type, default_value, flags);
 	}
@@ -711,9 +717,15 @@ create_property (const gchar  *prop_name,
     case G_TYPE_FLAGS:
 	{
 	    guint default_value;
+	    PyObject *pydefault;
 
-	    if (!PyArg_ParseTuple(args, "i", &default_value))
+	    if (!PyArg_ParseTuple(args, "O", &pydefault))
 		return NULL;
+	    
+	    if (pyg_flags_get_value(prop_type, pydefault,
+				    (gint *)&default_value))
+		return NULL;
+	    
 	    pspec = g_param_spec_flags (prop_name, nick, blurb,
 					prop_type, default_value, flags);
 	}
