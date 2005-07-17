@@ -714,9 +714,7 @@ pygobject_new_full(GObject *obj, gboolean sink)
 	self = PyObject_GC_New(PyGObject, tp);
 	if (self == NULL)
 	    return NULL;
-        pyg_begin_allow_threads;
 	self->obj = g_object_ref(obj);
-	pyg_end_allow_threads;
         if (sink)
             sink_object(self->obj);
 
@@ -787,9 +785,7 @@ pygobject_dealloc(PyGObject *self)
     PyObject_GC_UnTrack((PyObject *)self);
 
     if (self->obj) {
-	pyg_begin_allow_threads;
 	g_object_unref(self->obj);
-	pyg_end_allow_threads;
     }
     self->obj = NULL;
 
@@ -898,9 +894,7 @@ pygobject_clear(PyGObject *self)
 	g_message("invalidated all closures, but self->closures != NULL !");
 
     if (self->obj) {
-	pyg_begin_allow_threads;
 	g_object_unref(self->obj);
-	pyg_end_allow_threads;
     }
     self->obj = NULL;
 
