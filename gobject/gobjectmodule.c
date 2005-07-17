@@ -1926,12 +1926,6 @@ pyg_enable_threads ()
 	pygobject_api_functions.threads_enabled = TRUE;
 	pyg_thread_state_tls_key = PyThread_create_key();
     }
-    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
-	PyThreadState* state;
-	state = PyThreadState_Get();
-	if ( state != NULL )
-	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
-    }
 
     return 0;
 #else
@@ -1941,54 +1935,16 @@ pyg_enable_threads ()
 #endif
 }
 
-static PyThreadState *
-pyg_find_thread_state (void)
-{
-    PyThreadState* state;
-    
-    if (pyg_thread_state_tls_key == -1)
-	return NULL;
-    state = PyThread_get_key_value(pyg_thread_state_tls_key);
-    if (state == NULL) {
-	state = PyGILState_GetThisThreadState();
-	if (state != NULL)
-	    PyThread_set_key_value(pyg_thread_state_tls_key, state);
-    }
-    return state;
-}
-
 static int
 pyg_gil_state_ensure_py23 (void)
 {
-    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
-	PyThreadState* state = pyg_find_thread_state();
-
-	if (state == NULL)
-	    return PyGILState_LOCKED;
-    
-	if (state == _PyThreadState_Current)
-	    return PyGILState_LOCKED;
-	else {
-	    PyEval_RestoreThread(state);
-	    return PyGILState_UNLOCKED;
-	}
-    } else {
-	return PyGILState_Ensure();
-    }
+    return PyGILState_Ensure();
 }
 
 static void
 pyg_gil_state_release_py23 (int flag)
 {
-    if (PYGIL_API_IS_BUGGY && !use_gil_state_api) {
-	if (flag == PyGILState_UNLOCKED) {
-	    PyThreadState* state = pyg_find_thread_state();
-	    if (state != NULL)
-		PyEval_ReleaseThread(state);
-	}
-    } else {
-	PyGILState_Release(flag);
-    }
+    PyGILState_Release(flag);
 }
 
 static PyObject *

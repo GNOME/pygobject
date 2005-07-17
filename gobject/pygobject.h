@@ -9,12 +9,8 @@
 
 G_BEGIN_DECLS
 
-/* Work around bugs in PyGILState api fixed in 2.4.0a4 */
-#if PY_VERSION_HEX < 0x020400A4
-#define PYGIL_API_IS_BUGGY TRUE
-#else
+/* This is deprecated, don't use */
 #define PYGIL_API_IS_BUGGY FALSE
-#endif
 
   /* PyGClosure is a _private_ structure */
 typedef void (* PyClosureExceptionHandler) (GValue *ret, guint n_param_values, const GValue *params);
@@ -161,8 +157,11 @@ struct _PyGObject_Functions {
 
     gboolean threads_enabled;
     int       (*enable_threads) (void);
+
+    /* These 2 are deprecated */
     int       (*gil_state_ensure) (void);
     void      (*gil_state_release) (int flag);
+    
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
     void      (*closure_set_exception_handler) (GClosure *closure, PyClosureExceptionHandler handler);
@@ -245,10 +244,12 @@ struct _PyGObject_Functions *_PyGObject_API;
 
 #define pyg_threads_enabled (_PyGObject_API->threads_enabled)
 
-#define pyg_gil_state_ensure() (_PyGObject_API->threads_enabled? (_PyGObject_API->gil_state_ensure()) : 0)
+#define pyg_gil_state_ensure() \
+    (_PyGObject_API->threads_enabled ? \
+      (PyGILState_Ensure()) : 0)
 #define pyg_gil_state_release(state) G_STMT_START {     \
     if (_PyGObject_API->threads_enabled)                \
-        _PyGObject_API->gil_state_release(state);       \
+        PyGILState_Release(state);                      \
     } G_STMT_END
 
 #define pyg_begin_allow_threads                 \
