@@ -1610,6 +1610,12 @@ pygobjectmeta_register(PyTypeObject *subtype, PyObject *instance_dict)
 	goto out;
     }
 
+    /* Maybe the type doesn't really need to registered? */
+    if (!(PyDict_GetItemString(instance_dict, "__gtype_name__")
+          || PyDict_GetItemString(instance_dict, "__gproperties__")
+          || PyDict_GetItemString(instance_dict, "__gsignals__")))
+	goto out;
+
     /* If it's already registered, skip registration */
     if (PyDict_GetItemString(instance_dict, "__gtype__"))
 	goto out;
