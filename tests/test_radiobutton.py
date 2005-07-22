@@ -71,21 +71,20 @@ class RadioActionTest(RadioTest):
     def newLabel(self, label):
         return gtk.RadioAction('RadioAction', label, '', '', 0)
 
-# Depends on bug 309836 
-# class RadioToolButtonTest(RadioTest):
-#     widget_type = gtk.RadioToolButton
+class RadioToolButtonTest(RadioTest):
+    widget_type = gtk.RadioToolButton
 
-#     def compareGroups(self, group1, group2):
-#         # GtkRadioToolButton.set/get_groups return GtkRadioButtons,
-#         # so instead of doing a normal cmp, compare ids
-#         return cmp(map(id, group1), map(id, group2))
+    def compareGroups(self, group1, group2):
+        # GtkRadioToolButton.set/get_groups return GtkRadioButtons,
+        # so instead of doing a normal cmp, compare ids
+        return cmp(map(id, group1), map(id, group2))
 
-#     def newLabel(self, label):
-#         # We don't have a constructor for which we can pass in a label
-#         # for, so just call set_label instead
-#         radio = gtk.RadioToolButton(None)
-#         radio.set_label(label)
-#         return radio
+    def newLabel(self, label):
+        # We don't have a constructor for which we can pass in a label
+        # for, so just call set_label instead
+        radio = gtk.RadioToolButton(None)
+        radio.set_label(label)
+        return radio
     
 class RadioMenuItem(RadioTest):
     widget_type = gtk.RadioMenuItem

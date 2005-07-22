@@ -1,15 +1,24 @@
+import sys
 import unittest
 
 from common import gtk
 
-class DialogTest(unittest.TestCase):
+class MessageDialogTest(unittest.TestCase):
     def testDialogAdd(self):
         dialog = gtk.MessageDialog()
         
-        # sys.maxint + 1
-        response_id = 2147483648
+        response_id = sys.maxint + 1
         self.assertRaises(OverflowError, dialog.add_button, "Foo", response_id)
         self.assertRaises(OverflowError, dialog.add_buttons, "Foo", response_id)
 
+    def testSubclass(self):
+        # Normal subclassing should not register a type
+        sub = type('sub', (gtk.MessageDialog,), {})
+        self.assertEqual(sub.__gtype__.name, 'GtkMessageDialog')
+
+        # This depends on 311254
+        #type('Sub', (gtk.MessageDialog,), {'__gtype_name__': 'SubDialog'})
+        #self.assertEqual(sub.__gtype__.name, 'SubDialog')
+        
 if __name__ == '__main__':
     unittest.main()
