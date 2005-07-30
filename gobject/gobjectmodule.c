@@ -2713,9 +2713,10 @@ initgobject(void)
 
     REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
 
-    PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
-						  pyobject_copy,
-						  pyobject_free);
+    if (!PY_TYPE_OBJECT)
+	PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
+						      pyobject_copy,
+						      pyobject_free);
 
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
