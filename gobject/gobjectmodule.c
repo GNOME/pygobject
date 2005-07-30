@@ -974,11 +974,6 @@ static PyObject *
 _wrap_pyg_type_register(PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
-    PyObject *gtype;
-
-    if (PyErr_Warn(PyExc_DeprecationWarning, "gobject.type_register is deprecated;"
-                   " now types are automatically registered"))
-        return NULL;
 
     if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
 	return NULL;
@@ -988,16 +983,21 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     }
 
       /* Check if type already registered */
-    gtype = PyObject_GetAttrString((PyObject *)class, "__gtype__");
-    if (gtype == NULL) {
-        PyErr_Clear();
-          /* not registered */
+    if (pyg_type_from_object((PyObject *) class) ==
+        pyg_type_from_object((PyObject *) class->tp_base))
+    {
         if (pyg_type_register(class, NULL))
             return NULL;
-    } else
+    } else {
+        gchar *msg;
           /* already registered */
-        Py_DECREF(gtype);
-
+        msg = g_strdup_printf("Class %s is already GObject-registered", class->tp_name);
+        if (PyErr_Warn(PyExc_Warning, msg)) {
+            g_free(msg);
+            return NULL;
+        }
+        g_free(msg);
+    }
     Py_INCREF(class);
     return (PyObject *) class;
 }
