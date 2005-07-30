@@ -40,3 +40,15 @@ class TestSubType(unittest.TestCase):
         refcount = testhelper.test_g_object_new()
         self.assertEqual(refcount, 2)
         
+    def testMassiveGtkSubclassing(self):
+        for name, cls in [(name, getattr(gtk, name)) for name in dir(gtk)]:
+            ## Skip some deprecated types
+            if name in ['CTree', '_gobject']:
+                continue
+            try:
+                if not issubclass(cls, gobject.GObject):
+                    continue
+            except TypeError: # raised by issubclass if cls is not a class
+                    continue
+            subname = name + "PyGtkTestSubclass"
+            sub = type(subname, (cls,), {'__gtype_name__': subname })

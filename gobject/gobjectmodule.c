@@ -1158,10 +1158,7 @@ pyg_type_register(PyTypeObject *class, char *type_name)
       /* propagate new constructor API compatility flag from parent to child type */
     has_new_constructor_api = g_type_get_qdata(parent_type,
                                                pygobject_has_updated_constructor_key);
-    if (has_new_constructor_api == NULL)
-        g_warning("Constructor wrapper for %s needs to be updated to the new API",
-                  g_type_name(parent_type));
-    else
+    if (has_new_constructor_api != NULL)
         g_type_set_qdata(instance_type, pygobject_has_updated_constructor_key,
                          has_new_constructor_api);
 
