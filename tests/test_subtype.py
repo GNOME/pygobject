@@ -52,3 +52,21 @@ class TestSubType(unittest.TestCase):
                     continue
             subname = name + "PyGtkTestSubclass"
             sub = type(subname, (cls,), {'__gtype_name__': subname })
+    
+    def testGtkWindowObjNewRefcount(self):
+        foo = gobject.new(gtk.Window)
+        self.assertEqual(foo.__grefcount__, 2)
+        
+    def testGtkWindowFactoryRefcount(self):
+        foo = gtk.Window()
+        self.assertEqual(foo.__grefcount__, 2)
+        
+    def testPyWindowObjNewRefcount(self):
+        PyWindow = type('PyWindow', (gtk.Window,), dict(__gtype_name__='PyWindow1'))
+        foo = gobject.new(PyWindow)
+        self.assertEqual(foo.__grefcount__, 2)
+        
+    def testGtkWindowFactoryRefcount(self):
+        PyWindow = type('PyWindow', (gtk.Window,), dict(__gtype_name__='PyWindow2'))
+        foo = PyWindow()
+        self.assertEqual(foo.__grefcount__, 2)

@@ -1646,10 +1646,11 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
     
     if (obj)
-	self = (PyGObject *) pygobject_new ((GObject *)obj);
+	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE);
     else
         self = NULL;
     g_object_unref(obj);
+    pygobject_sink(obj);
 
     return (PyObject *) self;
 }

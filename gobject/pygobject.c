@@ -33,8 +33,17 @@ typedef struct {
 } SinkFunc;
 static GArray *sink_funcs = NULL;
 
-static inline void
-sink_object(GObject *obj)
+/**
+ * pygobject_sink:
+ * @obj: a GObject
+ * 
+ * As Python handles reference counting for us, the "floating
+ * reference" code in GTK is not all that useful.  In fact, it can
+ * cause leaks.  This function should be called to remove the floating
+ * references on objects on construction.
+ **/
+void
+pygobject_sink(GObject *obj)
 {
     if (sink_funcs) {
 	gint i;
@@ -517,7 +526,7 @@ pygobject_register_wrapper(PyObject *self)
 {
     GObject *obj = ((PyGObject *)self)->obj;
 
-    sink_object(obj);
+    pygobject_sink(obj);
     Py_INCREF(self);
     g_object_set_qdata_full(obj, pygobject_wrapper_key, self,
 			    pyg_destroy_notify);
@@ -716,7 +725,7 @@ pygobject_new_full(GObject *obj, gboolean sink)
 	    return NULL;
 	self->obj = g_object_ref(obj);
         if (sink)
-            sink_object(self->obj);
+            pygobject_sink(self->obj);
 
 	self->inst_dict = NULL;
 	self->weakreflist = NULL;
