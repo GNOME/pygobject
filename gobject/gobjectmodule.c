@@ -1892,18 +1892,9 @@ pyg_source_remove(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_main_context_default (PyObject *unused)
+pyg_main_context_default(PyObject *unused)
 {
-    PyGMainContext *self;
-
-    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
-					  &PyGMainContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = g_main_context_default();
-    return (PyObject *)self;
-
+    return pyg_main_context_new(g_main_context_default());
 }
 
 static int pyg_thread_state_tls_key = -1;

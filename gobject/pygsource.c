@@ -167,7 +167,6 @@ pyg_source_set_callback(PyGSource *self, PyObject *args)
 static PyObject *
 pyg_source_get_context(PyGSource *self)
 {
-    PyGMainContext *py_context;
     GMainContext *context;
 
     CHECK_DESTROYED(self, NULL);
@@ -175,13 +174,7 @@ pyg_source_get_context(PyGSource *self)
     context = g_source_get_context(self->source);
 
     if (context) {
-	py_context = PyObject_NEW(PyGMainContext, &PyGMainContext_Type);
-	if (py_context == NULL)
-	    return NULL;
-
-	py_context->context = context;
-
-	return (PyObject *)py_context;
+	return pyg_main_context_new(context);
     } else {
 	Py_INCREF(Py_None);
 	return Py_None;

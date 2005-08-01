@@ -189,6 +189,7 @@ typedef struct {
 } PyGMainContext;
 
 extern PyTypeObject PyGMainContext_Type;
+PyObject * pyg_main_context_new (GMainContext *context);
 
 /* pygparamspec */
 

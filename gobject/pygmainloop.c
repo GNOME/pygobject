@@ -228,17 +228,7 @@ pyg_main_loop_compare(PyGMainLoop *self, PyGMainLoop *v)
 static PyObject *
 _wrap_g_main_loop_get_context (PyGMainLoop *loop)
 {
-    PyGMainContext *self;
-
-    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
-					  &PyGMainContext_Type);
-    
-    self->context = g_main_loop_get_context(loop->loop);
-    
-    if (self->context == NULL)
-	return NULL;
-
-    return (PyObject *)self;
+    return pyg_main_context_new(g_main_loop_get_context(loop->loop));
 }
 
 static PyObject *
