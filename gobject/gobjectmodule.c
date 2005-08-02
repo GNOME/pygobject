@@ -991,8 +991,12 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     } else {
         gchar *msg;
           /* already registered */
-        msg = g_strdup_printf("Class %s is already GObject-registered", class->tp_name);
-        if (PyErr_Warn(PyExc_Warning, msg)) {
+        msg = g_strdup_printf("Class %s is already GObject-registered; "
+			      "Please note that classes containing any of the "
+			      "attributes __gtype_name__, __gproperties__, or "
+			      "__gsignals__ are now automatically registered.",
+			      class->tp_name);
+        if (PyErr_Warn(PyExc_DeprecationWarning, msg)) {
             g_free(msg);
             return NULL;
         }
