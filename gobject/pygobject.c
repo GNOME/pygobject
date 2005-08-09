@@ -643,9 +643,8 @@ pygobject_new_with_interfaces(GType gtype)
     /* insert type name in module dict */
     modules = PyImport_GetModuleDict();
     if ((module = PyDict_GetItemString(modules, mod_name)) != NULL) {
-	PyObject *mod_dict = PyModule_GetDict(module);
-	if (mod_dict != NULL)
-	    PyDict_SetItemString(mod_dict, gtype_name, (PyObject *)type);
+        if (PyObject_SetAttrString(module, gtype_name, (PyObject *)type) < 0)
+            PyErr_Clear();
     }
 
     /* stash a pointer to the python class with the GType */
