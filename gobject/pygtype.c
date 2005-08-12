@@ -480,6 +480,9 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
     } else if (PyInt_Check(obj)) {
 	*val = PyInt_AsLong(obj);
 	res = 0;
+    } else if (PyLong_Check(obj)) {
+        *val = PyLong_AsLongLong(obj);
+        res = 0;
     } else if (PyString_Check(obj)) {
 	GFlagsValue *info;
 	char *str = PyString_AsString(obj);
@@ -534,7 +537,7 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 	g_type_class_unref(fclass);
     } else {
 	PyErr_SetString(PyExc_TypeError,
-			"flag values must be strings, ints or tuples");
+			"flag values must be strings, ints, longs, or tuples");
 	res = -1;
     }
     return res;
