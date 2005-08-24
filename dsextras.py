@@ -214,43 +214,63 @@ class PkgConfigExtension(Extension):
         del kwargs['pkc_name'], kwargs['pkc_version']
         Extension.__init__(self, **kwargs)
 
-    def get_include_dirs(self, name):
-        output = getoutput('pkg-config --cflags-only-I %s' % name)
-        return output.replace('-I', '').split()
+    def get_include_dirs(self, names):
+        if type(names) != tuple:
+            names = (names,)
+        retval = []
+        for name in names:
+            output = getoutput('pkg-config --cflags-only-I %s' % name)
+            retval.extend(output.replace('-I', '').split())
+        return retval
 
-    def get_libraries(self, name):
-        output = getoutput('pkg-config --libs-only-l %s' % name)
-        return output.replace('-l', '').split()
+    def get_libraries(self, names):
+        if type(names) != tuple:
+            names = (names,)
+        retval = []
+        for name in names:
+            output = getoutput('pkg-config --libs-only-l %s' % name)
+            retval.extend(output.replace('-l', '').split())
+        return retval
     
-    def get_library_dirs(self, name):
-        output = getoutput('pkg-config --libs-only-L %s' % name)
-        return output.replace('-L', '').split()
+    def get_library_dirs(self, names):
+        if type(names) != tuple:
+            names = (names,)
+        retval = []
+        for name in names:
+            output = getoutput('pkg-config --libs-only-L %s' % name)
+            retval.extend(output.replace('-L', '').split())
+        return retval
 
     def can_build(self):
         """If the pkg-config version found is good enough"""
         if self.can_build_ok != None: 
             return self.can_build_ok
 
-        retval = os.system('pkg-config --exists %s' % self.pkc_name)
-        if retval:
-            print ("* %s.pc could not be found, bindings for %s"
-                   " will not be built." % (self.pkc_name, self.name))
-            self.can_build_ok = 0
-            return 0
-
-        orig_version = getoutput('pkg-config --modversion %s' % self.pkc_name)
-        version = map(int, orig_version.split('.'))
-        pkc_version = map(int, self.pkc_version.split('.'))
-                      
-        if version >= pkc_version:
-            self.can_build_ok = 1
-            return 1
+        if type(self.pkc_name) != tuple:
+            reqs = [(self.pkc_name, self.pkc_version)]
         else:
-            print "Warning: Too old version of %s" % self.pkc_name
-            print "         Need %s, but %s is installed" % \
-                  (self.pkc_version, orig_version)
-            self.can_build_ok = 0
-            return 0
+            reqs = zip(self.pkc_name, self.pkc_version)
+
+        for package, version in reqs:
+            retval = os.system('pkg-config --exists %s' % package)
+            if retval:
+                print ("* %s.pc could not be found, bindings for %s"
+                       " will not be built." % (package, self.name))
+                self.can_build_ok = 0
+                return 0
+
+            orig_version = getoutput('pkg-config --modversion %s' %
+                                     package)
+            if (map(int, orig_version.split('.')) >=
+                map(int, version.split('.'))):
+                self.can_build_ok = 1
+                return 1
+            else:
+                print "Warning: Too old version of %s" % self.pkc_name
+                print "         Need %s, but %s is installed" % \
+                      (package, orig_version)
+                self.can_build_ok = 0
+                return 0
         
     def generate(self):
         pass

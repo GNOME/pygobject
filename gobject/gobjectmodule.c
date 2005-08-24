@@ -1906,7 +1906,7 @@ static int pyg_thread_state_tls_key = -1;
 /* Enable threading; note that the GIL must be held by the current
    thread when this function is called */
 static int
-pyg_enable_threads ()
+pyg_enable_threads (void)
 {
     if (getenv ("PYGTK_USE_GIL_STATE_API"))
 	use_gil_state_api = TRUE;
