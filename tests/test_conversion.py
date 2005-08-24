@@ -1,5 +1,7 @@
 # -*- Mode: Python -*-
 
+import sys
+
 import unittest
 
 from common import gtk, gobject
@@ -69,5 +71,15 @@ class Tests(unittest.TestCase):
         c = gtk.gdk.Color(pixel=0xffffffffL)
         self.assertEqual(c.pixel, 0xffffffffL)
 
+    def testUIntArg(self):
+        child = gtk.DrawingArea()
+        table = gtk.Table(2, 2, False)
+        table.attach(child, 1, 2, 0, 1, ypadding=2)
+        self.assertEqual(table.child_get_property(child, 'y-padding'), 2)
+        
+        child = gtk.DrawingArea()
+        table.attach(child, 1, 2, 0, 1, ypadding=2L)
+        self.assertEqual(table.child_get_property(child, 'y-padding'), 2)
+        
 if __name__ == '__main__':
     unittest.main()
