@@ -2717,6 +2717,7 @@ initgobject(void)
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
 
+    PyGObject_MetaType.tp_base = &PyType_Type;
     PyGObject_MetaType.tp_traverse = PyType_Type.tp_traverse;
     PyGObject_MetaType.tp_clear = PyType_Type.tp_clear;
     PyGObject_MetaType.tp_is_gc = PyType_Type.tp_is_gc;
