@@ -1099,7 +1099,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
 }
 
 int
-pyg_type_register(PyTypeObject *class, char *type_name)
+pyg_type_register(PyTypeObject *class, const char *type_name)
 {
     PyObject *gtype, *gsignals, *gproperties, *overridden_signals;
     GType parent_type, instance_type;
@@ -1121,7 +1121,7 @@ pyg_type_register(PyTypeObject *class, char *type_name)
 	0,    /* n_preallocs */
 	(GInstanceInitFunc) pygobject__g_instance_init
     };
-
+    gchar *new_type_name;
 
     /* find the GType of the parent */
     parent_type = pyg_type_from_object((PyObject *)class);
@@ -1129,8 +1129,10 @@ pyg_type_register(PyTypeObject *class, char *type_name)
 	return -1;
     }
 
-    if (!type_name)
-	type_name = get_type_name_for_class(class);
+    if (type_name)
+        new_type_name = (gchar *) type_name; /* care is taken below not to free this */
+    else
+	new_type_name = get_type_name_for_class(class);
     
     /* set class_data that will be passed to the class_init function. */
     type_info.class_data = class;
@@ -1141,9 +1143,10 @@ pyg_type_register(PyTypeObject *class, char *type_name)
     type_info.instance_size = query.instance_size;
 
     /* create new typecode */
-    instance_type = g_type_register_static(parent_type, type_name,
+    instance_type = g_type_register_static(parent_type, new_type_name,
 					   &type_info, 0);
-    g_free(type_name);
+    if (type_name == NULL)
+        g_free(new_type_name);
     if (instance_type == 0) {
 	PyErr_SetString(PyExc_RuntimeError, "could not create new GType");
 	return -1;
