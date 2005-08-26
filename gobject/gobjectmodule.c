@@ -1315,12 +1315,12 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "type", NULL };
     PyObject *py_itype, *list;
-    GObjectClass *class;
+    GObjectClass *class = NULL;
     GType itype;
     guint n;
     guint *ids;
     guint i;
-
+    
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O:gobject.signal_list_names",
                                      kwlist, &py_itype))
@@ -1328,31 +1328,31 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     if ((itype = pyg_type_from_object(py_itype)) == 0)
 	return NULL;
 
-    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+    if (G_TYPE_IS_INSTANTIATABLE(itype)) {
+	class = g_type_class_ref(itype);
+	if (!class) {
+	    PyErr_SetString(PyExc_RuntimeError,
+			    "could not get a reference to type class");
+	    return NULL;
+	}
+    } else if (!G_TYPE_IS_INTERFACE(itype)) {
 	PyErr_SetString(PyExc_TypeError,
 			"type must be instantiable or an interface");
 	return NULL;
     }
-
-    class = g_type_class_ref(itype);
-    if (!class) {
-	PyErr_SetString(PyExc_RuntimeError,
-			"could not get a reference to type class");
-	return NULL;
-    }
+    
     ids = g_signal_list_ids(itype, &n);
 
     list = PyTuple_New((gint)n);
-    if (list == NULL) {
-	g_free(ids);
-	g_type_class_unref(class);
-	return NULL;
+    if (list != NULL) {
+	for (i = 0; i < n; i++)
+	    PyTuple_SetItem(list, i,
+			    PyString_FromString(g_signal_name(ids[i])));
     }
-
-    for (i = 0; i < n; i++)
-	PyTuple_SetItem(list, i, PyString_FromString(g_signal_name(ids[i])));
+    
     g_free(ids);
-    g_type_class_unref(class);
+    if (class)
+	g_type_class_unref(class);
     return list;
 }
 

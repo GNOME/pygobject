@@ -106,6 +106,16 @@ class TestOldStyleOverride(unittest.TestCase):
         self.assertEqual(b.adjusted, False)
         b.set_scroll_adjustments(gtk.Adjustment(), gtk.Adjustment())
         self.assertEqual(b.adjusted, True)
+
+class TestList(unittest.TestCase):
+    def testListObject(self):
+        self.assertEqual(gobject.signal_list_names(C), ('my-signal',))         
+
+    def testListInterface(self):
+        signals = gobject.signal_list_names(gtk.Editable)
+        self.failUnless('changed' in signals)
+        self.failUnless('insert-text' in signals)
+        self.failUnless('delete-text' in signals)
         
 if __name__ == '__main__':
     unittest.main()
