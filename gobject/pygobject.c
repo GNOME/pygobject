@@ -1615,7 +1615,7 @@ static int
 pygobjectmeta_register(PyTypeObject *subtype)
 {
     PyObject *pytype_name;
-    char *type_name = NULL;
+    const char *type_name = NULL;
     int retval = 0;
     
     /* Maybe the type doesn't really need to registered? */
@@ -1633,9 +1633,8 @@ pygobjectmeta_register(PyTypeObject *subtype)
 
     pytype_name = PyDict_GetItemString(subtype->tp_dict, "__gtype_name__");
     if (pytype_name)
-	type_name = g_strdup(PyString_AsString(pytype_name));
+	type_name = PyString_AsString(pytype_name);
     retval = pyg_type_register(subtype, type_name);
-    g_free(type_name);
 
 out:
     return retval;
