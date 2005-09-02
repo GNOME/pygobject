@@ -1320,7 +1320,8 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     guint n;
     guint *ids;
     guint i;
-    
+    gpointer iface = NULL;
+
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O:gobject.signal_list_names",
                                      kwlist, &py_itype))
@@ -1339,6 +1340,8 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
 	PyErr_SetString(PyExc_TypeError,
 			"type must be instantiable or an interface");
 	return NULL;
+    } else {
+        iface = g_type_default_interface_ref(itype);
     }
     
     ids = g_signal_list_ids(itype, &n);
@@ -1352,7 +1355,10 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     
     g_free(ids);
     if (class)
-	g_type_class_unref(class);
+	   g_type_class_unref(class);
+    else
+       g_type_default_interface_unref(iface);
+
     return list;
 }
 
