@@ -70,3 +70,6 @@ class TestSubType(unittest.TestCase):
         PyWindow = type('PyWindow', (gtk.Window,), dict(__gtype_name__='PyWindow2'))
         foo = PyWindow()
         self.assertEqual(foo.__grefcount__, 2)
+
+    def testRegisterArgNotType(self):
+        self.assertRaises(TypeError, gobject.type_register, 1)

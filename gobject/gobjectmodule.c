@@ -975,7 +975,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
 
-    if (!PyArg_ParseTuple(args, "O:gobject.type_register", &class))
+    if (!PyArg_ParseTuple(args, "O!:gobject.type_register", &PyType_Type, &class))
 	return NULL;
     if (!PyType_IsSubtype(class, &PyGObject_Type)) {
 	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
