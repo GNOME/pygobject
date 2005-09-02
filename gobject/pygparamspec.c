@@ -126,10 +126,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     if (G_IS_PARAM_SPEC_CHAR(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value", "flags",
+				 "maximum", "minimum", "name", "nick",
+				 "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyString_FromFormat(
 		"%c", G_PARAM_SPEC_CHAR(pspec)->default_value);
@@ -141,10 +140,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_UCHAR(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum", 
+				 "name", "nick", "owner_type",
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyString_FromFormat(
 		"%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
@@ -156,19 +155,18 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_BOOLEAN(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssss]", "__doc__", "__gtype__",
-				 "blurb",
+				 "blurb", "default_value",
 				 "flags", "name", "nick", "owner_type",
-				 "value_type", "default_value");
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyBool_FromLong(G_PARAM_SPEC_BOOLEAN(pspec)->default_value);
 	}
     } else if (G_IS_PARAM_SPEC_INT(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum", "name",
+				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -179,10 +177,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_UINT(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum",
+				 "name", "nick", "owner_type",
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyInt_FromLong(G_PARAM_SPEC_UINT(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -193,10 +191,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_LONG(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum", "name",
+				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyLong_FromLong(G_PARAM_SPEC_LONG(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -207,10 +204,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_ULONG(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum", "name",
+				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyLong_FromLong(G_PARAM_SPEC_ULONG(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -221,10 +217,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_INT64(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum", "name",
+				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyLong_FromLong(G_PARAM_SPEC_INT64(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -235,10 +230,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_UINT64(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value");
+				 "blurb", "default_value",
+				 "flags", "maximum", "minimum",
+				 "name", "nick", "owner_type",
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyLong_FromLong(G_PARAM_SPEC_UINT64(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -249,19 +244,19 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[sssssssss]", "__doc__", "__gtype__",
-				 "blurb",
+				 "blurb", "default_value",
 				 "flags", "name", "nick", "owner_type",
-				 "value_type", "default_value");
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyString_FromFormat(
 		"%c", G_PARAM_SPEC_UNICHAR(pspec)->default_value);
 	}
     } else if (G_IS_PARAM_SPEC_ENUM(pspec)) {
 	if (!strcmp(attr, "__members__")) {
-	    return Py_BuildValue("[sssssssss]", "__doc__", "__gtype__",
-				 "blurb",
+	    return Py_BuildValue("[ssssssssss]", "__doc__", "__gtype__",
+				 "blurb", "default_value", "enum_class",
 				 "flags", "name", "nick", "owner_type",
-				 "value_type", "enum_class");
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return pyg_enum_from_gtype(
 		pspec->value_type, G_PARAM_SPEC_ENUM(pspec)->default_value);
@@ -270,10 +265,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	}
     } else if (G_IS_PARAM_SPEC_FLAGS(pspec)) {
 	if (!strcmp(attr, "__members__")) {
-	    return Py_BuildValue("[sssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "flags_class");
+	    return Py_BuildValue("[ssssssssss]", "__doc__", "__gtype__",
+				 "blurb", "default_value",
+				 "flags", "flags_class", "name", "nick",
+				 "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return pyg_flags_from_gtype(
 		pspec->value_type, G_PARAM_SPEC_FLAGS(pspec)->default_value);
@@ -283,10 +278,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_FLOAT(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[ssssssssssss]", "__doc__", "__gtype__",
-				 "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type", "minimum", "maximum",
-				 "default_value", "epsilon");
+				 "blurb", "epsilon",
+				 "flags", "maximum", "minimum", "name", "nick", "owner_type",
+				 "value_type", 
+				 "default_value");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyFloat_FromDouble(G_PARAM_SPEC_FLOAT(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
@@ -299,10 +294,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_DOUBLE(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[ssssssssssss]", "__doc__", "__gtype__",
-				 "blurb", "flags", "name", "nick",
-				 "owner_type", "value_type",
-				 "minimum", "maximum",
-				 "default_value", "epsilon");
+				 "blurb", "default_value", "epsilon",
+				 "flags", "maximum", "minimum", "name", "nick",
+				 "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return PyFloat_FromDouble(
 		G_PARAM_SPEC_DOUBLE(pspec)->default_value);
@@ -316,10 +310,10 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_STRING(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[ssssssssssssss]", "__doc__", "__gtype__",
-				 "blurb", "flags", "name", "nick", "owner_type",
-				 "value_type", "default_value", "cset_firth",
-				 "cset_nth", "substitutor",
-				 "null_fold_if_empty", "ensure_non_null");
+				 "blurb", "cset_firth", "cset_nth", "default_value",
+				 "ensure_non_null", "flags", "name", "nick",
+				 "null_fold_if_empty", "owner_type", "substitutor",
+				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
 	    return Py_BuildValue(
 		"s", G_PARAM_SPEC_STRING(pspec)->default_value);
@@ -342,8 +336,17 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[ssssssss]", "__doc__", "__gtype__", "blurb",
-				 "flags", "name", "nick", "owner_type",
-				 "value_type");
+				 "flags", "name", "nick",
+				 "owner_type", "value_type");
+	    
+	/* This is actually not what's exported by GObjects paramspecs,
+	 * But we exported this in earlier versions, so it's better to keep it here
+	 * compatibility. But don't add it in __members__, to "hide" it.
+	 */
+	} else if (!strcmp(attr, "default_value")) {
+	    /* XXX: Raise deprecation warning */
+	    Py_INCREF(Py_None);
+	    return Py_None;
 	}
     }
 
