@@ -925,7 +925,17 @@ add_properties (GType instance_type, PyObject *properties)
 	if (pspec) {
 	    g_object_class_install_property(oclass, 1, pspec);
 	} else {
+            PyObject *type, *value, *traceback;
 	    ret = FALSE;
+            PyErr_Fetch(&type, &value, &traceback);
+            if (PyString_Check(value)) {
+                char msg[256];
+                g_snprintf(msg, 256, "%s (while registering property '%s' for GType '%s')",
+                           PyString_AsString(value), prop_name, g_type_name(instance_type));
+                Py_DECREF(value);
+                value = PyString_FromString(msg);
+            }
+            PyErr_Restore(type, value, traceback);
 	    break;
 	}
     }
