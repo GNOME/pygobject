@@ -2615,6 +2615,20 @@ pyg_set_object_has_new_constructor(GType type)
     g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
 }
 
+static void
+_log_func(const gchar *log_domain,
+          GLogLevelFlags log_level,
+          const gchar *message,
+          gpointer user_data)
+{
+    PyGILState_STATE state;
+    PyObject* warning = user_data;
+
+    state = pyg_gil_state_ensure();
+    PyErr_Warn(warning, (char *) message);
+    pyg_gil_state_release(state);
+}
+
 /* ----------------- gobject module initialisation -------------- */
 
 struct _PyGObject_Functions pygobject_api_functions = {
@@ -2706,6 +2720,8 @@ initgobject(void)
 {
     PyObject *m, *d, *o, *tuple;
     PyObject *descr;
+    PyObject *warning;
+    
     PyGParamSpec_Type.ob_type = &PyType_Type;
     
     m = Py_InitModule("gobject", pygobject_functions);
@@ -2884,4 +2900,14 @@ initgobject(void)
     pyg_register_gtype_custom(G_TYPE_STRV,
 			      _pyg_strv_from_gvalue,
 			      _pyg_strv_to_gvalue);
+
+    warning = PyErr_NewException("gobject.Warning", PyExc_Warning, NULL);
+    PyDict_SetItemString(d, "Warning", warning);
+    g_log_set_handler("GLib", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
+                      _log_func, warning);
+    g_log_set_handler("GLib-GObject", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
+                      _log_func, warning);
+    g_log_set_handler("GThread", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
+                      _log_func, warning);
+
 }
