@@ -1147,7 +1147,9 @@ pygobject_connect(PyGObject *self, PyObject *args)
     }
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1189,7 +1191,9 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     }
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1231,7 +1235,9 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     }
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1273,7 +1279,9 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     }
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1357,7 +1365,9 @@ pygobject_emit(PyGObject *self, PyObject *args)
     Py_DECREF(first);
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
 	return NULL;
     }
     g_signal_query(signal_id, &query);
@@ -1427,7 +1437,9 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 	return NULL;
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
-	PyErr_SetString(PyExc_TypeError, "unknown signal name");
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     signal);
 	return NULL;
     }
     g_signal_stop_emission(self->obj, signal_id, detail);

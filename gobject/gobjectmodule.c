@@ -274,7 +274,9 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     type = g_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
-    PyErr_SetString(PyExc_RuntimeError, "unknown type name");
+    PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
+		 PyString_AsString(PyObject_Repr((PyObject*)self)),
+		 name);
     return NULL;
 }
 
