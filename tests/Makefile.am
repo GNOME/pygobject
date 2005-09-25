@@ -6,7 +6,7 @@ INCLUDES = \
 	$(GTK_CFLAGS) \
 	-I$(top_srcdir)/gobject
 
-EXTRA_DIST = $(tests) common.py runtests.py test-thread.h test-unknown.h testmodule.py
+EXTRA_DIST = $(tests) common.py runtests.py test-thread.h test-unknown.h testmodule.py leak.glade
 
 noinst_LTLIBRARIES = testhelper.la
 linked_LIBS = testhelper.la
