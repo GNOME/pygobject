@@ -31,6 +31,7 @@ tests =  \
 	test_subtype.py \
 	test_gdkevent.py \
 	test_unknown.py \
+	test_textview.py \
 	test_source.py
 
 # This is a hack to make sure a shared library is built
