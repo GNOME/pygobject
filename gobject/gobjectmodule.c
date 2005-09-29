@@ -242,10 +242,12 @@ pyg_type_name (PyObject *self, PyObject *args)
     GType type;
     const gchar *name;
 
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_name is deprecated; "
 		   "use GType.name instead"))
         return NULL;
+#endif
     
     if (!PyArg_ParseTuple(args, "O:gobject.type_name", &gtype))
 	return NULL;
@@ -263,12 +265,12 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 {
     const gchar *name;
     GType type;
-
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_from_name is deprecated; "
 		   "use GType.from_name instead"))
         return NULL;
-    
+#endif    
     if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
 	return NULL;
     type = g_type_from_name(name);
@@ -285,12 +287,12 @@ pyg_type_parent (PyObject *self, PyObject *args)
 {
     PyObject *gtype;
     GType type, parent;
-
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_parent is deprecated; "
 		   "use GType.parent instead"))
         return NULL;
-    
+#endif    
     if (!PyArg_ParseTuple(args, "O:gobject.type_parent", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -307,12 +309,12 @@ pyg_type_is_a (PyObject *self, PyObject *args)
 {
     PyObject *gtype, *gparent;
     GType type, parent;
-
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_is_a is deprecated; "
 		   "use GType.is_a instead"))
         return NULL;
-    
+#endif    
     if (!PyArg_ParseTuple(args, "OO:gobject.type_is_a", &gtype, &gparent))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -328,12 +330,12 @@ pyg_type_children (PyObject *self, PyObject *args)
     PyObject *gtype, *list;
     GType type, *children;
     guint n_children, i;
-
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_children is deprecated; "
 		   "use GType.children instead"))
         return NULL;
-    
+#endif    
     if (!PyArg_ParseTuple(args, "O:gobject.type_children", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -359,12 +361,12 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
     PyObject *gtype, *list;
     GType type, *interfaces;
     guint n_interfaces, i;
-
+#if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_interfaces is deprecated; "
 		   "use GType.interfaces instead"))
         return NULL;
-    
+#endif    
     if (!PyArg_ParseTuple(args, "O:gobject.type_interfaces", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
