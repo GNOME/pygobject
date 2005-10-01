@@ -73,3 +73,6 @@ class TestSubType(unittest.TestCase):
 
     def testRegisterArgNotType(self):
         self.assertRaises(TypeError, gobject.type_register, 1)
+
+    def testGObjectNewError(self):
+        self.assertRaises(TypeError, gobject.new, gtk.Label, text='foo')
