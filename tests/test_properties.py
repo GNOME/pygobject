@@ -3,7 +3,7 @@ import unittest
 
 from common import testhelper
 from gobject import GObject, GType, new, PARAM_READWRITE, \
-     PARAM_CONSTRUCT, PARAM_CONSTRUCT_ONLY
+     PARAM_CONSTRUCT, PARAM_CONSTRUCT_ONLY, TYPE_UINT64
 
 class PropertyObject(GObject):
     __gproperties__ = {
@@ -13,6 +13,8 @@ class PropertyObject(GObject):
                      PARAM_READWRITE|PARAM_CONSTRUCT),
         'construct-only': (str, 'blurb', 'description', 'default',
                      PARAM_READWRITE|PARAM_CONSTRUCT_ONLY),
+        'uint64': (TYPE_UINT64, 'blurb', 'description', 0, 10, 0,
+                   PARAM_READWRITE),
     }
     
     def __init__(self):
@@ -20,6 +22,7 @@ class PropertyObject(GObject):
         self._value = 'default'
         self._construct_only = None
         self._construct = None
+        self._uint64 = 0L
         
     def do_get_property(self, pspec):
         if pspec.name == 'normal':
@@ -28,6 +31,8 @@ class PropertyObject(GObject):
             return self._construct
         elif pspec.name == 'construct-only':
             return self._construct_only
+        elif pspec.name == 'uint64':
+            return self._uint64
         else:
             raise AssertionError
 
@@ -38,6 +43,8 @@ class PropertyObject(GObject):
             self._construct = value
         elif pspec.name == 'construct-only':
             self._construct_only = value
+        elif pspec.name == 'uint64':
+            self._uint64
         else:
             raise AssertionError
         
@@ -67,8 +74,9 @@ class TestProperties(unittest.TestCase):
                 self.assertEqual(gtype.parent.name, 'GParam')
                 self.failUnless(pspec.name in ['normal',
                                                'construct',
-                                               'construct-only'])
-            self.assertEqual(len(obj), 3)
+                                               'construct-only',
+                                               'uint64'])
+            self.assertEqual(len(obj), 4)
 
     def testNormal(self):
         obj = new(PropertyObject, normal="123")
@@ -93,3 +101,11 @@ class TestProperties(unittest.TestCase):
                           setattr, obj.props, 'construct_only', '456')
         self.assertRaises(TypeError,
                           obj.set_property, 'construct-only', '456')
+
+    def _testUint64(self):
+        obj = new(PropertyObject)
+        self.assertEqual(obj.props.uint64, 0)
+        obj.props.uint64 = 1L
+        self.assertEqual(obj.props.uint64, 1L)
+        obj.props.uint64 = 1
+        self.assertEqual(obj.props.uint64, 1L)
