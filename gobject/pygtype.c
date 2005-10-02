@@ -95,7 +95,7 @@ _wrap_g_type_wrapper__get_fundamental(PyGTypeWrapper *self, void *closure)
 static PyObject *
 _wrap_g_type_wrapper__get_children(PyGTypeWrapper *self, void *closure)
 {
-  int n_children, i;
+  guint n_children, i;
   GType *children;
   PyObject *retval;
     
@@ -112,7 +112,7 @@ _wrap_g_type_wrapper__get_children(PyGTypeWrapper *self, void *closure)
 static PyObject *
 _wrap_g_type_wrapper__get_interfaces(PyGTypeWrapper *self, void *closure)
 {
-  int n_interfaces, i;
+  guint n_interfaces, i;
   GType *interfaces;
   PyObject *retval;
     
@@ -774,12 +774,12 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_UINT64:
-	g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
+        if (PyInt_Check(obj))
+            g_value_set_uint64(value, PyInt_AsLong(obj));
+        else if (PyLong_Check(obj))
+            g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
+        else
+            return -1;
 	break;
     case G_TYPE_ENUM:
 	{
@@ -793,7 +793,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_FLAGS:
 	{
-	    guint val = 0;
+	    gint val = 0;
 	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
 		PyErr_Clear();
 		return -1;

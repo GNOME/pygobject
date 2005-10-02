@@ -44,7 +44,7 @@ class PropertyObject(GObject):
         elif pspec.name == 'construct-only':
             self._construct_only = value
         elif pspec.name == 'uint64':
-            self._uint64
+            self._uint64 = value
         else:
             raise AssertionError
         
@@ -102,10 +102,11 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError,
                           obj.set_property, 'construct-only', '456')
 
-    def _testUint64(self):
+    def testUint64(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.uint64, 0)
         obj.props.uint64 = 1L
         self.assertEqual(obj.props.uint64, 1L)
         obj.props.uint64 = 1
         self.assertEqual(obj.props.uint64, 1L)
+
