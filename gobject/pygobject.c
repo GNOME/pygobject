@@ -337,13 +337,13 @@ static int
 PyGProps_length(PyGProps *self)
 {
     GObjectClass *class;
-    int n_props;
+    guint n_props;
     
     class = g_type_class_ref(self->gtype);
     g_object_class_list_properties(class, &n_props);
     g_type_class_unref(class);
     
-    return n_props;
+    return (int)n_props;
 }
 
 static PySequenceMethods _PyGProps_as_sequence = {
