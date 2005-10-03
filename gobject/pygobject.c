@@ -1002,6 +1002,14 @@ pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
+#define CHECK_GOBJECT(self) \
+    if (!G_IS_OBJECT(self->obj)) {                                           \
+	PyErr_Format(PyExc_TypeError,                                        \
+                     "object at 0x%x of type %s is not initialized",	     \
+                     (int)self, self->ob_type->tp_name);                     \
+	return NULL;                                                         \
+    }
+
 static PyObject *
 pygobject_get_property(PyGObject *self, PyObject *args)
 {
@@ -1012,6 +1020,9 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:GObject.get_property", &param_name))
 	return NULL;
+
+    CHECK_GOBJECT(self);
+    
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 param_name);
     if (!pspec) {
@@ -1041,6 +1052,9 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
 			  &pvalue))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 param_name);
     if (!pspec) {
@@ -1061,6 +1075,9 @@ pygobject_freeze_notify(PyGObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ":GObject.freeze_notify"))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     g_object_freeze_notify(self->obj);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1073,6 +1090,9 @@ pygobject_notify(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:GObject.notify", &property_name))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     g_object_notify(self->obj, property_name);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1083,6 +1103,9 @@ pygobject_thaw_notify(PyGObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ":GObject.thaw_notify"))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     g_object_thaw_notify(self->obj);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1097,6 +1120,9 @@ pygobject_get_data(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:GObject.get_data", &key))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     quark = g_quark_from_string(key);
     data = g_object_get_qdata(self->obj, quark);
     if (!data) data = Py_None;
@@ -1113,6 +1139,9 @@ pygobject_set_data(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "sO:GObject.set_data", &key, &data))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     quark = g_quark_from_string(key);
     Py_INCREF(data);
     g_object_set_qdata_full(self->obj, quark, data, pyg_destroy_notify);
@@ -1145,6 +1174,9 @@ pygobject_connect(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1189,6 +1221,9 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1233,6 +1268,9 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1277,6 +1315,9 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 	PyErr_SetString(PyExc_TypeError, "second argument must be callable");
 	return NULL;
     }
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1302,6 +1343,9 @@ pygobject_disconnect(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "i:GObject.disconnect", &handler_id))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     g_signal_handler_disconnect(self->obj, handler_id);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1315,6 +1359,9 @@ pygobject_handler_is_connected(PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "i:GObject.handler_is_connected", &handler_id))
 	return NULL;
 
+    
+    CHECK_GOBJECT(self);
+    
     return PyBool_FromLong(g_signal_handler_is_connected(self->obj, handler_id));
 }
 
@@ -1325,6 +1372,9 @@ pygobject_handler_block(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "i:GObject.handler_block", &handler_id))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     g_signal_handler_block(self->obj, handler_id);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1363,6 +1413,9 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	return NULL;
     }
     Py_DECREF(first);
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1435,6 +1488,9 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:GObject.stop_emission", &signal))
 	return NULL;
+    
+    CHECK_GOBJECT(self);
+    
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
@@ -1456,7 +1512,9 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     const gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
-
+    
+    CHECK_GOBJECT(self);
+    
     ihint = g_signal_get_invocation_hint(self->obj);
     if (!ihint) {
 	PyErr_SetString(PyExc_TypeError, "could not find signal invocation "
