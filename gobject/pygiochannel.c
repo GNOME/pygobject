@@ -435,12 +435,14 @@ pyg_iowatch_marshal(GIOChannel *source,
     PyObject *ret;
     gboolean res;
     PyGIOWatchData *data = (PyGIOWatchData *) user_data;
+    PyGILState_STATE state;
 
     g_return_val_if_fail(user_data != NULL, FALSE);
     g_return_val_if_fail(((PyGIOChannel *) data->iochannel)->channel == source,
                          FALSE);
 
-    pyg_block_threads();
+    state = pyg_gil_state_ensure();
+
     if (data->user_data)
         ret = PyObject_CallFunction(data->callback, "OiO", data->iochannel,
                                     condition, data->user_data);
@@ -455,7 +457,8 @@ pyg_iowatch_marshal(GIOChannel *source,
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
-    pyg_unblock_threads();
+    pyg_gil_state_release(state);
+
     return res;
 }
 
