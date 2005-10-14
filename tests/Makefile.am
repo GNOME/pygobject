@@ -22,6 +22,7 @@ tests =  \
 	test_conversion.py \
 	test_dialog.py \
 	test_enum.py \
+	test_gdk.py \
 	test_gtype.py \
 	test_mainloop.py \
 	test_radiobutton.py \
