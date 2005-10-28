@@ -192,6 +192,8 @@ pygobject_new_with_interfaces(GType gtype)
     PyObject *modules, *module;
     gchar *type_name, *mod_name, *gtype_name;
 
+    state = pyg_gil_state_ensure();
+
     interfaces = g_type_interfaces (gtype, &n_interfaces);
     bases = PyTuple_New(n_interfaces+1);
     
@@ -200,6 +202,7 @@ pygobject_new_with_interfaces(GType gtype)
     py_parent_type = pygobject_lookup_class(parent_type);
 
     /* We will always put the parent at the first position in bases */
+    Py_INCREF(py_parent_type); /* PyTuple_SetItem steals a reference */
     PyTuple_SetItem(bases, 0, (PyObject*)py_parent_type);
 
     /* And traverse interfaces */
@@ -207,6 +210,7 @@ pygobject_new_with_interfaces(GType gtype)
 	for (i = 0; i < n_interfaces; i++) {
 	    interface_type = interfaces[i];
 	    py_interface_type = pygobject_lookup_class(interface_type);
+            Py_INCREF(py_interface_type); /* PyTuple_SetItem steals a reference */
 	    PyTuple_SetItem(bases, i+1, (PyObject*)py_interface_type);
 	}
 	
@@ -244,8 +248,6 @@ pygobject_new_with_interfaces(GType gtype)
 	mod_name = "__main__";
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
-
-    state = pyg_gil_state_ensure();
 
     type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type, "sOO",
 						type_name, bases, dict);
