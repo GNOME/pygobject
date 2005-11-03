@@ -27,25 +27,22 @@
 
 #include "pygobject-private.h"
 
-
-#define GET_INT(x) (((PyIntObject*)x)->ob_ival)
-static int
-pyg_enum_compare(PyGEnum *self, PyObject *other)
+static PyObject *
+pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
-    if (!PyInt_CheckExact(other) && ((PyGEnum*)other)->gtype != self->gtype) {
-	PyErr_Warn(PyExc_Warning, "comparing different enum types");
-	return -1;
+    if (!PyInt_Check(other)) {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
     }
-    
-    if (GET_INT(self) == GET_INT(other))
-      return 0;
-    else if (GET_INT(self) < GET_INT(other))
-      return -1;
-    else
-      return 1;
+
+    if (PyObject_TypeCheck(other, &PyGEnum_Type) && ((PyGEnum*)other)->gtype != self->gtype) {
+	PyErr_Warn(PyExc_Warning, "comparing different enum types");
+	return NULL;
+    }
+
+    return pyg_integer_richcompare((PyObject *)self, other, op);
 }
-#undef GET_INT
-    
+
 static PyObject *
 pyg_enum_repr(PyGEnum *self)
 {
@@ -293,7 +290,7 @@ PyTypeObject PyGEnum_Type = {
 	0,                			  /* tp_print */
 	0,					  /* tp_getattr */
 	0,					  /* tp_setattr */
-	(cmpfunc)pyg_enum_compare,		  /* tp_compare */
+	0,					  /* tp_compare */
 	(reprfunc)pyg_enum_repr,		  /* tp_repr */
 	0,                   			  /* tp_as_number */
 	0,					  /* tp_as_sequence */
@@ -308,7 +305,7 @@ PyTypeObject PyGEnum_Type = {
 	0,      				  /* tp_doc */
 	0,					  /* tp_traverse */
 	0,					  /* tp_clear */
-	0,					  /* tp_richcompare */
+	(richcmpfunc)pyg_enum_richcompare,	  /* tp_richcompare */
 	0,					  /* tp_weaklistoffset */
 	0,					  /* tp_iter */
 	0,					  /* tp_iternext */

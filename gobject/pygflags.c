@@ -28,20 +28,21 @@
 #include "pygobject-private.h"
 
 #define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
-static int
-pyg_flags_compare(PyGFlags *self, PyObject *other)
+
+static PyObject *
+pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
 {
-    if (!PyInt_CheckExact(other) && ((PyGFlags*)other)->gtype != self->gtype) {
-	PyErr_Warn(PyExc_Warning, "comparing different flags types");
-	return -1;
+    if (!PyInt_Check(other)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
     }
 
-    if (GET_INT_VALUE(self) == GET_INT_VALUE(other))
-      return 0;
-    else if (GET_INT_VALUE(self) < GET_INT_VALUE(other))
-      return -1;
-    else
-      return 1;
+    if (PyObject_TypeCheck(other, &PyGFlags_Type) && ((PyGFlags*)other)->gtype != self->gtype) {
+	PyErr_Warn(PyExc_Warning, "comparing different flags types");
+	return NULL;
+    }
+
+    return pyg_integer_richcompare((PyObject *)self, other, op);
 }
 
 static char *
@@ -434,7 +435,7 @@ PyTypeObject PyGFlags_Type = {
 	0,                			  /* tp_print */
 	0,					  /* tp_getattr */
 	0,					  /* tp_setattr */
-	(cmpfunc)pyg_flags_compare,		  /* tp_compare */
+	0,					  /* tp_compare */
 	(reprfunc)pyg_flags_repr,		  /* tp_repr */
 	&pyg_flags_as_number,			  /* tp_as_number */
 	0,					  /* tp_as_sequence */
@@ -449,7 +450,7 @@ PyTypeObject PyGFlags_Type = {
 	0,      				  /* tp_doc */
 	0,					  /* tp_traverse */
 	0,					  /* tp_clear */
-	0,					  /* tp_richcompare */
+	(richcmpfunc)pyg_flags_richcompare,	  /* tp_richcompare */
 	0,					  /* tp_weaklistoffset */
 	0,					  /* tp_iter */
 	0,					  /* tp_iternext */

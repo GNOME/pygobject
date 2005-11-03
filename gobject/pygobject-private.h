@@ -64,6 +64,10 @@ int      pygobject_construct  (PyGObject   *self,
                                ...);
 void     pyg_set_object_has_new_constructor (GType gtype);
 
+PyObject *pyg_integer_richcompare(PyObject *v,
+                                  PyObject *w,
+                                  int op);
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

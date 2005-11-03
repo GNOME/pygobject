@@ -2619,6 +2619,29 @@ pyg_set_object_has_new_constructor(GType type)
     g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
 }
 
+#define GET_INT(x) (((PyIntObject*)x)->ob_ival)
+PyObject *
+pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
+{
+    PyObject *result;
+    gboolean t;
+
+    switch (op) {
+    case Py_EQ: t = GET_INT(v) == GET_INT(w); break;
+    case Py_NE: t = GET_INT(v) != GET_INT(w); break;
+    case Py_LE: t = GET_INT(v) <= GET_INT(w); break;
+    case Py_GE: t = GET_INT(v) >= GET_INT(w); break;
+    case Py_LT: t = GET_INT(v) <  GET_INT(w); break;
+    case Py_GT: t = GET_INT(v) >  GET_INT(w); break;
+    default: g_assert_not_reached();
+    }
+
+    result = t ? Py_True : Py_False;
+    Py_INCREF(result);
+    return result;
+}
+#undef GET_INT
+
 static void
 _log_func(const gchar *log_domain,
           GLogLevelFlags log_level,
