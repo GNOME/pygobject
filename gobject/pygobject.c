@@ -1005,8 +1005,8 @@ pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
 #define CHECK_GOBJECT(self) \
     if (!G_IS_OBJECT(self->obj)) {                                           \
 	PyErr_Format(PyExc_TypeError,                                        \
-                     "object at 0x%x of type %s is not initialized",	     \
-                     (int)self, self->ob_type->tp_name);                     \
+                     "object at %p of type %s is not initialized",	     \
+                     self, self->ob_type->tp_name);                          \
 	return NULL;                                                         \
     }
 

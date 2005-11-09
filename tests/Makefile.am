@@ -19,6 +19,7 @@ testhelper_la_SOURCES = \
 	test-unknown.c 
 
 tests =  \
+	test_glade.py \
 	test_conversion.py \
 	test_dialog.py \
 	test_enum.py \

@@ -22,10 +22,10 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_threads_enabled (pygobject_api_functions.threads_enabled)
 
 
-#define pyg_gil_state_ensure() (pygobject_api_functions.threads_enabled? (pygobject_api_functions.gil_state_ensure()) : 0)
+#define pyg_gil_state_ensure() (pygobject_api_functions.threads_enabled? (PyGILState_Ensure()) : 0)
 #define pyg_gil_state_release(state) G_STMT_START {     \
-    if (pygobject_api_functions.threads_enabled)                \
-        pygobject_api_functions.gil_state_release(state);       \
+    if (pygobject_api_functions.threads_enabled)        \
+        PyGILState_Release(state);                      \
     } G_STMT_END
 
 #define pyg_begin_allow_threads                         \
