@@ -580,8 +580,8 @@ pygobject_new_with_interfaces(GType gtype)
 	    PyTuple_SetItem(bases, i+1, (PyObject*)py_interface_type);
 	}
 	
-	g_free(interfaces);
     }
+    g_free(interfaces);
 	
     dict = PyDict_New();
     
