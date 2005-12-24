@@ -214,14 +214,15 @@ pyg_flags_add (PyObject *   module,
     ((PyTypeObject *)stub)->tp_flags &= ~Py_TPFLAGS_BASETYPE;
     ((PyTypeObject *)stub)->tp_new = pyg_flags_new;
 
-    PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
-			 "__module__",
-			 PyString_FromString(PyModule_GetName(module)));
+    if (module) {
+        PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
+                             "__module__",
+                             PyString_FromString(PyModule_GetName(module)));
     
-    /* Add it to the module name space */
-    PyModule_AddObject(module, (char*)typename, stub);
-    Py_INCREF(stub);
-
+          /* Add it to the module name space */
+        PyModule_AddObject(module, (char*)typename, stub);
+        Py_INCREF(stub);
+    }
     g_type_set_qdata(gtype, pygflags_class_key, stub);
 
     o = pyg_type_wrapper_new(gtype);
@@ -241,11 +242,13 @@ pyg_flags_add (PyObject *   module,
             
       PyDict_SetItem(values, PyInt_FromLong(eclass->values[i].value), item);
 
-      PyModule_AddObject(module,
-			 pyg_constant_strip_prefix(eclass->values[i].value_name,
-						   strip_prefix),
-			 item);
-      Py_INCREF(item);
+      if (module) {
+          PyModule_AddObject(module,
+                             pyg_constant_strip_prefix(eclass->values[i].value_name,
+                                                       strip_prefix),
+                             item);
+          Py_INCREF(item);
+      }
     }
     
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
