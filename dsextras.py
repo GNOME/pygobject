@@ -317,7 +317,7 @@ class Template:
             return
 
         for item in self.register:
-            dp = DefsParser(item)
+            dp = DefsParser(item,dict(GLOBAL_MACROS))
             dp.startParsing()
             register_types(dp)
 
@@ -325,7 +325,7 @@ class Template:
             globals = {}
             execfile(self.load_types, globals)
             
-        dp = DefsParser(self.defs)
+        dp = DefsParser(self.defs,dict(GLOBAL_MACROS))
         dp.startParsing()
         register_types(dp)
         
