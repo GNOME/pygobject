@@ -7,17 +7,19 @@ PLATFORM_VERSION = 2.0
 CLEANFILES = 
 EXTRA_DIST = 				\
 	MANIFEST.in 			\
-	MAPPING 			\
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO 			\
 	PKG-INFO.in 			\
-	setup.py 			\
-	THREADS
+	setup.py
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/gobject
 
 # pkg-config files
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
+
+# extension modules
+pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexec_LTLIBRARIES =
 
 # python
 pyexec_PYTHON = pygtk.py

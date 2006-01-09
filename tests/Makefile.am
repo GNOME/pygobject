@@ -3,7 +3,13 @@ INCLUDES = \
 	$(GLIB_CFLAGS) \
 	-I$(top_srcdir)/gobject
 
-EXTRA_DIST = $(tests) common.py runtests.py test-thread.h test-unknown.h
+EXTRA_DIST = \
+	$(tests) \
+	common.py \
+	runtests.py \
+	testmodule.py \
+	test-thread.h \
+	test-unknown.h
 
 noinst_LTLIBRARIES = testhelper.la
 linked_LIBS = testhelper.la
