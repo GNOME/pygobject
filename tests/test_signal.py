@@ -3,7 +3,7 @@
 import gc
 import unittest
 
-from common import gobject, gtk
+from common import gobject
 
 class C(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
@@ -73,49 +73,9 @@ class TestGPropertyError(unittest.TestCase):
         self.assertRaises(TypeError, foo)
         gc.collect()
 
-
-class DrawingArea(gtk.DrawingArea):
-    __gsignals__ = { 'my-activate': (gobject.SIGNAL_RUN_FIRST,
-                                     gobject.TYPE_NONE, ()) ,
-                     'my-adjust': (gobject.SIGNAL_RUN_FIRST,
-                                     gobject.TYPE_NONE,
-                                   (gtk.Adjustment, gtk.Adjustment)) }
-    def __init__(self):
-        gtk.DrawingArea.__init__(self)
-        self.activated = False
-        self.adjusted = False
-        
-    def do_my_activate(self):
-        self.activated = True
-        
-    def do_my_adjust(self, hadj, vadj):
-        self.adjusted = True
-        
-DrawingArea.set_activate_signal('my-activate')
-DrawingArea.set_set_scroll_adjustments_signal('my-adjust')
-
-class TestOldStyleOverride(unittest.TestCase):
-    def testActivate(self):
-        b = DrawingArea()
-        self.assertEqual(b.activated, False)
-        b.activate()
-        self.assertEqual(b.activated, True)
-
-    def testSetScrollAdjustment(self):
-        b = DrawingArea()
-        self.assertEqual(b.adjusted, False)
-        b.set_scroll_adjustments(gtk.Adjustment(), gtk.Adjustment())
-        self.assertEqual(b.adjusted, True)
-
 class TestList(unittest.TestCase):
     def testListObject(self):
         self.assertEqual(gobject.signal_list_names(C), ('my-signal',))         
 
-    def testListInterface(self):
-        signals = gobject.signal_list_names(gtk.Editable)
-        self.failUnless('changed' in signals)
-        self.failUnless('insert-text' in signals)
-        self.failUnless('delete-text' in signals)
-        
 if __name__ == '__main__':
     unittest.main()

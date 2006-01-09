@@ -2821,9 +2821,13 @@ initgobject(void)
     PyDict_SetItemString(d, "glib_version", tuple);    
     Py_DECREF(tuple);
 
-    /* pygtk version */
-    tuple = Py_BuildValue ("(iii)", PYGTK_MAJOR_VERSION, PYGTK_MINOR_VERSION,
-			   PYGTK_MICRO_VERSION);
+    /* pygobject version */
+    tuple = Py_BuildValue ("(iii)",
+			   PYGOBJECT_MAJOR_VERSION,
+			   PYGOBJECT_MINOR_VERSION,
+			   PYGOBJECT_MICRO_VERSION);
+    PyDict_SetItemString(d, "pygobject_version", tuple);
+    /* backwards compatibility */
     PyDict_SetItemString(d, "pygtk_version", tuple);
     Py_DECREF(tuple);
 

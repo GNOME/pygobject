@@ -15,9 +15,9 @@ test_type_get_type(void)
         GTypeInfo *type_info;
         GTypeQuery query;
 	
-	parent_type = g_type_from_name("PyLabel");
+	parent_type = g_type_from_name("PyGObject");
 	if (parent_type == 0)
-	     g_error("could not get PyLabel from testmodule");
+	     g_error("could not get PyGObject from testmodule");
 
 	type_info = (GTypeInfo *)g_new0(GTypeInfo, 1);
 	
@@ -74,7 +74,7 @@ _wrap_test_g_object_new (PyObject * self)
     GObject *obj;
     PyObject *rv;
 
-    obj = g_object_new(g_type_from_name("PyLabel"), NULL);
+    obj = g_object_new(g_type_from_name("PyGObject"), NULL);
     rv = PyInt_FromLong(obj->ref_count); /* should be == 2 at this point */
     g_object_unref(obj);
     return rv;

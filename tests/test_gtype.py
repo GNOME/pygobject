@@ -1,7 +1,7 @@
 import unittest
 
 from gobject import GType
-from common import gobject, gtk
+from common import gobject
 
 class GTypeTest(unittest.TestCase):
     def checkType(self, expected, *objects):
@@ -23,9 +23,9 @@ class GTypeTest(unittest.TestCase):
 
     def testInt(self):
         self.checkType(gobject.TYPE_INT, 'gint', int)
-        model = gtk.ListStore(str, int)
-        iter = model.append()
-        model.set(iter, 1, 100000000)
+    #    model = gtk.ListStore(str, int)
+    #    iter = model.append()
+    #    model.set(iter, 1, 100000000)
         
     def testInt64(self):
         self.checkType(gobject.TYPE_INT64, 'gint64')

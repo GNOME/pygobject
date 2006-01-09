@@ -1,7 +1,7 @@
 import unittest
 
 import testmodule
-from common import gobject, gtk, testhelper
+from common import gobject, testhelper
 from gobject import GObject, GInterface
 
 class TestSubType(unittest.TestCase):
@@ -9,28 +9,18 @@ class TestSubType(unittest.TestCase):
         t = type('testtype', (GObject, GInterface), {})
         self.failUnless(issubclass(t, GObject))
         self.failUnless(issubclass(t, GInterface))
-        t = type('testtype2', (GObject, gtk.TreeModel), {})
-        self.failUnless(issubclass(t, GObject))
-        self.failUnless(issubclass(t, gtk.TreeModel))
         
-    def testTpBasicSize(self):
-        self.assertEqual(GObject.__basicsize__,
-                         gtk.Widget.__basicsize__)
-
-        self.assertEqual(GInterface.__basicsize__,
-                         gtk.TreeModel.__basicsize__)
-
-    def testLabel(self):
-        label = gtk.Label()
+    def testGObject(self):
+        label = gobject.GObject()
         self.assertEqual(label.__grefcount__, 1)
-        label = gobject.new(gtk.Label)
+        label = gobject.new(gobject.GObject)
         self.assertEqual(label.__grefcount__, 1)
 
     def testPythonSubclass(self):
-        label = testmodule.PyLabel()
+        label = testmodule.PyGObject()
         self.assertEqual(label.__grefcount__, 1)
         self.assertEqual(label.props.label, "hello")
-        label = gobject.new(testmodule.PyLabel)
+        label = gobject.new(testmodule.PyGObject)
         self.assertEqual(label.__grefcount__, 1)
         self.assertEqual(label.props.label, "hello")
 
@@ -40,39 +30,8 @@ class TestSubType(unittest.TestCase):
         refcount = testhelper.test_g_object_new()
         self.assertEqual(refcount, 2)
         
-    def testMassiveGtkSubclassing(self):
-        for name, cls in [(name, getattr(gtk, name)) for name in dir(gtk)]:
-            ## Skip some deprecated types
-            if name in ['CTree', '_gobject']:
-                continue
-            try:
-                if not issubclass(cls, gobject.GObject):
-                    continue
-            except TypeError: # raised by issubclass if cls is not a class
-                    continue
-            subname = name + "PyGtkTestSubclass"
-            sub = type(subname, (cls,), {'__gtype_name__': subname })
-    
-    def testGtkWindowObjNewRefcount(self):
-        foo = gobject.new(gtk.Window)
-        self.assertEqual(foo.__grefcount__, 2)
-        
-    def testGtkWindowFactoryRefcount(self):
-        foo = gtk.Window()
-        self.assertEqual(foo.__grefcount__, 2)
-        
-    def testPyWindowObjNewRefcount(self):
-        PyWindow = type('PyWindow', (gtk.Window,), dict(__gtype_name__='PyWindow1'))
-        foo = gobject.new(PyWindow)
-        self.assertEqual(foo.__grefcount__, 2)
-        
-    def testGtkWindowFactoryRefcount(self):
-        PyWindow = type('PyWindow', (gtk.Window,), dict(__gtype_name__='PyWindow2'))
-        foo = PyWindow()
-        self.assertEqual(foo.__grefcount__, 2)
-
     def testRegisterArgNotType(self):
         self.assertRaises(TypeError, gobject.type_register, 1)
 
     def testGObjectNewError(self):
-        self.assertRaises(TypeError, gobject.new, gtk.Label, text='foo')
+        self.assertRaises(TypeError, gobject.new, gobject.GObject, text='foo')

@@ -1,0 +1,38 @@
+2006-01-09  Johan Dahlin  <jdahlin@async.com.br>
+
+	* .cvsignore:
+	* AUTHORS:
+	* COPYING:
+	* INSTALL:
+	* Makefile.am:
+	* PKG-INFO.in:
+	* README:
+	* autogen.sh:
+	* configure.ac:
+	* examples/.cvsignore:
+	* examples/Makefile.am:
+	* gobject/gobjectmodule.c: (initgobject):
+	* m4/jhflags.m4:
+	* m4/python.m4:
+	* pygobject-2.0.pc.in:
+	* tests/Makefile.am:
+	* tests/common.py:
+	* tests/leak.glade:
+	* tests/runtests.py:
+	* tests/test_actiongroup.py:
+	* tests/test_dialog.py:
+	* tests/test_gdk.py:
+	* tests/test_gdkevent.py:
+	* tests/test_glade.py:
+	* tests/test_gtype.py:
+	* tests/test_liststore.py:
+	* tests/test_radiobutton.py:
+	* tests/test_signal.py:
+	* tests/test_subtype.py:
+	* tests/test_textview.py:
+	* tests/test_thread.py:
+	* tests/testhelpermodule.c: (test_type_get_type),
+	(_wrap_test_g_object_new):
+	* tests/testmodule.py:
+
+	Split out PyGObject from PyGTK.
