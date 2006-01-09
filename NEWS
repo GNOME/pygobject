@@ -1,4 +1,4 @@
-2.9.0 09-january-2006
+2.8.0 09-january-2006
       - Initial release, split of from PyGTK.
       - Updates for Python 2.5's richcompare (Manish Yosh)
       - PyFlags bug fixes (Gustavo)
