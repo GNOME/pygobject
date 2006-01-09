@@ -3,6 +3,7 @@ Makefile.in
 PKG-INFO
 aclocal.m4
 autom4te.cache
+build
 compile
 config.guess
 config.h
@@ -12,6 +13,7 @@ config.status
 config.sub
 configure
 depcomp
+dsextras.pyc
 install-sh
 libtool
 ltihooks.pyc
