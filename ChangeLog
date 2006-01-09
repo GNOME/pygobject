@@ -1,5 +1,9 @@
 2006-01-09  Johan Dahlin  <jdahlin@async.com.br>
 
+	* setup.py: Add distutils support
+
+	* dsextras.py (get_m4_define): Check for configure.ac aswell.
+
 	* .cvsignore:
 	* AUTHORS:
 	* COPYING:

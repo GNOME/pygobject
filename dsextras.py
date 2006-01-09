@@ -20,9 +20,16 @@ GLOBAL_MACROS = []
 
 def get_m4_define(varname):
     """Return the value of a m4_define variable as set in configure.in."""
-    pattern=re.compile("m4_define\("+varname+"\,\s*(.+)\)")
-    for line in open("configure.in").readlines():
-        match_obj=pattern.match(line)
+    pattern = re.compile("m4_define\(" + varname + "\,\s*(.+)\)")
+    if os.path.exists('configure.ac'):
+        fname = 'configure.ac'
+    elif os.path.exists('configure.in'):
+        fname = 'configure.in'
+    else:
+        raise SystemExit('could not find configure file')
+    
+    for line in open(fname).readlines():
+        match_obj = pattern.match(line)
         if match_obj:
             return match_obj.group(1)
 
