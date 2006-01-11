@@ -1,5 +1,10 @@
 2006-01-11  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
+	* gobject/pygtype.c (object_doc_descr_get): Reorder
+	properties/signals documentation more nicely: signals + properties
+	from each type are presented, with types ranging from the leaf
+	types to the base types.
+
 	* configure.ac: Branch, bump version to 2.9.1.
 
 === PyGObject 2.8.0 ===

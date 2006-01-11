@@ -1422,30 +1422,34 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
     else
 	g_string_append_printf(string, "%s\n\n", g_type_name(gtype));
 
+    if (((PyTypeObject *) type)->tp_doc)
+        g_string_append_printf(string, "%s\n\n", ((PyTypeObject *) type)->tp_doc);
+
     if (g_type_is_a(gtype, G_TYPE_OBJECT)) {
 	GType parent = G_TYPE_OBJECT;
+        GArray *parents = g_array_new(FALSE, FALSE, sizeof(GType));
+        int iparent;
 
-	while (parent) {
+        while (parent) {
+            g_array_append_val(parents, parent);
+            parent = g_type_next_base(gtype, parent);
+        }
+        
+        for (iparent = parents->len - 1; iparent >= 0; --iparent) {
 	    GType *interfaces;
 	    guint n_interfaces, i;
 
+            parent = g_array_index(parents, GType, iparent);
 	    add_signal_docs(parent, string);
+	    add_property_docs(parent, string);
 
 	    /* add docs for implemented interfaces */
 	    interfaces = g_type_interfaces(parent, &n_interfaces);
 	    for (i = 0; i < n_interfaces; i++)
 		add_signal_docs(interfaces[i], string);
 	    g_free(interfaces);
-
-	    parent = g_type_next_base(gtype, parent);
 	}
-	parent = G_TYPE_OBJECT;
-	while (parent) {
-	    add_property_docs(parent, string);
-	    parent = g_type_next_base(gtype, parent);
-	}
-    } else if (g_type_is_a(gtype, G_TYPE_OBJECT)) {
-	add_signal_docs(gtype, string);
+        g_array_free(parents, TRUE);
     }
 
     pystring = PyString_FromStringAndSize(string->str, string->len);
