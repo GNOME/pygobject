@@ -30,6 +30,7 @@
 
 static PyObject *gerror_exc = NULL;
 static gboolean use_gil_state_api = FALSE;
+static PyObject *_pyg_signal_accumulator_true_handled_func;
 
 GQuark pyginterface_type_key;
 GQuark pygobject_class_init_key;
@@ -458,6 +459,61 @@ pyg_object_class_init(GObjectClass *class, PyObject *py_class)
     class->get_property = pyg_object_get_property;
 }
 
+typedef struct _PyGSignalAccumulatorData {
+    PyObject *callable;
+    PyObject *user_data;
+} PyGSignalAccumulatorData;
+
+static gboolean
+_pyg_signal_accumulator(GSignalInvocationHint *ihint,
+                        GValue *return_accu,
+                        const GValue *handler_return,
+                        gpointer _data)
+{
+    PyObject *py_ihint, *py_return_accu, *py_handler_return, *py_detail;
+    PyObject *py_retval;
+    gboolean retval = FALSE;
+    PyGSignalAccumulatorData *data = _data;
+    PyGILState_STATE state;
+
+    state = pyg_gil_state_ensure();
+    if (ihint->detail)
+        py_detail = PyString_FromString(g_quark_to_string(ihint->detail));
+    else {
+        Py_INCREF(Py_None);
+        py_detail = Py_None;
+    }
+
+    py_ihint = Py_BuildValue("lNi", (long int) ihint->signal_id,
+                             py_detail, ihint->run_type);
+    py_handler_return = pyg_value_as_pyobject(handler_return, TRUE);
+    py_return_accu = pyg_value_as_pyobject(return_accu, FALSE);
+    if (data->user_data)
+        py_retval = PyObject_CallFunction(data->callable, "NNNO", py_ihint,
+                                          py_return_accu, py_handler_return,
+                                          data->user_data);
+    else
+        py_retval = PyObject_CallFunction(data->callable, "NNN", py_ihint,
+                                          py_return_accu, py_handler_return);
+    if (!py_retval)
+	PyErr_Print();
+    else {
+        if (!PyTuple_Check(py_retval) || PyTuple_Size(py_retval) != 2) {
+            PyErr_SetString(PyExc_TypeError, "accumulator function must return"
+                            " a (bool, object) tuple");
+            PyErr_Print();
+        } else {
+            retval = PyObject_IsTrue(PyTuple_GET_ITEM(py_retval, 0));
+            if (pyg_value_from_pyobject(return_accu, PyTuple_GET_ITEM(py_retval, 1))) {
+                PyErr_Print();
+            }
+        }
+        Py_DECREF(py_retval);
+    }
+    pyg_gil_state_release(state);
+    return retval;
+}
+
 static gboolean
 create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 {
@@ -467,13 +523,26 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     guint n_params, i;
     GType *param_types;
     guint signal_id;
+    GSignalAccumulator accumulator = NULL;
+    PyGSignalAccumulatorData *accum_data = NULL;
+    PyObject *py_accum = NULL, *py_accum_data = NULL;
 
-    if (!PyArg_ParseTuple(tuple, "iOO", &signal_flags, &py_return_type,
-			  &py_param_types)) {
+    if (!PyArg_ParseTuple(tuple, "iOO|OO", &signal_flags, &py_return_type,
+			  &py_param_types, &py_accum, &py_accum_data))
+    {
 	gchar buf[128];
 
 	PyErr_Clear();
 	g_snprintf(buf, sizeof(buf), "value for __gsignals__['%s'] not in correct format", signal_name);
+	PyErr_SetString(PyExc_TypeError, buf);
+	return FALSE;
+    }
+
+    if (py_accum && py_accum != Py_None && !PyCallable_Check(py_accum))
+    {
+	gchar buf[128];
+
+	g_snprintf(buf, sizeof(buf), "accumulator for __gsignals__['%s'] must be callable", signal_name);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return FALSE;
     }
@@ -502,9 +571,22 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	Py_DECREF(item);
     }
 
+    if (py_accum == _pyg_signal_accumulator_true_handled_func)
+        accumulator = g_signal_accumulator_true_handled;
+    else {
+        if (py_accum != NULL && py_accum != Py_None) {
+            accum_data = g_new(PyGSignalAccumulatorData, 1);
+            accum_data->callable = py_accum;
+            Py_INCREF(py_accum);
+            accum_data->user_data = py_accum_data;
+            Py_XINCREF(py_accum_data);
+            accumulator = _pyg_signal_accumulator;
+        }
+    }
+
     signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
 			      pyg_signal_class_closure_get(),
-			      (GSignalAccumulator)0, NULL,
+			      accumulator, accum_data,
 			      (GSignalCMarshaller)0,
 			      return_type, n_params, param_types);
     g_free(param_types);
@@ -2231,6 +2313,14 @@ pyg_main_depth(PyObject *unused)
     return PyInt_FromLong(g_main_depth());
 }
 
+static PyObject *
+pyg_signal_accumulator_true_handled(PyObject *unused, PyObject *args)
+{
+    PyErr_SetString(PyExc_TypeError, "signal_accumulator_true_handled can only"
+                    " be used as accumulator argument when registering signals");
+    return NULL;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2258,6 +2348,7 @@ static PyMethodDef pygobject_functions[] = {
     { "markup_escape_text", (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { "get_current_time", (PyCFunction)pyg_get_current_time, METH_NOARGS },
     { "main_depth", (PyCFunction)pyg_main_depth, METH_NOARGS },
+    { "signal_accumulator_true_handled", (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
@@ -2929,4 +3020,7 @@ initgobject(void)
     g_log_set_handler("GThread", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
                       _log_func, warning);
 
+      /* signal registration recognizes this special accumulator 'constant' */
+    _pyg_signal_accumulator_true_handled_func = \
+        PyDict_GetItemString(d, "signal_accumulator_true_handled");
 }

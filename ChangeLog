@@ -1,5 +1,15 @@
 2006-01-11  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
+	* gobject/gobjectmodule.c (_pyg_signal_accumulator),
+	(create_signal, pyg_signal_accumulator_true_handled),
+	(initgobject): Bug 155380 -- Add support for signal accumulators.
+
+	* tests/runtests.py: Add 'test_enum', 'test_conversion' to
+	SKIP_FILES, since they depend on pygtk modules so don't work
+	anymore.  This should be eventually fixed, though.
+
+	* tests/test_signal.py: Test signal accumulators.
+
 	* gobject/pygtype.c (object_doc_descr_get): Reorder
 	properties/signals documentation more nicely: signals + properties
 	from each type are presented, with types ranging from the leaf

@@ -77,5 +77,57 @@ class TestList(unittest.TestCase):
     def testListObject(self):
         self.assertEqual(gobject.signal_list_names(C), ('my-signal',))         
 
+
+def my_accumulator(ihint, return_accu, handler_return, user_data):
+    """An accumulator that stops emission when the sum of handler
+    returned values reaches 3"""
+    assert user_data == "accum data"
+    if return_accu >= 3:
+        return False, return_accu
+    return True, return_accu + handler_return
+
+class Foo(gobject.GObject):
+    __gsignals__ = {
+        'my-acc-signal': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_INT,
+                                   (), my_accumulator, "accum data"),
+        'my-other-acc-signal': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,
+                                (), gobject.signal_accumulator_true_handled)
+        }
+
+class TestAccumulator(unittest.TestCase):
+        
+    def testAccumulator(self):
+        inst = Foo()
+        inst.connect("my-acc-signal", lambda obj: 1)
+        inst.connect("my-acc-signal", lambda obj: 2)
+        ## the value returned in the following handler will not be
+        ## considered, because at this point the accumulator already
+        ## reached its limit.
+        inst.connect("my-acc-signal", lambda obj: 3)
+        retval = inst.emit("my-acc-signal")
+        self.assertEqual(retval, 3)
+        
+    def testAccumulatorTrueHandled(self):
+        inst = Foo()
+        inst.connect("my-other-acc-signal", self._true_handler1)
+        inst.connect("my-other-acc-signal", self._true_handler2)
+        ## the following handler will not be called because handler2
+        ## returns True, so it should stop the emission.
+        inst.connect("my-other-acc-signal", self._true_handler3)
+        self.__true_val = None
+        inst.emit("my-other-acc-signal")
+        self.assertEqual(self.__true_val, 2)
+
+    def _true_handler1(self, obj):
+        self.__true_val = 1
+        return False
+    def _true_handler2(self, obj):
+        self.__true_val = 2
+        return True
+    def _true_handler3(self, obj):
+        self.__true_val = 3
+        return False
+
+
 if __name__ == '__main__':
     unittest.main()
