@@ -1,3 +1,7 @@
+2006-01-11  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Branch, bump version to 2.9.1.
+
 === PyGObject 2.8.0 ===
 2006-01-09  Johan Dahlin  <jdahlin@async.com.br>
 
