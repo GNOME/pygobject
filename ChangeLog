@@ -1,4 +1,8 @@
-2006-01-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+2006-01-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_register_class): Change strategy
+	a bit: don't ignore bases; use but augment it with missing bases
+	extracted in runtime.
 
 	* gobject/pygobject.c (pygobject_register_class): Don't use the
 	passed in 'bases' parameter; instead find out in runtime the bases

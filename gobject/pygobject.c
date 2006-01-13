@@ -462,8 +462,8 @@ PyTypeObject PyGPropsDescr_Type = {
  * @type_name: not used ?
  * @gtype: the GType of the GObject subclass.
  * @type: the Python type object for this wrapper.
- * @unused_bases: deprecated, a tuple of Python type objects that are
- * the bases of this type, should be NULL now
+ * @static_bases: a tuple of Python type objects that are the bases of
+ * this type
  *
  * This function is used to register a Python type as the wrapper for
  * a particular GObject subclass.  It will also insert a reference to
@@ -473,20 +473,46 @@ PyTypeObject PyGPropsDescr_Type = {
 void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
 			 GType gtype, PyTypeObject *type,
-			 PyObject *unused_bases)
+			 PyObject *static_bases)
 {
     PyObject *o;
     const char *class_name, *s;
-    PyObject *bases;
+    PyObject *runtime_bases;
+    PyObject *bases_list, *bases;
+    int i;
 
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
     if (s != NULL)
 	class_name = s + 1;
 
-      /* bases are now automatically discovered in runtime */
-    Py_XDECREF(unused_bases);
-    bases = pyg_type_get_bases(gtype);
+    runtime_bases = pyg_type_get_bases(gtype);
+    if (static_bases) {
+        PyTypeObject *py_parent_type = (PyTypeObject *) PyTuple_GET_ITEM(static_bases, 0);
+        bases_list = PySequence_List(static_bases);
+          /* we start at index 1 because we want to skip the primary
+           * base, otherwise we might get MRO conflict */
+        for (i = 1; i < PyTuple_GET_SIZE(runtime_bases); ++i)
+        {
+            PyObject *base = PyTuple_GET_ITEM(runtime_bases, i);
+            int contains = PySequence_Contains(bases_list, base);
+            if (contains < 0)
+                PyErr_Print();
+            else if (!contains) {
+                if (!PySequence_Contains(py_parent_type->tp_mro, base)) {
+#if 0
+                    g_message("Adding missing base %s to type %s",
+                              ((PyTypeObject *)base)->tp_name, type->tp_name);
+#endif
+                    PyList_Append(bases_list, base);
+                }
+            }
+        }
+        bases = PySequence_Tuple(bases_list);
+        Py_DECREF(bases_list);
+        Py_DECREF(runtime_bases);
+    } else
+        bases = runtime_bases;
 
     type->ob_type = &PyGObject_MetaType;
     type->tp_bases = bases;
