@@ -24,6 +24,7 @@
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 static int  pygobject_clear(PyGObject *self);
+static PyObject * pyg_type_get_bases(GType gtype);
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
@@ -461,7 +462,8 @@ PyTypeObject PyGPropsDescr_Type = {
  * @type_name: not used ?
  * @gtype: the GType of the GObject subclass.
  * @type: the Python type object for this wrapper.
- * @bases: a tuple of Python type objects that are the bases of this type.
+ * @unused_bases: deprecated, a tuple of Python type objects that are
+ * the bases of this type, should be NULL now
  *
  * This function is used to register a Python type as the wrapper for
  * a particular GObject subclass.  It will also insert a reference to
@@ -471,22 +473,26 @@ PyTypeObject PyGPropsDescr_Type = {
 void
 pygobject_register_class(PyObject *dict, const gchar *type_name,
 			 GType gtype, PyTypeObject *type,
-			 PyObject *bases)
+			 PyObject *unused_bases)
 {
     PyObject *o;
     const char *class_name, *s;
-
+    PyObject *bases;
 
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
     if (s != NULL)
 	class_name = s + 1;
-	
-    type->ob_type = &PyGObject_MetaType;
 
-    if (bases) {
-	type->tp_bases = bases;
-	type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
+      /* bases are now automatically discovered in runtime */
+    Py_XDECREF(unused_bases);
+    bases = pyg_type_get_bases(gtype);
+
+    type->ob_type = &PyGObject_MetaType;
+    type->tp_bases = bases;
+    if (G_LIKELY(bases)) {
+        type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
+        Py_INCREF(type->tp_base);
     }
 
     if (PyType_Ready(type) < 0) {
@@ -532,6 +538,40 @@ pygobject_register_wrapper(PyObject *self)
 			    pyg_destroy_notify);
 }
 
+static PyObject *
+pyg_type_get_bases(GType gtype)
+{
+    GType *interfaces, parent_type, interface_type;
+    guint n_interfaces;
+    PyTypeObject *py_parent_type, *py_interface_type;
+    PyObject *bases;
+    int i;
+    
+    if (G_UNLIKELY(gtype == G_TYPE_OBJECT))
+        return NULL;
+
+    /* Lookup the parent type */
+    parent_type = g_type_parent(gtype);
+    py_parent_type = pygobject_lookup_class(parent_type);
+    interfaces = g_type_interfaces(gtype, &n_interfaces);
+    bases = PyTuple_New(n_interfaces + 1);
+    /* We will always put the parent at the first position in bases */
+    Py_INCREF(py_parent_type); /* PyTuple_SetItem steals a reference */
+    PyTuple_SetItem(bases, 0, (PyObject *) py_parent_type);
+
+    /* And traverse interfaces */
+    if (n_interfaces) {
+	for (i = 0; i < n_interfaces; i++) {
+	    interface_type = interfaces[i];
+	    py_interface_type = pygobject_lookup_class(interface_type);
+            Py_INCREF(py_interface_type); /* PyTuple_SetItem steals a reference */
+	    PyTuple_SetItem(bases, i + 1, (PyObject *) py_interface_type);
+	}
+    }
+    g_free(interfaces);
+    return bases;
+}
+
 /**
  * pygobject_new_with_interfaces
  * @gtype: the GType of the GObject subclass.
@@ -549,40 +589,16 @@ pygobject_new_with_interfaces(GType gtype)
     PyObject *o;
     PyTypeObject *type;
     PyObject *dict;
-    PyTypeObject *py_parent_type, *py_interface_type;
-    GType *interfaces;
-    guint n_interfaces;
-    int i;
+    PyTypeObject *py_parent_type;
     PyObject *bases;
-    GType parent_type, interface_type;
     PyObject *modules, *module;
     gchar *type_name, *mod_name, *gtype_name;
 
     state = pyg_gil_state_ensure();
 
-    interfaces = g_type_interfaces (gtype, &n_interfaces);
-    bases = PyTuple_New(n_interfaces+1);
-    
-    /* Lookup the parent type */
-    parent_type = g_type_parent(gtype);
-    py_parent_type = pygobject_lookup_class(parent_type);
+    bases = pyg_type_get_bases(gtype);
+    py_parent_type = (PyTypeObject *) PyTuple_GetItem(bases, 0);
 
-    /* We will always put the parent at the first position in bases */
-    Py_INCREF(py_parent_type); /* PyTuple_SetItem steals a reference */
-    PyTuple_SetItem(bases, 0, (PyObject*)py_parent_type);
-
-    /* And traverse interfaces */
-    if (n_interfaces) {
-	for (i = 0; i < n_interfaces; i++) {
-	    interface_type = interfaces[i];
-	    py_interface_type = pygobject_lookup_class(interface_type);
-            Py_INCREF(py_interface_type); /* PyTuple_SetItem steals a reference */
-	    PyTuple_SetItem(bases, i+1, (PyObject*)py_interface_type);
-	}
-	
-    }
-    g_free(interfaces);
-	
     dict = PyDict_New();
     
     o = pyg_type_wrapper_new(gtype);
@@ -615,9 +631,8 @@ pygobject_new_with_interfaces(GType gtype)
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
 
-
-    type = (PyTypeObject*)PyObject_CallFunction((PyObject*)&PyType_Type, "sNN",
-						type_name, bases, dict);
+    type = (PyTypeObject*)PyObject_CallFunction((PyObject *) py_parent_type->ob_type,
+                                                "sNN", type_name, bases, dict);
     g_free(type_name);
 
     if (type == NULL) {
@@ -636,13 +651,18 @@ pygobject_new_with_interfaces(GType gtype)
         type->tp_setattro = NULL;
         type->tp_setattr = py_parent_type->tp_setattr;
     }
+      /* override more python stupid hacks behind our back */
+    type->tp_dealloc = py_parent_type->tp_dealloc;
+    type->tp_alloc = py_parent_type->tp_alloc;
+    type->tp_free = py_parent_type->tp_free;
+    type->tp_traverse = py_parent_type->tp_traverse;
+    type->tp_clear = py_parent_type->tp_clear;
 
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
         pyg_gil_state_release(state);
 	return NULL;
     }
-    
     /* insert type name in module dict */
     modules = PyImport_GetModuleDict();
     if ((module = PyDict_GetItemString(modules, mod_name)) != NULL) {
@@ -904,7 +924,7 @@ pygobject_clear(PyGObject *self)
     pyg_end_allow_threads;
 
     if (self->closures != NULL)
-	g_message("invalidated all closures, but self->closures != NULL !");
+	g_warning("invalidated all closures, but self->closures != NULL !");
 
     if (self->obj) {
 	g_object_unref(self->obj);

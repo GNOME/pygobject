@@ -1,3 +1,16 @@
+2006-01-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* gobject/pygobject.c (pygobject_register_class): Don't use the
+	passed in 'bases' parameter; instead find out in runtime the bases
+	for any given gtype.
+	(pyg_type_get_bases, pygobject_new_with_interfaces): Refactor code
+	that dynamically discovers bases into a separate function;
+	Override tp_dealloc, tp_alloc, tp_free, tp_traverse, and tp_clear,
+	inherit them again from the parent type, since type_new inside
+	Python core sets them to hardcoded functions subtype_xxx.  Also
+	call py_parent_type->ob_type, instead of fixed &PyType_Type.
+	(pygobject_clear): Change a g_message to g_warning.
+
 2006-01-13  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/gobjectmodule.c: (pyg_io_add_watch),
