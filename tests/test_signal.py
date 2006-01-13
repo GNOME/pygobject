@@ -128,6 +128,45 @@ class TestAccumulator(unittest.TestCase):
         self.__true_val = 3
         return False
 
+class E(gobject.GObject):
+    __gsignals__ = { 'signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                                ()) }
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        self.status = 0
+            
+    def do_signal(self):
+        assert self.status == 0
+        self.status = 1
+
+class TestEmissionHook(unittest.TestCase):
+    def testAdd(self):
+        self.hook = True 
+        e = E()
+        e.connect('signal', self._callback)
+        gobject.add_emission_hook(E, "signal", self._emission_hook)
+        e.emit('signal')
+        self.assertEqual(e.status, 3)
+
+    def testRemove(self):
+        self.hook = False
+        e = E()
+        e.connect('signal', self._callback)
+        hook_id = gobject.add_emission_hook(E, "signal", self._emission_hook)
+        gobject.remove_emission_hook(E, "signal", hook_id)
+        e.emit('signal')
+        self.assertEqual(e.status, 3)
+        
+    def _emission_hook(self, e):
+        self.assertEqual(e.status, 1)
+        e.status = 2
+
+    def _callback(self, e):
+        if self.hook:
+            self.assertEqual(e.status, 2)
+        else:
+            self.assertEqual(e.status, 1)
+        e.status = 3
 
 if __name__ == '__main__':
     unittest.main()

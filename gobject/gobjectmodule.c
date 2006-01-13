@@ -1971,7 +1971,7 @@ pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     iochannel = g_io_channel_unix_new(fd);
     handler_id = g_io_add_watch_full(iochannel, priority, condition,
 				     iowatch_marshal, data,
-				    (GDestroyNotify)pyg_destroy_notify);
+				     (GDestroyNotify)pyg_destroy_notify);
     g_io_channel_unref(iochannel);
     
     return PyInt_FromLong(handler_id);
@@ -2321,6 +2321,141 @@ pyg_signal_accumulator_true_handled(PyObject *unused, PyObject *args)
     return NULL;
 }
 
+static gboolean
+marshal_emission_hook(GSignalInvocationHint *ihint,
+		      guint n_param_values,
+		      const GValue *param_values,
+		      gpointer user_data)
+{
+    PyGILState_STATE state;
+    gboolean retval = FALSE;
+    PyObject *func, *args;
+    PyObject *retobj;
+    PyObject *params;
+    guint i;
+
+    state = pyg_gil_state_ensure();
+
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(n_param_values);
+
+    for (i = 0; i < n_param_values; i++) {
+	PyObject *item = pyg_value_as_pyobject(&param_values[i], FALSE);
+	
+	/* error condition */
+	if (!item) {
+	    goto out;
+	}
+	PyTuple_SetItem(params, i, item);
+    }
+
+    args = (PyObject *)user_data;
+    func = PyTuple_GetItem(args, 0);
+    args = PySequence_Concat(params, PyTuple_GetItem(args, 1));
+    Py_DECREF(params);
+
+    /* params passed to function may have extra arguments */
+
+    retobj = PyObject_CallObject(func, args);
+    Py_DECREF(args);
+    if (retobj == NULL) {
+        PyErr_Print();
+    }
+    
+    retval = (retobj == Py_True ? TRUE : FALSE);
+    Py_XDECREF(retobj);
+out:
+    pyg_gil_state_release(state);
+    return retval;
+}
+
+static PyObject *
+pyg_add_emission_hook(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args, *data;
+    gchar *name;
+    gulong hook_id;
+    guint sigid, len;
+    GQuark detail = 0;
+    GType gtype;
+    PyObject *pygtype;
+
+    len = PyTuple_Size(args);
+    if (len < 3) {
+	PyErr_SetString(PyExc_TypeError,
+			"kiwi.add_emission_hook requires at least 3 arguments");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 3);
+    if (!PyArg_ParseTuple(first, "OsO:add_emission_hook",
+			  &pygtype, &name, &callback)) {
+	Py_DECREF(first);
+	return NULL;
+    }
+    Py_DECREF(first);
+    
+    if ((gtype = pyg_type_from_object(pygtype)) == 0) {
+	return NULL;
+    }
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "third argument must be callable");
+	return NULL;
+    }
+
+    if (!g_signal_parse_name(name, gtype, &sigid, &detail, TRUE)) {
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
+	return NULL;
+    }
+    extra_args = PySequence_GetSlice(args, 3, len);
+    if (extra_args == NULL)
+	return NULL;
+
+    data = Py_BuildValue("(ON)", callback, extra_args);
+    if (data == NULL)
+      return NULL;
+    
+    hook_id = g_signal_add_emission_hook(sigid, detail,
+					 marshal_emission_hook,
+					 data,
+					 (GDestroyNotify)pyg_destroy_notify);
+        
+    Py_DECREF(extra_args);
+    return PyInt_FromLong(hook_id);
+}
+
+static PyObject *
+pyg_remove_emission_hook(PyGObject *self, PyObject *args)
+{
+    PyObject *pygtype;
+    char *name;
+    guint signal_id;
+    gulong hook_id;
+    GType gtype;
+    
+    if (!PyArg_ParseTuple(args, "Osi:gobject.remove_emission_hook",
+			  &pygtype, &name, &hook_id))
+	return NULL;
+    
+    if ((gtype = pyg_type_from_object(pygtype)) == 0) {
+	return NULL;
+    }
+    
+    if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     name);
+	return NULL;
+    }
+
+    g_signal_remove_emission_hook(signal_id, hook_id);
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2349,6 +2484,8 @@ static PyMethodDef pygobject_functions[] = {
     { "get_current_time", (PyCFunction)pyg_get_current_time, METH_NOARGS },
     { "main_depth", (PyCFunction)pyg_main_depth, METH_NOARGS },
     { "signal_accumulator_true_handled", (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
+    { "add_emission_hook", (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
+    { "remove_emission_hook", (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
