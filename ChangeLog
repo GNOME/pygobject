@@ -1,3 +1,8 @@
+2006-01-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (iowatch_marshal): Warn if io callback
+	returns None: almost always this is an error.
+
 2006-01-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygobject.c (pygobject_register_class): Change strategy

@@ -1921,6 +1921,12 @@ iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
 	PyErr_Print();
 	res = FALSE;
     } else {
+        if (ret == Py_None) {
+            if (PyErr_Warn(PyExc_Warning, "gobject.io_add_watch callback returned None;"
+                           " should return True/False")) {
+                PyErr_Print();
+            }
+        }
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
