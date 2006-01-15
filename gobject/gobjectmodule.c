@@ -2691,7 +2691,6 @@ _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
     for (i = 0; i < argc; ++i)
 	argv[i] = g_strdup(PyString_AsString(PySequence_Fast_GET_ITEM(obj, i)));
     argv[i] = NULL;
-    g_value_init(value, G_TYPE_STRV);
     g_value_take_boxed(value, argv);
     return 0;
 }

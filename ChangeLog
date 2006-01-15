@@ -1,3 +1,9 @@
+2006-01-15  Christopher Aillon  <caillon@redhat.com>
+
+	* gobject/gobjectmodule.c (pyg_strv_to_gvalue):
+	Don't call g_value_init since the other *_to_gvalue
+	methods expect an already inited GValue
+
 2006-01-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (iowatch_marshal): Warn if io callback
