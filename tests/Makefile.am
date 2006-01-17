@@ -22,6 +22,8 @@ testhelper_la_SOURCES = \
 	test-unknown.c 
 
 tests =  \
+	test_conversion.py \
+	test_enum.py \
 	test_gtype.py \
 	test_mainloop.py \
 	test_properties.py \
