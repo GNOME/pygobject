@@ -1,3 +1,9 @@
+2.9.0 16-january-2006
+      - Signal accumulator support (Gustavo)
+      - GObject doc string generation improvements (Gustavo)
+      - Discover GInterfaces in runtime (Gustavo)
+      - Warn if return value in iowatch callback is not bool (Gustavo)
+      - Convert string arrays properly (Christopher Aillon)
 2.8.0 09-january-2006
       - Initial release, split of from PyGTK.
       - Updates for Python 2.5's richcompare (Manish Yosh)

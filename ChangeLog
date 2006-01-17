@@ -1,3 +1,8 @@
+=== PyGObject 2.9.1 ===
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* NEWS: Update
+
 2006-01-15  Christopher Aillon  <caillon@redhat.com>
 
 	* gobject/gobjectmodule.c (pyg_strv_to_gvalue):
