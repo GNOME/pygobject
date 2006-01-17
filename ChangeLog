@@ -1,3 +1,7 @@
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac: Post release version bump
+
 === PyGObject 2.9.1 ===
 2006-01-16  Johan Dahlin  <johan@gnome.org>
 
