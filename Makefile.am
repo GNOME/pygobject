@@ -57,7 +57,6 @@ egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
 	echo "gobject.so" >> $(TMPDIR)/EGG-INFO/native_libs.txt
 	echo "gobject" >> $(TMPDIR)/EGG-INFO/top_level.txt
 	echo "dsextras.py" >> $(TMPDIR)/EGG-INFO/top_level.txt
-	touch $(TMPDIR)/EGG-INFO/zip-safe
 	cd $(TMPDIR) && zip -rq $(EGG_NAME) .
 	mv $(TMPDIR)/$(EGG_NAME) .
 	rm -fr $(TMPDIR)
