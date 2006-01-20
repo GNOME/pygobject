@@ -41,3 +41,23 @@ install-exec-local:
 	echo "gtk-$(PLATFORM_VERSION)" > $(DESTDIR)$(pyexecdir)/pygtk.pth
 uninstall-local:
 	rm -f $(DESTDIR)$(pythondir)/pygtk.pth $(DESTDIR)$(pyexecdir)/pygtk.pth
+
+EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM).egg
+TMPDIR = `pwd`/$(PACKAGE)-$(PACKAGE_VERSION)
+
+egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
+	rm -fr $(TMPDIR)
+	echo $(EGG_NAME)
+	mkdir -p $(TMPDIR)
+	mkdir -p $(TMPDIR)/EGG-INFO
+	make -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(TMPDIR)
+	$(INSTALL) dsextras.py $(TMPDIR)
+	rm -fr $(TMPDIR)/gobject.la
+	$(INSTALL) PKG-INFO $(TMPDIR)/EGG-INFO
+	echo "gobject.so" >> $(TMPDIR)/EGG-INFO/native_libs.txt
+	echo "gobject" >> $(TMPDIR)/EGG-INFO/top_level.txt
+	echo "dsextras.py" >> $(TMPDIR)/EGG-INFO/top_level.txt
+	touch $(TMPDIR)/EGG-INFO/zip-safe
+	cd $(TMPDIR) && zip -rq $(EGG_NAME) .
+	mv $(TMPDIR)/$(EGG_NAME) .
+	rm -fr $(TMPDIR)

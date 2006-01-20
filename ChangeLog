@@ -1,3 +1,9 @@
+2006-01-19  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac (export_dynamic):
+	* Makefile.am (egg):
+	Add a make egg target
+
 2006-01-16  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Post release version bump

@@ -63,6 +63,9 @@ AM_PATH_PYTHON(2.3.5)
 
 AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
+PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
+AC_SUBST(PLATFORM)
+
 AC_ARG_ENABLE(thread,
   AC_HELP_STRING([--disable-thread], [Disable pygobject threading support]),,
   enable_thread=yes)
