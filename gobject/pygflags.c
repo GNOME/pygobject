@@ -105,7 +105,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "value", NULL };
     long value;
-    PyObject *pytc, *values, *ret;
+    PyObject *pytc, *values, *ret, *pyint;
     GType gtype;
     GFlagsClass *eclass;
     
@@ -143,8 +143,11 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    ret = PyDict_GetItem(values, PyInt_FromLong(value));
+    pyint = PyInt_FromLong(value);
+    ret = PyDict_GetItem(values, pyint);
+    Py_DECREF(pyint);
     Py_DECREF(values);
+
     if (ret)
         Py_INCREF(ret);
     else
@@ -155,7 +158,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 PyObject*
 pyg_flags_from_gtype (GType gtype, int value)
 {
-    PyObject *pyclass, *values, *retval;
+    PyObject *pyclass, *values, *retval, *pyint;
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
     
@@ -169,7 +172,10 @@ pyg_flags_from_gtype (GType gtype, int value)
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__flags_values__");
-    retval = PyDict_GetItem(values, PyInt_FromLong(value));
+    pyint = PyInt_FromLong(value);
+    retval = PyDict_GetItem(values, pyint);
+    Py_DECREF(pyint);
+
     if (!retval) {
 	PyErr_Clear();
 
@@ -234,13 +240,15 @@ pyg_flags_add (PyObject *   module,
 
     values = PyDict_New();
     for (i = 0; i < eclass->n_values; i++) {
-      PyObject *item;
+      PyObject *item, *intval;
       
       item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
       ((PyIntObject*)item)->ob_ival = eclass->values[i].value;
       ((PyGFlags*)item)->gtype = gtype;
             
-      PyDict_SetItem(values, PyInt_FromLong(eclass->values[i].value), item);
+      intval = PyInt_FromLong(eclass->values[i].value);
+      PyDict_SetItem(values, intval, item);
+      Py_DECREF(intval);
 
       if (module) {
           PyModule_AddObject(module,

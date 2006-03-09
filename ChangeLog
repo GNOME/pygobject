@@ -1,3 +1,13 @@
+2006-03-09 Michael Smith  <msmith@fluendo.com>
+
+	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygenum.c: (pyg_enum_new), (pyg_enum_from_gtype),
+	(pyg_enum_add):
+	* gobject/pygflags.c: (pyg_flags_new), (pyg_flags_from_gtype),
+	(pyg_flags_add):
+	Plug a couple of leaks, fixes #334027.
+
 2006-01-19  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac (export_dynamic):
