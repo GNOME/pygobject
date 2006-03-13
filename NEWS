@@ -1,3 +1,5 @@
+2.10.0 13-march-2006
+      - enum/leak fix (Michael Smith)
 2.9.0 16-january-2006
       - Signal accumulator support (Gustavo)
       - GObject doc string generation improvements (Gustavo)
