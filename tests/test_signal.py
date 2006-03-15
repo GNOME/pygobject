@@ -15,7 +15,7 @@ class D(C):
     def do_my_signal(self, arg2):
         self.arg2 = arg2
 	C.do_my_signal(self, arg2)
-    
+
 class TestChaining(unittest.TestCase):
     def setUp(self):
         self.inst = C()
@@ -25,16 +25,16 @@ class TestChaining(unittest.TestCase):
         assert len(args) == 5
         assert isinstance(args[0], C)
         assert args[0] == self.inst
-        
+
         assert isinstance(args[1], int)
         assert args[1] == 42
 
         assert args[2:] == (1, 2, 3)
-        
+
     def testChaining(self):
         self.inst.emit("my_signal", 42)
         assert self.inst.arg == 42
-        
+
     def testChaining(self):
         inst2 = D()
         inst2.emit("my_signal", 44)
@@ -49,7 +49,7 @@ class TestGSignalsError(unittest.TestCase):
                 __gsignals__ = None
         self.assertRaises(TypeError, foo)
         gc.collect()
-        
+
     def testInvalidName(self, *args):
         def foo():
             class Foo(gobject.GObject):
@@ -64,18 +64,18 @@ class TestGPropertyError(unittest.TestCase):
                 __gproperties__ = None
         self.assertRaises(TypeError, foo)
         gc.collect()
-        
+
     def testInvalidName(self, *args):
         def foo():
             class Foo(gobject.GObject):
                 __gproperties__ = { None: None }
-            
+
         self.assertRaises(TypeError, foo)
         gc.collect()
 
 class TestList(unittest.TestCase):
     def testListObject(self):
-        self.assertEqual(gobject.signal_list_names(C), ('my-signal',))         
+        self.assertEqual(gobject.signal_list_names(C), ('my-signal',))
 
 
 def my_accumulator(ihint, return_accu, handler_return, user_data):
@@ -95,7 +95,7 @@ class Foo(gobject.GObject):
         }
 
 class TestAccumulator(unittest.TestCase):
-        
+
     def testAccumulator(self):
         inst = Foo()
         inst.connect("my-acc-signal", lambda obj: 1)
@@ -106,7 +106,7 @@ class TestAccumulator(unittest.TestCase):
         inst.connect("my-acc-signal", lambda obj: 3)
         retval = inst.emit("my-acc-signal")
         self.assertEqual(retval, 3)
-        
+
     def testAccumulatorTrueHandled(self):
         inst = Foo()
         inst.connect("my-other-acc-signal", self._true_handler1)
@@ -134,14 +134,14 @@ class E(gobject.GObject):
     def __init__(self):
         gobject.GObject.__init__(self)
         self.status = 0
-            
+
     def do_signal(self):
         assert self.status == 0
         self.status = 1
 
 class TestEmissionHook(unittest.TestCase):
     def testAdd(self):
-        self.hook = True 
+        self.hook = True
         e = E()
         e.connect('signal', self._callback)
         gobject.add_emission_hook(E, "signal", self._emission_hook)
@@ -156,7 +156,7 @@ class TestEmissionHook(unittest.TestCase):
         gobject.remove_emission_hook(E, "signal", hook_id)
         e.emit('signal')
         self.assertEqual(e.status, 3)
-        
+
     def _emission_hook(self, e):
         self.assertEqual(e.status, 1)
         e.status = 2
