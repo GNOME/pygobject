@@ -1,3 +1,10 @@
+2006-03-19  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_new_with_interfaces): Remove
+	comment "It will currently not filter out interfaces already
+	implemented by it parents.", since it is no longer true since
+	2006-01-13.
+
 === PyGObject 2.10.0 ===
 2006-01-16  Johan Dahlin  <johan@gnome.org>
 

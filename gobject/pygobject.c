@@ -603,8 +603,7 @@ pyg_type_get_bases(GType gtype)
  * @gtype: the GType of the GObject subclass.
  *
  * Creates a new PyTypeObject from the given GType with interfaces attached in
- * bases. It will currently not filter out interfaces already implemented by
- * it parents.
+ * bases.
  *
  * Returns: a PyTypeObject for the new type or NULL if it couldn't be created
  */
