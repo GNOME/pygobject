@@ -1,3 +1,7 @@
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am: Include dsextras.py in the dist and install it.
+
 2006-03-19  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygobject.c (pygobject_new_with_interfaces): Remove

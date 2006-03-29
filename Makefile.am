@@ -10,15 +10,18 @@ EXTRA_DIST = 				\
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO 			\
 	PKG-INFO.in 			\
-	setup.py
+	setup.py			\
+	dsextras.py
+
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/gobject
 
 # pkg-config files
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
 
-# extension modules
+# python modules
 pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexec_PYTHON = dsextras.py
 pkgpyexec_LTLIBRARIES =
 
 # python
