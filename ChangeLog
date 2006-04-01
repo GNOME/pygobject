@@ -1,5 +1,8 @@
 2006-04-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* pygtk.py.in (require): For version == '2.0', use a hardcoded
+	pygtk path, recorded during build.
+
 	* gobject/gobjectmodule.c (_pyg_strv_to_gvalue): Don't allow
 	arbitrary sequences, only tuple or list, since a string is a
 	sequence too.

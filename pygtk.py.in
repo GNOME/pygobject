@@ -22,9 +22,12 @@
 import fnmatch
 import glob
 import os
+import os.path
 import sys
 
 __all__ = ['require']
+
+_pygtk_2_0_dir = os.path.normpath('@pyexecdir@/gtk-2.0')
 
 _pygtk_dir_pat = 'gtk-[0-9].[0-9]'
 
@@ -58,7 +61,14 @@ def _get_available_versions():
             	versions[filename[-3:]] = pathname
     return versions
 
+def require20():
+    if _pygtk_2_0_dir not in sys.path:
+        sys.path.insert(0, _pygtk_2_0_dir)
+
 def require(version):
+    if version == '2.0':
+        return require20()
+    
     global _pygtk_required_version
 
     if _pygtk_required_version != None:
