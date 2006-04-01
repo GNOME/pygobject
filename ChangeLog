@@ -1,5 +1,7 @@
 2006-04-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* tests/test_properties.py: Add test for #335854.
+
 	* pygtk.py.in (require): For version == '2.0', use a hardcoded
 	pygtk path, recorded during build.
 

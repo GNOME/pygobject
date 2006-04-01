@@ -3,7 +3,7 @@ import unittest
 
 from common import testhelper
 from gobject import GObject, GType, new, PARAM_READWRITE, \
-     PARAM_CONSTRUCT, PARAM_CONSTRUCT_ONLY, TYPE_UINT64
+     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_CONSTRUCT_ONLY, TYPE_UINT64
 
 class PropertyObject(GObject):
     __gproperties__ = {
@@ -110,3 +110,13 @@ class TestProperties(unittest.TestCase):
         obj.props.uint64 = 1
         self.assertEqual(obj.props.uint64, 1L)
 
+    def testUInt64DefaultValue(self):
+        try:
+            class TimeControl(GObject):
+                __gproperties__ = {
+                    'time': (TYPE_UINT64, 'Time', 'Time',
+                             0L, (1<<64) - 1, 0L,
+                             PARAM_READABLE)
+                    }
+        except OverflowError, ex:
+            self.fail(str(ex))
