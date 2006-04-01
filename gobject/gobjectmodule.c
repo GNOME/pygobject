@@ -1721,8 +1721,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	    if (pyg_param_gvalue_from_pyobject(&params[n_params].value,
 					       value, pspec) < 0) {
 		PyErr_Format(PyExc_TypeError,
-			     "could not convert value for property `%s'",
-			     key_str);
+			     "could not convert value for property `%s' from %s to %s",
+			     key_str, value->ob_type->tp_name, g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
 		goto cleanup;
 	    }
 	    params[n_params].name = g_strdup(key_str);
@@ -2682,7 +2682,9 @@ _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
     int     argc, i;
     gchar **argv;
 
-    if (!PySequence_Check(obj)) return -1;
+    if (!(PyTuple_Check(obj) || PyList_Check(obj)))
+        return -1;
+
     argc = PySequence_Length(obj);
     for (i = 0; i < argc; ++i)
 	if (!PyString_Check(PySequence_Fast_GET_ITEM(obj, i)))
