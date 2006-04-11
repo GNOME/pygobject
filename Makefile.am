@@ -4,7 +4,7 @@ SUBDIRS = gobject . examples tests
 
 PLATFORM_VERSION = 2.0
 
-CLEANFILES = 
+CLEANFILES = pygtk.py
 EXTRA_DIST = 				\
 	MANIFEST.in 			\
 	pygobject-$(PLATFORM_VERSION).pc.in \
