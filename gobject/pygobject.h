@@ -276,7 +276,7 @@ struct _PyGObject_Functions *_PyGObject_API;
         } \
     } else { \
         PyErr_SetString(PyExc_ImportError, \
-                        "could not import gobject._gobjet"); \
+                        "could not import gobject._gobject"); \
         return; \
     } \
 } G_STMT_END
