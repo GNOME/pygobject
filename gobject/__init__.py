@@ -35,17 +35,17 @@ class GObjectMeta(type):
         type.__init__(cls, name, bases, dict_)
         cls._type_register(cls.__dict__)
 
-    def _type_register(cls, ns):
+    def _type_register(cls, namespace):
         ## don't register the class if already registered
-        if '__gtype__' in ns:
+        if '__gtype__' in namespace:
             return
 
-        if not ('__gproperties__' in ns or
-                '__gsignals__' in ns or
-                '__gtype_name__' in ns):
+        if not ('__gproperties__' in namespace or
+                '__gsignals__' in namespace or
+                '__gtype_name__' in namespace):
             return
 
-        type_register(cls, ns.get('__gtype_name__'))
+        type_register(cls, namespace.get('__gtype_name__'))
 
 _gobject._install_metaclass(GObjectMeta)
 del _gobject
