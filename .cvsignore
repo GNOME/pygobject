@@ -21,4 +21,5 @@ ltmain.sh
 missing
 py-compile
 pygobject-2.0.pc
+pygtk.py
 stamp-h1
