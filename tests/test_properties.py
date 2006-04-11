@@ -16,14 +16,14 @@ class PropertyObject(GObject):
         'uint64': (TYPE_UINT64, 'blurb', 'description', 0, 10, 0,
                    PARAM_READWRITE),
     }
-    
+
     def __init__(self):
         GObject.__init__(self)
         self._value = 'default'
         self._construct_only = None
         self._construct = None
         self._uint64 = 0L
-        
+
     def do_get_property(self, pspec):
         if pspec.name == 'normal':
             return self._value
@@ -47,7 +47,7 @@ class PropertyObject(GObject):
             self._uint64 = value
         else:
             raise AssertionError
-        
+
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
         obj = PropertyObject()
@@ -64,7 +64,7 @@ class TestProperties(unittest.TestCase):
     def testSetNoInstance(self):
         def set(obj):
             obj.props.normal = "foobar"
-            
+
         self.assertRaises(TypeError, set, PropertyObject)
 
     def testIterator(self):
@@ -85,7 +85,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.normal, "456")
         obj.props.normal = '789'
         self.assertEqual(obj.props.normal, "789")
-        
+
     def testConstruct(self):
         obj = new(PropertyObject, construct="123")
         self.assertEqual(obj.props.construct, "123")
@@ -93,7 +93,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.construct, "456")
         obj.props.construct = '789'
         self.assertEqual(obj.props.construct, "789")
-                         
+
     def testConstructOnly(self):
         obj = new(PropertyObject, construct_only="123")
         self.assertEqual(obj.props.construct_only, "123")

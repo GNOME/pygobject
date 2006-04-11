@@ -38,8 +38,8 @@ loader = unittest.TestLoader()
 
 for name in gettestnames():
     if program and program not in name:
-       continue
+        continue
     suite.addTest(loader.loadTestsFromName(name))
-    
+
 testRunner = unittest.TextTestRunner()
 testRunner.run(suite)

@@ -5,7 +5,7 @@ from gobject import GType, new
 from common import gobject, testhelper
 
 TestInterface = GType.from_name('TestInterface')
-    
+
 class TestUnknown(unittest.TestCase):
     def testFoo(self):
         obj = testhelper.get_unknown()

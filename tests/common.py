@@ -4,7 +4,7 @@ import sys
 def importModules(buildDir, srcDir):
     # Be very careful when you change this code, it's
     # fragile and the order is really significant
-    
+
     # ltihooks
     sys.path.insert(0, srcDir)
     import ltihooks
@@ -15,15 +15,15 @@ def importModules(buildDir, srcDir):
     # testhelper
     sys.path.insert(0, os.path.join(buildDir, 'tests'))
     sys.argv.append('--g-fatal-warnings')
-    
+
     gobject = importModule('gobject', buildDir, 'gobject/gobject.la')
     testhelper = importModule('testhelper', '.')
-        
+
     ltihooks.uninstall()
     del ltihooks
-    
+
     globals().update(locals())
-    
+
     os.environ['PYGTK_USE_GIL_STATE_API'] = ''
     gobject.threads_init()
 
@@ -44,8 +44,8 @@ def importModule(module, directory, name=None):
     except ImportError, e:
         print 'WARNING: %s could not be imported' % origName
         print e
-        return 
-    
+        return
+
     if hasattr(obj, '__file__'):
         location = obj.__file__
     else:
@@ -57,7 +57,6 @@ def importModule(module, directory, name=None):
     current = os.path.abspath(location)
     if current != expected:
         raise AssertionError('module %s imported from wrong location. Expected %s, got %s' % (
-	                         module, expected, current))
+                                 module, expected, current))
 
     return obj
-    

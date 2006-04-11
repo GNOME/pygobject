@@ -123,7 +123,7 @@ class FlagsTest(unittest.TestCase):
         else:
             raise AssertionError
         warnings.resetwarnings()
-        
+
     def testFlagOperations(self):
         a = gdk.BUTTON_PRESS_MASK
         self.failUnless(isinstance(a, GFlags))
@@ -164,7 +164,7 @@ class FlagsTest(unittest.TestCase):
         self.assertEquals(int(c), (int(gdk.BUTTON_PRESS_MASK) |
                                    int(gdk.BUTTON_RELEASE_MASK) |
                                    int(gdk.ENTER_NOTIFY_MASK)))
-        
+
     def testUnsupportedOpertionWarning(self):
         warnings.filterwarnings("error", "", Warning, "", 0)
         try:
@@ -180,13 +180,13 @@ class FlagsTest(unittest.TestCase):
                        gtk.container_class_list_child_properties(gtk.Table))
         self.failUnless(len(props) >= 2)
         pspec = props[0]
-        klass = pspec.flags_class 
+        klass = pspec.flags_class
         self.assertEquals(klass, gtk.AttachOptions)
         self.failUnless(hasattr(klass, '__flags_values__'))
         self.failUnless(isinstance(klass.__flags_values__, dict))
         self.failUnless(len(klass.__flags_values__) >= 3)
         self.failUnless(isinstance(pspec.default_value, gtk.AttachOptions))
-        
+
     def testEnumComparision(self):
         enum = gtk.TREE_VIEW_DROP_BEFORE
         self.assertEquals(enum, 0)
@@ -201,7 +201,7 @@ class FlagsTest(unittest.TestCase):
         self.failUnless(not enum >= 10)
         self.failUnless(enum <= 0)
         self.failUnless(enum <= 10)
-        
+
     def testFlagComparision(self):
         flag = gdk.EXPOSURE_MASK
         self.assertEquals(flag, 2)

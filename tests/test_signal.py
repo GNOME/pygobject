@@ -14,7 +14,7 @@ class C(gobject.GObject):
 class D(C):
     def do_my_signal(self, arg2):
         self.arg2 = arg2
-	C.do_my_signal(self, arg2)
+        C.do_my_signal(self, arg2)
 
 class TestChaining(unittest.TestCase):
     def setUp(self):

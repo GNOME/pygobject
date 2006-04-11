@@ -7,10 +7,10 @@ import unittest
 from common import gtk, gobject
 
 class Tests(unittest.TestCase):
-  
+
     def testUnicharArg(self):
         """ Test unichar values when used as arguments. """
-      
+
         entry = gtk.Entry()
         for valid_value in ['a', u'b', u'\ufff0', u'\ufff0'.encode()]:
             entry.set_invisible_char(valid_value)
@@ -27,11 +27,11 @@ class Tests(unittest.TestCase):
                 raise AssertionError(
                     'exception not raised on invalid value w/ '
                     'set_invisible_char: %s'  % invalid_value)
-      
+
 
     def testUnicharProperty(self):
         """ Test unichar values when used as properties. """
-      
+
         entry = gtk.Entry()
         for valid_value in ['a', u'b', u'\ufff0', u'\ufff0'.encode()]:
             entry.set_property('invisible_char', valid_value)
@@ -53,7 +53,7 @@ class Tests(unittest.TestCase):
             entry = gobject.new(gtk.Entry, invisible_char=valid_value)
             self.assertEqual(entry.get_property('invisible_char'),
                              valid_value, valid_value)
-      
+
     def testColorCreation(self):
         """ Test GdkColor creation """
 
@@ -76,10 +76,10 @@ class Tests(unittest.TestCase):
         table = gtk.Table(2, 2, False)
         table.attach(child, 1, 2, 0, 1, ypadding=2)
         self.assertEqual(table.child_get_property(child, 'y-padding'), 2)
-        
+
         child = gtk.DrawingArea()
         table.attach(child, 1, 2, 0, 1, ypadding=2L)
         self.assertEqual(table.child_get_property(child, 'y-padding'), 2)
-        
+
 if __name__ == '__main__':
     unittest.main()

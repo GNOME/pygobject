@@ -9,7 +9,7 @@ class TestSubType(unittest.TestCase):
         t = type('testtype', (GObject, GInterface), {})
         self.failUnless(issubclass(t, GObject))
         self.failUnless(issubclass(t, GInterface))
-        
+
     def testGObject(self):
         label = gobject.GObject()
         self.assertEqual(label.__grefcount__, 1)
@@ -29,7 +29,7 @@ class TestSubType(unittest.TestCase):
         self.assertEqual(obj.__grefcount__, 1)
         refcount = testhelper.test_g_object_new()
         self.assertEqual(refcount, 2)
-        
+
     def testRegisterArgNotType(self):
         self.assertRaises(TypeError, gobject.type_register, 1)
 

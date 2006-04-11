@@ -21,7 +21,7 @@ else:
     print "It's mainly included to be able to easily build win32 installers"
     print "You may continue, but only if you agree to not ask any questions"
     print "To build PyGObject in a supported way, read the INSTALL file"
-    print 
+    print
     print "Build fixes are of course welcome and should be filed in bugzilla"
     print '*'*70
     input = raw_input('Not supported, ok [y/N]? ')

@@ -22,7 +22,7 @@ class TestMainLoop(unittest.TestCase):
         def child_died(pid, status, loop):
             loop.quit()
             raise Exception("deadbabe")
-        
+
         loop = gobject.MainLoop()
         gobject.child_watch_add(pid, child_died, loop)
 
@@ -40,7 +40,7 @@ class TestMainLoop(unittest.TestCase):
             loop.run()
         except:
             got_exception = True
-        
+
         #
         # The exception should be handled (by printing it)
         # immediately on return from child_died() rather

@@ -27,7 +27,7 @@ def get_m4_define(varname):
         fname = 'configure.in'
     else:
         raise SystemExit('could not find configure file')
-    
+
     for line in open(fname).readlines():
         match_obj = pattern.match(line)
         if match_obj:
@@ -85,11 +85,11 @@ def pkgc_version_check(name, longname, req_version):
     if not is_installed:
         print "Could not find %s" % longname
         return 0
-    
+
     orig_version = getoutput('pkg-config --modversion %s' % name)
     version = map(int, orig_version.split('.'))
     pkc_version = map(int, req_version.split('.'))
-                      
+
     if version >= pkc_version:
         return 1
     else:
@@ -105,7 +105,7 @@ class BuildExt(build_ext):
         if sys.platform == 'win32' and \
            self.compiler.compiler_type == 'mingw32':
             # MSVC compatible struct packing is required.
-            # Note gcc2 uses -fnative-struct while gcc3 
+            # Note gcc2 uses -fnative-struct while gcc3
             # uses -mms-bitfields. Based on the version
             # the proper flag is used below.
             msnative_struct = { '2' : '-fnative-struct',
@@ -114,7 +114,7 @@ class BuildExt(build_ext):
             print 'using MinGW GCC version %s with %s option' % \
                   (gcc_version, msnative_struct[gcc_version[0]])
             self.extra_compile_args.append(msnative_struct[gcc_version[0]])
-    
+
     def modify_compiler(self):
         if sys.platform == 'win32' and \
            self.compiler.compiler_type == 'mingw32':
@@ -122,7 +122,7 @@ class BuildExt(build_ext):
             # from trying to link with MSVC import libraries.
             if self.compiler.linker_so.count('-static'):
                 self.compiler.linker_so.remove('-static')
-    
+
     def build_extensions(self):
         # Init self.extra_compile_args
         self.init_extra_compile_args()
@@ -130,7 +130,7 @@ class BuildExt(build_ext):
         self.modify_compiler()
         # Invoke base build_extensions()
         build_ext.build_extensions(self)
-        
+
     def build_extension(self, ext):
         # Add self.extra_compile_args to ext.extra_compile_args
         ext.extra_compile_args += self.extra_compile_args
@@ -144,10 +144,10 @@ class InstallLib(install_lib):
 
     local_outputs = []
     local_inputs = []
-        
+
     def set_install_dir(self, install_dir):
         self.install_dir = install_dir
-    
+
     def get_outputs(self):
         return install_lib.get_outputs(self) + self.local_outputs
 
@@ -155,7 +155,7 @@ class InstallLib(install_lib):
         return install_lib.get_inputs(self) + self.local_inputs
 
 class InstallData(install_data):
-    
+
     local_outputs = []
     local_inputs = []
     template_options = {}
@@ -171,18 +171,18 @@ class InstallData(install_data):
         self.includedir = '${prefix}/include'
         self.libdir = '${prefix}/lib'
         self.datadir = '${prefix}/share'
-        
-        self.add_template_option('prefix', self.prefix)        
-        self.add_template_option('exec_prefix', self.exec_prefix)        
+
+        self.add_template_option('prefix', self.prefix)
+        self.add_template_option('exec_prefix', self.exec_prefix)
         self.add_template_option('includedir', self.includedir)
         self.add_template_option('libdir', self.libdir)
         self.add_template_option('datadir', self.datadir)
         self.add_template_option('PYTHON', sys.executable)
         self.add_template_option('THREADING_CFLAGS', '')
-        
+
     def set_install_dir(self, install_dir):
         self.install_dir = install_dir
-        
+
     def add_template_option(self, name, value):
         self.template_options['@%s@' % name] = value
 
@@ -193,20 +193,20 @@ class InstallData(install_data):
         template = open(filename).read()
         for key, value in self.template_options.items():
             template = template.replace(key, value)
-        
+
         output = os.path.join(install_dir, output_file)
         self.mkpath(install_dir)
         open(output, 'w').write(template)
         self.local_inputs.append(filename)
         self.local_outputs.append(output)
         return output
-    
+
     def get_outputs(self):
         return install_lib.get_outputs(self) + self.local_outputs
 
     def get_inputs(self):
         return install_lib.get_inputs(self) + self.local_inputs
-    
+
 class PkgConfigExtension(Extension):
     can_build_ok = None
     def __init__(self, **kwargs):
@@ -238,7 +238,7 @@ class PkgConfigExtension(Extension):
             output = getoutput('pkg-config --libs-only-l %s' % name)
             retval.extend(output.replace('-l', '').split())
         return retval
-    
+
     def get_library_dirs(self, names):
         if type(names) != tuple:
             names = (names,)
@@ -250,7 +250,7 @@ class PkgConfigExtension(Extension):
 
     def can_build(self):
         """If the pkg-config version found is good enough"""
-        if self.can_build_ok != None: 
+        if self.can_build_ok != None:
             return self.can_build_ok
 
         if type(self.pkc_name) != tuple:
@@ -278,10 +278,10 @@ class PkgConfigExtension(Extension):
                       (package, orig_version)
                 self.can_build_ok = 0
                 return 0
-        
+
     def generate(self):
         pass
-       
+
 class Template:
     def __init__(self, override, output, defs, prefix,
                  register=[], load_types=None):
@@ -291,7 +291,7 @@ class Template:
         self.output = output
         self.prefix = prefix
         self.load_types = load_types
-        
+
     def check_dates(self):
         if not os.path.exists(self.output):
             return 0
@@ -300,17 +300,17 @@ class Template:
         files.append(self.override)
 #        files.append('setup.py')
         files.append(self.defs)
-        
+
         newest = 0
         for file in files:
             test = os.stat(file)[8]
             if test > newest:
                 newest = test
-                
+
         if newest < os.stat(self.output)[8]:
             return 1
         return 0
-    
+
     def generate(self):
         # We must insert it first, otherwise python will try '.' first,
         # in which it exist a "bogus" codegen (the third import line
@@ -319,7 +319,7 @@ class Template:
         from override import Overrides
         from defsparser import DefsParser
         from codegen import register_types, write_source, FileOutput
-        
+
         if self.check_dates():
             return
 
@@ -331,18 +331,18 @@ class Template:
         if self.load_types:
             globals = {}
             execfile(self.load_types, globals)
-            
+
         dp = DefsParser(self.defs,dict(GLOBAL_MACROS))
         dp.startParsing()
         register_types(dp)
-        
+
         fd = open(self.output, 'w')
         write_source(dp,
                      Overrides(self.override),
                      self.prefix,
                      FileOutput(fd, self.output))
         fd.close()
-        
+
 class TemplateExtension(PkgConfigExtension):
     def __init__(self, **kwargs):
         name = kwargs['name']
@@ -353,19 +353,16 @@ class TemplateExtension(PkgConfigExtension):
         self.templates = []
         self.templates.append(Template(override, output, defs, 'py' + name,
                                        kwargs['register'], load_types))
-        
+
         del kwargs['register'], kwargs['override'], kwargs['defs']
         if load_types:
-           del kwargs['load_types']
-           
+            del kwargs['load_types']
+
         if kwargs.has_key('output'):
             kwargs['name'] = kwargs['output']
             del kwargs['output']
-        
+
         PkgConfigExtension.__init__(self, **kwargs)
-        
+
     def generate(self):
         map(lambda x: x.generate(), self.templates)
-        
-        
-

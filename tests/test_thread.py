@@ -9,7 +9,7 @@ class TestThread(unittest.TestCase):
         assert test == self.obj
         assert int(enum) == 0
         assert type(enum) != int
-        
+
     def idle_cb(self):
         self.obj = testhelper.get_test_thread()
         self.obj.connect('from-thread', self.from_thread_cb)
