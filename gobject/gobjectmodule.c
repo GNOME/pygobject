@@ -777,7 +777,7 @@ create_property (const gchar  *prop_name,
 	{
 	    guint64 minimum, maximum, default_value;
 
-	    if (!PyArg_ParseTuple(args, "LLL", &minimum, &maximum,
+	    if (!PyArg_ParseTuple(args, "KKK", &minimum, &maximum,
 				  &default_value))
 		return NULL;
 	    pspec = g_param_spec_uint64 (prop_name, nick, blurb, minimum,

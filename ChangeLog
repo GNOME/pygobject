@@ -1,3 +1,12 @@
+2006-04-11  Andy Wingo  <wingo@pobox.com>
+
+	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c (create_property): Parse unsigned int64
+	constraints in param spec declaration using the "K" ParseTuple
+	format unit, not L -- allows the full range of the datatype to be
+	parsed. K format unit added in python 2.3.
+
 2006-04-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/test_properties.py: Add test for #335854.
