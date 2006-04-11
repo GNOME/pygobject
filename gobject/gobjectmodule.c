@@ -1070,8 +1070,9 @@ static PyObject *
 _wrap_pyg_type_register(PyObject *self, PyObject *args)
 {
     PyTypeObject *class;
+    char *type_name = NULL;
 
-    if (!PyArg_ParseTuple(args, "O!:gobject.type_register", &PyType_Type, &class))
+    if (!PyArg_ParseTuple(args, "O!|z:gobject.type_register", &PyType_Type, &class, &type_name))
 	return NULL;
     if (!PyType_IsSubtype(class, &PyGObject_Type)) {
 	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
@@ -1082,7 +1083,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     if (pyg_type_from_object((PyObject *) class) ==
         pyg_type_from_object((PyObject *) class->tp_base))
     {
-        if (pyg_type_register(class, NULL))
+        if (pyg_type_register(class, type_name))
             return NULL;
     }
  
@@ -2461,6 +2462,16 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
+{
+    Py_INCREF(metaclass);
+    PyGObject_MetaType = metaclass;
+    Py_INCREF(metaclass);
+    PyGObject_Type.ob_type = metaclass;
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
@@ -2492,6 +2503,7 @@ static PyMethodDef pygobject_functions[] = {
     { "signal_accumulator_true_handled", (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
     { "add_emission_hook", (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
     { "remove_emission_hook", (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
+    { "_install_metaclass", (PyCFunction)pyg__install_metaclass, METH_O },
 
     { NULL, NULL, 0 }
 };
@@ -3001,13 +3013,6 @@ init_gobject(void)
 
     gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
     PyDict_SetItemString(d, "GError", gerror_exc);
-
-    PyGObject_MetaType.tp_base = &PyType_Type;
-    PyGObject_MetaType.tp_traverse = PyType_Type.tp_traverse;
-    PyGObject_MetaType.tp_clear = PyType_Type.tp_clear;
-    PyGObject_MetaType.tp_is_gc = PyType_Type.tp_is_gc;
-    PyType_Ready(&PyGObject_MetaType);
-    PyDict_SetItemString(d, "GObjectMeta", (PyObject *) &PyGObject_MetaType);
 
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;

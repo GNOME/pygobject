@@ -1,5 +1,17 @@
 2006-04-11  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (_wrap_pyg_type_register),
+	(pyg__install_metaclass, init_gobject):  GObjectMeta now moved to
+	python-land (__init__.py).
+	
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_register_class):
+	PyGObject_MetaType is now a pointer, not structure.
+
+	* gobject/gobjectmodule.c (_wrap_pyg_type_register): Add optional
+	type name parameter.
+
 	* tests/common.py (importModule): Include original exception
 	string in the raised SystemExit.
 

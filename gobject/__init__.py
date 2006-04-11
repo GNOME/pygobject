@@ -28,3 +28,21 @@ except ImportError:
     pass
 
 from _gobject import *
+
+class GObjectMeta(type):
+    "Metaclass for automatically gobject.type_register()ing GObject classes"
+    def __init__(cls, name, bases, dict_):
+        type.__init__(cls, name, bases, dict_)
+        ## don't register the class if already registered
+        if '__gtype__' in cls.__dict__:
+            return
+
+        if not ('__gproperties__' in cls.__dict__ or
+                '__gsignals__' in cls.__dict__ or
+                '__gtype_name__' in cls.__dict__):
+            return
+
+        type_register(cls, cls.__dict__.get('__gtype_name__'))
+
+_gobject._install_metaclass(GObjectMeta)
+
