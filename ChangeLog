@@ -1,3 +1,9 @@
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c (init_gobject): 
+	* gobject/__init__.py:
+	Move over almost all GType constants from C to Python.
+
 2006-04-11  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/__init__.py:
