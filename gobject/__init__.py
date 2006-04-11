@@ -30,19 +30,22 @@ except ImportError:
 from _gobject import *
 
 class GObjectMeta(type):
-    "Metaclass for automatically gobject.type_register()ing GObject classes"
+    "Metaclass for automatically registering GObject classes"
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
+        cls._type_register(cls.__dict__)
+
+    def _type_register(cls, ns):
         ## don't register the class if already registered
-        if '__gtype__' in cls.__dict__:
+        if '__gtype__' in ns:
             return
 
-        if not ('__gproperties__' in cls.__dict__ or
-                '__gsignals__' in cls.__dict__ or
-                '__gtype_name__' in cls.__dict__):
+        if not ('__gproperties__' in ns or
+                '__gsignals__' in ns or
+                '__gtype_name__' in ns):
             return
 
-        type_register(cls, cls.__dict__.get('__gtype_name__'))
+        type_register(cls, ns.get('__gtype_name__'))
 
 _gobject._install_metaclass(GObjectMeta)
-
+del _gobject
