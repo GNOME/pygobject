@@ -7,16 +7,15 @@ def importModules(buildDir, srcDir):
 
     # ltihooks
     sys.path.insert(0, srcDir)
-    import ltihooks
-    sys.path.remove(srcDir)
-
-    # gobject
+    sys.path.insert(0, buildDir)
     sys.path.insert(0, os.path.join(buildDir, 'gobject'))
+    import ltihooks
+
     # testhelper
     sys.path.insert(0, os.path.join(buildDir, 'tests'))
     sys.argv.append('--g-fatal-warnings')
 
-    gobject = importModule('gobject', buildDir, 'gobject/gobject.la')
+    gobject = importModule('gobject', buildDir, 'gobject')
     testhelper = importModule('testhelper', '.')
 
     ltihooks.uninstall()
@@ -31,20 +30,13 @@ def importModule(module, directory, name=None):
     global isDistCheck
 
     origName = module
-    if '.' in module:
-        fromlist = '.'.join(module.split('.')[:-1])
-    else:
-        fromlist = None
-
     if not name:
         name = module + '.la'
 
     try:
-        obj = __import__(module, {}, {}, fromlist)
+        obj = __import__(module, {}, {}, '')
     except ImportError, e:
-        print 'WARNING: %s could not be imported' % origName
-        print e
-        return
+        raise SystemExit('%s could not be imported' % origName)
 
     if hasattr(obj, '__file__'):
         location = obj.__file__
@@ -58,5 +50,4 @@ def importModule(module, directory, name=None):
     if current != expected:
         raise AssertionError('module %s imported from wrong location. Expected %s, got %s' % (
                                  module, expected, current))
-
     return obj

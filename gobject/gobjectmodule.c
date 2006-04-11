@@ -2966,7 +2966,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
     Py_DECREF(o);
 
 DL_EXPORT(void)
-initgobject(void)
+init_gobject(void)
 {
     PyObject *m, *d, *o, *tuple;
     PyObject *descr;
@@ -2974,7 +2974,7 @@ initgobject(void)
     
     PyGParamSpec_Type.ob_type = &PyType_Type;
     
-    m = Py_InitModule("gobject", pygobject_functions);
+    m = Py_InitModule("gobject._gobject", pygobject_functions);
     d = PyModule_GetDict(m);
 
     g_type_init();

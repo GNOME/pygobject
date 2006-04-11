@@ -263,7 +263,7 @@ struct _PyGObject_Functions *_PyGObject_API;
     } G_STMT_END
 
 #define init_pygobject() G_STMT_START { \
-    PyObject *gobject = PyImport_ImportModule("gobject"); \
+    PyObject *gobject = PyImport_ImportModule("gobject._gobject"); \
     if (gobject != NULL) { \
         PyObject *mdict = PyModule_GetDict(gobject); \
         PyObject *cobject = PyDict_GetItemString(mdict, "_PyGObject_API"); \
@@ -276,7 +276,7 @@ struct _PyGObject_Functions *_PyGObject_API;
         } \
     } else { \
         PyErr_SetString(PyExc_ImportError, \
-                        "could not import gobject"); \
+                        "could not import gobject._gobjet"); \
         return; \
     } \
 } G_STMT_END

@@ -6,17 +6,21 @@ pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
 
 pkgpyexecdir = $(pyexecdir)/gtk-2.0
-pkgpyexec_LTLIBRARIES = gobject.la 
+pkgpyexec_LTLIBRARIES = _gobject.la 
 
 common_ldflags = -module -avoid-version
 if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
 
-gobject_la_CFLAGS = $(GLIB_CFLAGS)
-gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex initgobject
-gobject_la_LIBADD = $(GLIB_LIBS)
-gobject_la_SOURCES = \
+# gobject python scripts
+pygobjectdir = $(pkgpythondir)/gtk
+pygobject_PYTHON = __init__.py
+
+_gobject_la_CFLAGS = $(GLIB_CFLAGS)
+_gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gobject
+_gobject_la_LIBADD = $(GLIB_LIBS)
+_gobject_la_SOURCES = \
 	gobjectmodule.c \
 	pygboxed.c \
 	pygenum.c \
@@ -33,5 +37,5 @@ gobject_la_SOURCES = \
 	pygtype.c
 
 if PLATFORM_WIN32
-gobject_la_CFLAGS += -DPLATFORM_WIN32
+_gobject_la_CFLAGS += -DPLATFORM_WIN32
 endif

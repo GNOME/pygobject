@@ -1,5 +1,18 @@
 2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
 
+	* gobject/.cvsignore:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c: (init_gobject):
+	* gobject/pygobject.h:
+	* tests/Makefile.am:
+	* tests/common.py:
+
+	Turn gobject into a package; move _gobject to gobject._gobject and
+	add gobject/__init__.py. Update macros and testsuite.
+
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
 	* configure.ac: Post release version bump
 
 === PyGObject 2.10.1 ===
