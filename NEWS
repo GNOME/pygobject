@@ -2,7 +2,7 @@
       - uint64 property bug fix (Andy Wingo)
       - Hard code path to 2.0 (Gustavo)
       - Allow only tuples and lists in strv to value (Gustavo)
-      - Include dsextras.py in the dist (Gustavo)
+      - Include dsextras.py in the dist (Johan)
 2.10.0 13-march-2006
       - enum/leak fix (Michael Smith)
 2.9.0 16-january-2006
