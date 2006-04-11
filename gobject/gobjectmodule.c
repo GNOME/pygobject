@@ -65,7 +65,8 @@ static void
 pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
 			    PyGThreadBlockFunc unblock_threads_func)
 {
-    g_return_if_fail(pygobject_api_functions.block_threads == NULL && pygobject_api_functions.unblock_threads == NULL);
+    g_return_if_fail(pygobject_api_functions.block_threads == NULL &&
+		     pygobject_api_functions.unblock_threads == NULL);
 
     pygobject_api_functions.block_threads   = block_threads_func;
     pygobject_api_functions.unblock_threads = unblock_threads_func;
@@ -533,7 +534,8 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	gchar buf[128];
 
 	PyErr_Clear();
-	g_snprintf(buf, sizeof(buf), "value for __gsignals__['%s'] not in correct format", signal_name);
+	g_snprintf(buf, sizeof(buf),
+		   "value for __gsignals__['%s'] not in correct format", signal_name);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return FALSE;
     }
@@ -542,7 +544,8 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     {
 	gchar buf[128];
 
-	g_snprintf(buf, sizeof(buf), "accumulator for __gsignals__['%s'] must be callable", signal_name);
+	g_snprintf(buf, sizeof(buf),
+		   "accumulator for __gsignals__['%s'] must be callable", signal_name);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return FALSE;
     }
@@ -553,7 +556,8 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     if (!PySequence_Check(py_param_types)) {
 	gchar buf[128];
 
-	g_snprintf(buf, sizeof(buf), "third element of __gsignals__['%s'] tuple must be a sequence", signal_name);
+	g_snprintf(buf, sizeof(buf),
+		   "third element of __gsignals__['%s'] tuple must be a sequence", signal_name);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return FALSE;
     }
@@ -651,7 +655,8 @@ add_signals (GType instance_type, PyObject *signals)
             for (c = signal_name_canon; *c; ++c)
                 if (*c == '-')
                     *c = '_';
-            if (PyDict_SetItemString(overridden_signals, signal_name_canon, key)) {
+            if (PyDict_SetItemString(overridden_signals,
+				     signal_name_canon, key)) {
                 g_free(signal_name_canon);
                 ret = FALSE;
                 break;
@@ -1016,8 +1021,10 @@ add_properties (GType instance_type, PyObject *properties)
             PyErr_Fetch(&type, &value, &traceback);
             if (PyString_Check(value)) {
                 char msg[256];
-                g_snprintf(msg, 256, "%s (while registering property '%s' for GType '%s')",
-                           PyString_AsString(value), prop_name, g_type_name(instance_type));
+                g_snprintf(msg, 256,
+			   "%s (while registering property '%s' for GType '%s')",
+                           PyString_AsString(value),
+			   prop_name, g_type_name(instance_type));
                 Py_DECREF(value);
                 value = PyString_FromString(msg);
             }
@@ -1072,10 +1079,12 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
     PyTypeObject *class;
     char *type_name = NULL;
 
-    if (!PyArg_ParseTuple(args, "O!|z:gobject.type_register", &PyType_Type, &class, &type_name))
+    if (!PyArg_ParseTuple(args, "O!|z:gobject.type_register",
+			  &PyType_Type, &class, &type_name))
 	return NULL;
     if (!PyType_IsSubtype(class, &PyGObject_Type)) {
-	PyErr_SetString(PyExc_TypeError,"argument must be a GObject subclass");
+	PyErr_SetString(PyExc_TypeError,
+			"argument must be a GObject subclass");
 	return NULL;
     }
 
@@ -1155,7 +1164,8 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     GObject *object = (GObject *) instance;
     PyObject *wrapper, *args, *kwargs;
 
-    if (!g_type_get_qdata(G_OBJECT_TYPE(object), pygobject_has_updated_constructor_key))
+    if (!g_type_get_qdata(G_OBJECT_TYPE(object),
+			  pygobject_has_updated_constructor_key))
         return;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key); 
@@ -1215,7 +1225,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     }
 
     if (type_name)
-        new_type_name = (gchar *) type_name; /* care is taken below not to free this */
+	/* care is taken below not to free this */
+        new_type_name = (gchar *) type_name; 
     else
 	new_type_name = get_type_name_for_class(class);
     
@@ -1248,8 +1259,9 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     Py_DECREF(gtype);
 
       /* propagate new constructor API compatility flag from parent to child type */
-    has_new_constructor_api = g_type_get_qdata(parent_type,
-                                               pygobject_has_updated_constructor_key);
+    has_new_constructor_api =
+	g_type_get_qdata(parent_type,
+			 pygobject_has_updated_constructor_key);
     if (has_new_constructor_api != NULL)
         g_type_set_qdata(instance_type, pygobject_has_updated_constructor_key,
                          has_new_constructor_api);
@@ -1272,7 +1284,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	if (!(overridden_signals = add_signals(instance_type, gsignals))) {
 	    return -1;
 	}
-        if (PyDict_SetItemString(class->tp_dict, "__gsignals__", overridden_signals))
+        if (PyDict_SetItemString(class->tp_dict, "__gsignals__",
+				 overridden_signals))
             return -1;
         Py_DECREF(overridden_signals);
     } else {
@@ -1311,7 +1324,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     if (class->tp_bases) {
         for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
         {
-            PyTypeObject *base = (PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
+            PyTypeObject *base =
+		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
             GType itype;
             const GInterfaceInfo *iinfo;
             
@@ -1723,7 +1737,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 					       value, pspec) < 0) {
 		PyErr_Format(PyExc_TypeError,
 			     "could not convert value for property `%s' from %s to %s",
-			     key_str, value->ob_type->tp_name, g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
+			     key_str, value->ob_type->tp_name,
+			     g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
 		goto cleanup;
 	    }
 	    params[n_params].name = g_strdup(key_str);
@@ -1898,7 +1913,9 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static gboolean
-iowatch_marshal(GIOChannel *source, GIOCondition condition, gpointer user_data)
+iowatch_marshal(GIOChannel *source,
+		GIOCondition condition,
+		gpointer user_data)
 {
     PyGILState_STATE state;
     PyObject *tuple, *func, *firstargs, *args, *ret;
@@ -2097,7 +2114,8 @@ pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
     PyObject *func, *user_data = NULL;
     struct _PyGChildData *child_data;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iO|Oi:gobject.child_watch_add", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "iO|Oi:gobject.child_watch_add", kwlist,
                                      &pid, &func, &user_data, &priority))
         return NULL;
     if (!PyCallable_Check(func)) {
@@ -2188,7 +2206,8 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
       /* parse argv */
     if (!PySequence_Check(pyargv)) {
         PyErr_SetString(PyExc_TypeError,
-                        "gobject.spawn_async: first argument must be a sequence of strings");
+                        "gobject.spawn_async: "
+			"first argument must be a sequence of strings");
         return NULL;
     }
     len = PySequence_Length(pyargv);
@@ -2197,7 +2216,8 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
         PyObject *tmp = PySequence_ITEM(pyargv, i);
         if (!PyString_Check(tmp)) {
             PyErr_SetString(PyExc_TypeError,
-                            "gobject.spawn_async: first argument must be a sequence of strings");
+                            "gobject.spawn_async: "
+			    "first argument must be a sequence of strings");
             g_free(argv);
             Py_XDECREF(tmp);
             return NULL;
@@ -2210,7 +2230,8 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
     if (pyenvp) {
         if (!PySequence_Check(pyenvp)) {
             PyErr_SetString(PyExc_TypeError,
-                            "gobject.spawn_async: second argument must be a sequence of strings");
+                            "gobject.spawn_async: "
+			    "second argument must be a sequence of strings");
             g_free(argv);
             return NULL;
         }
@@ -2220,7 +2241,8 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
             PyObject *tmp = PySequence_ITEM(pyenvp, i);
             if (!PyString_Check(tmp)) {
                 PyErr_SetString(PyExc_TypeError,
-                                "gobject.spawn_async: second argument must be a sequence of strings");
+                                "gobject.spawn_async: "
+				"second argument must be a sequence of strings");
                 g_free(envp);
                 Py_XDECREF(tmp);
                 return NULL;
@@ -2293,7 +2315,8 @@ pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
     int text_size;
     PyObject *retval;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#:gobject.markup_escape_text", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "s#:gobject.markup_escape_text", kwlist,
                                      &text_in, &text_size))
         return NULL;
 
@@ -2323,7 +2346,8 @@ pyg_main_depth(PyObject *unused)
 static PyObject *
 pyg_signal_accumulator_true_handled(PyObject *unused, PyObject *args)
 {
-    PyErr_SetString(PyExc_TypeError, "signal_accumulator_true_handled can only"
+    PyErr_SetString(PyExc_TypeError,
+		    "signal_accumulator_true_handled can only"
                     " be used as accumulator argument when registering signals");
     return NULL;
 }
@@ -2390,7 +2414,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     len = PyTuple_Size(args);
     if (len < 3) {
 	PyErr_SetString(PyExc_TypeError,
-			"kiwi.add_emission_hook requires at least 3 arguments");
+			"gobject.add_emission_hook requires at least 3 arguments");
 	return NULL;
     }
     first = PySequence_GetSlice(args, 0, 3);
@@ -2482,28 +2506,50 @@ static PyMethodDef pygobject_functions[] = {
     { "type_interfaces", pyg_type_interfaces, METH_VARARGS },
     { "type_register", _wrap_pyg_type_register, METH_VARARGS },
     { "signal_new", pyg_signal_new, METH_VARARGS },
-    { "signal_list_names", (PyCFunction)pyg_signal_list_names, METH_VARARGS|METH_KEYWORDS },
-    { "signal_list_ids", (PyCFunction)pyg_signal_list_ids, METH_VARARGS|METH_KEYWORDS },
-    { "signal_lookup", (PyCFunction)pyg_signal_lookup, METH_VARARGS|METH_KEYWORDS },
-    { "signal_name", (PyCFunction)pyg_signal_name, METH_VARARGS|METH_KEYWORDS },
-    { "signal_query", (PyCFunction)pyg_signal_query, METH_VARARGS|METH_KEYWORDS },
-    { "list_properties", pyg_object_class_list_properties, METH_VARARGS },
-    { "new", (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "idle_add", (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
-    { "timeout_add", (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
-    { "io_add_watch", (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
-    { "source_remove", pyg_source_remove, METH_VARARGS },
-    { "main_context_default", (PyCFunction)pyg_main_context_default, METH_NOARGS },
-    { "threads_init", (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
-    { "child_watch_add", (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
-    { "spawn_async", (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
-    { "markup_escape_text", (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
-    { "get_current_time", (PyCFunction)pyg_get_current_time, METH_NOARGS },
-    { "main_depth", (PyCFunction)pyg_main_depth, METH_NOARGS },
-    { "signal_accumulator_true_handled", (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
-    { "add_emission_hook", (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
-    { "remove_emission_hook", (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
-    { "_install_metaclass", (PyCFunction)pyg__install_metaclass, METH_O },
+    { "signal_list_names",
+      (PyCFunction)pyg_signal_list_names, METH_VARARGS|METH_KEYWORDS },
+    { "signal_list_ids",
+      (PyCFunction)pyg_signal_list_ids, METH_VARARGS|METH_KEYWORDS },
+    { "signal_lookup",
+      (PyCFunction)pyg_signal_lookup, METH_VARARGS|METH_KEYWORDS },
+    { "signal_name",
+      (PyCFunction)pyg_signal_name, METH_VARARGS|METH_KEYWORDS },
+    { "signal_query",
+      (PyCFunction)pyg_signal_query, METH_VARARGS|METH_KEYWORDS },
+    { "list_properties",
+      pyg_object_class_list_properties, METH_VARARGS },
+    { "new",
+      (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
+    { "idle_add",
+      (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
+    { "timeout_add",
+      (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
+    { "io_add_watch",
+      (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
+    { "source_remove",
+      pyg_source_remove, METH_VARARGS },
+    { "main_context_default",
+      (PyCFunction)pyg_main_context_default, METH_NOARGS },
+    { "threads_init",
+      (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
+    { "child_watch_add",
+      (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
+    { "spawn_async",
+      (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
+    { "markup_escape_text",
+      (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
+    { "get_current_time",
+      (PyCFunction)pyg_get_current_time, METH_NOARGS },
+    { "main_depth",
+      (PyCFunction)pyg_main_depth, METH_NOARGS },
+    { "signal_accumulator_true_handled",
+      (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
+    { "add_emission_hook",
+      (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
+    { "remove_emission_hook",
+      (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
+    { "_install_metaclass",
+      (PyCFunction)pyg__install_metaclass, METH_O },
 
     { NULL, NULL, 0 }
 };
@@ -3123,13 +3169,20 @@ init_gobject(void)
 
 #undef addint
 
-    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN", G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
-    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD", G_SPAWN_DO_NOT_REAP_CHILD);
-    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH", G_SPAWN_SEARCH_PATH);
-    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL", G_SPAWN_STDOUT_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL", G_SPAWN_STDERR_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN", G_SPAWN_CHILD_INHERITS_STDIN);
-    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO", G_SPAWN_FILE_AND_ARGV_ZERO);
+    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
+			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
+    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD",
+			    G_SPAWN_DO_NOT_REAP_CHILD);
+    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH",
+			    G_SPAWN_SEARCH_PATH);
+    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL",
+			    G_SPAWN_STDOUT_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL",
+			    G_SPAWN_STDERR_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN",
+			    G_SPAWN_CHILD_INHERITS_STDIN);
+    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
+			    G_SPAWN_FILE_AND_ARGV_ZERO);
 
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
