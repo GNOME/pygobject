@@ -1,3 +1,8 @@
+2006-04-11  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/common.py (importModule): Include original exception
+	string in the raised SystemExit.
+
 2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/.cvsignore:
