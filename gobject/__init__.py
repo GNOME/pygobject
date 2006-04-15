@@ -28,6 +28,7 @@ except ImportError:
     pass
 
 from _gobject import *
+_PyGObject_API = _gobject._PyGObject_API
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"

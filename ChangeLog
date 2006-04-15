@@ -1,5 +1,11 @@
 2006-04-15  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* gobject/__init__.py (_PyGObject_API): Copy _PyGObject_API from
+	gobject._gobject into gobject in order to preserve binary
+	compatibility with 3rd party modules.
+
+	* gobject/pygobject.h (init_pygobject): Import gobject, gobject._gobject.
+
 	* gobject/Makefile.am: Fix pygobject installation dir: install
 	both _gobject.la and __init__.py into
 	$(pyexecdir)/gtk-2.0/gobject.
