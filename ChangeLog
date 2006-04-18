@@ -1,3 +1,12 @@
+2006-04-18  John Ehresman   <jpe@wingware.com>
+
+	* dsextras.py: Add compiler / linker flags from pkgconfig-2.0.pc
+	by default, with an override mechanism.  Filter out -lc & -lm if
+	compiling with msvc.
+
+	* setup.py: Change C extension name to _gobject and don't use the
+	pkgconfig-2.0.pc when compiling
+
 2006-04-15  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/__init__.py (_PyGObject_API): Copy _PyGObject_API from

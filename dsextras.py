@@ -137,8 +137,17 @@ class BuildExt(build_ext):
         # Generate eventual templates before building
         if hasattr(ext, 'generate'):
             ext.generate()
+        # Filter out 'c' and 'm' libs when compilic w/ msvc
+        if sys.platform == 'win32' and self.compiler.compiler_type == 'msvc':
+            save_libs = ext.libraries
+            ext.libraries = [lib for lib in ext.libraries 
+                             if lib not in ['c', 'm']]
+        else:
+            save_libs = ext.libraries
         # Invoke base build_extension()
         build_ext.build_extension(self, ext)
+        if save_libs != None and save_libs != ext.libraries:
+            ext.libraries = save_libs
 
 class InstallLib(install_lib):
 
@@ -208,6 +217,8 @@ class InstallData(install_data):
         return install_lib.get_inputs(self) + self.local_inputs
 
 class PkgConfigExtension(Extension):
+    # Name of pygobject package extension depends on, can be None
+    pygobject_pkc = 'pygobject-2.0'
     can_build_ok = None
     def __init__(self, **kwargs):
         name = kwargs['pkc_name']
@@ -215,6 +226,12 @@ class PkgConfigExtension(Extension):
         kwargs['define_macros'] = GLOBAL_MACROS
         kwargs['libraries'] = self.get_libraries(name)
         kwargs['library_dirs'] = self.get_library_dirs(name)
+        if 'pygobject_pkc' in kwargs:
+            self.pygobject_pkc = kwargs.pop('pygobject_pkc')
+        if self.pygobject_pkc:
+            kwargs['include_dirs'] += self.get_include_dirs(self.pygobject_pkc)
+            kwargs['libraries'] += self.get_libraries(self.pygobject_pkc)
+            kwargs['library_dirs'] += self.get_library_dirs(self.pygobject_pkc)
         self.name = kwargs['name']
         self.pkc_name = kwargs['pkc_name']
         self.pkc_version = kwargs['pkc_version']

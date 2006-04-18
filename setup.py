@@ -105,8 +105,9 @@ PyGObjectBuild.user_options.append(('enable-threading', None,
                                 'enable threading support'))
 
 # GObject
-gobject = PkgConfigExtension(name='gobject', pkc_name='gobject-2.0',
+gobject = PkgConfigExtension(name='_gobject', pkc_name='gobject-2.0',
                              pkc_version=GOBJECT_REQUIRED,
+                             pygobject_pkc=None,
                              sources=['gobject/gobjectmodule.c',
                                       'gobject/pygboxed.c',
                                       'gobject/pygenum.c',
