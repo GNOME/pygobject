@@ -11,7 +11,7 @@ EXTRA_DIST = 				\
 	PKG-INFO 			\
 	PKG-INFO.in 			\
 	setup.py			\
-	pygtk.py.in			\
+	pygtk.py			\
 	dsextras.py
 
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/gobject
@@ -25,13 +25,8 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 pkgpyexec_PYTHON = dsextras.py
 pkgpyexec_LTLIBRARIES =
 
-pygtk.py: pygtk.py.in
-	sed -e s!\@pyexecdir\@!@pyexecdir@! \
-		< $< > $@
-pygtk.py: Makefile
-
 # python
-nodist_pyexec_PYTHON = pygtk.py
+pyexec_PYTHON = pygtk.py
 pyexec_LTLIBRARIES =
 noinst_PYTHON = ltihooks.py
 

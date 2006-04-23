@@ -1,3 +1,12 @@
+2006-04-23  John Ehresman   <jpe@wingware.com>
+
+	reviewed by: Gustavo
+
+	* Makefile.am:
+	* pygtk.py:
+	* pygtk.py.in:
+	Bug 338945: Make pygtk.py relocatable
+
 2006-04-18  John Ehresman   <jpe@wingware.com>
 
 	* dsextras.py: Add compiler / linker flags from pkgconfig-2.0.pc
