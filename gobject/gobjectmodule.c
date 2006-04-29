@@ -3101,6 +3101,9 @@ init_gobject(void)
     REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
     REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
 
+    REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
+    REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
+
     /* glib version */
     tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
 			   glib_micro_version);
@@ -3167,7 +3170,21 @@ init_gobject(void)
     addint(IO_FLAG_GET_MASK);
     addint(IO_FLAG_SET_MASK);
 
+    addint(OPTION_FLAG_HIDDEN);
+    addint(OPTION_FLAG_IN_MAIN);
+    addint(OPTION_FLAG_REVERSE);
+    addint(OPTION_FLAG_NO_ARG);
+    addint(OPTION_FLAG_FILENAME);
+    addint(OPTION_FLAG_OPTIONAL_ARG);
+    addint(OPTION_FLAG_NOALIAS);
+ 
+    addint(OPTION_ERROR_UNKNOWN_OPTION);
+    addint(OPTION_ERROR_BAD_VALUE);
+    addint(OPTION_ERROR_FAILED);
+ 
 #undef addint
+  
+    PyModule_AddStringConstant(m, "OPTION_REMAINING", G_OPTION_REMAINING);
 
     PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
 			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);

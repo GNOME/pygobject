@@ -218,4 +218,27 @@ typedef struct
 } PyGPollFD;
 
 
+/* pygoption.c */
+extern PyTypeObject PyGOptionContext_Type;
+extern PyTypeObject PyGOptionGroup_Type;
+
+typedef struct {
+    PyObject_HEAD
+    GOptionGroup *group;
+    gboolean other_owner, is_in_context;
+    PyObject *callback;
+    GSList *strings; /* all strings added with the entries, are freed on 
+                        GOptionGroup.destroy() */
+} PyGOptionGroup;
+
+typedef struct {
+    PyObject_HEAD
+    PyGOptionGroup *main_group;
+    GOptionContext *context;
+} PyGOptionContext;
+
+PyObject * pyg_option_context_new (GOptionContext * context);
+PyObject * pyg_option_group_new (GOptionGroup * group);
+GOptionGroup *pyg_option_group_transfer_group(PyGOptionGroup *self);
+
 #endif

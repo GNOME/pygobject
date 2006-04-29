@@ -1,1 +1,2 @@
-EXTRA_DIST = properties.py signal.py
+EXTRA_DIST = properties.py signal.py option.py
+

@@ -9,7 +9,7 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 
 # gobject python scripts
 pygobjectdir = $(pkgpyexecdir)/gobject
-pygobject_PYTHON = __init__.py
+pygobject_PYTHON = __init__.py option.py
 pygobject_LTLIBRARIES = _gobject.la 
 
 
@@ -36,7 +36,9 @@ _gobject_la_SOURCES = \
 	pygpointer.c \
 	pygiochannel.c \
 	pygsource.c \
-	pygtype.c
+	pygtype.c \
+	pygoptioncontext.c \
+	pygoptiongroup.c
 
 if PLATFORM_WIN32
 _gobject_la_CFLAGS += -DPLATFORM_WIN32
