@@ -168,5 +168,34 @@ class TestEmissionHook(unittest.TestCase):
             self.assertEqual(e.status, 1)
         e.status = 3
 
+class TestClosures(unittest.TestCase):
+    def setUp(self):
+        self.count = 0
+
+    def _callback(self, e):
+        self.count += 1
+
+    def testDisconnect(self):
+        e = E()
+        e.connect('signal', self._callback)
+        e.disconnect_by_func(self._callback)
+        e.emit('signal')
+        self.assertEqual(self.count, 0)
+
+    def testHandlerBlock(self):
+        e = E()
+        e.connect('signal', self._callback)
+        e.handler_block_by_func(self._callback)
+        e.emit('signal')
+        self.assertEqual(self.count, 0)
+
+    def testHandlerUnBlock(self):
+        e = E()
+        signal_id = e.connect('signal', self._callback)
+        e.handler_block(signal_id)
+        e.handler_unblock_by_func(self._callback)
+        e.emit('signal')
+        self.assertEqual(self.count, 1)
+
 if __name__ == '__main__':
     unittest.main()

@@ -1306,6 +1306,21 @@ pyg_signal_class_closure_get(void)
     return closure;
 }
 
+GClosure *
+gclosure_from_pyfunc(PyGObject *object, PyObject *func)
+{
+    GSList *l;
+
+    for (l = object->closures; l; l = l->next) {
+	PyGClosure *pyclosure = l->data;
+	if (PyFunction_GetClosure(pyclosure->callback) ==
+		PyFunction_GetClosure(func)) {
+	    return (GClosure*)pyclosure;
+	}
+    }
+    return NULL;
+}
+
 /* ----- __doc__ descriptor for GObject and GInterface ----- */
 
 static void

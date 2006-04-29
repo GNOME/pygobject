@@ -1630,6 +1630,102 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     return py_ret;
 }
 
+static PyObject *
+pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
+{
+    PyObject *pyfunc = NULL;
+    GClosure *closure = NULL;
+    guint retval;
+    
+    CHECK_GOBJECT(self);
+
+    if (!PyArg_ParseTuple(args, "O:GObject.disconnect_by_func", &pyfunc))
+	return NULL;
+
+    if (!PyCallable_Check(pyfunc)) {
+	PyErr_SetString(PyExc_TypeError, "first argument must be callable");
+	return NULL;
+    }
+
+    closure = gclosure_from_pyfunc(self, pyfunc);
+    if (!closure) {
+	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+	return NULL;
+    }
+    
+    retval = g_signal_handlers_disconnect_matched(self->obj,
+						  G_SIGNAL_MATCH_CLOSURE,
+						  0, 0,
+						  closure,
+						  NULL, NULL);
+    return PyInt_FromLong(retval);
+}
+
+static PyObject *
+pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
+{
+    PyObject *pyfunc = NULL;
+    GClosure *closure = NULL;
+    guint retval;
+    
+    CHECK_GOBJECT(self);
+
+    if (!PyArg_ParseTuple(args, "O:GObject.handler_block_by_func", &pyfunc))
+	return NULL;
+
+    if (!PyCallable_Check(pyfunc)) {
+	PyErr_SetString(PyExc_TypeError, "first argument must be callable");
+	return NULL;
+    }
+
+    closure = gclosure_from_pyfunc(self, pyfunc);
+    if (!closure) {
+	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+	return NULL;
+    }
+    
+    retval = g_signal_handlers_block_matched(self->obj,
+					     G_SIGNAL_MATCH_CLOSURE,
+					     0, 0,
+					     closure,
+					     NULL, NULL);
+    return PyInt_FromLong(retval);
+}
+
+static PyObject *
+pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
+{
+    PyObject *pyfunc = NULL;
+    GClosure *closure = NULL;
+    guint retval;
+    
+    CHECK_GOBJECT(self);
+
+    if (!PyArg_ParseTuple(args, "O:GObject.handler_unblock_by_func", &pyfunc))
+	return NULL;
+
+    if (!PyCallable_Check(pyfunc)) {
+	PyErr_SetString(PyExc_TypeError, "first argument must be callable");
+	return NULL;
+    }
+
+    closure = gclosure_from_pyfunc(self, pyfunc);
+    if (!closure) {
+	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
+		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+	return NULL;
+    }
+    
+    retval = g_signal_handlers_unblock_matched(self->obj,
+					       G_SIGNAL_MATCH_CLOSURE,
+					       0, 0,
+					       closure,
+					       NULL, NULL);
+    return PyInt_FromLong(retval);
+}
+
 static PyMethodDef pygobject_methods[] = {
     { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
       METH_VARARGS|METH_KEYWORDS },
@@ -1645,10 +1741,13 @@ static PyMethodDef pygobject_methods[] = {
     { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
     { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
     { "disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
+    { "disconnect_by_func", (PyCFunction)pygobject_disconnect_by_func, METH_VARARGS },
     { "handler_disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
     { "handler_is_connected", (PyCFunction)pygobject_handler_is_connected, METH_VARARGS },
     { "handler_block", (PyCFunction)pygobject_handler_block, METH_VARARGS },
     { "handler_unblock", (PyCFunction)pygobject_handler_unblock,METH_VARARGS },
+    { "handler_block_by_func", (PyCFunction)pygobject_handler_block_by_func, METH_VARARGS },
+    { "handler_unblock_by_func", (PyCFunction)pygobject_handler_unblock_by_func, METH_VARARGS },
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
     { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
