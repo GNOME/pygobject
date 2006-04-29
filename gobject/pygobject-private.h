@@ -97,6 +97,7 @@ GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *sw
 void	  pyg_closure_set_exception_handler(GClosure *closure,
 					    PyClosureExceptionHandler handler);
 GClosure *pyg_signal_class_closure_get(void);
+GClosure *gclosure_from_pyfunc(PyGObject *object, PyObject *func);
 
 PyObject *pyg_object_descr_doc_get(void);
 

@@ -1,3 +1,15 @@
+2006-04-29  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygtype.c (gclosure_from_pyfunc): 
+
+	* gobject/pygobject.c (pygobject_disconnect_by_func) 
+	(pygobject_handler_block_by_func) 
+	(pygobject_handler_unblock_by_func): 
+
+	* tests/test_signal.py (TestEmissionHook._callback): 
+
+	Fix #154845, add tests and a private method.
+	
 2006-04-23  John Ehresman   <jpe@wingware.com>
 
 	reviewed by: Gustavo
