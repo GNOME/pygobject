@@ -18,6 +18,7 @@ class TestProcess(unittest.TestCase):
         argv = [sys.executable, '-c', 'import sys']
         pid, stdin, stdout, stderr = gobject.spawn_async(
             argv, flags=gobject.SPAWN_DO_NOT_REAP_CHILD)
+        pid.close()
         gobject.child_watch_add(pid, self._child_watch_cb, 12345)
         self.loop.run()
         self.assertEqual(self.data, 12345)

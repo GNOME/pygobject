@@ -2135,6 +2135,19 @@ pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
     return PyInt_FromLong(id);
 }
 
+static PyObject *
+pyg_pid_close(PyIntObject *self, PyObject *args, PyObject *kwargs)
+{
+    g_spawn_close_pid((GPid) self->ob_ival);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef pyg_pid_methods[] = {
+    { "close", (PyCFunction)pyg_pid_close, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
 static void
 pyg_pid_free(PyIntObject *gpid)
 {
@@ -2178,7 +2191,7 @@ static PyTypeObject PyGPid_Type = {
     0,					  /* tp_weaklistoffset */
     0,					  /* tp_iter */
     0,					  /* tp_iternext */
-    0,					  /* tp_methods */
+    pyg_pid_methods,			  /* tp_methods */
     0,					  /* tp_members */
     0,					  /* tp_getset */
     0,	  				  /* tp_base */
