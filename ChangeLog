@@ -1,3 +1,9 @@
+2006-05-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_pid_free, pyg_pid_new),
+	(pyg_spawn_async, init_gobject): Wrap GPid in an object whose
+	destructor calls g_spawn_close_pid.  Fixes #340160.
+
 2006-04-29  Johannes Hölzl <johannes.hoelzl@gmx.de>
 
 	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
