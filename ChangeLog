@@ -1,3 +1,8 @@
+2006-05-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygoptioncontext.c:
+	s/sizeof(PyGMainContext)/sizeof(PyGOptionContext)/ (copy-paste error).
+
 2006-05-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_pid_close): Add a close() method

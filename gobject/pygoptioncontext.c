@@ -272,7 +272,7 @@ PyTypeObject PyGOptionContext_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
     "gobject.OptionContext",
-    sizeof(PyGMainContext),
+    sizeof(PyGOptionContext),
     0,
     /* methods */
     (destructor)pyg_option_context_dealloc,
