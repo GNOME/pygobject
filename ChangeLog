@@ -1,3 +1,8 @@
+2006-05-07  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am (CLEANFILES): Remove pygtk.py, it's not
+	auto-generated any longer. Thanks to Kjartan for noticing.
+
 2006-05-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygoptioncontext.c:
