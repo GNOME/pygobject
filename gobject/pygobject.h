@@ -172,6 +172,10 @@ struct _PyGObject_Functions {
                                       const char *first_property_name,
                                       ...);
     void      (*set_object_has_new_constructor) (GType type);
+
+    void      (*add_warning_redirection) (const char *domain,
+                                          PyObject   *warning);
+    void      (*disable_warning_redirections) (void);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -231,6 +235,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_construct         (_PyGObject_API->pygobject_construct)
 #define pygobject_constructv        (_PyGObject_API->pygobject_constructv)
 #define pyg_set_object_has_new_constructor (_PyGObject_API->set_object_has_new_constructor)
+#define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
+#define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
 
 
 #define pyg_block_threads()   G_STMT_START {   \

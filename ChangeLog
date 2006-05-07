@@ -1,3 +1,12 @@
+2006-05-07  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/gobjectmodule.c (_log_func, add_warning_redirection),
+	(remove_handler, disable_warning_redirections, init_gobject):
+	* gobject/pygobject.h:  Add new pyg_add_warning_redirection and
+	pyg_disable_warning_redirections APIs (bug #323786 again).
+
 2006-05-07  Johan Dahlin  <johan@gnome.org>
 
 	* Makefile.am (CLEANFILES): Remove pygtk.py, it's not

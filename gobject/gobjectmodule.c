@@ -31,6 +31,8 @@
 static PyObject *gerror_exc = NULL;
 static gboolean use_gil_state_api = FALSE;
 static PyObject *_pyg_signal_accumulator_true_handled_func;
+static GHashTable *log_handlers = NULL;
+static gboolean log_handlers_disabled = FALSE;
 
 GQuark pyginterface_type_key;
 GQuark pygobject_class_init_key;
@@ -3010,12 +3012,61 @@ _log_func(const gchar *log_domain,
           const gchar *message,
           gpointer user_data)
 {
-    PyGILState_STATE state;
-    PyObject* warning = user_data;
+    if (G_LIKELY(Py_IsInitialized()))
+    {
+	PyGILState_STATE state;
+	PyObject* warning = user_data;
 
-    state = pyg_gil_state_ensure();
-    PyErr_Warn(warning, (char *) message);
-    pyg_gil_state_release(state);
+	state = pyg_gil_state_ensure();
+	PyErr_Warn(warning, (char *) message);
+	pyg_gil_state_release(state);
+    } else
+        g_log_default_handler(log_domain, log_level, message, user_data);
+}
+
+static void
+add_warning_redirection(const char *domain, 
+                        PyObject   *warning)
+{
+    g_return_if_fail(domain != NULL);
+    g_return_if_fail(warning != NULL);
+
+    if (!log_handlers_disabled)
+    {
+	guint handler;
+	gpointer old_handler;
+	
+	if (!log_handlers)
+	    log_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
+	if ((old_handler = g_hash_table_lookup(log_handlers, domain)))
+	    g_log_remove_handler(domain, GPOINTER_TO_UINT(old_handler));
+
+	handler = g_log_set_handler(domain, G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
+	                            _log_func, warning);
+	g_hash_table_insert(log_handlers, g_strdup(domain), GUINT_TO_POINTER(handler));
+    }
+}
+
+static void
+remove_handler(gpointer domain,
+               gpointer handler,
+	       gpointer unused)
+{
+    g_log_remove_handler(domain, GPOINTER_TO_UINT(handler));
+}
+
+static void
+disable_warning_redirections(void)
+{
+    log_handlers_disabled = TRUE;
+    
+    if (log_handlers)
+    {
+	g_hash_table_foreach(log_handlers, remove_handler, NULL);
+	g_hash_table_destroy(log_handlers);
+	log_handlers = NULL;
+    }
 }
 
 /* ----------------- gobject module initialisation -------------- */
@@ -3087,7 +3138,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_closure_set_exception_handler,
   pygobject_constructv,
   pygobject_construct,
-  pyg_set_object_has_new_constructor
+  pyg_set_object_has_new_constructor,
+  
+  add_warning_redirection,
+  disable_warning_redirections
 };
 
 #define REGISTER_TYPE(d, type, name) \
@@ -3293,12 +3347,9 @@ init_gobject(void)
 
     warning = PyErr_NewException("gobject.Warning", PyExc_Warning, NULL);
     PyDict_SetItemString(d, "Warning", warning);
-    g_log_set_handler("GLib", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
-                      _log_func, warning);
-    g_log_set_handler("GLib-GObject", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
-                      _log_func, warning);
-    g_log_set_handler("GThread", G_LOG_LEVEL_CRITICAL|G_LOG_LEVEL_WARNING,
-                      _log_func, warning);
+    add_warning_redirection("GLib", warning);
+    add_warning_redirection("GLib-GObject", warning);
+    add_warning_redirection("GThread", warning);
 
       /* signal registration recognizes this special accumulator 'constant' */
     _pyg_signal_accumulator_true_handled_func = \
