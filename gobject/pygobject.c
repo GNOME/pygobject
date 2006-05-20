@@ -1010,7 +1010,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	    pspec = g_object_class_find_property (class, key_str);
 	    if (!pspec) {
 		PyErr_Format(PyExc_TypeError,
-			     "gobject `%s' doesn't support property `%s'",
+			     "object of type `%s' doesn't support property `%s'",
 			     g_type_name(object_type), key_str);
 		goto cleanup;
 	    }
@@ -1073,8 +1073,9 @@ pygobject_get_property(PyGObject *self, PyObject *args)
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 param_name);
     if (!pspec) {
-	PyErr_SetString(PyExc_TypeError,
-			"the object does not support the given parameter");
+	PyErr_Format(PyExc_TypeError,
+		     "object of type `%s' does not have property `%s'",
+		     g_type_name(G_OBJECT_TYPE(self->obj)), param_name);
 	return NULL;
     }
     if (!(pspec->flags & G_PARAM_READABLE)) {
@@ -1105,8 +1106,9 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 param_name);
     if (!pspec) {
-	PyErr_SetString(PyExc_TypeError,
-			"the object does not support the given parameter");
+	PyErr_Format(PyExc_TypeError,
+		     "object of type `%s' does not have property `%s'",
+		     g_type_name(G_OBJECT_TYPE(self->obj)), param_name);
 	return NULL;
     }
     

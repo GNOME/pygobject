@@ -1,3 +1,11 @@
+2006-05-20  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/pygobject.c (pygobject_init, pygobject_get_property),
+	(pygobject_set_property): Bug 341174: Be more specific in
+	set/get_property error messages.
+
 2006-05-07  Yevgen Muntyan  <muntyan@tamu.edu>
 
 	reviewed by: Gustavo Carneiro
