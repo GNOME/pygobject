@@ -35,3 +35,17 @@ class TestSubType(unittest.TestCase):
 
     def testGObjectNewError(self):
         self.assertRaises(TypeError, gobject.new, gobject.GObject, text='foo')
+
+    def testSubSubType(self):
+        Object1 = type('Object1', (gobject.GObject,),
+                       {'__gtype_name__': 'Object1'})
+        Object2 = type('Object2', (Object1,),
+                       {'__gtype_name__': 'Object2'})
+
+        obj = Object2()
+        self.failUnless(isinstance(obj, Object2))
+        self.assertEqual(obj.__gtype__.name, 'Object2')
+
+        obj = gobject.new(Object2)
+        #self.failUnless(isinstance(obj, Object2))
+        #self.assertEqual(obj.__gtype__.name, 'Object2')
