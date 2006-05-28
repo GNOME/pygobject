@@ -739,9 +739,10 @@ pygobject_lookup_class(GType gtype)
 }
 
 /**
- * pygobject_new:
+ * pygobject_new_full:
  * @obj: a GObject instance.
  * @sink: whether to sink any floating reference found on the GObject.
+ * @g_class: the GObjectClass
  *
  * This function gets a reference to a wrapper for the given GObject
  * instance.  If a wrapper has already been created, a new reference
@@ -751,7 +752,7 @@ pygobject_lookup_class(GType gtype)
  * Returns: a reference to the wrapper for the GObject.
  */
 PyObject *
-pygobject_new_full(GObject *obj, gboolean sink)
+pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 {
     PyGObject *self;
 
@@ -766,7 +767,11 @@ pygobject_new_full(GObject *obj, gboolean sink)
 	Py_INCREF(self);
     } else {
 	/* create wrapper */
-	PyTypeObject *tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+	PyTypeObject *tp;
+        if (g_class)
+            tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
+        else
+            tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
         /* need to bump type refcount if created with
            pygobject_new_with_interfaces(). fixes bug #141042 */
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
@@ -792,10 +797,11 @@ pygobject_new_full(GObject *obj, gboolean sink)
     return (PyObject *)self;
 }
 
+
 PyObject *
 pygobject_new(GObject *obj)
 {
-    return pygobject_new_full(obj, TRUE);
+    return pygobject_new_full(obj, TRUE, NULL);
 }
 
 static void

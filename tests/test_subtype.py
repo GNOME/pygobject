@@ -47,5 +47,6 @@ class TestSubType(unittest.TestCase):
         self.assertEqual(obj.__gtype__.name, 'Object2')
 
         obj = gobject.new(Object2)
-        #self.failUnless(isinstance(obj, Object2))
-        #self.assertEqual(obj.__gtype__.name, 'Object2')
+        self.failUnless(isinstance(obj, Object2))
+        self.assertEqual(obj.__gtype__.name, 'Object2')
+

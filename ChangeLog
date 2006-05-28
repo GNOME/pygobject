@@ -1,3 +1,17 @@
+2006-05-28  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_subtype.py: Uncomment Johan's "subsubtype" test case.
+
+	* gobject/gobjectmodule.c (pygobject__g_instance_init): Pass the
+	g_class to pygobject_new_full, because during the instance init
+	function instances are temporarily assigned the parent's GType.
+
+	* gobject/pygobject-private.h,
+	* gobject/pygobject.c (pygobject_new_full): Make
+	pygobject_new_full accept an optional g_class parameter; If
+	present, the GType is extracted from the class instead of from the
+	instance.
+
 2006-05-20  Yevgen Muntyan  <muntyan@tamu.edu>
 
 	reviewed by: Gustavo Carneiro

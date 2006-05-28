@@ -1184,7 +1184,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
            * now */
         PyGILState_STATE state;
         state = pyg_gil_state_ensure();
-        wrapper = pygobject_new_full(object, FALSE);
+        wrapper = pygobject_new_full(object, FALSE, g_class);
         args = PyTuple_New(0);
         kwargs = PyDict_New();
         if (wrapper->ob_type->tp_init(wrapper, args, kwargs))
@@ -1751,7 +1751,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     obj = g_object_newv(type, n_params, params);
     if (!obj)
 	PyErr_SetString (PyExc_RuntimeError, "could not create object");
-	   
+
  cleanup:
     for (i = 0; i < n_params; i++) {
 	g_free((gchar *) params[i].name);
@@ -1761,7 +1761,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
     
     if (obj) {
-	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE);
+	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
         g_object_unref(obj);
         pygobject_sink(obj);
     } else
