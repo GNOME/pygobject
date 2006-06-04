@@ -1,3 +1,9 @@
+2006-06-04  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_spawn_async)
+	(pyg_signal_new): Fix two leaks in error cases, found by
+	Coverity.
+
 2006-05-28  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/test_subtype.py: Uncomment Johan's "subsubtype" test case.

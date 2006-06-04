@@ -1394,6 +1394,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 	    Py_DECREF(item);
 	    PyErr_SetString(PyExc_TypeError,
 			    "argument 5 must be a sequence of GType codes");
+	    g_free(param_types);
 	    return NULL;
 	}
 	Py_DECREF(item);
@@ -2328,6 +2329,7 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
 				"second argument must be a sequence of strings");
                 g_free(envp);
                 Py_XDECREF(tmp);
+		g_free(argv);
                 return NULL;
             }
             envp[i] = PyString_AsString(tmp);
