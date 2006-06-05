@@ -8,6 +8,18 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
+/* Python 2.3 does not define Py_CLEAR */
+#ifndef Py_CLEAR
+#define Py_CLEAR(op)                \
+        do {                                \
+                if (op) {           \
+                        PyObject *tmp = (PyObject *)(op);   \
+                        (op) = NULL;        \
+                        Py_DECREF(tmp);     \
+                }               \
+        } while (0)
+#endif
+
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_block_threads()   G_STMT_START { \
