@@ -1457,7 +1457,7 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     
     g_free(ids);
     if (class)
-	   g_type_class_unref(class);
+        g_type_class_unref(class);
     else
        g_type_default_interface_unref(iface);
 
@@ -1469,11 +1469,12 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "type", NULL };
     PyObject *py_itype, *list;
-    GObjectClass *class;
+    GObjectClass *class = NULL;
     GType itype;
     guint n;
     guint *ids;
     guint i;
+    gpointer iface = NULL;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O:gobject.signal_list_ids",
@@ -1482,18 +1483,21 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
     if ((itype = pyg_type_from_object(py_itype)) == 0)
 	return NULL;
 
-    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+    if (G_TYPE_IS_INSTANTIATABLE(itype)) {
+	class = g_type_class_ref(itype);
+	if (!class) {
+	    PyErr_SetString(PyExc_RuntimeError,
+			    "could not get a reference to type class");
+	    return NULL;
+	}
+    } else if (!G_TYPE_IS_INTERFACE(itype)) {
 	PyErr_SetString(PyExc_TypeError,
 			"type must be instantiable or an interface");
 	return NULL;
+    } else {
+        iface = g_type_default_interface_ref(itype);
     }
-
-    class = g_type_class_ref(itype);
-    if (!class) {
-	PyErr_SetString(PyExc_RuntimeError,
-			"could not get a reference to type class");
-	return NULL;
-    }
+    
     ids = g_signal_list_ids(itype, &n);
 
     list = PyTuple_New((gint)n);
@@ -1506,7 +1510,11 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
     for (i = 0; i < n; i++)
 	PyTuple_SetItem(list, i, PyInt_FromLong(ids[i]));
     g_free(ids);
-    g_type_class_unref(class);
+    if (class)
+        g_type_class_unref(class);
+    else
+       g_type_default_interface_unref(iface);
+
     return list;
 }
 
@@ -1515,10 +1523,11 @@ pyg_signal_lookup (PyObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "name", "type", NULL };
     PyObject *py_itype;
-    GObjectClass *class;
+    GObjectClass *class = NULL;
     GType itype;
     gchar *signal_name;
     guint id;
+    gpointer iface = NULL;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO:gobject.signal_lookup",
                                      kwlist, &signal_name, &py_itype))
@@ -1526,21 +1535,27 @@ pyg_signal_lookup (PyObject *self, PyObject *args, PyObject *kwargs)
     if ((itype = pyg_type_from_object(py_itype)) == 0)
 	return NULL;
 
-    if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+    if (G_TYPE_IS_INSTANTIATABLE(itype)) {
+	class = g_type_class_ref(itype);
+	if (!class) {
+	    PyErr_SetString(PyExc_RuntimeError,
+			    "could not get a reference to type class");
+	    return NULL;
+	}
+    } else if (!G_TYPE_IS_INTERFACE(itype)) {
 	PyErr_SetString(PyExc_TypeError,
 			"type must be instantiable or an interface");
 	return NULL;
+    } else {
+        iface = g_type_default_interface_ref(itype);
     }
-
-    class = g_type_class_ref(itype);
-    if (!class) {
-	PyErr_SetString(PyExc_RuntimeError,
-			"could not get a reference to type class");
-	return NULL;
-    }
+    
     id = g_signal_lookup(signal_name, itype);
 
-    g_type_class_unref(class);
+    if (class)
+        g_type_class_unref(class);
+    else
+       g_type_default_interface_unref(iface);
     return PyInt_FromLong(id);
 }
 
@@ -1574,23 +1589,26 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
     guint i;
     GSignalQuery query;
     guint id;
+    gpointer iface = NULL;
 
     if (PyArg_ParseTupleAndKeywords(args, kwargs, "sO:gobject.signal_query",
                                      kwlist1, &signal_name, &py_itype)) {
         if ((itype = pyg_type_from_object(py_itype)) == 0)
             return NULL;
 
-        if (!G_TYPE_IS_INSTANTIATABLE(itype) && !G_TYPE_IS_INTERFACE(itype)) {
+        if (G_TYPE_IS_INSTANTIATABLE(itype)) {
+            class = g_type_class_ref(itype);
+            if (!class) {
+                PyErr_SetString(PyExc_RuntimeError,
+                                "could not get a reference to type class");
+                return NULL;
+            }
+        } else if (!G_TYPE_IS_INTERFACE(itype)) {
             PyErr_SetString(PyExc_TypeError,
                             "type must be instantiable or an interface");
             return NULL;
-        }
-
-        class = g_type_class_ref(itype);
-        if (!class) {
-            PyErr_SetString(PyExc_RuntimeError,
-                            "could not get a reference to type class");
-            return NULL;
+        } else {
+            iface = g_type_default_interface_ref(itype);
         }
         id = g_signal_lookup(signal_name, itype);
     } else {
@@ -1640,6 +1658,8 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
  done:
     if (class)
         g_type_class_unref(class);
+    if (iface)
+        g_type_default_interface_unref(iface);
 
     return py_query;
 }
@@ -1650,7 +1670,8 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     GParamSpec **specs;
     PyObject *py_itype, *list;
     GType itype;
-    GObjectClass *class;
+    GObjectClass *class = NULL;
+    gpointer iface = NULL;
     guint nprops;
     guint i;
 
@@ -1660,19 +1681,28 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
     if ((itype = pyg_type_from_object(py_itype)) == 0)
 	return NULL;
 
-    if (!g_type_is_a(itype, G_TYPE_OBJECT)) {
-	PyErr_SetString(PyExc_TypeError, "type must be derived from GObject");
+    if (G_TYPE_IS_INTERFACE(itype)) {
+        iface = g_type_default_interface_ref(itype);
+        if (!iface) {
+            PyErr_SetString(PyExc_RuntimeError,
+                            "could not get a reference to interface type");
+            return NULL;
+        }
+        specs = g_object_interface_list_properties(iface, &nprops);
+    } else if (g_type_is_a(itype, G_TYPE_OBJECT)) {
+        class = g_type_class_ref(itype);
+        if (!class) {
+            PyErr_SetString(PyExc_RuntimeError,
+                            "could not get a reference to type class");
+            return NULL;
+        }
+        specs = g_object_class_list_properties(class, &nprops);
+    } else {
+	PyErr_SetString(PyExc_TypeError,
+                        "type must be derived from GObject or an interface");
 	return NULL;
     }
-
-    class = g_type_class_ref(itype);
-    if (!class) {
-	PyErr_SetString(PyExc_RuntimeError,
-			"could not get a reference to type class");
-	return NULL;
-    }
-
-    specs = g_object_class_list_properties(class, &nprops);
+        
     list = PyTuple_New(nprops);
     if (list == NULL) {
 	g_free(specs);
@@ -1683,7 +1713,10 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
 	PyTuple_SetItem(list, i, pyg_param_spec_new(specs[i]));
     }
     g_free(specs);
-    g_type_class_unref(class);
+    if (class)
+        g_type_class_unref(class);
+    else
+        g_type_default_interface_unref(iface);
 
     return list;
 }

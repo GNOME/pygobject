@@ -1,3 +1,9 @@
+2006-06-23  John Finlay  <finlay@moeraki.com>
+
+	* gobject/gobjectmodule.c (pyg_object_class_list_properties)
+	(pyg_signal_list_ids, pyg_signal_lookup, pyg_signal_query): Add
+	support for retrieving signal and propertie info from interface types.
+
 2006-06-04  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_spawn_async)
