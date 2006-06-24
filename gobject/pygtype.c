@@ -852,6 +852,17 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	else if (PySequence_Check(obj) &&
 		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
 	    return pyg_value_array_from_pyobject(value, obj, NULL);
+	else if (PyString_Check(obj) &&
+                 G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
+            GString *string;
+            char *buffer;
+            int len;
+            if (PyString_AsStringAndSize(obj, &buffer, &len))
+                return -1;
+            string = g_string_new_len(buffer, len);
+	    g_value_set_boxed(value, string);
+            break;
+        }
 	else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
 	    return bm->tovalue(value, obj);
 	else if (PyCObject_Check(obj))
@@ -999,6 +1010,10 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    for (i = 0; i < array->n_values; ++i)
 		PyList_SET_ITEM(ret, i, pyg_value_as_pyobject
                                 (array->values + i, copy_boxed));
+	    return ret;
+	} else if (G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
+	    GString *string = (GString *) g_value_get_boxed(value);
+	    PyObject *ret = PyString_FromStringAndSize(string->str, string->len);
 	    return ret;
 	}	    
 	bm = pyg_type_lookup(G_VALUE_TYPE(value));

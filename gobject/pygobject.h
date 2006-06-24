@@ -114,7 +114,7 @@ struct _PyGObject_Functions {
     void (* flags_add_constants)(PyObject *module, GType flags_type,
 				 const gchar *strip_prefix);
 
-    gchar *(* constant_strip_prefix)(gchar *name,
+    const gchar *(* constant_strip_prefix)(const gchar *name,
 				     const gchar *strip_prefix);
 
     gboolean (* error_check)(GError **error);

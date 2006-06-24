@@ -197,5 +197,21 @@ class TestClosures(unittest.TestCase):
         e.emit('signal')
         self.assertEqual(self.count, 1)
 
+    def testGString(self):
+        class C(gobject.GObject):
+            __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_GSTRING,
+                                           (gobject.TYPE_GSTRING,)) }
+            def __init__(self, test):
+                gobject.GObject.__init__(self)
+                self.test = test
+            def do_my_signal(self, data):
+                self.data = data
+                self.test.assertEqual(len(data), 3)
+                return ''.join([data[2], data[1], data[0]])
+        c = C(self)
+        data = c.emit("my_signal", "\01\00\02")
+        self.assertEqual(data, "\02\00\01")
+        
+
 if __name__ == '__main__':
     unittest.main()

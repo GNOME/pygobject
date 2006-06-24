@@ -1,3 +1,26 @@
+2006-06-24  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_signal.py (TestClosures.testGString): Add unit test
+	for signals using the type TYPE_GSTRING.
+
+	* gobject/pygtype.c (pyg_value_as_pyobject)
+	(pyg_value_from_pyobject): Implement conversion code for the type
+	G_TYPE_GSTRING.
+
+	* gobject/gobjectmodule.c (pyg_filename_display_basename)
+	(pyg_filename_display_name): Add bindings for
+	g_filename_display_basename and g_filename_display_name.
+	(init_gobject): Add a TYPE_GSTRING definition.
+
+	* gobject/pygobject.h,
+	* gobject/pygobject-private.h: Make pyg_constant_strip_prefix
+	receive and return const gchar*, to indicate it does not change
+	the string.  Unfortunately since PyModule_AddIntConst is broken in
+	python < 2.5 this introduces const warnings elsewhere :-(
+
+	* gobject/gobjectmodule.c (pyg_flags_add_constants) 
+	(pyg_enum_add_constants): Fix const warnings.
+
 2006-06-23  John Finlay  <finlay@moeraki.com>
 
 	* gobject/gobjectmodule.c (pyg_object_class_list_properties)

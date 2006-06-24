@@ -152,7 +152,7 @@ void       pyg_register_pointer (PyObject *dict, const gchar *class_name,
 				 GType pointer_type, PyTypeObject *type);
 PyObject * pyg_pointer_new      (GType pointer_type, gpointer pointer);
 
-extern char * pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix);
+const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix);
 
 /* pygflags */
 typedef struct {

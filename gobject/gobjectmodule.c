@@ -2615,6 +2615,39 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
+
+static PyObject *
+pyg_filename_display_name(PyGObject *self, PyObject *args)
+{
+    PyObject *py_display_name;
+    char *filename, *display_name;
+    
+    if (!PyArg_ParseTuple(args, "s:gobject.filename_display_name",
+			  &filename))
+	return NULL;
+
+    display_name = g_filename_display_name(filename);
+    py_display_name = PyUnicode_DecodeUTF8(display_name, strlen(display_name), NULL);
+    g_free(display_name);
+    return py_display_name;
+}
+
+static PyObject *
+pyg_filename_display_basename(PyGObject *self, PyObject *args)
+{
+    PyObject *py_display_basename;
+    char *filename, *display_basename;
+    
+    if (!PyArg_ParseTuple(args, "s:gobject.filename_display_basename",
+			  &filename))
+	return NULL;
+
+    display_basename = g_filename_display_basename(filename);
+    py_display_basename = PyUnicode_DecodeUTF8(display_basename, strlen(display_basename), NULL);
+    g_free(display_basename);
+    return py_display_basename;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2668,6 +2701,10 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
     { "_install_metaclass",
       (PyCFunction)pyg__install_metaclass, METH_O },
+    { "filename_display_name",
+      (PyCFunction)pyg_filename_display_name, METH_VARARGS },
+    { "filename_display_basename",
+      (PyCFunction)pyg_filename_display_basename, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
@@ -2688,8 +2725,8 @@ static PyMethodDef pygobject_functions[] = {
  *
  * Returns: the stripped constant name.
  */
-char *
-pyg_constant_strip_prefix(gchar *name, const gchar *strip_prefix)
+const gchar *
+pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 {
     gint prefix_len;
     guint j;
@@ -2734,7 +2771,7 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
     eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
 
     for (i = 0; i < eclass->n_values; i++) {
-	gchar *name = eclass->values[i].value_name;
+	const gchar *name = eclass->values[i].value_name;
 	gint value = eclass->values[i].value;
 
 	PyModule_AddIntConstant(module,
@@ -2773,7 +2810,7 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
     fclass = G_FLAGS_CLASS(g_type_class_ref(flags_type));
 
     for (i = 0; i < fclass->n_values; i++) {
-	gchar *name = fclass->values[i].value_name;
+	const gchar *name = fclass->values[i].value_name;
 	guint value = fclass->values[i].value;
 
 	PyModule_AddIntConstant(module,
@@ -3375,6 +3412,7 @@ init_gobject(void)
 
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
+    PyModule_AddObject(m, "TYPE_GSTRING", pyg_type_wrapper_new(G_TYPE_GSTRING));
     
     pyg_register_gtype_custom(G_TYPE_STRV,
 			      _pyg_strv_from_gvalue,
