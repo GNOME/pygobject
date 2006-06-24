@@ -2648,6 +2648,29 @@ pyg_filename_display_basename(PyGObject *self, PyObject *args)
     return py_display_basename;
 }
 
+static PyObject *
+pyg_filename_from_utf8(PyGObject *self, PyObject *args)
+{
+    char *filename, *utf8string;
+    int utf8string_len;
+    gsize bytes_written;
+    GError *error = NULL;
+    PyObject *py_filename;
+    
+    if (!PyArg_ParseTuple(args, "s#:gobject.filename_from_utf8",
+			  &utf8string, &utf8string_len))
+	return NULL;
+
+    filename = g_filename_from_utf8(utf8string, utf8string_len, NULL, &bytes_written, &error);
+    if (pyg_error_check(&error)) {
+        g_free(filename);
+        return NULL;
+    }
+    py_filename = PyString_FromStringAndSize(filename, bytes_written);
+    g_free(filename);
+    return py_filename;
+}
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2705,6 +2728,8 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_filename_display_name, METH_VARARGS },
     { "filename_display_basename",
       (PyCFunction)pyg_filename_display_basename, METH_VARARGS },
+    { "filename_from_utf8",
+      (PyCFunction)pyg_filename_from_utf8, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
@@ -2775,7 +2800,7 @@ pyg_enum_add_constants(PyObject *module, GType enum_type,
 	gint value = eclass->values[i].value;
 
 	PyModule_AddIntConstant(module,
-				pyg_constant_strip_prefix(name, strip_prefix),
+				(char*) pyg_constant_strip_prefix(name, strip_prefix),
 				(long) value);
     }
 
@@ -2814,7 +2839,7 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
 	guint value = fclass->values[i].value;
 
 	PyModule_AddIntConstant(module,
-				pyg_constant_strip_prefix(name, strip_prefix),
+				(char*) pyg_constant_strip_prefix(name, strip_prefix),
 				(long) value);
     }
 
