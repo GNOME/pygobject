@@ -179,12 +179,14 @@ class InstallData(install_data):
         self.exec_prefix = '${prefix}/bin'
         self.includedir = '${prefix}/include'
         self.libdir = '${prefix}/lib'
+        self.datarootdir = '${prefix}/share'
         self.datadir = '${prefix}/share'
 
         self.add_template_option('prefix', self.prefix)
         self.add_template_option('exec_prefix', self.exec_prefix)
         self.add_template_option('includedir', self.includedir)
         self.add_template_option('libdir', self.libdir)
+        self.add_template_option('datarootdir', self.datarootdir)
         self.add_template_option('datadir', self.datadir)
         self.add_template_option('PYTHON', sys.executable)
         self.add_template_option('THREADING_CFLAGS', '')

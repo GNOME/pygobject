@@ -105,7 +105,7 @@ PyGObjectBuild.user_options.append(('enable-threading', None,
                                 'enable threading support'))
 
 # GObject
-gobject = PkgConfigExtension(name='_gobject', pkc_name='gobject-2.0',
+gobject = PkgConfigExtension(name='gobject._gobject', pkc_name='gobject-2.0',
                              pkc_version=GOBJECT_REQUIRED,
                              pygobject_pkc=None,
                              sources=['gobject/gobjectmodule.c',
@@ -115,6 +115,8 @@ gobject = PkgConfigExtension(name='_gobject', pkc_name='gobject-2.0',
                                       'gobject/pygobject.c',
                                       'gobject/pygmaincontext.c',
                                       'gobject/pygmainloop.c',
+                                      'gobject/pygoptioncontext.c',
+                                      'gobject/pygoptiongroup.c',
                                       'gobject/pygparamspec.c',
                                       'gobject/pygpointer.c',
                                       'gobject/pygtype.c',
@@ -126,6 +128,7 @@ data_files = []
 ext_modules = []
 py_modules = []
 py_modules.append('dsextras')
+py_modules.append('gobject.option')
 
 if not have_pkgconfig():
     print "Error, could not find pkg-config"
@@ -177,7 +180,7 @@ doclines = __doc__.split("\n")
 
 options = {"bdist_wininst": {"install_script": "pygobject_postinstall.py"}}
 
-setup(name="pygtk",
+setup(name="pygobject",
       url='http://www.pygtk.org/',
       version=VERSION,
       license='LGPL',

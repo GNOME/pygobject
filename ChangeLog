@@ -1,3 +1,15 @@
+2006-06-28  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* dsextras.py (InstallData): Set datarootdir in .pc file.
+
+	* pygobject_postinstall.py (replace_prefix): Do not parse
+	pygtk-codegen-2.0 as it is part of pygtk.
+
+	* setup.py: Create gobject extension as gobject._gobject. Add
+	pygoptioncontext.c and pygoptiongroup.c to the list of source
+	files. Add option.py to the module files. Changed name of
+	distutils package from pygtk to pygobject.
+
 2006-06-24  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_filename_from_utf8): Wrap
