@@ -1,3 +1,7 @@
+2006-07-05  John Finlay  <finlay@moeraki.com>
+
+	* gobject/pygiochannel.c (py_io_channel_init): Fix message typo.
+
 2006-06-28  Cedric Gustin  <cedric.gustin@gmail.com>
 
 	* dsextras.py (InstallData): Set datarootdir in .pc file.

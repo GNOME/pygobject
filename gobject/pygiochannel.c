@@ -751,10 +751,10 @@ py_io_channel_init(PyGIOChannel *self, PyObject *args, PyObject *kwargs)
 #endif
     else {
 #ifdef G_OS_WIN32
-        PyErr_SetString(PyExc_TypeError, "either a valid file descriptor,"
+        PyErr_SetString(PyExc_TypeError, "either a valid file descriptor, "
                         "file name, or window handle must be supplied");
 #else
-        PyErr_SetString(PyExc_TypeError, "either a valid file descriptor"
+        PyErr_SetString(PyExc_TypeError, "either a valid file descriptor "
                         "or file name must be supplied");
 #endif
         return -1;
