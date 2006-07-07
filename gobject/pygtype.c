@@ -577,7 +577,7 @@ pyg_type_lookup(GType type)
 
 void
 pyg_register_gtype_custom(GType gtype,
-		                  fromvaluefunc from_func,
+			  fromvaluefunc from_func,
                           tovaluefunc to_func)
 {
     PyGTypeMarshal *tm;
