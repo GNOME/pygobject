@@ -1330,12 +1330,15 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
             GType itype;
             const GInterfaceInfo *iinfo;
+            GInterfaceInfo iinfo_copy;
             
             if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
                 continue;
 
             itype = pyg_type_from_object((PyObject *) base);
             iinfo = pyg_lookup_interface_info(itype);
+            iinfo_copy = *iinfo;
+            iinfo_copy.interface_data = class;
             if (!iinfo) {
                 char *msg;
                 msg = g_strdup_printf("Interface type %s "
@@ -1345,7 +1348,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 g_free(msg);
                 continue;
             }
-            g_type_add_interface_static(instance_type, itype, iinfo);
+            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
         }
     } else
         g_warning("type has no tp_bases");

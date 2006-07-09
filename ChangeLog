@@ -1,3 +1,11 @@
+2006-07-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Make interface_data
+	point to the python type before adding the interface to the new
+	type.  This should fix interface implementation (actually I
+	thought such code had already been added earlier but can't find it
+	now and it is obviously needed...)
+
 2006-07-05  John Finlay  <finlay@moeraki.com>
 
 	* gobject/pygiochannel.c (py_io_channel_init): Fix message typo.
