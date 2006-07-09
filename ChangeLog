@@ -5,6 +5,9 @@
 	type.  This should fix interface implementation (actually I
 	thought such code had already been added earlier but can't find it
 	now and it is obviously needed...)
+	(pyg_type_register): move the code that needs g_type_class_ref
+	until after interface registration (more code that I already wrote
+	in the past but got lost).
 
 2006-07-05  John Finlay  <finlay@moeraki.com>
 

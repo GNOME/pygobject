@@ -1312,16 +1312,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	PyErr_Clear();
     }
 
-    gclass = g_type_class_ref(instance_type);
-    if (pyg_run_class_init(instance_type, gclass, class)) {
-        g_type_class_unref(gclass);
-        return -1;
-    }
-    g_type_class_unref(gclass);
-
-    if (gsignals)
-        PyDict_DelItemString(class->tp_dict, "__gsignals__");
-
       /* Register interface implementations  */
     if (class->tp_bases) {
         for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
@@ -1352,6 +1342,16 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
         }
     } else
         g_warning("type has no tp_bases");
+
+    gclass = g_type_class_ref(instance_type);
+    if (pyg_run_class_init(instance_type, gclass, class)) {
+        g_type_class_unref(gclass);
+        return -1;
+    }
+    g_type_class_unref(gclass);
+
+    if (gsignals)
+        PyDict_DelItemString(class->tp_dict, "__gsignals__");
 
     return 0;
 }
