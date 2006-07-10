@@ -20,10 +20,15 @@ typedef struct {
 GType test_unknown_get_type (void);
 
 /* TestInterface */
-typedef struct
+typedef struct _TestInterface TestInterface;
+typedef struct _TestInterfaceIface TestInterfaceIface;
+
+struct _TestInterfaceIface
 {
   GTypeInterface g_iface;
-} TestInterface;
+  /* VTable */
+  void (* iface_method) (TestInterface *iface);
+};
 
 #define TEST_TYPE_INTERFACE            (test_interface_get_type ())
 #define TEST_INTERFACE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_INTERFACE, TestInterface))
@@ -31,3 +36,5 @@ typedef struct
 #define TEST_INTERFACE_GET_IFACE(obj)  (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TEST_TYPE_INTERFACE, TestInterfaceIface))
 
 GType test_interface_get_type (void);
+
+void test_interface_iface_method (TestInterface *iface);

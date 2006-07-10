@@ -1,11 +1,5 @@
 #include "test-unknown.h"
 
-G_DEFINE_TYPE_WITH_CODE (TestUnknown, test_unknown, G_TYPE_OBJECT,
-			 G_IMPLEMENT_INTERFACE (TEST_TYPE_INTERFACE, NULL));
-
-static void test_unknown_init (TestUnknown *self) {}
-static void test_unknown_class_init (TestUnknownClass *klass) {}
-
 GType
 test_interface_get_type (void)
 {
@@ -15,7 +9,7 @@ test_interface_get_type (void)
     {
       static const GTypeInfo info =
       {
-        sizeof (TestInterface), /* class_size */
+        sizeof (TestInterfaceIface), /* class_size */
 	NULL,   /* base_init */
         NULL,           /* base_finalize */
         NULL,
@@ -34,4 +28,29 @@ test_interface_get_type (void)
     }
 
   return gtype;
+}
+
+void test_unknown_iface_method (TestInterface *iface)
+{
+  g_print ("C impl\n");
+}
+
+static void
+test_unknown_test_interface_init (TestInterfaceIface *iface)
+{
+  iface->iface_method = test_unknown_iface_method;
+}
+
+G_DEFINE_TYPE_WITH_CODE (TestUnknown, test_unknown, G_TYPE_OBJECT,
+			 G_IMPLEMENT_INTERFACE (TEST_TYPE_INTERFACE,
+						test_unknown_test_interface_init));
+
+static void test_unknown_init (TestUnknown *self) {}
+static void test_unknown_class_init (TestUnknownClass *klass) {}
+
+void test_interface_iface_method (TestInterface *instance)
+{
+  TestInterfaceIface *iface = TEST_INTERFACE_GET_IFACE (instance);
+
+  return (* iface->iface_method) (instance);
 }

@@ -25,6 +25,7 @@ tests =  \
 	test_conversion.py \
 	test_enum.py \
 	test_gtype.py \
+	test_interface.py \
 	test_mainloop.py \
 	test_properties.py \
 	test_signal.py \
