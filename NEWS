@@ -1,3 +1,17 @@
+2.11.0 12-july-2006
+      - Add GOption support (#163645, Johannes Hölzl)
+      - GObject metaclass converted to Python code (Gustavo)
+      - Register GType constants from Python-land (Johan)
+      - Distutils updates (John Ehresman, Cedric Gustin)
+      - Add support for signal emission hooks (#154845, Johan)
+      - g_spawn_close_pid support (Gustavo)
+      - Add new APIs do add or disable log redirections (Muntyan, #323786)
+      - "sub-sub-type" bug fixed (Gustavo)
+      - Coverity report code fixes (Johan)
+      - Support retrieving signal and property info from interfaces (Finlay)
+      - Support parameters of type G_TYPE_GSTRING in signals (Gustavo)
+      - Wrap a few g_filename_* APIs (Gustavo)
+
 2.10.1 11-april-2006
       - uint64 property bug fix (Andy Wingo)
       - Hard code path to 2.0 (Gustavo)

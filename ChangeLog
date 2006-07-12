@@ -1,3 +1,4 @@
+=== PyGObject 2.11.0 ===
 2006-07-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_type_register): Make interface_data
