@@ -1,0 +1,154 @@
+<?xml version='1.0'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<book id="pygtk-reference" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <pubdate>July 6, 2006</pubdate>
+    <title>PyGObject Reference Manual</title>
+    <edition>PyGObject Reference Manual version 2.9.0 for PyGTK 2.9.x</edition>
+    <releaseinfo>Version 2.9.0</releaseinfo>
+    <authorgroup>
+      <author>
+	<firstname>John</firstname>
+	<surname>Finlay</surname>
+      </author>
+    </authorgroup>
+    <abstract>
+      <para>This reference describes the classes of the python gobject
+module.</para>
+    </abstract>
+<!--    <revhistory>
+      <revision>
+        <revnumber>2.9.0</revnumber>
+        <date>July 7, 2006</date>
+        <revremark>Release covering PyGTK 2.9.x (GTK+ 2.9)</revremark>
+      </revision>
+      <revision>
+        <revnumber>2.8.2</revnumber>
+        <date>October 7, 2005</date>
+        <revremark>Release covering PyGTK 2.8.x (GTK+ 2.8)</revremark>
+      </revision>
+      <revision>
+        <revnumber>2.8.1</revnumber>
+        <date>September 17, 2005</date>
+        <revremark>Release covering PyGTK 2.8.x (GTK+ 2.8)</revremark>
+      </revision>
+      <revision>
+        <revnumber>2.8.0</revnumber>
+        <date>September 7, 2005</date>
+        <revremark>Release covering PyGTK 2.8.x (GTK+ 2.8)</revremark>
+      </revision>
+     <revision>
+        <revnumber>2.6.0</revnumber>
+        <date>April 10, 2005</date>
+        <revremark>First release covering PyGTK 2.6.x (GTK+ 2.6)</revremark>
+      </revision>
+      <revision>
+        <revnumber>2.5.2</revnumber>
+        <date>March 5, 2005</date>
+      </revision>
+       <revision>
+        <revnumber>2.5.1</revnumber>
+        <date>December 23, 2004</date>
+        <revremark>First release covering PyGTK 2.5.1 (GTK+ 2.6)</revremark>
+      </revision>
+     <revision>
+        <revnumber>2.5.0</revnumber>
+        <date>November 15, 2004</date>
+        <revremark>First release covering PyGTK 2.5.x</revremark>
+      </revision>
+      <revision>
+        <revnumber>2.4.11</revnumber>
+        <date>October 3, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.10</revnumber>
+        <date>August 11, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.9</revnumber>
+        <date>August 3, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.8</revnumber>
+        <date>July 1, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.7</revnumber>
+        <date>May 19, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.6</revnumber>
+        <date>May 17, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.4</revnumber>
+        <date>May 5, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.2</revnumber>
+        <date>April 29, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>2.4.0</revnumber>
+        <date>April 27, 2004</date>
+        <revremark>First release covering PyGTK 2.2 and 2.4</revremark>
+      </revision>
+      <revision>
+        <revnumber>1.9</revnumber>
+        <date>January 28, 2004</date>
+      </revision>
+      <revision>
+        <revnumber>1.8</revnumber>
+        <date>October 7, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.7</revnumber>
+        <date>August 23, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.6</revnumber>
+        <date>July 20, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.5</revnumber>
+        <date>July 17, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.4</revnumber>
+        <date>July 16, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.3</revnumber>
+        <date>July 15, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.2</revnumber>
+        <date>July 12, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.1</revnumber>
+        <date>July 11, 2003</date>
+      </revision>
+      <revision>
+        <revnumber>1.0</revnumber>
+        <date>July 2, 2003</date>
+        <revremark>First release for PyGTK 2.0</revremark>
+      </revision>
+    </revhistory>-->
+  </bookinfo>
+  <toc>
+  </toc>
+
+  <!-- <xi:include href="pygtk-introduction.xml"/> -->
+
+  <xi:include href="pygobject-classes.xml"/>
+<!--
+<appendix id="pygtk-ref-changelog">
+<title>ChangeLog</title>
+  <xi:include href="ChangeLog.xml"/>
+</appendix>
+ -->
+
+</book>

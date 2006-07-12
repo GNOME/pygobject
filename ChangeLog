@@ -1,3 +1,29 @@
+2006-07-12  Johan Dahlin  <jdahlin@async.com.br>
+
+	* Makefile.am:
+	* configure.ac:
+	* docs/.cvsignore:
+	* docs/Makefile.am:
+	* docs/common.xsl:
+	* docs/devhelp.xsl:
+	* docs/html.xsl:
+	* docs/pdf-style.xsl:
+	* docs/pdf.xsl:
+	* docs/ref-html-style.xsl:
+	* docs/reference/.cvsignore:
+	* docs/reference/pygobject-classes.xml:
+	* docs/reference/pygobject-constants.xml:
+	* docs/reference/pygobject-functions.xml:
+	* docs/reference/pygobject-gboxed.xml:
+	* docs/reference/pygobject-ginterface.xml:
+	* docs/reference/pygobject-gpointer.xml:
+	* docs/reference/pygobject-maincontext.xml:
+	* docs/reference/pygobject-mainloop.xml:
+	* docs/reference/pygobject-ref.xml:
+	* docs/reference/pygobject.xml:
+	Import GObject part of John Finlay's PyGTK Reference Manual, copy
+	over infrastructure from the pygtk-web module.
+
 2006-07-12  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
 	* configure.ac: Post-release version bump to 2.11.1.

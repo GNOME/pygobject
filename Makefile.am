@@ -1,6 +1,9 @@
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = gobject . examples tests 
+SUBDIRS = gobject examples tests
+if ENABLE_DOCS
+  SUBDIRS += docs
+endif
 
 PLATFORM_VERSION = 2.0
 
