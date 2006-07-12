@@ -1,3 +1,7 @@
+2006-07-12  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Post-release version bump to 2.11.1.
+
 === PyGObject 2.11.0 ===
 2006-07-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
