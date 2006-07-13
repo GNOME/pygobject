@@ -1,25 +1,26 @@
-SUBDIRS = 
-
 REF_VERSION = $(PYGOBJECT_MAJOR_VERSION).$(PYGOBJECT_MINOR_VERSION)
 
-XSLFILES = 			\
-	common.xsl 		\
-	devhelp.xsl		\
-	html.xsl 		\
-	ref-html-style.xsl 	\
-	pdf-style.xsl 		\
-	pdf.xsl
-
 XMLFILES = 					\
-	reference/pygobject-ref.xml		\
 	reference/pygobject-classes.xml 	\
 	reference/pygobject-constants.xml 	\
+	reference/pygobject-ref.xml		\
 	reference/pygobject-functions.xml	\
 	reference/pygobject-gboxed.xml		\
 	reference/pygobject-ginterface.xml 	\
 	reference/pygobject-gpointer.xml 	\
 	reference/pygobject-maincontext.xml 	\
 	reference/pygobject-mainloop.xml
+
+XSLFILES =			\
+	xsl/common.xsl 		\
+	xsl/devhelp.xsl		\
+	xsl/html.xsl 		\
+	xsl/pdf-style.xsl 	\
+	xsl/pdf.xsl		\
+	xsl/ref-html-style.xsl
+
+XSLdir = $(datadir)/pygobject/xsl
+XSL_DATA = $(XSLFILES)
 
 HTMLdir = $(datadir)/devhelp/books/pygobject
 HTML_DATA = 					\
@@ -38,16 +39,17 @@ HTML_DATA = 					\
 
 BUILT_SOURCES = build_stamp $(HTML_DATA)
 CLEANFILES = build_stamp $(HTML_DATA) 
+EXTRA_DIST = $(XMLFILES) $(XSLFILES)
 
 build_stamp: reference ${XMLFILES} ${XSLFILES}
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
-                 ref-html-style.xsl reference/pygobject-ref.xml
+                 xsl/ref-html-style.xsl reference/pygobject-ref.xml
 	touch $@
 
-pdf: reference ${XMLFILES} ${XSLFILES}
-	xsltproc --nonet --xinclude -o pygobject-ref.fo pdf-style.xsl \
+pdf: reference ${XMLFILES}  ${XSLFILES}
+	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
 		reference/pygobject-ref.xml
 	pdfxmltex pygobject-ref.fo >output </dev/null
 
