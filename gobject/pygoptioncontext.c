@@ -108,7 +108,7 @@ pyg_option_context_parse(PyGOptionContext *self,
 
     if (!result)
     {
-        g_free(argv_content);
+        g_strfreev(argv_content);
         g_strfreev(original);
         pyg_error_check(&error);
         return NULL;
@@ -122,7 +122,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     }
     
     g_strfreev(original);
-    g_free(argv_content);
+    g_strfreev(argv_content);
     return new_argv;
 }
 

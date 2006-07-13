@@ -1,3 +1,10 @@
+2006-07-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* m4/python.m4: Properly quote AM_CHECK_PYMOD definition.
+
+	* gobject/pygoptioncontext.c (pyg_option_context_parse): Fix mem
+	leak.
+
 2006-07-12  Johan Dahlin  <jdahlin@async.com.br>
 
 	* Makefile.am:
