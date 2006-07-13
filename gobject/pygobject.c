@@ -34,6 +34,8 @@ typedef struct {
 } SinkFunc;
 static GArray *sink_funcs = NULL;
 
+GHashTable *custom_type_registration = NULL;
+
 PyTypeObject *PyGObject_MetaType = NULL;
 
 /**
@@ -636,7 +638,7 @@ pygobject_new_with_interfaces(GType gtype)
     PyDict_SetItemString(dict, "__doc__", pyg_object_descr_doc_get());
 
     /* generate the pygtk module name and extract the base type name */
-    gtype_name = (gchar *)g_type_name(gtype);
+    gtype_name = (gchar*)g_type_name(gtype);
     if (g_str_has_prefix(gtype_name, "Gtk")) {
 	mod_name = "gtk";
 	gtype_name += 3;
@@ -725,6 +727,10 @@ pygobject_lookup_class(GType gtype)
 
     if (gtype == G_TYPE_INTERFACE)
 	return &PyGInterface_Type;
+    
+    py_type = pyg_type_get_custom(g_type_name(gtype));
+    if (py_type)
+	return py_type;
 
     py_type = g_type_get_qdata(gtype, pygobject_class_key);
     if (py_type == NULL) {
@@ -1513,7 +1519,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	    g_free(params);
 	    return NULL;
 	}
-    }
+    }    
+
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     

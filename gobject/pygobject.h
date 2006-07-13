@@ -65,6 +65,8 @@ typedef struct {
 #define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
 
 typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
+typedef PyTypeObject * (*PyGTypeRegistrationFunction) (const gchar *name,
+						       gpointer data);
 
 struct _PyGObject_Functions {
     /* 
@@ -176,6 +178,10 @@ struct _PyGObject_Functions {
     void      (*add_warning_redirection) (const char *domain,
                                           PyObject   *warning);
     void      (*disable_warning_redirections) (void);
+    void      (*type_register_custom)(const gchar *typename,
+				      PyGTypeRegistrationFunction callback,
+				      gpointer data);
+
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -237,7 +243,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_set_object_has_new_constructor (_PyGObject_API->set_object_has_new_constructor)
 #define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
 #define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
-
+#define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

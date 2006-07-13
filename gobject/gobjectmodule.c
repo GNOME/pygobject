@@ -277,7 +277,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 #endif    
     if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
 	return NULL;
-    type = g_type_from_name(name);
+    type = _pyg_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
     PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
@@ -1136,7 +1136,7 @@ get_type_name_for_class(PyTypeObject *class)
 	for (i = 0; type_name[i] != '\0'; i++)
 	    if (type_name[i] == '.')
 		type_name[i] = '+';
-	if (g_type_from_name(type_name) == 0)
+	if (_pyg_type_from_name(type_name) == 0)
 	    break;              /* we now have a unique name */
 	++name_serial;
     }
@@ -3241,7 +3241,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_set_object_has_new_constructor,
   
   add_warning_redirection,
-  disable_warning_redirections
+  disable_warning_redirections,
+  
+  pyg_type_register_custom_callback
 };
 
 #define REGISTER_TYPE(d, type, name) \

@@ -253,4 +253,11 @@ PyObject * pyg_option_context_new (GOptionContext * context);
 PyObject * pyg_option_group_new (GOptionGroup * group);
 GOptionGroup *pyg_option_group_transfer_group(PyGOptionGroup *self);
 
+extern GHashTable *custom_type_registration;
+void pyg_type_register_custom_callback(const gchar *typename,
+				       PyGTypeRegistrationFunction callback,
+				       gpointer data);
+PyTypeObject * pyg_type_get_custom(const gchar *name);
+GType _pyg_type_from_name(const gchar *name);
+
 #endif

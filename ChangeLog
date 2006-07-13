@@ -1,3 +1,17 @@
+2006-07-13  Johan Dahlin  <jdahlin@async.com.br>
+
+	reviewed by: <delete if not using a buddy>
+
+	* gobject/gobjectmodule.c: (pyg_type_from_name),
+	(get_type_name_for_class):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c: (pygobject_new_with_interfaces),
+	(pygobject_lookup_class), (pygobject_emit):
+	* gobject/pygobject.h:
+	* gobject/pygtype.c: (_wrap_g_type_from_name),
+	(pyg_type_from_object), (pyg_type_register_custom_callback),
+	(pyg_type_get_custom), (_pyg_type_from_name):
+
 2006-07-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
 	* m4/python.m4: Properly quote AM_CHECK_PYMOD definition.
