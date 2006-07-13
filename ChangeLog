@@ -1,7 +1,5 @@
 2006-07-13  Johan Dahlin  <jdahlin@async.com.br>
 
-	reviewed by: <delete if not using a buddy>
-
 	* gobject/gobjectmodule.c: (pyg_type_from_name),
 	(get_type_name_for_class):
 	* gobject/pygobject-private.h:
@@ -11,6 +9,7 @@
 	* gobject/pygtype.c: (_wrap_g_type_from_name),
 	(pyg_type_from_object), (pyg_type_register_custom_callback),
 	(pyg_type_get_custom), (_pyg_type_from_name):
+	Add infrastructure for lazy type registration, fixes #346947
 
 2006-07-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
