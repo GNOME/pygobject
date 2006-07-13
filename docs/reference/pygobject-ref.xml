@@ -6,8 +6,8 @@
   <bookinfo>
     <pubdate>July 6, 2006</pubdate>
     <title>PyGObject Reference Manual</title>
-    <edition>PyGObject Reference Manual version 2.9.0 for PyGTK 2.9.x</edition>
-    <releaseinfo>Version 2.9.0</releaseinfo>
+    <edition>for version 2.12.x</edition>
+    <releaseinfo>Version 2.11.0</releaseinfo>
     <authorgroup>
       <author>
 	<firstname>John</firstname>

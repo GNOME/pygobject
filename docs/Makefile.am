@@ -21,7 +21,7 @@ XMLFILES = 					\
 	reference/pygobject-maincontext.xml 	\
 	reference/pygobject-mainloop.xml
 
-HTMLdir = $(datadir)/devhelp/books/pygobject-$(REF_VERSION)
+HTMLdir = $(datadir)/devhelp/books/pygobject
 HTML_DATA = 					\
 	html/class-gobjectgboxed.html		\
 	html/class-gobjectginterface.html	\
@@ -34,16 +34,17 @@ HTML_DATA = 					\
 	html/gobject-functions.html		\
 	html/index.html				\
 	html/index.sgml				\
-	html/pygobject-$(REF_VERSION).devhelp
+	html/pygobject.devhelp
 
-BUILT_SOURCES = $(HTML_DATA)
-CLEANFILES = $(HTML_DATA)
+BUILT_SOURCES = build_stamp $(HTML_DATA)
+CLEANFILES = build_stamp $(HTML_DATA) 
 
-%.html: reference ${XMLFILES} ${XSLFILES}
+build_stamp: reference ${XMLFILES} ${XSLFILES}
 	xsltproc --nonet --xinclude -o html/ \
-                 --stringparam gtkdoc.bookname "pygobject-$(REF_VERSION)" \
+                 --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  ref-html-style.xsl reference/pygobject-ref.xml
+	touch $@
 
 pdf: reference ${XMLFILES} ${XSLFILES}
 	xsltproc --nonet --xinclude -o pygobject-ref.fo pdf-style.xsl \
