@@ -1,3 +1,7 @@
+2006-07-18  Johan Dahlin  <johan@gnome.org>
+
+	* docs/Makefile.am (HTMLdir): Install book in $datadir/gtk-doc/html
+
 2006-07-13  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/gobjectmodule.c: (pyg_type_from_name),

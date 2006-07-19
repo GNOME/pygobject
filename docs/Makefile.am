@@ -22,7 +22,7 @@ XSLFILES =			\
 XSLdir = $(datadir)/pygobject/xsl
 XSL_DATA = $(XSLFILES)
 
-HTMLdir = $(datadir)/devhelp/books/pygobject
+HTMLdir = $(datadir)/gtk-doc/html/pygobject
 HTML_DATA = 					\
 	html/class-gobjectgboxed.html		\
 	html/class-gobjectginterface.html	\
