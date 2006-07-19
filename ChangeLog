@@ -1,9 +1,11 @@
 2006-07-19  John Finlay  <finlay@moeraki.com>
 
+	* docs/xsl/ref-html-style.xsl: Add book to list of indexed items.
+
 	* docs/xsl/html.xsl: Output xref links for unknown links.
 
 	* docs/xsl/ref-html-style.xsl: Include refsect1 and refsect2 in
-	indexed items but only ig they have ids.
+	indexed items but only if they have ids.
 
 	* configure.ac (AC_CONFIG_FILES) : Add docs/reference/version.xml
 

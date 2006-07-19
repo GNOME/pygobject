@@ -14,7 +14,7 @@
       <xsl:with-param name="filename" select="'index.sgml'"/>
       <xsl:with-param name="content">
         <!-- check all anchor and refentry elements -->
-        <xsl:apply-templates select="//anchor|//refentry|//refsect1|//refsect2"
+        <xsl:apply-templates select="//anchor|//refentry|//refsect1|//refsect2|//book"
                              mode="generate.index.mode"/>
       </xsl:with-param>
       <xsl:with-param name="encoding" select="'utf-8'"/>
