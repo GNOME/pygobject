@@ -128,6 +128,7 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
   docs/Makefile
+  docs/reference/version.xml
   gobject/Makefile
   examples/Makefile
   tests/Makefile

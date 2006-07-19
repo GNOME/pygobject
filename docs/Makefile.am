@@ -1,6 +1,7 @@
 REF_VERSION = $(PYGOBJECT_MAJOR_VERSION).$(PYGOBJECT_MINOR_VERSION)
 
 XMLFILES = 					\
+	reference/pygobject-introduction.xml 	\
 	reference/pygobject-classes.xml 	\
 	reference/pygobject-constants.xml 	\
 	reference/pygobject-ref.xml		\
@@ -24,6 +25,8 @@ XSL_DATA = $(XSLFILES)
 
 HTMLdir = $(datadir)/gtk-doc/html/pygobject
 HTML_DATA = 					\
+	html/pygobject-introduction.html	\
+	html/pygobject-reference-copyright.html	\
 	html/class-gobjectgboxed.html		\
 	html/class-gobjectginterface.html	\
 	html/class-gobjectgpointer.html		\
@@ -37,11 +40,14 @@ HTML_DATA = 					\
 	html/index.sgml				\
 	html/pygobject.devhelp
 
-BUILT_SOURCES = build_stamp $(HTML_DATA)
-CLEANFILES = build_stamp $(HTML_DATA) 
-EXTRA_DIST = $(XMLFILES) $(XSLFILES)
+BUILT_SOURCES = build_stamp $(HTML_DATA) reference/version.xml \
+		reference/builddate.xml
+CLEANFILES = build_stamp $(HTML_DATA)  reference/version.xml \
+		reference/builddate.xml
+EXTRA_DIST = $(XMLFILES) $(XSLFILES) reference/version.xml.in
 
 build_stamp: reference ${XMLFILES} ${XSLFILES}
+	date '+%B %d, %Y' > reference/builddate.xml
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \

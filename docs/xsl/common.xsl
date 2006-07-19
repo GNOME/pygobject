@@ -1,4 +1,4 @@
-<?xml version='1.0'?> <!--*- mode: xml -*-->
+<?xml version='1.0'?>
 <!DOCTYPE xsl:stylesheet [
 ]>
 
@@ -15,6 +15,5 @@
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
-
 
 </xsl:stylesheet>

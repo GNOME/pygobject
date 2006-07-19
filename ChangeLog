@@ -1,3 +1,18 @@
+2006-07-19  John Finlay  <finlay@moeraki.com>
+
+	* docs/xsl/html.xsl: Output xref links for unknown links.
+
+	* docs/xsl/ref-html-style.xsl: Include refsect1 and refsect2 in
+	indexed items but only ig they have ids.
+
+	* configure.ac (AC_CONFIG_FILES) : Add docs/reference/version.xml
+
+	* docs/reference/pygobject-ref.xml: Add pygobject-introduction.xml
+	and version and builddate entities. Remove commented out items.
+
+	* docs/Makefile.am: Add reference/pygobject-introduction.xml and
+	 reference/version.xml.in
+
 2006-07-18  Johan Dahlin  <johan@gnome.org>
 
 	* docs/Makefile.am (HTMLdir): Install book in $datadir/gtk-doc/html

@@ -1,4 +1,4 @@
-<?xml version='1.0'?> <!--*- mode: xml -*-->
+<?xml version='1.0'?>
 <!DOCTYPE xsl:stylesheet [
 <!ENTITY RE "&#10;">
 <!ENTITY nbsp "&#160;">
@@ -260,6 +260,22 @@
   <!-- hack -->
   <xsl:template match="link" mode="python">
     <xsl:apply-templates select="."/>
+  </xsl:template>
+
+  <!-- ========================================================= -->
+  <!-- template to output gtkdoclink elements for the unknown targets -->
+
+  <xsl:template match="link">
+    <xsl:choose>
+      <xsl:when test="id(@linkend)">
+        <xsl:apply-imports/>
+      </xsl:when>
+      <xsl:otherwise>
+        <PYGTKDOCLINK HREF="{@linkend}">
+          <xsl:apply-templates/>
+        </PYGTKDOCLINK>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
  <xsl:template match="parameter" mode="python">
