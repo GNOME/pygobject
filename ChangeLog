@@ -1,5 +1,7 @@
 2006-07-19  John Finlay  <finlay@moeraki.com>
 
+	* docs/Makefile.am: Use more portable date generator.
+
 	* docs/xsl/ref-html-style.xsl: Add book to list of indexed items.
 
 	* docs/xsl/html.xsl: Output xref links for unknown links.

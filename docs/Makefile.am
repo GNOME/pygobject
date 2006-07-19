@@ -47,7 +47,8 @@ CLEANFILES = build_stamp $(HTML_DATA)  reference/version.xml \
 EXTRA_DIST = $(XMLFILES) $(XSLFILES) reference/version.xml.in
 
 build_stamp: reference ${XMLFILES} ${XSLFILES}
-	date '+%B %d, %Y' > reference/builddate.xml
+	python -c 'import datetime; print datetime.date.today()' \
+		 > reference/builddate.xml
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
