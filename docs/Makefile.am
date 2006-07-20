@@ -1,4 +1,5 @@
 REF_VERSION = $(PYGOBJECT_MAJOR_VERSION).$(PYGOBJECT_MINOR_VERSION)
+FULL_VERSION = $(REF_VERSION).$(PYGOBJECT_MICRO_VERSION)
 
 XMLFILES = 					\
 	reference/pygobject-introduction.xml 	\
@@ -40,22 +41,43 @@ HTML_DATA = 					\
 	html/index.sgml				\
 	html/pygobject.devhelp
 
-BUILT_SOURCES = build_stamp $(HTML_DATA) reference/version.xml \
-		reference/builddate.xml
-CLEANFILES = build_stamp $(HTML_DATA)  reference/version.xml \
-		reference/builddate.xml
-EXTRA_DIST = $(XMLFILES) $(XSLFILES) reference/version.xml.in
+BUILT_SOURCES = 			\
+	build_stamp 			\
+	reference/builddate.xml		\
+	reference/version.xml 		\
+	$(HTML_DATA)
 
-build_stamp: reference ${XMLFILES} ${XSLFILES}
-	python -c 'import datetime; print datetime.date.today()' \
-		 > reference/builddate.xml
+CLEANFILES = 				\
+	build_stamp 			\
+	reference/builddate.xml		\
+	reference/version.xml 		\
+	$(HTML_DATA)
+
+EXTRA_DIST = 				\
+	$(XMLFILES) 			\
+	$(XSLFILES)
+
+REFERENCE_DEPS = 			\
+	reference/builddate.xml 	\
+	reference/version.xml 		\
+	reference 			\
+	$(XMLFILES)			\
+	$(XSLFILES)
+
+reference/builddate.xml:
+	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
+
+reference/version.xml:
+	@echo $(FULL_VERSION) > $@
+
+build_stamp: $(REFERENCE_DEPS)
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  xsl/ref-html-style.xsl reference/pygobject-ref.xml
 	touch $@
 
-pdf: reference ${XMLFILES}  ${XSLFILES}
+pdf: $(REFERENCE_DEPS)
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
 		reference/pygobject-ref.xml
 	pdfxmltex pygobject-ref.fo >output </dev/null

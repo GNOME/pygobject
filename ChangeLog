@@ -1,3 +1,12 @@
+2006-07-20  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac:
+	* docs/Makefile.am:
+	* docs/reference/.cvsignore:
+	* docs/reference/version.xml.in:
+	Generate builddate.xml and version.xml at build time instead on
+	configure time, add proper dependencies.
+
 2006-07-19  John Finlay  <finlay@moeraki.com>
 
 	* docs/Makefile.am: Use more portable date generator.
