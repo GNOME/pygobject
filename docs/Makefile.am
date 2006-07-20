@@ -51,6 +51,7 @@ CLEANFILES = 				\
 	build_stamp 			\
 	reference/builddate.xml		\
 	reference/version.xml 		\
+	pygobject-ref.*			\
 	$(HTML_DATA)
 
 EXTRA_DIST = 				\
@@ -58,26 +59,25 @@ EXTRA_DIST = 				\
 	$(XSLFILES)
 
 REFERENCE_DEPS = 			\
-	reference/builddate.xml 	\
 	reference/version.xml 		\
 	reference 			\
 	$(XMLFILES)			\
 	$(XSLFILES)
 
-reference/builddate.xml:
+reference/builddate.xml: $(REFERENCE_DEPS)
 	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
 
-reference/version.xml:
+reference/version.xml: $(top_srcdir)/config.h
 	@echo $(FULL_VERSION) > $@
 
-build_stamp: $(REFERENCE_DEPS)
+build_stamp: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  xsl/ref-html-style.xsl reference/pygobject-ref.xml
 	touch $@
 
-pdf: $(REFERENCE_DEPS)
+pdf: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
 		reference/pygobject-ref.xml
 	pdfxmltex pygobject-ref.fo >output </dev/null

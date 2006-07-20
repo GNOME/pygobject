@@ -1,3 +1,9 @@
+2006-07-20  John Finlay  <finlay@moeraki.com>
+
+	* docs/Makefile.am: Make version.xml dependent on config.h
+	Make builddate.xml dependent on REFERENCE_DEPS. Add builddate.xml to
+	build_stamp and pdf dependencies. Add pdf files to cleanup.
+
 2006-07-20  Johan Dahlin  <jdahlin@async.com.br>
 
 	* configure.ac:
