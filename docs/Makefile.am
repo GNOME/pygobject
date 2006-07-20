@@ -70,14 +70,14 @@ reference/builddate.xml: $(REFERENCE_DEPS)
 reference/version.xml: $(top_srcdir)/config.h
 	@echo $(FULL_VERSION) > $@
 
-build_stamp: $(REFERENCE_DEPS) reference/builddate.xml
+build_stamp: $(REFERENCE_DEPS)
 	xsltproc --nonet --xinclude -o html/ \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  xsl/ref-html-style.xsl reference/pygobject-ref.xml
 	touch $@
 
-pdf: $(REFERENCE_DEPS) reference/builddate.xml
+pdf: $(REFERENCE_DEPS)
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
 		reference/pygobject-ref.xml
 	pdfxmltex pygobject-ref.fo >output </dev/null
