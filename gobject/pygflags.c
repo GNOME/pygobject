@@ -327,7 +327,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
       retval = PyString_FromString(flags_value->value_name);
   else {
       retval = Py_None;
-      PY_INCREF(Py_None);
+      Py_INCREF(Py_None);
   }
   g_type_class_unref(flags_class);
 
@@ -349,7 +349,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
       retval = PyString_FromString(flags_value->value_nick);
   else {
       retval = Py_None;
-      PY_INCREF(Py_None);
+      Py_INCREF(Py_None);
   }
   g_type_class_unref(flags_class);
 
