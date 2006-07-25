@@ -225,10 +225,12 @@ pyg_enum_add (PyObject *   module,
         Py_DECREF(intval);
 	
 	if (module) {
-	    PyModule_AddObject(module,
-			       pyg_constant_strip_prefix(eclass->values[i].value_name,
-							 strip_prefix),
-			       item);
+	    char *prefix;
+
+	    prefix = g_strdup(pyg_constant_strip_prefix(eclass->values[i].value_name, strip_prefix));
+	    PyModule_AddObject(module, prefix, item);
+	    g_free(prefix);
+
 	    Py_INCREF(item);
 	}
     }

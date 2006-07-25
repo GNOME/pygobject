@@ -1,3 +1,9 @@
+2006-07-25  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygflags.c (pyg_flags_add) 
+	* gobject/pygenum.c (pyg_enum_add): Duplicate the string before
+	sending it to python. Fixes GCC warnings.
+
 2006-07-24  John Finlay  <finlay@moeraki.com>
 
 	* gobject/pygflags.c (pyg_flags_get_first_value_name) 
