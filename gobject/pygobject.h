@@ -293,6 +293,30 @@ struct _PyGObject_Functions *_PyGObject_API;
     } \
 } G_STMT_END
 
+#define init_pygobject_check(major, minor, micro) G_STMT_START {         \
+    init_pygobject();                                                    \
+    PyObject *gobject = PyImport_ImportModule("gobject");                \
+    version = PyDict_GetItemString(mdict, "pygobject_version");          \
+    if (!version)                                                        \
+        version = PyDict_GetItemString(mdict, "pygtk_version");          \
+    if (!version) {                                                      \
+        PyErr_SetString(PyExc_ImportError,                               \
+                         "PyGObject version too old");                   \
+        return;                                                          \
+    }                                                                    \
+    if (!PyArg_ParseTuple(version, "iii",                                \
+                          &found_major, &found_minor, &found_micro))     \
+        return;                                                          \
+    if (major > found_major || minor > found_minor ||                    \
+        micro > found_micro) {                                           \
+        PyErr_Format(PyExc_ImportError,                                  \
+                     "PyGObject version too old, %d.%d.%d is required, " \
+                     "found %d.%d.%d.", major, minor, micro,             \
+                     found_major, found_minor, found_micro);             \
+        return;                                                          \
+    }                                                                    \
+} G_STMT_END
+
 #endif /* !_INSIDE_PYGOBJECT_ */
 
 G_END_DECLS

@@ -1,5 +1,8 @@
 2006-07-25  Johan Dahlin  <jdahlin@async.com.br>
 
+	* gobject/pygobject.h (init_pygobject_check): Add a macro to easily 
+	check the installed pygobject version.
+
 	* gobject/pygflags.c (pyg_flags_add) 
 	* gobject/pygenum.c (pyg_enum_add): Duplicate the string before
 	sending it to python. Fixes GCC warnings.
