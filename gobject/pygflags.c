@@ -323,8 +323,12 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
   flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
-  retval = PyString_FromString(flags_value->value_name);
-
+  if (flags_value)
+      retval = PyString_FromString(flags_value->value_name);
+  else {
+      retval = Py_None;
+      PY_INCREF(Py_None);
+  }
   g_type_class_unref(flags_class);
 
   return retval;
@@ -341,7 +345,12 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
   flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
-  retval = PyString_FromString(flags_value->value_nick);
+  if (flags_value)
+      retval = PyString_FromString(flags_value->value_nick);
+  else {
+      retval = Py_None;
+      PY_INCREF(Py_None);
+  }
   g_type_class_unref(flags_class);
 
   return retval;

@@ -1,3 +1,9 @@
+2006-07-24  John Finlay  <finlay@moeraki.com>
+
+	* gobject/pygflags.c (pyg_flags_get_first_value_name) 
+	(pyg_flags_get_first_value_nick): Avoid segfault when
+	g_flags_get_first_value returns NULL.
+
 2006-07-20  John Finlay  <finlay@moeraki.com>
 
 	* docs/Makefile.am: Make version.xml dependent on config.h
