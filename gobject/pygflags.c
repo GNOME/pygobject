@@ -202,7 +202,11 @@ pyg_flags_add (PyObject *   module,
     int i;
 
     g_return_val_if_fail(typename != NULL, NULL);
-    g_return_val_if_fail(g_type_is_a(gtype, G_TYPE_FLAGS), NULL);
+    if (!g_type_is_a(gtype, G_TYPE_FLAGS)) {
+        g_warning("Trying to register gtype '%s' as flags when in fact it is of type '%s'",
+                  g_type_name(gtype), g_type_name(G_TYPE_FUNDAMENTAL(gtype)));
+        return NULL;
+    }
     
     state = pyg_gil_state_ensure();
 
