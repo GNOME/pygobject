@@ -1,3 +1,8 @@
+2006-08-04  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.in: Add hack to disable libtool checking for g++ and
+	g77 (copied from libglade).
+
 2006-07-29  John Finlay  <finlay@moeraki.com>
 
 	* gobject/pygobject.h (pyg_param_gvalue_from_pyobject): Fix define

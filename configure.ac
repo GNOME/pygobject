@@ -56,6 +56,12 @@ AC_MSG_RESULT([$os_win32])
 AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
 
 AC_DISABLE_STATIC
+
+dnl XXXX hack to kill off all the libtool tags ...
+dnl it isn't like we are using C++ or Fortran.
+dnl (copied from libglade/configure.in)
+m4_define([_LT_AC_TAGCONFIG],[])
+
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
