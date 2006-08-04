@@ -1,9 +1,10 @@
 <?xml version='1.0'?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
-<!ENTITY version SYSTEM "version.xml">
-<!ENTITY builddate SYSTEM "builddate.xml">
+<!ENTITY % entities SYSTEM "entities.docbook">
+%entities;
 ]>
+
 <book id="pygobject-reference" xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
     <pubdate>&builddate;</pubdate>

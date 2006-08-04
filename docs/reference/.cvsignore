@@ -1,4 +1,3 @@
 *.html
 pygobject.devhelp
-builddate.xml
-version.xml
+entities.docbook

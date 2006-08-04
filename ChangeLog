@@ -1,3 +1,14 @@
+2006-08-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac:
+	* docs/Makefile.am:
+	* docs/reference/.cvsignore:
+	* docs/reference/entities.docbook.in:
+	* docs/reference/pygobject-ref.xml:
+	Clean up the build date/version mess I created.
+	Now it's created during configure time and properly included in
+	the docbook files. Also make sure distcheck passes
+
 2006-08-04  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* configure.in: Add hack to disable libtool checking for g++ and

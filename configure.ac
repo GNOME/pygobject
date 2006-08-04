@@ -72,6 +72,9 @@ AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
 AC_SUBST(PLATFORM)
 
+BUILDDATE=`$PYTHON -c "import datetime; print datetime.date.today()"`
+AC_SUBST(BUILDDATE)
+
 AC_ARG_ENABLE(thread,
   AC_HELP_STRING([--disable-thread], [Disable pygobject threading support]),,
   enable_thread=yes)
@@ -134,6 +137,7 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
   docs/Makefile
+  docs/reference/entities.docbook
   gobject/Makefile
   examples/Makefile
   tests/Makefile

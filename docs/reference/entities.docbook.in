@@ -1,0 +1,2 @@
+<!ENTITY builddate "@BUILDDATE@">
+<!ENTITY version "@PACKAGE_VERSION@">
