@@ -1,4 +1,4 @@
-PyGTK
+PyGObject
 =====
 Original author: James Henstridge <james@daa.com.au>
 Current maintainer: Johan Dahlin <johan@gnome.org>
@@ -50,7 +50,7 @@ say you wrote bits you didn't.
 Compilation
 ===========
 
-PyGTK uses the standard autotools for the build infrastructure.  To
+PyGObject uses the standard autotools for the build infrastructure.  To
 build, it should be as simple as running:
 
     $ ./configure --prefix=<prefix where python is installed>
@@ -73,12 +73,12 @@ for all the .py files.
 Note. If you're installing to another prefix than the one where python
 is installed you'll need to set the PYTHONPATH variable to the
 $prefix/lib/pythonX.Y/site-packages directory created by 
-the PyGTK installation.
+the PyGObject installation.
 
 Tests
 =====
 
-After having compiled and installed pygtk, you may want to test them.
+After having compiled and installed pygobject, you may want to test them.
 There are a number of example programs available in the examples/
 subdirectory.
 

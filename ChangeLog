@@ -1,4 +1,9 @@
+=== 2.11.1 ===
 2006-08-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+	* README: Update, some s/PyGTK/PyGObject/
 
 	* configure.ac:
 	* docs/Makefile.am:

@@ -1,3 +1,9 @@
+2.11.1 04-august-2006
+      - Add John Finlay's reference manual (Johan, John)
+      - Fix GOption mem leak (Gustavo)
+      - Infrastructure for lazy type registration (Johan)
+      - Enum/Flags fixes (Gustavo, John)
+      - Eliminate some GCC warnings (Johan)
 2.11.0 12-july-2006
       - Add GOption support (#163645, Johannes Hölzl)
       - GObject metaclass converted to Python code (Gustavo)
@@ -11,7 +17,6 @@
       - Support retrieving signal and property info from interfaces (Finlay)
       - Support parameters of type G_TYPE_GSTRING in signals (Gustavo)
       - Wrap a few g_filename_* APIs (Gustavo)
-
 2.10.1 11-april-2006
       - uint64 property bug fix (Andy Wingo)
       - Hard code path to 2.0 (Gustavo)
