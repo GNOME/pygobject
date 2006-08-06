@@ -7,16 +7,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version='1.0'>
 
-<xsl:param name="shade.verbatim" select="1"/>
 <xsl:param name="use.id.as.filename" select="1"/>
 <xsl:param name="chunk.fast" select="1"/>
 <xsl:param name="chunker.output.encoding" select="'utf-8'"/>
-
-<xsl:attribute-set name="shade.verbatim.style">
-  <xsl:attribute name="border">0</xsl:attribute>
-  <xsl:attribute name="bgcolor">#E0E0E0</xsl:attribute>
-  <xsl:attribute name="width">100%</xsl:attribute>
-</xsl:attribute-set>
 
 <xsl:param name="linenumbering.extension" select="1"/>
 <xsl:param name="variablelist.as.table" select="1"/>
@@ -50,26 +43,13 @@
         </table>
       </xsl:when>
       <xsl:when test="@role = 'properties' or @role = 'prototypes'">
-  	<xsl:choose>
-    	  <xsl:when test="$shade.verbatim != 0">
-            <table width="100%" xsl:use-attribute-sets="shade.verbatim.style">
-              <tr>
-                <td valign="top">
-                  <xsl:apply-templates select="child::*[local-name(.)!='attribution']"/>
-                </td>
-              </tr>
-            </table>
-          </xsl:when>
-	  <xsl:otherwise>
-            <table width="100%" border="0">
-              <tr>
-                <td valign="top">
-                  <xsl:apply-templates select="child::*[local-name(.)!='attribution']"/>
-                </td>
-              </tr>
-            </table>
-          </xsl:otherwise>
-        </xsl:choose>
+        <table width="100%" border="0" bgcolor="#E0E0E0">
+          <tr>
+            <td valign="top">
+              <xsl:apply-templates select="child::*[local-name(.)!='attribution']"/>
+            </td>
+          </tr>
+        </table>
       </xsl:when>
       <xsl:otherwise>
         <blockquote class="{local-name(.)}">

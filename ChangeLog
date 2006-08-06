@@ -1,3 +1,9 @@
+2006-08-06  Johan Dahlin  <johan@gnome.org>
+
+	* docs/xsl/html.xsl: Do not use shade.verbatim, set the background
+	color and border as a normal html tag to avoid an external
+	stylesheet.
+
 2006-08-04  Johan Dahlin  <jdahlin@async.com.br>
 
 	* configure.ac: Post release version bump
