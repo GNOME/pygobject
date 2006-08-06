@@ -1,5 +1,12 @@
 2006-08-06  Johan Dahlin  <johan@gnome.org>
 
+	* m4/as-expand.m4: New file to workaround automake silliness
+
+	* docs/xsl/fixxref.py.in: New script
+
+	* docs/Makefile.am (XSLFILES): Add fixxref.py script, moved in from
+	PyGTK.
+
 	* docs/xsl/html.xsl: Do not use shade.verbatim, set the background
 	color and border as a normal html tag to avoid an external
 	stylesheet.

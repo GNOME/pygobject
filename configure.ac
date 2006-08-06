@@ -128,6 +128,8 @@ fi
 pygobject_CODEGEN_DEFINES=""
 AC_SUBST([pygobject_CODEGEN_DEFINES])
 
+AS_AC_EXPAND(DATADIR, $datadir)
+
 dnl add required cflags ...
 JH_ADD_CFLAG([-Wall])
 JH_ADD_CFLAG([-std=c9x])
@@ -138,6 +140,7 @@ AC_CONFIG_FILES(
   pygobject-2.0.pc
   docs/Makefile
   docs/reference/entities.docbook
+  docs/xsl/fixxref.py
   gobject/Makefile
   examples/Makefile
   tests/Makefile

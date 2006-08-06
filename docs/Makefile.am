@@ -17,6 +17,7 @@ XMLFILES = 					\
 XSLFILES =			\
 	xsl/common.xsl 		\
 	xsl/devhelp.xsl		\
+	xsl/fixxref.py		\
 	xsl/html.xsl 		\
 	xsl/pdf-style.xsl 	\
 	xsl/pdf.xsl		\
