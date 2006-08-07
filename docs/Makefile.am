@@ -63,6 +63,8 @@ REFERENCE_DEPS = 			\
 	$(XMLFILES)			\
 	$(XSLFILES)
 
+$(HTML_DATA): build_stamp
+
 build_stamp: $(REFERENCE_DEPS)
 	xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
 		 --path $(BUILDDIR)/reference:$(srcdir)/reference \
