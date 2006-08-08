@@ -1,9 +1,14 @@
-2.11.1 04-august-2006
+2.11.2 8-august-2006
+      - Add fixxref.py from PyGTK (Johan)
+      - Fix parallel build (#350225, Ed Catmur)
+
+2.11.1 4-august-2006
       - Add John Finlay's reference manual (Johan, John)
       - Fix GOption mem leak (Gustavo)
       - Infrastructure for lazy type registration (Johan)
       - Enum/Flags fixes (Gustavo, John)
       - Eliminate some GCC warnings (Johan)
+
 2.11.0 12-july-2006
       - Add GOption support (#163645, Johannes Hölzl)
       - GObject metaclass converted to Python code (Gustavo)
@@ -17,20 +22,24 @@
       - Support retrieving signal and property info from interfaces (Finlay)
       - Support parameters of type G_TYPE_GSTRING in signals (Gustavo)
       - Wrap a few g_filename_* APIs (Gustavo)
+
 2.10.1 11-april-2006
       - uint64 property bug fix (Andy Wingo)
       - Hard code path to 2.0 (Gustavo)
       - Allow only tuples and lists in strv to value (Gustavo)
       - Include dsextras.py in the dist (Johan)
+
 2.10.0 13-march-2006
       - enum/leak fix (Michael Smith)
+
 2.9.0 16-january-2006
       - Signal accumulator support (Gustavo)
       - GObject doc string generation improvements (Gustavo)
       - Discover GInterfaces in runtime (Gustavo)
       - Warn if return value in iowatch callback is not bool (Gustavo)
       - Convert string arrays properly (Christopher Aillon)
-2.8.0 09-january-2006
+
+2.8.0 9-january-2006
       - Initial release, split of from PyGTK.
       - Updates for Python 2.5's richcompare (Manish Yosh)
       - PyFlags bug fixes (Gustavo)
