@@ -3,6 +3,7 @@
 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY % entities SYSTEM "entities.docbook">
 %entities;
+<!ENTITY builddate SYSTEM "builddate.xml">
 ]>
 
 <book id="pygobject-reference" xmlns:xi="http://www.w3.org/2001/XInclude">

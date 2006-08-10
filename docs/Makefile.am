@@ -47,11 +47,13 @@ HTML_DATA = 					\
 
 BUILT_SOURCES = 			\
 	build_stamp 			\
+	reference/builddate.xml         \
 	$(HTML_DATA)
 
 CLEANFILES = 				\
 	build_stamp 			\
 	pygobject-ref.*			\
+	reference/builddate.xml         \
 	$(HTML_DATA)
 
 EXTRA_DIST = 				\
@@ -65,7 +67,10 @@ REFERENCE_DEPS = 			\
 
 $(HTML_DATA): build_stamp
 
-build_stamp: $(REFERENCE_DEPS)
+reference/builddate.xml: $(REFERENCE_DEPS)
+	$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
+
+build_stamp: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
 		 --path $(BUILDDIR)/reference:$(srcdir)/reference \
                  --stringparam gtkdoc.bookname "pygobject" \
@@ -74,7 +79,7 @@ build_stamp: $(REFERENCE_DEPS)
                  $(srcdir)/reference/pygobject-ref.xml
 	touch $@
 
-pdf: $(REFERENCE_DEPS)
+pdf: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
 		reference/pygobject-ref.xml
 	pdfxmltex pygobject-ref.fo >output </dev/null

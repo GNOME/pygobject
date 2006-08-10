@@ -1,3 +1,12 @@
+2006-08-10  John Finlay  <finlay@moeraki.com>
+
+	* docs/reference/entities.docbook.in: 
+	* docs/reference/pygobject-ref.xml: 
+	* docs/Makefile.am: 
+	* configure.ac:
+	Use builddate.xml for the builddate entity and have builddate.xml be
+	updated when the docs are built not during configure time.
+
 2006-08-08  Johan Dahlin  <jdahlin@async.com.br>
 
 	* configure.ac:  Post release version bump.
