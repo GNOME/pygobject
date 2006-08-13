@@ -45,6 +45,10 @@ HTML_DATA = 					\
 	html/index.sgml				\
 	html/pygobject.devhelp
 
+CSS_FILES = style.css
+CSSdir = $(HTMLdir)
+CSS_DATA = $(CSS_FILES)
+
 BUILT_SOURCES = 			\
 	build_stamp 			\
 	reference/builddate.xml         \
@@ -58,7 +62,8 @@ CLEANFILES = 				\
 
 EXTRA_DIST = 				\
 	$(XMLFILES) 			\
-	$(XSLFILES)
+	$(XSLFILES)                     \
+	$(CSS_FILES)
 
 REFERENCE_DEPS = 			\
 	reference 			\

@@ -1,3 +1,10 @@
+2006-08-12  John Finlay  <finlay@moeraki.com>
+
+	* pygobject-2.0.pc.in: Add reference to installed pygobject docs
+	* docs/Makefile.am: Add install of style.css
+	* docs/xsl/html.xsl: Define stylesheet as style.css
+	* docs/style.css: Add.
+
 2006-08-10  John Finlay  <finlay@moeraki.com>
 
 	* docs/reference/entities.docbook.in: 

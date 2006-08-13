@@ -9,6 +9,7 @@ datadir=@datadir@
 # install additional headers.
 pygtkincludedir=${includedir}/pygtk-2.0
 fixxref=${datadir}/pygobject/xsl/fixxref.py
+pygdocs=${datadir}/gtk-doc/html/pygobject
 
 Name: PyGObject
 Description: Python bindings for GObject

@@ -7,6 +7,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version='1.0'>
 
+<xsl:param name="html.stylesheet">style.css</xsl:param>
 <xsl:param name="use.id.as.filename" select="1"/>
 <xsl:param name="chunk.fast" select="1"/>
 <xsl:param name="chunker.output.encoding" select="'utf-8'"/>
