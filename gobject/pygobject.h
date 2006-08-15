@@ -145,14 +145,14 @@ struct _PyGObject_Functions {
 					const GParamSpec* pspec);
     PyTypeObject *enum_type;
     PyObject *(*enum_add)(PyObject *module,
-			  const char *typename_,
+			  const char *type_name_,
 			  const char *strip_prefix,
 			  GType gtype);
     PyObject* (*enum_from_gtype)(GType gtype, int value);
     
     PyTypeObject *flags_type;
     PyObject *(*flags_add)(PyObject *module,
-			   const char *typename_,
+			   const char *type_name_,
 			   const char *strip_prefix,
 			   GType gtype);
     PyObject* (*flags_from_gtype)(GType gtype, int value);
@@ -178,7 +178,7 @@ struct _PyGObject_Functions {
     void      (*add_warning_redirection) (const char *domain,
                                           PyObject   *warning);
     void      (*disable_warning_redirections) (void);
-    void      (*type_register_custom)(const gchar *typename,
+    void      (*type_register_custom)(const gchar *type_name,
 				      PyGTypeRegistrationFunction callback,
 				      gpointer data);
 

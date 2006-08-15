@@ -1,3 +1,12 @@
+2006-08-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.h:
+	Replace uses of typename with type_name, because that is a 
+	reserved C++ keyword. This was breaking compilation of Glom 
+	due its use in the new type_register_custom function pointer in 
+	pygobject.h.
+
 2006-08-12  John Finlay  <finlay@moeraki.com>
 
 	* pygobject-2.0.pc.in: Add reference to installed pygobject docs

@@ -136,7 +136,7 @@ void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
 void          pygobject_register_sinkfunc(GType type,
 					  void (* sinkfunc)(GObject *object));
 int           pyg_type_register          (PyTypeObject *class,
-					  const gchar *typename);
+					  const gchar *type_name);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;
@@ -165,7 +165,7 @@ extern PyTypeObject PyGFlags_Type;
 #define PyGFlags_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_FLAGS))
 			   
 extern PyObject * pyg_flags_add        (PyObject *   module,
-					const char * typename,
+					const char * type_name,
 					const char * strip_prefix,
 					GType        gtype);
 extern PyObject * pyg_flags_from_gtype (GType        gtype,
@@ -182,7 +182,7 @@ typedef struct {
 extern PyTypeObject PyGEnum_Type;
 
 extern PyObject * pyg_enum_add        (PyObject *   module,
-				       const char * typename,
+				       const char * type_name,
 				       const char * strip_prefix,
 				       GType        gtype);
 extern PyObject * pyg_enum_from_gtype (GType        gtype,
@@ -254,7 +254,7 @@ PyObject * pyg_option_group_new (GOptionGroup * group);
 GOptionGroup *pyg_option_group_transfer_group(PyGOptionGroup *self);
 
 extern GHashTable *custom_type_registration;
-void pyg_type_register_custom_callback(const gchar *typename,
+void pyg_type_register_custom_callback(const gchar *type_name,
 				       PyGTypeRegistrationFunction callback,
 				       gpointer data);
 PyTypeObject * pyg_type_get_custom(const gchar *name);
