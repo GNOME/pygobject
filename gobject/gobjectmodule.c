@@ -1274,6 +1274,37 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 			     pyg_object_descr_doc_get());
     }
 
+      /* Register interface implementations  */
+    if (class->tp_bases) {
+        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
+        {
+            PyTypeObject *base =
+		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
+            GType itype;
+            const GInterfaceInfo *iinfo;
+            GInterfaceInfo iinfo_copy;
+            
+            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
+                continue;
+
+            itype = pyg_type_from_object((PyObject *) base);
+            iinfo = pyg_lookup_interface_info(itype);
+            iinfo_copy = *iinfo;
+            iinfo_copy.interface_data = class;
+            if (!iinfo) {
+                char *msg;
+                msg = g_strdup_printf("Interface type %s "
+                                      "has no python implementation support",
+                                      base->tp_name);
+                PyErr_Warn(PyExc_RuntimeWarning, msg);
+                g_free(msg);
+                continue;
+            }
+            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
+        }
+    } else
+        g_warning("type has no tp_bases");
+
     /* we look this up in the instance dictionary, so we don't
      * accidentally get a parent type's __gsignals__ attribute. */
     gsignals = PyDict_GetItemString(class->tp_dict, "__gsignals__");
@@ -1311,37 +1342,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     } else {
 	PyErr_Clear();
     }
-
-      /* Register interface implementations  */
-    if (class->tp_bases) {
-        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
-        {
-            PyTypeObject *base =
-		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
-            GType itype;
-            const GInterfaceInfo *iinfo;
-            GInterfaceInfo iinfo_copy;
-            
-            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
-                continue;
-
-            itype = pyg_type_from_object((PyObject *) base);
-            iinfo = pyg_lookup_interface_info(itype);
-            iinfo_copy = *iinfo;
-            iinfo_copy.interface_data = class;
-            if (!iinfo) {
-                char *msg;
-                msg = g_strdup_printf("Interface type %s "
-                                      "has no python implementation support",
-                                      base->tp_name);
-                PyErr_Warn(PyExc_RuntimeWarning, msg);
-                g_free(msg);
-                continue;
-            }
-            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
-        }
-    } else
-        g_warning("type has no tp_bases");
 
     gclass = g_type_class_ref(instance_type);
     if (pyg_run_class_init(instance_type, gclass, class)) {

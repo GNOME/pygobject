@@ -1,3 +1,10 @@
+2006-08-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Move the interface
+	registration code up, to run before properties and signals
+	registration, because glib doesn't allow us to add interfaces
+	after the first call to g_class_ref.
+
 2006-08-16  John Finlay  <finlay@moeraki.com>
 
 	* docs/reference/pygobject-functions.xml: Update docs for
