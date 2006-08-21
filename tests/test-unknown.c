@@ -32,7 +32,6 @@ test_interface_get_type (void)
 
 void test_unknown_iface_method (TestInterface *iface)
 {
-  g_print ("C impl\n");
 }
 
 static void
