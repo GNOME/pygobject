@@ -1,3 +1,10 @@
+2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
+
+	* Makefile.am: 
+	* docs/Makefile.am: 
+	Always install the xsl files & css files, regardless if the
+	documentation was actually built or not. Also clean it up considerably.
+
 2006-08-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_type_register): Move the interface

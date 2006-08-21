@@ -1,7 +1,31 @@
 REF_VERSION = $(PYGOBJECT_MAJOR_VERSION).$(PYGOBJECT_MINOR_VERSION)
 FULL_VERSION = $(REF_VERSION).$(PYGOBJECT_MICRO_VERSION)
 
-XMLFILES = 					\
+BUILDDIR = $(top_builddir)/docs
+
+CSS_FILES = style.css
+
+if ENABLE_DOCS
+HTML_FILES =					\
+	html/class-gobjectgboxed.html		\
+	html/class-gobjectginterface.html	\
+	html/class-gobjectgpointer.html		\
+	html/class-gobject.html			\
+	html/class-gobjectmaincontext.html	\
+	html/class-gobjectmainloop.html		\
+	html/gobject-class-reference.html	\
+	html/gobject-constants.html		\
+	html/gobject-functions.html		\
+	html/index.html				\
+	html/index.sgml				\
+	html/pygobject.devhelp			\
+	html/pygobject-introduction.html	\
+	html/pygobject-reference-copyright.html
+else
+HTML_FILES =
+endif
+
+XML_FILES = 					\
 	reference/pygobject.xml			\
 	reference/pygobject-introduction.xml 	\
 	reference/pygobject-classes.xml 	\
@@ -14,7 +38,7 @@ XMLFILES = 					\
 	reference/pygobject-maincontext.xml 	\
 	reference/pygobject-mainloop.xml
 
-XSLFILES =			\
+XSL_FILES =			\
 	xsl/common.xsl 		\
 	xsl/devhelp.xsl		\
 	xsl/fixxref.py		\
@@ -23,66 +47,36 @@ XSLFILES =			\
 	xsl/pdf.xsl		\
 	xsl/ref-html-style.xsl
 
-XSLdir = $(datadir)/pygobject/xsl
-XSL_DATA = $(XSLFILES)
-
-BUILDDIR = $(top_builddir)/docs
-
-HTMLdir = $(datadir)/gtk-doc/html/pygobject
-HTML_DATA = 					\
-	html/pygobject-introduction.html	\
-	html/pygobject-reference-copyright.html	\
-	html/class-gobjectgboxed.html		\
-	html/class-gobjectginterface.html	\
-	html/class-gobjectgpointer.html		\
-	html/class-gobject.html			\
-	html/class-gobjectmaincontext.html	\
-	html/class-gobjectmainloop.html		\
-	html/gobject-class-reference.html	\
-	html/gobject-constants.html		\
-	html/gobject-functions.html		\
-	html/index.html				\
-	html/index.sgml				\
-	html/pygobject.devhelp
-
-CSS_FILES = style.css
 CSSdir = $(HTMLdir)
 CSS_DATA = $(CSS_FILES)
 
-BUILT_SOURCES = 			\
-	build_stamp 			\
-	reference/builddate.xml         \
-	$(HTML_DATA)
+HTMLdir = $(datadir)/gtk-doc/html/pygobject
+HTML_DATA = $(HTML_FILES)
 
-CLEANFILES = 				\
-	build_stamp 			\
-	pygobject-ref.*			\
-	reference/builddate.xml         \
-	$(HTML_DATA)
+XSLdir = $(datadir)/pygobject/xsl
+XSL_DATA = $(XSL_FILES)
 
-EXTRA_DIST = 				\
-	$(XMLFILES) 			\
-	$(XSLFILES)                     \
-	$(CSS_FILES)
+BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
 
-REFERENCE_DEPS = 			\
-	reference 			\
-	$(XMLFILES)			\
-	$(XSLFILES)
+CLEANFILES = build_stamp reference/builddate.xml $(HTML_FILES)
 
-$(HTML_DATA): build_stamp
+EXTRA_DIST = $(XML_FILES) $(XSL_FILES) $(CSS_FILES)
+
+REFERENCE_DEPS = reference $(XML_FILES)	$(XSL_FILES)
+
+$(HTML_FILES): build_stamp
 
 reference/builddate.xml: $(REFERENCE_DEPS)
-	$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
+	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
 
 build_stamp: $(REFERENCE_DEPS) reference/builddate.xml
-	xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
+	@xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
 		 --path $(BUILDDIR)/reference:$(srcdir)/reference \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  $(srcdir)/xsl/ref-html-style.xsl \
                  $(srcdir)/reference/pygobject-ref.xml
-	touch $@
+	@touch $@
 
 pdf: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
