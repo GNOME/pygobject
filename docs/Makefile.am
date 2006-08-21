@@ -58,25 +58,22 @@ XSL_DATA = $(XSL_FILES)
 
 BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
 
-CLEANFILES = build_stamp reference/builddate.xml $(HTML_FILES)
+CLEANFILES = reference/builddate.xml $(HTML_FILES)
 
-EXTRA_DIST = $(XML_FILES) $(XSL_FILES) $(CSS_FILES)
+EXTRA_DIST = $(XML_FILES) $(XSL_FILES) $(CSS_FILES) $(HTML_FILES)
 
 REFERENCE_DEPS = reference $(XML_FILES)	$(XSL_FILES)
-
-$(HTML_FILES): build_stamp
 
 reference/builddate.xml: $(REFERENCE_DEPS)
 	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
 
-build_stamp: $(REFERENCE_DEPS) reference/builddate.xml
+$(HTML_FILES): $(REFERENCE_DEPS) reference/builddate.xml
 	@xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
 		 --path $(BUILDDIR)/reference:$(srcdir)/reference \
                  --stringparam gtkdoc.bookname "pygobject" \
                  --stringparam gtkdoc.version ${REF_VERSION} \
                  $(srcdir)/xsl/ref-html-style.xsl \
                  $(srcdir)/reference/pygobject-ref.xml
-	@touch $@
 
 pdf: $(REFERENCE_DEPS) reference/builddate.xml
 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \

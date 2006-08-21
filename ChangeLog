@@ -1,5 +1,8 @@
 2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
 
+	* docs/Makefile.am (EXTRA_DIST): Remove build_stamp, include generated .html
+	in the distributed tarball
+
 	* configure.ac: Post release version bump
 
 === 2.11.3 ===
