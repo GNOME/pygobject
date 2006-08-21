@@ -1,8 +1,9 @@
 2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
 
 	* docs/Makefile.am (EXTRA_DIST): Remove build_stamp, include generated .html
-	in the distributed tarball
-
+	in the distributed tarball. Remove builddate.xml, reference directory and fixxref.py 
+	dependencies to avoid regenerating the tarball when it's not needed.
+	
 	* configure.ac: Post release version bump
 
 === 2.11.3 ===

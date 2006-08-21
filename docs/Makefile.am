@@ -41,11 +41,14 @@ XML_FILES = 					\
 XSL_FILES =			\
 	xsl/common.xsl 		\
 	xsl/devhelp.xsl		\
-	xsl/fixxref.py		\
 	xsl/html.xsl 		\
 	xsl/pdf-style.xsl 	\
 	xsl/pdf.xsl		\
 	xsl/ref-html-style.xsl
+
+# fixxref cannot be included in XSL_FILES, because automake is touching it
+# so the date is newer then the files in HTML_FILES
+FIXXREF = xsl/fixxref.py
 
 CSSdir = $(HTMLdir)
 CSS_DATA = $(CSS_FILES)
@@ -54,20 +57,27 @@ HTMLdir = $(datadir)/gtk-doc/html/pygobject
 HTML_DATA = $(HTML_FILES)
 
 XSLdir = $(datadir)/pygobject/xsl
-XSL_DATA = $(XSL_FILES)
+XSL_DATA = $(XSL_FILES) $(FIXXREF)
 
 BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
 
 CLEANFILES = reference/builddate.xml $(HTML_FILES)
 
-EXTRA_DIST = $(XML_FILES) $(XSL_FILES) $(CSS_FILES) $(HTML_FILES)
+EXTRA_DIST = 		\
+	$(HTML_FILES) 	\
+	$(XML_FILES) 	\
+	$(XSL_FILES) 	\
+	$(FIXXREF) 	\
+	$(CSS_FILES)
 
-REFERENCE_DEPS = reference $(XML_FILES)	$(XSL_FILES)
-
-reference/builddate.xml: $(REFERENCE_DEPS)
+reference/builddate.xml:
 	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
 
-$(HTML_FILES): $(REFERENCE_DEPS) reference/builddate.xml
+# Do not add a builddate.xml dependency here, because the generated html 
+# documentation will be included in the tarball so xsltproc is not needed to 
+# install the documentation. Adding a builddate.xml dependency will force 
+# the documentation to be rebuilt when it doesn't need to be.
+$(HTML_FILES): $(XML_FILES) $(XSL_FILES)
 	@xsltproc --nonet --xinclude -o $(BUILDDIR)/html/ \
 		 --path $(BUILDDIR)/reference:$(srcdir)/reference \
                  --stringparam gtkdoc.bookname "pygobject" \
