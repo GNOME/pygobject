@@ -1,3 +1,9 @@
+2.11.3 21-august-2006
+      - Documentation updates (John)
+      - Documentation build fixes (Johan, John, Gian Mario Tagliaretti)
+      - PyGObject can now be compiled using a C++ compiler (Murray Cumming)
+      - Type registration bug fix (Gustavo)
+
 2.11.2 8-august-2006
       - Add fixxref.py from PyGTK (Johan)
       - Fix parallel build (#350225, Ed Catmur)

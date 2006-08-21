@@ -1,4 +1,7 @@
+=== 2.11.3 ===
 2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
 
 	* Makefile.am: 
 	* docs/Makefile.am: 
