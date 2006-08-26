@@ -1,3 +1,13 @@
+2006-08-26  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Fix type
+	registration once more to account for all corner cases.  This time
+	we register interfaces in two stages: first, before properties and
+	signals are registered, we register the interfaces that are
+	already implemented in the parent type and are being overridden;
+	second, after registration of properties and signals, we register
+	the remaining interfaces.
+
 2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
 
 	* docs/Makefile.am (EXTRA_DIST): Remove build_stamp, include generated .html

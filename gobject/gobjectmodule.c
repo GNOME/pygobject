@@ -1200,6 +1200,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 {
     PyObject *gtype, *gsignals, *gproperties, *overridden_signals;
     GType parent_type, instance_type;
+    GType *parent_interfaces;
+    guint n_parent_interfaces;
     gint i;
     GTypeQuery query;
     gpointer gclass;
@@ -1225,6 +1227,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     if (!parent_type) {
 	return -1;
     }
+
+    parent_interfaces = g_type_interfaces(parent_type, &n_parent_interfaces);
 
     if (type_name)
 	/* care is taken below not to free this */
@@ -1274,7 +1278,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 			     pyg_object_descr_doc_get());
     }
 
-      /* Register interface implementations  */
+      /* Register interfaces that are already defined by the parent
+       * type and are going to be reimplemented  */
     if (class->tp_bases) {
         for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
         {
@@ -1283,11 +1288,25 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
             GType itype;
             const GInterfaceInfo *iinfo;
             GInterfaceInfo iinfo_copy;
+            guint parent_interface_iter;
             
             if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
                 continue;
 
             itype = pyg_type_from_object((PyObject *) base);
+              /* ignore interface unless defined in parent type */
+            if (n_parent_interfaces == 0)
+                continue;
+            for (parent_interface_iter = 0;
+                 parent_interface_iter < n_parent_interfaces;
+                 ++parent_interface_iter)
+            {
+                if (parent_interfaces[parent_interface_iter] == itype)
+                    break;
+            }
+            if (parent_interface_iter != n_parent_interfaces)
+                continue;
+
             iinfo = pyg_lookup_interface_info(itype);
             iinfo_copy = *iinfo;
             iinfo_copy.interface_data = class;
@@ -1312,14 +1331,18 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	if (!PyDict_Check(gsignals)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ attribute not a dict!");
+            g_free(parent_interfaces);
 	    return -1;
 	}
 	if (!(overridden_signals = add_signals(instance_type, gsignals))) {
+            g_free(parent_interfaces);
 	    return -1;
 	}
         if (PyDict_SetItemString(class->tp_dict, "__gsignals__",
-				 overridden_signals))
+				 overridden_signals)) {
+            g_free(parent_interfaces);
             return -1;
+        }
         Py_DECREF(overridden_signals);
     } else {
 	PyErr_Clear();
@@ -1332,9 +1355,11 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	if (!PyDict_Check(gproperties)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ attribute not a dict!");
+            g_free(parent_interfaces);
 	    return -1;
 	}
 	if (!add_properties(instance_type, gproperties)) {
+            g_free(parent_interfaces);
 	    return -1;
 	}
 	PyDict_DelItemString(class->tp_dict, "__gproperties__");
@@ -1343,12 +1368,59 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	PyErr_Clear();
     }
 
+      /* Register new interfaces, that are _not_ already defined by
+       * the parent type  */
+    if (class->tp_bases) {
+        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
+        {
+            PyTypeObject *base =
+		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
+            GType itype;
+            const GInterfaceInfo *iinfo;
+            GInterfaceInfo iinfo_copy;
+            guint parent_interface_iter;
+            
+            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
+                continue;
+
+            itype = pyg_type_from_object((PyObject *) base);
+
+              /* ignore interface if already defined in parent type */
+            if (n_parent_interfaces != 0) {
+                for (parent_interface_iter = 0;
+                     parent_interface_iter < n_parent_interfaces;
+                     ++parent_interface_iter)
+                {
+                    if (parent_interfaces[parent_interface_iter] == itype)
+                        continue;
+                }
+            }
+
+            iinfo = pyg_lookup_interface_info(itype);
+            iinfo_copy = *iinfo;
+            iinfo_copy.interface_data = class;
+            if (!iinfo) {
+                char *msg;
+                msg = g_strdup_printf("Interface type %s "
+                                      "has no python implementation support",
+                                      base->tp_name);
+                PyErr_Warn(PyExc_RuntimeWarning, msg);
+                g_free(msg);
+                continue;
+            }
+            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
+        }
+    } else
+        g_warning("type has no tp_bases");
+
     gclass = g_type_class_ref(instance_type);
     if (pyg_run_class_init(instance_type, gclass, class)) {
         g_type_class_unref(gclass);
+        g_free(parent_interfaces);
         return -1;
     }
     g_type_class_unref(gclass);
+    g_free(parent_interfaces);
 
     if (gsignals)
         PyDict_DelItemString(class->tp_dict, "__gsignals__");
