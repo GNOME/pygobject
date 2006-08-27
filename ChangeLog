@@ -1,5 +1,22 @@
 2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* gobject/gobjectmodule.c (pyg_type_register): Correct a bug in
+	the code that checks if parent already implements an interface or not.
+	
+	* tests/test-unknown.c (test_interface_base_init),
+	(test_interface_get_type): Add a property to the interface, for
+	better testing.
+	(test_unknown_get_property),
+	(test_unknown_set_property, test_unknown_class_init): Add a
+	property to the class as required by the interface.
+	
+	* tests/test_interface.py: More thorough interface testing, with
+	properties and test both the case of implementing an interface
+	from scratch, and re-implementing and interface that a parent
+	already implements.
+
+2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
 	* gobject/gobjectmodule.c (pygobject__g_instance_init): If
 	necessary, attach the GObject to the PyGObject here.
 	(pygobject_constructv): Cope with the fact that wrapper->obj may

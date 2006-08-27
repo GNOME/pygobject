@@ -1295,6 +1295,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 continue;
 
             itype = pyg_type_from_object((PyObject *) base);
+
               /* ignore interface unless defined in parent type */
             if (n_parent_interfaces == 0)
                 continue;
@@ -1305,7 +1306,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 if (parent_interfaces[parent_interface_iter] == itype)
                     break;
             }
-            if (parent_interface_iter != n_parent_interfaces)
+            if (parent_interface_iter == n_parent_interfaces)
                 continue;
 
             iinfo = pyg_lookup_interface_info(itype);
@@ -1393,9 +1394,11 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                      ++parent_interface_iter)
                 {
                     if (parent_interfaces[parent_interface_iter] == itype)
-                        continue;
+                        break;
                 }
             }
+            if (parent_interface_iter < n_parent_interfaces)
+                continue;
 
             iinfo = pyg_lookup_interface_info(itype);
             iinfo_copy = *iinfo;
