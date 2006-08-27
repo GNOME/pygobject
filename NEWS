@@ -1,3 +1,9 @@
+2.11.4 27-august-2006
+      - Include pre-generated html docs in the tarball  (Johan)
+      - Fix bug in do_set_property called from constructor (Gustavo, #353039)
+      - Fix type registration involving interfaces with signals and/or
+        properties (Gustavo)
+
 2.11.3 21-august-2006
       - Documentation updates (John)
       - Documentation build fixes (Johan, John, Gian Mario Tagliaretti)

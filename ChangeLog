@@ -1,4 +1,7 @@
+=== 2.11.4 ===
 2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* NEWS: Update.
 
 	* gobject/gobjectmodule.c (pyg_type_register): Correct a bug in
 	the code that checks if parent already implements an interface or not.
