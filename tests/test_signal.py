@@ -211,7 +211,35 @@ class TestClosures(unittest.TestCase):
         c = C(self)
         data = c.emit("my_signal", "\01\00\02")
         self.assertEqual(data, "\02\00\01")
-        
+
+class SigPropClass(gobject.GObject):
+    __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                                   (gobject.TYPE_INT,)) }
+
+    __gproperties__ = {
+        'foo': (str, None, None, '', gobject.PARAM_WRITABLE|gobject.PARAM_CONSTRUCT),
+        }
+
+    signal_emission_failed = False
+
+    def do_my_signal(self, arg):
+        self.arg = arg
+
+    def do_set_property(self, pspec, value):
+        if pspec.name == 'foo':
+            self._foo = value
+        else:
+            raise AttributeError, 'unknown property %s' % pspec.name
+        try:
+            self.emit("my-signal", 1)
+        except TypeError:
+            self.signal_emission_failed = True
+
+
+class TestSigProp(unittest.TestCase):
+    def testEmitInPropertySetter(self):
+        obj = SigPropClass()
+        self.failIf(obj.signal_emission_failed)
 
 if __name__ == '__main__':
     unittest.main()

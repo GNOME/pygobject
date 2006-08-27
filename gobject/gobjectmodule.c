@@ -1173,8 +1173,9 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key); 
     if (wrapper == NULL) {
         wrapper = pygobject_init_wrapper_get();
-        if (wrapper) {
-            g_object_set_qdata(object, pygobject_wrapper_key, wrapper);
+        if (wrapper && ((PyGObject *) wrapper)->obj == NULL) {
+            ((PyGObject *) wrapper)->obj = object;
+            pygobject_register_wrapper(wrapper);
         }
     }
     pygobject_init_wrapper_set(NULL);
@@ -3070,11 +3071,16 @@ pygobject_constructv(PyGObject  *self,
                      GParameter *parameters)
 {
     if (self->obj == NULL) {
+        GObject *obj;
         pygobject_init_wrapper_set((PyObject *) self);
-        self->obj = g_object_newv(pyg_type_from_object((PyObject *) self),
-                                  n_parameters, parameters);
+        obj = g_object_newv(pyg_type_from_object((PyObject *) self),
+                            n_parameters, parameters);
         pygobject_init_wrapper_set(NULL);
-        pygobject_register_wrapper((PyObject *) self);
+        if (self->obj == NULL) {
+            self->obj = obj;
+            pygobject_sink(obj);
+            pygobject_register_wrapper((PyObject *) self);
+        }
     } else {
         int i;
         for (i = 0; i < n_parameters; ++i)

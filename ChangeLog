@@ -1,3 +1,17 @@
+2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pygobject__g_instance_init): If
+	necessary, attach the GObject to the PyGObject here.
+	(pygobject_constructv): Cope with the fact that wrapper->obj may
+	have already been set due to the change above.
+	
+	* tests/test_signal.py: Add test case fixed by the changes above,
+	basically calling self.emit() inside do_set_property called
+	implicitly by the constructor due to a CONSTRUCT property.
+
+	Fixes bug 353039: "Failure in signal emission during
+	do_set_property invoked from constructor".
+
 2006-08-26  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_type_register): Fix type
