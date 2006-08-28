@@ -1,3 +1,7 @@
+2.11.5 ?-?-2006
+      - Install the html files even when using --disable-docs (#353159, Johan,
+        Matthias Clasen)
+
 2.11.4 27-august-2006
       - Include pre-generated html docs in the tarball  (Johan)
       - Fix bug in do_set_property called from constructor (Gustavo, #353039)

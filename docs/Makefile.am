@@ -5,7 +5,6 @@ BUILDDIR = $(top_builddir)/docs
 
 CSS_FILES = style.css
 
-if ENABLE_DOCS
 HTML_FILES =					\
 	html/class-gobjectgboxed.html		\
 	html/class-gobjectginterface.html	\
@@ -21,8 +20,11 @@ HTML_FILES =					\
 	html/pygobject.devhelp			\
 	html/pygobject-introduction.html	\
 	html/pygobject-reference-copyright.html
+
+if ENABLE_DOCS
+BUILT_HTML_FILES = $(HTML_FILES)
 else
-HTML_FILES =
+BUILT_HTML_FILES =
 endif
 
 XML_FILES = 					\
@@ -59,9 +61,9 @@ HTML_DATA = $(HTML_FILES)
 XSLdir = $(datadir)/pygobject/xsl
 XSL_DATA = $(XSL_FILES) $(FIXXREF)
 
-BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
+BUILT_SOURCES = reference/builddate.xml $(BUILT_HTML_FILES)
 
-CLEANFILES = reference/builddate.xml $(HTML_FILES)
+CLEANFILES = reference/builddate.xml $(BUILT_HTML_FILES)
 
 EXTRA_DIST = 		\
 	$(HTML_FILES) 	\
