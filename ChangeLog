@@ -1,4 +1,8 @@
+=== 2.12.1 ===
 2006-09-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygobject.h (_PYGOBJECT_H_): Corrected version check,
+	(Sebastian Dröge, #354364)
 
 	* configure.ac: Post release version bump
 
