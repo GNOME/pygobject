@@ -64,3 +64,12 @@ egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
 	cd $(TMPDIR) && zip -rq $(EGG_NAME) .
 	mv $(TMPDIR)/$(EGG_NAME) .
 	rm -fr $(TMPDIR)
+
+doc-dist:
+	mkdir pygobject
+	cp -r docs/html/*.html pygobject
+	cp -r docs/html/*.sgml pygobject
+	cp -r docs/html/*.devhelp pygobject
+	cp -r docs/style.css pygobject
+	tar cfz $(PACKAGE)-docs.tar.gz pygobject
+	rm -fr pygobject
