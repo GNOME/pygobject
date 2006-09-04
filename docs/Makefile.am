@@ -87,8 +87,8 @@ $(HTML_FILES): $(XML_FILES) $(XSL_FILES)
                  $(srcdir)/xsl/ref-html-style.xsl \
                  $(srcdir)/reference/pygobject-ref.xml
 
-pdf: $(REFERENCE_DEPS) reference/builddate.xml
-	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
-		reference/pygobject-ref.xml
-	pdfxmltex pygobject-ref.fo >output </dev/null
+# pdf: $(REFERENCE_DEPS) reference/builddate.xml
+# 	xsltproc --nonet --xinclude -o pygobject-ref.fo xsl/pdf-style.xsl \
+# 		reference/pygobject-ref.xml
+# 	pdfxmltex pygobject-ref.fo >output </dev/null
 
