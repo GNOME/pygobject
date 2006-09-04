@@ -1,3 +1,9 @@
+=== 2.12.0 ===
+2006-09-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: 
+	* configure.ac: 2.12.0
+
 2006-08-28  Johan Dahlin  <jdahlin@async.com.br>
 
 	* docs/Makefile.am: Install html files regardless even when passing

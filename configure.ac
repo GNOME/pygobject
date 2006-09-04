@@ -3,8 +3,8 @@ AC_PREREQ(2.52)
 
 dnl the pygobject version number
 m4_define(pygobject_major_version, 2)
-m4_define(pygobject_minor_version, 11)
-m4_define(pygobject_micro_version, 5)
+m4_define(pygobject_minor_version, 12)
+m4_define(pygobject_micro_version, 0)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...

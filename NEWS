@@ -1,4 +1,4 @@
-2.11.5 ?-?-2006
+2.12.0 4-september-2006
       - Install the html files even when using --disable-docs (#353159, Johan,
         Matthias Clasen)
 
