@@ -117,7 +117,7 @@ pyg_signal_watch_prepare(GSource *source,
 #ifndef PLATFORM_WIN32
     if (pyg_threads_enabled)
 #endif
-	*timeout = 100;
+	*timeout = 1000;
 
     return FALSE;
 }
