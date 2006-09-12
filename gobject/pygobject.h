@@ -294,11 +294,12 @@ struct _PyGObject_Functions *_PyGObject_API;
 } G_STMT_END
 
 #define init_pygobject_check(req_major, req_minor, req_micro) G_STMT_START { \
-    init_pygobject();                                                        \
-    PyObject *gobject = PyImport_ImportModule("gobject");                    \
-    PyObject *mdict = PyModule_GetDict(gobject);                             \
-    PyObject *version = PyDict_GetItemString(mdict, "pygobject_version");    \
+    PyObject *gobject, *mdict, *version;                                     \
     int found_major, found_minor, found_micro;                               \
+    init_pygobject();                                                        \
+    gobject = PyImport_ImportModule("gobject");                              \
+    mdict = PyModule_GetDict(gobject);                                       \
+    version = PyDict_GetItemString(mdict, "pygobject_version");              \
     if (!version)                                                            \
         version = PyDict_GetItemString(mdict, "pygtk_version");              \
     if (!version) {                                                          \
