@@ -1,5 +1,10 @@
 2006-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* tests/test_signal.py (TestEmissionHook.testCallbackReturnFalse) 
+	(TestEmissionHook.testCallbackReturnTrue) 
+	(TestEmissionHook.testCallbackReturnTrueButRemove): Add a few more
+	emission hook tests.
+
 	* gobject/gobjectmodule.c (pyg_add_emission_hook): One too many
 	DECREF on 'extra_args'.
 

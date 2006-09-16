@@ -139,6 +139,16 @@ class E(gobject.GObject):
         assert self.status == 0
         self.status = 1
 
+class F(gobject.GObject):
+    __gsignals__ = { 'signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                                ()) }
+    def __init__(self):
+        gobject.GObject.__init__(self)
+        self.status = 0
+
+    def do_signal(self):
+        self.status += 1
+
 class TestEmissionHook(unittest.TestCase):
     def testAdd(self):
         self.hook = True
@@ -167,6 +177,41 @@ class TestEmissionHook(unittest.TestCase):
         else:
             self.assertEqual(e.status, 1)
         e.status = 3
+
+    def testCallbackReturnFalse(self):
+        self.hook = False
+        obj = F()
+        def _emission_hook(obj):
+            obj.status += 1
+            return False
+        hook_id = gobject.add_emission_hook(obj, "signal", _emission_hook)
+        obj.emit('signal')
+        obj.emit('signal')
+        self.assertEqual(obj.status, 3)
+
+    def testCallbackReturnTrue(self):
+        self.hook = False
+        obj = F()
+        def _emission_hook(obj):
+            obj.status += 1
+            return True
+        hook_id = gobject.add_emission_hook(obj, "signal", _emission_hook)
+        obj.emit('signal')
+        obj.emit('signal')
+        gobject.remove_emission_hook(obj, "signal", hook_id)
+        self.assertEqual(obj.status, 4)
+
+    def testCallbackReturnTrueButRemove(self):
+        self.hook = False
+        obj = F()
+        def _emission_hook(obj):
+            obj.status += 1
+            return True
+        hook_id = gobject.add_emission_hook(obj, "signal", _emission_hook)
+        obj.emit('signal')
+        gobject.remove_emission_hook(obj, "signal", hook_id)
+        obj.emit('signal')
+        self.assertEqual(obj.status, 3)
 
 class TestClosures(unittest.TestCase):
     def setUp(self):
