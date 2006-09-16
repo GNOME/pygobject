@@ -2649,7 +2649,6 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 					 data,
 					 (GDestroyNotify)pyg_destroy_notify);
         
-    Py_DECREF(extra_args);
     return PyInt_FromLong(hook_id);
 }
 
