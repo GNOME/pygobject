@@ -1,14 +1,13 @@
 #
-# dsextras.py - Extra classes and utilities
-#
-# TODO:
-# Make it possible to import codegen from another dir
-#
+# dsextras.py - Extra classes and utilities for distutils, adding
+#               pkg-config support
+
 
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
+import distutils.dep_util
 import fnmatch
 import os
 import re
@@ -80,10 +79,11 @@ def list_files(dir):
             retval.append(os.path.join(dir, file))
     return retval
 
-def pkgc_version_check(name, longname, req_version):
+def pkgc_version_check(name, req_version):
+    """Check the existence and version number of a package:
+    returns 0 if not installed or too old, 1 otherwise."""
     is_installed = not os.system('pkg-config --exists %s' % name)
     if not is_installed:
-        print "Could not find %s" % longname
         return 0
 
     orig_version = getoutput('pkg-config --modversion %s' % name)
@@ -92,12 +92,8 @@ def pkgc_version_check(name, longname, req_version):
 
     if version >= pkc_version:
         return 1
-    else:
-        print "Warning: Too old version of %s" % longname
-        print "         Need %s, but %s is installed" % \
-              (pkc_version, orig_version)
-        self.can_build_ok = 0
-        return 0
+        
+    return 0
 
 class BuildExt(build_ext):
     def init_extra_compile_args(self):
@@ -213,10 +209,10 @@ class InstallData(install_data):
         return output
 
     def get_outputs(self):
-        return install_lib.get_outputs(self) + self.local_outputs
+        return install_data.get_outputs(self) + self.local_outputs
 
     def get_inputs(self):
-        return install_lib.get_inputs(self) + self.local_inputs
+        return install_data.get_inputs(self) + self.local_inputs
 
 class PkgConfigExtension(Extension):
     # Name of pygobject package extension depends on, can be None
@@ -301,44 +297,81 @@ class PkgConfigExtension(Extension):
     def generate(self):
         pass
 
-class Template:
+# The Template and TemplateExtension classes require codegen which is
+# currently part of the pygtk distribution. While codegen might ultimately
+# be moved to pygobject, it was decided (bug #353849) to keep the Template
+# and TemplateExtension code in dsextras. In the meantime, we check for the
+# availability of codegen and redirect the user to the pygtk installer if
+# he/she wants to get access to Template and TemplateExtension.
+
+template_classes_enabled=True
+codegen_error_message="""
+***************************************************************************
+Codegen could not be found on your system and is required by the
+dsextras.Template and dsextras.TemplateExtension classes. codegen is part
+of PyGTK. To use either Template or TemplateExtension, you should also
+install PyGTK.
+***************************************************************************
+"""
+try:
+    from codegen.override import Overrides
+    from codegen.defsparser import DefsParser
+    from codegen.codegen import register_types, SourceWriter, \
+         FileOutput
+    import codegen.createdefs
+except ImportError, e:
+    template_classes_enabled=False
+
+class Template(object):
+    def __new__(cls,*args, **kwds):
+        if not template_classes_enabled:
+            raise NameError("'%s' is not defined\n" % cls.__name__
+                            + codegen_error_message)    
+        return object.__new__(cls,*args, **kwds)
+
     def __init__(self, override, output, defs, prefix,
                  register=[], load_types=None):
+        
         self.override = override
-        self.defs = defs
-        self.register = register
         self.output = output
         self.prefix = prefix
         self.load_types = load_types
 
-    def check_dates(self):
-        if not os.path.exists(self.output):
-            return 0
+        self.built_defs=[]
+        if isinstance(defs,tuple):
+            self.defs=defs[0]
+            self.built_defs.append(defs)
+        else:
+            self.defs=defs
 
-        files = self.register[:]
+        self.register=[]
+        for r in register:
+            if isinstance(r,tuple):
+                self.register.append(r[0])
+                self.built_defs.append(r)
+            else:
+                self.register.append(r)
+
+    def check_dates(self):
+        # Return True if files are up-to-date
+        files=self.register[:]
         files.append(self.override)
-#        files.append('setup.py')
         files.append(self.defs)
 
-        newest = 0
-        for file in files:
-            test = os.stat(file)[8]
-            if test > newest:
-                newest = test
+        return not distutils.dep_util.newer_group(files,self.output)
 
-        if newest < os.stat(self.output)[8]:
-            return 1
-        return 0
+    def generate_defs(self):
+        for (target,sources) in self.built_defs:
+            if distutils.dep_util.newer_group(sources,target):
+                # createdefs is mostly called from the CLI !
+                args=['dummy',target]+sources
+                codegen.createdefs.main(args)
+
 
     def generate(self):
-        # We must insert it first, otherwise python will try '.' first,
-        # in which it exist a "bogus" codegen (the third import line
-        # here will fail)
-        sys.path.insert(0, 'codegen')
-        from override import Overrides
-        from defsparser import DefsParser
-        from codegen import register_types, write_source, FileOutput
-
+        # Generate defs files if necessary
+        self.generate_defs()
+        # ... then check the file timestamps
         if self.check_dates():
             return
 
@@ -356,17 +389,25 @@ class Template:
         register_types(dp)
 
         fd = open(self.output, 'w')
-        write_source(dp,
-                     Overrides(self.override),
-                     self.prefix,
-                     FileOutput(fd, self.output))
+        sw = SourceWriter(dp,Overrides(self.override),
+                          self.prefix,FileOutput(fd,self.output))
+        sw.write()
         fd.close()
 
 class TemplateExtension(PkgConfigExtension):
+    def __new__(cls,*args, **kwds):
+        if not template_classes_enabled:
+            raise NameError("'%s' is not defined\n" % cls.__name__
+                            + codegen_error_message)    
+        return PkgConfigExtension.__new__(cls,*args, **kwds)
+    
     def __init__(self, **kwargs):
         name = kwargs['name']
         defs = kwargs['defs']
-        output = defs[:-5] + '.c'
+        if isinstance(defs,tuple):
+            output = defs[0][:-5] + '.c'
+        else:
+            output = defs[:-5] + '.c'
         override = kwargs['override']
         load_types = kwargs.get('load_types')
         self.templates = []
@@ -385,3 +426,5 @@ class TemplateExtension(PkgConfigExtension):
 
     def generate(self):
         map(lambda x: x.generate(), self.templates)
+
+

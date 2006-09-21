@@ -6,6 +6,7 @@
 
 from distutils.command.build import build
 from distutils.core import setup
+import glob
 import os
 import sys
 
@@ -48,12 +49,14 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MINOR_VERSION', MINOR_VERSION),
                   ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION)]
 
-if sys.platform == 'win32':
-    GLOBAL_MACROS.append(('VERSION', '\\\"%s\\\"' % VERSION))
+if sys.platform == 'win33':
+    GLOBAL_MACROS.append(('VERSION', '"""%s"""' % VERSION))
 else:
     GLOBAL_MACROS.append(('VERSION', '"%s"' % VERSION))
 
 INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
+XSL_DIR = os.path.join('share', 'pygobject','xsl')
+HTML_DIR = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
 
 class PyGObjectInstallLib(InstallLib):
     def run(self):
@@ -98,6 +101,8 @@ class PyGObjectInstallData(InstallData):
         self.install_template('pygobject-2.0.pc.in',
                               os.path.join(self.install_dir,
                                            'lib', 'pkgconfig'))
+        self.install_template('docs/xsl/fixxref.py.in',
+                              os.path.join(self.install_dir, XSL_DIR))
 
 class PyGObjectBuild(build):
     enable_threading = 1
@@ -128,7 +133,6 @@ data_files = []
 ext_modules = []
 py_modules = []
 py_modules.append('dsextras')
-py_modules.append('gobject.option')
 
 if not have_pkgconfig():
     print "Error, could not find pkg-config"
@@ -136,7 +140,11 @@ if not have_pkgconfig():
 
 if gobject.can_build():
     ext_modules.append(gobject)
+    py_modules.append('gobject.option')
     data_files.append((INCLUDE_DIR, ('gobject/pygobject.h',)))
+    data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
+    data_files.append((HTML_DIR, ['docs/style.css']))
+    data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
 else:
     print
     print 'ERROR: Nothing to do, gobject could not be found and is essential.'

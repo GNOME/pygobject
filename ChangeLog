@@ -1,3 +1,19 @@
+2006-09-21  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* dsextras.py: Catch ImportError exception when codegen is not
+	available: disable Template and TemplateExtension, redirect the
+	user to the pygtk installer and raise a NameError
+	exception. check_date has also been rewritten and now uses
+	distutils.dep_util.newer_group(). defs files can also be built
+	using createdefs by passing tuples as keyword argument to Template
+	(see for example the gdk and gtk templates in setup.py).
+	* setup.py: Changed the way the VERSION macro is defined on win32.
+	Also install the html reference documentation, the xsl files and
+	fixxref.
+	* pygobject_postinstall.py: Set the value of DATADIR in
+	fixxref.py. Add functions to install shortcuts in the Start menu
+	to the reference manual (currently disabled: see bug #353849).
+
 2006-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/test_signal.py (TestEmissionHook.testCallbackReturnFalse) 
