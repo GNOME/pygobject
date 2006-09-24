@@ -312,7 +312,7 @@ struct _PyGObject_Functions *_PyGObject_API;
         return;                                                              \
     if (req_major != found_major ||                                          \
         req_minor >  found_minor ||                                          \
-        req_minor == found_minor && req_micro > found_micro) {		     \
+        (req_minor == found_minor && req_micro > found_micro)) {	     \
         PyErr_Format(PyExc_ImportError,                                      \
                      "PyGObject version mismatch, %d.%d.%d is required, "    \
                      "found %d.%d.%d.", req_major, req_minor, req_micro,     \
