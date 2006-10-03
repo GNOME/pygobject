@@ -859,7 +859,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
                  G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
             GString *string;
             char *buffer;
-            int len;
+            Py_ssize_t len;
             if (PyString_AsStringAndSize(obj, &buffer, &len))
                 return -1;
             string = g_string_new_len(buffer, len);

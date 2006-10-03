@@ -631,7 +631,7 @@ add_signals (GType instance_type, PyObject *signals)
 {
     gboolean ret = TRUE;
     GObjectClass *oclass;
-    int pos = 0;
+    Py_ssize_t pos = 0;
     PyObject *key, *value, *overridden_signals = NULL;
 
     overridden_signals = PyDict_New();
@@ -947,7 +947,7 @@ add_properties (GType instance_type, PyObject *properties)
 {
     gboolean ret = TRUE;
     GObjectClass *oclass;
-    int pos = 0;
+    Py_ssize_t pos = 0;
     PyObject *key, *value;
 
     oclass = g_type_class_ref(instance_type);
@@ -1442,7 +1442,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
     PyObject *py_return_type, *py_param_types;
 
     GType instance_type = 0;
-    guint n_params, i;
+    Py_ssize_t n_params, i;
     GType *param_types;
 
     guint signal_id;
@@ -1830,7 +1830,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     }
 
     if (kwargs) {
-	int pos = 0;
+	Py_ssize_t pos = 0;
 	PyObject *key;
 	PyObject *value;
 
@@ -1886,7 +1886,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 static gint
 get_handler_priority(gint *priority, PyObject *kwargs)
 {
-    gint len, pos;
+    Py_ssize_t len, pos;
     PyObject *key, *val;
 
     /* no keyword args? leave as default */
@@ -2073,7 +2073,8 @@ static PyObject *
 pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
-    gint fd, priority = G_PRIORITY_DEFAULT, condition, len;
+    gint fd, priority = G_PRIORITY_DEFAULT, condition;
+    Py_ssize_t len;
     GIOChannel *iochannel;
     guint handler_id;
 
@@ -2375,7 +2376,7 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
     struct _PyGChildSetupData *callback_data = NULL;
     GError *error = NULL;
     GPid child_pid = -1;
-    int len, i;
+    Py_ssize_t len, i;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:gobject.spawn_async",
                                      kwlist,
@@ -2603,7 +2604,8 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     PyObject *first, *callback, *extra_args, *data;
     gchar *name;
     gulong hook_id;
-    guint sigid, len;
+    guint sigid;
+    Py_ssize_t len;
     GQuark detail = 0;
     GType gtype;
     PyObject *pygtype;
@@ -2649,7 +2651,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 					 data,
 					 (GDestroyNotify)pyg_destroy_notify);
         
-    return PyInt_FromLong(hook_id);
+    return PyLong_FromUnsignedLong(hook_id);
 }
 
 static PyObject *
@@ -2661,7 +2663,7 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     gulong hook_id;
     GType gtype;
     
-    if (!PyArg_ParseTuple(args, "Osi:gobject.remove_emission_hook",
+    if (!PyArg_ParseTuple(args, "Osk:gobject.remove_emission_hook",
 			  &pygtype, &name, &hook_id))
 	return NULL;
     
@@ -2730,7 +2732,7 @@ static PyObject *
 pyg_filename_from_utf8(PyGObject *self, PyObject *args)
 {
     char *filename, *utf8string;
-    int utf8string_len;
+    Py_ssize_t utf8string_len;
     gsize bytes_written;
     GError *error = NULL;
     PyObject *py_filename;
@@ -2995,7 +2997,7 @@ _pyg_strv_from_gvalue(const GValue *value)
 static int
 _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
 {
-    int     argc, i;
+    Py_ssize_t argc, i;
     gchar **argv;
 
     if (!(PyTuple_Check(obj) || PyList_Check(obj)))

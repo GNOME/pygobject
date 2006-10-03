@@ -1,3 +1,27 @@
+2006-10-03  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c: (add_signals), (add_properties),
+	(pyg_signal_new), (pyg_object_new), (get_handler_priority),
+	(pyg_io_add_watch), (pyg_spawn_async), (pyg_add_emission_hook),
+	(pyg_remove_emission_hook), (pyg_filename_from_utf8),
+	(_pyg_strv_to_gvalue):
+	* gobject/pygiochannel.c: (py_io_channel_write_chars),
+	(py_io_channel_write_lines):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c: (PyGProps_length), (pygobject_init),
+	(pygobject_connect), (pygobject_connect_after),
+	(pygobject_connect_object), (pygobject_connect_object_after),
+	(pygobject_disconnect), (pygobject_handler_is_connected),
+	(pygobject_handler_block), (pygobject_handler_unblock),
+	(pygobject_emit), (pygobject_chain_from_overridden):
+	* gobject/pygoptioncontext.c: (pyg_option_context_parse):
+	* gobject/pygtype.c: (pyg_value_from_pyobject):
+
+	Python 2.5 and 64 bits fixes (Py_ssize_t), closes bug #338487.
+
+	* gobject/pygenum.c (pyg_enum_repr): Const warning fix.
+
 2006-09-29  Johan Dahlin  <jdahlin@async.com.br>
 
 	* pygtk.py: LGPL, not GPL header

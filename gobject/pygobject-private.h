@@ -20,6 +20,13 @@
         } while (0)
 #endif
 
+#if PY_VERSION_HEX < 0x02050000
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#endif
+
+
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_block_threads()   G_STMT_START { \

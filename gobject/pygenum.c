@@ -47,7 +47,7 @@ static PyObject *
 pyg_enum_repr(PyGEnum *self)
 {
   GEnumClass *enum_class;
-  char *value;
+  const char *value;
   guint index;
   static char tmp[256];
   

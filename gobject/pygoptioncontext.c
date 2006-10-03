@@ -63,7 +63,8 @@ pyg_option_context_parse(PyGOptionContext *self,
     static char *kwlist[] = { "argv", NULL };
     PyObject *arg;
     PyObject *new_argv, *argv;
-    gssize argv_length, pos;
+    Py_ssize_t argv_length, pos;
+    gint argv_length_int;
     char **argv_content, **original;
     GError *error = NULL;
     gboolean result;
@@ -100,11 +101,14 @@ pyg_option_context_parse(PyGOptionContext *self,
         }
     }
     original = g_strdupv(argv_content);
-    
+
+    g_assert(argv_length <= G_MAXINT);
+    argv_length_int = argv_length;
     pyg_begin_allow_threads;
-    result = g_option_context_parse(self->context, &argv_length, &argv_content,
+    result = g_option_context_parse(self->context, &argv_length_int, &argv_content,
                                     &error);
     pyg_end_allow_threads;
+    argv_length = argv_length_int;
 
     if (!result)
     {

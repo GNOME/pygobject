@@ -255,7 +255,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "buf", NULL };
     const char* buf;
-    int buf_len;
+    Py_ssize_t buf_len;
     gsize count;
     GError* error = NULL;
     GIOStatus status;
@@ -278,7 +278,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "lines", NULL };
     char *buf;
-    int buf_len;
+    Py_ssize_t buf_len;
     gsize count;
     GError* error = NULL;
     GIOStatus status;

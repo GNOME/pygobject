@@ -338,7 +338,7 @@ pygobject_props_get_iter(PyGProps *self)
     return (PyObject *) iter;
 }
 
-static int
+static Py_ssize_t
 PyGProps_length(PyGProps *self)
 {
     GObjectClass *class;
@@ -348,17 +348,17 @@ PyGProps_length(PyGProps *self)
     g_object_class_list_properties(class, &n_props);
     g_type_class_unref(class);
     
-    return (int)n_props;
+    return (Py_ssize_t)n_props;
 }
 
 static PySequenceMethods _PyGProps_as_sequence = {
-    (inquiry)PyGProps_length,
-    (binaryfunc)0,
-    (intargfunc)0,
-    (intargfunc)0,
-    (intintargfunc)0,
-    (intobjargproc)0,
-    (intintobjargproc)0
+    (lenfunc) PyGProps_length,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
 };
 
 PyTypeObject PyGProps_Type = {
@@ -1010,7 +1010,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     }
 
     if (kwargs) {
-	int pos = 0;
+	Py_ssize_t pos = 0;
 	PyObject *key;
 	PyObject *value;
 
@@ -1215,7 +1215,8 @@ pygobject_connect(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args;
     gchar *name;
-    guint handlerid, sigid, len;
+    guint sigid, len;
+    gulong handlerid;
     GQuark detail = 0;
     GClosure *closure;
 
@@ -1253,7 +1254,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
     Py_DECREF(extra_args);
-    return PyInt_FromLong(handlerid);
+    return PyLong_FromUnsignedLong(handlerid);
 }
 
 static PyObject *
@@ -1261,7 +1262,9 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args;
     gchar *name;
-    guint handlerid, sigid, len;
+    guint sigid;
+    gulong handlerid;
+    Py_ssize_t len;
     GQuark detail;
     GClosure *closure;
 
@@ -1300,7 +1303,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);
     Py_DECREF(extra_args);
-    return PyInt_FromLong(handlerid);
+    return PyLong_FromUnsignedLong(handlerid);
 }
 
 static PyObject *
@@ -1308,7 +1311,9 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args, *object;
     gchar *name;
-    guint handlerid, sigid, len;
+    guint sigid;
+    gulong handlerid;
+    Py_ssize_t len;
     GQuark detail;
     GClosure *closure;
 
@@ -1347,7 +1352,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
     Py_DECREF(extra_args);
-    return PyInt_FromLong(handlerid);
+    return PyLong_FromUnsignedLong(handlerid);
 }
 
 static PyObject *
@@ -1355,7 +1360,9 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args, *object;
     gchar *name;
-    guint handlerid, sigid, len;
+    guint sigid;
+    gulong handlerid;
+    Py_ssize_t len;
     GQuark detail;
     GClosure *closure;
 
@@ -1394,15 +1401,15 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);
     Py_DECREF(extra_args);
-    return PyInt_FromLong(handlerid);
+    return PyLong_FromUnsignedLong(handlerid);
 }
 
 static PyObject *
 pygobject_disconnect(PyGObject *self, PyObject *args)
 {
-    guint handler_id;
+    gulong handler_id;
 
-    if (!PyArg_ParseTuple(args, "i:GObject.disconnect", &handler_id))
+    if (!PyArg_ParseTuple(args, "k:GObject.disconnect", &handler_id))
 	return NULL;
     
     CHECK_GOBJECT(self);
@@ -1415,9 +1422,9 @@ pygobject_disconnect(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_handler_is_connected(PyGObject *self, PyObject *args)
 {
-    guint handler_id;
+    gulong handler_id;
 
-    if (!PyArg_ParseTuple(args, "i:GObject.handler_is_connected", &handler_id))
+    if (!PyArg_ParseTuple(args, "k:GObject.handler_is_connected", &handler_id))
 	return NULL;
 
     
@@ -1429,9 +1436,9 @@ pygobject_handler_is_connected(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_handler_block(PyGObject *self, PyObject *args)
 {
-    guint handler_id;
+    gulong handler_id;
 
-    if (!PyArg_ParseTuple(args, "i:GObject.handler_block", &handler_id))
+    if (!PyArg_ParseTuple(args, "k:GObject.handler_block", &handler_id))
 	return NULL;
     
     CHECK_GOBJECT(self);
@@ -1444,9 +1451,9 @@ pygobject_handler_block(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_handler_unblock(PyGObject *self, PyObject *args)
 {
-    guint handler_id;
+    gulong handler_id;
 
-    if (!PyArg_ParseTuple(args, "i:GObject.handler_unblock", &handler_id))
+    if (!PyArg_ParseTuple(args, "k:GObject.handler_unblock", &handler_id))
 	return NULL;
     g_signal_handler_unblock(self->obj, handler_id);
     Py_INCREF(Py_None);
@@ -1456,7 +1463,8 @@ pygobject_handler_unblock(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_emit(PyGObject *self, PyObject *args)
 {
-    guint signal_id, i, len;
+    guint signal_id, i;
+    Py_ssize_t len;
     GQuark detail;
     PyObject *first, *py_ret;
     gchar *name;
@@ -1489,7 +1497,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	gchar buf[128];
 
 	g_snprintf(buf, sizeof(buf),
-		   "%d parameters needed for signal %s; %d given",
+		   "%d parameters needed for signal %s; %ld given",
 		   query.n_params, name, len - 1);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
@@ -1569,7 +1577,8 @@ static PyObject *
 pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 {
     GSignalInvocationHint *ihint;
-    guint signal_id, i, len;
+    guint signal_id, i;
+    Py_ssize_t len;
     PyObject *py_ret;
     const gchar *name;
     GSignalQuery query;
@@ -1597,7 +1606,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	gchar buf[128];
 
 	g_snprintf(buf, sizeof(buf),
-		   "%d parameters needed for signal %s; %d given",
+		   "%d parameters needed for signal %s; %ld given",
 		   query.n_params, name, len);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
