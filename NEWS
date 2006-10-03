@@ -1,3 +1,12 @@
+2.12.2 3-october-2006
+       - Make PyGObject 64-bit safe for Python 2.5 (Gustavo)
+       - All headers are now LGPL and not GPL (Johan)
+       - Remove a couple of GCC warnings (Gustavo)
+       - Revive distutils support (Cedric Gustin)
+       - Emission hook reference count bugfix (Gustavo)
+       - MSVC/ANSI C compilation fix (John Ehresman)
+       - Bump Ctrl-C timeout handler from 100ms to 1000 (Johan)
+
 2.12.1 4-september-2006
        - Corrected version check (Sebastian Dröge, #354364)
 
