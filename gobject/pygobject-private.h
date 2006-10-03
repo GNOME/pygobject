@@ -24,6 +24,7 @@
 typedef int Py_ssize_t;
 #define PY_SSIZE_T_MAX INT_MAX
 #define PY_SSIZE_T_MIN INT_MIN
+typedef inquiry lenfunc;
 #endif
 
 
