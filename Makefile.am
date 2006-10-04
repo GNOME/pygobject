@@ -11,6 +11,7 @@ EXTRA_DIST = 				\
 	PKG-INFO 			\
 	PKG-INFO.in 			\
 	setup.py			\
+	pygobject_postinstall.py	\
 	pygtk.py			\
 	dsextras.py
 
