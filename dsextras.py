@@ -330,12 +330,13 @@ class Template(object):
         return object.__new__(cls,*args, **kwds)
 
     def __init__(self, override, output, defs, prefix,
-                 register=[], load_types=None):
+                 register=[], load_types=None, py_ssize_t_clean=False):
         
         self.override = override
         self.output = output
         self.prefix = prefix
         self.load_types = load_types
+        self.py_ssize_t_clean = py_ssize_t_clean
 
         self.built_defs=[]
         if isinstance(defs,tuple):
@@ -391,7 +392,7 @@ class Template(object):
         fd = open(self.output, 'w')
         sw = SourceWriter(dp,Overrides(self.override),
                           self.prefix,FileOutput(fd,self.output))
-        sw.write()
+        sw.write(self.py_ssize_t_clean)
         fd.close()
 
 class TemplateExtension(PkgConfigExtension):
@@ -410,9 +411,11 @@ class TemplateExtension(PkgConfigExtension):
             output = defs[:-5] + '.c'
         override = kwargs['override']
         load_types = kwargs.get('load_types')
+        py_ssize_t_clean = kwargs.pop('py_ssize_t_clean',False)
         self.templates = []
         self.templates.append(Template(override, output, defs, 'py' + name,
-                                       kwargs['register'], load_types))
+                                       kwargs['register'], load_types,
+                                       py_ssize_t_clean))
 
         del kwargs['register'], kwargs['override'], kwargs['defs']
         if load_types:
