@@ -1,3 +1,10 @@
+2006-10-11  John Finlay  <finlay@moeraki.com>
+
+	* docs/reference/pygobject-introduction.xml: Remove Copyright and
+	License section.
+
+	* docs/reference/pygobject-ref.xml: Remove author info
+
 2006-10-05  Cedric Gustin  <cedric.gustin@gmail.com>
 
 	* dsextras.py (Template) (TemplateExtension): Add
