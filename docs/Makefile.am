@@ -18,8 +18,7 @@ HTML_FILES =					\
 	html/index.html				\
 	html/index.sgml				\
 	html/pygobject.devhelp			\
-	html/pygobject-introduction.html	\
-	html/pygobject-reference-copyright.html
+	html/pygobject-introduction.html
 
 if ENABLE_DOCS
 BUILT_HTML_FILES = $(HTML_FILES)
