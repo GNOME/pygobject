@@ -26,7 +26,7 @@ class LibtoolHooks(ihooks.Hooks):
         ret.insert(0, ('.la', 'rb', 3))
         return ret
 
-    def load_dynamic(self, name, filename, file=None):
+    def load_dynamic(self, name, filename, file=None, *args):
         """Like normal load_dynamic, but treat .la files specially"""
         if len(filename) > 3 and filename[-3:] == '.la':
             fp = open(filename, 'r')

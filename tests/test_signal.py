@@ -257,6 +257,16 @@ class TestClosures(unittest.TestCase):
         data = c.emit("my_signal", "\01\00\02")
         self.assertEqual(data, "\02\00\01")
 
+    def _test_bug375589(self):
+        class A:
+            def callback(self, o):
+                o.handler_block_by_func(self.callback)
+
+        e = E()
+        e.connect("signal", A().callback)
+        e.emit('signal')
+        gc.collect()
+
 class SigPropClass(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
                                    (gobject.TYPE_INT,)) }
