@@ -482,9 +482,9 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyObject *o;
     const char *class_name, *s;
     PyObject *runtime_bases;
-    PyObject *bases_list, *bases;
+    PyObject *bases_list, *bases, *mod_name;
     int i;
-
+    
     class_name = type->tp_name;
     s = strrchr(class_name, '.');
     if (s != NULL)
@@ -530,6 +530,16 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 	return;
     }
 
+    /* Set type.__module__ to the name of the module,
+     * otherwise it'll default to 'gobject', see #376099
+     */
+    s = strrchr(type->tp_name, '.');
+    if (s != NULL) {
+	mod_name = PyString_FromStringAndSize(type->tp_name, (int)(s - type->tp_name));
+	PyDict_SetItemString(type->tp_dict, "__module__", mod_name);
+	Py_DECREF(mod_name);
+    }
+    
     if (gtype) {
 	o = pyg_type_wrapper_new(gtype);
 	PyDict_SetItemString(type->tp_dict, "__gtype__", o);
