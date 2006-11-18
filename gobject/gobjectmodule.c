@@ -740,7 +740,7 @@ create_property (const gchar  *prop_name,
 	{
 	    guint minimum, maximum, default_value;
 
-	    if (!PyArg_ParseTuple(args, "iii", &minimum, &maximum,
+	    if (!PyArg_ParseTuple(args, "III", &minimum, &maximum,
 				  &default_value))
 		return NULL;
 	    pspec = g_param_spec_uint (prop_name, nick, blurb, minimum,
@@ -762,7 +762,7 @@ create_property (const gchar  *prop_name,
 	{
 	    gulong minimum, maximum, default_value;
 
-	    if (!PyArg_ParseTuple(args, "lll", &minimum, &maximum,
+	    if (!PyArg_ParseTuple(args, "kkk", &minimum, &maximum,
 				  &default_value))
 		return NULL;
 	    pspec = g_param_spec_ulong (prop_name, nick, blurb, minimum,

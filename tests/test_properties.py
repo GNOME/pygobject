@@ -1,9 +1,12 @@
 
+import struct
 import unittest
 
 from common import testhelper
 from gobject import GObject, GType, new, PARAM_READWRITE, \
-     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_CONSTRUCT_ONLY, TYPE_UINT64
+     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY, \
+     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, \
+     TYPE_INT64, TYPE_UINT64
 
 class PropertyObject(GObject):
     __gproperties__ = {
@@ -120,3 +123,72 @@ class TestProperties(unittest.TestCase):
                     }
         except OverflowError, ex:
             self.fail(str(ex))
+
+    def testRange(self):
+        # kiwi code
+        def max(c):
+            return 2 ** ((8 * struct.calcsize(c)) - 1) - 1
+        def umax(c):
+            return 2 ** (8 * struct.calcsize(c)) - 1
+
+        maxint = max('i')
+        minint = -maxint - 1
+        maxuint = umax('I')
+        maxlong = max('l')
+        minlong = -maxlong - 1
+        maxulong = umax('L')
+        maxint64 = max('q')
+        minint64 = -maxint64 - 1
+        maxuint64 = umax('Q')
+
+        types = dict(int=(TYPE_INT, minint, maxint),
+                     uint=(TYPE_UINT, 0, maxuint),
+                     long=(TYPE_LONG, minlong, maxlong),
+                     ulong=(TYPE_ULONG, 0, maxulong),
+                     int64=(TYPE_INT64, minint64, maxint64),
+                     uint64=(TYPE_UINT64, 0, maxuint64))
+
+        def build_gproperties(types):
+            d = {}
+            for key, (gtype, min, max) in types.items():
+                d[key] = (gtype, 'blurb', 'desc', min, max, 0,
+                          PARAM_READABLE | PARAM_WRITABLE)
+            return d
+
+        class RangeCheck(GObject):
+            __gproperties__ = build_gproperties(types)
+
+            def __init__(self):
+                self.values = {}
+                GObject.__init__(self)
+
+            def do_set_property(self, pspec, value):
+                self.values[pspec.name] = value
+
+            def do_get_property(self, pspec):
+                return self.values.get(pspec.name, pspec.default_value)
+
+        self.assertEqual(RangeCheck.props.int.minimum, minint)
+        self.assertEqual(RangeCheck.props.int.maximum, maxint)
+        self.assertEqual(RangeCheck.props.uint.minimum, 0)
+        self.assertEqual(RangeCheck.props.uint.maximum, maxuint)
+        self.assertEqual(RangeCheck.props.long.minimum, minlong)
+        self.assertEqual(RangeCheck.props.long.maximum, maxlong)
+        self.assertEqual(RangeCheck.props.ulong.minimum, 0)
+        self.assertEqual(RangeCheck.props.ulong.maximum, maxulong)
+        self.assertEqual(RangeCheck.props.int64.minimum, minint64)
+        self.assertEqual(RangeCheck.props.int64.maximum, maxint64)
+        self.assertEqual(RangeCheck.props.uint64.minimum, 0)
+        self.assertEqual(RangeCheck.props.uint64.maximum, maxuint64)
+
+        obj = RangeCheck()
+        for key, (gtype, min, max) in types.items():
+            self.assertEqual(obj.get_property(key),
+                             getattr(RangeCheck.props, key).default_value)
+
+            obj.set_property(key, min)
+            self.assertEqual(obj.get_property(key), min)
+
+            obj.set_property(key, max)
+            self.assertEqual(obj.get_property(key), max)
+

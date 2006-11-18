@@ -1,3 +1,14 @@
+2006-11-18  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c: (create_property):
+	* gobject/pygparamspec.c: (pyg_param_spec_getattr):
+	* tests/test_properties.py:
+
+	Avoid truncating in pyg_param_spec_getattr, add test for all non-float
+	numeric types. Fixes #353943
+
 2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/pygtype.c (gclosure_from_pyfunc): Use PyObject_Cmp instead

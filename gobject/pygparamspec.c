@@ -182,11 +182,11 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "name", "nick", "owner_type",
 				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_UINT(pspec)->default_value);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_UINT(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_UINT(pspec)->minimum);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_UINT(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_UINT(pspec)->maximum);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_UINT(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_LONG(pspec)) {
 	if (!strcmp(attr, "__members__")) {
@@ -208,11 +208,11 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "flags", "maximum", "minimum", "name",
 				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_ULONG(pspec)->default_value);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_ULONG(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_ULONG(pspec)->minimum);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_ULONG(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_ULONG(pspec)->maximum);
+	    return PyLong_FromUnsignedLong(G_PARAM_SPEC_ULONG(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_INT64(pspec)) {
 	if (!strcmp(attr, "__members__")) {
@@ -221,11 +221,11 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "flags", "maximum", "minimum", "name",
 				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_INT64(pspec)->default_value);
+	    return PyLong_FromLongLong(G_PARAM_SPEC_INT64(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_INT64(pspec)->minimum);
+	    return PyLong_FromLongLong(G_PARAM_SPEC_INT64(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_INT64(pspec)->maximum);
+	    return PyLong_FromLongLong(G_PARAM_SPEC_INT64(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_UINT64(pspec)) {
 	if (!strcmp(attr, "__members__")) {
@@ -235,11 +235,11 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "name", "nick", "owner_type",
 				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_UINT64(pspec)->default_value);
+	    return PyLong_FromUnsignedLongLong(G_PARAM_SPEC_UINT64(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_UINT64(pspec)->minimum);
+	    return PyLong_FromUnsignedLongLong(G_PARAM_SPEC_UINT64(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyLong_FromLong(G_PARAM_SPEC_UINT64(pspec)->maximum);
+	    return PyLong_FromUnsignedLongLong(G_PARAM_SPEC_UINT64(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_UNICHAR(pspec)) {
 	if (!strcmp(attr, "__members__")) {
