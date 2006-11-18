@@ -1,3 +1,14 @@
+2.12.3 18-november-2006
+       - distutils build fixes (Cedric)
+       - documentation updates (John)
+       - gobject.handler_block_by_func and friends now accept methods 
+         (Johan, Dima, #375589)
+       - avoid truncating of gparamspec (Yevgen Muntyan, #353943)
+       - set __module__ on gobject derived types (Johan, 
+         Osmo Salomaa, #376099)
+       - Ensure exceptions are raised on errors in gobject.OptionGroup
+       	 (Johan, Laszlo Pandy, #364576
+
 2.12.2 3-october-2006
        - Make PyGObject 64-bit safe for Python 2.5 (Gustavo)
        - All headers are now LGPL and not GPL (Johan)

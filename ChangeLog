@@ -1,4 +1,7 @@
+=== 2.12.3 ===
 2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
 
 	* gobject/pygoptiongroup.c (pyg_option_group_dealloc): 
 	* tests/test_option.py (TestOption.testBadConstructor): 
