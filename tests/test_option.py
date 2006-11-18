@@ -28,7 +28,7 @@ class TestOption(unittest.TestCase):
         parser.add_option("-t", "--test", help="Unit test option",
                           action="store_false", dest="test", default=True)
         return parser
-    
+
     def testOption(self):
         parser = self.setup_parser()
         group = self.setup_group()
@@ -38,3 +38,6 @@ class TestOption(unittest.TestCase):
         assert group.values.test
         assert not parser.values.test
         assert group.values.unit_file == "test"
+
+    def testBadConstructor(self):
+        self.assertRaises(TypeError, option.OptionGroup)

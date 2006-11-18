@@ -1,7 +1,12 @@
 2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
 
+	* gobject/pygoptiongroup.c (pyg_option_group_dealloc): 
+	* tests/test_option.py (TestOption.testBadConstructor): 
+	Make sure an exception is raised when we pass in invalid arguments
+	to the optiongroup constructor, add a test. #364576 (Laszlo Pandy)
+
 	* gobject/pygobject.c (pygobject_register_class): set __module__ on
-	gobject derived types, fixes #376099
+	gobject derived types, fixes #376099 (Osmo Salomaa)
 
 2006-11-18  Yevgen Muntyan  <muntyan@tamu.edu>
 

@@ -88,9 +88,9 @@ pyg_option_group_dealloc(PyGOptionGroup *self)
     if (!self->other_owner && !self->is_in_context)
     {
         GOptionGroup *tmp = self->group;
-        g_assert(tmp != NULL);
         self->group = NULL;
-        g_option_group_free(tmp);
+	if (tmp)
+	    g_option_group_free(tmp);
     }
 
     PyObject_Del(self);
