@@ -1677,7 +1677,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
 	return NULL;
     }
-
+    
     retval = g_signal_handlers_disconnect_matched(self->obj,
 						  G_SIGNAL_MATCH_CLOSURE,
 						  0, 0,
