@@ -1,3 +1,10 @@
+2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygtype.c (gclosure_from_pyfunc): Use PyObject_Cmp instead
+	of comparing function closure addresses, which makes it possible 
+	to use any callable and not just functions. 
+	Fixes #375589 (Dima)
+
 2006-10-13  John Finlay  <finlay@moeraki.com>
 
 	* docs/Makefile.am (HTML_FILES): Remove 

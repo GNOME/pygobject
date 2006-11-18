@@ -1331,8 +1331,9 @@ gclosure_from_pyfunc(PyGObject *object, PyObject *func)
 
     for (l = object->closures; l; l = l->next) {
 	PyGClosure *pyclosure = l->data;
-	if (PyFunction_GetClosure(pyclosure->callback) ==
-		PyFunction_GetClosure(func)) {
+	int res;
+	PyObject_Cmp(pyclosure->callback, func, &res);
+	if (!res) {
 	    return (GClosure*)pyclosure;
 	}
     }

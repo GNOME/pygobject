@@ -242,6 +242,23 @@ class TestClosures(unittest.TestCase):
         e.emit('signal')
         self.assertEqual(self.count, 1)
 
+    def testHandlerBlockMethod(self):
+        # Filed as #375589
+        class A:
+            def __init__(self):
+                self.a = 0
+
+            def callback(self, o):
+                self.a = 1
+                o.handler_block_by_func(self.callback)
+
+        inst = A()
+        e = E()
+        e.connect("signal", inst.callback)
+        e.emit('signal')
+        self.assertEqual(inst.a, 1)
+        gc.collect()
+
     def testGString(self):
         class C(gobject.GObject):
             __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_GSTRING,
@@ -256,16 +273,6 @@ class TestClosures(unittest.TestCase):
         c = C(self)
         data = c.emit("my_signal", "\01\00\02")
         self.assertEqual(data, "\02\00\01")
-
-    def _test_bug375589(self):
-        class A:
-            def callback(self, o):
-                o.handler_block_by_func(self.callback)
-
-        e = E()
-        e.connect("signal", A().callback)
-        e.emit('signal')
-        gc.collect()
 
 class SigPropClass(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
