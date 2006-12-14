@@ -1,3 +1,7 @@
+2006-12-14  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* autogen.sh: Make this work with automake 1.10 too.
+
 2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
 
 	* configure.ac: Post release version bump
