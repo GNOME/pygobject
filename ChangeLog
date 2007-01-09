@@ -1,3 +1,10 @@
+2007-01-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.ac:  Turn the option --disable-docs into --enable-docs.
+	* docs/Makefile.am:  Tread --enable-docs like --enable-gtk-doc in
+	gtk+, i.e. do not ever build docs unless requested, but always
+	install them if they are found already built.
+
 2006-12-14  Kjartan Maraas  <kmaraas@gnome.org>
 
 	* autogen.sh: Make this work with automake 1.10 too.

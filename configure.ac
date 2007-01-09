@@ -78,8 +78,8 @@ AC_ARG_ENABLE(thread,
 
 dnl Building documentation
 AC_ARG_ENABLE(docs,
-  AC_HELP_STRING([--disable-docs], [Disable documentation building]),,
-  enable_docs=yes)
+  AC_HELP_STRING([--enable-docs], [Enable documentation building]),enable_docs=yes,
+  enable_docs=no)
 if test "${enable_docs}" != no; then
   dnl
   dnl Check for xsltproc

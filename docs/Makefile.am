@@ -20,11 +20,6 @@ HTML_FILES =					\
 	html/pygobject.devhelp			\
 	html/pygobject-introduction.html
 
-if ENABLE_DOCS
-BUILT_HTML_FILES = $(HTML_FILES)
-else
-BUILT_HTML_FILES =
-endif
 
 XML_FILES = 					\
 	reference/pygobject.xml			\
@@ -51,18 +46,31 @@ XSL_FILES =			\
 # so the date is newer then the files in HTML_FILES
 FIXXREF = xsl/fixxref.py
 
-CSSdir = $(HTMLdir)
+TARGET_DIR = $(datadir)/gtk-doc/html/pygobject
+CSSdir = $(TARGET_DIR)
 CSS_DATA = $(CSS_FILES)
 
-HTMLdir = $(datadir)/gtk-doc/html/pygobject
-HTML_DATA = $(HTML_FILES)
+
+install-data-local:
+	installfiles=`echo $(srcdir)/html/*`; \
+	if test "$$installfiles" = '$(srcdir)/html/*'; \
+	then echo '-- Nothing to install' ; \
+	else \
+	  $(mkinstalldirs) $(DESTDIR)$(TARGET_DIR); \
+	  for i in $$installfiles; do \
+	    echo '-- Installing '$$i ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(TARGET_DIR); \
+	  done; \
+	  echo '-- Installing $(srcdir)/html/index.sgml' ; \
+	  $(INSTALL_DATA) $(srcdir)/html/index.sgml $(DESTDIR)$(TARGET_DIR) || :; \
+	fi
+
+uninstall-local:
+	rm -f $(DESTDIR)$(TARGET_DIR)/*
+
 
 XSLdir = $(datadir)/pygobject/xsl
 XSL_DATA = $(XSL_FILES) $(FIXXREF)
-
-BUILT_SOURCES = reference/builddate.xml $(BUILT_HTML_FILES)
-
-CLEANFILES = reference/builddate.xml $(BUILT_HTML_FILES)
 
 EXTRA_DIST = 		\
 	$(HTML_FILES) 	\
@@ -73,6 +81,13 @@ EXTRA_DIST = 		\
 
 reference/builddate.xml:
 	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
+
+
+if ENABLE_DOCS
+
+BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
+DISTCLEANFILES = reference/builddate.xml $(HTML_FILES)
+
 
 # Do not add a builddate.xml dependency here, because the generated html 
 # documentation will be included in the tarball so xsltproc is not needed to 
@@ -91,3 +106,4 @@ $(HTML_FILES): $(XML_FILES) $(XSL_FILES)
 # 		reference/pygobject-ref.xml
 # 	pdfxmltex pygobject-ref.fo >output </dev/null
 
+endif
