@@ -1,3 +1,10 @@
+2007-03-03  Edward Hervey  <edward@fluendo.com>
+
+	* gobject/pygobject.c: (set_property_from_pspec):
+	Release the GIL when calling g_object_set_property, since setting a
+	property might trigger some code that might come back in python land.
+	Fixes #395048
+
 2007-01-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* configure.ac:  Turn the option --disable-docs into --enable-docs.

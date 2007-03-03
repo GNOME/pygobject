@@ -273,7 +273,10 @@ set_property_from_pspec(GObject *obj,
 	return FALSE;
     }
 
+    pyg_begin_allow_threads;
     g_object_set_property(obj, attr_name, &value);
+    pyg_end_allow_threads;
+
     g_value_unset(&value);
     
     return TRUE;
