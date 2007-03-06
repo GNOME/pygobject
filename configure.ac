@@ -78,7 +78,7 @@ AC_ARG_ENABLE(thread,
 
 dnl Building documentation
 AC_ARG_ENABLE(docs,
-  AC_HELP_STRING([--enable-docs], [Enable documentation building]),enable_docs=yes,
+  AC_HELP_STRING([--enable-docs], [Enable documentation building]),enable_docs=$enableval,
   enable_docs=no)
 if test "${enable_docs}" != no; then
   dnl

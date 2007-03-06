@@ -1,3 +1,8 @@
+2007-03-06  Richard Hult  <richard@imendio.com>
+
+	* configure.ac: Fix the docs option so that it's possible to disable
+	building the docs.
+
 2007-03-03  Edward Hervey  <edward@fluendo.com>
 
 	* gobject/pygobject.c: (set_property_from_pspec):
