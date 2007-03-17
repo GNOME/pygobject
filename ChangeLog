@@ -1,3 +1,8 @@
+2007-03-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_emit): Fix %ld vs int warning.
+	(pygobject_chain_from_overridden): Idem.
+
 2007-03-06  Richard Hult  <richard@imendio.com>
 
 	* configure.ac: Fix the docs option so that it's possible to disable

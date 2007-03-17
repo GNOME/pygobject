@@ -1511,7 +1511,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
 
 	g_snprintf(buf, sizeof(buf),
 		   "%d parameters needed for signal %s; %ld given",
-		   query.n_params, name, len - 1);
+		   query.n_params, name, (long int) (len - 1));
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
@@ -1620,7 +1620,7 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 
 	g_snprintf(buf, sizeof(buf),
 		   "%d parameters needed for signal %s; %ld given",
-		   query.n_params, name, len);
+		   query.n_params, name, (long int) len);
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
