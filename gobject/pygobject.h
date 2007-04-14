@@ -185,6 +185,7 @@ struct _PyGObject_Functions {
     void      (*type_register_custom)(const gchar *type_name,
 				      PyGTypeRegistrationFunction callback,
 				      gpointer data);
+    gboolean  (*gerror_exception_check) (GError **error);
 
 };
 
@@ -248,6 +249,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
 #define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
 #define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)
+#define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
+
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

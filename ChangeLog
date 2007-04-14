@@ -1,5 +1,8 @@
 2007-04-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* gobject/gobjectmodule.c, gobject/pygobject.h: Add a new
+	pyg_gerror_exception_check API.  Fixes #425242.
+
 	* gobject/gobjectmodule.c (pyg_set_application_name) 
 	(pyg_set_prgname): Add wrappers for g_set_application_name and
 	g_set_prgname.  Patch by Havoc Pennington.  Fixes #415853.

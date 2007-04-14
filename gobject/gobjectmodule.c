@@ -3010,6 +3010,78 @@ pyg_error_check(GError **error)
     return FALSE;
 }
 
+/**
+ * pyg_gerror_exception_check:
+ * @error: a standard GLib GError ** output parameter
+ *
+ * Checks to see if a GError exception has been raised, and if so
+ * translates the python exception to a standard GLib GError.  If the
+ * raised exception is not a GError then PyErr_Print() is called.
+ *
+ * Returns: 0 if no exception has been raised, -1 if it is a
+ * valid gobject.GError, -2 otherwise.
+ */
+static gboolean
+pyg_gerror_exception_check(GError **error)
+{
+    PyObject *type, *value, *traceback;
+    PyObject *py_message, *py_domain, *py_code;
+    const char *bad_gerror_message;
+
+    PyErr_Fetch(&type, &value, &traceback);
+    if (type == NULL)
+        return 0;
+    PyErr_NormalizeException(&type, &value, &traceback);
+    if (value == NULL) {
+        PyErr_Restore(type, value, traceback);
+        PyErr_Print();
+        return -2;
+    }
+    if (!value || !PyErr_GivenExceptionMatches(type, (PyObject *) &gerror_exc)) {
+        PyErr_Restore(type, value, traceback);
+        PyErr_Print();
+        return -2;
+    }
+    Py_DECREF(type);
+    Py_XDECREF(traceback);
+
+    py_message = PyObject_GetAttrString(value, "message");
+    if (!py_message || !PyString_Check(py_message)) {
+        bad_gerror_message = "gobject.GError instances must have a 'message' string attribute";
+        goto bad_gerror;
+    }
+
+    py_domain = PyObject_GetAttrString(value, "domain");
+    if (!py_domain || !PyString_Check(py_domain)) {
+        bad_gerror_message = "gobject.GError instances must have a 'domain' string attribute";
+        Py_DECREF(py_message);
+        goto bad_gerror;
+    }
+
+    py_code = PyObject_GetAttrString(value, "code");
+    if (!py_code || !PyInt_Check(py_code)) {
+        bad_gerror_message = "gobject.GError instances must have a 'code' int attribute";
+        Py_DECREF(py_message);
+        Py_DECREF(py_domain);
+        goto bad_gerror;
+    }
+
+    g_set_error(error, g_quark_from_string(PyString_AsString(py_domain)),
+                PyInt_AsLong(py_code), PyString_AsString(py_message));
+
+    Py_DECREF(py_message);
+    Py_DECREF(py_code);
+    Py_DECREF(py_domain);
+    return -1;
+
+bad_gerror:
+    Py_DECREF(value);
+    g_set_error(error, g_quark_from_static_string("pygobject"), 0, bad_gerror_message);
+    PyErr_SetString(PyExc_ValueError, bad_gerror_message);
+    PyErr_Print();
+    return -2;
+}
+
 
 static PyObject *
 _pyg_strv_from_gvalue(const GValue *value)
@@ -3359,7 +3431,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   add_warning_redirection,
   disable_warning_redirections,
   
-  pyg_type_register_custom_callback
+  pyg_type_register_custom_callback,
+  pyg_gerror_exception_check
 };
 
 #define REGISTER_TYPE(d, type, name) \
