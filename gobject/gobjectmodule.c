@@ -2755,6 +2755,32 @@ pyg_filename_from_utf8(PyGObject *self, PyObject *args)
     return py_filename;
 }
 
+
+PyObject*
+pyg_set_application_name(PyObject *self, PyObject *args)
+{
+    char *s;
+
+    if (!PyArg_ParseTuple(args, "s:gobject.set_application_name", &s))
+        return NULL;
+    g_set_application_name(s);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+PyObject*
+pyg_set_prgname(PyObject *self, PyObject *args)
+{
+    char *s;
+
+    if (!PyArg_ParseTuple(args, "s:gobject.set_prgname", &s))
+        return NULL;
+    g_set_prgname(s);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2814,6 +2840,10 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_filename_display_basename, METH_VARARGS },
     { "filename_from_utf8",
       (PyCFunction)pyg_filename_from_utf8, METH_VARARGS },
+    { "set_application_name",
+      (PyCFunction)pyg_set_application_name, METH_VARARGS },
+    { "set_prgname",
+      (PyCFunction)pyg_set_prgname, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
