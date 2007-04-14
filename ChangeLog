@@ -1,5 +1,8 @@
 2007-04-14 Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* gobject/pygobject.h: Bug #419379: Modernize init_pygobject: use
+	static inline functions instead of macros.
+
 	* gobject/gobjectmodule.c (init_gobject):
 	* gobject/pygobject-private.h:
 	* gobject/pygobject.c (pygobject_data_free, pygobject_data_new),
