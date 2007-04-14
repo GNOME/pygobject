@@ -59,6 +59,17 @@ extern struct _PyGObject_Functions pygobject_api_functions;
     } G_STMT_END
 
 
+#ifndef Py_CLEAR /* since Python 2.4 */
+# define Py_CLEAR(op)				\
+        do {                            	\
+                if (op) {			\
+                        PyObject *tmp = (PyObject *)(op);	\
+                        (op) = NULL;		\
+                        Py_DECREF(tmp);		\
+                }				\
+        } while (0)
+#endif
+
 extern GType PY_TYPE_OBJECT;
 
 extern GQuark pygboxed_type_key;
@@ -72,7 +83,9 @@ extern GQuark pygobject_class_key;
 extern GQuark pygobject_wrapper_key;
 extern GQuark pygpointer_class_key;
 extern GQuark pygobject_has_updated_constructor_key;
+extern GQuark pygobject_instance_data_key;
 
+void     pygobject_data_free  (PyGObjectData *data);
 void     pyg_destroy_notify   (gpointer     user_data);
 gboolean pyg_handler_marshal  (gpointer     user_data);
 gboolean pyg_error_check      (GError     **error);
@@ -130,7 +143,6 @@ extern PyTypeObject PyGInterface_Type;
 extern PyTypeObject PyGProps_Type;
 extern PyTypeObject PyGPropsDescr_Type;
 extern PyTypeObject PyGPropsIter_Type;
-
 void          pygobject_register_class   (PyObject *dict,
 					  const gchar *type_name,
 					  GType gtype, PyTypeObject *type,
@@ -237,6 +249,11 @@ typedef struct
     PyObject *fd_obj;
 } PyGPollFD;
 
+  /* Data that belongs to the GObject instance, not the Python wrapper */
+struct _PyGObjectData {
+    PyTypeObject *type; /* wrapper type for this instance */
+    GSList *closures;
+};
 
 /* pygoption.c */
 extern PyTypeObject PyGOptionContext_Type;
@@ -267,5 +284,16 @@ void pyg_type_register_custom_callback(const gchar *type_name,
 				       gpointer data);
 PyTypeObject * pyg_type_get_custom(const gchar *name);
 GType _pyg_type_from_name(const gchar *name);
+
+/* pygobject.c */
+extern PyTypeObject PyGObjectWeakRef_Type;
+
+static inline PyGObjectData *
+pyg_object_peek_inst_data(GObject *obj)
+{
+    return ((PyGObjectData *) 
+            g_object_get_qdata(obj, pygobject_instance_data_key));
+}
+
 
 #endif

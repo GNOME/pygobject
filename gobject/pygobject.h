@@ -15,6 +15,8 @@ G_BEGIN_DECLS
   /* PyGClosure is a _private_ structure */
 typedef void (* PyClosureExceptionHandler) (GValue *ret, guint n_param_values, const GValue *params);
 typedef struct _PyGClosure PyGClosure;
+typedef struct _PyGObjectData PyGObjectData;
+
 struct _PyGClosure {
     GClosure closure;
     PyObject *callback;
@@ -23,12 +25,14 @@ struct _PyGClosure {
     PyClosureExceptionHandler exception_handler;
 };
 
+  /* closures is just an alias for what is found in the
+   * PyGObjectData */
 typedef struct {
     PyObject_HEAD
     GObject *obj;
     PyObject *inst_dict; /* the instance dictionary -- must be last */
     PyObject *weakreflist; /* list of weak references */
-    GSList *closures;
+    GSList *closures;           /* stale field; no longer updated DO-NOT-USE! */
 } PyGObject;
 
 #define pygobject_get(v) (((PyGObject *)(v))->obj)

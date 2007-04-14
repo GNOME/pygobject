@@ -1328,14 +1328,18 @@ GClosure *
 gclosure_from_pyfunc(PyGObject *object, PyObject *func)
 {
     GSList *l;
-
-    for (l = object->closures; l; l = l->next) {
-	PyGClosure *pyclosure = l->data;
-	int res;
-	PyObject_Cmp(pyclosure->callback, func, &res);
-	if (!res) {
-	    return (GClosure*)pyclosure;
-	}
+    PyGObjectData *inst_data;
+    inst_data = pyg_object_peek_inst_data(object->obj);
+    if (inst_data)
+    {
+        for (l = inst_data->closures; l; l = l->next) {
+            PyGClosure *pyclosure = l->data;
+            int res;
+            PyObject_Cmp(pyclosure->callback, func, &res);
+            if (!res) {
+                return (GClosure*)pyclosure;
+            }
+        }
     }
     return NULL;
 }

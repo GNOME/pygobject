@@ -1,3 +1,24 @@
+2007-04-14 Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_data_free, pygobject_data_new),
+	(pygobject_get_inst_data, pyg_toggle_notify),
+	(pygobject_switch_to_toggle_ref),
+	(pygobject_register_wrapper_full, pygobject_register_wrapper),
+	(pygobject_new_full, pygobject_unwatch_closure),
+	(pygobject_watch_closure, pygobject_dealloc, pygobject_repr),
+	(pygobject_traverse, pygobject_clear, pygobject_weak_ref),
+	(pygobject_setattro, pygobject_weak_ref_traverse),
+	(pygobject_weak_ref_notify, pygobject_weak_ref_clear),
+	(pygobject_weak_ref_dealloc, pygobject_weak_ref_new),
+	(pygobject_weak_ref_unref, pygobject_weak_ref_call):
+	* gobject/pygobject.h:
+	* gobject/pygtype.c (gclosure_from_pyfunc):
+	* tests/test_subtype.py:
+	Bug #320428: Break PyGObject<->GObject reference cycle (patch
+	v7.1; thanks John Ehresman for the help with this patch).
+
 2007-03-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygobject.c (pygobject_emit): Fix %ld vs int warning.

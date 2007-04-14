@@ -1,8 +1,23 @@
 import unittest
+import weakref
+import gc
+import sys
 
 import testmodule
 from common import gobject, testhelper
-from gobject import GObject, GInterface
+from gobject import GObject, GInterface, GObjectMeta
+import gtk
+
+class _ClassInittableMetaType(GObjectMeta):
+    def __init__(cls, name, bases, namespace):
+        super(_ClassInittableMetaType, cls).__init__(name, bases, namespace)
+        cls.__class_init__(namespace)
+
+class ClassInittableObject(object):
+    __metaclass__ = _ClassInittableMetaType
+    def __class_init__(cls, namespace):
+        pass
+    __class_init__ = classmethod(__class_init__)
 
 class TestSubType(unittest.TestCase):
     def testSubType(self):
@@ -50,3 +65,172 @@ class TestSubType(unittest.TestCase):
         self.failUnless(isinstance(obj, Object2))
         self.assertEqual(obj.__gtype__.name, 'Object2')
 
+    def testUnregisteredSubclass(self):
+        class MyButton(gtk.Button):
+            def custom_method(self):
+                pass
+        b = MyButton()
+        self.assertEqual(type(b), MyButton)
+        box = gtk.EventBox()
+        box.add(b)
+        del b
+        b = box.child
+        self.assertEqual(type(b), MyButton)
+        try:
+            b.custom_method()
+        except AttributeError:
+            self.fail()
+
+    def testInstDict(self):
+        b = gtk.Button()
+        box = gtk.EventBox()
+        box.add(b)
+        b.xyz = "zbr"
+        del b
+        b = box.child
+        self.assert_(hasattr(b, "xyz"))
+        try:
+            xyz = b.xyz
+        except AttributeError:
+            self.fail()
+        self.assertEqual(xyz, "zbr")
+
+    def testImmediateCollection(self):
+        b = gtk.Button()
+        bref = weakref.ref(b)
+        while gc.collect():
+            pass
+        del b
+        self.assertEqual(gc.collect(), 0)
+        self.assertEqual(bref(), None)
+
+    def testGCCollection(self):
+        a = gtk.Button()
+        b = gtk.Button()
+        a.b = b
+        b.a = a
+        aref = weakref.ref(a)
+        bref = weakref.ref(b)
+        del a, b
+        while gc.collect():
+            pass
+        self.assertEqual(aref(), None)
+        self.assertEqual(bref(), None)
+
+    def testWrapperUnref(self):
+        b = gtk.Button()
+        bref = weakref.ref(b)
+        del b
+        self.assertEqual(bref(), None)
+
+    def testGObjectUnref(self):
+        b = gtk.Button()
+        bref = b.weak_ref()
+        self.assert_(bref() is b)
+        del b
+        self.assertEqual(bref(), None)
+
+    def testGCCollection(self):
+        a = gtk.Button()
+        b = gtk.Button()
+        a.b = b
+        b.a = a
+        aref = a.weak_ref()
+        bref = b.weak_ref()
+        del a, b
+        while gc.collect():
+            pass
+        self.assertEqual(aref(), None)
+        self.assertEqual(bref(), None)
+
+    def testGhostTwice(self):
+        b = gtk.Button()
+        bref = b.weak_ref()
+        box = gtk.EventBox()
+        box.add(b)
+        del b
+        b = box.child
+        del b
+        self.assertNotEqual(bref(), None)
+        box.destroy()
+        del box
+        self.assertEqual(bref(), None)
+        
+    def testGhostWeakref(self):
+        b = gtk.Button()
+        bref = b.weak_ref()
+        box = gtk.EventBox()
+        box.add(b)
+        del b
+        b = bref()
+        b.hide()
+        del box
+        b.hide()
+        del b
+
+    def testWeakRefCallback(self):
+        def callback(a, b, c):
+            self._wr_args = a, b, c
+        self._wr_args = None
+        b = gtk.Button()
+        bref = b.weak_ref(callback, 1, 2, 3)
+        del b
+        self.assertEqual(self._wr_args, (1, 2, 3))
+
+
+    def testCycle(self):
+
+        class _TestCycle(gtk.EventBox):
+            def __init__(self):
+                gtk.EventBox.__init__(self)
+                self.connect('notify', self.cb)
+
+                class DetectDel:
+                    def __del__(self):
+                        pass
+                        #print 'del'
+
+                self.d = DetectDel()
+
+            def cb(self, *args):
+                pass
+
+        a = _TestCycle()
+        a_d_id = id(a.d)
+        a.foo = "hello"
+        b = gtk.EventBox()
+        b.add(a)
+        #print "__dict__1: refcount=%i id=%i" % (sys.getrefcount(a.__dict__), id(a.__dict__))
+
+        del a
+        while gc.collect():
+            pass
+        a = b.child
+        #print "__dict__2: refcount=%i id=%i" % (sys.getrefcount(a.__dict__), id(a.__dict__))
+
+        del a
+        while gc.collect():
+            pass
+        a = b.child
+        #print "__dict__3: refcount=%i id=%i" % (sys.getrefcount(a.__dict__), id(a.__dict__))
+        
+        self.assert_(hasattr(a, 'd'))
+        self.assert_(hasattr(a, 'foo'))
+        self.assertEqual(a.foo, "hello")
+        self.assertEqual(id(a.d), a_d_id)
+
+    def testSimpleDecref(self):
+        class CallInDel:
+            def __init__(self, callback):
+                self.callback = callback
+                
+            def __del__(self):
+                if callable(self.callback):
+                    self.callback()
+        disposed_calls = []
+        def on_dispose():
+            disposed_calls.append(None)
+        gobj = GObject()
+        gobj.set_data('tmp', CallInDel(on_dispose))
+        del gobj
+        assert len(disposed_calls) == 1

@@ -45,6 +45,7 @@ GQuark pygenum_class_key;
 GQuark pygflags_class_key;
 GQuark pygpointer_class_key;
 GQuark pygobject_has_updated_constructor_key;
+GQuark pygobject_instance_data_key;
 
 
 
@@ -3371,6 +3372,7 @@ init_gobject(void)
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
     pygobject_has_updated_constructor_key =\
         g_quark_from_static_string("PyGObject::has-updated-constructor");
+    pygobject_instance_data_key = g_quark_from_static_string("PyGObject::instance-data");
 
     REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
 
@@ -3424,6 +3426,9 @@ init_gobject(void)
     REGISTER_TYPE(d, PyGIdle_Type, "Idle");
     REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
     REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
+
+    PyType_Ready(&PyGObjectWeakRef_Type);
+    PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
 
     REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
     REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");

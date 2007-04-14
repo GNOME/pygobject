@@ -25,8 +25,71 @@ static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
 static int  pygobject_clear(PyGObject *self);
 static PyObject * pyg_type_get_bases(GType gtype);
+static inline int pygobject_clear(PyGObject *self);
+static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
+static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
+static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 
 /* -------------- class <-> wrapper manipulation --------------- */
+
+void
+pygobject_data_free(PyGObjectData *data)
+{
+    PyGILState_STATE state = pyg_gil_state_ensure();
+    GSList *closures, *tmp;
+    Py_DECREF(data->type);
+    tmp = closures = data->closures;
+#ifndef NDEBUG
+    data->closures = NULL;
+    data->type = NULL;
+#endif
+    pyg_begin_allow_threads;
+    while (tmp) {
+ 	GClosure *closure = tmp->data;
+ 
+          /* we get next item first, because the current link gets
+           * invalidated by pygobject_unwatch_closure */
+ 	tmp = tmp->next;
+ 	g_closure_invalidate(closure);
+    }
+    pyg_end_allow_threads;
+ 
+    if (data->closures != NULL)
+ 	g_warning("invalidated all closures, but data->closures != NULL !");
+
+    g_free(data);
+    pyg_gil_state_release(state);
+}
+
+static inline PyGObjectData *
+pygobject_data_new(void)
+{
+    PyGObjectData *data;
+    data = g_new0(PyGObjectData, 1);
+    return data;
+}
+
+static inline PyGObjectData *
+pygobject_get_inst_data(PyGObject *self)
+{
+    PyGObjectData *inst_data;
+
+    if (G_UNLIKELY(!self->obj))
+        return NULL;
+    inst_data = g_object_get_qdata(self->obj, pygobject_instance_data_key);
+    if (inst_data == NULL)
+    {
+        inst_data = pygobject_data_new();
+
+        inst_data->type = ((PyObject *)self)->ob_type;
+        Py_INCREF((PyObject *) inst_data->type);
+
+        g_object_set_qdata_full(self->obj, pygobject_instance_data_key,
+                                inst_data, (GDestroyNotify) pygobject_data_free);
+    }
+    return inst_data;
+}
+
 
 typedef struct {
     GType type;
@@ -560,6 +623,38 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+static void
+pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
+{
+    PyGObject *self = (PyGObject*) data;
+    PyGILState_STATE state;
+
+    state = pyg_gil_state_ensure();
+
+    if (is_last_ref)
+	Py_DECREF(self);
+    else
+        Py_INCREF(self);
+
+    pyg_gil_state_release(state);
+}
+
+  /* Called when the inst_dict is first created; switches the 
+     reference counting strategy to start using toggle ref to keep the
+     wrapper alive while the GObject lives.  In contrast, while
+     inst_dict was NULL the python wrapper is allowed to die at
+     will and is recreated on demand. */
+static inline void
+pygobject_switch_to_toggle_ref(PyGObject *self)
+{
+    g_assert(self->obj->ref_count >= 1);
+      /* Note that add_toggle_ref will never immediately call back into 
+         pyg_toggle_notify */
+    Py_INCREF((PyObject *) self);
+    g_object_add_toggle_ref(self->obj, pyg_toggle_notify, self);
+    g_object_unref(self->obj);
+}
+
 /**
  * pygobject_register_wrapper:
  * @self: the wrapper instance
@@ -567,18 +662,27 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
  * In the constructor of PyGTK wrappers, this function should be
  * called after setting the obj member.  It will tie the wrapper
  * instance to the GObject so that the same wrapper instance will
- * always be used for this GObject instance.  It will also sink any
+ * always be used for this GObject instance.  It may also sink any
  * floating references on the GObject.
  */
+static inline void
+pygobject_register_wrapper_full(PyGObject *self, gboolean sink)
+{
+    GObject *obj = self->obj;
+
+    if (sink)
+        pygobject_sink(obj);
+    g_assert(obj->ref_count >= 1);
+      /* save wrapper pointer so we can access it later */
+    g_object_set_qdata_full(obj, pygobject_wrapper_key, self, NULL);
+    if (self->inst_dict)
+        pygobject_switch_to_toggle_ref(self);
+}
+
 void
 pygobject_register_wrapper(PyObject *self)
 {
-    GObject *obj = ((PyGObject *)self)->obj;
-
-    pygobject_sink(obj);
-    Py_INCREF(self);
-    g_object_set_qdata_full(obj, pygobject_wrapper_key, self,
-			    pyg_destroy_notify);
+    pygobject_register_wrapper_full((PyGObject *)self, TRUE);
 }
 
 static PyObject *
@@ -786,11 +890,18 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	Py_INCREF(self);
     } else {
 	/* create wrapper */
-	PyTypeObject *tp;
-        if (g_class)
-            tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
-        else
-            tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+        PyGObjectData *inst_data = pyg_object_peek_inst_data(obj);
+ 	PyTypeObject *tp;
+        if (inst_data)
+            tp = inst_data->type;
+        else {
+            if (g_class)
+                tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
+            else
+                tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+        }
+        g_assert(tp != NULL);
+        
         /* need to bump type refcount if created with
            pygobject_new_with_interfaces(). fixes bug #141042 */
         if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
@@ -798,18 +909,11 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self = PyObject_GC_New(PyGObject, tp);
 	if (self == NULL)
 	    return NULL;
-	self->obj = g_object_ref(obj);
-        if (sink)
-            pygobject_sink(self->obj);
-
-	self->inst_dict = NULL;
+        self->inst_dict = NULL;
 	self->weakreflist = NULL;
-	self->closures = NULL;
-	/* save wrapper pointer so we can access it later */
-	Py_INCREF(self);
-	g_object_set_qdata_full(obj, pygobject_wrapper_key, self,
-				pyg_destroy_notify);
-
+	self->obj = obj;
+	g_object_ref(obj);
+	pygobject_register_wrapper_full(self, sink);
 	PyObject_GC_Track((PyObject *)self);
     }
 
@@ -826,9 +930,9 @@ pygobject_new(GObject *obj)
 static void
 pygobject_unwatch_closure(gpointer data, GClosure *closure)
 {
-    PyGObject *self = (PyGObject *)data;
+    PyGObjectData *inst_data = data;
 
-    self->closures = g_slist_remove (self->closures, closure);
+    inst_data->closures = g_slist_remove (inst_data->closures, closure);
 }
 
 /**
@@ -847,15 +951,17 @@ void
 pygobject_watch_closure(PyObject *self, GClosure *closure)
 {
     PyGObject *gself;
+    PyGObjectData *data;
 
     g_return_if_fail(self != NULL);
     g_return_if_fail(PyObject_TypeCheck(self, &PyGObject_Type));
     g_return_if_fail(closure != NULL);
-    g_return_if_fail(g_slist_find(((PyGObject *)self)->closures, closure) == NULL);
 
     gself = (PyGObject *)self;
-    gself->closures = g_slist_prepend(gself->closures, closure);
-    g_closure_add_invalidate_notifier(closure,self, pygobject_unwatch_closure);
+    data = pygobject_get_inst_data(gself);
+    g_return_if_fail(g_slist_find(data->closures, closure) == NULL);
+    data->closures = g_slist_prepend(data->closures, closure);
+    g_closure_add_invalidate_notifier(closure, data, pygobject_unwatch_closure);
 }
 
 /* -------------- PyGObject behaviour ----------------- */
@@ -863,35 +969,13 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 static void
 pygobject_dealloc(PyGObject *self)
 {
-    GSList *tmp;
-
     PyObject_ClearWeakRefs((PyObject *)self);
-
     PyObject_GC_UnTrack((PyObject *)self);
-
-    if (self->obj) {
-	g_object_unref(self->obj);
-    }
-    self->obj = NULL;
-
-    if (self->inst_dict) {
-	Py_DECREF(self->inst_dict);
-    }
-    self->inst_dict = NULL;
-
-    pyg_begin_allow_threads;
-    tmp = self->closures;
-    while (tmp) {
-	GClosure *closure = tmp->data;
-
-	/* we get next item first, because the current link gets
-	 * invalidated by pygobject_unwatch_closure */
-	tmp = tmp->next;
-	g_closure_invalidate(closure);
-    }
-    self->closures = NULL;
-    pyg_end_allow_threads;
-
+      /* this forces inst_data->type to be updated, which could prove
+       * important if a new wrapper has to be created and it is of a
+       * unregistered type */
+    pygobject_get_inst_data(self);
+    pygobject_clear(self);
     /* the following causes problems with subclassed types */
     /* self->ob_type->tp_free((PyObject *)self); */
     PyObject_GC_Del(self);
@@ -917,72 +1001,55 @@ pygobject_repr(PyGObject *self)
     gchar buf[256];
 
     g_snprintf(buf, sizeof(buf),
-	       "<%s object (%s) at 0x%lx>",
+	       "<%s object at 0x%lx (%s at 0x%lx)>",
 	       self->ob_type->tp_name,
+	       (long)self,
 	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
-	       (long)self);
+               (long)self->obj);
     return PyString_FromString(buf);
 }
+
 
 static int
 pygobject_traverse(PyGObject *self, visitproc visit, void *arg)
 {
     int ret = 0;
     GSList *tmp;
+    PyGObjectData *data = pygobject_get_inst_data(self);
 
     if (self->inst_dict) ret = visit(self->inst_dict, arg);
     if (ret != 0) return ret;
 
-    for (tmp = self->closures; tmp != NULL; tmp = tmp->next) {
-	PyGClosure *closure = tmp->data;
+    if (data) {
 
-	if (closure->callback) ret = visit(closure->callback, arg);
-	if (ret != 0) return ret;
+        for (tmp = data->closures; tmp != NULL; tmp = tmp->next) {
+            PyGClosure *closure = tmp->data;
 
-	if (closure->extra_args) ret = visit(closure->extra_args, arg);
-	if (ret != 0) return ret;
+            if (closure->callback) ret = visit(closure->callback, arg);
+            if (ret != 0) return ret;
 
-	if (closure->swap_data) ret = visit(closure->swap_data, arg);
-	if (ret != 0) return ret;
+            if (closure->extra_args) ret = visit(closure->extra_args, arg);
+            if (ret != 0) return ret;
+
+            if (closure->swap_data) ret = visit(closure->swap_data, arg);
+            if (ret != 0) return ret;
+        }
     }
-
-    if (self->obj && self->obj->ref_count == 1)
-	ret = visit((PyObject *)self, arg);
-    if (ret != 0) return ret;
-
-    return 0;
+    return ret;
 }
 
-static int
+static inline int
 pygobject_clear(PyGObject *self)
 {
-    GSList *tmp;
-
-    if (self->inst_dict) {
-	Py_DECREF(self->inst_dict);
-    }
-    self->inst_dict = NULL;
-
-    pyg_begin_allow_threads;
-    tmp = self->closures;
-    while (tmp) {
-	GClosure *closure = tmp->data;
-
-	/* we get next item first, because the current link gets
-	 * invalidated by pygobject_unwatch_closure */
-	tmp = tmp->next;
-	g_closure_invalidate(closure);
-    }
-    pyg_end_allow_threads;
-
-    if (self->closures != NULL)
-	g_warning("invalidated all closures, but self->closures != NULL !");
-
     if (self->obj) {
-	g_object_unref(self->obj);
+        g_object_set_qdata_full(self->obj, pygobject_wrapper_key, NULL, NULL);
+        if (self->inst_dict)
+            g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, self);
+        else
+            g_object_unref(self->obj);
+        self->obj = NULL;
     }
-    self->obj = NULL;
-
+    Py_CLEAR(self->inst_dict);
     return 0;
 }
 
@@ -1667,6 +1734,26 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
     return py_ret;
 }
 
+
+static PyObject *
+pygobject_weak_ref(PyGObject *self, PyObject *args)
+{
+    int len;
+    PyObject *callback = NULL, *user_data = NULL;
+    PyObject *retval;
+
+    CHECK_GOBJECT(self);
+
+    if ((len = PySequence_Length(args)) >= 1) {
+        callback = PySequence_ITEM(args, 0);
+        user_data = PySequence_GetSlice(args, 1, len);
+    }
+    retval = pygobject_weak_ref_new(self->obj, callback, user_data);
+    Py_XDECREF(callback);
+    Py_XDECREF(user_data);
+    return retval;
+}
+
 static PyObject *
 pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 {
@@ -1789,8 +1876,10 @@ static PyMethodDef pygobject_methods[] = {
     { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
     { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
+    { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
     { NULL, NULL, 0 }
 };
+
 
 static PyObject *
 pygobject_get_dict(PyGObject *self, void *closure)
@@ -1808,6 +1897,20 @@ static PyObject *
 pygobject_get_refcount(PyGObject *self, void *closure)
 {
     return PyInt_FromLong(self->obj->ref_count);
+}
+
+static int
+pygobject_setattro(PyObject *self, PyObject *name, PyObject *value)
+{
+    int res;
+    PyGObject *gself = (PyGObject *) self;
+    if (gself->inst_dict == NULL) {
+        if (G_LIKELY(gself->obj))
+            pygobject_switch_to_toggle_ref(gself);
+    }
+      /* call parent type's setattro */
+    res = PyGObject_Type.tp_base->tp_setattro(self, name, value);
+    return res;
 }
 
 static PyGetSetDef pygobject_getsets[] = {
@@ -1836,7 +1939,7 @@ PyTypeObject PyGObject_Type = {
     (ternaryfunc)0,			/* tp_call */
     (reprfunc)0,			/* tp_str */
     (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
+    (setattrofunc)pygobject_setattro,   /* tp_setattro */
     0,					/* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
     	Py_TPFLAGS_HAVE_GC,		/* tp_flags */
@@ -1864,3 +1967,176 @@ PyTypeObject PyGObject_Type = {
 };
 
 
+  /* ------------------------------------ */
+  /* ****** GObject weak reference ****** */
+  /* ------------------------------------ */
+
+typedef struct {
+    PyObject_HEAD
+    GObject *obj;
+    PyObject *callback;
+    PyObject *user_data;
+    gboolean have_floating_ref;
+} PyGObjectWeakRef;
+
+static int
+pygobject_weak_ref_traverse(PyGObjectWeakRef *self, visitproc visit, void *arg)
+{
+    if (self->callback && visit(self->callback, arg) < 0)
+        return -1;
+    if (self->user_data && visit(self->user_data, arg) < 0)
+        return -1;
+    return 0;
+}
+
+static void
+pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
+{
+    self->obj = NULL;
+    if (self->callback) {
+        PyObject *retval;
+        PyGILState_STATE state = pyg_gil_state_ensure();
+        retval = PyObject_Call(self->callback, self->user_data, NULL);
+        if (retval) {
+            if (retval != Py_None)
+                PyErr_Format(PyExc_TypeError,
+                             "GObject weak notify callback returned a value"
+                             " of type %s, should return None",
+                             retval->ob_type->tp_name);
+            Py_DECREF(retval);
+            PyErr_Print();
+        } else
+            PyErr_Print();
+        Py_CLEAR(self->callback);
+        Py_CLEAR(self->user_data);
+        if (self->have_floating_ref) {
+            self->have_floating_ref = FALSE;
+            Py_DECREF((PyObject *) self);
+        }
+        pyg_gil_state_release(state);
+    }
+}
+
+static inline int
+pygobject_weak_ref_clear(PyGObjectWeakRef *self)
+{
+    Py_CLEAR(self->callback);
+    Py_CLEAR(self->user_data);
+    if (self->obj) {
+        g_object_weak_unref(self->obj, (GWeakNotify) pygobject_weak_ref_notify, self);
+        self->obj = NULL;
+    }
+    return 0;
+}
+
+static void
+pygobject_weak_ref_dealloc(PyGObjectWeakRef *self)
+{
+    PyObject_GC_UnTrack((PyObject *)self);
+    pygobject_weak_ref_clear(self);
+    PyObject_GC_Del(self);
+}
+
+static PyObject *
+pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data)
+{
+    PyGObjectWeakRef *self;
+
+    self = PyObject_GC_New(PyGObjectWeakRef, &PyGObjectWeakRef_Type);
+    self->callback = callback;
+    self->user_data = user_data;
+    Py_XINCREF(self->callback);
+    Py_XINCREF(self->user_data);
+    self->obj = obj;
+    g_object_weak_ref(self->obj, (GWeakNotify) pygobject_weak_ref_notify, self);
+    if (callback != NULL) {
+          /* when we have a callback, we should INCREF the weakref
+           * object to make it stay alive even if it goes out of scope */
+        self->have_floating_ref = TRUE;
+        Py_INCREF((PyObject *) self);
+    }
+    return (PyObject *) self;
+}
+
+static PyObject *
+pygobject_weak_ref_unref(PyGObjectWeakRef *self, PyObject *args)
+{
+    if (!self->obj) {
+        PyErr_SetString(PyExc_ValueError, "weak ref already unreffed");
+        return NULL;
+    }
+    g_object_weak_unref(self->obj, (GWeakNotify) pygobject_weak_ref_notify, self);
+    self->obj = NULL;
+    if (self->have_floating_ref) {
+        self->have_floating_ref = FALSE;
+        Py_DECREF(self);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef pygobject_weak_ref_methods[] = {
+    { "unref", (PyCFunction)pygobject_weak_ref_unref, METH_NOARGS},
+    { NULL, NULL, 0}
+};
+
+static PyObject *
+pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
+{
+    static char *argnames[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, ":__call__", argnames))
+        return NULL;
+
+    if (self->obj)
+        return pygobject_new_full(self->obj, FALSE, NULL);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+PyTypeObject PyGObjectWeakRef_Type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                                          /* ob_size */
+    "gobject.GObjectWeakRef",                   /* tp_name */
+    sizeof(PyGObjectWeakRef),                   /* tp_basicsize */
+    0,                                          /* tp_itemsize */
+    (destructor)pygobject_weak_ref_dealloc,     /* tp_dealloc */
+    0,                                          /* tp_print */
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_compare */
+    0,                                          /* tp_repr */
+    0,                                          /* tp_as_number */
+    0, 						/* tp_as_sequence */
+    0,                                          /* tp_as_mapping */
+    0,                                          /* tp_hash */
+    (ternaryfunc)pygobject_weak_ref_call,  	/*tp_call*/
+    0,                                          /* tp_str */
+    (getattrofunc)0,            		/* tp_getattro */
+    (setattrofunc)0,            		/* tp_setattro */
+    0,                                          /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,	/* tp_flags */
+    "A GObject weak reference",                 /* tp_doc */
+    (traverseproc)pygobject_weak_ref_traverse,  /* tp_traverse */
+    (inquiry)pygobject_weak_ref_clear,          /* tp_clear */
+    0,                                          /* tp_richcompare */
+    0,                                          /* tp_weaklistoffset */
+    0,      					/* tp_iter */
+    0,                                          /* tp_iternext */
+    pygobject_weak_ref_methods,			/* tp_methods */
+    0,						/* tp_members */
+    0,						/* tp_getset */
+    NULL,					/* tp_base */
+    0,						/* tp_dict */
+    0,						/* tp_descr_get */
+    0,						/* tp_descr_set */
+    0,						/* tp_dictoffset */
+    0,						/* tp_init */
+    0,						/* tp_alloc */
+    0,						/* tp_new */
+    0,						/* tp_free */
+    0,						/* tp_is_gc */
+    NULL,					/* tp_bases */
+};
