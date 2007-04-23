@@ -1,3 +1,8 @@
+2007-04-23  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* tests/test_properties.py (TestProperties.testMulti): Unit test
+	for get/set_properties.
+
 2007-04-23  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gobject/pygobject.c: Implemented pygobject_set_properties and

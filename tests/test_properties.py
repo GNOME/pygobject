@@ -192,3 +192,11 @@ class TestProperties(unittest.TestCase):
             obj.set_property(key, max)
             self.assertEqual(obj.get_property(key), max)
 
+
+    def testMulti(self):
+        obj = PropertyObject()
+        obj.set_properties(normal="foo",
+                           uint64=7)
+        normal, uint64 = obj.get_properties("normal", "uint64")
+        self.assertEqual(normal, "foo")
+        self.assertEqual(uint64, 7)
