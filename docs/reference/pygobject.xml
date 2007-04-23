@@ -25,9 +25,22 @@ linkend="method-gobject--get-property">get_property</link></methodname>
 	</methodsynopsis>
 	<methodsynopsis language="python">
 	  <methodname><link
+linkend="method-gobject--get-properties">get_properties</link></methodname>
+	  <methodparam><parameter>first_property_name</parameter></methodparam>
+	  <methodparam><parameter>...</parameter></methodparam>
+	</methodsynopsis>
+	<methodsynopsis language="python">
+	  <methodname><link
 linkend="method-gobject--set-property">set_property</link></methodname>
 	  <methodparam><parameter>property_name</parameter></methodparam>
 	  <methodparam><parameter>value</parameter></methodparam>
+	</methodsynopsis>
+	<methodsynopsis language="python">
+	  <methodname><link
+linkend="method-gobject--set-properties">set_properties</link></methodname>
+	  <methodparam><parameter>property_name</parameter>
+	  <initializer>value</initializer></methodparam>
+	  <methodparam><parameter>...</parameter></methodparam>
 	</methodsynopsis>
 	<methodsynopsis language="python">
 	  <methodname><link
@@ -242,6 +255,40 @@ if the property name is not registered with the object class.</para>
 
     </refsect2>
 
+    <refsect2 id="method-gobject--get-properties">
+      <title>gobject.GObject.get_properties</title>
+
+      <programlisting><methodsynopsis language="python">
+	  <methodname>get_properties</methodname>
+	  <methodparam><parameter>first_property_name</parameter></methodparam>
+	  <methodparam><parameter>...</parameter></methodparam>
+	</methodsynopsis></programlisting>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>first_property_name</parameter>&nbsp;:</term>
+	  <listitem><simpara>a string containing the first property name for the
+GObject</simpara></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>...</parameter>&nbsp;:</term>
+	  <listitem><simpara>additional property names 
+</simpara></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
+	  <listitem><simpara>a tuple containing the property values 
+requested</simpara></listitem>
+	</varlistentry>
+      </variablelist>
+
+      <para>The <methodname>get_properties</methodname>() method returns a tuple containing
+the values of the properties requested, or
+None if there is no value associated with the property.</para>
+      <para>The <exceptionname>TypeError</exceptionname> exception is raised
+if the property name is not registered with the object class.</para>
+
+    </refsect2>
+
     <refsect2 id="method-gobject--set-property">
       <title>gobject.GObject.set_property</title>
 
@@ -266,6 +313,42 @@ to be set</simpara></listitem>
       <para>The <methodname>set_property</methodname>() method sets the
 property specified by <parameter>property_name</parameter> to the specified
 <parameter>value</parameter>.</para>
+      <para>The <exceptionname>TypeError</exceptionname> exception is raised
+if the property name is not registered with the object class or if the value
+specified could not be converted to the property type.</para>
+
+    </refsect2>
+    
+    <refsect2 id="method-gobject--set-properties">
+      <title>gobject.GObject.set_properties</title>
+
+      <programlisting><methodsynopsis language="python">
+	  <methodname>set_properties</methodname>
+	  <methodparam><parameter>property_name</parameter>
+	  <initializer>value</initializer></methodparam>
+	  <methodparam><parameter>...</parameter></methodparam>
+	</methodsynopsis></programlisting>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>property_name</parameter>&nbsp;:</term>
+	  <listitem><simpara>the property name</simpara></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>value</parameter>&nbsp;:</term>
+	  <listitem><simpara>a Python object containing the property value
+to be set</simpara></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><parameter>...</parameter>&nbsp;:</term>
+	  <listitem><simpara>additional property name and value 
+kwargs</simpara></listitem>
+	</varlistentry>
+      </variablelist>
+
+      <para>The <methodname>set_properties</methodname>() method sets the
+property specified by <parameter>property_name</parameter> to the specified
+<parameter>value</parameter>, followed by pairs of property name 
+and value as keyword arguments.</para>
       <para>The <exceptionname>TypeError</exceptionname> exception is raised
 if the property name is not registered with the object class or if the value
 specified could not be converted to the property type.</para>

@@ -1,3 +1,11 @@
+2007-04-23  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gobject/pygobject.c: Implemented pygobject_set_properties and
+	pygobject_get_properties in order to set multiple properties using
+	keyword arguments. Fixes 403212
+	
+	* docs/reference/pygobject.xml: Docs for the above new methods.
+
 2007-04-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c, gobject/pygobject.h: Add a new

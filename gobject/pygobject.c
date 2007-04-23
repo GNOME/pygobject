@@ -1183,6 +1183,61 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
+pygobject_get_properties(PyGObject *self, PyObject *args)
+{
+    GObjectClass *class;
+    int len, i;
+    PyObject *tuple;
+
+    if ((len = PyTuple_Size(args)) < 1) {
+        PyErr_SetString(PyExc_TypeError, "requires at least one argument");
+        return NULL;
+    }
+
+    tuple = PyTuple_New(len);
+    class = G_OBJECT_GET_CLASS(self->obj);
+    for (i = 0; i < len; i++) {
+        PyObject *py_property = PyTuple_GetItem(args, i);
+        gchar *property_name;
+        GParamSpec *pspec;
+        GValue value = { 0 };
+        PyObject *item;
+
+        if (!PyString_Check(py_property)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "Expected string argument for property.");
+            return NULL;
+        }
+
+        property_name = PyString_AsString(py_property);
+
+        pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
+					 property_name);
+        if (!pspec) {
+	    PyErr_Format(PyExc_TypeError,
+		         "object of type `%s' does not have property `%s'",
+		         g_type_name(G_OBJECT_TYPE(self->obj)), property_name);
+    	return NULL;
+        }
+        if (!(pspec->flags & G_PARAM_READABLE)) {
+	    PyErr_Format(PyExc_TypeError, "property %s is not readable",
+		        property_name);
+	    return NULL;
+        }
+        g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+
+        g_object_get_property(self->obj, property_name, &value);
+
+        item = pyg_value_as_pyobject(&value, TRUE);
+        PyTuple_SetItem(tuple, i, item);
+
+        g_value_unset(&value);
+    }
+
+    return tuple;
+}
+
+static PyObject *
 pygobject_set_property(PyGObject *self, PyObject *args)
 {
     gchar *param_name;
@@ -1207,6 +1262,56 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     if (!set_property_from_pspec(self->obj, param_name, pspec, pvalue))
 	return NULL;
     
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
+{    
+    GObjectClass    *class;
+    Py_ssize_t      pos;
+    PyObject        *value;
+    PyObject        *key;
+
+    CHECK_GOBJECT(self);
+
+    class = G_OBJECT_GET_CLASS(self->obj);
+    
+    g_object_freeze_notify (G_OBJECT(self->obj));
+    pos = 0;
+
+    while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
+    gchar *key_str = PyString_AsString (key);
+    GParamSpec *pspec;
+    GValue gvalue ={ 0, };
+
+    pspec = g_object_class_find_property (class, key_str);
+    if (!pspec) {
+	    gchar buf[512];
+
+	    g_snprintf(buf, sizeof(buf),
+		       "object `%s' doesn't support property `%s'",
+		       g_type_name(G_OBJECT_TYPE(self->obj)), key_str);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    return NULL;
+	}
+
+	g_value_init(&gvalue, G_PARAM_SPEC_VALUE_TYPE(pspec));
+	if (pyg_value_from_pyobject(&gvalue, value)) {
+	    gchar buf[512];
+
+	    g_snprintf(buf, sizeof(buf),
+		       "could not convert value for property `%s'", key_str);
+	    PyErr_SetString(PyExc_TypeError, buf);
+	    return NULL;
+	}
+	g_object_set_property(G_OBJECT(self->obj), key_str, &gvalue);
+	g_value_unset(&gvalue);
+    }
+
+    g_object_thaw_notify (G_OBJECT(self->obj));
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1854,7 +1959,9 @@ static PyMethodDef pygobject_methods[] = {
     { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
       METH_VARARGS|METH_KEYWORDS },
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
+    { "get_properties", (PyCFunction)pygobject_get_properties, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
+    { "set_properties", (PyCFunction)pygobject_set_properties, METH_KEYWORDS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
     { "notify", (PyCFunction)pygobject_notify, METH_VARARGS },
     { "thaw_notify", (PyCFunction)pygobject_thaw_notify, METH_VARARGS },
