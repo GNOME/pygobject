@@ -1,4 +1,7 @@
+=== 2.13.0 ===
 2007-04-23  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Bump version to 2.13.0.
 
 	* tests/test_properties.py (TestProperties.testMulti): Unit test
 	for get/set_properties.

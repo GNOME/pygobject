@@ -1,3 +1,14 @@
+2.13.0 23-april-2007
+        - Release the GIL in g_object_set_property (Edward Hervey, #395048)
+        - Break PyGObject<->GObject reference cycle (Gustavo Carneiro, #320428)
+        - use static inline functions for init_pygobject (Gustavo, #419379)
+        - Wrap g_set_application_name, g_set_prgname
+          (Havoc Pennington, #415853)
+        - New pyg_gerror_exception_check API (Gustavo, #425242)
+        - New API to get/set multiple properties
+          (Gian Mario Tagliaretti, #403212)
+        - Misc. bug fixes.
+
 2.12.3 18-november-2006
        - distutils build fixes (Cedric)
        - documentation updates (John)
