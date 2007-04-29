@@ -87,14 +87,6 @@ _wrap_test_g_object_new (PyObject * self)
     return rv;
 }
 
-static PyMethodDef testhelper_methods[] = {
-    { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
-    { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
-    { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
-    { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
-    { NULL, NULL }
-};
-
 /* TestUnknown */
 static PyObject *
 _wrap_test_interface_iface_method(PyGObject *self, PyObject *args, PyObject *kwargs)
@@ -319,6 +311,154 @@ static const GInterfaceInfo __TestInterface__iinfo = {
     NULL
 };
 
+#include <string.h>
+#include <glib-object.h>
+
+static void
+test1_callback (GObject *object, char *data)
+{
+  g_return_if_fail (G_IS_OBJECT (object));
+  g_return_if_fail (!strcmp (data, "user-data"));
+}
+
+static void
+test1_callback_swapped (char *data, GObject *object)
+{
+  g_return_if_fail (G_IS_OBJECT (object));
+  g_return_if_fail (!strcmp (data, "user-data"));
+}
+
+static void
+test2_callback (GObject *object, char *string)
+{
+  g_return_if_fail (G_IS_OBJECT (object));
+  g_return_if_fail (!strcmp (string, "string"));
+}
+
+static int
+test3_callback (GObject *object, double d)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), -1);
+  g_return_val_if_fail (d == 42.0, -1);
+
+  return 20;
+}
+
+static void
+test4_callback (GObject *object,
+                gboolean b, long l, float f, double d, guint uint, gulong ulong,
+                gpointer user_data)
+{
+  g_return_if_fail (b == TRUE);
+  g_return_if_fail (l == 10L);
+  g_return_if_fail (f <= 3.14001 && f >= 3.13999);
+  g_return_if_fail (d == 1.78);
+  g_return_if_fail (uint == 20);
+  g_return_if_fail (ulong == 30L);
+}
+
+static float
+test_float_callback (GObject *object, float f)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), -1);
+  g_return_val_if_fail (f <= 1.234001 && f >= 1.123999, -1);
+
+  return f;
+}
+
+static double
+test_double_callback (GObject *object, double d)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), -1);
+  g_return_val_if_fail (d <= 1.234001 && d >= 1.123999, -1);
+
+  return d;
+}
+
+static char *
+test_string_callback (GObject *object, char *s)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+  g_return_val_if_fail (!strcmp(s, "str"), NULL);
+
+  return g_strdup (s);
+}
+
+static GObject *
+test_object_callback (GObject *object, GObject *o)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+
+  return o;
+}
+
+void
+connectcallbacks (GObject *object)
+{
+
+  gchar *data = "user-data";
+  
+  g_signal_connect (G_OBJECT (object),
+                    "test1",
+                    G_CALLBACK (test1_callback), 
+                    data);
+  g_signal_connect_swapped (G_OBJECT (object),
+                    "test1",
+                    G_CALLBACK (test1_callback_swapped), 
+                    data);
+  g_signal_connect (G_OBJECT (object),
+                    "test2",
+                    G_CALLBACK (test2_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test3",
+                    G_CALLBACK (test3_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test4",
+                    G_CALLBACK (test4_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_float",
+                    G_CALLBACK (test_float_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_double",
+                    G_CALLBACK (test_double_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_string",
+                    G_CALLBACK (test_string_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_object",
+                    G_CALLBACK (test_object_callback), 
+                    NULL);
+}
+
+static PyObject *
+_wrap_connectcallbacks(PyObject * self, PyObject *args)
+{
+    PyGObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O", &obj))
+      return NULL;
+
+    connectcallbacks (G_OBJECT (obj->obj));
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef testhelper_functions[] = {
+    { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
+    { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
+    { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
+    { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
+    { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
+    { NULL, NULL }
+};
+
 void 
 inittesthelper ()
 {
@@ -327,7 +467,7 @@ inittesthelper ()
   
   init_pygobject();
   g_thread_init(NULL);
-  m = Py_InitModule ("testhelper", testhelper_methods);
+  m = Py_InitModule ("testhelper", testhelper_functions);
 
   d = PyModule_GetDict(m);
 

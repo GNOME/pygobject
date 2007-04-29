@@ -3,7 +3,7 @@
 import gc
 import unittest
 
-from common import gobject
+from common import gobject, testhelper
 
 class C(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
@@ -302,6 +302,67 @@ class TestSigProp(unittest.TestCase):
     def testEmitInPropertySetter(self):
         obj = SigPropClass()
         self.failIf(obj.signal_emission_failed)
+
+f = gobject.SIGNAL_RUN_FIRST
+l = gobject.SIGNAL_RUN_LAST
+float = gobject.TYPE_FLOAT
+double = gobject.TYPE_DOUBLE
+uint = gobject.TYPE_UINT
+ulong = gobject.TYPE_ULONG
+
+class CM(gobject.GObject):
+    __gsignals__ = dict(
+        test1=(f, None, ()),
+        test2=(l, None, (str,)),
+        test3=(l, int, (double,)),
+        test4=(f, None, (bool, long, float, double, int, uint, ulong)),
+        test_float=(l, float, (float,)),
+        test_double=(l, double, (double, )),
+        test_string=(l, str, (str, )),
+        test_object=(l, object, (object, )),
+    )
+
+class _TestCMarshaller:
+    def setUp(self):
+        self.obj = CM()
+        testhelper.connectcallbacks(self.obj)
+
+    def testTest1(self):
+        self.obj.emit("test1")
+
+    def testTest2(self):
+        self.obj.emit("test2", "string")
+
+    def testTest3(self):
+        rv = self.obj.emit("test3", 42.0)
+        self.assertEqual(rv, 20)
+
+    def testTest4(self):
+        self.obj.emit("test4", True, 10L, 3.14, 1.78, 20, 30L, 31L)
+
+    def testTestReturnFloat(self):
+        rv = self.obj.emit("test-float", 1.234)
+        self.failUnless(rv >= 1.233999 and rv <= 1.2400001, rv)
+
+    def testTestReturnDouble(self):
+        rv = self.obj.emit("test-double", 1.234)
+        self.assertEqual(rv, 1.234)
+
+    def testTestReturnString(self):
+        rv = self.obj.emit("test-string", "str")
+        self.assertEqual(rv, "str")
+
+    def testTestReturnObject(self):
+        rv = self.obj.emit("test-object", self)
+        self.assertEqual(rv, self)
+
+if 'generic-c-marshaller' in gobject.features:
+    class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
+        pass
+else:
+    print
+    print '** WARNING: LIBFFI disabled, not testing'
+    print
 
 if __name__ == '__main__':
     unittest.main()

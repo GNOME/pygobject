@@ -127,6 +127,17 @@ AC_SUBST([pygobject_CODEGEN_DEFINES])
 
 AS_AC_EXPAND(DATADIR, $datadir)
 
+dnl libffi
+AC_MSG_CHECKING(for ffi.h)
+AC_TRY_CPP([#include <ffi.h>], pygobject_ffi_h=yes, pygobject_ffi_h=no)
+if test $pygobject_ffi_h = yes; then
+   AC_DEFINE(HAVE_FFI_H,1,[Have ffi.h include file])
+   FFI_LIBS="-lffi"
+fi
+AC_MSG_RESULT([$pygobject_ffi_h])
+AM_CONDITIONAL(HAVE_LIBFFI, test "$pygobject_ffi_h" = "yes")
+AC_SUBST(FFI_LIBS)
+
 dnl add required cflags ...
 JH_ADD_CFLAG([-Wall])
 JH_ADD_CFLAG([-std=c9x])
@@ -143,3 +154,7 @@ AC_CONFIG_FILES(
   tests/Makefile
   PKG-INFO)
 AC_OUTPUT
+
+echo
+echo "libffi support: $pygobject_ffi_h"
+echo

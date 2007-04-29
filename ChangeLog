@@ -1,3 +1,25 @@
+2007-04-29  Johan Dahlin  <jdahlin@async.com.br>
+
+	* README: 
+	* configure.ac:
+	* gobject/Makefile.am:
+	* gobject/ffi-marshaller.c: (g_value_to_ffi_type),
+	(g_value_from_ffi_type), (g_cclosure_marshal_generic_ffi):
+	* gobject/ffi-marshaller.h:
+	* gobject/gobjectmodule.c: (create_signal), (init_gobject):
+	* pygobject-2.0.pc.in:
+	* tests/test_signal.py:
+	* tests/testhelpermodule.c: (test1_callback),
+	(test1_callback_swapped), (test2_callback), (test3_callback),
+	(test4_callback), (test_float_callback), (test_double_callback),
+	(test_string_callback), (test_object_callback), (connectcallbacks),
+	(_wrap_connectcallbacks), (inittesthelper):
+
+	Add a generic CClosure marshaller based on ffi. 
+	This makes it possible to connect to signals on PyGObjects from C.
+	libffi is now an optional dependency
+	Fixes #353816 (Edward Hervey)
+
 2007-04-23  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
 	* configure.ac: Post-release version bump.

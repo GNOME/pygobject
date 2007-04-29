@@ -21,7 +21,7 @@ endif
 
 _gobject_la_CFLAGS = $(GLIB_CFLAGS)
 _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gobject
-_gobject_la_LIBADD = $(GLIB_LIBS)
+_gobject_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
 _gobject_la_SOURCES = \
 	gobjectmodule.c \
 	pygboxed.c \
@@ -39,6 +39,10 @@ _gobject_la_SOURCES = \
 	pygtype.c \
 	pygoptioncontext.c \
 	pygoptiongroup.c
+
+if HAVE_LIBFFI
+_gobject_la_SOURCES += ffi-marshaller.c
+endif
 
 if PLATFORM_WIN32
 _gobject_la_CFLAGS += -DPLATFORM_WIN32

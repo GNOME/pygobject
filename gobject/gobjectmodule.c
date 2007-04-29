@@ -28,6 +28,13 @@
 #include "pythread.h"
 #include <gobject/gvaluecollector.h>
 
+#ifdef HAVE_FFI_H
+#include "ffi-marshaller.h"
+static GSignalCMarshaller marshal_generic = g_cclosure_marshal_generic_ffi;
+#else
+static GSignalCMarshaller marshal_generic = 0;
+#endif
+
 static PyObject *gerror_exc = NULL;
 static gboolean use_gil_state_api = FALSE;
 static PyObject *_pyg_signal_accumulator_true_handled_func;
@@ -594,7 +601,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
 			      pyg_signal_class_closure_get(),
 			      accumulator, accum_data,
-			      (GSignalCMarshaller)0,
+			      marshal_generic,
 			      return_type, n_params, param_types);
     g_free(param_types);
 
@@ -3452,7 +3459,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 DL_EXPORT(void)
 init_gobject(void)
 {
-    PyObject *m, *d, *o, *tuple;
+    PyObject *m, *d, *o, *tuple, *features;
     PyObject *descr;
     PyObject *warning;
     
@@ -3556,7 +3563,16 @@ init_gobject(void)
     PyDict_SetItemString(d, "_PyGObject_API",
 			 o=PyCObject_FromVoidPtr(&pygobject_api_functions,NULL));
     Py_DECREF(o);
-	
+
+
+    /* features */
+    features = PyDict_New();
+#ifdef HAVE_FFI_H
+    PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
+#endif
+    PyDict_SetItemString(d, "features", features);
+    Py_DECREF(features);
+
     /* some constants */
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
