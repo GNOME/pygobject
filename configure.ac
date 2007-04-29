@@ -146,6 +146,7 @@ JH_ADD_CFLAG([-fno-strict-aliasing])
 AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
+  pygobject-2.0-uninstalled.pc
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py

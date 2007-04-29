@@ -1,4 +1,13 @@
-2007-04-29  Johan Dahlin  <jdahlin@async.com.br>
+2007-04-29  Damien Carbery <damien.carbery@sun.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac:
+	* pygobject-2.0-uninstalled.pc.in:
+
+	Add an uninstalled pkg-config file, fixes #385129
+
+2007-04-29  Johan Dahlin  <johan@gnome.org>
 
 	* README: 
 	* configure.ac:
