@@ -1,3 +1,12 @@
+2007-04-29  Loïc Minier  <lool+gnome@via.ecp.fr>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* autogen.sh:
+
+	Use dirname $0 instead of pwd to compute srcdir in autogen,
+	fixes #409234
+	
 2007-04-29  Damien Carbery <damien.carbery@sun.com>
 
 	reviewed by: Johan Dahlin  <johan@gnome.org>

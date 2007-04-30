@@ -7,7 +7,7 @@ test -z "$srcdir" && srcdir=.
 REQUIRED_AUTOMAKE_VERSION=1.8
 
 PKG_NAME="PyGObject"
-ACLOCAL_FLAGS="-I `pwd`/m4 $ACLOCAL_FLAGS"
+ACLOCAL_FLAGS="-I `dirname $0`/m4 $ACLOCAL_FLAGS"
 
 #name of package
 PKG_NAME=${PKG_NAME:-Package}
