@@ -234,3 +234,15 @@ class TestSubType(unittest.TestCase):
         gobj.set_data('tmp', CallInDel(on_dispose))
         del gobj
         assert len(disposed_calls) == 1
+
+    def testDescriptor(self):
+        class GProperty(object):
+            def __set__(self, instance, value):
+                pass
+
+        class C(gobject.GObject):
+            str = GProperty()
+
+        o = C()
+        o.str = 'str'
+        o.str = 'str'

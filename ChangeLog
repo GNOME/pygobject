@@ -1,3 +1,13 @@
+2007-04-30  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* tests/test_subtype.py (TestSubType.testDescriptor): Unit test
+	for the bug below.
+
+	* gobject/pygobject.c (pygobject_setattro): Account for the case
+	when attribute setting doesn't actually create an instance
+	dictionary, in which case pygobject_switch_to_toggle_ref would be
+	called twice, thereby causing gobject error.
+
 2007-04-29  James Livingstone  <doclivingstone@gmail.com>
 
 	reviewed by: Johan Dahlin  <johan@gnome.org>

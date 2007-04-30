@@ -2011,12 +2011,13 @@ pygobject_setattro(PyObject *self, PyObject *name, PyObject *value)
 {
     int res;
     PyGObject *gself = (PyGObject *) self;
-    if (gself->inst_dict == NULL) {
+    PyObject *inst_dict_before = gself->inst_dict;
+      /* call parent type's setattro */
+    res = PyGObject_Type.tp_base->tp_setattro(self, name, value);
+    if (inst_dict_before == NULL && gself->inst_dict != NULL) {
         if (G_LIKELY(gself->obj))
             pygobject_switch_to_toggle_ref(gself);
     }
-      /* call parent type's setattro */
-    res = PyGObject_Type.tp_base->tp_setattro(self, name, value);
     return res;
 }
 
