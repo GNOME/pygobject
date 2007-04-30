@@ -1,7 +1,7 @@
 import unittest
 
 from gobject import GType
-from common import gobject
+from common import gobject, testhelper
 
 class GTypeTest(unittest.TestCase):
     def checkType(self, expected, *objects):
@@ -53,6 +53,14 @@ class GTypeTest(unittest.TestCase):
 
     def testObject(self):
         self.checkType(gobject.TYPE_OBJECT, 'PyObject')
+
+    def testValueArray(self):
+        array = [1, 2, 3, "foo", True]
+        self.assertEqual(array, testhelper.test_value_array(array))
+
+    def testValueArrayNone(self):
+        array = [1, 2, 3, "foo", True, None]
+        self.assertEqual(array, testhelper.test_value_array(array))
 
     # XXX: Flags, Enums
 

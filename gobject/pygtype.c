@@ -628,6 +628,8 @@ pyg_value_array_from_pyobject(GValue *value,
 
 	if (pspec && pspec->element_spec)
 	    type = G_PARAM_SPEC_VALUE_TYPE(pspec->element_spec);
+	else if (item == Py_None)
+	    type = G_TYPE_POINTER; /* store None as NULL */
 	else {
 	    type = pyg_type_from_object((PyObject *) item->ob_type);
 	    if (! type) {

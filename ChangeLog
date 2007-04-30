@@ -1,3 +1,12 @@
+2007-04-29  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygtype.c: (pyg_value_array_from_pyobject):
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: (_wrap_test_value_array):
+
+	Treat None in a GValueArray as pointer/NULL, patch by
+	Ed Catmur, fixes #352209.
+
 2007-04-29  Loïc Minier  <lool+gnome@via.ecp.fr>
 
 	reviewed by: Johan Dahlin  <johan@gnome.org>

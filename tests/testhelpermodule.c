@@ -450,12 +450,31 @@ _wrap_connectcallbacks(PyObject * self, PyObject *args)
     return Py_None;
 }
 
+static PyObject *
+_wrap_test_value_array(PyObject *self, PyObject *args)
+{
+  GValue tvalue = {0,}, *value = &tvalue;
+  PyObject *obj;
+
+  if (!PyArg_ParseTuple(args, "O", &obj))
+    return NULL;
+
+  g_value_init(value, G_TYPE_VALUE_ARRAY);
+  if (pyg_value_from_pyobject(value, obj)) {
+    PyErr_SetString(PyExc_TypeError, "Could not convert to GValueArray");
+    return NULL;
+  }
+  
+  return pyg_value_as_pyobject(value, FALSE);
+}
+
 static PyMethodDef testhelper_functions[] = {
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
     { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
+    { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
     { NULL, NULL }
 };
 
