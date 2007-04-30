@@ -1,3 +1,11 @@
+2007-04-29  Damien Carbery <damien.carbery@sun.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* tests/test-unknown.c: (test_interface_iface_method):
+
+	Do not return in a void function, fixes #385127
+
 2007-04-29  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/pygflags.c: (pyg_flags_from_gtype):

@@ -109,5 +109,5 @@ void test_interface_iface_method (TestInterface *instance)
 {
   TestInterfaceIface *iface = TEST_INTERFACE_GET_IFACE (instance);
 
-  return (* iface->iface_method) (instance);
+  (* iface->iface_method) (instance);
 }
