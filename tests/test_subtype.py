@@ -155,7 +155,7 @@ class TestSubType(unittest.TestCase):
         box.destroy()
         del box
         self.assertEqual(bref(), None)
-        
+
     def testGhostWeakref(self):
         b = gtk.Button()
         bref = b.weak_ref()
@@ -213,7 +213,7 @@ class TestSubType(unittest.TestCase):
             pass
         a = b.child
         #print "__dict__3: refcount=%i id=%i" % (sys.getrefcount(a.__dict__), id(a.__dict__))
-        
+
         self.assert_(hasattr(a, 'd'))
         self.assert_(hasattr(a, 'foo'))
         self.assertEqual(a.foo, "hello")
@@ -223,7 +223,7 @@ class TestSubType(unittest.TestCase):
         class CallInDel:
             def __init__(self, callback):
                 self.callback = callback
-                
+
             def __del__(self):
                 if callable(self.callback):
                     self.callback()
@@ -236,6 +236,7 @@ class TestSubType(unittest.TestCase):
         assert len(disposed_calls) == 1
 
     def testDescriptor(self):
+        # Test for bug #434659
         class GProperty(object):
             def __set__(self, instance, value):
                 pass
