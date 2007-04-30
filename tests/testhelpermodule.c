@@ -484,8 +484,8 @@ inittesthelper ()
   PyObject *m, *d;
   PyObject *module;
   
-  init_pygobject();
   g_thread_init(NULL);
+  init_pygobject();
   m = Py_InitModule ("testhelper", testhelper_functions);
 
   d = PyModule_GetDict(m);

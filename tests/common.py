@@ -15,8 +15,8 @@ def importModules(buildDir, srcDir):
     sys.path.insert(0, os.path.join(buildDir, 'tests'))
     sys.argv.append('--g-fatal-warnings')
 
-    gobject = importModule('gobject', buildDir, 'gobject')
     testhelper = importModule('testhelper', '.')
+    gobject = importModule('gobject', buildDir, 'gobject')
 
     ltihooks.uninstall()
     del ltihooks

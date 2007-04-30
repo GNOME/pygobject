@@ -1,5 +1,11 @@
 2007-04-30  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
+	* tests/common.py (importModules): Import testhelper first so that
+	g_thread_init is called before init_pygobject.
+
+	* tests/testhelpermodule.c (inittesthelper): Call g_thread_init
+	before init_pygobject.
+
 	* tests/test_subtype.py (TestSubType.testDescriptor): Unit test
 	for the bug below.
 
