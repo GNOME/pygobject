@@ -1,3 +1,14 @@
+2007-04-29  James Livingstone  <doclivingstone@gmail.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygtype.c: (pyg_value_from_pyobject):
+	* tests/test_signal.py:
+
+	Add a missing else to avoid throwing a TypeError.
+	Includes a test written by Ed Catmur.
+	Fixes #374653
+
 2007-04-29  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/pygtype.c: (pyg_value_array_from_pyobject):

@@ -849,7 +849,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 
 	if (obj == Py_None)
 	    g_value_set_boxed(value, NULL);
-	if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
+	else if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT))
 	    g_value_set_boxed(value, obj);
 	else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
 		   G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype))

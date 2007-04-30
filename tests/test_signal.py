@@ -2,6 +2,7 @@
 
 import gc
 import unittest
+import sys
 
 from common import gobject, testhelper
 
@@ -363,6 +364,20 @@ else:
     print
     print '** WARNING: LIBFFI disabled, not testing'
     print
+
+# Test for 374653
+class TestPyGValue(unittest.TestCase):
+    def testNoneNULLBoxedConversion(self):
+        class C(gobject.GObject):
+            __gsignals__ = dict(my_boxed_signal=(
+                gobject.SIGNAL_RUN_LAST,
+                gobject.type_from_name('GStrv'), ()))
+
+        obj = C()
+        obj.connect('my-boxed-signal', lambda obj: None)
+        sys.last_type = None
+        obj.emit('my-boxed-signal')
+        assert not sys.last_type
 
 if __name__ == '__main__':
     unittest.main()
