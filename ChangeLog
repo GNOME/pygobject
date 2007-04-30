@@ -1,3 +1,8 @@
+2007-04-29  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygflags.c: (pyg_flags_from_gtype):
+	Fix leak, patch by Daniel Berrange. Fixes #428726 (Phil Dumont)
+
 2007-04-29  Damien Carbery <damien.carbery@sun.com>
 
 	reviewed by: Johan Dahlin  <johan@gnome.org>

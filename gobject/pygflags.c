@@ -184,9 +184,9 @@ pyg_flags_from_gtype (GType gtype, int value)
 	
 	((PyIntObject*)retval)->ob_ival = value;
 	((PyGFlags*)retval)->gtype = gtype;
-    } 
-
-    Py_INCREF(retval);
+    } else {
+	Py_INCREF(retval);
+    }
     return retval;
 }
 
