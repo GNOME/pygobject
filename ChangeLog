@@ -1,3 +1,18 @@
+2007-05-01  Johan Dahlin  <johan@gnome.org>
+
+	* examples/properties.py:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/constants.py.in:
+	* gobject/generate-constants.c: (main):
+	* gobject/propertyhelper.py:
+	* tests/Makefile.am:
+	* tests/test_enum.py:
+	* tests/test_interface.py:
+	* tests/test_properties.py:
+
+	Add a property helper, fixes #338098
+
 2007-04-30  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
 	* tests/common.py (importModules): Import testhelper first so that

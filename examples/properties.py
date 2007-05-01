@@ -1,43 +1,31 @@
 import gobject
 
 class MyObject(gobject.GObject):
-    __gproperties__ = {
-        'foo': (gobject.TYPE_STRING, 'foo property', 'the foo of the object',
-                'bar', gobject.PARAM_READWRITE),
-        'boolprop': (gobject.TYPE_BOOLEAN, 'bool prop', 'a test boolean prop',
-                     0, gobject.PARAM_READABLE),
-    }
+
+    foo = gobject.property(type=str, default='bar')
+    boolprop = gobject.property(type=bool, default=False)
 
     def __init__(self):
-        self.__gobject_init__()
-        self.foo = 'bar'
-    def do_set_property(self, pspec, value):
-        print '    do_set_property called for %s=%r' % (pspec.name, value)
-        if pspec.name == 'foo':
-            self.foo = value
-        else:
-            raise AttributeError, 'unknown property %s' % pspec.name
-    def do_get_property(self, pspec):
-        print '    do_get_property called for %s' % pspec.name
-        if pspec.name == 'foo':
-            return self.foo
-        elif pspec.name == 'boolprop':
-            return 1
-        else:
-            raise AttributeError, 'unknown property %s' % pspec.name
+        gobject.GObject.__init__(self)
+
+    @gobject.property
+    def readonly(self):
+        return 'readonly'
+
 gobject.type_register(MyObject)
 
-print "MyObject properties: ", gobject.list_properties(MyObject)
+print "MyObject properties: ", list(MyObject.props)
+
 obj = MyObject()
 
-val = obj.get_property('foo')
-print "obj.get_property('foo') == ", val
+print "obj.foo ==", obj.foo
 
-obj.set_property('foo', 'spam')
-print "obj.set_property('foo', 'spam')"
+obj.foo = 'spam'
+print "obj.foo = spam"
 
-val = obj.get_property('foo')
-print "obj.get_property('foo') == ", val
+print "obj.foo == ", obj.foo
 
-val = obj.get_property('boolprop')
-print "obj.get_property('boolprop') == ", val
+print "obj.boolprop == ", obj.boolprop
+
+print obj.readonly
+obj.readonly = 'does-not-work'

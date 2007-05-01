@@ -27,14 +27,60 @@ try:
 except ImportError:
     pass
 
+from gobject.constants import *
 from _gobject import *
 _PyGObject_API = _gobject._PyGObject_API
+
+from propertyhelper import property
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
+        cls._install_properties()
         cls._type_register(cls.__dict__)
+
+    def _install_properties(cls):
+        gproperties = getattr(cls, '__gproperties__', {})
+        props = {}
+        for name, prop in cls.__dict__.items():
+            if isinstance(prop, property): # not same as the built-in
+                if name in gproperties:
+                    raise ValueError
+                prop.name = name
+                props[name] = prop.get_pspec_args()
+
+        if not props:
+            return
+
+        if not gproperties:
+            cls.__gproperties__ = props
+        else:
+            gproperties.update(props)
+
+        if (hasattr(cls, 'do_get_property') or
+            hasattr(cls, 'do_set_property')):
+            for prop in props:
+                if (prop.getter != prop.default_getter or
+                    prop.setter != prop.default_setter):
+                    raise TypeError(
+                        "GObject subclass %r defines do_get/set_property"
+                        " and it also uses a property which a custom setter"
+                        " or getter. This is not allowed" % (cls,))
+
+        def obj_get_property(self, pspec):
+            name = pspec.name.replace('-', '_')
+            prop = getattr(cls, name, None)
+            if prop:
+                return prop.getter(self)
+        cls.do_get_property = obj_get_property
+
+        def obj_set_property(self, pspec, value):
+            name = pspec.name.replace('-', '_')
+            prop = getattr(cls, name, None)
+            if prop:
+                prop.setter(self, value)
+        cls.do_set_property = obj_set_property
 
     def _type_register(cls, namespace):
         ## don't register the class if already registered
@@ -49,29 +95,5 @@ class GObjectMeta(type):
         type_register(cls, namespace.get('__gtype_name__'))
 
 _gobject._install_metaclass(GObjectMeta)
-
-# TYPE_INVALID defined in gobjectmodule.c
-TYPE_NONE = type_from_name('void')
-TYPE_INTERFACE = type_from_name('GInterface')
-TYPE_CHAR = type_from_name('gchar')
-TYPE_UCHAR = type_from_name('guchar')
-TYPE_BOOLEAN = type_from_name('gboolean')
-TYPE_INT = type_from_name('gint')
-TYPE_UINT = type_from_name('guint')
-TYPE_LONG = type_from_name('glong')
-TYPE_ULONG = type_from_name('gulong')
-TYPE_INT64 = type_from_name('gint64')
-TYPE_UINT64 = type_from_name('guint64')
-TYPE_ENUM = type_from_name('GEnum')
-TYPE_FLAGS = type_from_name('GFlags')
-TYPE_FLOAT = type_from_name('gfloat')
-TYPE_DOUBLE = type_from_name('gdouble')
-TYPE_STRING = type_from_name('gchararray')
-TYPE_POINTER = type_from_name('gpointer')
-TYPE_BOXED = type_from_name('GBoxed')
-TYPE_PARAM = type_from_name('GParam')
-TYPE_OBJECT = type_from_name('GObject')
-TYPE_PYOBJECT = type_from_name('PyObject')
-TYPE_UNICHAR = TYPE_UINT
 
 del _gobject

@@ -3,15 +3,13 @@ import unittest
 import testmodule
 from common import gobject, testhelper
 from gobject import GObject, GInterface
+import gobject
 
 GUnknown = gobject.type_from_name("TestUnknown")
 Unknown = GUnknown.pytype
 
 class MyUnknown(Unknown, testhelper.Interface):
-    __gproperties__ = {
-        'some-property': (str, 'blurb', 'description',  'default',
-                          gobject.PARAM_READWRITE),
-    }
+    some_property = gobject.property(type=str)
 
     def __init__(self):
         Unknown.__init__(self)
@@ -24,10 +22,7 @@ class MyUnknown(Unknown, testhelper.Interface):
 gobject.type_register(MyUnknown)
 
 class MyObject(gobject.GObject, testhelper.Interface):
-    __gproperties__ = {
-        'some-property': (str, 'blurb', 'description',  'default',
-                          gobject.PARAM_READWRITE),
-    }
+    some_property = gobject.property(type=str)
 
     def __init__(self):
         GObject.__init__(self)

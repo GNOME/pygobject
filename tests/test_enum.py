@@ -1,20 +1,15 @@
 import unittest
 import warnings
 
+import gobject
 from gobject import GEnum, GFlags, GObject, GType, PARAM_READWRITE
 from common import gobject, atk, pango, gtk, gdk
 
 class PObject(GObject):
-    __gproperties__ = {
-        'enum': (gtk.WindowType, 'blurb', 'description',
-                 gtk.WINDOW_TOPLEVEL, PARAM_READWRITE),
-        'enum2': (gtk.WindowType, 'blurb', 'description',
-                  int(gtk.WINDOW_TOPLEVEL), PARAM_READWRITE),
-        'flags': (gtk.AttachOptions, 'blurb', 'description',
-                  gtk.EXPAND, PARAM_READWRITE),
-        'flags2': (gtk.AttachOptions, 'blurb', 'description',
-                   int(gtk.EXPAND), PARAM_READWRITE),
-    }
+    enum = gobject.property(type=gtk.WindowType, default=gtk.WINDOW_TOPLEVEL)
+    enum2 = gobject.property(type=gtk.WindowType, default=int(gtk.WINDOW_TOPLEVEL))
+    flags = gobject.property(type=gtk.AttachOptions, default=gtk.EXPAND)
+    flags2 = gobject.property(type=gtk.AttachOptions, default=int(gtk.EXPAND))
 
 class EnumTest(unittest.TestCase):
     def testEnums(self):

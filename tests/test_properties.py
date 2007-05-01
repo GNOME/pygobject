@@ -2,54 +2,26 @@
 import struct
 import unittest
 
-from common import testhelper
-from gobject import GObject, GType, new, PARAM_READWRITE, \
-     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY, \
-     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, \
-     TYPE_INT64, TYPE_UINT64
+import gobject
+from gobject import GObject, GType, GEnum, new, PARAM_READWRITE, \
+     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
+from gobject.constants import \
+     TYPE_INT, TYPE_UINT, TYPE_LONG, \
+     TYPE_ULONG, TYPE_INT64, TYPE_UINT64
+from gobject.constants import \
+     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
+     G_MAXULONG
 
 class PropertyObject(GObject):
-    __gproperties__ = {
-        'normal': (str, 'blurb', 'description',  'default',
-                     PARAM_READWRITE),
-        'construct': (str, 'blurb', 'description', 'default',
-                     PARAM_READWRITE|PARAM_CONSTRUCT),
-        'construct-only': (str, 'blurb', 'description', 'default',
-                     PARAM_READWRITE|PARAM_CONSTRUCT_ONLY),
-        'uint64': (TYPE_UINT64, 'blurb', 'description', 0, 10, 0,
-                   PARAM_READWRITE),
-    }
-
-    def __init__(self):
-        GObject.__init__(self)
-        self._value = 'default'
-        self._construct_only = None
-        self._construct = None
-        self._uint64 = 0L
-
-    def do_get_property(self, pspec):
-        if pspec.name == 'normal':
-            return self._value
-        elif pspec.name == 'construct':
-            return self._construct
-        elif pspec.name == 'construct-only':
-            return self._construct_only
-        elif pspec.name == 'uint64':
-            return self._uint64
-        else:
-            raise AssertionError
-
-    def do_set_property(self, pspec, value):
-        if pspec.name == 'normal':
-            self._value = value
-        elif pspec.name == 'construct':
-            self._construct = value
-        elif pspec.name == 'construct-only':
-            self._construct_only = value
-        elif pspec.name == 'uint64':
-            self._uint64 = value
-        else:
-            raise AssertionError
+    normal = gobject.property(type=str)
+    construct = gobject.property(
+        type=str,
+        flags=PARAM_READWRITE|PARAM_CONSTRUCT, default='default')
+    construct_only = gobject.property(
+        type=str,
+        flags=PARAM_READWRITE|PARAM_CONSTRUCT_ONLY)
+    uint64 = gobject.property(
+        type=TYPE_UINT64, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -200,3 +172,109 @@ class TestProperties(unittest.TestCase):
         normal, uint64 = obj.get_properties("normal", "uint64")
         self.assertEqual(normal, "foo")
         self.assertEqual(uint64, 7)
+
+class TestProperty(unittest.TestCase):
+    def testSimple(self):
+        class C(gobject.GObject):
+            str = gobject.property(type=str)
+            int = gobject.property(type=int)
+            float = gobject.property(type=float)
+            long = gobject.property(type=long)
+
+        self.failUnless(hasattr(C.props, 'str'))
+        self.failUnless(hasattr(C.props, 'int'))
+        self.failUnless(hasattr(C.props, 'float'))
+        self.failUnless(hasattr(C.props, 'long'))
+
+        o = C()
+        self.assertEqual(o.str, '')
+        o.str = 'str'
+        self.assertEqual(o.str, 'str')
+
+        self.assertEqual(o.int, 0)
+        o.int = 1138
+        self.assertEqual(o.int, 1138)
+
+        self.assertEqual(o.float, 0.0)
+        o.float = 3.14
+        self.assertEqual(o.float, 3.14)
+
+        self.assertEqual(o.long, 0L)
+        o.long = 100L
+        self.assertEqual(o.long, 100L)
+
+    def testCustomGetter(self):
+        class C(gobject.GObject):
+            def get_prop(self):
+                return 'value'
+            prop = gobject.property(getter=get_prop)
+
+        o = C()
+        self.assertEqual(o.prop, 'value')
+        self.assertRaises(TypeError, setattr, o, 'prop', 'xxx')
+
+    def testCustomSetter(self):
+        class C(gobject.GObject):
+            def set_prop(self, value):
+                self._value = value
+            prop = gobject.property(setter=set_prop)
+
+            def __init__(self):
+                self._value = None
+                gobject.GObject.__init__(self)
+
+        o = C()
+        self.assertEquals(o._value, None)
+        o.prop = 'bar'
+        self.assertEquals(o._value, 'bar')
+        self.assertRaises(TypeError, getattr, o, 'prop')
+
+    def testErrors(self):
+        self.assertRaises(TypeError, gobject.property, type='str')
+        self.assertRaises(TypeError, gobject.property, nick=False)
+        self.assertRaises(TypeError, gobject.property, blurb=False)
+        self.assertRaises(TypeError, gobject.property, type=bool, default=0)
+        self.assertRaises(TypeError, gobject.property, type=GEnum)
+        self.assertRaises(TypeError, gobject.property, type=GEnum, default=0)
+        self.assertRaises(TypeError, gobject.property, type=object, default=0)
+        self.assertRaises(TypeError, gobject.property, type=complex)
+        self.assertRaises(TypeError, gobject.property, flags=-10)
+
+    def testNameWithUnderscore(self):
+        class C(gobject.GObject):
+            prop_name = gobject.property(type=int)
+        o = C()
+        o.prop_name = 10
+        self.assertEqual(o.prop_name, 10)
+
+    def testRange(self):
+        maxint64 = 2 ** 62 - 1
+        minint64 = -2 ** 62 - 1
+        maxuint64 = 2 ** 63 - 1
+
+        types = [
+            (TYPE_INT, G_MININT, G_MAXINT),
+            (TYPE_UINT, 0, G_MAXUINT),
+            (TYPE_LONG, G_MINLONG, G_MAXLONG),
+            (TYPE_ULONG, 0, G_MAXULONG),
+            (TYPE_INT64, minint64, maxint64),
+            (TYPE_UINT64, 0, maxuint64),
+            ]
+
+        for gtype, min, max in types:
+            # Normal, everything is alright
+            prop = gobject.property(type=gtype, minimum=min, maximum=max)
+            subtype = type('', (gobject.GObject,),
+                         dict(prop=prop))
+            self.assertEqual(subtype.props.prop.minimum, min)
+            self.assertEqual(subtype.props.prop.maximum, max)
+
+            # Lower than minimum
+            self.assertRaises(TypeError,
+                              gobject.property, type=gtype, minimum=min-1,
+                              maximum=max)
+
+            # Higher than maximum
+            self.assertRaises(TypeError,
+                              gobject.property, type=gtype, minimum=min,
+                              maximum=max+1)

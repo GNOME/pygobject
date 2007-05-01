@@ -40,10 +40,10 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 
 check-local: $(top_srcdir)/gobject/__init__.py
 	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
-	   cp $(top_srcdir)/gobject/__init__.py $(top_builddir)/gobject/__init__.py; \
+	   cp $(top_srcdir)/gobject/*.py $(top_builddir)/gobject; \
 	fi
 	@$(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir)
 	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
-	   rm -f $(top_builddir)/gobject/__init__.py*; \
+	   rm -f $(top_builddir)/gobject/*.py; \
 	fi
-	@rm -fr *.pyc 
+	@rm -fr $(top_builddir)/gobject/*.pyc
