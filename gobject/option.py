@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2006  Johannes Hoelzl
 #
-#   gobject/option.py: GOption command line parser 
+#   gobject/option.py: GOption command line parser
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -67,7 +67,7 @@ class Option(optparse.Option):
     For further help, see optparse.Option.
     """
     TYPES = optparse.Option.TYPES + (
-        'filename', 
+        'filename',
     )
 
     ATTRS = optparse.Option.ATTRS + [
@@ -85,11 +85,11 @@ class Option(optparse.Option):
 
         if len(self._long_opts) < len(self._short_opts):
             raise ValueError("%s at least more long option names than short option names.")
-        
+
         if not self.help:
             raise ValueError("%s needs a help message.", self._long_opts[0])
 
-    
+
     def _set_opt_string(self, opts):
         if self.REMAINING in opts:
             self._long_opts.append(self.REMAINING)
@@ -100,25 +100,25 @@ class Option(optparse.Option):
 
     def _to_goptionentries(self):
         flags = 0
-        
+
         if self.hidden:
             self.flags |= gobject.OPTION_FLAG_HIDDEN
-        
+
         if self.in_main:
             self.flags |= gobject.OPTION_FLAG_IN_MAIN
-        
+
         if self.takes_value():
             if self.optional_arg:
                 flags |= gobject.OPTION_FLAG_OPTIONAL_ARG
         else:
             flags |= gobject.OPTION_FLAG_NO_ARG
-            
+
         if self.type == 'filename':
             flags |= gobject.OPTION_FLAG_FILENAME
 
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
             yield (long_name[2:], short_name[1], flags, self.help, self.metavar)
-            
+
         for long_name in self._long_opts[len(self._short_opts):]:
             yield (long_name[2:], '\0', flags, self.help, self.metavar)
 
@@ -143,7 +143,7 @@ class OptionGroup(optparse.OptionGroup):
 
     For further help, see optparse.OptionGroup.
     """
-    def __init__(self, name, description, help_description="", 
+    def __init__(self, name, description, help_description="",
                  option_list=None, defaults=None,
                  translation_domain=None):
         optparse.OptionContainer.__init__(self, Option, 'error', description)
@@ -152,41 +152,41 @@ class OptionGroup(optparse.OptionGroup):
         self.help_description = help_description
         if defaults:
             self.defaults = defaults
-        
+
         self.values = None
 
         self.translation_domain = translation_domain
-        
+
         for option in option_list:
             self.add_option(option)
-    
+
     def _create_option_list(self):
         self.option_list = []
         self._create_option_mappings()
-        
+
     def _to_goptiongroup(self, parser):
         def callback(option_name, option_value, group):
             if option_name.startswith('--'):
                 opt = self._long_opt[option_name]
-            else:            
+            else:
                 opt = self._short_opt[option_name]
             opt.process(option_name, option_value, self.values, parser)
-                
-        group = gobject.OptionGroup(self.name, self.description, 
+
+        group = gobject.OptionGroup(self.name, self.description,
                                     self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
-        
+
         entries = []
         for option in self.option_list:
             entries.extend(option._to_goptionentries())
         group.add_entries(entries)
-        
+
         return group
-    
+
     def get_option_group(self, parser = None):
         """ Returns the corresponding GOptionGroup object.
-        
+
         Can be used as parameter for gnome_program_init(), gtk_init().
         """
         self.set_values_to_defaults()
@@ -199,7 +199,7 @@ class OptionGroup(optparse.OptionGroup):
                 opt_str = option.get_opt_string()
                 self.defaults[option.dest] = option.check_value(opt_str, default)
         self.values = optparse.Values(self.defaults)
-    
+
 class OptionParser(optparse.OptionParser):
     """Command line parser with GOption support.
 
@@ -212,7 +212,7 @@ class OptionParser(optparse.OptionParser):
                                 options are enabled (default).
         ignore_unknown_options: Do not throw a exception when a option is not
                                 knwon, the option will be in the result list.
-    
+
     OptionParser.add_option_group() does not only accept OptionGroup instances
     but also gobject.OptionGroup, which is returned by gtk_get_option_group().
 
@@ -221,14 +221,14 @@ class OptionParser(optparse.OptionParser):
 
     For further help, see optparse.OptionParser.
     """
-    
+
     def __init__(self, *args, **kwargs):
         if 'option_class' not in kwargs:
             kwargs['option_class'] = Option
         self.help_enabled = kwargs.pop('help_enabled', True)
         self.ignore_unknown_options = kwargs.pop('ignore_unknown_options', False)
         optparse.OptionParser.__init__(self, add_help_option=False, *args, **kwargs)
-        
+
     def set_usage(self, usage):
         if usage is None:
             self.usage = ''
@@ -245,7 +245,7 @@ class OptionParser(optparse.OptionParser):
         context = gobject.OptionContext(parameter_string)
         context.set_help_enabled(self.help_enabled)
         context.set_ignore_unknown_options(self.ignore_unknown_options)
-        
+
         for option_group in self.option_groups:
             if isinstance(option_group, gobject.OptionGroup):
                 g_group = option_group
@@ -268,7 +268,7 @@ class OptionParser(optparse.OptionParser):
         context.set_main_group(main_group)
 
         return context
-    
+
     def add_option_group(self, *args, **kwargs):
         if isinstance(args[0], basestring):
             optparse.OptionParser.add_option_group(self,
@@ -291,7 +291,7 @@ class OptionParser(optparse.OptionParser):
             if isinstance(group, optparse.OptionGroup):
                 options.extend(group.option_list)
         return options
-    
+
     def _process_args(self, largs, rargs, values):
         context = self._to_goptioncontext(values)
         largs.extend(context.parse([sys.argv[0]] + rargs))
