@@ -84,7 +84,8 @@ class Option(optparse.Option):
             raise ValueError("%s at least one long option name.")
 
         if len(self._long_opts) < len(self._short_opts):
-            raise ValueError("%s at least more long option names than short option names.")
+            raise ValueError(
+                "%s at least more long option names than short option names.")
 
         if not self.help:
             raise ValueError("%s needs a help message.", self._long_opts[0])
@@ -126,7 +127,8 @@ class OptionGroup(optparse.OptionGroup):
     """A group of command line options.
 
     Arguements:
-       name:             The groups name, used to create the --help-{name} option
+       name:             The groups name, used to create the
+                         --help-{name} option
        description:      Shown as title of the groups help view
        help_description: Shown as help to the --help-{name} option
        option_list:      The options used in this group, must be option.Option()
@@ -197,7 +199,8 @@ class OptionGroup(optparse.OptionGroup):
             default = self.defaults.get(option.dest)
             if isinstance(default, basestring):
                 opt_str = option.get_opt_string()
-                self.defaults[option.dest] = option.check_value(opt_str, default)
+                self.defaults[option.dest] = option.check_value(
+                    opt_str, default)
         self.values = optparse.Values(self.defaults)
 
 class OptionParser(optparse.OptionParser):
@@ -226,8 +229,10 @@ class OptionParser(optparse.OptionParser):
         if 'option_class' not in kwargs:
             kwargs['option_class'] = Option
         self.help_enabled = kwargs.pop('help_enabled', True)
-        self.ignore_unknown_options = kwargs.pop('ignore_unknown_options', False)
-        optparse.OptionParser.__init__(self, add_help_option=False, *args, **kwargs)
+        self.ignore_unknown_options = kwargs.pop('ignore_unknown_options',
+                                                 False)
+        optparse.OptionParser.__init__(self, add_help_option=False,
+                                       *args, **kwargs)
 
     def set_usage(self, usage):
         if usage is None:
