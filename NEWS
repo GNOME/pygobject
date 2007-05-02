@@ -1,3 +1,15 @@
+2.13.1 02-may-2007
+        - Generic CClosure marshaller using libffi (Johan, #353816)
+	- Uninstalled .pc file (Damien Carbery, #385129)
+	- Fix leak in GFlags handling (Daniel Berrange, #428726)
+	- Use dirname in autogen (Loïc Minier, #409234)
+	- Treat None in a GValueArray as pointer/NULL (Ed Catmur, #352209)
+	- Toggle reference bug fix in tp_setattro (Gustavo, #434659)
+	- Add a simplified helper for creating properties (Johan, Gustavo, #338089)
+	- Avoid throwing an exception in GValue converter (James Livingstone,
+          Ed Catmur, #374653)
+	- Build fix in .pc file (Luca Ferretti, #435132)
+
 2.13.0 23-april-2007
         - Release the GIL in g_object_set_property (Edward Hervey, #395048)
         - Break PyGObject<->GObject reference cycle (Gustavo Carneiro, #320428)

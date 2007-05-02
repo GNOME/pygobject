@@ -1,3 +1,4 @@
+=== 2.13.1 ===
 2007-05-02  Johan Dahlin  <jdahlin@async.com.br>
 
 	* pygobject-2.0-uninstalled.pc.in: Add libdir.
@@ -38,6 +39,7 @@
 	when attribute setting doesn't actually create an instance
 	dictionary, in which case pygobject_switch_to_toggle_ref would be
 	called twice, thereby causing gobject error.
+	Fixes #434659
 
 2007-04-29  James Livingstone  <doclivingstone@gmail.com>
 
