@@ -3,6 +3,7 @@ exec_prefix=@exec_prefix@
 includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@
+libdir=@libdir@
 
 # you can use the --variable=pygtkincludedir argument to
 # pkg-config to get this value.  You might want to use this to

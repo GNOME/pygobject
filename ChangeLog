@@ -1,3 +1,8 @@
+2007-05-02  Johan Dahlin  <jdahlin@async.com.br>
+
+	* pygobject-2.0-uninstalled.pc.in: Add libdir.
+	Fixes #435132 (Luca Ferretti)
+
 2007-05-01  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/propertyhelper.py:
