@@ -1,5 +1,10 @@
 2007-05-01  Johan Dahlin  <johan@gnome.org>
 
+	* gobject/propertyhelper.py:
+	* tests/test_properties.py:
+
+	Store property values in the descriptor per instance, add a test.
+
 	* examples/properties.py:
 	* gobject/Makefile.am:
 	* gobject/__init__.py:

@@ -278,3 +278,15 @@ class TestProperty(unittest.TestCase):
             self.assertRaises(TypeError,
                               gobject.property, type=gtype, minimum=min,
                               maximum=max+1)
+
+    def testMultipleInstances(self):
+        class C(gobject.GObject):
+            prop = gobject.property(type=str, default='default')
+
+        o1 = C()
+        o2 = C()
+        self.assertEqual(o1.prop, 'default')
+        self.assertEqual(o2.prop, 'default')
+        o1.prop = 'value'
+        self.assertEqual(o1.prop, 'value')
+        self.assertEqual(o2.prop, 'default')
