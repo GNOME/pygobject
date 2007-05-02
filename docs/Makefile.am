@@ -86,7 +86,7 @@ reference/builddate.xml:
 if ENABLE_DOCS
 
 BUILT_SOURCES = reference/builddate.xml $(HTML_FILES)
-DISTCLEANFILES = reference/builddate.xml $(HTML_FILES)
+CLEANFILES = reference/builddate.xml $(HTML_FILES)
 
 
 # Do not add a builddate.xml dependency here, because the generated html 
