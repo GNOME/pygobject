@@ -1,7 +1,8 @@
 INCLUDES = \
 	$(PYTHON_INCLUDES) \
 	$(GLIB_CFLAGS) \
-	-I$(top_srcdir)/gobject
+	-I$(top_srcdir)/gobject \
+	-D_XOPEN_SOURCE=600 -D__EXTENSIONS__
 
 EXTRA_DIST = \
 	$(tests) \
