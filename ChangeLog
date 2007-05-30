@@ -1,3 +1,9 @@
+2007-05-30  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* autogen.sh: Allow running autogen.sh from outside $srcdir.
+
 2007-05-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/Makefile.am (INCLUDES): Idem.
