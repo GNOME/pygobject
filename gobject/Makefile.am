@@ -21,11 +21,11 @@ if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
 
-constants.py: generate-constants constants.py.in
+constants.py: generate-constants$(EXEEXT) constants.py.in
 	rm -f constants.py
 	cp $(srcdir)/constants.py.in constants.py
 	chmod 644 constants.py
-	$(top_builddir)/gobject/generate-constants >> constants.py
+	$(top_builddir)/gobject/generate-constants$(EXEEXT) >> constants.py
 	chmod 444 constants.py
 
 generate_constants_CFLAGS = $(GLIB_CFLAGS)

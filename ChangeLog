@@ -1,3 +1,12 @@
+2007-06-06  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	OK'd by Johan
+
+	* gobject/generate-constants.c: Return 0 from main().
+
+	* gobject/Makefile.am: use generate-constants$(EXEEXT) instead
+	of generate-constants in the constants.py target rule.
+
 2007-05-30  Yevgen Muntyan  <muntyan@tamu.edu>
 
 	reviewed by: Gustavo Carneiro

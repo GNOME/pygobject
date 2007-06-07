@@ -18,4 +18,5 @@ int main(void)
   printf("G_MINLONG = %ldL\n", G_MINLONG);
   printf("G_MAXLONG = %ldL\n", G_MAXLONG);
   printf("G_MAXULONG = %luL\n", G_MAXULONG);
+  return 0;
 }
