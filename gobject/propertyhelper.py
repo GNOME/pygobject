@@ -173,6 +173,8 @@ class property(object):
             return TYPE_STRING
         elif type == object:
             return TYPE_PYOBJECT
+        elif type == _gobject.GObject:
+            return TYPE_OBJECT
         elif type in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                       TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
                       TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM,
@@ -278,6 +280,8 @@ class property(object):
         elif ptype == TYPE_STRING or ptype == TYPE_BOOLEAN:
             args = (self.default,)
         elif ptype == TYPE_PYOBJECT:
+            args = ()
+        elif ptype == TYPE_OBJECT:
             args = ()
         else:
             raise NotImplementedError(ptype)

@@ -290,3 +290,17 @@ class TestProperty(unittest.TestCase):
         o1.prop = 'value'
         self.assertEqual(o1.prop, 'value')
         self.assertEqual(o2.prop, 'default')
+
+    def testObjectProperty(self):
+        class PropertyObject(GObject):
+            obj = gobject.property(type=GObject)
+
+        pobj1 = PropertyObject()
+        obj1_hash = hash(pobj1)
+        pobj2 = PropertyObject()
+
+        pobj2.obj = pobj1
+        del pobj1
+        pobj1 = pobj2.obj
+        self.assertEqual(hash(pobj1), obj1_hash)
+
