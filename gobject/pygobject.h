@@ -25,6 +25,10 @@ struct _PyGClosure {
     PyClosureExceptionHandler exception_handler;
 };
 
+typedef enum {
+    PYGOBJECT_USING_TOGGLE_REF = 1 << 0
+} PyGObjectFlags;
+
   /* closures is just an alias for what is found in the
    * PyGObjectData */
 typedef struct {
@@ -32,7 +36,15 @@ typedef struct {
     GObject *obj;
     PyObject *inst_dict; /* the instance dictionary -- must be last */
     PyObject *weakreflist; /* list of weak references */
-    GSList *closures;           /* stale field; no longer updated DO-NOT-USE! */
+    
+      /*< private >*/
+      /* using union to preserve ABI compatibility (structure size
+       * must not change) */
+    union {
+        GSList *closures; /* stale field; no longer updated DO-NOT-USE! */
+        PyGObjectFlags flags;
+    } private;
+
 } PyGObject;
 
 #define pygobject_get(v) (((PyGObject *)(v))->obj)

@@ -247,3 +247,15 @@ class TestSubType(unittest.TestCase):
         o = C()
         o.str = 'str'
         o.str = 'str'
+
+    def testDescriptorV2(self):
+        """http://bugzilla.gnome.org/show_bug.cgi?id=447271"""
+        class Foo(gobject.GObject):
+            def set_foo(self, foo):
+                self._foo = foo
+            def get_foo(self, foo):
+                self._foo = foo
+            fooprop = property(get_foo, set_foo)
+
+        foo = Foo()
+        foo.fooprop = 123
