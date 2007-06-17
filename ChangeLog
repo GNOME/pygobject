@@ -1,3 +1,8 @@
+2007-06-17  Sebastien Bacher  <seb128@ubuntu.com>
+
+	* m4/python.m4: use python-config to get python includes
+          (Closes #448173)
+
 2007-06-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/propertyhelper.py,
