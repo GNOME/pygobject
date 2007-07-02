@@ -3044,7 +3044,7 @@ pyg_gerror_exception_check(GError **error)
         PyErr_Print();
         return -2;
     }
-    if (!value || !PyErr_GivenExceptionMatches(type, (PyObject *) &gerror_exc)) {
+    if (!value || !PyErr_GivenExceptionMatches(type, (PyObject *) gerror_exc)) {
         PyErr_Restore(type, value, traceback);
         PyErr_Print();
         return -2;

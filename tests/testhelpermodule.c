@@ -468,6 +468,32 @@ _wrap_test_value_array(PyObject *self, PyObject *args)
   return pyg_value_as_pyobject(value, FALSE);
 }
 
+static PyObject *
+_wrap_test_gerror_exception(PyObject *self, PyObject *args)
+{
+    PyObject *py_method;
+    PyObject *py_args;
+    PyObject *py_ret;
+    GError *err = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &py_method))
+        return NULL;
+
+    py_args = PyTuple_New(0);
+    py_ret = PyObject_CallObject(py_method, py_args);
+    if (pyg_gerror_exception_check(&err)) {
+        pyg_error_check(&err);
+        return NULL;
+    }	    
+
+    Py_DECREF(py_method);
+    Py_DECREF(py_args);
+    Py_DECREF(py_ret);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 static PyMethodDef testhelper_functions[] = {
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
@@ -475,6 +501,7 @@ static PyMethodDef testhelper_functions[] = {
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
+    { "test_gerror_exception", (PyCFunction)_wrap_test_gerror_exception, METH_VARARGS },
     { NULL, NULL }
 };
 

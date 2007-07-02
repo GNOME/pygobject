@@ -1,3 +1,13 @@
+2007-07-02  Sebastian Granjoux  <seb.sfo@free.fr>
+
+	reviewed by: Johan Dahlin
+
+	* gobject/gobjectmodule.c: (pyg_gerror_exception_check):
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: (_wrap_test_gerror_exception):
+
+	Fix a bug in pyg_error_exception_check, add a test, Fixes #449879
+
 2007-06-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygobject.h: Add a flags field to PyGObject; uses

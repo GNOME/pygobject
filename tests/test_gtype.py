@@ -3,6 +3,16 @@ import unittest
 from gobject import GType
 from common import gobject, testhelper
 
+def raiseGError():
+    err = gobject.GError
+    err.message = "Test conversion between exception and GError"
+    err.code = 1
+    err.domain = ""
+    raise err
+
+def test_raiseGError():
+    testhelper.test_gerror_exception(raiseGError)
+
 class GTypeTest(unittest.TestCase):
     def checkType(self, expected, *objects):
         # First, double check so we get back what we sent
@@ -61,6 +71,9 @@ class GTypeTest(unittest.TestCase):
     def testValueArrayNone(self):
         array = [1, 2, 3, "foo", True, None]
         self.assertEqual(array, testhelper.test_value_array(array))
+
+    def testGError(self):
+        self.assertRaises(gobject.GError, test_raiseGError)
 
     # XXX: Flags, Enums
 
