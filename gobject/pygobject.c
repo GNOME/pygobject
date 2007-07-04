@@ -649,9 +649,9 @@ pygobject_switch_to_toggle_ref(PyGObject *self)
 {
     g_assert(self->obj->ref_count >= 1);
 
-    if (self->private.flags & PYGOBJECT_USING_TOGGLE_REF)
+    if (self->private_flags.flags & PYGOBJECT_USING_TOGGLE_REF)
         return; /* already using toggle ref */
-    self->private.flags |= PYGOBJECT_USING_TOGGLE_REF;
+    self->private_flags.flags |= PYGOBJECT_USING_TOGGLE_REF;
       /* Note that add_toggle_ref will never immediately call back into 
          pyg_toggle_notify */
     Py_INCREF((PyObject *) self);

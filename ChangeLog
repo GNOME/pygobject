@@ -1,3 +1,10 @@
+2007-07-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gobject/pygobject.c: (pygobject_switch_to_toggle_ref):
+	* gobject/pygobject.h: Rename the private struct field to 
+	private_flags, because private is a C++ keyword, so this broke 
+	builds of some C++ applications, such as Glom.
+
 2007-07-02  Sebastian Granjoux  <seb.sfo@free.fr>
 
 	reviewed by: Johan Dahlin

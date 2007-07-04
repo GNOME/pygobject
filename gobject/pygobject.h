@@ -43,7 +43,7 @@ typedef struct {
     union {
         GSList *closures; /* stale field; no longer updated DO-NOT-USE! */
         PyGObjectFlags flags;
-    } private;
+    } private_flags;
 
 } PyGObject;
 
