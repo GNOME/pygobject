@@ -1,3 +1,12 @@
+2007-04-30  Johannes Hölzl  <johannes.hoelzl@gmx.de>
+
+	* gobject/gobjectmodule.c (init_gobjectmodule),
+	* gobject/pygoptiongroup.c (arg_func),
+	* gobject/option.py (OptionParser._parse_args, OptionGroup._to_goptiongroup),
+	* tests/test_option.py: OptParse-Exceptions in GOption-callbacks
+	are now convertet into an GError.  GError from the
+	GOptionGroup.run is convertet into an OptParse-Exception.
+
 2007-07-06  Ed Catmur  <ed@catmur.co.uk>
 
 	* gobject/pygtype.c (pyg_param_gvalue_from_pyobject),

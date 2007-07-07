@@ -101,6 +101,8 @@ PyObject *pyg_integer_richcompare(PyObject *v,
                                   PyObject *w,
                                   int op);
 
+gboolean pyg_gerror_exception_check(GError **error);
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

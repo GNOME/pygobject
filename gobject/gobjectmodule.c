@@ -3028,7 +3028,7 @@ pyg_error_check(GError **error)
  * Returns: 0 if no exception has been raised, -1 if it is a
  * valid gobject.GError, -2 otherwise.
  */
-static gboolean
+gboolean
 pyg_gerror_exception_check(GError **error)
 {
     PyObject *type, *value, *traceback;
@@ -3633,6 +3633,8 @@ init_gobject(void)
 #undef addint
   
     PyModule_AddStringConstant(m, "OPTION_REMAINING", G_OPTION_REMAINING);
+
+    PyModule_AddStringConstant(m, "OPTION_ERROR", (char*) g_quark_to_string(G_OPTION_ERROR));
 
     PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
 			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);

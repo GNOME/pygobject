@@ -25,6 +25,7 @@
 #endif
 
 #include "pygobject-private.h"
+#include "pygobject.h"
 
 static gboolean
 check_if_owned(PyGOptionGroup *self)
@@ -38,8 +39,8 @@ check_if_owned(PyGOptionGroup *self)
     return FALSE;
 }
 
-
-static void destroy_g_group(PyGOptionGroup *self)
+static void
+destroy_g_group(PyGOptionGroup *self)
 {
     PyGILState_STATE state;
     state = pyg_gil_state_ensure();
@@ -100,30 +101,37 @@ static gboolean
 arg_func(const gchar *option_name,
          const gchar *value,
          PyGOptionGroup *self,
-         GError *error)
+         GError **error)
 {
     PyObject *ret;
     PyGILState_STATE state;
-
+    gboolean no_error;
+        
     state = pyg_gil_state_ensure();
   
     if (value == NULL)
+    {
         ret = PyObject_CallFunction(self->callback, "sOO", 
                                     option_name, Py_None, self);
+    }
     else
+    {
         ret = PyObject_CallFunction(self->callback, "ssO", 
                                     option_name, value, self);
+    }
     
-    if (ret == NULL)
-        PyErr_Print();
-
-    pyg_gil_state_release(state);
-
-    if (ret == NULL)
-        return FALSE;
-
-    Py_DECREF(ret);
-    return TRUE;      
+    if (ret != NULL)
+    {
+        Py_DECREF(ret);
+        pyg_gil_state_release(state);
+        return TRUE;
+    }
+    else
+    {
+        no_error = pyg_gerror_exception_check(error) != -1;
+        pyg_gil_state_release(state);
+        return no_error;
+    }
 }
 
 static PyObject *

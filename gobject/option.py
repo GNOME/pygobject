@@ -31,11 +31,16 @@ GOptionGroup in gobject.
 
 import sys
 import optparse
-from optparse import OptionError
+from optparse import OptParseError, OptionError, OptionValueError, \
+                     BadOptionError, OptionConflictError
 import _gobject as gobject
 
 __all__ = [
+    "OptParseError",
     "OptionError",
+    "OptionValueError",
+    "BadOptionError",
+    "OptionConflictError"
     "Option",
     "OptionGroup",
     "OptionParser",
@@ -172,7 +177,15 @@ class OptionGroup(optparse.OptionGroup):
                 opt = self._long_opt[option_name]
             else:
                 opt = self._short_opt[option_name]
-            opt.process(option_name, option_value, self.values, parser)
+
+            try:
+                opt.process(option_name, option_value, self.values, parser)
+            except OptionValueError, error:
+            	gerror = gobject.GError(str(error))
+            	gerror.domain = gobject.OPTION_ERROR
+            	gerror.code = gobject.OPTION_ERROR_BAD_VALUE
+            	gerror.message = str(error)
+            	raise gerror
 
         group = gobject.OptionGroup(self.name, self.description,
                                     self.help_description, callback)
@@ -301,5 +314,19 @@ class OptionParser(optparse.OptionParser):
         context = self._to_goptioncontext(values)
         largs.extend(context.parse([sys.argv[0]] + rargs))
 
+    def parse_args(self, args=None, values=None):
+        try:
+            return optparse.OptionParser.parse_args(self, args, values)
+        except gobject.GError, error:
+            if error.domain != gobject.OPTION_ERROR:
+            	raise
+            if error.code == gobject.OPTION_ERROR_BAD_VALUE:
+                raise OptionValueError(error.message)
+            elif error.code == gobject.OPTION_ERROR_UNKNOWN_OPTION:
+    	        raise BadOptionError(error.message)
+            elif error.code == gobject.OPTION_ERROR_FAILED:
+                raise OptParseError(error.message)
+            else:
+                raise
 
 make_option = Option
