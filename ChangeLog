@@ -6,6 +6,7 @@
 	* tests/test_option.py: OptParse-Exceptions in GOption-callbacks
 	are now convertet into an GError.  GError from the
 	GOptionGroup.run is convertet into an OptParse-Exception.
+	Fixes #342948.
 
 2007-07-06  Ed Catmur  <ed@catmur.co.uk>
 
