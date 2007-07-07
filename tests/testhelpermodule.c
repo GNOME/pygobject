@@ -451,6 +451,24 @@ _wrap_connectcallbacks(PyObject * self, PyObject *args)
 }
 
 static PyObject *
+_wrap_test_value(PyObject *self, PyObject *args)
+{
+  GValue tvalue = {0,}, *value = &tvalue;
+  PyObject *obj;
+
+  if (!PyArg_ParseTuple(args, "O", &obj))
+    return NULL;
+
+  g_value_init(value, G_TYPE_VALUE);
+  if (pyg_value_from_pyobject(value, obj)) {
+    PyErr_SetString(PyExc_TypeError, "Could not convert to GValue");
+    return NULL;
+  }
+  
+  return pyg_value_as_pyobject(value, FALSE);
+}
+
+static PyObject *
 _wrap_test_value_array(PyObject *self, PyObject *args)
 {
   GValue tvalue = {0,}, *value = &tvalue;
@@ -500,6 +518,7 @@ static PyMethodDef testhelper_functions[] = {
     { "create_test_type", (PyCFunction)_wrap_create_test_type, METH_NOARGS },
     { "test_g_object_new", (PyCFunction)_wrap_test_g_object_new, METH_NOARGS },
     { "connectcallbacks", (PyCFunction)_wrap_connectcallbacks, METH_VARARGS },
+    { "test_value", (PyCFunction)_wrap_test_value, METH_VARARGS },      
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
     { "test_gerror_exception", (PyCFunction)_wrap_test_gerror_exception, METH_VARARGS },
     { NULL, NULL }

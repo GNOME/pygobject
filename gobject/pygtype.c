@@ -854,7 +854,21 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	else if (PyObject_TypeCheck(obj, &PyGBoxed_Type) &&
 		   G_VALUE_HOLDS(value, ((PyGBoxed *)obj)->gtype))
 	    g_value_set_boxed(value, pyg_boxed_get(obj, gpointer));
-	else if (PySequence_Check(obj) &&
+        else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
+            GType type;
+            GValue *n_value; 
+            
+            type = pyg_type_from_object((PyObject *)obj->ob_type);
+            if (G_UNLIKELY (! type)) {
+                PyErr_Clear();
+                return -1;
+            }
+            n_value = g_new0 (GValue, 1);
+            g_value_init (n_value, type);
+            g_value_take_boxed (value, n_value);
+            return pyg_value_from_pyobject (n_value, obj);
+        }
+        else if (PySequence_Check(obj) &&
 		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
 	    return pyg_value_array_from_pyobject(value, obj, NULL);
 	else if (PyString_Check(obj) &&
@@ -1008,7 +1022,10 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 		return Py_None;
 	    }
 	    return ret;
-	} else if (G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY)) {
+        } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
+            GValue *n_value = g_value_get_boxed (value);
+            return pyg_value_as_pyobject(n_value, copy_boxed);
+        } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY)) {
 	    GValueArray *array = (GValueArray *) g_value_get_boxed(value);
 	    PyObject *ret = PyList_New(array->n_values);
 	    int i;

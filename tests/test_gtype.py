@@ -64,6 +64,11 @@ class GTypeTest(unittest.TestCase):
     def testObject(self):
         self.checkType(gobject.TYPE_OBJECT, 'PyObject')
 
+    def testValue(self):
+        array = [1, "foo", True]
+        for i in array:
+            self.assertEqual(i, testhelper.test_value(i))
+            
     def testValueArray(self):
         array = [1, 2, 3, "foo", True]
         self.assertEqual(array, testhelper.test_value_array(array))

@@ -1,3 +1,15 @@
+2007-07-06  Ed Catmur  <ed@catmur.co.uk>
+
+	* gobject/pygtype.c (pyg_param_gvalue_from_pyobject),
+	(pyg_param_gvalue_as_pyobject): Applied patch from Ed Catmur to
+	support G_TYPE_VALUE boxed args/signals, and add a test, Fixes
+	#351072
+
+2007-07-06  Carlos Martin  <inean@users.sf.net>
+
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: add test for #351072
+
 2007-07-04  Murray Cumming  <murrayc@murrayc.com>
 
 	* gobject/pygobject.c: (pygobject_switch_to_toggle_ref):
