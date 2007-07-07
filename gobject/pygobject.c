@@ -1959,16 +1959,6 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     return PyInt_FromLong(retval);
 }
 
-
-static PyObject *
-pygobject_run_dispose(PyGObject *self, PyObject *args)
-{
-    CHECK_GOBJECT(self);
-    g_object_run_dispose(self->obj);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static PyMethodDef pygobject_methods[] = {
     { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
       METH_VARARGS|METH_KEYWORDS },
@@ -1998,7 +1988,6 @@ static PyMethodDef pygobject_methods[] = {
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
     { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
-    { "run_dispose", (PyCFunction)pygobject_run_dispose, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

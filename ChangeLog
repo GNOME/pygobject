@@ -1,8 +1,3 @@
-2007-07-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
-
-	* gobject/pygobject.c (pygobject_run_dispose):
-	Bug 398696 – Wrap g_object_run_dispose.
-
 2007-04-30  Johannes Hölzl  <johannes.hoelzl@gmx.de>
 
 	* gobject/gobjectmodule.c (init_gobjectmodule),
