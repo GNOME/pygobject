@@ -1,3 +1,9 @@
+2007-07-07  Damien Carbery   <damien.carbery@sun.com>
+
+	reviewed by: Gustavo Carneiro.
+
+	* configure.ac: Bug 339924 – pygobject doesn't compile on opensolaris.
+
 2007-04-30  Johannes Hölzl  <johannes.hoelzl@gmx.de>
 
 	* gobject/gobjectmodule.c (init_gobjectmodule),

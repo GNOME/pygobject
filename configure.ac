@@ -139,9 +139,11 @@ AM_CONDITIONAL(HAVE_LIBFFI, test "$pygobject_ffi_h" = "yes")
 AC_SUBST(FFI_LIBS)
 
 dnl add required cflags ...
-JH_ADD_CFLAG([-Wall])
-JH_ADD_CFLAG([-std=c9x])
-JH_ADD_CFLAG([-fno-strict-aliasing])
+if test "x$GCC" = "xyes"; then
+  JH_ADD_CFLAG([-Wall])
+  JH_ADD_CFLAG([-std=c9x])
+  JH_ADD_CFLAG([-fno-strict-aliasing])
+fi
 
 AC_CONFIG_FILES(
   Makefile
