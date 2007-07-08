@@ -1999,6 +1999,7 @@ pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     return PyInt_FromLong(handler_id);
 }
 
+
 static PyObject *
 pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2038,7 +2039,7 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     return PyInt_FromLong(handler_id);
 }
 
-
+#if GLIB_CHECK_VERSION(2,13,5)
 static PyObject *
 pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2077,6 +2078,7 @@ pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
                                             pyg_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
+#endif
 
 
 static gboolean
@@ -2856,8 +2858,10 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
     { "timeout_add",
       (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
+#if GLIB_CHECK_VERSION(2,13,5)
     { "timeout_add_seconds",
       (PyCFunction)pyg_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
+#endif
     { "io_add_watch",
       (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove",

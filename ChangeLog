@@ -1,7 +1,8 @@
 2007-07-08  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pygobject_functions)
-	(pyg_timeout_add_seconds): Wrap g_timeout_add_seconds.
+	(pyg_timeout_add_seconds): Wrap g_timeout_add_seconds,
+	conditionally compiled if glib version >= 2.13.5.
 
 2007-07-08   Johannes Hölzl   <johannes.hoelzl@gmx.de>
 
