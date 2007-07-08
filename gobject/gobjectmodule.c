@@ -2038,6 +2038,47 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     return PyInt_FromLong(handler_id);
 }
 
+
+static PyObject *
+pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *first, *callback, *cbargs = NULL, *data;
+    gint len, priority = G_PRIORITY_DEFAULT;
+    guint interval, handler_id;
+
+    len = PyTuple_Size(args);
+    if (len < 2) {
+	PyErr_SetString(PyExc_TypeError,
+			"timeout_add_seconds requires at least 2 args");
+	return NULL;
+    }
+    first = PySequence_GetSlice(args, 0, 2);
+    if (!PyArg_ParseTuple(first, "IO:timeout_add_seconds", &interval, &callback)) {
+	Py_DECREF(first);
+        return NULL;
+    }
+    Py_DECREF(first);
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "second argument not callable");
+        return NULL;
+    }
+    if (get_handler_priority(&priority, kwargs) < 0)
+	return NULL;
+
+    cbargs = PySequence_GetSlice(args, 2, len);
+    if (cbargs == NULL)
+	return NULL;
+
+    data = Py_BuildValue("(ON)", callback, cbargs);
+    if (data == NULL)
+	return NULL;
+    handler_id = g_timeout_add_seconds_full(priority, interval,
+                                            pyg_handler_marshal, data,
+                                            pyg_destroy_notify);
+    return PyInt_FromLong(handler_id);
+}
+
+
 static gboolean
 iowatch_marshal(GIOChannel *source,
 		GIOCondition condition,
@@ -2815,6 +2856,8 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
     { "timeout_add",
       (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
+    { "timeout_add_seconds",
+      (PyCFunction)pyg_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
     { "io_add_watch",
       (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove",
