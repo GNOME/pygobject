@@ -1,3 +1,11 @@
+2007-07-08   Johannes Hölzl   <johannes.hoelzl@gmx.de>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/gobjectmodule.c (build_gerror, init_gobject): Work
+	around the deprecation warning of BaseException.message in Python
+	2.6+ affecting GError exceptions.  Fixes #342948.
+
 2007-07-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* configure.ac: Post-release version bump.

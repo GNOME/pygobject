@@ -3089,6 +3089,21 @@ bad_gerror:
     return -2;
 }
 
+static PyObject *
+build_gerror( void )
+{
+    PyObject *dict;
+    PyObject *gerror_class;   
+    dict = PyDict_New();
+    /* This is a hack to work around the deprecation warning of
+     * BaseException.message in Python 2.6+.
+     * GError has also an "message" attribute.
+     */
+    PyDict_SetItemString(dict, "message", Py_None);
+    gerror_class = PyErr_NewException("gobject.GError", PyExc_RuntimeError, dict);
+    Py_DECREF(dict);
+    return gerror_class;
+}
 
 static PyObject *
 _pyg_strv_from_gvalue(const GValue *value)
@@ -3491,7 +3506,7 @@ init_gobject(void)
 						      pyobject_copy,
 						      pyobject_free);
 
-    gerror_exc = PyErr_NewException("gobject.GError", PyExc_RuntimeError,NULL);
+    gerror_exc = build_gerror();
     PyDict_SetItemString(d, "GError", gerror_exc);
 
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
