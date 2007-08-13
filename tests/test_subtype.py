@@ -259,3 +259,11 @@ class TestSubType(unittest.TestCase):
 
         foo = Foo()
         foo.fooprop = 123
+
+    def testGetDict(self):
+        """reported in bug #466082"""
+        class Foo(gobject.GObject):
+            __gtype_name__ = 'Foo'
+        foo = Foo()
+        d = foo.__dict__
+

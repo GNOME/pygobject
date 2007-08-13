@@ -1,3 +1,8 @@
+2007-08-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_subtype.py (TestSubType.testGetDict): Add unit test
+	exercising a bug when GObject.__dict__ is accessed directly.
+
 2007-07-08  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pygobject_functions)
