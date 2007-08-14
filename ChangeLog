@@ -1,3 +1,11 @@
+2007-08-14   Ed Catmur   <ed@catmur.co.uk>
+
+	reviewed by: Gustavo J. A. M. Carneiro
+
+	* gobject/pygobject.c (pygobject_new_full, pygobject_clear),
+	(pygobject_get_dict): Bug 466082 – pygobject_new_full not fully
+	initialising PyGObject, chaos results.
+
 2007-08-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/test_subtype.py (TestSubType.testGetDict): Add unit test

@@ -915,6 +915,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	    return NULL;
         self->inst_dict = NULL;
 	self->weakreflist = NULL;
+	self->private_flags.flags = 0;
 	self->obj = obj;
 	g_object_ref(obj);
 	pygobject_register_wrapper_full(self, sink);
@@ -1047,9 +1048,10 @@ pygobject_clear(PyGObject *self)
 {
     if (self->obj) {
         g_object_set_qdata_full(self->obj, pygobject_wrapper_key, NULL, NULL);
-        if (self->inst_dict)
+        if (self->inst_dict) {
             g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, self);
-        else
+            self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
+        } else
             g_object_unref(self->obj);
         self->obj = NULL;
     }
@@ -1999,6 +2001,8 @@ pygobject_get_dict(PyGObject *self, void *closure)
 	self->inst_dict = PyDict_New();
 	if (self->inst_dict == NULL)
 	    return NULL;
+        if (G_LIKELY(self->obj))
+            pygobject_switch_to_toggle_ref(self);
     }
     Py_INCREF(self->inst_dict);
     return self->inst_dict;
