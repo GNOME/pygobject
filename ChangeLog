@@ -1,5 +1,9 @@
 2007-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* tests/Makefile.am,
+	* gobject/Makefile.am: Remove -D_XOPEN_SOURCE=600
+	-D__EXTENSIONS__, no longer needed.
+
 	* configure.ac: Don't add -std=c9x CFLAG on Solaris.  Fixes
 	#339924 again.
 
