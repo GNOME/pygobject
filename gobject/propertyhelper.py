@@ -203,9 +203,7 @@ class property(object):
     def _check_default(self):
         ptype = self.type
         default = self.default
-        if (ptype == TYPE_BOOLEAN and
-            (default is not True or
-             default is not False)):
+        if (ptype == TYPE_BOOLEAN and (default not in (True, False))):
             raise TypeError(
                 "default must be True or False, not %r" % (default,))
         elif ptype == TYPE_PYOBJECT:

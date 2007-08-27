@@ -233,12 +233,21 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, gobject.property, type='str')
         self.assertRaises(TypeError, gobject.property, nick=False)
         self.assertRaises(TypeError, gobject.property, blurb=False)
-        self.assertRaises(TypeError, gobject.property, type=bool, default=0)
+        # this never fail while bool is a subclass of int
+        # >>> bool.__bases__
+        # (<type 'int'>,)
+        # self.assertRaises(TypeError, gobject.property, type=bool, default=0)
+        self.assertRaises(TypeError, gobject.property, type=bool, default='ciao mamma')
+        self.assertRaises(TypeError, gobject.property, type=bool)
         self.assertRaises(TypeError, gobject.property, type=GEnum)
         self.assertRaises(TypeError, gobject.property, type=GEnum, default=0)
         self.assertRaises(TypeError, gobject.property, type=object, default=0)
         self.assertRaises(TypeError, gobject.property, type=complex)
         self.assertRaises(TypeError, gobject.property, flags=-10)
+
+    def testDefaults(self):
+        p1 = gobject.property(type=bool, default=True)
+        p2 = gobject.property(type=bool, default=False)
 
     def testNameWithUnderscore(self):
         class C(gobject.GObject):
@@ -304,3 +313,6 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,3 +1,11 @@
+2007-08-27   Marco Giusti  <marco.giusti@gmail.com>
+
+	reviewed by: Gustavo J. A. M. Carneiro
+
+	* gobject/propertyhelper.py:
+	* tests/test_properties.py:
+	Bug 470230 – check for default value in boolean type is wrong.
+
 2007-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* tests/Makefile.am,
