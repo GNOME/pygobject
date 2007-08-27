@@ -1,3 +1,9 @@
+2007-08-27  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/__init__.py (GObjectMeta._install_properties): 
+	Refactor a bit to make sure that it is possible to use in subclasses,
+	fixes #470718 (Marco Giusti)
+
 2007-08-27   Marco Giusti  <marco.giusti@gmail.com>
 
 	reviewed by: Gustavo J. A. M. Carneiro

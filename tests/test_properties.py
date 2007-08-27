@@ -313,6 +313,20 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
+    def testPropertySubclass(self):
+        # test for #470718
+        class A(GObject):
+            prop1 = gobject.property(type=int)
+
+        class B(A):
+            prop2 = gobject.property(type=int)
+
+        b = B()
+        b.prop2 = 10
+        self.assertEquals(b.prop2, 10)
+        b.prop1 = 20
+        self.assertEquals(b.prop1, 20)
+
 
 if __name__ == '__main__':
     unittest.main()

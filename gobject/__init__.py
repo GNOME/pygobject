@@ -42,27 +42,26 @@ class GObjectMeta(type):
 
     def _install_properties(cls):
         gproperties = getattr(cls, '__gproperties__', {})
-        props = {}
+
+        props = []
         for name, prop in cls.__dict__.items():
             if isinstance(prop, property): # not same as the built-in
                 if name in gproperties:
                     raise ValueError
                 prop.name = name
-                props[name] = prop.get_pspec_args()
+                gproperties[name] = prop.get_pspec_args()
+                props.append(prop)
 
         if not props:
             return
 
-        if not gproperties:
-            cls.__gproperties__ = props
-        else:
-            gproperties.update(props)
+        cls.__gproperties__ = gproperties
 
         if (hasattr(cls, 'do_get_property') or
             hasattr(cls, 'do_set_property')):
             for prop in props:
-                if (prop.getter != prop.default_getter or
-                    prop.setter != prop.default_setter):
+                if (prop.getter != prop._default_getter or
+                    prop.setter != prop._default_setter):
                     raise TypeError(
                         "GObject subclass %r defines do_get/set_property"
                         " and it also uses a property which a custom setter"
