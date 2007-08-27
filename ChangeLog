@@ -1,5 +1,8 @@
 2007-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
+	* configure.ac: Don't add -std=c9x CFLAG on Solaris.  Fixes
+	#339924 again.
+
 	* gobject/pygtype.c (pyg_type_wrapper_repr): Typecast self->type
 	to (unsigned long int) to fix a compilation warning.
 

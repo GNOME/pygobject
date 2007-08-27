@@ -141,8 +141,16 @@ AC_SUBST(FFI_LIBS)
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])
-  JH_ADD_CFLAG([-std=c9x])
   JH_ADD_CFLAG([-fno-strict-aliasing])
+
+  case $host_os in
+  solaris*)
+    ;;
+  *)
+    JH_ADD_CFLAG([-std=c9x])
+    ;;
+  esac
+
 fi
 
 AC_CONFIG_FILES(
