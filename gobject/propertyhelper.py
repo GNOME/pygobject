@@ -33,11 +33,6 @@ from gobject.constants import \
      G_MAXULONG
 
 
-class PropertyMeta(type):
-    def __repr__(self):
-        return "<class 'gobject.property'>"
-
-
 class property(object):
     """
     Creates a new property which in conjunction with GObjectMeta will
@@ -53,7 +48,9 @@ class property(object):
     'value'
     """
 
-    __metaclass__ = PropertyMeta
+    class __metaclass__(type):
+        def __repr__(self):
+            return "<class 'gobject.property'>"
 
     def __init__(self, getter=None, setter=None, type=None, default=None,
                  nick='', blurb='', flags=_gobject.PARAM_READWRITE,
