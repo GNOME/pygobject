@@ -50,7 +50,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
     const gchar *name = g_type_name(self->type);
 
     g_snprintf(buf, sizeof(buf), "<GType %s (%lu)>",
-	       name?name:"invalid", self->type);
+	       name?name:"invalid", (unsigned long int) self->type);
     return PyString_FromString(buf);
 }
 
