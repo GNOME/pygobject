@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2007 Johan Dahlin
 #
-#   gobject/_property.py: GObject property wrapper/helper
+#   gobject/propertyhelper.py: GObject property wrapper/helper
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -35,8 +35,8 @@ from gobject.constants import \
 
 class property(object):
     """
-    Creates a new property which in conjunction with GObjectMeta will
-    create a GObject property proxy:
+    Creates a new property which in conjunction with GObject subclass will
+    create a property proxy:
 
     >>> class MyObject(gobject.GObject):
     >>> ... prop = gobject.property(type=str)
@@ -46,6 +46,15 @@ class property(object):
 
     >>> obj.prop
     'value'
+
+    The API is similar to the builtin property:
+
+    class AnotherObject(gobject.GObject):
+        @gobject.property
+        def prop(self):
+            return ...
+
+    Which will create a read-only property called prop.
     """
 
     class __metaclass__(type):
