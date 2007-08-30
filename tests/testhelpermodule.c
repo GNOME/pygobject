@@ -112,8 +112,7 @@ static const PyMethodDef _PyTestInterface_methods[] = {
 
 /* TestInterface */
 PyTypeObject PyTestInterface_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "test.Interface",			/* tp_name */
     sizeof(PyObject),	        /* tp_basicsize */
     0,					/* tp_itemsize */
@@ -183,8 +182,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
 }
 
 PyTypeObject PyTestUnknown_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                 /* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "testhelper.Unknown",            /* tp_name */
     sizeof(PyGObject),          /* tp_basicsize */
     0,                                 /* tp_itemsize */
@@ -524,6 +522,48 @@ static PyMethodDef testhelper_functions[] = {
     { NULL, NULL }
 };
 
+typedef enum
+{
+  GTK_WINDOW_TOPLEVEL,
+  GTK_WINDOW_POPUP
+} GtkWindowType;
+
+GType gtk_window_type_get_type (void)
+{
+  const GEnumValue values[] = {
+    { GTK_WINDOW_TOPLEVEL, "GTK_WINDOW_TOPLEVEL", "toplevel" },
+    { GTK_WINDOW_POPUP, "GTK_WINDOW_POPUP", "toplevel" },
+  };
+  static GType type = 0;
+
+  if (!type)
+    type = g_enum_register_static("GtkWindowType", values);
+
+  return type;
+}
+
+typedef enum
+{
+  GTK_EXPAND = 1 << 0,
+  GTK_SHRINK = 1 << 1,
+  GTK_FILL   = 1 << 2
+} GtkAttachOptions;
+
+GType gtk_attach_options_get_type (void)
+{
+  const GFlagsValue values[] = {
+    { GTK_EXPAND, "GTK_EXPAND", "expand" },
+    { GTK_SHRINK, "GTK_SHRINK", "shrink" },
+    { GTK_FILL, "GTK_FILL", "fill" },
+  };
+  static GType type = 0;
+
+  if (!type)
+    type = g_flags_register_static("GtkAttachOptions", values);
+
+  return type;
+}
+
 void 
 inittesthelper ()
 {
@@ -566,5 +606,7 @@ inittesthelper ()
   pyg_set_object_has_new_constructor(TEST_TYPE_UNKNOWN);
   //pyg_register_class_init(TEST_TYPE_UNKNOWN, __GtkUIManager_class_init);
 
+  pyg_enum_add(m, "WindowType", "GTK_", gtk_window_type_get_type());
+  pyg_flags_add(m, "AttachOptions", "GTK_", gtk_attach_options_get_type());
 }
 

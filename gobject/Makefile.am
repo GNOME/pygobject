@@ -5,7 +5,7 @@ INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
 
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexecdir = $(pyexecdir)
 
 # gobject python scripts
 pygobjectdir = $(pkgpyexecdir)/gobject

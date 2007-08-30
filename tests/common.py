@@ -35,7 +35,7 @@ def importModule(module, directory, name=None):
 
     try:
         obj = __import__(module, {}, {}, '')
-    except ImportError, e:
+    except ImportError as e:
         raise SystemExit('%s could not be imported: %s' % (origName, e))
 
     if hasattr(obj, '__file__'):

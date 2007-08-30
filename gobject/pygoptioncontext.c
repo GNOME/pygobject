@@ -273,8 +273,7 @@ static PyMethodDef pyg_option_context_methods[] = {
 };
 
 PyTypeObject PyGOptionContext_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.OptionContext",
     sizeof(PyGOptionContext),
     0,

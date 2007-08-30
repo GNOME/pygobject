@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import _gobject
+from . import _gobject
 from gobject.constants import \
      TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
      TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
@@ -171,8 +171,6 @@ class property(object):
             return TYPE_INT
         elif type == bool:
             return TYPE_BOOLEAN
-        elif type == long:
-            return TYPE_LONG
         elif type == float:
             return TYPE_DOUBLE
         elif type == str:

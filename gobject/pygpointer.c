@@ -29,7 +29,7 @@
 static void
 pyg_pointer_dealloc(PyGPointer *self)
 {
-    self->ob_type->tp_free((PyObject *)self);
+    Py_Type(self)->tp_free((PyObject *)self);
 }
 
 static int
@@ -67,7 +67,9 @@ pyg_pointer_init(PyGPointer *self, PyObject *args, PyObject *kwargs)
     self->pointer = NULL;
     self->gtype = 0;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
+    g_snprintf(buf, sizeof(buf),
+	       "%s can not be constructed",
+	       Py_Type(self)->tp_name);
     PyErr_SetString(PyExc_NotImplementedError, buf);
     return -1;
 }
@@ -79,8 +81,7 @@ pyg_pointer_free(PyObject *op)
 }
 
 PyTypeObject PyGPointer_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GPointer",                 /* tp_name */
     sizeof(PyGPointer),                 /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -147,7 +148,6 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
 
     if (!type->tp_dealloc) type->tp_dealloc = (destructor)pyg_pointer_dealloc;
 
-    type->ob_type = &PyType_Type;
     type->tp_base = &PyGPointer_Type;
 
     if (PyType_Ready(type) < 0) {

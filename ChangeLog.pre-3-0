@@ -1,0 +1,1183 @@
+2007-08-27  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/propertyhelper.py (property.__metaclass__.__repr__): Avoid
+	exporting the metaclass, just define it in the class.
+
+	* gobject/__init__.py (GObjectMeta._install_properties): 
+	Refactor a bit to make sure that it is possible to use in subclasses,
+	fixes #470718 (Marco Giusti)
+
+2007-08-27   Marco Giusti  <marco.giusti@gmail.com>
+
+	reviewed by: Gustavo J. A. M. Carneiro
+
+	* gobject/propertyhelper.py:
+	* tests/test_properties.py:
+	Bug 470230 – check for default value in boolean type is wrong.
+
+2007-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/Makefile.am,
+	* gobject/Makefile.am: Remove -D_XOPEN_SOURCE=600
+	-D__EXTENSIONS__, no longer needed.
+
+	* configure.ac: Don't add -std=c9x CFLAG on Solaris.  Fixes
+	#339924 again.
+
+	* gobject/pygtype.c (pyg_type_wrapper_repr): Typecast self->type
+	to (unsigned long int) to fix a compilation warning.
+
+2007-08-14   Ed Catmur   <ed@catmur.co.uk>
+
+	reviewed by: Gustavo J. A. M. Carneiro
+
+	* gobject/pygobject.c (pygobject_new_full, pygobject_clear),
+	(pygobject_get_dict): Bug 466082 – pygobject_new_full not fully
+	initialising PyGObject, chaos results.
+
+2007-08-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_subtype.py (TestSubType.testGetDict): Add unit test
+	exercising a bug when GObject.__dict__ is accessed directly.
+
+2007-07-08  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pygobject_functions)
+	(pyg_timeout_add_seconds): Wrap g_timeout_add_seconds,
+	conditionally compiled if glib version >= 2.13.5.
+
+2007-07-08   Johannes Hölzl   <johannes.hoelzl@gmx.de>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/gobjectmodule.c (build_gerror, init_gobject): Work
+	around the deprecation warning of BaseException.message in Python
+	2.6+ affecting GError exceptions.  Fixes #342948.
+
+2007-07-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.ac: Post-release version bump.
+
+=== 2.13.2 ===
+2007-07-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* NEWS: Update.
+
+2007-07-07  Damien Carbery   <damien.carbery@sun.com>
+
+	reviewed by: Gustavo Carneiro.
+
+	* configure.ac: Bug 339924 – pygobject doesn't compile on opensolaris.
+
+2007-04-30  Johannes Hölzl  <johannes.hoelzl@gmx.de>
+
+	* gobject/gobjectmodule.c (init_gobjectmodule),
+	* gobject/pygoptiongroup.c (arg_func),
+	* gobject/option.py (OptionParser._parse_args, OptionGroup._to_goptiongroup),
+	* tests/test_option.py: OptParse-Exceptions in GOption-callbacks
+	are now convertet into an GError.  GError from the
+	GOptionGroup.run is convertet into an OptParse-Exception.
+	Fixes #342948.
+
+2007-07-06  Ed Catmur  <ed@catmur.co.uk>
+
+	* gobject/pygtype.c (pyg_param_gvalue_from_pyobject),
+	(pyg_param_gvalue_as_pyobject): Applied patch from Ed Catmur to
+	support G_TYPE_VALUE boxed args/signals, and add a test, Fixes
+	#351072
+
+2007-07-06  Carlos Martin  <inean@users.sf.net>
+
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: add test for #351072
+
+2007-07-04  Murray Cumming  <murrayc@murrayc.com>
+
+	* gobject/pygobject.c: (pygobject_switch_to_toggle_ref):
+	* gobject/pygobject.h: Rename the private struct field to 
+	private_flags, because private is a C++ keyword, so this broke 
+	builds of some C++ applications, such as Glom.
+
+2007-07-02  Sebastian Granjoux  <seb.sfo@free.fr>
+
+	reviewed by: Johan Dahlin
+
+	* gobject/gobjectmodule.c: (pyg_gerror_exception_check):
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: (_wrap_test_gerror_exception):
+
+	Fix a bug in pyg_error_exception_check, add a test, Fixes #449879
+
+2007-06-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.h: Add a flags field to PyGObject; uses
+	structure space formerly occupied by the now stale "GSList
+	*closures" field.
+
+	* gobject/pygobject.c (pygobject_switch_to_toggle_ref): Do nothing
+	if the wrapper is already in toggle reference mode.  Closes #447271.
+
+	* tests/test_subtype.py: Test case for #447271.
+
+2007-06-17  Sebastien Bacher  <seb128@ubuntu.com>
+
+	* m4/python.m4: use python-config to get python includes
+          (Closes #448173)
+
+2007-06-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/propertyhelper.py,
+	* tests/test_properties.py: Support type=GObject or
+	type=TYPE_OBJECT in the new properties API.
+
+2007-06-06  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	OK'd by Johan
+
+	* gobject/generate-constants.c: Return 0 from main().
+
+	* gobject/Makefile.am: use generate-constants$(EXEEXT) instead
+	of generate-constants in the constants.py target rule.
+
+2007-05-30  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* autogen.sh: Allow running autogen.sh from outside $srcdir.
+
+2007-05-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/Makefile.am (INCLUDES): Idem.
+
+	* gobject/Makefile.am (INCLUDES): Add -D_XOPEN_SOURCE=600 and
+	-D__EXTENSIONS__ to make it compile with c99 and Sun C compiler.
+
+	Fixes #339924: gnome-python doesn't compile on opensolaris.
+
+2007-05-02  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac: Post-release version bump.
+
+=== 2.13.1 ===
+2007-05-02  Johan Dahlin  <jdahlin@async.com.br>
+
+	* pygobject-2.0-uninstalled.pc.in: Add libdir.
+	Fixes #435132 (Luca Ferretti)
+
+2007-05-01  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/propertyhelper.py:
+	* tests/test_properties.py:
+
+	Store property values in the descriptor per instance, add a test.
+
+	* examples/properties.py:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/constants.py.in:
+	* gobject/generate-constants.c: (main):
+	* gobject/propertyhelper.py:
+	* tests/Makefile.am:
+	* tests/test_enum.py:
+	* tests/test_interface.py:
+	* tests/test_properties.py:
+
+	Add a property helper, fixes #338098
+
+2007-04-30  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* tests/common.py (importModules): Import testhelper first so that
+	g_thread_init is called before init_pygobject.
+
+	* tests/testhelpermodule.c (inittesthelper): Call g_thread_init
+	before init_pygobject.
+
+	* tests/test_subtype.py (TestSubType.testDescriptor): Unit test
+	for the bug below.
+
+	* gobject/pygobject.c (pygobject_setattro): Account for the case
+	when attribute setting doesn't actually create an instance
+	dictionary, in which case pygobject_switch_to_toggle_ref would be
+	called twice, thereby causing gobject error.
+	Fixes #434659
+
+2007-04-29  James Livingstone  <doclivingstone@gmail.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygtype.c: (pyg_value_from_pyobject):
+	* tests/test_signal.py:
+
+	Add a missing else to avoid throwing a TypeError.
+	Includes a test written by Ed Catmur.
+	Fixes #374653
+
+2007-04-29  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygtype.c: (pyg_value_array_from_pyobject):
+	* tests/test_gtype.py:
+	* tests/testhelpermodule.c: (_wrap_test_value_array):
+
+	Treat None in a GValueArray as pointer/NULL, patch by
+	Ed Catmur, fixes #352209.
+
+2007-04-29  Loïc Minier  <lool+gnome@via.ecp.fr>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* autogen.sh:
+
+	Use dirname $0 instead of pwd to compute srcdir in autogen,
+	fixes #409234
+	
+2007-04-29  Damien Carbery <damien.carbery@sun.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* tests/test-unknown.c: (test_interface_iface_method):
+
+	Do not return in a void function, fixes #385127
+
+2007-04-29  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygflags.c: (pyg_flags_from_gtype):
+	Fix leak, patch by Daniel Berrange. Fixes #428726 (Phil Dumont)
+
+2007-04-29  Damien Carbery <damien.carbery@sun.com>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac:
+	* pygobject-2.0-uninstalled.pc.in:
+
+	Add an uninstalled pkg-config file, fixes #385129
+
+2007-04-29  Johan Dahlin  <johan@gnome.org>
+
+	* README: 
+	* configure.ac:
+	* gobject/Makefile.am:
+	* gobject/ffi-marshaller.c: (g_value_to_ffi_type),
+	(g_value_from_ffi_type), (g_cclosure_marshal_generic_ffi):
+	* gobject/ffi-marshaller.h:
+	* gobject/gobjectmodule.c: (create_signal), (init_gobject):
+	* pygobject-2.0.pc.in:
+	* tests/test_signal.py:
+	* tests/testhelpermodule.c: (test1_callback),
+	(test1_callback_swapped), (test2_callback), (test3_callback),
+	(test4_callback), (test_float_callback), (test_double_callback),
+	(test_string_callback), (test_object_callback), (connectcallbacks),
+	(_wrap_connectcallbacks), (inittesthelper):
+
+	Add a generic CClosure marshaller based on ffi. 
+	This makes it possible to connect to signals on PyGObjects from C.
+	libffi is now an optional dependency
+	Fixes #353816 (Edward Hervey)
+
+2007-04-23  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Post-release version bump.
+
+=== 2.13.0 ===
+2007-04-23  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Bump version to 2.13.0.
+
+	* tests/test_properties.py (TestProperties.testMulti): Unit test
+	for get/set_properties.
+
+2007-04-23  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gobject/pygobject.c: Implemented pygobject_set_properties and
+	pygobject_get_properties in order to set multiple properties using
+	keyword arguments. Fixes 403212
+	
+	* docs/reference/pygobject.xml: Docs for the above new methods.
+
+2007-04-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c, gobject/pygobject.h: Add a new
+	pyg_gerror_exception_check API.  Fixes #425242.
+
+	* gobject/gobjectmodule.c (pyg_set_application_name) 
+	(pyg_set_prgname): Add wrappers for g_set_application_name and
+	g_set_prgname.  Patch by Havoc Pennington.  Fixes #415853.
+
+	* gobject/pygobject.h: Bug #419379: Modernize init_pygobject: use
+	static inline functions instead of macros.
+
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_data_free, pygobject_data_new),
+	(pygobject_get_inst_data, pyg_toggle_notify),
+	(pygobject_switch_to_toggle_ref),
+	(pygobject_register_wrapper_full, pygobject_register_wrapper),
+	(pygobject_new_full, pygobject_unwatch_closure),
+	(pygobject_watch_closure, pygobject_dealloc, pygobject_repr),
+	(pygobject_traverse, pygobject_clear, pygobject_weak_ref),
+	(pygobject_setattro, pygobject_weak_ref_traverse),
+	(pygobject_weak_ref_notify, pygobject_weak_ref_clear),
+	(pygobject_weak_ref_dealloc, pygobject_weak_ref_new),
+	(pygobject_weak_ref_unref, pygobject_weak_ref_call):
+	* gobject/pygobject.h:
+	* gobject/pygtype.c (gclosure_from_pyfunc):
+	* tests/test_subtype.py:
+	Bug #320428: Break PyGObject<->GObject reference cycle (patch
+	v7.1; thanks John Ehresman for the help with this patch).
+
+2007-03-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_emit): Fix %ld vs int warning.
+	(pygobject_chain_from_overridden): Idem.
+
+2007-03-06  Richard Hult  <richard@imendio.com>
+
+	* configure.ac: Fix the docs option so that it's possible to disable
+	building the docs.
+
+2007-03-03  Edward Hervey  <edward@fluendo.com>
+
+	* gobject/pygobject.c: (set_property_from_pspec):
+	Release the GIL when calling g_object_set_property, since setting a
+	property might trigger some code that might come back in python land.
+	Fixes #395048
+
+2007-01-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.ac:  Turn the option --disable-docs into --enable-docs.
+	* docs/Makefile.am:  Tread --enable-docs like --enable-gtk-doc in
+	gtk+, i.e. do not ever build docs unless requested, but always
+	install them if they are found already built.
+
+2006-12-14  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* autogen.sh: Make this work with automake 1.10 too.
+
+2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac: Post release version bump
+
+=== 2.12.3 ===
+2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+	* gobject/pygoptiongroup.c (pyg_option_group_dealloc): 
+	* tests/test_option.py (TestOption.testBadConstructor): 
+	Make sure an exception is raised when we pass in invalid arguments
+	to the optiongroup constructor, add a test. #364576 (Laszlo Pandy)
+
+	* gobject/pygobject.c (pygobject_register_class): set __module__ on
+	gobject derived types, fixes #376099 (Osmo Salomaa)
+
+2006-11-18  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c: (create_property):
+	* gobject/pygparamspec.c: (pyg_param_spec_getattr):
+	* tests/test_properties.py:
+
+	Avoid truncating in pyg_param_spec_getattr, add test for all non-float
+	numeric types. Fixes #353943
+
+2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygtype.c (gclosure_from_pyfunc): Use PyObject_Cmp instead
+	of comparing function closure addresses, which makes it possible 
+	to use any callable and not just functions. 
+	Fixes #375589 (Dima)
+
+2006-10-13  John Finlay  <finlay@moeraki.com>
+
+	* docs/Makefile.am (HTML_FILES): Remove 
+	html/pygobject-reference-copyright.html.
+	Fixes #361906 (Marc-Andre Lureau)
+
+2006-10-11  John Finlay  <finlay@moeraki.com>
+
+	* docs/reference/pygobject-introduction.xml: Remove Copyright and
+	License section.
+
+	* docs/reference/pygobject-ref.xml: Remove author info
+
+2006-10-05  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* dsextras.py (Template) (TemplateExtension): Add
+	py_ssize_t_clean flag to be passed to codegen.SourceWriter.
+
+2006-10-04  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* Makefile.am: Add pygobject_postinstall.py to EXTRA_DIST.
+
+2006-10-03  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac: Post release version bump
+
+=== 2.12.2 ===
+2006-10-03  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: 
+	* configure.ac: 2.12.2
+
+2006-10-03  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c: (add_signals), (add_properties),
+	(pyg_signal_new), (pyg_object_new), (get_handler_priority),
+	(pyg_io_add_watch), (pyg_spawn_async), (pyg_add_emission_hook),
+	(pyg_remove_emission_hook), (pyg_filename_from_utf8),
+	(_pyg_strv_to_gvalue):
+	* gobject/pygiochannel.c: (py_io_channel_write_chars),
+	(py_io_channel_write_lines):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c: (PyGProps_length), (pygobject_init),
+	(pygobject_connect), (pygobject_connect_after),
+	(pygobject_connect_object), (pygobject_connect_object_after),
+	(pygobject_disconnect), (pygobject_handler_is_connected),
+	(pygobject_handler_block), (pygobject_handler_unblock),
+	(pygobject_emit), (pygobject_chain_from_overridden):
+	* gobject/pygoptioncontext.c: (pyg_option_context_parse):
+	* gobject/pygtype.c: (pyg_value_from_pyobject):
+
+	Python 2.5 and 64 bits fixes (Py_ssize_t), closes bug #338487.
+
+	* gobject/pygenum.c (pyg_enum_repr): Const warning fix.
+
+2006-09-29  Johan Dahlin  <jdahlin@async.com.br>
+
+	* pygtk.py: LGPL, not GPL header
+
+2006-09-24  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.h (init_pygobject_check): Add parentheses
+	"around && within ||" to please gcc.
+
+2006-09-21  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* dsextras.py: Catch ImportError exception when codegen is not
+	available: disable Template and TemplateExtension, redirect the
+	user to the pygtk installer and raise a NameError
+	exception. check_date has also been rewritten and now uses
+	distutils.dep_util.newer_group(). defs files can also be built
+	using createdefs by passing tuples as keyword argument to Template
+	(see for example the gdk and gtk templates in setup.py).
+	* setup.py: Changed the way the VERSION macro is defined on win32.
+	Also install the html reference documentation, the xsl files and
+	fixxref.
+	* pygobject_postinstall.py: Set the value of DATADIR in
+	fixxref.py. Add functions to install shortcuts in the Start menu
+	to the reference manual (currently disabled: see bug #353849).
+
+2006-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_signal.py (TestEmissionHook.testCallbackReturnFalse) 
+	(TestEmissionHook.testCallbackReturnTrue) 
+	(TestEmissionHook.testCallbackReturnTrueButRemove): Add a few more
+	emission hook tests.
+
+	* gobject/gobjectmodule.c (pyg_add_emission_hook): One too many
+	DECREF on 'extra_args'.
+
+2006-09-12  John Ehresman  <jpe@wingware.com>
+
+	* gobject/pygobject.h (init_pygobject_check): Declare variables
+	at start of code block
+
+2006-09-06  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygmainloop.c (pyg_signal_watch_prepare): Increase the timeout
+	to 1000ms instead of 100.
+
+=== 2.12.1 ===
+2006-09-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygobject.h (_PYGOBJECT_H_): Corrected version check,
+	(Sebastian Dröge, #354364)
+
+	* configure.ac: Post release version bump
+
+=== 2.12.0 ===
+2006-09-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: 
+	* configure.ac: 2.12.0
+
+2006-08-28  Johan Dahlin  <jdahlin@async.com.br>
+
+	* docs/Makefile.am: Install html files regardless even when passing
+	in --disable-docs, fixes #353159 (Matthias Clasen)
+
+2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.ac: Post-release version bump.
+
+=== 2.11.4 ===
+2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* NEWS: Update.
+
+	* gobject/gobjectmodule.c (pyg_type_register): Correct a bug in
+	the code that checks if parent already implements an interface or not.
+	
+	* tests/test-unknown.c (test_interface_base_init),
+	(test_interface_get_type): Add a property to the interface, for
+	better testing.
+	(test_unknown_get_property),
+	(test_unknown_set_property, test_unknown_class_init): Add a
+	property to the class as required by the interface.
+	
+	* tests/test_interface.py: More thorough interface testing, with
+	properties and test both the case of implementing an interface
+	from scratch, and re-implementing and interface that a parent
+	already implements.
+
+2006-08-27  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pygobject__g_instance_init): If
+	necessary, attach the GObject to the PyGObject here.
+	(pygobject_constructv): Cope with the fact that wrapper->obj may
+	have already been set due to the change above.
+	
+	* tests/test_signal.py: Add test case fixed by the changes above,
+	basically calling self.emit() inside do_set_property called
+	implicitly by the constructor due to a CONSTRUCT property.
+
+	Fixes bug 353039: "Failure in signal emission during
+	do_set_property invoked from constructor".
+
+2006-08-26  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Fix type
+	registration once more to account for all corner cases.  This time
+	we register interfaces in two stages: first, before properties and
+	signals are registered, we register the interfaces that are
+	already implemented in the parent type and are being overridden;
+	second, after registration of properties and signals, we register
+	the remaining interfaces.
+
+2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
+
+	* docs/Makefile.am (EXTRA_DIST): Remove build_stamp, include generated .html
+	in the distributed tarball. Remove builddate.xml, reference directory and fixxref.py 
+	dependencies to avoid regenerating the tarball when it's not needed.
+	
+	* configure.ac: Post release version bump
+
+=== 2.11.3 ===
+2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+	* Makefile.am: 
+	* docs/Makefile.am: 
+	Always install the xsl files & css files, regardless if the
+	documentation was actually built or not. Also clean it up considerably.
+
+2006-08-17  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Move the interface
+	registration code up, to run before properties and signals
+	registration, because glib doesn't allow us to add interfaces
+	after the first call to g_class_ref.
+
+2006-08-16  John Finlay  <finlay@moeraki.com>
+
+	* docs/reference/pygobject-functions.xml: Update docs for
+	gobject functions.
+
+2006-08-15  Murray Cumming  <murrayc@murrayc.com>
+
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.h:
+	Replace uses of typename with type_name, because that is a 
+	reserved C++ keyword. This was breaking compilation of Glom 
+	due its use in the new type_register_custom function pointer in 
+	pygobject.h.
+
+2006-08-12  John Finlay  <finlay@moeraki.com>
+
+	* pygobject-2.0.pc.in: Add reference to installed pygobject docs
+	* docs/Makefile.am: Add install of style.css
+	* docs/xsl/html.xsl: Define stylesheet as style.css
+	* docs/style.css: Add.
+
+2006-08-10  John Finlay  <finlay@moeraki.com>
+
+	* docs/reference/entities.docbook.in: 
+	* docs/reference/pygobject-ref.xml: 
+	* docs/Makefile.am: 
+	* configure.ac:
+	Use builddate.xml for the builddate entity and have builddate.xml be
+	updated when the docs are built not during configure time.
+
+2006-08-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac:  Post release version bump.
+
+=== 2.11.2 ===
+2006-08-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+2006-08-07  Johan Dahlin  <jdahlin@async.com.br>
+
+	* docs/Makefile.am ($(HTML_DATA)): Fix parallel build 
+	(#350225, Ed Catmur)
+
+2006-08-06  Johan Dahlin  <johan@gnome.org>
+
+	* m4/as-expand.m4: New file to workaround automake silliness
+
+	* docs/xsl/fixxref.py.in: New script
+
+	* docs/Makefile.am (XSLFILES): Add fixxref.py script, moved in from
+	PyGTK.
+
+	* docs/xsl/html.xsl: Do not use shade.verbatim, set the background
+	color and border as a normal html tag to avoid an external
+	stylesheet.
+
+2006-08-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac: Post release version bump
+
+=== 2.11.1 ===
+2006-08-04  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+	* README: Update, some s/PyGTK/PyGObject/
+
+	* configure.ac:
+	* docs/Makefile.am:
+	* docs/reference/.cvsignore:
+	* docs/reference/entities.docbook.in:
+	* docs/reference/pygobject-ref.xml:
+	Clean up the build date/version mess I created.
+	Now it's created during configure time and properly included in
+	the docbook files. Also make sure distcheck passes
+
+2006-08-04  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.in: Add hack to disable libtool checking for g++ and
+	g77 (copied from libglade).
+
+2006-07-29  John Finlay  <finlay@moeraki.com>
+
+	* gobject/pygobject.h (pyg_param_gvalue_from_pyobject): Fix define
+	to point to the correct function pointer field.
+
+2006-07-29  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygflags.c (pyg_flags_add): idem.
+
+	* gobject/pygenum.c (pyg_enum_add): Give a more explicit error
+	message when the gtype is not an enum.
+
+2006-07-25  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygobject.h (init_pygobject_check): Add a macro to easily 
+	check the installed pygobject version.
+
+	* gobject/pygflags.c (pyg_flags_add) 
+	* gobject/pygenum.c (pyg_enum_add): Duplicate the string before
+	sending it to python. Fixes GCC warnings.
+
+2006-07-24  John Finlay  <finlay@moeraki.com>
+
+	* gobject/pygflags.c (pyg_flags_get_first_value_name) 
+	(pyg_flags_get_first_value_nick): Avoid segfault when
+	g_flags_get_first_value returns NULL.
+
+2006-07-20  John Finlay  <finlay@moeraki.com>
+
+	* docs/Makefile.am: Make version.xml dependent on config.h
+	Make builddate.xml dependent on REFERENCE_DEPS. Add builddate.xml to
+	build_stamp and pdf dependencies. Add pdf files to cleanup.
+
+2006-07-20  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac:
+	* docs/Makefile.am:
+	* docs/reference/.cvsignore:
+	* docs/reference/version.xml.in:
+	Generate builddate.xml and version.xml at build time instead on
+	configure time, add proper dependencies.
+
+2006-07-19  John Finlay  <finlay@moeraki.com>
+
+	* docs/Makefile.am: Use more portable date generator.
+
+	* docs/xsl/ref-html-style.xsl: Add book to list of indexed items.
+
+	* docs/xsl/html.xsl: Output xref links for unknown links.
+
+	* docs/xsl/ref-html-style.xsl: Include refsect1 and refsect2 in
+	indexed items but only if they have ids.
+
+	* configure.ac (AC_CONFIG_FILES) : Add docs/reference/version.xml
+
+	* docs/reference/pygobject-ref.xml: Add pygobject-introduction.xml
+	and version and builddate entities. Remove commented out items.
+
+	* docs/Makefile.am: Add reference/pygobject-introduction.xml and
+	 reference/version.xml.in
+
+2006-07-18  Johan Dahlin  <johan@gnome.org>
+
+	* docs/Makefile.am (HTMLdir): Install book in $datadir/gtk-doc/html
+
+2006-07-13  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c: (pyg_type_from_name),
+	(get_type_name_for_class):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c: (pygobject_new_with_interfaces),
+	(pygobject_lookup_class), (pygobject_emit):
+	* gobject/pygobject.h:
+	* gobject/pygtype.c: (_wrap_g_type_from_name),
+	(pyg_type_from_object), (pyg_type_register_custom_callback),
+	(pyg_type_get_custom), (_pyg_type_from_name):
+	Add infrastructure for lazy type registration, fixes #346947
+
+2006-07-13  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* m4/python.m4: Properly quote AM_CHECK_PYMOD definition.
+
+	* gobject/pygoptioncontext.c (pyg_option_context_parse): Fix mem
+	leak.
+
+2006-07-12  Johan Dahlin  <jdahlin@async.com.br>
+
+	* Makefile.am:
+	* configure.ac:
+	* docs/.cvsignore:
+	* docs/Makefile.am:
+	* docs/common.xsl:
+	* docs/devhelp.xsl:
+	* docs/html.xsl:
+	* docs/pdf-style.xsl:
+	* docs/pdf.xsl:
+	* docs/ref-html-style.xsl:
+	* docs/reference/.cvsignore:
+	* docs/reference/pygobject-classes.xml:
+	* docs/reference/pygobject-constants.xml:
+	* docs/reference/pygobject-functions.xml:
+	* docs/reference/pygobject-gboxed.xml:
+	* docs/reference/pygobject-ginterface.xml:
+	* docs/reference/pygobject-gpointer.xml:
+	* docs/reference/pygobject-maincontext.xml:
+	* docs/reference/pygobject-mainloop.xml:
+	* docs/reference/pygobject-ref.xml:
+	* docs/reference/pygobject.xml:
+	Import GObject part of John Finlay's PyGTK Reference Manual, copy
+	over infrastructure from the pygtk-web module.
+
+2006-07-12  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* configure.ac: Post-release version bump to 2.11.1.
+
+=== PyGObject 2.11.0 ===
+2006-07-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Make interface_data
+	point to the python type before adding the interface to the new
+	type.  This should fix interface implementation (actually I
+	thought such code had already been added earlier but can't find it
+	now and it is obviously needed...)
+	(pyg_type_register): move the code that needs g_type_class_ref
+	until after interface registration (more code that I already wrote
+	in the past but got lost).
+
+2006-07-05  John Finlay  <finlay@moeraki.com>
+
+	* gobject/pygiochannel.c (py_io_channel_init): Fix message typo.
+
+2006-06-28  Cedric Gustin  <cedric.gustin@gmail.com>
+
+	* dsextras.py (InstallData): Set datarootdir in .pc file.
+
+	* pygobject_postinstall.py (replace_prefix): Do not parse
+	pygtk-codegen-2.0 as it is part of pygtk.
+
+	* setup.py: Create gobject extension as gobject._gobject. Add
+	pygoptioncontext.c and pygoptiongroup.c to the list of source
+	files. Add option.py to the module files. Changed name of
+	distutils package from pygtk to pygobject.
+
+2006-06-24  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_filename_from_utf8): Wrap
+	g_filename_from_utf8.
+
+	* tests/test_signal.py (TestClosures.testGString): Add unit test
+	for signals using the type TYPE_GSTRING.
+
+	* gobject/pygtype.c (pyg_value_as_pyobject)
+	(pyg_value_from_pyobject): Implement conversion code for the type
+	G_TYPE_GSTRING.
+
+	* gobject/gobjectmodule.c (pyg_filename_display_basename)
+	(pyg_filename_display_name): Add bindings for
+	g_filename_display_basename and g_filename_display_name.
+	(init_gobject): Add a TYPE_GSTRING definition.
+
+	* gobject/pygobject.h,
+	* gobject/pygobject-private.h: Make pyg_constant_strip_prefix
+	receive and return const gchar*, to indicate it does not change
+	the string.  Unfortunately since PyModule_AddIntConst is broken in
+	python < 2.5 this introduces const warnings elsewhere :-(
+
+	* gobject/gobjectmodule.c (pyg_flags_add_constants) 
+	(pyg_enum_add_constants): Fix const warnings.
+
+2006-06-23  John Finlay  <finlay@moeraki.com>
+
+	* gobject/gobjectmodule.c (pyg_object_class_list_properties)
+	(pyg_signal_list_ids, pyg_signal_lookup, pyg_signal_query): Add
+	support for retrieving signal and propertie info from interface types.
+
+2006-06-04  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_spawn_async)
+	(pyg_signal_new): Fix two leaks in error cases, found by
+	Coverity.
+
+2006-05-28  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_subtype.py: Uncomment Johan's "subsubtype" test case.
+
+	* gobject/gobjectmodule.c (pygobject__g_instance_init): Pass the
+	g_class to pygobject_new_full, because during the instance init
+	function instances are temporarily assigned the parent's GType.
+
+	* gobject/pygobject-private.h,
+	* gobject/pygobject.c (pygobject_new_full): Make
+	pygobject_new_full accept an optional g_class parameter; If
+	present, the GType is extracted from the class instead of from the
+	instance.
+
+2006-05-20  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/pygobject.c (pygobject_init, pygobject_get_property),
+	(pygobject_set_property): Bug 341174: Be more specific in
+	set/get_property error messages.
+
+2006-05-07  Yevgen Muntyan  <muntyan@tamu.edu>
+
+	reviewed by: Gustavo Carneiro
+
+	* gobject/gobjectmodule.c (_log_func, add_warning_redirection),
+	(remove_handler, disable_warning_redirections, init_gobject):
+	* gobject/pygobject.h:  Add new pyg_add_warning_redirection and
+	pyg_disable_warning_redirections APIs (bug #323786 again).
+
+2006-05-07  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am (CLEANFILES): Remove pygtk.py, it's not
+	auto-generated any longer. Thanks to Kjartan for noticing.
+
+2006-05-07  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygoptioncontext.c:
+	s/sizeof(PyGMainContext)/sizeof(PyGOptionContext)/ (copy-paste error).
+
+2006-05-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_pid_close): Add a close() method
+	to the GPid wrapper.
+	
+	* gobject/gobjectmodule.c (pyg_pid_free, pyg_pid_new),
+	(pyg_spawn_async, init_gobject): Wrap GPid in an object whose
+	destructor calls g_spawn_close_pid.  Fixes #340160.
+
+2006-04-29  Johannes Hölzl <johannes.hoelzl@gmx.de>
+
+	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
+
+	* examples/Makefile.am:
+	* examples/option.py:
+	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c: (init_gobject):
+	* gobject/option.py:
+	* gobject/pygobject-private.h:
+	* gobject/pygoptioncontext.c: (pyg_option_context_init),
+	(pyg_option_context_dealloc), (pyg_option_context_parse),
+	(pyg_option_context_set_help_enabled),
+	(pyg_option_context_get_help_enabled),
+	(pyg_option_context_set_ignore_unknown_options),
+	(pyg_option_context_get_ignore_unknown_options),
+	(pyg_option_context_set_main_group),
+	(pyg_option_context_get_main_group),
+	(pyg_option_context_add_group), (pyg_option_context_compare),
+	(pyg_option_context_new):
+	* gobject/pygoptiongroup.c: (check_if_owned), (destroy_g_group),
+	(pyg_option_group_init), (pyg_option_group_dealloc), (arg_func),
+	(pyg_option_group_add_entries),
+	(pyg_option_group_set_translation_domain),
+	(pyg_option_group_compare), (pyg_option_group_transfer_group),
+	(pyg_option_group_new):
+	* tests/test_option.py:
+
+	Add support for GOption, fixes #163645
+
+2006-04-29  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygtype.c (gclosure_from_pyfunc): 
+
+	* gobject/pygobject.c (pygobject_disconnect_by_func) 
+	(pygobject_handler_block_by_func) 
+	(pygobject_handler_unblock_by_func): 
+
+	* tests/test_signal.py (TestEmissionHook._callback): 
+
+	Fix #154845, add tests and a private method.
+	
+2006-04-23  John Ehresman   <jpe@wingware.com>
+
+	reviewed by: Gustavo
+
+	* Makefile.am:
+	* pygtk.py:
+	* pygtk.py.in:
+	Bug 338945: Make pygtk.py relocatable
+
+2006-04-18  John Ehresman   <jpe@wingware.com>
+
+	* dsextras.py: Add compiler / linker flags from pkgconfig-2.0.pc
+	by default, with an override mechanism.  Filter out -lc & -lm if
+	compiling with msvc.
+
+	* setup.py: Change C extension name to _gobject and don't use the
+	pkgconfig-2.0.pc when compiling
+
+2006-04-15  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/__init__.py (_PyGObject_API): Copy _PyGObject_API from
+	gobject._gobject into gobject in order to preserve binary
+	compatibility with 3rd party modules.
+
+	* gobject/pygobject.h (init_pygobject): Import gobject, gobject._gobject.
+
+	* gobject/Makefile.am: Fix pygobject installation dir: install
+	both _gobject.la and __init__.py into
+	$(pyexecdir)/gtk-2.0/gobject.
+
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c (init_gobject): 
+	* gobject/__init__.py:
+	Move over almost all GType constants from C to Python.
+
+2006-04-11  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (_wrap_pyg_type_register),
+	(pyg__install_metaclass, init_gobject):  GObjectMeta now moved to
+	python-land (__init__.py).
+	
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_register_class):
+	PyGObject_MetaType is now a pointer, not structure.
+
+	* gobject/gobjectmodule.c (_wrap_pyg_type_register): Add optional
+	type name parameter.
+
+	* tests/common.py (importModule): Include original exception
+	string in the raised SystemExit.
+
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/.cvsignore:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c: (init_gobject):
+	* gobject/pygobject.h:
+	* tests/Makefile.am:
+	* tests/common.py:
+
+	Turn gobject into a package; move _gobject to gobject._gobject and
+	add gobject/__init__.py. Update macros and testsuite.
+
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* configure.ac: Post release version bump
+
+=== PyGObject 2.10.1 ===
+2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* NEWS: Update
+
+2006-04-11  Andy Wingo  <wingo@pobox.com>
+
+	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c (create_property): Parse unsigned int64
+	constraints in param spec declaration using the "K" ParseTuple
+	format unit, not L -- allows the full range of the datatype to be
+	parsed. K format unit added in python 2.3.
+
+2006-04-01  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* tests/test_properties.py: Add test for #335854.
+
+	* pygtk.py.in (require): For version == '2.0', use a hardcoded
+	pygtk path, recorded during build.
+
+	* gobject/gobjectmodule.c (_pyg_strv_to_gvalue): Don't allow
+	arbitrary sequences, only tuple or list, since a string is a
+	sequence too.
+	(pyg_object_new): Add a bit more detail to the exception string.
+
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am: Include dsextras.py in the dist and install it.
+
+2006-03-19  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_new_with_interfaces): Remove
+	comment "It will currently not filter out interfaces already
+	implemented by it parents.", since it is no longer true since
+	2006-01-13.
+
+=== PyGObject 2.10.0 ===
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* NEWS: Update
+
+2006-03-09 Michael Smith  <msmith@fluendo.com>
+
+	reviewed by: Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygenum.c: (pyg_enum_new), (pyg_enum_from_gtype),
+	(pyg_enum_add):
+	* gobject/pygflags.c: (pyg_flags_new), (pyg_flags_from_gtype),
+	(pyg_flags_add):
+	Plug a couple of leaks, fixes #334027.
+
+2006-01-19  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac (export_dynamic):
+	* Makefile.am (egg):
+	Add a make egg target
+
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac: Post release version bump
+
+=== PyGObject 2.9.1 ===
+2006-01-16  Johan Dahlin  <johan@gnome.org>
+
+	* NEWS: Update
+
+2006-01-15  Christopher Aillon  <caillon@redhat.com>
+
+	* gobject/gobjectmodule.c (pyg_strv_to_gvalue):
+	Don't call g_value_init since the other *_to_gvalue
+	methods expect an already inited GValue
+
+2006-01-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (iowatch_marshal): Warn if io callback
+	returns None: almost always this is an error.
+
+2006-01-13  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygobject.c (pygobject_register_class): Change strategy
+	a bit: don't ignore bases; use but augment it with missing bases
+	extracted in runtime.
+
+	* gobject/pygobject.c (pygobject_register_class): Don't use the
+	passed in 'bases' parameter; instead find out in runtime the bases
+	for any given gtype.
+	(pyg_type_get_bases, pygobject_new_with_interfaces): Refactor code
+	that dynamically discovers bases into a separate function;
+	Override tp_dealloc, tp_alloc, tp_free, tp_traverse, and tp_clear,
+	inherit them again from the parent type, since type_new inside
+	Python core sets them to hardcoded functions subtype_xxx.  Also
+	call py_parent_type->ob_type, instead of fixed &PyType_Type.
+	(pygobject_clear): Change a g_message to g_warning.
+
+2006-01-13  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/gobjectmodule.c: (pyg_io_add_watch),
+	(marshal_emission_hook), (pyg_add_emission_hook),
+	(pyg_remove_emission_hook):
+	* gobject/pygobject.c:
+	* tests/test_signal.py:
+
+	Add add/remove_emission_hook and tests. Fixes #325977
+
+2006-01-11  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* gobject/gobjectmodule.c (_pyg_signal_accumulator),
+	(create_signal, pyg_signal_accumulator_true_handled),
+	(initgobject): Bug 155380 -- Add support for signal accumulators.
+
+	* tests/runtests.py: Add 'test_enum', 'test_conversion' to
+	SKIP_FILES, since they depend on pygtk modules so don't work
+	anymore.  This should be eventually fixed, though.
+
+	* tests/test_signal.py: Test signal accumulators.
+
+	* gobject/pygtype.c (object_doc_descr_get): Reorder
+	properties/signals documentation more nicely: signals + properties
+	from each type are presented, with types ranging from the leaf
+	types to the base types.
+
+	* configure.ac: Branch, bump version to 2.9.1.
+
+=== PyGObject 2.8.0 ===
+2006-01-09  Johan Dahlin  <jdahlin@async.com.br>
+
+	* MANIFEST.in:
+	* Makefile.am:
+	* tests/Makefile.am:
+
+	Make dist/distcheck work again
+
+2006-01-09  Johan Dahlin  <jdahlin@async.com.br>
+
+	* setup.py: Add distutils support
+
+	* dsextras.py (get_m4_define): Check for configure.ac aswell.
+
+	* .cvsignore:
+	* AUTHORS:
+	* COPYING:
+	* INSTALL:
+	* Makefile.am:
+	* PKG-INFO.in:
+	* README:
+	* autogen.sh:
+	* configure.ac:
+	* examples/.cvsignore:
+	* examples/Makefile.am:
+	* gobject/gobjectmodule.c: (initgobject):
+	* m4/jhflags.m4:
+	* m4/python.m4:
+	* pygobject-2.0.pc.in:
+	* tests/Makefile.am:
+	* tests/common.py:
+	* tests/leak.glade:
+	* tests/runtests.py:
+	* tests/test_actiongroup.py:
+	* tests/test_dialog.py:
+	* tests/test_gdk.py:
+	* tests/test_gdkevent.py:
+	* tests/test_glade.py:
+	* tests/test_gtype.py:
+	* tests/test_liststore.py:
+	* tests/test_radiobutton.py:
+	* tests/test_signal.py:
+	* tests/test_subtype.py:
+	* tests/test_textview.py:
+	* tests/test_thread.py:
+	* tests/testhelpermodule.c: (test_type_get_type),
+	(_wrap_test_g_object_new):
+	* tests/testmodule.py:
+
+	Split out PyGObject from PyGTK.

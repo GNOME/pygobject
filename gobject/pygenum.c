@@ -55,13 +55,14 @@ pyg_enum_repr(PyGEnum *self)
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
   for (index = 0; index < enum_class->n_values; index++)
-      if (self->parent.ob_ival == enum_class->values[index].value)
+      if (self->parent.ob_digit[0] == enum_class->values[index].value)
           break;
   value = enum_class->values[index].value_name;
   if (value)
       sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
   else
-      sprintf(tmp, "<enum %ld of type %s>", self->parent.ob_ival, g_type_name(self->gtype));
+      sprintf(tmp, "<enum %d of type %s>",
+	      self->parent.ob_digit[0], g_type_name(self->gtype));
 
   g_type_class_unref(enum_class);
 
@@ -153,7 +154,7 @@ pyg_enum_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
-	((PyIntObject*)retval)->ob_ival = value;
+	((PyIntObject*)retval)->ob_digit[0] = value;
 	((PyGFlags*)retval)->gtype = gtype;
 	//return PyInt_FromLong(value);
     }
@@ -221,7 +222,7 @@ pyg_enum_add (PyObject *   module,
 	PyObject *item, *intval;
       
 	item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-	((PyIntObject*)item)->ob_ival = eclass->values[i].value;
+	((PyIntObject*)item)->ob_digit[0] = eclass->values[i].value;
 	((PyGEnum*)item)->gtype = gtype;
 	
         intval = PyInt_FromLong(eclass->values[i].value);
@@ -259,7 +260,7 @@ pyg_enum_get_value_name(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+  enum_value = g_enum_get_value(enum_class, self->parent.ob_digit[0]);
 
   retval = PyString_FromString(enum_value->value_name);
   g_type_class_unref(enum_class);
@@ -277,7 +278,7 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+  enum_value = g_enum_get_value(enum_class, self->parent.ob_digit[0]);
 
   retval = PyString_FromString(enum_value->value_nick);
   g_type_class_unref(enum_class);
@@ -293,8 +294,7 @@ static PyGetSetDef pyg_enum_getsets[] = {
 };
 
 PyTypeObject PyGEnum_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,
+        PyVarObject_HEAD_INIT(0, 0)
 	"gobject.GEnum",
 	sizeof(PyGEnum),
 	0,

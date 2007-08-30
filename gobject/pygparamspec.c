@@ -355,8 +355,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 }
 
 PyTypeObject PyGParamSpec_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GParamSpec",
     sizeof(PyGParamSpec),
     0,

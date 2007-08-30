@@ -3,13 +3,17 @@ import warnings
 
 import gobject
 from gobject import GEnum, GFlags, GObject, GType, PARAM_READWRITE
-from common import gobject, atk, pango, gtk, gdk
+from common import gobject, testhelper as th
 
 class PObject(GObject):
-    enum = gobject.property(type=gtk.WindowType, default=gtk.WINDOW_TOPLEVEL)
-    enum2 = gobject.property(type=gtk.WindowType, default=int(gtk.WINDOW_TOPLEVEL))
-    flags = gobject.property(type=gtk.AttachOptions, default=gtk.EXPAND)
-    flags2 = gobject.property(type=gtk.AttachOptions, default=int(gtk.EXPAND))
+    enum = gobject.property(type=int, #th.WindowType,
+                            default=th.WINDOW_TOPLEVEL)
+    enum2 = gobject.property(type=int, #th.WindowType,
+                             default=int(th.WINDOW_TOPLEVEL))
+    flags = gobject.property(type=int, #th.AttachOptions,
+                             default=th.EXPAND)
+    flags2 = gobject.property(type=int, #th.AttachOptions,
+                              default=int(th.EXPAND))
 
 class EnumTest(unittest.TestCase):
     def testEnums(self):

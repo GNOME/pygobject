@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import exceptions
 import os
 import sys
 import select

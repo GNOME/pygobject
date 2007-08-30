@@ -65,11 +65,11 @@ m4_define([_LT_AC_TAGCONFIG],[])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-AM_PATH_PYTHON(2.3.5)
+AM_PATH_PYTHON(3.0)
 
 AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
-PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
+PLATFORM=`$PYTHON -c "from distutils import util; print(util.get_platform())"`
 AC_SUBST(PLATFORM)
 
 AC_ARG_ENABLE(thread,

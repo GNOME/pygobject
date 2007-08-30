@@ -27,7 +27,7 @@
 
 #include "pygobject-private.h"
 
-#define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
+#define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_digit[0])
 
 static PyObject *
 pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
@@ -84,13 +84,14 @@ pyg_flags_repr(PyGFlags *self)
     char *tmp, *retval;
     PyObject *pyretval;
   
-    tmp = generate_repr(self->gtype, self->parent.ob_ival);
+    tmp = generate_repr(self->gtype, self->parent.ob_digit[0]);
 
     if (tmp)
         retval = g_strdup_printf("<flags %s of type %s>", tmp,
                                  g_type_name(self->gtype));
     else
-        retval = g_strdup_printf("<flags %ld of type %s>", self->parent.ob_ival,
+        retval = g_strdup_printf("<flags %d of type %s>",
+				 self->parent.ob_digit[0],
                                  g_type_name(self->gtype));
     g_free(tmp);
     
@@ -182,7 +183,7 @@ pyg_flags_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
-	((PyIntObject*)retval)->ob_ival = value;
+	((PyIntObject*)retval)->ob_digit[0] = value;
 	((PyGFlags*)retval)->gtype = gtype;
     } else {
 	Py_INCREF(retval);
@@ -247,7 +248,7 @@ pyg_flags_add (PyObject *   module,
       PyObject *item, *intval;
       
       item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-      ((PyIntObject*)item)->ob_ival = eclass->values[i].value;
+      ((PyIntObject*)item)->ob_digit[0] = eclass->values[i].value;
       ((PyGFlags*)item)->gtype = gtype;
             
       intval = PyInt_FromLong(eclass->values[i].value);
@@ -328,7 +329,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
   
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
-  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_digit[0]);
   if (flags_value)
       retval = PyString_FromString(flags_value->value_name);
   else {
@@ -350,7 +351,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
-  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_digit[0]);
   if (flags_value)
       retval = PyString_FromString(flags_value->value_nick);
   else {
@@ -374,7 +375,7 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
   
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+      if ((self->parent.ob_digit[0] & flags_class->values[i].value) == flags_class->values[i].value)
 	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_name));
 
   g_type_class_unref(flags_class);
@@ -394,7 +395,7 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
   
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+      if ((self->parent.ob_digit[0] & flags_class->values[i].value) == flags_class->values[i].value)
 	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_nick));
 
   g_type_class_unref(flags_class);
@@ -414,14 +415,13 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_warn,		/* nb_add */
 	(binaryfunc)pyg_flags_warn,		/* nb_subtract */
 	(binaryfunc)pyg_flags_warn,		/* nb_multiply */
-	(binaryfunc)pyg_flags_warn,		/* nb_divide */
 	(binaryfunc)pyg_flags_warn,		/* nb_remainder */
 	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
 	(ternaryfunc)pyg_flags_warn,		/* nb_power */
 	0,					/* nb_negative */
 	0,					/* nb_positive */
 	0,					/* nb_absolute */
-	0,					/* nb_nonzero */
+	0,					/* nb_bool */
 	0,					/* nb_invert */
 	0,					/* nb_lshift */
 	0,					/* nb_rshift */
@@ -437,7 +437,6 @@ static PyNumberMethods pyg_flags_as_number = {
 	0,					/* nb_inplace_add */
 	0,					/* nb_inplace_subtract */
 	0,					/* nb_inplace_multiply */
-	0,					/* nb_inplace_divide */
 	0,					/* nb_inplace_remainder */
 	0,					/* nb_inplace_power */
 	0,					/* nb_inplace_lshift */
@@ -449,11 +448,11 @@ static PyNumberMethods pyg_flags_as_number = {
 	0,					/* nb_true_divide */
 	0,					/* nb_inplace_floor_divide */
 	0,					/* nb_inplace_true_divide */
+	0,					/* nb_index */
 };
 
 PyTypeObject PyGFlags_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,
+        PyVarObject_HEAD_INIT(0, 0)
 	"gobject.GFlags",
 	sizeof(PyGFlags),
 	0,

@@ -339,7 +339,7 @@ class _TestCMarshaller:
         self.assertEqual(rv, 20)
 
     def testTest4(self):
-        self.obj.emit("test4", True, 10L, 3.14, 1.78, 20, 30L, 31L)
+        self.obj.emit("test4", True, 10, 3.14, 1.78, 20, 30, 31)
 
     def testTestReturnFloat(self):
         rv = self.obj.emit("test-float", 1.234)
@@ -361,9 +361,9 @@ if 'generic-c-marshaller' in gobject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
         pass
 else:
-    print
-    print '** WARNING: LIBFFI disabled, not testing'
-    print
+    print()
+    print('** WARNING: LIBFFI disabled, not testing')
+    print()
 
 # Test for 374653
 class TestPyGValue(unittest.TestCase):

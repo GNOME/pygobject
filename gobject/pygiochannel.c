@@ -764,8 +764,7 @@ py_io_channel_init(PyGIOChannel *self, PyObject *args, PyObject *kwargs)
 
 
 PyTypeObject PyGIOChannel_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.IOChannel",		/* tp_name */
     sizeof(PyGIOChannel),		/* tp_basicsize */
     0,					/* tp_itemsize */

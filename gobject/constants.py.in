@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-from _gobject import type_from_name
+from ._gobject import type_from_name
 
 # TYPE_INVALID defined in gobjectmodule.c
 TYPE_NONE = type_from_name('void')

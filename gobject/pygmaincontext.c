@@ -81,8 +81,7 @@ static PyMethodDef _PyGMainContext_methods[] = {
 };
 
 PyTypeObject PyGMainContext_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.MainContext",
     sizeof(PyGMainContext),
     0,

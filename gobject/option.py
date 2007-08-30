@@ -180,7 +180,7 @@ class OptionGroup(optparse.OptionGroup):
 
             try:
                 opt.process(option_name, option_value, self.values, parser)
-            except OptionValueError, error:
+            except OptionValueError as error:
             	gerror = gobject.GError(str(error))
             	gerror.domain = gobject.OPTION_ERROR
             	gerror.code = gobject.OPTION_ERROR_BAD_VALUE
@@ -317,7 +317,7 @@ class OptionParser(optparse.OptionParser):
     def parse_args(self, args=None, values=None):
         try:
             return optparse.OptionParser.parse_args(self, args, values)
-        except gobject.GError, error:
+        except gobject.GError as error:
             if error.domain != gobject.OPTION_ERROR:
             	raise
             if error.code == gobject.OPTION_ERROR_BAD_VALUE:

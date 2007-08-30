@@ -3,7 +3,7 @@
 import unittest
 import sys
 
-from StringIO import StringIO
+#from StringIO import StringIO
 from common import gobject
 from gobject import option
 
@@ -13,7 +13,7 @@ class TestOption(unittest.TestCase):
     def setup_group(self):
         def option_callback(option, opt, value, parser):
             raise StandardError(self.EXCEPTION_MESSAGE)
-        
+
         group = option.OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
             option_list = [

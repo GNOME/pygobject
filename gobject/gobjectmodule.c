@@ -148,8 +148,7 @@ pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 PyTypeObject PyGInterface_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GInterface",               /* tp_name */
     sizeof(PyObject),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -210,7 +209,6 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 {
     PyObject *o;
 
-    type->ob_type = &PyType_Type;
     type->tp_base = &PyGInterface_Type;
 
     if (PyType_Ready(type) < 0) {
@@ -892,7 +890,7 @@ create_property (const gchar  *prop_name,
 	char buf[128];
 
 	g_snprintf(buf, sizeof(buf), "could not create param spec for type %s",
-		   g_type_name(prop_type));
+		   g_type_name(G_TYPE_FUNDAMENTAL(prop_type)));
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
@@ -970,7 +968,7 @@ add_properties (GType instance_type, PyObject *properties)
 	
 	/* values are of format (type,nick,blurb, type_specific_args, flags) */
 	
-	if (!PyString_Check(key)) {
+	if (!PyUnicode_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ keys must be strings");
 	    ret = FALSE;
@@ -2308,7 +2306,7 @@ pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
 static PyObject *
 pyg_pid_close(PyIntObject *self, PyObject *args, PyObject *kwargs)
 {
-    g_spawn_close_pid((GPid) self->ob_ival);
+    g_spawn_close_pid((GPid) self->ob_digit[0]);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2321,8 +2319,8 @@ static PyMethodDef pyg_pid_methods[] = {
 static void
 pyg_pid_free(PyIntObject *gpid)
 {
-    g_spawn_close_pid((GPid) gpid->ob_ival);
-    PyInt_Type.tp_free((void *) gpid);
+    g_spawn_close_pid((GPid) gpid->ob_digit[0]);
+    PyLong_Type.tp_free((void *) gpid);
 }
 
 static int
@@ -2333,8 +2331,7 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyTypeObject PyGPid_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.Pid",
     sizeof(PyIntObject),
     0,
@@ -2382,7 +2379,7 @@ pyg_pid_new(GPid pid)
     PyIntObject *pygpid;
     pygpid = PyObject_NEW(PyIntObject, &PyGPid_Type);
 
-    pygpid->ob_ival = pid;
+    pygpid->ob_digit[0] = pid;
     return (PyObject *) pygpid;
 }
 
@@ -2744,7 +2741,7 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     Py_INCREF(metaclass);
     PyGObject_MetaType = metaclass;
     Py_INCREF(metaclass);
-    PyGObject_Type.ob_type = metaclass;
+    Py_Type(&PyGObject_Type) = metaclass;
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -3340,7 +3337,7 @@ pyg_set_object_has_new_constructor(GType type)
     g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
 }
 
-#define GET_INT(x) (((PyIntObject*)x)->ob_ival)
+#define GET_INT(x) (((PyIntObject*)x)->ob_digit[0])
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -3505,10 +3502,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
 };
 
 #define REGISTER_TYPE(d, type, name) \
-    type.ob_type = &PyType_Type; \
     type.tp_alloc = PyType_GenericAlloc; \
     type.tp_new = PyType_GenericNew; \
-    if (PyType_Ready(&type)) \
+    if (PyType_Ready(&type) < 0) \
 	return; \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
@@ -3518,14 +3514,12 @@ struct _PyGObject_Functions pygobject_api_functions = {
 			 o=pyg_type_wrapper_new(gtype)); \
     Py_DECREF(o);
 
-DL_EXPORT(void)
+PyMODINIT_FUNC
 init_gobject(void)
 {
     PyObject *m, *d, *o, *tuple, *features;
     PyObject *descr;
     PyObject *warning;
-    
-    PyGParamSpec_Type.ob_type = &PyType_Type;
     
     m = Py_InitModule("gobject._gobject", pygobject_functions);
     d = PyModule_GetDict(m);

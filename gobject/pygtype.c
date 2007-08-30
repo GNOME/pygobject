@@ -265,8 +265,7 @@ pyg_type_wrapper_init(PyGTypeWrapper *self, PyObject *args, PyObject *kwargs)
 }
 
 PyTypeObject PyGTypeWrapper_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GType",
     sizeof(PyGTypeWrapper),
     0,
@@ -1515,8 +1514,7 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
 }
 
 static PyTypeObject PyGObjectDoc_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GObject__doc__",
     sizeof(PyObject),
     0,
@@ -1567,7 +1565,6 @@ pyg_object_descr_doc_get(void)
     static PyObject *doc_descr = NULL;
 
     if (!doc_descr) {
-	PyGObjectDoc_Type.ob_type = &PyType_Type;
 	if (PyType_Ready(&PyGObjectDoc_Type))
 	    return NULL;
 

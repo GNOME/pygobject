@@ -184,8 +184,7 @@ pygobject_props_iter_next(PyGPropsIter *iter)
 
 
 PyTypeObject PyGPropsIter_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,					/* ob_size */
+        PyVarObject_HEAD_INIT(0, 0)
 	"gobject.GPropsIter",			/* tp_name */
 	sizeof(PyGPropsIter),			/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -428,8 +427,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
 };
 
 PyTypeObject PyGProps_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                          /* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GProps",                           /* tp_name */
     sizeof(PyGProps),                           /* tp_basicsize */
     0,                                          /* tp_itemsize */
@@ -483,8 +481,7 @@ pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
 }
 
 PyTypeObject PyGPropsDescr_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,					/* ob_size */
+        PyVarObject_HEAD_INIT(0, 0)
 	"gobject.GPropsDescr",			/* tp_name */
 	0,					/* tp_basicsize */
 	0,					/* tp_itemsize */
@@ -584,7 +581,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     } else
         bases = runtime_bases;
 
-    type->ob_type = PyGObject_MetaType;
+    Py_Type(type) = PyGObject_MetaType;
     type->tp_bases = bases;
     if (G_LIKELY(bases)) {
         type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
@@ -781,7 +778,7 @@ pygobject_new_with_interfaces(GType gtype)
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
 
-    type = (PyTypeObject*)PyObject_CallFunction((PyObject *) py_parent_type->ob_type,
+    type = (PyTypeObject*)PyObject_CallFunction((PyObject *) Py_Type(py_parent_type),
                                                 "sNN", type_name, bases, dict);
     g_free(type_name);
 
@@ -1007,7 +1004,7 @@ pygobject_repr(PyGObject *self)
 
     g_snprintf(buf, sizeof(buf),
 	       "<%s object at 0x%lx (%s at 0x%lx)>",
-	       self->ob_type->tp_name,
+	       Py_Type(self)->tp_name,
 	       (long)self,
 	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
                (long)self->obj);
@@ -1151,7 +1148,7 @@ pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!G_IS_OBJECT(self->obj)) {                                           \
 	PyErr_Format(PyExc_TypeError,                                        \
                      "object at %p of type %s is not initialized",	     \
-                     self, self->ob_type->tp_name);                          \
+                     self, Py_Type(self)->tp_name);		             \
 	return NULL;                                                         \
     }
 
@@ -2036,8 +2033,7 @@ static PyGetSetDef pygobject_getsets[] = {
 };
 
 PyTypeObject PyGObject_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GObject",			/* tp_name */
     sizeof(PyGObject),			/* tp_basicsize */
     0,					/* tp_itemsize */
@@ -2213,8 +2209,7 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
 }
 
 PyTypeObject PyGObjectWeakRef_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                          /* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.GObjectWeakRef",                   /* tp_name */
     sizeof(PyGObjectWeakRef),                   /* tp_basicsize */
     0,                                          /* tp_itemsize */

@@ -8,26 +8,6 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
-/* Python 2.3 does not define Py_CLEAR */
-#ifndef Py_CLEAR
-#define Py_CLEAR(op)                \
-        do {                                \
-                if (op) {           \
-                        PyObject *tmp = (PyObject *)(op);   \
-                        (op) = NULL;        \
-                        Py_DECREF(tmp);     \
-                }               \
-        } while (0)
-#endif
-
-#if PY_VERSION_HEX < 0x02050000
-typedef int Py_ssize_t;
-#define PY_SSIZE_T_MAX INT_MAX
-#define PY_SSIZE_T_MIN INT_MIN
-typedef inquiry lenfunc;
-#endif
-
-
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
 #define pyg_block_threads()   G_STMT_START { \
@@ -178,7 +158,7 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 /* pygflags */
 typedef struct {
-    PyIntObject parent;
+    PyLongObject parent;
     GType gtype;
 } PyGFlags;
 
@@ -197,7 +177,7 @@ extern PyObject * pyg_flags_from_gtype (GType        gtype,
 #define PyGEnum_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
-    PyIntObject parent;
+    PyLongObject parent;
     GType gtype;
 } PyGEnum;
 
@@ -297,5 +277,9 @@ pyg_object_peek_inst_data(GObject *obj)
             g_object_get_qdata(obj, pygobject_instance_data_key));
 }
 
+
+#define PyErr_Warn(warn, msg) PyErr_WarnEx(warn, msg, 0)
+#define PyIntObject PyLongObject
+#define PyInt_Type PyLong_Type
 
 #endif

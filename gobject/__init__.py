@@ -28,10 +28,11 @@ except ImportError:
     pass
 
 from gobject.constants import *
-from _gobject import *
+from . import _gobject
+from gobject._gobject import *
 _PyGObject_API = _gobject._PyGObject_API
 
-from propertyhelper import property
+from .propertyhelper import property
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"

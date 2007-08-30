@@ -275,8 +275,7 @@ static PyMethodDef _PyGMainLoop_methods[] = {
 };
 
 PyTypeObject PyGMainLoop_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,			
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.MainLoop",	
     sizeof(PyGMainLoop),	
     0,			

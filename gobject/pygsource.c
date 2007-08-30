@@ -557,8 +557,7 @@ pyg_source_free(PyObject *op)
 }
 
 PyTypeObject PyGSource_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.Source",			/* tp_name */
     sizeof(PyGSource),			/* tp_basicsize */
     0,					/* tp_itemsize */
@@ -633,8 +632,7 @@ pyg_idle_init(PyGSource *self, PyObject *args, PyObject *kwargs)
 }
 
 PyTypeObject PyGIdle_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.Idle",			/* tp_name */
     sizeof(PyGSource),			/* tp_basicsize */
     0,					/* tp_itemsize */
@@ -710,8 +708,7 @@ pyg_timeout_init(PyGSource *self, PyObject *args, PyObject *kwargs)
 }
 
 PyTypeObject PyGTimeout_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.Timeout",			/* tp_name */
     sizeof(PyGSource),			/* tp_basicsize */
     0,					/* tp_itemsize */
@@ -756,9 +753,9 @@ PyTypeObject PyGTimeout_Type = {
 };
 
 static PyMemberDef pyg_poll_fd_members[] = {
-    { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      RO },
-    { "events",  T_USHORT, offsetof(PyGPollFD, pollfd.events),  RO },
-    { "revents", T_USHORT, offsetof(PyGPollFD, pollfd.revents), RO },
+    { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      READONLY },
+    { "events",  T_USHORT, offsetof(PyGPollFD, pollfd.events),  READONLY },
+    { "revents", T_USHORT, offsetof(PyGPollFD, pollfd.revents), READONLY },
     { NULL, 0, 0, 0 }
 };
 
@@ -805,8 +802,7 @@ pyg_poll_fd_init(PyGPollFD *self, PyObject *args, PyObject *kwargs)
 }
 
 PyTypeObject PyGPollFD_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.PollFD",			/* tp_name */
     sizeof(PyGPollFD),			/* tp_basicsize */
     0,					/* tp_itemsize */

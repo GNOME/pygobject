@@ -254,8 +254,7 @@ static PyMethodDef pyg_option_group_methods[] = {
 };
 
 PyTypeObject PyGOptionGroup_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(0, 0)
     "gobject.OptionGroup",
     sizeof(PyGOptionGroup),
     0,

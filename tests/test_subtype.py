@@ -6,7 +6,6 @@ import sys
 import testmodule
 from common import gobject, testhelper
 from gobject import GObject, GInterface, GObjectMeta
-import gtk
 
 class _ClassInittableMetaType(GObjectMeta):
     def __init__(cls, name, bases, namespace):

@@ -29,7 +29,7 @@ os.chdir(dir)
 
 def gettestnames():
     files = glob.glob('*.py')
-    names = map(lambda x: x[:-3], files)
+    names = list(map(lambda x: x[:-3], files))
     map(names.remove, SKIP_FILES)
     return names
 
