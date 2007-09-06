@@ -1,3 +1,9 @@
+2007-09-06  John Finlay  <finlay@moeraki.com>
+
+	* docs/xsl/fixxref.py.in: Remove DATADIR substitution since it now
+	gets substituted as ${prefix}/share which doesn't work in a Python
+	script.
+
 2007-08-27  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/propertyhelper.py (property.__metaclass__.__repr__): Avoid

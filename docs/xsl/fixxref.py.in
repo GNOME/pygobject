@@ -6,8 +6,6 @@ import os
 import re
 import sys
 
-DOCDIR = '@DATADIR@/gtk-doc/html/pygobject'
-
 anchors = {}
 anchor_pat = re.compile(r'''^\s*<ANCHOR\s+id\s*=\s*"([^"]*)"\s+
                             href\s*=\s*"([^"]*)"\s*>''',
@@ -58,8 +56,6 @@ if __name__ == '__main__':
     for opt, arg in opts:
         if opt in ('-i', '--index-dir'):
             index_dirs.append(arg)
-
-    index_dirs.append(DOCDIR)
 
     if len(args) != 1:
         usage()
