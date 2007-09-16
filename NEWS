@@ -1,3 +1,12 @@
+2.14.0 16-sep-2007
+	- Fix a Python 2.6 deprecation warning (Johannes Hölzl, #342948)
+	- Wrap g_timeout_add_seconds, when compiling with glib 2.14 (Gustavo)
+	- Always fully initialize the PyGObject (Ed Catmur, #466082)
+	- Fix compilation in Solaris, again (#339924, Gustavo)
+	- Fix check for default value in boolean type (Marco Giusti, #470230)
+	- Fix new style properties with subclasses (Johan Dahlin, #470718)
+	- Docs generation fixes (John Finlay)
+
 2.13.2 07-jul-2007
 	- Fix build on opensolaris (Damien Carbery, #339924)
 	- Proxy GOption exceptions from Python to C (Johannes Hölzl, #342948)
