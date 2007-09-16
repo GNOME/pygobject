@@ -1,4 +1,7 @@
+=== 2.14.0 ===
 2007-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* configure.ac: Bump version to 2.14.0.
 
 	* NEWS: Update NEWS for next release.
 
