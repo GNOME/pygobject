@@ -15,3 +15,4 @@ defsdir=${pc_top_builddir}/${pcfiledir}/.
 fixxref=${pc_top_builddir}/pygobject-@VERSION@/docs/xsl/fixxref.py
 codegendir=${pc_top_builddir}/${pcfiledir}/gobject/codegen
 pygdocs=${pc_top_builddir}/pygobject-@VERSION@/docs
+datadir=${pc_top_builddir}/pygobject-@VERSION@

@@ -1,3 +1,10 @@
+2007-10-16  Damien Carbery   <damien.carbery@sun.com>
+
+	reviewed by: Johan Dahlin.
+
+	* pygobject-2.0-uninstalled.pc.in: uninstalled.pc file missing
+    'datadir' value. Fixes #486876
+    
 2007-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* configure.ac: Post-relase version bump.
