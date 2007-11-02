@@ -164,8 +164,9 @@ class OptionGroup(optparse.OptionGroup):
 
         self.translation_domain = translation_domain
 
-        for option in option_list:
-            self.add_option(option)
+        if option_list:
+            for option in option_list:
+                self.add_option(option)
 
     def _create_option_list(self):
         self.option_list = []
