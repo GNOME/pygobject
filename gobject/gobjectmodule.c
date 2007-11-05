@@ -3501,7 +3501,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   disable_warning_redirections,
   
   pyg_type_register_custom_callback,
-  pyg_gerror_exception_check
+  pyg_gerror_exception_check,
+
+  pyg_option_group_new
+  
 };
 
 #define REGISTER_TYPE(d, type, name) \

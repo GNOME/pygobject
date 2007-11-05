@@ -1,3 +1,11 @@
+2007-11-05  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/pygobject.h: 
+	* gobject/gobjectmodule.c: 
+	Add pyg_option_group_new to the public API
+
+	* configure.ac: Branch, bump version to 2.15.0.
+
 2007-10-16  Damien Carbery   <damien.carbery@sun.com>
 
 	reviewed by: Johan Dahlin.
