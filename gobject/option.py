@@ -316,8 +316,10 @@ class OptionParser(optparse.OptionParser):
         largs.extend(context.parse([sys.argv[0]] + rargs))
 
     def parse_args(self, args=None, values=None):
+        old_args = args
         try:
-            return optparse.OptionParser.parse_args(self, args, values)
+            options, args = optparse.OptionParser.parse_args(
+                self, args, values)
         except gobject.GError, error:
             if error.domain != gobject.OPTION_ERROR:
             	raise
@@ -329,5 +331,12 @@ class OptionParser(optparse.OptionParser):
                 raise OptParseError(error.message)
             else:
                 raise
+
+        for group in self.option_groups:
+            for key, value in group.values.__dict__.items():
+                options.ensure_value(key, value)
+
+        args = args[2:-len(old_args)]
+	return options, args
 
 make_option = Option

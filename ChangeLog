@@ -1,3 +1,12 @@
+2007-11-06  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/option.py (OptionParser.parse_args): Merge in values
+	from all groups to the global option group. Slice up args
+	so it doesn't return too much.
+
+	* tests/test_option.py: Refactor to be unittesty,
+	Add new tests to test what options returns.
+
 2007-11-05  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/pygobject.h: 
