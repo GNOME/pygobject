@@ -13,7 +13,7 @@ class TestOption(unittest.TestCase):
     def setup_group(self):
         def option_callback(option, opt, value, parser):
             raise StandardError(self.EXCEPTION_MESSAGE)
-        
+
         group = option.OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
             option_list = [
@@ -31,15 +31,15 @@ class TestOption(unittest.TestCase):
                                    dest="test_integer",
                                    help="Unit integer option"),
             ])
-        group.add_option("-t", "--test", 
-                         action="store_false", 
-                         dest="test", 
+        group.add_option("-t", "--test",
+                         action="store_false",
+                         dest="test",
                          default=True,
                          help="Unit test option")
         return group
 
     def setup_parser(self):
-        parser = option.OptionParser("NAMES...", 
+        parser = option.OptionParser("NAMES...",
                                      description="Option unit test")
         parser.add_option("-t", "--test", help="Unit test option",
                           action="store_false", dest="test", default=True)
@@ -54,7 +54,7 @@ class TestOption(unittest.TestCase):
         assert group.values.test
         assert not parser.values.test
         assert group.values.unit_file == "test"
-        
+
         try:
             parser.parse_args(["test_option.py", "--test-integer=text"])
         except option.OptionValueError:
@@ -69,7 +69,7 @@ class TestOption(unittest.TestCase):
             parser.parse_args(["test_option.py", "--callback-failure-test"])
         finally:
             sys.stderr = old_stderr
-        assert (sio.getvalue().split('\n')[-2] == 
+        assert (sio.getvalue().split('\n')[-2] ==
                 "StandardError: " + self.EXCEPTION_MESSAGE)
 
         try:
