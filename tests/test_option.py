@@ -65,6 +65,9 @@ class TestOption(unittest.TestCase):
             ["test_option.py", "--", "-xxx"])
         #self.assertEquals(args, ["-xxx"])
 
+    def testParseArgs(self):
+        options, args = self.parser.parse_args()
+
     def testParseArgsGroup(self):
         group = self._create_group()
 

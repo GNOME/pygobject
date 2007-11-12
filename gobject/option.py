@@ -316,7 +316,7 @@ class OptionParser(optparse.OptionParser):
         largs.extend(context.parse([sys.argv[0]] + rargs))
 
     def parse_args(self, args=None, values=None):
-        old_args = args
+        old_args = args or 0
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
