@@ -1407,9 +1407,10 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                     if (parent_interfaces[parent_interface_iter] == itype)
                         break;
                 }
+
+                if (parent_interface_iter < n_parent_interfaces)
+                    continue;
             }
-            if (parent_interface_iter < n_parent_interfaces)
-                continue;
 
             iinfo = pyg_lookup_interface_info(itype);
             iinfo_copy = *iinfo;

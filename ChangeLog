@@ -1,3 +1,8 @@
+2007-11-24  Paolo Borelli  <pborelli@katamail.com>
+
+	* gobject/gobjectmodule.c (pyg_type_register): do not use a
+	potentially uninitialized variable. Bug #499334.
+
 2007-11-12  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/option.py (OptionParser.parse_args): 
