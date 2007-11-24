@@ -1301,7 +1301,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
             const GInterfaceInfo *iinfo;
             GInterfaceInfo iinfo_copy;
             guint parent_interface_iter;
-            
+
             if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
                 continue;
 
@@ -1321,8 +1321,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 continue;
 
             iinfo = pyg_lookup_interface_info(itype);
-            iinfo_copy = *iinfo;
-            iinfo_copy.interface_data = class;
             if (!iinfo) {
                 char *msg;
                 msg = g_strdup_printf("Interface type %s "
@@ -1332,6 +1330,9 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 g_free(msg);
                 continue;
             }
+
+            iinfo_copy = *iinfo;
+            iinfo_copy.interface_data = class;
             g_type_add_interface_static(instance_type, itype, &iinfo_copy);
         }
     } else
@@ -1392,7 +1393,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
             const GInterfaceInfo *iinfo;
             GInterfaceInfo iinfo_copy;
             guint parent_interface_iter;
-            
+
             if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
                 continue;
 
@@ -1413,8 +1414,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
             }
 
             iinfo = pyg_lookup_interface_info(itype);
-            iinfo_copy = *iinfo;
-            iinfo_copy.interface_data = class;
             if (!iinfo) {
                 char *msg;
                 msg = g_strdup_printf("Interface type %s "
@@ -1424,6 +1423,9 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
                 g_free(msg);
                 continue;
             }
+
+            iinfo_copy = *iinfo;
+            iinfo_copy.interface_data = class;
             g_type_add_interface_static(instance_type, itype, &iinfo_copy);
         }
     } else
