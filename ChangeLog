@@ -1,3 +1,7 @@
+2007-11-30  Rafael Villar Burke  <pachi@rvburke.com>
+
+	* docs/reference/pygobject.xml: Add props attribute
+
 2007-11-24  Paolo Borelli  <pborelli@katamail.com>
 
 	* gobject/gobjectmodule.c (pyg_type_register): check for NULL before

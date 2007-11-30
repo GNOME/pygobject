@@ -159,6 +159,26 @@ linkend="method-gobject--chain">chain</link></methodname>
 	  <tbody>
 
 	    <row valign="top">
+	      <entry>"props"</entry>
+          <entry>Read/Write</entry>
+          <entry>
+              <para>This attribute gives full access to GObject properties as
+                  simple attributes. It can be used to iterate over all the object
+                  properties, and can be used both on class or instance objects.</para>
+              <para>Examples:</para>
+              <programlisting>
+button = Button()
+button_label = button.props.label
+button.props.label = 'Click on this fancy button'
+for pspec in button.props:
+    print pspec
+    print button.get_property(pspec.name)
+label_pspec = Button.props.label
+button_label = button.get_property(label_pspec.name)
+              </programlisting>
+            </entry>
+	    </row>
+	    <row valign="top">
 	      <entry>"__doc__"</entry>
 	      <entry>Read</entry>
 	      <entry>The documentation for the object type. Uses
