@@ -1,3 +1,10 @@
+2008-01-02  Sebastian Rittau  <srittau@jroger.in-berlin.de>
+
+	* gobject/gobjectmodule.c
+	* gobject/gobjectmodule.c (pyg_get_application_name) 
+	(pyg_get_prgname): Add wrappers for g_get_application_name and
+	g_get_prgname.
+
 2007-11-30  Rafael Villar Burke  <pachi@rvburke.com>
 
 	* docs/reference/pygobject.xml: Add props attribute
