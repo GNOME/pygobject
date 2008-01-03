@@ -1,3 +1,7 @@
+2.14.1 03-jan-2007
+        - Avoid wakeups when using Python trunk (Johan Dahlin, #481569)
+        - Add an uninstalled.pc (Damien Carbery, #486876)
+
 2.14.0 16-sep-2007
 	- Fix a Python 2.6 deprecation warning (Johannes Hölzl, #342948)
 	- Wrap g_timeout_add_seconds, when compiling with glib 2.14 (Gustavo)
