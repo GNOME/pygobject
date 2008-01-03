@@ -8,6 +8,9 @@
 	out if there are any pending signals from python.
 	Fixes #481569
 
+	* configure.ac (CPPFLAGS): 
+	Include -Wall and -Werror when checking for PySignal_SetWakeupFd
+	
 2008-01-02  Sebastian Rittau  <srittau@jroger.in-berlin.de>
 
 	* gobject/gobjectmodule.c
