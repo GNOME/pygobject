@@ -1,3 +1,13 @@
+2008-01-03  Johan Dahlin  <johan@gnome.org>
+
+	Backport from trunk:
+	
+	* configure.ac:
+	* gobject/pygmainloop.c (pyg_signal_watch_prepare): Optinally
+	use PySignal_SetWakeupFd to avoid having to do a timeout to find
+	out if there are any pending signals from python.
+	Fixes #481569
+
 2007-10-16  Damien Carbery   <damien.carbery@sun.com>
 
 	reviewed by: Johan Dahlin.

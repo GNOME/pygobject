@@ -69,6 +69,22 @@ AM_PATH_PYTHON(2.3.5)
 
 AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
+AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
+py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
+PYTHON_INCLUDES="-I${py_prefix}/include/python${PYTHON_VERSION}"
+old_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="$PYTHON_INCLUDES"
+AC_TRY_COMPILE([#include <Python.h>],
+  [PySignal_SetWakeupFd(0);],
+  setwakeupfd_ok=yes,
+  setwakeupfd_ok=no)
+AC_MSG_RESULT($setwakeupfd_ok)
+if test "x$setwakeupfd_ok" != xno; then
+  AC_DEFINE(HAVE_PYSIGNAL_SETWAKEUPFD, 1,
+                [Define to 1 if PySignal_SetWakeupFd is available])
+fi
+CPPFLAGS=$old_CPPFLAGS
+
 PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
 AC_SUBST(PLATFORM)
 
