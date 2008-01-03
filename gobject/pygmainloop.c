@@ -102,22 +102,60 @@ pyg_get_current_main_loop (void)
 }
 #endif /* DISABLE_THREADING */
 
+typedef struct {
+    GSource source;
+    int fds[2];
+    GPollFD fd;
+} PySignalWatchSource;
+
 static gboolean
 pyg_signal_watch_prepare(GSource *source,
 			 int     *timeout)
 {
+    PySignalWatchSource *real_source = (PySignalWatchSource *)source;
+
     /* Python only invokes signal handlers from the main thread,
      * so if a thread other than the main thread receives the signal
      * from the kernel, PyErr_CheckSignals() from that thread will
-     * do nothing. So, we need to time out and check for signals
-     * regularily too.
-     * Also, on Windows g_poll() won't be interrupted by a signal
-     * (AFAIK), so we need the timeout there too.
+     * do nothing.
+     */
+
+    /* On Windows g_poll() won't be interrupted by a signal
+     * (AFAIK), so we need the timeout there too, even if there's
+     * only one thread.
      */
 #ifndef PLATFORM_WIN32
-    if (pyg_threads_enabled)
+    if (!pyg_threads_enabled)
+	return FALSE;
 #endif
-	*timeout = 1000;
+
+#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
+    if (real_source->fds[0] != 0)
+	return FALSE;
+
+    /* Unfortunately we need to create a new pipe here instead of
+     * reusing the pipe inside the GMainContext.
+     * Ideally an api should be added to GMainContext which allows us
+     * to reuse that pipe which would suit us perfectly fine.     
+     */
+    if (pipe(real_source->fds) < 0)
+	g_error("Cannot create main loop pipe: %s\n",
+		g_strerror(errno));
+
+    real_source->fd.fd = real_source->fds[0];
+    real_source->fd.events = G_IO_IN | G_IO_HUP | G_IO_ERR;
+    g_source_add_poll(source, &real_source->fd);
+
+    PySignal_SetWakeupFd(real_source->fds[1]);
+
+#else /* !HAVE_PYSIGNAL_SETWAKEUPFD */
+    /* If we're using 2.5 or an earlier version of python we
+     * will default to a timeout every second, be aware,
+     * this will cause unnecessary wakeups, see
+     * http://bugzilla.gnome.org/show_bug.cgi?id=481569
+     */
+    *timeout = 1000;
+#endif /* HAVE_PYSIGNAL_SETWAKEUPFD */
 
     return FALSE;
 }
@@ -143,13 +181,27 @@ pyg_signal_watch_check(GSource *source)
 }
 
 static gboolean
-pyg_signal_watch_dispatch(GSource    *source,
-			  GSourceFunc callback,
-			  gpointer    user_data)
+pyg_signal_watch_dispatch(GSource     *source,
+			  GSourceFunc  callback,
+			  gpointer     user_data)
 {
     /* We should never be dispatched */
     g_assert_not_reached();
     return TRUE;
+}
+
+static void
+pyg_signal_watch_finalize(GSource *source)
+{
+    PySignalWatchSource *real_source = (PySignalWatchSource*)source;
+
+    if (source != NULL) {
+	if (real_source->fds[0] != 0)
+	    close(real_source->fds[0]);
+	
+	if (real_source->fds[1] != 0)
+	    close(real_source->fds[1]);
+    }
 }
 
 static GSourceFuncs pyg_signal_watch_funcs =
@@ -157,13 +209,13 @@ static GSourceFuncs pyg_signal_watch_funcs =
     pyg_signal_watch_prepare,
     pyg_signal_watch_check,
     pyg_signal_watch_dispatch,
-    NULL
+    pyg_signal_watch_finalize
 };
 
 static GSource *
 pyg_signal_watch_new(void)
 {
-    return g_source_new(&pyg_signal_watch_funcs, sizeof(GSource));
+    return g_source_new(&pyg_signal_watch_funcs, sizeof(PySignalWatchSource));
 }
 
 static int

@@ -1,3 +1,13 @@
+2008-01-03  Johan Dahlin  <johan@gnome.org>
+
+	Reviewed by: Gustavo
+	
+	* configure.ac:
+	* gobject/pygmainloop.c (pyg_signal_watch_prepare): Optinally
+	use PySignal_SetWakeupFd to avoid having to do a timeout to find
+	out if there are any pending signals from python.
+	Fixes #481569
+
 2008-01-02  Sebastian Rittau  <srittau@jroger.in-berlin.de>
 
 	* gobject/gobjectmodule.c
