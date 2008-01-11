@@ -1,3 +1,8 @@
+2008-01-11  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac: Don't link against libffi if we cannot find libffi
+	on the system. (#496006, Ed Catmur)	
+
 2008-01-03  Johan Dahlin  <johan@gnome.org>
 
 	Reviewed by: Gustavo
