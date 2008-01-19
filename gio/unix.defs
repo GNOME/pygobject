@@ -266,6 +266,24 @@
 
 
 
+;; From gunixinputstream.h
+
+(define-function unix_input_stream_get_type
+  (c-name "g_unix_input_stream_get_type")
+  (return-type "GType")
+)
+
+(define-function unix_input_stream_new
+  (c-name "g_unix_input_stream_new")
+  (is-constructor-of "GUnixInputStream")
+  (return-type "GInputStream*")
+  (parameters
+    '("int" "fd")
+    '("gboolean" "close_fd_at_close")
+  )
+)
+
+
 ;; From gunixoutputstream.h
 
 (define-function unix_output_stream_get_type

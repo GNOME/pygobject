@@ -9,6 +9,7 @@ def importModules(buildDir, srcDir):
     sys.path.insert(0, srcDir)
     sys.path.insert(0, buildDir)
     sys.path.insert(0, os.path.join(buildDir, 'gobject'))
+    sys.path.insert(0, os.path.join(buildDir, 'gio'))
     import ltihooks
 
     # testhelper
@@ -17,6 +18,7 @@ def importModules(buildDir, srcDir):
 
     testhelper = importModule('testhelper', '.')
     gobject = importModule('gobject', buildDir, 'gobject')
+    gio = importModule('gio', buildDir, 'gio')
 
     ltihooks.uninstall()
     del ltihooks

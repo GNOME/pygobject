@@ -1,5 +1,14 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override (_wrap_g_output_stream_write): Impl.
+	* gio/gio.override:
+	* gio/unix.defs:
+	Add GUnixInputStream type and methods
+
+	* tests/common.py:
+	* tests/test_gio.py:
+	Add GIO tests.
+
 	* gio/gio.override (_wrap_g_app_info_get_all_for_type),
 	(_wrap_g_app_info_get_all),
 	(_wrap_g_drive_get_volumes): Implement.
