@@ -1,9 +1,12 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override (_wrap_g_app_info_get_all_for_type),
+	(_wrap_g_app_info_get_all),
+	(_wrap_g_drive_get_volumes): Implement.
+
 	* gio/gio.override (async_result_callback_marshal): New marshaller
 	for async results
-	(_wrap_g_input_stream_read_async): impl.
-
+	(_wrap_g_input_stream_read_async): Impl.
 	* gio/gio-types.defs: Add SimpleAsyncRequest
 	* gio/giomodule.c: Register enums/constants
 
