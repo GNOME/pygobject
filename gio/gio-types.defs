@@ -60,6 +60,13 @@
   (gtype-id "G_TYPE_APP_LAUNCH_CONTEXT")
 )
 
+(define-object Cancellable
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GCancellable")
+  (gtype-id "G_TYPE_CANCELLABLE")
+)
+
 (define-object Drive
   (in-module "gio")
   (c-name "GDrive")
@@ -85,6 +92,13 @@
   (parent "GObject")
   (c-name "GInputStream")
   (gtype-id "G_TYPE_INPUT_STREAM")
+)
+
+(define-object FileInputStream
+  (in-module "gio")
+  (parent "GInputStream")
+  (c-name "GFileInputStream")
+  (gtype-id "G_TYPE_FILE_INPUT_STREAM")
 )
 
 (define-object FilterInputStream

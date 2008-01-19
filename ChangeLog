@@ -1,5 +1,14 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override: Implement InputStream.read efficiently without
+	copying the strings, based on the standard libararys file.read() 
+	implementation.
+
+	* gio/gio-types.defs (Cancellable): Add wrapper.
+
+	* gio/gio.defs (replace): Do not require cancellable argument 
+	to be specified, default to NULL if not.
+
 	* Makefile.am:
 	* codegen/Makefile.am:
 	* codegen/README.defs:
