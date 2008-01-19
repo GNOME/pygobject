@@ -33,5 +33,5 @@ try:
     import unix
     unix # pyflakes
 except ImportError:
-    pass
+    unix = None
 del _gio

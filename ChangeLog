@@ -1,5 +1,7 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/__init__.py: set gio.unix to None if it's not available
+
 	* gio/gio.override: Implement InputStream.read efficiently without
 	copying the strings, based on the standard libararys file.read() 
 	implementation.
