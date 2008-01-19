@@ -1,5 +1,8 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override: Fix a silly bug so it possible to read files 
+	larger than 8192 bytes.
+
 	* gio/gio.defs: Set null-ok for all cancelable as well.
 
 	* gio/__init__.py: set gio.unix to None if it's not available

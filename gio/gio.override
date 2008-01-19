@@ -5,6 +5,8 @@ headers
 #include <pygobject.h>
 #include <gio/gio.h>
 
+#DEFINE BUFSIZE
+
 %%
 modulename gio
 %%
@@ -86,20 +88,19 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
   PyObject *v;
   
   GCancellable *cancellable;
-  gsize count = -1; 
+  long count = -1; 
   GError *error = NULL;
   size_t bytesread, buffersize, chunksize;
   
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "|iO!:GInputStream.skip",
+				   "|iO!:InputStream.read",
 				   kwlist, &count,
 				   &PyGCancellable_Type, &pycancellable))
         return NULL;
 
-  buffersize = 8192;
+  buffersize = BUFSIZE;
 
   cancellable = pycancellable ? G_CANCELLABLE(pycancellable->obj) : NULL;
-
 
   v = PyString_FromStringAndSize((char *)NULL, buffersize);
   if (v == NULL)
@@ -134,6 +135,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
 
       if (count < 0)
 	{
+	  buffersize += BUFSIZE;
 	  if (_PyString_Resize(&v, buffersize) < 0)
 	    return NULL;
 	}
