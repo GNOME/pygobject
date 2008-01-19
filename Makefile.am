@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs gobject examples tests
+SUBDIRS = docs codegen gobject gio examples tests
 
 PLATFORM_VERSION = 2.0
 

@@ -1,0 +1,79 @@
+/* -*- Mode: C; c-basic-offset: 4 -*- */
+%%
+headers
+#define NO_IMPORT_PYGOBJECT
+#include <pygobject.h>
+#include <gio/gio.h>
+
+%%
+modulename gio
+%%
+import gobject.GObject as PyGObject_Type
+%%
+ignore-glob
+  *_get_type
+  *free
+%%
+override g_volume_monitor_get_connected_drives noargs
+static PyObject *
+_wrap_g_volume_monitor_get_connected_drives (PyGObject *self)
+{
+  GList *list, *l;
+  PyObject *ret;
+  
+  list = g_volume_monitor_get_connected_drives (G_VOLUME_MONITOR (self->obj));
+
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GDrive *drive = l->data;
+    PyObject *item = pygobject_new((GObject *)drive);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+  }
+  g_list_free(list);
+  
+  return ret;
+}
+%%
+override g_volume_monitor_get_volumes noargs
+static PyObject *
+_wrap_g_volume_monitor_get_volumes (PyGObject *self)
+{
+  GList *list, *l;
+  PyObject *ret;
+  
+  list = g_volume_monitor_get_volumes (G_VOLUME_MONITOR (self->obj));
+
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GVolume *volume = l->data;
+    PyObject *item = pygobject_new((GObject *)volume);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+  }
+  g_list_free(list);
+  
+  return ret;
+}
+%%
+override g_volume_monitor_get_mounts noargs
+static PyObject *
+_wrap_g_volume_monitor_get_mounts (PyGObject *self)
+{
+  GList *list, *l;
+  PyObject *ret;
+  
+  list = g_volume_monitor_get_mounts (G_VOLUME_MONITOR (self->obj));
+
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GMount *mount = l->data;
+    PyObject *item = pygobject_new((GObject *)mount);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+  }
+  g_list_free(list);
+  
+  return ret;
+}
+

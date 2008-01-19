@@ -1,3 +1,45 @@
+2008-01-19  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am:
+	* codegen/Makefile.am:
+	* codegen/README.defs:
+	* codegen/__init__.py:
+	* codegen/argtypes.py:
+	* codegen/code-coverage.py:
+	* codegen/codegen.py:
+	* codegen/createdefs.py:
+	* codegen/definitions.py:
+	* codegen/defsconvert.py:
+	* codegen/defsgen.py:
+	* codegen/defsparser.py:
+	* codegen/docextract.py:
+	* codegen/docextract_to_xml.py:
+	* codegen/docgen.py:
+	* codegen/h2def.py:
+	* codegen/mergedefs.py:
+	* codegen/missingdefs.py:
+	* codegen/mkskel.py:
+	* codegen/override.py:
+	* codegen/pygtk-codegen-2.0.in:
+	* codegen/reversewrapper.py:
+	* codegen/scanvirtuals.py:
+	* codegen/scmexpr.py:
+
+	* configure.ac:
+	* gio/Makefile.am:
+	* gio/__init__.py:
+	* gio/gio-types.defs:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* gio/giomodule.c: (init_gio):
+	* gio/unix-types.defs:
+	* gio/unix.defs:
+	* gio/unix.override:
+	* gio/unixmodule.c: (initunix):
+
+	Import codegen from pygtk.
+	Add initial gio and gio.unix bindings.
+
 2008-01-11  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Don't link against libffi if we cannot find libffi

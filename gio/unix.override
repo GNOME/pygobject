@@ -1,0 +1,32 @@
+/* -*- Mode: C; c-basic-offset: 4 -*- */
+%%
+headers
+#define NO_IMPORT_PYGOBJECT
+#include <pygobject.h>
+#include <gio/gdesktopappinfo.h>
+#include <gio/gunixinputstream.h>
+#include <gio/gunixmounts.h>
+#include <gio/gunixoutputstream.h>
+
+#define GIO_UNIX_MOUNT_ENTRY_TYPE (_gio_unix_mount_entry_get_type ())
+
+static GType _gio_unix_mount_entry_get_type (void)
+{
+  static GType our_type = 0;
+  
+  if (our_type == 0)
+    our_type = g_pointer_type_register_static ("GUnixMountEntry");
+
+  return our_type;
+}
+
+%%
+modulename gio.unix
+%%
+import gobject.GObject as PyGObject_Type
+import gio.InputStream as PyGInputStream_Type
+import gio.OutputStream as PyGOutputStream_Type
+%%
+ignore-glob
+  *_get_type
+%%

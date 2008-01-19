@@ -9,6 +9,8 @@ m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pyg
 
 dnl versions of packages we require ...
 m4_define(glib_required_version, 2.8.0)
+m4_define(gio_required_version, 2.15.0)
+m4_define(giounix_required_version, 2.15.0)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -177,6 +179,26 @@ AC_MSG_RESULT([$pygobject_ffi_h])
 AM_CONDITIONAL(HAVE_LIBFFI, test "$pygobject_ffi_h" = "yes")
 AC_SUBST(FFI_LIBS)
 
+dnl gio
+PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
+	have_gio=true, have_gio=false)
+AC_SUBST(GIO_CFLAGS)
+AC_SUBST(GIO_LIBS)
+AM_CONDITIONAL(BUILD_GIO, $have_gio)
+if test -n "$export_dynamic"; then
+  GIO_LIBS=`echo $GIO_LIBS | sed -e "s/$export_dynamic//"`
+fi
+
+dnl giounix
+PKG_CHECK_MODULES(GIOUNIX, gio-unix-2.0 >= giounix_required_version,
+	have_giounix=true, have_giounix=false)
+AC_SUBST(GIOUNIX_CFLAGS)
+AC_SUBST(GIOUNIX_LIBS)
+AM_CONDITIONAL(BUILD_GIOUNIX, $have_giounix)
+if test -n "$export_dynamic"; then
+  GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
+fi
+
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])
@@ -196,10 +218,13 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
   pygobject-2.0-uninstalled.pc
+  codegen/Makefile
+  codegen/pygtk-codegen-2.0
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
   gobject/Makefile
+  gio/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)
