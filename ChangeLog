@@ -1,5 +1,12 @@
 2008-01-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override (async_result_callback_marshal): New marshaller
+	for async results
+	(_wrap_g_input_stream_read_async): impl.
+
+	* gio/gio-types.defs: Add SimpleAsyncRequest
+	* gio/giomodule.c: Register enums/constants
+
 	* gio/gio.override: Fix a silly bug so it possible to read files 
 	larger than 8192 bytes.
 

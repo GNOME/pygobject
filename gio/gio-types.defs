@@ -171,6 +171,13 @@
   (gtype-id "G_TYPE_FILE_OUTPUT_STREAM")
 )
 
+(define-object SimpleAsyncResult
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSimpleAsyncResult")
+  (gtype-id "G_TYPE_SIMPLE_ASYNC_RESULT")	
+)
+
 (define-object Vfs
   (in-module "gio")
   (parent "GObject")

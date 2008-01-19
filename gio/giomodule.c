@@ -47,6 +47,7 @@ init_gio(void)
     init_pygobject();
 
     pygio_register_classes(d);
+    pygio_add_constants(m, "G_");
 
 }
 
