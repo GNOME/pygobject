@@ -18,14 +18,25 @@ class TestInputStream(unittest.TestCase):
         self._f.close()
         os.unlink("inputstream.txt")
 
-    def testWrite(self):
+    def testRead(self):
         self.assertEquals(self.stream.read(), "testing")
+
+    def testReadAsync(self):
+        def callback(stream, result):
+            self.assertEquals(stream.read_finish(result), len("testing"))
+            loop.quit()
+
+        self.stream.read_async(10240, 0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
 
 
 class TestOutputStream(unittest.TestCase):
     def setUp(self):
         self._f = open("outputstream.txt", "w")
         self.stream = gio.unix.OutputStream(self._f.fileno(), False)
+        self._f.flush()
 
     def tearDown(self):
         self._f.close()
@@ -37,13 +48,3 @@ class TestOutputStream(unittest.TestCase):
         self.failUnless(os.path.exists("outputstream.txt"))
         self.assertEquals(open("outputstream.txt").read(), "testing")
 
-    def testWriteAsync(self):
-        def callback(stream, result):
-            loop.quit()
-
-        f = gio.file_new_for_path("outputstream.txt")
-        stream = f.read()
-        stream.read_async(10240, 0, None, callback)
-
-        loop = gobject.MainLoop()
-        loop.run()
