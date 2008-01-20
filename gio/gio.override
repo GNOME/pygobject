@@ -8,9 +8,16 @@ headers
 #define BUFSIZE 8192
 
 typedef struct {
-  PyObject *callback;
-  PyObject *data;
+    PyObject *callback;
+    PyObject *data;
+    PyObject *buffer;
 } PyGAsyncRequestNotify;
+
+static void
+py_decref_callback (gpointer data)
+{
+    Py_DECREF((PyObject*)data);
+}
 
 static void
 async_result_callback_marshal(GObject *source_object, 
@@ -19,8 +26,15 @@ async_result_callback_marshal(GObject *source_object,
 {
     PyObject *ret;
     PyGILState_STATE state;
-
+    static GQuark quark = 0;
+    
     state = pyg_gil_state_ensure();
+
+    if (!quark)
+	quark = g_quark_from_string("pygio::buffer");
+    Py_INCREF(notify->buffer);
+    g_object_set_qdata_full(G_OBJECT(result), quark,
+			    notify->buffer, py_decref_callback);
 
     if (notify->data)
 	ret = PyEval_CallFunction(notify->callback, "(OOO)", 
@@ -266,7 +280,6 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
   long count = -1;
   int io_priority = G_PRIORITY_DEFAULT;
   PyGObject *pycancellable;
-  PyObject *buffer;
   GCancellable *cancellable;
   PyGAsyncRequestNotify *notify;
   
@@ -303,12 +316,12 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
-  buffer = PyString_FromStringAndSize((char *)NULL, count);
-  if (buffer == NULL)
+  notify->buffer = PyString_FromStringAndSize((char *)NULL, count);
+  if (notify->buffer == NULL)
     return NULL;
-
+  
   g_input_stream_read_async(G_INPUT_STREAM(self->obj),
-			    PyString_AS_STRING((PyStringObject *)buffer),
+			    PyString_AS_STRING((PyStringObject *)notify->buffer),
 			    count,
 			    io_priority,
 			    cancellable,
@@ -356,4 +369,20 @@ _wrap_g_output_stream_write(PyGObject *self, PyObject *args, PyObject *kwargs)
     return NULL;
       
   return PyInt_FromLong(written);
+}
+%%
+define GSimpleAsyncResult.get_buffer noargs 
+static PyObject *
+_wrap_g_simple_async_result_get_buffer(PyGObject *self)
+{
+    static GQuark quark = 0;
+    PyObject *buffer;
+
+    if (!quark)
+	quark = g_quark_from_string("pygio::buffer");
+
+    buffer = g_object_get_qdata(G_OBJECT(self->obj), quark);
+
+    Py_INCREF(buffer);
+    return buffer;
 }
