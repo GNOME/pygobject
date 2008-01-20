@@ -300,7 +300,9 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
       g_slice_free(PyGAsyncRequestNotify, notify);
       return NULL;
     }
-
+  Py_INCREF(notify->callback);
+  Py_XINCREF(notify->data);
+  
   buffer = PyString_FromStringAndSize((char *)NULL, count);
   if (buffer == NULL)
     return NULL;

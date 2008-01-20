@@ -23,13 +23,32 @@ class TestInputStream(unittest.TestCase):
 
     def testReadAsync(self):
         def callback(stream, result):
-            self.assertEquals(stream.read_finish(result), len("testing"))
+            read = stream.read_finish(result)
+            self.assertEquals(read, len("testing"))
+            stream.close()
             loop.quit()
 
         self.stream.read_async(10240, 0, None, callback)
 
         loop = gobject.MainLoop()
         loop.run()
+
+    def testReadAsyncError(self):
+        self.count = 0
+        def callback(stream, result):
+            self.count += 1
+            if self.count == 1:
+                return
+            self.assertRaises(gobject.GError, stream.read_finish, result)
+            loop.quit()
+
+        self.stream.read_async(10240, 0, None, callback)
+        self.stream.read_async(10240, 0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
+        self.assertEquals(self.count, 2)
 
 
 class TestOutputStream(unittest.TestCase):
