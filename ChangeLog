@@ -1,5 +1,7 @@
 2008-01-20  Johan Dahlin  <johan@gnome.org>
 
+	* tests/test_gio.py (TestVolumeMonitor): New test
+
 	* gio/Makefile.am:
 	* gio/ginputstream.override:
 	* gio/gio.override:

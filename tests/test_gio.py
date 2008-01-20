@@ -67,3 +67,19 @@ class TestOutputStream(unittest.TestCase):
         self.failUnless(os.path.exists("outputstream.txt"))
         self.assertEquals(open("outputstream.txt").read(), "testing")
 
+
+class TestVolumeMonitor(unittest.TestCase):
+    def setUp(self):
+        self.monitor = gio.volume_monitor_get()
+
+    def testGetConnectedDrives(self):
+        drives = self.monitor.get_connected_drives()
+        self.failUnless(isinstance(drives, list))
+
+    def testGetVolumes(self):
+        volumes = self.monitor.get_volumes()
+        self.failUnless(isinstance(volumes, list))
+
+    def testGetMounts(self):
+        mounts = self.monitor.get_mounts()
+        self.failUnless(isinstance(mounts, list))
