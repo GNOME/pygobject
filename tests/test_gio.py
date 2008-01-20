@@ -8,10 +8,9 @@ from common import gio, gobject
 
 class TestInputStream(unittest.TestCase):
     def setUp(self):
-        f = open("inputstream.txt", "w")
-        f.write("testing")
-
-        self._f = open("inputstream.txt", "r")
+        self._f = open("inputstream.txt", "w+")
+        self._f.write("testing")
+        self._f.seek(0)
         self.stream = gio.unix.InputStream(self._f.fileno(), False)
 
     def tearDown(self):
@@ -57,7 +56,6 @@ class TestOutputStream(unittest.TestCase):
     def setUp(self):
         self._f = open("outputstream.txt", "w")
         self.stream = gio.unix.OutputStream(self._f.fileno(), False)
-        self._f.flush()
 
     def tearDown(self):
         self._f.close()
