@@ -33,10 +33,16 @@ CLEANFILES =
 EXTRA_DIST = 
 
 # gio module
-GIO_DEFS = gio.defs gio-types.defs gio.override
+GIO_OVERRIDES = 			\
+	gio.override			\
+	ginputstream.override 		\
+	goutputstream.override 		\
+	gvolumemonitor.override
+
+GIO_DEFS = gio.defs gio-types.defs $(GIO_OVERRIDES)
 CLEANFILES += gio.c
-EXTRA_DIST += $(GIO_DEFS) gio.override
-gio.c: $(GIO_DEFS) gio.override
+EXTRA_DIST += $(GIO_DEFS) $(GIO_OVERRIDES)
+gio.c: $(GIO_DEFS) $(GIO_OVERRIDES)
 _gio_la_CFLAGS = $(GIO_CFLAGS)
 _gio_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gio
 _gio_la_LIBADD = $(GIO_LIBS)

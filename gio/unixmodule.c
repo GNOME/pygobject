@@ -1,8 +1,8 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
- * pygtk- Python bindings for the GTK toolkit.
+ * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
  *
- *   giomodule.c: module wrapping the GIO library
+ *   unixmodule.c: module wrapping the GIO UNIX library
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

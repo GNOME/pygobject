@@ -1,0 +1,155 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * pygtk- Python bindings for the GTK toolkit.
+ * Copyright (C) 2008  Johan Dahlin
+ *
+ *   ginputstream.override: module overrides for GInputStream
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
+ */
+%%
+override g_input_stream_read kwargs
+static PyObject *
+_wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+  static char *kwlist[] = { "count", "cancellable", NULL };
+  PyGObject *pycancellable = NULL;
+  PyObject *v;
+  
+  GCancellable *cancellable;
+  long count = -1; 
+  GError *error = NULL;
+  size_t bytesread, buffersize, chunksize;
+  
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				   "|iO!:InputStream.read",
+				   kwlist, &count,
+				   &PyGCancellable_Type, &pycancellable))
+    return NULL;
+  
+  buffersize = BUFSIZE;
+
+  cancellable = pycancellable ? G_CANCELLABLE(pycancellable->obj) : NULL;
+
+  v = PyString_FromStringAndSize((char *)NULL, buffersize);
+  if (v == NULL)
+    return NULL;
+  
+  bytesread = 0;
+  for (;;)
+    {
+      pyg_begin_allow_threads;
+      errno = 0;
+      chunksize = g_input_stream_read(G_INPUT_STREAM(self->obj),
+				      PyString_AS_STRING((PyStringObject *)v) + bytesread,
+				      buffersize - bytesread, cancellable,
+				      &error);
+      pyg_end_allow_threads;
+      
+      if (pyg_error_check(&error))
+	{
+	  Py_DECREF(v);
+	  return NULL;
+	}
+      else if (chunksize == 0)
+	{
+	  PyErr_SetFromErrno(PyExc_IOError);
+	  Py_DECREF(v);
+	  return NULL;
+	}
+      
+      bytesread += chunksize;
+      if (bytesread < buffersize)
+	break;
+
+      if (count < 0)
+	{
+	  buffersize += BUFSIZE;
+	  if (_PyString_Resize(&v, buffersize) < 0)
+	    return NULL;
+	}
+      else
+	/* Got what was requested. */
+	break;
+    }
+  
+  if (bytesread != buffersize)
+    _PyString_Resize(&v, bytesread);
+
+  return v;
+}
+%%
+override g_input_stream_read_async kwargs
+static PyObject *
+_wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+  static char *kwlist[] = { "count", "io_priority", "cancellable", "callback",
+			    "user_data", NULL };
+  long count = -1;
+  int io_priority = G_PRIORITY_DEFAULT;
+  PyGObject *pycancellable;
+  GCancellable *cancellable;
+
+
+  PyGAsyncRequestNotify *notify;
+  
+  notify = g_slice_new0(PyGAsyncRequestNotify);
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				   "iiOO|O:InputStream.read_async",
+				   kwlist, &count,
+				   &io_priority,
+				   &pycancellable,
+				   &notify->callback,
+				   &notify->data))
+    {
+      g_slice_free(PyGAsyncRequestNotify, notify);
+      return NULL;
+    }
+
+  if ((PyObject*)pycancellable == Py_None)
+    cancellable = NULL;
+  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
+      cancellable = G_CANCELLABLE(pycancellable->obj);
+  else
+    {
+      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
+      return NULL;
+    }
+
+  if (!PyCallable_Check(notify->callback))
+    {
+      PyErr_SetString(PyExc_TypeError, "callback argument not callable");
+      g_slice_free(PyGAsyncRequestNotify, notify);
+      return NULL;
+    }
+  Py_INCREF(notify->callback);
+  Py_XINCREF(notify->data);
+  
+  notify->buffer = PyString_FromStringAndSize((char *)NULL, count);
+  if (notify->buffer == NULL)
+    return NULL;
+  
+  g_input_stream_read_async(G_INPUT_STREAM(self->obj),
+			    PyString_AS_STRING((PyStringObject *)notify->buffer),
+			    count,
+			    io_priority,
+			    cancellable,
+			    (GAsyncReadyCallback)async_result_callback_marshal,
+			    notify);
+  
+  Py_INCREF(Py_None);
+  return Py_None;
+}
