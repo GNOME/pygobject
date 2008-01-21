@@ -6,6 +6,33 @@ import unittest
 from common import gio, gobject
 
 
+class TestFile(unittest.TestCase):
+    def setUp(self):
+        self._f = open("file.txt", "w+")
+        self.file = gio.file_new_for_path("file.txt")
+
+    def tearDown(self):
+        self._f.close()
+        os.unlink("file.txt")
+
+    def testReadAsync(self):
+        self._f.write("testing")
+        self._f.seek(0)
+
+        def callback(file, result):
+            try:
+                stream = file.read_finish(result)
+                self.failUnless(isinstance(stream, gio.InputStream))
+                self.assertEquals(stream.read(), "testing")
+            finally:
+                loop.quit()
+
+        self.file.read_async(0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
+
 class TestInputStream(unittest.TestCase):
     def setUp(self):
         self._f = open("inputstream.txt", "w+")
@@ -22,11 +49,13 @@ class TestInputStream(unittest.TestCase):
 
     def testReadAsync(self):
         def callback(stream, result):
-            read = stream.read_finish(result)
-            self.assertEquals(read, len("testing"))
-            self.assertEquals(result.get_buffer(), "testing")
-            stream.close()
-            loop.quit()
+            try:
+                read = stream.read_finish(result)
+                self.assertEquals(read, len("testing"))
+                self.assertEquals(result.get_buffer(), "testing")
+                stream.close()
+            finally:
+                loop.quit()
 
         self.stream.read_async(7, 0, None, callback)
 
@@ -36,12 +65,14 @@ class TestInputStream(unittest.TestCase):
     def testReadAsyncError(self):
         self.count = 0
         def callback(stream, result):
-            #self.assertEquals(result.get_buffer(), None)
-            self.count += 1
-            if self.count == 1:
-                return
-            self.assertRaises(gobject.GError, stream.read_finish, result)
-            loop.quit()
+            try:
+                #self.assertEquals(result.get_buffer(), None)
+                self.count += 1
+                if self.count == 1:
+                    return
+                self.assertRaises(gobject.GError, stream.read_finish, result)
+            finally:
+                loop.quit()
 
         self.stream.read_async(10240, 0, None, callback)
         self.stream.read_async(10240, 0, None, callback)

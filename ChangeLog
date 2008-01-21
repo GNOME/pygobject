@@ -1,3 +1,18 @@
+2008-01-21  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gio.override (async_result_callback_marshal): 
+	Don't assume the buffer is set, use Py_XINCREF instead of Py_INCREF.
+
+	* gio/Makefile.am:
+	* gio/ginputstream.override:
+	* gio/goutputstream.override:
+	* gio/gvolumemonitor.override:
+	* gio/gfile.override:
+	* tests/test_gio.py:
+	Implement and test GFile.read_async. Use try/finally to always quit
+	the mainloop, even if the test fail.
+	Update source comment headers.
+
 2008-01-20  Johan Dahlin  <johan@gnome.org>
 
 	* tests/test_gio.py (TestVolumeMonitor): New test

@@ -53,10 +53,10 @@ async_result_callback_marshal(GObject *source_object,
     static GQuark quark = 0;
     
     state = pyg_gil_state_ensure();
-
+    
     if (!quark)
 	quark = g_quark_from_string("pygio::buffer");
-    Py_INCREF(notify->buffer);
+    Py_XINCREF(notify->buffer);
     g_object_set_qdata_full(G_OBJECT(result), quark,
 			    notify->buffer, py_decref_callback);
 
@@ -86,6 +86,7 @@ async_result_callback_marshal(GObject *source_object,
 }
 %%
 include
+  gfile.override
   ginputstream.override
   goutputstream.override
   gvolumemonitor.override
