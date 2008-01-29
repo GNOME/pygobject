@@ -561,10 +561,6 @@
 
 
 
-;; From gcontenttypeprivate.h
-
-
-
 ;; From gdatainputstream.h
 
 (define-function data_input_stream_get_type
@@ -985,10 +981,6 @@
     '("GFileAttributeInfoFlags" "flags")
   )
 )
-
-
-
-;; From gfileattribute-priv.h
 
 
 
@@ -3137,10 +3129,6 @@
 
 
 
-;; From giomodule-priv.h
-
-
-
 ;; From gioscheduler.h
 
 (define-function io_scheduler_push_job
@@ -3573,10 +3561,6 @@
     '("GMountOperationResult" "result")
   )
 )
-
-
-
-;; From gmountprivate.h
 
 
 
