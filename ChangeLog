@@ -1,3 +1,8 @@
+2008-02-01  Dan Winship  <danw@gnome.org>
+
+	* pygobject-2.0.pc.in (defsdir): Add this so other bindings can
+	find gio.defs
+
 2008-01-21  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gio.override (async_result_callback_marshal): 
