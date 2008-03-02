@@ -1,3 +1,8 @@
+2008-03-22  Johan Dahlin  <johan@gnome.org>
+
+	* Makefile.am: Dist .m4 files.
+	(#496011, Ed Catmur)
+
 2008-03-02  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/gobjectmodule.c (REGISTER_TYPE): Never override customly
@@ -219,7 +224,7 @@
 2007-08-27  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/propertyhelper.py (property.__metaclass__.__repr__): Avoid
-	exporting the metaclass, just define it in the class.
+	exporting the metaclass, just define it where it will be used.
 
 	* gobject/__init__.py (GObjectMeta._install_properties): 
 	Refactor a bit to make sure that it is possible to use in subclasses,

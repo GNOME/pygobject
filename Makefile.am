@@ -13,7 +13,10 @@ EXTRA_DIST = 				\
 	setup.py			\
 	pygobject_postinstall.py	\
 	pygtk.py			\
-	dsextras.py
+	dsextras.py			\
+	m4/as-ac-expand.m4		\
+	m4/jhflags.m4			\
+	m4/python.m4
 
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/gobject
 
