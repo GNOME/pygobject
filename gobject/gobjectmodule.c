@@ -3542,8 +3542,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
 #define REGISTER_TYPE(d, type, name) \
     type.ob_type = &PyType_Type; \
-    type.tp_alloc = PyType_GenericAlloc; \
-    type.tp_new = PyType_GenericNew; \
+    if (!type.tp_alloc) \
+	type.tp_alloc = PyType_GenericAlloc; \
+    if (!type.tp_new) \
+	type.tp_new = PyType_GenericNew; \
     if (PyType_Ready(&type)) \
 	return; \
     PyDict_SetItemString(d, name, (PyObject *)&type);

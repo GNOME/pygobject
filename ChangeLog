@@ -1,3 +1,8 @@
+2008-03-02  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/gobjectmodule.c (REGISTER_TYPE): Never override customly
+	set 'tp_new' and 'tp_alloc'.
+
 2008-02-01  Dan Winship  <danw@gnome.org>
 
 	* pygobject-2.0.pc.in (defsdir): Add this so other bindings can
