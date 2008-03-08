@@ -1,4 +1,11 @@
-2008-03-22  Johan Dahlin  <johan@gnome.org>
+2008-03-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/ginputstream.override:
+	Pass in l instead of i to PyArg_ParseTupleAndKeywords when
+	parsing a long. Fixes the build on 64-bit systems.
+	(#521165, Thomas Leonard)
+
+2008-03-02  Johan Dahlin  <johan@gnome.org>
 
 	* Makefile.am: Dist .m4 files.
 	(#496011, Ed Catmur)
