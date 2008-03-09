@@ -1,3 +1,15 @@
+2008-03-09  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gio-types.defs:
+	* gio/gio.defs:
+	* tests/test_gio.py:
+	Update to SVN of gio:
+	g_file_contains_file -> g_file_has_prefix
+	can_seek and can_truncate are now only on the GSeekable interface
+	Add tests
+
+	(#521207, Thomas Leonard)
+
 2008-03-08  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/ginputstream.override:

@@ -80,6 +80,13 @@
   (gtype-id "G_TYPE_FILE_ENUMERATOR")
 )
 
+(define-object FileInfo
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GFileInfo")
+  (gtype-id "G_TYPE_FILE_INFO")
+)
+
 (define-object FileMonitor
   (in-module "gio")
   (parent "GObject")

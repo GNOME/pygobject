@@ -32,6 +32,22 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+class TestGFileEnumerator(unittest.TestCase):
+    def setUp(self):
+        self.file = gio.file_new_for_path(".")
+
+    def testEnumerateChildren(self):
+        found = []
+
+        e = self.file.enumerate_children("standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
+        while True:
+            info = e.next_file()
+            if not info:
+                break
+            found.append(info.get_name())
+        e.close()
+
+        assert 'test_gio.py' in found, found
 
 class TestInputStream(unittest.TestCase):
     def setUp(self):

@@ -1190,9 +1190,9 @@
   )
 )
 
-(define-method contains_file
+(define-method has_prefix
   (of-object "GFile")
-  (c-name "g_file_contains_file")
+  (c-name "g_file_has_prefix")
   (return-type "gboolean")
   (parameters
     '("GFile*" "descendant")
@@ -2578,12 +2578,6 @@
   (return-type "goffset")
 )
 
-(define-method can_seek
-  (of-object "GFileInputStream")
-  (c-name "g_file_input_stream_can_seek")
-  (return-type "gboolean")
-)
-
 (define-method seek
   (of-object "GFileInputStream")
   (c-name "g_file_input_stream_seek")
@@ -2734,12 +2728,6 @@
   (return-type "goffset")
 )
 
-(define-method can_seek
-  (of-object "GFileOutputStream")
-  (c-name "g_file_output_stream_can_seek")
-  (return-type "gboolean")
-)
-
 (define-method seek
   (of-object "GFileOutputStream")
   (c-name "g_file_output_stream_seek")
@@ -2750,12 +2738,6 @@
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
-)
-
-(define-method can_truncate
-  (of-object "GFileOutputStream")
-  (c-name "g_file_output_stream_can_truncate")
-  (return-type "gboolean")
 )
 
 (define-method truncate
