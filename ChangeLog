@@ -1,3 +1,7 @@
+2008-03-10  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac: Require gio and giounix 2.15.7.
+
 2008-03-09  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gio-types.defs:

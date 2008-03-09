@@ -9,8 +9,8 @@ m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pyg
 
 dnl versions of packages we require ...
 m4_define(glib_required_version, 2.8.0)
-m4_define(gio_required_version, 2.15.0)
-m4_define(giounix_required_version, 2.15.0)
+m4_define(gio_required_version, 2.15.7)
+m4_define(giounix_required_version, 2.15.7)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
