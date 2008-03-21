@@ -327,6 +327,41 @@ class TestProperty(unittest.TestCase):
         b.prop1 = 20
         self.assertEquals(b.prop1, 20)
 
+    def testPropertySubclassCustomSetter(self):
+        # test for #523352
+        class A(GObject):
+            def get_first(self):
+                return 'first'
+            first = gobject.property(type=str, getter=get_first)
+
+        class B(A):
+            def get_second(self):
+                return 'second'
+            second = gobject.property(type=str, getter=get_second)
+
+        a = A()
+        self.assertEquals(a.first, 'first')
+        self.assertRaises(TypeError, setattr, a, 'first', 'foo')
+
+        b = B()
+        self.assertEquals(b.first, 'first')
+        self.assertRaises(TypeError, setattr, b, 'first', 'foo')
+        self.assertEquals(b.second, 'second')
+        self.assertRaises(TypeError, setattr, b, 'second', 'foo')
+
+    def testPropertySubclassCustomSetterError(self):
+        try:
+            class A(GObject):
+                def get_first(self):
+                    return 'first'
+                first = gobject.property(type=str, getter=get_first)
+
+                def do_get_property(self, pspec):
+                    pass
+        except TypeError:
+            pass
+        else:
+            raise AssertionError
 
 if __name__ == '__main__':
     unittest.main()

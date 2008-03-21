@@ -1,3 +1,11 @@
+2008-03-21  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/__init__.py:
+	* tests/test_properties.py:
+	Allow gobject.property work with subclasses. Add tests.
+
+	(#523352, Tomeu Vizoso)
+
 2008-03-10  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Require gio and giounix 2.15.7.
