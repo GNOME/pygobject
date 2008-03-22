@@ -66,9 +66,8 @@ class TestInputStream(unittest.TestCase):
     def testReadAsync(self):
         def callback(stream, result):
             try:
-                read = stream.read_finish(result)
-                self.assertEquals(read, len("testing"))
-                self.assertEquals(result.get_buffer(), "testing")
+                data = stream.read_finish(result)
+                self.assertEquals(data, "testing")
                 stream.close()
             finally:
                 loop.quit()
@@ -82,7 +81,6 @@ class TestInputStream(unittest.TestCase):
         self.count = 0
         def callback(stream, result):
             try:
-                #self.assertEquals(result.get_buffer(), None)
                 self.count += 1
                 if self.count == 1:
                     return

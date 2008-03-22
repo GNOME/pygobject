@@ -19,6 +19,64 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  */
+#define BUFSIZE 8192
+
+typedef struct {
+    PyObject *callback;
+    PyObject *data;
+    PyObject *buffer;
+} PyGAsyncRequestNotifyRead;
+
+static void
+py_decref_callback (gpointer data)
+{
+    Py_DECREF((PyObject*)data);
+}
+
+static void
+async_result_callback_marshal_read(GObject *source_object, 
+				   GAsyncResult *result, 
+				   PyGAsyncRequestNotifyRead *notify)
+{
+    PyObject *ret;
+    PyGILState_STATE state;
+    static GQuark quark = 0;
+    
+    state = pyg_gil_state_ensure();
+
+    /* buffer is only used by read_async */
+    if (notify->buffer) {
+	if (!quark)
+	    quark = g_quark_from_string("pygio::buffer");
+	Py_XINCREF(notify->buffer);
+	g_object_set_qdata_full(G_OBJECT(result), quark,
+				notify->buffer, py_decref_callback);
+    }
+    
+    if (notify->data)
+	ret = PyEval_CallFunction(notify->callback, "(OOO)", 
+				  pygobject_new(source_object), 
+				  pygobject_new((GObject *)result),
+				  notify->data);
+    else
+	ret = PyObject_CallFunction(notify->callback, "(OO)", 
+				    pygobject_new(source_object), 
+				    pygobject_new((GObject *)result));
+
+    if (ret == NULL)
+      {
+	PyErr_Print();
+	PyErr_Clear();
+      }
+
+    Py_XDECREF(ret);
+
+    Py_DECREF(notify->callback);
+    Py_XDECREF(notify->data);
+    g_slice_free(PyGAsyncRequestNotifyRead, notify);
+
+    pyg_gil_state_release(state);
+}
 %%
 override g_input_stream_read kwargs
 static PyObject *
@@ -103,9 +161,9 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
   GCancellable *cancellable;
 
 
-  PyGAsyncRequestNotify *notify;
+  PyGAsyncRequestNotifyRead *notify;
   
-  notify = g_slice_new0(PyGAsyncRequestNotify);
+  notify = g_slice_new0(PyGAsyncRequestNotifyRead);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				   "liOO|O:InputStream.read_async",
@@ -115,7 +173,7 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
 				   &notify->callback,
 				   &notify->data))
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGAsyncRequestNotifyRead, notify);
       return NULL;
     }
 
@@ -132,7 +190,7 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
   if (!PyCallable_Check(notify->callback))
     {
       PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGAsyncRequestNotifyRead, notify);
       return NULL;
     }
   Py_INCREF(notify->callback);
@@ -147,9 +205,38 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
 			    count,
 			    io_priority,
 			    cancellable,
-			    (GAsyncReadyCallback)async_result_callback_marshal,
+			    (GAsyncReadyCallback)async_result_callback_marshal_read,
 			    notify);
   
   Py_INCREF(Py_None);
   return Py_None;
+}
+%%
+override g_input_stream_read_finish kwargs
+static PyObject *
+_wrap_g_input_stream_read_finish(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *result;
+    GError *error = NULL;
+    static GQuark quark = 0;
+    PyObject *buffer;
+    
+    if (!quark)
+	quark = g_quark_from_string("pygio::buffer");
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O!:GInputStream.read_finish",
+				     kwlist, &PyGAsyncResult_Type, &result))
+        return NULL;
+    
+
+    g_input_stream_read_finish(G_INPUT_STREAM(self->obj), G_ASYNC_RESULT(result->obj), &error);
+    
+    if (pyg_error_check(&error))
+        return NULL;
+
+    buffer = g_object_get_qdata(G_OBJECT(result->obj), quark);
+    /* FIXME: Should we refcount the buffer here? */
+    return buffer;
 }

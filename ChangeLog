@@ -1,3 +1,14 @@
+2008-03-22  Johan Dahlin  <johan@gnome.org>
+
+	* gio/ginputstream.override:
+	* gio/gio.override:
+	* tests/test_gio.py:
+
+	Make read_finish() return the string, remove the get_buffer method.
+	This is more pythonic, as it mimics the normal read() behavior of 
+	python.
+	Update the tests and use a separate marshaller for read.
+
 2008-03-21  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/__init__.py:

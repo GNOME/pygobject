@@ -53,13 +53,16 @@ async_result_callback_marshal(GObject *source_object,
     static GQuark quark = 0;
     
     state = pyg_gil_state_ensure();
-    
-    if (!quark)
-	quark = g_quark_from_string("pygio::buffer");
-    Py_XINCREF(notify->buffer);
-    g_object_set_qdata_full(G_OBJECT(result), quark,
-			    notify->buffer, py_decref_callback);
 
+    /* buffer is only used by read_async */
+    if (notify->buffer) {
+	if (!quark)
+	    quark = g_quark_from_string("pygio::buffer");
+	Py_XINCREF(notify->buffer);
+	g_object_set_qdata_full(G_OBJECT(result), quark,
+				notify->buffer, py_decref_callback);
+    }
+    
     if (notify->data)
 	ret = PyEval_CallFunction(notify->callback, "(OOO)", 
 				  pygobject_new(source_object), 
@@ -160,20 +163,4 @@ _wrap_g_app_info_get_all_for_type (PyGObject *self, PyObject *args)
   g_list_free(list);
   
   return ret;
-}
-%%
-define GSimpleAsyncResult.get_buffer noargs 
-static PyObject *
-_wrap_g_simple_async_result_get_buffer(PyGObject *self)
-{
-    static GQuark quark = 0;
-    PyObject *buffer;
-
-    if (!quark)
-	quark = g_quark_from_string("pygio::buffer");
-
-    buffer = g_object_get_qdata(G_OBJECT(self->obj), quark);
-
-    Py_INCREF(buffer);
-    return buffer;
 }
