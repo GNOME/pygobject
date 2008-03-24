@@ -30,14 +30,17 @@
 static PyObject *
 pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
+    static char warning[256];
+
     if (!PyInt_Check(other)) {
 	Py_INCREF(Py_NotImplemented);
 	return Py_NotImplemented;
     }
 
     if (PyObject_TypeCheck(other, &PyGEnum_Type) && ((PyGEnum*)other)->gtype != self->gtype) {
-	PyErr_Warn(PyExc_Warning, "comparing different enum types");
-	return NULL;
+	g_snprintf(warning, sizeof(warning), "comparing different enum types: %s and %s",
+		   g_type_name(self->gtype), g_type_name(((PyGEnum*)other)->gtype));
+	PyErr_Warn(PyExc_Warning, warning);
     }
 
     return pyg_integer_richcompare((PyObject *)self, other, op);

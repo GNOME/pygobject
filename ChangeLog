@@ -1,3 +1,8 @@
+2008-03-24  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/pygenum.c (pyg_enum_richcompare): Don't return NULL
+	after warning; more useful warning message (bug #519631).
+
 2008-03-22  Johan Dahlin  <johan@gnome.org>
 
 	* gio/ginputstream.override:
