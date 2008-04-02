@@ -1,3 +1,4 @@
+import pickle
 import unittest
 import warnings
 
@@ -95,6 +96,14 @@ class EnumTest(unittest.TestCase):
         default = PObject.props.enum2.default_value
         self.failUnless(isinstance(default, gtk.WindowType))
         self.assertEqual(default, gtk.WINDOW_TOPLEVEL)
+
+    def testPickling(self):
+        values = [getattr(gtk, name) for name in dir(gtk)
+                  if isinstance(getattr(gtk, name), gobject.GEnum)]
+        for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
+            for value in values:
+                self.assertEqual(value, pickle.loads(pickle.dumps(value, protocol)))
+
 
 class FlagsTest(unittest.TestCase):
     def testFlags(self):

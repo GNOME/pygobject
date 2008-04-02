@@ -1,3 +1,11 @@
+2008-04-02  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/pygenum.c: bug #428732
+	(pyg_enum_new): Fix two wrong assertions about '__enum_values__'
+	size and contents.
+	(pyg_enum_reduce): New function (based on patch by Phil Dumont).
+	(pyg_enum_methods): Hook it up.
+
 2008-03-24  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/pygenum.c (pyg_enum_richcompare): Don't return NULL

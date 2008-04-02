@@ -99,19 +99,25 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     eclass = G_ENUM_CLASS(g_type_class_ref(gtype));
 
-    if (value < 0 || value > eclass->n_values) {
-	PyErr_SetString(PyExc_ValueError, "value out of range");
-	g_type_class_unref(eclass);
-	return NULL;
-    }
+    /* A check that 0 < value < eclass->n_values was here but got
+     * removed: enumeration values do not need to be consequitive,
+     * e.g. GtkPathPriorityType values are not.
+     */
 
     values = PyObject_GetAttrString((PyObject *)type, "__enum_values__");
     if (!values) {
 	g_type_class_unref(eclass);
 	return NULL;
     }
-    
-    if (!PyDict_Check(values) || PyDict_Size(values) != eclass->n_values) {
+
+    /* Note that size of __enum_values__ dictionary can easily be less
+     * than 'n_values'.  This happens if some values of the enum are
+     * numerically equal, e.g. gtk.ANCHOR_N == gtk.ANCHOR_NORTH.
+     * Johan said that "In retrospect, using a dictionary to store the
+     * values might not have been that good", but we need to keep
+     * backward compatibility.
+     */
+    if (!PyDict_Check(values) || PyDict_Size(values) > eclass->n_values) {
 	PyErr_SetString(PyExc_TypeError, "__enum_values__ badly formed");
 	Py_DECREF(values);
 	g_type_class_unref(eclass);
@@ -253,6 +259,16 @@ pyg_enum_add (PyObject *   module,
 }
 
 static PyObject *
+pyg_enum_reduce(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GEnum.__reduce__"))
+        return NULL;
+
+    return Py_BuildValue("(O(i)O)", self->ob_type, PyInt_AsLong(self),
+                         PyObject_GetAttrString(self, "__dict__"));
+}
+
+static PyObject *
 pyg_enum_get_value_name(PyGEnum *self, void *closure)
 {
   GEnumClass *enum_class;
@@ -289,6 +305,11 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
 }
 
 
+static PyMethodDef pyg_enum_methods[] = {
+    { "__reduce__", (PyCFunction)pyg_enum_reduce, METH_VARARGS },
+    { NULL, NULL, 0 }
+};
+
 static PyGetSetDef pyg_enum_getsets[] = {
     { "value_name", (getter)pyg_enum_get_value_name, (setter)0 },
     { "value_nick", (getter)pyg_enum_get_value_nick, (setter)0 },
@@ -324,7 +345,7 @@ PyTypeObject PyGEnum_Type = {
 	0,					  /* tp_weaklistoffset */
 	0,					  /* tp_iter */
 	0,					  /* tp_iternext */
-	0,					  /* tp_methods */
+	pyg_enum_methods,			  /* tp_methods */
 	0,					  /* tp_members */
 	pyg_enum_getsets,			  /* tp_getset */
 	0,	  				  /* tp_base */
