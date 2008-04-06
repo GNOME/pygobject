@@ -1,5 +1,8 @@
 2008-04-06  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override: Ignore vararg functions and remove a couple
+	of left overs in the generic marshaller.
+
 	* gio/gio.defs: Remove g_file_output_stream_truncate,
 	g_file_output_stream_tell and g_file_input_stream_tell
 

@@ -34,7 +34,6 @@ headers
 typedef struct {
     PyObject *callback;
     PyObject *data;
-    PyObject *buffer;
 } PyGAsyncRequestNotify;
 
 static void
@@ -50,19 +49,9 @@ async_result_callback_marshal(GObject *source_object,
 {
     PyObject *ret;
     PyGILState_STATE state;
-    static GQuark quark = 0;
     
     state = pyg_gil_state_ensure();
 
-    /* buffer is only used by read_async */
-    if (notify->buffer) {
-	if (!quark)
-	    quark = g_quark_from_string("pygio::buffer");
-	Py_XINCREF(notify->buffer);
-	g_object_set_qdata_full(G_OBJECT(result), quark,
-				notify->buffer, py_decref_callback);
-    }
-    
     if (notify->data)
 	ret = PyEval_CallFunction(notify->callback, "(OOO)", 
 				  pygobject_new(source_object), 
@@ -90,6 +79,7 @@ async_result_callback_marshal(GObject *source_object,
 %%
 include
   gfile.override
+  gfileenumerator.override
   ginputstream.override
   goutputstream.override
   gvolumemonitor.override
@@ -97,6 +87,8 @@ include
 ignore-glob
   *_get_type
   *free
+  g_simple_async_result_new_error
+  g_simple_async_report_error_in_idle
 %%
 override g_drive_get_volumes noargs
 static PyObject *
