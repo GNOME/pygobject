@@ -2572,12 +2572,6 @@
   )
 )
 
-(define-method tell
-  (of-object "GFileInputStream")
-  (c-name "g_file_input_stream_tell")
-  (return-type "goffset")
-)
-
 (define-method seek
   (of-object "GFileInputStream")
   (c-name "g_file_input_stream_seek")
@@ -2722,12 +2716,6 @@
   (return-type "char*")
 )
 
-(define-method tell
-  (of-object "GFileOutputStream")
-  (c-name "g_file_output_stream_tell")
-  (return-type "goffset")
-)
-
 (define-method seek
   (of-object "GFileOutputStream")
   (c-name "g_file_output_stream_seek")
@@ -2739,18 +2727,6 @@
     '("GError**" "error")
   )
 )
-
-(define-method truncate
-  (of-object "GFileOutputStream")
-  (c-name "g_file_output_stream_truncate")
-  (return-type "gboolean")
-  (parameters
-    '("goffset" "size")
-    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
-    '("GError**" "error")
-  )
-)
-
 
 
 ;; From gfilterinputstream.h

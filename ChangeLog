@@ -1,5 +1,8 @@
 2008-04-06  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.defs: Remove g_file_output_stream_truncate,
+	g_file_output_stream_tell and g_file_input_stream_tell
+
 	* Makefile.am:
 	* gio/gfileenumerator.override (_wrap_g_file_enumerator_tp_iter): 
 	Implement the python iteration protocol on GFileEnumerator
