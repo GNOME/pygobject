@@ -994,6 +994,7 @@ matcher.register('gulong', arg)
 arg = Int64Arg()
 matcher.register('gint64', arg)
 matcher.register('long-long', arg)
+matcher.register('goffset', arg)
 
 arg = UInt64Arg()
 matcher.register('guint64', arg)

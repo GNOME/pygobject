@@ -1,3 +1,7 @@
+2008-04-06  Johan Dahlin  <johan@gnome.org>
+
+	* codegen/argtypes.py (arg): Add goffset to the int64 arg type
+
 2008-04-02  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/pygenum.c: bug #428732
