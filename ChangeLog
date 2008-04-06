@@ -1,5 +1,7 @@
 2008-04-06  Johan Dahlin  <johan@gnome.org>
 
+	* tests/test_gio.py: Add tests for recently added features.
+
 	* gio/goutputstream.override: 
 	(_wrap_g_output_stream_write_asyn,_wrap_g_output_stream_close_async): 
 	* gio/ginputstream.override (async_result_callback_marshal_read): 

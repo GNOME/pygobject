@@ -32,22 +32,20 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
         self.file = gio.file_new_for_path(".")
 
     def testEnumerateChildren(self):
-        found = []
-
-        e = self.file.enumerate_children("standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
-        while True:
-            info = e.next_file()
-            if not info:
+        enumerator = self.file.enumerate_children(
+            "standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
+        for file_info in enumerator:
+            if file_info.get_name() == 'test_gio.py':
                 break
-            found.append(info.get_name())
-        e.close()
+        else:
+            raise AssertionError
 
-        assert 'test_gio.py' in found, found
 
 class TestInputStream(unittest.TestCase):
     def setUp(self):
@@ -65,6 +63,7 @@ class TestInputStream(unittest.TestCase):
 
     def testReadAsync(self):
         def callback(stream, result):
+            self.assertEquals(result.get_op_res_gssize(), 7)
             try:
                 data = stream.read_finish(result)
                 self.assertEquals(data, "testing")
@@ -96,6 +95,18 @@ class TestInputStream(unittest.TestCase):
 
         self.assertEquals(self.count, 2)
 
+    def testCloseAsync(self):
+        def callback(stream, result):
+            try:
+                self.failUnless(stream.close_finish(result))
+            finally:
+                loop.quit()
+
+        self.stream.close_async(0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
 
 class TestOutputStream(unittest.TestCase):
     def setUp(self):
@@ -112,6 +123,47 @@ class TestOutputStream(unittest.TestCase):
         self.failUnless(os.path.exists("outputstream.txt"))
         self.assertEquals(open("outputstream.txt").read(), "testing")
 
+    def testWriteAsync(self):
+        def callback(stream, result):
+            self.assertEquals(result.get_op_res_gssize(), 7)
+            try:
+                self.assertEquals(stream.write_finish(result), 7)
+                self.failUnless(os.path.exists("outputstream.txt"))
+                self.assertEquals(open("outputstream.txt").read(), "testing")
+            finally:
+                loop.quit()
+
+        self.stream.write_async("testing", 0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
+    def testWriteAsyncError(self):
+        def callback(stream, result):
+            self.assertEquals(result.get_op_res_gssize(), 0)
+            try:
+                self.assertRaises(gobject.GError, stream.write_finish, result)
+            finally:
+                loop.quit()
+
+        self.stream.close()
+        self.stream.write_async("testing", 0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
+
+    def testCloseAsync(self):
+        def callback(stream, result):
+            try:
+                self.failUnless(stream.close_finish(result))
+            finally:
+                loop.quit()
+
+        self.stream.close_async(0, None, callback)
+
+        loop = gobject.MainLoop()
+        loop.run()
 
 class TestVolumeMonitor(unittest.TestCase):
     def setUp(self):
