@@ -36,6 +36,7 @@ EXTRA_DIST =
 GIO_OVERRIDES = 			\
 	gio.override			\
 	gfile.override			\
+	gfileenumerator.override	\
 	ginputstream.override 		\
 	goutputstream.override 		\
 	gvolumemonitor.override

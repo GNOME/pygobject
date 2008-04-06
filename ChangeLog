@@ -1,5 +1,9 @@
 2008-04-06  Johan Dahlin  <johan@gnome.org>
 
+	* Makefile.am:
+	* gio/gfileenumerator.override (_wrap_g_file_enumerator_tp_iter): 
+	Implement the python iteration protocol on GFileEnumerator
+
 	* codegen/argtypes.py (arg): Add goffset to the int64 arg type
 
 2008-04-02  Paul Pogonyshev  <pogonyshev@gmx.net>
