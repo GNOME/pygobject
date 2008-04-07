@@ -32,6 +32,25 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+    def testConstructor(self):
+        for gfile in [gio.File("/"),
+                      gio.File("file:///"),
+                      gio.File(uri="file:///"),
+                      gio.File(path="/"),
+                      gio.File(u"/"),
+                      gio.File(path=u"/")]:
+            self.failUnless(isinstance(gfile, gio.File))
+            self.assertEquals(gfile.get_path(), "/")
+            self.assertEquals(gfile.get_uri(), "file:///")
+
+    def testConstructorError(self):
+        self.assertRaises(TypeError, gio.File)
+        self.assertRaises(TypeError, gio.File, 1)
+        self.assertRaises(TypeError, gio.File, "foo", "bar")
+        self.assertRaises(TypeError, gio.File, foo="bar")
+        self.assertRaises(TypeError, gio.File, uri=1)
+        self.assertRaises(TypeError, gio.File, path=1)
+
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):

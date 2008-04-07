@@ -20,6 +20,70 @@
  * USA
  */
 %%
+define _install_file_meta
+static PyObject *
+_wrap__install_file_meta(PyObject *self, PyObject *args)
+{
+    PyObject *metaclass;
+
+    if (!PyArg_ParseTuple(args, "O", &metaclass))
+	return NULL;
+
+    Py_INCREF(metaclass);
+    PyGFile_Type.ob_type = (PyTypeObject*)metaclass;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+define _file_init kwargs
+static PyObject*
+_wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    GFile *file;
+    Py_ssize_t n_args, n_kwargs;
+    char *arg;
+
+    n_args = PyTuple_Size(args);
+    n_kwargs = kwargs != NULL ? PyDict_Size(kwargs) : 0;
+    if (n_args == 1 && n_kwargs == 0) {
+	if (!PyArg_ParseTuple(args, "s:GFile", &arg))
+	    return NULL;
+	file = g_file_new_for_commandline_arg(arg);
+    } else if (n_args == 0 && n_kwargs == 1) {
+	if (PyDict_GetItemString(kwargs, "path")) {
+	    char *kwlist[] = { "uri", NULL };
+	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+					     "s:GFile", kwlist, &arg))
+		return NULL;
+	    file = g_file_new_for_path(arg);
+	} else if (PyDict_GetItemString(kwargs, "uri")) {
+	    char *kwlist[] = { "path", NULL };
+	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+					     "s:GFile", kwlist, &arg))
+		return NULL;
+	    file = g_file_new_for_uri(arg);
+	} else {	
+	    PyErr_Format(PyExc_TypeError,
+			 "GFile() got an unexpected keyword argument '%s'",
+			 "unknown");
+	    return NULL;
+	}
+    } else {	
+	PyErr_Format(PyExc_TypeError,
+		     "GFile() takes exactly 1 argument (%d given)",
+		     n_args + n_kwargs);
+	return NULL;
+    }
+
+    if (!file) {
+        PyErr_SetString(PyExc_RuntimeError,
+			"could not create GFile object");
+        return NULL;
+    }
+    return pygobject_new((GObject *)file);
+}
+%%
 override g_file_read_async kwargs
 static PyObject *
 _wrap_g_file_read_async(PyGObject *self, PyObject *args, PyObject *kwargs)
@@ -73,3 +137,29 @@ _wrap_g_file_read_async(PyGObject *self, PyObject *args, PyObject *kwargs)
   Py_INCREF(Py_None);
   return Py_None;
 }
+/* GFile.append_to_async */
+/* GFile.create_async */
+/* GFile.enumerate_children_async */
+/* GFile.eject_mountable */
+/* GFile.find_enclosing_mount_async */
+/* GFile.load_contents_async */
+/* GFile.mount_enclosing_volume */
+/* GFile.mount_mountable */
+/* GFile.query_info_async */
+/* GFile.replace_async */
+/* GFile.replace_contents_async */
+/* GFile.set_attributes_async */
+/* GFile.set_display_name_async */
+/* GFile.unmount_mountable */
+/* GFile.load_partial_contents_async: No ArgType for GFileReadMoreCallback */
+/* GFile.copy: No ArgType for GFileProgressCallback */
+/* GFile.move: No ArgType for GFileProgressCallback */
+/* GFile.query_settable_attributes: No ArgType for GFileAttributeInfoList* */
+/* GFile.query_writable_namespaces: No ArgType for GFileAttributeInfoList* */
+/* GFile.set_attribute: No ArgType for gpointer */
+/* GFile.set_attributes_finish: No ArgType for GFileInfo** */
+/* GFile.load_contents: No ArgType for char** */
+/* GFile.load_contents_finish: No ArgType for char** */
+/* GFile.load_partial_contents_finish: No ArgType for char** */
+/* GFile.replace_contents: No ArgType for char** */
+/* GFile.replace_contents_finish: No ArgType for char** */

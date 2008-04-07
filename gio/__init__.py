@@ -27,11 +27,17 @@ try:
 except ImportError:
     pass
 
+from gobject import GObjectMeta
 from _gio import *
-
+from _gio import _file_init, _install_file_meta
 try:
     import unix
     unix # pyflakes
 except ImportError:
     unix = None
 del _gio
+
+class GFileMeta(GObjectMeta):
+    __call__ = _file_init
+
+_install_file_meta(GFileMeta)

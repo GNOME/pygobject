@@ -15,6 +15,16 @@
 )
 
 (define-interface File
+  (docstring 
+"File(arg, path=None, uri=None) -> gio.File subclass\n"
+"\n"
+"If arg is specified; creates a GFile with the given argument from the\n"
+"command line.  The value of arg can be either a URI, an absolute path\n"
+"or a relative path resolved relative to the current working directory.\n"
+"If path is specified, create a file from an absolute or relative path.\n"
+"If uri is specified, create a file from a URI.\n\n"
+"This operation never fails, but the returned object might not \n"
+"support any I/O operation if arg points to a malformed path.")
   (in-module "gio")
   (c-name "GFile")
   (gtype-id "G_TYPE_FILE")

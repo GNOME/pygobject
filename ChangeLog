@@ -1,5 +1,15 @@
 2008-04-07  Johan Dahlin  <johan@gnome.org>
 
+	* gio/__init__.py:
+	* gio/gfile.override:
+	* gio/gio-types.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Make gio.File() (calling on an interface) a factory for creating
+	files. Add tests and a docstring.
+
+2008-04-07  Johan Dahlin  <johan@gnome.org>
+
 	* gio/Makefile.am (pygiodir): Install gio in the right location
 
 2008-04-06  Johan Dahlin  <johan@gnome.org>
