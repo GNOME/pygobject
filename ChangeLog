@@ -1,3 +1,7 @@
+2008-04-07  Johan Dahlin  <johan@gnome.org>
+
+	* gio/Makefile.am (pygiodir): Install gio in the right location
+
 2008-04-06  Johan Dahlin  <johan@gnome.org>
 
 	* tests/test_gio.py: Add tests for recently added features.
