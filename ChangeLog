@@ -1,3 +1,8 @@
+2008-04-08  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gfile.override (_wrap__install_file_meta): Fix a couple of
+	silly typos and use gio.File instead of GFile in exceptions.
+
 2008-04-07  Johan Dahlin  <johan@gnome.org>
 
 	* gio/__init__.py:

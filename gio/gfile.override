@@ -46,32 +46,33 @@ _wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     n_args = PyTuple_Size(args);
     n_kwargs = kwargs != NULL ? PyDict_Size(kwargs) : 0;
+
     if (n_args == 1 && n_kwargs == 0) {
 	if (!PyArg_ParseTuple(args, "s:GFile", &arg))
 	    return NULL;
 	file = g_file_new_for_commandline_arg(arg);
     } else if (n_args == 0 && n_kwargs == 1) {
 	if (PyDict_GetItemString(kwargs, "path")) {
-	    char *kwlist[] = { "uri", NULL };
+	    char *kwlist[] = { "path", NULL };
 	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-					     "s:GFile", kwlist, &arg))
+					     "s:gio.File", kwlist, &arg))
 		return NULL;
 	    file = g_file_new_for_path(arg);
 	} else if (PyDict_GetItemString(kwargs, "uri")) {
-	    char *kwlist[] = { "path", NULL };
+	    char *kwlist[] = { "uri", NULL };
 	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-					     "s:GFile", kwlist, &arg))
+					     "s:gio.File", kwlist, &arg))
 		return NULL;
 	    file = g_file_new_for_uri(arg);
 	} else {	
 	    PyErr_Format(PyExc_TypeError,
-			 "GFile() got an unexpected keyword argument '%s'",
+			 "gio.File() got an unexpected keyword argument '%s'",
 			 "unknown");
 	    return NULL;
 	}
-    } else {	
+    } else {
 	PyErr_Format(PyExc_TypeError,
-		     "GFile() takes exactly 1 argument (%d given)",
+		     "gio.File() takes exactly 1 argument (%d given)",
 		     n_args + n_kwargs);
 	return NULL;
     }
