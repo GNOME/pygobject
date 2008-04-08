@@ -36,6 +36,13 @@
   (gtype-id "G_TYPE_ICON")
 )
 
+(define-object ThemedIcon
+  (in-module "gio")
+  (c-name "GThemedIcon")
+  (gtype-id "G_TYPE_THEMED_ICON")
+  (implements "GIcon")
+)
+
 (define-object LoadableIcon
   (in-module "gio")
   (c-name "GLoadableIcon")

@@ -4000,6 +4000,20 @@
   )
 )
 
+(define-method get_names
+  (c-name "g_themed_icon_get_names")
+  (of-object "GThemedIcon")
+  (return-type "const-gchar*-const*")
+)
+
+(define-method append_name
+  (c-name "g_themed_icon_append_name")
+  (of-object "GThemedIcon")
+  (return-type "none")
+  (parameters
+    '("char*" "iconname")
+  )
+)
 
 
 ;; From gunionvolumemonitor.h

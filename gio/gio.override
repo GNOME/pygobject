@@ -159,3 +159,24 @@ _wrap_g_app_info_get_all_for_type (PyGObject *self, PyObject *args)
   
   return ret;
 }
+%%
+override g_themed_icon_get_names noargs
+static PyObject *
+_wrap_g_themed_icon_get_names(PyGObject *self)
+{
+    const char * const *names;
+    PyObject *ret;
+
+    names = g_themed_icon_get_names(G_THEMED_ICON(self->obj));
+
+    ret = PyList_New(0);
+    while (names && *names) {
+        PyObject *item = PyString_FromString(names[0]);
+        PyList_Append(ret, item);
+        Py_DECREF(item);
+
+        names++;
+    }
+
+    return ret;
+}
