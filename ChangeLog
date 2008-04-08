@@ -1,5 +1,13 @@
 2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
 
+	* gio/gio.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Add bindings for content_type_guess.
+	Based on patch by Thomas Leonard (#525113)
+
+2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
+
 	* gio/gio-types.defs:
 	* gio/gio.defs:
 	* gio/gio.override:

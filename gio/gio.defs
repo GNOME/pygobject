@@ -544,6 +544,13 @@
 )
 
 (define-function content_type_guess
+  (docstring
+"content_type_guess(filename=None, data=None, want_uncertain=False) -> mime-type\n"
+"\n"
+"Guesses the content-type based on the parameters passed.\n"
+"Returns a string containing the mime type.\n"
+"If want_uncertain is set to True, return a tuple with the mime type and \n"
+"True/False if the type guess was uncertain or not.")
   (c-name "g_content_type_guess")
   (return-type "char*")
   (parameters

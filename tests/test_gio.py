@@ -212,3 +212,18 @@ class TestThemedIcon(unittest.TestCase):
         self.assertEquals(self.icon.get_names(), ['open'])
         self.icon.append_name('close')
         self.assertEquals(self.icon.get_names(), ['open', 'close'])
+
+class TestType(unittest.TestCase):
+    def testGuessFromName(self):
+        mime_type = gio.content_type_guess('diagram.svg')
+        self.assertEquals('image/svg+xml', mime_type)
+
+    def testGuessFromContents(self):
+        mime_type = gio.content_type_guess(data='<html></html>')
+        self.assertEquals('text/html', mime_type)
+
+    def testGuessFromContentsUncertain(self):
+        mime_type, result_uncertain = gio.content_type_guess(
+            data='<html></html>', want_uncertain=True)
+        self.assertEquals('text/html', mime_type)
+        self.assertEquals(bool, type(result_uncertain))
