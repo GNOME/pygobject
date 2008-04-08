@@ -1,3 +1,10 @@
+2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/option.py: Fix a typo
+	* tests/test_option.py:
+	Update the tests after the latest "refactoring".
+	The testsuite should run fine now again, finally.
+
 2008-04-08  Johan Dahlin  <johan@gnome.org>
 
 	* tests/test_gio.py (TestOutputStream.testWriteAsyncError): 

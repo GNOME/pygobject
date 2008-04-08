@@ -1,4 +1,4 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
+# -*- Mode: Python -*-
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2006  Johannes Hoelzl
 #
@@ -316,7 +316,7 @@ class OptionParser(optparse.OptionParser):
         largs.extend(context.parse([sys.argv[0]] + rargs))
 
     def parse_args(self, args=None, values=None):
-        old_args = args or 0
+        old_args = args or []
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)

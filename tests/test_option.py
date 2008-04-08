@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import optparse
 import unittest
 import sys
 from StringIO import StringIO
@@ -17,6 +18,10 @@ class TestOption(unittest.TestCase):
                                      description="Option unit test")
         self.parser.add_option("-t", "--test", help="Unit test option",
                           action="store_false", dest="test", default=True)
+        self.parser.add_option("--g-fatal-warnings",
+                               action="store_true",
+                               dest="fatal_warnings",
+                               help="dummy"),
 
     def _create_group(self):
         def option_callback(option, opt, value, parser):
@@ -83,6 +88,7 @@ class TestOption(unittest.TestCase):
         self.failIf(args)
 
     def testOptionValueError(self):
+        self._create_group()
         self.assertRaises(option.OptionValueError, self.parser.parse_args,
                           ["test_option.py", "--test-integer=text"])
 
@@ -95,6 +101,7 @@ class TestOption(unittest.TestCase):
         self.assertRaises(TypeError, option.OptionGroup)
 
     def testStandardError(self):
+        self._create_group()
         sio = StringIO()
         old_stderr = sys.stderr
         sys.stderr = sio
