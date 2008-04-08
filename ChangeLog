@@ -1,6 +1,16 @@
 2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/Makefile.am:
+	* gio/__init__.py:
+	* gio/gappinfo.override:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Implement GAppInfo constructor, add tests.
+
+2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/Makefile.am:
 	* gio/gfileinfo.override:
 	* gio/gio.defs:
 	* gio/gio.override:

@@ -34,6 +34,7 @@ EXTRA_DIST =
 
 # gio module
 GIO_OVERRIDES = 			\
+	gappinfo.override		\
 	gio.override			\
 	gfile.override			\
 	gfileenumerator.override	\

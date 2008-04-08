@@ -1,4 +1,4 @@
-# -*- Mode: Python; py-indent-offset: 4 -*-
+# -*- Mode: Python -*-
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2008  Johan Dahlin
 #
@@ -29,7 +29,9 @@ except ImportError:
 
 from gobject import GObjectMeta
 from _gio import *
-from _gio import _file_init, _install_file_meta
+from _gio import \
+     _app_info_init, _install_app_info_meta, \
+     _file_init, _install_file_meta
 try:
     import unix
     unix # pyflakes
@@ -39,5 +41,8 @@ del _gio
 
 class GFileMeta(GObjectMeta):
     __call__ = _file_init
-
 _install_file_meta(GFileMeta)
+
+class GAppInfoMeta(GObjectMeta):
+    __call__ = _app_info_init
+_install_app_info_meta(GAppInfoMeta)

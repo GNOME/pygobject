@@ -9,7 +9,7 @@ from common import gio, gobject
 class TestFile(unittest.TestCase):
     def setUp(self):
         self._f = open("file.txt", "w+")
-        self.file = gio.file_new_for_path("file.txt")
+        self.file = gio.File("file.txt")
 
     def tearDown(self):
         self._f.close()
@@ -54,7 +54,7 @@ class TestFile(unittest.TestCase):
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
-        self.file = gio.file_new_for_path(".")
+        self.file = gio.File(".")
 
     def testEnumerateChildren(self):
         enumerator = self.file.enumerate_children(
@@ -186,6 +186,7 @@ class TestOutputStream(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+
 class TestVolumeMonitor(unittest.TestCase):
     def setUp(self):
         self.monitor = gio.volume_monitor_get()
@@ -215,16 +216,17 @@ class TestThemedIcon(unittest.TestCase):
         self.icon.append_name('close')
         self.assertEquals(self.icon.get_names(), ['open', 'close'])
 
-class TestType(unittest.TestCase):
-    def testGuessFromName(self):
+
+class TestContentTypeGuess(unittest.TestCase):
+    def testFromName(self):
         mime_type = gio.content_type_guess('diagram.svg')
         self.assertEquals('image/svg+xml', mime_type)
 
-    def testGuessFromContents(self):
+    def testFromContents(self):
         mime_type = gio.content_type_guess(data='<html></html>')
         self.assertEquals('text/html', mime_type)
 
-    def testGuessFromContentsUncertain(self):
+    def testFromContentsUncertain(self):
         mime_type, result_uncertain = gio.content_type_guess(
             data='<html></html>', want_uncertain=True)
         self.assertEquals('text/html', mime_type)
@@ -233,8 +235,16 @@ class TestType(unittest.TestCase):
 
 class TestFileInfo(unittest.TestCase):
     def testListAttributes(self):
-        gfile = gio.File("test_gio.py")
-        fileinfo = gfile.query_info("*")
+        fileinfo = gio.File("test_gio.py").query_info("*")
         attributes = fileinfo.list_attributes("standard")
         self.failUnless(attributes)
         self.failUnless('standard::name' in attributes)
+
+
+class TestAppInfo(unittest.TestCase):
+    def setUp(self):
+        self.appinfo = gio.AppInfo("does-not-exist")
+
+    def testSimple(self):
+        self.assertEquals(self.appinfo.get_description(),
+                          "Custom definition for (null)")

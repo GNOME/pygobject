@@ -78,6 +78,7 @@ async_result_callback_marshal(GObject *source_object,
 }
 %%
 include
+  gappinfo.override
   gfile.override
   gfileenumerator.override
   gfileinfo.override

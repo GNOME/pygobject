@@ -15,11 +15,12 @@
 
 (define-function app_info_create_from_commandline
   (c-name "g_app_info_create_from_commandline")
+  (is-constructor-of "GAppInfo")
   (return-type "GAppInfo*")
   (parameters
     '("const-char*" "commandline")
-    '("const-char*" "application_name")
-    '("GAppInfoCreateFlags" "flags")
+    '("const-char*" "application_name" (null-ok) (default "NULL"))
+    '("GAppInfoCreateFlags" "flags" (default "G_APP_INFO_CREATE_NONE"))
     '("GError**" "error")
   )
 )
@@ -1095,6 +1096,7 @@
 
 (define-function file_new_for_path
   (c-name "g_file_new_for_path")
+  (is-constructor-of "GFile")
   (return-type "GFile*")
   (parameters
     '("const-char*" "path")
@@ -1103,6 +1105,7 @@
 
 (define-function file_new_for_uri
   (c-name "g_file_new_for_uri")
+  (is-constructor-of "GFile")
   (return-type "GFile*")
   (parameters
     '("const-char*" "uri")
@@ -1110,6 +1113,7 @@
 )
 
 (define-function file_new_for_commandline_arg
+  (is-constructor-of "GFile")
   (c-name "g_file_new_for_commandline_arg")
   (return-type "GFile*")
   (parameters
