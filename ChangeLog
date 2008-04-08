@@ -1,3 +1,9 @@
+2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gobject/pygsource.c:
+	* tests/test_source.py:
+	Unbreak Source.prepare (#523075, Bryan Silverthorn)
+
 2008-04-08  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gfile.override (_wrap__install_file_meta): Fix a couple of

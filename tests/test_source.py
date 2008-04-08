@@ -62,5 +62,33 @@ class TestSource(unittest.TestCase):
 
         assert self.pos >= 0 and idle.count >= 0
 
+    def testSourcePrepare(self):
+        # this test may not terminate if prepare() is wrapped incorrectly
+        dispatched = [False]
+        loop = gobject.MainLoop()
+
+        class CustomTimeout(gobject.Source):
+            def prepare(self):
+                return (False, 10)
+
+            def check(self):
+                return True
+
+            def dispatch(self, callback, args):
+                dispatched[0] = True
+
+                loop.quit()
+
+                return False
+
+        source = CustomTimeout()
+
+        source.attach()
+        source.set_callback(dir)
+
+        loop.run()
+
+        assert dispatched[0]
+
 if __name__ == '__main__':
     unittest.main()
