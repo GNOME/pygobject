@@ -1398,7 +1398,7 @@
   (return-type "GFileInfo*")
   (parameters
     '("const-char*" "attributes")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1410,7 +1410,7 @@
   (return-type "none")
   (parameters
     '("const-char*" "attributes")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("int" "io_priority")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1477,7 +1477,7 @@
   (return-type "GFileEnumerator*")
   (parameters
     '("const-char*" "attributes")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1489,7 +1489,7 @@
   (return-type "none")
   (parameters
     '("const-char*" "attributes")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("int" "io_priority")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1638,7 +1638,7 @@
     '("const-char*" "attribute")
     '("GFileAttributeType" "type")
     '("gpointer" "value_p")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1650,7 +1650,7 @@
   (return-type "gboolean")
   (parameters
     '("GFileInfo*" "info")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1662,7 +1662,7 @@
   (return-type "none")
   (parameters
     '("GFileInfo*" "info")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("int" "io_priority")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1688,7 +1688,7 @@
   (parameters
     '("const-char*" "attribute")
     '("const-char*" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1701,7 +1701,7 @@
   (parameters
     '("const-char*" "attribute")
     '("const-char*" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1714,7 +1714,7 @@
   (parameters
     '("const-char*" "attribute")
     '("guint32" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1727,7 +1727,7 @@
   (parameters
     '("const-char*" "attribute")
     '("gint32" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1740,7 +1740,7 @@
   (parameters
     '("const-char*" "attribute")
     '("guint64" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1753,7 +1753,7 @@
   (parameters
     '("const-char*" "attribute")
     '("gint64" "value")
-    '("GFileQueryInfoFlags" "flags")
+    '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )

@@ -37,6 +37,7 @@ GIO_OVERRIDES = 			\
 	gio.override			\
 	gfile.override			\
 	gfileenumerator.override	\
+	gfileinfo.override		\
 	ginputstream.override 		\
 	goutputstream.override 		\
 	gvolumemonitor.override

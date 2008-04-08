@@ -1,5 +1,15 @@
 2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
 
+	* gio/Makefile.am:
+	* gio/gfileinfo.override:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Wrap GFileInfo.list_attributes(), add tests and
+	set the default of GFileQueryInfoFlags args to G_FILE_QUERY_INFO_NONE.
+
+2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
+
 	* gobject/option.py: Fix a typo
 	* tests/test_option.py:
 	Update the tests after the latest "refactoring".

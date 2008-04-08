@@ -229,3 +229,12 @@ class TestType(unittest.TestCase):
             data='<html></html>', want_uncertain=True)
         self.assertEquals('text/html', mime_type)
         self.assertEquals(bool, type(result_uncertain))
+
+
+class TestFileInfo(unittest.TestCase):
+    def testListAttributes(self):
+        gfile = gio.File("test_gio.py")
+        fileinfo = gfile.query_info("*")
+        attributes = fileinfo.list_attributes("standard")
+        self.failUnless(attributes)
+        self.failUnless('standard::name' in attributes)
