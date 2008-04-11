@@ -32,6 +32,17 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+    def testReadAsyncError(self):
+        self.assertRaises(TypeError, self.file.read_async)
+        self.assertRaises(TypeError, self.file.read_async, "foo", "bar")
+        self.assertRaises(TypeError, self.file.read_async, "foo",
+                          priority="bar")
+        self.assertRaises(TypeError, self.file.read_async, "foo",
+                          priority="bar")
+        self.assertRaises(TypeError, self.file.read_async, "foo",
+                          priority=1, cancellable="bar")
+        self.assertRaises(TypeError, self.file.read_async, "foo", 1, "bar")
+
     def testConstructor(self):
         for gfile in [gio.File("/"),
                       gio.File("file:///"),
@@ -114,6 +125,18 @@ class TestInputStream(unittest.TestCase):
 
         self.assertEquals(self.count, 2)
 
+        self.assertRaises(TypeError, self.stream.read_async)
+        self.assertRaises(TypeError, self.stream.read_async, "foo")
+        self.assertRaises(TypeError, self.stream.read_async, 1024, "bar")
+        self.assertRaises(TypeError, self.stream.read_async, 1024,
+                          priority="bar")
+        self.assertRaises(TypeError, self.stream.read_async, 1024,
+                          priority="bar")
+        self.assertRaises(TypeError, self.stream.read_async, 1024,
+                          priority=1, cancellable="bar")
+        self.assertRaises(TypeError, self.stream.read_async, 1024, 1, "bar")
+
+
     # FIXME: this makes 'make check' freeze
     def _testCloseAsync(self):
         def callback(stream, result):
@@ -172,6 +195,16 @@ class TestOutputStream(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+        self.assertRaises(TypeError, self.stream.write_async)
+        self.assertRaises(TypeError, self.stream.write_async, 1138)
+        self.assertRaises(TypeError, self.stream.write_async, "foo", "bar")
+        self.assertRaises(TypeError, self.stream.write_async, "foo",
+                          priority="bar")
+        self.assertRaises(TypeError, self.stream.write_async, "foo",
+                          priority="bar")
+        self.assertRaises(TypeError, self.stream.write_async, "foo",
+                          priority=1, cancellable="bar")
+        self.assertRaises(TypeError, self.stream.write_async, "foo", 1, "bar")
 
     # FIXME: this makes 'make check' freeze
     def _testCloseAsync(self):
