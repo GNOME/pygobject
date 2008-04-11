@@ -1,3 +1,8 @@
+2008-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/gio.defs (write_async): document.
+	Add default values to all flags parameters.
+
 2008-04-11  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gio.defs (read_async, read): document.

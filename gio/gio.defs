@@ -546,9 +546,10 @@
 
 (define-function content_type_guess
   (docstring
-"content_type_guess(filename=None, data=None, want_uncertain=False) -> mime-type\n"
+"content_type_guess([filename, data, want_uncertain]) -> mime type\n"
 "\n"
-"Guesses the content-type based on the parameters passed.\n"
+"Guesses the content type based on the parameters passed.\n"
+"Either filename or data must be specified\n"
 "Returns a string containing the mime type.\n"
 "If want_uncertain is set to True, return a tuple with the mime type and \n"
 "True/False if the type guess was uncertain or not.")
@@ -900,7 +901,7 @@
   (c-name "g_drive_eject")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -986,7 +987,7 @@
   (parameters
     '("const-char*" "name")
     '("GFileAttributeType" "type")
-    '("GFileAttributeInfoFlags" "flags")
+    '("GFileAttributeInfoFlags" "flags" (default "G_FILE_ATTRIBUTE_INFO_NONE"))
   )
 )
 
@@ -1305,7 +1306,7 @@
   (c-name "g_file_append_to")
   (return-type "GFileOutputStream*")
   (parameters
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1316,7 +1317,7 @@
   (c-name "g_file_create")
   (return-type "GFileOutputStream*")
   (parameters
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1329,7 +1330,7 @@
   (parameters
     '("const-char*" "etag")
     '("gboolean" "make_backup")
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1340,7 +1341,7 @@
   (c-name "g_file_append_to_async")
   (return-type "none")
   (parameters
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1363,7 +1364,7 @@
   (c-name "g_file_create_async")
   (return-type "none")
   (parameters
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1388,7 +1389,7 @@
   (parameters
     '("const-char*" "etag")
     '("gboolean" "make_backup")
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -1590,7 +1591,7 @@
   (return-type "gboolean")
   (parameters
     '("GFile*" "destination")
-    '("GFileCopyFlags" "flags")
+    '("GFileCopyFlags" "flags" (default "G_FILE_COPY_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GFileProgressCallback" "progress_callback")
     '("gpointer" "progress_callback_data")
@@ -1604,7 +1605,7 @@
   (return-type "gboolean")
   (parameters
     '("GFile*" "destination")
-    '("GFileCopyFlags" "flags")
+    '("GFileCopyFlags" "flags" (default "G_FILE_COPY_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GFileProgressCallback" "progress_callback")
     '("gpointer" "progress_callback_data")
@@ -1831,7 +1832,7 @@
   (c-name "g_file_unmount_mountable")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1853,7 +1854,7 @@
   (c-name "g_file_eject_mountable")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1876,7 +1877,7 @@
   (return-type "gboolean")
   (parameters
     '("GFile*" "destination")
-    '("GFileCopyFlags" "flags")
+    '("GFileCopyFlags" "flags" (default "G_FILE_COPY_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1887,7 +1888,7 @@
   (c-name "g_file_monitor_directory")
   (return-type "GFileMonitor*")
   (parameters
-    '("GFileMonitorFlags" "flags")
+    '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1898,7 +1899,7 @@
   (c-name "g_file_monitor_file")
   (return-type "GFileMonitor*")
   (parameters
-    '("GFileMonitorFlags" "flags")
+    '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -1975,7 +1976,7 @@
     '("gsize" "length")
     '("const-char*" "etag")
     '("gboolean" "make_backup")
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("char**" "new_etag")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1991,7 +1992,7 @@
     '("gsize" "length")
     '("const-char*" "etag")
     '("gboolean" "make_backup")
-    '("GFileCreateFlags" "flags")
+    '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3375,7 +3376,7 @@
   (c-name "g_mount_unmount")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3397,7 +3398,7 @@
   (c-name "g_mount_eject")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3599,7 +3600,7 @@
   (return-type "gssize")
   (parameters
     '("GInputStream*" "source")
-    '("GOutputStreamSpliceFlags" "flags")
+    '("GOutputStreamSpliceFlags" "flags" (default "G_OUTPUT_STREAM_SPLICE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -3627,6 +3628,18 @@
 
 (define-method write_async
   (of-object "GOutputStream")
+  (docstring
+"S.write_async(buffer, callback [,io_priority] [,cancellable] [,user_data])\n"
+"\n"
+"Request an asynchronous write of count bytes from buffer into the stream.\n"
+" When the operation is finished callback will be called. You can then call \n"
+"gio.OutputStream.write_finish() to get the result of the operation.\n"
+"On success, the number of bytes written will be passed to the callback.\n"
+"It is not an error if this is not the same as the requested size, as it can \n"
+"happen e.g. on a partial I/O error, but generally tries to write as many \n"
+"bytes as requested.\n"
+"For the synchronous, blocking version of this function, see "
+"gio.OutputStream.write().\n")
   (c-name "g_output_stream_write_async")
   (return-type "none")
   (parameters
@@ -3655,7 +3668,7 @@
   (return-type "none")
   (parameters
     '("GInputStream*" "source")
-    '("GOutputStreamSpliceFlags" "flags")
+    '("GOutputStreamSpliceFlags" "flags" (default "G_OUTPUT_STREAM_SPLICE_NONE"))
     '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
@@ -4206,7 +4219,7 @@
   (c-name "g_volume_eject")
   (return-type "none")
   (parameters
-    '("GMountUnmountFlags" "flags")
+    '("GMountUnmountFlags" "flags" (default "G_MOUNT_UNMOUNT_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
