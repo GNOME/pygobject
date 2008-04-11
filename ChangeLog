@@ -1,3 +1,13 @@
+2008-04-11  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/gfile.override:
+	* gio/ginputstream.override:
+	* gio/goutputstream.override:
+	* tests/test_gio.py:
+	Move around the order of the callback argument to async methods,
+	so it comes before priority and cancellable, which can have default
+	values.
+
 2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/Makefile.am:

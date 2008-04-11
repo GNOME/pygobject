@@ -81,21 +81,29 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
   static char *kwlist[] = { "count", "cancellable", NULL };
   PyGObject *pycancellable = NULL;
   PyObject *v;
-  
   GCancellable *cancellable;
   long count = -1; 
   GError *error = NULL;
   size_t bytesread, buffersize, chunksize;
   
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "|lO!:InputStream.read",
+				   "|lO:InputStream.read",
 				   kwlist, &count,
-				   &PyGCancellable_Type, &pycancellable))
+				   &pycancellable))
     return NULL;
   
   buffersize = BUFSIZE;
 
-  cancellable = pycancellable ? G_CANCELLABLE(pycancellable->obj) : NULL;
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
+    cancellable = NULL;
+  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
+      cancellable = G_CANCELLABLE(pycancellable->obj);
+  else
+    {
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
+      return NULL;
+    }
 
   v = PyString_FromStringAndSize((char *)NULL, buffersize);
   if (v == NULL)
@@ -147,37 +155,30 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
 %%
 override g_input_stream_read_async kwargs
 static PyObject *
-_wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_input_stream_read_async(PyGObject *self,
+				PyObject *args,
+				PyObject *kwargs)
 {
-  static char *kwlist[] = { "count", "io_priority", "cancellable", "callback",
-			    "user_data", NULL };
+  static char *kwlist[] = { "callback", "count", "io_priority",
+			    "cancellable", "user_data", NULL };
   long count = -1;
   int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable;
+  PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
   PyGAsyncRequestNotifyRead *notify;
 
   notify = g_slice_new0(PyGAsyncRequestNotifyRead);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "liOO|O:InputStream.read_async",
-				   kwlist, &count,
+				   "lO|iOO:InputStream.read_async",
+				   kwlist, 
+				   &count,				   
+				   &notify->callback,
 				   &io_priority,
 				   &pycancellable,
-				   &notify->callback,
 				   &notify->data))
     {
       g_slice_free(PyGAsyncRequestNotifyRead, notify);
-      return NULL;
-    }
-
-  if ((PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
       return NULL;
     }
 
@@ -190,6 +191,18 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
+    cancellable = NULL;
+  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
+      cancellable = G_CANCELLABLE(pycancellable->obj);
+  else
+    {
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
+      g_slice_free(PyGAsyncRequestNotifyRead, notify);
+      return NULL;
+    }
+
   notify->buffer = PyString_FromStringAndSize((char *)NULL, count);
   if (notify->buffer == NULL)
     return NULL;
@@ -208,7 +221,9 @@ _wrap_g_input_stream_read_async(PyGObject *self, PyObject *args, PyObject *kwarg
 %%
 override g_input_stream_read_finish kwargs
 static PyObject *
-_wrap_g_input_stream_read_finish(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_input_stream_read_finish(PyGObject *self,
+				 PyObject *args,
+				 PyObject *kwargs)
 {
     static char *kwlist[] = { "result", NULL };
     PyGObject *result;
@@ -225,7 +240,8 @@ _wrap_g_input_stream_read_finish(PyGObject *self, PyObject *args, PyObject *kwar
         return NULL;
     
 
-    g_input_stream_read_finish(G_INPUT_STREAM(self->obj), G_ASYNC_RESULT(result->obj), &error);
+    g_input_stream_read_finish(G_INPUT_STREAM(self->obj),
+			       G_ASYNC_RESULT(result->obj), &error);
     
     if (pyg_error_check(&error))
         return NULL;
@@ -237,36 +253,28 @@ _wrap_g_input_stream_read_finish(PyGObject *self, PyObject *args, PyObject *kwar
 %%
 override g_input_stream_close_async kwargs
 static PyObject *
-_wrap_g_input_stream_close_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_input_stream_close_async(PyGObject *self,
+				 PyObject *args,
+				 PyObject *kwargs)
 {
-  static char *kwlist[] = { "io_priority", "cancellable",
-			    "callback", "user_data", NULL };
+  static char *kwlist[] = { "callback", "io_priority", "cancellable",
+			    "user_data", NULL };
   int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable;
+  PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
   PyGAsyncRequestNotify *notify;
 
   notify = g_slice_new0(PyGAsyncRequestNotify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "iOO|O:InputStream.close_async",
+				   "O|iOO:InputStream.close_async",
 				   kwlist,
+				   &notify->callback,
 				   &io_priority,
 				   &pycancellable,
-				   &notify->callback,
 				   &notify->data))
     {
       g_slice_free(PyGAsyncRequestNotify, notify);
-      return NULL;
-    }
-
-  if ((PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
       return NULL;
     }
 
@@ -279,6 +287,18 @@ _wrap_g_input_stream_close_async(PyGObject *self, PyObject *args, PyObject *kwar
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
+    cancellable = NULL;
+  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
+      cancellable = G_CANCELLABLE(pycancellable->obj);
+  else
+    {
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
+      g_slice_free(PyGAsyncRequestNotify, notify);
+      return NULL;
+    }
+ 
   g_input_stream_close_async(G_INPUT_STREAM(self->obj),
 			     io_priority,
 			     cancellable,

@@ -27,7 +27,7 @@ class TestFile(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.file.read_async(0, None, callback)
+        self.file.read_async(callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -90,7 +90,7 @@ class TestInputStream(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.stream.read_async(7, 0, None, callback)
+        self.stream.read_async(7, callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -106,8 +106,8 @@ class TestInputStream(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.stream.read_async(10240, 0, None, callback)
-        self.stream.read_async(10240, 0, None, callback)
+        self.stream.read_async(10240, callback)
+        self.stream.read_async(10240, callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -122,7 +122,7 @@ class TestInputStream(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.stream.close_async(0, None, callback)
+        self.stream.close_async(callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -153,7 +153,7 @@ class TestOutputStream(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.stream.write_async("testing", 0, None, callback)
+        self.stream.write_async("testing", callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -167,7 +167,7 @@ class TestOutputStream(unittest.TestCase):
                 loop.quit()
 
         self.stream.close()
-        self.stream.write_async("testing", 0, None, callback)
+        self.stream.write_async("testing", callback)
 
         loop = gobject.MainLoop()
         loop.run()
@@ -181,7 +181,7 @@ class TestOutputStream(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.stream.close_async(0, None, callback)
+        self.stream.close_async(callback)
 
         loop = gobject.MainLoop()
         loop.run()

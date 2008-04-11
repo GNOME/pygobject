@@ -22,7 +22,9 @@
 %%
 override g_output_stream_write kwargs
 static PyObject *
-_wrap_g_output_stream_write(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_output_stream_write(PyGObject *self,
+			    PyObject *args,
+			    PyObject *kwargs)
 {
   static char *kwlist[] = { "buffer", "cancellable", NULL };
   PyGObject *pycancellable = NULL;
@@ -38,13 +40,14 @@ _wrap_g_output_stream_write(PyGObject *self, PyObject *args, PyObject *kwargs)
 				   &PyGCancellable_Type, &pycancellable))
     return NULL;
   
-  if (!pycancellable)
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
     cancellable = NULL;
   else if (pygobject_check(pycancellable, &PyGCancellable_Type))
       cancellable = G_CANCELLABLE(pycancellable->obj);
   else
     {
-      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
       return NULL;
     }
 
@@ -61,38 +64,31 @@ _wrap_g_output_stream_write(PyGObject *self, PyObject *args, PyObject *kwargs)
 %%
 override g_output_stream_write_async kwargs
 static PyObject *
-_wrap_g_output_stream_write_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_output_stream_write_async(PyGObject *self,
+				  PyObject *args,
+				  PyObject *kwargs)
 {
-  static char *kwlist[] = { "buffer", "io_priority", "cancellable",
-			    "callback", "user_data", NULL };
+  static char *kwlist[] = { "buffer", "callback", "io_priority", "cancellable",
+			    "user_data", NULL };
   gchar *buffer;
   long count = -1;
   int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable;
+  PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
   PyGAsyncRequestNotify *notify;
 
   notify = g_slice_new0(PyGAsyncRequestNotify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "s#iOO|O:OutputStream.write_async",
-				   kwlist, &buffer, &count,
+				   "s#O|iOO:OutputStream.write_async",
+				   kwlist, &buffer,
+				   &count,
+				   &notify->callback,
 				   &io_priority,
 				   &pycancellable,
-				   &notify->callback,
 				   &notify->data))
     {
       g_slice_free(PyGAsyncRequestNotify, notify);
-      return NULL;
-    }
-
-  if ((PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
       return NULL;
     }
 
@@ -105,6 +101,17 @@ _wrap_g_output_stream_write_async(PyGObject *self, PyObject *args, PyObject *kwa
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
+    cancellable = NULL;
+  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
+      cancellable = G_CANCELLABLE(pycancellable->obj);
+  else
+    {
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
+      return NULL;
+    }
+
   g_output_stream_write_async(G_OUTPUT_STREAM(self->obj),
 			      buffer,
 			      count,
@@ -119,36 +126,39 @@ _wrap_g_output_stream_write_async(PyGObject *self, PyObject *args, PyObject *kwa
 %%
 override g_output_stream_close_async kwargs
 static PyObject *
-_wrap_g_output_stream_close_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+_wrap_g_output_stream_close_async(PyGObject *self,
+				  PyObject *args,
+				  PyObject *kwargs)
 {
-  static char *kwlist[] = { "io_priority", "cancellable",
-			    "callback", "user_data", NULL };
+  static char *kwlist[] = { "callback", "io_priority",
+			    "cancellable", "user_data", NULL };
   int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable;
+  PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
   PyGAsyncRequestNotify *notify;
 
   notify = g_slice_new0(PyGAsyncRequestNotify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "iOO|O:OutputStream.close_async",
+				   "O|iOO:OutputStream.close_async",
 				   kwlist,
+				   &notify->callback,
 				   &io_priority,
 				   &pycancellable,
-				   &notify->callback,
 				   &notify->data))
     {
       g_slice_free(PyGAsyncRequestNotify, notify);
       return NULL;
     }
 
-  if ((PyObject*)pycancellable == Py_None)
+  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
     cancellable = NULL;
   else if (pygobject_check(pycancellable, &PyGCancellable_Type))
       cancellable = G_CANCELLABLE(pycancellable->obj);
   else
     {
-      PyErr_SetString(PyExc_TypeError, "cancellable should be a gio.Cancellable");
+      PyErr_SetString(PyExc_TypeError,
+		      "cancellable should be a gio.Cancellable");
       return NULL;
     }
 
