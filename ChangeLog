@@ -1,3 +1,8 @@
+2008-04-11  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gio.defs (read_async, read): document.
+	Set io_priority default to G_PRIORITY_DEFAULT.
+
 2008-04-11  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/gfile.override:

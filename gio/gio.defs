@@ -333,7 +333,7 @@
   (return-type "none")
   (parameters
     '("gssize" "count")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1025,7 +1025,7 @@
   (return-type "none")
   (parameters
     '("int" "num_files")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1047,7 +1047,7 @@
   (c-name "g_file_enumerator_close_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1251,6 +1251,18 @@
 
 (define-method read
   (of-object "GFile")
+  (docstring
+"F.read([cancellable]) -> input stream\n"
+"Opens a file for reading. The result is a GFileInputStream that can be \n"
+"used to read the contents of the file.\n"
+"\n"
+"If cancellable is specified, then the operation can be cancelled by \n"
+"triggering the cancellable object from another thread. If the operation \n"
+"was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
+"If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will \n"
+"be returned. If the file is a directory, the gio.IO_ERROR_IS_DIRECTORY \n"
+"error will be returned. Other errors are possible too, and depend on what \n"
+"kind of filesystem the file is on.")
   (c-name "g_file_read")
   (return-type "GFileInputStream*")
   (parameters
@@ -1261,10 +1273,17 @@
 
 (define-method read_async
   (of-object "GFile")
+  (docstring 
+"F.read_async(callback [,io_priority [,cancellable [,user_data]]]) -> start read\n"
+"\n"
+"For more details, see gio.File.read() which is the synchronous version of this call.\n"
+"Asynchronously opens file for reading."
+"When the operation is finished, callback will be called.\n"
+"You can then call g_file_read_finish() to get the result of the operation.\n")
   (c-name "g_file_read_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1322,7 +1341,7 @@
   (return-type "none")
   (parameters
     '("GFileCreateFlags" "flags")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1345,7 +1364,7 @@
   (return-type "none")
   (parameters
     '("GFileCreateFlags" "flags")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1370,7 +1389,7 @@
     '("const-char*" "etag")
     '("gboolean" "make_backup")
     '("GFileCreateFlags" "flags")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1415,7 +1434,7 @@
   (parameters
     '("const-char*" "attributes")
     '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1458,7 +1477,7 @@
   (c-name "g_file_find_enclosing_mount_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1494,7 +1513,7 @@
   (parameters
     '("const-char*" "attributes")
     '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1528,7 +1547,7 @@
   (return-type "none")
   (parameters
     '("const-char*" "display_name")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -1667,7 +1686,7 @@
   (parameters
     '("GFileInfo*" "info")
     '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -2566,7 +2585,7 @@
   (return-type "none")
   (parameters
     '("char*" "attributes")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -2704,7 +2723,7 @@
   (return-type "none")
   (parameters
     '("char*" "attributes")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -2856,7 +2875,7 @@
   (parameters
     '("void*" "buffer")
     '("gsize" "count")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -2879,7 +2898,7 @@
   (return-type "none")
   (parameters
     '("gsize" "count")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -2901,7 +2920,7 @@
   (c-name "g_input_stream_close_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3107,7 +3126,7 @@
     '("GIOSchedulerJobFunc" "job_func")
     '("gpointer" "user_data")
     '("GDestroyNotify" "notify")
-    '("gint" "io_priority")
+    '("gint" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
   )
 )
@@ -3613,7 +3632,7 @@
   (parameters
     '("const-void*" "buffer")
     '("gsize" "count")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3637,7 +3656,7 @@
   (parameters
     '("GInputStream*" "source")
     '("GOutputStreamSpliceFlags" "flags")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3659,7 +3678,7 @@
   (c-name "g_output_stream_flush_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3681,7 +3700,7 @@
   (c-name "g_output_stream_close_async")
   (return-type "none")
   (parameters
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GAsyncReadyCallback" "callback")
     '("gpointer" "user_data")
@@ -3904,7 +3923,7 @@
   (return-type "none")
   (parameters
     '("GSimpleAsyncThreadFunc" "func")
-    '("int" "io_priority")
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
   )
 )
