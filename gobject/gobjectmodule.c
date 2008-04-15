@@ -3611,7 +3611,10 @@ init_gobject(void)
         return;
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
-
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
+                        o=PyString_FromString("gobject._gobject"));
+    Py_DECREF(o);
+ 
     REGISTER_GTYPE(d, PyGInterface_Type, "GInterface", G_TYPE_INTERFACE);
     PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",
 			 pyg_object_descr_doc_get());

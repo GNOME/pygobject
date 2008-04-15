@@ -1,3 +1,15 @@
+2008-04-15  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c (init_gobject): Set 
+	gobject.GObject.__module__ to gobject._gobject, this
+	helps pylint to check public methods of GObject subclasses
+
+	* tests/Makefile.am (tests): 
+	* tests/test_gobject.py (TestGObjectAPI.testGObjectModule): 
+	Add a test for this
+
+	(#523821, Simon Schampijer)
+
 2008-04-11  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/gio.defs (write_async): document.
