@@ -1,3 +1,7 @@
+2008-04-21  Johan Dahlin  <johan@gnome.org>
+
+	* codegen/h2def.py: Update link to defs format discussion
+
 2008-04-15  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/gobjectmodule.c (init_gobject): Set 

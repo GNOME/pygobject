@@ -7,7 +7,7 @@
 #
 # Modified by James Henstridge <james@daa.com.au> to output stuff in
 # Havoc's new defs format.  Info on this format can be seen at:
-#   http://www.gnome.org/mailing-lists/archives/gtk-devel-list/2000-January/0085.shtml
+#   http://mail.gnome.org/archives/gtk-devel-list/2000-January/msg00070.html
 # Updated to be PEP-8 compatible and refactored to use OOP
 
 import getopt
