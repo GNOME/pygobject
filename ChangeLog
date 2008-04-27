@@ -1,3 +1,13 @@
+2008-04-27  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/pygenum.c (pyg_enum_richcompare): Fix: raise warning as
+	exception if asked by PyErr_Warn().
+
+	* gobject/pygflags.c (pyg_flags_richcompare):  Don't return NULL
+	after warning; more useful warning message.
+
+	(#480424, borrowing code by Mark Doffman)
+
 2008-04-21  Johan Dahlin  <johan@gnome.org>
 
 	* codegen/h2def.py: Update link to defs format discussion

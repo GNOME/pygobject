@@ -32,14 +32,18 @@
 static PyObject *
 pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
 {
+    static char warning[256];
+
     if (!PyInt_Check(other)) {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
     }
 
     if (PyObject_TypeCheck(other, &PyGFlags_Type) && ((PyGFlags*)other)->gtype != self->gtype) {
-	PyErr_Warn(PyExc_Warning, "comparing different flags types");
-	return NULL;
+	g_snprintf(warning, sizeof(warning), "comparing different flags types: %s and %s",
+		   g_type_name(self->gtype), g_type_name(((PyGFlags*)other)->gtype));
+ 	if (PyErr_Warn(PyExc_Warning, warning))
+ 	    return NULL;
     }
 
     return pyg_integer_richcompare((PyObject *)self, other, op);

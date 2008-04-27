@@ -40,7 +40,8 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
     if (PyObject_TypeCheck(other, &PyGEnum_Type) && ((PyGEnum*)other)->gtype != self->gtype) {
 	g_snprintf(warning, sizeof(warning), "comparing different enum types: %s and %s",
 		   g_type_name(self->gtype), g_type_name(((PyGEnum*)other)->gtype));
-	PyErr_Warn(PyExc_Warning, warning);
+	if (PyErr_Warn(PyExc_Warning, warning))
+	    return NULL;
     }
 
     return pyg_integer_richcompare((PyObject *)self, other, op);
