@@ -1,3 +1,9 @@
+2008-05-21  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_spawn_async): Accept None for the
+	child_setup parameter of gobject.spawn_async().  Also check that
+	it is callable.
+
 2008-04-27  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/pygenum.c (pyg_enum_richcompare): Fix: raise warning as

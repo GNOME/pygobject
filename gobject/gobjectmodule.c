@@ -2425,7 +2425,7 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
                               "standard_output", "standard_error", NULL };
     PyObject *pyargv, *pyenvp = NULL;
     char **argv, **envp = NULL;
-    PyObject *func = NULL, *user_data = NULL;
+    PyObject *func = Py_None, *user_data = NULL;
     char *working_directory = NULL;
     int flags = 0, _stdin = -1, _stdout = -1, _stderr = -1;
     PyObject *pystdin = NULL, *pystdout = NULL, *pystderr = NULL;
@@ -2507,7 +2507,14 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
         }
     }
 
-    if (func) {
+    if (func != Py_None) {
+        if (!PyCallable_Check(func)) {
+            PyErr_SetString(PyExc_TypeError, "child_setup parameter must be callable or None");
+            g_free(argv);
+            if (envp)
+                g_free(envp);
+            return NULL;
+        }
         callback_data = g_new(struct _PyGChildSetupData, 1);
         callback_data->func = func;
         callback_data->data = user_data;
@@ -2517,12 +2524,14 @@ pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
     }
 
     if (!g_spawn_async_with_pipes(working_directory, argv, envp, flags,
-                                  func? _pyg_spawn_async_callback : NULL,
+                                  (func != Py_None ? _pyg_spawn_async_callback : NULL),
                                   callback_data, &child_pid,
                                   standard_input,
                                   standard_output,
                                   standard_error,
                                   &error))
+
+
     {
         g_free(argv);
         if (envp) g_free(envp);
