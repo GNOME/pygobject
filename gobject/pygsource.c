@@ -418,14 +418,12 @@ pyg_source_prepare(GSource *source, gint *timeout)
     }
 
     ret = PyObject_IsTrue(PyTuple_GET_ITEM(t, 0));
-
-    if (ret) {
 	*timeout = PyInt_AsLong(PyTuple_GET_ITEM(t, 1));
+
 	if (*timeout == -1 && PyErr_Occurred()) {
 	    ret = FALSE;
 	    goto bail;
 	}
-    }
 
     got_err = FALSE;
 

@@ -1,3 +1,30 @@
+2008-05-23  Johan Dahlin  <jdahlin@async.com.br>
+
+    Merge from trunk:
+
+	* gobject/__init__.py:
+	* tests/test_properties.py:
+	Allow gobject.property work with subclasses. Add tests.
+	(#523352, Tomeu Vizoso)
+
+	* gobject/pygsource.c:
+	* tests/test_source.py:
+	Unbreak Source.prepare
+	(#523075, Bryan Silverthorn)
+
+	* gobject/gobjectmodule.c (REGISTER_TYPE): Never override customly
+	set 'tp_new' and 'tp_alloc'.
+
+	* configure.ac: Don't link against libffi if we cannot find libffi
+	on the system.
+	(#496006, Ed Catmur)
+
+	* Makefile.am: Dist .m4 files.
+	(#496011, Ed Catmur)
+
+	* gobject/pygenum.c (pyg_enum_richcompare): Don't return NULL
+	after warning; more useful warning message (bug #519631).
+
 2008-01-03  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Post release version bump
@@ -43,7 +70,7 @@
 2007-08-27  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/propertyhelper.py (property.__metaclass__.__repr__): Avoid
-	exporting the metaclass, just define it in the class.
+	exporting the metaclass, just define it where it will be used.
 
 	* gobject/__init__.py (GObjectMeta._install_properties): 
 	Refactor a bit to make sure that it is possible to use in subclasses,

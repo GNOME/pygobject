@@ -145,10 +145,33 @@ AS_AC_EXPAND(DATADIR, $datadir)
 
 dnl libffi
 AC_MSG_CHECKING(for ffi.h)
-AC_TRY_CPP([#include <ffi.h>], pygobject_ffi_h=yes, pygobject_ffi_h=no)
-if test $pygobject_ffi_h = yes; then
-   AC_DEFINE(HAVE_FFI_H,1,[Have ffi.h include file])
-   FFI_LIBS="-lffi"
+AC_ARG_WITH(libffi,
+  AC_HELP_STRING([--without-ffi], [Disable libffi support]),
+  with_ffi=$withval,
+  with_ffi=auto)
+if test x"$with_ffi" = xno ; then
+  pygobject_ffi_h=disabled
+else
+  AC_TRY_CPP([#include <ffi.h>], pygobject_ffi_h=yes, pygobject_ffi_h=no)
+  if test $pygobject_ffi_h = yes; then
+    AC_DEFINE(HAVE_FFI_H,1,[Have ffi.h include file])
+    save_LIBS=$LIBS
+    if test x"$with_ffi" = xyes || test x"$with_ffi" = xauto; then
+      other_LIBS=
+    else
+      other_LIBS=$with_ffi
+    fi
+    AC_SEARCH_LIBS(ffi_call,ffi,,AC_MSG_ERROR([libffi not found]),$other_LIBS)
+    if test x$"ac_cv_search_ffi_call" = x"none required" ; then
+      FFI_LIBS=$other_LIBS
+    else
+      FFI_LIBS="$ac_cv_search_ffi_call $other_LIBS"
+    fi
+    LIBS=$save_LIBS
+  fi
+fi
+if test x"$with_ffi" != xauto && test x"$pygobject_ffi_h" != xyes ; then
+  AC_MSG_ERROR([libffi requested, but ffi.h not found])
 fi
 AC_MSG_RESULT([$pygobject_ffi_h])
 AM_CONDITIONAL(HAVE_LIBFFI, test "$pygobject_ffi_h" = "yes")

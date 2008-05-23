@@ -57,15 +57,16 @@ class GObjectMeta(type):
 
         cls.__gproperties__ = gproperties
 
-        if (hasattr(cls, 'do_get_property') or
-            hasattr(cls, 'do_set_property')):
+        if ('do_get_property' in cls.__dict__ or
+            'do_set_property' in cls.__dict__):
             for prop in props:
                 if (prop.getter != prop._default_getter or
                     prop.setter != prop._default_setter):
                     raise TypeError(
                         "GObject subclass %r defines do_get/set_property"
                         " and it also uses a property which a custom setter"
-                        " or getter. This is not allowed" % (cls,))
+                        " or getter. This is not allowed" % (
+                        cls.__name__,))
 
         def obj_get_property(self, pspec):
             name = pspec.name.replace('-', '_')
@@ -92,7 +93,6 @@ class GObjectMeta(type):
             return
 
         type_register(cls, namespace.get('__gtype_name__'))
-
 _gobject._install_metaclass(GObjectMeta)
 
 del _gobject
