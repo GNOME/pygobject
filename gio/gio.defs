@@ -2609,7 +2609,7 @@
   (return-type "gboolean")
   (parameters
     '("goffset" "offset")
-    '("GSeekType" "type")
+    '("GSeekType" "type" (default "G_SEEK_SET"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -2753,7 +2753,7 @@
   (return-type "gboolean")
   (parameters
     '("goffset" "offset")
-    '("GSeekType" "type")
+    '("GSeekType" "type" (default "G_SEEK_SET"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
@@ -3788,7 +3788,7 @@
   (return-type "gboolean")
   (parameters
     '("goffset" "offset")
-    '("GSeekType" "type")
+    '("GSeekType" "type" (default "G_SEEK_SET"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )

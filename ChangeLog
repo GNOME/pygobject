@@ -1,3 +1,8 @@
+2008-05-23  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/gio.defs:
+	Add default values for all GSeekType variables.
+
 2008-05-21  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_spawn_async): Accept None for the
