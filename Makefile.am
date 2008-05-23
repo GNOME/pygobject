@@ -77,3 +77,12 @@ doc-dist:
 	cp -r docs/style.css pygobject
 	tar cfz $(PACKAGE)-docs.tar.gz pygobject
 	rm -fr pygobject
+
+release-tag:
+	@ROOT=`svn info --xml|egrep ^"<url>"|cut -d\> -f2|cut -d\< -f1`; \
+    SVNVERSION=`echo $(VERSION)|sed s/\\\./_/g`;\
+      echo "* Tagging $(VERSION)"; \
+          svn cp -m "Tag $(VERSION)" \
+              $$ROOT \
+              svn+ssh://svn.gnome.org/svn/pygobject/tags/PYGOBJECT_$$SVNVERSION
+

@@ -1,4 +1,14 @@
-2.14.1 03-jan-2007
+2.14.2 23-may-2008
+    - Allow gobject.property work with subclasses. (#523352, Tomeu Vizoso)
+    - Unbreak Source.prepare (#523075, Bryan Silverthorn)
+    - Never override customly set 'tp_new' and 'tp_alloc' (Paul Pogonyshev)
+    - Don't link against libffi if we cannot find libffi
+      on the system. (#496006, Ed Catmur)
+    - Dist .m4 files. (#496011, Ed Catmur)
+    - Don't return NULL after warning of enum comparsion
+      (#519631, Paul Pogonyshev)
+
+2.14.1 03-jan-2008
         - Avoid wakeups when using Python trunk (Johan Dahlin, #481569)
         - Add an uninstalled.pc (Damien Carbery, #486876)
 
