@@ -3573,9 +3573,13 @@ init_gobject(void)
     PyObject *warning;
     
     PyGParamSpec_Type.ob_type = &PyType_Type;
+    if (PyType_Ready(&PyGParamSpec_Type))
+	return;
     
     m = Py_InitModule("gobject._gobject", pygobject_functions);
     d = PyModule_GetDict(m);
+
+    PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);
 
     g_type_init();
 

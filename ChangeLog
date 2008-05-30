@@ -1,3 +1,8 @@
+2008-05-30  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (init_gobject): Call PyType_Ready for
+	PyGParamSpec_Type, and add it to the module dict.
+
 2008-05-23  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/gio.defs:
