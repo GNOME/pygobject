@@ -90,6 +90,7 @@ class PyGObjectInstallLib(InstallLib):
 class PyGObjectInstallData(InstallData):
     def run(self):
         self.add_template_option('VERSION', VERSION)
+        self.add_template_option('FFI_LIBS', '')
         self.prepare()
 
         # Install templates

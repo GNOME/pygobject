@@ -1,3 +1,7 @@
+2008-05-31  Johan Dahlin  <johan@gnome.org>
+
+    * setup.py: set FFI_LIBS to '', since this is mostly used on win32.
+
 2008-05-30  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (init_gobject): Call PyType_Ready for
