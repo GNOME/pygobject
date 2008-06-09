@@ -1865,6 +1865,24 @@ pygobject_weak_ref(PyGObject *self, PyObject *args)
     return retval;
 }
 
+
+static PyObject *
+pygobject_copy(PyGObject *self)
+{
+    PyErr_SetString(PyExc_TypeError,
+		    "gobject.GObject descendants' instances are non-copyable");
+    return NULL;
+}
+
+static PyObject *
+pygobject_deepcopy(PyGObject *self, PyObject *args)
+{
+    PyErr_SetString(PyExc_TypeError,
+		    "gobject.GObject descendants' instances are non-copyable");
+    return NULL;
+}
+
+
 static PyObject *
 pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 {
@@ -1990,6 +2008,8 @@ static PyMethodDef pygobject_methods[] = {
     { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
     { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
+    { "__copy__", (PyCFunction)pygobject_copy, METH_NOARGS },
+    { "__deepcopy__", (PyCFunction)pygobject_deepcopy, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

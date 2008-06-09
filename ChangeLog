@@ -1,3 +1,9 @@
+2008-06-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/pygobject.c (pygobject_copy, pygobject_deepcopy): New
+	functions, unconditionally raise TypeError.
+	(pygobject_methods): Hook them up. (bug #482370)
+
 2008-05-31  Johan Dahlin  <johan@gnome.org>
 
     * setup.py: set FFI_LIBS to '', since this is mostly used on win32.
