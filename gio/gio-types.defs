@@ -14,8 +14,14 @@
   (gtype-id "G_TYPE_ASYNC_RESULT")
 )
 
+(define-interface Drive
+  (in-module "gio")
+  (c-name "GDrive")
+  (gtype-id "G_TYPE_DRIVE")
+)
+
 (define-interface File
-  (docstring 
+  (docstring
 "File(arg, path=None, uri=None) -> gio.File subclass\n"
 "\n"
 "If arg is specified; creates a GFile with the given argument from the\n"
@@ -36,14 +42,7 @@
   (gtype-id "G_TYPE_ICON")
 )
 
-(define-object ThemedIcon
-  (in-module "gio")
-  (c-name "GThemedIcon")
-  (gtype-id "G_TYPE_THEMED_ICON")
-  (implements "GIcon")
-)
-
-(define-object LoadableIcon
+(define-interface LoadableIcon
   (in-module "gio")
   (c-name "GLoadableIcon")
   (gtype-id "G_TYPE_LOADABLE_ICON")
@@ -82,12 +81,6 @@
   (parent "GObject")
   (c-name "GCancellable")
   (gtype-id "G_TYPE_CANCELLABLE")
-)
-
-(define-object Drive
-  (in-module "gio")
-  (c-name "GDrive")
-  (gtype-id "G_TYPE_DRIVE")
 )
 
 (define-object FileEnumerator
@@ -199,7 +192,7 @@
   (in-module "gio")
   (parent "GObject")
   (c-name "GSimpleAsyncResult")
-  (gtype-id "G_TYPE_SIMPLE_ASYNC_RESULT")	
+  (gtype-id "G_TYPE_SIMPLE_ASYNC_RESULT")
 )
 
 (define-object Vfs
@@ -221,6 +214,14 @@
   (parent "GVolumeMonitor")
   (c-name "GNativeVolumeMonitor")
   (gtype-id "G_TYPE_NATIVE_VOLUME_MONITOR")
+)
+
+(define-object ThemedIcon
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GThemedIcon")
+  (gtype-id "G_TYPE_THEMED_ICON")
+  (implements "GIcon")
 )
 
 ;; Enumerations and flags ...

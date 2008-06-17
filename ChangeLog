@@ -1,3 +1,10 @@
+2008-06-17  Johan Dahlin  <jdahlin@async.com.br>
+
+	* gio/gio-types.defs:
+	* tests/test_gio.py:
+	Sort out confusion between interfaces and objects, add test.
+	Fixes #538601
+
 2008-06-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/pygobject.c (pygobject_copy, pygobject_deepcopy): New

@@ -235,7 +235,16 @@ class TestVolumeMonitor(unittest.TestCase):
     def testGetMounts(self):
         mounts = self.monitor.get_mounts()
         self.failUnless(isinstance(mounts, list))
-
+        if not mounts:
+            return
+        
+        self.failUnless(isinstance(mounts[0], gio.Mount))
+        # Bug 538601
+        icon = mounts[0].get_icon()
+        if not icon:
+            return
+        self.failUnless(isinstance(icon, gio.Icon))
+    
 
 class TestThemedIcon(unittest.TestCase):
     def setUp(self):
@@ -280,4 +289,4 @@ class TestAppInfo(unittest.TestCase):
 
     def testSimple(self):
         self.assertEquals(self.appinfo.get_description(),
-                          "Custom definition for (null)")
+                          "Custom definition for does-not-exist")
