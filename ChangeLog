@@ -1,3 +1,8 @@
+2008-06-28  Johan Dahlin  <jdahlin@async.com.br>
+
+	* docs/reference/pygobject.xml:
+	Document GObject.handler_block_by_func/handler_unblock_by_func
+
 2008-06-17  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gio/gio-types.defs:

@@ -117,6 +117,16 @@ linkend="method-gobject--handler-unblock">handler_unblock</link></methodname>
 	</methodsynopsis>
 	<methodsynopsis language="python">
 	  <methodname><link
+linkend="method-gobject--handler-block-by-func">handler_block_by_func</link></methodname>
+	  <methodparam><parameter>callable</parameter></methodparam>
+	</methodsynopsis>
+	<methodsynopsis language="python">
+	  <methodname><link
+linkend="method-gobject--handler-unblock-by-func">handler_unblock_by_func</link></methodname>
+	  <methodparam><parameter>callable</parameter></methodparam>
+	</methodsynopsis>
+	<methodsynopsis language="python">
+	  <methodname><link
 linkend="method-gobject--emit">emit</link></methodname>
 	  <methodparam><parameter>detailed_signal</parameter></methodparam>
 	</methodsynopsis>
@@ -797,9 +807,45 @@ identifier</simpara></listitem>
 	</varlistentry>
       </variablelist>
 
-      <para>The <methodname>handler_unblock</methodname>() method unblocks
-the signal handler with the specified <parameter>handler_id</parameter>
-thereby allowing it to be invoked when the associated signal is
+    </refsect2>
+
+    <refsect2 id="method-gobject--handler-block-by-func">
+      <title>gobject.GObject.handler_block_by_func</title>
+
+      <programlisting><methodsynopsis language="python">
+	  <methodname>handler_block_by_func</methodname>
+	  <methodparam><parameter>callable</parameter></methodparam>
+	</methodsynopsis></programlisting>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>callable</parameter>&nbsp;:</term>
+	  <listitem><simpara>a callable python object</simpara></listitem>
+	</varlistentry>
+      </variablelist>
+
+      <para>The <methodname>handler_block_by_func</methodname>() method blocks the
+all signal handler connected to a specific <parameter>callable</parameter> from
+being invoked until the callable is unblocked.</para>
+
+    </refsect2>
+
+    <refsect2 id="method-gobject--handler-unblock-by-func">
+      <title>gobject.GObject.handler_unblock_by_func</title>
+
+      <programlisting><methodsynopsis language="python">
+	  <methodname>handler_unblock_by_func</methodname>
+	  <methodparam><parameter>callback</parameter></methodparam>
+	</methodsynopsis></programlisting>
+      <variablelist>
+	<varlistentry>
+	  <term><parameter>callable</parameter>&nbsp;:</term>
+	  <listitem><simpara>a callable python object</simpara></listitem>
+	</varlistentry>
+      </variablelist>
+
+      <para>The <methodname>handler_unblock_by_func</methodname>() method unblocks
+all signal handler connected to a specified <parameter>callable</parameter>
+thereby allowing it to be invoked when the associated signals are
 emitted.</para>
 
     </refsect2>
