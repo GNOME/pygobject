@@ -2564,7 +2564,7 @@ pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "text", NULL };
     char *text_in, *text_out;
-    int text_size;
+    Py_ssize_t text_size;
     PyObject *retval;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
