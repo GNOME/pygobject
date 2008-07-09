@@ -1,3 +1,8 @@
+2008-07-09  Juha Sahakangas  <voas0113@saunalahti.fi>
+
+	* gobject/gobjectmodule.c (pyg_io_add_watch): Fix error message
+	referencing wrong argument.
+
 2008-06-29  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/gobjectmodule.c (pyg_markup_escape_text): text_size

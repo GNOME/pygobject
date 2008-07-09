@@ -2153,7 +2153,7 @@ pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
     if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "second argument not callable");
+        PyErr_SetString(PyExc_TypeError, "third argument not callable");
         return NULL;
     }
     if (get_handler_priority(&priority, kwargs) < 0)
