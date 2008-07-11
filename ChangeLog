@@ -1,3 +1,11 @@
+2008-07-11  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override: wrap File.load_contents, fix a typo.
+
+	* gio/gio.defs: Add docstring for File.load_contents.
+
+	* tests/test_gio.py: Add a test for the above method.
+
 2008-07-09  Juha Sahakangas  <voas0113@saunalahti.fi>
 
 	* gobject/gobjectmodule.c (pyg_io_add_watch): Fix error message

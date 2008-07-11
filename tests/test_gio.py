@@ -61,6 +61,15 @@ class TestFile(unittest.TestCase):
         self.assertRaises(TypeError, gio.File, foo="bar")
         self.assertRaises(TypeError, gio.File, uri=1)
         self.assertRaises(TypeError, gio.File, path=1)
+        
+    def testLoadContents(self):
+        self._f.write("testing load_contents")
+        self._f.seek(0)
+        c = gio.Cancellable()
+        cont, leng, etag = self.file.load_contents(cancellable=c)
+        self.assertEqual(cont, "testing load_contents")
+        self.assertEqual(leng, 21)
+        self.assertNotEqual(etag, '')
 
 
 class TestGFileEnumerator(unittest.TestCase):

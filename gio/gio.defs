@@ -1253,17 +1253,18 @@
 (define-method read
   (of-object "GFile")
   (docstring
-"F.read([cancellable]) -> input stream\n"
-"Opens a file for reading. The result is a GFileInputStream that can be \n"
-"used to read the contents of the file.\n"
-"\n"
-"If cancellable is specified, then the operation can be cancelled by \n"
-"triggering the cancellable object from another thread. If the operation \n"
-"was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
-"If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will \n"
-"be returned. If the file is a directory, the gio.IO_ERROR_IS_DIRECTORY \n"
-"error will be returned. Other errors are possible too, and depend on what \n"
-"kind of filesystem the file is on.")
+  "F.read([cancellable]) -> input stream\n"
+  "Opens a file for reading. The result is a GFileInputStream that\n"
+  "can be used to read the contents of the file.\n"
+  "\n"
+  "If cancellable is specified, then the operation can be cancelled\n"
+  "by triggering the cancellable object from another thread. If the\n"
+  "operation was cancelled, the error gio.IO_ERROR_CANCELLED will\n"
+  "be returned. If the file does not exist, the gio.IO_ERROR_NOT_FOUND\n"
+  "error will be returned. If the file is a directory, the\n"
+  "gio.IO_ERROR_IS_DIRECTORY error will be returned. Other errors\n"
+  "are possible too, and depend on what kind of filesystem the file is on."
+  )
   (c-name "g_file_read")
   (return-type "GFileInputStream*")
   (parameters
@@ -1275,12 +1276,14 @@
 (define-method read_async
   (of-object "GFile")
   (docstring 
-"F.read_async(callback [,io_priority [,cancellable [,user_data]]]) -> start read\n"
-"\n"
-"For more details, see gio.File.read() which is the synchronous version of this call.\n"
-"Asynchronously opens file for reading."
-"When the operation is finished, callback will be called.\n"
-"You can then call g_file_read_finish() to get the result of the operation.\n")
+  "F.read_async(callback [,io_priority [,cancellable [,user_data]]]) -> start read\n"
+  "\n"
+  "For more details, see gio.File.read() which is the synchronous\n"
+  "version of this call. Asynchronously opens file for reading.\n"
+  "When the operation is finished, callback will be called.\n"
+  "You can then call g_file_read_finish() to get the result of the\n"
+  "operation.\n"
+  )
   (c-name "g_file_read_async")
   (return-type "none")
   (parameters
@@ -1906,6 +1909,15 @@
 )
 
 (define-method load_contents
+  (docstring
+  "F.load_contents([cancellable]) -> contents, length, etag_out\n\n"
+  "Loads the content of the file into memory, returning the size of the\n"
+  "data. The data is always zero terminated, but this is not included\n"
+  "in the resultant length.\n"
+  "If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_load_contents")
   (return-type "gboolean")
