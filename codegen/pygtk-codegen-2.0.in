@@ -3,7 +3,7 @@
 prefix=@prefix@
 datarootdir=@datarootdir@
 datadir=@datadir@
-codegendir=${datadir}/pygtk/2.0/codegen
+codegendir=${datadir}/pygobject/2.0/codegen
 
 PYTHONPATH=$codegendir
 export PYTHONPATH

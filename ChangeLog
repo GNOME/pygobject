@@ -1,3 +1,10 @@
+2008-07-14  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* pygobject-2.0.pc.in: Add 'codegendir' variable.
+	* codegen/pygtk-codegen-2.0.in: Make 'codegendir' refer to
+	PyGObject's codegen, not PyGTK's one --- the latter will be
+	removed (first part of bug #542821).
+
 2008-07-08  Murray Cumming  <murrayc@murrayc.com>
 
 	* codegen/h2def.py: clean_func(): Strip GSEAL out, to avoid us
