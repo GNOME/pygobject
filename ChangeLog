@@ -1,3 +1,14 @@
+2008-07-08  Murray Cumming  <murrayc@murrayc.com>
+
+	* codegen/h2def.py: clean_func(): Strip GSEAL out, to avoid us
+	thinking that there are many functions called GSEAL (merge from
+	PyGTK).
+
+2008-01-29  Olivier Crete  <tester@tester.ca>
+
+	* codegen/h2def.py (DefsWriter.__init__): Fix copy-paste
+	typos (merge from PyGTK).
+
 2008-07-11  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override: wrap File.load_contents, fix a typo.

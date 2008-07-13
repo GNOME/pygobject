@@ -247,6 +247,10 @@ def clean_func(buf):
     buf = string.replace(buf, 'G_CONST_RETURN ', 'const-')
     buf = string.replace(buf, 'const ', 'const-')
 
+    #strip GSEAL macros from the middle of function declarations:
+    pat = re.compile(r"""GSEAL""", re.VERBOSE)
+    buf = pat.sub('', buf)
+
     return buf
 
 proto_pat=re.compile(r"""
@@ -281,9 +285,9 @@ class DefsWriter:
             for func in filter.functions + filter.methods.values():
                 self._functions[func.c_name] = func
             for obj in filter.objects + filter.boxes + filter.interfaces:
-                self._objects[obj.c_name] = func
+                self._objects[obj.c_name] = obj
             for obj in filter.enums:
-                self._enums[obj.c_name] = func
+                self._enums[obj.c_name] = obj
 
     def write_def(self, deffile):
         buf = open(deffile).read()
