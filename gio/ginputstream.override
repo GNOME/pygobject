@@ -94,17 +94,9 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
   
   buffersize = BUFSIZE;
 
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
-      return NULL;
-    }
-
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
+    return NULL;
+  
   v = PyString_FromStringAndSize((char *)NULL, buffersize);
   if (v == NULL)
     return NULL;
@@ -191,18 +183,9 @@ _wrap_g_input_stream_read_async(PyGObject *self,
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
-      g_slice_free(PyGAsyncRequestNotifyRead, notify);
-      return NULL;
-    }
-
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
+    return NULL;
+  
   notify->buffer = PyString_FromStringAndSize((char *)NULL, count);
   if (notify->buffer == NULL)
     return NULL;
@@ -286,18 +269,9 @@ _wrap_g_input_stream_close_async(PyGObject *self,
     }
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
-  
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
-      g_slice_free(PyGAsyncRequestNotify, notify);
-      return NULL;
-    }
+    
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
+    return NULL;
  
   g_input_stream_close_async(G_INPUT_STREAM(self->obj),
 			     io_priority,

@@ -121,18 +121,9 @@ _wrap_g_file_read_async(PyGObject *self,
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
-      g_slice_free(PyGAsyncRequestNotify, notify);
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
       return NULL;
-    }
-
+  
   g_file_read_async(G_FILE(self->obj),
                     io_priority,
                     cancellable,
@@ -163,16 +154,9 @@ _wrap_g_file_load_contents(PyGObject *self,
                                       &pycancellable))
         return NULL;
 
-    if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-        cancellable = NULL;
-    else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-        cancellable = G_CANCELLABLE(pycancellable->obj);
-    else {
-        PyErr_SetString(PyExc_TypeError,
-                        "cancellable should be a gio.Cancellable");
-        return NULL;
-    }
-
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+	return NULL;
+  
     ret = g_file_load_contents(G_FILE(self->obj), cancellable,
                                &contents, &lenght, &etag_out, &error);
 

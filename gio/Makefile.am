@@ -50,7 +50,10 @@ gio.c: $(GIO_DEFS) $(GIO_OVERRIDES)
 _gio_la_CFLAGS = $(GIO_CFLAGS)
 _gio_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gio
 _gio_la_LIBADD = $(GIO_LIBS)
-_gio_la_SOURCES = giomodule.c
+_gio_la_SOURCES = \
+	giomodule.c \
+	pygio-utils.c \
+	pygio-utils.h
 nodist__gio_la_SOURCES = gio.c
 if BUILD_GIO
 pkgpyexec_LTLIBRARIES += _gio.la

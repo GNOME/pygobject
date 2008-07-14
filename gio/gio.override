@@ -28,6 +28,7 @@ headers
 #define NO_IMPORT_PYGOBJECT
 #include <pygobject.h>
 #include <gio/gio.h>
+#include "pygio-utils.h"
 
 #define BUFSIZE 8192
 

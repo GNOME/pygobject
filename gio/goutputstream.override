@@ -40,16 +40,8 @@ _wrap_g_output_stream_write(PyGObject *self,
 				   &PyGCancellable_Type, &pycancellable))
     return NULL;
   
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
       return NULL;
-    }
 
   pyg_begin_allow_threads;
   written = g_output_stream_write(G_OUTPUT_STREAM(self->obj),
@@ -101,16 +93,8 @@ _wrap_g_output_stream_write_async(PyGObject *self,
   Py_INCREF(notify->callback);
   Py_XINCREF(notify->data);
   
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
       return NULL;
-    }
 
   g_output_stream_write_async(G_OUTPUT_STREAM(self->obj),
 			      buffer,
@@ -151,16 +135,8 @@ _wrap_g_output_stream_close_async(PyGObject *self,
       return NULL;
     }
 
-  if (pycancellable == NULL || (PyObject*)pycancellable == Py_None)
-    cancellable = NULL;
-  else if (pygobject_check(pycancellable, &PyGCancellable_Type))
-      cancellable = G_CANCELLABLE(pycancellable->obj);
-  else
-    {
-      PyErr_SetString(PyExc_TypeError,
-		      "cancellable should be a gio.Cancellable");
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
       return NULL;
-    }
 
   if (!PyCallable_Check(notify->callback))
     {

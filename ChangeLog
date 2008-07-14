@@ -1,3 +1,15 @@
+2008-07-14  Johan Dahlin  <johan@gnome.org>
+
+	* gio/Makefile.am:
+	* gio/gfile.override:
+	* gio/ginputstream.override:
+	* gio/gio.override:
+	* gio/goutputstream.override:
+	* gio/pygio-utils.c (pygio_check_cancellable):
+	* gio/pygio-utils.h:
+	Refactor cancellable check to a utility function, avoids
+	plenty of code duplication.
+
 2008-07-14  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* codegen/definitions.py (ReturnType): New class.
