@@ -1,5 +1,10 @@
 2008-07-15  Johan Dahlin  <johan@gnome.org>
 
+	* tests/Makefile.am:
+	Make sure we can distcheck the gio module properly
+
+2008-07-15  Johan Dahlin  <johan@gnome.org>
+
 	Bug 450659 – h2def.py - export 'typedef struct' object definitions not
 	working
 
