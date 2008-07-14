@@ -1,5 +1,15 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 
+	* codegen/argtypes.py: 
+	Map GSeekType to an int
+	
+	* gio/gfileinfo.override:
+	* gio/ginputstream.override:
+	* gio/goutputstream.override:
+	Add comments for missing API
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
+
 	* gio/Makefile.am:
 	* gio/gfile.override:
 	* gio/ginputstream.override:

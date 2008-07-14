@@ -981,6 +981,7 @@ matcher.register('guint16', arg)
 matcher.register('gint16', arg)
 matcher.register('gint32', arg)
 matcher.register('GTime', arg)
+matcher.register('GSeekType', arg) # Hack, but we have no python wrapper
 
 arg = LongArg()
 matcher.register('long', arg)

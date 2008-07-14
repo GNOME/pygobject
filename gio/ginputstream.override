@@ -282,3 +282,5 @@ _wrap_g_input_stream_close_async(PyGObject *self,
   Py_INCREF(Py_None);
   return Py_None;
 }
+/* GInputStream.read_all: No ArgType for void* */
+/* GInputStream.skip_async: No ArgType for GAsyncReadyCallback */

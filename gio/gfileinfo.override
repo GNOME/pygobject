@@ -50,3 +50,8 @@ _wrap_g_file_info_list_attributes(PyGObject *self,
 
     return ret;
 }
+/* GFileInfo.get_attribute_data: No ArgType for GFileAttributeType* */
+/* GFileInfo.set_attribute: No ArgType for gpointer */
+/* GFileInfo.get_modification_time: No ArgType for GTimeVal* */
+/* GFileInfo.set_attribute_mask: No ArgType for GFileAttributeMatcher* */
+/* GFileInfo.set_modification_time: No ArgType for GTimeVal* */

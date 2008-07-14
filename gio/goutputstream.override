@@ -156,3 +156,6 @@ _wrap_g_output_stream_close_async(PyGObject *self,
   Py_INCREF(Py_None);
   return Py_None;
 }
+/* GOutputStream.write_all: No ArgType for const-void* */
+/* GOutputStream.splice_async: No ArgType for GAsyncReadyCallback */
+/* GOutputStream.flush_async: No ArgType for GAsyncReadyCallback */
