@@ -1,4 +1,9 @@
+=== 2.15.0 ===
 2008-07-15  Johan Dahlin  <johan@gnome.org>
+
+	New version
+	
+	* NEWS: Update
 
 	* tests/Makefile.am:
 	Make sure we can distcheck the gio module properly

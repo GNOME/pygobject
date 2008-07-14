@@ -1,3 +1,20 @@
+2.15.0 15-jul-2008
+        - Add GIO bindings (Johan, Mario Tagliaretti, Thomas Leonard)
+	- Move codegen from PyGTK (Johan, Paul Pogonyshev, #542821)
+	- Add more variables to the .pc files (Damien Carbery, Paul, 
+          Dan Winship, #486876)
+	- Add pyg_option_group_new to the public API (Johan)
+	- Add g_get_application_anme and g_get_progname (Sebastian Rittau)
+	- Avoid making wakeups when using Python 2.6 (Johan, Gustavo,
+	  Adam Olsen, Josselin Mouette, Philippe Normand, Guido Van Rossum)
+	- Only link against libffi when found (Ed Catmur, #496006)
+	- Improve gobject.property (Tomeu Vizoso, #523352)
+	- Improve enum comparision and warnings (Paul, Phil Dumont, #428732)
+	- Many gobject.Source improvements (Bryan Silverthorn)
+	- Apply some fixes to make pylint happier (Johan, Simon Schampijer,
+	  #523821)
+	- Fix error message in pyg_io_add_watch (Juha Sahkangas)
+	- Improve h2def.py (Oliver Crete, Murray Cumming, Lauro Moura)
 2.14.0 16-sep-2007
 	- Fix a Python 2.6 deprecation warning (Johannes Hölzl, #342948)
 	- Wrap g_timeout_add_seconds, when compiling with glib 2.14 (Gustavo)
