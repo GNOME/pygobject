@@ -1,5 +1,12 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 
+	Bug 378704 – OptionParser.parse_args() returns unexpected results
+
+	* gobject/option.py:
+	Patch by Johannes Hölzl
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
+
 	Bug 491773 – autoconf failure: .m4 files cannot be found
 
 	* Makefile.am:

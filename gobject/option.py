@@ -313,7 +313,11 @@ class OptionParser(optparse.OptionParser):
 
     def _process_args(self, largs, rargs, values):
         context = self._to_goptioncontext(values)
-        largs.extend(context.parse([sys.argv[0]] + rargs))
+        
+        # _process_args() returns the remaining parameters in rargs.
+        # The prepended program name is used to all g_set_prgname()
+        # The program name is cut away so it doesn't appear in the result.
+        rargs[:] = context.parse([sys.argv[0]] + rargs)[1:]
 
     def parse_args(self, args=None, values=None):
         old_args = args or []
