@@ -1,4 +1,12 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
+	
+	Bug 504337 - crash bug in gobject.Timeout and gobject.Idle
+	
+	* gobject/pygsource.c:
+	* tests/test_source.py:
+	Fix crash in Timeout and Idle, patch by Bryan Silverthorn.
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
 
 	* codegen/argtypes.py: 
 	Map GSeekType to an int

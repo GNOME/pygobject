@@ -651,8 +651,7 @@ PyTypeObject PyGIdle_Type = {
     (getattrofunc)0,			/* tp_getattro */
     (setattrofunc)0,			/* tp_setattro */
     0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-      Py_TPFLAGS_HAVE_GC,		/* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		/* tp_flags */
     NULL,				/* tp_doc */
     (traverseproc)0,			/* tp_traverse */
     (inquiry)0,				/* tp_clear */
@@ -728,8 +727,7 @@ PyTypeObject PyGTimeout_Type = {
     (getattrofunc)0,			/* tp_getattro */
     (setattrofunc)0,			/* tp_setattro */
     0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-      Py_TPFLAGS_HAVE_GC,		/* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		/* tp_flags */
     NULL,				/* tp_doc */
     (traverseproc)0,			/* tp_traverse */
     (inquiry)0,				/* tp_clear */

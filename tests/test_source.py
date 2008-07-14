@@ -90,5 +90,12 @@ class TestSource(unittest.TestCase):
 
         assert dispatched[0]
 
+
+class TestTimeout(unittest.TestCase):
+     def test504337(self):
+	timeout_source = gobject.Timeout(20)
+	idle_source = gobject.Idle()
+
+
 if __name__ == '__main__':
     unittest.main()
