@@ -2615,18 +2615,6 @@
   )
 )
 
-(define-method seek
-  (of-object "GFileInputStream")
-  (c-name "g_file_input_stream_seek")
-  (return-type "gboolean")
-  (parameters
-    '("goffset" "offset")
-    '("GSeekType" "type" (default "G_SEEK_SET"))
-    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
-    '("GError**" "error")
-  )
-)
-
 
 
 ;; From gfilemonitor.h
@@ -2757,18 +2745,6 @@
   (of-object "GFileOutputStream")
   (c-name "g_file_output_stream_get_etag")
   (return-type "char*")
-)
-
-(define-method seek
-  (of-object "GFileOutputStream")
-  (c-name "g_file_output_stream_seek")
-  (return-type "gboolean")
-  (parameters
-    '("goffset" "offset")
-    '("GSeekType" "type" (default "G_SEEK_SET"))
-    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
-    '("GError**" "error")
-  )
 )
 
 

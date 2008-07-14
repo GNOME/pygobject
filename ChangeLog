@@ -1,4 +1,10 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gio.defs:
+	Remove g_file_input_stream_seek and g_file_output_stream_seek,
+	they already implement the seekable interface.
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
 	
 	Bug 504337 - crash bug in gobject.Timeout and gobject.Idle
 	
