@@ -1,4 +1,11 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
+	
+	Bug 487523 – Add xslfiles variable to .pc.in files
+
+	* pygobject-2.0-uninstalled.pc.in:
+	Add xslfiles variable, patch by Damien Carbery
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gio.defs:
 	Remove g_file_input_stream_seek and g_file_output_stream_seek,
