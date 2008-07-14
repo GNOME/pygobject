@@ -1931,6 +1931,18 @@
 )
 
 (define-method load_contents_async
+  (docstring
+  "F.load_contents_async(callback, [cancellable, [user_data]])->start loading\n\n"
+  "Starts an asynchronous load of the file's contents.\n\n"
+  "For more details, see F.load_contents() which is the synchronous\n"
+  "version of this call.\n\n"
+  "When the load operation has completed, callback will be called with\n"
+  "user data. To finish the operation, call F.load_contents_finish() with\n"
+  "the parameter 'res' returned by the callback.\n\n"
+  "If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_load_contents_async")
   (return-type "none")
@@ -1942,6 +1954,13 @@
 )
 
 (define-method load_contents_finish
+  (docstring
+  "F.load_contents_finish(res) -> contents, length, etag_out\n\n"
+  "Finishes an asynchronous load of the file's contents. The contents are\n"
+  "placed in contents, and length is set to the size of the contents\n"
+  "string. If etag_out is present, it will be set to the new entity\n"
+  "tag for the file.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_load_contents_finish")
   (return-type "gboolean")

@@ -70,7 +70,25 @@ class TestFile(unittest.TestCase):
         self.assertEqual(cont, "testing load_contents")
         self.assertEqual(leng, 21)
         self.assertNotEqual(etag, '')
-
+    
+    def testLoadContentsAsync(self):
+        self._f.write("testing load_contents_async")
+        self._f.seek(0)
+        
+        def callback(contents, result):
+            try:
+                cont, leng, etag = contents.load_contents_finish(result)
+                self.assertEqual(cont, "testing load_contents_async")
+                self.assertEqual(leng, 27)
+                self.assertNotEqual(etag, '')
+            finally:
+                loop.quit()
+        
+        canc = gio.Cancellable()
+        self.file.load_contents_async(callback, cancellable=canc)
+        
+        loop = gobject.MainLoop()
+        loop.run()
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):

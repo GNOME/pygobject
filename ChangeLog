@@ -1,3 +1,12 @@
+2008-07-14  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override: wrap File.load_contents_async and
+	File.load_contents_finish
+
+	* gio/gio.defs: Add docstring for the above methods.
+
+	* tests/test_gio.py: Add a test for the above methods.
+
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 	
 	Bug 487523 – Add xslfiles variable to .pc.in files
