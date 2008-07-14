@@ -917,10 +917,19 @@ class ArgMatcher:
                 return registry['GBoxed'], props
             else:
                 raise ArgTypeNotFoundError("No ArgType for %s" % (ptype,))
+
     def get_reverse(self, ptype):
         return self._get_reverse_common(ptype, self.reverse_argtypes)
+
     def get_reverse_ret(self, ptype):
-        return self._get_reverse_common(ptype, self.reverse_rettypes)
+        ret, props = self._get_reverse_common(ptype, self.reverse_rettypes)
+        if hasattr(ptype, 'optional') and ptype.optional:
+            if ret.supports_optional:
+                props['optional'] = True
+            else:
+                raise ArgTypeNotFoundError("Unsupported 'optional' for %s"
+                                           % (ptype,))
+        return ret, props
 
     def object_is_a(self, otype, parent):
         if otype == None: return 0

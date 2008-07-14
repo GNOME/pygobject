@@ -31,6 +31,17 @@ class Parameter(object):
         if old.pnull is not None:
             self.pnull = old.pnull
 
+# We currently subclass 'str' to make impact on the rest of codegen as
+# little as possible.  Later we can subclass 'object' instead, but
+# then we must find and adapt all places which expect return types to
+# be strings.
+class ReturnType(str):
+    def __new__(cls, *args, **kwds):
+        return str.__new__(cls, *args[:1])
+    def __init__(self, type_name, optional=False):
+        str.__init__(self, type_name)
+        self.optional = optional
+
 # Parameter for property based constructors
 class Property(object):
     def __init__(self, pname, optional, argname):
@@ -297,7 +308,12 @@ class MethodDefBase(Definition):
             elif arg[0] == 'gtype-id':
                 self.typecode = arg[1]
             elif arg[0] == 'return-type':
-                self.ret = arg[1]
+                type_name = arg[1]
+                optional = False
+                for prop in arg[2:]:
+                    if prop[0] == 'optional':
+                        optional = True
+                self.ret = ReturnType(type_name, optional)
             elif arg[0] == 'caller-owns-return':
                 self.caller_owns_return = arg[1] in ('t', '#t')
             elif arg[0] == 'unblock-threads':

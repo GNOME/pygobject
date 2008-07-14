@@ -359,6 +359,8 @@ class TypeHandler(object):
 
 class ReturnType(TypeHandler):
 
+    supports_optional = False
+
     def get_c_type(self):
         raise NotImplementedError
 
@@ -479,23 +481,39 @@ argtypes.matcher.register_reverse('GObject*', GObjectParam)
 
 class GObjectReturn(ReturnType):
 
+    supports_optional = True
+
     def get_c_type(self):
         return self.props.get('c_type', 'GObject *')
 
     def write_decl(self):
-        self.wrapper.add_declaration("%s retval;" % self.get_c_type())
+        if not self.props.get('optional'):
+            self.wrapper.add_declaration("%s retval;" % self.get_c_type())
+        else:
+            self.wrapper.add_declaration("%s retval = NULL;" % self.get_c_type())
 
     def write_error_return(self):
         self.wrapper.write_code("return NULL;")
 
     def write_conversion(self):
-        self.wrapper.write_code(
-            code=None,
-            failure_expression="!PyObject_TypeCheck(py_retval, &PyGObject_Type)",
-            failure_exception='PyErr_SetString(PyExc_TypeError, "retval should be a GObject");')
-        self.wrapper.write_code("retval = (%s) pygobject_get(py_retval);"
-                                % self.get_c_type())
-        self.wrapper.write_code("g_object_ref((GObject *) retval);")
+        if not self.props.get('optional'):
+            self.wrapper.write_code(
+                code=None,
+                failure_expression="!PyObject_TypeCheck(py_retval, &PyGObject_Type)",
+                failure_exception='PyErr_SetString(PyExc_TypeError, "retval should be a GObject");')
+            self.wrapper.write_code("retval = (%s) pygobject_get(py_retval);"
+                                    % self.get_c_type())
+            self.wrapper.write_code("g_object_ref((GObject *) retval);")
+        else:
+            self.wrapper.write_code(
+                code=None,
+                failure_expression="py_retval != Py_None && !PyObject_TypeCheck(py_retval, &PyGObject_Type)",
+                failure_exception='PyErr_SetString(PyExc_TypeError, "retval should be None or a GObject");')
+            self.wrapper.write_code("if (py_retval != Py_None) {\n"
+                                    "    retval = (%s) pygobject_get(py_retval);\n"
+                                    "    g_object_ref((GObject *) retval);\n"
+                                    "}\n"
+                                    % self.get_c_type())
 
 argtypes.matcher.register_reverse_ret('GObject*', GObjectReturn)
 

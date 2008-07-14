@@ -1,5 +1,17 @@
 2008-07-14  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	* codegen/definitions.py (ReturnType): New class.
+	(MethodDefBase.__init__): Make 'self.ret' a 'ReturnType' instance,
+	not string.  Accept 'optional' flag.
+
+	* codegen/argtypes.py (ArgMatcher.get_reverse_ret): Test if
+	'ptype' has true 'optional' attribute and copy it to 'props' then.
+
+	* codegen/reversewrapper.py (ReturnType.support_optional): New
+	class field, False by default.
+	(GObjectReturn.support_optional, GObjectReturn.write_decl)
+	(GObjectReturn.write_conversion): Support optional return.
+
 	* pygobject-2.0.pc.in: Add 'codegendir' variable.
 	* codegen/pygtk-codegen-2.0.in: Make 'codegendir' refer to
 	PyGObject's codegen, not PyGTK's one --- the latter will be
