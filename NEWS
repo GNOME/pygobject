@@ -15,6 +15,7 @@
 	  #523821)
 	- Fix error message in pyg_io_add_watch (Juha Sahkangas)
 	- Improve h2def.py (Oliver Crete, Murray Cumming, Lauro Moura)
+
 2.14.0 16-sep-2007
 	- Fix a Python 2.6 deprecation warning (Johannes Hölzl, #342948)
 	- Wrap g_timeout_add_seconds, when compiling with glib 2.14 (Gustavo)
