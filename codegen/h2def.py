@@ -89,7 +89,7 @@ def find_obj_defs(buf, objdefs=[]):
     while pos < len(buf):
         m = pat.search(buf, pos)
         if not m: break
-        maybeobjdefs.append((m.group(2), m.group(2)))
+        maybeobjdefs.append((m.group(2), m.group(1)))
         pos = m.end()
 
     # now find all structures that look like they might represent a class:

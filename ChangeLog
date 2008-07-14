@@ -1,3 +1,11 @@
+2008-07-15  Johan Dahlin  <johan@gnome.org>
+
+	Bug 450659 – h2def.py - export 'typedef struct' object definitions not
+	working
+
+	* codegen/h2def.py:
+	Patch by Lauro Moura
+
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 
 	Bug 471559 – add AM_PROG_CC_C_O to configure.ac for recent automake
