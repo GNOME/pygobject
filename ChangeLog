@@ -1,3 +1,10 @@
+2008-07-14  Johan Dahlin  <johan@gnome.org>
+
+	Bug 491773 – autoconf failure: .m4 files cannot be found
+
+	* Makefile.am:
+	Patch by macks@netspace.org
+
 2008-07-14  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override: wrap File.load_contents_async and
