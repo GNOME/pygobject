@@ -9,8 +9,8 @@ m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pyg
 
 dnl versions of packages we require ...
 m4_define(glib_required_version, 2.8.0)
-m4_define(gio_required_version, 2.15.7)
-m4_define(giounix_required_version, 2.15.7)
+m4_define(gio_required_version, 2.16.0)
+m4_define(giounix_required_version, 2.16.0)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -73,7 +73,11 @@ AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
 py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
+if test -x "$PYTHON-config"; then
+PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
+else
 PYTHON_INCLUDES="-I${py_prefix}/include/python${PYTHON_VERSION}"
+fi
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-Wall -Werror $PYTHON_INCLUDES"
 AC_TRY_COMPILE([#include <Python.h>],
