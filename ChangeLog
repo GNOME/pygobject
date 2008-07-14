@@ -1,5 +1,12 @@
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 
+	Bug 471559 – add AM_PROG_CC_C_O to configure.ac for recent automake
+
+	* configure.ac:
+	Patch by Tim Mooney
+
+2008-07-14  Johan Dahlin  <johan@gnome.org>
+
 	Bug 448173 – use python-config to get python includes
 
 	* configure.ac:
