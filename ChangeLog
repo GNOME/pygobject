@@ -1,3 +1,11 @@
+2008-07-15  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* codegen/pygobject-codegen-2.0.in: Rename from
+	'pygtk-codegen-2.0.in'.
+
+	* configure.ac:
+	* codegen/Makefile.am: Update accordingly.
+
 2008-07-15  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Post release version bump

@@ -224,7 +224,7 @@ AC_CONFIG_FILES(
   pygobject-2.0.pc
   pygobject-2.0-uninstalled.pc
   codegen/Makefile
-  codegen/pygtk-codegen-2.0
+  codegen/pygobject-codegen-2.0
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py

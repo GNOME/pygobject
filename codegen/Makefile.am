@@ -1,6 +1,6 @@
 PLATFORM_VERSION = 2.0
 
-bin_SCRIPTS = pygtk-codegen-$(PLATFORM_VERSION)
+bin_SCRIPTS = pygobject-codegen-$(PLATFORM_VERSION)
 
 codegendir = $(pkgdatadir)/$(PLATFORM_VERSION)/codegen
 
@@ -20,4 +20,4 @@ codegen_PYTHON = \
 	override.py \
 	scmexpr.py
 
-EXTRA_DIST = README.defs pygtk-codegen-$(PLATFORM_VERSION).in
+EXTRA_DIST = README.defs pygobject-codegen-$(PLATFORM_VERSION).in
