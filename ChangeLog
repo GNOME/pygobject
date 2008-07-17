@@ -2,6 +2,7 @@
 
 	* gio/giomodule.c (init_gio):
 	Add a pygio_version module attribute
+	(DL_EXPORT): The module is called gio._gio, not just _gio.
 
 2008-07-17  Johan Dahlin  <johan@gnome.org>
 

@@ -46,7 +46,7 @@ init_gio(void)
     
     /* perform any initialisation required by the library here */
 
-    m = Py_InitModule("_gio", pygio_functions);
+    m = Py_InitModule("gio._gio", pygio_functions);
     d = PyModule_GetDict(m);
 
     init_pygobject();
