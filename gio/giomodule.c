@@ -49,5 +49,7 @@ init_gio(void)
     pygio_register_classes(d);
     pygio_add_constants(m, "G_IO_");
 
+    PyModule_AddStringConstant(m, "ERROR", g_quark_to_string(G_IO_ERROR));
+    
 }
 

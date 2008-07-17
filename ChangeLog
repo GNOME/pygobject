@@ -1,6 +1,11 @@
 2008-07-17  Johan Dahlin  <johan@gnome.org>
 
 	* gio/giomodule.c (init_gio):
+	Add gio.ERROR which maps to the G_IO_ERROR quark.
+
+2008-07-17  Johan Dahlin  <johan@gnome.org>
+
+	* gio/giomodule.c (init_gio):
 	Use the prefix G_IO_ for stripping constants instead of just G_
 	* gobject/gobjectmodule.c (pyg_constant_strip_prefix):
 	Check so the fist part of name and strip_prefix are the same,
