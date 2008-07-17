@@ -1,5 +1,10 @@
 2008-07-17  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio-types.defs:
+	Rename gio.IOErrorEnum to gio.ErrorEnum
+
+2008-07-17  Johan Dahlin  <johan@gnome.org>
+
 	* gio/giomodule.c (init_gio):
 	Add gio.ERROR which maps to the G_IO_ERROR quark.
 

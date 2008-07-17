@@ -382,7 +382,7 @@
   )
 )
 
-(define-enum IOErrorEnum
+(define-enum ErrorEnum
   (in-module "gio")
   (c-name "GIOErrorEnum")
   (gtype-id "G_TYPE_IO_ERROR_ENUM")
