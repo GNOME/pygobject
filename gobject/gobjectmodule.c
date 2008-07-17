@@ -2964,15 +2964,24 @@ const gchar *
 pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 {
     gint prefix_len;
-    guint j;
+    guint i;
     
     prefix_len = strlen(strip_prefix);
-    
+
+    /* Check so name starts with strip_prefix, if it doesn't:
+     * return the rest of the part which doesn't match
+     */
+    for (i = 0; i < prefix_len; i++) {
+	if (name[i] != strip_prefix[i] && name[i] != '_') {
+	    return &name[i];
+	}
+    }
+
     /* strip off prefix from value name, while keeping it a valid
      * identifier */
-    for (j = prefix_len; j >= 0; j--) {
-	if (g_ascii_isalpha(name[j]) || name[j] == '_') {
-	    return &name[j];
+    for (i = prefix_len; i >= 0; i--) {
+	if (g_ascii_isalpha(name[i]) || name[i] == '_') {
+	    return &name[i];
 	}
     }
     return name;

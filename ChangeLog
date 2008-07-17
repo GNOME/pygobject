@@ -1,3 +1,15 @@
+2008-07-17  Johan Dahlin  <johan@gnome.org>
+
+	* gio/giomodule.c (init_gio):
+	Use the prefix G_IO_ for stripping constants instead of just G_
+	* gobject/gobjectmodule.c (pyg_constant_strip_prefix):
+	Check so the fist part of name and strip_prefix are the same,
+	if they don't, just strip of the part of strip_prefix which
+	matches.
+
+	This removes the initial IO_* prefix for some constants in gio.
+	Eg, gio.IO_ERROR_* -> gio.ERROR_*
+
 2008-07-16  Johan Dahlin  <johan@gnome.org>
 	
 	* configure.ac: Post release version bump
