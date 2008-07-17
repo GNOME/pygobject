@@ -27,6 +27,10 @@
 
 #include <gio/gio.h>
 
+#define PYGIO_MAJOR_VERSION PYGOBJECT_MAJOR_VERSION
+#define PYGIO_MINOR_VERSION PYGOBJECT_MINOR_VERSION
+#define PYGIO_MICRO_VERSION PYGOBJECT_MICRO_VERSION
+
 /* include any extra headers needed here */
 
 void pygio_register_classes(PyObject *d);
@@ -38,7 +42,8 @@ DL_EXPORT(void)
 init_gio(void)
 {
     PyObject *m, *d;
-
+    PyObject *tuple;
+    
     /* perform any initialisation required by the library here */
 
     m = Py_InitModule("_gio", pygio_functions);
@@ -50,6 +55,13 @@ init_gio(void)
     pygio_add_constants(m, "G_IO_");
 
     PyModule_AddStringConstant(m, "ERROR", g_quark_to_string(G_IO_ERROR));
-    
+
+    /* pygobject version */
+    tuple = Py_BuildValue ("(iii)",
+			   PYGIO_MAJOR_VERSION,
+			   PYGIO_MINOR_VERSION,
+			   PYGIO_MICRO_VERSION);
+    PyDict_SetItemString(d, "pygio_version", tuple); 
+    Py_DECREF(tuple);
 }
 

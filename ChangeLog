@@ -1,5 +1,10 @@
 2008-07-17  Johan Dahlin  <johan@gnome.org>
 
+	* gio/giomodule.c (init_gio):
+	Add a pygio_version module attribute
+
+2008-07-17  Johan Dahlin  <johan@gnome.org>
+
 	* gio/gio-types.defs:
 	Rename gio.IOErrorEnum to gio.ErrorEnum
 
