@@ -56,7 +56,7 @@ init_gio(void)
 
     PyModule_AddStringConstant(m, "ERROR", g_quark_to_string(G_IO_ERROR));
 
-    /* pygobject version */
+    /* pygio version */
     tuple = Py_BuildValue ("(iii)",
 			   PYGIO_MAJOR_VERSION,
 			   PYGIO_MINOR_VERSION,
