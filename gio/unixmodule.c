@@ -23,7 +23,7 @@
 #  include "config.h"
 #endif
 #include <Python.h>
-#include "pygobject.h"
+#include <pygobject.h>
 
 #include <gio/gio.h>
 

@@ -25,7 +25,7 @@
 
 #include <Python.h>
 #include <gio/gio.h>
-#include "pygobject.h"
+#include <pygobject.h>
 
 extern PyTypeObject PyGCancellable_Type;
 
