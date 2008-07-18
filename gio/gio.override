@@ -20,7 +20,7 @@
  * USA
  */
 %%
-modulename gio
+modulename gio._gio
 %%
 import gobject.GObject as PyGObject_Type
 %%

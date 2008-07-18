@@ -1,3 +1,10 @@
+2008-07-19  Johan Dahlin  <johan@gnome.org>
+
+	* examples/gio/directory-async.py:
+	Only fetch name, saves a couple of syscalls.
+	* gio/gio.override:
+	Set name to gio._gio so pychecker/pydoc works.
+
 2008-07-18  Johan Dahlin  <johan@gnome.org>
 
 	* examples/gio/directory-async.py:

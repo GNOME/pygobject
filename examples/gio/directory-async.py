@@ -7,7 +7,7 @@ def callback(gfile, result):
     loop.quit()
 
 gfile = gio.File("/")
-gfile.enumerate_children_async("standard::*", callback)
+gfile.enumerate_children_async("standard::name", callback)
 
 loop = gobject.MainLoop()
 loop.run()
