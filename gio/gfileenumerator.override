@@ -2,7 +2,7 @@
  * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
  *
- *   ginputstream.override: module overrides for GInputStream
+ *   gfileenumerator.override: module overrides for GFileEnumerator
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
