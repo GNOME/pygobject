@@ -1,5 +1,10 @@
 2008-07-18  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gfile.override:
+	Use %zd instead of %d since it's a Py_ssize_t and not an int.
+
+2008-07-18  Johan Dahlin  <johan@gnome.org>
+
 	* gio/pygio-utils.h:
 	define NO_IMPORT_PYGOBJECT before including pygobject.h
 

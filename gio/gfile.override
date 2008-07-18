@@ -72,7 +72,7 @@ _wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	}
     } else {
 	PyErr_Format(PyExc_TypeError,
-		     "gio.File() takes exactly 1 argument (%d given)",
+		     "gio.File() takes exactly 1 argument (%zd given)",
 		     n_args + n_kwargs);
 	return NULL;
     }
