@@ -1021,6 +1021,25 @@
 )
 
 (define-method next_files_async
+  (docstring 
+"FE.next_files_async(num_files, callback, [io_priority, cancellable, user_data])\n"
+"Request information for a number of files from the enumerator asynchronously.\n"
+"When all i/o for the operation is finished the callback will be called with\n"
+"the requested information.\n"
+"\n"
+"he callback can be called with less than num_files files in case of error\n"
+"or at the end of the enumerator. In case of a partial error the callback\n"
+"will be called with any succeeding items and no error, and on the next\n"
+"request the error will be reported. If a request is cancelled the callback\n"
+"will be called with gio.ERROR_CANCELLED.\n"
+"\n"
+"During an async request no other sync and async calls are allowed, and will\n"
+"result in gio.ERROR_PENDING errors.\n"
+"\n"
+"Any outstanding i/o request with higher priority (lower numerical value)\n"
+"will be executed before an outstanding request with lower priority.\n"
+"Default priority is gobject.PRIORITY_DEFAULT.")
+
   (of-object "GFileEnumerator")
   (c-name "g_file_enumerator_next_files_async")
   (return-type "none")
@@ -1034,6 +1053,10 @@
 )
 
 (define-method next_files_finish
+  (docstring
+"FE.next_files_finish(result) -> a list of gio.FileInfos\n"
+"Finishes the asynchronous operation started with\n"
+"gio.FileEnumerator.next_files_async().")
   (of-object "GFileEnumerator")
   (c-name "g_file_enumerator_next_files_finish")
   (return-type "GList*")

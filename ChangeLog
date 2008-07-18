@@ -1,6 +1,16 @@
 2008-07-19  Johan Dahlin  <johan@gnome.org>
 
 	* examples/gio/directory-async.py:
+	* gio/gfileenumerator.override:
+	* gio/gio.defs:
+	* tests/test_gio.py:
+	Wrap gio.FileEnumerator.next_files_async/next_files_done.
+	Update the example to use them instead of the synchronous versions,
+	add documentation and tests.
+
+2008-07-19  Johan Dahlin  <johan@gnome.org>
+
+	* examples/gio/directory-async.py:
 	Only fetch name, saves a couple of syscalls.
 	* gio/gio.override:
 	Set name to gio._gio so pychecker/pydoc works.

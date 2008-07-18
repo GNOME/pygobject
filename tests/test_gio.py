@@ -119,6 +119,23 @@ class TestGFileEnumerator(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+    def testNextFilesAsync(self):
+        def callback(enumerator, result):
+            try:
+                for file_info in enumerator.next_files_finish(result):
+                    if file_info.get_name() == 'test_gio.py':
+                        break
+                else:
+                    raise AssertionError
+            finally:
+                loop.quit()
+
+        enumerator = self.file.enumerate_children(
+            "standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
+        enumerator.next_files_async(1000, callback)
+        loop = gobject.MainLoop()
+        loop.run()
+
 
 class TestInputStream(unittest.TestCase):
     def setUp(self):
