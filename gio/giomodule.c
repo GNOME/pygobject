@@ -49,7 +49,7 @@ init_gio(void)
     m = Py_InitModule("gio._gio", pygio_functions);
     d = PyModule_GetDict(m);
 
-    init_pygobject();
+    init_pygobject_check(2, 15, 2);
 
     pygio_register_classes(d);
     pygio_add_constants(m, "G_IO_");
