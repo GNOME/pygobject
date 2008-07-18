@@ -23,9 +23,10 @@
 #ifndef __PYGIO_UTILS_H__
 #define __PYGIO_UTILS_H__
 
+#define NO_IMPORT_PYGOBJECT
 #include <Python.h>
-#include <gio/gio.h>
 #include <pygobject.h>
+#include <gio/gio.h>
 
 extern PyTypeObject PyGCancellable_Type;
 

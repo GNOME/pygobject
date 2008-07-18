@@ -1,5 +1,10 @@
 2008-07-18  Johan Dahlin  <johan@gnome.org>
 
+	* gio/pygio-utils.h:
+	define NO_IMPORT_PYGOBJECT before including pygobject.h
+
+2008-07-18  Johan Dahlin  <johan@gnome.org>
+
 	* gio/giomodule.c (init_gio):
 	Require pygobject 2.15.2
 
