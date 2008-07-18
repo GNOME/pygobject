@@ -1,6 +1,5 @@
 import gobject
 import gio
-import gtk
 
 def callback(gfile, result):
     for file_info in gfile.enumerate_children_finish(result):
