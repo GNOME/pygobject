@@ -15,12 +15,13 @@ def enumerate_children_done(gfile, result):
         print 'ERROR:', e
         loop.quit()
         return
-    enumerator.next_files_async(10, next_files_done)
+    enumerator.next_files_async(100, next_files_done)
 
 if len(sys.argv) >= 2:
     uri = sys.argv[1]
 else:
     uri = "/"
+
 gfile = gio.File(uri)
 gfile.enumerate_children_async(
     "standard::name", enumerate_children_done)
