@@ -61,7 +61,7 @@ class TestFile(unittest.TestCase):
         self.assertRaises(TypeError, gio.File, foo="bar")
         self.assertRaises(TypeError, gio.File, uri=1)
         self.assertRaises(TypeError, gio.File, path=1)
-        
+
     def testLoadContents(self):
         self._f.write("testing load_contents")
         self._f.seek(0)
@@ -70,11 +70,11 @@ class TestFile(unittest.TestCase):
         self.assertEqual(cont, "testing load_contents")
         self.assertEqual(leng, 21)
         self.assertNotEqual(etag, '')
-    
+
     def testLoadContentsAsync(self):
         self._f.write("testing load_contents_async")
         self._f.seek(0)
-        
+
         def callback(contents, result):
             try:
                 cont, leng, etag = contents.load_contents_finish(result)
@@ -83,10 +83,10 @@ class TestFile(unittest.TestCase):
                 self.assertNotEqual(etag, '')
             finally:
                 loop.quit()
-        
+
         canc = gio.Cancellable()
         self.file.load_contents_async(callback, cancellable=canc)
-        
+
         loop = gobject.MainLoop()
         loop.run()
 
@@ -102,6 +102,22 @@ class TestGFileEnumerator(unittest.TestCase):
                 break
         else:
             raise AssertionError
+
+    def testEnumerateChildrenAsync(self):
+        def callback(gfile, result):
+            try:
+                for file_info in gfile.enumerate_children_finish(result):
+                    if file_info.get_name() == 'test_gio.py':
+                        break
+                else:
+                    raise AssertionError
+            finally:
+                loop.quit()
+
+        self.file.enumerate_children_async(
+            "standard::*", callback)
+        loop = gobject.MainLoop()
+        loop.run()
 
 
 class TestInputStream(unittest.TestCase):
@@ -264,14 +280,14 @@ class TestVolumeMonitor(unittest.TestCase):
         self.failUnless(isinstance(mounts, list))
         if not mounts:
             return
-        
+
         self.failUnless(isinstance(mounts[0], gio.Mount))
         # Bug 538601
         icon = mounts[0].get_icon()
         if not icon:
             return
         self.failUnless(isinstance(icon, gio.Icon))
-    
+
 
 class TestThemedIcon(unittest.TestCase):
     def setUp(self):

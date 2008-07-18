@@ -1,5 +1,16 @@
 2008-07-18  Johan Dahlin  <johan@gnome.org>
 
+	* examples/gio/directory-async.py:
+	* gio/gfile.override:
+	* gio/gfileenumerator.override:
+	* gio/gio.defs:
+	* tests/test_gio.py:
+	Wrap gio.File.enumerate_children_async, add tests, docstring
+	and an example.
+	Also document gio.File.enumerate while we're at it.
+
+2008-07-18  Johan Dahlin  <johan@gnome.org>
+
 	* gio/gfile.override:
 	Use %zd instead of %d since it's a Py_ssize_t and not an int.
 

@@ -24,6 +24,7 @@ override-slot GFileEnumerator.tp_iter
 static PyObject*
 _wrap_g_file_enumerator_tp_iter(PyGObject *self)
 {
+    Py_INCREF (self);
     return (PyObject *) self;
 }
 %%
@@ -34,12 +35,18 @@ _wrap_g_file_enumerator_tp_iternext(PyGObject *iter)
     GFileInfo *file_info;
     GError *error = NULL;
 
+    if (!iter->obj) {
+	PyErr_SetNone(PyExc_StopIteration);
+	return NULL;
+    }
+
     file_info = g_file_enumerator_next_file(G_FILE_ENUMERATOR(iter->obj),
 					    NULL,
 					    &error);
     if (pyg_error_check(&error)) {
         return NULL;
     }
+    
     if (!file_info) {
 	PyErr_SetNone(PyExc_StopIteration);
 	return NULL;

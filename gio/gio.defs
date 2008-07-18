@@ -1499,6 +1499,27 @@
 )
 
 (define-method enumerate_children
+  (docstring 
+"F.enumerate_children(attributes, [flags, cancellable]) -> enumerator\n"
+"Gets the requested information about the files in a directory.\n" 
+"The result is a gio.FileEnumerator object that will give out gio.FileInfo\n"
+"objects for all the files in the directory.\n"
+"The attribute value is a string that specifies the file attributes that\n"
+"should be gathered. It is not an error if it's not possible to read a \n"
+"particular requested attribute from a file - it just won't be set.\n"
+"attribute should be a comma-separated list of attribute or attribute\n"
+"wildcards. The wildcard \"*\" means all attributes, and a wildcard like\n"
+"\"standard::*\" means all attributes in the standard namespace.\n"
+"An example attribute query be \"standard::*,owner::user\". The standard\n"
+"attributes are available as defines, like gio.FILE_ATTRIBUTE_STANDARD_NAME.\n"
+"\n"
+"If cancellable is not None, then the operation can be cancelled by\n"
+"triggering the cancellable object from another thread. If the operation was\n"
+"cancelled, the error gio.ERROR_CANCELLED will be returned.\n"
+"\n"
+"If the file does not exist, the gio.ERROR_NOT_FOUND error will be returned.\n"
+"If the file is not a directory, the gio.FILE_ERROR_NOTDIR error will\n"
+"be returned. Other errors are possible too.")
   (of-object "GFile")
   (c-name "g_file_enumerate_children")
   (return-type "GFileEnumerator*")
@@ -1511,6 +1532,18 @@
 )
 
 (define-method enumerate_children_async
+  (docstring 
+"F.enumerate_children_async(attributes, callback,\n"
+"                           [flags, io_priority, cancellable, user_data])\n"
+"Asynchronously gets the requested information about the files in a directory.\n"
+"The result is a GFileEnumerator object that will give out GFileInfo objects\n"
+"for all the files in the directory.\n"
+"\n"
+"For more details, see gio.File.enumerate_children() which is the synchronous\n"
+"version of this call.\n"
+"\n"
+"When the operation is finished, callback will be called. You can then call\n"
+"gio.File.enumerate_children_finish() to get the result of the operation.")
   (of-object "GFile")
   (c-name "g_file_enumerate_children_async")
   (return-type "none")
