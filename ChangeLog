@@ -1,5 +1,10 @@
 2008-07-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override:
+	Ignore a bunch of functions which are not relevant.
+
+2008-07-19  Johan Dahlin  <johan@gnome.org>
+
 	* gio/gfile.override:
 	* gio/gio.defs:
 	* gio/gio.override:
