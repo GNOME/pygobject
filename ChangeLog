@@ -1,5 +1,10 @@
 2008-07-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.defs:
+	Use property based constructors when possible.
+
+2008-07-19  Johan Dahlin  <johan@gnome.org>
+
 	* examples/gio/directory-async.py:
 	* gio/gfileenumerator.override:
 	* gio/gio.defs:

@@ -261,8 +261,8 @@
   (c-name "g_buffered_input_stream_new")
   (is-constructor-of "GBufferedInputStream")
   (return-type "GInputStream*")
-  (parameters
-    '("GInputStream*" "base_stream")
+  (properties
+    '("base_stream")
   )
 )
 
@@ -373,8 +373,8 @@
   (c-name "g_buffered_output_stream_new")
   (is-constructor-of "GBufferedOutputStream")
   (return-type "GOutputStream*")
-  (parameters
-    '("GOutputStream*" "base_stream")
+  (properties
+    '("base_stream")
   )
 )
 
@@ -581,8 +581,8 @@
   (c-name "g_data_input_stream_new")
   (is-constructor-of "GDataInputStream")
   (return-type "GDataInputStream*")
-  (parameters
-    '("GInputStream*" "base_stream")
+  (properties
+    '("base_stream")
   )
 )
 
@@ -722,8 +722,8 @@
   (c-name "g_data_output_stream_new")
   (is-constructor-of "GDataOutputStream")
   (return-type "GDataOutputStream*")
-  (parameters
-    '("GOutputStream*" "base_stream")
+  (properties
+    '("base_stream")
   )
 )
 
@@ -4084,8 +4084,8 @@
   (c-name "g_themed_icon_new")
   (is-constructor-of "GThemedIcon")
   (return-type "GIcon*")
-  (parameters
-    '("const-char*" "iconname")
+  (properties
+    '("name" (argname "iconname"))
   )
 )
 
