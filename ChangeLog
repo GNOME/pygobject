@@ -1,5 +1,8 @@
 2008-07-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.override: Set module name back to
+	gio, as setting it to gio._gio breaks pydoc.
+
 	* gio/gio.defs:
 	Use property based constructors when possible.
 
