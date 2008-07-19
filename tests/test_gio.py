@@ -90,6 +90,41 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+    def testMountMountable(self):
+        gfile = gio.File('localtest:')
+        def unmount_done(mount, result):
+            try:
+                retval = mount.unmount_finish(result)
+                self.failUnless(retval)
+            finally:
+                loop.quit()
+
+        def mount_enclosing_volume_done(gfile, result):
+            try:
+                try:
+                    retval = gfile.mount_enclosing_volume_finish(result)
+                except gobject.GError, e:
+                    # If we run the tests too fast
+                    if (e.domain == gio.ERROR and
+                        e.code == gio.ERROR_ALREADY_MOUNTED):
+                        print ('WARNING: testfile is already mounted, '
+                               'skipping test')
+                        loop.quit()
+                        return
+                    raise
+                self.failUnless(retval)
+            finally:
+                mount = gfile.find_enclosing_mount()
+                mount.unmount(unmount_done)
+
+        mount_operation = gio.MountOperation()
+        gfile.mount_enclosing_volume(mount_operation,
+                                     mount_enclosing_volume_done)
+
+        loop = gobject.MainLoop()
+        loop.run()
+
+
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
         self.file = gio.File(".")
@@ -350,3 +385,4 @@ class TestAppInfo(unittest.TestCase):
     def testSimple(self):
         self.assertEquals(self.appinfo.get_description(),
                           "Custom definition for does-not-exist")
+

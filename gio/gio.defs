@@ -1843,6 +1843,19 @@
 )
 
 (define-method mount_enclosing_volume
+  (docstring
+"F.mount_enclosing_volume(mount_operaetion, callback, cancellable, user_data])\n"
+"Starts a mount_operation, mounting the volume that contains\n"
+"the file location.\n"
+"\n"
+"When this operation has completed, callback will be called with\n"
+"user_user data, and the operation can be finalized with\n"
+"gio.File.mount_enclosing_volume_finish().\n"
+"\n"
+"If cancellable is not None, then the operation can be cancelled\n"
+"by triggering the cancellable object from another thread.\n"
+"If the operation was cancelled, the error gio.ERROR_CANCELLED\n"
+"will be returned.")
   (of-object "GFile")
   (c-name "g_file_mount_enclosing_volume")
   (return-type "none")
@@ -1865,6 +1878,18 @@
 )
 
 (define-method mount_mountable
+  (docstring 
+"F.mount_mountable(mount_operation, callback, [flags, cancellable, user_data])\n" 
+"Mounts a file of type gio.FILE_TYPE_MOUNTABLE. Using mount_operation,\n"
+"you can request callbacks when, for instance, passwords are needed\n"
+"during authentication.\n"
+"\n"
+"If cancellable is not None, then the operation can be cancelled by\n"
+" triggering the cancellable object from another thread. If the\n"
+"operation was cancelled, the error gio.ERROR_CANCELLED will be returned.\n"
+"\n"
+"When the operation is finished, callback will be called. You can then\n"
+"call g_file_mount_mountable_finish() to get the result of the operation.\n")
   (of-object "GFile")
   (c-name "g_file_mount_mountable")
   (return-type "none")
@@ -1887,6 +1912,17 @@
 )
 
 (define-method unmount_mountable
+  (docstring
+"F.unmount_mountable(callback, [flags, cancellable, user_data])\n"
+"Unmounts a file of type gio.FILE_TYPE_MOUNTABLE.\n"
+"\n"
+"If cancellable is not None, then the operation can be cancelled by\n"
+"triggering the cancellable object from another thread. If the\n"
+"operation was cancelled, the error gio.ERROR_CANCELLED will be returned.\n"
+"\n"
+"When the operation is finished, callback will be called. You can\n"
+"then call g_file_unmount_mountable_finish() to get the\n"
+"result of the operation.\n")
   (of-object "GFile")
   (c-name "g_file_unmount_mountable")
   (return-type "none")
@@ -3435,6 +3471,12 @@
 )
 
 (define-method unmount
+  (docstring
+"M.unmount(callback, [flags, cancellable, user_data])\n"
+"Unmounts a mount. This is an asynchronous operation, and is finished\n"
+"by calling gio.Mount.unmount_finish() with the mount and gio.AsyncResults\n"
+"data returned in the callback."
+)
   (of-object "GMount")
   (c-name "g_mount_unmount")
   (return-type "none")
@@ -3695,10 +3737,10 @@
 "S.write_async(buffer, callback [,io_priority] [,cancellable] [,user_data])\n"
 "\n"
 "Request an asynchronous write of count bytes from buffer into the stream.\n"
-" When the operation is finished callback will be called. You can then call \n"
+"When the operation is finished callback will be called. You can then call\n"
 "gio.OutputStream.write_finish() to get the result of the operation.\n"
 "On success, the number of bytes written will be passed to the callback.\n"
-"It is not an error if this is not the same as the requested size, as it can \n"
+"It is not an error if this is not the same as the requested size, as it can\n"
 "happen e.g. on a partial I/O error, but generally tries to write as many \n"
 "bytes as requested.\n"
 "For the synchronous, blocking version of this function, see "

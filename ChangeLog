@@ -1,5 +1,15 @@
 2008-07-19  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gfile.override:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Bind gio.Mount.unmount, gio.File.mount_mountable,
+	gio.File.unmount_mountable and gio.File.mount_enclosing_volume.
+	Add documents and tests.
+
+2008-07-19  Johan Dahlin  <johan@gnome.org>
+
 	* gio/gio.override: Set module name back to
 	gio, as setting it to gio._gio breaks pydoc.
 
