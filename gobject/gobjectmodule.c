@@ -26,6 +26,7 @@
 
 #include "pygobject-private.h"
 #include "pythread.h"
+#include <pyglib.h>
 #include <gobject/gvaluecollector.h>
 
 #ifdef HAVE_FFI_H
@@ -35,8 +36,6 @@ static GSignalCMarshaller marshal_generic = g_cclosure_marshal_generic_ffi;
 static GSignalCMarshaller marshal_generic = 0;
 #endif
 
-static PyObject *gerror_exc = NULL;
-static gboolean use_gil_state_api = FALSE;
 static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
@@ -1897,46 +1896,6 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     return (PyObject *) self;
 }
 
-static gint
-get_handler_priority(gint *priority, PyObject *kwargs)
-{
-    Py_ssize_t len, pos;
-    PyObject *key, *val;
-
-    /* no keyword args? leave as default */
-    if (kwargs == NULL)	return 0;
-
-    len = PyDict_Size(kwargs);
-    if (len == 0) return 0;
-
-    if (len != 1) {
-	PyErr_SetString(PyExc_TypeError,
-			"expecting at most one keyword argument");
-	return -1;
-    }
-    pos = 0;
-    PyDict_Next(kwargs, &pos, &key, &val);
-    if (!PyString_Check(key)) {
-	PyErr_SetString(PyExc_TypeError,
-			"keyword argument name is not a string");
-	return -1;
-    }
-
-    if (strcmp(PyString_AsString(key), "priority") != 0) {
-	PyErr_SetString(PyExc_TypeError,
-			"only 'priority' keyword argument accepted");
-	return -1;
-    }
-
-    *priority = PyInt_AsLong(val);
-    if (PyErr_Occurred()) {
-	PyErr_Clear();
-	PyErr_SetString(PyExc_ValueError, "could not get priority value");
-	return -1;
-    }
-    return 0;
-}
-
 gboolean
 pyg_handler_marshal(gpointer user_data)
 {
@@ -1965,257 +1924,9 @@ pyg_handler_marshal(gpointer user_data)
 }
 
 static PyObject *
-pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority = G_PRIORITY_DEFAULT_IDLE;
-    guint handler_id;
-
-    len = PyTuple_Size(args);
-    if (len < 1) {
-	PyErr_SetString(PyExc_TypeError,
-			"idle_add requires at least 1 argument");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 1);
-    if (!PyArg_ParseTuple(first, "O:idle_add", &callback)) {
-	Py_DECREF(first);
-        return NULL;
-    }
-    Py_DECREF(first);
-    if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "first argument not callable");
-        return NULL;
-    }
-    if (get_handler_priority(&priority, kwargs) < 0)
-	return NULL;
-
-    cbargs = PySequence_GetSlice(args, 1, len);
-    if (cbargs == NULL)
-	return NULL;
-
-    data = Py_BuildValue("(ON)", callback, cbargs);
-    if (data == NULL)
-	return NULL;
-    handler_id = g_idle_add_full(priority, pyg_handler_marshal, data,
-				 pyg_destroy_notify);
-    return PyInt_FromLong(handler_id);
-}
-
-
-static PyObject *
-pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority = G_PRIORITY_DEFAULT;
-    guint interval, handler_id;
-
-    len = PyTuple_Size(args);
-    if (len < 2) {
-	PyErr_SetString(PyExc_TypeError,
-			"timeout_add requires at least 2 args");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 2);
-    if (!PyArg_ParseTuple(first, "IO:timeout_add", &interval, &callback)) {
-	Py_DECREF(first);
-        return NULL;
-    }
-    Py_DECREF(first);
-    if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "second argument not callable");
-        return NULL;
-    }
-    if (get_handler_priority(&priority, kwargs) < 0)
-	return NULL;
-
-    cbargs = PySequence_GetSlice(args, 2, len);
-    if (cbargs == NULL)
-	return NULL;
-
-    data = Py_BuildValue("(ON)", callback, cbargs);
-    if (data == NULL)
-	return NULL;
-    handler_id = g_timeout_add_full(priority, interval,
-				    pyg_handler_marshal, data,
-				    pyg_destroy_notify);
-    return PyInt_FromLong(handler_id);
-}
-
-#if GLIB_CHECK_VERSION(2,13,5)
-static PyObject *
-pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *first, *callback, *cbargs = NULL, *data;
-    gint len, priority = G_PRIORITY_DEFAULT;
-    guint interval, handler_id;
-
-    len = PyTuple_Size(args);
-    if (len < 2) {
-	PyErr_SetString(PyExc_TypeError,
-			"timeout_add_seconds requires at least 2 args");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 2);
-    if (!PyArg_ParseTuple(first, "IO:timeout_add_seconds", &interval, &callback)) {
-	Py_DECREF(first);
-        return NULL;
-    }
-    Py_DECREF(first);
-    if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "second argument not callable");
-        return NULL;
-    }
-    if (get_handler_priority(&priority, kwargs) < 0)
-	return NULL;
-
-    cbargs = PySequence_GetSlice(args, 2, len);
-    if (cbargs == NULL)
-	return NULL;
-
-    data = Py_BuildValue("(ON)", callback, cbargs);
-    if (data == NULL)
-	return NULL;
-    handler_id = g_timeout_add_seconds_full(priority, interval,
-                                            pyg_handler_marshal, data,
-                                            pyg_destroy_notify);
-    return PyInt_FromLong(handler_id);
-}
-#endif
-
-
-static gboolean
-iowatch_marshal(GIOChannel *source,
-		GIOCondition condition,
-		gpointer user_data)
-{
-    PyGILState_STATE state;
-    PyObject *tuple, *func, *firstargs, *args, *ret;
-    gboolean res;
-
-    g_return_val_if_fail(user_data != NULL, FALSE);
-
-    state = pyg_gil_state_ensure();
-
-    tuple = (PyObject *)user_data;
-    func = PyTuple_GetItem(tuple, 0);
-
-    /* arg vector is (fd, condtion, *args) */
-    firstargs = Py_BuildValue("(Oi)", PyTuple_GetItem(tuple, 1), condition);
-    args = PySequence_Concat(firstargs, PyTuple_GetItem(tuple, 2));
-    Py_DECREF(firstargs);
-
-    ret = PyObject_CallObject(func, args);
-    Py_DECREF(args);
-    if (!ret) {
-	PyErr_Print();
-	res = FALSE;
-    } else {
-        if (ret == Py_None) {
-            if (PyErr_Warn(PyExc_Warning, "gobject.io_add_watch callback returned None;"
-                           " should return True/False")) {
-                PyErr_Print();
-            }
-        }
-	res = PyObject_IsTrue(ret);
-	Py_DECREF(ret);
-    }
-
-    pyg_gil_state_release(state);
-
-    return res;
-}
-
-static PyObject *
-pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
-    gint fd, priority = G_PRIORITY_DEFAULT, condition;
-    Py_ssize_t len;
-    GIOChannel *iochannel;
-    guint handler_id;
-
-    len = PyTuple_Size(args);
-    if (len < 3) {
-	PyErr_SetString(PyExc_TypeError,
-			"io_add_watch requires at least 3 args");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 3);
-    if (!PyArg_ParseTuple(first, "OiO:io_add_watch", &pyfd, &condition,
-			  &callback)) {
-	Py_DECREF(first);
-        return NULL;
-    }
-    Py_DECREF(first);
-    fd = PyObject_AsFileDescriptor(pyfd);
-    if (fd < 0) {
-	return NULL;
-    }
-    if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "third argument not callable");
-        return NULL;
-    }
-    if (get_handler_priority(&priority, kwargs) < 0)
-	return NULL;
-
-    cbargs = PySequence_GetSlice(args, 3, len);
-    if (cbargs == NULL)
-      return NULL;
-    data = Py_BuildValue("(OON)", callback, pyfd, cbargs);
-    if (data == NULL)
-      return NULL;
-    iochannel = g_io_channel_unix_new(fd);
-    handler_id = g_io_add_watch_full(iochannel, priority, condition,
-				     iowatch_marshal, data,
-				     (GDestroyNotify)pyg_destroy_notify);
-    g_io_channel_unref(iochannel);
-    
-    return PyInt_FromLong(handler_id);
-}
-
-static PyObject *
-pyg_source_remove(PyObject *self, PyObject *args)
-{
-    guint tag;
-
-    if (!PyArg_ParseTuple(args, "i:source_remove", &tag))
-	return NULL;
-
-    return PyBool_FromLong(g_source_remove(tag));
-}
-
-static PyObject *
 pyg_main_context_default(PyObject *unused)
 {
     return pyg_main_context_new(g_main_context_default());
-}
-
-static int pyg_thread_state_tls_key = -1;
-
-/* Enable threading; note that the GIL must be held by the current
-   thread when this function is called */
-static int
-pyg_enable_threads (void)
-{
-    if (getenv ("PYGTK_USE_GIL_STATE_API"))
-	use_gil_state_api = TRUE;
-
-#ifndef DISABLE_THREADING
-    if (!pygobject_api_functions.threads_enabled) {
-	PyEval_InitThreads();
-	if (!g_threads_got_initialized)
-	    g_thread_init(NULL);
-	pygobject_api_functions.threads_enabled = TRUE;
-	pyg_thread_state_tls_key = PyThread_create_key();
-    }
-
-    return 0;
-#else
-    PyErr_SetString(PyExc_RuntimeError,
-                    "pygtk threading disabled at compile time");
-    return -1;
-#endif
 }
 
 static int
@@ -2233,378 +1944,11 @@ pyg_gil_state_release_py23 (int flag)
 static PyObject *
 pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 {
-    if (pyg_enable_threads())
+    if (!pyglib_enable_threads())
         return NULL;
     
     Py_INCREF(Py_None);
     return Py_None;
-}
-
-struct _PyGChildData {
-    PyObject *func;
-    PyObject *data;
-};
-
-static void
-child_watch_func(GPid pid, gint status, gpointer data)
-{
-    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
-    PyObject *retval;
-    PyGILState_STATE gil;
-
-    gil = pyg_gil_state_ensure();
-    if (child_data->data)
-        retval = PyObject_CallFunction(child_data->func, "iiO", pid, status,
-                                       child_data->data);
-    else
-        retval = PyObject_CallFunction(child_data->func, "ii", pid, status);
-
-    if (retval)
-	Py_DECREF(retval);
-    else
-	PyErr_Print();
-
-    pyg_gil_state_release(gil);
-}
-
-static void
-child_watch_dnotify(gpointer data)
-{
-    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
-    Py_DECREF(child_data->func);
-    Py_XDECREF(child_data->data);
-    g_free(child_data);
-}
-
-
-static PyObject *
-pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "pid", "function", "data", "priority", NULL };
-    guint id;
-    gint priority = G_PRIORITY_DEFAULT;
-    int pid;
-    PyObject *func, *user_data = NULL;
-    struct _PyGChildData *child_data;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "iO|Oi:gobject.child_watch_add", kwlist,
-                                     &pid, &func, &user_data, &priority))
-        return NULL;
-    if (!PyCallable_Check(func)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "gobject.child_watch_add: second argument must be callable");
-        return NULL;
-    }
-
-    child_data = g_new(struct _PyGChildData, 1);
-    child_data->func = func;
-    child_data->data = user_data;
-    Py_INCREF(child_data->func);
-    if (child_data->data)
-        Py_INCREF(child_data->data);
-    id = g_child_watch_add_full(priority, pid, child_watch_func,
-                                child_data, child_watch_dnotify);
-    return PyInt_FromLong(id);
-}
-
-static PyObject *
-pyg_pid_close(PyIntObject *self, PyObject *args, PyObject *kwargs)
-{
-    g_spawn_close_pid((GPid) self->ob_ival);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyMethodDef pyg_pid_methods[] = {
-    { "close", (PyCFunction)pyg_pid_close, METH_NOARGS },
-    { NULL, NULL, 0 }
-};
-
-static void
-pyg_pid_free(PyIntObject *gpid)
-{
-    g_spawn_close_pid((GPid) gpid->ob_ival);
-    PyInt_Type.tp_free((void *) gpid);
-}
-
-static int
-pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyErr_SetString(PyExc_TypeError, "gobject.Pid cannot be manually instantiated");
-    return -1;
-}
-
-static PyTypeObject PyGPid_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.Pid",
-    sizeof(PyIntObject),
-    0,
-    0,					  /* tp_dealloc */
-    0,                			  /* tp_print */
-    0,					  /* tp_getattr */
-    0,					  /* tp_setattr */
-    0,					  /* tp_compare */
-    0,		  			  /* tp_repr */
-    0,                   		  /* tp_as_number */
-    0,					  /* tp_as_sequence */
-    0,					  /* tp_as_mapping */
-    0,					  /* tp_hash */
-    0,					  /* tp_call */
-    0,		  			  /* tp_str */
-    0,					  /* tp_getattro */
-    0,					  /* tp_setattro */
-    0,				  	  /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT, 		  /* tp_flags */
-    0,      				  /* tp_doc */
-    0,					  /* tp_traverse */
-    0,					  /* tp_clear */
-    0,					  /* tp_richcompare */
-    0,					  /* tp_weaklistoffset */
-    0,					  /* tp_iter */
-    0,					  /* tp_iternext */
-    pyg_pid_methods,			  /* tp_methods */
-    0,					  /* tp_members */
-    0,					  /* tp_getset */
-    0,	  				  /* tp_base */
-    0,					  /* tp_dict */
-    0,					  /* tp_descr_get */
-    0,					  /* tp_descr_set */
-    0,					  /* tp_dictoffset */
-    pyg_pid_tp_init,		  	  /* tp_init */
-    0,					  /* tp_alloc */
-    0,					  /* tp_new */
-    (freefunc)pyg_pid_free,		  /* tp_free */
-    0,					  /* tp_is_gc */
-};
-
-static PyObject *
-pyg_pid_new(GPid pid)
-{
-    PyIntObject *pygpid;
-    pygpid = PyObject_NEW(PyIntObject, &PyGPid_Type);
-
-    pygpid->ob_ival = pid;
-    return (PyObject *) pygpid;
-}
-
-struct _PyGChildSetupData {
-    PyObject *func;
-    PyObject *data;
-};
-
-static void
-_pyg_spawn_async_callback(gpointer user_data)
-{
-    struct _PyGChildSetupData *data;
-    PyObject *retval;
-    PyGILState_STATE gil;
-
-    data = (struct _PyGChildSetupData *) user_data;
-    gil = pyg_gil_state_ensure();
-    if (data->data)
-        retval = PyObject_CallFunction(data->func, "O", data->data);
-    else
-        retval = PyObject_CallFunction(data->func, NULL);
-    if (retval)
-	Py_DECREF(retval);
-    else
-	PyErr_Print();
-    Py_DECREF(data->func);
-    Py_XDECREF(data->data);
-    g_free(data);
-    pyg_gil_state_release(gil);
-}
-
-static PyObject *
-pyg_spawn_async(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "argv", "envp", "working_directory", "flags",
-                              "child_setup", "user_data", "standard_input",
-                              "standard_output", "standard_error", NULL };
-    PyObject *pyargv, *pyenvp = NULL;
-    char **argv, **envp = NULL;
-    PyObject *func = Py_None, *user_data = NULL;
-    char *working_directory = NULL;
-    int flags = 0, _stdin = -1, _stdout = -1, _stderr = -1;
-    PyObject *pystdin = NULL, *pystdout = NULL, *pystderr = NULL;
-    gint *standard_input, *standard_output, *standard_error;
-    struct _PyGChildSetupData *callback_data = NULL;
-    GError *error = NULL;
-    GPid child_pid = -1;
-    Py_ssize_t len, i;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:gobject.spawn_async",
-                                     kwlist,
-                                     &pyargv, &pyenvp, &working_directory, &flags,
-                                     &func, &user_data,
-                                     &pystdin, &pystdout, &pystderr))
-        return NULL;
-
-    if (pystdin && PyObject_IsTrue(pystdin))
-        standard_input = &_stdin;
-    else
-        standard_input = NULL;
-
-    if (pystdout && PyObject_IsTrue(pystdout))
-        standard_output = &_stdout;
-    else
-        standard_output = NULL;
-
-    if (pystderr && PyObject_IsTrue(pystderr))
-        standard_error = &_stderr;
-    else
-        standard_error = NULL;
-
-      /* parse argv */
-    if (!PySequence_Check(pyargv)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "gobject.spawn_async: "
-			"first argument must be a sequence of strings");
-        return NULL;
-    }
-    len = PySequence_Length(pyargv);
-    argv = g_new0(char *, len + 1);
-    for (i = 0; i < len; ++i) {
-        PyObject *tmp = PySequence_ITEM(pyargv, i);
-        if (!PyString_Check(tmp)) {
-            PyErr_SetString(PyExc_TypeError,
-                            "gobject.spawn_async: "
-			    "first argument must be a sequence of strings");
-            g_free(argv);
-            Py_XDECREF(tmp);
-            return NULL;
-        }
-        argv[i] = PyString_AsString(tmp);
-        Py_DECREF(tmp);
-    }
-
-      /* parse envp */
-    if (pyenvp) {
-        if (!PySequence_Check(pyenvp)) {
-            PyErr_SetString(PyExc_TypeError,
-                            "gobject.spawn_async: "
-			    "second argument must be a sequence of strings");
-            g_free(argv);
-            return NULL;
-        }
-        len = PySequence_Length(pyenvp);
-        envp = g_new0(char *, len + 1);
-        for (i = 0; i < len; ++i) {
-            PyObject *tmp = PySequence_ITEM(pyenvp, i);
-            if (!PyString_Check(tmp)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "gobject.spawn_async: "
-				"second argument must be a sequence of strings");
-                g_free(envp);
-                Py_XDECREF(tmp);
-		g_free(argv);
-                return NULL;
-            }
-            envp[i] = PyString_AsString(tmp);
-            Py_DECREF(tmp);
-        }
-    }
-
-    if (func != Py_None) {
-        if (!PyCallable_Check(func)) {
-            PyErr_SetString(PyExc_TypeError, "child_setup parameter must be callable or None");
-            g_free(argv);
-            if (envp)
-                g_free(envp);
-            return NULL;
-        }
-        callback_data = g_new(struct _PyGChildSetupData, 1);
-        callback_data->func = func;
-        callback_data->data = user_data;
-        Py_INCREF(callback_data->func);
-        if (callback_data->data)
-            Py_INCREF(callback_data->data);
-    }
-
-    if (!g_spawn_async_with_pipes(working_directory, argv, envp, flags,
-                                  (func != Py_None ? _pyg_spawn_async_callback : NULL),
-                                  callback_data, &child_pid,
-                                  standard_input,
-                                  standard_output,
-                                  standard_error,
-                                  &error))
-
-
-    {
-        g_free(argv);
-        if (envp) g_free(envp);
-        if (callback_data) {
-            Py_DECREF(callback_data->func);
-            Py_XDECREF(callback_data->data);
-            g_free(callback_data);
-        }
-        pyg_error_check(&error);
-        return NULL;
-    }
-    g_free(argv);
-    if (envp) g_free(envp);
-
-    if (standard_input)
-        pystdin = PyInt_FromLong(*standard_input);
-    else {
-        Py_INCREF(Py_None);
-        pystdin = Py_None;
-    }
-
-    if (standard_output)
-        pystdout = PyInt_FromLong(*standard_output);
-    else {
-        Py_INCREF(Py_None);
-        pystdout = Py_None;
-    }
-
-    if (standard_error)
-        pystderr = PyInt_FromLong(*standard_error);
-    else {
-        Py_INCREF(Py_None);
-        pystderr = Py_None;
-    }
-
-    return Py_BuildValue("NNNN", pyg_pid_new(child_pid), pystdin, pystdout, pystderr);
-}
-
-
-static PyObject *
-pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "text", NULL };
-    char *text_in, *text_out;
-    Py_ssize_t text_size;
-    PyObject *retval;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s#:gobject.markup_escape_text", kwlist,
-                                     &text_in, &text_size))
-        return NULL;
-
-    text_out = g_markup_escape_text(text_in, text_size);
-    retval = PyString_FromString(text_out);
-    g_free(text_out);
-    return retval;
-}
-
-static PyObject *
-pyg_get_current_time(PyObject *unused)
-{
-    GTimeVal timeval;
-    double ret;
-
-    g_get_current_time(&timeval);
-    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
-    return PyFloat_FromDouble(ret);
-}
-
-static PyObject *
-pyg_main_depth(PyObject *unused)
-{
-    return PyInt_FromLong(g_main_depth());
 }
 
 static PyObject *
@@ -2761,114 +2105,6 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
-
-static PyObject *
-pyg_filename_display_name(PyGObject *self, PyObject *args)
-{
-    PyObject *py_display_name;
-    char *filename, *display_name;
-    
-    if (!PyArg_ParseTuple(args, "s:gobject.filename_display_name",
-			  &filename))
-	return NULL;
-
-    display_name = g_filename_display_name(filename);
-    py_display_name = PyUnicode_DecodeUTF8(display_name, strlen(display_name), NULL);
-    g_free(display_name);
-    return py_display_name;
-}
-
-static PyObject *
-pyg_filename_display_basename(PyGObject *self, PyObject *args)
-{
-    PyObject *py_display_basename;
-    char *filename, *display_basename;
-    
-    if (!PyArg_ParseTuple(args, "s:gobject.filename_display_basename",
-			  &filename))
-	return NULL;
-
-    display_basename = g_filename_display_basename(filename);
-    py_display_basename = PyUnicode_DecodeUTF8(display_basename, strlen(display_basename), NULL);
-    g_free(display_basename);
-    return py_display_basename;
-}
-
-static PyObject *
-pyg_filename_from_utf8(PyGObject *self, PyObject *args)
-{
-    char *filename, *utf8string;
-    Py_ssize_t utf8string_len;
-    gsize bytes_written;
-    GError *error = NULL;
-    PyObject *py_filename;
-    
-    if (!PyArg_ParseTuple(args, "s#:gobject.filename_from_utf8",
-			  &utf8string, &utf8string_len))
-	return NULL;
-
-    filename = g_filename_from_utf8(utf8string, utf8string_len, NULL, &bytes_written, &error);
-    if (pyg_error_check(&error)) {
-        g_free(filename);
-        return NULL;
-    }
-    py_filename = PyString_FromStringAndSize(filename, bytes_written);
-    g_free(filename);
-    return py_filename;
-}
-
-
-PyObject*
-pyg_get_application_name(PyObject *self)
-{
-    const char *name;
-
-    name = g_get_application_name();
-    if (!name) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return PyString_FromString(name);
-}
-
-PyObject*
-pyg_set_application_name(PyObject *self, PyObject *args)
-{
-    char *s;
-
-    if (!PyArg_ParseTuple(args, "s:gobject.set_application_name", &s))
-        return NULL;
-    g_set_application_name(s);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-PyObject*
-pyg_get_prgname(PyObject *self)
-{
-    char *name;
-
-    name = g_get_prgname();
-    if (!name) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return PyString_FromString(name);
-}
-
-PyObject*
-pyg_set_prgname(PyObject *self, PyObject *args)
-{
-    char *s;
-
-    if (!PyArg_ParseTuple(args, "s:gobject.set_prgname", &s))
-        return NULL;
-    g_set_prgname(s);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 static PyMethodDef pygobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2892,32 +2128,10 @@ static PyMethodDef pygobject_functions[] = {
       pyg_object_class_list_properties, METH_VARARGS },
     { "new",
       (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "idle_add",
-      (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
-    { "timeout_add",
-      (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
-#if GLIB_CHECK_VERSION(2,13,5)
-    { "timeout_add_seconds",
-      (PyCFunction)pyg_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
-#endif
-    { "io_add_watch",
-      (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
-    { "source_remove",
-      pyg_source_remove, METH_VARARGS },
     { "main_context_default",
       (PyCFunction)pyg_main_context_default, METH_NOARGS },
     { "threads_init",
       (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
-    { "child_watch_add",
-      (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
-    { "spawn_async",
-      (PyCFunction)pyg_spawn_async, METH_VARARGS|METH_KEYWORDS },
-    { "markup_escape_text",
-      (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
-    { "get_current_time",
-      (PyCFunction)pyg_get_current_time, METH_NOARGS },
-    { "main_depth",
-      (PyCFunction)pyg_main_depth, METH_NOARGS },
     { "signal_accumulator_true_handled",
       (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
     { "add_emission_hook",
@@ -2926,20 +2140,6 @@ static PyMethodDef pygobject_functions[] = {
       (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
     { "_install_metaclass",
       (PyCFunction)pyg__install_metaclass, METH_O },
-    { "filename_display_name",
-      (PyCFunction)pyg_filename_display_name, METH_VARARGS },
-    { "filename_display_basename",
-      (PyCFunction)pyg_filename_display_basename, METH_VARARGS },
-    { "filename_from_utf8",
-      (PyCFunction)pyg_filename_from_utf8, METH_VARARGS },
-    { "get_application_name",
-      (PyCFunction)pyg_get_application_name, METH_NOARGS },
-    { "set_application_name",
-      (PyCFunction)pyg_set_application_name, METH_VARARGS },
-    { "get_prgname",
-      (PyCFunction)pyg_get_prgname, METH_NOARGS },
-    { "set_prgname",
-      (PyCFunction)pyg_set_prgname, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
@@ -3074,45 +2274,19 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
  * the GError cleared.
  *
  * Returns: True if an error was set.
+ *
+ * Deprecated: Since 2.16, use pyglib_error_check instead.
  */
 gboolean
 pyg_error_check(GError **error)
 {
-    PyGILState_STATE state;
-
-    g_return_val_if_fail(error != NULL, FALSE);
-
-    if (*error != NULL) {
-	PyObject *exc_instance;
-	PyObject *d;
-	
-	state = pyg_gil_state_ensure();
-	
-	exc_instance = PyObject_CallFunction(gerror_exc, "z",
-					     (*error)->message);
-	PyObject_SetAttrString(exc_instance, "domain",
-			       d=PyString_FromString(g_quark_to_string((*error)->domain)));
-	Py_DECREF(d);
-	PyObject_SetAttrString(exc_instance, "code",
-			       d=PyInt_FromLong((*error)->code));
-	Py_DECREF(d);
-	if ((*error)->message) {
-	    PyObject_SetAttrString(exc_instance, "message",
-				   d=PyString_FromString((*error)->message));
-	    Py_DECREF(d);
-	} else {
-	    PyObject_SetAttrString(exc_instance, "message", Py_None);
-	}
-
-	PyErr_SetObject(gerror_exc, exc_instance);
-	Py_DECREF(exc_instance);
-	g_clear_error(error);
-	
-	pyg_gil_state_release(state);
-	
-	return TRUE;
-    }
-    return FALSE;
+#if 0
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "pyg_error_check is deprecated, use "
+		   "pyglib_error_check instead"))
+        return NULL;
+#endif    
+    return pyglib_error_check(error);
 }
 
 /**
@@ -3125,82 +2299,19 @@ pyg_error_check(GError **error)
  *
  * Returns: 0 if no exception has been raised, -1 if it is a
  * valid gobject.GError, -2 otherwise.
+ *
+ * Deprecated: Since 2.16, use pyglib_gerror_exception_check instead.
  */
 gboolean
 pyg_gerror_exception_check(GError **error)
 {
-    PyObject *type, *value, *traceback;
-    PyObject *py_message, *py_domain, *py_code;
-    const char *bad_gerror_message;
-
-    PyErr_Fetch(&type, &value, &traceback);
-    if (type == NULL)
-        return 0;
-    PyErr_NormalizeException(&type, &value, &traceback);
-    if (value == NULL) {
-        PyErr_Restore(type, value, traceback);
-        PyErr_Print();
-        return -2;
-    }
-    if (!value || !PyErr_GivenExceptionMatches(type, (PyObject *) gerror_exc)) {
-        PyErr_Restore(type, value, traceback);
-        PyErr_Print();
-        return -2;
-    }
-    Py_DECREF(type);
-    Py_XDECREF(traceback);
-
-    py_message = PyObject_GetAttrString(value, "message");
-    if (!py_message || !PyString_Check(py_message)) {
-        bad_gerror_message = "gobject.GError instances must have a 'message' string attribute";
-        goto bad_gerror;
-    }
-
-    py_domain = PyObject_GetAttrString(value, "domain");
-    if (!py_domain || !PyString_Check(py_domain)) {
-        bad_gerror_message = "gobject.GError instances must have a 'domain' string attribute";
-        Py_DECREF(py_message);
-        goto bad_gerror;
-    }
-
-    py_code = PyObject_GetAttrString(value, "code");
-    if (!py_code || !PyInt_Check(py_code)) {
-        bad_gerror_message = "gobject.GError instances must have a 'code' int attribute";
-        Py_DECREF(py_message);
-        Py_DECREF(py_domain);
-        goto bad_gerror;
-    }
-
-    g_set_error(error, g_quark_from_string(PyString_AsString(py_domain)),
-                PyInt_AsLong(py_code), PyString_AsString(py_message));
-
-    Py_DECREF(py_message);
-    Py_DECREF(py_code);
-    Py_DECREF(py_domain);
-    return -1;
-
-bad_gerror:
-    Py_DECREF(value);
-    g_set_error(error, g_quark_from_static_string("pygobject"), 0, bad_gerror_message);
-    PyErr_SetString(PyExc_ValueError, bad_gerror_message);
-    PyErr_Print();
-    return -2;
-}
-
-static PyObject *
-build_gerror( void )
-{
-    PyObject *dict;
-    PyObject *gerror_class;   
-    dict = PyDict_New();
-    /* This is a hack to work around the deprecation warning of
-     * BaseException.message in Python 2.6+.
-     * GError has also an "message" attribute.
-     */
-    PyDict_SetItemString(dict, "message", Py_None);
-    gerror_class = PyErr_NewException("gobject.GError", PyExc_RuntimeError, dict);
-    Py_DECREF(dict);
-    return gerror_class;
+#if 0
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+		   "pyg_gerror_exception_check is deprecated, use "
+		   "pyglib_gerror_exception_check instead"))
+        return NULL;
+#endif    
+    return pyglib_gerror_exception_check(error);
 }
 
 static PyObject *
@@ -3537,7 +2648,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_flags_from_gtype,
 
   FALSE, /* threads_enabled */
-  pyg_enable_threads,
+  pyglib_enable_threads,
   pyg_gil_state_ensure_py23,
   pyg_gil_state_release_py23,
   pyg_register_class_init,
@@ -3613,9 +2724,6 @@ init_gobject(void)
 						      pyobject_copy,
 						      pyobject_free);
 
-    gerror_exc = build_gerror();
-    PyDict_SetItemString(d, "GError", gerror_exc);
-
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
@@ -3649,8 +2757,6 @@ init_gobject(void)
     REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
     PyGFlags_Type.tp_base = &PyInt_Type;
     REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
-    PyGPid_Type.tp_base = &PyInt_Type;
-    REGISTER_TYPE(d, PyGPid_Type, "Pid");
 
     REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
     REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
@@ -3667,12 +2773,6 @@ init_gobject(void)
 
     REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
     REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
-
-    /* glib version */
-    tuple = Py_BuildValue ("(iii)", glib_major_version, glib_minor_version,
-			   glib_micro_version);
-    PyDict_SetItemString(d, "glib_version", tuple);    
-    Py_DECREF(tuple);
 
     /* pygobject version */
     tuple = Py_BuildValue ("(iii)",

@@ -1,11 +1,17 @@
 AUTOMAKE_OPTIONS = 1.7
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 
-# Workaround for automake so we can build shared library which are not
-# going to be installed
-noinstshared_LTLIBRARIES = libpyglib-2.0.la _glib.la 
-noinstshareddir = /tmp
-install-noinstsharedLTLIBRARIES: # prevent it from being installed
+pkgincludedir = $(includedir)/pygtk-2.0
+pkginclude_HEADERS = pyglib.h
+
+lib_LTLIBRARIES = libpyglib-2.0.la
+
+pkgpyexecdir = $(pyexecdir)/gtk-2.0
+
+pyglibdir = $(pkgpyexecdir)/glib
+pyglib_PYTHON = 	\
+	__init__.py
+pyglib_LTLIBRARIES = _glib.la
 
 common_ldflags = -module -avoid-version
 if PLATFORM_WIN32

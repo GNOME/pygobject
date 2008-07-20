@@ -27,6 +27,11 @@ try:
 except ImportError:
     pass
 
+from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
+     io_add_watch, source_remove, child_watch_add, markup_escape_text, \
+     get_current_time, filename_display_name, filename_display_basename, \
+     filename_from_utf8, get_application_name, set_application_name, \
+     get_prgname, set_prgname, main_depth, Pid, GError, glib_version
 from gobject.constants import *
 from _gobject import *
 _PyGObject_API = _gobject._PyGObject_API

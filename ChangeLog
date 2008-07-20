@@ -1,5 +1,16 @@
 2008-07-20  Johan Dahlin  <johan@gnome.org>
 
+	* glib/Makefile.am:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (pyg_threads_init), (pyg_error_check),
+	(pyg_gerror_exception_check), (init_gobject):
+	* gobject/option.py:
+	Install the glib module, the helper library and the headers.
+	Use it from gobject and remove the old glib specific code from there.
+
+2008-07-20  Johan Dahlin  <johan@gnome.org>
+
 	* configure.ac:
 	* gobject/Makefile.am:
 	Use pkg-config to check for libffi again.

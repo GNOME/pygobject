@@ -33,6 +33,9 @@ import sys
 import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
                      BadOptionError, OptionConflictError
+
+from glib import GError
+
 import _gobject as gobject
 
 __all__ = [
@@ -182,7 +185,7 @@ class OptionGroup(optparse.OptionGroup):
             try:
                 opt.process(option_name, option_value, self.values, parser)
             except OptionValueError, error:
-            	gerror = gobject.GError(str(error))
+            	gerror = GError(str(error))
             	gerror.domain = gobject.OPTION_ERROR
             	gerror.code = gobject.OPTION_ERROR_BAD_VALUE
             	gerror.message = str(error)
@@ -324,7 +327,7 @@ class OptionParser(optparse.OptionParser):
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
-        except gobject.GError, error:
+        except GError, error:
             if error.domain != gobject.OPTION_ERROR:
             	raise
             if error.code == gobject.OPTION_ERROR_BAD_VALUE:

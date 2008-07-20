@@ -1,6 +1,5 @@
 AUTOMAKE_OPTIONS = 1.7
 PLATFORM_VERSION = 2.0
-INCLUDES = $(PYTHON_INCLUDES) $(FFI_CFLAGS) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
@@ -33,9 +32,17 @@ noinst_PROGRAMS = generate-constants
 CLEANFILES = constants.py
 EXTRA_DIST = constants.py.in
 
-_gobject_la_CFLAGS = $(GLIB_CFLAGS)
+_gobject_la_CFLAGS = \
+	$(PYTHON_INCLUDES) \
+	$(FFI_CFLAGS) \
+	$(GLIB_CFLAGS) \
+	 -DPY_SSIZE_T_CLEAN \
+	-I$(top_srcdir)/glib
 _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gobject
-_gobject_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
+_gobject_la_LIBADD = \
+	$(GLIB_LIBS) \
+	$(FFI_LIBS) \
+	$(top_srcdir)/glib/libpyglib-2.0.la
 _gobject_la_SOURCES = \
 	gobjectmodule.c \
 	pygboxed.c \
