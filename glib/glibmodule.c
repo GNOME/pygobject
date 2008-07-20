@@ -29,8 +29,10 @@
 #include <glib.h>
 #include "pyglib.h"
 
-#include "pygspawn.h"
 #include "pyglib-private.h"
+#include "pygmaincontext.h"
+#include "pygmainloop.h"
+#include "pygspawn.h"
 
 #define PYGLIB_MAJOR_VERSION PYGOBJECT_MAJOR_VERSION
 #define PYGLIB_MINOR_VERSION PYGOBJECT_MINOR_VERSION
@@ -343,13 +345,11 @@ pyg_source_remove(PyObject *self, PyObject *args)
     return PyBool_FromLong(g_source_remove(tag));
 }
 
-#ifdef FIXME
 static PyObject *
-pyg_main_context_default(PyObject *unused)
+pyglib_main_context_default(PyObject *unused)
 {
-    return pyg_main_context_new(g_main_context_default());
+    return pyglib_main_context_new(g_main_context_default());
 }
-#endif
 
 struct _PyGChildData {
     PyObject *func;
@@ -565,6 +565,8 @@ pyg_set_prgname(PyObject *self, PyObject *args)
 static PyMethodDef pyglib_functions[] = {
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS },
+    { "main_context_default",
+      (PyCFunction)pyglib_main_context_default, METH_NOARGS },
 
     { "idle_add",
       (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
@@ -598,10 +600,8 @@ static PyMethodDef pyglib_functions[] = {
       (PyCFunction)pyg_set_prgname, METH_VARARGS },
     { "main_depth",
       (PyCFunction)pyg_main_depth, METH_NOARGS },
-#if 0
-    { "main_context_default",
-      (PyCFunction)pyg_main_context_default, METH_NOARGS },
-#endif
+
+
     { NULL, NULL, 0 }
 };
 
@@ -675,4 +675,7 @@ init_glib(void)
     pyg_register_error(d);
     pyg_register_version_tuples(d);
     pyg_spawn_register_types(d);
+
+    pyglib_mainloop_register_types(d);
+    pyglib_maincontext_register_types(d);
 }

@@ -8,6 +8,7 @@ def importModules(buildDir, srcDir):
     # ltihooks
     sys.path.insert(0, srcDir)
     sys.path.insert(0, buildDir)
+    sys.path.insert(0, os.path.join(buildDir, 'glib'))
     sys.path.insert(0, os.path.join(buildDir, 'gobject'))
     sys.path.insert(0, os.path.join(buildDir, 'gio'))
     import ltihooks
@@ -17,6 +18,7 @@ def importModules(buildDir, srcDir):
     sys.argv.append('--g-fatal-warnings')
 
     testhelper = importModule('testhelper', '.')
+    glib = importModule('glib', buildDir, 'glib')
     gobject = importModule('gobject', buildDir, 'gobject')
     gio = importModule('gio', buildDir, 'gio')
 

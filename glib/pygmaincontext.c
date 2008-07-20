@@ -24,7 +24,12 @@
 #  include <config.h>
 #endif
 
-#include "pygobject-private.h"
+#include <Python.h>
+#include <pythread.h>
+#include <glib.h>
+#include "pygmaincontext.h"
+#include "pyglib.h"
+#include "pyglib-private.h"
 
 static int
 pyg_main_context_init(PyGMainContext *self)
@@ -61,9 +66,9 @@ _wrap_g_main_context_iteration (PyGMainContext *self, PyObject *args)
 			  &may_block))
 	return NULL;
 
-    pyg_begin_allow_threads;
+    pyglib_begin_allow_threads;
     ret = g_main_context_iteration(self->context, may_block);
-    pyg_end_allow_threads;
+    pyglib_end_allow_threads;
     
     return PyBool_FromLong(ret);
 }
@@ -83,7 +88,7 @@ static PyMethodDef _PyGMainContext_methods[] = {
 PyTypeObject PyGMainContext_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
-    "gobject.MainContext",
+    "glib.MainContext",
     sizeof(PyGMainContext),
     0,
     /* methods */
@@ -121,24 +126,8 @@ PyTypeObject PyGMainContext_Type = {
     (initproc)pyg_main_context_init,
 };
 
-/**
- * pyg_main_context_new:
- * @context: a GMainContext.
- *
- * Creates a wrapper for a GMainContext.
- *
- * Returns: the GMainContext wrapper.
- */
-PyObject *
-pyg_main_context_new(GMainContext *context)
+void
+pyglib_maincontext_register_types(PyObject *d)
 {
-    PyGMainContext *self;
-
-    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
-					  &PyGMainContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = g_main_context_ref(context);
-    return (PyObject *)self;
+    PYGLIB_REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
 }

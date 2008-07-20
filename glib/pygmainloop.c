@@ -25,8 +25,21 @@
 #  include <config.h>
 #endif
 
-#include "pygobject-private.h"
-#include "pythread.h"
+#include <Python.h>
+#include <pythread.h>
+#include <glib.h>
+
+#include "pygmainloop.h"
+#include "pygmaincontext.h"
+#include "pyglib.h"
+#include "pyglib-private.h"
+
+
+typedef struct {
+    GSource source;
+    int fds[2];
+    GPollFD fd;
+} PySignalWatchSource;
 
 #ifdef DISABLE_THREADING
 static GMainLoop *pyg_current_main_loop = NULL;;
@@ -102,18 +115,14 @@ pyg_get_current_main_loop (void)
 }
 #endif /* DISABLE_THREADING */
 
-typedef struct {
-    GSource source;
-    int fds[2];
-    GPollFD fd;
-} PySignalWatchSource;
-
 static gboolean
 pyg_signal_watch_prepare(GSource *source,
 			 int     *timeout)
 {
+#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
     PySignalWatchSource *real_source = (PySignalWatchSource *)source;
-
+#endif
+    
     /* Python only invokes signal handlers from the main thread,
      * so if a thread other than the main thread receives the signal
      * from the kernel, PyErr_CheckSignals() from that thread will
@@ -125,7 +134,7 @@ pyg_signal_watch_prepare(GSource *source,
      * only one thread.
      */
 #ifndef PLATFORM_WIN32
-    if (!pyg_threads_enabled)
+    if (!pyglib_threads_enabled())
 	return FALSE;
 #endif
 
@@ -166,7 +175,7 @@ pyg_signal_watch_check(GSource *source)
     PyGILState_STATE state;
     GMainLoop *main_loop;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     main_loop = pyg_get_current_main_loop();
 
@@ -175,7 +184,7 @@ pyg_signal_watch_check(GSource *source)
 	g_main_loop_quit(main_loop);
     }
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return FALSE;
 }
@@ -235,7 +244,7 @@ pyg_main_loop_new(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
     if (!PyObject_TypeCheck(py_context, &PyGMainContext_Type) &&
 	py_context != Py_None) {
 	PyErr_SetString(PyExc_TypeError,
-			"context must be a gobject.GMainContext or None");
+			"context must be a glib.GMainContext or None");
 	return -1;
     }
 
@@ -280,7 +289,7 @@ pyg_main_loop_compare(PyGMainLoop *self, PyGMainLoop *v)
 static PyObject *
 _wrap_g_main_loop_get_context (PyGMainLoop *loop)
 {
-    return pyg_main_context_new(g_main_loop_get_context(loop->loop));
+    return pyglib_main_context_new(g_main_loop_get_context(loop->loop));
 }
 
 static PyObject *
@@ -305,9 +314,9 @@ _wrap_g_main_loop_run (PyGMainLoop *self)
 
     prev_loop = pyg_save_current_main_loop(self->loop);
 
-    pyg_begin_allow_threads;
+    pyglib_begin_allow_threads;
     g_main_loop_run(self->loop);
-    pyg_end_allow_threads;
+    pyglib_end_allow_threads;
 
     pyg_restore_current_main_loop(prev_loop);
    
@@ -329,7 +338,7 @@ static PyMethodDef _PyGMainLoop_methods[] = {
 PyTypeObject PyGMainLoop_Type = {
     PyObject_HEAD_INIT(NULL)
     0,			
-    "gobject.MainLoop",	
+    "glib.MainLoop",	
     sizeof(PyGMainLoop),	
     0,			
     /* methods */
@@ -366,3 +375,9 @@ PyTypeObject PyGMainLoop_Type = {
     0,                 
     (initproc)pyg_main_loop_new,
 };
+
+void
+pyglib_mainloop_register_types(PyObject *d)
+{
+    PYGLIB_REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
+}

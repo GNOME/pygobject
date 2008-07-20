@@ -24,6 +24,7 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
 #include "pygobject-private.h"
 
 static void
@@ -185,11 +186,11 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     PyTypeObject *tp;
     g_return_val_if_fail(pointer_type != 0, NULL);
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     if (!pointer) {
 	Py_INCREF(Py_None);
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
 	return Py_None;
     }
 
@@ -198,7 +199,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     if (self == NULL)
 	return NULL;

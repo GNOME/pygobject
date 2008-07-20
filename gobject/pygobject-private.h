@@ -218,7 +218,8 @@ typedef struct {
     GSource *signal_source;
 } PyGMainLoop;
 
-extern PyTypeObject PyGMainLoop_Type;
+PyTypeObject *_PyGMainLoop_Type;
+#define PyGMainLoop_Type (*_PyGMainLoop_Type)
 
 /* pygmaincontext */
 
@@ -227,8 +228,8 @@ typedef struct {
     GMainContext *context;
 } PyGMainContext;
 
-extern PyTypeObject PyGMainContext_Type;
-PyObject * pyg_main_context_new (GMainContext *context);
+PyTypeObject *_PyGMainContext_Type;
+#define PyGMainContext_Type (*_PyGMainContext_Type)
 
 /* pygparamspec */
 

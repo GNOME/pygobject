@@ -51,8 +51,6 @@ _gobject_la_SOURCES = \
 	pygobject.c \
 	pygobject.h \
 	pygobject-private.h \
-	pygmaincontext.c \
-	pygmainloop.c \
 	pygparamspec.c \
 	pygpointer.c \
 	pygiochannel.c \

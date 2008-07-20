@@ -24,6 +24,7 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
 #include "pygobject-private.h"
 #include "pygobject.h"
 
@@ -43,7 +44,7 @@ static void
 destroy_g_group(PyGOptionGroup *self)
 {
     PyGILState_STATE state;
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     self->group = NULL;
     Py_CLEAR(self->callback);
@@ -56,7 +57,7 @@ destroy_g_group(PyGOptionGroup *self)
         Py_DECREF(self);
     }
         
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 static int
@@ -107,7 +108,7 @@ arg_func(const gchar *option_name,
     PyGILState_STATE state;
     gboolean no_error;
         
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
   
     if (value == NULL)
     {
@@ -123,13 +124,13 @@ arg_func(const gchar *option_name,
     if (ret != NULL)
     {
         Py_DECREF(ret);
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
         return TRUE;
     }
     else
     {
         no_error = pyg_gerror_exception_check(error) != -1;
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
         return no_error;
     }
 }

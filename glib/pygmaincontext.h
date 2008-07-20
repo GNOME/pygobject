@@ -19,37 +19,22 @@
  * USA
  */
 
-#ifndef __PYGLIB_H__
-#define __PYGLIB_H__
+#ifndef __PYG_MAINCONTEXT_H__
+#define __PYG_MAINCONTEXT_H__
 
 #include <Python.h>
-
 #include <glib.h>
 
-G_BEGIN_DECLS
+typedef struct {
+    PyObject_HEAD
+    GMainContext *context;
+} PyGMainContext;
 
-void pyglib_init(void);
-void pyglib_init_internal(PyObject *api);
-PyGILState_STATE pyglib_gil_state_ensure(void);
-void pyglib_gil_state_release(PyGILState_STATE state);
-gboolean pyglib_enable_threads(void);
-gboolean pyglib_error_check(GError **error);
-gboolean pyglib_gerror_exception_check(GError **error);
-gboolean pyglib_threads_enabled(void);
-PyObject *pyglib_main_context_new(GMainContext *context);
+extern PyTypeObject PyGMainContext_Type;
 
-#define pyglib_begin_allow_threads		\
-    G_STMT_START {                              \
-        PyThreadState *_save = NULL;            \
-        if (pyglib_threads_enabled())		\
-            _save = PyEval_SaveThread();
+PyObject * pyglib_main_context_new(GMainContext *context);
 
-#define pyglib_end_allow_threads                \
-        if (pyglib_threads_enabled())           \
-            PyEval_RestoreThread(_save);        \
-    } G_STMT_END
+void pyglib_maincontext_register_types(PyObject *d);
 
-G_END_DECLS
-
-#endif /* __PYGLIB_H__ */
+#endif /* __PYG_MAINCONTEXT_H__ */
 

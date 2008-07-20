@@ -4,6 +4,7 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
 #include "pygobject-private.h"
 #include "pythread.h"
 #include <structmember.h> /* for PyMemberDef */
@@ -441,7 +442,7 @@ pyg_iowatch_marshal(GIOChannel *source,
     g_return_val_if_fail(((PyGIOChannel *) data->iochannel)->channel == source,
                          FALSE);
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     if (data->user_data)
         ret = PyObject_CallFunction(data->callback, "OiO", data->iochannel,
@@ -457,7 +458,7 @@ pyg_iowatch_marshal(GIOChannel *source,
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return res;
 }

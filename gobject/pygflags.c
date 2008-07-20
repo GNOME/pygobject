@@ -25,6 +25,7 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
 #include "pygobject-private.h"
 
 #define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
@@ -212,7 +213,7 @@ pyg_flags_add (PyObject *   module,
         return NULL;
     }
     
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     instance_dict = PyDict_New();
     stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
@@ -221,7 +222,7 @@ pyg_flags_add (PyObject *   module,
     Py_DECREF(instance_dict);
     if (!stub) {
 	PyErr_SetString(PyExc_RuntimeError, "can't create const");
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
         return NULL;
     }
     
@@ -275,7 +276,7 @@ pyg_flags_add (PyObject *   module,
 
     g_type_class_unref(eclass);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return stub;
 }

@@ -1,6 +1,51 @@
 2008-07-20  Johan Dahlin  <johan@gnome.org>
 
 	* glib/Makefile.am:
+	* glib/glibmodule.c (pyglib_main_context_default), (init_glib):
+	* glib/pyglib.c (pyglib_init), (pyglib_threads_enabled),
+	(pyglib_main_context_new):
+	* glib/pyglib.h:
+	* glib/pygmaincontext.c (_wrap_g_main_context_iteration),
+	(pyglib_maincontext_register_types):
+	* glib/pygmaincontext.h:
+	* glib/pygmainloop.c (pyg_signal_watch_prepare),
+	(pyg_signal_watch_check), (pyg_main_loop_new),
+	(_wrap_g_main_loop_get_context), (_wrap_g_main_loop_run),
+	(pyglib_mainloop_register_types):
+	* glib/pygmainloop.h:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (pyg_destroy_notify), (pyobject_free),
+	(pyg_object_set_property), (pyg_object_get_property),
+	(_pyg_signal_accumulator), (pygobject__g_instance_init),
+	(pyg_handler_marshal), (pygobject_gil_state_ensure),
+	(pygobject_gil_state_release), (marshal_emission_hook),
+	(_log_func), (init_gobject):
+	* gobject/pygboxed.c (pyg_boxed_dealloc), (pyg_boxed_new):
+	* gobject/pygenum.c (pyg_enum_add):
+	* gobject/pygflags.c (pyg_flags_add):
+	* gobject/pygiochannel.c (pyg_iowatch_marshal):
+	* gobject/pygmaincontext.c:
+	* gobject/pygmainloop.c:
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_data_free), (pyg_toggle_notify),
+	(pygobject_new_with_interfaces), (pygobject_weak_ref_notify):
+	* gobject/pygobject.h:
+	* gobject/pygoptiongroup.c (destroy_g_group), (arg_func):
+	* gobject/pygpointer.c (pyg_pointer_new):
+	* gobject/pygsource.c (pyg_source_get_context),
+	(pyg_source_prepare), (pyg_source_check), (pyg_source_dispatch),
+	(pyg_source_finalize):
+	* gobject/pygtype.c (pyg_closure_invalidate),
+	(pyg_closure_marshal), (pyg_signal_class_closure_marshal):
+	* tests/common.py:
+
+	Move maincontext and mainloop over to glib.
+	Update the threadstate api to use the variant in glib.
+
+2008-07-20  Johan Dahlin  <johan@gnome.org>
+
+	* glib/Makefile.am:
 	* gobject/Makefile.am:
 	* gobject/__init__.py:
 	* gobject/gobjectmodule.c (pyg_threads_init), (pyg_error_check),

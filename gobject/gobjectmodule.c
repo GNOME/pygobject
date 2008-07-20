@@ -100,9 +100,9 @@ pyg_destroy_notify(gpointer user_data)
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
     Py_DECREF(obj);
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 
@@ -125,9 +125,9 @@ pyobject_free(gpointer boxed)
     PyObject *object = boxed;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
     Py_DECREF(object);
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 
@@ -240,9 +240,6 @@ pyg_lookup_interface_info(GType gtype)
 {
     return g_type_get_qdata(gtype, pyginterface_info_key);
 }
-
-/* -------------- GMainContext objects ---------------------------- */
-
 
 /* ---------------- gobject module functions -------------------- */
 
@@ -405,12 +402,12 @@ pyg_object_set_property (GObject *object, guint property_id,
     PyObject *py_pspec, *py_value;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
 	return;
     }
 
@@ -429,7 +426,7 @@ pyg_object_set_property (GObject *object, guint property_id,
     Py_DECREF(py_pspec);
     Py_DECREF(py_value);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 static void
@@ -440,12 +437,12 @@ pyg_object_get_property (GObject *object, guint property_id,
     PyObject *py_pspec;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     object_wrapper = pygobject_new(object);
 
     if (object_wrapper == NULL) {
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
 	return;
     }
 
@@ -459,7 +456,7 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_DECREF(py_pspec);
     Py_XDECREF(retval);
     
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 static void
@@ -486,7 +483,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
     PyGSignalAccumulatorData *data = _data;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
     if (ihint->detail)
         py_detail = PyString_FromString(g_quark_to_string(ihint->detail));
     else {
@@ -520,7 +517,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
         }
         Py_DECREF(py_retval);
     }
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
     return retval;
 }
 
@@ -1191,7 +1188,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
            * g_object_new -> we have no python wrapper, so create it
            * now */
         PyGILState_STATE state;
-        state = pyg_gil_state_ensure();
+        state = pyglib_gil_state_ensure();
         wrapper = pygobject_new_full(object, FALSE, g_class);
         args = PyTuple_New(0);
         kwargs = PyDict_New();
@@ -1199,7 +1196,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
             PyErr_Print();
         Py_DECREF(args);
         Py_DECREF(kwargs);
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
     }
 }
 
@@ -1905,7 +1902,7 @@ pyg_handler_marshal(gpointer user_data)
 
     g_return_val_if_fail(user_data != NULL, FALSE);
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     tuple = (PyObject *)user_data;
     ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
@@ -1918,27 +1915,21 @@ pyg_handler_marshal(gpointer user_data)
 	Py_DECREF(ret);
     }
     
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return res;
 }
 
-static PyObject *
-pyg_main_context_default(PyObject *unused)
-{
-    return pyg_main_context_new(g_main_context_default());
-}
-
 static int
-pyg_gil_state_ensure_py23 (void)
+pygobject_gil_state_ensure (void)
 {
-    return PyGILState_Ensure();
+    return pyglib_gil_state_ensure ();
 }
 
 static void
-pyg_gil_state_release_py23 (int flag)
+pygobject_gil_state_release (int flag)
 {
-    PyGILState_Release(flag);
+    pyglib_gil_state_release(flag);
 }
 
 static PyObject *
@@ -1973,7 +1964,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
     PyObject *params;
     guint i;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     /* construct Python tuple for the parameter values */
     params = PyTuple_New(n_param_values);
@@ -2004,7 +1995,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
     retval = (retobj == Py_True ? TRUE : FALSE);
     Py_XDECREF(retobj);
 out:
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
     return retval;
 }
 
@@ -2128,8 +2119,6 @@ static PyMethodDef pygobject_functions[] = {
       pyg_object_class_list_properties, METH_VARARGS },
     { "new",
       (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "main_context_default",
-      (PyCFunction)pyg_main_context_default, METH_NOARGS },
     { "threads_init",
       (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
     { "signal_accumulator_true_handled",
@@ -2536,9 +2525,9 @@ _log_func(const gchar *log_domain,
 	PyGILState_STATE state;
 	PyObject* warning = user_data;
 
-	state = pyg_gil_state_ensure();
+	state = pyglib_gil_state_ensure();
 	PyErr_Warn(warning, (char *) message);
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
     } else
         g_log_default_handler(log_domain, log_level, message, user_data);
 }
@@ -2649,8 +2638,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   FALSE, /* threads_enabled */
   pyglib_enable_threads,
-  pyg_gil_state_ensure_py23,
-  pyg_gil_state_release_py23,
+  pygobject_gil_state_ensure,
+  pygobject_gil_state_release,
   pyg_register_class_init,
   pyg_register_interface_info,
 
@@ -2691,6 +2680,7 @@ init_gobject(void)
     PyObject *m, *d, *o, *tuple, *features;
     PyObject *descr;
     PyObject *warning;
+    PyObject *glib;
     
     PyGParamSpec_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGParamSpec_Type))
@@ -2702,6 +2692,11 @@ init_gobject(void)
     PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);
 
     g_type_init();
+    pyglib_init();
+
+    glib = PyImport_ImportModule("glib");
+    _PyGMainLoop_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainLoop");
+    _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
 
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
@@ -2757,9 +2752,6 @@ init_gobject(void)
     REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
     PyGFlags_Type.tp_base = &PyInt_Type;
     REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
-
-    REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
-    REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
 
     REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
 

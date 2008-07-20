@@ -176,7 +176,6 @@ struct _PyGObject_Functions {
     gboolean threads_enabled;
     int       (*enable_threads) (void);
 
-    /* These 2 are deprecated */
     int       (*gil_state_ensure) (void);
     void      (*gil_state_release) (int flag);
     
@@ -254,6 +253,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_add               (_PyGObject_API->flags_add)
 #define pyg_flags_from_gtype        (_PyGObject_API->flags_from_gtype)
 #define pyg_enable_threads          (_PyGObject_API->enable_threads)
+#define pyg_gil_state_ensure        (_PyGObject_API->gil_state_ensure)
+#define pyg_gil_state_release       (_PyGObject_API->gil_state_release)
 #define pyg_register_class_init     (_PyGObject_API->register_class_init)
 #define pyg_register_interface_info (_PyGObject_API->register_interface_info)
 #define pygobject_construct         (_PyGObject_API->pygobject_construct)
@@ -265,7 +266,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
 #define pyg_option_group_new       (_PyGObject_API->option_group_new)
 
-
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
       (* _PyGObject_API->block_threads)();     \
@@ -276,14 +276,6 @@ struct _PyGObject_Functions *_PyGObject_API;
   } G_STMT_END
 
 #define pyg_threads_enabled (_PyGObject_API->threads_enabled)
-
-#define pyg_gil_state_ensure() \
-    (_PyGObject_API->threads_enabled ? \
-      (PyGILState_Ensure()) : 0)
-#define pyg_gil_state_release(state) G_STMT_START {     \
-    if (_PyGObject_API->threads_enabled)                \
-        PyGILState_Release(state);                      \
-    } G_STMT_END
 
 #define pyg_begin_allow_threads                 \
     G_STMT_START {                              \

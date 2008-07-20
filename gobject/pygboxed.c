@@ -24,15 +24,16 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
 #include "pygobject-private.h"
 
 static void
 pyg_boxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && self->boxed) {
-	PyGILState_STATE state = pyg_gil_state_ensure();
+	PyGILState_STATE state = pyglib_gil_state_ensure();
 	g_boxed_free(self->gtype, self->boxed);
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
     }
 
     self->ob_type->tp_free((PyObject *)self);
@@ -213,11 +214,11 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     g_return_val_if_fail(boxed_type != 0, NULL);
     g_return_val_if_fail(!copy_boxed || (copy_boxed && own_ref), NULL);
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     if (!boxed) {
 	Py_INCREF(Py_None);
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
 	return Py_None;
     }
 
@@ -227,7 +228,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self = PyObject_NEW(PyGBoxed, tp);
 
     if (self == NULL) {
-	pyg_gil_state_release(state);
+	pyglib_gil_state_release(state);
         return NULL;
     }
 
@@ -237,7 +238,7 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     self->gtype = boxed_type;
     self->free_on_dealloc = own_ref;
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
     
     return (PyObject *)self;
 }

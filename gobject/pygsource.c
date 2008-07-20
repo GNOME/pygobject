@@ -30,6 +30,7 @@
 #include "pygobject-private.h"
 #include "pythread.h"
 #include <structmember.h>
+#include <pyglib.h>
 
 
 #define CHECK_DESTROYED(self, ret)			G_STMT_START {	\
@@ -174,7 +175,7 @@ pyg_source_get_context(PyGSource *self)
     context = g_source_get_context(self->source);
 
     if (context) {
-	return pyg_main_context_new(context);
+	return pyglib_main_context_new(context);
     } else {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -397,7 +398,7 @@ pyg_source_prepare(GSource *source, gint *timeout)
     gboolean got_err = TRUE;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     t = PyObject_CallMethod(pysource->obj, "prepare", NULL);
 
@@ -433,7 +434,7 @@ bail:
 
     Py_XDECREF(t);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return ret;
 }
@@ -446,7 +447,7 @@ pyg_source_check(GSource *source)
     gboolean ret;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     t = PyObject_CallMethod(pysource->obj, "check", NULL);
 
@@ -458,7 +459,7 @@ pyg_source_check(GSource *source)
 	Py_DECREF(t);
     }
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return ret;
 }
@@ -471,7 +472,7 @@ pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
     gboolean ret;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     if (callback) {
 	tuple = user_data;
@@ -493,7 +494,7 @@ pyg_source_dispatch(GSource *source, GSourceFunc callback, gpointer user_data)
 	Py_DECREF(t);
     }
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return ret;
 }
@@ -505,7 +506,7 @@ pyg_source_finalize(GSource *source)
     PyObject *func, *t;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     func = PyObject_GetAttrString(pysource->obj, "finalize");
     if (func) {
@@ -519,7 +520,7 @@ pyg_source_finalize(GSource *source)
 	}
     }
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 static GSourceFuncs pyg_source_funcs =

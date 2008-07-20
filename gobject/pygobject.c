@@ -19,6 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  */
+
+#include <pyglib.h>
 #include "pygobject-private.h"
 
 static void pygobject_dealloc(PyGObject *self);
@@ -35,7 +37,7 @@ static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObj
 void
 pygobject_data_free(PyGObjectData *data)
 {
-    PyGILState_STATE state = pyg_gil_state_ensure();
+    PyGILState_STATE state = pyglib_gil_state_ensure();
     GSList *closures, *tmp;
     Py_DECREF(data->type);
     tmp = closures = data->closures;
@@ -58,7 +60,7 @@ pygobject_data_free(PyGObjectData *data)
  	g_warning("invalidated all closures, but data->closures != NULL !");
 
     g_free(data);
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
 static inline PyGObjectData *
@@ -629,14 +631,14 @@ pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
     PyGObject *self = (PyGObject*) data;
     PyGILState_STATE state;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     if (is_last_ref)
 	Py_DECREF(self);
     else
         Py_INCREF(self);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 }
 
   /* Called when the inst_dict is first created; switches the 
@@ -744,7 +746,7 @@ pygobject_new_with_interfaces(GType gtype)
     PyObject *modules, *module;
     gchar *type_name, *mod_name, *gtype_name;
 
-    state = pyg_gil_state_ensure();
+    state = pyglib_gil_state_ensure();
 
     bases = pyg_type_get_bases(gtype);
     py_parent_type = (PyTypeObject *) PyTuple_GetItem(bases, 0);
@@ -787,7 +789,7 @@ pygobject_new_with_interfaces(GType gtype)
 
     if (type == NULL) {
 	PyErr_Print();
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
 	return NULL;
     }
 
@@ -810,7 +812,7 @@ pygobject_new_with_interfaces(GType gtype)
 
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
 	return NULL;
     }
     /* insert type name in module dict */
@@ -824,7 +826,7 @@ pygobject_new_with_interfaces(GType gtype)
     Py_INCREF(type);
     g_type_set_qdata(gtype, pygobject_class_key, type);
 
-    pyg_gil_state_release(state);
+    pyglib_gil_state_release(state);
 
     return type;
 }
@@ -2131,7 +2133,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
     self->obj = NULL;
     if (self->callback) {
         PyObject *retval;
-        PyGILState_STATE state = pyg_gil_state_ensure();
+        PyGILState_STATE state = pyglib_gil_state_ensure();
         retval = PyObject_Call(self->callback, self->user_data, NULL);
         if (retval) {
             if (retval != Py_None)
@@ -2149,7 +2151,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
             self->have_floating_ref = FALSE;
             Py_DECREF((PyObject *) self);
         }
-        pyg_gil_state_release(state);
+        pyglib_gil_state_release(state);
     }
 }
 

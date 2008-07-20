@@ -27,9 +27,13 @@
 #include <pythread.h>
 #include "pyglib.h"
 #include "pyglib-private.h"
+#include "pygmaincontext.h"
 
 static struct _PyGLib_Functions *_PyGLib_API;
 static int pyglib_thread_state_tls_key;
+
+static PyTypeObject *_PyGMainContext_Type;
+#define PyGMainContext_Type (*_PyGMainContext_Type)
 
 void
 pyglib_init(void)
@@ -63,12 +67,20 @@ pyglib_init(void)
 			"could not import glib (could not find _PyGLib_API object)");
 	Py_DECREF(glib);
     }
+
+    _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
 }
 
 void
 pyglib_init_internal(PyObject *api)
 {
     _PyGLib_API = (struct _PyGLib_Functions *) PyCObject_AsVoidPtr(api);
+}
+
+gboolean
+pyglib_threads_enabled(void)
+{
+    return _PyGLib_API->threads_enabled;
 }
 
 PyGILState_STATE
@@ -254,4 +266,26 @@ bad_gerror:
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;
+}
+
+/**
+ * pyglib_main_context_new:
+ * @context: a GMainContext.
+ *
+ * Creates a wrapper for a GMainContext.
+ *
+ * Returns: the GMainContext wrapper.
+ */
+PyObject *
+pyglib_main_context_new(GMainContext *context)
+{
+    PyGMainContext *self;
+
+    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
+					  &PyGMainContext_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->context = g_main_context_ref(context);
+    return (PyObject *)self;
 }
