@@ -163,7 +163,8 @@ else
 fi
 if test x"$with_libffi" == xyes && test x"$have_libffi" != xyes ; then
   AC_MSG_ERROR([ffi requested, but not found])
-else
+fi
+if test x"$with_libffi" == xyes; then
   AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
 fi
 AC_MSG_RESULT([$have_libffi])
