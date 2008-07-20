@@ -1,5 +1,11 @@
 2008-07-20  Johan Dahlin  <johan@gnome.org>
 
+	* configure.ac:
+	* gobject/Makefile.am:
+	Use pkg-config to check for libffi again.
+
+2008-07-20  Johan Dahlin  <johan@gnome.org>
+
 	* glib/Makefile.am:
 	* glib/glibmodule.c (pyg_main_context_default):
 	* glib/pyglib.c (pyglib_gerror_exception_check):
