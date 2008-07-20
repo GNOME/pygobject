@@ -32,7 +32,9 @@ void pyglib_init(void);
 void pyglib_init_internal(PyObject *api);
 PyGILState_STATE pyglib_gil_state_ensure(void);
 void pyglib_gil_state_release(PyGILState_STATE state);
+gboolean pyglib_enable_threads(void);
 gboolean pyglib_error_check(GError **error);
+gboolean pyglib_gerror_exception_check(GError **error);
 
 G_END_DECLS
 

@@ -343,14 +343,13 @@ pyg_source_remove(PyObject *self, PyObject *args)
     return PyBool_FromLong(g_source_remove(tag));
 }
 
+#ifdef FIXME
 static PyObject *
 pyg_main_context_default(PyObject *unused)
 {
-#ifdef FIXME
     return pyg_main_context_new(g_main_context_default());
-#endif
-    return NULL;
 }
+#endif
 
 struct _PyGChildData {
     PyObject *func;
@@ -599,9 +598,10 @@ static PyMethodDef pyglib_functions[] = {
       (PyCFunction)pyg_set_prgname, METH_VARARGS },
     { "main_depth",
       (PyCFunction)pyg_main_depth, METH_NOARGS },
+#if 0
     { "main_context_default",
       (PyCFunction)pyg_main_context_default, METH_NOARGS },
-
+#endif
     { NULL, NULL, 0 }
 };
 

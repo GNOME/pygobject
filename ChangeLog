@@ -1,5 +1,14 @@
 2008-07-20  Johan Dahlin  <johan@gnome.org>
 
+	* glib/Makefile.am:
+	* glib/glibmodule.c (pyg_main_context_default):
+	* glib/pyglib.c (pyglib_gerror_exception_check):
+	* glib/pyglib.h:
+	Rename helper library to libpyglib-2.0.
+	Move over pyg_gerror_exception_check as well.
+
+2008-07-20  Johan Dahlin  <johan@gnome.org>
+
 	* Makefile.am:
 	* configure.ac:
 	* glib/Makefile.am:
