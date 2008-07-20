@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs codegen gobject gio examples tests
+SUBDIRS = docs codegen glib gobject gio examples tests
 
 PLATFORM_VERSION = 2.0
 

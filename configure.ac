@@ -228,6 +228,7 @@ AC_CONFIG_FILES(
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
+  glib/Makefile
   gobject/Makefile
   gio/Makefile
   examples/Makefile
