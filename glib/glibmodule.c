@@ -28,7 +28,6 @@
 #include <Python.h>
 #include <glib.h>
 #include "pyglib.h"
-
 #include "pyglib-private.h"
 #include "pygiochannel.h"
 #include "pygmaincontext.h"
@@ -42,6 +41,11 @@
 
 
 /* ---------------- glib module functions -------------------- */
+
+struct _PyGChildData {
+    PyObject *func;
+    PyObject *data;
+};
 
 static gint
 get_handler_priority(gint *priority, PyObject *kwargs)
@@ -84,7 +88,7 @@ get_handler_priority(gint *priority, PyObject *kwargs)
 }
 
 static PyObject *
-pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
+pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
     gint len, priority = G_PRIORITY_DEFAULT_IDLE;
@@ -123,7 +127,7 @@ pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 
 
 static PyObject *
-pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
+pyglib_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
     gint len, priority = G_PRIORITY_DEFAULT;
@@ -162,7 +166,7 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
+pyglib_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
     gint len, priority = G_PRIORITY_DEFAULT;
@@ -243,7 +247,7 @@ iowatch_marshal(GIOChannel *source,
 }
 
 static PyObject *
-pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
+pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
     gint fd, priority = G_PRIORITY_DEFAULT, condition;
@@ -291,7 +295,7 @@ pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyg_source_remove(PyObject *self, PyObject *args)
+pyglib_source_remove(PyObject *self, PyObject *args)
 {
     guint tag;
 
@@ -306,11 +310,6 @@ pyglib_main_context_default(PyObject *unused)
 {
     return pyglib_main_context_new(g_main_context_default());
 }
-
-struct _PyGChildData {
-    PyObject *func;
-    PyObject *data;
-};
 
 static void
 child_watch_func(GPid pid, gint status, gpointer data)
@@ -345,7 +344,7 @@ child_watch_dnotify(gpointer data)
 
 
 static PyObject *
-pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
+pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "pid", "function", "data", "priority", NULL };
     guint id;
@@ -376,7 +375,7 @@ pyg_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
+pyglib_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "text", NULL };
     char *text_in, *text_out;
@@ -395,7 +394,7 @@ pyg_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyg_get_current_time(PyObject *unused)
+pyglib_get_current_time(PyObject *unused)
 {
     GTimeVal timeval;
     double ret;
@@ -406,13 +405,13 @@ pyg_get_current_time(PyObject *unused)
 }
 
 static PyObject *
-pyg_main_depth(PyObject *unused)
+pyglib_main_depth(PyObject *unused)
 {
     return PyInt_FromLong(g_main_depth());
 }
 
 static PyObject *
-pyg_filename_display_name(PyObject *self, PyObject *args)
+pyglib_filename_display_name(PyObject *self, PyObject *args)
 {
     PyObject *py_display_name;
     char *filename, *display_name;
@@ -428,7 +427,7 @@ pyg_filename_display_name(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_filename_display_basename(PyObject *self, PyObject *args)
+pyglib_filename_display_basename(PyObject *self, PyObject *args)
 {
     PyObject *py_display_basename;
     char *filename, *display_basename;
@@ -444,7 +443,7 @@ pyg_filename_display_basename(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_filename_from_utf8(PyObject *self, PyObject *args)
+pyglib_filename_from_utf8(PyObject *self, PyObject *args)
 {
     char *filename, *utf8string;
     Py_ssize_t utf8string_len;
@@ -467,8 +466,8 @@ pyg_filename_from_utf8(PyObject *self, PyObject *args)
 }
 
 
-PyObject*
-pyg_get_application_name(PyObject *self)
+static PyObject*
+pyglib_get_application_name(PyObject *self)
 {
     const char *name;
 
@@ -480,8 +479,8 @@ pyg_get_application_name(PyObject *self)
     return PyString_FromString(name);
 }
 
-PyObject*
-pyg_set_application_name(PyObject *self, PyObject *args)
+static PyObject*
+pyglib_set_application_name(PyObject *self, PyObject *args)
 {
     char *s;
 
@@ -492,8 +491,8 @@ pyg_set_application_name(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-PyObject*
-pyg_get_prgname(PyObject *self)
+static PyObject*
+pyglib_get_prgname(PyObject *self)
 {
     char *name;
 
@@ -505,8 +504,8 @@ pyg_get_prgname(PyObject *self)
     return PyString_FromString(name);
 }
 
-PyObject*
-pyg_set_prgname(PyObject *self, PyObject *args)
+static PyObject*
+pyglib_set_prgname(PyObject *self, PyObject *args)
 {
     char *s;
 
@@ -523,49 +522,48 @@ static PyMethodDef pyglib_functions[] = {
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS },
     { "main_context_default",
       (PyCFunction)pyglib_main_context_default, METH_NOARGS },
-
     { "idle_add",
-      (PyCFunction)pyg_idle_add, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_idle_add, METH_VARARGS|METH_KEYWORDS },
     { "timeout_add",
-      (PyCFunction)pyg_timeout_add, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_timeout_add, METH_VARARGS|METH_KEYWORDS },
     { "timeout_add_seconds",
-      (PyCFunction)pyg_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
     { "io_add_watch",
-      (PyCFunction)pyg_io_add_watch, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_io_add_watch, METH_VARARGS|METH_KEYWORDS },
     { "source_remove",
-      pyg_source_remove, METH_VARARGS },
+      (PyCFunction)pyglib_source_remove, METH_VARARGS },
     { "child_watch_add",
-      (PyCFunction)pyg_child_watch_add, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_child_watch_add, METH_VARARGS|METH_KEYWORDS },
     { "markup_escape_text",
-      (PyCFunction)pyg_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { "get_current_time",
-      (PyCFunction)pyg_get_current_time, METH_NOARGS },
+      (PyCFunction)pyglib_get_current_time, METH_NOARGS },
     { "filename_display_name",
-      (PyCFunction)pyg_filename_display_name, METH_VARARGS },
+      (PyCFunction)pyglib_filename_display_name, METH_VARARGS },
     { "filename_display_basename",
-      (PyCFunction)pyg_filename_display_basename, METH_VARARGS },
+      (PyCFunction)pyglib_filename_display_basename, METH_VARARGS },
     { "filename_from_utf8",
-      (PyCFunction)pyg_filename_from_utf8, METH_VARARGS },
+      (PyCFunction)pyglib_filename_from_utf8, METH_VARARGS },
     { "get_application_name",
-      (PyCFunction)pyg_get_application_name, METH_NOARGS },
+      (PyCFunction)pyglib_get_application_name, METH_NOARGS },
     { "set_application_name",
-      (PyCFunction)pyg_set_application_name, METH_VARARGS },
+      (PyCFunction)pyglib_set_application_name, METH_VARARGS },
     { "get_prgname",
-      (PyCFunction)pyg_get_prgname, METH_NOARGS },
+      (PyCFunction)pyglib_get_prgname, METH_NOARGS },
     { "set_prgname",
-      (PyCFunction)pyg_set_prgname, METH_VARARGS },
+      (PyCFunction)pyglib_set_prgname, METH_VARARGS },
     { "main_depth",
-      (PyCFunction)pyg_main_depth, METH_NOARGS },
-
-
+      (PyCFunction)pyglib_main_depth, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
 /* ----------------- glib module initialisation -------------- */
 
-struct _PyGLib_Functions pyglib_api_functions = {
+static struct _PyGLib_Functions pyglib_api = {
     FALSE, /* threads_enabled */
-    NULL  /* gerror_exception */
+    NULL,  /* gerror_exception */
+    NULL,  /* block_threads */
+    NULL  /* unblock_threads */
 };
 
 static void
@@ -575,7 +573,7 @@ pyglib_register_api(PyObject *d)
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGLib_API",
-			 o=PyCObject_FromVoidPtr(&pyglib_api_functions,NULL));
+			 o=PyCObject_FromVoidPtr(&pyglib_api,NULL));
     Py_DECREF(o);
     
     pyglib_init_internal(o);
@@ -596,7 +594,7 @@ pyglib_register_error(PyObject *d)
     Py_DECREF(dict);
 
     PyDict_SetItemString(d, "GError", gerror_class);
-    pyglib_api_functions.gerror_exception = gerror_class;
+    pyglib_api.gerror_exception = gerror_class;
 }
 
 static void

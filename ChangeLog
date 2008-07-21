@@ -1,5 +1,19 @@
 2008-07-21  Johan Dahlin  <johan@gnome.org>
 
+	* glib/glibmodule.c (pyglib_idle_add), (pyglib_timeout_add),
+	(pyglib_timeout_add_seconds), (pyglib_io_add_watch),
+	(pyglib_source_remove), (pyglib_child_watch_add),
+	(pyglib_markup_escape_text), (pyglib_get_current_time),
+	(pyglib_main_depth), (pyglib_filename_display_name),
+	(pyglib_filename_display_basename), (pyglib_filename_from_utf8),
+	(pyglib_get_application_name), (pyglib_set_application_name),
+	(pyglib_get_prgname), (pyglib_set_prgname), (pyglib_register_api),
+	(pyglib_register_error):
+	Mark as static, rename from pyg_* -> pyglib_*. Fill in api struct,
+	rename struct and remove function suffix.
+
+2008-07-21  Johan Dahlin  <johan@gnome.org>
+
 	* glib/Makefile.am:
 	* glib/glibmodule.c (pyg_idle_add), (pyg_timeout_add),
 	(pyg_timeout_add_seconds), (pyg_io_add_watch),
