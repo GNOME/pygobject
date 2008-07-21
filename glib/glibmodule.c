@@ -30,32 +30,15 @@
 #include "pyglib.h"
 
 #include "pyglib-private.h"
+#include "pygiochannel.h"
 #include "pygmaincontext.h"
 #include "pygmainloop.h"
+#include "pygsource.h"
 #include "pygspawn.h"
 
 #define PYGLIB_MAJOR_VERSION PYGOBJECT_MAJOR_VERSION
 #define PYGLIB_MINOR_VERSION PYGOBJECT_MINOR_VERSION
 #define PYGLIB_MICRO_VERSION PYGOBJECT_MICRO_VERSION
-
-/**
- * pyg_destroy_notify:
- * @user_data: a PyObject pointer.
- *
- * A function that can be used as a GDestroyNotify callback that will
- * call Py_DECREF on the data.
- */
-void
-pyg_destroy_notify(gpointer user_data)
-{
-    PyObject *obj = (PyObject *)user_data;
-    PyGILState_STATE state;
-
-    state = pyglib_gil_state_ensure();
-    Py_DECREF(obj);
-    pyglib_gil_state_release(state);
-}
-
 
 
 /* ---------------- glib module functions -------------------- */
@@ -100,33 +83,6 @@ get_handler_priority(gint *priority, PyObject *kwargs)
     return 0;
 }
 
-gboolean
-pyg_handler_marshal(gpointer user_data)
-{
-    PyObject *tuple, *ret;
-    gboolean res;
-    PyGILState_STATE state;
-
-    g_return_val_if_fail(user_data != NULL, FALSE);
-
-    state = pyglib_gil_state_ensure();
-
-    tuple = (PyObject *)user_data;
-    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
-			      PyTuple_GetItem(tuple, 1));
-    if (!ret) {
-	PyErr_Print();
-	res = FALSE;
-    } else {
-	res = PyObject_IsTrue(ret);
-	Py_DECREF(ret);
-    }
-    
-    pyglib_gil_state_release(state);
-
-    return res;
-}
-
 static PyObject *
 pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -160,8 +116,8 @@ pyg_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
 	return NULL;
-    handler_id = g_idle_add_full(priority, pyg_handler_marshal, data,
-				 pyg_destroy_notify);
+    handler_id = g_idle_add_full(priority, pyglib_handler_marshal, data,
+				 pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -200,8 +156,8 @@ pyg_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     if (data == NULL)
 	return NULL;
     handler_id = g_timeout_add_full(priority, interval,
-				    pyg_handler_marshal, data,
-				    pyg_destroy_notify);
+				    pyglib_handler_marshal, data,
+				    pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -239,8 +195,8 @@ pyg_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
     if (data == NULL)
 	return NULL;
     handler_id = g_timeout_add_seconds_full(priority, interval,
-                                            pyg_handler_marshal, data,
-                                            pyg_destroy_notify);
+                                            pyglib_handler_marshal, data,
+                                            pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -328,7 +284,7 @@ pyg_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     iochannel = g_io_channel_unix_new(fd);
     handler_id = g_io_add_watch_full(iochannel, priority, condition,
 				     iowatch_marshal, data,
-				     (GDestroyNotify)pyg_destroy_notify);
+				     (GDestroyNotify)pyglib_destroy_notify);
     g_io_channel_unref(iochannel);
     
     return PyInt_FromLong(handler_id);
@@ -613,7 +569,7 @@ struct _PyGLib_Functions pyglib_api_functions = {
 };
 
 static void
-pyg_register_api(PyObject *d)
+pyglib_register_api(PyObject *d)
 {
     PyObject *o;
 
@@ -626,7 +582,7 @@ pyg_register_api(PyObject *d)
 }
 
 static void
-pyg_register_error(PyObject *d)
+pyglib_register_error(PyObject *d)
 {
     PyObject *dict;
     PyObject *gerror_class;
@@ -644,7 +600,7 @@ pyg_register_error(PyObject *d)
 }
 
 static void
-pyg_register_version_tuples(PyObject *d)
+pyglib_register_version_tuples(PyObject *d)
 {
     PyObject *o;
 
@@ -671,11 +627,12 @@ init_glib(void)
     m = Py_InitModule("glib._glib", pyglib_functions);
     d = PyModule_GetDict(m);
 
-    pyg_register_api(d);
-    pyg_register_error(d);
-    pyg_register_version_tuples(d);
-    pyg_spawn_register_types(d);
-
+    pyglib_register_api(d);
+    pyglib_register_error(d);
+    pyglib_register_version_tuples(d);
+    pyglib_iochannel_register_types(d);
     pyglib_mainloop_register_types(d);
     pyglib_maincontext_register_types(d);
+    pyglib_source_register_types(d);
+    pyglib_spawn_register_types(d);
 }

@@ -4,11 +4,12 @@
 #  include <config.h>
 #endif
 
-#include <pyglib.h>
-#include "pygobject-private.h"
-#include "pythread.h"
+#include <Python.h>
+#include <pythread.h>
 #include <structmember.h> /* for PyMemberDef */
 
+#include "pyglib.h"
+#include "pyglib-private.h"
 
 typedef struct {
     PyObject_HEAD
@@ -27,7 +28,7 @@ py_io_channel_next(PyGIOChannel *self)
 
     status = g_io_channel_read_line(self->channel, &str_return, &length,
                                     &terminator_pos, &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
         return NULL;
 
     if (status == G_IO_STATUS_EOF) {
@@ -82,7 +83,7 @@ py_io_channel_shutdown(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     ret = g_io_channel_shutdown(self->channel, PyObject_IsTrue(flush), &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
 	return NULL;
 	
     return PyInt_FromLong(ret);
@@ -160,7 +161,7 @@ py_io_channel_set_encoding(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
     
     g_io_channel_set_encoding(self->channel, encoding, &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
 	return NULL;
     
     Py_INCREF(Py_None);
@@ -230,11 +231,11 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
        
         buf = PyString_AS_STRING(ret_obj) + total_read;
 
-        pyg_unblock_threads();
+        pyglib_unblock_threads();
         status = g_io_channel_read_chars(self->channel, buf, buf_size, 
                                          &single_read, &error);
-        pyg_block_threads();
-	if (pyg_error_check(&error))
+        pyglib_block_threads();
+	if (pyglib_error_check(&error))
 	    goto failure;
 	
 	total_read += single_read;
@@ -265,10 +266,10 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
                                      kwlist, &buf, &buf_len))
         return NULL;
 	
-    pyg_unblock_threads();
+    pyglib_unblock_threads();
     status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
-    pyg_block_threads();
-    if (pyg_error_check(&error))
+    pyglib_block_threads();
+    if (pyglib_error_check(&error))
 	return NULL;
 	
     return PyInt_FromLong(count);
@@ -304,11 +305,11 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             return NULL;
         }
         PyString_AsStringAndSize(value, &buf, &buf_len);
-        pyg_unblock_threads();
+        pyglib_unblock_threads();
         status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
-        pyg_unblock_threads();
+        pyglib_unblock_threads();
         Py_DECREF(value);
-        if (pyg_error_check(&error)) {
+        if (pyglib_error_check(&error)) {
             Py_DECREF(iter);
             return NULL;
         }
@@ -330,10 +331,10 @@ py_io_channel_flush(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
                                      kwlist))
         return NULL;
 	
-    pyg_unblock_threads();
+    pyglib_unblock_threads();
     status = g_io_channel_flush(self->channel, &error);
-    pyg_block_threads();
-    if (pyg_error_check(&error))
+    pyglib_block_threads();
+    if (pyglib_error_check(&error))
 	return NULL;
 	
     return PyInt_FromLong(status);
@@ -352,7 +353,7 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     status = g_io_channel_set_flags(self->channel, flags, &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
 	return NULL;
 	
     return PyInt_FromLong(status);
@@ -576,7 +577,7 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 
     status = g_io_channel_read_line(self->channel, &str_return, &length,
                                     &terminator_pos, &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
         return NULL;
     ret_obj = PyString_FromStringAndSize(str_return, length);
     g_free(str_return);
@@ -603,7 +604,7 @@ py_io_channel_read_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     while (status == G_IO_STATUS_NORMAL) {
         status = g_io_channel_read_line(self->channel, &str_return, &length,
                                         &terminator_pos, &error);
-        if (pyg_error_check(&error)) {
+        if (pyglib_error_check(&error)) {
             Py_DECREF(line);
             return NULL;
         }
@@ -645,7 +646,7 @@ py_io_channel_seek(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	
     status = g_io_channel_seek_position(self->channel, offset,
                                         seek_type, &error);
-    if (pyg_error_check(&error))
+    if (pyglib_error_check(&error))
 	return NULL;
 	
     return PyInt_FromLong(status);
@@ -742,7 +743,7 @@ py_io_channel_init(PyGIOChannel *self, PyObject *args, PyObject *kwargs)
         self->channel = g_io_channel_unix_new(fd);
     else if (filename != NULL) {
         self->channel = g_io_channel_new_file(filename, mode, &error);
-        if (pyg_error_check(&error))
+        if (pyglib_error_check(&error))
             return -1;
     }
 #ifdef G_OS_WIN32
@@ -810,3 +811,8 @@ PyTypeObject PyGIOChannel_Type = {
     (PyObject *)0,			/* tp_bases */
 };
 
+void
+pyglib_iochannel_register_types(PyObject *d)
+{
+    PYGLIB_REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
+}

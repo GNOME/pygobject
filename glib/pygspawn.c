@@ -290,7 +290,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 }
 
 void
-pyg_spawn_register_types(PyObject *d)
+pyglib_spawn_register_types(PyObject *d)
 {
     PyGPid_Type.tp_base = &PyInt_Type;
     PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");

@@ -27,11 +27,14 @@
 #  include <config.h>
 #endif
 
-#include "pygobject-private.h"
-#include "pythread.h"
-#include <structmember.h>
-#include <pyglib.h>
+#include <Python.h>
+#include <pythread.h>
+#include <structmember.h> /* for PyMemberDef */
 
+#include "pyglib.h"
+#include "pyglib-private.h"
+#include "pygmaincontext.h"
+#include "pygsource.h"
 
 #define CHECK_DESTROYED(self, ret)			G_STMT_START {	\
     if ((self)->source == NULL) {					\
@@ -158,8 +161,9 @@ pyg_source_set_callback(PyGSource *self, PyObject *args)
     if (data == NULL)
 	return NULL;
 
-    g_source_set_callback(self->source, pyg_handler_marshal, data,
-			  pyg_destroy_notify);
+    g_source_set_callback(self->source,
+			  pyglib_handler_marshal, data,
+			  pyglib_destroy_notify);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -845,3 +849,12 @@ PyTypeObject PyGPollFD_Type = {
     (inquiry)0,				/* tp_is_gc */
     (PyObject *)0,			/* tp_bases */
 };
+
+void
+pyglib_source_register_types(PyObject *d)
+{
+    PYGLIB_REGISTER_TYPE(d, PyGSource_Type, "Source");
+    PYGLIB_REGISTER_TYPE(d, PyGIdle_Type, "Idle");
+    PYGLIB_REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
+    PYGLIB_REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
+}

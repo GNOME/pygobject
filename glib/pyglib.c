@@ -80,12 +80,16 @@ pyglib_init_internal(PyObject *api)
 gboolean
 pyglib_threads_enabled(void)
 {
+    g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
+
     return _PyGLib_API->threads_enabled;
 }
 
 PyGILState_STATE
 pyglib_gil_state_ensure(void)
 {
+    g_return_val_if_fail (_PyGLib_API != NULL, PyGILState_LOCKED);
+
     if (!_PyGLib_API->threads_enabled)
 	return PyGILState_LOCKED;
 
@@ -95,6 +99,8 @@ pyglib_gil_state_ensure(void)
 void
 pyglib_gil_state_release(PyGILState_STATE state)
 {
+    g_return_if_fail (_PyGLib_API != NULL);
+
     if (!_PyGLib_API->threads_enabled)
 	return;
 
@@ -116,6 +122,8 @@ pyglib_enable_threads(void)
 gboolean
 pyglib_enable_threads(void)
 {
+    g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
+
     if (_PyGLib_API->threads_enabled)
 	return TRUE;
   
@@ -140,6 +148,47 @@ void
 pyglib_gil_state_release_py23 (int flag)
 {
     PyGILState_Release(flag);
+}
+
+/**
+ * pyglib_block_threads:
+ *
+ */
+void
+pyglib_block_threads(void)
+{
+    g_return_if_fail (_PyGLib_API != NULL);
+
+    if (_PyGLib_API->block_threads != NULL)
+	(* _PyGLib_API->block_threads)();
+}
+
+/**
+ * pyglib_unblock_threads:
+ *
+ */
+void
+pyglib_unblock_threads(void)
+{
+    g_return_if_fail (_PyGLib_API != NULL);
+    if (_PyGLib_API->unblock_threads != NULL)
+	(* _PyGLib_API->unblock_threads)();
+}
+
+/**
+ * pyglib_set_thread_block_funcs:
+ *
+ * hooks to register handlers for getting GDK threads to cooperate
+ * with python threading
+ */
+void
+pyglib_set_thread_block_funcs (PyGLibThreadBlockFunc block_threads_func,
+			       PyGLibThreadBlockFunc unblock_threads_func)
+{
+    g_return_if_fail (_PyGLib_API != NULL);
+
+    _PyGLib_API->block_threads = block_threads_func;
+    _PyGLib_API->unblock_threads = unblock_threads_func;
 }
 
 
@@ -288,4 +337,51 @@ pyglib_main_context_new(GMainContext *context)
 
     self->context = g_main_context_ref(context);
     return (PyObject *)self;
+}
+
+gboolean
+pyglib_handler_marshal(gpointer user_data)
+{
+    PyObject *tuple, *ret;
+    gboolean res;
+    PyGILState_STATE state;
+
+    g_return_val_if_fail(user_data != NULL, FALSE);
+
+    state = pyglib_gil_state_ensure();
+
+    tuple = (PyObject *)user_data;
+    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
+			      PyTuple_GetItem(tuple, 1));
+    if (!ret) {
+	PyErr_Print();
+	res = FALSE;
+    } else {
+	res = PyObject_IsTrue(ret);
+	Py_DECREF(ret);
+    }
+    
+    pyglib_gil_state_release(state);
+
+    return res;
+}
+
+/**
+ * pyglib_destroy_notify:
+ * @user_data: a PyObject pointer.
+ *
+ * A function that can be used as a GDestroyNotify callback that will
+ * call Py_DECREF on the data.
+ */
+void
+pyglib_destroy_notify(gpointer user_data)
+{
+    PyObject *obj = (PyObject *)user_data;
+    PyGILState_STATE state;
+
+    g_return_if_fail (_PyGLib_API != NULL);
+    
+    state = pyglib_gil_state_ensure();
+    Py_DECREF(obj);
+    pyglib_gil_state_release(state);
 }

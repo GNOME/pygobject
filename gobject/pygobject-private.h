@@ -145,6 +145,13 @@ extern PyTypeObject PyGInterface_Type;
 extern PyTypeObject PyGProps_Type;
 extern PyTypeObject PyGPropsDescr_Type;
 extern PyTypeObject PyGPropsIter_Type;
+
+  /* Data that belongs to the GObject instance, not the Python wrapper */
+struct _PyGObjectData {
+    PyTypeObject *type; /* wrapper type for this instance */
+    GSList *closures;
+};
+
 void          pygobject_register_class   (PyObject *dict,
 					  const gchar *type_name,
 					  GType gtype, PyTypeObject *type,
@@ -235,28 +242,6 @@ PyTypeObject *_PyGMainContext_Type;
 
 extern PyTypeObject PyGParamSpec_Type;
 PyObject * pyg_param_spec_new (GParamSpec *pspec);
-
-/* pygiochannel.c */
-extern PyTypeObject PyGIOChannel_Type;
-
-/* pygsource.c */
-extern PyTypeObject PyGSource_Type;
-extern PyTypeObject PyGIdle_Type;
-extern PyTypeObject PyGTimeout_Type;
-extern PyTypeObject PyGPollFD_Type;
-
-typedef struct
-{
-    PyObject_HEAD
-    GPollFD pollfd;
-    PyObject *fd_obj;
-} PyGPollFD;
-
-  /* Data that belongs to the GObject instance, not the Python wrapper */
-struct _PyGObjectData {
-    PyTypeObject *type; /* wrapper type for this instance */
-    GSList *closures;
-};
 
 /* pygoption.c */
 extern PyTypeObject PyGOptionContext_Type;

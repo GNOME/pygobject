@@ -28,6 +28,8 @@
 
 G_BEGIN_DECLS
 
+typedef void (*PyGLibThreadBlockFunc) (void);
+
 void pyglib_init(void);
 void pyglib_init_internal(PyObject *api);
 PyGILState_STATE pyglib_gil_state_ensure(void);
@@ -37,6 +39,10 @@ gboolean pyglib_error_check(GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
 gboolean pyglib_threads_enabled(void);
 PyObject *pyglib_main_context_new(GMainContext *context);
+gboolean pyglib_handler_marshal(gpointer user_data);
+void pyglib_destroy_notify(gpointer user_data);
+void pyglib_set_thread_block_funcs(PyGLibThreadBlockFunc block_threads_func,
+				   PyGLibThreadBlockFunc unblock_threads_func);
 
 #define pyglib_begin_allow_threads		\
     G_STMT_START {                              \

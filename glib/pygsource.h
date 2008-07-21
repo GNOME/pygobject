@@ -19,14 +19,21 @@
  * USA
  */
 
-#ifndef __PYG_PID_H__
-#define __PYG_PID_H__
+#ifndef __PYG_SOURCE_H__
+#define __PYG_SOURCE_H__
 
-PyObject * pyg_pid_new(GPid pid);
-void pyglib_spawn_register_types(PyObject *d);
+extern PyTypeObject PyGSource_Type;
+extern PyTypeObject PyGIdle_Type;
+extern PyTypeObject PyGTimeout_Type;
+extern PyTypeObject PyGPollFD_Type;
 
-PyObject * pyglib_spawn_async(PyObject *self, PyObject *args, PyObject *kwargs);
+typedef struct
+{
+    PyObject_HEAD
+    GPollFD pollfd;
+    PyObject *fd_obj;
+} PyGPollFD;
 
+void pyglib_source_register_types(PyObject *d);
 
-#endif /* __PYG_PID_H__ */
-
+#endif /* __PYG_SOURCE_H__ */

@@ -79,6 +79,8 @@ pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
 
     pygobject_api_functions.block_threads   = block_threads_func;
     pygobject_api_functions.unblock_threads = unblock_threads_func;
+    pyglib_set_thread_block_funcs(block_threads_func,
+				  unblock_threads_func);
 }
 
 static void
@@ -2753,13 +2755,6 @@ init_gobject(void)
     PyGFlags_Type.tp_base = &PyInt_Type;
     REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 
-    REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
-
-    REGISTER_TYPE(d, PyGSource_Type, "Source");
-    REGISTER_TYPE(d, PyGIdle_Type, "Idle");
-    REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
-    REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
-
     PyType_Ready(&PyGObjectWeakRef_Type);
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
 
@@ -2780,7 +2775,6 @@ init_gobject(void)
     PyDict_SetItemString(d, "_PyGObject_API",
 			 o=PyCObject_FromVoidPtr(&pygobject_api_functions,NULL));
     Py_DECREF(o);
-
 
     /* features */
     features = PyDict_New();

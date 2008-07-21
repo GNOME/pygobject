@@ -53,8 +53,6 @@ _gobject_la_SOURCES = \
 	pygobject-private.h \
 	pygparamspec.c \
 	pygpointer.c \
-	pygiochannel.c \
-	pygsource.c \
 	pygtype.c \
 	pygoptioncontext.c \
 	pygoptiongroup.c

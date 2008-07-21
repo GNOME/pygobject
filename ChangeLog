@@ -1,5 +1,43 @@
 2008-07-21  Johan Dahlin  <johan@gnome.org>
 
+	* glib/Makefile.am:
+	* glib/glibmodule.c (pyg_idle_add), (pyg_timeout_add),
+	(pyg_timeout_add_seconds), (pyg_io_add_watch),
+	(pyglib_register_api), (pyglib_register_error),
+	(pyglib_register_version_tuples), (init_glib):
+	* glib/pygiochannel.c (py_io_channel_next),
+	(py_io_channel_shutdown), (py_io_channel_set_encoding),
+	(py_io_channel_read_chars), (py_io_channel_write_chars),
+	(py_io_channel_write_lines), (py_io_channel_flush),
+	(py_io_channel_set_flags), (py_io_channel_read_line),
+	(py_io_channel_read_lines), (py_io_channel_seek),
+	(py_io_channel_init), (pyglib_iochannel_register_types):
+	* glib/pygiochannel.h:
+	* glib/pyglib-private.h:
+	* glib/pyglib.c (pyglib_threads_enabled),
+	(pyglib_gil_state_ensure), (pyglib_gil_state_release),
+	(pyglib_enable_threads), (pyglib_block_threads),
+	(pyglib_unblock_threads), (pyglib_set_thread_block_funcs),
+	(pyglib_handler_marshal), (pyglib_destroy_notify):
+	* glib/pyglib.h:
+	* glib/pygsource.c (pyg_source_set_callback),
+	(pyglib_source_register_types):
+	* glib/pygsource.h:
+	* glib/pygspawn.c (pyglib_spawn_register_types):
+	* glib/pygspawn.h:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (pyg_set_thread_block_funcs),
+	(init_gobject):
+	* gobject/pygiochannel.c:
+	* gobject/pygobject-private.h:
+	* gobject/pygsource.c:
+	Move over Source, IOChannel, Idle, Timeout and PollFD to glib from
+	gobject.
+	Clean up and add a bit of new api for glib.
+
+2008-07-21  Johan Dahlin  <johan@gnome.org>
+
 	* configure.ac:
 	Use yes/no instead of true/false. Avoid bashism.
 	Fix another logic bug, and let's hope I didn't break anything

@@ -30,10 +30,16 @@ _glib_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_glib
 _glib_la_LIBADD = $(GLIB_LIBS) libpyglib-2.0.la
 _glib_la_SOURCES = 	 \
 	glibmodule.c	 \
-	pygspawn.c	 \
-	pygspawn.h	 \
+	pygiochannel.c 	 \
+	pygiochannel.h 	 \
 	pygmaincontext.c \
-	pygmainloop.c
+	pygmaincontext.h \
+	pygmainloop.c	 \
+	pygmainloop.h	 \
+	pygsource.c 	 \
+	pygsource.h 	 \
+	pygspawn.c	 \
+	pygspawn.h
 
 if PLATFORM_WIN32
 _glib_la_CFLAGS += -DPLATFORM_WIN32

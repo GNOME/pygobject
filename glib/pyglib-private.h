@@ -28,8 +28,10 @@
 G_BEGIN_DECLS
 
 struct _PyGLib_Functions {
-  gboolean threads_enabled;
-  PyObject *gerror_exception;
+    gboolean threads_enabled;
+    PyObject *gerror_exception;
+    PyGLibThreadBlockFunc block_threads;
+    PyGLibThreadBlockFunc unblock_threads;
 };
 
 #define PYGLIB_REGISTER_TYPE(d, type, name)	\
