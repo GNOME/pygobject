@@ -1,3 +1,9 @@
+2008-07-21  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac:
+	Use yes/no instead of true/false. Avoid bashism.
+	Fix another logic bug, and let's hope I didn't break anything
+
 2008-07-20  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* configure.ac (pygobject_CODEGEN_DEFINES): Fix libffi check

@@ -159,16 +159,16 @@ AC_ARG_WITH(ffi,
 if test x"$with_libffi" = xno ; then
   have_libffi=false
 else
-  PKG_CHECK_MODULES(FFI, libffi >= 3.0, have_libffi=true, have_libffi=false)
+  PKG_CHECK_MODULES(FFI, libffi >= 3.0, have_libffi=yes, have_libffi=no)
 fi
-if test x"$with_libffi" == xyes && test x"$have_libffi" != xyes ; then
+if test x"$with_libffi" = xyes && test x"$have_libffi" = xno ; then
   AC_MSG_ERROR([ffi requested, but not found])
 fi
-if test x"$with_libffi" == xyes; then
+if test x"$have_libffi" = xyes; then
   AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
 fi
 AC_MSG_RESULT([$have_libffi])
-AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "true")
+AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 
