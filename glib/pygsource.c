@@ -30,7 +30,6 @@
 #include <Python.h>
 #include <pythread.h>
 #include <structmember.h> /* for PyMemberDef */
-
 #include "pyglib.h"
 #include "pyglib-private.h"
 #include "pygmaincontext.h"
@@ -162,8 +161,8 @@ pyg_source_set_callback(PyGSource *self, PyObject *args)
 	return NULL;
 
     g_source_set_callback(self->source,
-			  pyglib_handler_marshal, data,
-			  pyglib_destroy_notify);
+			  _pyglib_handler_marshal, data,
+			  _pyglib_destroy_notify);
 
     Py_INCREF(Py_None);
     return Py_None;

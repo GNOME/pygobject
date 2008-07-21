@@ -44,6 +44,9 @@ struct _PyGLib_Functions {
 	return; \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
+gboolean _pyglib_handler_marshal(gpointer user_data);
+void _pyglib_destroy_notify(gpointer user_data);
+
 G_END_DECLS
 
 #endif /* __PYGLIB_PRIVATE_H__ */

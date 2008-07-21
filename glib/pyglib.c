@@ -339,8 +339,30 @@ pyglib_main_context_new(GMainContext *context)
     return (PyObject *)self;
 }
 
+/**
+ * pyglib_destroy_notify:
+ * @user_data: a PyObject pointer.
+ *
+ * A function that can be used as a GDestroyNotify callback that will
+ * call Py_DECREF on the data.
+ */
+void
+pyglib_destroy_notify(gpointer user_data)
+{
+    PyObject *obj = (PyObject *)user_data;
+    PyGILState_STATE state;
+
+    g_return_if_fail (_PyGLib_API != NULL);
+    
+    state = pyglib_gil_state_ensure();
+    Py_DECREF(obj);
+    pyglib_gil_state_release(state);
+}
+
+/****** Private *****/
+
 gboolean
-pyglib_handler_marshal(gpointer user_data)
+_pyglib_handler_marshal(gpointer user_data)
 {
     PyObject *tuple, *ret;
     gboolean res;
@@ -366,22 +388,3 @@ pyglib_handler_marshal(gpointer user_data)
     return res;
 }
 
-/**
- * pyglib_destroy_notify:
- * @user_data: a PyObject pointer.
- *
- * A function that can be used as a GDestroyNotify callback that will
- * call Py_DECREF on the data.
- */
-void
-pyglib_destroy_notify(gpointer user_data)
-{
-    PyObject *obj = (PyObject *)user_data;
-    PyGILState_STATE state;
-
-    g_return_if_fail (_PyGLib_API != NULL);
-    
-    state = pyglib_gil_state_ensure();
-    Py_DECREF(obj);
-    pyglib_gil_state_release(state);
-}

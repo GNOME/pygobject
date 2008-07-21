@@ -1,6 +1,17 @@
 2008-07-21  Johan Dahlin  <johan@gnome.org>
 
 	* glib/glibmodule.c (pyglib_idle_add), (pyglib_timeout_add),
+	(pyglib_timeout_add_seconds), (pyglib_io_add_watch):
+	* glib/pyglib-private.h:
+	* glib/pyglib.c (pyglib_destroy_notify), (_pyglib_handler_marshal):
+	* glib/pyglib.h:
+	* glib/pygsource.c (pyg_source_set_callback):
+	Make pyglib_destroy_notify and pyglib_handler_marshal private.
+	Add a few public prototypes.
+
+2008-07-21  Johan Dahlin  <johan@gnome.org>
+
+	* glib/glibmodule.c (pyglib_idle_add), (pyglib_timeout_add),
 	(pyglib_timeout_add_seconds), (pyglib_io_add_watch),
 	(pyglib_source_remove), (pyglib_child_watch_add),
 	(pyglib_markup_escape_text), (pyglib_get_current_time),

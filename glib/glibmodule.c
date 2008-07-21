@@ -120,8 +120,9 @@ pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     data = Py_BuildValue("(ON)", callback, cbargs);
     if (data == NULL)
 	return NULL;
-    handler_id = g_idle_add_full(priority, pyglib_handler_marshal, data,
-				 pyglib_destroy_notify);
+    handler_id = g_idle_add_full(priority,
+				 _pyglib_handler_marshal, data,
+				 _pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -160,8 +161,8 @@ pyglib_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     if (data == NULL)
 	return NULL;
     handler_id = g_timeout_add_full(priority, interval,
-				    pyglib_handler_marshal, data,
-				    pyglib_destroy_notify);
+				    _pyglib_handler_marshal, data,
+				    _pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -199,8 +200,8 @@ pyglib_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
     if (data == NULL)
 	return NULL;
     handler_id = g_timeout_add_seconds_full(priority, interval,
-                                            pyglib_handler_marshal, data,
-                                            pyglib_destroy_notify);
+                                            _pyglib_handler_marshal, data,
+                                            _pyglib_destroy_notify);
     return PyInt_FromLong(handler_id);
 }
 
@@ -288,7 +289,7 @@ pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     iochannel = g_io_channel_unix_new(fd);
     handler_id = g_io_add_watch_full(iochannel, priority, condition,
 				     iowatch_marshal, data,
-				     (GDestroyNotify)pyglib_destroy_notify);
+				     (GDestroyNotify)_pyglib_destroy_notify);
     g_io_channel_unref(iochannel);
     
     return PyInt_FromLong(handler_id);
