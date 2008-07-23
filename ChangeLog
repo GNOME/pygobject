@@ -1,3 +1,8 @@
+2008-07-23  Johan Dahlin  <johan@gnome.org>
+
+	* glib/pyglib.c (_pyglib_destroy_notify):
+	Rename the function too, not just the prototype!
+
 2008-07-21  Johan Dahlin  <johan@gnome.org>
 
 	* glib/glibmodule.c (pyglib_idle_add), (pyglib_timeout_add),
