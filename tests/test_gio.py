@@ -124,6 +124,37 @@ class TestFile(unittest.TestCase):
         loop = gobject.MainLoop()
         loop.run()
 
+    def testCopy(self):
+        if os.path.exists('copy.txt'):
+            os.unlink("copy.txt")
+
+        source = gio.File('file.txt')
+        destination = gio.File('copy.txt')
+        try:
+            retval = source.copy(destination)
+            self.failUnless(retval)
+
+            self.failUnless(os.path.exists('copy.txt'))
+            self.assertEqual(open('file.txt').read(),
+                             open('copy.txt').read())
+        finally:
+            os.unlink("copy.txt")
+
+        self.called = False
+        def callback(current, total):
+            self.called = True
+        source = gio.File('file.txt')
+        destination = gio.File('copy.txt')
+        try:
+            retval = source.copy(destination, callback)
+            self.failUnless(retval)
+
+            self.failUnless(os.path.exists('copy.txt'))
+            self.assertEqual(open('file.txt').read(),
+                             open('copy.txt').read())
+            self.failUnless(self.called)
+        finally:
+            os.unlink("copy.txt")
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):

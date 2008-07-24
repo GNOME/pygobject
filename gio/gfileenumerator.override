@@ -61,13 +61,13 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
 {
     static char *kwlist[] = { "num_files", "callback",
 			      "io_priority", "cancellable", "user_data", NULL };
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
     int num_files;
     int io_priority = G_PRIORITY_DEFAULT;
     GCancellable *cancellable = NULL;
     PyGObject *py_cancellable = NULL;
 
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "iO|iOO:GFileEnumerator.enumerate_children_async",
@@ -78,14 +78,14 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
 				     &py_cancellable,
 				     &notify->data))
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
     if (!PyCallable_Check(notify->callback))
     {
 	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGAsyncRequestNotify, notify);
+	g_slice_free(PyGIONotify, notify);
 	return NULL;
     }
     Py_INCREF(notify->callback);

@@ -1,4 +1,4 @@
-/* -*- Mode: C; c-basic-offset: 4 -*-
+%%/* -*- Mode: C; c-basic-offset: 4 -*-
  * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
  *
@@ -19,6 +19,48 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  */
+%%
+headers
+
+typedef struct {
+    PyObject *callback;
+    PyObject *data;
+} PyGFileProgressCallback;
+
+static void
+file_progress_callback_marshal(goffset current_num_bytes,
+			       goffset total_num_bytes,
+			       PyGIONotify *notify)
+{
+    PyObject *ret;
+    PyGILState_STATE state;
+    
+    state = pyg_gil_state_ensure();
+
+    if (notify->data)
+	ret = PyEval_CallFunction(notify->callback, "(kkO)",
+				  current_num_bytes,
+				  total_num_bytes,
+				  notify->data);
+    else
+	ret = PyObject_CallFunction(notify->callback, "(kk)", 
+				    current_num_bytes,
+				    total_num_bytes);
+
+    if (ret == NULL)
+      {
+	PyErr_Print();
+	PyErr_Clear();
+      }
+
+    Py_XDECREF(ret);
+
+    Py_DECREF(notify->callback);
+    Py_XDECREF(notify->data);
+    g_slice_free(PyGIONotify, notify);
+
+    pyg_gil_state_release(state);
+}
 %%
 define _install_file_meta
 static PyObject *
@@ -96,9 +138,9 @@ _wrap_g_file_read_async(PyGObject *self,
   int io_priority = G_PRIORITY_DEFAULT;
   PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
-  PyGAsyncRequestNotify *notify;
+  PyGIONotify *notify;
   
-  notify = g_slice_new0(PyGAsyncRequestNotify);
+  notify = g_slice_new0(PyGIONotify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                    "O|iOO:File.read_async",
@@ -108,14 +150,14 @@ _wrap_g_file_read_async(PyGObject *self,
                                    &pycancellable,
                                    &notify->data))
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
   if (!PyCallable_Check(notify->callback))
     {
       PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
   Py_INCREF(notify->callback);
@@ -180,9 +222,9 @@ _wrap_g_file_load_contents_async(PyGObject *self,
     static char *kwlist[] = { "callback", "cancellable", "user_data", NULL };
     GCancellable *cancellable;
     PyGObject *pycancellable = NULL;
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
   
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O|OO:File.load_contents_async",
@@ -192,7 +234,7 @@ _wrap_g_file_load_contents_async(PyGObject *self,
                                       &notify->data))
             
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
@@ -249,7 +291,7 @@ _wrap_g_file_enumerate_children_async(PyGObject *self, PyObject *args, PyObject 
 {
     static char *kwlist[] = { "attributes", "flags", "callback",
 			      "io_priority", "cancellable", "user_data", NULL };
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
     char *attributes;
     PyObject *py_flags = NULL;
     int io_priority = G_PRIORITY_DEFAULT;
@@ -257,7 +299,7 @@ _wrap_g_file_enumerate_children_async(PyGObject *self, PyObject *args, PyObject 
     GCancellable *cancellable = NULL;
     PyGObject *py_cancellable = NULL;
 
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "sO|OiOO:GFile.enumerate_children_async",
@@ -269,14 +311,14 @@ _wrap_g_file_enumerate_children_async(PyGObject *self, PyObject *args, PyObject 
 				     &py_cancellable,
 				     &notify->data))
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
     if (!PyCallable_Check(notify->callback))
     {
 	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGAsyncRequestNotify, notify);
+	g_slice_free(PyGIONotify, notify);
 	return NULL;
     }
     Py_INCREF(notify->callback);
@@ -309,14 +351,14 @@ _wrap_g_file_mount_mountable(PyGObject *self,
 {
     static char *kwlist[] = { "callback", "flags", "mount_operation",
 			      "cancellable", "user_data", NULL };
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
     PyObject *py_flags = NULL;
     PyGObject *mount_operation;
     PyGObject *py_cancellable = NULL;
     GMountMountFlags flags = G_MOUNT_MOUNT_NONE;
     GCancellable *cancellable;
   
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O!O|OOO:File.mount_mountable",
@@ -329,14 +371,14 @@ _wrap_g_file_mount_mountable(PyGObject *self,
 				     &notify->data))
             
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
     if (!PyCallable_Check(notify->callback))
     {
 	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGAsyncRequestNotify, notify);
+	g_slice_free(PyGIONotify, notify);
 	return NULL;
     }
     Py_INCREF(notify->callback);
@@ -368,13 +410,13 @@ _wrap_g_file_unmount_mountable(PyGObject *self,
 {
     static char *kwlist[] = { "callback", "flags",
 			      "cancellable", "user_data", NULL };
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
     PyObject *py_flags = NULL;
     PyGObject *py_cancellable = NULL;
     GMountMountFlags flags = G_MOUNT_MOUNT_NONE;
     GCancellable *cancellable;
   
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O|OOO:File.unmount_mountable",
@@ -385,14 +427,14 @@ _wrap_g_file_unmount_mountable(PyGObject *self,
 				     &notify->data))
             
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
     if (!PyCallable_Check(notify->callback))
     {
 	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGAsyncRequestNotify, notify);
+	g_slice_free(PyGIONotify, notify);
 	return NULL;
     }
     Py_INCREF(notify->callback);
@@ -423,14 +465,14 @@ _wrap_g_file_mount_enclosing_volume(PyGObject *self,
 {
     static char *kwlist[] = { "callback", "flags", "mount_operation",
 			      "cancellable", "user_data", NULL };
-    PyGAsyncRequestNotify *notify;
+    PyGIONotify *notify;
     PyObject *py_flags = NULL;
     PyGObject *mount_operation;
     PyGObject *py_cancellable = NULL;
     GMountMountFlags flags = G_MOUNT_MOUNT_NONE;
     GCancellable *cancellable;
   
-    notify = g_slice_new0(PyGAsyncRequestNotify);
+    notify = g_slice_new0(PyGIONotify);
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O!O|OOO:File.mount_enclosing_volume",
@@ -443,14 +485,14 @@ _wrap_g_file_mount_enclosing_volume(PyGObject *self,
 				     &notify->data))
             
     {
-      g_slice_free(PyGAsyncRequestNotify, notify);
+      g_slice_free(PyGIONotify, notify);
       return NULL;
     }
 
     if (!PyCallable_Check(notify->callback))
     {
 	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGAsyncRequestNotify, notify);
+	g_slice_free(PyGIONotify, notify);
 	return NULL;
     }
     Py_INCREF(notify->callback);
@@ -473,7 +515,76 @@ _wrap_g_file_mount_enclosing_volume(PyGObject *self,
     Py_INCREF(Py_None);
     return Py_None;
 }
+%%
+override g_file_copy kwargs
+static PyObject *
+_wrap_g_file_copy(PyGObject *self,
+		  PyObject *args,
+		  PyObject *kwargs)
+{
+    static char *kwlist[] = { "destination", "flags",
+			      "cancellable", "progress_callback",
+			      "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    PyGObject *destination = NULL;
+    PyGObject *py_cancellable = NULL;
+    GFileCopyFlags flags = G_FILE_COPY_NONE;
+    GCancellable *cancellable;
+    int ret;
+    GError *error = NULL;
+    GFileProgressCallback callback = NULL;
+    
+    notify = g_slice_new0(PyGIONotify);
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!|OOOO:File.unmount_mountable",
+				     kwlist,
+				     &PyGFile_Type,
+				     &destination,
+				     &notify->callback,
+				     &py_flags,
+				     &py_cancellable,
+				     &notify->data))
+            
+    {
+      g_slice_free(PyGIONotify, notify);
+      return NULL;
+    }
 
+    if (notify->callback != NULL)
+    {
+	if (!PyCallable_Check(notify->callback))
+	{
+	    PyErr_SetString(PyExc_TypeError, "callback argument not callable");
+	    g_slice_free(PyGIONotify, notify);
+	    return NULL;
+	}
+	callback = (GFileProgressCallback)file_progress_callback_marshal;
+	Py_INCREF(notify->callback);
+    }
+    Py_XINCREF(notify->data);
+  
+    if (py_flags && pyg_flags_get_value(G_TYPE_FILE_COPY_FLAGS,
+					py_flags, (gpointer)&flags))
+        return NULL;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        return NULL;
+
+    ret = g_file_copy(G_FILE(self->obj),
+		      G_FILE(destination->obj),
+		      flags,
+		      cancellable,
+		      callback,
+		      notify,
+		      &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    return PyBool_FromLong(ret);
+}
 /* GFile.append_to_async */
 /* GFile.create_async */
 /* GFile.eject_mountable */
@@ -484,7 +595,6 @@ _wrap_g_file_mount_enclosing_volume(PyGObject *self,
 /* GFile.set_attributes_async */
 /* GFile.set_display_name_async */
 /* GFile.load_partial_contents_async: No ArgType for GFileReadMoreCallback */
-/* GFile.copy: No ArgType for GFileProgressCallback */
 /* GFile.move: No ArgType for GFileProgressCallback */
 /* GFile.query_settable_attributes: No ArgType for GFileAttributeInfoList* */
 /* GFile.query_writable_namespaces: No ArgType for GFileAttributeInfoList* */

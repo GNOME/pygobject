@@ -1,3 +1,15 @@
+2008-07-24  Johan Dahlin  <johan@gnome.org>
+
+	* gio/gfile.override:
+	* gio/gfileenumerator.override:
+	* gio/ginputstream.override:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* gio/goutputstream.override:
+	* tests/test_gio.py:
+	Wrap gio.File.copy, add tests and documentation.
+	Rename PyGAsyncRequestNotify to PyGIONotify and reuse it.
+
 2008-07-23  Johan Dahlin  <johan@gnome.org>
 
 	* glib/pyglib.c (_pyglib_destroy_notify):
