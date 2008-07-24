@@ -27,6 +27,11 @@
 
 G_BEGIN_DECLS
 
+/* Compilation on Python 2.4 */
+#if PY_VERSION_HEX < 0x02050000
+typedef int Py_ssize_t;
+#endif
+
 struct _PyGLib_Functions {
     gboolean threads_enabled;
     PyObject *gerror_exception;
