@@ -22,11 +22,6 @@
 %%
 headers
 
-typedef struct {
-    PyObject *callback;
-    PyObject *data;
-} PyGFileProgressCallback;
-
 static void
 file_progress_callback_marshal(goffset current_num_bytes,
 			       goffset total_num_bytes,
