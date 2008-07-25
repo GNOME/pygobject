@@ -42,7 +42,7 @@ _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gobject
 _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
-	$(top_srcdir)/glib/libpyglib-2.0.la
+	$(top_builddir)/glib/libpyglib-2.0.la
 _gobject_la_SOURCES = \
 	gobjectmodule.c \
 	pygboxed.c \

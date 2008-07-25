@@ -1,5 +1,11 @@
 2008-07-25  Johan Dahlin  <johan@gnome.org>
 
+	* gobject/Makefile.am:
+	* tests/Makefile.am:
+	Make distcheck pass
+
+2008-07-25  Johan Dahlin  <johan@gnome.org>
+
 	* gobject/gobjectmodule.c (init_gobject):
 	* gobject/pygobject-private.h:
 	Remove private structures which moved to pyglib.
