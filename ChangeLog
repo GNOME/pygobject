@@ -1,3 +1,9 @@
+2008-07-25  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pygobject-private.h:
+	Remove private structures which moved to pyglib.
+
 2008-07-24  Johan Dahlin  <johan@gnome.org>
 
 	Bug 544600 – pygobject building failed since 839 revision, 

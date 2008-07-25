@@ -2682,7 +2682,6 @@ init_gobject(void)
     PyObject *m, *d, *o, *tuple, *features;
     PyObject *descr;
     PyObject *warning;
-    PyObject *glib;
     
     PyGParamSpec_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGParamSpec_Type))
@@ -2695,10 +2694,6 @@ init_gobject(void)
 
     g_type_init();
     pyglib_init();
-
-    glib = PyImport_ImportModule("glib");
-    _PyGMainLoop_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainLoop");
-    _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
 
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");

@@ -217,27 +217,6 @@ extern PyObject * pyg_enum_add        (PyObject *   module,
 extern PyObject * pyg_enum_from_gtype (GType        gtype,
 				       int          value);
 
-/* pygmainloop */
-
-typedef struct {
-    PyObject_HEAD
-    GMainLoop *loop;
-    GSource *signal_source;
-} PyGMainLoop;
-
-PyTypeObject *_PyGMainLoop_Type;
-#define PyGMainLoop_Type (*_PyGMainLoop_Type)
-
-/* pygmaincontext */
-
-typedef struct {
-    PyObject_HEAD
-    GMainContext *context;
-} PyGMainContext;
-
-PyTypeObject *_PyGMainContext_Type;
-#define PyGMainContext_Type (*_PyGMainContext_Type)
-
 /* pygparamspec */
 
 extern PyTypeObject PyGParamSpec_Type;
