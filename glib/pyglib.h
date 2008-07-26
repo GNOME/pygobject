@@ -60,6 +60,27 @@ GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
             PyEval_RestoreThread(_save);        \
     } G_STMT_END
 
+#define PYGLIB_MODULE_START(symbol, modname)	        \
+DL_EXPORT(void) init##symbol(void)			\
+{                                                       \
+    PyObject *module;                                   \
+    module = Py_InitModule(modname, symbol##_functions);
+#define PYGLIB_MODULE_END }
+#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
+PyTypeObject symbol = {                                 \
+    PyObject_HEAD_INIT(NULL)                            \
+    0,                                                  \
+    typename,						\
+    sizeof(csymbol)                                     \
+};
+#define PYGLIB_REGISTER_TYPE(d, type, name)	        \
+    if (!type.tp_alloc)                                 \
+	type.tp_alloc = PyType_GenericAlloc;            \
+    if (!type.tp_new)                                   \
+	type.tp_new = PyType_GenericNew;                \
+    if (PyType_Ready(&type))                            \
+	return;                                         \
+    PyDict_SetItemString(d, name, (PyObject *)&type);
 
 G_END_DECLS
 

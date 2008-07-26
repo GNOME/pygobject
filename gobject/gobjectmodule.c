@@ -24,10 +24,11 @@
 #  include <config.h>
 #endif
 
+#include <gobject/gvaluecollector.h>
+#include <pyglib.h>
 #include "pygobject-private.h"
 #include "pythread.h"
-#include <pyglib.h>
-#include <gobject/gvaluecollector.h>
+#include "pyginterface.h"
 
 #ifdef HAVE_FFI_H
 #include "ffi-marshaller.h"
@@ -40,9 +41,7 @@ static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
 
-GQuark pyginterface_type_key;
 GQuark pygobject_class_init_key;
-GQuark pyginterface_info_key;
 GQuark pygboxed_type_key;
 GQuark pygobject_class_key;
 GQuark pygobject_wrapper_key;
@@ -81,12 +80,6 @@ pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
     pygobject_api_functions.unblock_threads = unblock_threads_func;
     pyglib_set_thread_block_funcs(block_threads_func,
 				  unblock_threads_func);
-}
-
-static void
-object_free(PyObject *op)
-{
-    PyObject_FREE(op);
 }
 
 /**
@@ -132,116 +125,6 @@ pyobject_free(gpointer boxed)
     pyglib_gil_state_release(state);
 }
 
-
-/* ---------------- GInterface functions -------------------- */
-
-static int
-pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    gchar buf[512];
-
-    if (!PyArg_ParseTuple(args, ":GInterface.__init__"))
-	return -1;
-
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
-    return -1;
-}
-
-PyTypeObject PyGInterface_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
-    "gobject.GInterface",               /* tp_name */
-    sizeof(PyObject),                   /* tp_basicsize */
-    0,                                  /* tp_itemsize */
-    /* methods */
-    (destructor)0,                      /* tp_dealloc */
-    (printfunc)0,                       /* tp_print */
-    (getattrfunc)0,                     /* tp_getattr */
-    (setattrfunc)0,                     /* tp_setattr */
-    (cmpfunc)0,                         /* tp_compare */
-    (reprfunc)0,                        /* tp_repr */
-    0,                                  /* tp_as_number */
-    0,                                  /* tp_as_sequence */
-    0,                                  /* tp_as_mapping */
-    (hashfunc)0,                        /* tp_hash */
-    (ternaryfunc)0,                     /* tp_call */
-    (reprfunc)0,                        /* tp_str */
-    (getattrofunc)0,                    /* tp_getattro */
-    (setattrofunc)0,                    /* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-    NULL, /* Documentation string */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    0,					/* tp_methods */
-    0,					/* tp_members */
-    0,					/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_interface_init,	/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)object_free,		/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
-
-/**
- * pyg_register_interface:
- * @dict: a module dictionary.
- * @class_name: the class name for the wrapper class.
- * @gtype: the GType of the interface.
- * @type: the wrapper class for the interface.
- *
- * Registers a Python class as the wrapper for a GInterface.  As a
- * convenience it will also place a reference to the wrapper class in
- * the provided module dictionary.
- */
-static void
-pyg_register_interface(PyObject *dict, const gchar *class_name,
-                       GType gtype, PyTypeObject *type)
-{
-    PyObject *o;
-
-    type->ob_type = &PyType_Type;
-    type->tp_base = &PyGInterface_Type;
-
-    if (PyType_Ready(type) < 0) {
-        g_warning("could not ready `%s'", type->tp_name);
-        return;
-    }
-
-    if (gtype) {
-        o = pyg_type_wrapper_new(gtype);
-        PyDict_SetItemString(type->tp_dict, "__gtype__", o);
-        Py_DECREF(o);
-    }
-
-    g_type_set_qdata(gtype, pyginterface_type_key, type);
-    
-    PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
-    
-}
-
-static void
-pyg_register_interface_info(GType gtype, const GInterfaceInfo *info)
-{
-    g_type_set_qdata(gtype, pyginterface_info_key, (gpointer) info);
-}
-
-static const GInterfaceInfo *
-pyg_lookup_interface_info(GType gtype)
-{
-    return g_type_get_qdata(gtype, pyginterface_info_key);
-}
 
 /* ---------------- gobject module functions -------------------- */
 
@@ -2702,8 +2585,6 @@ init_gobject(void)
     pygobject_class_key      = g_quark_from_static_string("PyGObject::class");
     pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
     pygobject_wrapper_key    = g_quark_from_static_string("PyGObject::wrapper");
-    pyginterface_type_key    = g_quark_from_static_string("PyGInterface::type");
-    pyginterface_info_key    = g_quark_from_static_string("PyGInterface::info");
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
     pygobject_has_updated_constructor_key =\
         g_quark_from_static_string("PyGObject::has-updated-constructor");
@@ -2736,13 +2617,9 @@ init_gobject(void)
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
                         o=PyString_FromString("gobject._gobject"));
     Py_DECREF(o);
- 
-    REGISTER_GTYPE(d, PyGInterface_Type, "GInterface", G_TYPE_INTERFACE);
-    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__doc__",
-			 pyg_object_descr_doc_get());
-    PyDict_SetItemString(PyGInterface_Type.tp_dict, "__gdoc__",
-			 pyg_object_descr_doc_get());
 
+    pygobject_interface_register_types(d);
+    
     REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
     REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
     PyGEnum_Type.tp_base = &PyInt_Type;

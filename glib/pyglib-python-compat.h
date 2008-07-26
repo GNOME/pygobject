@@ -28,27 +28,6 @@ typedef int Py_ssize_t;
 
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
-#define PYGLIB_MODULE_START(symbol, modname)	        \
-DL_EXPORT(void) init##symbol(void)			\
-{                                                       \
-    PyObject *module;                                   \
-    module = Py_InitModule(modname, symbol##_functions);
-#define PYGLIB_MODULE_END }
-#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
-PyTypeObject symbol = {                                 \
-    PyObject_HEAD_INIT(NULL)                            \
-    0,                                                  \
-    typename,						\
-    sizeof(csymbol)                                     \
-};
-#define PYGLIB_REGISTER_TYPE(d, type, name)	        \
-    if (!type.tp_alloc)                                 \
-	type.tp_alloc = PyType_GenericAlloc;            \
-    if (!type.tp_new)                                   \
-	type.tp_new = PyType_GenericNew;                \
-    if (PyType_Ready(&type))                            \
-	return;                                         \
-    PyDict_SetItemString(d, name, (PyObject *)&type);
 
 #define _PyUnicode_Check PyString_Check 
 #define _PyUnicode_AsString PyString_AsString
@@ -66,6 +45,11 @@ PyTypeObject symbol = {                                 \
 #define _PyLongObject PyIntObject
 #define _PyLong_Type PyInt_Type
 #else
+#undef PYGLIB_MODULE_START
+#undef PYGLIB_MODULE_END
+#undef PYGLIB_DEFINE_TYPE
+#undef PYGLIB_REGISTER_TYPE
+
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
     PyModuleDef_HEAD_INIT,                              \

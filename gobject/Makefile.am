@@ -47,6 +47,8 @@ _gobject_la_SOURCES = \
 	pygboxed.c \
 	pygenum.c \
 	pygflags.c \
+	pyginterface.c \
+	pyginterface.h \
 	pygobject.c \
 	pygobject.h \
 	pygobject-private.h \

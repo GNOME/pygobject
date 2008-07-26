@@ -1,5 +1,24 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	reviewed by: <delete if not using a buddy>
+
+	* glib/pyglib-python-compat.h:
+	* glib/pyglib.h:
+	Make a few macros public
+
+	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pyginterface.c (pyg_interface_init),
+	(pyg_interface_free), (pyg_register_interface),
+	(pyg_register_interface_info), (pyg_lookup_interface_info),
+	(pygobject_interface_register_types):
+	* gobject/pyginterface.h:
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c:
+	Move GInterface wrapper into its own file
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/Makefile.am:
 	Also export PyInit_glib
 	* glib/__init__.py:

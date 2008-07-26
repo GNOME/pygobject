@@ -27,6 +27,14 @@ typedef int Py_ssize_t;
 typedef inquiry lenfunc;
 #endif
 
+#define PYGOBJECT_REGISTER_GTYPE(d, type, name, gtype)      \
+  {                                                         \
+    PyObject *o;					    \
+    PYGLIB_REGISTER_TYPE(d, type, name);                    \
+    PyDict_SetItemString(type.tp_dict, "__gtype__",         \
+			 o=pyg_type_wrapper_new(gtype));    \
+    Py_DECREF(o);                                           \
+}
 
 /* from gobjectmodule.c */
 extern struct _PyGObject_Functions pygobject_api_functions;
@@ -141,7 +149,6 @@ extern PyTypeObject *PyGObject_MetaType;
 
 /* from pygobject.h */
 extern PyTypeObject PyGObject_Type;
-extern PyTypeObject PyGInterface_Type;
 extern PyTypeObject PyGProps_Type;
 extern PyTypeObject PyGPropsDescr_Type;
 extern PyTypeObject PyGPropsIter_Type;

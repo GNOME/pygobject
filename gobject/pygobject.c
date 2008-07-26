@@ -22,6 +22,7 @@
 
 #include <pyglib.h>
 #include "pygobject-private.h"
+#include "pyginterface.h"
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
