@@ -2,7 +2,7 @@
 
 	* README:
 	* configure.ac:
-	Bump required glib version to 2.16
+	Bump required glib version to 2.10
 
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
