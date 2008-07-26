@@ -23,6 +23,7 @@
 #  include "config.h"
 #endif
 #include <Python.h>
+#include <pyglib.h>
 #include <pygobject.h>
 
 #include <gio/gio.h>
@@ -43,7 +44,7 @@ init_gio(void)
 {
     PyObject *m, *d;
     PyObject *tuple;
-    
+    PyObject *e;
     /* perform any initialisation required by the library here */
 
     m = Py_InitModule("gio._gio", pygio_functions);
@@ -55,6 +56,9 @@ init_gio(void)
     pygio_add_constants(m, "G_IO_");
 
     PyModule_AddStringConstant(m, "ERROR", g_quark_to_string(G_IO_ERROR));
+    e = pyglib_register_exception_for_domain("gio.Error", G_IO_ERROR);
+    PyDict_SetItemString(d, "Error", e);
+    Py_DECREF(e);
 
     /* pygio version */
     tuple = Py_BuildValue ("(iii)",

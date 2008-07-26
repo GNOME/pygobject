@@ -1,5 +1,18 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* examples/gio/directory-async.py:
+	* gio/Makefile.am:
+	* gio/giomodule.c (init_gio):
+	* glib/pyglib.c (pyglib_error_check),
+	(pyglib_register_exception_for_domain):
+	* glib/pyglib.h:
+	* tests/test_gio.py:
+	Add a new API for registering exceptions for a GError domain.
+	Register a new exception for G_IO_ERROR, update tests
+	and examples to use the new exception.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pygoptioncontext.c (pyg_option_context_set_main_group),
 	(pyg_option_context_add_group):
 	Send in a PyObject instead of a PyGOptionGroup object.

@@ -37,6 +37,8 @@ void pyglib_gil_state_release(PyGILState_STATE state);
 gboolean pyglib_enable_threads(void);
 gboolean pyglib_error_check(GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
+PyObject *pyglib_register_exception_for_domain(gchar *name,
+					       gint error_domain);
 gboolean pyglib_threads_enabled(void);
 PyObject * pyglib_main_context_new(GMainContext *context);
 void pyglib_set_thread_block_funcs(PyGLibThreadBlockFunc block_threads_func,

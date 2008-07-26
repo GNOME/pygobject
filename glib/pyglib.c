@@ -33,6 +33,7 @@
 
 static struct _PyGLib_Functions *_PyGLib_API;
 static int pyglib_thread_state_tls_key;
+static PyObject *exception_table = NULL;
 
 static PyTypeObject *_PyGMainContext_Type;
 #define PyGMainContext_Type (*_PyGMainContext_Type)
@@ -216,6 +217,7 @@ gboolean
 pyglib_error_check(GError **error)
 {
     PyGILState_STATE state;
+    PyObject *exc_type;
     PyObject *exc_instance;
     PyObject *d;
 
@@ -225,9 +227,17 @@ pyglib_error_check(GError **error)
 	return FALSE;
     
     state = pyglib_gil_state_ensure();
-	
-    exc_instance = PyObject_CallFunction(_PyGLib_API->gerror_exception, "z",
-					 (*error)->message);
+
+    exc_type = _PyGLib_API->gerror_exception;
+    if (exception_table != NULL)
+    {
+	PyObject *item;
+	item = PyDict_GetItem(exception_table, PyInt_FromLong((*error)->domain));
+	if (item != NULL)
+	    exc_type = item;
+    }
+
+    exc_instance = PyObject_CallFunction(exc_type, "z", (*error)->message);
     PyObject_SetAttrString(exc_instance, "domain",
 			   d=PyString_FromString(g_quark_to_string((*error)->domain)));
     Py_DECREF(d);
@@ -325,6 +335,35 @@ bad_gerror:
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;
+}
+
+/**
+ * pyglib_register_exception_for_domain:
+ * @name: name of the exception
+ * @error_domain: error domain
+ *
+ * Registers a new glib.GError exception subclass called #name for
+ * a specific #domain. This exception will be raised when a GError
+ * of the same domain is passed in to pyglib_error_check().
+ *
+ * Returns: the new exception
+ */
+PyObject *
+pyglib_register_exception_for_domain(gchar *name,
+				     gint error_domain)
+{
+    PyObject *exception;
+
+    exception = PyErr_NewException(name, _PyGLib_API->gerror_exception, NULL);
+
+    if (exception_table == NULL)
+	exception_table = PyDict_New();
+
+    PyDict_SetItem(exception_table,
+		   PyInt_FromLong(error_domain),
+		   exception);
+    
+    return exception;
 }
 
 /**

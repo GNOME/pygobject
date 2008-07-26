@@ -1,6 +1,6 @@
 import sys
 
-import gobject
+import glib
 import gio
 
 def next_files_done(enumerator, result):
@@ -11,7 +11,7 @@ def next_files_done(enumerator, result):
 def enumerate_children_done(gfile, result):
     try:
         enumerator = gfile.enumerate_children_finish(result)
-    except gobject.GError, e:
+    except gio.Error, e:
         print 'ERROR:', e
         loop.quit()
         return
@@ -26,5 +26,5 @@ gfile = gio.File(uri)
 gfile.enumerate_children_async(
     "standard::name", enumerate_children_done)
 
-loop = gobject.MainLoop()
+loop = glib.MainLoop()
 loop.run()

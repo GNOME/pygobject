@@ -103,18 +103,21 @@ class TestFile(unittest.TestCase):
             try:
                 try:
                     retval = gfile.mount_enclosing_volume_finish(result)
-                except glib.GError, e:
+                except gio.Error, e:
                     # If we run the tests too fast
-                    if (e.domain == gio.ERROR and
-                        e.code == gio.ERROR_ALREADY_MOUNTED):
+                    if e.code == gio.ERROR_ALREADY_MOUNTED:
                         print ('WARNING: testfile is already mounted, '
-                               'skipping test')
+                        'skipping test')
                         loop.quit()
                         return
                     raise
                 self.failUnless(retval)
             finally:
-                mount = gfile.find_enclosing_mount()
+                try:
+                    mount = gfile.find_enclosing_mount()
+                except gio.Error:
+                    loop.quit()
+                    return
                 mount.unmount(unmount_done)
 
         mount_operation = gio.MountOperation()
@@ -239,7 +242,7 @@ class TestInputStream(unittest.TestCase):
                 self.count += 1
                 if self.count == 1:
                     return
-                self.assertRaises(glib.GError, stream.read_finish, result)
+                self.assertRaises(gio.Error, stream.read_finish, result)
             finally:
                 loop.quit()
 
@@ -311,7 +314,7 @@ class TestOutputStream(unittest.TestCase):
         def callback(stream, result):
             self.assertEquals(result.get_op_res_gssize(), 0)
             try:
-                self.assertRaises(glib.GError, stream.write_finish, result)
+                self.assertRaises(gio.Error, stream.write_finish, result)
             finally:
                 loop.quit()
 
