@@ -1,5 +1,11 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* README:
+	* configure.ac:
+	Bump required glib version to 2.16
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/glibmodule.c (child_watch_dnotify),
 	(pyglib_child_watch_add):
 	* glib/pygiochannel.c (pyg_iowatch_data_free),
