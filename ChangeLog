@@ -1,5 +1,21 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/Makefile.am:
+	Also export PyInit_glib
+	* glib/__init__.py:
+	import glib._glib instead of just _glib
+	* glib/pyglib-python-compat.h:
+	* glib/pygoptioncontext.c (pyg_option_context_parse):
+	* glib/pygsource.c (source_repr), (pyg_source_attach),
+	(pyg_source_get_priority), (pyg_source_set_priority),
+	(pyg_source_get_id), (pyg_source_prepare), (pyg_poll_fd_repr):
+	* glib/pygspawn.c (pyg_pid_close), (pyg_pid_free), (pyg_pid_new),
+	(pyglib_spawn_async), (pyglib_spawn_register_types):
+	Go over the rest and replace missing symbols on python3.
+	the glib module successfully compiles and runs now.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pygiochannel.c (py_io_channel_shutdown),
 	(py_io_channel_set_buffer_size), (py_io_channel_get_buffer_size),
 	(py_io_channel_set_buffered), (py_io_channel_get_buffered),

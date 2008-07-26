@@ -32,12 +32,12 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, PyIntObject)
+PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, _PyLongObject)
 
 static PyObject *
-pyg_pid_close(PyIntObject *self, PyObject *args, PyObject *kwargs)
+pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    g_spawn_close_pid((GPid) self->ob_ival);
+    g_spawn_close_pid(_PyLong_AsLong(self));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -48,10 +48,10 @@ static PyMethodDef pyg_pid_methods[] = {
 };
 
 static void
-pyg_pid_free(PyIntObject *gpid)
+pyg_pid_free(PyObject *gpid)
 {
-    g_spawn_close_pid((GPid) gpid->ob_ival);
-    PyInt_Type.tp_free((void *) gpid);
+    g_spawn_close_pid((GPid) _PyLong_AsLong(gpid));
+    _PyLong_Type.tp_free((void *) gpid);
 }
 
 static int
@@ -64,10 +64,14 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 PyObject *
 pyg_pid_new(GPid pid)
 {
-    PyIntObject *pygpid;
-    pygpid = PyObject_NEW(PyIntObject, &PyGPid_Type);
+    _PyLongObject *pygpid;
+    pygpid = PyObject_NEW(_PyLongObject, &PyGPid_Type);
 
+#if PY_VERSION_HEX >= 0x03000000
+#   warning "FIXME: figure out how to subclass long"    
+#else
     pygpid->ob_ival = pid;
+#endif    
     return (PyObject *) pygpid;
 }
 
@@ -145,7 +149,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     argv = g_new0(char *, len + 1);
     for (i = 0; i < len; ++i) {
         PyObject *tmp = PySequence_ITEM(pyargv, i);
-        if (!PyString_Check(tmp)) {
+        if (!_PyUnicode_Check(tmp)) {
             PyErr_SetString(PyExc_TypeError,
                             "glib.spawn_async: "
 			    "first argument must be a sequence of strings");
@@ -153,7 +157,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
             Py_XDECREF(tmp);
             return NULL;
         }
-        argv[i] = PyString_AsString(tmp);
+        argv[i] = _PyUnicode_AsString(tmp);
         Py_DECREF(tmp);
     }
 
@@ -170,7 +174,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         envp = g_new0(char *, len + 1);
         for (i = 0; i < len; ++i) {
             PyObject *tmp = PySequence_ITEM(pyenvp, i);
-            if (!PyString_Check(tmp)) {
+            if (!_PyUnicode_Check(tmp)) {
                 PyErr_SetString(PyExc_TypeError,
                                 "glib.spawn_async: "
 				"second argument must be a sequence of strings");
@@ -179,7 +183,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 		g_free(argv);
                 return NULL;
             }
-            envp[i] = PyString_AsString(tmp);
+            envp[i] = _PyUnicode_AsString(tmp);
             Py_DECREF(tmp);
         }
     }
@@ -224,21 +228,21 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     if (envp) g_free(envp);
 
     if (standard_input)
-        pystdin = PyInt_FromLong(*standard_input);
+        pystdin = _PyLong_FromLong(*standard_input);
     else {
         Py_INCREF(Py_None);
         pystdin = Py_None;
     }
 
     if (standard_output)
-        pystdout = PyInt_FromLong(*standard_output);
+        pystdout = _PyLong_FromLong(*standard_output);
     else {
         Py_INCREF(Py_None);
         pystdout = Py_None;
     }
 
     if (standard_error)
-        pystderr = PyInt_FromLong(*standard_error);
+        pystderr = _PyLong_FromLong(*standard_error);
     else {
         Py_INCREF(Py_None);
         pystderr = Py_None;
@@ -250,7 +254,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 void
 pyglib_spawn_register_types(PyObject *d)
 {
-    PyGPid_Type.tp_base = &PyInt_Type;
+    PyGPid_Type.tp_base = &_PyLong_Type;
     PyGPid_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGPid_Type.tp_methods = pyg_pid_methods;
     PyGPid_Type.tp_init = pyg_pid_tp_init;

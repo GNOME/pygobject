@@ -82,7 +82,7 @@ source_repr(PyGSource *self, const char *type)
 	g_snprintf(buf, sizeof(buf), "<%s glib source at 0x%lx>",
 		   desc, (long) self);
 
-    return PyString_FromString(buf);
+    return _PyUnicode_FromString(buf);
 }
 
 static PyObject *
@@ -109,7 +109,7 @@ pyg_source_attach(PyGSource *self, PyObject *args, PyObject *kwargs)
     }
 
     id = g_source_attach(self->source, context);
-    return PyInt_FromLong(id);
+    return _PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -283,7 +283,7 @@ pyg_source_get_priority(PyGSource *self, void *closure)
 {
     CHECK_DESTROYED(self, NULL);
 
-    return PyInt_FromLong(g_source_get_priority(self->source));
+    return _PyLong_FromLong(g_source_get_priority(self->source));
 }
 
 static int
@@ -296,12 +296,12 @@ pyg_source_set_priority(PyGSource *self, PyObject *value, void *closure)
 	return -1;
     }
 
-    if (!PyInt_Check(value)) {
+    if (!_PyLong_Check(value)) {
 	PyErr_SetString(PyExc_TypeError, "type mismatch");
 	return -1;
     }
 
-    g_source_set_priority(self->source, PyInt_AsLong(value));
+    g_source_set_priority(self->source, _PyLong_AsLong(value));
 
     return 0;
 }
@@ -339,7 +339,7 @@ pyg_source_get_id(PyGSource *self, void *closure)
 	return NULL;
     }
 
-    return PyInt_FromLong(g_source_get_id(self->source));
+    return _PyLong_FromLong(g_source_get_id(self->source));
 }
 
 static PyGetSetDef pyg_source_getsets[] = {
@@ -426,7 +426,7 @@ pyg_source_prepare(GSource *source, gint *timeout)
     }
 
     ret = PyObject_IsTrue(PyTuple_GET_ITEM(t, 0));
-	*timeout = PyInt_AsLong(PyTuple_GET_ITEM(t, 1));
+	*timeout = _PyLong_AsLong(PyTuple_GET_ITEM(t, 1));
 
 	if (*timeout == -1 && PyErr_Occurred()) {
 	    ret = FALSE;
@@ -636,9 +636,9 @@ pyg_timeout_init(PyGSource *self, PyObject *args, PyObject *kwargs)
 PYGLIB_DEFINE_TYPE("glib.PollFD", PyGPollFD_Type, PyGPollFD)
 
 static PyMemberDef pyg_poll_fd_members[] = {
-    { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      RO },
-    { "events",  T_USHORT, offsetof(PyGPollFD, pollfd.events),  RO },
-    { "revents", T_USHORT, offsetof(PyGPollFD, pollfd.revents), RO },
+    { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      READONLY },
+    { "events",  T_USHORT, offsetof(PyGPollFD, pollfd.events),  READONLY },
+    { "revents", T_USHORT, offsetof(PyGPollFD, pollfd.revents), READONLY },
     { NULL, 0, 0, 0 }
 };
 
@@ -652,9 +652,9 @@ pyg_poll_fd_dealloc(PyGPollFD *self)
 static PyObject *
 pyg_poll_fd_repr(PyGPollFD *self)
 {
-    return PyString_FromFormat("<GPollFD %d (%d) at 0x%lx>",
-			       self->pollfd.fd, self->pollfd.events,
-			       (long)self);
+    return _PyUnicode_FromFormat("<GPollFD %d (%d) at 0x%lx>",
+				 self->pollfd.fd, self->pollfd.events,
+				 (long)self);
 }
 
 static int

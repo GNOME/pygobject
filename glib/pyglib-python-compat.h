@@ -55,12 +55,16 @@ PyTypeObject symbol = {                                 \
 #define _PyUnicode_AsStringAndSize PyString_AsStringAndSize
 #define _PyUnicode_FromString PyString_FromString 
 #define _PyUnicode_FromStringAndSize PyString_FromStringAndSize 
+#define _PyUnicode_FromFormat PyString_FromFormat
 #define _PyUnicode_AS_STRING PyString_AS_STRING
 #define _PyUnicode_GET_SIZE PyString_GET_SIZE
 #define _PyUnicode_Resize _PyString_Resize
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
 #define _PyLong_AsLong  PyInt_AsLong
+#define RO READONLY
+#define _PyLongObject PyIntObject
+#define _PyLong_Type PyInt_Type
 #else
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
@@ -99,12 +103,15 @@ PyTypeObject symbol = {                                 \
 #define _PyUnicode_AsStringAndSize(obj, buf, size) PyUnicode_AsStringAndSize(obj, size)
 #define _PyUnicode_FromString PyUnicode_FromString
 #define _PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
+#define _PyUnicode_FromFormat PyUnicode_FromFormat
 #define _PyUnicode_AS_STRING _PyUnicode_AsString
 #define _PyUnicode_GET_SIZE PyUnicode_GET_SIZE
 #define _PyUnicode_Resize PyUnicode_Resize
 #define _PyLong_Check PyLong_Check
 #define _PyLong_FromLong PyLong_FromLong
 #define _PyLong_AsLong PyLong_AsLong
+#define _PyLongObject PyLongObject
+#define _PyLong_Type PyLong_Type
 #endif
 
 #endif /* __PYGLIB_PYTHON_COMPAT_H__ */

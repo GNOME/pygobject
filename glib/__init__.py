@@ -27,7 +27,7 @@ try:
 except ImportError:
     pass
 
-from _glib import *
+from glib._glib import *
 _PyGLib_API = _glib._PyGLib_API
 
 del _glib
