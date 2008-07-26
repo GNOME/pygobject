@@ -224,11 +224,6 @@ extern PyObject * pyg_enum_add        (PyObject *   module,
 extern PyObject * pyg_enum_from_gtype (GType        gtype,
 				       int          value);
 
-/* pygparamspec */
-
-extern PyTypeObject PyGParamSpec_Type;
-PyObject * pyg_param_spec_new (GParamSpec *pspec);
-
 /* pygtype.c */
 extern GHashTable *custom_type_registration;
 void pyg_type_register_custom_callback(const gchar *type_name,

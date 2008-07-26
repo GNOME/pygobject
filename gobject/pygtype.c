@@ -20,9 +20,14 @@
  * USA
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <pyglib.h>
 
 #include "pygobject-private.h"
+#include "pygparamspec.h"
 
 /* -------------- __gtype__ objects ---------------------------- */
 

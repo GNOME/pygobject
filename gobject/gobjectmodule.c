@@ -26,9 +26,10 @@
 
 #include <gobject/gvaluecollector.h>
 #include <pyglib.h>
+#include <pythread.h>
 #include "pygobject-private.h"
-#include "pythread.h"
 #include "pyginterface.h"
+#include "pygparamspec.h"
 
 #ifdef HAVE_FFI_H
 #include "ffi-marshaller.h"
@@ -2566,14 +2567,8 @@ init_gobject(void)
     PyObject *descr;
     PyObject *warning;
     
-    PyGParamSpec_Type.ob_type = &PyType_Type;
-    if (PyType_Ready(&PyGParamSpec_Type))
-	return;
-    
     m = Py_InitModule("gobject._gobject", pygobject_functions);
     d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);
 
     g_type_init();
     pyglib_init();
@@ -2619,6 +2614,7 @@ init_gobject(void)
     Py_DECREF(o);
 
     pygobject_interface_register_types(d);
+    pygobject_paramspec_register_types(d);
     
     REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
     REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 

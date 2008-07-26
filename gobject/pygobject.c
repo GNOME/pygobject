@@ -20,9 +20,15 @@
  * USA
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <pyglib.h>
 #include "pygobject-private.h"
 #include "pyginterface.h"
+#include "pygparamspec.h"
+
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);

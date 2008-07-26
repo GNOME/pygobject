@@ -26,6 +26,7 @@
 #endif
 
 #include "pygobject-private.h"
+#include "pygparamspec.h"
 
 static int
 pyg_param_spec_compare(PyGParamSpec *self, PyGParamSpec *v)
@@ -99,7 +100,7 @@ pygflags_from_pspec(GParamSpec *pspec)
     return pyclass;
 }    
 
-PyObject *
+static PyObject *
 pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 {
     GParamSpec *pspec;
@@ -396,4 +397,13 @@ pyg_param_spec_new(GParamSpec *pspec)
 
     self->pspec = g_param_spec_ref(pspec);
     return (PyObject *)self;
+}
+
+void
+pygobject_paramspec_register_types(PyObject *d)
+{
+    PyGParamSpec_Type.ob_type = &PyType_Type;
+    if (PyType_Ready(&PyGParamSpec_Type))
+	return;
+    PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);
 }

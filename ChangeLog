@@ -1,3 +1,15 @@
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c:
+	* gobject/pygparamspec.c (pygobject_paramspec_register_types):
+	* gobject/pygparamspec.h:
+	* gobject/pygtype.c:
+	Move paramspec registration to a separate file, add a header
+	for the internal API.
+
 2008-07-27  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gobject/pygtype.c (pyg_enum_get_value): Issue warning if 'obj'

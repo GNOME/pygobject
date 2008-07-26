@@ -53,6 +53,7 @@ _gobject_la_SOURCES = \
 	pygobject.h \
 	pygobject-private.h \
 	pygparamspec.c \
+	pygparamspec.h \
 	pygpointer.c \
 	pygtype.c
 _gobject_la_DEPENDENCIES = constants.py
