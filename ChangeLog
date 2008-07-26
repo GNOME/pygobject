@@ -1,6 +1,12 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac:
+	* m4/python.m4:
+	Add macros which are compatible with python > 2.6.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
+	* configure.ac:
 	Post release version bump
 
 === 2.15.2 ===

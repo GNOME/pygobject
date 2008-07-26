@@ -68,12 +68,12 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 
-AM_PATH_PYTHON(2.3.5)
+JD_PATH_PYTHON(2.3.5)
 
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+JD_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
-py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
+py_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`
 if test -x "$PYTHON-config"; then
 PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
 else
@@ -92,7 +92,7 @@ if test "x$setwakeupfd_ok" != xno; then
 fi
 CPPFLAGS=$old_CPPFLAGS
 
-PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
+PLATFORM=`$PYTHON -c "import sys; from distutils import util; sys.stdout.write(util.get_platform())"`
 AC_SUBST(PLATFORM)
 
 AC_ARG_ENABLE(thread,
