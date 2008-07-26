@@ -1,3 +1,9 @@
+2008-07-27  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gobject/pygtype.c (pyg_enum_get_value): Issue warning if 'obj'
+	is a PyGEnum of wrong type, i.e. not matching 'enum_type' (bug
+	#503771).
+
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
 	reviewed by: <delete if not using a buddy>

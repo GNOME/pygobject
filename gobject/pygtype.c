@@ -428,6 +428,12 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
     } else if (PyInt_Check(obj)) {
 	*val = PyInt_AsLong(obj);
 	res = 0;
+
+	if (PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
+	    g_warning("expected enumeration type %s, but got %s instead",
+		      g_type_name(enum_type),
+		      g_type_name(((PyGEnum *) obj)->gtype));
+	}
     } else if (PyString_Check(obj)) {
 	GEnumValue *info;
 	char *str = PyString_AsString(obj);
