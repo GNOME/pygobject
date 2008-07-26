@@ -28,6 +28,8 @@
 #include "pyglib-private.h"
 #include "pygoptiongroup.h"
 
+PYGLIB_DEFINE_TYPE("glib.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
+
 static gboolean
 check_if_owned(PyGOptionGroup *self)
 {
@@ -254,50 +256,14 @@ static PyMethodDef pyg_option_group_methods[] = {
     { NULL, NULL, 0 },
 };
 
-PyTypeObject PyGOptionGroup_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.OptionGroup",
-    sizeof(PyGOptionGroup),
-    0,
-    /* methods */
-    (destructor)pyg_option_group_dealloc,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)pyg_option_group_compare,
-    (reprfunc)0,
-    0,
-    0,
-    0,
-    (hashfunc)0,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,
-    (setattrofunc)0,
-    0,
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    NULL,
-    (traverseproc)0,
-    (inquiry)0,
-    (richcmpfunc)0,
-    0,
-    (getiterfunc)0,
-    (iternextfunc)0,
-    pyg_option_group_methods,
-    0,
-    0,
-    NULL,
-    NULL,
-    (descrgetfunc)0,
-    (descrsetfunc)0,
-    0,
-    (initproc)pyg_option_group_init,
-};
-
 void
 pyglib_option_group_register_types(PyObject *d)
 {
+    PyGOptionGroup_Type.tp_dealloc = (destructor)pyg_option_group_dealloc;
+    PyGOptionGroup_Type.tp_compare = (cmpfunc)pyg_option_group_compare;
+    PyGOptionGroup_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGOptionGroup_Type.tp_methods = pyg_option_group_methods;
+    PyGOptionGroup_Type.tp_init = (initproc)pyg_option_group_init;
     PYGLIB_REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
 }
 

@@ -28,6 +28,8 @@
 #include "pyglib-private.h"
 #include "pygoptioncontext.h"
 
+PYGLIB_DEFINE_TYPE("glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+
 static int
 pyg_option_context_init(PyGOptionContext *self, 
                         PyObject *args,
@@ -201,7 +203,8 @@ pyg_option_context_set_main_group(PyGOptionContext *self,
     g_group = pyglib_option_group_transfer_group(group);
     if (g_group == NULL)
     {
-        PyErr_SetString(PyExc_RuntimeError, "Group is already in a OptionContext.");
+        PyErr_SetString(PyExc_RuntimeError,
+			"Group is already in a OptionContext.");
         return NULL;
     }
 
@@ -277,49 +280,13 @@ static PyMethodDef pyg_option_context_methods[] = {
     { NULL, NULL, 0 },
 };
 
-PyTypeObject PyGOptionContext_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.OptionContext",
-    sizeof(PyGOptionContext),
-    0,
-    /* methods */
-    (destructor)pyg_option_context_dealloc,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)pyg_option_context_compare,
-    (reprfunc)0,
-    0,
-    0,
-    0,
-    (hashfunc)0,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,
-    (setattrofunc)0,
-    0,
-    Py_TPFLAGS_DEFAULT,
-    NULL,
-    (traverseproc)0,
-    (inquiry)0,
-    (richcmpfunc)0,
-    0,
-    (getiterfunc)0,
-    (iternextfunc)0,
-    pyg_option_context_methods,
-    0,
-    0,
-    NULL,
-    NULL,
-    (descrgetfunc)0,
-    (descrsetfunc)0,
-    0,
-    (initproc)pyg_option_context_init,
-};
-
 void
 pyglib_option_context_register_types(PyObject *d)
 {
+    PyGOptionContext_Type.tp_dealloc = (destructor)pyg_option_context_dealloc;
+    PyGOptionContext_Type.tp_compare = (cmpfunc)pyg_option_context_compare;
+    PyGOptionContext_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGOptionContext_Type.tp_methods = pyg_option_context_methods;
+    PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;
     PYGLIB_REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
 }

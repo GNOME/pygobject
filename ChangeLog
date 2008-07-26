@@ -1,5 +1,16 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pygmaincontext.c (pyglib_maincontext_register_types):
+	* glib/pygmainloop.c (pyg_main_loop_init),
+	(pyglib_mainloop_register_types):
+	* glib/pygoptioncontext.c (pyg_option_context_set_main_group),
+	(pyglib_option_context_register_types):
+	* glib/pygoptiongroup.c (pyglib_option_group_register_types):
+	* glib/pygspawn.c (pyglib_spawn_register_types):
+	Convert the pid/mainloop/maincontext/optiongroup/optioncontext.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pygsource.c (pyglib_source_register_types):
 	Convert the source objects to use macros, saves ~150 lines of code!
 

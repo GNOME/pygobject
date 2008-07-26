@@ -31,6 +31,8 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 
+PYGLIB_DEFINE_TYPE("glib.MainContext", PyGMainContext_Type, PyGMainContext)
+
 static int
 pyg_main_context_init(PyGMainContext *self)
 {
@@ -85,49 +87,13 @@ static PyMethodDef _PyGMainContext_methods[] = {
     { NULL, NULL, 0 }
 };
 
-PyTypeObject PyGMainContext_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "glib.MainContext",
-    sizeof(PyGMainContext),
-    0,
-    /* methods */
-    (destructor)pyg_main_context_dealloc,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)pyg_main_context_compare,
-    (reprfunc)0,
-    0,
-    0,
-    0,
-    (hashfunc)0,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,
-    (setattrofunc)0,
-    0,
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    NULL,
-    (traverseproc)0,
-    (inquiry)0,
-    (richcmpfunc)0,
-    0,
-    (getiterfunc)0,
-    (iternextfunc)0,
-    _PyGMainContext_methods,
-    0,
-    0,
-    NULL,
-    NULL,
-    (descrgetfunc)0,
-    (descrsetfunc)0,
-    0,
-    (initproc)pyg_main_context_init,
-};
-
 void
 pyglib_maincontext_register_types(PyObject *d)
 {
+    PyGMainContext_Type.tp_dealloc = (destructor)pyg_main_context_dealloc;
+    PyGMainContext_Type.tp_compare = (cmpfunc)pyg_main_context_compare;
+    PyGMainContext_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGMainContext_Type.tp_methods = _PyGMainContext_methods;
+    PyGMainContext_Type.tp_init = (initproc)pyg_main_context_init;
     PYGLIB_REGISTER_TYPE(d, PyGMainContext_Type, "MainContext"); 
 }

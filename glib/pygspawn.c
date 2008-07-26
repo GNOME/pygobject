@@ -32,6 +32,8 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
+PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, PyIntObject)
+
 static PyObject *
 pyg_pid_close(PyIntObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -58,50 +60,6 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
     PyErr_SetString(PyExc_TypeError, "glib.Pid cannot be manually instantiated");
     return -1;
 }
-
-static PyTypeObject PyGPid_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "glib.Pid",
-    sizeof(PyIntObject),
-    0,
-    0,					  /* tp_dealloc */
-    0,                			  /* tp_print */
-    0,					  /* tp_getattr */
-    0,					  /* tp_setattr */
-    0,					  /* tp_compare */
-    0,		  			  /* tp_repr */
-    0,                   		  /* tp_as_number */
-    0,					  /* tp_as_sequence */
-    0,					  /* tp_as_mapping */
-    0,					  /* tp_hash */
-    0,					  /* tp_call */
-    0,		  			  /* tp_str */
-    0,					  /* tp_getattro */
-    0,					  /* tp_setattro */
-    0,				  	  /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT, 		  /* tp_flags */
-    0,      				  /* tp_doc */
-    0,					  /* tp_traverse */
-    0,					  /* tp_clear */
-    0,					  /* tp_richcompare */
-    0,					  /* tp_weaklistoffset */
-    0,					  /* tp_iter */
-    0,					  /* tp_iternext */
-    pyg_pid_methods,			  /* tp_methods */
-    0,					  /* tp_members */
-    0,					  /* tp_getset */
-    0,	  				  /* tp_base */
-    0,					  /* tp_dict */
-    0,					  /* tp_descr_get */
-    0,					  /* tp_descr_set */
-    0,					  /* tp_dictoffset */
-    pyg_pid_tp_init,		  	  /* tp_init */
-    0,					  /* tp_alloc */
-    0,					  /* tp_new */
-    (freefunc)pyg_pid_free,		  /* tp_free */
-    0,					  /* tp_is_gc */
-};
 
 PyObject *
 pyg_pid_new(GPid pid)
@@ -293,5 +251,9 @@ void
 pyglib_spawn_register_types(PyObject *d)
 {
     PyGPid_Type.tp_base = &PyInt_Type;
+    PyGPid_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGPid_Type.tp_methods = pyg_pid_methods;
+    PyGPid_Type.tp_init = pyg_pid_tp_init;
+    PyGPid_Type.tp_free = (freefunc)pyg_pid_free;
     PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");
 }

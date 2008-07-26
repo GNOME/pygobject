@@ -227,8 +227,10 @@ pyg_signal_watch_new(void)
     return g_source_new(&pyg_signal_watch_funcs, sizeof(PySignalWatchSource));
 }
 
+PYGLIB_DEFINE_TYPE("glib.MainLoop", PyGMainLoop_Type, PyGMainLoop)
+
 static int
-pyg_main_loop_new(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
+pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
 {
 
     static char *kwlist[] = { "context", "is_running", NULL };
@@ -335,49 +337,13 @@ static PyMethodDef _PyGMainLoop_methods[] = {
     { NULL, NULL, 0 }
 };
 
-PyTypeObject PyGMainLoop_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,			
-    "glib.MainLoop",	
-    sizeof(PyGMainLoop),	
-    0,			
-    /* methods */
-    (destructor)pyg_main_loop_dealloc,	
-    (printfunc)0,	
-    (getattrfunc)0,	
-    (setattrfunc)0,	
-    (cmpfunc)pyg_main_loop_compare,
-    (reprfunc)0,	
-    0,			
-    0,		
-    0,		
-    (hashfunc)0,		
-    (ternaryfunc)0,		
-    (reprfunc)0,		
-    (getattrofunc)0,		
-    (setattrofunc)0,		
-    0,				
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, 
-    NULL,
-    (traverseproc)0,		
-    (inquiry)0,
-    (richcmpfunc)0,	
-    0,             
-    (getiterfunc)0,
-    (iternextfunc)0,
-    _PyGMainLoop_methods,
-    0,				
-    0,		       	
-    NULL,		
-    NULL,		
-    (descrgetfunc)0,	
-    (descrsetfunc)0,	
-    0,                 
-    (initproc)pyg_main_loop_new,
-};
-
 void
 pyglib_mainloop_register_types(PyObject *d)
 {
+    PyGMainLoop_Type.tp_dealloc = (destructor)pyg_main_loop_dealloc;
+    PyGMainLoop_Type.tp_compare = (cmpfunc)pyg_main_loop_compare;
+    PyGMainLoop_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGMainLoop_Type.tp_methods = _PyGMainLoop_methods;
+    PyGMainLoop_Type.tp_init = (initproc)pyg_main_loop_init;
     PYGLIB_REGISTER_TYPE(d, PyGMainLoop_Type, "MainLoop"); 
 }
