@@ -1,3 +1,13 @@
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
+	* glib/glibmodule.c (child_watch_dnotify),
+	(pyglib_child_watch_add):
+	* glib/pygiochannel.c (pyg_iowatch_data_free),
+	(py_io_channel_add_watch):
+	* glib/pygspawn.c (_pyg_spawn_async_callback),
+	(pyglib_spawn_async):
+	Use g_slice_new instead of g_new
+
 2008-07-25  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/Makefile.am:

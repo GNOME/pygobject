@@ -426,7 +426,7 @@ pyg_iowatch_data_free(PyGIOWatchData *data)
     Py_DECREF(data->callback);
     Py_XDECREF(data->user_data);
     Py_DECREF(data->iochannel);
-    g_free(data);
+    g_slice_free(PyGIOWatchData, data);
 }
 
 static gboolean
@@ -489,7 +489,7 @@ py_io_channel_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
 
-    data = g_new(PyGIOWatchData, 1);
+    data = g_slice_new(PyGIOWatchData);
     data->callback = callback; Py_INCREF(callback);
     data->user_data = user_data; Py_XINCREF(user_data);
     data->iochannel = self; Py_INCREF(self);

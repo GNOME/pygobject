@@ -132,7 +132,7 @@ _pyg_spawn_async_callback(gpointer user_data)
 	PyErr_Print();
     Py_DECREF(data->func);
     Py_XDECREF(data->data);
-    g_free(data);
+    g_slice_free(struct _PyGChildSetupData, data);
     pyglib_gil_state_release(gil);
 }
 
@@ -234,7 +234,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
                 g_free(envp);
             return NULL;
         }
-        callback_data = g_new(struct _PyGChildSetupData, 1);
+        callback_data = g_slice_new(struct _PyGChildSetupData);
         callback_data->func = func;
         callback_data->data = user_data;
         Py_INCREF(callback_data->func);
@@ -257,7 +257,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         if (callback_data) {
             Py_DECREF(callback_data->func);
             Py_XDECREF(callback_data->data);
-            g_free(callback_data);
+            g_slice_free(struct _PyGChildSetupData, callback_data);
         }
         pyglib_error_check(&error);
         return NULL;

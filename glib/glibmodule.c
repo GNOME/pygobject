@@ -340,7 +340,7 @@ child_watch_dnotify(gpointer data)
     struct _PyGChildData *child_data = (struct _PyGChildData *) data;
     Py_DECREF(child_data->func);
     Py_XDECREF(child_data->data);
-    g_free(child_data);
+    g_slice_free(struct _PyGChildData, child_data);
 }
 
 
@@ -364,7 +364,7 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
     }
 
-    child_data = g_new(struct _PyGChildData, 1);
+    child_data = g_slice_new(struct _PyGChildData);
     child_data->func = func;
     child_data->data = user_data;
     Py_INCREF(child_data->func);
