@@ -1,5 +1,10 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pygsource.c (pyglib_source_register_types):
+	Convert the source objects to use macros, saves ~150 lines of code!
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/glibmodule.c (get_handler_priority), (pyglib_idle_add),
 	(pyglib_timeout_add), (pyglib_timeout_add_seconds),
 	(pyglib_io_add_watch), (pyglib_child_watch_add),

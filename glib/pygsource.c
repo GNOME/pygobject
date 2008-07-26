@@ -57,6 +57,10 @@ typedef struct
     PyObject *obj;
 } PyGRealSource;
 
+/* gobject.GSource */
+
+PYGLIB_DEFINE_TYPE("gobject.Source", PyGSource_Type, PyGSource)
+
 static PyObject *
 source_repr(PyGSource *self, const char *type)
 {
@@ -558,51 +562,9 @@ pyg_source_free(PyObject *op)
     PyObject_GC_Del(op);
 }
 
-PyTypeObject PyGSource_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.Source",			/* tp_name */
-    sizeof(PyGSource),			/* tp_basicsize */
-    0,					/* tp_itemsize */
-    (destructor)pyg_source_dealloc,	/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)0,				/* tp_compare */
-    (reprfunc)pyg_source_repr,		/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)0,			/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-      Py_TPFLAGS_HAVE_GC,		/* tp_flags */
-    NULL,				/* tp_doc */
-    (traverseproc)pyg_source_traverse,	/* tp_traverse */
-    (inquiry)pyg_source_clear,		/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    offsetof(PyGSource, weakreflist),	/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    pyg_source_methods,			/* tp_methods */
-    0,					/* tp_members */
-    pyg_source_getsets,			/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    offsetof(PyGSource, inst_dict),	/* tp_dictoffset */
-    (initproc)pyg_source_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)pyg_source_free,		/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
+/* gobject.Idle */
+
+PYGLIB_DEFINE_TYPE("gobject.Idle", PyGIdle_Type, PyGSource)
 
 static PyObject *
 pyg_idle_repr(PyGSource *self)
@@ -634,50 +596,9 @@ pyg_idle_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-PyTypeObject PyGIdle_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.Idle",			/* tp_name */
-    sizeof(PyGSource),			/* tp_basicsize */
-    0,					/* tp_itemsize */
-    (destructor)0,			/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)0,				/* tp_compare */
-    (reprfunc)pyg_idle_repr,		/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)0,			/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		/* tp_flags */
-    NULL,				/* tp_doc */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    NULL,				/* tp_methods */
-    NULL,				/* tp_members */
-    NULL,				/* tp_getset */
-    (PyTypeObject *)&PyGSource_Type,	/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_idle_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)0,			/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
+/* gobject.Timeout */
+
+PYGLIB_DEFINE_TYPE("gobject.Timeout", PyGTimeout_Type, PyGSource)
 
 static PyObject *
 pyg_timeout_repr(PyGSource *self)
@@ -710,50 +631,9 @@ pyg_timeout_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-PyTypeObject PyGTimeout_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.Timeout",			/* tp_name */
-    sizeof(PyGSource),			/* tp_basicsize */
-    0,					/* tp_itemsize */
-    (destructor)0,			/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)0,				/* tp_compare */
-    (reprfunc)pyg_timeout_repr,		/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)0,			/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,		/* tp_flags */
-    NULL,				/* tp_doc */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    NULL,				/* tp_methods */
-    NULL,				/* tp_members */
-    NULL,				/* tp_getset */
-    (PyTypeObject *)&PyGSource_Type,	/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_timeout_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)0,			/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
+/* gobject.PollFD */
+
+PYGLIB_DEFINE_TYPE("gobject.PollFD", PyGPollFD_Type, PyGPollFD)
 
 static PyMemberDef pyg_poll_fd_members[] = {
     { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      RO },
@@ -804,56 +684,40 @@ pyg_poll_fd_init(PyGPollFD *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-PyTypeObject PyGPollFD_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.PollFD",			/* tp_name */
-    sizeof(PyGPollFD),			/* tp_basicsize */
-    0,					/* tp_itemsize */
-    (destructor)pyg_poll_fd_dealloc,	/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)0,				/* tp_compare */
-    (reprfunc)pyg_poll_fd_repr,		/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)0,			/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,			/* tp_flags */
-    NULL,				/* tp_doc */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    0,					/* tp_methods */
-    pyg_poll_fd_members,		/* tp_members */
-    0,					/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_poll_fd_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)0,			/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
-
 void
 pyglib_source_register_types(PyObject *d)
 {
+    PyGSource_Type.tp_flags = (Py_TPFLAGS_DEFAULT |
+			       Py_TPFLAGS_BASETYPE |
+			       Py_TPFLAGS_HAVE_GC);
+    PyGSource_Type.tp_init = (initproc)pyg_source_init;
+    PyGSource_Type.tp_free = (freefunc)pyg_source_free;
+    PyGSource_Type.tp_dealloc = (destructor)pyg_source_dealloc;
+    PyGSource_Type.tp_methods = pyg_source_methods;
+    PyGSource_Type.tp_repr = (reprfunc)pyg_source_repr;
+    PyGSource_Type.tp_traverse = (traverseproc)pyg_source_traverse;
+    PyGSource_Type.tp_clear = (inquiry)pyg_source_clear;
+    PyGSource_Type.tp_getset = pyg_source_getsets;
+    PyGSource_Type.tp_weaklistoffset = offsetof(PyGSource, weakreflist);
+    PyGSource_Type.tp_dictoffset = offsetof(PyGSource, inst_dict);
     PYGLIB_REGISTER_TYPE(d, PyGSource_Type, "Source");
+
+    PyGIdle_Type.tp_repr = (reprfunc)pyg_idle_repr;
+    PyGIdle_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGIdle_Type.tp_base = (PyTypeObject *)&PyGSource_Type;
+    PyGIdle_Type.tp_init = (initproc)pyg_idle_init;
     PYGLIB_REGISTER_TYPE(d, PyGIdle_Type, "Idle");
+
+    PyGTimeout_Type.tp_repr = (reprfunc)pyg_timeout_repr;
+    PyGTimeout_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGTimeout_Type.tp_base = (PyTypeObject *)&PyGSource_Type;
+    PyGTimeout_Type.tp_init = (initproc)pyg_timeout_init;
     PYGLIB_REGISTER_TYPE(d, PyGTimeout_Type, "Timeout");
+
+    PyGPollFD_Type.tp_dealloc = (destructor)pyg_poll_fd_dealloc;
+    PyGPollFD_Type.tp_repr = (reprfunc)pyg_poll_fd_repr;
+    PyGPollFD_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGPollFD_Type.tp_members = pyg_poll_fd_members;
+    PyGPollFD_Type.tp_init = (initproc)pyg_poll_fd_init;
     PYGLIB_REGISTER_TYPE(d, PyGPollFD_Type, "PollFD");
 }
