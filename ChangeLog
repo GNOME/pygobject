@@ -1,5 +1,20 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* tests/common.py:
+	* tests/test_conversion.py:
+	* tests/test_enum.py:
+	* tests/test_interface.py:
+	* tests/test_option.py:
+	* tests/test_source.py:
+	* tests/test_subprocess.py:
+	* tests/test_subtype.py:
+	* tests/test_thread.py:
+	* tests/test_unknown.py:
+	Run pyflakes on the testsuite, remove unused imports
+	and reorganize others.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/glibmodule.c (pyglib_register_constants), (init_glib):
 	* gobject/__init__.py:
 	* gobject/gobjectmodule.c (init_gobject):

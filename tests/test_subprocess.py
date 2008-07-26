@@ -1,10 +1,10 @@
 # -*- Mode: Python -*-
 
-import gc
-import unittest
 import sys
+import unittest
 
-from common import glib, gobject
+from common import glib
+
 
 class TestProcess(unittest.TestCase):
 

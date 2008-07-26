@@ -1,17 +1,19 @@
 import unittest
 import weakref
 import gc
-import sys
 
 import testmodule
 from common import gobject, testhelper
-from gobject import GObject, GInterface, GObjectMeta
+
+# FIXME: do not import gtk
 import gtk
 
-class _ClassInittableMetaType(GObjectMeta):
+
+class _ClassInittableMetaType(gobject.GObjectMeta):
     def __init__(cls, name, bases, namespace):
         super(_ClassInittableMetaType, cls).__init__(name, bases, namespace)
         cls.__class_init__(namespace)
+
 
 class ClassInittableObject(object):
     __metaclass__ = _ClassInittableMetaType
@@ -19,11 +21,12 @@ class ClassInittableObject(object):
         pass
     __class_init__ = classmethod(__class_init__)
 
+
 class TestSubType(unittest.TestCase):
     def testSubType(self):
-        t = type('testtype', (GObject, GInterface), {})
-        self.failUnless(issubclass(t, GObject))
-        self.failUnless(issubclass(t, GInterface))
+        t = type('testtype', (gobject.GObject, gobject.GInterface), {})
+        self.failUnless(issubclass(t, gobject.GObject))
+        self.failUnless(issubclass(t, gobject.GInterface))
 
     def testGObject(self):
         label = gobject.GObject()
@@ -230,7 +233,7 @@ class TestSubType(unittest.TestCase):
         disposed_calls = []
         def on_dispose():
             disposed_calls.append(None)
-        gobj = GObject()
+        gobj = gobject.GObject()
         gobj.set_data('tmp', CallInDel(on_dispose))
         del gobj
         assert len(disposed_calls) == 1

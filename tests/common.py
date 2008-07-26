@@ -42,11 +42,7 @@ def importModule(module, directory, name=None):
     except ImportError, e:
         raise SystemExit('%s could not be imported: %s' % (origName, e))
 
-    if hasattr(obj, '__file__'):
-        location = obj.__file__
-    else:
-        package = __import__(fromlist)
-        location = os.path.join(package.__file__, name)
+    location = obj.__file__
 
     current = os.getcwd()
     expected = os.path.abspath(os.path.join(current, location))

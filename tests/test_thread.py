@@ -1,11 +1,12 @@
-import os
 import unittest
 
 from common import glib, testhelper
 
-main = glib.MainLoop()
 
 class TestThread(unittest.TestCase):
+    def setUp(self):
+        self.main = glib.MainLoop()
+
     def from_thread_cb(self, test, enum):
         assert test == self.obj
         assert int(enum) == 0
@@ -19,7 +20,7 @@ class TestThread(unittest.TestCase):
     def testExtensionModule(self):
         glib.idle_add(self.idle_cb)
         glib.timeout_add(50, self.timeout_cb)
-        main.run()
+        self.main.run()
 
     def timeout_cb(self):
-        main.quit()
+        self.main.quit()

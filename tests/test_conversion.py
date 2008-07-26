@@ -1,7 +1,5 @@
 # -*- Mode: Python -*-
 
-import sys
-
 import unittest
 
 from common import gtk, gobject

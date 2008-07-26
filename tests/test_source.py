@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
-import exceptions
-import os
-import sys
-import select
 import unittest
 
-from common import glib, gobject
+from common import glib
+
 
 class Idle(glib.Idle):
     def __init__(self, loop):
@@ -17,6 +14,7 @@ class Idle(glib.Idle):
     def callback(self, loop):
         self.count += 1
         return True
+
 
 class MySource(glib.Source):
     def __init__(self):
@@ -30,6 +28,7 @@ class MySource(glib.Source):
 
     def dispatch(self, callback, args):
         return callback(*args)
+
 
 class TestSource(unittest.TestCase):
     def timeout_callback(self, loop):

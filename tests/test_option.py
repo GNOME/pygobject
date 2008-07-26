@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 
-import optparse
 import unittest
 import sys
 from StringIO import StringIO
 
-from gobject import option
-
-from common import gobject
+from gobject.option import OptionParser, OptionGroup, OptionValueError, \
+     make_option, BadOptionError
 
 
 class TestOption(unittest.TestCase):
     EXCEPTION_MESSAGE = "This callback fails"
 
     def setUp(self):
-        self.parser = option.OptionParser("NAMES...",
+        self.parser = OptionParser("NAMES...",
                                      description="Option unit test")
         self.parser.add_option("-t", "--test", help="Unit test option",
                           action="store_false", dest="test", default=True)
@@ -27,18 +25,18 @@ class TestOption(unittest.TestCase):
         def option_callback(option, opt, value, parser):
             raise StandardError(self.EXCEPTION_MESSAGE)
 
-        group = option.OptionGroup(
+        group = OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
             option_list = [
-                option.make_option("-f", "-u", "--file", "--unit-file",
+                make_option("-f", "-u", "--file", "--unit-file",
                                    type="filename",
                                    dest="unit_file",
                                    help="Unit test option"),
-                option.make_option("--test-integer",
+                make_option("--test-integer",
                                    type="int",
                                    dest="test_integer",
                                    help="Unit integer option"),
-                option.make_option("--callback-failure-test",
+                make_option("--callback-failure-test",
                                    action="callback",
                                    callback=option_callback,
                                    dest="test_integer",
@@ -89,16 +87,16 @@ class TestOption(unittest.TestCase):
 
     def testOptionValueError(self):
         self._create_group()
-        self.assertRaises(option.OptionValueError, self.parser.parse_args,
+        self.assertRaises(OptionValueError, self.parser.parse_args,
                           ["test_option.py", "--test-integer=text"])
 
     def testBadOptionError(self):
-        self.assertRaises(option.BadOptionError,
+        self.assertRaises(BadOptionError,
                           self.parser.parse_args,
                           ["test_option.py", "--unknwon-option"])
 
     def testOptionGroupConstructor(self):
-        self.assertRaises(TypeError, option.OptionGroup)
+        self.assertRaises(TypeError, OptionGroup)
 
     def testStandardError(self):
         self._create_group()
