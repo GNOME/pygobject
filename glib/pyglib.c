@@ -272,7 +272,7 @@ pyglib_error_check(GError **error)
  * raised exception is not a GError then PyErr_Print() is called.
  *
  * Returns: 0 if no exception has been raised, -1 if it is a
- * valid gobject.GError, -2 otherwise.
+ * valid glib.GError, -2 otherwise.
  */
 gboolean
 pyglib_gerror_exception_check(GError **error)
@@ -302,20 +302,20 @@ pyglib_gerror_exception_check(GError **error)
 
     py_message = PyObject_GetAttrString(value, "message");
     if (!py_message || !_PyUnicode_Check(py_message)) {
-        bad_gerror_message = "gobject.GError instances must have a 'message' string attribute";
+        bad_gerror_message = "glib.GError instances must have a 'message' string attribute";
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
     if (!py_domain || !_PyUnicode_Check(py_domain)) {
-        bad_gerror_message = "gobject.GError instances must have a 'domain' string attribute";
+        bad_gerror_message = "glib.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         goto bad_gerror;
     }
 
     py_code = PyObject_GetAttrString(value, "code");
     if (!py_code || !_PyLong_Check(py_code)) {
-        bad_gerror_message = "gobject.GError instances must have a 'code' int attribute";
+        bad_gerror_message = "glib.GError instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
         goto bad_gerror;
@@ -331,7 +331,7 @@ pyglib_gerror_exception_check(GError **error)
 
 bad_gerror:
     Py_DECREF(value);
-    g_set_error(error, g_quark_from_static_string("pygobject"), 0, bad_gerror_message);
+    g_set_error(error, g_quark_from_static_string("pyglib"), 0, bad_gerror_message);
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;

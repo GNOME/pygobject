@@ -1,5 +1,26 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pygiochannel.c (py_io_channel_shutdown),
+	(py_io_channel_set_buffer_size), (py_io_channel_get_buffer_size),
+	(py_io_channel_set_buffered), (py_io_channel_get_buffered),
+	(py_io_channel_set_encoding), (py_io_channel_get_encoding),
+	(py_io_channel_read_chars), (py_io_channel_write_chars),
+	(py_io_channel_write_lines), (py_io_channel_flush),
+	(py_io_channel_set_flags), (py_io_channel_get_flags),
+	(py_io_channel_get_buffer_condition),
+	(py_io_channel_set_close_on_unref), (py_io_channel_add_watch),
+	(py_io_channel_win32_poll), (py_io_channel_win32_make_pollfd),
+	(py_io_channel_read_line), (py_io_channel_read_lines),
+	(py_io_channel_seek), (py_io_channel_init):
+	* glib/pyglib.c (pyglib_gerror_exception_check):
+	* glib/pygoptioncontext.c (pyg_option_context_init):
+	* glib/pygoptiongroup.c (check_if_owned):
+	* glib/pygsource.c (pyg_idle_init), (pyg_timeout_init),
+	(pyg_poll_fd_init):
+	gobject -> glib
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pygmaincontext.c (pyglib_maincontext_register_types):
 	* glib/pygmainloop.c (pyg_main_loop_init),
 	(pyglib_mainloop_register_types):

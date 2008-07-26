@@ -36,7 +36,7 @@ pyg_option_context_init(PyGOptionContext *self,
                         PyObject *kwargs)
 {
     char *parameter_string;
-    if (!PyArg_ParseTuple(args, "s:gobject.GOptionContext.__init__",
+    if (!PyArg_ParseTuple(args, "s:glib.GOptionContext.__init__",
                           &parameter_string))
         return -1;
     

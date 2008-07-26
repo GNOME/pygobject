@@ -57,9 +57,9 @@ typedef struct
     PyObject *obj;
 } PyGRealSource;
 
-/* gobject.GSource */
+/* glib.GSource */
 
-PYGLIB_DEFINE_TYPE("gobject.Source", PyGSource_Type, PyGSource)
+PYGLIB_DEFINE_TYPE("glib.Source", PyGSource_Type, PyGSource)
 
 static PyObject *
 source_repr(PyGSource *self, const char *type)
@@ -562,9 +562,9 @@ pyg_source_free(PyObject *op)
     PyObject_GC_Del(op);
 }
 
-/* gobject.Idle */
+/* glib.Idle */
 
-PYGLIB_DEFINE_TYPE("gobject.Idle", PyGIdle_Type, PyGSource)
+PYGLIB_DEFINE_TYPE("glib.Idle", PyGIdle_Type, PyGSource)
 
 static PyObject *
 pyg_idle_repr(PyGSource *self)
@@ -579,7 +579,7 @@ pyg_idle_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     gint priority = G_PRIORITY_DEFAULT_IDLE;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "|i:gobject.Idle.__init__", kwlist,
+				     "|i:glib.Idle.__init__", kwlist,
 				     &priority))
 	return -1;
 
@@ -596,9 +596,9 @@ pyg_idle_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-/* gobject.Timeout */
+/* glib.Timeout */
 
-PYGLIB_DEFINE_TYPE("gobject.Timeout", PyGTimeout_Type, PyGSource)
+PYGLIB_DEFINE_TYPE("glib.Timeout", PyGTimeout_Type, PyGSource)
 
 static PyObject *
 pyg_timeout_repr(PyGSource *self)
@@ -614,7 +614,7 @@ pyg_timeout_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     guint interval;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "I|i:gobject.Timeout.__init__", kwlist,
+				     "I|i:glib.Timeout.__init__", kwlist,
 				     &interval, &priority))
 	return -1;
 
@@ -631,9 +631,9 @@ pyg_timeout_init(PyGSource *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-/* gobject.PollFD */
+/* glib.PollFD */
 
-PYGLIB_DEFINE_TYPE("gobject.PollFD", PyGPollFD_Type, PyGPollFD)
+PYGLIB_DEFINE_TYPE("glib.PollFD", PyGPollFD_Type, PyGPollFD)
 
 static PyMemberDef pyg_poll_fd_members[] = {
     { "fd",      T_INT,    offsetof(PyGPollFD, pollfd.fd),      RO },
@@ -666,7 +666,7 @@ pyg_poll_fd_init(PyGPollFD *self, PyObject *args, PyObject *kwargs)
     gushort events;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "OH:gobject.PollFD.__init__", kwlist,
+				     "OH:glib.PollFD.__init__", kwlist,
 				     &o, &events))
 	return -1;
 

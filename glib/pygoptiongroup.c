@@ -36,7 +36,7 @@ check_if_owned(PyGOptionGroup *self)
     if (self->other_owner)
     {
         PyErr_SetString(PyExc_ValueError, "The GOptionGroup was not created by "
-                        "gobject.OptionGroup(), so operation is not possible.");
+                        "glib.OptionGroup(), so operation is not possible.");
         return TRUE;
     }
     return FALSE;
