@@ -68,19 +68,19 @@ get_handler_priority(gint *priority, PyObject *kwargs)
     }
     pos = 0;
     PyDict_Next(kwargs, &pos, &key, &val);
-    if (!PyString_Check(key)) {
+    if (!_PyUnicode_Check(key)) {
 	PyErr_SetString(PyExc_TypeError,
 			"keyword argument name is not a string");
 	return -1;
     }
 
-    if (strcmp(PyString_AsString(key), "priority") != 0) {
+    if (strcmp(_PyUnicode_AsString(key), "priority") != 0) {
 	PyErr_SetString(PyExc_TypeError,
 			"only 'priority' keyword argument accepted");
 	return -1;
     }
 
-    *priority = PyInt_AsLong(val);
+    *priority = _PyLong_AsLong(val);
     if (PyErr_Occurred()) {
 	PyErr_Clear();
 	PyErr_SetString(PyExc_ValueError, "could not get priority value");
@@ -125,7 +125,7 @@ pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_idle_add_full(priority,
 				 _pyglib_handler_marshal, data,
 				 _pyglib_destroy_notify);
-    return PyInt_FromLong(handler_id);
+    return _PyLong_FromLong(handler_id);
 }
 
 
@@ -165,7 +165,7 @@ pyglib_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_full(priority, interval,
 				    _pyglib_handler_marshal, data,
 				    _pyglib_destroy_notify);
-    return PyInt_FromLong(handler_id);
+    return _PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -204,7 +204,7 @@ pyglib_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_seconds_full(priority, interval,
                                             _pyglib_handler_marshal, data,
                                             _pyglib_destroy_notify);
-    return PyInt_FromLong(handler_id);
+    return _PyLong_FromLong(handler_id);
 }
 
 static gboolean
@@ -294,7 +294,7 @@ pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 				     (GDestroyNotify)_pyglib_destroy_notify);
     g_io_channel_unref(iochannel);
     
-    return PyInt_FromLong(handler_id);
+    return _PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -374,7 +374,7 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
         Py_INCREF(child_data->data);
     id = g_child_watch_add_full(priority, pid, child_watch_func,
                                 child_data, child_watch_dnotify);
-    return PyInt_FromLong(id);
+    return _PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -391,7 +391,7 @@ pyglib_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     text_out = g_markup_escape_text(text_in, text_size);
-    retval = PyString_FromString(text_out);
+    retval = _PyUnicode_FromString(text_out);
     g_free(text_out);
     return retval;
 }
@@ -410,7 +410,7 @@ pyglib_get_current_time(PyObject *unused)
 static PyObject *
 pyglib_main_depth(PyObject *unused)
 {
-    return PyInt_FromLong(g_main_depth());
+    return _PyLong_FromLong(g_main_depth());
 }
 
 static PyObject *
@@ -463,7 +463,7 @@ pyglib_filename_from_utf8(PyObject *self, PyObject *args)
         g_free(filename);
         return NULL;
     }
-    py_filename = PyString_FromStringAndSize(filename, bytes_written);
+    py_filename = _PyUnicode_FromStringAndSize(filename, bytes_written);
     g_free(filename);
     return py_filename;
 }
@@ -479,7 +479,7 @@ pyglib_get_application_name(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return PyString_FromString(name);
+    return _PyUnicode_FromString(name);
 }
 
 static PyObject*
@@ -504,7 +504,7 @@ pyglib_get_prgname(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return PyString_FromString(name);
+    return _PyUnicode_FromString(name);
 }
 
 static PyObject*
@@ -520,7 +520,7 @@ pyglib_set_prgname(PyObject *self, PyObject *args)
 }
 
 
-static PyMethodDef pyglib_functions[] = {
+static PyMethodDef _glib_functions[] = {
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS },
     { "main_context_default",
@@ -710,15 +710,11 @@ pyglib_register_constants(PyObject *m)
 			       (char*) g_quark_to_string(G_OPTION_ERROR));
 }
 
-DL_EXPORT(void)
-init_glib(void)
+PYGLIB_MODULE_START(_glib, "glib._glib")
 {
-    PyObject *m, *d;
+    PyObject *d = PyModule_GetDict(module);
 
-    m = Py_InitModule("glib._glib", pyglib_functions);
-    pyglib_register_constants(m);
-
-    d = PyModule_GetDict(m);
+    pyglib_register_constants(module);
     pyglib_register_api(d);
     pyglib_register_error(d);
     pyglib_register_version_tuples(d);
@@ -730,3 +726,4 @@ init_glib(void)
     pyglib_option_context_register_types(d);
     pyglib_option_group_register_types(d);
 }
+PYGLIB_MODULE_END

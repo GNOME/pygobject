@@ -25,12 +25,9 @@
 #include <Python.h>
 #include <glib.h>
 
-G_BEGIN_DECLS
+#include <pyglib-python-compat.h>
 
-/* Compilation on Python 2.4 */
-#if PY_VERSION_HEX < 0x02050000
-typedef int Py_ssize_t;
-#endif
+G_BEGIN_DECLS
 
 struct _PyGLib_Functions {
     gboolean threads_enabled;
@@ -38,16 +35,6 @@ struct _PyGLib_Functions {
     PyGLibThreadBlockFunc block_threads;
     PyGLibThreadBlockFunc unblock_threads;
 };
-
-#define PYGLIB_REGISTER_TYPE(d, type, name)	\
-    type.ob_type = &PyType_Type; \
-    if (!type.tp_alloc) \
-	type.tp_alloc = PyType_GenericAlloc; \
-    if (!type.tp_new) \
-	type.tp_new = PyType_GenericNew; \
-    if (PyType_Ready(&type)) \
-	return; \
-    PyDict_SetItemString(d, name, (PyObject *)&type);
 
 gboolean _pyglib_handler_marshal(gpointer user_data);
 void _pyglib_destroy_notify(gpointer user_data);

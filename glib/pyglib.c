@@ -61,7 +61,7 @@ pyglib_init(void)
 	    Py_XDECREF(traceback);
 	    PyErr_Format(PyExc_ImportError,
 			 "could not import glib (error was: %s)",
-			 PyString_AsString(py_orig_exc));
+			 _PyUnicode_AsString(py_orig_exc));
 	    Py_DECREF(py_orig_exc);
         } else
 	    PyErr_SetString(PyExc_ImportError,
@@ -232,23 +232,23 @@ pyglib_error_check(GError **error)
     if (exception_table != NULL)
     {
 	PyObject *item;
-	item = PyDict_GetItem(exception_table, PyInt_FromLong((*error)->domain));
+	item = PyDict_GetItem(exception_table, _PyLong_FromLong((*error)->domain));
 	if (item != NULL)
 	    exc_type = item;
     }
 
     exc_instance = PyObject_CallFunction(exc_type, "z", (*error)->message);
     PyObject_SetAttrString(exc_instance, "domain",
-			   d=PyString_FromString(g_quark_to_string((*error)->domain)));
+			   d=_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
     Py_DECREF(d);
 
     PyObject_SetAttrString(exc_instance, "code",
-			   d=PyInt_FromLong((*error)->code));
+			   d=_PyLong_FromLong((*error)->code));
     Py_DECREF(d);
 
     if ((*error)->message) {
 	PyObject_SetAttrString(exc_instance, "message",
-			       d=PyString_FromString((*error)->message));
+			       d=_PyUnicode_FromString((*error)->message));
 	Py_DECREF(d);
     } else {
 	PyObject_SetAttrString(exc_instance, "message", Py_None);
@@ -301,28 +301,28 @@ pyglib_gerror_exception_check(GError **error)
     Py_XDECREF(traceback);
 
     py_message = PyObject_GetAttrString(value, "message");
-    if (!py_message || !PyString_Check(py_message)) {
+    if (!py_message || !_PyUnicode_Check(py_message)) {
         bad_gerror_message = "gobject.GError instances must have a 'message' string attribute";
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
-    if (!py_domain || !PyString_Check(py_domain)) {
+    if (!py_domain || !_PyUnicode_Check(py_domain)) {
         bad_gerror_message = "gobject.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         goto bad_gerror;
     }
 
     py_code = PyObject_GetAttrString(value, "code");
-    if (!py_code || !PyInt_Check(py_code)) {
+    if (!py_code || !_PyLong_Check(py_code)) {
         bad_gerror_message = "gobject.GError instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
         goto bad_gerror;
     }
 
-    g_set_error(error, g_quark_from_string(PyString_AsString(py_domain)),
-                PyInt_AsLong(py_code), PyString_AsString(py_message));
+    g_set_error(error, g_quark_from_string(_PyUnicode_AsString(py_domain)),
+                _PyLong_AsLong(py_code), _PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);
@@ -360,7 +360,7 @@ pyglib_register_exception_for_domain(gchar *name,
 	exception_table = PyDict_New();
 
     PyDict_SetItem(exception_table,
-		   PyInt_FromLong(error_domain),
+		   _PyLong_FromLong(error_domain),
 		   exception);
     
     return exception;

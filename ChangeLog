@@ -1,5 +1,30 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/glibmodule.c (get_handler_priority), (pyglib_idle_add),
+	(pyglib_timeout_add), (pyglib_timeout_add_seconds),
+	(pyglib_io_add_watch), (pyglib_child_watch_add),
+	(pyglib_markup_escape_text), (pyglib_main_depth),
+	(pyglib_filename_from_utf8), (pyglib_get_application_name),
+	(pyglib_get_prgname), (PYGLIB_MODULE_START):
+	* glib/pygiochannel.c (py_io_channel_next),
+	(py_io_channel_shutdown), (py_io_channel_get_buffer_size),
+	(py_io_channel_get_buffered), (py_io_channel_get_encoding),
+	(py_io_channel_read_chars), (py_io_channel_write_chars),
+	(py_io_channel_write_lines), (py_io_channel_flush),
+	(py_io_channel_set_flags), (py_io_channel_get_flags),
+	(py_io_channel_get_buffer_condition), (py_io_channel_win32_poll),
+	(py_io_channel_read_line), (py_io_channel_read_lines),
+	(py_io_channel_seek), (pyglib_iochannel_register_types):
+	* glib/pyglib-private.h:
+	* glib/pyglib-python-compat.h:
+	* glib/pyglib.c (pyglib_init), (pyglib_error_check),
+	(pyglib_gerror_exception_check),
+	(pyglib_register_exception_for_domain):
+	Add macros for supporting additional python versions.
+	Start using them for the glib module. Tested on python 2.5 and 3.0.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* configure.ac:
 	* m4/python.m4:
 	Add macros which are compatible with python > 2.6.

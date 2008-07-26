@@ -21,10 +21,11 @@ endif
 
 libpyglib_2_0_la_CFLAGS = $(GLIB_CFLAGS)
 libpyglib_2_0_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
-libpyglib_2_0_la_SOURCES = \
-	pyglib.c	\
-	pyglib.h	\
-	pyglib-private.h
+libpyglib_2_0_la_SOURCES = 	\
+	pyglib.c		\
+	pyglib.h		\
+	pyglib-private.h 	\
+	pyglib-python-compat.h
 
 _glib_la_CFLAGS = $(GLIB_CFLAGS)
 _glib_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_glib

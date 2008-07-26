@@ -17,6 +17,8 @@ typedef struct {
     int softspace;         /* to make print >> chan, "foo" ... work */
 } PyGIOChannel;
 
+PYGLIB_DEFINE_TYPE("gobject.IOChannel", PyGIOChannel_Type, PyGIOChannel)
+
 static PyObject*
 py_io_channel_next(PyGIOChannel *self)
 {
@@ -36,10 +38,9 @@ py_io_channel_next(PyGIOChannel *self)
         return NULL;
     }
 
-    ret_obj = PyString_FromStringAndSize(str_return, length);
+    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
-
 }
 
 static int
@@ -86,7 +87,7 @@ py_io_channel_shutdown(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return PyInt_FromLong(ret);
+    return _PyLong_FromLong(ret);
 }
 
 /* character encoding conversion involved functions.
@@ -118,7 +119,7 @@ py_io_channel_get_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwar
 	
     size = g_io_channel_get_buffer_size(self->channel);
     
-    return PyInt_FromLong(size);
+    return _PyLong_FromLong(size);
 }
 
 static PyObject*
@@ -147,7 +148,7 @@ py_io_channel_get_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	
     buffered = g_io_channel_get_buffered(self->channel);
     
-    return PyInt_FromLong(buffered);
+    return _PyLong_FromLong(buffered);
 }
 
 static PyObject*
@@ -184,7 +185,7 @@ py_io_channel_get_encoding(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	return Py_None;
     }
 
-    return PyString_FromString(encoding);
+    return _PyUnicode_FromString(encoding);
 }
 
 #define CHUNK_SIZE (8 * 1024)
@@ -203,7 +204,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     if (max_count == 0)
-	return PyString_FromString("");
+	return _PyUnicode_FromString("");
     
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
@@ -220,16 +221,16 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         }
 	
 	if ( ret_obj == NULL ) {
-	    ret_obj = PyString_FromStringAndSize((char *)NULL, buf_size);
+	    ret_obj = _PyUnicode_FromStringAndSize((char *)NULL, buf_size);
 	    if (ret_obj == NULL)
 		goto failure;
 	}
-	else if (buf_size + total_read > PyString_GET_SIZE(ret_obj)) {
-	    if (_PyString_Resize(&ret_obj, buf_size + total_read) == -1)
+	else if (buf_size + total_read > _PyUnicode_GET_SIZE(ret_obj)) {
+	    if (_PyUnicode_Resize(&ret_obj, buf_size + total_read) == -1)
 		goto failure;
 	}
        
-        buf = PyString_AS_STRING(ret_obj) + total_read;
+        buf = _PyUnicode_AS_STRING(ret_obj) + total_read;
 
         pyglib_unblock_threads();
         status = g_io_channel_read_chars(self->channel, buf, buf_size, 
@@ -241,8 +242,8 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	total_read += single_read;
     }
 	
-    if ( total_read != PyString_GET_SIZE(ret_obj) ) {
-	if (_PyString_Resize(&ret_obj, total_read) == -1)
+    if ( total_read != _PyUnicode_GET_SIZE(ret_obj) ) {
+	if (_PyUnicode_Resize(&ret_obj, total_read) == -1)
 	    goto failure;
     }
     return ret_obj;
@@ -272,7 +273,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return PyInt_FromLong(count);
+    return _PyLong_FromLong(count);
 }
 
 static PyObject*
@@ -298,13 +299,13 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             PyErr_Clear();
             goto normal_exit;
         }
-        if (!PyString_Check(value)) {
+        if (!_PyUnicode_Check(value)) {
             PyErr_SetString(PyExc_TypeError, "gobject.IOChannel.writelines must"
                             " be sequence/iterator of strings");
             Py_DECREF(iter);
             return NULL;
         }
-        PyString_AsStringAndSize(value, &buf, &buf_len);
+        _PyUnicode_AsStringAndSize(value, &buf, &buf_len);
         pyglib_unblock_threads();
         status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
         pyglib_unblock_threads();
@@ -337,7 +338,7 @@ py_io_channel_flush(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return PyInt_FromLong(status);
+    return _PyLong_FromLong(status);
 }
 
 static PyObject*
@@ -356,7 +357,7 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return PyInt_FromLong(status);
+    return _PyLong_FromLong(status);
 }
 
 static PyObject*
@@ -370,7 +371,7 @@ py_io_channel_get_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     flags = g_io_channel_get_flags(self->channel);
-    return PyInt_FromLong(flags);
+    return _PyLong_FromLong(flags);
 }
 
 static PyObject*
@@ -384,7 +385,7 @@ py_io_channel_get_buffer_condition(PyGIOChannel* self, PyObject *args, PyObject 
         return NULL;
 	
     cond = g_io_channel_get_buffer_condition(self->channel);
-    return PyInt_FromLong(cond);
+    return _PyLong_FromLong(cond);
 }
 
 static PyObject*
@@ -535,7 +536,7 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
         pyfd = PyList_GET_ITEM(pyfds, i);
         ((PyGPollFD *) pyfd)->pollfd = pollfd[i];
     }
-    return PyInt_FromLong(result);
+    return _PyLong_FromLong(result);
 }
 
 static PyObject *
@@ -579,7 +580,7 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
                                     &terminator_pos, &error);
     if (pyglib_error_check(&error))
         return NULL;
-    ret_obj = PyString_FromStringAndSize(str_return, length);
+    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
 }
@@ -608,7 +609,7 @@ py_io_channel_read_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             Py_DECREF(line);
             return NULL;
         }
-        line = PyString_FromStringAndSize(str_return, length);
+        line = _PyUnicode_FromStringAndSize(str_return, length);
         g_free(str_return);
         if (PyList_Append(list, line)) {
             Py_DECREF(line);
@@ -649,7 +650,7 @@ py_io_channel_seek(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return PyInt_FromLong(status);
+    return _PyLong_FromLong(status);
 }
 
 #if 0 // Not wrapped
@@ -764,55 +765,18 @@ py_io_channel_init(PyGIOChannel *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-
-PyTypeObject PyGIOChannel_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.IOChannel",		/* tp_name */
-    sizeof(PyGIOChannel),		/* tp_basicsize */
-    0,					/* tp_itemsize */
-    /* methods */
-    (destructor)py_io_channel_dealloc,	/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)NULL,             	/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)py_io_channel_compare,	/* tp_compare */
-    (reprfunc)0,			/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)py_io_channel_hash,	/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,			/* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,			/* tp_flags */
-    NULL, /* Documentation string */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)py_io_channel_get_iter,/* tp_iter */
-    (iternextfunc)py_io_channel_next,   /* tp_iternext */
-    py_io_channel_methods,		/* tp_methods */
-    py_io_channel_members,		/* tp_members */
-    NULL,				/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)py_io_channel_init,	/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    0,					/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
-
 void
 pyglib_iochannel_register_types(PyObject *d)
 {
+    PyGIOChannel_Type.tp_init = (initproc)py_io_channel_init;
+    PyGIOChannel_Type.tp_dealloc = (destructor)py_io_channel_dealloc;
+    PyGIOChannel_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGIOChannel_Type.tp_members = py_io_channel_members;
+    PyGIOChannel_Type.tp_methods = py_io_channel_methods;
+    PyGIOChannel_Type.tp_hash = (hashfunc)py_io_channel_hash;
+    PyGIOChannel_Type.tp_compare = (cmpfunc)py_io_channel_compare;
+    PyGIOChannel_Type.tp_iter = (getiterfunc)py_io_channel_get_iter;
+    PyGIOChannel_Type.tp_iternext = (iternextfunc)py_io_channel_next;
+
     PYGLIB_REGISTER_TYPE(d, PyGIOChannel_Type, "IOChannel");
 }
