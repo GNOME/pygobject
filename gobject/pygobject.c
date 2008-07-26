@@ -38,6 +38,7 @@ static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
+GType PY_TYPE_OBJECT = 0;
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
@@ -2285,3 +2286,73 @@ PyTypeObject PyGObjectWeakRef_Type = {
     0,						/* tp_is_gc */
     NULL,					/* tp_bases */
 };
+
+static gpointer
+pyobject_copy(gpointer boxed)
+{
+    PyObject *object = boxed;
+
+    Py_INCREF(object);
+    return object;
+}
+
+static void
+pyobject_free(gpointer boxed)
+{
+    PyObject *object = boxed;
+    PyGILState_STATE state;
+
+    state = pyglib_gil_state_ensure();
+    Py_DECREF(object);
+    pyglib_gil_state_release(state);
+}
+
+GQuark pygobject_class_key;
+GQuark pygobject_class_init_key;
+GQuark pygobject_wrapper_key;
+GQuark pygobject_has_updated_constructor_key;
+GQuark pygobject_instance_data_key;
+
+void
+pygobject_object_register_types(PyObject *d)
+{
+    PyObject *o, *descr;
+
+    pygobject_class_key = g_quark_from_static_string("PyGObject::class");
+    pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
+    pygobject_wrapper_key = g_quark_from_static_string("PyGObject::wrapper");
+    pygobject_has_updated_constructor_key =
+        g_quark_from_static_string("PyGObject::has-updated-constructor");
+    pygobject_instance_data_key = g_quark_from_static_string("PyGObject::instance-data");
+
+    if (!PY_TYPE_OBJECT)
+	PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
+						      pyobject_copy,
+						      pyobject_free);
+
+    PyGObject_Type.tp_alloc = PyType_GenericAlloc;
+    PyGObject_Type.tp_new = PyType_GenericNew;
+    pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
+			     &PyGObject_Type, NULL);
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
+			 pyg_object_descr_doc_get());
+    pyg_set_object_has_new_constructor(G_TYPE_OBJECT);
+
+      /* GObject properties descriptor */
+    if (PyType_Ready(&PyGProps_Type) < 0)
+        return;
+    if (PyType_Ready(&PyGPropsDescr_Type) < 0)
+        return;
+    if (PyType_Ready(&PyGPropsIter_Type) < 0)
+        return;
+    descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
+    PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
+                        o=PyString_FromString("gobject._gobject"));
+    Py_DECREF(o);
+
+    PyType_Ready(&PyGObjectWeakRef_Type);
+    PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
+
+
+}

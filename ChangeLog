@@ -1,6 +1,22 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c (pygobject_register_api),
+	(pygobject_register_constants), (pygobject_register_features),
+	(pygobject_register_version_tuples), (pygobject_register_warnings),
+	(init_gobject):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pyobject_copy), (pyobject_free),
+	(pygobject_object_register_types):
+	* gobject/pygtype.c (_pyg_strv_from_gvalue), (_pyg_strv_to_gvalue),
+	(pygobject_type_register_types):
+	* gobject/pygtype.h:
+	Move off a bit more to separate functions, cleaning up the init_glib
+	a bit more.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/Makefile.am:
 	* gobject/gobjectmodule.c (init_gobject):
 	* gobject/pygobject-private.h:
 	* gobject/pygobject.c:

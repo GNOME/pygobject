@@ -143,7 +143,7 @@ GClosure *pyg_signal_class_closure_get(void);
 GClosure *gclosure_from_pyfunc(PyGObject *object, PyObject *func);
 
 PyObject *pyg_object_descr_doc_get(void);
-
+void pygobject_object_register_types(PyObject *d);
 
 extern PyTypeObject *PyGObject_MetaType;
 

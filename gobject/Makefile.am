@@ -42,20 +42,21 @@ _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(top_builddir)/glib/libpyglib-2.0.la
-_gobject_la_SOURCES = \
-	gobjectmodule.c \
-	pygboxed.c \
-	pygenum.c \
-	pygflags.c \
-	pyginterface.c \
-	pyginterface.h \
-	pygobject.c \
-	pygobject.h \
-	pygobject-private.h \
-	pygparamspec.c \
-	pygparamspec.h \
-	pygpointer.c \
-	pygtype.c
+_gobject_la_SOURCES =           \
+        gobjectmodule.c         \
+        pygboxed.c              \
+        pygenum.c               \
+        pygflags.c              \
+        pyginterface.c          \
+        pyginterface.h          \
+        pygobject.c             \
+        pygobject.h             \
+        pygobject-private.h     \
+        pygparamspec.c          \
+        pygparamspec.h          \
+        pygpointer.c            \
+        pygtype.c               \
+        pygtype.h
 _gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI

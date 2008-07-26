@@ -30,6 +30,7 @@
 #include "pygobject-private.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
+#include "pygtype.h"
 
 #ifdef HAVE_FFI_H
 #include "ffi-marshaller.h"
@@ -42,18 +43,11 @@ static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
 
-GQuark pygobject_class_init_key;
 GQuark pygboxed_type_key;
-GQuark pygobject_class_key;
-GQuark pygobject_wrapper_key;
 GQuark pygboxed_marshal_key;
 GQuark pygenum_class_key;
 GQuark pygflags_class_key;
 GQuark pygpointer_class_key;
-GQuark pygobject_has_updated_constructor_key;
-GQuark pygobject_instance_data_key;
-
-
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -98,31 +92,6 @@ pyg_destroy_notify(gpointer user_data)
 
     state = pyglib_gil_state_ensure();
     Py_DECREF(obj);
-    pyglib_gil_state_release(state);
-}
-
-
-/* ---------------- GBoxed functions -------------------- */
-
-GType PY_TYPE_OBJECT = 0;
-
-static gpointer
-pyobject_copy(gpointer boxed)
-{
-    PyObject *object = boxed;
-
-    Py_INCREF(object);
-    return object;
-}
-
-static void
-pyobject_free(gpointer boxed)
-{
-    PyObject *object = boxed;
-    PyGILState_STATE state;
-
-    state = pyglib_gil_state_ensure();
-    Py_DECREF(object);
     pyglib_gil_state_release(state);
 }
 
@@ -2189,44 +2158,6 @@ pyg_gerror_exception_check(GError **error)
     return pyglib_gerror_exception_check(error);
 }
 
-static PyObject *
-_pyg_strv_from_gvalue(const GValue *value)
-{
-    gchar    **argv = (gchar **) g_value_get_boxed(value);
-    int        argc = 0, i;
-    PyObject  *py_argv;
-
-    if (argv) {
-        while (argv[argc])
-            argc++;
-    }
-    py_argv = PyList_New(argc);
-    for (i = 0; i < argc; ++i)
-	PyList_SET_ITEM(py_argv, i, PyString_FromString(argv[i]));
-    return py_argv;
-}
-
-static int
-_pyg_strv_to_gvalue(GValue *value, PyObject *obj)
-{
-    Py_ssize_t argc, i;
-    gchar **argv;
-
-    if (!(PyTuple_Check(obj) || PyList_Check(obj)))
-        return -1;
-
-    argc = PySequence_Length(obj);
-    for (i = 0; i < argc; ++i)
-	if (!PyString_Check(PySequence_Fast_GET_ITEM(obj, i)))
-	    return -1;
-    argv = g_new(gchar *, argc + 1);
-    for (i = 0; i < argc; ++i)
-	argv[i] = g_strdup(PyString_AsString(PySequence_Fast_GET_ITEM(obj, i)));
-    argv[i] = NULL;
-    g_value_take_boxed(value, argv);
-    return 0;
-}
-
 /**
  * pyg_parse_constructor_args: helper function for PyGObject constructors
  * @obj_type: GType of the GObject, for parameter introspection
@@ -2544,112 +2475,21 @@ struct _PyGObject_Functions pygobject_api_functions = {
   
 };
 
-#define REGISTER_TYPE(d, type, name) \
-    type.ob_type = &PyType_Type; \
-    if (!type.tp_alloc) \
-	type.tp_alloc = PyType_GenericAlloc; \
-    if (!type.tp_new) \
-	type.tp_new = PyType_GenericNew; \
-    if (PyType_Ready(&type)) \
-	return; \
-    PyDict_SetItemString(d, name, (PyObject *)&type);
-
-#define REGISTER_GTYPE(d, type, name, gtype) \
-    REGISTER_TYPE(d, type, name); \
-    PyDict_SetItemString(type.tp_dict, "__gtype__", \
-			 o=pyg_type_wrapper_new(gtype)); \
-    Py_DECREF(o);
-
-DL_EXPORT(void)
-init_gobject(void)
+/* for addon libraries ... */
+static void
+pygobject_register_api(PyObject *d)
 {
-    PyObject *m, *d, *o, *tuple, *features;
-    PyObject *descr;
-    PyObject *warning;
+    PyObject *api;
     
-    m = Py_InitModule("gobject._gobject", pygobject_functions);
-    d = PyModule_GetDict(m);
+    api = PyCObject_FromVoidPtr(&pygobject_api_functions,NULL);
+    PyDict_SetItemString(d, "_PyGObject_API", api);
+    Py_DECREF(api);
+}
 
-    g_type_init();
-    pyglib_init();
-
-    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
-    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
-    pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
-    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
-    pygobject_class_key      = g_quark_from_static_string("PyGObject::class");
-    pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
-    pygobject_wrapper_key    = g_quark_from_static_string("PyGObject::wrapper");
-    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
-    pygobject_has_updated_constructor_key =\
-        g_quark_from_static_string("PyGObject::has-updated-constructor");
-    pygobject_instance_data_key = g_quark_from_static_string("PyGObject::instance-data");
-
-    REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
-
-    if (!PY_TYPE_OBJECT)
-	PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
-						      pyobject_copy,
-						      pyobject_free);
-
-    PyGObject_Type.tp_alloc = PyType_GenericAlloc;
-    PyGObject_Type.tp_new = PyType_GenericNew;
-    pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
-			     &PyGObject_Type, NULL);
-    PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
-			 pyg_object_descr_doc_get());
-    pyg_set_object_has_new_constructor(G_TYPE_OBJECT);
-
-      /* GObject properties descriptor */
-    if (PyType_Ready(&PyGProps_Type) < 0)
-        return;
-    if (PyType_Ready(&PyGPropsDescr_Type) < 0)
-        return;
-    if (PyType_Ready(&PyGPropsIter_Type) < 0)
-        return;
-    descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
-    PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
-    PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
-                        o=PyString_FromString("gobject._gobject"));
-    Py_DECREF(o);
-
-    pygobject_interface_register_types(d);
-    pygobject_paramspec_register_types(d);
-    
-    REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
-    REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
-    PyGEnum_Type.tp_base = &PyInt_Type;
-    REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
-    PyGFlags_Type.tp_base = &PyInt_Type;
-    REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
-
-    PyType_Ready(&PyGObjectWeakRef_Type);
-    PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
-
-    /* pygobject version */
-    tuple = Py_BuildValue ("(iii)",
-			   PYGOBJECT_MAJOR_VERSION,
-			   PYGOBJECT_MINOR_VERSION,
-			   PYGOBJECT_MICRO_VERSION);
-    PyDict_SetItemString(d, "pygobject_version", tuple);
-    /* backwards compatibility */
-    PyDict_SetItemString(d, "pygtk_version", tuple);
-    Py_DECREF(tuple);
-
-    /* for addon libraries ... */
-    PyDict_SetItemString(d, "_PyGObject_API",
-			 o=PyCObject_FromVoidPtr(&pygobject_api_functions,NULL));
-    Py_DECREF(o);
-
-    /* features */
-    features = PyDict_New();
-#ifdef HAVE_FFI_H
-    PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
-#endif
-    PyDict_SetItemString(d, "features", features);
-    Py_DECREF(features);
-
-    /* some constants */
+/* some constants */
+static void
+pygobject_register_constants(PyObject *m)
+{
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_CLEANUP", G_SIGNAL_RUN_CLEANUP);
@@ -2668,16 +2508,84 @@ init_gobject(void)
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
     PyModule_AddObject(m, "TYPE_GSTRING", pyg_type_wrapper_new(G_TYPE_GSTRING));
+}
+
+/* features */
+static void
+pygobject_register_features(PyObject *d)
+{
+    PyObject *features;
     
-    pyg_register_gtype_custom(G_TYPE_STRV,
-			      _pyg_strv_from_gvalue,
-			      _pyg_strv_to_gvalue);
+    features = PyDict_New();
+#ifdef HAVE_FFI_H
+    PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
+#endif
+    PyDict_SetItemString(d, "features", features);
+    Py_DECREF(features);
+}
+
+static void
+pygobject_register_version_tuples(PyObject *d)
+{
+    PyObject *tuple;
+
+    /* pygobject version */
+    tuple = Py_BuildValue ("(iii)",
+			   PYGOBJECT_MAJOR_VERSION,
+			   PYGOBJECT_MINOR_VERSION,
+			   PYGOBJECT_MICRO_VERSION);
+    PyDict_SetItemString(d, "pygobject_version", tuple);
+
+    /* backwards compatibility */
+    PyDict_SetItemString(d, "pygtk_version", tuple);
+    Py_DECREF(tuple);
+}
+
+static void
+pygobject_register_warnings(PyObject *d)
+{
+    PyObject *warning;
 
     warning = PyErr_NewException("gobject.Warning", PyExc_Warning, NULL);
     PyDict_SetItemString(d, "Warning", warning);
     add_warning_redirection("GLib", warning);
     add_warning_redirection("GLib-GObject", warning);
     add_warning_redirection("GThread", warning);
+}
+
+DL_EXPORT(void)
+init_gobject(void)
+{
+    PyObject *m, *d;
+    
+    m = Py_InitModule("gobject._gobject", pygobject_functions);
+    d = PyModule_GetDict(m);
+
+    g_type_init();
+    pyglib_init();
+
+    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
+    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
+    pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
+    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
+    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
+
+    pygobject_register_api(d);
+    pygobject_register_constants(m);
+    pygobject_register_features(d);
+    pygobject_register_version_tuples(d);
+    pygobject_register_warnings(d);
+    pygobject_type_register_types(d);
+    pygobject_object_register_types(d);
+    pygobject_interface_register_types(d);
+    pygobject_paramspec_register_types(d);
+    
+    PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
+    PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
+    PyGEnum_Type.tp_base = &PyInt_Type;
+    PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
+    PyGFlags_Type.tp_base = &PyInt_Type;
+    PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 
       /* signal registration recognizes this special accumulator 'constant' */
     _pyg_signal_accumulator_true_handled_func = \

@@ -1743,3 +1743,50 @@ _pyg_type_from_name(const gchar *name)
     return type;
 }
 
+static PyObject *
+_pyg_strv_from_gvalue(const GValue *value)
+{
+    gchar    **argv = (gchar **) g_value_get_boxed(value);
+    int        argc = 0, i;
+    PyObject  *py_argv;
+
+    if (argv) {
+        while (argv[argc])
+            argc++;
+    }
+    py_argv = PyList_New(argc);
+    for (i = 0; i < argc; ++i)
+	PyList_SET_ITEM(py_argv, i, PyString_FromString(argv[i]));
+    return py_argv;
+}
+
+static int
+_pyg_strv_to_gvalue(GValue *value, PyObject *obj)
+{
+    Py_ssize_t argc, i;
+    gchar **argv;
+
+    if (!(PyTuple_Check(obj) || PyList_Check(obj)))
+        return -1;
+
+    argc = PySequence_Length(obj);
+    for (i = 0; i < argc; ++i)
+	if (!PyString_Check(PySequence_Fast_GET_ITEM(obj, i)))
+	    return -1;
+    argv = g_new(gchar *, argc + 1);
+    for (i = 0; i < argc; ++i)
+	argv[i] = g_strdup(PyString_AsString(PySequence_Fast_GET_ITEM(obj, i)));
+    argv[i] = NULL;
+    g_value_take_boxed(value, argv);
+    return 0;
+}
+
+void
+pygobject_type_register_types(PyObject *d)
+{
+    PYGLIB_REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
+
+    pyg_register_gtype_custom(G_TYPE_STRV,
+			      _pyg_strv_from_gvalue,
+			      _pyg_strv_to_gvalue);
+}
