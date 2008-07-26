@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from common import gio, gobject
+from common import gio, glib
 
 
 class TestFile(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestFile(unittest.TestCase):
 
         self.file.read_async(callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testReadAsyncError(self):
@@ -87,7 +87,7 @@ class TestFile(unittest.TestCase):
         canc = gio.Cancellable()
         self.file.load_contents_async(callback, cancellable=canc)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testMountMountable(self):
@@ -103,7 +103,7 @@ class TestFile(unittest.TestCase):
             try:
                 try:
                     retval = gfile.mount_enclosing_volume_finish(result)
-                except gobject.GError, e:
+                except glib.GError, e:
                     # If we run the tests too fast
                     if (e.domain == gio.ERROR and
                         e.code == gio.ERROR_ALREADY_MOUNTED):
@@ -121,7 +121,7 @@ class TestFile(unittest.TestCase):
         gfile.mount_enclosing_volume(mount_operation,
                                      mount_enclosing_volume_done)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testCopy(self):
@@ -182,7 +182,7 @@ class TestGFileEnumerator(unittest.TestCase):
 
         self.file.enumerate_children_async(
             "standard::*", callback)
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testNextFilesAsync(self):
@@ -199,7 +199,7 @@ class TestGFileEnumerator(unittest.TestCase):
         enumerator = self.file.enumerate_children(
             "standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
         enumerator.next_files_async(1000, callback)
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
 
@@ -229,7 +229,7 @@ class TestInputStream(unittest.TestCase):
 
         self.stream.read_async(7, callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testReadAsyncError(self):
@@ -239,14 +239,14 @@ class TestInputStream(unittest.TestCase):
                 self.count += 1
                 if self.count == 1:
                     return
-                self.assertRaises(gobject.GError, stream.read_finish, result)
+                self.assertRaises(glib.GError, stream.read_finish, result)
             finally:
                 loop.quit()
 
         self.stream.read_async(10240, callback)
         self.stream.read_async(10240, callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
         self.assertEquals(self.count, 2)
@@ -273,7 +273,7 @@ class TestInputStream(unittest.TestCase):
 
         self.stream.close_async(callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
 
@@ -304,21 +304,21 @@ class TestOutputStream(unittest.TestCase):
 
         self.stream.write_async("testing", callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
     def testWriteAsyncError(self):
         def callback(stream, result):
             self.assertEquals(result.get_op_res_gssize(), 0)
             try:
-                self.assertRaises(gobject.GError, stream.write_finish, result)
+                self.assertRaises(glib.GError, stream.write_finish, result)
             finally:
                 loop.quit()
 
         self.stream.close()
         self.stream.write_async("testing", callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
         self.assertRaises(TypeError, self.stream.write_async)
@@ -342,7 +342,7 @@ class TestOutputStream(unittest.TestCase):
 
         self.stream.close_async(callback)
 
-        loop = gobject.MainLoop()
+        loop = glib.MainLoop()
         loop.run()
 
 

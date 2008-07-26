@@ -1,5 +1,18 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/glibmodule.c (pyglib_register_constants), (init_glib):
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (init_gobject):
+	Move over glib constants to gobject
+	* tests/test_gio.py:
+	* tests/test_mainloop.py:
+	* tests/test_source.py:
+	* tests/test_subprocess.py:
+	* tests/test_thread.py:
+	Update tests to refer to glib when appropriate
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* README:
 	* configure.ac:
 	Bump required glib version to 2.10

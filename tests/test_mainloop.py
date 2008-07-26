@@ -6,7 +6,7 @@ import sys
 import select
 import unittest
 
-from common import gobject
+from common import glib
 
 class TestMainLoop(unittest.TestCase):
     def testExceptionHandling(self):
@@ -23,8 +23,8 @@ class TestMainLoop(unittest.TestCase):
             loop.quit()
             raise Exception("deadbabe")
 
-        loop = gobject.MainLoop()
-        gobject.child_watch_add(pid, child_died, loop)
+        loop = glib.MainLoop()
+        glib.child_watch_add(pid, child_died, loop)
 
         os.close(pipe_r)
         os.write(pipe_w, "Y")

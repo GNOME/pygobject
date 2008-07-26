@@ -1,8 +1,9 @@
 import os
 import unittest
 
-from common import gobject, testhelper
-main = gobject.MainLoop()
+from common import glib, testhelper
+
+main = glib.MainLoop()
 
 class TestThread(unittest.TestCase):
     def from_thread_cb(self, test, enum):
@@ -16,8 +17,8 @@ class TestThread(unittest.TestCase):
         self.obj.emit('emit-signal')
 
     def testExtensionModule(self):
-        gobject.idle_add(self.idle_cb)
-        gobject.timeout_add(50, self.timeout_cb)
+        glib.idle_add(self.idle_cb)
+        glib.timeout_add(50, self.timeout_cb)
         main.run()
 
     def timeout_cb(self):

@@ -618,14 +618,78 @@ pyglib_register_version_tuples(PyObject *d)
     Py_DECREF(o);
 }
 
+static void
+pyglib_register_constants(PyObject *m)
+{
+
+    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
+			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
+    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD",
+			    G_SPAWN_DO_NOT_REAP_CHILD);
+    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH",
+			    G_SPAWN_SEARCH_PATH);
+    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL",
+			    G_SPAWN_STDOUT_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL",
+			    G_SPAWN_STDERR_TO_DEV_NULL);
+    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN",
+			    G_SPAWN_CHILD_INHERITS_STDIN);
+    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
+			    G_SPAWN_FILE_AND_ARGV_ZERO);
+
+    PyModule_AddIntConstant(m, "PRIORITY_HIGH",
+			    G_PRIORITY_HIGH);
+    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT",
+			    G_PRIORITY_DEFAULT);
+    PyModule_AddIntConstant(m, "PRIORITY_HIGH_IDLE",
+			    G_PRIORITY_HIGH_IDLE);
+    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT_IDLE",
+			    G_PRIORITY_DEFAULT_IDLE);
+    PyModule_AddIntConstant(m, "PRIORITY_LOW",
+			    G_PRIORITY_LOW);
+
+    PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);
+    PyModule_AddIntConstant(m, "IO_OUT",  G_IO_OUT);
+    PyModule_AddIntConstant(m, "IO_PRI",  G_IO_PRI);
+    PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
+    PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
+    PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
+
+    PyModule_AddIntConstant(m, "IO_STATUS_ERROR",
+			    G_IO_STATUS_ERROR);
+    PyModule_AddIntConstant(m, "IO_STATUS_NORMAL",
+			    G_IO_STATUS_NORMAL);
+    PyModule_AddIntConstant(m, "IO_STATUS_EOF",
+			    G_IO_STATUS_EOF);
+    PyModule_AddIntConstant(m, "IO_STATUS_AGAIN",
+			    G_IO_STATUS_AGAIN);
+    PyModule_AddIntConstant(m, "IO_FLAG_APPEND",
+			    G_IO_FLAG_APPEND);
+    PyModule_AddIntConstant(m, "IO_FLAG_NONBLOCK",
+			    G_IO_FLAG_NONBLOCK);
+    PyModule_AddIntConstant(m, "IO_FLAG_IS_READABLE",
+			    G_IO_FLAG_IS_READABLE);
+    PyModule_AddIntConstant(m, "IO_FLAG_IS_WRITEABLE",
+			    G_IO_FLAG_IS_WRITEABLE);
+    PyModule_AddIntConstant(m, "IO_FLAG_IS_SEEKABLE",
+			    G_IO_FLAG_IS_SEEKABLE);
+    PyModule_AddIntConstant(m, "IO_FLAG_MASK",
+			    G_IO_FLAG_MASK);
+    PyModule_AddIntConstant(m, "IO_FLAG_GET_MASK",
+			    G_IO_FLAG_GET_MASK);
+    PyModule_AddIntConstant(m, "IO_FLAG_SET_MASK",
+			    G_IO_FLAG_SET_MASK);
+  
+}
 DL_EXPORT(void)
 init_glib(void)
 {
     PyObject *m, *d;
 
     m = Py_InitModule("glib._glib", pyglib_functions);
-    d = PyModule_GetDict(m);
+    pyglib_register_constants(m);
 
+    d = PyModule_GetDict(m);
     pyglib_register_api(d);
     pyglib_register_error(d);
     pyglib_register_version_tuples(d);

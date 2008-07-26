@@ -34,12 +34,22 @@ from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
      get_prgname, set_prgname, main_depth, Pid, GError, glib_version, \
      MainLoop, MainContext, main_context_default, IOChannel, Source, Idle, \
      Timeout, PollFD
+from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
+     SPAWN_SEARCH_PATH, SPAWN_STDOUT_TO_DEV_NULL, SPAWN_STDERR_TO_DEV_NULL, \
+     SPAWN_CHILD_INHERITS_STDIN, SPAWN_FILE_AND_ARGV_ZERO, PRIORITY_HIGH, \
+     PRIORITY_DEFAULT, PRIORITY_HIGH_IDLE, PRIORITY_DEFAULT_IDLE, \
+     PRIORITY_LOW, IO_IN, IO_OUT, IO_PRI, IO_ERR, IO_HUP, IO_NVAL, \
+     IO_STATUS_ERROR, IO_STATUS_NORMAL, IO_STATUS_EOF, IO_STATUS_AGAIN, \
+     IO_FLAG_APPEND, IO_FLAG_NONBLOCK, IO_FLAG_IS_READABLE, \
+     IO_FLAG_IS_WRITEABLE, IO_FLAG_IS_SEEKABLE, IO_FLAG_MASK, \
+     IO_FLAG_GET_MASK, IO_FLAG_SET_MASK
 
 from gobject.constants import *
 from _gobject import *
 _PyGObject_API = _gobject._PyGObject_API
 
 from propertyhelper import property
+
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"

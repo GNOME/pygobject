@@ -2795,67 +2795,30 @@ init_gobject(void)
     PyModule_AddIntConstant(m, "PARAM_LAX_VALIDATION", G_PARAM_LAX_VALIDATION);
     PyModule_AddIntConstant(m, "PARAM_READWRITE", G_PARAM_READWRITE);
 
-    PyModule_AddIntConstant(m, "PRIORITY_HIGH", G_PRIORITY_HIGH);
-    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT", G_PRIORITY_DEFAULT);
-    PyModule_AddIntConstant(m, "PRIORITY_HIGH_IDLE", G_PRIORITY_HIGH_IDLE);
-    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT_IDLE",G_PRIORITY_DEFAULT_IDLE);
-    PyModule_AddIntConstant(m, "PRIORITY_LOW", G_PRIORITY_LOW);
-
-    PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);
-    PyModule_AddIntConstant(m, "IO_OUT",  G_IO_OUT);
-    PyModule_AddIntConstant(m, "IO_PRI",  G_IO_PRI);
-    PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
-    PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
-    PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
-
-#define addint(x) PyModule_AddIntConstant(m, #x, G_##x)
-
-    addint(IO_STATUS_ERROR);
-    addint(IO_STATUS_NORMAL);
-    addint(IO_STATUS_EOF);
-    addint(IO_STATUS_AGAIN);
-
-    addint(IO_FLAG_APPEND);
-    addint(IO_FLAG_NONBLOCK);
-    addint(IO_FLAG_IS_READABLE);
-    addint(IO_FLAG_IS_WRITEABLE);
-    addint(IO_FLAG_IS_SEEKABLE);
-    addint(IO_FLAG_MASK);
-    addint(IO_FLAG_GET_MASK);
-    addint(IO_FLAG_SET_MASK);
-
-    addint(OPTION_FLAG_HIDDEN);
-    addint(OPTION_FLAG_IN_MAIN);
-    addint(OPTION_FLAG_REVERSE);
-    addint(OPTION_FLAG_NO_ARG);
-    addint(OPTION_FLAG_FILENAME);
-    addint(OPTION_FLAG_OPTIONAL_ARG);
-    addint(OPTION_FLAG_NOALIAS);
- 
-    addint(OPTION_ERROR_UNKNOWN_OPTION);
-    addint(OPTION_ERROR_BAD_VALUE);
-    addint(OPTION_ERROR_FAILED);
- 
-#undef addint
-  
-    PyModule_AddStringConstant(m, "OPTION_REMAINING", G_OPTION_REMAINING);
-
-    PyModule_AddStringConstant(m, "OPTION_ERROR", (char*) g_quark_to_string(G_OPTION_ERROR));
-
-    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
-			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
-    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD",
-			    G_SPAWN_DO_NOT_REAP_CHILD);
-    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH",
-			    G_SPAWN_SEARCH_PATH);
-    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL",
-			    G_SPAWN_STDOUT_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL",
-			    G_SPAWN_STDERR_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN",
-			    G_SPAWN_CHILD_INHERITS_STDIN);
-    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
-			    G_SPAWN_FILE_AND_ARGV_ZERO);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
+			    G_OPTION_FLAG_HIDDEN);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",
+			    G_OPTION_FLAG_IN_MAIN);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_REVERSE",
+			    G_OPTION_FLAG_REVERSE);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_NO_ARG",
+			    G_OPTION_FLAG_NO_ARG);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_FILENAME",
+			    G_OPTION_FLAG_FILENAME);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_OPTIONAL_ARG",
+			    G_OPTION_FLAG_OPTIONAL_ARG);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_NOALIAS)",
+			    G_OPTION_FLAG_NOALIAS); 
+    PyModule_AddIntConstant(m, "OPTION_ERROR_UNKNOWN_OPTION",
+			    G_OPTION_ERROR_UNKNOWN_OPTION);
+    PyModule_AddIntConstant(m, "OPTION_ERROR_BAD_VALUE",
+			    G_OPTION_ERROR_BAD_VALUE);
+    PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
+			    G_OPTION_ERROR_FAILED);
+    PyModule_AddStringConstant(m, "OPTION_REMAINING",
+			       G_OPTION_REMAINING);
+    PyModule_AddStringConstant(m, "OPTION_ERROR",
+			       (char*) g_quark_to_string(G_OPTION_ERROR));
 
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));
