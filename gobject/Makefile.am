@@ -52,7 +52,7 @@ _gobject_la_SOURCES = \
 	pygobject-private.h \
 	pygparamspec.c \
 	pygpointer.c \
-	pygtype.c \
+	pygtype.c
 _gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI

@@ -1,5 +1,8 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* gobject/Makefile.am (_gobject_la_SOURCES): Build fix, remove
+	extra \
+
 	* examples/gio/directory-async.py:
 	* gio/Makefile.am:
 	* gio/giomodule.c (init_gio):
