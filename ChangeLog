@@ -1,3 +1,8 @@
+=== 2.15.2 ===
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
+	* NEWS: Update
+
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/Makefile.am (_gobject_la_SOURCES): Build fix, remove
