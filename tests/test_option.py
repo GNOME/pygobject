@@ -4,7 +4,7 @@ import unittest
 import sys
 from StringIO import StringIO
 
-from gobject.option import OptionParser, OptionGroup, OptionValueError, \
+from glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError
 
 
