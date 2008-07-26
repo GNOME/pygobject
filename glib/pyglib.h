@@ -38,11 +38,14 @@ gboolean pyglib_enable_threads(void);
 gboolean pyglib_error_check(GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
 gboolean pyglib_threads_enabled(void);
-PyObject *pyglib_main_context_new(GMainContext *context);
+PyObject * pyglib_main_context_new(GMainContext *context);
 void pyglib_set_thread_block_funcs(PyGLibThreadBlockFunc block_threads_func,
 				   PyGLibThreadBlockFunc unblock_threads_func);
 void pyglib_block_threads(void);
 void pyglib_unblock_threads(void);
+PyObject * pyglib_option_context_new(GOptionContext *context);
+PyObject * pyglib_option_group_new(GOptionGroup *group);
+GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 
 #define pyglib_begin_allow_threads		\
     G_STMT_START {                              \
@@ -54,6 +57,7 @@ void pyglib_unblock_threads(void);
         if (pyglib_threads_enabled())           \
             PyEval_RestoreThread(_save);        \
     } G_STMT_END
+
 
 G_END_DECLS
 

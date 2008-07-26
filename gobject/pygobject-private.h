@@ -222,29 +222,7 @@ extern PyObject * pyg_enum_from_gtype (GType        gtype,
 extern PyTypeObject PyGParamSpec_Type;
 PyObject * pyg_param_spec_new (GParamSpec *pspec);
 
-/* pygoption.c */
-extern PyTypeObject PyGOptionContext_Type;
-extern PyTypeObject PyGOptionGroup_Type;
-
-typedef struct {
-    PyObject_HEAD
-    GOptionGroup *group;
-    gboolean other_owner, is_in_context;
-    PyObject *callback;
-    GSList *strings; /* all strings added with the entries, are freed on 
-                        GOptionGroup.destroy() */
-} PyGOptionGroup;
-
-typedef struct {
-    PyObject_HEAD
-    PyGOptionGroup *main_group;
-    GOptionContext *context;
-} PyGOptionContext;
-
-PyObject * pyg_option_context_new (GOptionContext * context);
-PyObject * pyg_option_group_new (GOptionGroup * group);
-GOptionGroup *pyg_option_group_transfer_group(PyGOptionGroup *self);
-
+/* pygtype.c */
 extern GHashTable *custom_type_registration;
 void pyg_type_register_custom_callback(const gchar *type_name,
 				       PyGTypeRegistrationFunction callback,

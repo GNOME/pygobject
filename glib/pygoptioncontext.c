@@ -24,7 +24,9 @@
 #  include <config.h>
 #endif
 
-#include "pygobject-private.h"
+#include <pyglib.h>
+#include "pyglib-private.h"
+#include "pygoptioncontext.h"
 
 static int
 pyg_option_context_init(PyGOptionContext *self, 
@@ -104,17 +106,17 @@ pyg_option_context_parse(PyGOptionContext *self,
 
     g_assert(argv_length <= G_MAXINT);
     argv_length_int = argv_length;
-    pyg_begin_allow_threads;
+    pyglib_begin_allow_threads;
     result = g_option_context_parse(self->context, &argv_length_int, &argv_content,
                                     &error);
-    pyg_end_allow_threads;
+    pyglib_end_allow_threads;
     argv_length = argv_length_int;
 
     if (!result)
     {
         g_strfreev(argv_content);
         g_strfreev(original);
-        pyg_error_check(&error);
+        pyglib_error_check(&error);
         return NULL;
     }
     
@@ -184,16 +186,19 @@ pyg_option_context_set_main_group(PyGOptionContext *self,
     static char *kwlist[] = { "group", NULL };
     GOptionGroup *g_group;
     PyObject *group;
+    
     if (! PyArg_ParseTupleAndKeywords(args, kwargs, 
                                       "O:GOptionContext.set_main_group", 
                                       kwlist, &group))
         return NULL;
+
     if (PyObject_IsInstance(group, (PyObject*) &PyGOptionGroup_Type) != 1) {
         PyErr_SetString(PyExc_TypeError, 
                         "GOptionContext.set_main_group expects a GOptionGroup.");
         return NULL;
     }
-    g_group = pyg_option_group_transfer_group((PyGOptionGroup*) group);
+
+    g_group = pyglib_option_group_transfer_group((PyGOptionGroup*) group);
     if (g_group == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, "Group is already in a OptionContext.");
@@ -237,7 +242,7 @@ pyg_option_context_add_group(PyGOptionContext *self,
                         "GOptionContext.add_group expects a GOptionGroup.");
         return NULL;
     }
-    g_group = pyg_option_group_transfer_group((PyGOptionGroup*) group);
+    g_group = pyglib_option_group_transfer_group((PyGOptionGroup*) group);
     if (g_group == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, 
@@ -313,24 +318,8 @@ PyTypeObject PyGOptionContext_Type = {
     (initproc)pyg_option_context_init,
 };
 
-/**
- * pyg_option_context_new:
- * @context: a GOptionContext
- *
- * Returns: A new GOptionContext wrapper.
- */
-PyObject * 
-pyg_option_context_new (GOptionContext *context)
+void
+pyglib_option_context_register_types(PyObject *d)
 {
-    PyGOptionContext *self;
-
-    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext,
-					    &PyGOptionContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = context;
-    self->main_group = NULL;
-    
-    return (PyObject *)self;
+    PYGLIB_REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
 }

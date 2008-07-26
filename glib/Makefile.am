@@ -10,7 +10,8 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 
 pyglibdir = $(pkgpyexecdir)/glib
 pyglib_PYTHON = 	\
-	__init__.py
+	__init__.py	\
+	option.py
 pyglib_LTLIBRARIES = _glib.la
 
 common_ldflags = -module -avoid-version
@@ -28,17 +29,21 @@ libpyglib_2_0_la_SOURCES = \
 _glib_la_CFLAGS = $(GLIB_CFLAGS)
 _glib_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_glib
 _glib_la_LIBADD = $(GLIB_LIBS) libpyglib-2.0.la
-_glib_la_SOURCES = 	 \
-	glibmodule.c	 \
-	pygiochannel.c 	 \
-	pygiochannel.h 	 \
-	pygmaincontext.c \
-	pygmaincontext.h \
-	pygmainloop.c	 \
-	pygmainloop.h	 \
-	pygsource.c 	 \
-	pygsource.h 	 \
-	pygspawn.c	 \
+_glib_la_SOURCES = 	 	\
+	glibmodule.c	 	\
+	pygiochannel.c 	 	\
+	pygiochannel.h 	 	\
+	pygoptioncontext.c 	\
+	pygoptioncontext.h 	\
+	pygoptiongroup.c 	\
+	pygoptiongroup.h 	\
+	pygmaincontext.c 	\
+	pygmaincontext.h 	\
+	pygmainloop.c	 	\
+	pygmainloop.h	 	\
+	pygsource.c 	 	\
+	pygsource.h 	 	\
+	pygspawn.c	 	\
 	pygspawn.h
 
 if PLATFORM_WIN32

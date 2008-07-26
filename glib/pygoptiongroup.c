@@ -25,8 +25,8 @@
 #endif
 
 #include <pyglib.h>
-#include "pygobject-private.h"
-#include "pygobject.h"
+#include "pyglib-private.h"
+#include "pygoptiongroup.h"
 
 static gboolean
 check_if_owned(PyGOptionGroup *self)
@@ -129,7 +129,7 @@ arg_func(const gchar *option_name,
     }
     else
     {
-        no_error = pyg_gerror_exception_check(error) != -1;
+        no_error = pyglib_gerror_exception_check(error) != -1;
         pyglib_gil_state_release(state);
         return no_error;
     }
@@ -295,59 +295,11 @@ PyTypeObject PyGOptionGroup_Type = {
     (initproc)pyg_option_group_init,
 };
 
-/**
- * pyg_option_group_transfer_group:
- * @group: a GOptionGroup wrapper
- *
- * This is used to transfer the GOptionGroup to a GOptionContext. After this
- * is called, the calle must handle the release of the GOptionGroup.
- *
- * When #NULL is returned, the GOptionGroup was already transfered.
- *
- * Returns: Either #NULL or the wrapped GOptionGroup.
- */
-GOptionGroup *
-pyg_option_group_transfer_group(PyGOptionGroup *self)
+void
+pyglib_option_group_register_types(PyObject *d)
 {
-    if (self->is_in_context) return NULL;
-    self->is_in_context = TRUE;
-    
-    /* Here we increase the reference count of the PyGOptionGroup, because now
-     * the GOptionContext holds an reference to us (it is the userdata passed
-     * to g_option_group_new().
-     *
-     * The GOptionGroup is freed with the GOptionContext.
-     *
-     * We set it here because if we would do this in the init method we would
-     * hold two references and the PyGOptionGroup would never be freed.
-     */
-    Py_INCREF(self);
-    
-    return self->group;
+    PYGLIB_REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
 }
 
-/**
- * pyg_option_group_new:
- * @group: a GOptionGroup
- *
- * The returned GOptionGroup can't be used to set any hooks, translation domains
- * or add entries. It's only intend is, to use for GOptionContext.add_group().
- *
- * Returns: the GOptionGroup wrapper.
- */
-PyObject * 
-pyg_option_group_new (GOptionGroup *group)
-{
-    PyGOptionGroup *self;
 
-    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
-					  &PyGOptionGroup_Type);
-    if (self == NULL)
-	return NULL;
 
-    self->group = group;
-    self->other_owner = TRUE;
-    self->is_in_context = FALSE;
-        
-    return (PyObject *)self;
-}

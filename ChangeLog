@@ -1,5 +1,31 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/Makefile.am:
+	* glib/glibmodule.c (pyglib_register_constants), (init_glib):
+	* glib/option.py:
+	* glib/pyglib.c (pyglib_init),
+	(pyglib_option_group_transfer_group), (pyglib_option_group_new),
+	(pyglib_option_context_new):
+	* glib/pyglib.h:
+	* glib/pygoptioncontext.c (pyg_option_context_parse),
+	(pyg_option_context_set_main_group),
+	(pyg_option_context_add_group),
+	(pyglib_option_context_register_types):
+	* glib/pygoptioncontext.h:
+	* glib/pygoptiongroup.c (arg_func),
+	(pyglib_option_group_register_types):
+	* glib/pygoptiongroup.h:
+	* gobject/Makefile.am:
+	* gobject/__init__.py:
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/option.py:
+	* gobject/pygobject-private.h:
+	* gobject/pygoptioncontext.c:
+	* gobject/pygoptiongroup.c:
+	Move option over from gobject to glib.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* tests/common.py:
 	* tests/test_conversion.py:
 	* tests/test_enum.py:

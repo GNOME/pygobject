@@ -28,12 +28,20 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 #include "pygmaincontext.h"
+#include "pygoptioncontext.h"
+#include "pygoptiongroup.h"
 
 static struct _PyGLib_Functions *_PyGLib_API;
 static int pyglib_thread_state_tls_key;
 
 static PyTypeObject *_PyGMainContext_Type;
 #define PyGMainContext_Type (*_PyGMainContext_Type)
+
+static PyTypeObject *_PyGOptionGroup_Type;
+#define PyGOptionGroup_Type (*_PyGOptionGroup_Type)
+
+static PyTypeObject *_PyGOptionContext_Type;
+#define PyGOptionContext_Type (*_PyGOptionContext_Type)
 
 void
 pyglib_init(void)
@@ -69,6 +77,8 @@ pyglib_init(void)
     }
 
     _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
+    _PyGOptionGroup_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionGroup");
+    _PyGOptionContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionContext");
 }
 
 void
@@ -340,6 +350,92 @@ pyglib_main_context_new(GMainContext *context)
 }
 
 /**
+ * pyg_option_group_transfer_group:
+ * @group: a GOptionGroup wrapper
+ *
+ * This is used to transfer the GOptionGroup to a GOptionContext. After this
+ * is called, the calle must handle the release of the GOptionGroup.
+ *
+ * When #NULL is returned, the GOptionGroup was already transfered.
+ *
+ * Returns: Either #NULL or the wrapped GOptionGroup.
+ */
+GOptionGroup *
+pyglib_option_group_transfer_group(PyObject *obj)
+{
+    PyGOptionGroup *self = (PyGOptionGroup*)obj;
+    
+    if (self->is_in_context)
+	return NULL;
+
+    self->is_in_context = TRUE;
+    
+    /* Here we increase the reference count of the PyGOptionGroup, because now
+     * the GOptionContext holds an reference to us (it is the userdata passed
+     * to g_option_group_new().
+     *
+     * The GOptionGroup is freed with the GOptionContext.
+     *
+     * We set it here because if we would do this in the init method we would
+     * hold two references and the PyGOptionGroup would never be freed.
+     */
+    Py_INCREF(self);
+    
+    return self->group;
+}
+
+/**
+ * pyglib_option_group_new:
+ * @group: a GOptionGroup
+ *
+ * The returned GOptionGroup can't be used to set any hooks, translation domains
+ * or add entries. It's only intend is, to use for GOptionContext.add_group().
+ *
+ * Returns: the GOptionGroup wrapper.
+ */
+PyObject * 
+pyglib_option_group_new (GOptionGroup *group)
+{
+    PyGOptionGroup *self;
+
+    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
+					  &PyGOptionGroup_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->group = group;
+    self->other_owner = TRUE;
+    self->is_in_context = FALSE;
+        
+    return (PyObject *)self;
+}
+
+/**
+ * pyglib_option_context_new:
+ * @context: a GOptionContext
+ *
+ * Returns: A new GOptionContext wrapper.
+ */
+PyObject * 
+pyglib_option_context_new (GOptionContext *context)
+{
+    PyGOptionContext *self;
+
+    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext,
+					    &PyGOptionContext_Type);
+    if (self == NULL)
+	return NULL;
+
+    self->context = context;
+    self->main_group = NULL;
+    
+    return (PyObject *)self;
+}
+
+
+/****** Private *****/
+
+/**
  * _pyglib_destroy_notify:
  * @user_data: a PyObject pointer.
  *
@@ -358,8 +454,6 @@ _pyglib_destroy_notify(gpointer user_data)
     Py_DECREF(obj);
     pyglib_gil_state_release(state);
 }
-
-/****** Private *****/
 
 gboolean
 _pyglib_handler_marshal(gpointer user_data)
@@ -387,4 +481,5 @@ _pyglib_handler_marshal(gpointer user_data)
 
     return res;
 }
+
 

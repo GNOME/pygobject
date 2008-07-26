@@ -32,6 +32,8 @@
 #include "pygiochannel.h"
 #include "pygmaincontext.h"
 #include "pygmainloop.h"
+#include "pygoptioncontext.h"
+#include "pygoptiongroup.h"
 #include "pygsource.h"
 #include "pygspawn.h"
 
@@ -679,8 +681,35 @@ pyglib_register_constants(PyObject *m)
 			    G_IO_FLAG_GET_MASK);
     PyModule_AddIntConstant(m, "IO_FLAG_SET_MASK",
 			    G_IO_FLAG_SET_MASK);
-  
+
+    PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
+			    G_OPTION_FLAG_HIDDEN);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",
+			    G_OPTION_FLAG_IN_MAIN);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_REVERSE",
+			    G_OPTION_FLAG_REVERSE);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_NO_ARG",
+			    G_OPTION_FLAG_NO_ARG);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_FILENAME",
+			    G_OPTION_FLAG_FILENAME);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_OPTIONAL_ARG",
+			    G_OPTION_FLAG_OPTIONAL_ARG);
+    PyModule_AddIntConstant(m, "OPTION_FLAG_NOALIAS",
+			    G_OPTION_FLAG_NOALIAS); 
+
+    PyModule_AddIntConstant(m, "OPTION_ERROR_UNKNOWN_OPTION",
+			    G_OPTION_ERROR_UNKNOWN_OPTION);
+    PyModule_AddIntConstant(m, "OPTION_ERROR_BAD_VALUE",
+			    G_OPTION_ERROR_BAD_VALUE);
+    PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
+			    G_OPTION_ERROR_FAILED);
+
+    PyModule_AddStringConstant(m, "OPTION_REMAINING",
+			       G_OPTION_REMAINING);
+    PyModule_AddStringConstant(m, "OPTION_ERROR",
+			       (char*) g_quark_to_string(G_OPTION_ERROR));
 }
+
 DL_EXPORT(void)
 init_glib(void)
 {
@@ -698,4 +727,6 @@ init_glib(void)
     pyglib_maincontext_register_types(d);
     pyglib_source_register_types(d);
     pyglib_spawn_register_types(d);
+    pyglib_option_context_register_types(d);
+    pyglib_option_group_register_types(d);
 }

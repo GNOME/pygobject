@@ -2656,7 +2656,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_type_register_custom_callback,
   pyg_gerror_exception_check,
 
-  pyg_option_group_new
+  pyglib_option_group_new
   
 };
 
@@ -2753,9 +2753,6 @@ init_gobject(void)
     PyType_Ready(&PyGObjectWeakRef_Type);
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
 
-    REGISTER_TYPE(d, PyGOptionContext_Type, "OptionContext");
-    REGISTER_TYPE(d, PyGOptionGroup_Type, "OptionGroup");
-
     /* pygobject version */
     tuple = Py_BuildValue ("(iii)",
 			   PYGOBJECT_MAJOR_VERSION,
@@ -2794,31 +2791,6 @@ init_gobject(void)
     PyModule_AddIntConstant(m, "PARAM_CONSTRUCT_ONLY", G_PARAM_CONSTRUCT_ONLY);
     PyModule_AddIntConstant(m, "PARAM_LAX_VALIDATION", G_PARAM_LAX_VALIDATION);
     PyModule_AddIntConstant(m, "PARAM_READWRITE", G_PARAM_READWRITE);
-
-    PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
-			    G_OPTION_FLAG_HIDDEN);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",
-			    G_OPTION_FLAG_IN_MAIN);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_REVERSE",
-			    G_OPTION_FLAG_REVERSE);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_NO_ARG",
-			    G_OPTION_FLAG_NO_ARG);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_FILENAME",
-			    G_OPTION_FLAG_FILENAME);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_OPTIONAL_ARG",
-			    G_OPTION_FLAG_OPTIONAL_ARG);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_NOALIAS)",
-			    G_OPTION_FLAG_NOALIAS); 
-    PyModule_AddIntConstant(m, "OPTION_ERROR_UNKNOWN_OPTION",
-			    G_OPTION_ERROR_UNKNOWN_OPTION);
-    PyModule_AddIntConstant(m, "OPTION_ERROR_BAD_VALUE",
-			    G_OPTION_ERROR_BAD_VALUE);
-    PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
-			    G_OPTION_ERROR_FAILED);
-    PyModule_AddStringConstant(m, "OPTION_REMAINING",
-			       G_OPTION_REMAINING);
-    PyModule_AddStringConstant(m, "OPTION_ERROR",
-			       (char*) g_quark_to_string(G_OPTION_ERROR));
 
     /* The rest of the types are set in __init__.py */
     PyModule_AddObject(m, "TYPE_INVALID", pyg_type_wrapper_new(G_TYPE_INVALID));

@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2006  Johannes Hoelzl
 #
-#   gobject/option.py: GOption command line parser
+#   glib/option.py: GOption command line parser
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@ objects. So it is possible to use the gtk, gnome_program and gstreamer command
 line groups and contexts.
 
 Use this interface instead of the raw wrappers of GOptionContext and
-GOptionGroup in gobject.
+GOptionGroup in glib.
 """
 
 import sys
@@ -34,9 +34,7 @@ import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
                      BadOptionError, OptionConflictError
 
-from glib import GError
-
-import _gobject as gobject
+import _glib
 
 __all__ = [
     "OptParseError",
@@ -84,7 +82,7 @@ class Option(optparse.Option):
         'optional_arg',
     ]
 
-    REMAINING = '--' + gobject.OPTION_REMAINING
+    REMAINING = '--' + _glib.OPTION_REMAINING
 
     def __init__(self, *args, **kwargs):
         optparse.Option.__init__(self, *args, **kwargs)
@@ -111,19 +109,19 @@ class Option(optparse.Option):
         flags = 0
 
         if self.hidden:
-            self.flags |= gobject.OPTION_FLAG_HIDDEN
+            self.flags |= _glib.OPTION_FLAG_HIDDEN
 
         if self.in_main:
-            self.flags |= gobject.OPTION_FLAG_IN_MAIN
+            self.flags |= _glib.OPTION_FLAG_IN_MAIN
 
         if self.takes_value():
             if self.optional_arg:
-                flags |= gobject.OPTION_FLAG_OPTIONAL_ARG
+                flags |= _glib.OPTION_FLAG_OPTIONAL_ARG
         else:
-            flags |= gobject.OPTION_FLAG_NO_ARG
+            flags |= _glib.OPTION_FLAG_NO_ARG
 
         if self.type == 'filename':
-            flags |= gobject.OPTION_FLAG_FILENAME
+            flags |= _glib.OPTION_FLAG_FILENAME
 
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
             yield (long_name[2:], short_name[1], flags, self.help, self.metavar)
@@ -185,13 +183,13 @@ class OptionGroup(optparse.OptionGroup):
             try:
                 opt.process(option_name, option_value, self.values, parser)
             except OptionValueError, error:
-            	gerror = GError(str(error))
-            	gerror.domain = gobject.OPTION_ERROR
-            	gerror.code = gobject.OPTION_ERROR_BAD_VALUE
+            	gerror = _glib.GError(str(error))
+            	gerror.domain = _glib.OPTION_ERROR
+            	gerror.code = _glib.OPTION_ERROR_BAD_VALUE
             	gerror.message = str(error)
             	raise gerror
 
-        group = gobject.OptionGroup(self.name, self.description,
+        group = _glib.OptionGroup(self.name, self.description,
                                     self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
@@ -234,9 +232,9 @@ class OptionParser(optparse.OptionParser):
                                 knwon, the option will be in the result list.
 
     OptionParser.add_option_group() does not only accept OptionGroup instances
-    but also gobject.OptionGroup, which is returned by gtk_get_option_group().
+    but also glib.OptionGroup, which is returned by gtk_get_option_group().
 
-    Only gobject.option.OptionGroup and gobject.option.Option instances should
+    Only glib.option.OptionGroup and glib.option.Option instances should
     be passed as groups and options.
 
     For further help, see optparse.OptionParser.
@@ -264,12 +262,12 @@ class OptionParser(optparse.OptionParser):
             parameter_string = self.usage + " - " + self.description
         else:
             parameter_string = self.usage
-        context = gobject.OptionContext(parameter_string)
+        context = _glib.OptionContext(parameter_string)
         context.set_help_enabled(self.help_enabled)
         context.set_ignore_unknown_options(self.ignore_unknown_options)
 
         for option_group in self.option_groups:
-            if isinstance(option_group, gobject.OptionGroup):
+            if isinstance(option_group, _glib.OptionGroup):
                 g_group = option_group
             else:
                 g_group = option_group.get_option_group(self)
@@ -282,7 +280,7 @@ class OptionParser(optparse.OptionParser):
                 opt = self._short_opt[option_name]
             opt.process(option_name, option_value, values, self)
 
-        main_group = gobject.OptionGroup(None, None, None, callback)
+        main_group = _glib.OptionGroup(None, None, None, callback)
         main_entries = []
         for option in self.option_list:
             main_entries.extend(option._to_goptionentries())
@@ -302,7 +300,7 @@ class OptionParser(optparse.OptionParser):
                     args[0].parser = self
                 if args[0].parser is not self:
                     raise ValueError("invalid OptionGroup (wrong parser)")
-            if isinstance(args[0], gobject.OptionGroup):
+            if isinstance(args[0], _glib.OptionGroup):
                 self.option_groups.append(args[0])
                 return
         optparse.OptionParser.add_option_group(self, *args, **kwargs)
@@ -316,7 +314,7 @@ class OptionParser(optparse.OptionParser):
 
     def _process_args(self, largs, rargs, values):
         context = self._to_goptioncontext(values)
-        
+
         # _process_args() returns the remaining parameters in rargs.
         # The prepended program name is used to all g_set_prgname()
         # The program name is cut away so it doesn't appear in the result.
@@ -327,14 +325,14 @@ class OptionParser(optparse.OptionParser):
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
-        except GError, error:
-            if error.domain != gobject.OPTION_ERROR:
+        except _glib.GError, error:
+            if error.domain != _glib.OPTION_ERROR:
             	raise
-            if error.code == gobject.OPTION_ERROR_BAD_VALUE:
+            if error.code == _glib.OPTION_ERROR_BAD_VALUE:
                 raise OptionValueError(error.message)
-            elif error.code == gobject.OPTION_ERROR_UNKNOWN_OPTION:
+            elif error.code == _glib.OPTION_ERROR_UNKNOWN_OPTION:
     	        raise BadOptionError(error.message)
-            elif error.code == gobject.OPTION_ERROR_FAILED:
+            elif error.code == _glib.OPTION_ERROR_FAILED:
                 raise OptParseError(error.message)
             else:
                 raise

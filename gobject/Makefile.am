@@ -10,7 +10,6 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 pygobjectdir = $(pkgpyexecdir)/gobject
 pygobject_PYTHON = 	\
 	__init__.py 	\
-	option.py	\
 	propertyhelper.py
 pygobject_LTLIBRARIES = _gobject.la 
 nodist_pygobject_PYTHON = constants.py
@@ -54,8 +53,6 @@ _gobject_la_SOURCES = \
 	pygparamspec.c \
 	pygpointer.c \
 	pygtype.c \
-	pygoptioncontext.c \
-	pygoptiongroup.c
 _gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI

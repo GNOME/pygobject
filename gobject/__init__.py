@@ -20,6 +20,7 @@
 # USA
 
 # this can go when things are a little further along
+
 try:
     import ltihooks
     ltihooks # pyflakes
@@ -27,13 +28,15 @@ try:
 except ImportError:
     pass
 
+import sys
+
 from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
      io_add_watch, source_remove, child_watch_add, markup_escape_text, \
      get_current_time, filename_display_name, filename_display_basename, \
      filename_from_utf8, get_application_name, set_application_name, \
      get_prgname, set_prgname, main_depth, Pid, GError, glib_version, \
      MainLoop, MainContext, main_context_default, IOChannel, Source, Idle, \
-     Timeout, PollFD
+     Timeout, PollFD, OptionGroup, OptionContext, option
 from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      SPAWN_SEARCH_PATH, SPAWN_STDOUT_TO_DEV_NULL, SPAWN_STDERR_TO_DEV_NULL, \
      SPAWN_CHILD_INHERITS_STDIN, SPAWN_FILE_AND_ARGV_ZERO, PRIORITY_HIGH, \
@@ -42,7 +45,11 @@ from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      IO_STATUS_ERROR, IO_STATUS_NORMAL, IO_STATUS_EOF, IO_STATUS_AGAIN, \
      IO_FLAG_APPEND, IO_FLAG_NONBLOCK, IO_FLAG_IS_READABLE, \
      IO_FLAG_IS_WRITEABLE, IO_FLAG_IS_SEEKABLE, IO_FLAG_MASK, \
-     IO_FLAG_GET_MASK, IO_FLAG_SET_MASK
+     IO_FLAG_GET_MASK, IO_FLAG_SET_MASK, OPTION_FLAG_HIDDEN, \
+     OPTION_FLAG_IN_MAIN, OPTION_FLAG_REVERSE, OPTION_FLAG_NO_ARG, \
+     OPTION_FLAG_FILENAME, OPTION_FLAG_OPTIONAL_ARG, OPTION_FLAG_NOALIAS, \
+     OPTION_ERROR_UNKNOWN_OPTION, OPTION_ERROR_BAD_VALUE, \
+     OPTION_ERROR_FAILED, OPTION_REMAINING, OPTION_ERROR
 
 from gobject.constants import *
 from _gobject import *
@@ -50,6 +57,7 @@ _PyGObject_API = _gobject._PyGObject_API
 
 from propertyhelper import property
 
+sys.modules['gobject.option'] = option
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"
