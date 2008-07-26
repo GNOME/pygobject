@@ -57,7 +57,7 @@ typedef struct
     PyObject *obj;
 } PyGRealSource;
 
-/* glib.GSource */
+/* glib.Source */
 
 PYGLIB_DEFINE_TYPE("glib.Source", PyGSource_Type, PyGSource)
 
