@@ -1,5 +1,11 @@
 2008-07-26  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pygoptioncontext.c (pyg_option_context_set_main_group),
+	(pyg_option_context_add_group):
+	Send in a PyObject instead of a PyGOptionGroup object.
+
+2008-07-26  Johan Dahlin  <johan@gnome.org>
+
 	* glib/Makefile.am:
 	* glib/glibmodule.c (pyglib_register_constants), (init_glib):
 	* glib/option.py:

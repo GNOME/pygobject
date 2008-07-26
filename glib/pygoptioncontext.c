@@ -198,7 +198,7 @@ pyg_option_context_set_main_group(PyGOptionContext *self,
         return NULL;
     }
 
-    g_group = pyglib_option_group_transfer_group((PyGOptionGroup*) group);
+    g_group = pyglib_option_group_transfer_group(group);
     if (g_group == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, "Group is already in a OptionContext.");
@@ -242,7 +242,7 @@ pyg_option_context_add_group(PyGOptionContext *self,
                         "GOptionContext.add_group expects a GOptionGroup.");
         return NULL;
     }
-    g_group = pyglib_option_group_transfer_group((PyGOptionGroup*) group);
+    g_group = pyglib_option_group_transfer_group(group);
     if (g_group == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, 
