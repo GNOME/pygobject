@@ -1,5 +1,27 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
+	* gobject/gobjectmodule.c (pyg_param_spec_from_object),
+	(add_properties), (pyg_signal_new), (pyg_signal_list_ids),
+	(pyg_signal_lookup), (pyg_signal_query):
+	* gobject/pygenum.c (pyg_enum_richcompare), (pyg_enum_new),
+	(pyg_enum_from_gtype), (pyg_enum_add), (pyg_enum_reduce),
+	(pygobject_enum_register_types):
+	* gobject/pygflags.c (pyg_flags_richcompare), (pyg_flags_new),
+	(pyg_flags_from_gtype), (pyg_flags_add), (pyg_flags_and),
+	(pyg_flags_or), (pyg_flags_xor), (pygobject_flags_register_types):
+	* gobject/pygobject-private.h:
+	* gobject/pygobject.c (pygobject_disconnect_by_func),
+	(pygobject_handler_block_by_func),
+	(pygobject_handler_unblock_by_func), (pygobject_get_refcount):
+	* gobject/pygparamspec.c (pyg_param_spec_getattr):
+	* gobject/pygtype.c (_wrap_g_type_wrapper__get_depth),
+	(pyg_type_from_object), (pyg_enum_get_value),
+	(pyg_flags_get_value), (pyg_value_from_pyobject),
+	(pyg_value_as_pyobject):
+	Use _PyLong macros.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
 	* gobject/pygboxed.c (pygobject_boxed_register_types):
 	* gobject/pygenum.c (pygobject_enum_register_types):
 	* gobject/pygflags.c (pygobject_flags_register_types):

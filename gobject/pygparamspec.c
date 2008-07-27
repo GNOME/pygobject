@@ -121,7 +121,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (!strcmp(attr, "blurb") || !strcmp(attr, "__doc__")) {
 	return Py_BuildValue("s", g_param_spec_get_blurb(pspec));
     } else if (!strcmp(attr, "flags")) {
-	return PyInt_FromLong(pspec->flags);
+	return _PyLong_FromLong(pspec->flags);
     } else if (!strcmp(attr, "value_type")) {
 	return pyg_type_wrapper_new(pspec->value_type);
     } else if (!strcmp(attr, "owner_type")) {
@@ -138,9 +138,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	    return _PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_CHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_CHAR(pspec)->minimum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_CHAR(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_CHAR(pspec)->maximum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_CHAR(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_UCHAR(pspec)) {
 	if (!strcmp(attr, "__members__")) {
@@ -153,9 +153,9 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 	    return _PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_UCHAR(pspec)->minimum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_UCHAR(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_UCHAR(pspec)->maximum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_UCHAR(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_BOOLEAN(pspec)) {
 	if (!strcmp(attr, "__members__")) {
@@ -173,11 +173,11 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "flags", "maximum", "minimum", "name",
 				 "nick", "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->default_value);
+	    return _PyLong_FromLong(G_PARAM_SPEC_INT(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->minimum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_INT(pspec)->minimum);
 	} else if (!strcmp(attr, "maximum")) {
-	    return PyInt_FromLong(G_PARAM_SPEC_INT(pspec)->maximum);
+	    return _PyLong_FromLong(G_PARAM_SPEC_INT(pspec)->maximum);
 	}
     } else if (G_IS_PARAM_SPEC_UINT(pspec)) {
 	if (!strcmp(attr, "__members__")) {

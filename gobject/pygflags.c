@@ -33,14 +33,14 @@ GQuark pygflags_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
 
-#define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
+#define GET_INT_VALUE(x) (((_PyLongObject*)x)->ob_ival)
 
 static PyObject *
 pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
 {
     static char warning[256];
 
-    if (!PyInt_Check(other)) {
+    if (!_PyLong_Check(other)) {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
     }
@@ -153,7 +153,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    pyint = PyInt_FromLong(value);
+    pyint = _PyLong_FromLong(value);
     ret = PyDict_GetItem(values, pyint);
     Py_DECREF(pyint);
     Py_DECREF(values);
@@ -176,13 +176,13 @@ pyg_flags_from_gtype (GType gtype, int value)
     if (pyclass == NULL) {
 	pyclass = pyg_flags_add(NULL, g_type_name(gtype), NULL, gtype);
 	if (!pyclass)
-	    return PyInt_FromLong(value);
+	    return _PyLong_FromLong(value);
     }
 
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__flags_values__");
-    pyint = PyInt_FromLong(value);
+    pyint = _PyLong_FromLong(value);
     retval = PyDict_GetItem(values, pyint);
     Py_DECREF(pyint);
 
@@ -192,7 +192,7 @@ pyg_flags_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
-	((PyIntObject*)retval)->ob_ival = value;
+	((_PyLongObject*)retval)->ob_ival = value;
 	((PyGFlags*)retval)->gtype = gtype;
     } else {
 	Py_INCREF(retval);
@@ -257,10 +257,10 @@ pyg_flags_add (PyObject *   module,
       PyObject *item, *intval;
       
       item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-      ((PyIntObject*)item)->ob_ival = eclass->values[i].value;
+      ((_PyLongObject*)item)->ob_ival = eclass->values[i].value;
       ((PyGFlags*)item)->gtype = gtype;
             
-      intval = PyInt_FromLong(eclass->values[i].value);
+      intval = _PyLong_FromLong(eclass->values[i].value);
       PyDict_SetItem(values, intval, item);
       Py_DECREF(intval);
 
@@ -290,7 +290,7 @@ static PyObject *
 pyg_flags_and(PyGFlags *a, PyGFlags *b)
 {
 	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyInt_Type.tp_as_number->nb_and((PyObject*)a,
+		return _PyLong_Type.tp_as_number->nb_and((PyObject*)a,
 						       (PyObject*)b);
 	
 	return pyg_flags_from_gtype(a->gtype,
@@ -301,7 +301,7 @@ static PyObject *
 pyg_flags_or(PyGFlags *a, PyGFlags *b)
 {
 	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyInt_Type.tp_as_number->nb_or((PyObject*)a,
+		return _PyLong_Type.tp_as_number->nb_or((PyObject*)a,
 						      (PyObject*)b);
 
 	return pyg_flags_from_gtype(a->gtype, GET_INT_VALUE(a) | GET_INT_VALUE(b));
@@ -311,7 +311,7 @@ static PyObject *
 pyg_flags_xor(PyGFlags *a, PyGFlags *b)
 {
 	if (!PyGFlags_Check(a) || !PyGFlags_Check(b))
-		return PyInt_Type.tp_as_number->nb_xor((PyObject*)a,
+		return _PyLong_Type.tp_as_number->nb_xor((PyObject*)a,
 						       (PyObject*)b);
 
 	return pyg_flags_from_gtype(a->gtype,
@@ -466,7 +466,7 @@ pygobject_flags_register_types(PyObject *d)
 {
     pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
 
-    PyGFlags_Type.tp_base = &PyInt_Type;
+    PyGFlags_Type.tp_base = &_PyLong_Type;
     PyGFlags_Type.tp_repr = 	(reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_as_number = &pyg_flags_as_number;
     PyGFlags_Type.tp_str = (reprfunc)pyg_flags_repr;

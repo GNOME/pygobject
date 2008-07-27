@@ -194,7 +194,7 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 /* pygflags */
 typedef struct {
-    PyIntObject parent;
+    _PyLongObject parent;
     GType gtype;
 } PyGFlags;
 
@@ -213,7 +213,7 @@ extern PyObject * pyg_flags_from_gtype (GType        gtype,
 #define PyGEnum_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
-    PyIntObject parent;
+    _PyLongObject parent;
     GType gtype;
 } PyGEnum;
 

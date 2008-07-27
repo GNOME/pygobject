@@ -37,7 +37,7 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
     static char warning[256];
 
-    if (!PyInt_Check(other)) {
+    if (!_PyLong_Check(other)) {
 	Py_INCREF(Py_NotImplemented);
 	return Py_NotImplemented;
     }
@@ -132,7 +132,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    intvalue = PyInt_FromLong(value);
+    intvalue = _PyLong_FromLong(value);
     ret = PyDict_GetItem(values, intvalue);
     Py_DECREF(intvalue);
     Py_DECREF(values);
@@ -155,12 +155,12 @@ pyg_enum_from_gtype (GType gtype, int value)
     if (pyclass == NULL) {
 	pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
 	if (!pyclass)
-	    return PyInt_FromLong(value);
+	    return _PyLong_FromLong(value);
     }
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
-    intvalue = PyInt_FromLong(value);
+    intvalue = _PyLong_FromLong(value);
     retval = PyDict_GetItem(values, intvalue);
     Py_DECREF(intvalue);
     if (!retval) {
@@ -168,9 +168,9 @@ pyg_enum_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
-	((PyIntObject*)retval)->ob_ival = value;
+	((_PyLongObject*)retval)->ob_ival = value;
 	((PyGFlags*)retval)->gtype = gtype;
-	//return PyInt_FromLong(value);
+	//return _PyLong_FromLong(value);
     }
     
     Py_INCREF(retval);
@@ -236,10 +236,10 @@ pyg_enum_add (PyObject *   module,
 	PyObject *item, *intval;
       
 	item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-	((PyIntObject*)item)->ob_ival = eclass->values[i].value;
+	((_PyLongObject*)item)->ob_ival = eclass->values[i].value;
 	((PyGEnum*)item)->gtype = gtype;
 	
-        intval = PyInt_FromLong(eclass->values[i].value);
+        intval = _PyLong_FromLong(eclass->values[i].value);
 	PyDict_SetItem(values, intval, item);
         Py_DECREF(intval);
 	
@@ -270,7 +270,7 @@ pyg_enum_reduce(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, ":GEnum.__reduce__"))
         return NULL;
 
-    return Py_BuildValue("(O(i)O)", self->ob_type, PyInt_AsLong(self),
+    return Py_BuildValue("(O(i)O)", self->ob_type, _PyLong_AsLong(self),
                          PyObject_GetAttrString(self, "__dict__"));
 }
 
@@ -327,7 +327,7 @@ pygobject_enum_register_types(PyObject *d)
 {
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
-    PyGEnum_Type.tp_base = &PyInt_Type;
+    PyGEnum_Type.tp_base = &_PyLong_Type;
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
