@@ -45,7 +45,7 @@ typedef int Py_ssize_t;
 #define _PyLongObject PyIntObject
 #define _PyLong_Type PyInt_Type
 #define _PyLong_AS_LONG PyInt_AS_LONG
-#define Py_TYPE(ob) (ob->ob_type)
+#define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 #else
 #undef PYGLIB_MODULE_START
 #undef PYGLIB_MODULE_END

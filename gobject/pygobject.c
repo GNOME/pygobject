@@ -97,7 +97,7 @@ pygobject_get_inst_data(PyGObject *self)
     {
         inst_data = pygobject_data_new();
 
-        inst_data->type = ((PyObject *)self)->ob_type;
+        inst_data->type = Py_TYPE(self);
         Py_INCREF((PyObject *) inst_data->type);
 
         g_object_set_qdata_full(self->obj, pygobject_instance_data_key,
@@ -497,7 +497,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
     } else
         bases = runtime_bases;
 
-    type->ob_type = PyGObject_MetaType;
+    Py_TYPE(type) = PyGObject_MetaType;
     type->tp_bases = bases;
     if (G_LIKELY(bases)) {
         type->tp_base = (PyTypeObject *)PyTuple_GetItem(bases, 0);
@@ -694,7 +694,7 @@ pygobject_new_with_interfaces(GType gtype)
 	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
     }
 
-    type = (PyTypeObject*)PyObject_CallFunction((PyObject *) py_parent_type->ob_type,
+    type = (PyTypeObject*)PyObject_CallFunction((PyObject *) Py_TYPE(py_parent_type),
                                                 "sNN", type_name, bases, dict);
     g_free(type_name);
 
@@ -897,7 +897,7 @@ pygobject_dealloc(PyGObject *self)
     pygobject_get_inst_data(self);
     pygobject_clear(self);
     /* the following causes problems with subclassed types */
-    /* self->ob_type->tp_free((PyObject *)self); */
+    /* Py_TYPE(self)->tp_free((PyObject *)self); */
     PyObject_GC_Del(self);
 }
 
@@ -922,7 +922,7 @@ pygobject_repr(PyGObject *self)
 
     g_snprintf(buf, sizeof(buf),
 	       "<%s object at 0x%lx (%s at 0x%lx)>",
-	       self->ob_type->tp_name,
+	       Py_TYPE(self)->tp_name,
 	       (long)self,
 	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
                (long)self->obj);
@@ -1066,7 +1066,7 @@ pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!G_IS_OBJECT(self->obj)) {                                           \
 	PyErr_Format(PyExc_TypeError,                                        \
                      "object at %p of type %s is not initialized",	     \
-                     self, self->ob_type->tp_name);                          \
+                     self, Py_TYPE(self)->tp_name);			     \
 	return NULL;                                                         \
     }
 
@@ -1622,8 +1622,8 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	if (pyg_value_from_pyobject(&params[i+1], item) < 0) {
 	    gchar buf[128];
 	    g_snprintf(buf, sizeof(buf),
-		"could not convert type %s to %s required for parameter %d",
-		item->ob_type->tp_name,
+		       "could not convert type %s to %s required for parameter %d",
+		       Py_TYPE(item)->tp_name,
 		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
 	    PyErr_SetString(PyExc_TypeError, buf);
 
@@ -1734,9 +1734,9 @@ pygobject_chain_from_overridden(PyGObject *self, PyObject *args)
 	    gchar buf[128];
 
 	    g_snprintf(buf, sizeof(buf),
-		"could not convert type %s to %s required for parameter %d",
-		item->ob_type->tp_name,
-		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
+		       "could not convert type %s to %s required for parameter %d",
+		       Py_TYPE(item)->tp_name,
+		       g_type_name(G_VALUE_TYPE(&params[i+1])), i);
 	    PyErr_SetString(PyExc_TypeError, buf);
 	    for (i = 0; i < query.n_params + 1; i++)
 		g_value_unset(&params[i]);
@@ -2007,7 +2007,7 @@ pygobject_weak_ref_notify(PyGObjectWeakRef *self, GObject *dummy)
                 PyErr_Format(PyExc_TypeError,
                              "GObject weak notify callback returned a value"
                              " of type %s, should return None",
-                             retval->ob_type->tp_name);
+                             Py_TYPE(retval)->tp_name);
             Py_DECREF(retval);
             PyErr_Print();
         } else

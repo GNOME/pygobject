@@ -42,7 +42,7 @@ pyg_boxed_dealloc(PyGBoxed *self)
 	pyglib_gil_state_release(state);
     }
 
-    self->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static int
@@ -81,7 +81,8 @@ pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
     self->gtype = 0;
     self->free_on_dealloc = FALSE;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
+    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
+	       Py_TYPE(self)->tp_name);
     PyErr_SetString(PyExc_NotImplementedError, buf);
     return -1;
 }
@@ -129,7 +130,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 
     if (!type->tp_dealloc)  type->tp_dealloc  = (destructor)pyg_boxed_dealloc;
 
-    type->ob_type = &PyType_Type;
+    Py_TYPE(type) = &PyType_Type;
     type->tp_base = &PyGBoxed_Type;
 
     if (PyType_Ready(type) < 0) {

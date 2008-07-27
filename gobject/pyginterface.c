@@ -41,7 +41,8 @@ pyg_interface_init(PyObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTuple(args, ":GInterface.__init__"))
 	return -1;
 
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed", self->ob_type->tp_name);
+    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
+	       Py_TYPE(self)->tp_name);
     PyErr_SetString(PyExc_NotImplementedError, buf);
     return -1;
 }
@@ -69,7 +70,7 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 {
     PyObject *o;
 
-    type->ob_type = &PyType_Type;
+    Py_TYPE(type) = &PyType_Type;
     type->tp_base = &PyGInterface_Type;
 
     if (PyType_Ready(type) < 0) {

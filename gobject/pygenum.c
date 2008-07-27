@@ -278,7 +278,7 @@ pyg_enum_reduce(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, ":GEnum.__reduce__"))
         return NULL;
 
-    return Py_BuildValue("(O(i)O)", self->ob_type, _PyLong_AsLong(self),
+    return Py_BuildValue("(O(i)O)", Py_TYPE(self), _PyLong_AsLong(self),
                          PyObject_GetAttrString(self, "__dict__"));
 }
 

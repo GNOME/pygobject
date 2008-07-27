@@ -337,7 +337,7 @@ pyg_type_from_object(PyObject *obj)
 	    return PY_TYPE_OBJECT;
     }
 
-    if (obj->ob_type == &PyGTypeWrapper_Type) {
+    if (Py_TYPE(obj) == &PyGTypeWrapper_Type) {
 	return ((PyGTypeWrapper *)obj)->type;
     }
 
@@ -355,7 +355,7 @@ pyg_type_from_object(PyObject *obj)
     gtype = PyObject_GetAttrString(obj, "__gtype__");
 
     if (gtype) {
-	if (gtype->ob_type == &PyGTypeWrapper_Type) {
+	if (Py_TYPE(gtype) == &PyGTypeWrapper_Type) {
 	    type = ((PyGTypeWrapper *)gtype)->type;
 	    Py_DECREF(gtype);
 	    return type;
@@ -607,7 +607,7 @@ pyg_value_array_from_pyobject(GValue *value,
 	else if (item == Py_None)
 	    type = G_TYPE_POINTER; /* store None as NULL */
 	else {
-	    type = pyg_type_from_object((PyObject *) item->ob_type);
+	    type = pyg_type_from_object((PyObject*)Py_TYPE(item));
 	    if (! type) {
 		PyErr_Clear();
 		g_value_array_free(value_array);
@@ -834,7 +834,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             GType type;
             GValue *n_value; 
             
-            type = pyg_type_from_object((PyObject *)obj->ob_type);
+            type = pyg_type_from_object((PyObject*)Py_TYPE(obj));
             if (G_UNLIKELY (! type)) {
                 PyErr_Clear();
                 return -1;
@@ -1507,7 +1507,7 @@ pyg_object_descr_doc_get(void)
     static PyObject *doc_descr = NULL;
 
     if (!doc_descr) {
-	PyGObjectDoc_Type.ob_type = &PyType_Type;
+	Py_TYPE(&PyGObjectDoc_Type) = &PyType_Type;
 	if (PyType_Ready(&PyGObjectDoc_Type))
 	    return NULL;
 

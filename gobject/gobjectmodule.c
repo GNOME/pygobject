@@ -1715,7 +1715,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 					       value, pspec) < 0) {
 		PyErr_Format(PyExc_TypeError,
 			     "could not convert value for property `%s' from %s to %s",
-			     key_str, value->ob_type->tp_name,
+			     key_str, Py_TYPE(value)->tp_name,
 			     g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
 		goto cleanup;
 	    }
@@ -1944,7 +1944,9 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     Py_INCREF(metaclass);
     PyGObject_MetaType = metaclass;
     Py_INCREF(metaclass);
-    PyGObject_Type.ob_type = metaclass;
+
+    Py_TYPE(&PyGObject_Type) = metaclass;
+
     Py_INCREF(Py_None);
     return Py_None;
 }

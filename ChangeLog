@@ -1,6 +1,28 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
 	* glib/pyglib-python-compat.h:
+	* gobject/gobjectmodule.c (pyg_object_new),
+	(pyg__install_metaclass):
+	* gobject/pygboxed.c (pyg_boxed_dealloc), (pyg_boxed_init),
+	(pyg_register_boxed):
+	* gobject/pygenum.c (pyg_enum_reduce):
+	* gobject/pyginterface.c (pyg_interface_init),
+	(pyg_register_interface):
+	* gobject/pygobject.c (pygobject_get_inst_data),
+	(pygobject_register_class), (pygobject_new_with_interfaces),
+	(pygobject_dealloc), (pygobject_repr), (pygobject_emit),
+	(pygobject_chain_from_overridden), (pygobject_weak_ref_notify):
+	* gobject/pygparamspec.c (pygobject_paramspec_register_types):
+	* gobject/pygpointer.c (pyg_pointer_dealloc), (pyg_pointer_init),
+	(pyg_register_pointer):
+	* gobject/pygtype.c (pyg_type_from_object),
+	(pyg_value_array_from_pyobject), (pyg_value_from_pyobject),
+	(pyg_object_descr_doc_get):
+	Use the Py_TYPE macro everywhere.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
+	* glib/pyglib-python-compat.h:
 	Add a Py_TYPE macro for accessing ob_type.
 	* glib/glibmodule.c (pyglib_register_constants):
 	* gobject/gobjectmodule.c (pygobject__g_instance_init),
