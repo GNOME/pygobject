@@ -1,5 +1,17 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
+	* gobject/pygboxed.c (pygobject_boxed_register_types):
+	* gobject/pygenum.c (pygobject_enum_register_types):
+	* gobject/pygflags.c (pygobject_flags_register_types):
+	* gobject/pygobject.c (pygobject_object_register_types):
+	* gobject/pygparamspec.c (pygobject_paramspec_register_types):
+	* gobject/pygpointer.c (pygobject_pointer_register_types):
+	* gobject/pygtype.c (pygobject_type_register_types):
+	Use PYGLIB_DEFINE_TYPE macro and move struct field initialization
+	to the registration methods.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pyglib-python-compat.h:
 	Add _PyUnicode_Type macro
 

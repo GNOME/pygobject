@@ -30,6 +30,8 @@
 
 GQuark pygpointer_class_key;
 
+PYGLIB_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
+
 static void
 pyg_pointer_dealloc(PyGPointer *self)
 {
@@ -81,52 +83,6 @@ pyg_pointer_free(PyObject *op)
 {
   PyObject_FREE(op);
 }
-
-PyTypeObject PyGPointer_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
-    "gobject.GPointer",                 /* tp_name */
-    sizeof(PyGPointer),                 /* tp_basicsize */
-    0,                                  /* tp_itemsize */
-    /* methods */
-    (destructor)pyg_pointer_dealloc,    /* tp_dealloc */
-    (printfunc)0,                       /* tp_print */
-    (getattrfunc)0,                     /* tp_getattr */
-    (setattrfunc)0,                     /* tp_setattr */
-    (cmpfunc)pyg_pointer_compare,       /* tp_compare */
-    (reprfunc)pyg_pointer_repr,         /* tp_repr */
-    0,                                  /* tp_as_number */
-    0,                                  /* tp_as_sequence */
-    0,                                  /* tp_as_mapping */
-    (hashfunc)pyg_pointer_hash,         /* tp_hash */
-    (ternaryfunc)0,                     /* tp_call */
-    (reprfunc)0,                        /* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,                    /* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-    NULL, /* Documentation string */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    0,					/* tp_methods */
-    0,					/* tp_members */
-    0,					/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_pointer_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)pyg_pointer_free,		/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
 
 /**
  * pyg_register_pointer:
@@ -218,6 +174,12 @@ pygobject_pointer_register_types(PyObject *d)
 {
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
+    PyGPointer_Type.tp_dealloc = (destructor)pyg_pointer_dealloc;
+    PyGPointer_Type.tp_compare = (cmpfunc)pyg_pointer_compare;
+    PyGPointer_Type.tp_repr = (reprfunc)pyg_pointer_repr;
+    PyGPointer_Type.tp_hash = (hashfunc)pyg_pointer_hash;
+    PyGPointer_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGPointer_Type.tp_init = (initproc)pyg_pointer_init;
+    PyGPointer_Type.tp_free = (freefunc)pyg_pointer_free;
     PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
-
 }

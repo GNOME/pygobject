@@ -31,6 +31,8 @@
 
 GQuark pygflags_class_key;
 
+PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
+
 #define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
 
 static PyObject *
@@ -459,53 +461,18 @@ static PyNumberMethods pyg_flags_as_number = {
 	0,					/* nb_inplace_true_divide */
 };
 
-PyTypeObject PyGFlags_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,
-	"gobject.GFlags",
-	sizeof(PyGFlags),
-	0,
-	0,					  /* tp_dealloc */
-	0,                			  /* tp_print */
-	0,					  /* tp_getattr */
-	0,					  /* tp_setattr */
-	0,					  /* tp_compare */
-	(reprfunc)pyg_flags_repr,		  /* tp_repr */
-	&pyg_flags_as_number,			  /* tp_as_number */
-	0,					  /* tp_as_sequence */
-	0,					  /* tp_as_mapping */
-	0,					  /* tp_hash */
-        0,					  /* tp_call */
-	(reprfunc)pyg_flags_repr,		  /* tp_str */
-	0,					  /* tp_getattro */
-	0,					  /* tp_setattro */
-	0,				  	  /* tp_as_buffer */
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-	0,      				  /* tp_doc */
-	0,					  /* tp_traverse */
-	0,					  /* tp_clear */
-	(richcmpfunc)pyg_flags_richcompare,	  /* tp_richcompare */
-	0,					  /* tp_weaklistoffset */
-	0,					  /* tp_iter */
-	0,					  /* tp_iternext */
-	0,					  /* tp_methods */
-	0,					  /* tp_members */
-	pyg_flags_getsets,			  /* tp_getset */
-	0,	  				  /* tp_base */
-	0,					  /* tp_dict */
-	0,					  /* tp_descr_get */
-	0,					  /* tp_descr_set */
-	0,					  /* tp_dictoffset */
-	0,					  /* tp_init */
-	0,					  /* tp_alloc */
-	pyg_flags_new,				  /* tp_new */
-};
-
 void
 pygobject_flags_register_types(PyObject *d)
 {
     pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
 
     PyGFlags_Type.tp_base = &PyInt_Type;
+    PyGFlags_Type.tp_repr = 	(reprfunc)pyg_flags_repr;
+    PyGFlags_Type.tp_as_number = &pyg_flags_as_number;
+    PyGFlags_Type.tp_str = (reprfunc)pyg_flags_repr;
+    PyGFlags_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGFlags_Type.tp_richcompare = (richcmpfunc)pyg_flags_richcompare;
+    PyGFlags_Type.tp_getset = pyg_flags_getsets;
+    PyGFlags_Type.tp_new = pyg_flags_new;
     PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 }

@@ -28,6 +28,7 @@
 
 #include "pygobject-private.h"
 #include "pygparamspec.h"
+#include "pygtype.h"
 
 /* -------------- __gtype__ objects ---------------------------- */
 
@@ -35,6 +36,8 @@ typedef struct {
     PyObject_HEAD
     GType type;
 } PyGTypeWrapper;
+
+PYGLIB_DEFINE_TYPE("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
 
 static int
 pyg_type_wrapper_compare(PyGTypeWrapper *self, PyGTypeWrapper *v)
@@ -270,46 +273,6 @@ pyg_type_wrapper_init(PyGTypeWrapper *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-
-PyTypeObject PyGTypeWrapper_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.GType",
-    sizeof(PyGTypeWrapper),
-    0,
-    (destructor)pyg_type_wrapper_dealloc,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)pyg_type_wrapper_compare,
-    (reprfunc)pyg_type_wrapper_repr,
-    0,
-    0,
-    0,
-    (hashfunc)pyg_type_wrapper_hash,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,		
-    (setattrofunc)0,		
-    0,				
-    Py_TPFLAGS_DEFAULT, 
-    NULL,
-    (traverseproc)0,		
-    (inquiry)0,
-    (richcmpfunc)0,	
-    0,             
-    (getiterfunc)0,
-    (iternextfunc)0,
-    _PyGTypeWrapper_methods,
-    0,
-    _PyGTypeWrapper_getsets,
-    NULL,		
-    NULL,		
-    (descrgetfunc)0,	
-    (descrsetfunc)0,	
-    0,                 
-    (initproc)pyg_type_wrapper_init
-};
 
 /**
  * pyg_type_wrapper_new:
@@ -1527,43 +1490,7 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
     return pystring;
 }
 
-static PyTypeObject PyGObjectDoc_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.GObject__doc__",
-    sizeof(PyObject),
-    0,
-    (destructor)object_doc_dealloc,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)0,
-    (reprfunc)0,
-    0,
-    0,
-    0,
-    (hashfunc)0,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,
-    (setattrofunc)0,
-    0,
-    Py_TPFLAGS_DEFAULT,
-    NULL,
-    (traverseproc)0,
-    (inquiry)0,
-    (richcmpfunc)0,
-    0,
-    (getiterfunc)0,
-    (iternextfunc)0,
-    0,
-    0,
-    0,
-    (PyTypeObject *)0,
-    (PyObject *)0,
-    (descrgetfunc)object_doc_descr_get,
-    (descrsetfunc)0
-};
+PYGLIB_DEFINE_TYPE("gobject.GObject.__doc__", PyGObjectDoc_Type, PyObject);
 
 /**
  * pyg_object_descr_doc_get:
@@ -1784,8 +1711,21 @@ _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
 void
 pygobject_type_register_types(PyObject *d)
 {
+    PyGTypeWrapper_Type.tp_dealloc = (destructor)pyg_type_wrapper_dealloc;
+    PyGTypeWrapper_Type.tp_compare = (cmpfunc)pyg_type_wrapper_compare;
+    PyGTypeWrapper_Type.tp_repr = (reprfunc)pyg_type_wrapper_repr;
+    PyGTypeWrapper_Type.tp_hash = (hashfunc)pyg_type_wrapper_hash;
+    PyGTypeWrapper_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGTypeWrapper_Type.tp_methods = _PyGTypeWrapper_methods;
+    PyGTypeWrapper_Type.tp_getset = _PyGTypeWrapper_getsets;
+    PyGTypeWrapper_Type.tp_init = (initproc)pyg_type_wrapper_init;
     PYGLIB_REGISTER_TYPE(d, PyGTypeWrapper_Type, "GType");
 
+    /* This type lazily registered in pyg_object_descr_doc_get */
+    PyGObjectDoc_Type.tp_dealloc = (destructor)object_doc_dealloc;
+    PyGObjectDoc_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGObjectDoc_Type.tp_descr_get = (descrgetfunc)object_doc_descr_get;
+    
     pyg_register_gtype_custom(G_TYPE_STRV,
 			      _pyg_strv_from_gvalue,
 			      _pyg_strv_to_gvalue);

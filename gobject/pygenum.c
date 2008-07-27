@@ -30,6 +30,8 @@
 
 GQuark pygenum_class_key;
 
+PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
+
 static PyObject *
 pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
@@ -320,54 +322,19 @@ static PyGetSetDef pyg_enum_getsets[] = {
     { NULL, 0, 0 }
 };
 
-PyTypeObject PyGEnum_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,
-	"gobject.GEnum",
-	sizeof(PyGEnum),
-	0,
-	0,					  /* tp_dealloc */
-	0,                			  /* tp_print */
-	0,					  /* tp_getattr */
-	0,					  /* tp_setattr */
-	0,					  /* tp_compare */
-	(reprfunc)pyg_enum_repr,		  /* tp_repr */
-	0,                   			  /* tp_as_number */
-	0,					  /* tp_as_sequence */
-	0,					  /* tp_as_mapping */
-	0,					  /* tp_hash */
-        0,					  /* tp_call */
-	(reprfunc)pyg_enum_repr,		  /* tp_str */
-	0,					  /* tp_getattro */
-	0,					  /* tp_setattro */
-	0,				  	  /* tp_as_buffer */
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-	0,      				  /* tp_doc */
-	0,					  /* tp_traverse */
-	0,					  /* tp_clear */
-	(richcmpfunc)pyg_enum_richcompare,	  /* tp_richcompare */
-	0,					  /* tp_weaklistoffset */
-	0,					  /* tp_iter */
-	0,					  /* tp_iternext */
-	pyg_enum_methods,			  /* tp_methods */
-	0,					  /* tp_members */
-	pyg_enum_getsets,			  /* tp_getset */
-	0,	  				  /* tp_base */
-	0,					  /* tp_dict */
-	0,					  /* tp_descr_get */
-	0,					  /* tp_descr_set */
-	0,					  /* tp_dictoffset */
-	0,				  	  /* tp_init */
-	0,					  /* tp_alloc */
-	pyg_enum_new,				  /* tp_new */
-};
-
 void
 pygobject_enum_register_types(PyObject *d)
 {
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
     PyGEnum_Type.tp_base = &PyInt_Type;
+    PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
+    PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
+    PyGEnum_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGEnum_Type.tp_richcompare = (richcmpfunc)pyg_enum_richcompare;
+    PyGEnum_Type.tp_methods = pyg_enum_methods;
+    PyGEnum_Type.tp_getset = pyg_enum_getsets;
+    PyGEnum_Type.tp_new = pyg_enum_new;
     PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
 
 }

@@ -31,6 +31,8 @@
 GQuark pygboxed_type_key;
 GQuark pygboxed_marshal_key;
 
+PYGLIB_DEFINE_TYPE("gobject.GBoxed", PyGBoxed_Type, PyGBoxed);
+
 static void
 pyg_boxed_dealloc(PyGBoxed *self)
 {
@@ -101,54 +103,6 @@ pyg_boxed_copy(PyGBoxed *self)
 static PyMethodDef pygboxed_methods[] = {
     { "copy", (PyCFunction) pyg_boxed_copy, METH_NOARGS },
     { NULL, NULL, 0 }
-};
-
-
-
-PyTypeObject PyGBoxed_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
-    "gobject.GBoxed",                   /* tp_name */
-    sizeof(PyGBoxed),                   /* tp_basicsize */
-    0,                                  /* tp_itemsize */
-    /* methods */
-    (destructor)pyg_boxed_dealloc,      /* tp_dealloc */
-    (printfunc)0,                       /* tp_print */
-    (getattrfunc)0,                     /* tp_getattr */
-    (setattrfunc)0,                     /* tp_setattr */
-    (cmpfunc)pyg_boxed_compare,         /* tp_compare */
-    (reprfunc)pyg_boxed_repr,           /* tp_repr */
-    0,                                  /* tp_as_number */
-    0,                                  /* tp_as_sequence */
-    0,                                  /* tp_as_mapping */
-    (hashfunc)pyg_boxed_hash,           /* tp_hash */
-    (ternaryfunc)0,                     /* tp_call */
-    (reprfunc)0,                        /* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)0,                    /* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-    NULL, /* Documentation string */
-    (traverseproc)0,			/* tp_traverse */
-    (inquiry)0,				/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    0,					/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    pygboxed_methods,                   /* tp_methods */
-    0,					/* tp_members */
-    0,					/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    0,					/* tp_dictoffset */
-    (initproc)pyg_boxed_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)pyg_boxed_free,		/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
 };
 
 
@@ -253,6 +207,14 @@ pygobject_boxed_register_types(PyObject *d)
     pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
 
+    PyGBoxed_Type.tp_dealloc = (destructor)pyg_boxed_dealloc;
+    PyGBoxed_Type.tp_compare = (cmpfunc)pyg_boxed_compare;
+    PyGBoxed_Type.tp_repr = (reprfunc)pyg_boxed_repr;
+    PyGBoxed_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+    PyGBoxed_Type.tp_methods = pygboxed_methods;
+    PyGBoxed_Type.tp_init = (initproc)pyg_boxed_init;
+    PyGBoxed_Type.tp_free = (freefunc)pyg_boxed_free;
+    PyGBoxed_Type.tp_hash = (hashfunc)pyg_boxed_hash;
+    
     PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
-
 }

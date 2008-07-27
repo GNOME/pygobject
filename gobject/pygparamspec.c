@@ -25,8 +25,12 @@
 #  include <config.h>
 #endif
 
+#include <pyglib.h>
+
 #include "pygobject-private.h"
 #include "pygparamspec.h"
+
+PYGLIB_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);
 
 static int
 pyg_param_spec_compare(PyGParamSpec *self, PyGParamSpec *v)
@@ -355,28 +359,6 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     return NULL;
 }
 
-PyTypeObject PyGParamSpec_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
-    "gobject.GParamSpec",
-    sizeof(PyGParamSpec),
-    0,
-    (destructor)pyg_param_spec_dealloc,
-    (printfunc)0,
-    (getattrfunc)pyg_param_spec_getattr,
-    (setattrfunc)0,
-    (cmpfunc)pyg_param_spec_compare,
-    (reprfunc)pyg_param_spec_repr,
-    0,
-    0,
-    0,
-    (hashfunc)pyg_param_spec_hash,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    0L,0L,0L,0L,
-    NULL
-};
-
 /**
  * pyg_param_spec_new:
  * @pspec: a GParamSpec.
@@ -403,6 +385,12 @@ void
 pygobject_paramspec_register_types(PyObject *d)
 {
     PyGParamSpec_Type.ob_type = &PyType_Type;
+    PyGParamSpec_Type.tp_dealloc = (destructor)pyg_param_spec_dealloc;
+    PyGParamSpec_Type.tp_getattr = (getattrfunc)pyg_param_spec_getattr;
+    PyGParamSpec_Type.tp_compare = (cmpfunc)pyg_param_spec_compare;
+    PyGParamSpec_Type.tp_repr = (reprfunc)pyg_param_spec_repr;
+    PyGParamSpec_Type.tp_hash = (hashfunc)pyg_param_spec_hash;
+
     if (PyType_Ready(&PyGParamSpec_Type))
 	return;
     PyDict_SetItemString(d, "GParamSpec", (PyObject *)&PyGParamSpec_Type);

@@ -39,6 +39,12 @@ static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObj
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 GType PY_TYPE_OBJECT = 0;
+GQuark pygobject_class_key;
+GQuark pygobject_class_init_key;
+GQuark pygobject_wrapper_key;
+GQuark pygobject_has_updated_constructor_key;
+GQuark pygobject_instance_data_key;
+
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
@@ -174,6 +180,8 @@ typedef struct {
     guint index;
 } PyGPropsIter;
 
+PYGLIB_DEFINE_TYPE("gobject.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
+
 static void
 pyg_props_iter_dealloc(PyGPropsIter *self)
 {
@@ -191,38 +199,6 @@ pygobject_props_iter_next(PyGPropsIter *iter)
         return NULL;
     }
 }
-
-
-PyTypeObject PyGPropsIter_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,					/* ob_size */
-	"gobject.GPropsIter",			/* tp_name */
-	sizeof(PyGPropsIter),			/* tp_basicsize */
-	0,					/* tp_itemsize */
-	(destructor)pyg_props_iter_dealloc,	/* tp_dealloc */
-	0,					/* tp_print */
-	0,					/* tp_getattr */
-	0,					/* tp_setattr */
-	0,					/* tp_compare */
-	0,					/* tp_repr */
-	0,					/* tp_as_number */
-	0,					/* tp_as_sequence */
-	0,		       			/* tp_as_mapping */
-	0,					/* tp_hash */
-	0,					/* tp_call */
-	0,					/* tp_str */
-	0,					/* tp_getattro */
-	0,					/* tp_setattro */
-	0,					/* tp_as_buffer */
-	Py_TPFLAGS_DEFAULT,			/* tp_flags */
- 	"GObject properties iterator",		/* tp_doc */
-	0,					/* tp_traverse */
- 	0,					/* tp_clear */
-	0,					/* tp_richcompare */
-	0,					/* tp_weaklistoffset */
-	0,					/* tp_iter */
-	(iternextfunc)pygobject_props_iter_next, /* tp_iternext */
-};
 
 typedef struct {
     PyObject_HEAD
@@ -355,6 +331,8 @@ set_property_from_pspec(GObject *obj,
     return TRUE;
 }
 
+PYGLIB_DEFINE_TYPE("gobject.GProps", PyGProps_Type, PyGProps);
+
 static int
 PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 {
@@ -437,38 +415,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     0
 };
 
-PyTypeObject PyGProps_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                          /* ob_size */
-    "gobject.GProps",                           /* tp_name */
-    sizeof(PyGProps),                           /* tp_basicsize */
-    0,                                          /* tp_itemsize */
-    (destructor)PyGProps_dealloc,               /* tp_dealloc */
-    0,                                          /* tp_print */
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
-    0,                                          /* tp_compare */
-    0,                                          /* tp_repr */
-    0,                                          /* tp_as_number */
-    (PySequenceMethods*)&_PyGProps_as_sequence, /* tp_as_sequence */
-    0,                                          /* tp_as_mapping */
-    0,                                          /* tp_hash */
-    0,                                          /* tp_call */
-    0,                                          /* tp_str */
-    (getattrofunc)PyGProps_getattro,            /* tp_getattro */
-    (setattrofunc)PyGProps_setattro,            /* tp_setattro */
-    0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,      /* tp_flags */
-    "The properties of the GObject accessible as "
-    "Python attributes.",                       /* tp_doc */
-    (traverseproc)pygobject_props_traverse,     /* tp_traverse */
-    0,                                          /* tp_clear */
-    0,                                          /* tp_richcompare */
-    0,                                          /* tp_weaklistoffset */
-    (getiterfunc)pygobject_props_get_iter,      /* tp_iter */
-    0,                                          /* tp_iternext */
-};
-
+PYGLIB_DEFINE_TYPE("gobject.GPropsDescr", PyGPropsDescr_Type, 0);
 
 static PyObject *
 pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
@@ -491,50 +438,6 @@ pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
     }
     return (PyObject *) gprops;
 }
-
-PyTypeObject PyGPropsDescr_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,					/* ob_size */
-	"gobject.GPropsDescr",			/* tp_name */
-	0,					/* tp_basicsize */
-	0,					/* tp_itemsize */
-	0,	 				/* tp_dealloc */
-	0,					/* tp_print */
-	0,					/* tp_getattr */
-	0,					/* tp_setattr */
-	0,					/* tp_compare */
-	0,					/* tp_repr */
-	0,					/* tp_as_number */
-	0,					/* tp_as_sequence */
-	0,		       			/* tp_as_mapping */
-	0,					/* tp_hash */
-	0,					/* tp_call */
-	0,					/* tp_str */
-	0,					/* tp_getattro */
-	0,					/* tp_setattro */
-	0,					/* tp_as_buffer */
-	Py_TPFLAGS_DEFAULT,			/* tp_flags */
- 	0,					/* tp_doc */
-	0,					/* tp_traverse */
- 	0,					/* tp_clear */
-	0,					/* tp_richcompare */
-	0,					/* tp_weaklistoffset */
-	0,					/* tp_iter */
-	0,					/* tp_iternext */
-	0,					/* tp_methods */
-	0,					/* tp_members */
-	0,					/* tp_getset */
-	0,					/* tp_base */
-	0,					/* tp_dict */
-	pyg_props_descr_descr_get,		/* tp_descr_get */
-	0,					/* tp_descr_set */
-	0,					/* tp_dictoffset */
-	0,					/* tp_init */
-	0,					/* tp_alloc */
-	0,					/* tp_new */
-	0,               			/* tp_free */
-};
-
 
 /**
  * pygobject_register_class:
@@ -980,6 +883,8 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 }
 
 /* -------------- PyGObject behaviour ----------------- */
+
+PYGLIB_DEFINE_TYPE("gobject.GObject", PyGObject_Type, PyGObject);
 
 static void
 pygobject_dealloc(PyGObject *self)
@@ -2065,57 +1970,9 @@ static PyGetSetDef pygobject_getsets[] = {
     { NULL, 0, 0 }
 };
 
-PyTypeObject PyGObject_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
-    "gobject.GObject",			/* tp_name */
-    sizeof(PyGObject),			/* tp_basicsize */
-    0,					/* tp_itemsize */
-    /* methods */
-    (destructor)pygobject_dealloc,	/* tp_dealloc */
-    (printfunc)0,			/* tp_print */
-    (getattrfunc)0,			/* tp_getattr */
-    (setattrfunc)0,			/* tp_setattr */
-    (cmpfunc)pygobject_compare,		/* tp_compare */
-    (reprfunc)pygobject_repr,		/* tp_repr */
-    0,					/* tp_as_number */
-    0,					/* tp_as_sequence */
-    0,					/* tp_as_mapping */
-    (hashfunc)pygobject_hash,		/* tp_hash */
-    (ternaryfunc)0,			/* tp_call */
-    (reprfunc)0,			/* tp_str */
-    (getattrofunc)0,			/* tp_getattro */
-    (setattrofunc)pygobject_setattro,   /* tp_setattro */
-    0,					/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-    	Py_TPFLAGS_HAVE_GC,		/* tp_flags */
-    NULL, /* Documentation string */
-    (traverseproc)pygobject_traverse,	/* tp_traverse */
-    (inquiry)pygobject_clear,		/* tp_clear */
-    (richcmpfunc)0,			/* tp_richcompare */
-    offsetof(PyGObject, weakreflist),	/* tp_weaklistoffset */
-    (getiterfunc)0,			/* tp_iter */
-    (iternextfunc)0,			/* tp_iternext */
-    pygobject_methods,			/* tp_methods */
-    0,					/* tp_members */
-    pygobject_getsets,			/* tp_getset */
-    (PyTypeObject *)0,			/* tp_base */
-    (PyObject *)0,			/* tp_dict */
-    0,					/* tp_descr_get */
-    0,					/* tp_descr_set */
-    offsetof(PyGObject, inst_dict),	/* tp_dictoffset */
-    (initproc)pygobject_init,		/* tp_init */
-    (allocfunc)0,			/* tp_alloc */
-    (newfunc)0,				/* tp_new */
-    (freefunc)pygobject_free,		/* tp_free */
-    (inquiry)0,				/* tp_is_gc */
-    (PyObject *)0,			/* tp_bases */
-};
-
-
-  /* ------------------------------------ */
-  /* ****** GObject weak reference ****** */
-  /* ------------------------------------ */
+/* ------------------------------------ */
+/* ****** GObject weak reference ****** */
+/* ------------------------------------ */
 
 typedef struct {
     PyObject_HEAD
@@ -2124,6 +1981,8 @@ typedef struct {
     PyObject *user_data;
     gboolean have_floating_ref;
 } PyGObjectWeakRef;
+
+PYGLIB_DEFINE_TYPE("gobject.GObjectWeakRef", PyGObjectWeakRef_Type, PyGObjectWeakRef);
 
 static int
 pygobject_weak_ref_traverse(PyGObjectWeakRef *self, visitproc visit, void *arg)
@@ -2242,51 +2101,6 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
     }
 }
 
-PyTypeObject PyGObjectWeakRef_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                          /* ob_size */
-    "gobject.GObjectWeakRef",                   /* tp_name */
-    sizeof(PyGObjectWeakRef),                   /* tp_basicsize */
-    0,                                          /* tp_itemsize */
-    (destructor)pygobject_weak_ref_dealloc,     /* tp_dealloc */
-    0,                                          /* tp_print */
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
-    0,                                          /* tp_compare */
-    0,                                          /* tp_repr */
-    0,                                          /* tp_as_number */
-    0, 						/* tp_as_sequence */
-    0,                                          /* tp_as_mapping */
-    0,                                          /* tp_hash */
-    (ternaryfunc)pygobject_weak_ref_call,  	/*tp_call*/
-    0,                                          /* tp_str */
-    (getattrofunc)0,            		/* tp_getattro */
-    (setattrofunc)0,            		/* tp_setattro */
-    0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC,	/* tp_flags */
-    "A GObject weak reference",                 /* tp_doc */
-    (traverseproc)pygobject_weak_ref_traverse,  /* tp_traverse */
-    (inquiry)pygobject_weak_ref_clear,          /* tp_clear */
-    0,                                          /* tp_richcompare */
-    0,                                          /* tp_weaklistoffset */
-    0,      					/* tp_iter */
-    0,                                          /* tp_iternext */
-    pygobject_weak_ref_methods,			/* tp_methods */
-    0,						/* tp_members */
-    0,						/* tp_getset */
-    NULL,					/* tp_base */
-    0,						/* tp_dict */
-    0,						/* tp_descr_get */
-    0,						/* tp_descr_set */
-    0,						/* tp_dictoffset */
-    0,						/* tp_init */
-    0,						/* tp_alloc */
-    0,						/* tp_new */
-    0,						/* tp_free */
-    0,						/* tp_is_gc */
-    NULL,					/* tp_bases */
-};
-
 static gpointer
 pyobject_copy(gpointer boxed)
 {
@@ -2307,12 +2121,6 @@ pyobject_free(gpointer boxed)
     pyglib_gil_state_release(state);
 }
 
-GQuark pygobject_class_key;
-GQuark pygobject_class_init_key;
-GQuark pygobject_wrapper_key;
-GQuark pygobject_has_updated_constructor_key;
-GQuark pygobject_instance_data_key;
-
 void
 pygobject_object_register_types(PyObject *d)
 {
@@ -2325,11 +2133,26 @@ pygobject_object_register_types(PyObject *d)
         g_quark_from_static_string("PyGObject::has-updated-constructor");
     pygobject_instance_data_key = g_quark_from_static_string("PyGObject::instance-data");
 
+    /* GObject */
     if (!PY_TYPE_OBJECT)
 	PY_TYPE_OBJECT = g_boxed_type_register_static("PyObject",
 						      pyobject_copy,
 						      pyobject_free);
-
+    PyGObject_Type.tp_dealloc = (destructor)pygobject_dealloc;
+    PyGObject_Type.tp_compare = (cmpfunc)pygobject_compare;
+    PyGObject_Type.tp_repr = (reprfunc)pygobject_repr;
+    PyGObject_Type.tp_hash = (hashfunc)pygobject_hash;
+    PyGObject_Type.tp_setattro = (setattrofunc)pygobject_setattro;
+    PyGObject_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
+			       Py_TPFLAGS_HAVE_GC);
+    PyGObject_Type.tp_traverse = (traverseproc)pygobject_traverse;
+    PyGObject_Type.tp_clear = (inquiry)pygobject_clear;
+    PyGObject_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
+    PyGObject_Type.tp_methods = pygobject_methods;
+    PyGObject_Type.tp_getset = pygobject_getsets;
+    PyGObject_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
+    PyGObject_Type.tp_init = (initproc)pygobject_init;
+    PyGObject_Type.tp_free = (freefunc)pygobject_free;
     PyGObject_Type.tp_alloc = PyType_GenericAlloc;
     PyGObject_Type.tp_new = PyType_GenericNew;
     pygobject_register_class(d, "GObject", G_TYPE_OBJECT,
@@ -2338,12 +2161,23 @@ pygobject_object_register_types(PyObject *d)
 			 pyg_object_descr_doc_get());
     pyg_set_object_has_new_constructor(G_TYPE_OBJECT);
 
-      /* GObject properties descriptor */
+    /* GProps */
+    PyGProps_Type.tp_dealloc = (destructor)PyGProps_dealloc;
+    PyGProps_Type.tp_as_sequence = (PySequenceMethods*)&_PyGProps_as_sequence;
+    PyGProps_Type.tp_getattro = (getattrofunc)PyGProps_getattro;
+    PyGProps_Type.tp_setattro = (setattrofunc)PyGProps_setattro;
+    PyGProps_Type.tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC;
+    PyGProps_Type.tp_doc = "The properties of the GObject accessible as "
+	"Python attributes.";
+    PyGProps_Type.tp_traverse = (traverseproc)pygobject_props_traverse;
+    PyGProps_Type.tp_iter = (getiterfunc)pygobject_props_get_iter;
     if (PyType_Ready(&PyGProps_Type) < 0)
         return;
+
+    /* GPropsDescr */
+    PyGPropsDescr_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGPropsDescr_Type.tp_descr_get = pyg_props_descr_descr_get;
     if (PyType_Ready(&PyGPropsDescr_Type) < 0)
-        return;
-    if (PyType_Ready(&PyGPropsIter_Type) < 0)
         return;
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
@@ -2351,8 +2185,22 @@ pygobject_object_register_types(PyObject *d)
                         o=_PyUnicode_FromString("gobject._gobject"));
     Py_DECREF(o);
 
-    PyType_Ready(&PyGObjectWeakRef_Type);
+    /* GPropsIter */
+    PyGPropsIter_Type.tp_dealloc = (destructor)pyg_props_iter_dealloc;
+    PyGPropsIter_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGPropsIter_Type.tp_doc = "GObject properties iterator";
+    PyGPropsIter_Type.tp_iternext = (iternextfunc)pygobject_props_iter_next;
+    if (PyType_Ready(&PyGPropsIter_Type) < 0)
+        return;
+
+    PyGObjectWeakRef_Type.tp_dealloc = (destructor)pygobject_weak_ref_dealloc;
+    PyGObjectWeakRef_Type.tp_call = (ternaryfunc)pygobject_weak_ref_call;
+    PyGObjectWeakRef_Type.tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC;
+    PyGObjectWeakRef_Type.tp_doc = "A GObject weak reference";
+    PyGObjectWeakRef_Type.tp_traverse = (traverseproc)pygobject_weak_ref_traverse;
+    PyGObjectWeakRef_Type.tp_clear = (inquiry)pygobject_weak_ref_clear;
+    PyGObjectWeakRef_Type.tp_methods = pygobject_weak_ref_methods;
+    if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
+        return;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
-
-
 }
