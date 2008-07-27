@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <glibconfig.h>
+#include <Python.h>
+
+#if PY_VERSION_HEX < 0x03000000
+# define LONGSUFFIX "L"
+#else
+# define LONGSUFFIX ""
+#endif
 
 int main(void)
 {
@@ -15,8 +22,8 @@ int main(void)
   printf("G_MININT = %d\n", G_MININT);
   printf("G_MAXINT = %d\n", G_MAXINT);
   printf("G_MAXUINT = %u\n", G_MAXUINT);
-  printf("G_MINLONG = %ldL\n", G_MINLONG);
-  printf("G_MAXLONG = %ldL\n", G_MAXLONG);
-  printf("G_MAXULONG = %luL\n", G_MAXULONG);
+  printf("G_MINLONG = %ld%s\n", G_MINLONG, LONGSUFFIX);
+  printf("G_MAXLONG = %ld%s\n", G_MAXLONG, LONGSUFFIX);
+  printf("G_MAXULONG = %lu%s\n", G_MAXULONG, LONGSUFFIX);
   return 0;
 }

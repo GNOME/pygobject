@@ -19,7 +19,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import _gobject
+import sys
+
+import gobject._gobject
+_gobject = sys.modules['gobject._gobject']
+
 from gobject.constants import \
      TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
      TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \

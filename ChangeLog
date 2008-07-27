@@ -1,5 +1,19 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
+	* glib/option.py:
+	Remove tabs. Use sys.exc_info()[1] to fetch the exception value
+
+	* gobject/__init__.py:
+	* gobject/propertyhelper.py:
+	Import gobject._gobject instead of just gobject.
+
+	* gobject/Makefile.am:
+	* gobject/constants.py.in:
+	* gobject/generate-constants.c (main):
+	Don't add long suffix if python >= 3.0
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pyglib-python-compat.h:
 	* gobject/gobjectmodule.c (pyg_object_new),
 	(pyg__install_metaclass):

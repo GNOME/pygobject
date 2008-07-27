@@ -52,10 +52,10 @@ from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      OPTION_ERROR_FAILED, OPTION_REMAINING, OPTION_ERROR
 
 from gobject.constants import *
-from _gobject import *
+from gobject._gobject import *
 _PyGObject_API = _gobject._PyGObject_API
 
-from propertyhelper import property
+from gobject.propertyhelper import property
 
 sys.modules['gobject.option'] = option
 

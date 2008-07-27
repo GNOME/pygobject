@@ -34,7 +34,8 @@ import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
                      BadOptionError, OptionConflictError
 
-import _glib
+import glib
+_glib = sys.modules['glib._glib']
 
 __all__ = [
     "OptParseError",
@@ -182,12 +183,13 @@ class OptionGroup(optparse.OptionGroup):
 
             try:
                 opt.process(option_name, option_value, self.values, parser)
-            except OptionValueError, error:
-            	gerror = _glib.GError(str(error))
-            	gerror.domain = _glib.OPTION_ERROR
-            	gerror.code = _glib.OPTION_ERROR_BAD_VALUE
-            	gerror.message = str(error)
-            	raise gerror
+            except OptionValueError:
+                error = sys.exc_info()[1]
+                gerror = _glib.GError(str(error))
+                gerror.domain = _glib.OPTION_ERROR
+                gerror.code = _glib.OPTION_ERROR_BAD_VALUE
+                gerror.message = str(error)
+                raise gerror
 
         group = _glib.OptionGroup(self.name, self.description,
                                     self.help_description, callback)
@@ -325,13 +327,14 @@ class OptionParser(optparse.OptionParser):
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
-        except _glib.GError, error:
+        except _glib.GError:
+            error = sys.exc_info()[1]
             if error.domain != _glib.OPTION_ERROR:
-            	raise
+                raise
             if error.code == _glib.OPTION_ERROR_BAD_VALUE:
                 raise OptionValueError(error.message)
             elif error.code == _glib.OPTION_ERROR_UNKNOWN_OPTION:
-    	        raise BadOptionError(error.message)
+                raise BadOptionError(error.message)
             elif error.code == _glib.OPTION_ERROR_FAILED:
                 raise OptParseError(error.message)
             else:
@@ -342,6 +345,6 @@ class OptionParser(optparse.OptionParser):
                 options.ensure_value(key, value)
 
         args = args[2:-len(old_args)]
-	return options, args
+        return options, args
 
 make_option = Option

@@ -26,7 +26,8 @@ constants.py: generate-constants$(EXEEXT) constants.py.in
 	$(top_builddir)/gobject/generate-constants$(EXEEXT) >> constants.py
 	chmod 444 constants.py
 
-generate_constants_CFLAGS = $(GLIB_CFLAGS)
+generate_constants_CFLAGS = $(GLIB_CFLAGS) $(PYTHON_INCLUDES)
+
 noinst_PROGRAMS = generate-constants
 CLEANFILES = constants.py
 EXTRA_DIST = constants.py.in
