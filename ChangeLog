@@ -1,6 +1,13 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c (PYGLIB_MODULE_START):
+	* gobject/pygobject-private.h:
+	Use glib macros to define the module, update export regexp.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/Makefile.am:
 	* gobject/gobjectmodule.c (init_gobject):
 	* gobject/pygboxed.c (pygobject_boxed_register_types):
 	* gobject/pygboxed.h:

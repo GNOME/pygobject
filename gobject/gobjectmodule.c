@@ -1949,7 +1949,7 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
-static PyMethodDef pygobject_functions[] = {
+static PyMethodDef _gobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
     { "type_parent", pyg_type_parent, METH_VARARGS },
@@ -2552,19 +2552,16 @@ pygobject_register_warnings(PyObject *d)
 }
 
 
-DL_EXPORT(void)
-init_gobject(void)
+PYGLIB_MODULE_START(_gobject, "gobject._gobject")
 {
-    PyObject *m, *d;
-    
-    m = Py_InitModule("gobject._gobject", pygobject_functions);
-    d = PyModule_GetDict(m);
+    PyObject *d;
 
     g_type_init();
     pyglib_init();
 
+    d = PyModule_GetDict(module);
     pygobject_register_api(d);
-    pygobject_register_constants(m);
+    pygobject_register_constants(module);
     pygobject_register_features(d);
     pygobject_register_version_tuples(d);
     pygobject_register_warnings(d);
@@ -2581,3 +2578,4 @@ init_gobject(void)
     _pyg_signal_accumulator_true_handled_func = \
         PyDict_GetItemString(d, "signal_accumulator_true_handled");
 }
+PYGLIB_MODULE_END

@@ -8,6 +8,8 @@
 #define _INSIDE_PYGOBJECT_
 #include "pygobject.h"
 
+#include "pyglib-python-compat.h"
+
 /* Python 2.3 does not define Py_CLEAR */
 #ifndef Py_CLEAR
 #define Py_CLEAR(op)                \
