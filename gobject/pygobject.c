@@ -260,7 +260,7 @@ build_parameter_list(GObjectClass *class)
 	name = g_strdup(g_param_spec_get_name(props[i]));
 	/* hyphens cannot belong in identifiers */
 	g_strdelimit(name, "-", '_');
-	prop_str = PyString_FromString(name);
+	prop_str = _PyUnicode_FromString(name);
 	
 	PyList_SetItem(props_list, i, prop_str);
     }
@@ -280,7 +280,7 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     GValue value = { 0, };
     PyObject *ret;
 
-    attr_name = PyString_AsString(attr);
+    attr_name = _PyUnicode_AsString(attr);
     if (!attr_name) {
         PyErr_Clear();
         return PyObject_GenericGetAttr((PyObject *)self, attr);
@@ -368,7 +368,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 	return -1;
     }
 
-    attr_name = PyString_AsString(attr);
+    attr_name = _PyUnicode_AsString(attr);
     if (!attr_name) {
         PyErr_Clear();
         return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
@@ -611,7 +611,7 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
      */
     s = strrchr(type->tp_name, '.');
     if (s != NULL) {
-	mod_name = PyString_FromStringAndSize(type->tp_name, (int)(s - type->tp_name));
+	mod_name = _PyUnicode_FromStringAndSize(type->tp_name, (int)(s - type->tp_name));
 	PyDict_SetItemString(type->tp_dict, "__module__", mod_name);
 	Py_DECREF(mod_name);
     }
@@ -1021,7 +1021,7 @@ pygobject_repr(PyGObject *self)
 	       (long)self,
 	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
                (long)self->obj);
-    return PyString_FromString(buf);
+    return _PyUnicode_FromString(buf);
 }
 
 
@@ -1113,7 +1113,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	params = g_new0(GParameter, PyDict_Size(kwargs));
 	while (PyDict_Next (kwargs, &pos, &key, &value)) {
 	    GParamSpec *pspec;
-	    gchar *key_str = PyString_AsString(key);
+	    gchar *key_str = _PyUnicode_AsString(key);
 
 	    pspec = g_object_class_find_property (class, key_str);
 	    if (!pspec) {
@@ -1219,13 +1219,13 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
         GValue value = { 0 };
         PyObject *item;
 
-        if (!PyString_Check(py_property)) {
+        if (!_PyUnicode_Check(py_property)) {
             PyErr_SetString(PyExc_TypeError,
                             "Expected string argument for property.");
             return NULL;
         }
 
-        property_name = PyString_AsString(py_property);
+        property_name = _PyUnicode_AsString(py_property);
 
         pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
 					 property_name);
@@ -1298,7 +1298,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     pos = 0;
 
     while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
-    gchar *key_str = PyString_AsString (key);
+    gchar *key_str = _PyUnicode_AsString (key);
     GParamSpec *pspec;
     GValue gvalue ={ 0, };
 
@@ -1443,7 +1443,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1492,7 +1492,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1541,7 +1541,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1590,7 +1590,7 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1689,7 +1689,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1765,7 +1765,7 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)self)),
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     signal);
 	return NULL;
     }
@@ -1913,7 +1913,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
 	return NULL;
     }
     
@@ -1945,7 +1945,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
 	return NULL;
     }
     
@@ -1977,7 +1977,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PyString_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
 	return NULL;
     }
     
@@ -2348,7 +2348,7 @@ pygobject_object_register_types(PyObject *d)
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
-                        o=PyString_FromString("gobject._gobject"));
+                        o=_PyUnicode_FromString("gobject._gobject"));
     Py_DECREF(o);
 
     PyType_Ready(&PyGObjectWeakRef_Type);

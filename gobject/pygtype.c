@@ -58,7 +58,7 @@ pyg_type_wrapper_repr(PyGTypeWrapper *self)
 
     g_snprintf(buf, sizeof(buf), "<GType %s (%lu)>",
 	       name?name:"invalid", (unsigned long int) self->type);
-    return PyString_FromString(buf);
+    return _PyUnicode_FromString(buf);
 }
 
 static void
@@ -84,7 +84,7 @@ static PyObject *
 _wrap_g_type_wrapper__get_name(PyGTypeWrapper *self, void *closure)
 {
    const char *name = g_type_name(self->type);
-   return PyString_FromString(g_strdup(name ? name : "invalid"));
+   return _PyUnicode_FromString(g_strdup(name ? name : "invalid"));
 }
 
 static PyObject *
@@ -368,7 +368,7 @@ pyg_type_from_object(PyObject *obj)
 	    return G_TYPE_LONG;
 	else if (tp == &PyFloat_Type)
 	    return G_TYPE_DOUBLE;
-	else if (tp == &PyString_Type)
+	else if (tp == &_PyUnicode_Type)
 	    return G_TYPE_STRING;
 	else if (tp == &PyBaseObject_Type)
 	    return PY_TYPE_OBJECT;
@@ -379,8 +379,8 @@ pyg_type_from_object(PyObject *obj)
     }
 
     /* handle strings */
-    if (PyString_Check(obj)) {
-	gchar *name = PyString_AsString(obj);
+    if (_PyUnicode_Check(obj)) {
+	gchar *name = _PyUnicode_AsString(obj);
 	
 	type = _pyg_type_from_name(name);
 	if (type != 0) {
@@ -439,9 +439,9 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
 		      g_type_name(enum_type),
 		      g_type_name(((PyGEnum *) obj)->gtype));
 	}
-    } else if (PyString_Check(obj)) {
+    } else if (_PyUnicode_Check(obj)) {
 	GEnumValue *info;
-	char *str = PyString_AsString(obj);
+	char *str = _PyUnicode_AsString(obj);
 	
 	if (enum_type != G_TYPE_NONE)
 	    eclass = G_ENUM_CLASS(g_type_class_ref(enum_type));
@@ -499,9 +499,9 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
     } else if (PyLong_Check(obj)) {
         *val = PyLong_AsLongLong(obj);
         res = 0;
-    } else if (PyString_Check(obj)) {
+    } else if (_PyUnicode_Check(obj)) {
 	GFlagsValue *info;
-	char *str = PyString_AsString(obj);
+	char *str = _PyUnicode_AsString(obj);
 
 	if (flag_type != G_TYPE_NONE)
 	    fclass = G_FLAGS_CLASS(g_type_class_ref(flag_type));
@@ -537,7 +537,7 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 
 	for (i = 0; i < len; i++) {
 	    PyObject *item = PyTuple_GetItem(obj, i);
-	    char *str = PyString_AsString(item);
+	    char *str = _PyUnicode_AsString(item);
 	    GFlagsValue *info = g_flags_get_value_by_name(fclass, str);
 
 	    if (!info)
@@ -708,7 +708,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_CHAR:
 	if ((tmp = PyObject_Str(obj)))
-	    g_value_set_char(value, PyString_AsString(tmp)[0]);
+	    g_value_set_char(value, _PyUnicode_AsString(tmp)[0]);
 	else {
 	    PyErr_Clear();
 	    return -1;
@@ -717,7 +717,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_UCHAR:
 	if ((tmp = PyObject_Str(obj)))
-	    g_value_set_char(value, PyString_AsString(tmp)[0]);
+	    g_value_set_char(value, _PyUnicode_AsString(tmp)[0]);
 	else {
 	    PyErr_Clear();
 	    return -1;
@@ -839,7 +839,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	if (obj == Py_None)
 	    g_value_set_string(value, NULL);
 	else if ((tmp = PyObject_Str(obj))) {
-	    g_value_set_string(value, PyString_AsString(tmp));
+	    g_value_set_string(value, _PyUnicode_AsString(tmp));
 	    Py_DECREF(tmp);
 	} else {
 	    PyErr_Clear();
@@ -884,12 +884,12 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
         else if (PySequence_Check(obj) &&
 		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
 	    return pyg_value_array_from_pyobject(value, obj, NULL);
-	else if (PyString_Check(obj) &&
+	else if (_PyUnicode_Check(obj) &&
                  G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
             GString *string;
             char *buffer;
             Py_ssize_t len;
-            if (PyString_AsStringAndSize(obj, &buffer, &len))
+            if (_PyUnicode_AsStringAndSize(obj, &buffer, &len))
                 return -1;
             string = g_string_new_len(buffer, len);
 	    g_value_set_boxed(value, string);
@@ -953,11 +953,11 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    break;
     case G_TYPE_CHAR: {
 	gint8 val = g_value_get_char(value);
-	return PyString_FromStringAndSize((char *)&val, 1);
+	return _PyUnicode_FromStringAndSize((char *)&val, 1);
     }
     case G_TYPE_UCHAR: {
 	guint8 val = g_value_get_uchar(value);
-	return PyString_FromStringAndSize((char *)&val, 1);
+	return _PyUnicode_FromStringAndSize((char *)&val, 1);
     }
     case G_TYPE_BOOLEAN: {
 	return PyBool_FromLong(g_value_get_boolean(value));
@@ -1018,7 +1018,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    const gchar *str = g_value_get_string(value);
 
 	    if (str)
-		return PyString_FromString(str);
+		return _PyUnicode_FromString(str);
 	    Py_INCREF(Py_None);
 	    return Py_None;
 	}
@@ -1048,7 +1048,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    return ret;
 	} else if (G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
 	    GString *string = (GString *) g_value_get_boxed(value);
-	    PyObject *ret = PyString_FromStringAndSize(string->str, string->len);
+	    PyObject *ret = _PyUnicode_FromStringAndSize(string->str, string->len);
 	    return ret;
 	}	    
 	bm = pyg_type_lookup(G_VALUE_TYPE(value));
@@ -1522,7 +1522,7 @@ object_doc_descr_get(PyObject *self, PyObject *obj, PyObject *type)
         g_array_free(parents, TRUE);
     }
 
-    pystring = PyString_FromStringAndSize(string->str, string->len);
+    pystring = _PyUnicode_FromStringAndSize(string->str, string->len);
     g_string_free(string, TRUE);
     return pystring;
 }
@@ -1756,7 +1756,7 @@ _pyg_strv_from_gvalue(const GValue *value)
     }
     py_argv = PyList_New(argc);
     for (i = 0; i < argc; ++i)
-	PyList_SET_ITEM(py_argv, i, PyString_FromString(argv[i]));
+	PyList_SET_ITEM(py_argv, i, _PyUnicode_FromString(argv[i]));
     return py_argv;
 }
 
@@ -1771,11 +1771,11 @@ _pyg_strv_to_gvalue(GValue *value, PyObject *obj)
 
     argc = PySequence_Length(obj);
     for (i = 0; i < argc; ++i)
-	if (!PyString_Check(PySequence_Fast_GET_ITEM(obj, i)))
+	if (!_PyUnicode_Check(PySequence_Fast_GET_ITEM(obj, i)))
 	    return -1;
     argv = g_new(gchar *, argc + 1);
     for (i = 0; i < argc; ++i)
-	argv[i] = g_strdup(PyString_AsString(PySequence_Fast_GET_ITEM(obj, i)));
+	argv[i] = g_strdup(_PyUnicode_AsString(PySequence_Fast_GET_ITEM(obj, i)));
     argv[i] = NULL;
     g_value_take_boxed(value, argv);
     return 0;

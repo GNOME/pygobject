@@ -50,7 +50,7 @@ pyg_param_spec_repr(PyGParamSpec *self)
     g_snprintf(buf, sizeof(buf), "<%s '%s'>",
 	       G_PARAM_SPEC_TYPE_NAME(self->pspec),
 	       g_param_spec_get_name(self->pspec));
-    return PyString_FromString(buf);
+    return _PyUnicode_FromString(buf);
 }
 
 static void
@@ -131,7 +131,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "maximum", "minimum", "name", "nick",
 				 "owner_type", "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyString_FromFormat(
+	    return _PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_CHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
 	    return PyInt_FromLong(G_PARAM_SPEC_CHAR(pspec)->minimum);
@@ -146,7 +146,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "name", "nick", "owner_type",
 				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyString_FromFormat(
+	    return _PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_UCHAR(pspec)->default_value);
 	} else if (!strcmp(attr, "minimum")) {
 	    return PyInt_FromLong(G_PARAM_SPEC_UCHAR(pspec)->minimum);
@@ -249,7 +249,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 				 "flags", "name", "nick", "owner_type",
 				 "value_type");
 	} else if (!strcmp(attr, "default_value")) {
-	    return PyString_FromFormat(
+	    return _PyUnicode_FromFormat(
 		"%c", G_PARAM_SPEC_UNICHAR(pspec)->default_value);
 	}
     } else if (G_IS_PARAM_SPEC_ENUM(pspec)) {

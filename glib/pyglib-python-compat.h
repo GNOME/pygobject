@@ -38,6 +38,7 @@ typedef int Py_ssize_t;
 #define _PyUnicode_AS_STRING PyString_AS_STRING
 #define _PyUnicode_GET_SIZE PyString_GET_SIZE
 #define _PyUnicode_Resize _PyString_Resize
+#define _PyUnicode_Type PyString_Type
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
 #define _PyLong_AsLong  PyInt_AsLong
@@ -91,6 +92,7 @@ PyTypeObject symbol = {                                 \
 #define _PyUnicode_AS_STRING _PyUnicode_AsString
 #define _PyUnicode_GET_SIZE PyUnicode_GET_SIZE
 #define _PyUnicode_Resize PyUnicode_Resize
+#define _PyUnicode_Type PyUnicode_Type
 #define _PyLong_Check PyLong_Check
 #define _PyLong_FromLong PyLong_FromLong
 #define _PyLong_AsLong PyLong_AsLong

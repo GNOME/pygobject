@@ -72,7 +72,7 @@ pyg_enum_repr(PyGEnum *self)
 
   g_type_class_unref(enum_class);
 
-  return PyString_FromString(tmp);
+  return _PyUnicode_FromString(tmp);
 }
 
 static PyObject *
@@ -212,7 +212,7 @@ pyg_enum_add (PyObject *   module,
     if (module)
 	PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
 			     "__module__",
-			     PyString_FromString(PyModule_GetName(module)));
+			     _PyUnicode_FromString(PyModule_GetName(module)));
     
     g_type_set_qdata(gtype, pygenum_class_key, stub);
 
@@ -284,7 +284,7 @@ pyg_enum_get_value_name(PyGEnum *self, void *closure)
   
   enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
 
-  retval = PyString_FromString(enum_value->value_name);
+  retval = _PyUnicode_FromString(enum_value->value_name);
   g_type_class_unref(enum_class);
 
   return retval;
@@ -302,7 +302,7 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   
   enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
 
-  retval = PyString_FromString(enum_value->value_nick);
+  retval = _PyUnicode_FromString(enum_value->value_nick);
   g_type_class_unref(enum_class);
 
   return retval;

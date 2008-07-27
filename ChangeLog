@@ -1,5 +1,43 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pyglib-python-compat.h:
+	Add _PyUnicode_Type macro
+
+	* gobject/gobjectmodule.c (pyg_type_name), (pyg_type_from_name),
+	(_pyg_signal_accumulator), (add_signals), (add_properties),
+	(get_type_name_for_class), (pyg_signal_list_names),
+	(pyg_signal_name), (pyg_signal_query), (pyg_object_new),
+	(pyg_add_emission_hook), (pyg_remove_emission_hook):
+	* gobject/pygboxed.c (pyg_boxed_repr):
+	* gobject/pygenum.c (pyg_enum_repr), (pyg_enum_add),
+	(pyg_enum_get_value_name), (pyg_enum_get_value_nick):
+	* gobject/pygflags.c (pyg_flags_repr), (pyg_flags_add),
+	(pyg_flags_get_first_value_name), (pyg_flags_get_first_value_nick),
+	(pyg_flags_get_value_names), (pyg_flags_get_value_nicks):
+	* gobject/pygobject.c (build_parameter_list), (PyGProps_getattro),
+	(PyGProps_setattro), (pygobject_register_class), (pygobject_repr),
+	(pygobject_init), (pygobject_get_properties),
+	(pygobject_set_properties), (pygobject_connect),
+	(pygobject_connect_after), (pygobject_connect_object),
+	(pygobject_connect_object_after), (pygobject_emit),
+	(pygobject_stop_emission), (pygobject_disconnect_by_func),
+	(pygobject_handler_block_by_func),
+	(pygobject_handler_unblock_by_func),
+	(pygobject_object_register_types):
+	* gobject/pygparamspec.c (pyg_param_spec_repr),
+	(pyg_param_spec_getattr):
+	* gobject/pygpointer.c (pyg_pointer_repr):
+	* gobject/pygtype.c (pyg_type_wrapper_repr),
+	(_wrap_g_type_wrapper__get_name), (pyg_type_from_object),
+	(pyg_enum_get_value), (pyg_flags_get_value),
+	(pyg_value_from_pyobject), (pyg_value_as_pyobject),
+	(object_doc_descr_get), (_pyg_strv_from_gvalue),
+	(_pyg_strv_to_gvalue):
+
+	Use _PyUnicode_* macros in the gobject module
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
 	* gobject/Makefile.am:
 	* gobject/gobjectmodule.c (PYGLIB_MODULE_START):
 	* gobject/pygobject-private.h:

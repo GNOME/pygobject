@@ -102,7 +102,7 @@ pyg_flags_repr(PyGFlags *self)
                                  g_type_name(self->gtype));
     g_free(tmp);
     
-    pyretval = PyString_FromString(retval);
+    pyretval = _PyUnicode_FromString(retval);
     g_free(retval);
   
     return pyretval;
@@ -235,7 +235,7 @@ pyg_flags_add (PyObject *   module,
     if (module) {
         PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
                              "__module__",
-                             PyString_FromString(PyModule_GetName(module)));
+                             _PyUnicode_FromString(PyModule_GetName(module)));
     
           /* Add it to the module name space */
         PyModule_AddObject(module, (char*)typename, stub);
@@ -338,7 +338,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
   g_assert(G_IS_FLAGS_CLASS(flags_class));
   flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
   if (flags_value)
-      retval = PyString_FromString(flags_value->value_name);
+      retval = _PyUnicode_FromString(flags_value->value_name);
   else {
       retval = Py_None;
       Py_INCREF(Py_None);
@@ -360,7 +360,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
 
   flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
   if (flags_value)
-      retval = PyString_FromString(flags_value->value_nick);
+      retval = _PyUnicode_FromString(flags_value->value_nick);
   else {
       retval = Py_None;
       Py_INCREF(Py_None);
@@ -383,7 +383,7 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
       if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
-	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_name));
+	  PyList_Append(retval, _PyUnicode_FromString(flags_class->values[i].value_name));
 
   g_type_class_unref(flags_class);
 
@@ -403,7 +403,7 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
       if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
-	  PyList_Append(retval, PyString_FromString(flags_class->values[i].value_nick));
+	  PyList_Append(retval, _PyUnicode_FromString(flags_class->values[i].value_nick));
 
   g_type_class_unref(flags_class);
 
