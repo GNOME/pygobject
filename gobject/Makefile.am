@@ -45,8 +45,11 @@ _gobject_la_LIBADD = \
 _gobject_la_SOURCES =           \
         gobjectmodule.c         \
         pygboxed.c              \
+        pygboxed.h              \
         pygenum.c               \
+        pygenum.h               \
         pygflags.c              \
+        pygflags.h              \
         pyginterface.c          \
         pyginterface.h          \
         pygobject.c             \
@@ -55,6 +58,7 @@ _gobject_la_SOURCES =           \
         pygparamspec.c          \
         pygparamspec.h          \
         pygpointer.c            \
+        pygpointer.h            \
         pygtype.c               \
         pygtype.h
 _gobject_la_DEPENDENCIES = constants.py

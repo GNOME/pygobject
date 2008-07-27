@@ -26,6 +26,10 @@
 
 #include <pyglib.h>
 #include "pygobject-private.h"
+#include "pygboxed.h"
+
+GQuark pygboxed_type_key;
+GQuark pygboxed_marshal_key;
 
 static void
 pyg_boxed_dealloc(PyGBoxed *self)
@@ -243,3 +247,12 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     return (PyObject *)self;
 }
 
+void
+pygobject_boxed_register_types(PyObject *d)
+{
+    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
+    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
+
+    PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
+
+}

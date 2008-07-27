@@ -28,6 +28,8 @@
 #include <pyglib.h>
 #include "pygobject-private.h"
 
+GQuark pygenum_class_key;
+
 static PyObject *
 pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
@@ -360,3 +362,12 @@ PyTypeObject PyGEnum_Type = {
 	pyg_enum_new,				  /* tp_new */
 };
 
+void
+pygobject_enum_register_types(PyObject *d)
+{
+    pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
+
+    PyGEnum_Type.tp_base = &PyInt_Type;
+    PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
+
+}

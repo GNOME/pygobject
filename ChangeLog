@@ -1,6 +1,21 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
 	* gobject/Makefile.am:
+	* gobject/gobjectmodule.c (init_gobject):
+	* gobject/pygboxed.c (pygobject_boxed_register_types):
+	* gobject/pygboxed.h:
+	* gobject/pygenum.c (pygobject_enum_register_types):
+	* gobject/pygenum.h:
+	* gobject/pygflags.c (pygobject_flags_register_types):
+	* gobject/pygflags.h:
+	* gobject/pygpointer.c (pygobject_pointer_register_types):
+	* gobject/pygpointer.h:
+	Split out quark and type registration to the respective
+	implementation source files, add headers.
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
+	* gobject/Makefile.am:
 	* gobject/gobjectmodule.c (pygobject_register_api),
 	(pygobject_register_constants), (pygobject_register_features),
 	(pygobject_register_version_tuples), (pygobject_register_warnings),

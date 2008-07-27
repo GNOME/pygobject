@@ -27,6 +27,9 @@
 
 #include <pyglib.h>
 #include "pygobject-private.h"
+#include "pygflags.h"
+
+GQuark pygflags_class_key;
 
 #define GET_INT_VALUE(x) (((PyIntObject*)x)->ob_ival)
 
@@ -497,3 +500,12 @@ PyTypeObject PyGFlags_Type = {
 	0,					  /* tp_alloc */
 	pyg_flags_new,				  /* tp_new */
 };
+
+void
+pygobject_flags_register_types(PyObject *d)
+{
+    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
+
+    PyGFlags_Type.tp_base = &PyInt_Type;
+    PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
+}

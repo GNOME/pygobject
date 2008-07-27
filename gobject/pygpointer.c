@@ -26,6 +26,9 @@
 
 #include <pyglib.h>
 #include "pygobject-private.h"
+#include "pygpointer.h"
+
+GQuark pygpointer_class_key;
 
 static void
 pyg_pointer_dealloc(PyGPointer *self)
@@ -208,4 +211,13 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     self->gtype = pointer_type;
 
     return (PyObject *)self;
+}
+
+void
+pygobject_pointer_register_types(PyObject *d)
+{
+    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
+
+    PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
+
 }

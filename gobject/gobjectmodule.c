@@ -28,8 +28,12 @@
 #include <pyglib.h>
 #include <pythread.h>
 #include "pygobject-private.h"
+#include "pygboxed.h"
+#include "pygenum.h"
+#include "pygflags.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
+#include "pygpointer.h"
 #include "pygtype.h"
 
 #ifdef HAVE_FFI_H
@@ -42,12 +46,6 @@ static GSignalCMarshaller marshal_generic = 0;
 static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
-
-GQuark pygboxed_type_key;
-GQuark pygboxed_marshal_key;
-GQuark pygenum_class_key;
-GQuark pygflags_class_key;
-GQuark pygpointer_class_key;
 
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
@@ -2553,6 +2551,7 @@ pygobject_register_warnings(PyObject *d)
     add_warning_redirection("GThread", warning);
 }
 
+
 DL_EXPORT(void)
 init_gobject(void)
 {
@@ -2564,12 +2563,6 @@ init_gobject(void)
     g_type_init();
     pyglib_init();
 
-    pygboxed_type_key        = g_quark_from_static_string("PyGBoxed::class");
-    pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
-    pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
-    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
-    pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
-
     pygobject_register_api(d);
     pygobject_register_constants(m);
     pygobject_register_features(d);
@@ -2579,14 +2572,11 @@ init_gobject(void)
     pygobject_object_register_types(d);
     pygobject_interface_register_types(d);
     pygobject_paramspec_register_types(d);
+    pygobject_boxed_register_types(d);
+    pygobject_pointer_register_types(d);
+    pygobject_enum_register_types(d);
+    pygobject_flags_register_types(d);
     
-    PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
-    PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
-    PyGEnum_Type.tp_base = &PyInt_Type;
-    PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
-    PyGFlags_Type.tp_base = &PyInt_Type;
-    PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
-
       /* signal registration recognizes this special accumulator 'constant' */
     _pyg_signal_accumulator_true_handled_func = \
         PyDict_GetItemString(d, "signal_accumulator_true_handled");
