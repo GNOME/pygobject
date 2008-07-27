@@ -1045,7 +1045,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         wrapper = pygobject_new_full(object, FALSE, g_class);
         args = PyTuple_New(0);
         kwargs = PyDict_New();
-        if (wrapper->ob_type->tp_init(wrapper, args, kwargs))
+        if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
             PyErr_Print();
         Py_DECREF(args);
         Py_DECREF(kwargs);
@@ -2306,7 +2306,6 @@ pyg_set_object_has_new_constructor(GType type)
     g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
 }
 
-#define GET_INT(x) (((_PyLongObject*)x)->ob_ival)
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -2314,12 +2313,12 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     gboolean t;
 
     switch (op) {
-    case Py_EQ: t = GET_INT(v) == GET_INT(w); break;
-    case Py_NE: t = GET_INT(v) != GET_INT(w); break;
-    case Py_LE: t = GET_INT(v) <= GET_INT(w); break;
-    case Py_GE: t = GET_INT(v) >= GET_INT(w); break;
-    case Py_LT: t = GET_INT(v) <  GET_INT(w); break;
-    case Py_GT: t = GET_INT(v) >  GET_INT(w); break;
+    case Py_EQ: t = _PyLong_AS_LONG(v) == _PyLong_AS_LONG(w); break;
+    case Py_NE: t = _PyLong_AS_LONG(v) != _PyLong_AS_LONG(w); break;
+    case Py_LE: t = _PyLong_AS_LONG(v) <= _PyLong_AS_LONG(w); break;
+    case Py_GE: t = _PyLong_AS_LONG(v) >= _PyLong_AS_LONG(w); break;
+    case Py_LT: t = _PyLong_AS_LONG(v) <  _PyLong_AS_LONG(w); break;
+    case Py_GT: t = _PyLong_AS_LONG(v) >  _PyLong_AS_LONG(w); break;
     default: g_assert_not_reached();
     }
 
@@ -2327,7 +2326,6 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     Py_INCREF(result);
     return result;
 }
-#undef GET_INT
 
 static void
 _log_func(const gchar *log_domain,

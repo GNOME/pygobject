@@ -33,8 +33,6 @@ GQuark pygflags_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
 
-#define GET_INT_VALUE(x) (((_PyLongObject*)x)->ob_ival)
-
 static PyObject *
 pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
 {
@@ -94,13 +92,13 @@ pyg_flags_repr(PyGFlags *self)
     char *tmp, *retval;
     PyObject *pyretval;
   
-    tmp = generate_repr(self->gtype, self->parent.ob_ival);
+    tmp = generate_repr(self->gtype, _PyLong_AS_LONG(self));
 
     if (tmp)
         retval = g_strdup_printf("<flags %s of type %s>", tmp,
                                  g_type_name(self->gtype));
     else
-        retval = g_strdup_printf("<flags %ld of type %s>", self->parent.ob_ival,
+        retval = g_strdup_printf("<flags %ld of type %s>", _PyLong_AS_LONG(self),
                                  g_type_name(self->gtype));
     g_free(tmp);
     
@@ -192,7 +190,11 @@ pyg_flags_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
+#if PY_VERSION_HEX >= 0x03000000
+#   warning "FIXME: figure out how to subclass long"    
+#else
 	((_PyLongObject*)retval)->ob_ival = value;
+#endif    
 	((PyGFlags*)retval)->gtype = gtype;
     } else {
 	Py_INCREF(retval);
@@ -257,7 +259,11 @@ pyg_flags_add (PyObject *   module,
       PyObject *item, *intval;
       
       item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
+#if PY_VERSION_HEX >= 0x03000000
+#   warning "FIXME: figure out how to subclass long"    
+#else
       ((_PyLongObject*)item)->ob_ival = eclass->values[i].value;
+#endif    
       ((PyGFlags*)item)->gtype = gtype;
             
       intval = _PyLong_FromLong(eclass->values[i].value);
@@ -294,7 +300,7 @@ pyg_flags_and(PyGFlags *a, PyGFlags *b)
 						       (PyObject*)b);
 	
 	return pyg_flags_from_gtype(a->gtype,
-				    GET_INT_VALUE(a) & GET_INT_VALUE(b));
+				    _PyLong_AS_LONG(a) & _PyLong_AS_LONG(b));
 }
 
 static PyObject *
@@ -304,7 +310,7 @@ pyg_flags_or(PyGFlags *a, PyGFlags *b)
 		return _PyLong_Type.tp_as_number->nb_or((PyObject*)a,
 						      (PyObject*)b);
 
-	return pyg_flags_from_gtype(a->gtype, GET_INT_VALUE(a) | GET_INT_VALUE(b));
+	return pyg_flags_from_gtype(a->gtype, _PyLong_AS_LONG(a) | _PyLong_AS_LONG(b));
 }
 
 static PyObject *
@@ -315,7 +321,7 @@ pyg_flags_xor(PyGFlags *a, PyGFlags *b)
 						       (PyObject*)b);
 
 	return pyg_flags_from_gtype(a->gtype,
-				    GET_INT_VALUE(a) ^ GET_INT_VALUE(b));
+				    _PyLong_AS_LONG(a) ^ _PyLong_AS_LONG(b));
 
 }
 
@@ -338,7 +344,7 @@ pyg_flags_get_first_value_name(PyGFlags *self, void *closure)
   
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
-  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  flags_value = g_flags_get_first_value(flags_class, _PyLong_AS_LONG(self));
   if (flags_value)
       retval = _PyUnicode_FromString(flags_value->value_name);
   else {
@@ -360,7 +366,7 @@ pyg_flags_get_first_value_nick(PyGFlags *self, void *closure)
   flags_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_FLAGS_CLASS(flags_class));
 
-  flags_value = g_flags_get_first_value(flags_class, self->parent.ob_ival);
+  flags_value = g_flags_get_first_value(flags_class, _PyLong_AS_LONG(self));
   if (flags_value)
       retval = _PyUnicode_FromString(flags_value->value_nick);
   else {
@@ -384,7 +390,7 @@ pyg_flags_get_value_names(PyGFlags *self, void *closure)
   
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+      if ((_PyLong_AS_LONG(self) & flags_class->values[i].value) == flags_class->values[i].value)
 	  PyList_Append(retval, _PyUnicode_FromString(flags_class->values[i].value_name));
 
   g_type_class_unref(flags_class);
@@ -404,7 +410,7 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
   
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      if ((self->parent.ob_ival & flags_class->values[i].value) == flags_class->values[i].value)
+      if ((_PyLong_AS_LONG(self) & flags_class->values[i].value) == flags_class->values[i].value)
 	  PyList_Append(retval, _PyUnicode_FromString(flags_class->values[i].value_nick));
 
   g_type_class_unref(flags_class);

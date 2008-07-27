@@ -519,7 +519,6 @@ pyglib_set_prgname(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-
 static PyMethodDef _glib_functions[] = {
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS },
@@ -623,7 +622,6 @@ pyglib_register_version_tuples(PyObject *d)
 static void
 pyglib_register_constants(PyObject *m)
 {
-
     PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
 			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
     PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD",

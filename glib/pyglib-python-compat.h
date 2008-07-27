@@ -28,7 +28,7 @@ typedef int Py_ssize_t;
 
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
-
+#define RO READONLY
 #define _PyUnicode_Check PyString_Check 
 #define _PyUnicode_AsString PyString_AsString
 #define _PyUnicode_AsStringAndSize PyString_AsStringAndSize
@@ -42,9 +42,10 @@ typedef int Py_ssize_t;
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
 #define _PyLong_AsLong  PyInt_AsLong
-#define RO READONLY
 #define _PyLongObject PyIntObject
 #define _PyLong_Type PyInt_Type
+#define _PyLong_AS_LONG PyInt_AS_LONG
+#define Py_TYPE(ob) (ob->ob_type)
 #else
 #undef PYGLIB_MODULE_START
 #undef PYGLIB_MODULE_END
@@ -96,6 +97,7 @@ PyTypeObject symbol = {                                 \
 #define _PyLong_Check PyLong_Check
 #define _PyLong_FromLong PyLong_FromLong
 #define _PyLong_AsLong PyLong_AsLong
+#define _PyLong_AS_LONG PyLong_AS_LONG
 #define _PyLongObject PyLongObject
 #define _PyLong_Type PyLong_Type
 #endif

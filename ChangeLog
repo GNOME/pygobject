@@ -1,5 +1,21 @@
 2008-07-27  Johan Dahlin  <johan@gnome.org>
 
+	* glib/pyglib-python-compat.h:
+	Add a Py_TYPE macro for accessing ob_type.
+	* glib/glibmodule.c (pyglib_register_constants):
+	* gobject/gobjectmodule.c (pygobject__g_instance_init),
+	(pyg_integer_richcompare):
+	* gobject/pygenum.c (pyg_enum_repr), (pyg_enum_from_gtype),
+	(pyg_enum_add), (pyg_enum_get_value_name),
+	(pyg_enum_get_value_nick):
+	* gobject/pygflags.c (pyg_flags_repr), (pyg_flags_from_gtype),
+	(pyg_flags_add), (pyg_flags_and), (pyg_flags_or), (pyg_flags_xor),
+	(pyg_flags_get_first_value_name), (pyg_flags_get_first_value_nick),
+	(pyg_flags_get_value_names), (pyg_flags_get_value_nicks):
+	Use Py_TYPE and PyLong macros to access struct fields
+
+2008-07-27  Johan Dahlin  <johan@gnome.org>
+
 	* gobject/gobjectmodule.c (pyg_param_spec_from_object),
 	(add_properties), (pyg_signal_new), (pyg_signal_list_ids),
 	(pyg_signal_lookup), (pyg_signal_query):

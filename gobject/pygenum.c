@@ -64,13 +64,13 @@ pyg_enum_repr(PyGEnum *self)
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
   for (index = 0; index < enum_class->n_values; index++)
-      if (self->parent.ob_ival == enum_class->values[index].value)
+      if (_PyLong_AS_LONG(self) == enum_class->values[index].value)
           break;
   value = enum_class->values[index].value_name;
   if (value)
       sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
   else
-      sprintf(tmp, "<enum %ld of type %s>", self->parent.ob_ival, g_type_name(self->gtype));
+      sprintf(tmp, "<enum %ld of type %s>", _PyLong_AS_LONG(self), g_type_name(self->gtype));
 
   g_type_class_unref(enum_class);
 
@@ -168,7 +168,11 @@ pyg_enum_from_gtype (GType gtype, int value)
 	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
 	g_assert(retval != NULL);
 	
+#if PY_VERSION_HEX >= 0x03000000
+#   warning "FIXME: figure out how to subclass long"    
+#else
 	((_PyLongObject*)retval)->ob_ival = value;
+#endif    
 	((PyGFlags*)retval)->gtype = gtype;
 	//return _PyLong_FromLong(value);
     }
@@ -236,7 +240,11 @@ pyg_enum_add (PyObject *   module,
 	PyObject *item, *intval;
       
 	item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
+#if PY_VERSION_HEX >= 0x03000000
+#   warning "FIXME: figure out how to subclass long"    
+#else
 	((_PyLongObject*)item)->ob_ival = eclass->values[i].value;
+#endif    
 	((PyGEnum*)item)->gtype = gtype;
 	
         intval = _PyLong_FromLong(eclass->values[i].value);
@@ -284,7 +292,7 @@ pyg_enum_get_value_name(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+  enum_value = g_enum_get_value(enum_class, _PyLong_AS_LONG(self));
 
   retval = _PyUnicode_FromString(enum_value->value_name);
   g_type_class_unref(enum_class);
@@ -302,7 +310,7 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, self->parent.ob_ival);
+  enum_value = g_enum_get_value(enum_class, _PyLong_AS_LONG(self));
 
   retval = _PyUnicode_FromString(enum_value->value_nick);
   g_type_class_unref(enum_class);
