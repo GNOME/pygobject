@@ -470,10 +470,10 @@ static PyNumberMethods pyg_flags_as_number = {
 void
 pygobject_flags_register_types(PyObject *d)
 {
-    pygflags_class_key       = g_quark_from_static_string("PyGFlags::class");
+    pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
     PyGFlags_Type.tp_base = &_PyLong_Type;
-    PyGFlags_Type.tp_repr = 	(reprfunc)pyg_flags_repr;
+    PyGFlags_Type.tp_repr = (reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_as_number = &pyg_flags_as_number;
     PyGFlags_Type.tp_str = (reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
