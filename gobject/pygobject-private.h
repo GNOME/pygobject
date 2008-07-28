@@ -10,25 +10,6 @@
 
 #include "pyglib-python-compat.h"
 
-/* Python 2.3 does not define Py_CLEAR */
-#ifndef Py_CLEAR
-#define Py_CLEAR(op)                \
-        do {                                \
-                if (op) {           \
-                        PyObject *tmp = (PyObject *)(op);   \
-                        (op) = NULL;        \
-                        Py_DECREF(tmp);     \
-                }               \
-        } while (0)
-#endif
-
-#if PY_VERSION_HEX < 0x02050000
-typedef int Py_ssize_t;
-#define PY_SSIZE_T_MAX INT_MAX
-#define PY_SSIZE_T_MIN INT_MIN
-typedef inquiry lenfunc;
-#endif
-
 #define PYGOBJECT_REGISTER_GTYPE(d, type, name, gtype)      \
   {                                                         \
     PyObject *o;					    \
