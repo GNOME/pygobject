@@ -26,7 +26,7 @@ headers
 typedef struct {
     PyObject *callback;
     PyObject *data;
-    PyObject *buffer;
+    guchar *buffer;
 } PyGIONotifyRead;
 
 static void
@@ -44,7 +44,6 @@ async_result_callback_marshal_read(GObject *source_object,
     if (notify->buffer) {
 	if (!quark)
 	    quark = g_quark_from_string("pygio::buffer");
-	Py_XINCREF(notify->buffer);
 	g_object_set_qdata_full(G_OBJECT(result), quark,
 				notify->buffer, py_decref_callback);
     }
@@ -186,12 +185,12 @@ _wrap_g_input_stream_read_async(PyGObject *self,
   if (!pygio_check_cancellable(pycancellable, &cancellable))
     return NULL;
   
-  notify->buffer = PyString_FromStringAndSize((char *)NULL, count);
+  notify->buffer = g_malloc(count);
   if (notify->buffer == NULL)
     return NULL;
   
   g_input_stream_read_async(G_INPUT_STREAM(self->obj),
-			    PyString_AS_STRING((PyStringObject *)notify->buffer),
+			    notify->buffer,
 			    count,
 			    io_priority,
 			    cancellable,
@@ -212,7 +211,8 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
     PyGObject *result;
     GError *error = NULL;
     static GQuark quark = 0;
-    PyObject *buffer;
+    gchar *buffer;
+    Py_ssize_t bytesread;
     
     if (!quark)
 	quark = g_quark_from_string("pygio::buffer");
@@ -223,15 +223,18 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
         return NULL;
     
 
-    g_input_stream_read_finish(G_INPUT_STREAM(self->obj),
-			       G_ASYNC_RESULT(result->obj), &error);
+    bytesread = g_input_stream_read_finish(G_INPUT_STREAM(self->obj),
+					   G_ASYNC_RESULT(result->obj), &error);
     
     if (pyg_error_check(&error))
         return NULL;
 
+    if (bytesread == 0) {
+	return PyString_FromString("");
+    }
+
     buffer = g_object_get_qdata(G_OBJECT(result->obj), quark);
-    /* FIXME: Should we refcount the buffer here? */
-    return buffer;
+    return PyString_FromStringAndSize(buffer, bytesread);
 }
 %%
 override g_input_stream_close_async kwargs
