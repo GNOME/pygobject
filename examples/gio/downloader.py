@@ -8,7 +8,8 @@ import gio
 
 class Downloader(object):
     def __init__(self, uri):
-        self.total = 0
+        self.fetched = 0
+        self.total = -1
         self.uri = uri
         self.loop = None
         self.gfile = gio.File(self.uri)
@@ -36,16 +37,20 @@ class Downloader(object):
             print 'ERROR: %s' % (e.message,)
             self.stop()
             return
+        info = gfile.query_info('standard::size')
+        self.total = info.get_attribute_uint64('standard::size')
         stream.read_async(4096, self.stream_read_callback)
 
     def data_read(self, data):
         if self.fd is None:
             self.fd = open(self.output, 'w')
         self.fd.write(data)
-        self.total += len(data)
+        self.fetched += len(data)
+        if self.total != -1:
+            print '%7.2f %%' % (self.fetched / float(self.total) * 100)
 
     def data_finished(self):
-        print '%d bytes read.' % (self.total,)
+        print '%d bytes read.' % (self.fetched,)
         self.fd.close()
         self.stop()
 
