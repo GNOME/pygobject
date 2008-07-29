@@ -1,5 +1,6 @@
 # Async Directory listing
 # Johan Dahlin 2008
+
 import sys
 
 import glib
