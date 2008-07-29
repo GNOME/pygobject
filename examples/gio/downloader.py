@@ -1,4 +1,5 @@
 # Example GIO based Asynchronous downloader
+# Johan Dahlin 2008
 
 import sys
 
