@@ -37,8 +37,8 @@ class Downloader(object):
             print 'ERROR: %s' % (e.message,)
             self.stop()
             return
-        info = gfile.query_info('standard::size')
-        self.total = info.get_attribute_uint64('standard::size')
+        info = gfile.query_info(gio.FILE_ATTRIBUTE_STANDARD_SIZE)
+        self.total = info.get_attribute_uint64(gio.FILE_ATTRIBUTE_STANDARD_SIZE)
         stream.read_async(4096, self.stream_read_callback)
 
     def data_read(self, data):

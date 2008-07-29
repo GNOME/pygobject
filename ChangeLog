@@ -1,6 +1,12 @@
 2008-07-29  Johan Dahlin  <johan@gnome.org>
 
 	* examples/gio/downloader.py:
+	* gio/giomodule.c (init_gio):
+	Add gio.FILE_ATTRIBUTE_* constants and update the examples to use them.
+
+2008-07-29  Johan Dahlin  <johan@gnome.org>
+
+	* examples/gio/downloader.py:
 	Add a new example
 
 	* gio/ginputstream.override:
