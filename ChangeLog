@@ -1,3 +1,19 @@
+2008-07-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/unix-types.defs: Wrap gio.unix.DesktopAppInfo
+
+	* gio/gappinfo.override:
+	* gio/gio.override:
+	* gio/gio.defs:
+	* gio/gapplaunchcontext.override:
+	* gio/Makefile.am: Wrap g_app_info_launch_uris,
+	g_app_info_launch, g_app_launch_context_get_display and
+	g_app_launch_context_get_startup_notify_id
+
+	* gio/pygio-utils.c:
+	* gio/pygio-utils.h: Add a couple of useful function to reduce the
+	code in wrapped methods.
+
 2008-07-29  Johan Dahlin  <johan@gnome.org>
 
 	* examples/gio/downloader.py:
@@ -420,7 +436,7 @@
 
 2008-07-24  Johan Dahlin  <johan@gnome.org>
 
-	Bug 544600 – pygobject building failed since 839 revision, 
+	Bug 544600 – pygobject building failed since 839 revision,
 	error : "Py_ssize_t" undeclared
 
 	* glib/pyglib-private.h: Add backward compatibility macros for
@@ -712,7 +728,7 @@
 	Eg, gio.IO_ERROR_* -> gio.ERROR_*
 
 2008-07-16  Johan Dahlin  <johan@gnome.org>
-	
+
 	* configure.ac: Post release version bump
 
 === 2.15.1 ===
@@ -736,7 +752,7 @@
 2008-07-15  Johan Dahlin  <johan@gnome.org>
 
 	New version
-	
+
 	* NEWS: Update
 
 	* tests/Makefile.am:
@@ -788,7 +804,7 @@
 	* tests/test_gio.py: Add a test for the above methods.
 
 2008-07-14  Johan Dahlin  <johan@gnome.org>
-	
+
 	Bug 487523 – Add xslfiles variable to .pc.in files
 
 	* pygobject-2.0-uninstalled.pc.in:
@@ -801,18 +817,18 @@
 	they already implement the seekable interface.
 
 2008-07-14  Johan Dahlin  <johan@gnome.org>
-	
+
 	Bug 504337 - crash bug in gobject.Timeout and gobject.Idle
-	
+
 	* gobject/pygsource.c:
 	* tests/test_source.py:
 	Fix crash in Timeout and Idle, patch by Bryan Silverthorn.
 
 2008-07-14  Johan Dahlin  <johan@gnome.org>
 
-	* codegen/argtypes.py: 
+	* codegen/argtypes.py:
 	Map GSeekType to an int
-	
+
 	* gio/gfileinfo.override:
 	* gio/ginputstream.override:
 	* gio/goutputstream.override:
@@ -933,12 +949,12 @@
 
 2008-04-15  Johan Dahlin  <johan@gnome.org>
 
-	* gobject/gobjectmodule.c (init_gobject): Set 
+	* gobject/gobjectmodule.c (init_gobject): Set
 	gobject.GObject.__module__ to gobject._gobject, this
 	helps pylint to check public methods of GObject subclasses
 
-	* tests/Makefile.am (tests): 
-	* tests/test_gobject.py (TestGObjectAPI.testGObjectModule): 
+	* tests/Makefile.am (tests):
+	* tests/test_gobject.py (TestGObjectAPI.testGObjectModule):
 	Add a test for this
 
 	(#523821, Simon Schampijer)
@@ -992,9 +1008,9 @@
 
 2008-04-08  Johan Dahlin  <johan@gnome.org>
 
-	* tests/test_gio.py (TestOutputStream.testWriteAsyncError): 
-	(TestInputStream._testCloseAsync.callback): 
-	Disable these tests until we can figure why they freeze during 
+	* tests/test_gio.py (TestOutputStream.testWriteAsyncError):
+	(TestInputStream._testCloseAsync.callback):
+	Disable these tests until we can figure why they freeze during
 	make check.
 
 2008-04-08  Johan Dahlin  <jdahlin@async.com.br>
@@ -1043,9 +1059,9 @@
 
 	* tests/test_gio.py: Add tests for recently added features.
 
-	* gio/goutputstream.override: 
-	(_wrap_g_output_stream_write_asyn,_wrap_g_output_stream_close_async): 
-	* gio/ginputstream.override (async_result_callback_marshal_read): 
+	* gio/goutputstream.override:
+	(_wrap_g_output_stream_write_asyn,_wrap_g_output_stream_close_async):
+	* gio/ginputstream.override (async_result_callback_marshal_read):
 	Add wrappers.
 
 	* gio/gio.override: Ignore vararg functions and remove a couple
@@ -1055,7 +1071,7 @@
 	g_file_output_stream_tell and g_file_input_stream_tell
 
 	* Makefile.am:
-	* gio/gfileenumerator.override (_wrap_g_file_enumerator_tp_iter): 
+	* gio/gfileenumerator.override (_wrap_g_file_enumerator_tp_iter):
 	Implement the python iteration protocol on GFileEnumerator
 
 	* codegen/argtypes.py (arg): Add goffset to the int64 arg type
@@ -1080,7 +1096,7 @@
 	* tests/test_gio.py:
 
 	Make read_finish() return the string, remove the get_buffer method.
-	This is more pythonic, as it mimics the normal read() behavior of 
+	This is more pythonic, as it mimics the normal read() behavior of
 	python.
 	Update the tests and use a separate marshaller for read.
 
@@ -1132,7 +1148,7 @@
 
 2008-01-21  Johan Dahlin  <johan@gnome.org>
 
-	* gio/gio.override (async_result_callback_marshal): 
+	* gio/gio.override (async_result_callback_marshal):
 	Don't assume the buffer is set, use Py_XINCREF instead of Py_INCREF.
 
 	* gio/Makefile.am:
@@ -1158,7 +1174,7 @@
 	* gio/unix.override:
 	* gio/unixmodule.c:
 
-	Split out overrides into more files. Fix up module description in 
+	Split out overrides into more files. Fix up module description in
 	comments
 
 2008-01-20  Johan Dahlin  <johan@gnome.org>
@@ -1166,10 +1182,10 @@
 	* gio/gio.override (_wrap_g_simple_async_result_get_buffer): Add
 	a new method, to fetch the buffer
 	(_wrap_g_input_stream_read_async): Save a reference to the buffer.
-	* tests/test_gio.py (TestInputStream.testReadAsync.callback): 
+	* tests/test_gio.py (TestInputStream.testReadAsync.callback):
 	Check the content
-	
-	* tests/test_gio.py (TestInputStream.testReadAsyncError): 
+
+	* tests/test_gio.py (TestInputStream.testReadAsyncError):
 	New function to test error condition of async read.
 
 	* gio/gio.override (async_result_callback_marshal): Grab a reference
@@ -1196,7 +1212,7 @@
 	* gio/gio-types.defs: Add SimpleAsyncRequest
 	* gio/giomodule.c: Register enums/constants
 
-	* gio/gio.override: Fix a silly bug so it possible to read files 
+	* gio/gio.override: Fix a silly bug so it possible to read files
 	larger than 8192 bytes.
 
 	* gio/gio.defs: Set null-ok for all cancelable as well.
@@ -1204,12 +1220,12 @@
 	* gio/__init__.py: set gio.unix to None if it's not available
 
 	* gio/gio.override: Implement InputStream.read efficiently without
-	copying the strings, based on the standard libararys file.read() 
+	copying the strings, based on the standard libararys file.read()
 	implementation.
 
 	* gio/gio-types.defs (Cancellable): Add wrapper.
 
-	* gio/gio.defs (replace): Do not require cancellable argument 
+	* gio/gio.defs (replace): Do not require cancellable argument
 	to be specified, default to NULL if not.
 
 	* Makefile.am:
@@ -1255,25 +1271,25 @@
 2008-01-11  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac: Don't link against libffi if we cannot find libffi
-	on the system. (#496006, Ed Catmur)	
+	on the system. (#496006, Ed Catmur)
 
 2008-01-03  Johan Dahlin  <johan@gnome.org>
 
 	Reviewed by: Gustavo
-	
+
 	* configure.ac:
 	* gobject/pygmainloop.c (pyg_signal_watch_prepare): Optinally
 	use PySignal_SetWakeupFd to avoid having to do a timeout to find
 	out if there are any pending signals from python.
 	Fixes #481569
 
-	* configure.ac (CPPFLAGS): 
+	* configure.ac (CPPFLAGS):
 	Include -Wall and -Werror when checking for PySignal_SetWakeupFd
-	
+
 2008-01-02  Sebastian Rittau  <srittau@jroger.in-berlin.de>
 
 	* gobject/gobjectmodule.c
-	* gobject/gobjectmodule.c (pyg_get_application_name) 
+	* gobject/gobjectmodule.c (pyg_get_application_name)
 	(pyg_get_prgname): Add wrappers for g_get_application_name and
 	g_get_prgname.
 
@@ -1293,7 +1309,7 @@
 
 2007-11-12  Johan Dahlin  <johan@gnome.org>
 
-	* gobject/option.py (OptionParser.parse_args): 
+	* gobject/option.py (OptionParser.parse_args):
 	Set the default value of old_args to 0, so we don't end
 	up slicing with None. Fixes #496278 (Vincent Untz)
 
@@ -1308,8 +1324,8 @@
 
 2007-11-05  Johan Dahlin  <johan@gnome.org>
 
-	* gobject/pygobject.h: 
-	* gobject/gobjectmodule.c: 
+	* gobject/pygobject.h:
+	* gobject/gobjectmodule.c:
 	Add pyg_option_group_new to the public API
 
 	* configure.ac: Branch, bump version to 2.15.0.
@@ -1320,7 +1336,7 @@
 
 	* pygobject-2.0-uninstalled.pc.in: uninstalled.pc file missing
 	'datadir' value. Fixes #486876.
-    
+
 2007-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* configure.ac: Post-relase version bump.
@@ -1343,7 +1359,7 @@
 	* gobject/propertyhelper.py (property.__metaclass__.__repr__): Avoid
 	exporting the metaclass, just define it where it will be used.
 
-	* gobject/__init__.py (GObjectMeta._install_properties): 
+	* gobject/__init__.py (GObjectMeta._install_properties):
 	Refactor a bit to make sure that it is possible to use in subclasses,
 	fixes #470718 (Marco Giusti)
 
@@ -1434,8 +1450,8 @@
 2007-07-04  Murray Cumming  <murrayc@murrayc.com>
 
 	* gobject/pygobject.c: (pygobject_switch_to_toggle_ref):
-	* gobject/pygobject.h: Rename the private struct field to 
-	private_flags, because private is a C++ keyword, so this broke 
+	* gobject/pygobject.h: Rename the private struct field to
+	private_flags, because private is a C++ keyword, so this broke
 	builds of some C++ applications, such as Glom.
 
 2007-07-02  Sebastian Granjoux  <seb.sfo@free.fr>
@@ -1569,7 +1585,7 @@
 
 	Use dirname $0 instead of pwd to compute srcdir in autogen,
 	fixes #409234
-	
+
 2007-04-29  Damien Carbery <damien.carbery@sun.com>
 
 	reviewed by: Johan Dahlin  <johan@gnome.org>
@@ -1594,7 +1610,7 @@
 
 2007-04-29  Johan Dahlin  <johan@gnome.org>
 
-	* README: 
+	* README:
 	* configure.ac:
 	* gobject/Makefile.am:
 	* gobject/ffi-marshaller.c: (g_value_to_ffi_type),
@@ -1609,7 +1625,7 @@
 	(test_string_callback), (test_object_callback), (connectcallbacks),
 	(_wrap_connectcallbacks), (inittesthelper):
 
-	Add a generic CClosure marshaller based on ffi. 
+	Add a generic CClosure marshaller based on ffi.
 	This makes it possible to connect to signals on PyGObjects from C.
 	libffi is now an optional dependency
 	Fixes #353816 (Edward Hervey)
@@ -1631,7 +1647,7 @@
 	* gobject/pygobject.c: Implemented pygobject_set_properties and
 	pygobject_get_properties in order to set multiple properties using
 	keyword arguments. Fixes 403212
-	
+
 	* docs/reference/pygobject.xml: Docs for the above new methods.
 
 2007-04-14  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
@@ -1639,7 +1655,7 @@
 	* gobject/gobjectmodule.c, gobject/pygobject.h: Add a new
 	pyg_gerror_exception_check API.  Fixes #425242.
 
-	* gobject/gobjectmodule.c (pyg_set_application_name) 
+	* gobject/gobjectmodule.c (pyg_set_application_name)
 	(pyg_set_prgname): Add wrappers for g_set_application_name and
 	g_set_prgname.  Patch by Havoc Pennington.  Fixes #415853.
 
@@ -1702,8 +1718,8 @@
 
 	* NEWS: Update
 
-	* gobject/pygoptiongroup.c (pyg_option_group_dealloc): 
-	* tests/test_option.py (TestOption.testBadConstructor): 
+	* gobject/pygoptiongroup.c (pyg_option_group_dealloc):
+	* tests/test_option.py (TestOption.testBadConstructor):
 	Make sure an exception is raised when we pass in invalid arguments
 	to the optiongroup constructor, add a test. #364576 (Laszlo Pandy)
 
@@ -1724,13 +1740,13 @@
 2006-11-18  Johan Dahlin  <jdahlin@async.com.br>
 
 	* gobject/pygtype.c (gclosure_from_pyfunc): Use PyObject_Cmp instead
-	of comparing function closure addresses, which makes it possible 
-	to use any callable and not just functions. 
+	of comparing function closure addresses, which makes it possible
+	to use any callable and not just functions.
 	Fixes #375589 (Dima)
 
 2006-10-13  John Finlay  <finlay@moeraki.com>
 
-	* docs/Makefile.am (HTML_FILES): Remove 
+	* docs/Makefile.am (HTML_FILES): Remove
 	html/pygobject-reference-copyright.html.
 	Fixes #361906 (Marc-Andre Lureau)
 
@@ -1757,7 +1773,7 @@
 === 2.12.2 ===
 2006-10-03  Johan Dahlin  <jdahlin@async.com.br>
 
-	* NEWS: 
+	* NEWS:
 	* configure.ac: 2.12.2
 
 2006-10-03  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
@@ -1811,8 +1827,8 @@
 
 2006-09-16  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
-	* tests/test_signal.py (TestEmissionHook.testCallbackReturnFalse) 
-	(TestEmissionHook.testCallbackReturnTrue) 
+	* tests/test_signal.py (TestEmissionHook.testCallbackReturnFalse)
+	(TestEmissionHook.testCallbackReturnTrue)
 	(TestEmissionHook.testCallbackReturnTrueButRemove): Add a few more
 	emission hook tests.
 
@@ -1840,7 +1856,7 @@
 === 2.12.0 ===
 2006-09-04  Johan Dahlin  <jdahlin@async.com.br>
 
-	* NEWS: 
+	* NEWS:
 	* configure.ac: 2.12.0
 
 2006-08-28  Johan Dahlin  <jdahlin@async.com.br>
@@ -1859,14 +1875,14 @@
 
 	* gobject/gobjectmodule.c (pyg_type_register): Correct a bug in
 	the code that checks if parent already implements an interface or not.
-	
+
 	* tests/test-unknown.c (test_interface_base_init),
 	(test_interface_get_type): Add a property to the interface, for
 	better testing.
 	(test_unknown_get_property),
 	(test_unknown_set_property, test_unknown_class_init): Add a
 	property to the class as required by the interface.
-	
+
 	* tests/test_interface.py: More thorough interface testing, with
 	properties and test both the case of implementing an interface
 	from scratch, and re-implementing and interface that a parent
@@ -1878,7 +1894,7 @@
 	necessary, attach the GObject to the PyGObject here.
 	(pygobject_constructv): Cope with the fact that wrapper->obj may
 	have already been set due to the change above.
-	
+
 	* tests/test_signal.py: Add test case fixed by the changes above,
 	basically calling self.emit() inside do_set_property called
 	implicitly by the constructor due to a CONSTRUCT property.
@@ -1899,9 +1915,9 @@
 2006-08-21  Johan Dahlin  <jdahlin@async.com.br>
 
 	* docs/Makefile.am (EXTRA_DIST): Remove build_stamp, include generated .html
-	in the distributed tarball. Remove builddate.xml, reference directory and fixxref.py 
+	in the distributed tarball. Remove builddate.xml, reference directory and fixxref.py
 	dependencies to avoid regenerating the tarball when it's not needed.
-	
+
 	* configure.ac: Post release version bump
 
 === 2.11.3 ===
@@ -1909,8 +1925,8 @@
 
 	* NEWS: Update
 
-	* Makefile.am: 
-	* docs/Makefile.am: 
+	* Makefile.am:
+	* docs/Makefile.am:
 	Always install the xsl files & css files, regardless if the
 	documentation was actually built or not. Also clean it up considerably.
 
@@ -1930,9 +1946,9 @@
 
 	* gobject/pygobject-private.h:
 	* gobject/pygobject.h:
-	Replace uses of typename with type_name, because that is a 
-	reserved C++ keyword. This was breaking compilation of Glom 
-	due its use in the new type_register_custom function pointer in 
+	Replace uses of typename with type_name, because that is a
+	reserved C++ keyword. This was breaking compilation of Glom
+	due its use in the new type_register_custom function pointer in
 	pygobject.h.
 
 2006-08-12  John Finlay  <finlay@moeraki.com>
@@ -1944,9 +1960,9 @@
 
 2006-08-10  John Finlay  <finlay@moeraki.com>
 
-	* docs/reference/entities.docbook.in: 
-	* docs/reference/pygobject-ref.xml: 
-	* docs/Makefile.am: 
+	* docs/reference/entities.docbook.in:
+	* docs/reference/pygobject-ref.xml:
+	* docs/Makefile.am:
 	* configure.ac:
 	Use builddate.xml for the builddate entity and have builddate.xml be
 	updated when the docs are built not during configure time.
@@ -1962,7 +1978,7 @@
 
 2006-08-07  Johan Dahlin  <jdahlin@async.com.br>
 
-	* docs/Makefile.am ($(HTML_DATA)): Fix parallel build 
+	* docs/Makefile.am ($(HTML_DATA)): Fix parallel build
 	(#350225, Ed Catmur)
 
 2006-08-06  Johan Dahlin  <johan@gnome.org>
@@ -2017,16 +2033,16 @@
 
 2006-07-25  Johan Dahlin  <jdahlin@async.com.br>
 
-	* gobject/pygobject.h (init_pygobject_check): Add a macro to easily 
+	* gobject/pygobject.h (init_pygobject_check): Add a macro to easily
 	check the installed pygobject version.
 
-	* gobject/pygflags.c (pyg_flags_add) 
+	* gobject/pygflags.c (pyg_flags_add)
 	* gobject/pygenum.c (pyg_enum_add): Duplicate the string before
 	sending it to python. Fixes GCC warnings.
 
 2006-07-24  John Finlay  <finlay@moeraki.com>
 
-	* gobject/pygflags.c (pyg_flags_get_first_value_name) 
+	* gobject/pygflags.c (pyg_flags_get_first_value_name)
 	(pyg_flags_get_first_value_nick): Avoid segfault when
 	g_flags_get_first_value returns NULL.
 
@@ -2169,7 +2185,7 @@
 	the string.  Unfortunately since PyModule_AddIntConst is broken in
 	python < 2.5 this introduces const warnings elsewhere :-(
 
-	* gobject/gobjectmodule.c (pyg_flags_add_constants) 
+	* gobject/gobjectmodule.c (pyg_flags_add_constants)
 	(pyg_enum_add_constants): Fix const warnings.
 
 2006-06-23  John Finlay  <finlay@moeraki.com>
@@ -2229,7 +2245,7 @@
 
 	* gobject/gobjectmodule.c (pyg_pid_close): Add a close() method
 	to the GPid wrapper.
-	
+
 	* gobject/gobjectmodule.c (pyg_pid_free, pyg_pid_new),
 	(pyg_spawn_async, init_gobject): Wrap GPid in an object whose
 	destructor calls g_spawn_close_pid.  Fixes #340160.
@@ -2266,16 +2282,16 @@
 
 2006-04-29  Johan Dahlin  <jdahlin@async.com.br>
 
-	* gobject/pygtype.c (gclosure_from_pyfunc): 
+	* gobject/pygtype.c (gclosure_from_pyfunc):
 
-	* gobject/pygobject.c (pygobject_disconnect_by_func) 
-	(pygobject_handler_block_by_func) 
-	(pygobject_handler_unblock_by_func): 
+	* gobject/pygobject.c (pygobject_disconnect_by_func)
+	(pygobject_handler_block_by_func)
+	(pygobject_handler_unblock_by_func):
 
-	* tests/test_signal.py (TestEmissionHook._callback): 
+	* tests/test_signal.py (TestEmissionHook._callback):
 
 	Fix #154845, add tests and a private method.
-	
+
 2006-04-23  John Ehresman   <jpe@wingware.com>
 
 	reviewed by: Gustavo
@@ -2308,7 +2324,7 @@
 
 2006-04-11  Johan Dahlin  <jdahlin@async.com.br>
 
-	* gobject/gobjectmodule.c (init_gobject): 
+	* gobject/gobjectmodule.c (init_gobject):
 	* gobject/__init__.py:
 	Move over almost all GType constants from C to Python.
 
@@ -2318,7 +2334,7 @@
 	* gobject/gobjectmodule.c (_wrap_pyg_type_register),
 	(pyg__install_metaclass, init_gobject):  GObjectMeta now moved to
 	python-land (__init__.py).
-	
+
 	* gobject/pygobject-private.h:
 	* gobject/pygobject.c (pygobject_register_class):
 	PyGObject_MetaType is now a pointer, not structure.

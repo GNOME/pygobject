@@ -1,5 +1,17 @@
 ;; -*- scheme -*-
 
+(define-object DesktopAppInfo
+  (docstring
+  "DesktopAppInfo(desktop_id) -> gio.unix.DesktopAppInfo\n\n"
+  "gio.Unix.DesktopAppInfo is an implementation of gio.AppInfo\n"
+  "based on desktop files."
+  )
+  (in-module "giounix")
+  (parent "GObject")
+  (c-name "GDesktopAppInfo")
+  (gtype-id "G_TYPE_DESKTOP_APP_INFO")
+)
+
 (define-object InputStream
   (in-module "giounix")
   (parent "GInputStream")
@@ -19,5 +31,3 @@
   (c-name "GUnixMountEntry")
   (gtype-id "GIO_UNIX_MOUNT_ENTRY_TYPE")
 )
-
-

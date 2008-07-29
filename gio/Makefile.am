@@ -31,12 +31,13 @@ common_ldflags += -no-undefined
 endif
 
 CLEANFILES =
-EXTRA_DIST = 
+EXTRA_DIST =
 
 # gio module
 GIO_OVERRIDES = 			\
 	gio.override			\
 	gappinfo.override		\
+	gapplaunchcontext.override 	\
 	gfile.override			\
 	gfileenumerator.override	\
 	gfileinfo.override		\
@@ -88,4 +89,3 @@ endif
 	    --prefix py$(*F) $*.defs) > $(*D)/gen-$(*F).c \
 	&& cp $(*D)/gen-$(*F).c $(*D)/$(*F).c \
 	&& rm -f $(*D)/gen-$(*F).c
-

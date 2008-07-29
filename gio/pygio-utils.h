@@ -29,8 +29,17 @@
 #include <gio/gio.h>
 
 extern PyTypeObject PyGCancellable_Type;
+extern PyTypeObject PyGAppLaunchContext_Type;
+extern PyTypeObject PyGFile_Type;
 
 gboolean pygio_check_cancellable(PyGObject *pycancellable,
 				 GCancellable **cancellable);
+
+gboolean pygio_check_launch_context(PyGObject *pycontext,
+				    GAppLaunchContext **context);
+
+GList* pygio_pylist_to_gfile_glist(PyObject *pycontext);
+
+GList* pygio_pylist_to_uri_glist(PyObject *pycontext);
 
 #endif /* __PYGIO_UTILS_H__ */

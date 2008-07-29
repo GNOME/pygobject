@@ -71,6 +71,21 @@
 )
 
 (define-method launch
+  (docstring
+  "launch (files=None, launch_context=None) -> gboolean\n"
+  "\n"
+  "Launches the application. Passes files to the launched application\n"
+  "as arguments, using the optional launch_context to get information\n"
+  "about the details of the launcher (like what screen it is on).\n"
+  "On error, error will be set accordingly.\n\n"
+  "Note that even if the launch is successful the application launched\n"
+  "can fail to start if it runs into problems during startup.\n"
+  "There is no way to detect this.\n\n"
+  "Some URIs can be changed when passed through a gio.File\n"
+  "(for instance unsupported uris with strange formats like mailto:),\n"
+  "so if you have a textual uri you want to pass in as argument,\n"
+  "consider using gio.AppInfo.launch_uris() instead."
+  )
   (of-object "GAppInfo")
   (c-name "g_app_info_launch")
   (return-type "gboolean")
@@ -94,6 +109,17 @@
 )
 
 (define-method launch_uris
+  (docstring
+  "launch_uris (files=None, launch_context=None) -> gboolean\n"
+  "\n"
+  "Launches the application. Passes files to the launched application\n"
+  "as arguments, using the optional launch_context to get information\n"
+  "about the details of the launcher (like what screen it is on).\n"
+  "On error, error will be set accordingly.\n\n"
+  "Note that even if the launch is successful the application launched\n"
+  "can fail to start if it runs into problems during startup.\n"
+  "There is no way to detect this.\n\n"
+  )
   (of-object "GAppInfo")
   (c-name "g_app_info_launch_uris")
   (return-type "gboolean")
@@ -1021,7 +1047,7 @@
 )
 
 (define-method next_files_async
-  (docstring 
+  (docstring
 "FE.next_files_async(num_files, callback, [io_priority, cancellable, user_data])\n"
 "Request information for a number of files from the enumerator asynchronously.\n"
 "When all i/o for the operation is finished the callback will be called with\n"
@@ -1298,7 +1324,7 @@
 
 (define-method read_async
   (of-object "GFile")
-  (docstring 
+  (docstring
   "F.read_async(callback [,io_priority [,cancellable [,user_data]]]) -> start read\n"
   "\n"
   "For more details, see gio.File.read() which is the synchronous\n"
@@ -1522,9 +1548,9 @@
 )
 
 (define-method enumerate_children
-  (docstring 
+  (docstring
 "F.enumerate_children(attributes, [flags, cancellable]) -> enumerator\n"
-"Gets the requested information about the files in a directory.\n" 
+"Gets the requested information about the files in a directory.\n"
 "The result is a gio.FileEnumerator object that will give out gio.FileInfo\n"
 "objects for all the files in the directory.\n"
 "The attribute value is a string that specifies the file attributes that\n"
@@ -1555,7 +1581,7 @@
 )
 
 (define-method enumerate_children_async
-  (docstring 
+  (docstring
 "F.enumerate_children_async(attributes, callback,\n"
 "                           [flags, io_priority, cancellable, user_data])\n"
 "Asynchronously gets the requested information about the files in a directory.\n"
@@ -1916,8 +1942,8 @@
 )
 
 (define-method mount_mountable
-  (docstring 
-"F.mount_mountable(mount_operation, callback, [flags, cancellable, user_data])\n" 
+  (docstring
+"F.mount_mountable(mount_operation, callback, [flags, cancellable, user_data])\n"
 "Mounts a file of type gio.FILE_TYPE_MOUNTABLE. Using mount_operation,\n"
 "you can request callbacks when, for instance, passwords are needed\n"
 "during authentication.\n"
@@ -4436,5 +4462,3 @@
     '("GMount*" "mount")
   )
 )
-
-
