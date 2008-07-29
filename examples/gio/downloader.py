@@ -16,7 +16,6 @@ class Downloader(object):
         output = self.get_output_filename()
         self.fd = open(output, 'w')
         print 'Downloading %s -> %s' % (uri, output)
-
         self.gfile.read_async(self.read_callback)
 
     def get_output_filename(self):
@@ -33,9 +32,13 @@ class Downloader(object):
         self.data_read(data)
         stream.read_async(4096, self.stream_read_callback)
 
-
     def read_callback(self, gfile, result):
-        stream = gfile.read_finish(result)
+        try:
+            stream = gfile.read_finish(result)
+        except gio.Error, e:
+            print 'ERROR: %s' % (e.message,)
+            self.loop.quit()
+            return
         stream.read_async(4096, self.stream_read_callback)
 
     def data_read(self, data):
