@@ -10,13 +10,11 @@ import gio
 class Downloader(object):
     def __init__(self, uri):
         self.total = 0
-        self.gfile = gio.File(uri)
-        self.loop = glib.MainLoop()
-
-        output = self.get_output_filename()
-        self.fd = open(output, 'w')
-        print 'Downloading %s -> %s' % (uri, output)
-        self.gfile.read_async(self.read_callback)
+        self.uri = uri
+        self.loop = None
+        self.gfile = gio.File(self.uri)
+        self.output = self.get_output_filename()
+        self.fd = None
 
     def get_output_filename(self):
         basename = self.gfile.get_basename()
@@ -37,20 +35,29 @@ class Downloader(object):
             stream = gfile.read_finish(result)
         except gio.Error, e:
             print 'ERROR: %s' % (e.message,)
-            self.loop.quit()
+            self.stop()
             return
         stream.read_async(4096, self.stream_read_callback)
 
     def data_read(self, data):
+        if self.fd is None:
+            self.fd = open(self.output, 'w')
         self.fd.write(data)
         self.total += len(data)
 
     def data_finished(self):
-        print '%d bytes read' % (self.total,)
-        self.loop.quit()
+        print '%d bytes read.' % (self.total,)
+        self.fd.close()
+        self.stop()
 
-    def run(self):
+    def start(self):
+        print 'Downloading %s -> %s' % (self.uri, self.output)
+        self.gfile.read_async(self.read_callback)
+        self.loop = glib.MainLoop()
         self.loop.run()
+
+    def stop(self):
+        self.loop.quit()
 
 def main(args):
     if len(args) < 2:
@@ -58,7 +65,7 @@ def main(args):
         return 1
 
     d = Downloader(args[1])
-    d.run()
+    d.start()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
