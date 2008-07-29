@@ -3,7 +3,6 @@
 import sys
 
 import glib
-import glib.option
 import gio
 
 
@@ -58,6 +57,7 @@ class Downloader(object):
 
     def stop(self):
         self.loop.quit()
+
 
 def main(args):
     if len(args) < 2:
