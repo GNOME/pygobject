@@ -159,6 +159,30 @@ class TestFile(unittest.TestCase):
         finally:
             os.unlink("copy.txt")
 
+    def testInfoList(self):
+        infolist = self.file.query_settable_attributes()
+        for info in infolist:
+            if info.name == "time::modified":
+                self.assertEqual(info.type, gio.FILE_ATTRIBUTE_TYPE_UINT64)
+                self.assertEqual(info.name, "time::modified")
+                self.assertEqual(info.flags,
+                                 gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED)
+
+    def testSetAttribute(self):
+        self._f.write("testing attributes")
+        self._f.seek(0)
+        infolist = self.file.query_settable_attributes()
+
+        self.assertNotEqual(len(infolist), 0)
+
+        for info in infolist:
+            if info.name == "time::modified-usec":
+                ret = self.file.set_attribute("time::modified-usec",
+                                              gio.FILE_ATTRIBUTE_TYPE_UINT32,
+                                              10, gio.FILE_QUERY_INFO_NONE)
+                self.assertEqual(ret, True)
+
+
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
         self.file = gio.File(".")
@@ -419,4 +443,3 @@ class TestAppInfo(unittest.TestCase):
     def testSimple(self):
         self.assertEquals(self.appinfo.get_description(),
                           "Custom definition for does-not-exist")
-

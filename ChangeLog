@@ -1,5 +1,16 @@
 2008-07-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* tests/test_gio.py:
+	* gio/gfileattribute.override:
+	* gio/gio.override:
+	* gio/gio.defs:
+	* gio/gfile.override:
+	* gio/Makefile.am: Wrap new object gio.FileAttributeInfo,
+	g_file_set_attribute and g_file_query_settable_attributes methods.
+
+
+2008-07-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/unix-types.defs: Wrap gio.unix.DesktopAppInfo
 
 	* gio/gappinfo.override:

@@ -1758,6 +1758,17 @@
 )
 
 (define-method query_settable_attributes
+  (docstring
+  "F.query_settable_attributes([cancellable]) -> list\n\n"
+  "Obtain the list of settable attributes for the file.\n"
+  "Returns the type and full attribute name of all the attributes that\n"
+  "can be set on this file. This doesn't mean setting it will always\n"
+  "succeed though, you might get an access failure, or some specific\n"
+  "file may not support a specific attribute.\n\n"
+  "If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned."
+  )
   (of-object "GFile")
   (c-name "g_file_query_settable_attributes")
   (return-type "GFileAttributeInfoList*")
@@ -1778,6 +1789,14 @@
 )
 
 (define-method set_attribute
+  (docstring
+  "F.set_attribute(attribute, type, value_p [,flags [,cancellable ]])->bool\n"
+  "\n"
+  "Sets an attribute in the file with attribute name attribute to value_p.\n"
+  "If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned."
+  )
   (of-object "GFile")
   (c-name "g_file_set_attribute")
   (return-type "gboolean")
