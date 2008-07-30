@@ -1,3 +1,11 @@
+2008-07-31  Johan Dahlin  <johan@gnome.org>
+
+	* glib/glibmodule.c (pyglib_set_prgname)
+	(pyglib_set_application_name): Use METH_O instead of METH_VARARGS.
+	(_glib_functions): Add doc strings for idle_add, timeout_add,
+	timeout_add_seconds, io_add_watch, child_watch_add, source_remove,
+	main_depth and main_context_default.
+
 2008-07-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* tests/test_gio.py:
@@ -7,7 +15,6 @@
 	* gio/gfile.override:
 	* gio/Makefile.am: Wrap new object gio.FileAttributeInfo,
 	g_file_set_attribute and g_file_query_settable_attributes methods.
-
 
 2008-07-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 

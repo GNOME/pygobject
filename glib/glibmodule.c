@@ -235,8 +235,9 @@ iowatch_marshal(GIOChannel *source,
 	res = FALSE;
     } else {
         if (ret == Py_None) {
-            if (PyErr_Warn(PyExc_Warning, "glib.io_add_watch callback returned None;"
-                           " should return True/False")) {
+            if (PyErr_Warn(PyExc_Warning,
+			   "glib.io_add_watch callback returned None; "
+                           "should return True/False")) {
                 PyErr_Print();
             }
         }
@@ -424,7 +425,8 @@ pyglib_filename_display_name(PyObject *self, PyObject *args)
 	return NULL;
 
     display_name = g_filename_display_name(filename);
-    py_display_name = PyUnicode_DecodeUTF8(display_name, strlen(display_name), NULL);
+    py_display_name = PyUnicode_DecodeUTF8(display_name,
+					   strlen(display_name), NULL);
     g_free(display_name);
     return py_display_name;
 }
@@ -440,7 +442,8 @@ pyglib_filename_display_basename(PyObject *self, PyObject *args)
 	return NULL;
 
     display_basename = g_filename_display_basename(filename);
-    py_display_basename = PyUnicode_DecodeUTF8(display_basename, strlen(display_basename), NULL);
+    py_display_basename = PyUnicode_DecodeUTF8(display_basename,
+					       strlen(display_basename), NULL);
     g_free(display_basename);
     return py_display_basename;
 }
@@ -458,7 +461,8 @@ pyglib_filename_from_utf8(PyObject *self, PyObject *args)
 			  &utf8string, &utf8string_len))
 	return NULL;
 
-    filename = g_filename_from_utf8(utf8string, utf8string_len, NULL, &bytes_written, &error);
+    filename = g_filename_from_utf8(utf8string, utf8string_len,
+				    NULL, &bytes_written, &error);
     if (pyglib_error_check(&error)) {
         g_free(filename);
         return NULL;
@@ -483,13 +487,15 @@ pyglib_get_application_name(PyObject *self)
 }
 
 static PyObject*
-pyglib_set_application_name(PyObject *self, PyObject *args)
+pyglib_set_application_name(PyObject *self, PyObject *arg)
 {
-    char *s;
-
-    if (!PyArg_ParseTuple(args, "s:glib.set_application_name", &s))
-        return NULL;
-    g_set_application_name(s);
+    if (!PyString_Check(arg)) {
+	PyErr_Format(PyExc_TypeError,
+		     "first argument must be a string, not %r",
+		     PyString_AS_STRING(PyObject_Repr(arg)));
+	return NULL;
+    }
+    g_set_application_name(PyString_AS_STRING(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -508,38 +514,80 @@ pyglib_get_prgname(PyObject *self)
 }
 
 static PyObject*
-pyglib_set_prgname(PyObject *self, PyObject *args)
+pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
-    char *s;
-
-    if (!PyArg_ParseTuple(args, "s:glib.set_prgname", &s))
-        return NULL;
-    g_set_prgname(s);
+    if (!PyString_Check(arg)) {
+	PyErr_Format(PyExc_TypeError,
+		     "first argument must be a string, not %r",
+		     PyString_AS_STRING(PyObject_Repr(arg)));
+	return NULL;
+    }
+    g_set_prgname(PyString_AS_STRING(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 static PyMethodDef _glib_functions[] = {
-    { "spawn_async",
-      (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS },
-    { "main_context_default",
-      (PyCFunction)pyglib_main_context_default, METH_NOARGS },
     { "idle_add",
-      (PyCFunction)pyglib_idle_add, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_idle_add, METH_VARARGS|METH_KEYWORDS,
+      "idle_add(callable, user_data=None, priority=None) -> source id\n"
+      "  callable receives (user_data)\n"
+      "Adds a callable to be called whenever there are no higher priority\n"
+      "events pending to the default main loop." },
     { "timeout_add",
-      (PyCFunction)pyglib_timeout_add, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_timeout_add, METH_VARARGS|METH_KEYWORDS,
+      "timeout_add(interval, callable, user_data=None,\n"
+      "            priority=None) -> source id\n"
+      "  callable receives (user_data)\n"
+      "Sets a callable be called repeatedly until it returns False." },
     { "timeout_add_seconds",
-      (PyCFunction)pyglib_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS },
+      (PyCFunction)pyglib_timeout_add_seconds, METH_VARARGS|METH_KEYWORDS,
+      "timeout_add(interval, callable, user_data=None,\n"
+      "            priority=None) -> source_id\n"
+      "  callable receives (user_data)\n"
+      "Sets a callable be called repeatedly until it returns False.\n"
+      "Use this if you want to have a timer in the \"seconds\" range\n"
+      "and do not care about the exact time of the first call of the\n"
+      "timer, use this for more efficient system power usage." },
     { "io_add_watch",
-      (PyCFunction)pyglib_io_add_watch, METH_VARARGS|METH_KEYWORDS },
-    { "source_remove",
-      (PyCFunction)pyglib_source_remove, METH_VARARGS },
+      (PyCFunction)pyglib_io_add_watch, METH_VARARGS|METH_KEYWORDS,
+      "io_add_watch(fd, condition, callback, user_data=None) -> source id\n"
+      "  callable receives (fd, condition, user_data)\n"
+      "Arranges for the fd to be monitored by the main loop for the\n"
+      "specified condition. Condition is a combination of glib.IO_IN,\n"
+      "glib.IO_OUT, glib.IO_PRI, gio.IO_ERR and gio.IO_HUB.\n" },
     { "child_watch_add",
-      (PyCFunction)pyglib_child_watch_add, METH_VARARGS|METH_KEYWORDS },
-    { "markup_escape_text",
-      (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
-    { "get_current_time",
-      (PyCFunction)pyglib_get_current_time, METH_NOARGS },
+      (PyCFunction)pyglib_child_watch_add, METH_VARARGS|METH_KEYWORDS,
+      "child_watch_add(pid, callable, user_data=None,\n"
+                       "priority=None) -> source id\n"
+      "  callable receives (pid, condition, user_data)\n"
+      "Sets the function specified by function to be called with the user\n"
+      "data specified by data when the child indicated by pid exits.\n"
+      "Condition is a combination of glib.IO_IN, glib.IO_OUT, glib.IO_PRI,\n"
+      "gio.IO_ERR and gio.IO_HUB." },
+    { "source_remove",
+      (PyCFunction)pyglib_source_remove, METH_VARARGS,
+      "source_remove(source_id) -> True if removed\n"
+      "Removes the event source specified by source id as returned by the\n"
+      "glib.idle_add(), glib.timeout_add() or glib.io_add_watch()\n"
+      "functions." },
+    { "spawn_async",
+      (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
+      "spawn_async(argv, envp=None, working_directory=None,\n"
+      "            flags=0, child_setup=None, user_data=None,\n"
+      "            standard_input=None, standard_output=None,\n"
+      "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
+      "Execute a child program asynchronously within a glib.MainLoop()\n"
+      "See the reference manual for a complete reference." },
+    { "main_context_default",
+      (PyCFunction)pyglib_main_context_default, METH_NOARGS,
+      "main_context_default() -> a main context\n"
+      "Returns the default main context. This is the main context used\n"
+      "for main loop functions when a main loop is not explicitly specified." },
+    { "main_depth",
+      (PyCFunction)pyglib_main_depth, METH_NOARGS,
+      "main_depth() -> stack depth\n"
+      "Returns the depth of the stack of calls in the main context." },
     { "filename_display_name",
       (PyCFunction)pyglib_filename_display_name, METH_VARARGS },
     { "filename_display_basename",
@@ -549,13 +597,15 @@ static PyMethodDef _glib_functions[] = {
     { "get_application_name",
       (PyCFunction)pyglib_get_application_name, METH_NOARGS },
     { "set_application_name",
-      (PyCFunction)pyglib_set_application_name, METH_VARARGS },
+      (PyCFunction)pyglib_set_application_name, METH_O },
     { "get_prgname",
       (PyCFunction)pyglib_get_prgname, METH_NOARGS },
     { "set_prgname",
-      (PyCFunction)pyglib_set_prgname, METH_VARARGS },
-    { "main_depth",
-      (PyCFunction)pyglib_main_depth, METH_NOARGS },
+      (PyCFunction)pyglib_set_prgname, METH_O },
+    { "get_current_time",
+      (PyCFunction)pyglib_get_current_time, METH_NOARGS },
+    { "markup_escape_text",
+      (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
