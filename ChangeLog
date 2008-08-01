@@ -1,3 +1,8 @@
+2008-08-01  Johan Dahlin  <johan@gnome.org>
+
+	* glib/glibmodule.c (pyglib_set_application_name):
+	Use %r instead of %s, this is not python!
+
 2008-07-31  Johan Dahlin  <johan@gnome.org>
 
 	* glib/glibmodule.c (pyglib_set_prgname)
