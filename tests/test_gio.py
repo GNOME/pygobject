@@ -443,3 +443,11 @@ class TestAppInfo(unittest.TestCase):
     def testSimple(self):
         self.assertEquals(self.appinfo.get_description(),
                           "Custom definition for does-not-exist")
+
+class TestVfs(unittest.TestCase):
+    def setUp(self):
+        self.vfs = gio.vfs_get_default()
+
+    def testGetSupportedURISchemes(self):
+        result = self.vfs.get_supported_uri_schemes()
+        self.failUnless(isinstance(result, [])

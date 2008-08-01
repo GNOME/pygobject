@@ -1,5 +1,14 @@
 2008-08-01  Johan Dahlin  <johan@gnome.org>
 
+	Bug 545846 – g_vfs_get_supported_uri_schemes is missing
+
+	* gio/gio.defs:
+	* gio/gio.override:
+	* tests/test_gio.py:
+	Wrap, add test and documentation
+
+2008-08-01  Johan Dahlin  <johan@gnome.org>
+
 	* glib/glibmodule.c (pyglib_set_application_name):
 	Use %r instead of %s, this is not python!
 

@@ -4320,6 +4320,15 @@
   (return-type "GVfs*")
 )
 
+(define-method get_supported_uri_schemes
+  (docstring
+"VFS.get_supported_uri_schemes() -> [uri, ..]\n"
+"Gets a list of URI schemes supported by vfs.")
+  (of-object "GVfs")
+  (c-name "g_vfs_get_supported_uri_schemes")
+  (return-type "const-char*-const*")
+)
+
 
 
 ;; From gwin32appinfo.h
