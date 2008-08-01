@@ -12,11 +12,8 @@
     <title>Synopsis</title>
 
     <programlisting>
-<xref linkend="gobject-io-condition-constants" endterm="gobject-io-condition-constants-title"></xref>
 <xref linkend="gobject-param-constants" endterm="gobject-param-constants-title"></xref>
-<xref linkend="gobject-priority-constants" endterm="gobject-priority-constants-title"></xref>
 <xref linkend="gobject-signal-constants" endterm="gobject-signal-constants-title"></xref>
-<xref linkend="gobject-spawn-flag-constants" endterm="gobject-spawn-flag-constants-title"></xref>
 <xref linkend="gobject-type-constants" endterm="gobject-type-constants-title"></xref>
 <xref linkend="gobject-version-constants" endterm="gobject-version-constants-title"></xref>
 </programlisting>
@@ -25,55 +22,6 @@
 
   <refsect1 id="gobject-constants-description">
     <title>Description</title>
-
-    <refsect2 id="gobject-io-condition-constants">
-      <title id="gobject-io-condition-constants-title">GObject IO Condition Constants</title>
-
-      <para>The IO Condition constants are a set of bit-flags that specify a
-condition to watch for on an event source.</para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>gobject.IO_IN</literal></term>
-	  <listitem>
-	    <simpara>There is data to read</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.IO_OUT</literal></term>
-	  <listitem>
-	    <simpara>Data can be written (without blocking).</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.IO_PRI</literal></term>
-	  <listitem>
-	    <simpara>There is urgent data to read.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.IO_ERR</literal></term>
-	  <listitem>
-	    <simpara>Error condition.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.IO_HUP</literal></term>
-	  <listitem>
-	    <simpara>Hung up (the connection has been broken, usually for
-	    pipes and sockets).</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.IO_NVAL</literal></term>
-	  <listitem>
-	    <simpara>Invalid request. The file descriptor is not
-	    open.</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-    </refsect2>
 
     <refsect2 id="gobject-param-constants">
       <title id="gobject-param-constants-title">GObject Param Flag Constants</title>
@@ -113,59 +61,6 @@ certain aspects of parameters that can be configured.</para>
 	  <listitem>
 	    <simpara>Upon parameter conversion strict validation is not
 	    required</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-    </refsect2>
-
-    <refsect2 id="gobject-priority-constants">
-      <title id="gobject-priority-constants-title">GObject Priority Constants</title>
-
-      <para>The Priority constants specify </para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>gobject.PRIORITY_HIGH</literal></term>
-	  <listitem>
-	    <simpara>Use this for high priority event sources.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.PRIORITY_DEFAULT</literal></term>
-	  <listitem>
-	    <simpara>Use this for default priority event sources.  This
-	    priority is used when adding timeout functions with the <link
-	    linkend="function-gobject--timeout-add"><function>gobject.timeout_add</function>()</link>
-	    function. This priority is also used for events from the X
-	    server.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.PRIORITY_HIGH_IDLE</literal></term>
-	  <listitem>
-	    <simpara>Use this for high priority idle functions. For example,
-	    gobject.PRIORITY_HIGH_IDLE + 10 is used for resizing operations;
-	    and, gobject.PRIORITY_HIGH_IDLE + 20, for redrawing
-	    operations. (This is done to ensure that any pending resizes are
-	    processed before any pending redraws, so that widgets are not
-	    redrawn twice unnecessarily.)</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.PRIORITY_DEFAULT_IDLE</literal></term>
-	  <listitem>
-	    <simpara>Use this for default priority idle functions. This
-	    priority is used when adding idle functions with the <link
-	    linkend="function-gobject--idle-add"><function>gobject.idle_add</function>()</link>
-	    function.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>gobject.PRIORITY_LOW</literal></term>
-	  <listitem>
-	    <simpara>Use this for very low priority background
-	    tasks.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>

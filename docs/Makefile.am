@@ -10,8 +10,10 @@ HTML_FILES =					\
 	html/class-gobjectginterface.html	\
 	html/class-gobjectgpointer.html		\
 	html/class-gobject.html			\
-	html/class-gobjectmaincontext.html	\
-	html/class-gobjectmainloop.html		\
+	html/class-glibmaincontext.html		\
+	html/class-glibmainloop.html		\
+	html/glib-constants.html		\
+	html/glib-functions.html		\
 	html/gobject-class-reference.html	\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
@@ -31,8 +33,10 @@ XML_FILES = 					\
 	reference/pygobject-gboxed.xml		\
 	reference/pygobject-ginterface.xml 	\
 	reference/pygobject-gpointer.xml 	\
-	reference/pygobject-maincontext.xml 	\
-	reference/pygobject-mainloop.xml
+	reference/pyglib-constants.xml 		\
+	reference/pyglib-functions.xml		\
+	reference/pyglib-maincontext.xml 	\
+	reference/pyglib-mainloop.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\

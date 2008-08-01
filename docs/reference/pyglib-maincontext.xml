@@ -2,29 +2,29 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
     "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 
-<refentry id="class-gobjectmaincontext">
+<refentry id="class-glibmaincontext">
   <refnamediv>
-    <refname>gobject.MainContext</refname>
+    <refname>glib.MainContext</refname>
 
     <refpurpose>an object representing a set of event sources to be handled
 in a <link
-linkend="class-gobjectmainloop"><classname>gobject.MainLoop</classname></link>.</refpurpose>
+linkend="class-glibmainloop"><classname>glib.MainLoop</classname></link>.</refpurpose>
   </refnamediv>
 
   <refsect1>
     <title>Synopsis</title>
 
 <classsynopsis language="python">
-  <ooclass><classname>gobject.MainContext</classname></ooclass>
+  <ooclass><classname>glib.MainContext</classname></ooclass>
 <constructorsynopsis language="python">
-    <methodname><link linkend="constructor-gobjectmaincontext">gobject.MainContext</link></methodname>
+    <methodname><link linkend="constructor-glibmaincontext">glib.MainContext</link></methodname>
   </constructorsynopsis>
 <methodsynopsis language="python">
-    <methodname><link linkend="method-gobjectmaincontext--iteration">iteration</link></methodname>
+    <methodname><link linkend="method-glibmaincontext--iteration">iteration</link></methodname>
     <methodparam><parameter>may_block</parameter></methodparam>
   </methodsynopsis>
 <methodsynopsis language="python">
-    <methodname><link linkend="method-gobjectmaincontext--pending">pending</link></methodname>
+    <methodname><link linkend="method-glibmaincontext--pending">pending</link></methodname>
   </methodsynopsis>
 </classsynopsis>
 
@@ -33,7 +33,7 @@ linkend="class-gobjectmainloop"><classname>gobject.MainLoop</classname></link>.<
   <refsect1>
     <title>Ancestry</title>
 
-<synopsis>+-- <link linkend="class-gobjectmaincontext">gobject.MainContext</link>
+<synopsis>+-- <link linkend="class-glibmaincontext">glib.MainContext</link>
 </synopsis>
 
   </refsect1>
@@ -42,39 +42,39 @@ linkend="class-gobjectmainloop"><classname>gobject.MainLoop</classname></link>.<
     <title>Description</title>
 
     <para>A <link
-linkend="class-gobjectmaincontext"><classname>gobject.MainContext</classname></link>
+linkend="class-glibmaincontext"><classname>glib.MainContext</classname></link>
 represents a set of event sources that can be run in a single thread. File
 descriptors (plain files, pipes or sockets) and timeouts are the standard
 event sources for <literal>GTK</literal> and <literal>PyGTK</literal> though
 others can be added. Each event source is assigned a priority. The default
-priority, <literal>gobject.PRIORITY_DEFAULT</literal>, is 0. Values less
+priority, <literal>glib.PRIORITY_DEFAULT</literal>, is 0. Values less
 than 0 denote higher priorities. Values greater than 0 denote lower
 priorities. Events from high priority sources are always processed before
 events from lower priority sources. Single iterations of a <link
-linkend="class-gobjectmaincontext"><classname>gobject.MainContext</classname></link>
+linkend="class-glibmaincontext"><classname>glib.MainContext</classname></link>
 can be run with the <link
-linkend="method-gobjectmaincontext--iteration"><methodname>iteration</methodname>()</link>
+linkend="method-glibmaincontext--iteration"><methodname>iteration</methodname>()</link>
 method.</para>
 
   </refsect1>
 
-  <refsect1 id="constructor-gobjectmaincontext">
+  <refsect1 id="constructor-glibmaincontext">
     <title>Constructor</title>
 
     <programlisting><constructorsynopsis language="python">
-        <methodname>gobject.MainContext</methodname>
+        <methodname>glib.MainContext</methodname>
       </constructorsynopsis></programlisting>
     <variablelist>
       <varlistentry>
         <term><emphasis>Returns</emphasis>&nbsp;:</term>
         <listitem><simpara>a new <link
-        linkend="class-gobjectmaincontext"><classname>gobject.MainContext</classname></link>
+        linkend="class-glibmaincontext"><classname>glib.MainContext</classname></link>
         object.</simpara></listitem>
       </varlistentry>
     </variablelist>
 
     <para>Creates a new <link
-linkend="class-gobjectmaincontext"><classname>gobject.MainContext</classname></link>
+linkend="class-glibmaincontext"><classname>glib.MainContext</classname></link>
 object.</para>
 
   </refsect1>
@@ -82,8 +82,8 @@ object.</para>
   <refsect1>
     <title>Methods</title>
 
-    <refsect2 id="method-gobjectmaincontext--iteration">
-      <title>gobject.MainContext.iteration</title>
+    <refsect2 id="method-glibmaincontext--iteration">
+      <title>glib.MainContext.iteration</title>
 
       <programlisting><methodsynopsis language="python">
 	  <methodname>iteration</methodname>
@@ -128,8 +128,8 @@ becoming ready.</para>
 
     </refsect2>
 
-    <refsect2 id="method-gobjectmaincontext--pending">
-      <title>gobject.MainContext.pending</title>
+    <refsect2 id="method-glibmaincontext--pending">
+      <title>glib.MainContext.pending</title>
 
       <programlisting><methodsynopsis language="python">
 	  <methodname>pending</methodname>

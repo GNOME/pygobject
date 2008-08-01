@@ -1,3 +1,17 @@
+2008-08-02  Johan Dahlin  <johan@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pyglib-constants.xml:
+	* docs/reference/pyglib-functions.xml:
+	* docs/reference/pyglib-maincontext.xml:
+	* docs/reference/pyglib-mainloop.xml:
+	* docs/reference/pygobject-classes.xml:
+	* docs/reference/pygobject-constants.xml:
+	* docs/reference/pygobject-functions.xml:
+	* docs/reference/pygobject-maincontext.xml:
+	* docs/reference/pygobject-mainloop.xml:
+	Separate the glib and gobject bindings in the manual.
+
 2008-08-02  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 545920 – Wrap GFile.query_writable_namespaces
