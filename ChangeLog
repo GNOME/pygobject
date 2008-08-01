@@ -1,3 +1,8 @@
+2008-08-01  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs:
+	Add docstring for gio.FileInfo.list_attributes
+
 2008-08-01  Johan Dahlin  <johan@gnome.org>
 
 	Bug 545861 – g_file_info_get_modification_time is missing

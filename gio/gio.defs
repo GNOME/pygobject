@@ -2277,6 +2277,10 @@
 )
 
 (define-method list_attributes
+  (docstring
+  "INFO.list_attributes(name_space) -> Attribute list\n\n"
+  "Lists the file info structure's attributes."
+  )
   (of-object "GFileInfo")
   (c-name "g_file_info_list_attributes")
   (return-type "char**")
