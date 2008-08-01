@@ -737,7 +737,52 @@ _wrap_g_file_query_settable_attributes(PyGObject *self,
         return Py_None;
     }
 }
+%%
+override g_file_query_writable_namespaces kwargs
+static PyObject *
+_wrap_g_file_query_writable_namespaces(PyGObject *self,
+                                       PyObject *args,
+                                       PyObject *kwargs)
+{
+    static char *kwlist[] = { "cancellable", NULL };
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable = NULL;
+    GFileAttributeInfoList *ret;
+    GError *error = NULL;
+    gint i, n_infos;
+    GFileAttributeInfo *infos;
+    PyObject *py_ret;
 
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "|O:GFile.query_writable_namespaces",
+                                     kwlist, &pycancellable))
+        return NULL;
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    ret = g_file_query_writable_namespaces(G_FILE(self->obj),
+                                           (GCancellable *) cancellable,
+                                           &error);
+    if (pyg_error_check(&error))
+        return NULL;
+
+    n_infos = ret->n_infos;
+    infos = ret->infos;
+
+    if (n_infos > 0) {
+        py_ret = PyList_New(n_infos);
+        for (i = 0; i < n_infos; i++) {
+            PyList_SetItem(py_ret, i, pyg_file_attribute_info_new(&infos[i]));
+        }
+        g_file_attribute_info_list_unref(ret);
+        return py_ret;
+
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
 /* GFile.append_to_async */
 /* GFile.create_async */
 /* GFile.eject_mountable */
@@ -749,7 +794,6 @@ _wrap_g_file_query_settable_attributes(PyGObject *self,
 /* GFile.set_display_name_async */
 /* GFile.load_partial_contents_async: No ArgType for GFileReadMoreCallback */
 /* GFile.move: No ArgType for GFileProgressCallback */
-/* GFile.query_writable_namespaces: No ArgType for GFileAttributeInfoList* */
 /* GFile.set_attributes_finish: No ArgType for GFileInfo** */
 /* GFile.load_partial_contents_finish: No ArgType for char** */
 /* GFile.replace_contents: No ArgType for char** */

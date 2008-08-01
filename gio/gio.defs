@@ -1818,6 +1818,16 @@
 )
 
 (define-method query_writable_namespaces
+  (docstring
+  "F.query_writable_namespaces([cancellable]) -> list\n\n"
+  "Obtain the list of attribute namespaces where new attributes can\n"
+  "be created by a user. An example of this is extended attributes\n"
+  "(in the "xattr" namespace).\n"
+  "If cancellable is not None, then the operation can be cancelled\n"
+  "by triggering the cancellable object from another thread. If the\n"
+  "operation was cancelled, the error gio.IO_ERROR_CANCELLED\n"
+  "will be returned."
+  )
   (of-object "GFile")
   (c-name "g_file_query_writable_namespaces")
   (return-type "GFileAttributeInfoList*")

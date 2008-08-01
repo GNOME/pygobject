@@ -196,6 +196,12 @@ class TestFile(unittest.TestCase):
                 self.assertEqual(info.flags,
                                  gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED)
 
+    def testQueryWritableNamespaces(self):
+        infolist = self.file.query_writable_namespaces()
+        for info in infolist:
+            if info.name == "xattr":
+                self.assertEqual(info.type, gio.FILE_ATTRIBUTE_TYPE_STRING)
+
     def testSetAttribute(self):
         self._f.write("testing attributes")
         self._f.seek(0)
