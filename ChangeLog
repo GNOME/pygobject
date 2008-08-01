@@ -1,3 +1,12 @@
+2008-08-02  Johan Dahlin  <johan@gnome.org>
+
+	* gio/Makefile.am:
+	* gio/gfile.override:
+	* gio/gio.defs:
+	* gio/gio.override:
+	* gio/gvolume.override:
+	Wrap gio.Volume.mount and gio.Volume.eject
+
 2008-08-01  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gio.defs:

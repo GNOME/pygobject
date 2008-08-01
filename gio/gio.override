@@ -2,7 +2,7 @@
  * pygtk- Python bindings for the GTK toolkit.
  * Copyright (C) 2008  Johan Dahlin
  *
- *   giomodule.c: module wrapping the GIO library
+ *   gio.override: module wrapping the GIO library
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -87,6 +87,7 @@ include
   gfileinfo.override
   ginputstream.override
   goutputstream.override
+  gvolume.override
   gvolumemonitor.override
 %%
 ignore-glob

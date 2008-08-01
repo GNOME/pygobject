@@ -44,6 +44,7 @@ GIO_OVERRIDES = 			\
 	gfileinfo.override		\
 	ginputstream.override 		\
 	goutputstream.override 		\
+	gvolume.override		\
 	gvolumemonitor.override
 
 GIO_DEFS = gio.defs gio-types.defs $(GIO_OVERRIDES)
