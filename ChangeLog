@@ -1,5 +1,12 @@
 2008-08-02  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gio.defs:
+	* gio/gfile.override:
+	* tests/test_gio.py:
+	Wrap gio.File.move
+
+2008-08-02  Johan Dahlin  <johan@gnome.org>
+
 	* gio/Makefile.am:
 	* gio/gfile.override:
 	* gio/gio.defs:

@@ -13,7 +13,8 @@ class TestFile(unittest.TestCase):
 
     def tearDown(self):
         self._f.close()
-        os.unlink("file.txt")
+        if os.path.exists('file.txt'):
+            os.unlink("file.txt")
 
     def testReadAsync(self):
         self._f.write("testing")
@@ -158,6 +159,33 @@ class TestFile(unittest.TestCase):
             self.failUnless(self.called)
         finally:
             os.unlink("copy.txt")
+
+    def testMove(self):
+        if os.path.exists('move.txt'):
+            os.unlink("move.txt")
+
+        source = gio.File('file.txt')
+        destination = gio.File('move.txt')
+        retval = source.move(destination)
+        self.failUnless(retval)
+
+        self.failIf(os.path.exists('file.txt'))
+        self.failUnless(os.path.exists('move.txt'))
+
+        self.called = False
+        def callback(current, total):
+            self.called = True
+        source = gio.File('move.txt')
+        destination = gio.File('move-2.txt')
+        try:
+            retval = source.move(destination, callback)
+            self.failUnless(retval)
+
+            self.failIf(os.path.exists('move.txt'))
+            self.failUnless(os.path.exists('move-2.txt'))
+            self.failUnless(self.called)
+        finally:
+            os.unlink("move-2.txt")
 
     def testInfoList(self):
         infolist = self.file.query_settable_attributes()

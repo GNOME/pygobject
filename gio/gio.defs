@@ -1723,6 +1723,45 @@
 )
 
 (define-method move
+  (docstring
+"Tries to move the file or directory source to the location\n"
+"specified by destination. If native move operations are\n"
+"supported then this is used, otherwise a copy + delete fallback\n"
+"is used. The native implementation may support moving directories\n"
+"(for instance on moves inside the same filesystem), but the \n"
+"fallback code does not.\n"
+"\n"
+"If the flag gio.FILE_COPY_OVERWRITE is specified an already existing\n"
+"destination file is overwritten.\n"
+"\n"
+"If the flag gio.FILE_COPY_NOFOLLOW_SYMLINKS is specified then symlink\n"
+"will be copied as symlinks, otherwise the target of the source symlink\n"
+"will be copied.\n"
+"\n"
+"If cancellable is not None, then the operation can be cancelled b\n"
+"triggering the cancellable object from another thread.\n"
+"If the operation was cancelled, the error gio.ERROR_CANCELLED\n"
+"will be returned.\n"
+"\n"
+"If progress_callback is not None, then the operation can be monitored\n"
+"by setting this to a callable. if specified progress_callback_data will\n"
+"be passed to this function. It is guaranteed that this callback\n"
+"will be called after all data has been transferred with the total number\n"
+"of bytes copied during the operation.\n"
+"\n"
+"If the source file does not exist then the gio.ERROR_NOT_FOUND\n"
+"error is returned, independent on the status of the destination.\n"
+"\n"
+"If gio.FILE_COPY_OVERWRITE is not specified and the target exists\n"
+"then the error gio.ERROR_EXISTS is returned.\n"
+"\n"
+"If trying to overwrite a file over a directory the gio.ERROR_IS_DIRECTORY\n"
+"error is returned. If trying to overwrite a directory with a directory\n"
+"the gio.ERROR_WOULD_MERGE error is returned.\n"
+"\n"
+"If the source is a directory and the target does not exist\n"
+"or gio.FILE_COPY_OVERWRITE is specified and the target is a file\n"
+"then the gio.ERROR_WOULD_RECURSE error is returned.")
   (of-object "GFile")
   (c-name "g_file_move")
   (return-type "gboolean")
