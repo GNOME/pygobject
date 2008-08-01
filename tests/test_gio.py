@@ -429,11 +429,17 @@ class TestContentTypeGuess(unittest.TestCase):
 
 
 class TestFileInfo(unittest.TestCase):
+    def setUp(self):
+        self.fileinfo = gio.File("test_gio.py").query_info("*")
+
     def testListAttributes(self):
-        fileinfo = gio.File("test_gio.py").query_info("*")
-        attributes = fileinfo.list_attributes("standard")
+        attributes = self.fileinfo.list_attributes("standard")
         self.failUnless(attributes)
         self.failUnless('standard::name' in attributes)
+
+    def testModificationTime(self):
+        mtime = self.fileinfo.get_modification_time()
+        self.assertEqual(type(mtime), float)
 
 
 class TestAppInfo(unittest.TestCase):
@@ -450,4 +456,4 @@ class TestVfs(unittest.TestCase):
 
     def testGetSupportedURISchemes(self):
         result = self.vfs.get_supported_uri_schemes()
-        self.failUnless(isinstance(result, [])
+        self.failUnless(type(result), [])

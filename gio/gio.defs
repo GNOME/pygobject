@@ -2563,6 +2563,9 @@
 )
 
 (define-method get_modification_time
+  (docstring
+"INFO.get_modification_time() -> modification time\n"
+"Returns the modification time, in UNIX time format\n")
   (of-object "GFileInfo")
   (c-name "g_file_info_get_modification_time")
   (return-type "none")
