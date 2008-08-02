@@ -1389,6 +1389,15 @@
 )
 
 (define-method append_to_async
+  (docstring
+  "F.append_to_async(callback [flags, [,io_priority [,cancellable [,user_data]]]]) -> open for append\n"
+  "\n"
+  "Asynchronously opens file for appending."
+  "For more details, see gio.File.append_to() which is the synchronous\n"
+  "version of this call. When the operation is finished, callback will\n"
+  "be called. You can then call F.append_to_finish() to get the result\n"
+  "of the operation."
+  )
   (of-object "GFile")
   (c-name "g_file_append_to_async")
   (return-type "none")

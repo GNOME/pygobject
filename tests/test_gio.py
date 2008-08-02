@@ -33,6 +33,45 @@ class TestFile(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
+    def testAppendToAsync(self):
+        self._f.write("append_to ")
+        self._f.close()
+
+        def callback(file, result):
+            try:
+                stream = file.append_to_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                w = stream.write("testing")
+                cont, leng, etag = self.file.load_contents()
+                self.assertEqual(cont, "append_to testing")
+            finally:
+                loop.quit()
+
+        self.file.append_to_async(callback, gio.FILE_CREATE_NONE,
+                                  glib.PRIORITY_HIGH)
+
+        loop = glib.MainLoop()
+        loop.run()
+
+    def testAppendToAsyncNoargs(self):
+        self._f.write("append_to ")
+        self._f.close()
+
+        def callback(file, result):
+            try:
+                stream = file.append_to_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                w = stream.write("testing")
+                cont, leng, etag = self.file.load_contents()
+                self.assertEqual(cont, "append_to testing")
+            finally:
+                loop.quit()
+
+        self.file.append_to_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
+
     def testReadAsyncError(self):
         self.assertRaises(TypeError, self.file.read_async)
         self.assertRaises(TypeError, self.file.read_async, "foo", "bar")

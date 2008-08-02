@@ -1,3 +1,12 @@
+2008-08-02  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 545959 – Wrap GFile.append_to_async
+
+	* tests/test_gio.py:
+	* gio/gfile.override:
+	* gio/gio.defs:
+	Wrap GFile.append_to_async with docs and test
+
 2008-08-02  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gfileinfo.override:
