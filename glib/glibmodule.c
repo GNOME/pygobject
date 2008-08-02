@@ -401,11 +401,9 @@ static PyObject *
 pyglib_get_current_time(PyObject *unused)
 {
     GTimeVal timeval;
-    double ret;
 
     g_get_current_time(&timeval);
-    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
-    return PyFloat_FromDouble(ret);
+    return pyglib_float_from_timeval(timeval);
 }
 
 static PyObject *

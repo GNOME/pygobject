@@ -1,5 +1,14 @@
 2008-08-02  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gfileinfo.override:
+	* gio/gio.override:
+	* glib/glibmodule.c (pyglib_get_current_time):
+	* glib/pyglib.c (pyglib_float_from_timeval):
+	* glib/pyglib.h:
+	Add pyglib_float_from_timeval and use it
+
+2008-08-02  Johan Dahlin  <johan@gnome.org>
+
 	* docs/Makefile.am:
 	* docs/reference/pyglib-constants.xml:
 	* docs/reference/pyglib-functions.xml:

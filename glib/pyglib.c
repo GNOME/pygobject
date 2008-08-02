@@ -471,6 +471,22 @@ pyglib_option_context_new (GOptionContext *context)
     return (PyObject *)self;
 }
 
+/**
+ * pyglib_option_context_new:
+ * @context: a GTimeVal struct
+ *
+ * Converts a GTimeVal struct to a python float
+ *
+ * Returns: a float representing the timeval
+ */
+PyObject *
+pyglib_float_from_timeval(GTimeVal timeval)
+{
+    double ret;
+    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
+    return PyFloat_FromDouble(ret);
+}
+
 
 /****** Private *****/
 

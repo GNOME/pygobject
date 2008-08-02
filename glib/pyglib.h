@@ -48,6 +48,7 @@ void pyglib_unblock_threads(void);
 PyObject * pyglib_option_context_new(GOptionContext *context);
 PyObject * pyglib_option_group_new(GOptionGroup *group);
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
+PyObject * pyglib_float_from_timeval(GTimeVal timeval);
 
 #define pyglib_begin_allow_threads		\
     G_STMT_START {                              \

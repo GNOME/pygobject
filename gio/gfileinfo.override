@@ -56,12 +56,9 @@ static PyObject *
 _wrap_g_file_info_get_modification_time(PyGObject *self, PyObject *unused)
 {
     GTimeVal timeval;
-    double ret;
 
     g_file_info_get_modification_time(G_FILE_INFO(self->obj), &timeval);
-
-    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
-    return PyFloat_FromDouble(ret);
+    return pyglib_float_from_timeval(timeval);
 }
 
 /* GFileInfo.get_attribute_data: No ArgType for GFileAttributeType* */

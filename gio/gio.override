@@ -29,6 +29,7 @@ headers
 #include <pygobject.h>
 #include <gio/gio.h>
 #include "pygio-utils.h"
+#include "pyglib.h"
 
 #define BUFSIZE 8192
 
