@@ -100,18 +100,11 @@ class DocWriter:
         if overrides_file:
             self.overrides.handle_file(overrides_file)
 
-        for obj in self.parser.objects:
-            if not self.classmap.has_key(obj.c_name):
-                self.classmap[obj.c_name] = '%s.%s' % (module_name, obj.name)
-        for obj in self.parser.interfaces:
-            if not self.classmap.has_key(obj.c_name):
-                self.classmap[obj.c_name] = '%s.%s' % (module_name, obj.name)
-        for obj in self.parser.boxes:
-            if not self.classmap.has_key(obj.c_name):
-                self.classmap[obj.c_name] = '%s.%s' % (module_name, obj.name)
-        for obj in self.parser.pointers:
-            if not self.classmap.has_key(obj.c_name):
-                self.classmap[obj.c_name] = '%s.%s' % (module_name, obj.name)
+        for obj in (self.parser.objects + self.parser.interfaces +
+                    self.parser.boxes + self.parser.pointers):
+            if not obj.c_name in self.classmap:
+                self.classmap[obj.c_name] = '%s.%s' % (
+                    module_name, obj.name)
 
     def pyname(self, name):
         return self.classmap.get(name, name)
@@ -340,17 +333,8 @@ class DocWriter:
         prototype = self.create_constructor_prototype(func_def)
         self._fp.write(prototype + '\n\n')
         for type, name, dflt, null in func_def.params:
-            if func_doc:
-                descr = func_doc.get_param_description(name)
-            else:
-                descr = 'a ' + type
-            self._fp.write('  ' + name + ': ' + descr + '\n')
-        if func_def.ret and func_def.ret != 'none':
-            if func_doc and func_doc.ret:
-                descr = func_doc.ret
-            else:
-                descr = 'a ' + func_def.ret
-            self._fp.write('  Returns: ' + descr + '\n')
+            self.write_parameter(name, func_doc)
+        self.write_return_value(func_def, func_doc)
         if func_doc and func_doc.description:
             self._fp.write(func_doc.description)
         self._fp.write('\n\n\n')
@@ -359,22 +343,50 @@ class DocWriter:
         prototype = self.create_method_prototype(meth_def)
         self._fp.write(prototype + '\n\n')
         for type, name, dflt, null in meth_def.params:
-            if func_doc:
-                descr = func_doc.get_param_description(name)
-            else:
-                descr = 'a ' + type
-            self._fp.write('  ' + name + ': ' + descr + '\n')
+            self.write_parameter(name, func_doc)
+        self.write_return_value(meth_def, func_doc)
+        if func_doc and func_doc.description:
+            self._fp.write('\n')
+            self._fp.write(func_doc.description)
+        self._fp.write('\n\n')
+
+    def write_parameter(self, param_name, func_doc):
+        if func_doc:
+            descr = func_doc.get_param_description(param_name)
+        else:
+            descr = 'a ' + type
+        self._fp.write('  ' + param_name + ': ' + descr + '\n')
+
+    def write_return_value(self, meth_def, func_doc):
         if meth_def.ret and meth_def.ret != 'none':
             if func_doc and func_doc.ret:
                 descr = func_doc.ret
             else:
                 descr = 'a ' + meth_def.ret
             self._fp.write('  Returns: ' + descr + '\n')
-        if func_doc and func_doc.description:
-            self._fp.write('\n')
-            self._fp.write(func_doc.description)
-        self._fp.write('\n\n')
 
+CLASS_HEADER_TEMPLATE = """<refentry id="%(entryid)s">
+  <refmeta>
+    <refentrytitle>%(name)s</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>%(miscinfo)s</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>%(name)s</refname><refpurpose></refpurpose>
+  </refnamediv>
+
+"""
+VARIABLE_TEMPLATE = """<varlistentry>
+      <term><parameter>%(parameter)s</parameter>&nbsp;:</term>
+      <listitem><simpara>%(description)s</simpara></listitem>
+    </varlistentry>
+"""
+
+DOCBOOK_HEADER = """<?xml version="1.0" standalone="no"?>
+<!DOCTYPE synopsis PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+"""
 
 class DocbookDocWriter(DocWriter):
 
@@ -505,9 +517,7 @@ class DocbookDocWriter(DocWriter):
             for child in node.subclasses:
                 handle_node(child, indent)
 
-        self._fp.write('<?xml version="1.0" standalone="no"?>\n')
-        self._fp.write('<!DOCTYPE synopsis PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-        self._fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
+        self._fp.write(DOCBOOK_HEADER)
         self._fp.write('<synopsis>')
         handle_node(hierarchy)
         self._fp.write('</synopsis>\n')
@@ -573,20 +583,11 @@ class DocbookDocWriter(DocWriter):
         return string.join(xml, '')
 
     def write_class_header(self, obj_name):
-        self._fp.write('<?xml version="1.0" standalone="no"?>\n')
-        self._fp.write('<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-        self._fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
-        self._fp.write('<refentry id="' + self.make_class_ref(obj_name) + '">\n')
-        self._fp.write('  <refmeta>\n')
-        self._fp.write('    <refentrytitle>%s</refentrytitle>\n'
-                 % self.pyname(obj_name))
-        self._fp.write('    <manvolnum>3</manvolnum>\n')
-        self._fp.write('    <refmiscinfo>PyGTK Docs</refmiscinfo>\n')
-        self._fp.write('  </refmeta>\n\n')
-        self._fp.write('  <refnamediv>\n')
-        self._fp.write('    <refname>%s</refname><refpurpose></refpurpose>\n'
-                 % self.pyname(obj_name))
-        self._fp.write('  </refnamediv>\n\n')
+        self._fp.write(DOCBOOK_HEADER)
+        self._fp.write(CLASS_HEADER_TEMPLATE % dict(
+            entryid=self.make_class_ref(obj_name),
+            name=self.pyname(obj_name),
+            miscinfo="PyGTK Docs"))
 
     def write_class_footer(self, obj_name):
         self._fp.write('</refentry>\n')
@@ -625,11 +626,11 @@ class DocbookDocWriter(DocWriter):
         constructor = self.parser.find_constructor(obj_def, self.overrides)
         if constructor:
             self._fp.write('%s\n' % self.create_constructor_prototype(constructor))
-        methods = self.parser.find_methods(obj_def)
-        methods = filter(lambda meth, self=self:
-                         not self.overrides.is_ignored(meth.c_name), methods)
-        for meth in methods:
-            self._fp.write('%s\n' % self.create_method_prototype(meth, addlink=1))
+        for method in self.parser.find_methods(obj_def):
+            if self.overrides.is_ignored(method.c_name):
+                continue
+            self._fp.write('%s\n' % self.create_method_prototype(
+                method, addlink=1))
         self._fp.write('</classsynopsis>\n\n')
 
     def write_hierarchy(self, obj_name, ancestry):
@@ -661,21 +662,17 @@ class DocbookDocWriter(DocWriter):
                 descr = string.strip(func_doc.get_param_description(name))
             else:
                 descr = 'a ' + type
-            self._fp.write('    <varlistentry>\n')
-            self._fp.write('      <term><parameter>%s</parameter>&nbsp;:</term>\n' % name)
-            self._fp.write('      <listitem><simpara>%s</simpara></listitem>\n' %
-                     self.reformat_text(descr, singleline=1))
-            self._fp.write('    </varlistentry>\n')
+            self._fp.write(VARIABLE_TEMPLATE % dict(
+                parameter=name,
+                description=self.reformat_text(descr, singleline=1)))
         if ret and ret != 'none':
             if func_doc and func_doc.ret:
                 descr = string.strip(func_doc.ret)
             else:
                 descr = 'a ' + ret
-            self._fp.write('    <varlistentry>\n')
-            self._fp.write('      <term><emphasis>Returns</emphasis>&nbsp;:</term>\n')
-            self._fp.write('      <listitem><simpara>%s</simpara></listitem>\n' %
-                     self.reformat_text(descr, singleline=1))
-            self._fp.write('    </varlistentry>\n')
+            self._fp.write(VARIABLE_TEMPLATE % dict(
+                parameter='Returns',
+                description=self.reformat_text(descr, singleline=1)))
         self._fp.write('  </variablelist>\n')
 
     def write_constructor(self, func_def, func_doc):
@@ -699,9 +696,7 @@ class DocbookDocWriter(DocWriter):
         self._fp.write('  </refsect2>\n\n\n')
 
     def output_toc(self, files, fp=sys.stdout):
-        self._fp.write('<?xml version="1.0" standalone="no"?>\n')
-        self._fp.write('<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-        self._fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
+        self._fp.write(DOCBOOK_HEADER)
 
         #self._fp.write('<reference id="class-reference">\n')
         #self._fp.write('  <title>Class Documentation</title>\n')
