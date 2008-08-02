@@ -432,48 +432,55 @@ class DocbookDocWriter(DocWriter):
         info = self.parser.c_name.get(match.group(1), None)
         if info:
             if isinstance(info, defsparser.FunctionDef):
-                if info.is_constructor_of is not None:
-                    # should have a link here
-                    return '<function>%s()</function>' % \
-                           self.pyname(info.is_constructor_of)
-                else:
-                    return '<function>' + info.name + '()</function>'
+                return self._format_funcdef(info)
             if isinstance(info, defsparser.MethodDef):
-                return '<link linkend="' + self.make_method_ref(info) + \
-                       '"><function>' + self.pyname(info.of_object) + '.' + \
-                       info.name + '()</function></link>'
+                return self._format_method(info)
+
         # fall through through
-        return '<function>' + match.group(1) + '()</function>'
+        return '<function>%s()</function>' % (match.group(1), )
+
+    def _format_funcdef(self, info):
+        if info.is_constructor_of is not None:
+            # should have a link here
+            return '<methodname>%s()</methodname>' % (
+                self.pyname(info.is_constructor_of), )
+        else:
+            return '<function>%s()</function>' % (info.name, )
 
     def _format_param(self, match):
-        return '<parameter>' + match.group(1) + '</parameter>'
+        return '<parameter>%s</parameterdliteral>' % (match.group(1), )
 
     def _format_const(self, match):
-        return '<literal>' + match.group(1) + '</literal>'
+        return '<literal>%s</literal>' % (match.group(1), )
+
+    def _format_method(self, info):
+        return ('<link linkend="%s">'
+                '<methodname>%s.%s</methodname>'
+                '</link>') % (self.make_method_ref(info),
+                              self.pyname(info.of_object),
+                              info.name)
+
+    def _format_object(self, info):
+        return ('<link linkend="%s">'
+                '<classname>%s</classname>'
+                '</link>') % (self.make_class_ref(info.c_name),
+                              self.pyname(info.c_name))
 
     def _format_symbol(self, match):
         info = self.parser.c_name.get(match.group(1), None)
         if info:
             if isinstance(info, defsparser.FunctionDef):
-                if info.is_constructor_of is not None:
-                    # should have a link here
-                    return '<methodname>%s</methodname>' % (
-                        self.pyname(info.is_constructor_of), )
-                else:
-                    return '<function>' + info.name + '</function>'
-            if isinstance(info, defsparser.MethodDef):
-                return '<link linkend="' + self.make_method_ref(info) + \
-                       '"><methodname>' + self.pyname(info.of_object) + '.' + \
-                       info.name + '</methodname></link>'
-            if isinstance(info, defsparser.ObjectDef) or \
-                   isinstance(info, defsparser.InterfaceDef) or \
-                   isinstance(info, defsparser.BoxedDef) or \
-                   isinstance(info, defsparser.PointerDef):
-                return '<link linkend="' + self.make_class_ref(info.c_name) + \
-                       '"><classname>' + self.pyname(info.c_name) + \
-                       '</classname></link>'
+                return self._format_funcdef(info)
+            elif isinstance(info, defsparser.MethodDef):
+                return self._format_method(info)
+            elif isinstance(info, (defsparser.ObjectDef,
+                                   defsparser.InterfaceDef,
+                                   defsparser.BoxedDef,
+                                   defsparser.PointerDef)):
+                return self._format_object(info)
+
         # fall through through
-        return '<literal>' + match.group(1) + '</literal>'
+        return '<literal>%s</literal>' % (match.group(1), )
 
     def reformat_text(self, text, singleline=0):
         # replace special strings ...
@@ -491,9 +498,7 @@ class DocbookDocWriter(DocWriter):
             if lines[index].strip() == '':
                 lines[index] = '</para>\n<para>'
                 continue
-        lines.insert(0, '<para>')
-        lines.append('</para>')
-        return '\n'.join(lines)
+        return '<para>%s</para>' % ('\n'.join(lines), )
 
     # write out hierarchy
 
