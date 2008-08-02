@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-
 import getopt
 import os
 import re
-import string
 import sys
 
 import definitions
@@ -13,6 +11,7 @@ import override
 
 
 class Node:
+
     def __init__(self, name, interfaces=[]):
         self.name = name
         self.interfaces = interfaces
@@ -37,7 +36,7 @@ def build_object_tree(parser):
             pos = pos + 1
 
     root = Node(None)
-    nodes = { None: root }
+    nodes = {None: root}
     for obj_def in objects:
         parent_name = obj_def.parent
         if parent_name == 'GObject':
@@ -156,7 +155,7 @@ class DocWriter:
         self.close_section()
 
         # construct the inheritence hierarchy ...
-        ancestry = [ (obj_def.c_name, obj_def.implements) ]
+        ancestry = [(obj_def.c_name, obj_def.implements)]
         try:
             parent = obj_def.parent
             while parent != None:
@@ -192,6 +191,13 @@ class DocWriter:
 
         self.write_class_footer(obj_def.c_name)
 
+    def get_methods_for_object(self, obj_def):
+        methods = []
+        for method in self.parser.find_methods(obj_def):
+            if not self.overrides.is_ignored(method.c_name):
+                methods.append(method)
+        return methods
+
     def output_interface_docs(self, int_def):
         self.write_class_header(int_def.c_name)
 
@@ -199,15 +205,12 @@ class DocWriter:
         self.write_synopsis(int_def)
         self.close_section()
 
-        methods = self.parser.find_methods(int_def)
-        methods = filter(lambda meth, self=self:
-                         not self.overrides.is_ignored(meth.c_name), methods)
+        methods = self.get_methods_for_object(int_def)
         if methods:
             self.write_heading('Methods')
             for method in methods:
                 self.write_method(method, self.docs.get(method.c_name, None))
             self.close_section()
-
         self.write_class_footer(int_def.c_name)
 
     def output_boxed_docs(self, box_def):
@@ -224,9 +227,7 @@ class DocWriter:
                                    self.docs.get(constructor.c_name, None))
             self.close_section()
 
-        methods = self.parser.find_methods(box_def)
-        methods = filter(lambda meth, self=self:
-                         not self.overrides.is_ignored(meth.c_name), methods)
+        methods = self.get_methods_for_object(box_def)
         if methods:
             self.write_heading('Methods')
             for method in methods:
@@ -237,7 +238,7 @@ class DocWriter:
 
     def output_toc(self, files):
         self._fp.write('TOC\n\n')
-        for filename in sorted(files.keys()):
+        for filename in sorted(files):
             obj_def = files[filename]
             self._fp.write(obj_def.c_name + ' - ' + filename + '\n')
 
@@ -245,7 +246,7 @@ class DocWriter:
 
     def create_filename(self, obj_name, output_prefix):
         '''Create output filename for this particular object'''
-        return output_prefix + '-' + string.lower(obj_name) + '.txt'
+        return output_prefix + '-' + obj_name.lower() + '.txt'
 
     def create_toc_filename(self, output_prefix):
         return self.create_filename(self, 'docs', output_prefix)
@@ -257,30 +258,33 @@ class DocWriter:
                 self._fp.write(indent + node.name)
                 if node.interfaces:
                     self._fp.write(' (implements ')
-                    self._fp.write(string.join(node.interfaces, ', '))
+                    self._fp.write(', '.join(node.interfaces))
                     self._fp.write(')\n')
                 else:
                     self._fp.write('\n')
                 handle_node(child, indent + '  ')
         handle_node(hierarchy)
 
+    def serialize_params(self, func_def):
+        params = []
+        for param in func_def.params:
+            params.append(param[1])
+        return ', '.join(params)
+
     # these need to handle default args ...
 
     def create_constructor_prototype(self, func_def):
-        return func_def.is_constructor_of + '(' + \
-               string.join(map(lambda x: x[1], func_def.params), ', ') + \
-               ')'
+        return '%s(%s)' % (func_def.is_constructor_of,
+                           self.serialize_params(func_def))
 
     def create_function_prototype(self, func_def):
-        return func_def.name + '(' + \
-               string.join(map(lambda x: x[1], func_def.params), ', ') + \
-               ')'
+        return '%s(%s)' % (func_def.name,
+                           self.serialize_params(func_def))
 
     def create_method_prototype(self, meth_def):
-        return meth_def.of_object + '.' + \
-               meth_def.name + '(' + \
-               string.join(map(lambda x: x[1], meth_def.params), ', ') + \
-               ')'
+        return '%s.%s(%s)' % (meth_def.of_object,
+                              meth_def.name,
+                              self.serialize_params(meth_def))
 
     def write_class_header(self, obj_name):
         self._fp.write('Class %s\n' % obj_name)
@@ -299,21 +303,20 @@ class DocWriter:
         self._fp.write('class %s' % obj_def.c_name)
         if isinstance(obj_def, definitions.ObjectDef):
             bases = []
-            if obj_def.parent: bases.append(obj_def.parent)
+            if obj_def.parent:
+                bases.append(obj_def.parent)
             bases = bases = obj_def.implements
             if bases:
-                self._fp.write('(%s)' % string.join(bases, ', '))
+                self._fp.write('(%s)' % ', '.join(bases, ))
         self._fp.write(':\n')
 
         constructor = self.parser.find_constructor(obj_def, self.overrides)
         if constructor:
             prototype = self.create_constructor_prototype(constructor)
             self._fp.write('    def %s\n' % prototype)
-        methods = self.parser.find_methods(obj_def)
-        methods = filter(lambda meth, self=self:
-                         not self.overrides.is_ignored(meth.c_name), methods)
-        for meth in methods:
-            prototype = self.create_method_prototype(meth)
+
+        for method in self.get_methods_for_object(obj_def):
+            prototype = self.create_method_prototype(method)
             self._fp.write('    def %s\n' % prototype)
 
     def write_hierarchy(self, obj_name, ancestry):
@@ -322,7 +325,7 @@ class DocWriter:
             self._fp.write(indent + '+-- ' + name)
             if interfaces:
                 self._fp.write(' (implements ')
-                self._fp.write(string.join(interfaces, ', '))
+                self._fp.write(', '.join(interfaces))
                 self._fp.write(')\n')
             else:
                 self._fp.write('\n')
@@ -388,6 +391,7 @@ DOCBOOK_HEADER = """<?xml version="1.0" standalone="no"?>
     "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 """
 
+
 class DocbookDocWriter(DocWriter):
 
     def __init__(self):
@@ -398,31 +402,31 @@ class DocbookDocWriter(DocWriter):
         self._constant_pat = re.compile(r'\%(-?\w+)')
         self._symbol_pat = re.compile(r'#([\w-]+)')
 
-        self._transtable = [ '-' ] * 256
+        self._transtable = ['-'] * 256
         # make string -> reference translation func
         for digit in '0123456789':
             self._transtable[ord(digit)] = digit
 
         for letter in 'abcdefghijklmnopqrstuvwxyz':
             self._transtable[ord(letter)] = letter
-            self._transtable[ord(string.upper(letter))] = letter
-        self._transtable = string.join(self._transtable, '')
+            self._transtable[ord(letter.upper())] = letter
+        self._transtable = ''.join(self._transtable)
 
     def create_filename(self, obj_name, output_prefix):
         '''Create output filename for this particular object'''
-        stem = output_prefix + '-' + string.lower(obj_name)
+        stem = output_prefix + '-' + obj_name.lower()
         return stem + '.xml'
 
     def create_toc_filename(self, output_prefix):
         return self.create_filename('classes', output_prefix)
 
     def make_class_ref(self, obj_name):
-        return 'class-' + string.translate(obj_name, self._transtable)
+        return 'class-' + obj_name.translate(self._transtable)
 
     def make_method_ref(self, meth_def):
-        return 'method-' + string.translate(meth_def.of_object,
-                                            self._transtable) + \
-            '--' + string.translate(meth_def.name, self._transtable)
+        return 'method-%s--%s' % (
+            meth_def.of_object.translate(self._transtable),
+            meth_def.name.translate(self._transtable))
 
     def _format_function(self, match):
         info = self.parser.c_name.get(match.group(1), None)
@@ -453,8 +457,8 @@ class DocbookDocWriter(DocWriter):
             if isinstance(info, defsparser.FunctionDef):
                 if info.is_constructor_of is not None:
                     # should have a link here
-                    return '<methodname>' + self.pyname(info.is_constructor_of) + \
-                           '</methodname>'
+                    return '<methodname>%s</methodname>' % (
+                        self.pyname(info.is_constructor_of), )
                 else:
                     return '<function>' + info.name + '</function>'
             if isinstance(info, defsparser.MethodDef):
@@ -482,16 +486,17 @@ class DocbookDocWriter(DocWriter):
         if singleline:
             return text
 
-        lines = string.split(string.strip(text), '\n')
+        lines = text.strip().split('\n')
         for index in range(len(lines)):
-            if string.strip(lines[index]) == '':
+            if lines[index].strip() == '':
                 lines[index] = '</para>\n<para>'
                 continue
         lines.insert(0, '<para>')
         lines.append('</para>')
-        return string.join(lines, '\n')
+        return '\n'.join(lines)
 
     # write out hierarchy
+
     def write_full_hierarchy(self, hierarchy):
 
         def handle_node(node, indent=''):
@@ -512,7 +517,7 @@ class DocbookDocWriter(DocWriter):
                     self._fp.write('\n')
 
                 indent = indent + '  '
-            node.subclasses.sort(lambda a,b:
+            node.subclasses.sort(lambda a, b:
                                  cmp(self.pyname(a.name), self.pyname(b.name)))
             for child in node.subclasses:
                 handle_node(child, indent)
@@ -523,8 +528,9 @@ class DocbookDocWriter(DocWriter):
         self._fp.write('</synopsis>\n')
 
     # these need to handle default args ...
+
     def create_constructor_prototype(self, func_def):
-        xml = [ '<constructorsynopsis language="python">\n']
+        xml = ['<constructorsynopsis language="python">\n']
         xml.append('    <methodname>__init__</methodname>\n')
         for type, name, dflt, null in func_def.params:
             xml.append('    <methodparam><parameter>')
@@ -538,10 +544,10 @@ class DocbookDocWriter(DocWriter):
         if not func_def.params:
             xml.append('    <methodparam></methodparam>')
         xml.append('  </constructorsynopsis>')
-        return string.join(xml, '')
+        return ''.join(xml)
 
     def create_function_prototype(self, func_def):
-        xml = [ '<funcsynopsis language="python">\n    <funcprototype>\n']
+        xml = ['<funcsynopsis language="python">\n    <funcprototype>\n']
         xml.append('      <funcdef><function>')
         xml.append(func_def.name)
         xml.append('</function></funcdef>\n')
@@ -557,10 +563,10 @@ class DocbookDocWriter(DocWriter):
         if not func_def.params:
             xml.append('      <paramdef></paramdef')
         xml.append('    </funcprototype>\n  </funcsynopsis>')
-        return string.join(xml, '')
+        return ''.join(xml)
 
     def create_method_prototype(self, meth_def, addlink=0):
-        xml = [ '<methodsynopsis language="python">\n']
+        xml = ['<methodsynopsis language="python">\n']
         xml.append('    <methodname>')
         if addlink:
             xml.append('<link linkend="%s">' % self.make_method_ref(meth_def))
@@ -580,7 +586,7 @@ class DocbookDocWriter(DocWriter):
         if not meth_def.params:
             xml.append('    <methodparam></methodparam>')
         xml.append('  </methodsynopsis>')
-        return string.join(xml, '')
+        return ''.join(xml)
 
     def write_class_header(self, obj_name):
         self._fp.write(DOCBOOK_HEADER)
@@ -625,20 +631,20 @@ class DocbookDocWriter(DocWriter):
 
         constructor = self.parser.find_constructor(obj_def, self.overrides)
         if constructor:
-            self._fp.write('%s\n' % self.create_constructor_prototype(constructor))
-        for method in self.parser.find_methods(obj_def):
-            if self.overrides.is_ignored(method.c_name):
-                continue
-            self._fp.write('%s\n' % self.create_method_prototype(
-                method, addlink=1))
+            self._fp.write(
+                '%s\n' % self.create_constructor_prototype(constructor))
+        for method in self.get_methods_for_object(obj_def):
+            self._fp.write(
+                '%s\n' % self.create_method_prototype(method, addlink=1))
         self._fp.write('</classsynopsis>\n\n')
 
     def write_hierarchy(self, obj_name, ancestry):
         self._fp.write('<synopsis>')
         indent = ''
         for name, interfaces in ancestry:
-            self._fp.write(indent + '+-- <link linkend="' +
-                     self.make_class_ref(name) + '">'+ self.pyname(name) + '</link>')
+            self._fp.write(
+                '%s+-- <link linkend="%s">%s</link>' %
+                (indent, self.make_class_ref(name), self.pyname(name)))
             if interfaces:
                 self._fp.write(' (implements ')
                 for i in range(len(interfaces)):
@@ -659,7 +665,7 @@ class DocbookDocWriter(DocWriter):
         self._fp.write('  <variablelist>\n')
         for type, name, dflt, null in params:
             if func_doc:
-                descr = string.strip(func_doc.get_param_description(name))
+                descr = func_doc.get_param_description(name).strip()
             else:
                 descr = 'a ' + type
             self._fp.write(VARIABLE_TEMPLATE % dict(
@@ -667,7 +673,7 @@ class DocbookDocWriter(DocWriter):
                 description=self.reformat_text(descr, singleline=1)))
         if ret and ret != 'none':
             if func_doc and func_doc.ret:
-                descr = string.strip(func_doc.ret)
+                descr = func_doc.ret.strip()
             else:
                 descr = 'a ' + ret
             self._fp.write(VARIABLE_TEMPLATE % dict(
@@ -685,9 +691,11 @@ class DocbookDocWriter(DocWriter):
         self._fp.write('\n\n\n')
 
     def write_method(self, meth_def, func_doc):
-        self._fp.write('  <refsect2 id="' + self.make_method_ref(meth_def) + '">\n')
-        self._fp.write('    <title>' + self.pyname(meth_def.of_object) + '.' +
-                 meth_def.name + '</title>\n\n')
+        self._fp.write('  <refsect2 id="%s">\n' % (
+            self.make_method_ref(meth_def), ))
+        self._fp.write('    <title>%s.%s</title>\n\n' % (
+            self.pyname(meth_def.of_object),
+            meth_def.name))
         prototype = self.create_method_prototype(meth_def)
         self._fp.write('<programlisting>%s</programlisting>\n' % prototype)
         self.write_params(meth_def.params, meth_def.ret, func_doc)
@@ -701,11 +709,12 @@ class DocbookDocWriter(DocWriter):
         #self._fp.write('<reference id="class-reference">\n')
         #self._fp.write('  <title>Class Documentation</title>\n')
         #for filename, obj_def in files:
-        #    self._fp.write('&' + string.translate(obj_def.c_name,
-        #                                    self._transtable) + ';\n')
+        #    self._fp.write('&' +
+        #                   obj_def.c_name.translate(self._transtable) + ';\n')
         #self._fp.write('</reference>\n')
 
-        self._fp.write('<reference id="class-reference" xmlns:xi="http://www.w3.org/2001/XInclude">\n')
+        self._fp.write('<reference id="class-reference" '
+                       'xmlns:xi="http://www.w3.org/2001/XInclude">\n')
         self._fp.write('  <title>Class Reference</title>\n')
         for filename in sorted(files):
             self._fp.write('  <xi:include href="%s"/>\n' % filename)
@@ -730,7 +739,7 @@ def main(args):
     for opt, arg in opts:
         if opt in ('-d', '--defs-file'):
             defs_file = arg
-        if opt in ('--override',):
+        if opt in ('--override', ):
             overrides_file = arg
         elif opt in ('-s', '--source-dir'):
             source_dirs.append(arg)
