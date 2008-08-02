@@ -516,7 +516,7 @@ pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
     if (!PyString_Check(arg)) {
 	PyErr_Format(PyExc_TypeError,
-		     "first argument must be a string, not %r",
+		     "first argument must be a string, not '%s'",
 		     PyString_AS_STRING(PyObject_Repr(arg)));
 	return NULL;
     }
