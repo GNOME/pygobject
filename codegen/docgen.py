@@ -32,7 +32,10 @@ def build_object_tree(parser):
     root = Node(None)
     nodes = { None: root }
     for obj_def in objects:
-        parent_node = nodes[obj_def.parent]
+        parent_name = obj_def.parent
+        if parent_name == 'GObject':
+            parent_name = None
+        parent_node = nodes[parent_name]
         node = Node(obj_def.c_name, obj_def.implements)
         parent_node.add_child(node)
         nodes[node.name] = node
@@ -76,6 +79,7 @@ class DocWriter:
 
     def add_sourcedirs(self, source_dirs):
         self.docs = docextract.extract(source_dirs, self.docs)
+
     def add_tmpldirs(self, tmpl_dirs):
         self.docs = docextract.extract_tmpl(tmpl_dirs, self.docs)
 
@@ -102,10 +106,11 @@ class DocWriter:
     def pyname(self, name):
         return self.classmap.get(name, name)
 
-    def __compare(self, obja, objb):
+    def _compare(self, obja, objb):
         return cmp(self.pyname(obja.c_name), self.pyname(objb.c_name))
+
     def output_docs(self, output_prefix):
-        files = []
+        files = {}
 
         # class hierarchy
         hierarchy = build_object_tree(self.parser)
@@ -116,7 +121,8 @@ class DocWriter:
 
         obj_defs = self.parser.objects + self.parser.interfaces + \
                    self.parser.boxes + self.parser.pointers
-        obj_defs.sort(self.__compare)
+        obj_defs.sort(self._compare)
+
         for obj_def in obj_defs:
             filename = self.create_filename(obj_def.c_name, output_prefix)
             fp = open(filename, 'w')
@@ -129,13 +135,15 @@ class DocWriter:
             elif isinstance(obj_def, definitions.PointerDef):
                 self.output_boxed_docs(obj_def, fp)
             fp.close()
-            files.append((os.path.basename(filename), obj_def))
+            files[os.path.basename(filename)] = obj_def
 
-        if files:
-            filename = self.create_toc_filename(output_prefix)
-            fp = open(filename, 'w')
-            self.output_toc(files, fp)
-            fp.close()
+        if not files:
+            return
+
+        output_filename = self.create_toc_filename(output_prefix)
+        fp = open(output_filename, 'w')
+        self.output_toc(files, fp)
+        fp.close()
 
     def output_object_docs(self, obj_def, fp=sys.stdout):
         self.write_class_header(obj_def.c_name, fp)
@@ -228,13 +236,16 @@ class DocWriter:
 
     def output_toc(self, files, fp=sys.stdout):
         fp.write('TOC\n\n')
-        for filename, obj_def in files:
+        for filename in sorted(files.keys()):
+            obj_def = files[filename]
             fp.write(obj_def.c_name + ' - ' + filename + '\n')
 
     # override the following to create a more complex output format
+
     def create_filename(self, obj_name, output_prefix):
         '''Create output filename for this particular object'''
         return output_prefix + '-' + string.lower(obj_name) + '.txt'
+
     def create_toc_filename(self, output_prefix):
         return self.create_filename(self, 'docs', output_prefix)
 
@@ -252,14 +263,17 @@ class DocWriter:
         handle_node(hierarchy, fp)
 
     # these need to handle default args ...
+
     def create_constructor_prototype(self, func_def):
         return func_def.is_constructor_of + '(' + \
                string.join(map(lambda x: x[1], func_def.params), ', ') + \
                ')'
+
     def create_function_prototype(self, func_def):
         return func_def.name + '(' + \
                string.join(map(lambda x: x[1], func_def.params), ', ') + \
                ')'
+
     def create_method_prototype(self, meth_def):
         return meth_def.of_object + '.' + \
                meth_def.name + '(' + \
@@ -269,12 +283,16 @@ class DocWriter:
     def write_class_header(self, obj_name, fp):
         fp.write('Class %s\n' % obj_name)
         fp.write('======%s\n\n' % ('=' * len(obj_name)))
+
     def write_class_footer(self, obj_name, fp):
         pass
+
     def write_heading(self, text, fp):
         fp.write('\n' + text + '\n' + ('-' * len(text)) + '\n')
+
     def close_section(self, fp):
         pass
+
     def write_synopsis(self, obj_def, fp):
         fp.write('class %s' % obj_def.c_name)
         if isinstance(obj_def, definitions.ObjectDef):
@@ -308,6 +326,7 @@ class DocWriter:
                 fp.write('\n')
             indent = indent + '  '
         fp.write('\n')
+
     def write_constructor(self, func_def, func_doc, fp):
         prototype = self.create_constructor_prototype(func_def)
         fp.write(prototype + '\n\n')
@@ -326,6 +345,7 @@ class DocWriter:
         if func_doc and func_doc.description:
             fp.write(func_doc.description)
         fp.write('\n\n\n')
+
     def write_method(self, meth_def, func_doc, fp):
         prototype = self.create_method_prototype(meth_def)
         fp.write(prototype + '\n\n')
@@ -346,42 +366,44 @@ class DocWriter:
             fp.write(func_doc.description)
         fp.write('\n\n')
 
+
 class DocbookDocWriter(DocWriter):
-    def __init__(self, use_xml=0):
+
+    def __init__(self):
         DocWriter.__init__(self)
-        self.use_xml = use_xml
+
+        self._function_pat = re.compile(r'(\w+)\s*\(\)')
+        self._parameter_pat = re.compile(r'\@(\w+)')
+        self._constant_pat = re.compile(r'\%(-?\w+)')
+        self._symbol_pat = re.compile(r'#([\w-]+)')
+
+        self._transtable = [ '-' ] * 256
+        # make string -> reference translation func
+        for digit in '0123456789':
+            self._transtable[ord(digit)] = digit
+
+        for letter in 'abcdefghijklmnopqrstuvwxyz':
+            self._transtable[ord(letter)] = letter
+            self._transtable[ord(string.upper(letter))] = letter
+        self._transtable = string.join(self._transtable, '')
 
     def create_filename(self, obj_name, output_prefix):
         '''Create output filename for this particular object'''
         stem = output_prefix + '-' + string.lower(obj_name)
-        if self.use_xml:
-            return stem + '.xml'
-        else:
-            return stem + '.sgml'
-    def create_toc_filename(self, output_prefix):
-        if self.use_xml:
-            return self.create_filename('classes', output_prefix)
-        else:
-            return self.create_filename('docs', output_prefix)
+        return stem + '.xml'
 
-    # make string -> reference translation func
-    __transtable = [ '-' ] * 256
-    for digit in '0123456789':
-        __transtable[ord(digit)] = digit
-    for letter in 'abcdefghijklmnopqrstuvwxyz':
-        __transtable[ord(letter)] = letter
-        __transtable[ord(string.upper(letter))] = letter
-    __transtable = string.join(__transtable, '')
+    def create_toc_filename(self, output_prefix):
+        return self.create_filename('classes', output_prefix)
 
     def make_class_ref(self, obj_name):
-        return 'class-' + string.translate(obj_name, self.__transtable)
+        return 'class-' + string.translate(obj_name, self._transtable)
+
     def make_method_ref(self, meth_def):
         return 'method-' + string.translate(meth_def.of_object,
-                                            self.__transtable) + \
-            '--' + string.translate(meth_def.name, self.__transtable)
+                                            self._transtable) + \
+            '--' + string.translate(meth_def.name, self._transtable)
 
-    __function_pat = re.compile(r'(\w+)\s*\(\)')
-    def __format_function(self, match):
+    def _format_function(self, match):
         info = self.parser.c_name.get(match.group(1), None)
         if info:
             if isinstance(info, defsparser.FunctionDef):
@@ -397,14 +419,14 @@ class DocbookDocWriter(DocWriter):
                        info.name + '()</function></link>'
         # fall through through
         return '<function>' + match.group(1) + '()</function>'
-    __parameter_pat = re.compile(r'\@(\w+)')
-    def __format_param(self, match):
+
+    def _format_param(self, match):
         return '<parameter>' + match.group(1) + '</parameter>'
-    __constant_pat = re.compile(r'\%(-?\w+)')
-    def __format_const(self, match):
+
+    def _format_const(self, match):
         return '<literal>' + match.group(1) + '</literal>'
-    __symbol_pat = re.compile(r'#([\w-]+)')
-    def __format_symbol(self, match):
+
+    def _format_symbol(self, match):
         info = self.parser.c_name.get(match.group(1), None)
         if info:
             if isinstance(info, defsparser.FunctionDef):
@@ -430,10 +452,10 @@ class DocbookDocWriter(DocWriter):
 
     def reformat_text(self, text, singleline=0):
         # replace special strings ...
-        text = self.__function_pat.sub(self.__format_function, text)
-        text = self.__parameter_pat.sub(self.__format_param, text)
-        text = self.__constant_pat.sub(self.__format_const, text)
-        text = self.__symbol_pat.sub(self.__format_symbol, text)
+        text = self._function_pat.sub(self._format_function, text)
+        text = self._parameter_pat.sub(self._format_param, text)
+        text = self._constant_pat.sub(self._format_const, text)
+        text = self._symbol_pat.sub(self._format_symbol, text)
 
         # don't bother with <para> expansion for single line text.
         if singleline: return text
@@ -449,6 +471,7 @@ class DocbookDocWriter(DocWriter):
 
     # write out hierarchy
     def write_full_hierarchy(self, hierarchy, fp):
+
         def handle_node(node, fp, indent=''):
             if node.name:
                 fp.write('%s<link linkend="%s">%s</link>' %
@@ -471,10 +494,10 @@ class DocbookDocWriter(DocWriter):
                                  cmp(self.pyname(a.name), self.pyname(b.name)))
             for child in node.subclasses:
                 handle_node(child, fp, indent)
-        if self.use_xml:
-            fp.write('<?xml version="1.0" standalone="no"?>\n')
-            fp.write('<!DOCTYPE synopsis PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-            fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
+
+        fp.write('<?xml version="1.0" standalone="no"?>\n')
+        fp.write('<!DOCTYPE synopsis PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
+        fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
         fp.write('<synopsis>')
         handle_node(hierarchy, fp)
         fp.write('</synopsis>\n')
@@ -496,6 +519,7 @@ class DocbookDocWriter(DocWriter):
             sgml.append('    <methodparam></methodparam>')
         sgml.append('  </constructorsynopsis>')
         return string.join(sgml, '')
+
     def create_function_prototype(self, func_def):
         sgml = [ '<funcsynopsis language="python">\n    <funcprototype>\n']
         sgml.append('      <funcdef><function>')
@@ -514,6 +538,7 @@ class DocbookDocWriter(DocWriter):
             sgml.append('      <paramdef></paramdef')
         sgml.append('    </funcprototype>\n  </funcsynopsis>')
         return string.join(sgml, '')
+
     def create_method_prototype(self, meth_def, addlink=0):
         sgml = [ '<methodsynopsis language="python">\n']
         sgml.append('    <methodname>')
@@ -538,10 +563,9 @@ class DocbookDocWriter(DocWriter):
         return string.join(sgml, '')
 
     def write_class_header(self, obj_name, fp):
-        if self.use_xml:
-            fp.write('<?xml version="1.0" standalone="no"?>\n')
-            fp.write('<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-            fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
+        fp.write('<?xml version="1.0" standalone="no"?>\n')
+        fp.write('<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
+        fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
         fp.write('<refentry id="' + self.make_class_ref(obj_name) + '">\n')
         fp.write('  <refmeta>\n')
         fp.write('    <refentrytitle>%s</refentrytitle>\n'
@@ -553,11 +577,14 @@ class DocbookDocWriter(DocWriter):
         fp.write('    <refname>%s</refname><refpurpose></refpurpose>\n'
                  % self.pyname(obj_name))
         fp.write('  </refnamediv>\n\n')
+
     def write_class_footer(self, obj_name, fp):
         fp.write('</refentry>\n')
+
     def write_heading(self, text, fp):
         fp.write('  <refsect1>\n')
         fp.write('    <title>' + text + '</title>\n\n')
+
     def close_section(self, fp):
         fp.write('  </refsect1>\n')
 
@@ -662,60 +689,27 @@ class DocbookDocWriter(DocWriter):
         fp.write('  </refsect2>\n\n\n')
 
     def output_toc(self, files, fp=sys.stdout):
-        if self.use_xml:
-            fp.write('<?xml version="1.0" standalone="no"?>\n')
-            fp.write('<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
-            fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
-            #for filename, obj_def in files:
-            #    fp.write('  <!ENTITY ' + string.translate(obj_def.c_name,
-            #                                              self.__transtable) +
-            #             ' SYSTEM "' + filename + '" >\n')
-            #fp.write(']>\n\n')
+        fp.write('<?xml version="1.0" standalone="no"?>\n')
+        fp.write('<!DOCTYPE reference PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"\n')
+        fp.write('    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">\n')
+        #for filename, obj_def in files:
+        #    fp.write('  <!ENTITY ' + string.translate(obj_def.c_name,
+        #                                              self._transtable) +
+        #             ' SYSTEM "' + filename + '" >\n')
+        #fp.write(']>\n\n')
 
-            #fp.write('<reference id="class-reference">\n')
-            #fp.write('  <title>Class Documentation</title>\n')
-            #for filename, obj_def in files:
-            #    fp.write('&' + string.translate(obj_def.c_name,
-            #                                    self.__transtable) + ';\n')
-            #fp.write('</reference>\n')
+        #fp.write('<reference id="class-reference">\n')
+        #fp.write('  <title>Class Documentation</title>\n')
+        #for filename, obj_def in files:
+        #    fp.write('&' + string.translate(obj_def.c_name,
+        #                                    self._transtable) + ';\n')
+        #fp.write('</reference>\n')
 
-            fp.write('<reference id="class-reference" xmlns:xi="http://www.w3.org/2001/XInclude">\n')
-            fp.write('  <title>Class Reference</title>\n')
-            for filename, obj_def in files:
-                fp.write('  <xi:include href="%s"/>\n' % filename)
-            fp.write('</reference>\n')
-        else:
-            fp.write('<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.1.2//EN" [\n')
-            for filename, obj_def in files:
-                fp.write('  <!ENTITY ' + string.translate(obj_def.c_name,
-                                                          self.__transtable) +
-                         ' SYSTEM "' + filename + '" >\n')
-            fp.write(']>\n\n')
-
-            fp.write('<book id="index">\n\n')
-            fp.write('  <bookinfo>\n')
-            fp.write('    <title>PyGTK Docs</title>\n')
-            fp.write('    <authorgroup>\n')
-            fp.write('      <author>\n')
-            fp.write('        <firstname>James</firstname>\n')
-            fp.write('        <surname>Henstridge</surname>\n')
-            fp.write('      </author>\n')
-            fp.write('    </authorgroup>\n')
-            fp.write('  </bookinfo>\n\n')
-
-            fp.write('  <chapter id="class-hierarchy">\n')
-            fp.write('    <title>Class Hierarchy</title>\n')
-            fp.write('    <para>Not done yet</para>\n')
-            fp.write('  </chapter>\n\n')
-
-            fp.write('  <reference id="class-reference">\n')
-            fp.write('    <title>Class Documentation</title>\n')
-            for filename, obj_def in files:
-                fp.write('&' + string.translate(obj_def.c_name,
-                                                self.__transtable) + ';\n')
-
-            fp.write('  </reference>\n')
-            fp.write('</book>\n')
+        fp.write('<reference id="class-reference" xmlns:xi="http://www.w3.org/2001/XInclude">\n')
+        fp.write('  <title>Class Reference</title>\n')
+        for filename in sorted(files):
+            fp.write('  <xi:include href="%s"/>\n' % filename)
+        fp.write('</reference>\n')
 
 if __name__ == '__main__':
     try:
@@ -747,5 +741,5 @@ if __name__ == '__main__':
 
     d = DocbookDocWriter()
     d.add_sourcedirs(source_dirs)
-    d.add_docs(defs_file, overrides_file, 'gtk')
+    d.add_docs(defs_file, overrides_file, 'gio')
     d.output_docs(output_prefix)

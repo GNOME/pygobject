@@ -1,5 +1,6 @@
 ;; -*- scheme -*-
 
+(include "gio-types.defs")
 
 ;; From gappinfo.h
 

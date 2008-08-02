@@ -1,5 +1,17 @@
 2008-08-02  Johan Dahlin  <johan@gnome.org>
 
+	* codegen/docgen.py:
+	Remove SGML support, require python 2.4, modernize,
+	PEP-8ify. Make it run on gio.
+
+	* codegen/definitions.py:
+	Make property iterable
+
+	* gio/gio.defs:
+	Include the gio-types.defs file.
+
+2008-08-02  Johan Dahlin  <johan@gnome.org>
+
 	* glib/glibmodule.c (pyglib_set_prgname):
 	* glib/pygoptioncontext.c (pyg_option_context_init),
 	(pyg_option_context_set_help_enabled),
