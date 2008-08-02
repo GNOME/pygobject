@@ -72,6 +72,45 @@ class TestFile(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
+    def testCreateAsync(self):
+        def callback(file, result):
+            try:
+                stream = file.create_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                w = stream.write("testing")
+                cont, leng, etag = file.load_contents()
+                self.assertEqual(cont, "testing")
+            finally:
+                if os.path.exists('temp.txt'):
+                    os.unlink("temp.txt")
+                loop.quit()
+
+        gfile = gio.File("temp.txt")
+        gfile.create_async(callback, gio.FILE_CREATE_NONE,
+                           glib.PRIORITY_HIGH)
+
+        loop = glib.MainLoop()
+        loop.run()
+
+    def testCreateAsyncNoargs(self):
+        def callback(file, result):
+            try:
+                stream = file.create_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                w = stream.write("testing")
+                cont, leng, etag = file.load_contents()
+                self.assertEqual(cont, "testing")
+            finally:
+                if os.path.exists('temp.txt'):
+                    os.unlink("temp.txt")
+                loop.quit()
+
+        gfile = gio.File("temp.txt")
+        gfile.create_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
+
     def testReadAsyncError(self):
         self.assertRaises(TypeError, self.file.read_async)
         self.assertRaises(TypeError, self.file.read_async, "foo", "bar")

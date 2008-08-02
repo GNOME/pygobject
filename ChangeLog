@@ -1,3 +1,12 @@
+2008-08-02  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 546020 – Wrap GFile.create_async
+
+	* tests/test_gio.py:
+	* gio/gfile.override:
+	* gio/gio.defs:
+	Wrap GFile.create_async with docs and test
+
 2008-08-02  Johan Dahlin  <johan@gnome.org>
 
 	* codegen/docgen.py:

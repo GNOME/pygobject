@@ -1420,6 +1420,16 @@
 )
 
 (define-method create_async
+  (docstring
+  "F.create_async(callback [flags, [,io_priority [,cancellable [,user_data]]]]) -> file created\n"
+  "\n"
+  "Asynchronously creates a new file and returns an output stream for\n"
+  "writing to it. The file must not already exist.\n"
+  "For more details, see F.create() which is the synchronous\n"
+  "version of this call.\n"
+  "When the operation is finished, callback will be called. You can\n"
+  "then call F.create_finish() to get the result of the operation."
+  )
   (of-object "GFile")
   (c-name "g_file_create_async")
   (return-type "none")
