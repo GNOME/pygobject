@@ -1,7 +1,5 @@
 ;; -*- scheme -*-
 
-(include "gio-types.defs")
-
 ;; From gappinfo.h
 
 (define-function app_info_get_type
