@@ -111,6 +111,49 @@ class TestFile(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
+    def testReplaceAsync(self):
+        self._f.write("testing")
+        self._f.close()
+
+        def callback(file, result):
+            try:
+                stream = file.replace_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                stream.write("some new string")
+                stream.close()
+                cont, leng, etag = file.load_contents()
+                self.assertEqual(cont, "some new string")
+            finally:
+                loop.quit()
+
+
+        self.file.replace_async(callback, None, True, gio.FILE_CREATE_NONE,
+                                glib.PRIORITY_HIGH)
+
+        loop = glib.MainLoop()
+        loop.run()
+
+    def testReplaceAsyncNoargs(self):
+        self._f.write("testing")
+        self._f.close()
+
+        def callback(file, result):
+            try:
+                stream = file.replace_finish(result)
+                self.failUnless(isinstance(stream, gio.OutputStream))
+                stream.write("some new string")
+                stream.close()
+                cont, leng, etag = file.load_contents()
+                self.assertEqual(cont, "some new string")
+            finally:
+                loop.quit()
+
+
+        self.file.replace_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
+
     def testReadAsyncError(self):
         self.assertRaises(TypeError, self.file.read_async)
         self.assertRaises(TypeError, self.file.read_async, "foo", "bar")
@@ -165,6 +208,20 @@ class TestFile(unittest.TestCase):
 
         canc = gio.Cancellable()
         self.file.load_contents_async(callback, cancellable=canc)
+
+        loop = glib.MainLoop()
+        loop.run()
+
+    def testQueryInfoAsync(self):
+        def callback(file, result):
+            try:
+                info = file.query_info_finish(result)
+                self.failUnless(isinstance(info, gio.FileInfo))
+                self.failUnless(info.get_name(), "file.txt")
+            finally:
+                loop.quit()
+
+        self.file.query_info_async(callback, "standard")
 
         loop = glib.MainLoop()
         loop.run()

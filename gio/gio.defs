@@ -1453,6 +1453,16 @@
 )
 
 (define-method replace_async
+  (docstring
+  "F.replace_async(callback [etag, [make_backup, [flags, [io_priority, [cancellable, [user_data]]]]]]) -> file replace\n"
+  "\n"
+  "Asynchronously overwrites the file, replacing the contents, possibly\n"
+  "creating a backup copy of the file first.\n"
+  "For more details, see F.replace() which is the synchronous\n"
+  "version of this call.\n"
+  "When the operation is finished, callback will be called. You can\n"
+  "then call F.replace_finish() to get the result of the operation."
+  )
   (of-object "GFile")
   (c-name "g_file_replace_async")
   (return-type "none")
@@ -1499,6 +1509,16 @@
 )
 
 (define-method query_info_async
+  (docstring
+  "F.query_info_async(callback, attributes, [flags, [io_priority, [cancellable, [user_data]]]]) -> query attributes\n\n"
+  "Asynchronously gets the requested information about specified file.\n"
+  "The result is a GFileInfo object that contains key-value attributes\n"
+  "(such as type or size for the file).\n"
+  "For more details, see F.query_info() which is the synchronous\n"
+  "version of this call. \n"
+  "When the operation is finished, callback will be called. You can\n"
+  "then call F.query_info_finish() to get the result of the operation.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_query_info_async")
   (return-type "none")

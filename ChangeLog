@@ -1,3 +1,12 @@
+2008-08-03  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 546046 – Wrap GFile.replace_async and query_info_async
+
+	* tests/test_gio.py:
+	* gio/gfile.override:
+	* gio/gio.defs:
+	Wrap GFile.replace_async and query_info_async with docs and test.
+
 2008-08-03  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* glib/pyglib.h:
