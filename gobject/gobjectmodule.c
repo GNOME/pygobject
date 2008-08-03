@@ -1788,7 +1788,7 @@ pygobject_gil_state_release (int flag)
 static PyObject *
 pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 {
-    if (!pyglib_enable_threads())
+    if (pyglib_enable_threads())
         return NULL;
     
     Py_INCREF(Py_None);

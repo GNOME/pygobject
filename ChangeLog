@@ -1,3 +1,13 @@
+2008-08-03  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* glib/pyglib.h:
+	* glib/pyglib.c (pyglib_enable_threads): Change return value from
+	'gboolean' to 'int' and changed semantics to Pythonic: restores
+	backwards compatibility.
+
+	* gobject/gobjectmodule.c (pyg_threads_init): Treat return value
+	accordingly (bug #544946).
+
 2008-08-02  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 546020 – Wrap GFile.create_async
