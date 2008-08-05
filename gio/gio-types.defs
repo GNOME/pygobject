@@ -216,6 +216,15 @@
   (gtype-id "G_TYPE_NATIVE_VOLUME_MONITOR")
 )
 
+(define-object FileIcon
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GFileIcon")
+  (gtype-id "G_TYPE_FILE_ICON")
+  (implements "GIcon")
+  (implements "GLoadableIcon")
+)
+
 (define-object ThemedIcon
   (in-module "gio")
   (parent "GObject")

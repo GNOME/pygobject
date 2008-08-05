@@ -1,3 +1,16 @@
+2008-08-05  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 546135 – GIcon and implementations improvements
+
+	* gio/gio-types.defs (FileIcon): New 'define-object'.
+
+	* gio/gio.override (pygio_do_icon_richcompare)
+	(_wrap_g_icon_tp_richcompare, _wrap_g_icon_tp_hash)
+	(_wrap_g_file_icon_tp_richcompare, _wrap_g_file_icon_tp_hash)
+	(_wrap_g_file_icon_tp_repr, _wrap_g_themed_icon_tp_richcompare)
+	(_wrap_g_themed_icon_tp_hash, _wrap_g_themed_icon_tp_repr): New
+	functions.
+
 2008-08-03  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 546046 – Wrap GFile.replace_async and query_info_async
