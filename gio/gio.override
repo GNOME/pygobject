@@ -38,6 +38,8 @@ typedef struct {
     PyObject *data;
 } PyGIONotify;
 
+static PyObject *  pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op);
+
 static void
 py_decref_callback (gpointer data)
 {
@@ -239,7 +241,7 @@ _wrap_g_file_icon_tp_hash(PyGObject *self)
 }
 %%
 override-slot GFileIcon.tp_repr
-static int
+static PyObject *
 _wrap_g_file_icon_tp_repr(PyGObject *self)
 {
     GFile *file = g_file_icon_get_file(G_FILE_ICON(self->obj));
@@ -297,7 +299,7 @@ _wrap_g_themed_icon_tp_hash(PyGObject *self)
 }
 %%
 override-slot GThemedIcon.tp_repr
-static int
+static PyObject *
 _wrap_g_themed_icon_tp_repr(PyGObject *self)
 {
     const char * const *names = g_themed_icon_get_names(G_THEMED_ICON(self->obj));
