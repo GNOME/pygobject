@@ -121,25 +121,31 @@ pyglib_gil_state_release(PyGILState_STATE state)
     PyGILState_Release(state);
 }
 
+/**
+ * pyglib_enable_threads:
+ *
+ * Returns: TRUE if threading is enabled, FALSE otherwise.
+ *
+ */
 #ifdef DISABLE_THREADING
-int
+gboolean
 pyglib_enable_threads(void)
 {
     PyErr_SetString(PyExc_RuntimeError,
 		    "pyglib threading disabled at compile time");
-    return -1;
+    return FALSE;
 }
 #else
 /* Enable threading; note that the GIL must be held by the current
  * thread when this function is called
  */
-int
+gboolean
 pyglib_enable_threads(void)
 {
-    g_return_val_if_fail (_PyGLib_API != NULL, -1);
+    g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
 
     if (_PyGLib_API->threads_enabled)
-	return 0;
+	return TRUE;
   
     PyEval_InitThreads();
     if (!g_threads_got_initialized)
@@ -148,7 +154,7 @@ pyglib_enable_threads(void)
     _PyGLib_API->threads_enabled = TRUE;
     pyglib_thread_state_tls_key = PyThread_create_key();
     
-    return 0;
+    return TRUE;
 }
 #endif
 

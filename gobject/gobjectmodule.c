@@ -1788,11 +1788,20 @@ pygobject_gil_state_release (int flag)
 static PyObject *
 pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 {
-    if (pyglib_enable_threads())
+    if (!pyglib_enable_threads())
         return NULL;
     
     Py_INCREF(Py_None);
     return Py_None;
+}
+
+/* Only for backwards compatibility */
+int
+pygobject_enable_threads(void)
+{
+    if (!pyglib_enable_threads())
+	return -1;
+    return 0;
 }
 
 static PyObject *
@@ -2452,7 +2461,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_flags_from_gtype,
 
   FALSE, /* threads_enabled */
-  pyglib_enable_threads,
+  pygobject_enable_threads,
   pygobject_gil_state_ensure,
   pygobject_gil_state_release,
   pyg_register_class_init,
