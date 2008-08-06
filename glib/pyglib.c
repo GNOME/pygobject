@@ -63,9 +63,11 @@ pyglib_init(void)
 			 "could not import glib (error was: %s)",
 			 _PyUnicode_AsString(py_orig_exc));
 	    Py_DECREF(py_orig_exc);
-        } else
+        } else {
 	    PyErr_SetString(PyExc_ImportError,
 			    "could not import glib (no error given)");
+	}
+	return;
     }
     
     cobject = PyObject_GetAttrString(glib, "_PyGLib_API");
@@ -75,6 +77,7 @@ pyglib_init(void)
 	PyErr_SetString(PyExc_ImportError,
 			"could not import glib (could not find _PyGLib_API object)");
 	Py_DECREF(glib);
+	return;
     }
 
     _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
