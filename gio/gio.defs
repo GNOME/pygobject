@@ -1710,6 +1710,7 @@
 
 (define-method copy
   (docstring
+"F.copy(destination, [callback, flags, cancellable, user_data])\n"
 "Copies the file source to the location specified by destination.\n"
 "Can not handle recursive copies of directories.\n"
 "\n"
@@ -1762,6 +1763,7 @@
 
 (define-method move
   (docstring
+"F.move(destination, [callback, flags, cancellable, user_data])\n"
 "Tries to move the file or directory source to the location\n"
 "specified by destination. If native move operations are\n"
 "supported then this is used, otherwise a copy + delete fallback\n"

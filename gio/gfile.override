@@ -1,4 +1,4 @@
-%%/* -*- Mode: C; c-basic-offset: 4 -*-
+/* -*- Mode: C; c-basic-offset: 4 -*-
  * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
  *
@@ -53,7 +53,7 @@ file_progress_callback_marshal(goffset current_num_bytes,
     Py_DECREF(notify->callback);
     Py_XDECREF(notify->data);
     g_slice_free(PyGIONotify, notify);
-
+    
     pyg_gil_state_release(state);
 }
 %%
@@ -517,8 +517,8 @@ _wrap_g_file_copy(PyGObject *self,
 		  PyObject *args,
 		  PyObject *kwargs)
 {
-    static char *kwlist[] = { "destination", "flags",
-			      "cancellable", "progress_callback",
+    static char *kwlist[] = { "destination", "progress_callback",
+			      "flags", "cancellable", 
 			      "user_data", NULL };
     PyGIONotify *notify;
     PyObject *py_flags = NULL;
@@ -587,8 +587,8 @@ _wrap_g_file_move(PyGObject *self,
 		  PyObject *args,
 		  PyObject *kwargs)
 {
-    static char *kwlist[] = { "destination", "flags",
-			      "cancellable", "progress_callback",
+    static char *kwlist[] = { "destination", "progress_callback",
+			      "flags", "cancellable", 
 			      "user_data", NULL };
     PyGIONotify *notify;
     PyObject *py_flags = NULL;

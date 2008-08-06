@@ -1,5 +1,12 @@
 2008-08-06  Johan Dahlin  <johan@gnome.org>
 
+	* gio/gfile.override:
+	* gio/gio.defs:
+	Move the progress callback for move/copy so it's consistent with
+	the documentation and positional arguments. Update documentation as well
+
+2008-08-06  Johan Dahlin  <johan@gnome.org>
+
 	* glib/pyglib.c (pyglib_enable_threads):
 	* gobject/gobjectmodule.c (pyg_threads_init),
 	(pygobject_enable_threads):
