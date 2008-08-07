@@ -1,3 +1,12 @@
+2008-08-07  Jonathan Matthew  <jonathan@d14n.org>
+
+	Bug 546734 – Missing Py_INCREFs for some file async methods
+
+	* gio/gfile.override:
+	Increment refcounts on callbacks and callback data for
+	append_to_async, create_async, replace_async, query_info_async and
+	load_contents_async as for all other async methods.
+
 2008-08-06  Johan Dahlin  <johan@gnome.org>
 
 	* gio/gfile.override:
