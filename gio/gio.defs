@@ -2314,10 +2314,16 @@
   (return-type "GType")
 )
 
-(define-method icon_new
-  (of-object "GFile")
+(define-function file_icon_new
   (c-name "g_file_icon_new")
+  (is-constructor-of "GFileIcon")
   (return-type "GIcon*")
+  ;; Note: starting with GLib 2.18 we could use (properties ...)
+  ;; instead, but I don't know if it is possible to branch on version
+  ;; in codegen.
+  (parameters
+    '("GFile*" "file")
+  )
 )
 
 (define-method get_file

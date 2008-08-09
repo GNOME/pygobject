@@ -8,21 +8,21 @@ from common import gio, glib
 
 class TestIcon(unittest.TestCase):
     def test_eq(self):
-        self.assertEquals(gio.File('foo.png').icon_new(),
-                          gio.File('foo.png').icon_new())
+        self.assertEquals(gio.FileIcon(gio.File('foo.png')),
+                          gio.FileIcon(gio.File('foo.png')))
         self.assertEquals(gio.ThemedIcon('foo'),
                           gio.ThemedIcon('foo'))
 
-        self.assertNotEqual(gio.File('foo.png').icon_new(),
-                            gio.File('bar.png').icon_new())
+        self.assertNotEqual(gio.FileIcon(gio.File('foo.png')),
+                            gio.FileIcon(gio.File('bar.png')))
         self.assertNotEquals(gio.ThemedIcon('foo'),
                              gio.ThemedIcon('bar'))
-        self.assertNotEquals(gio.File('foo.png').icon_new(),
+        self.assertNotEquals(gio.FileIcon(gio.File('foo.png')),
                              gio.ThemedIcon('foo'))
 
     def test_hash(self):
-        self.assertEquals(hash(gio.File('foo.png').icon_new()),
-                          hash(gio.File('foo.png').icon_new()))
+        self.assertEquals(hash(gio.FileIcon(gio.File('foo.png'))),
+                          hash(gio.FileIcon(gio.File('foo.png'))))
         self.assertEquals(hash(gio.ThemedIcon('foo')),
                           hash(gio.ThemedIcon('foo')))
 
@@ -35,7 +35,7 @@ class TestLoadableIcon(unittest.TestCase):
                     '<svg width="32" height="32"/>')
         self.file.write(self.svg)
         self.file.close()
-        self.icon = gio.File('temp.svg').icon_new()
+        self.icon = gio.FileIcon(gio.File('temp.svg'))
 
     def tearDown(self):
         if os.path.exists('temp.svg'):
@@ -63,6 +63,11 @@ class TestLoadableIcon(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+class TestFileIcon(unittest.TestCase):
+    def test_constructor(self):
+        file = gio.File('foo.png')
+        self.assert_(file is gio.FileIcon(file).get_file())
 
 class TestThemedIcon(unittest.TestCase):
     def setUp(self):

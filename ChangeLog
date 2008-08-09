@@ -1,5 +1,16 @@
 2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 546135 – GIcon and implementations improvements
+
+	* gio/gio.defs (g_file_icon_new): Change from method of gio.File
+	to constructor of gio.FileIcon.
+
+	* tests/test_gicon.py (TestIcon.test_eq, Test_Eq.test_hash)
+	(TestLoadableIcon.setUp): Adapt accordingly.
+	(TestFileIcon): New test case.
+
+2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 546591 – File.copy progress_callback does not work
 
 	* gio/gfile.override (file_progress_callback_marshal): Use
