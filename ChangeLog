@@ -1,5 +1,22 @@
 2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 546591 – File.copy progress_callback does not work
+
+	* gio/gfile.override (file_progress_callback_marshal): Use
+	PyObject_CallFunction() instead of PyEval_CallFunction().  Use "K"
+	instead of "k" (the latter is not correct for 32-bit platforms).
+	Don't free 'notify' here.
+	(_wrap_g_file_copy): Free 'notify'.
+	(_wrap_g_file_move): Likewise.
+
+	* gio/gio.override (pygio_free_notify): New function.
+	(async_result_callback_marshal): Use it.
+
+	* tests/test_gio.py (TestFile.test_copy_progress.progress): New
+	test.
+
+2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 546135 – GIcon and implementations improvements
 
 	* gio/gio.defs (gio.LoadableIcon.load)

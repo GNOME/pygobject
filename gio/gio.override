@@ -45,6 +45,14 @@ py_decref_callback (gpointer data)
 }
 
 static void
+pygio_free_notify(PyGIONotify *notify)
+{
+    Py_XDECREF(notify->callback);
+    Py_XDECREF(notify->data);
+    g_slice_free(PyGIONotify, notify);
+}
+
+static void
 async_result_callback_marshal(GObject *source_object,
 			      GAsyncResult *result,
 			      PyGIONotify *notify)
@@ -71,10 +79,7 @@ async_result_callback_marshal(GObject *source_object,
       }
 
     Py_XDECREF(ret);
-
-    Py_DECREF(notify->callback);
-    Py_XDECREF(notify->data);
-    g_slice_free(PyGIONotify, notify);
+    pygio_free_notify(notify);
 
     pyg_gil_state_release(state);
 }

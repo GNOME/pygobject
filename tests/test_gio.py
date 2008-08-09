@@ -295,6 +295,28 @@ class TestFile(unittest.TestCase):
         finally:
             os.unlink("copy.txt")
 
+    # See bug 546591.
+    def test_copy_progress(self):
+        source = gio.File('file.txt')
+        destination = gio.File('copy.txt')
+
+        def progress(current, total):
+            self.assert_(isinstance(current, long))
+            self.assert_(isinstance(total, long))
+            self.assert_(0 <= current <= total)
+
+        try:
+            retval = source.copy(destination,
+                                 flags=gio.FILE_COPY_OVERWRITE,
+                                 progress_callback=progress)
+            self.failUnless(retval)
+
+            self.failUnless(os.path.exists('copy.txt'))
+            self.assertEqual(open('file.txt').read(),
+                             open('copy.txt').read())
+        finally:
+            os.unlink("copy.txt")
+
     def testMove(self):
         if os.path.exists('move.txt'):
             os.unlink("move.txt")

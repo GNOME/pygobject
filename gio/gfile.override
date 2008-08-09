@@ -33,12 +33,12 @@ file_progress_callback_marshal(goffset current_num_bytes,
     state = pyg_gil_state_ensure();
 
     if (notify->data)
-	ret = PyEval_CallFunction(notify->callback, "(kkO)",
-				  current_num_bytes,
-				  total_num_bytes,
-				  notify->data);
+	ret = PyObject_CallFunction(notify->callback, "(KKO)",
+				    current_num_bytes,
+				    total_num_bytes,
+				    notify->data);
     else
-	ret = PyObject_CallFunction(notify->callback, "(kk)",
+	ret = PyObject_CallFunction(notify->callback, "(KK)",
 				    current_num_bytes,
 				    total_num_bytes);
 
@@ -49,11 +49,6 @@ file_progress_callback_marshal(goffset current_num_bytes,
       }
 
     Py_XDECREF(ret);
-
-    Py_DECREF(notify->callback);
-    Py_XDECREF(notify->data);
-    g_slice_free(PyGIONotify, notify);
-    
     pyg_gil_state_release(state);
 }
 %%
@@ -577,6 +572,7 @@ _wrap_g_file_copy(PyGObject *self,
 		      notify,
 		      &error);
 
+    pygio_free_notify(notify);
     if (pyg_error_check(&error))
         return NULL;
 
@@ -647,6 +643,7 @@ _wrap_g_file_move(PyGObject *self,
 		      notify,
 		      &error);
 
+    pygio_free_notify(notify);
     if (pyg_error_check(&error))
         return NULL;
 
