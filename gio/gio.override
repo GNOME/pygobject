@@ -38,8 +38,6 @@ typedef struct {
     PyObject *data;
 } PyGIONotify;
 
-static PyObject *  pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op);
-
 static void
 py_decref_callback (gpointer data)
 {
@@ -88,6 +86,7 @@ include
   gfileattribute.override
   gfileenumerator.override
   gfileinfo.override
+  gicon.override
   ginputstream.override
   goutputstream.override
   gvolume.override
@@ -101,7 +100,6 @@ ignore-glob
   g_file_new_from_path
   g_file_new_from_uri
   g_file_hash
-  g_icon_hash
   g_input_stream_read_all
   g_io_error_quark
   g_simple_async_result_new_error
@@ -179,151 +177,6 @@ _wrap_g_app_info_get_all_for_type (PyGObject *self, PyObject *args)
   g_list_free(list);
 
   return ret;
-}
-%%
-override-slot GIcon.tp_richcompare
-static PyObject *
-pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    PyObject *result;
-
-    if (PyObject_TypeCheck(self, &PyGIcon_Type)
-        && PyObject_TypeCheck(other, &PyGIcon_Type)) {
-        GIcon *icon1 = G_ICON(self->obj);
-        GIcon *icon2 = G_ICON(other->obj);
-
-        switch (op) {
-        case Py_EQ:
-            result = (g_icon_equal(icon1, icon2)
-                      ? Py_True : Py_False);
-            break;
-        case Py_NE:
-            result = (!g_icon_equal(icon1, icon2)
-                      ? Py_True : Py_False);
-            break;
-        default:
-            result = Py_NotImplemented;
-        }
-    }
-    else
-        result = Py_NotImplemented;
-
-    Py_INCREF(result);
-    return result;
-}
-static PyObject *
-_wrap_g_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
-}
-%%
-override-slot GIcon.tp_hash
-static long
-_wrap_g_icon_tp_hash(PyGObject *self)
-{
-    return g_icon_hash(G_ICON(self->obj));
-}
-%%
-override-slot GFileIcon.tp_richcompare
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static PyObject *
-_wrap_g_file_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
-}
-%%
-override-slot GFileIcon.tp_hash
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static long
-_wrap_g_file_icon_tp_hash(PyGObject *self)
-{
-    return g_icon_hash(G_ICON(self->obj));
-}
-%%
-override-slot GFileIcon.tp_repr
-static PyObject *
-_wrap_g_file_icon_tp_repr(PyGObject *self)
-{
-    GFile *file = g_file_icon_get_file(G_FILE_ICON(self->obj));
-    char *uri = (file ? g_file_get_uri(file) : NULL);
-    gchar *representation;
-    PyObject *result;
-
-    if (uri) {
-	representation = g_strdup_printf("<%s at %p: %s>", self->ob_type->tp_name, self, uri);
-	g_free(uri);
-    }
-    else
-	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", self->ob_type->tp_name, self);
-
-    result = PyString_FromString(representation);
-    g_free(representation);
-    return result;
-}
-%%
-override g_themed_icon_get_names noargs
-static PyObject *
-_wrap_g_themed_icon_get_names(PyGObject *self)
-{
-    const char * const *names;
-    PyObject *ret;
-
-    names = g_themed_icon_get_names(G_THEMED_ICON(self->obj));
-
-    ret = PyList_New(0);
-    while (names && *names) {
-        PyObject *item = PyString_FromString(names[0]);
-        PyList_Append(ret, item);
-        Py_DECREF(item);
-
-        names++;
-    }
-
-    return ret;
-}
-%%
-override-slot GThemedIcon.tp_richcompare
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static PyObject *
-_wrap_g_themed_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
-}
-%%
-override-slot GThemedIcon.tp_hash
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static long
-_wrap_g_themed_icon_tp_hash(PyGObject *self)
-{
-    return g_icon_hash(G_ICON(self->obj));
-}
-%%
-override-slot GThemedIcon.tp_repr
-static PyObject *
-_wrap_g_themed_icon_tp_repr(PyGObject *self)
-{
-    const char * const *names = g_themed_icon_get_names(G_THEMED_ICON(self->obj));
-    GString *representation = g_string_new(NULL);
-    PyObject *result;
-
-    g_string_append_printf(representation, "<%s at %p: ", self->ob_type->tp_name, self);
-
-    if (names) {
-	gboolean first_name = TRUE;
-	while (*names) {
-	    if (!first_name)
-		g_string_append(representation, ", ");
-	    else
-		first_name = FALSE;
-
-	    g_string_append(representation, *names++);
-	}
-    }
-
-    g_string_append(representation, ">");
-    result = PyString_FromString(representation->str);
-    g_string_free(representation, TRUE);
-    return result;
 }
 %%
 override g_content_type_guess kwargs

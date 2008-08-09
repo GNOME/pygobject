@@ -3448,6 +3448,20 @@
 
 (define-method load
   (of-object "GLoadableIcon")
+  (docstring
+  "ICON.load([size, [cancellable]]) -> input stream, type\n"
+  "\n"
+  "Opens a stream of icon data for reading. The result is a tuple of\n"
+  "gio.InputStream and type (either a string or None). The stream can\n"
+  "be read to retrieve icon data.\n"
+  "\n"
+  ;; Note: this is just a guess, GIO docs say nothing at the moment.
+  "Optional size is a hint at desired icon size. Not all implementations\n"
+  "support it and the hint will be just ignored in such cases.\n"
+  "If cancellable is specified, then the operation can be cancelled\n"
+  "by triggering the cancellable object from another thread. See\n"
+  "gio.File.read for details."
+  )
   (c-name "g_loadable_icon_load")
   (return-type "GInputStream*")
   (parameters
@@ -3460,6 +3474,15 @@
 
 (define-method load_async
   (of-object "GLoadableIcon")
+  (docstring
+  "ICON.load_async(callback, [size, [cancellable, [user_data]]]) -> start loading\n"
+  "\n"
+  "For more information, see gio.LoadableIcon.load() which is the\n"
+  "synchronous version of this call. Asynchronously opens icon data for\n"
+  "reading. When the operation is finished, callback will be called.\n"
+  "You can then call gio.LoadableIcon.load_finish() to get the result of\n"
+  "the operation.\n"
+  )
   (c-name "g_loadable_icon_load_async")
   (return-type "none")
   (parameters
@@ -3471,6 +3494,13 @@
 )
 
 (define-method load_finish
+  (docstring
+  "F.load_finish(res) -> start loading\n"
+  "\n"
+  "Finish asynchronous icon loading operation. Must be called from callback\n"
+  "as specified to gio.LoadableIcon.load_async. Returns a tuple of\n"
+  "gio.InputStream and type, just as gio.LoadableIcon.load."
+  )
   (of-object "GLoadableIcon")
   (c-name "g_loadable_icon_load_finish")
   (return-type "GInputStream*")

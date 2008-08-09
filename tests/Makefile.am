@@ -24,6 +24,7 @@ testhelper_la_SOURCES = \
 tests =  \
 	test_conversion.py \
 	test_enum.py \
+	test_gicon.py \
 	test_gio.py \
 	test_gobject.py \
 	test_gtype.py \

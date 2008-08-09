@@ -568,19 +568,6 @@ class TestVolumeMonitor(unittest.TestCase):
         self.failUnless(isinstance(icon, gio.Icon))
 
 
-class TestThemedIcon(unittest.TestCase):
-    def setUp(self):
-        self.icon = gio.ThemedIcon("open")
-
-    def testGetNames(self):
-        self.assertEquals(self.icon.get_names(), ['open'])
-
-    def testAppendName(self):
-        self.assertEquals(self.icon.get_names(), ['open'])
-        self.icon.append_name('close')
-        self.assertEquals(self.icon.get_names(), ['open', 'close'])
-
-
 class TestContentTypeGuess(unittest.TestCase):
     def testFromName(self):
         mime_type = gio.content_type_guess('diagram.svg')

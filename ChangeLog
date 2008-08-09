@@ -1,3 +1,25 @@
+2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 546135 – GIcon and implementations improvements
+
+	* gio/gio.defs (gio.LoadableIcon.load)
+	(gio.LoadableIcon.load_async, gio.LoadableIcon.load_finish):
+	Document.
+
+	* gio/Makefile.am:
+	* gio/gicon.override: New file: parts of 'gio.override', three
+	methods of gio.LoadableIcon and gio.ThemedIcon constructor.
+
+	* gio/gio.override: Move over all icon-related overrides to
+	'gicon.override'.
+
+	* tests/Makefile.am:
+	* tests/test_gicon.py: New file: parts of 'test_gio.py' and
+	several new gio.Icon tests.
+
+	* tests/test_gio.py (TestThemedIcon): Move over to
+	'test_gicon.py'.
+
 2008-08-07  Jonathan Matthew  <jonathan@d14n.org>
 
 	Bug 546734 – Missing Py_INCREFs for some file async methods
