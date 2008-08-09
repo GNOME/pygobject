@@ -1,5 +1,10 @@
 2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	* tests/test_gicon.py (TestThemedIcon.test_constructor): Fix to
+	not use `use_default_fallbacks' property (it's new).
+
+2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 546135 – GIcon and implementations improvements
 
 	* gio/gio.defs (g_file_icon_new): Change from method of gio.File

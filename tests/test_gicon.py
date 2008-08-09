@@ -74,17 +74,22 @@ class TestThemedIcon(unittest.TestCase):
         self.icon = gio.ThemedIcon("open")
 
     def test_constructor(self):
+        have_use_default_fallbacks = ('use_default_fallbacks'
+                                      in gio.ThemedIcon.props.__members__)
         icon = gio.ThemedIcon('foo')
         self.assertEquals(['foo'], icon.props.names)
-        self.assert_(not icon.props.use_default_fallbacks)
+        self.assert_(not have_use_default_fallbacks
+                     or not icon.props.use_default_fallbacks)
 
         icon = gio.ThemedIcon(['foo', 'bar', 'baz'])
         self.assertEquals(['foo', 'bar', 'baz'], icon.props.names)
-        self.assert_(not icon.props.use_default_fallbacks)
+        self.assert_(not have_use_default_fallbacks
+                     or not icon.props.use_default_fallbacks)
 
         icon = gio.ThemedIcon('xxx-yyy-zzz', True)
         self.assertEquals(['xxx-yyy-zzz', 'xxx-yyy', 'xxx'], icon.props.names)
-        self.assert_(icon.props.use_default_fallbacks)
+        self.assert_(not have_use_default_fallbacks
+                     or icon.props.use_default_fallbacks)
 
     def test_constructor_illegals(self):
         self.assertRaises(TypeError, lambda: gio.ThemedIcon(42))
