@@ -1123,6 +1123,64 @@ _wrap_g_file_replace_contents_async(PyGObject *self, PyObject *args, PyObject *k
     Py_INCREF(Py_None);
     return Py_None;
 }
+%%
+override-slot GFile.tp_richcompare
+static PyObject *
+_wrap_g_file_tp_richcompare(PyGObject *self, PyGObject *other, int op)
+{
+    PyObject *result;
+
+    if (PyObject_TypeCheck(self, &PyGFile_Type)
+        && PyObject_TypeCheck(other, &PyGFile_Type)) {
+        GFile *file1 = G_FILE(self->obj);
+        GFile *file2 = G_FILE(other->obj);
+
+        switch (op) {
+        case Py_EQ:
+            result = (g_file_equal(file1, file2)
+                      ? Py_True : Py_False);
+            break;
+        case Py_NE:
+            result = (!g_file_equal(file1, file2)
+                      ? Py_True : Py_False);
+            break;
+        default:
+            result = Py_NotImplemented;
+        }
+    }
+    else
+        result = Py_NotImplemented;
+
+    Py_INCREF(result);
+    return result;
+}
+%%
+override-slot GFile.tp_hash
+static long
+_wrap_g_file_tp_hash(PyGObject *self)
+{
+    return g_file_hash(G_FILE(self->obj));
+}
+%%
+override-slot GFile.tp_repr
+static PyObject *
+_wrap_g_file_tp_repr(PyGObject *self)
+{
+    char *uri = g_file_get_uri(G_FILE(self->obj));
+    gchar *representation;
+    PyObject *result;
+
+    if (uri) {
+	representation = g_strdup_printf("<%s at %p: %s>", self->ob_type->tp_name, self, uri);
+	g_free(uri);
+    }
+    else
+	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", self->ob_type->tp_name, self);
+
+    result = PyString_FromString(representation);
+    g_free(representation);
+    return result;
+}
 
 /* GFile.eject_mountable */
 /* GFile.find_enclosing_mount_async */

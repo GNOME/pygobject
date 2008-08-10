@@ -1,5 +1,15 @@
 2008-08-10  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 546120 – make gio.File more Pythonic
+
+	* gio/gfile.override (_wrap_g_file_tp_richcompare)
+	(_wrap_g_file_tp_hash, _wrap_g_file_tp_repr): New functions.
+
+	* tests/test_gio.py (TestFile.test_eq, TestFile.test_hash): New
+	tests.
+
+2008-08-10  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 547104 – improve runtime type wrapper creation
 
 	* gobject/pygobject.c (pygobject_new_with_interfaces): Use new

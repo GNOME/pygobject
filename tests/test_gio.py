@@ -413,7 +413,16 @@ class TestFile(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
-    
+    def test_eq(self):
+        self.assertEqual(gio.File('foo'),
+                         gio.File('foo'))
+        self.assertNotEqual(gio.File('foo'),
+                            gio.File('bar'))
+
+    def test_hash(self):
+        self.assertEquals(hash(gio.File('foo')),
+                          hash(gio.File('foo')))
+
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
