@@ -2172,6 +2172,16 @@
   )
 )
 
+(define-method query_default_handler
+  (of-object "GFile")
+  (c-name "g_file_query_default_handler")
+  (return-type "GAppInfo*")
+  (parameters
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
+    '("GError**" "error")
+  )
+)
+
 (define-method load_contents
   (docstring
   "F.load_contents([cancellable]) -> contents, length, etag_out\n\n"

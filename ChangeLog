@@ -1,3 +1,8 @@
+2008-08-10  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs:
+	Add GFile.query_default_handler which was missing from the defs.
+
 2008-08-10  Jonathan Matthew  <jonathan@d14n.org>
 
 	Bug 547067 – add File.replace_contents, replace_contents_async,
