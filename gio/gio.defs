@@ -1047,12 +1047,13 @@
 
 (define-method next_files_async
   (docstring
-"FE.next_files_async(num_files, callback, [io_priority, cancellable, user_data])\n"
-"Request information for a number of files from the enumerator asynchronously.\n"
-"When all i/o for the operation is finished the callback will be called with\n"
-"the requested information.\n"
+"FE.next_files_async(num_files, callback, [io_priority, cancellable,\n"
+"                    user_data])\n"
+"Request information for a number of files from the enumerator\n"
+"asynchronously. When all i/o for the operation is finished the callback\n"
+"will be called with the requested information.\n"
 "\n"
-"he callback can be called with less than num_files files in case of error\n"
+"The callback can be called with less than num_files files in case of error\n"
 "or at the end of the enumerator. In case of a partial error the callback\n"
 "will be called with any succeeding items and no error, and on the next\n"
 "request the error will be reported. If a request is cancelled the callback\n"
@@ -1324,7 +1325,8 @@
 (define-method read_async
   (of-object "GFile")
   (docstring
-  "F.read_async(callback [,io_priority [,cancellable [,user_data]]]) -> start read\n"
+  "F.read_async(callback [,io_priority [,cancellable [,user_data]]])\n"
+  "-> start read\n"
   "\n"
   "For more details, see gio.File.read() which is the synchronous\n"
   "version of this call. Asynchronously opens file for reading.\n"
@@ -1389,9 +1391,10 @@
 
 (define-method append_to_async
   (docstring
-  "F.append_to_async(callback [flags, [,io_priority [,cancellable [,user_data]]]]) -> open for append\n"
+  "F.append_to_async(callback [flags, [,io_priority [,cancellable\n"
+  "                  [,user_data]]]]) -> open for append\n"
   "\n"
-  "Asynchronously opens file for appending."
+  "Asynchronously opens file for appending.\n"
   "For more details, see gio.File.append_to() which is the synchronous\n"
   "version of this call. When the operation is finished, callback will\n"
   "be called. You can then call F.append_to_finish() to get the result\n"
@@ -1421,7 +1424,8 @@
 
 (define-method create_async
   (docstring
-  "F.create_async(callback [flags, [,io_priority [,cancellable [,user_data]]]]) -> file created\n"
+  "F.create_async(callback [flags, [,io_priority [,cancellable\n"
+  "               [,user_data]]]]) -> file created\n"
   "\n"
   "Asynchronously creates a new file and returns an output stream for\n"
   "writing to it. The file must not already exist.\n"
@@ -1454,7 +1458,8 @@
 
 (define-method replace_async
   (docstring
-  "F.replace_async(callback [etag, [make_backup, [flags, [io_priority, [cancellable, [user_data]]]]]]) -> file replace\n"
+  "F.replace_async(callback [etag, [make_backup, [flags, [io_priority,\n"
+  "                [cancellable, [user_data]]]]]]) -> file replace\n"
   "\n"
   "Asynchronously overwrites the file, replacing the contents, possibly\n"
   "creating a backup copy of the file first.\n"
@@ -1510,7 +1515,9 @@
 
 (define-method query_info_async
   (docstring
-  "F.query_info_async(callback, attributes, [flags, [io_priority, [cancellable, [user_data]]]]) -> query attributes\n\n"
+  "F.query_info_async(callback, attributes, [flags, [io_priority,\n"
+  "                   [cancellable, [user_data]]]]) -> query attributes\n"
+  "\n"
   "Asynchronously gets the requested information about specified file.\n"
   "The result is a GFileInfo object that contains key-value attributes\n"
   "(such as type or size for the file).\n"
@@ -1622,9 +1629,9 @@
   (docstring
 "F.enumerate_children_async(attributes, callback,\n"
 "                           [flags, io_priority, cancellable, user_data])\n"
-"Asynchronously gets the requested information about the files in a directory.\n"
-"The result is a GFileEnumerator object that will give out GFileInfo objects\n"
-"for all the files in the directory.\n"
+"Asynchronously gets the requested information about the files in a\n"
+"directory. The result is a GFileEnumerator object that will give out\n"
+"GFileInfo objects for all the files in the directory.\n"
 "\n"
 "For more details, see gio.File.enumerate_children() which is the synchronous\n"
 "version of this call.\n"
@@ -2016,7 +2023,8 @@
 
 (define-method mount_enclosing_volume
   (docstring
-"F.mount_enclosing_volume(mount_operaetion, callback, cancellable, user_data])\n"
+"F.mount_enclosing_volume(mount_operation, callback, [cancellable,\n"
+"                         user_data])\n"
 "Starts a mount_operation, mounting the volume that contains\n"
 "the file location.\n"
 "\n"
@@ -2051,7 +2059,8 @@
 
 (define-method mount_mountable
   (docstring
-"F.mount_mountable(mount_operation, callback, [flags, cancellable, user_data])\n"
+"F.mount_mountable(mount_operation, callback, [flags, cancellable,\n"
+"                  user_data])\n"
 "Mounts a file of type gio.FILE_TYPE_MOUNTABLE. Using mount_operation,\n"
 "you can request callbacks when, for instance, passwords are needed\n"
 "during authentication.\n"
@@ -3522,7 +3531,8 @@
 (define-method load_async
   (of-object "GLoadableIcon")
   (docstring
-  "ICON.load_async(callback, [size, [cancellable, [user_data]]]) -> start loading\n"
+  "ICON.load_async(callback, [size, [cancellable, [user_data]]])\n"
+  "-> start loading\n"
   "\n"
   "For more information, see gio.LoadableIcon.load() which is the\n"
   "synchronous version of this call. Asynchronously opens icon data for\n"
@@ -4009,7 +4019,7 @@
 "It is not an error if this is not the same as the requested size, as it can\n"
 "happen e.g. on a partial I/O error, but generally tries to write as many \n"
 "bytes as requested.\n"
-"For the synchronous, blocking version of this function, see "
+"For the synchronous, blocking version of this function, see\n"
 "gio.OutputStream.write().\n")
   (c-name "g_output_stream_write_async")
   (return-type "none")

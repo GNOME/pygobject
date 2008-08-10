@@ -1,3 +1,11 @@
+2008-08-10  Jonathan Matthew  <jonathan@d14n.org>
+
+	Bug 547134 – fix docstring line length
+
+	* gio/gio.defs:
+	Fix docstring line lengths so they don't wrap across lines in an 80
+	column terminal.
+
 2008-08-10  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gio.defs:
