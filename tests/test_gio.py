@@ -373,6 +373,47 @@ class TestFile(unittest.TestCase):
                                               10, gio.FILE_QUERY_INFO_NONE)
                 self.assertEqual(ret, True)
 
+    def testReplaceContents(self):
+        self.file.replace_contents("testing replace_contents")
+        cont, leng, etag = self.file.load_contents()
+        self.assertEqual(cont, "testing replace_contents")
+
+        caught = False
+        try:
+            self.file.replace_contents("this won't work", etag="wrong")
+        except gio.Error, e:
+            self.assertEqual(e.code, gio.ERROR_WRONG_ETAG)
+            caught = True
+        self.failUnless(caught)
+
+        self.file.replace_contents("testing replace_contents again", etag=etag)
+        cont, leng, etag = self.file.load_contents()
+        self.assertEqual(cont, "testing replace_contents again")
+
+        self.file.replace_contents("testing replace_contents yet again", etag=None)
+        cont, leng, etag = self.file.load_contents()
+        self.assertEqual(cont, "testing replace_contents yet again")
+
+    def testReplaceContentsAsync(self):
+
+        def callback(contents, result):
+            try:
+                newetag = contents.replace_contents_finish(result)
+                cont, leng, etag = self.file.load_contents()
+                self.assertEqual(cont, "testing replace_contents_async")
+                self.assertEqual(leng, 30)
+                self.assertEqual(etag, newetag)
+                self.assertNotEqual(newetag, '')
+            finally:
+                loop.quit()
+
+        canc = gio.Cancellable()
+        self.file.replace_contents_async("testing replace_contents_async", callback, cancellable=canc)
+
+        loop = glib.MainLoop()
+        loop.run()
+
+    
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):

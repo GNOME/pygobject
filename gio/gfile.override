@@ -972,14 +972,163 @@ _wrap_g_file_query_info_async(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
+%%
+override g_file_replace_contents kwargs
+static PyObject *
+_wrap_g_file_replace_contents(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "contents", "etag", "make_backup",
+                              "flags", "cancellable", NULL };
+    GCancellable *cancellable;
+    PyGObject *pycancellable = NULL;
+    GFileCreateFlags flags = G_FILE_CREATE_NONE;
+    PyObject *py_flags = NULL;
+    gsize length;
+    gboolean make_backup = FALSE;
+    char *contents;
+    char *etag = NULL;
+    char *new_etag = NULL;
+    GError *error = NULL;
+    gboolean ret;
+    PyObject *py_ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "s#|zbOO:File.replace_contents",
+                                     kwlist,
+                                     &contents,
+                                     &length,
+                                     &etag,
+                                     &make_backup,
+                                     &flags,
+                                     &cancellable))
+    {
+        return NULL;
+    }
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_FILE_CREATE_FLAGS,
+                                        py_flags, (gpointer)&flags))
+        return NULL;
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    ret = g_file_replace_contents(G_FILE(self->obj), contents, length, etag,
+                                  make_backup, flags, &new_etag, cancellable,
+                                  &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (ret) {
+        py_ret = PyString_FromString(new_etag);
+    } else {
+        py_ret = Py_None;
+        Py_INCREF(py_ret);
+    }
+
+    g_free(new_etag);
+    return py_ret;
+}
+%%
+override g_file_replace_contents_finish kwargs
+static PyObject *
+_wrap_g_file_replace_contents_finish(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *res;
+    gchar *etag_out = NULL;
+    GError *error = NULL;
+    gboolean ret;
+    PyObject *py_ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:File.replace_contents_finish",
+                                      kwlist,
+                                      &PyGAsyncResult_Type,
+                                      &res))
+        return NULL;
+
+    ret = g_file_replace_contents_finish(G_FILE(self->obj),
+                                         G_ASYNC_RESULT(res->obj), &etag_out,
+                                         &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (ret) {
+        py_ret = PyString_FromString(etag_out);
+        return py_ret;
+    } else {
+        py_ret = Py_None;
+        Py_INCREF(py_ret);
+    }
+
+    g_free(etag_out);
+    return py_ret;
+}
+%%
+override g_file_replace_contents_async kwargs
+static PyObject *
+_wrap_g_file_replace_contents_async(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "contents", "callback", "etag", "make_backup",
+                              "flags", "cancellable", "user_data", NULL };
+    GCancellable *cancellable;
+    PyGObject *pycancellable = NULL;
+    PyGIONotify *notify;
+    GFileCreateFlags flags = G_FILE_CREATE_NONE;
+    PyObject *py_flags = NULL;
+    gsize length;
+    gboolean make_backup = FALSE;
+    char *contents;
+    char *etag = NULL;
+
+    notify = g_slice_new0(PyGIONotify);
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "s#O|zbOOO:File.replace_contents_async",
+                                      kwlist,
+                                      &contents,
+                                      &length,
+                                      &notify->callback,
+                                      &etag,
+                                      &make_backup,
+                                      &py_flags,
+                                      &pycancellable,
+                                      &notify->data))
+    {
+      g_slice_free(PyGIONotify, notify);
+      return NULL;
+    }
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_FILE_CREATE_FLAGS,
+                                        py_flags, (gpointer)&flags))
+        return NULL;
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    Py_INCREF(notify->callback);
+    Py_XINCREF(notify->data);
+    g_file_replace_contents_async(G_FILE(self->obj),
+                                  contents,
+                                  length,
+                                  etag,
+                                  make_backup,
+                                  flags,
+                                  cancellable,
+                                  (GAsyncReadyCallback)async_result_callback_marshal,
+                                  notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 /* GFile.eject_mountable */
 /* GFile.find_enclosing_mount_async */
-/* GFile.replace_contents_async */
 /* GFile.set_attributes_async */
 /* GFile.set_display_name_async */
 /* GFile.load_partial_contents_async: No ArgType for GFileReadMoreCallback */
 /* GFile.move: No ArgType for GFileProgressCallback */
 /* GFile.set_attributes_finish: No ArgType for GFileInfo** */
 /* GFile.load_partial_contents_finish: No ArgType for char** */
-/* GFile.replace_contents: No ArgType for char** */
-/* GFile.replace_contents_finish: No ArgType for char** */

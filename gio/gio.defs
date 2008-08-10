@@ -2263,6 +2263,18 @@
 )
 
 (define-method replace_contents
+  (docstring
+  "F.replace_contents(contents, [etag, [make_backup, [flags, [cancellable]]]])\n"
+  "-> etag_out\n"
+  "\n"
+  "Replaces the content of the file, returning the new etag value for the\n"
+  "file. If an etag is specified, any existing file must have that etag, or\n"
+  "the error gio.IO_ERROR_WRONG_ETAG will be returned.\n"
+  "If make_backup is True, this method will attempt to make a backup of the\n"
+  "file. If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_replace_contents")
   (return-type "gboolean")
@@ -2279,6 +2291,20 @@
 )
 
 (define-method replace_contents_async
+  (docstring
+  "F.replace_contents_async(contents, callback, [etag, [make_backup, [flags,\n"
+  "                         [cancellable]]]]) -> etag_out\n"
+  "\n"
+  "Starts an asynchronous replacement of the file with the given contents.\n"
+  "For more details, see F.replace_contents() which is the synchronous\n"
+  "version of this call.\n\n"
+  "When the load operation has completed, callback will be called with\n"
+  "user data. To finish the operation, call F.replace_contents_finish() with\n"
+  "the parameter 'res' returned by the callback.\n\n"
+  "If cancellable is not None, then the operation can be cancelled by\n"
+  "triggering the cancellable object from another thread. If the operation\n"
+  "was cancelled, the error gio.IO_ERROR_CANCELLED will be returned.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_replace_contents_async")
   (return-type "none")
@@ -2295,6 +2321,11 @@
 )
 
 (define-method replace_contents_finish
+  (docstring
+  "F.replace_contents_finish(res) -> etag_out\n\n"
+  "Finishes an asynchronous replacement of the file's contents.\n"
+  "The new entity tag for the file is returned.\n"
+  )
   (of-object "GFile")
   (c-name "g_file_replace_contents_finish")
   (return-type "gboolean")

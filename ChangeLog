@@ -1,3 +1,14 @@
+2008-08-10  Jonathan Matthew  <jonathan@d14n.org>
+
+	Bug 547067 – add File.replace_contents, replace_contents_async,
+	replace_contents_finish.
+
+	* gio/gfile.override:
+	* gio/gio.defs:
+	* tests/test_gio.py:
+	Add overrides, docs, and tests for File.replace_contents,
+	replace_contents_async, and replace_contents_finish.
+
 2008-08-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* tests/test_gicon.py (TestThemedIcon.test_constructor): Fix to
