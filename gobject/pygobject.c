@@ -38,6 +38,7 @@ static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
+static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset);
 GType PY_TYPE_OBJECT = 0;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
@@ -721,6 +722,14 @@ pygobject_new_with_interfaces(GType gtype)
     type->tp_traverse = py_parent_type->tp_traverse;
     type->tp_clear = py_parent_type->tp_clear;
 
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_richcompare));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_compare));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_hash));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_iter));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_repr));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_str));
+    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_print));
+
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
         pyglib_gil_state_release(state);
@@ -740,6 +749,60 @@ pygobject_new_with_interfaces(GType gtype)
     pyglib_gil_state_release(state);
 
     return type;
+}
+
+/* Pick appropriate value for given slot (at slot_offset inside
+ * PyTypeObject structure).  It must be a pointer, e.g. a pointer to a
+ * function.  We use the following heuristic:
+ *
+ * - Scan all types listed as bases of the type.
+ * - If for exactly one base type slot value is non-NULL and
+ *   different from that of 'object' and 'GObject', set current type
+ *   slot into that value.
+ * - Otherwise (if there is more than one such base type or none at
+ *   all) don't touch it and live with Python default.
+ *
+ * The intention here is to propagate slot from custom wrappers to
+ * wrappers created at runtime when appropriate.  We prefer to be on
+ * the safe side, so if there is potential collision (more than one
+ * custom slot value), we discard custom overrides altogether.
+ */
+static void
+pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset)
+{
+#define TYPE_SLOT(type)  (* (void **) (((char *) (type)) + slot_offset))
+
+    void *found_slot = NULL;
+    int num_bases = PyTuple_Size(bases);
+    int i;
+
+    for (i = 0; i < num_bases; ++i) {
+	PyTypeObject *base_type = (PyTypeObject *) PyTuple_GetItem(bases, i);
+	void *slot = TYPE_SLOT(base_type);
+
+	if (slot == NULL)
+	    continue;
+	if (slot == TYPE_SLOT(&PyGObject_Type) ||
+	    slot == TYPE_SLOT(&PyBaseObject_Type))
+	    continue;
+
+	if (found_slot != NULL && found_slot != slot) {
+	    /* We have a conflict: more than one base use different
+	     * custom slots.  To be on the safe side, we bail out.
+	     */
+	    return;
+	}
+
+	found_slot = slot;
+    }
+
+    /* Only perform the final assignment if at least one base has a
+     * custom value.  Otherwise just leave this type's slot untouched.
+     */
+    if (found_slot != NULL)
+	TYPE_SLOT(type) = found_slot;
+
+#undef TYPE_SLOT
 }
 
 /**
