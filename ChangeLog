@@ -1,5 +1,21 @@
 2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 547354 – wrap a few memory stream methods
+
+	* gio/ginputstream.override (_wrap_g_memory_input_stream_add_data):
+	New function.
+
+	* gio/gio.defs (gio.MemoryOutputStream.get_contents): Rename from
+	get_data() to avoid name clash.
+
+	* gio/goutputstream.override (_wrap_g_memory_output_stream_new)
+	(_wrap_g_memory_output_stream_get_data): New functions.
+
+	* tests/test_gio.py (TestMemoryInputStream)
+	(TestMemoryOutputStream): New test cases.
+
+2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	* gio/gio.override: Ignore `g_io_module*' and `g_io_scheduler_*'.
 
 2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>

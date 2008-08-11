@@ -3667,7 +3667,8 @@
   )
 )
 
-(define-method get_data
+;; Note: name clash with gobject.GObject.get_data; renamed.
+(define-method get_contents
   (of-object "GMemoryOutputStream")
   (c-name "g_memory_output_stream_get_data")
   (return-type "gpointer")

@@ -545,6 +545,20 @@ class TestInputStream(unittest.TestCase):
         loop.run()
 
 
+class TestMemoryInputStream(unittest.TestCase):
+    def setUp(self):
+        self.stream = gio.MemoryInputStream()
+
+    def test_add_data(self):
+        self.stream.add_data('foobar')
+        self.assertEquals('foobar', self.stream.read())
+
+        self.stream.add_data('ham ')
+        self.stream.add_data(None)
+        self.stream.add_data('spam')
+        self.assertEquals('ham spam', self.stream.read())
+
+
 class TestOutputStream(unittest.TestCase):
     def setUp(self):
         self._f = open("outputstream.txt", "w")
@@ -612,6 +626,18 @@ class TestOutputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+
+class TestMemoryOutputStream(unittest.TestCase):
+    def setUp(self):
+        self.stream = gio.MemoryOutputStream()
+
+    def test_get_contents(self):
+        self.stream.write('foobar')
+        self.assertEquals('foobar', self.stream.get_contents())
+
+        self.stream.write('baz')
+        self.assertEquals('foobarbaz', self.stream.get_contents())
 
 
 class TestVolumeMonitor(unittest.TestCase):

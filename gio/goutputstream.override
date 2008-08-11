@@ -156,6 +156,31 @@ _wrap_g_output_stream_close_async(PyGObject *self,
   Py_INCREF(Py_None);
   return Py_None;
 }
+%%
+override g_memory_output_stream_new noargs
+static int
+_wrap_g_memory_output_stream_new(PyGObject *self)
+{
+    self->obj = (GObject *)g_memory_output_stream_new(NULL, 0, g_realloc, g_free);
+
+    if (!self->obj) {
+        PyErr_SetString(PyExc_RuntimeError, "could not create gio.MemoryOutputStream object");
+        return -1;
+    }
+
+    pygobject_register_wrapper((PyObject *)self);
+    return 0;
+}
+%%
+override g_memory_output_stream_get_data noargs
+static PyObject *
+_wrap_g_memory_output_stream_get_data(PyGObject *self)
+{
+    GMemoryOutputStream *stream = G_MEMORY_OUTPUT_STREAM(self->obj);
+    return PyString_FromStringAndSize(g_memory_output_stream_get_data(stream),
+				      g_seekable_tell(G_SEEKABLE(stream)));
+}
+
 /* GOutputStream.write_all: No ArgType for const-void* */
 /* GOutputStream.splice_async: No ArgType for GAsyncReadyCallback */
 /* GOutputStream.flush_async: No ArgType for GAsyncReadyCallback */
