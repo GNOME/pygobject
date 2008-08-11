@@ -1314,12 +1314,20 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			  &py_type, &signal_flags, &py_return_type,
 			  &py_param_types))
 	return NULL;
+
     instance_type = pyg_type_from_object(py_type);
     if (!instance_type)
 	return NULL;
+    if (!(G_TYPE_IS_INSTANTIATABLE(instance_type) || G_TYPE_IS_INTERFACE(instance_type))) {
+	PyErr_SetString(PyExc_TypeError,
+			"argument 2 must be an object type or interface type");
+	return NULL;
+    }
+    
     return_type = pyg_type_from_object(py_return_type);
     if (!return_type)
 	return NULL;
+
     if (!PySequence_Check(py_param_types)) {
 	PyErr_SetString(PyExc_TypeError,
 			"argument 5 must be a sequence of GType codes");

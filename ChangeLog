@@ -1,5 +1,14 @@
 2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 540376 – No TypeError raised when type is None
+
+	* gobject/gobjectmodule.c (pyg_signal_new): Add check on second
+	argument type.
+
+	* tests/test_signal.py (TestSignalCreation): New test case.
+
+2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 547104 – improve type wrapper creation
 
 	* gio/gappinfo.override (_wrap_g_app_info_tp_richcompare)

@@ -17,6 +17,16 @@ class D(C):
         self.arg2 = arg2
         C.do_my_signal(self, arg2)
 
+class TestSignalCreation(unittest.TestCase):
+    # Bug 540376.
+    def test_illegals(self):
+        self.assertRaises(TypeError, lambda: gobject.signal_new('test',
+                                                                None,
+                                                                0,
+                                                                gobject.TYPE_NONE,
+                                                                (gobject.TYPE_LONG,)))
+
+
 class TestChaining(unittest.TestCase):
     def setUp(self):
         self.inst = C()
