@@ -38,7 +38,10 @@ static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
-static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset);
+static void pygobject_inherit_slots(PyTypeObject *type, PyObject *bases,
+				    gboolean check_for_present);
+static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
+				    gboolean check_for_present);
 GType PY_TYPE_OBJECT = 0;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
@@ -505,6 +508,8 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
         Py_INCREF(type->tp_base);
     }
 
+    pygobject_inherit_slots(type, bases, TRUE);
+
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
 	return;
@@ -722,13 +727,7 @@ pygobject_new_with_interfaces(GType gtype)
     type->tp_traverse = py_parent_type->tp_traverse;
     type->tp_clear = py_parent_type->tp_clear;
 
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_richcompare));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_compare));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_hash));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_iter));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_repr));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_str));
-    pygobject_find_slot_for(type, bases, offsetof(PyTypeObject, tp_print));
+    pygobject_inherit_slots(type, bases, FALSE);
 
     if (PyType_Ready(type) < 0) {
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
@@ -766,15 +765,52 @@ pygobject_new_with_interfaces(GType gtype)
  * wrappers created at runtime when appropriate.  We prefer to be on
  * the safe side, so if there is potential collision (more than one
  * custom slot value), we discard custom overrides altogether.
+ *
+ * When registering type with pygobject_register_class(), i.e. a type
+ * that has been manually created (likely with Codegen help),
+ * `check_for_present' should be set to TRUE.  In this case, the
+ * function will never overwrite any non-NULL slots already present in
+ * the type.  If `check_for_present' is FALSE, such non-NULL slots are
+ * though to be set by Python interpreter and so will be overwritten
+ * if heuristic above says so.
  */
 static void
-pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset)
+pygobject_inherit_slots(PyTypeObject *type, PyObject *bases, gboolean check_for_present)
+{
+    static int slot_offsets[] = { offsetof(PyTypeObject, tp_richcompare),
+				  offsetof(PyTypeObject, tp_compare),
+				  offsetof(PyTypeObject, tp_hash),
+				  offsetof(PyTypeObject, tp_iter),
+				  offsetof(PyTypeObject, tp_repr),
+				  offsetof(PyTypeObject, tp_str),
+				  offsetof(PyTypeObject, tp_print) };
+    int i;
+
+    /* Happens when registering gobject.GObject itself, at least. */
+    if (!bases)
+	return;
+
+    for (i = 0; i < G_N_ELEMENTS(slot_offsets); ++i)
+	pygobject_find_slot_for(type, bases, slot_offsets[i], check_for_present);
+}
+
+static void
+pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
+			gboolean check_for_present)
 {
 #define TYPE_SLOT(type)  (* (void **) (((char *) (type)) + slot_offset))
 
     void *found_slot = NULL;
     int num_bases = PyTuple_Size(bases);
     int i;
+
+    if (check_for_present && TYPE_SLOT(type) != NULL) {
+	/* We are requested to check if there is any custom slot value
+	 * in this type already and there actually is.  Don't
+	 * overwrite it.
+	 */
+	return;
+    }
 
     for (i = 0; i < num_bases; ++i) {
 	PyTypeObject *base_type = (PyTypeObject *) PyTuple_GetItem(bases, i);

@@ -1,3 +1,21 @@
+2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 547104 – improve type wrapper creation
+
+	* gobject/pygobject.c (pygobject_register_class): Use new
+	pygobject_inherit_slots() to propagate custom slots in normal
+	types too.
+	(pygobject_inherit_slots): New function, break out of
+	pygobject_new_with_interfaces() and rewrite a bit.
+	(pygobject_find_slot_for): Add new argument that can forbid
+	overriding non-NULL slots.
+
+	* gio/gicon.override (pygio_do_icon_richcompare): Remove, the code
+	is now directly in _wrap_g_icon_tp_richcompare().
+	(_wrap_g_file_icon_tp_richcompare, _wrap_g_file_icon_tp_hash)
+	(_wrap_g_themed_icon_tp_richcompare, _wrap_g_themed_icon_tp_hash):
+	Remove, duplicating code in this way is not needed anymore.
+
 2008-08-10  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 546120 – make gio.File more Pythonic

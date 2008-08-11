@@ -20,11 +20,6 @@
  * USA
  */
 %%
-headers
-
-static PyObject *  pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op);
-
-%%
 ignore-glob
   g_icon_hash
   g_themed_icon_new_from_names
@@ -32,7 +27,7 @@ ignore-glob
 %%
 override-slot GIcon.tp_richcompare
 static PyObject *
-pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op)
+_wrap_g_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
 {
     PyObject *result;
 
@@ -59,11 +54,6 @@ pygio_do_icon_richcompare(PyGObject *self, PyGObject *other, int op)
 
     Py_INCREF(result);
     return result;
-}
-static PyObject *
-_wrap_g_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
 }
 %%
 override-slot GIcon.tp_hash
@@ -180,22 +170,6 @@ _wrap_g_loadable_icon_load_finish(PyGObject *self,
     return result;
 }
 %%
-override-slot GFileIcon.tp_richcompare
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static PyObject *
-_wrap_g_file_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
-}
-%%
-override-slot GFileIcon.tp_hash
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static long
-_wrap_g_file_icon_tp_hash(PyGObject *self)
-{
-    return g_icon_hash(G_ICON(self->obj));
-}
-%%
 override-slot GFileIcon.tp_repr
 static PyObject *
 _wrap_g_file_icon_tp_repr(PyGObject *self)
@@ -294,22 +268,6 @@ _wrap_g_themed_icon_get_names(PyGObject *self)
     }
 
     return ret;
-}
-%%
-override-slot GThemedIcon.tp_richcompare
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static PyObject *
-_wrap_g_themed_icon_tp_richcompare(PyGObject *self, PyGObject *other, int op)
-{
-    return pygio_do_icon_richcompare(self, other, op);
-}
-%%
-override-slot GThemedIcon.tp_hash
-/* We need to duplicate, because GIcon is an interface, not a class. */
-static long
-_wrap_g_themed_icon_tp_hash(PyGObject *self)
-{
-    return g_icon_hash(G_ICON(self->obj));
 }
 %%
 override-slot GThemedIcon.tp_repr
