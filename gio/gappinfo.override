@@ -158,3 +158,51 @@ _wrap_g_app_info_launch(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return PyBool_FromLong(ret);
 }
+%%
+override-slot GAppInfo.tp_richcompare
+static PyObject *
+_wrap_g_app_info_tp_richcompare(PyGObject *self, PyGObject *other, int op)
+{
+    PyObject *result;
+
+    if (PyObject_TypeCheck(self, &PyGAppInfo_Type)
+        && PyObject_TypeCheck(other, &PyGAppInfo_Type)) {
+        GAppInfo *info1 = G_APP_INFO(self->obj);
+        GAppInfo *info2 = G_APP_INFO(other->obj);
+
+        switch (op) {
+        case Py_EQ:
+            result = (g_app_info_equal(info1, info2)
+                      ? Py_True : Py_False);
+            break;
+        case Py_NE:
+            result = (!g_app_info_equal(info1, info2)
+                      ? Py_True : Py_False);
+            break;
+        default:
+            result = Py_NotImplemented;
+        }
+    }
+    else
+        result = Py_NotImplemented;
+
+    Py_INCREF(result);
+    return result;
+}
+%%
+override-slot GAppInfo.tp_repr
+static PyObject *
+_wrap_g_app_info_tp_repr(PyGObject *self)
+{
+    const char *name = g_app_info_get_name(G_APP_INFO(self->obj));
+    gchar *representation;
+    PyObject *result;
+
+    representation = g_strdup_printf("<%s at %p: %s>",
+				     self->ob_type->tp_name, self,
+				     name ? name : "UNKNOWN NAME");
+
+    result = PyString_FromString(representation);
+    g_free(representation);
+    return result;
+}

@@ -678,6 +678,14 @@ class TestAppInfo(unittest.TestCase):
         self.assertEquals(self.appinfo.get_description(),
                           "Custom definition for does-not-exist")
 
+    def test_eq(self):
+        info1 = gio.app_info_get_all()[0]
+        info2 = info1.dup()
+        self.assert_(info1 is not info2)
+        self.assertEquals(info1, info2)
+
+        self.assertNotEqual(gio.app_info_get_all()[0], gio.app_info_get_all()[1])
+
 class TestVfs(unittest.TestCase):
     def setUp(self):
         self.vfs = gio.vfs_get_default()

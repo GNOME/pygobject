@@ -2,6 +2,15 @@
 
 	Bug 547104 – improve type wrapper creation
 
+	* gio/gappinfo.override (_wrap_g_app_info_tp_richcompare)
+	(_wrap_g_app_info_tp_repr): New functions.
+
+	* tests/test_gio.py (TestAppInfo.test_eq): New test.
+
+2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 547104 – improve type wrapper creation
+
 	* gobject/pygobject.c (pygobject_register_class): Use new
 	pygobject_inherit_slots() to propagate custom slots in normal
 	types too.
