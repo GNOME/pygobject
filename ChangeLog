@@ -1,3 +1,7 @@
+2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gio/gio.override: Ignore `g_io_module*' and `g_io_scheduler_*'.
+
 2008-08-11  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 540376 – No TypeError raised when type is None
