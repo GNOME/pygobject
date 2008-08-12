@@ -30,39 +30,39 @@ typedef struct {
 } PyGIONotifyRead;
 
 static void
-async_result_callback_marshal_read(GObject *source_object, 
-				   GAsyncResult *result, 
-				   PyGIONotifyRead *notify)
+async_result_callback_marshal_read(GObject *source_object,
+                                   GAsyncResult *result,
+                                   PyGIONotifyRead *notify)
 {
     PyObject *ret;
     PyGILState_STATE state;
     static GQuark quark = 0;
-    
+
     state = pyg_gil_state_ensure();
 
     /* buffer is only used by read_async */
     if (notify->buffer) {
-	if (!quark)
-	    quark = g_quark_from_string("pygio::buffer");
-	g_object_set_qdata_full(G_OBJECT(result), quark,
-				notify->buffer, py_decref_callback);
+        if (!quark)
+            quark = g_quark_from_string("pygio::buffer");
+        g_object_set_qdata_full(G_OBJECT(result), quark,
+                                notify->buffer, py_decref_callback);
     }
-    
+
     if (notify->data)
-	ret = PyEval_CallFunction(notify->callback, "(OOO)", 
-				  pygobject_new(source_object), 
-				  pygobject_new((GObject *)result),
-				  notify->data);
+        ret = PyEval_CallFunction(notify->callback, "(OOO)",
+                                  pygobject_new(source_object),
+                                  pygobject_new((GObject *)result),
+                                  notify->data);
     else
-	ret = PyObject_CallFunction(notify->callback, "(OO)", 
-				    pygobject_new(source_object), 
-				    pygobject_new((GObject *)result));
+        ret = PyObject_CallFunction(notify->callback, "(OO)",
+                                    pygobject_new(source_object),
+                                    pygobject_new((GObject *)result));
 
     if (ret == NULL)
-      {
-	PyErr_Print();
-	PyErr_Clear();
-      }
+        {
+            PyErr_Print();
+            PyErr_Clear();
+        }
 
     Py_XDECREF(ret);
 
@@ -77,135 +77,135 @@ override g_input_stream_read kwargs
 static PyObject *
 _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-  static char *kwlist[] = { "count", "cancellable", NULL };
-  PyGObject *pycancellable = NULL;
-  PyObject *v;
-  GCancellable *cancellable;
-  long count = -1; 
-  GError *error = NULL;
-  size_t bytesread, buffersize, chunksize;
-  
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "|lO:InputStream.read",
-				   kwlist, &count,
-				   &pycancellable))
-    return NULL;
-  
-  buffersize = BUFSIZE;
+    static char *kwlist[] = { "count", "cancellable", NULL };
+    PyGObject *pycancellable = NULL;
+    PyObject *v;
+    GCancellable *cancellable;
+    long count = -1;
+    GError *error = NULL;
+    size_t bytesread, buffersize, chunksize;
 
-  if (!pygio_check_cancellable(pycancellable, &cancellable))
-    return NULL;
-  
-  v = PyString_FromStringAndSize((char *)NULL, buffersize);
-  if (v == NULL)
-    return NULL;
-  
-  bytesread = 0;
-  for (;;)
-    {
-      pyg_begin_allow_threads;
-      errno = 0;
-      chunksize = g_input_stream_read(G_INPUT_STREAM(self->obj),
-				      PyString_AS_STRING((PyStringObject *)v) + bytesread,
-				      buffersize - bytesread, cancellable,
-				      &error);
-      pyg_end_allow_threads;
-      
-      if (pyg_error_check(&error))
-	{
-	  Py_DECREF(v);
-	  return NULL;
-	}
-      else if (chunksize == 0)
-	{
-	  PyErr_SetFromErrno(PyExc_IOError);
-	  Py_DECREF(v);
-	  return NULL;
-	}
-      
-      bytesread += chunksize;
-      if (bytesread < buffersize)
-	break;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "|lO:InputStream.read",
+                                     kwlist, &count,
+                                     &pycancellable))
+        return NULL;
 
-      if (count < 0)
-	{
-	  buffersize += BUFSIZE;
-	  if (_PyString_Resize(&v, buffersize) < 0)
-	    return NULL;
-	}
-      else
-	/* Got what was requested. */
-	break;
-    }
-  
-  if (bytesread != buffersize)
-    _PyString_Resize(&v, bytesread);
+    buffersize = BUFSIZE;
 
-  return v;
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    v = PyString_FromStringAndSize((char *)NULL, buffersize);
+    if (v == NULL)
+        return NULL;
+
+    bytesread = 0;
+    for (;;)
+        {
+            pyg_begin_allow_threads;
+            errno = 0;
+            chunksize = g_input_stream_read(G_INPUT_STREAM(self->obj),
+                                            PyString_AS_STRING((PyStringObject *)v) + bytesread,
+                                            buffersize - bytesread, cancellable,
+                                            &error);
+            pyg_end_allow_threads;
+
+            if (pyg_error_check(&error))
+                {
+                    Py_DECREF(v);
+                    return NULL;
+                }
+            else if (chunksize == 0)
+                {
+                    PyErr_SetFromErrno(PyExc_IOError);
+                    Py_DECREF(v);
+                    return NULL;
+                }
+
+            bytesread += chunksize;
+            if (bytesread < buffersize)
+                break;
+
+            if (count < 0)
+                {
+                    buffersize += BUFSIZE;
+                    if (_PyString_Resize(&v, buffersize) < 0)
+                        return NULL;
+                }
+            else
+                /* Got what was requested. */
+                break;
+        }
+
+    if (bytesread != buffersize)
+        _PyString_Resize(&v, bytesread);
+
+    return v;
 }
 %%
 override g_input_stream_read_async kwargs
 static PyObject *
 _wrap_g_input_stream_read_async(PyGObject *self,
-				PyObject *args,
-				PyObject *kwargs)
+                                PyObject *args,
+                                PyObject *kwargs)
 {
-  static char *kwlist[] = { "callback", "count", "io_priority",
-			    "cancellable", "user_data", NULL };
-  long count = -1;
-  int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable = NULL;
-  GCancellable *cancellable;
-  PyGIONotifyRead *notify;
+    static char *kwlist[] = { "callback", "count", "io_priority",
+                              "cancellable", "user_data", NULL };
+    long count = -1;
+    int io_priority = G_PRIORITY_DEFAULT;
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable;
+    PyGIONotifyRead *notify;
 
-  notify = g_slice_new0(PyGIONotifyRead);
+    notify = g_slice_new0(PyGIONotifyRead);
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "lO|iOO:InputStream.read_async",
-				   kwlist, 
-				   &count,				   
-				   &notify->callback,
-				   &io_priority,
-				   &pycancellable,
-				   &notify->data))
-    {
-      g_slice_free(PyGIONotifyRead, notify);
-      return NULL;
-    }
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "lO|iOO:InputStream.read_async",
+                                     kwlist,
+                                     &count,
+                                     &notify->callback,
+                                     &io_priority,
+                                     &pycancellable,
+                                     &notify->data))
+        {
+            g_slice_free(PyGIONotifyRead, notify);
+            return NULL;
+        }
 
-  if (!PyCallable_Check(notify->callback))
-    {
-      PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGIONotifyRead, notify);
-      return NULL;
-    }
-  Py_INCREF(notify->callback);
-  Py_XINCREF(notify->data);
-  
-  if (!pygio_check_cancellable(pycancellable, &cancellable))
-    return NULL;
-  
-  notify->buffer = g_malloc(count);
-  if (notify->buffer == NULL)
-    return NULL;
-  
-  g_input_stream_read_async(G_INPUT_STREAM(self->obj),
-			    notify->buffer,
-			    count,
-			    io_priority,
-			    cancellable,
-			    (GAsyncReadyCallback)async_result_callback_marshal_read,
-			    notify);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
+    if (!PyCallable_Check(notify->callback))
+        {
+            PyErr_SetString(PyExc_TypeError, "callback argument not callable");
+            g_slice_free(PyGIONotifyRead, notify);
+            return NULL;
+        }
+    Py_INCREF(notify->callback);
+    Py_XINCREF(notify->data);
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    notify->buffer = g_malloc(count);
+    if (notify->buffer == NULL)
+        return NULL;
+
+    g_input_stream_read_async(G_INPUT_STREAM(self->obj),
+                              notify->buffer,
+                              count,
+                              io_priority,
+                              cancellable,
+                              (GAsyncReadyCallback)async_result_callback_marshal_read,
+                              notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 %%
 override g_input_stream_read_finish kwargs
 static PyObject *
 _wrap_g_input_stream_read_finish(PyGObject *self,
-				 PyObject *args,
-				 PyObject *kwargs)
+                                 PyObject *args,
+                                 PyObject *kwargs)
 {
     static char *kwlist[] = { "result", NULL };
     PyGObject *result;
@@ -213,24 +213,24 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
     static GQuark quark = 0;
     gchar *buffer;
     Py_ssize_t bytesread;
-    
+
     if (!quark)
-	quark = g_quark_from_string("pygio::buffer");
+        quark = g_quark_from_string("pygio::buffer");
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "O!:GInputStream.read_finish",
-				     kwlist, &PyGAsyncResult_Type, &result))
+                                     "O!:GInputStream.read_finish",
+                                     kwlist, &PyGAsyncResult_Type, &result))
         return NULL;
-    
+
 
     bytesread = g_input_stream_read_finish(G_INPUT_STREAM(self->obj),
-					   G_ASYNC_RESULT(result->obj), &error);
-    
+                                           G_ASYNC_RESULT(result->obj), &error);
+
     if (pyg_error_check(&error))
         return NULL;
 
     if (bytesread == 0) {
-	return PyString_FromString("");
+        return PyString_FromString("");
     }
 
     buffer = g_object_get_qdata(G_OBJECT(result->obj), quark);
@@ -240,82 +240,82 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
 override g_input_stream_close_async kwargs
 static PyObject *
 _wrap_g_input_stream_close_async(PyGObject *self,
-				 PyObject *args,
-				 PyObject *kwargs)
+                                 PyObject *args,
+                                 PyObject *kwargs)
 {
-  static char *kwlist[] = { "callback", "io_priority", "cancellable",
-			    "user_data", NULL };
-  int io_priority = G_PRIORITY_DEFAULT;
-  PyGObject *pycancellable = NULL;
-  GCancellable *cancellable;
-  PyGIONotify *notify;
+    static char *kwlist[] = { "callback", "io_priority", "cancellable",
+                              "user_data", NULL };
+    int io_priority = G_PRIORITY_DEFAULT;
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable;
+    PyGIONotify *notify;
 
-  notify = g_slice_new0(PyGIONotify);
+    notify = g_slice_new0(PyGIONotify);
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				   "O|iOO:InputStream.close_async",
-				   kwlist,
-				   &notify->callback,
-				   &io_priority,
-				   &pycancellable,
-				   &notify->data))
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O|iOO:InputStream.close_async",
+                                     kwlist,
+                                     &notify->callback,
+                                     &io_priority,
+                                     &pycancellable,
+                                     &notify->data))
+        {
+            g_slice_free(PyGIONotify, notify);
+            return NULL;
+        }
 
-  if (!PyCallable_Check(notify->callback))
-    {
-      PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
-  Py_INCREF(notify->callback);
-  Py_XINCREF(notify->data);
-    
-  if (!pygio_check_cancellable(pycancellable, &cancellable))
-    return NULL;
- 
-  g_input_stream_close_async(G_INPUT_STREAM(self->obj),
-			     io_priority,
-			     cancellable,
-			     (GAsyncReadyCallback)async_result_callback_marshal,
-			     notify);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
+    if (!PyCallable_Check(notify->callback))
+        {
+            PyErr_SetString(PyExc_TypeError, "callback argument not callable");
+            g_slice_free(PyGIONotify, notify);
+            return NULL;
+        }
+    Py_INCREF(notify->callback);
+    Py_XINCREF(notify->data);
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    g_input_stream_close_async(G_INPUT_STREAM(self->obj),
+                               io_priority,
+                               cancellable,
+                               (GAsyncReadyCallback)async_result_callback_marshal,
+                               notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 %%
 override g_memory_input_stream_add_data kwargs
 static PyObject *
 _wrap_g_memory_input_stream_add_data(PyGObject *self,
-				     PyObject *args,
-				     PyObject *kwargs)
+                                     PyObject *args,
+                                     PyObject *kwargs)
 {
     static char *kwlist[] = { "data", NULL };
     PyObject *data;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gio.MemoryInputStream.add_data",
-				     kwlist, &data))
-	return NULL;
+                                     kwlist, &data))
+        return NULL;
 
     if (data != Py_None) {
-	char *copy;
-	int length;
+        char *copy;
+        int length;
 
-	if (!PyString_Check(data)) {
-	    PyErr_SetString(PyExc_TypeError, "data must be a string or None");
-	    return NULL;
-	}
+        if (!PyString_Check(data)) {
+            PyErr_SetString(PyExc_TypeError, "data must be a string or None");
+            return NULL;
+        }
 
-	length = PyString_Size(data);
-	copy = g_malloc(length);
-	memcpy(copy, PyString_AsString(data), length);
+        length = PyString_Size(data);
+        copy = g_malloc(length);
+        memcpy(copy, PyString_AsString(data), length);
 
-	g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(self->obj),
-				       copy, length, (GDestroyNotify) g_free);
+        g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(self->obj),
+                                       copy, length, (GDestroyNotify) g_free);
     }
-  
+
     Py_INCREF(Py_None);
     return Py_None;
 }
