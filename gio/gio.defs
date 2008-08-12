@@ -713,6 +713,10 @@
 
 (define-method read_line
   (of-object "GDataInputStream")
+  (docstring
+   "S.read_line([cancellable]) -> str\n"
+   "Read a line from the stream. Return value includes ending newline\n"
+   "character.")
   (c-name "g_data_input_stream_read_line")
   (return-type "char*")
   (parameters
@@ -724,6 +728,11 @@
 
 (define-method read_until
   (of-object "GDataInputStream")
+  (docstring
+   "S.read_until(stop_chars, [cancellable]) -> str\n"
+   "Read characters from the string, stopping at the end or upon reading\n"
+   "any character in stop_chars. Return value does not include the stopping\n"
+   "character.")
   (c-name "g_data_input_stream_read_until")
   (return-type "char*")
   (parameters

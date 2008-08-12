@@ -4,6 +4,8 @@
 
 	* tests/test_gio.py (TestDataInputStream): New test case.
 
+	* gio/gio.defs (read_line, read_until): Document.
+
 	* gio/ginputstream.override (_wrap_g_data_input_stream_read_line)
 	(_wrap_g_data_input_stream_read_until): New functions.
 
