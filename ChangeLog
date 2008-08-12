@@ -1,5 +1,14 @@
 2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 547484 – wrap gio.DataInputStream.read_line and ...read_until
+
+	* tests/test_gio.py (TestDataInputStream): New test case.
+
+	* gio/ginputstream.override (_wrap_g_data_input_stream_read_line)
+	(_wrap_g_data_input_stream_read_until): New functions.
+
+2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 547354 – wrap a few memory stream methods
 
 	* gio/ginputstream.override (_wrap_g_memory_input_stream_add_data):

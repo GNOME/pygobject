@@ -545,6 +545,27 @@ class TestInputStream(unittest.TestCase):
         loop.run()
 
 
+class TestDataInputStream(unittest.TestCase):
+    def setUp(self):
+        self.base_stream = gio.MemoryInputStream()
+        self.data_stream = gio.DataInputStream(self.base_stream)
+
+    def test_read_line(self):
+        # Currently fails because GIO itself is buggy.  See bug 547481.
+        return
+        self.base_stream.add_data('foo\nbar\n\nbaz')
+        self.assertEquals('foo\n', self.data_stream.read_line())
+        self.assertEquals('bar\n', self.data_stream.read_line())
+        self.assertEquals('\n', self.data_stream.read_line())
+        self.assertEquals('baz', self.data_stream.read_line())
+
+    def test_read_until(self):
+        self.base_stream.add_data('sentence.end of line\nthe rest')
+        self.assertEquals('sentence', self.data_stream.read_until('.!?'))
+        self.assertEquals('end of line', self.data_stream.read_until('\n\r'))
+        self.assertEquals('the rest', self.data_stream.read_until('#$%^&'))
+
+
 class TestMemoryInputStream(unittest.TestCase):
     def setUp(self):
         self.stream = gio.MemoryInputStream()
