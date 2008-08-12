@@ -1,10 +1,23 @@
+2008-08-13  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 547495 – wrap four important asynchronous methods in gio.Drive
+	and gio.Mount
+
+	* gio/gio.defs (gio.Drive.eject, gio.Drive.poll_for_media)
+	(gio.Mount.remount): Document.
+
+	* gio/gio.override (_wrap_g_drive_eject)
+	(_wrap_g_drive_poll_for_media, _wrap_g_mount_eject)
+	(_wrap_g_mount_remount): New functions.
+
 2008-08-12  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 547484 – wrap gio.DataInputStream.read_line and ...read_until
 
 	* tests/test_gio.py (TestDataInputStream): New test case.
 
-	* gio/gio.defs (read_line, read_until): Document.
+	* gio/gio.defs (gio.DataInputStream.read_line)
+	(gio.DataInputStream.read_until): Document.
 
 	* gio/ginputstream.override (_wrap_g_data_input_stream_read_line)
 	(_wrap_g_data_input_stream_read_until): New functions.
