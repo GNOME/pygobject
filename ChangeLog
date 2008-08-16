@@ -1,3 +1,8 @@
+2008-08-16  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gio/gfile.override (_wrap_g_file_enumerate_children_async): Fix
+	keywords getting out of sync with actual argument order.
+
 2008-08-13  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 547495 – wrap four important asynchronous methods in gio.Drive

@@ -281,7 +281,7 @@ override g_file_enumerate_children_async kwargs
 static PyObject *
 _wrap_g_file_enumerate_children_async(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "attributes", "flags", "callback",
+    static char *kwlist[] = { "attributes", "callback", "flags",
 			      "io_priority", "cancellable", "user_data", NULL };
     PyGIONotify *notify;
     char *attributes;
