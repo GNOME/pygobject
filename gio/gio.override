@@ -133,6 +133,7 @@ _wrap_g_drive_get_volumes (PyGObject *self)
     PyObject *item = pygobject_new((GObject *)volume);
     PyList_Append(ret, item);
     Py_DECREF(item);
+    g_object_unref(volume);
   }
   g_list_free(list);
 
@@ -509,6 +510,28 @@ _wrap_g_vfs_get_supported_uri_schemes(PyGObject *self)
 
         names++;
     }
+
+    return ret;
+}
+%%
+override g_content_types_get_registered noargs
+static PyObject *
+_wrap_g_content_types_get_registered(PyObject *self)
+{
+    GList *list, *l;
+    PyObject *ret;
+
+    list = g_content_types_get_registered();
+
+    ret = PyList_New(0);
+    for (l = list; l; l = l->next) {
+	char *content_type = l->data;
+	PyObject *string = PyString_FromString(content_type);
+	PyList_Append(ret, string);
+	Py_DECREF(string);
+	g_free(content_type);
+    }
+    g_list_free(list);
 
     return ret;
 }

@@ -1,5 +1,22 @@
 2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 547088 – wrap g_content_types_get_registered()
+
+	* gio/gio.override (_wrap_g_drive_get_volumes): Fix refleak.
+	(_wrap_g_content_types_get_registered): New function.
+
+	* gio/gfileenumerator.override (_wrap_g_file_enumerator_next_files_finish):
+	Fix refleak.
+
+	* gio/gvolumemonitor.override (_wrap_g_volume_monitor_get_connected_drives):
+	Fix refleak.
+	(_wrap_g_volume_monitor_get_volumes): Likewise.
+	(_wrap_g_volume_monitor_get_mounts): Likewise.
+
+2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 547494 – gio.InputStream.read() looks broken
+
 	* gio/gio.defs (gio.InputStream.read_part): Rename from read(),
 	document.
 	(gio.InputStream.read): Rename from read_all(), document.

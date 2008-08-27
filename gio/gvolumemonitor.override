@@ -35,6 +35,7 @@ _wrap_g_volume_monitor_get_connected_drives (PyGObject *self)
     PyObject *item = pygobject_new((GObject *)drive);
     PyList_Append(ret, item);
     Py_DECREF(item);
+    g_object_unref(drive);
   }
   g_list_free(list);
   
@@ -56,6 +57,7 @@ _wrap_g_volume_monitor_get_volumes (PyGObject *self)
     PyObject *item = pygobject_new((GObject *)volume);
     PyList_Append(ret, item);
     Py_DECREF(item);
+    g_object_unref(volume);
   }
   g_list_free(list);
   
@@ -77,6 +79,7 @@ _wrap_g_volume_monitor_get_mounts (PyGObject *self)
     PyObject *item = pygobject_new((GObject *)mount);
     PyList_Append(ret, item);
     Py_DECREF(item);
+    g_object_unref(mount);
   }
   g_list_free(list);
   
