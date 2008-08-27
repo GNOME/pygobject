@@ -1,5 +1,13 @@
 2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 549191 – Constructor of gtk.TreeView raises TypeError when
+	model is None
+
+	* gobject/pygtype.c (pyg_value_from_pyobject): Handle None in
+	G_TYPE_INTERFACE branch.
+
+2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 549351 – an unitialized variable in PyGLib
 
 	* glib/pygmainloop.c (pyg_main_loop_init): Initialize

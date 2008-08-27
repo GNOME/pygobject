@@ -657,14 +657,18 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     case G_TYPE_INTERFACE:
 	/* we only handle interface types that have a GObject prereq */
 	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT)) {
-	    if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
-		return -1;
+	    if (obj == Py_None)
+		g_value_set_object(value, NULL);
+	    else {
+		if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
+		    return -1;
+		}
+		if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
+						G_VALUE_TYPE(value))) {
+		    return -1;
+		}
+		g_value_set_object(value, pygobject_get(obj));
 	    }
-	    if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
-					    G_VALUE_TYPE(value))) {
-		return -1;
-	    }
-	    g_value_set_object(value, pygobject_get(obj));
 	} else {
 	    return -1;
 	}
