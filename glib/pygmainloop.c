@@ -232,10 +232,9 @@ PYGLIB_DEFINE_TYPE("glib.MainLoop", PyGMainLoop_Type, PyGMainLoop)
 static int
 pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
 {
-
     static char *kwlist[] = { "context", "is_running", NULL };
     PyObject *py_context = Py_None;
-    int is_running;
+    int is_running = 0;
     GMainContext *context;
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
@@ -246,7 +245,7 @@ pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
     if (!PyObject_TypeCheck(py_context, &PyGMainContext_Type) &&
 	py_context != Py_None) {
 	PyErr_SetString(PyExc_TypeError,
-			"context must be a glib.GMainContext or None");
+			"context must be a glib.MainContext or None");
 	return -1;
     }
 

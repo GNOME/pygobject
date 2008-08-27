@@ -1,5 +1,12 @@
 2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 549351 – an unitialized variable in PyGLib
+
+	* glib/pygmainloop.c (pyg_main_loop_init): Initialize
+	`is_running'.
+
+2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 547633 – cannot create new threads when pygtk is used
 
 	* glib/pyglib.c (pyglib_notify_on_enabling_threads): New function.
