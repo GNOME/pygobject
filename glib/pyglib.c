@@ -135,13 +135,25 @@ pyglib_enable_threads(void)
 		    "pyglib threading disabled at compile time");
     return FALSE;
 }
+
+void
+pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
+{
+    /* Ignore, threads cannot be enabled. */
+}
+
 #else
+
+static GSList *thread_enabling_callbacks = NULL;
+
 /* Enable threading; note that the GIL must be held by the current
  * thread when this function is called
  */
 gboolean
 pyglib_enable_threads(void)
 {
+    GSList *callback;
+
     g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
 
     if (_PyGLib_API->threads_enabled)
@@ -153,8 +165,19 @@ pyglib_enable_threads(void)
     
     _PyGLib_API->threads_enabled = TRUE;
     pyglib_thread_state_tls_key = PyThread_create_key();
-    
+
+    for (callback = thread_enabling_callbacks; callback; callback = callback->next)
+	((PyGLibThreadsEnabledFunc) callback->data) ();
+
+    g_slist_free(thread_enabling_callbacks);
     return TRUE;
+}
+
+void
+pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
+{
+    if (callback && !pyglib_threads_enabled())
+	thread_enabling_callbacks = g_slist_append(thread_enabling_callbacks, callback);
 }
 #endif
 
