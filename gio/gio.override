@@ -105,7 +105,6 @@ ignore-glob
   g_file_new_from_path
   g_file_new_from_uri
   g_file_hash
-  g_input_stream_read_all
   g_io_error_quark
   g_simple_async_result_new_error
   g_simple_async_report_error_in_idle

@@ -91,7 +91,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
                                      &pycancellable))
         return NULL;
 
-    buffersize = BUFSIZE;
+    buffersize = (count < 0 ? BUFSIZE : count);
 
     if (!pygio_check_cancellable(pycancellable, &cancellable))
         return NULL;
@@ -111,31 +111,99 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
                                             &error);
             pyg_end_allow_threads;
 
-            if (pyg_error_check(&error))
-                {
-                    Py_DECREF(v);
-                    return NULL;
-                }
-            else if (chunksize == 0)
-                {
-                    PyErr_SetFromErrno(PyExc_IOError);
-                    Py_DECREF(v);
-                    return NULL;
-                }
+            if (pyg_error_check(&error)) {
+		Py_DECREF(v);
+		return NULL;
+	    }
+	    if (chunksize == 0) {
+		/* End of file. */
+                break;
+	    }
 
             bytesread += chunksize;
-            if (bytesread < buffersize)
+            if (bytesread < buffersize) {
+		/* g_input_stream_read() decided to not read full buffer.  We
+		 * then return early too, even if 'count' is less than 0.
+		 */
                 break;
+	    }
 
-            if (count < 0)
-                {
-                    buffersize += BUFSIZE;
-                    if (_PyString_Resize(&v, buffersize) < 0)
-                        return NULL;
-                }
-            else
+            if (count < 0) {
+		buffersize += BUFSIZE;
+		if (_PyString_Resize(&v, buffersize) < 0)
+		    return NULL;
+	    }
+            else {
                 /* Got what was requested. */
                 break;
+	    }
+        }
+
+    if (bytesread != buffersize)
+        _PyString_Resize(&v, bytesread);
+
+    return v;
+}
+%%
+override g_input_stream_read_all kwargs
+static PyObject *
+_wrap_g_input_stream_read_all(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "count", "cancellable", NULL };
+    PyGObject *pycancellable = NULL;
+    PyObject *v;
+    GCancellable *cancellable;
+    long count = -1;
+    GError *error = NULL;
+    size_t bytesread, buffersize, chunksize;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "|lO:InputStream.read",
+                                     kwlist, &count,
+                                     &pycancellable))
+        return NULL;
+
+    buffersize = (count < 0 ? BUFSIZE : count);
+
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+        return NULL;
+
+    v = PyString_FromStringAndSize((char *)NULL, buffersize);
+    if (v == NULL)
+        return NULL;
+
+    bytesread = 0;
+    for (;;)
+        {
+            pyg_begin_allow_threads;
+            errno = 0;
+            g_input_stream_read_all(G_INPUT_STREAM(self->obj),
+				    PyString_AS_STRING((PyStringObject *)v) + bytesread,
+				    buffersize - bytesread,
+				    &chunksize,
+				    cancellable, &error);
+            pyg_end_allow_threads;
+
+            if (pyg_error_check(&error)) {
+		Py_DECREF(v);
+		return NULL;
+	    }
+
+            bytesread += chunksize;
+            if (bytesread < buffersize || chunksize == 0) {
+		/* End of file. */
+                break;
+	    }
+
+            if (count < 0) {
+		buffersize += BUFSIZE;
+		if (_PyString_Resize(&v, buffersize) < 0)
+		    return NULL;
+	    }
+            else {
+                /* Got what was requested. */
+                break;
+	    }
         }
 
     if (bytesread != buffersize)
@@ -384,5 +452,4 @@ _wrap_g_memory_input_stream_add_data(PyGObject *self,
     Py_INCREF(Py_None);
     return Py_None;
 }
-/* GInputStream.read_all: No ArgType for void* */
 /* GInputStream.skip_async: No ArgType for GAsyncReadyCallback */

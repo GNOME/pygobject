@@ -3177,8 +3177,26 @@
   (return-type "GType")
 )
 
-(define-method read
+;; Note: the following two methods are renamed for consistency with
+;; Python file objects' read().  I.e. g_input_stream_read_all() is
+;; more like Python file.read(), so it is renamed read().  Since now
+;; there is a name clash, g_input_stream_read() is renamed
+;; read_part().
+(define-method read_part
   (of-object "GInputStream")
+  (docstring
+   "STREAM.read_part([count, [cancellable]]) -> string\n"
+   "\n"
+   "Read 'count' bytes from the stream. If 'count' is not specified or is\n"
+   "omitted, read until the end of the stream. This method is allowed to\n"
+   "stop at any time after reading at least 1 byte from the stream. E.g.\n"
+   "when reading over a (relatively slow) HTTP connection, it will often\n"
+   "stop after receiving one packet. Therefore, to reliably read requested\n"
+   "number of bytes, you need to use a loop. See also gio.InputStream.read\n"
+   "for easier to use (though less efficient) method.\n"
+   "\n"
+   "Note: this method roughly corresponds to C GIO g_input_stream_read."
+  )
   (c-name "g_input_stream_read")
   (return-type "gssize")
   (parameters
@@ -3189,8 +3207,21 @@
   )
 )
 
-(define-method read_all
+;; See comments before the previous method definition.
+(define-method read
   (of-object "GInputStream")
+  (docstring
+   "STREAM.read([count, [cancellable]]) -> string\n"
+   "\n"
+   "Read 'count' bytes from the stream. If 'count' is not specified or is\n"
+   "omitted, read until the end of the stream. This method will stop only\n"
+   "after reading requested number of bytes, reaching end of stream or\n"
+   "triggering an I/O error. See also gio.InputStream.read_part for more\n"
+   "efficient, but more cumbersome to use method.\n"
+   "\n"
+   "Note: this method roughly corresponds to C GIO g_input_stream_read_all.\n"
+   "It was renamed for consistency with Python standard file.read."
+  )
   (c-name "g_input_stream_read_all")
   (return-type "gboolean")
   (parameters
@@ -3976,8 +4007,24 @@
   (return-type "GType")
 )
 
-(define-method write
+;; Note: the following two methods are renamed for consistency with
+;; Python file objects' write().  I.e. g_output_stream_write_all() is
+;; more like Python file.write(), so it is renamed write().  Since now
+;; there is a name clash, g_output_stream_write() is renamed
+;; write_part().
+(define-method write_part
   (of-object "GOutputStream")
+  (docstring
+   "STREAM.write_part(buffer, [cancellable]) -> int\n"
+   "\n"
+   "Write the bytes in 'buffer' to the stream. Return the number of bytes\n"
+   "successfully written. This method is allowed to stop at any time after\n"
+   "writing at least 1 byte. Therefore, to reliably write the whole buffer,\n"
+   "you need to use a loop. See also gio.OutputStream.write for easier to\n"
+   "use (though less efficient) method.\n"
+   "\n"
+   "Note: this method roughly corresponds to C GIO g_output_stream_write."
+  )
   (c-name "g_output_stream_write")
   (return-type "gssize")
   (parameters
@@ -3988,8 +4035,18 @@
   )
 )
 
-(define-method write_all
+;; See comments before the previous method definition.
+(define-method write
   (of-object "GOutputStream")
+   "STREAM.write(buffer, [cancellable]) -> int\n"
+   "\n"
+   "Write the bytes in 'buffer' to the stream. Return the number of bytes\n"
+   "successfully written. This method will stop only after writing the whole\n"
+   "buffer or triggering an I/O error. See also gio.OutputStream.write_part\n"
+   "for more efficient, but more cumbersome to use method.\n"
+   "\n"
+   "Note: this method roughly corresponds to C GIO g_output_stream_write_all.\n"
+   "It was renamed for consistency with Python standard file.write."
   (c-name "g_output_stream_write_all")
   (return-type "gboolean")
   (parameters

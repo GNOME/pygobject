@@ -54,6 +54,40 @@ _wrap_g_output_stream_write(PyGObject *self,
   return PyInt_FromLong(written);
 }
 %%
+override g_output_stream_write_all kwargs
+static PyObject *
+_wrap_g_output_stream_write_all(PyGObject *self,
+				PyObject *args,
+				PyObject *kwargs)
+{
+  static char *kwlist[] = { "buffer", "cancellable", NULL };
+  PyGObject *pycancellable = NULL;
+  gchar *buffer;
+  long count = 0; 
+  GCancellable *cancellable;
+  GError *error = NULL;
+  gssize written;
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				   "s#|O!:OutputStream.write",
+				   kwlist, &buffer, &count,
+				   &PyGCancellable_Type, &pycancellable))
+    return NULL;
+
+  if (!pygio_check_cancellable(pycancellable, &cancellable))
+      return NULL;
+
+  pyg_begin_allow_threads;
+  g_output_stream_write_all(G_OUTPUT_STREAM(self->obj),
+			    buffer, count, &written, cancellable, &error);
+  pyg_end_allow_threads;
+
+  if (pyg_error_check(&error))
+    return NULL;
+      
+  return PyInt_FromLong(written);
+}
+%%
 override g_output_stream_write_async kwargs
 static PyObject *
 _wrap_g_output_stream_write_async(PyGObject *self,

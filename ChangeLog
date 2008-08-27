@@ -1,3 +1,23 @@
+2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* gio/gio.defs (gio.InputStream.read_part): Rename from read(),
+	document.
+	(gio.InputStream.read): Rename from read_all(), document.
+	(gio.OutputStream.write_part): Rename from write(), document.
+	(gio.OutputStream.write): Rename from write_all(), document.
+
+	* gio/ginputstream.override (_wrap_g_input_stream_read): Fix
+	several bugs.
+	(_wrap_g_input_stream_read_all): New function.
+
+	* gio/goutputstream.override (_wrap_g_output_stream_write_all):
+	New function.
+
+	* tests/test_gio.py (TestInputStream.testRead): Add more tests.
+	(TestInputStream.test_read_part): New test.
+	(TestInputStream._read_in_loop): New helper method.
+	(TestOutputStream.test_write_part): New test.
+
 2008-08-16  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* gio/gfile.override (_wrap_g_file_enumerate_children_async): Fix
