@@ -137,7 +137,7 @@ pyglib_enable_threads(void)
 }
 
 void
-pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
+_pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
 {
     /* Ignore, threads cannot be enabled. */
 }
@@ -174,7 +174,7 @@ pyglib_enable_threads(void)
 }
 
 void
-pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
+_pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
 {
     if (callback && !pyglib_threads_enabled())
 	thread_enabling_callbacks = g_slist_append(thread_enabling_callbacks, callback);

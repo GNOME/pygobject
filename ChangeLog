@@ -17,12 +17,13 @@
 
 	Bug 547633 – cannot create new threads when pygtk is used
 
-	* glib/pyglib.c (pyglib_notify_on_enabling_threads): New function.
+	* glib/pyglib.c (_pyglib_notify_on_enabling_threads): New
+	function.
 	(pyglib_enable_threads): Invoke all callbacks added with new
-	pyglib_notify_on_enabling_threads().
+	_pyglib_notify_on_enabling_threads().
 
 	* gobject/gobjectmodule.c (pyg_note_threads_enabled): New
-	function (callback for new pyglib_notify_on_enabling_threads()).
+	function (callback for new _pyglib_notify_on_enabling_threads()).
 	(PYGLIB_MODULE_START): Initialize
 	'pygobject_api_functions.threads_enabled' and also watch for
 	thread being enabled later on.

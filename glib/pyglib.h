@@ -36,7 +36,6 @@ void pyglib_init_internal(PyObject *api);
 PyGILState_STATE pyglib_gil_state_ensure(void);
 void pyglib_gil_state_release(PyGILState_STATE state);
 int pyglib_enable_threads(void);
-void pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback);
 gboolean pyglib_error_check(GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
 PyObject *pyglib_register_exception_for_domain(gchar *name,
@@ -51,6 +50,9 @@ PyObject * pyglib_option_context_new(GOptionContext *context);
 PyObject * pyglib_option_group_new(GOptionGroup *group);
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 PyObject * pyglib_float_from_timeval(GTimeVal timeval);
+
+/* Private: for gobject <-> glib interaction only. */
+void _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback);
 
 #define pyglib_begin_allow_threads		\
     G_STMT_START {                              \

@@ -2602,6 +2602,6 @@ PYGLIB_MODULE_START(_gobject, "gobject._gobject")
         PyDict_GetItemString(d, "signal_accumulator_true_handled");
 
     pygobject_api_functions.threads_enabled = pyglib_threads_enabled();
-    pyglib_notify_on_enabling_threads(pyg_note_threads_enabled);
+    _pyglib_notify_on_enabling_threads(pyg_note_threads_enabled);
 }
 PYGLIB_MODULE_END
