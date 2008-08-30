@@ -1,3 +1,9 @@
+2008-08-30  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* glib/pyglib.h: * gobject/pygobject.c: Fix memory problems
+	reported by valgrind due to invalid tp_basicsize in
+	PyGPropsDescr_Type.  Closes #549945.
+
 2008-08-28  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 549191 – Constructor of gtk.TreeView raises TypeError when

@@ -76,7 +76,8 @@ PyTypeObject symbol = {                                 \
     PyObject_HEAD_INIT(NULL)                            \
     0,                                                  \
     typename,						\
-    sizeof(csymbol)                                     \
+    sizeof(csymbol),                                    \
+    0,                                                  \
 };
 #define PYGLIB_REGISTER_TYPE(d, type, name)	        \
     if (!type.tp_alloc)                                 \
