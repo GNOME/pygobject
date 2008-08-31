@@ -1,3 +1,42 @@
+2.15.3 31-aug-2008
+        - Beginning of porting to 3.0. glib & gobject module ported.
+        - Wrap g_app_info_* functions (Gian)
+        - Wrap gio.FileAttributeInfo (Gian)
+        - Wrap g_vfs_get_supported_uri_schemes (Johan, #545846)
+        - Wrap g_file_info_get_modification_time (Johan, #545861)
+        - Wrap gio.Volume.mount/eject (Johan)
+        - Wrap gio.File.move (Johan)
+        - Wrap gio.query_writable_namespaces (Gian, #545920)
+        - Separate glib & gobject documentation
+        - Wrap GFile.append_to_async (Gian, #545959)
+        - Wrap GFile.create_async (Gian, #546020)
+        - Change return value from 'gboolean' to 'int' and changed semantics
+          to Pythonic (Paul, #544946)
+        - Wrap GFile.replace_async and query_info_async (Gian, #546046)
+        - GIcon and implementations improvements (Paul, #546135)
+        - Improve __repr__ and richcompare for gio classes (Paul)
+        - Missing Py_INCREFs for some file async methods (Jonathan Matthew, #546734)
+        - File.copy progress_callback does not work (Paul, #546591)
+        - add File.replace_contents, replace_contents_async, replace_contents_finish.
+          (Jonathan Matthew, #547067)
+        - Add GFile.query_default_handler (Gian)
+        - fix docstring line length (Jonathan Matthew, #547134)
+        - improve runtime type wrapper creation (Paul, #547104)
+        - make gio.File more Pythonic (Paul, #546120)
+        - No TypeError raised when type is None (Paul, #540376)
+        - wrap a few memory stream methods (Paul, #547354)
+        - wrap gio.DataInputStream.read_line and ...read_until (Paul, #547484)
+        - wrap four important asynchronous methods in gio.Drive and gio.Mount
+          (Paul, #547495)
+        - gio.InputStream.read() looks broken (Paul, #547494)
+        - wrap g_content_types_get_registered() (Paul, #547088)
+        - cannot create new threads when pygtk is used (Paul, #547633)
+        - an unitialized variable in PyGLib (Paul, #549351)
+        - Constructor of gtk.TreeView raises TypeError when model is None
+          (Paul, #549191)
+        - Fix memory problems reported by valgrind due to invalid tp_basicsize in
+          PyGPropsDescr_Type. (Gustavo, #549945)
+
 2.15.2 26-jul-2008
         - New module: glib, which contains the parts of the old
           gobject bindings which are in the glib library.
