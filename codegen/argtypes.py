@@ -1040,3 +1040,4 @@ matcher.register_object('GObject', None, 'G_TYPE_OBJECT')
 del arg
 
 matcher.register('cairo_t*', CairoArg())
+matcher.register_boxed("GClosure", "G_TYPE_CLOSURE")

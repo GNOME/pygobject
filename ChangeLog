@@ -1,3 +1,7 @@
+2008-09-01  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* codegen/argtypes.py: add G_TYPE_CLOSURE boxed type in codegen.
+
 2008-08-31  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac:
