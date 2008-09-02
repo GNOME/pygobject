@@ -1,3 +1,9 @@
+2008-09-03  Loïc Minier  <lool@dooz.org>
+
+	* gobject/pygpointer.c: (pyg_register_pointer):
+	Fix typo (s/&type/type) introduced in r886 causing weird crashes on
+	x86-64; bug #550463.
+
 2008-09-01  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* codegen/argtypes.py: add G_TYPE_CLOSURE boxed type in codegen.

@@ -108,7 +108,7 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
 
     if (!type->tp_dealloc) type->tp_dealloc = (destructor)pyg_pointer_dealloc;
 
-    Py_TYPE(&type) = &PyType_Type;
+    Py_TYPE(type) = &PyType_Type;
     type->tp_base = &PyGPointer_Type;
 
     if (PyType_Ready(type) < 0) {
