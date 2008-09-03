@@ -1,3 +1,8 @@
+=== 2.15.4 ===
+2008-09-03  Johan Dahlin  <johan@gnome.org>
+
+	* NEWS: Update
+
 2008-09-03  Loïc Minier  <lool@dooz.org>
 
 	* gobject/pygpointer.c: (pyg_register_pointer):

@@ -1,3 +1,7 @@
+2.15.4 3-sep-2008
+        - Fix typo in GPointer type registration (Loïc Minier,#550463)
+        - support G_TYPE_CLOSURE in codegen (Gian)
+
 2.15.3 31-aug-2008
         - Beginning of porting to 3.0. glib & gobject module ported.
         - Wrap g_app_info_* functions (Gian)
