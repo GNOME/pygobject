@@ -176,7 +176,7 @@ _wrap_g_file_load_contents(PyGObject *self,
     GCancellable *cancellable;
     PyGObject *pycancellable = NULL;
     gchar *contents, *etag_out;
-    gsize lenght;
+    gsize length;
     GError *error = NULL;
     gboolean ret;
 
@@ -190,7 +190,7 @@ _wrap_g_file_load_contents(PyGObject *self,
 	return NULL;
 
     ret = g_file_load_contents(G_FILE(self->obj), cancellable,
-                               &contents, &lenght, &etag_out, &error);
+                               &contents, &length, &etag_out, &error);
 
     if (pyg_error_check(&error))
         return NULL;
@@ -251,7 +251,7 @@ _wrap_g_file_load_contents_finish(PyGObject *self,
     static char *kwlist[] = { "res", NULL };
     PyGObject *res;
     gchar *contents, *etag_out;
-    gsize lenght;
+    gsize length;
     GError *error = NULL;
     gboolean ret;
 
@@ -264,7 +264,7 @@ _wrap_g_file_load_contents_finish(PyGObject *self,
 
     ret = g_file_load_contents_finish(G_FILE(self->obj),
                                       G_ASYNC_RESULT(res->obj), &contents,
-                                      &lenght, &etag_out, &error);
+                                      &length, &etag_out, &error);
 
     if (pyg_error_check(&error))
         return NULL;

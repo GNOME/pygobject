@@ -1,3 +1,9 @@
+2008-09-07  Frederic Peters  <fpeters@0d.be>
+
+	* gio/gfile.override (_wrap_g_file_load_contents)
+	(_wrap_g_file_load_contents_finish): Fix typos breaking
+	compilation (bug #551212).
+
 2008-09-07  Jonathan Matthew  <jonathan@d14n.org>
 
 	Bug 551059 – GFile load_contents methods chop data at first \0
