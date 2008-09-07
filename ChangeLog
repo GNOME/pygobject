@@ -1,3 +1,11 @@
+2008-09-07  Jonathan Matthew  <jonathan@d14n.org>
+
+	Bug 551059 – GFile load_contents methods chop data at first \0
+
+	* gio/gfile.override:
+	Use 's#' (length specified) rather than 's' when constructing
+	result values in load_contents and load_contents_finish.
+
 2008-09-03  Johan Dahlin  <johan@gnome.org>
 
 	* configure.ac:

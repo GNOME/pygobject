@@ -196,7 +196,7 @@ _wrap_g_file_load_contents(PyGObject *self,
         return NULL;
 
     if (ret)
-        return Py_BuildValue("(sks)", contents, lenght, etag_out);
+        return Py_BuildValue("(s#ks)", contents, length, length, etag_out);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -270,7 +270,7 @@ _wrap_g_file_load_contents_finish(PyGObject *self,
         return NULL;
 
     if (ret)
-        return Py_BuildValue("(sks)", contents, lenght, etag_out);
+        return Py_BuildValue("(s#ks)", contents, length, length, etag_out);
     else {
         Py_INCREF(Py_None);
         return Py_None;
