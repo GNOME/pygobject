@@ -1,3 +1,17 @@
+2008-09-08  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 551056 – make codegen not import when corresponding argument
+	types are not registered
+
+	* codegen/override.py (import_pat): Add support for optional 'for'
+	clause.
+	(Overrides.__parse_override): Handle it.
+
+	* codegen/codegen.py (SourceWriter.write_imports)
+	(SourceWriter.write_object_imports): Adapt for changes in
+	get_imports() return value.
+	(is_registered_object): New function.
+
 2008-09-07  Frederic Peters  <fpeters@0d.be>
 
 	* gio/gfile.override (_wrap_g_file_load_contents)

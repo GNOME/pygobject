@@ -1374,9 +1374,10 @@ typedef intobjargproc ssizeobjargproc;
 
     def write_imports(self):
         self.fp.write('/* ---------- types from other modules ---------- */\n')
-        for module, pyname, cname in self.overrides.get_imports():
-            self.fp.write('static PyTypeObject *_%s;\n' % cname)
-            self.fp.write('#define %s (*_%s)\n' % (cname, cname))
+        for module, pyname, cname, importing_for in self.overrides.get_imports():
+            if importing_for is None or is_registered_object(importing_for):
+                self.fp.write('static PyTypeObject *_%s;\n' % cname)
+                self.fp.write('#define %s (*_%s)\n' % (cname, cname))
         self.fp.write('\n\n')
 
     def write_type_declarations(self):
@@ -1485,8 +1486,9 @@ typedef intobjargproc ssizeobjargproc;
             return
 
         bymod = {}
-        for module, pyname, cname in imports:
-            bymod.setdefault(module, []).append((pyname, cname))
+        for module, pyname, cname, importing_for in imports:
+            if importing_for is None or is_registered_object(importing_for):
+                bymod.setdefault(module, []).append((pyname, cname))
         self.fp.write('    PyObject *module;\n\n')
         for module in bymod:
             self.fp.write(
@@ -1624,6 +1626,9 @@ typedef intobjargproc ssizeobjargproc;
                 (obj.typecode, obj.class_init_func))
 
 _objects = {}
+
+def is_registered_object(c_name):
+    return c_name in _objects
 
 def get_object_by_name(c_name):
     global _objects

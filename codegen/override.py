@@ -19,7 +19,10 @@ def class2cname(klass, method):
             c_name += c
     return c_name[1:] + '_'  + method
 
-import_pat = re.compile(r'\s*import\s+(\S+)\.([^\s.]+)\s+as\s+(\S+)')
+# import python_type as c_name [for arg_type]
+# Last ('for') clause is optional.  If present, the type will be
+# imported only if given 'arg_type' is registered.
+import_pat = re.compile(r'\s*import\s+(\S+)\.([^\s.]+)\s+as\s+(\S+)(\s+for\s+(\S+))?')
 
 class Overrides:
     def __init__(self, filename=None):
@@ -166,7 +169,8 @@ class Overrides:
             for line in string.split(buffer, '\n'):
                 match = import_pat.match(line)
                 if match:
-                    self.imports.append(match.groups())
+                    module, pyname, cname, conditional, importing_for = match.groups()
+                    self.imports.append((module, pyname, cname, importing_for or None))
         elif command == 'define':
             "define funcname [kwargs|noargs|onearg] [classmethod|staticmethod]"
             "define Class.method [kwargs|noargs|onearg] [classmethod|staticmethod]"
