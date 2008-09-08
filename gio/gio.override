@@ -238,6 +238,26 @@ _wrap_g_drive_poll_for_media(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 %%
+override-slot GDrive.tp_repr
+static PyObject *
+_wrap_g_drive_tp_repr(PyGObject *self)
+{
+    char *name = g_drive_get_name(G_DRIVE(self->obj));
+    gchar *representation;
+    PyObject *result;
+
+    if (name) {
+	representation = g_strdup_printf("<%s at %p: %s>", self->ob_type->tp_name, self, name);
+	g_free(name);
+    }
+    else
+	representation = g_strdup_printf("<%s at %p: UNKNOWN NAME>", self->ob_type->tp_name, self);
+
+    result = PyString_FromString(representation);
+    g_free(representation);
+    return result;
+}
+%%
 override g_app_info_get_all noargs
 static PyObject *
 _wrap_g_app_info_get_all (PyGObject *self)
@@ -491,6 +511,36 @@ _wrap_g_mount_remount(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     Py_INCREF(Py_None);
     return Py_None;
+}
+%%
+override-slot GMount.tp_repr
+static PyObject *
+_wrap_g_mount_tp_repr(PyGObject *self)
+{
+    char *name = g_mount_get_name(G_MOUNT(self->obj));
+    char *uuid = g_mount_get_uuid(G_MOUNT(self->obj));
+    gchar *representation;
+    PyObject *result;
+
+    if (name) {
+	if (uuid) {
+	    representation = g_strdup_printf("<%s at %p: %s (%s)>",
+					     self->ob_type->tp_name, self, name, uuid);
+	}
+	else {
+	    representation = g_strdup_printf("<%s at %p: %s>",
+					     self->ob_type->tp_name, self, name);
+	}
+    }
+    else
+	representation = g_strdup_printf("<%s at %p: UNKNOWN NAME>", self->ob_type->tp_name, self);
+
+    g_free(name);
+    g_free(uuid);
+
+    result = PyString_FromString(representation);
+    g_free(representation);
+    return result;
 }
 %%
 override g_vfs_get_supported_uri_schemes noargs

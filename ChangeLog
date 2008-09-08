@@ -1,3 +1,12 @@
+2008-09-09  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 549517 – add __repr__ to gio.Drive, gio.Mount and gio.Volume
+
+	* gio/gio.override (_wrap_g_drive_tp_repr, _wrap_g_mount_tp_repr):
+	New functions.
+
+	* gio/gvolume.override (_wrap_g_volume_tp_repr): New function.
+
 2008-09-09  Loïc Minier  <lool@dooz.org>
 
 	Bug 551227 – Missing AC_CONFIG_MACRO_DIR([m4])
