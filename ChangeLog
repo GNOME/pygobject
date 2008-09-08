@@ -1,3 +1,9 @@
+2008-09-09  Loïc Minier  <lool@dooz.org>
+
+	Bug 551227 – Missing AC_CONFIG_MACRO_DIR([m4])
+
+	* configure.ac: Add AC_CONFIG_MACRO_DIR.
+
 2008-09-08  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 551056 – make codegen not import when corresponding argument

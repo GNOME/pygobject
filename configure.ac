@@ -15,6 +15,7 @@ m4_define(giounix_required_version, 2.16.0)
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_DEFINE(PYGOBJECT_MAJOR_VERSION, pygobject_major_version, [pygobject major version])
 AC_SUBST(PYGOBJECT_MAJOR_VERSION, pygobject_major_version)
