@@ -1294,6 +1294,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_ssize_t      pos;
     PyObject        *value;
     PyObject        *key;
+    PyObject        *result = NULL;
 
     CHECK_GOBJECT(self);
 
@@ -1303,38 +1304,30 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     pos = 0;
 
     while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
-    gchar *key_str = _PyUnicode_AsString (key);
-    GParamSpec *pspec;
-    GValue gvalue ={ 0, };
+	gchar *key_str = _PyUnicode_AsString(key);
+	GParamSpec *pspec;
 
-    pspec = g_object_class_find_property (class, key_str);
-    if (!pspec) {
+	pspec = g_object_class_find_property(class, key_str);
+	if (!pspec) {
 	    gchar buf[512];
 
 	    g_snprintf(buf, sizeof(buf),
 		       "object `%s' doesn't support property `%s'",
 		       g_type_name(G_OBJECT_TYPE(self->obj)), key_str);
 	    PyErr_SetString(PyExc_TypeError, buf);
-	    return NULL;
+	    goto exit;
 	}
 
-	g_value_init(&gvalue, G_PARAM_SPEC_VALUE_TYPE(pspec));
-	if (pyg_value_from_pyobject(&gvalue, value)) {
-	    gchar buf[512];
-
-	    g_snprintf(buf, sizeof(buf),
-		       "could not convert value for property `%s'", key_str);
-	    PyErr_SetString(PyExc_TypeError, buf);
-	    return NULL;
-	}
-	g_object_set_property(G_OBJECT(self->obj), key_str, &gvalue);
-	g_value_unset(&gvalue);
+	if (!set_property_from_pspec(G_OBJECT(self->obj), key_str, pspec, value))
+	    goto exit;
     }
 
-    g_object_thaw_notify (G_OBJECT(self->obj));
+    result = Py_None;
 
-    Py_INCREF(Py_None);
-    return Py_None;
+ exit:
+    g_object_thaw_notify (G_OBJECT(self->obj));
+    Py_XINCREF(result);
+    return result;
 }
 
 static PyObject *

@@ -1,3 +1,11 @@
+2008-09-10  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 530935 – pygobject_set_properties doesnt release the GIL
+
+	* gobject/pygobject.c (pygobject_set_properties): Reuse
+	set_property_from_pspec() which release GIL for us.  Also make
+	sure that g_object_thaw_notify() is called even after error.
+
 2008-09-09  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 549517 – add __repr__ to gio.Drive, gio.Mount and gio.Volume
