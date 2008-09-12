@@ -1,3 +1,8 @@
+2008-09-12  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/goutputstream.override
+	(g_output_stream_write_all): use gsize instead of gssize.
+
 2008-09-10  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 530935 – pygobject_set_properties doesnt release the GIL
