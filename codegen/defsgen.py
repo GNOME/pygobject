@@ -100,9 +100,15 @@ def to_upper_str(name):
     name = _upperstr_pat3.sub(r'\1_\2', name, count=1)
     return name.upper()
 
-def typecode(typename):
+def typecode(typename, prefix=''):
     """create a typecode (eg. GTK_TYPE_WIDGET) from a typename"""
-    return to_upper_str(typename).replace('_', '_TYPE_', 1)
+    tcode = to_upper_str(typename)
+    if prefix and tcode.lower() != prefix and tcode.lower().startswith(prefix):
+        l = len(prefix)
+        tcode = tcode[:l] + '_TYPE' + tcode[l:]
+    else:
+        tcode = tcode.replace('_', '_TYPE_', 1)
+    return tcode
 
 _class_iface_pat = re.compile(r'\w+(Class|Iface)')
 
@@ -284,6 +290,20 @@ pointer_pat = re.compile('(.*)\*$')
 func_new_pat = re.compile('(\w+)_new$')
 getset_pat = re.compile(r'^(?:get|set)_(.*)$')
 
+def split_prefix(cname, prefix):
+    # use the module prefix to split the cname
+    pre = prefix.replace('_', '')
+    if cname.lower().startswith(pre):
+        l = len(pre)
+        module = cname[:l]
+        name = cname[l:]
+    else:
+        m = split_prefix_pat.match(cname)
+        if m:
+            module = m.group(1)
+            name = m.group(2)
+    return module, name
+
 class DefsWriter:
     def __init__(self, defs, fp=None, prefix=None, verbose=False,
                  defsfiles=None, defines={}, genpropgetsets=False):
@@ -340,15 +360,12 @@ class DefsWriter:
             klassptr = klassptrs[parent_name]
             typename = parent_name.lower()[1:]
             module = None
-            m = split_prefix_pat.match(cname)
-            if m:
-                module = m.group(1)
-                name = m.group(2)
+            module, name = split_prefix(cname, self.prefix)
             fp.write('(define-' + typename + ' ' + name + '\n')
             if module:
                 fp.write('  (in-module "' + module + '")\n')
             fp.write('  (c-name "' + cname + '")\n')
-            fp.write('  (gtype-id "' + typecode(cname) + '")\n')
+            fp.write('  (gtype-id "' + typecode(cname, self.prefix) + '")\n')
             fp.write('  (values\n')
             classref = self.gobj.g_type_class_ref(obj.type)
             itemclass = ctypes.cast(classref, klassptr).contents
@@ -366,17 +383,14 @@ class DefsWriter:
         cname = name = obj.name
         type_id = obj.type
         parent_name = obj.parent_name
-        m = split_prefix_pat.match(cname)
-        if m:
-            cmodule = m.group(1)
-            name = m.group(2)
+        cmodule, name = split_prefix(cname, self.prefix)
         fp.write('(define-' + base_name + ' ' + name + '\n')
         if cmodule:
             fp.write('  (in-module "' + cmodule + '")\n')
         if base_name == 'object':
             fp.write('  (parent "' + parent_name + '")\n')
         fp.write('  (c-name "' + cname + '")\n')
-        fp.write('  (gtype-id "' + typecode(cname) + '")\n')
+        fp.write('  (gtype-id "' + typecode(cname, self.prefix) + '")\n')
         n = ctypes.c_uint()
         ifaces = self.gobj.g_type_interfaces(type_id, ctypes.byref(n))
         for i in range(n.value):
@@ -489,7 +503,7 @@ class DefsWriter:
 
 # ---------- ctypes support classes for gobject library functions ----------
 
-GType = ctypes.c_ulong
+GType = ctypes.c_uint
 
 class GTypeClass(ctypes.Structure):
     _fields_ = [('g_type', GType)]
