@@ -1,5 +1,7 @@
 2008-10-31  John Finlay  <finlay@moeraki.com>
 
+	* codegen/Makefile.am (codegen_PYTHON): Add defsgen.py
+
 	* codegen/defsgen.py (typecode): Use the passed in prefix as a
 	hint when creating a typecode.
 	(split_prefix,write_enum_defs,_write_obj_helper): Add function to
