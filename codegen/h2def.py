@@ -174,6 +174,10 @@ def find_enum_defs(buf, enums=[]):
     # bulk comments
     buf = strip_comments(buf)
 
+    # strip # directives
+    pat = re.compile(r"""^[#].*?$""", re.MULTILINE)
+    buf = pat.sub('', buf)
+
     buf = re.sub('\n', ' ', buf)
 
     enum_pat = re.compile(r'enum\s*{([^}]*)}\s*([A-Z][A-Za-z]*)(\s|;)')
@@ -244,6 +248,7 @@ def clean_func(buf):
     buf = pat.sub(r'[] \1', buf)
 
     # make return types that are const work.
+    buf = re.sub(r'\s*\*\s*G_CONST_RETURN\s*\*\s*', '** ', buf)
     buf = string.replace(buf, 'G_CONST_RETURN ', 'const-')
     buf = string.replace(buf, 'const ', 'const-')
 

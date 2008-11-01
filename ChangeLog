@@ -1,5 +1,11 @@
 2008-10-31  John Finlay  <finlay@moeraki.com>
 
+	* codegen/__init__.py (__all__): Add defsgen to __all__ list.
+
+	* codegen/h2def.py (find_enum_defs): Strip out # directives from
+	enum defintions.
+	(clean_func): Change ' * G_CONST_RETURN * ' to '** '
+
 	* codegen/Makefile.am (codegen_PYTHON): Add defsgen.py
 
 	* codegen/defsgen.py (typecode): Use the passed in prefix as a
