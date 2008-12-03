@@ -1,3 +1,8 @@
+2008-12-03  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	* glib/pyglib.c (pyglib_error_check): Test if `domain' is not-null
+	before using it (avoids segfaults, see bug #561826).
+
 2008-10-31  John Finlay  <finlay@moeraki.com>
 
 	* codegen/__init__.py (__all__): Add defsgen to __all__ list.

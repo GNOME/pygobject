@@ -270,9 +270,14 @@ pyglib_error_check(GError **error)
     }
 
     exc_instance = PyObject_CallFunction(exc_type, "z", (*error)->message);
-    PyObject_SetAttrString(exc_instance, "domain",
-			   d=_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
-    Py_DECREF(d);
+
+    if ((*error)->domain) {
+	PyObject_SetAttrString(exc_instance, "domain",
+			       d=_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
+	Py_DECREF(d);
+    }
+    else
+	PyObject_SetAttrString(exc_instance, "domain", Py_None);
 
     PyObject_SetAttrString(exc_instance, "code",
 			   d=_PyLong_FromLong((*error)->code));
