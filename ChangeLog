@@ -1,3 +1,10 @@
+2008-12-06  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 555613 – gio.VolumeMonitor segfaults
+
+	* gio/gvolumemonitor.override (_wrap_g_volume_monitor_tp_new):
+	Unconditionally raise TypeError.
+
 2008-12-03  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	* glib/pyglib.c (pyglib_error_check): Test if `domain' is not-null

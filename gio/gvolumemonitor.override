@@ -20,6 +20,15 @@
  * USA
  */
 %%
+override-slot GVolumeMonitor.tp_new
+static PyObject *
+_wrap_g_volume_monitor_tp_new(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyErr_SetString(PyExc_TypeError,
+		    "cannot create instance of type `GVolumeMonitor'");
+    return NULL;
+}
+%%
 override g_volume_monitor_get_connected_drives noargs
 static PyObject *
 _wrap_g_volume_monitor_get_connected_drives (PyGObject *self)
