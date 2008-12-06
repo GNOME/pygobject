@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- Mode: Python; py-indent-offset: 4 -*-
 #
-# Copyright (C) 2006-2008 John Finlay.
+# Copyright (C) 2006 John Finlay.
 #
 # Scan the given public .h files of a GTK module (or module using
 # GTK object conventions) and generates a set of scheme defs.
@@ -44,9 +44,6 @@
 #                    useful with the --defsfile option
 #   -m --modulename  The prefix to be stripped from the front of function names
 #                    for the given module
-#   -p --useprefix   Use the modulename prefix as a hint to split names into
-#                    module and name for object and enum defs. Also used for
-#                    generating type codes.
 #   --onlyenums      Only produce defs for enums and flags
 #   --onlyobjdefs    Only produce defs for objects
 #   --onlyvirtuals   Only produce defs for virtuals
@@ -83,7 +80,7 @@
 
 import getopt
 import os
-import re, string
+import re
 import sys
 import ctypes
 import defsparser
@@ -103,16 +100,9 @@ def to_upper_str(name):
     name = _upperstr_pat3.sub(r'\1_\2', name, count=1)
     return name.upper()
 
-def typecode(typename, prefix, use_prefix):
+def typecode(typename):
     """create a typecode (eg. GTK_TYPE_WIDGET) from a typename"""
-    tcode = to_upper_str(typename)
-    if (use_prefix and prefix and tcode.lower() != prefix
-        and tcode.lower().startswith(prefix)):
-        l = len(prefix)
-        tcode = tcode[:l] + '_TYPE' + tcode[l:]
-    else:
-        tcode = tcode.replace('_', '_TYPE_', 1)
-    return tcode
+    return to_upper_str(typename).replace('_', '_TYPE_', 1)
 
 _class_iface_pat = re.compile(r'\w+(Class|Iface)')
 
@@ -137,6 +127,8 @@ clean_patterns = [
     (re.compile(r'^\s*(extern)\s+"C"\s+{', re.MULTILINE), ''),
     # remove singleline typedefs of stucts
     (re.compile(r'^typedef\s+struct\s*[^{;\n]*;\s*$', re.MULTILINE), ''),
+    # remove enum definitions
+    (re.compile(r'^typedef enum\s+{[^}]*}[^;]*;\s*$', re.MULTILINE), ''),
     # remove all struct definitons but those for object classes and interfaces
     (re.compile(r'^struct\s+(\w+)\s+{[^}]+}\s*;\s*$', re.MULTILINE),
      class_iface_sub),
@@ -149,13 +141,10 @@ clean_patterns = [
     (re.compile(r' \s* ([*|&]+) \s* ([(\w]+)', re.VERBOSE), r'\1 \2'),
     (re.compile(r'\s+ (\w+) \[ \s* \]', re.VERBOSE), r'[] \1'),
     # make return types that are const work.
-    (re.compile(r'\s*\*\s*G_CONST_RETURN\s*\*\s*'), '** '),
     (re.compile(r'G_CONST_RETURN |const '), 'const-'),
     # remove typedefs of callback types
     (re.compile(r'^typedef\s+\w+\s*\*?\s*\(\s*\*\s*\w+\)\s*\([^(]*\)\n',
-                re.MULTILINE), ''),
-    #strip GSEAL macros from the middle of function declarations:
-    (re.compile(r"""GSEAL""", re.VERBOSE), '')
+                re.MULTILINE), '')
     ]
 
 def clean_buffer(buf):
@@ -288,20 +277,6 @@ def find_virt_defs(buf, deffile, defs):
             virts.append((func, ret, args, objname))
     return
 
-enum_pat = re.compile(r'^\s*typedef enum\s+{\s*([^}]*)}\s*([^\s]*)$',
-                      re.MULTILINE)
-values_splitter = re.compile(r'\s*,\s', re.MULTILINE)
-
-def find_enums(buf, defs):
-    for vals, name in enum_pat.findall(buf):
-        if name != 'GdkCursorType':
-            isflags = '<<' in vals
-            entries = [val.split()[0] for val in values_splitter.split(vals)
-                       if val.strip()]
-            if entries:
-                defs['untypedenums'][name] = (isflags, entries)
-    return
-
 # ------------------ write definitions -----------------
 
 type_pat = re.compile(r'(?:const-)?([A-Za-z0-9]+)\*?\s+')
@@ -309,26 +284,10 @@ pointer_pat = re.compile('(.*)\*$')
 func_new_pat = re.compile('(\w+)_new$')
 getset_pat = re.compile(r'^(?:get|set)_(.*)$')
 
-def split_prefix(cname, prefix, use_prefix):
-    # use the module prefix to split the cname
-    pre = prefix.replace('_', '')
-    if use_prefix and cname.lower().startswith(pre):
-        l = len(pre)
-        module = cname[:l]
-        name = cname[l:]
-    else:
-        m = split_prefix_pat.match(cname)
-        if m:
-            module = m.group(1)
-            name = m.group(2)
-    return module, name
-
 class DefsWriter:
     def __init__(self, defs, fp=None, prefix=None, verbose=False,
-                 defsfiles=None, defines={}, genpropgetsets=False,
-                 useprefix=False):
+                 defsfiles=None, defines={}, genpropgetsets=False):
         self.defs = defs
-        self.use_prefix = useprefix
         self.objnames = reduce(list.__add__,
                                [[o.name for o in defs[base]]
                                 for base in defkeys.split()[:3]])
@@ -375,24 +334,21 @@ class DefsWriter:
         fp.write(';; Enumerations and Flags ...\n\n')
         for obj in objs:
             cname = name = obj.name
-            tcode = typecode(cname, self.prefix, self.use_prefix)
             if cname in filter:
                 continue
-            if cname in self.defs['untypedenums']:
-                if tcode not in self.defs['typedefines']:
-                    # no type define so skip and print as untyped enum
-                    continue
-                self.defs['untypedenums'].pop(cname, None)
             parent_name = obj.parent_name
             klassptr = klassptrs[parent_name]
             typename = parent_name.lower()[1:]
             module = None
-            module, name = split_prefix(cname, self.prefix, self.use_prefix)
+            m = split_prefix_pat.match(cname)
+            if m:
+                module = m.group(1)
+                name = m.group(2)
             fp.write('(define-' + typename + ' ' + name + '\n')
             if module:
                 fp.write('  (in-module "' + module + '")\n')
             fp.write('  (c-name "' + cname + '")\n')
-            fp.write('  (gtype-id "' + tcode + '")\n')
+            fp.write('  (gtype-id "' + typecode(cname) + '")\n')
             fp.write('  (values\n')
             classref = self.gobj.g_type_class_ref(obj.type)
             itemclass = ctypes.cast(classref, klassptr).contents
@@ -402,35 +358,7 @@ class DefsWriter:
                                                   val.value_name))
             fp.write('  )\n')
             fp.write(')\n\n')
-        if self.defs['untypedenums']:
-            self.write_untyped_enum_defs(fp)
         return
-
-    def write_untyped_enum_defs(self, fp):
-        fp.write(';; Untyped enumerations and flags ...\n\n')
-        filter = self._c_names
-        for cname, (isflags, entries) in self.defs['untypedenums'].items():
-            if filter and cname in filter: continue
-            module, name = split_prefix(cname, self.prefix, self.use_prefix)
-            if isflags:
-                fp.write('(define-flags ' + name + '\n')
-            else:
-                fp.write('(define-enum ' + name + '\n')
-            if module:
-                fp.write('  (in-module "' + module + '")\n')
-            fp.write('  (c-name "' + cname + '")\n')
-            preindex = entries[0].rfind('_')
-            for ent in entries[1:]:
-                while (preindex > 0
-                       and ent[:preindex] != entries[0][:preindex]):
-                    preindex = ent[:preindex].rfind('_')
-            fp.write('  (values\n')
-            for ent in entries:
-                fp.write('    \'("%s" "%s")\n' %
-                         (ent[preindex+1:].lower().replace('_', '-'), ent))
-            fp.write('  )\n')
-            fp.write(')\n\n')
-        
 
     def _write_obj_helper(self, obj, fp):
         base_name = obj.base_name.lower()[1:]
@@ -438,15 +366,17 @@ class DefsWriter:
         cname = name = obj.name
         type_id = obj.type
         parent_name = obj.parent_name
-        cmodule, name = split_prefix(cname, self.prefix, self.use_prefix)
+        m = split_prefix_pat.match(cname)
+        if m:
+            cmodule = m.group(1)
+            name = m.group(2)
         fp.write('(define-' + base_name + ' ' + name + '\n')
         if cmodule:
             fp.write('  (in-module "' + cmodule + '")\n')
         if base_name == 'object':
             fp.write('  (parent "' + parent_name + '")\n')
         fp.write('  (c-name "' + cname + '")\n')
-        fp.write('  (gtype-id "'
-                 + typecode(cname, self.prefix, self.use_prefix) + '")\n')
+        fp.write('  (gtype-id "' + typecode(cname) + '")\n')
         n = ctypes.c_uint()
         ifaces = self.gobj.g_type_interfaces(type_id, ctypes.byref(n))
         for i in range(n.value):
@@ -522,7 +452,7 @@ class DefsWriter:
         m = getset_pat.match(mname)
         if self.genpropgetsets and m and len(args[1:]) <= 1:
             prop = m.group(1)
-            if obj in self.objifacedefs:
+            if self.objifacedefs.has_key(obj):
                 oidef = self.objifacedefs[obj]
                 if prop.replace('_', '-') in oidef.props:
                     self.fp.write('  (prop-getset "' + prop + '")\n')
@@ -559,7 +489,7 @@ class DefsWriter:
 
 # ---------- ctypes support classes for gobject library functions ----------
 
-GType = ctypes.c_uint
+GType = ctypes.c_ulong
 
 class GTypeClass(ctypes.Structure):
     _fields_ = [('g_type', GType)]
@@ -616,12 +546,11 @@ def main(args):
     modulelibs = []
     defines = {}
     genpropgetsets = False
-    use_prefix = False
-    opts, args = getopt.getopt(args[1:], 'vs:m:f:D:L:l:p',
+    opts, args = getopt.getopt(args[1:], 'vs:m:f:D:L:l:',
                                ['onlyenums', 'onlyobjdefs', 'onlyvirtuals',
                                 'modulename=', 'separate=',
                                 'defsfile=', 'defines=', 'genpropgetsets',
-                                'libgobject-', 'modulelib=', 'useprefix'])
+                                'libgobject-', 'modulelib='])
     for o, v in opts:
         if o == '-v':
             verbose = True
@@ -634,8 +563,6 @@ def main(args):
         if o == '--onlyobjdefs':
             onlyobjdefs = True
             all = False
-        if o in ('-p', '--useprefix'):
-            use_prefix = True
         if o == '--genpropgetsets':
             genpropgetsets = True
         if o in ('-s', '--separate'):
@@ -688,19 +615,12 @@ def main(args):
         defs[key] = []
     defs['funcs'] = {}
     defs['virts'] = {}
-    defs['untypedenums'] = {}
-    defs['typedefines'] = []
 
     # read in all the object and function definitions
     args.sort()
-    type_define_pat = re.compile(
-        r'^#define\s+([A-Z]\S+_TYPE_\S+)\s+.*[a-z]\w+_get_type.*$',
-        re.MULTILINE)
     for filename in args:
         buf = open(filename).read()
-        defs['typedefines'] += type_define_pat.findall(buf)
         buf = clean_buffer(buf)
-        find_enums(buf, defs)
         find_defs(buf, gobj, modlib, defs)
         find_func_defs(buf, modlib, filename, defs, verbose)
         find_virt_defs(buf, filename, defs)
@@ -715,7 +635,7 @@ def main(args):
 
     dw = DefsWriter(defs, methods, prefix=modulename, verbose=verbose,
                     defsfiles=defsfiles, defines=defines,
-                    genpropgetsets=genpropgetsets, useprefix=use_prefix)
+                    genpropgetsets=genpropgetsets)
     dw.interfaces = [i.name for i in defs['GInterface']]
     dw.gobj = gobj
     dw.modlib = modlib

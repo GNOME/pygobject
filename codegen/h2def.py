@@ -174,10 +174,6 @@ def find_enum_defs(buf, enums=[]):
     # bulk comments
     buf = strip_comments(buf)
 
-    # strip # directives
-    pat = re.compile(r"""^[#].*?$""", re.MULTILINE)
-    buf = pat.sub('', buf)
-
     buf = re.sub('\n', ' ', buf)
 
     enum_pat = re.compile(r'enum\s*{([^}]*)}\s*([A-Z][A-Za-z]*)(\s|;)')
@@ -248,7 +244,6 @@ def clean_func(buf):
     buf = pat.sub(r'[] \1', buf)
 
     # make return types that are const work.
-    buf = re.sub(r'\s*\*\s*G_CONST_RETURN\s*\*\s*', '** ', buf)
     buf = string.replace(buf, 'G_CONST_RETURN ', 'const-')
     buf = string.replace(buf, 'const ', 'const-')
 
@@ -331,8 +326,7 @@ class DefsWriter:
             for ent in entries:
                 # shorten prefix til we get a match ...
                 # and handle GDK_FONT_FONT, GDK_FONT_FONTSET case
-                while (prefix[-1] != '_' or ent[:len(prefix)] != prefix
-                       or len(prefix) >= len(ent)):
+                while ent[:len(prefix)] != prefix or len(prefix) >= len(ent):
                     prefix = prefix[:-1]
             prefix_len = len(prefix)
             fp.write('  (values\n')

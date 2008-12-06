@@ -14,7 +14,6 @@ codegen_PYTHON = \
 	docextract.py \
 	docgen.py \
 	h2def.py \
-	defsgen.py \
 	createdefs.py \
 	mergedefs.py \
 	mkskel.py \

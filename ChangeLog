@@ -3,26 +3,6 @@
 	* glib/pyglib.c (pyglib_error_check): Test if `domain' is not-null
 	before using it (avoids segfaults, see bug #561826).
 
-2008-10-31  John Finlay  <finlay@moeraki.com>
-
-	* codegen/__init__.py (__all__): Add defsgen to __all__ list.
-
-	* codegen/h2def.py (find_enum_defs): Strip out # directives from
-	enum defintions.
-	(clean_func): Change ' * G_CONST_RETURN * ' to '** '
-
-	* codegen/Makefile.am (codegen_PYTHON): Add defsgen.py
-
-	* codegen/defsgen.py (typecode): Use the passed in prefix as a
-	hint when creating a typecode.
-	(split_prefix,write_enum_defs,_write_obj_helper): Add function to
-	use passed in prefix as a hint when splitting an object name into
-	module and name.
-
-	* codegen/h2def.py (DefsWriter.write_enum_defs): Make sure the
-	prefix ends with a _ i.e. really handle the GDK_FONT_FONT,
-	GDK_FONT_FONTSET case.
-
 2008-09-12  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/goutputstream.override
