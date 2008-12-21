@@ -36,6 +36,8 @@ headers
 typedef struct {
     PyObject *callback;
     PyObject *data;
+    gpointer  buffer;
+    gsize     buffer_size;
 } PyGIONotify;
 
 static void
@@ -45,10 +47,22 @@ py_decref_callback (gpointer data)
 }
 
 static void
+pygio_notify_copy_buffer(PyGIONotify *notify, gpointer buffer, gsize buffer_size)
+{
+    if (buffer_size > 0) {
+	notify->buffer = g_slice_copy(buffer_size, buffer);
+	notify->buffer_size = buffer_size;
+    }
+}
+
+static void
 pygio_free_notify(PyGIONotify *notify)
 {
     Py_XDECREF(notify->callback);
     Py_XDECREF(notify->data);
+    if (notify->buffer)
+	g_slice_free1(notify->buffer_size, notify->buffer);
+
     g_slice_free(PyGIONotify, notify);
 }
 
