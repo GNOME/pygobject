@@ -1110,9 +1110,10 @@ _wrap_g_file_replace_contents_async(PyGObject *self, PyObject *args, PyObject *k
 
     Py_INCREF(notify->callback);
     Py_XINCREF(notify->data);
+    pygio_notify_copy_buffer(notify, contents, length);
     g_file_replace_contents_async(G_FILE(self->obj),
-                                  contents,
-                                  length,
+                                  notify->buffer,
+                                  notify->buffer_size,
                                   etag,
                                   make_backup,
                                   flags,

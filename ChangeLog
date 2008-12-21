@@ -1,3 +1,18 @@
+2008-12-21  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 564102 – _wrap_g_output_stream_write_async not adding a
+	reference to the buffer passed
+
+	* gio/gio.override (pygio_notify_copy_buffer): New function.
+	(pygio_free_notify): Free new `buffer' field if it is set.
+
+	* gio/goutputstream.override (_wrap_g_output_stream_write_async):
+	Copy the buffer with new pygio_notify_copy_buffer() and use the
+	copy for g_output_stream_write_async() call.
+
+	* gio/gfile.override (_wrap_g_file_replace_contents_async): Same
+	as for _wrap_g_output_stream_write_async().
+
 2008-12-06  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 555613 – gio.VolumeMonitor segfaults
