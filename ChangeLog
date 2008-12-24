@@ -1,3 +1,10 @@
+2008-12-24  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 547119 – gobject.timeout_add_seconds() not found in docs
+
+	* docs/reference/pyglib-functions.xml (glib.timeout_add_seconds):
+	Describe.
+
 2008-12-21  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 564102 – _wrap_g_output_stream_write_async not adding a
