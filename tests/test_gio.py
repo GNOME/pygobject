@@ -295,6 +295,31 @@ class TestFile(unittest.TestCase):
         finally:
             os.unlink("copy.txt")
 
+    def test_copy_async(self):
+        if os.path.exists('copy.txt'):
+            os.unlink("copy.txt")
+
+        source = gio.File('file.txt')
+        destination = gio.File('copy.txt')
+
+        def copied(source_, result):
+            self.assert_(source_ is source)
+            self.failUnless(source_.copy_finish(result))
+
+        def progress(current, total):
+            self.assert_(isinstance(current, long))
+            self.assert_(isinstance(total, long))
+            self.assert_(0 <= current <= total)
+
+        try:
+            source.copy_async(destination, copied, progress_callback = progress)
+
+            self.failUnless(os.path.exists('copy.txt'))
+            self.assertEqual(open('file.txt').read(),
+                             open('copy.txt').read())
+        finally:
+            os.unlink("copy.txt")
+
     # See bug 546591.
     def test_copy_progress(self):
         source = gio.File('file.txt')

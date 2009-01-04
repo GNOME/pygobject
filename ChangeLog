@@ -1,3 +1,12 @@
+2009-01-04  Mads Chr. Olesen  <gnome-bugzilla@shiyee.dk>
+
+	* gio/gio.defs (gio.File.copy_async, gio.File.copy_finish): Define
+	methods.
+
+	* gio/gfile.override (_wrap_g_file_copy_async): New function.
+
+	* tests/test_gio.py (TestFile.test_copy_async): Test the methods.
+
 2009-01-04  Przemysław Grzegorczyk  <pgrzegorczyk@gmail.com>
 
 	Bug 563714 – GNOME Goal: Clean up GLib and GTK+ includes

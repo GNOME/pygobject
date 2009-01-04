@@ -1788,6 +1788,43 @@
   )
 )
 
+(define-method copy_async
+  (of-object "GFile")
+  (docstring
+  "F.copy_async(destination, callback, [flags, io_priority, user_data, cancellable, progress_callback])\n"
+  "-> start copy\n"
+  "\n"
+  "For more details, see gio.File.copy() which is the synchronous\n"
+  "version of this call. Asynchronously copies file.\n"
+  "When the operation is finished, callback will be called.\n"
+  "You can then call g_file_copy_finish() to get the result of the\n"
+  "operation.\n"
+  )
+  (c-name "g_file_copy_async")
+  (return-type "none")
+  (parameters
+    '("GFile*" "destination")
+    '("GFileCopyFlags" "flags" (default "G_FILE_COPY_NONE"))
+    '("int" "io_priority" (default "G_PRIORITY_DEFAULT"))
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
+    '("GFileProgressCallback" "progress_callback")
+    '("gpointer" "progress_callback_data")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method copy_finish
+  (of-object "GFile")
+  (c-name "g_file_copy_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+
 (define-method move
   (docstring
 "F.move(destination, [callback, flags, cancellable, user_data])\n"
