@@ -1,3 +1,10 @@
+2009-01-04  Przemysław Grzegorczyk  <pgrzegorczyk@gmail.com>
+
+	Bug 563714 – GNOME Goal: Clean up GLib and GTK+ includes
+
+	* gobject/generate-constants.c:
+	* glib/pygspawn.c: Only include toplevel <glib.h>.
+
 2009-01-04  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 564018 – pygobject libtool-2.2 patch

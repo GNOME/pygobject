@@ -22,7 +22,7 @@
  */
 
 #include <Python.h>
-#include <glib/gspawn.h>
+#include <glib.h>
 
 #include "pyglib.h"
 #include "pyglib-private.h"
