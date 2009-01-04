@@ -1,3 +1,21 @@
+2.16.0 04-jan-2009
+	- gobject.timeout_add_seconds() not found in docs
+	  (Paul Pogonyshev, #547119)
+	- _wrap_g_output_stream_write_async not adding a reference to the
+	  buffer passed (Paul, #564102)
+	- gio.VolumeMonitor segfaults (Gian Mario Tagliaretti, #555613)
+	- Test if `domain' is not-null before using it to avoids segfaults
+	  (Paul, #561826)
+	- g_output_stream_write_all use gsize instead of gssize (Gian)
+	- add __repr__ to gio.Drive, gio.Mount and gio.Volume
+	  (Paul, #530935)
+	- Missing AC_CONFIG_MACRO_DIR([m4]) (Loïc Minier, #551227)
+	- Make codegen not import when corresponding argument types are not
+	  registered (Paul, #551056)
+	- Fix typos breaking compilation (Frederic Peters #551212)
+	- GFile load_contents methods chop data at first \0
+	  (Jonathan Matthew, #551059) 
+
 2.15.4 3-sep-2008
         - Fix typo in GPointer type registration (Loïc Minier,#550463)
         - support G_TYPE_CLOSURE in codegen (Gian)

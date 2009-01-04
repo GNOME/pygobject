@@ -1,3 +1,7 @@
+2009-01-04  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* configure.ac: Version bump to 2.16.0
+
 2008-12-24  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 547119 – gobject.timeout_add_seconds() not found in docs
