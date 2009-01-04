@@ -67,6 +67,8 @@ m4_define([_LT_AC_TAGCONFIG],[])
 
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+dnl when using libtool 2.x create libtool early, because it's used in configure
+m4_ifdef([LT_OUTPUT], [LT_OUTPUT]) 
 AM_PROG_CC_C_O
 
 JD_PATH_PYTHON(2.3.5)

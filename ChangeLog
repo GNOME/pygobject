@@ -1,5 +1,12 @@
 2009-01-04  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 564018 – pygobject libtool-2.2 patch
+
+	* configure.ac: Apply the patch provided by Cygwin Ports
+	maintainer.
+
+2009-01-04  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	* configure.ac: Branch, bump version to 2.17.0.
 
 2008-12-24  Paul Pogonyshev  <pogonyshev@gmx.net>
