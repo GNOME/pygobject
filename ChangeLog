@@ -1,3 +1,13 @@
+2009-01-06  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 566737 – Bad -I ordering can break build
+
+	* Makefile.am:
+	* gobject/Makefile.am:
+	* gio/Makefile.am:
+	* tests/Makefile.am:
+	Commit a patch from [dmacks at netspace dot org]
+
 2009-01-04  Mads Chr. Olesen  <gnome-bugzilla@shiyee.dk>
 
 	* gio/gio.defs (gio.File.copy_async, gio.File.copy_finish): Define

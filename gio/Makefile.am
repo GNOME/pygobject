@@ -3,11 +3,11 @@ AUTOMAKE_OPTIONS = 1.7
 PLATFORM_VERSION = 2.0
 
 INCLUDES = 				\
+	-I$(top_srcdir)/glib		\
+	-I$(top_srcdir)/gobject		\
 	$(PYTHON_INCLUDES) 		\
 	$(PYGOBJECT_CFLAGS)		\
-	$(GIO_CFLAGS)			\
-	-I$(top_srcdir)/glib		\
-	-I$(top_srcdir)/gobject
+	$(GIO_CFLAGS)
 
 # defs files
 defsdir = $(pkgdatadir)/$(PLATFORM_VERSION)/defs

@@ -19,7 +19,7 @@ EXTRA_DIST = 				\
 	m4/jhflags.m4			\
 	m4/python.m4
 
-INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -I$(top_srcdir)/gobject
+INCLUDES = -I$(top_srcdir)/gobject $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 
 # pkg-config files
 pkgconfigdir = $(libdir)/pkgconfig

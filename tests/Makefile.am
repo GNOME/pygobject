@@ -1,7 +1,7 @@
 INCLUDES = \
+	-I$(top_srcdir)/gobject \
 	$(PYTHON_INCLUDES) \
-	$(GLIB_CFLAGS) \
-	-I$(top_srcdir)/gobject
+	$(GLIB_CFLAGS)
 
 EXTRA_DIST = \
 	$(tests) \
