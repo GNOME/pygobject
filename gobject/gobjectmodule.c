@@ -1139,6 +1139,35 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 			     pyg_object_descr_doc_get());
     }
 
+    /*
+     * Note: Interfaces to be implemented are searched twice.  First
+     * we register interfaces that are already implemented by a parent
+     * type.  The second time, the remaining interfaces are
+     * registered, i.e. the ones that are not implemented by a parent
+     * type.  In between these two loops, properties and signals are
+     * registered.  It has to be done this way, in two steps,
+     * otherwise glib will complain.  If registering all interfaces
+     * always before properties, you get an error like:
+     *
+     *    ../gobject:121: Warning: Object class
+     *    test_interface+MyObject doesn't implement property
+     *    'some-property' from interface 'TestInterface'
+     *
+     * If, on the other hand, you register interfaces after
+     * registering the properties, you get something like:
+     *
+     *     ../gobject:121: Warning: cannot add interface type
+     *    `TestInterface' to type `test_interface+MyUnknown', since
+     *    type `test_interface+MyUnknown' already conforms to
+     *    interface
+     *
+     * This looks like a GLib quirk, but no bug has been filed
+     * upstream.  However we have a unit test for this particular
+     * problem, which can be found in test_interfaces.py, class
+     * TestInterfaceImpl.
+     */
+
+
       /* Register interfaces that are already defined by the parent
        * type and are going to be reimplemented  */
     if (class->tp_bases) {
