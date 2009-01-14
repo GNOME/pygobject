@@ -67,7 +67,7 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
     GCancellable *cancellable = NULL;
     PyGObject *py_cancellable = NULL;
 
-    notify = g_slice_new0(PyGIONotify);
+    notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "iO|iOO:GFileEnumerator.enumerate_children_async",
@@ -77,22 +77,15 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
 				     &io_priority,
 				     &py_cancellable,
 				     &notify->data))
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
+        goto error;
 
-    if (!PyCallable_Check(notify->callback))
-    {
-	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGIONotify, notify);
-	return NULL;
-    }
-    Py_INCREF(notify->callback);
-    Py_XINCREF(notify->data);
-  
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
     if (!pygio_check_cancellable(py_cancellable, &cancellable))
-	return NULL;
+	goto error;
+
+    pygio_notify_reference_callback(notify);  
     
     g_file_enumerator_next_files_async(G_FILE_ENUMERATOR(self->obj),
 				       num_files,
@@ -103,6 +96,10 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
     
     Py_INCREF(Py_None);
     return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
 }
 %%
 override g_file_enumerator_next_files_finish kwargs

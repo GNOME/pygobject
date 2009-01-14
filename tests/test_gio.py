@@ -303,8 +303,11 @@ class TestFile(unittest.TestCase):
         destination = gio.File('copy.txt')
 
         def copied(source_, result):
-            self.assert_(source_ is source)
-            self.failUnless(source_.copy_finish(result))
+            try:
+                self.assert_(source_ is source)
+                self.failUnless(source_.copy_finish(result))
+            finally:
+                loop.quit()
 
         def progress(current, total):
             self.assert_(isinstance(current, long))
@@ -312,7 +315,9 @@ class TestFile(unittest.TestCase):
             self.assert_(0 <= current <= total)
 
         try:
+            loop = glib.MainLoop()
             source.copy_async(destination, copied, progress_callback = progress)
+            loop.run()
 
             self.failUnless(os.path.exists('copy.txt'))
             self.assertEqual(open('file.txt').read(),

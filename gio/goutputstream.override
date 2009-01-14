@@ -103,7 +103,7 @@ _wrap_g_output_stream_write_async(PyGObject *self,
   GCancellable *cancellable;
   PyGIONotify *notify;
 
-  notify = g_slice_new0(PyGIONotify);
+  notify = pygio_notify_new();
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				   "s#O|iOO:OutputStream.write_async",
@@ -113,24 +113,17 @@ _wrap_g_output_stream_write_async(PyGObject *self,
 				   &io_priority,
 				   &pycancellable,
 				   &notify->data))
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
+      goto error;
 
-  if (!PyCallable_Check(notify->callback))
-    {
-      PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
-  Py_INCREF(notify->callback);
-  Py_XINCREF(notify->data);
+  if (!pygio_notify_callback_is_valid(notify))
+      goto error;
   
   if (!pygio_check_cancellable(pycancellable, &cancellable))
-      return NULL;
+      goto error;
 
+  pygio_notify_reference_callback(notify);
   pygio_notify_copy_buffer(notify, buffer, count);
+
   g_output_stream_write_async(G_OUTPUT_STREAM(self->obj),
 			      notify->buffer,
 			      notify->buffer_size,
@@ -141,6 +134,10 @@ _wrap_g_output_stream_write_async(PyGObject *self,
   
   Py_INCREF(Py_None);
   return Py_None;
+
+ error:
+  pygio_notify_free(notify);
+  return NULL;
 }
 %%
 override g_output_stream_close_async kwargs
@@ -156,7 +153,7 @@ _wrap_g_output_stream_close_async(PyGObject *self,
   GCancellable *cancellable;
   PyGIONotify *notify;
 
-  notify = g_slice_new0(PyGIONotify);
+  notify = pygio_notify_new();
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				   "O|iOO:OutputStream.close_async",
@@ -165,22 +162,15 @@ _wrap_g_output_stream_close_async(PyGObject *self,
 				   &io_priority,
 				   &pycancellable,
 				   &notify->data))
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
+      goto error;
+
+  if (!pygio_notify_callback_is_valid(notify))
+      goto error;
 
   if (!pygio_check_cancellable(pycancellable, &cancellable))
-      return NULL;
+      goto error;
 
-  if (!PyCallable_Check(notify->callback))
-    {
-      PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
-  Py_INCREF(notify->callback);
-  Py_XINCREF(notify->data);
+  pygio_notify_reference_callback(notify);
   
   g_output_stream_close_async(G_OUTPUT_STREAM(self->obj),
 			      io_priority,
@@ -190,6 +180,10 @@ _wrap_g_output_stream_close_async(PyGObject *self,
   
   Py_INCREF(Py_None);
   return Py_None;
+
+ error:
+  pygio_notify_free(notify);
+  return NULL;
 }
 %%
 override g_memory_output_stream_new noargs

@@ -35,7 +35,7 @@ _wrap_g_volume_mount(PyGObject *self,
     GMountMountFlags flags = G_MOUNT_MOUNT_NONE;
     GCancellable *cancellable;
 
-    notify = g_slice_new0(PyGIONotify);
+    notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O!O|OOO:Volume.mount",
@@ -46,27 +46,19 @@ _wrap_g_volume_mount(PyGObject *self,
 				     &py_flags,
 				     &py_cancellable,
 				     &notify->data))
+        goto error;
 
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
-
-    if (!PyCallable_Check(notify->callback))
-    {
-	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGIONotify, notify);
-	return NULL;
-    }
-    Py_INCREF(notify->callback);
-    Py_XINCREF(notify->data);
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
 
     if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_MOUNT_FLAGS,
 					py_flags, (gpointer)&flags))
-        return NULL;
+        goto error;
 
     if (!pygio_check_cancellable(py_cancellable, &cancellable))
-        return NULL;
+        goto error;
+
+    pygio_notify_reference_callback(notify);
 
     g_volume_mount(G_VOLUME(self->obj),
 		   flags,
@@ -77,6 +69,10 @@ _wrap_g_volume_mount(PyGObject *self,
 
     Py_INCREF(Py_None);
     return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
 }
 %%
 override g_volume_eject kwargs
@@ -93,7 +89,7 @@ _wrap_g_volume_eject(PyGObject *self,
     GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
     GCancellable *cancellable;
 
-    notify = g_slice_new0(PyGIONotify);
+    notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O|OOO:Volume.eject",
@@ -102,27 +98,19 @@ _wrap_g_volume_eject(PyGObject *self,
 				     &py_flags,
 				     &py_cancellable,
 				     &notify->data))
+        goto error;
 
-    {
-      g_slice_free(PyGIONotify, notify);
-      return NULL;
-    }
-
-    if (!PyCallable_Check(notify->callback))
-    {
-	PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-	g_slice_free(PyGIONotify, notify);
-	return NULL;
-    }
-    Py_INCREF(notify->callback);
-    Py_XINCREF(notify->data);
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
 
     if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
 					py_flags, (gpointer)&flags))
-        return NULL;
+        goto error;
 
     if (!pygio_check_cancellable(py_cancellable, &cancellable))
-        return NULL;
+        goto error;
+
+    pygio_notify_reference_callback(notify);
 
     g_volume_eject(G_VOLUME(self->obj),
 		   flags,
@@ -132,6 +120,10 @@ _wrap_g_volume_eject(PyGObject *self,
 
     Py_INCREF(Py_None);
     return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
 }
 %%
 override-slot GVolume.tp_repr
