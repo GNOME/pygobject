@@ -1,5 +1,17 @@
 2009-01-14  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 566571 – gtk.Buildable interface method override is not
+	recognized
+
+	* gobject/gobjectmodule.c (pyg_type_add_interfaces): New function,
+	break out code repetition out of pyg_type_register().
+
+	* tests/test_subtype.py
+	(TestSubType.test_gtk_buildable_virtual_method): New test
+	case (inactive).
+
+2009-01-14  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 566706 – cleanup GIO overrides
 
 	* gio/gio.override (pygio_notify_new)

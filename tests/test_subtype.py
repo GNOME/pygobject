@@ -270,3 +270,20 @@ class TestSubType(unittest.TestCase):
         foo = Foo()
         d = foo.__dict__
 
+    def test_gtk_buildable_virtual_method(self):
+        """Bug 566571."""
+
+        # Currently the bug is not solved, so skip the test.
+        return
+
+        class CustomDialog(gtk.Dialog):
+            __gtype_name__ = 'CustomDialog'
+            def do_parser_finished(self, build):
+                self.built = True
+
+        builder = gtk.Builder()
+        builder.add_from_string('<interface><object class="CustomDialog" id="main"/></interface>')
+        dialog = builder.get_object('main')
+
+        self.assert_(isinstance(dialog, gtk.Buildable))
+        self.assert_(hasattr(dialog, 'built'))
