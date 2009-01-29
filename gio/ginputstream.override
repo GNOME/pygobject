@@ -23,55 +23,6 @@
 headers
 #define BUFSIZE 8192
 
-typedef struct {
-    PyObject *callback;
-    PyObject *data;
-    guchar *buffer;
-} PyGIONotifyRead;
-
-static void
-async_result_callback_marshal_read(GObject *source_object,
-                                   GAsyncResult *result,
-                                   PyGIONotifyRead *notify)
-{
-    PyObject *ret;
-    PyGILState_STATE state;
-    static GQuark quark = 0;
-
-    state = pyg_gil_state_ensure();
-
-    /* buffer is only used by read_async */
-    if (notify->buffer) {
-        if (!quark)
-            quark = g_quark_from_string("pygio::buffer");
-        g_object_set_qdata_full(G_OBJECT(result), quark,
-                                notify->buffer, py_decref_callback);
-    }
-
-    if (notify->data)
-        ret = PyEval_CallFunction(notify->callback, "(OOO)",
-                                  pygobject_new(source_object),
-                                  pygobject_new((GObject *)result),
-                                  notify->data);
-    else
-        ret = PyObject_CallFunction(notify->callback, "(OO)",
-                                    pygobject_new(source_object),
-                                    pygobject_new((GObject *)result));
-
-    if (ret == NULL)
-        {
-            PyErr_Print();
-            PyErr_Clear();
-        }
-
-    Py_XDECREF(ret);
-
-    Py_DECREF(notify->callback);
-    Py_XDECREF(notify->data);
-    g_slice_free(PyGIONotifyRead, notify);
-
-    pyg_gil_state_release(state);
-}
 %%
 override g_input_stream_read kwargs
 static PyObject *
@@ -224,9 +175,9 @@ _wrap_g_input_stream_read_async(PyGObject *self,
     int io_priority = G_PRIORITY_DEFAULT;
     PyGObject *pycancellable = NULL;
     GCancellable *cancellable;
-    PyGIONotifyRead *notify;
+    PyGIONotify *notify;
 
-    notify = g_slice_new0(PyGIONotifyRead);
+    notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "lO|iOO:InputStream.read_async",
@@ -236,37 +187,34 @@ _wrap_g_input_stream_read_async(PyGObject *self,
                                      &io_priority,
                                      &pycancellable,
                                      &notify->data))
-        {
-            g_slice_free(PyGIONotifyRead, notify);
-            return NULL;
-        }
+        goto error;
 
-    if (!PyCallable_Check(notify->callback))
-        {
-            PyErr_SetString(PyExc_TypeError, "callback argument not callable");
-            g_slice_free(PyGIONotifyRead, notify);
-            return NULL;
-        }
-    Py_INCREF(notify->callback);
-    Py_XINCREF(notify->data);
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
 
     if (!pygio_check_cancellable(pycancellable, &cancellable))
-        return NULL;
+        goto error;
 
-    notify->buffer = g_malloc(count);
-    if (notify->buffer == NULL)
-        return NULL;
+    if (!pygio_notify_allocate_buffer(notify, count))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+    pygio_notify_attach_to_result(notify);
 
     g_input_stream_read_async(G_INPUT_STREAM(self->obj),
                               notify->buffer,
-                              count,
+                              notify->buffer_size,
                               io_priority,
                               cancellable,
-                              (GAsyncReadyCallback)async_result_callback_marshal_read,
+                              (GAsyncReadyCallback) async_result_callback_marshal,
                               notify);
 
     Py_INCREF(Py_None);
     return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
 }
 %%
 override g_input_stream_read_finish kwargs
@@ -278,18 +226,13 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
     static char *kwlist[] = { "result", NULL };
     PyGObject *result;
     GError *error = NULL;
-    static GQuark quark = 0;
-    gchar *buffer;
     Py_ssize_t bytesread;
-
-    if (!quark)
-        quark = g_quark_from_string("pygio::buffer");
+    PyGIONotify *notify;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                      "O!:GInputStream.read_finish",
                                      kwlist, &PyGAsyncResult_Type, &result))
         return NULL;
-
 
     bytesread = g_input_stream_read_finish(G_INPUT_STREAM(self->obj),
                                            G_ASYNC_RESULT(result->obj), &error);
@@ -297,12 +240,11 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    if (bytesread == 0) {
+    if (bytesread == 0)
         return PyString_FromString("");
-    }
 
-    buffer = g_object_get_qdata(G_OBJECT(result->obj), quark);
-    return PyString_FromStringAndSize(buffer, bytesread);
+    notify = pygio_notify_get_attached(result);
+    return PyString_FromStringAndSize(notify->buffer, bytesread);
 }
 %%
 override g_input_stream_close_async kwargs
