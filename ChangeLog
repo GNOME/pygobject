@@ -1,5 +1,11 @@
 2009-01-29  Paul Pogonyshev  <pogonyshev@gmx.net>
 
+	Bug 569350 – Inconsistent use of tabs and spaces in pygtk.py
+
+	* pygtk.py: Replace all tabs with spaces.
+
+2009-01-29  Paul Pogonyshev  <pogonyshev@gmx.net>
+
 	Bug 567792 – gio.InputStream.read_async can cause memory
 	corruption
 
