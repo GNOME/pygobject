@@ -1,3 +1,8 @@
+2009-02-06  Murray Cumming  <murrayc@murrayc.com>
+
+	* codegen/h2def.py DefsWriter::write_enum_defs(): Prevent an exception 
+	when the prefix is empty.
+
 2009-01-29  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 569350 – Inconsistent use of tabs and spaces in pygtk.py

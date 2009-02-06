@@ -331,7 +331,7 @@ class DefsWriter:
             for ent in entries:
                 # shorten prefix til we get a match ...
                 # and handle GDK_FONT_FONT, GDK_FONT_FONTSET case
-                while (prefix[-1] != '_' or ent[:len(prefix)] != prefix
+                while ((len(prefix) and prefix[-1] != '_') or ent[:len(prefix)] != prefix
                        or len(prefix) >= len(ent)):
                     prefix = prefix[:-1]
             prefix_len = len(prefix)
