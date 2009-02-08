@@ -1,3 +1,22 @@
+2009-02-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	Bug 568427 – "gio.Error: Too many open files" without too many
+	open files
+	
+	* gobject/pygtype.c (_wrap_g_type_wrapper__get_name):
+	* gobject/gobjectmodule.c (get_type_name_for_class):
+	* gobject/pygobject.c (build_parameter_list), (PyGProps_length):
+	* gio/gfileinfo.override (_wrap_g_file_info_list_attributes):
+	* gio/gio.override (_wrap_g_content_type_guess):
+	* gio/gfile.override (_wrap__file_init), (_wrap_g_file_load_contents)
+	(_wrap_g_file_load_contents_finish): Remove some memory leaks.
+	
+	* gio/gio.defs: add (caller-owns-return #t) all over the place to
+	prevent memory leaks.
+	
+	patch contributed by Paul Pogonyshev, Paolo Borelli and
+	Gian Mario Tagliaretti.
+
 2009-02-06  Murray Cumming  <murrayc@murrayc.com>
 
 	* codegen/h2def.py DefsWriter::write_enum_defs(): Prevent an exception 

@@ -87,7 +87,7 @@ static PyObject *
 _wrap_g_type_wrapper__get_name(PyGTypeWrapper *self, void *closure)
 {
    const char *name = g_type_name(self->type);
-   return _PyUnicode_FromString(g_strdup(name ? name : "invalid"));
+   return _PyUnicode_FromString(name ? name : "invalid");
 }
 
 static PyObject *
@@ -860,6 +860,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
                 return -1;
             string = g_string_new_len(buffer, len);
 	    g_value_set_boxed(value, string);
+	    g_string_free (string, TRUE);
             break;
         }
 	else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)

@@ -417,6 +417,7 @@ _wrap_g_content_type_guess(PyGObject *self, PyObject *args, PyObject *kwargs)
     char *filename = NULL, *data = NULL, *type;
     int data_size = 0;
     gboolean result_uncertain, want_uncertain = FALSE;
+    PyObject *ret;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
 				      "|zz#i:g_content_type_guess",
@@ -433,10 +434,15 @@ _wrap_g_content_type_guess(PyGObject *self, PyObject *args, PyObject *kwargs)
     type = g_content_type_guess(filename, (guchar *) data,
 				data_size, &result_uncertain);
 
-    if (want_uncertain)
-	return Py_BuildValue("zN", type,
-			     PyBool_FromLong(result_uncertain));
-    return PyString_FromString(type);
+    if (want_uncertain) {
+	ret = Py_BuildValue("zN", type, PyBool_FromLong(result_uncertain));
+    
+    } else {
+        ret = PyString_FromString(type);
+    }
+
+    g_free(type);
+    return ret;
 }
 %%
 override g_mount_unmount kwargs

@@ -28,6 +28,7 @@
   (of-object "GAppInfo")
   (c-name "g_app_info_dup")
   (return-type "GAppInfo*")
+  (caller-owns-return #t)
 )
 
 (define-method equal
@@ -69,6 +70,9 @@
   (return-type "GIcon*")
 )
 
+;;
+;; wrapped in gappinfo.override
+;;
 (define-method launch
   (docstring
   "launch (files=None, launch_context=None) -> gboolean\n"
@@ -107,6 +111,9 @@
   (return-type "gboolean")
 )
 
+;;
+;; wrapped in gappinfo.override
+;;
 (define-method launch_uris
   (docstring
   "launch_uris (files=None, launch_context=None) -> gboolean\n"
@@ -183,11 +190,17 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-function app_info_get_all
   (c-name "g_app_info_get_all")
   (return-type "GList*")
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-function app_info_get_all_for_type
   (c-name "g_app_info_get_all_for_type")
   (return-type "GList*")
@@ -219,6 +232,9 @@
   (return-type "GAppLaunchContext*")
 )
 
+;;
+;; wrapped in gapplaunchcontext.override
+;;
 (define-method get_display
   (of-object "GAppLaunchContext")
   (c-name "g_app_launch_context_get_display")
@@ -229,6 +245,9 @@
   )
 )
 
+;;
+;; wrapped in gapplaunchcontext.override
+;;
 (define-method get_startup_notify_id
   (of-object "GAppLaunchContext")
   (c-name "g_app_launch_context_get_startup_notify_id")
@@ -556,6 +575,7 @@
 (define-function content_type_get_icon
   (c-name "g_content_type_get_icon")
   (return-type "GIcon*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "type")
   )
@@ -569,6 +589,9 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-function content_type_guess
   (docstring
 "content_type_guess([filename, data, want_uncertain]) -> mime type\n"
@@ -588,6 +611,9 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-function content_types_get_registered
   (c-name "g_content_types_get_registered")
   (return-type "GList*")
@@ -711,6 +737,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method read_line
   (of-object "GDataInputStream")
   (docstring
@@ -726,6 +755,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method read_until
   (of-object "GDataInputStream")
   (docstring
@@ -886,6 +918,7 @@
   (of-object "GDrive")
   (c-name "g_drive_get_icon")
   (return-type "GIcon*")
+  (caller-owns-return #t)
 )
 
 (define-method has_volumes
@@ -894,6 +927,9 @@
   (return-type "gboolean")
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method get_volumes
   (of-object "GDrive")
   (c-name "g_drive_get_volumes")
@@ -930,6 +966,9 @@
   (return-type "gboolean")
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method eject
   (of-object "GDrive")
   (docstring
@@ -957,6 +996,9 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method poll_for_media
   (of-object "GDrive")
   (docstring
@@ -1049,6 +1091,7 @@
   (of-object "GFileEnumerator")
   (c-name "g_file_enumerator_next_file")
   (return-type "GFileInfo*")
+  (caller-owns-return #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1065,6 +1108,9 @@
   )
 )
 
+;;
+;; wrapped in gfileenumerator.override
+;;
 (define-method next_files_async
   (docstring
 "FE.next_files_async(num_files, callback, [io_priority, cancellable,\n"
@@ -1098,6 +1144,9 @@
   )
 )
 
+;;
+;; wrapped in gfileenumerator.override
+;;
 (define-method next_files_finish
   (docstring
 "FE.next_files_finish(result) -> a list of gio.FileInfos\n"
@@ -1194,6 +1243,7 @@
 (define-function file_parse_name
   (c-name "g_file_parse_name")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "parse_name")
   )
@@ -1203,6 +1253,7 @@
   (of-object "GFile")
   (c-name "g_file_dup")
   (return-type "GFile*")
+  (caller-owns-return #t)
 )
 
 (define-function file_hash
@@ -1250,12 +1301,14 @@
   (of-object "GFile")
   (c-name "g_file_get_parent")
   (return-type "GFile*")
+  (caller-owns-return #t)
 )
 
 (define-method get_child
   (of-object "GFile")
   (c-name "g_file_get_child")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "name")
   )
@@ -1265,6 +1318,7 @@
   (of-object "GFile")
   (c-name "g_file_get_child_for_display_name")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "display_name")
     '("GError**" "error")
@@ -1293,6 +1347,7 @@
   (of-object "GFile")
   (c-name "g_file_resolve_relative_path")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "relative_path")
   )
@@ -1336,12 +1391,16 @@
   )
   (c-name "g_file_read")
   (return-type "GFileInputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method read_async
   (of-object "GFile")
   (docstring
@@ -1368,6 +1427,7 @@
   (of-object "GFile")
   (c-name "g_file_read_finish")
   (return-type "GFileInputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1378,6 +1438,7 @@
   (of-object "GFile")
   (c-name "g_file_append_to")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1389,6 +1450,7 @@
   (of-object "GFile")
   (c-name "g_file_create")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1400,6 +1462,7 @@
   (of-object "GFile")
   (c-name "g_file_replace")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "etag")
     '("gboolean" "make_backup")
@@ -1409,6 +1472,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method append_to_async
   (docstring
   "F.append_to_async(callback [flags, [,io_priority [,cancellable\n"
@@ -1436,12 +1502,16 @@
   (of-object "GFile")
   (c-name "g_file_append_to_finish")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method create_async
   (docstring
   "F.create_async(callback [flags, [,io_priority [,cancellable\n"
@@ -1470,12 +1540,16 @@
   (of-object "GFile")
   (c-name "g_file_create_finish")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method replace_async
   (docstring
   "F.replace_async(callback [etag, [make_backup, [flags, [io_priority,\n"
@@ -1506,6 +1580,7 @@
   (of-object "GFile")
   (c-name "g_file_replace_finish")
   (return-type "GFileOutputStream*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1525,6 +1600,7 @@
   (of-object "GFile")
   (c-name "g_file_query_info")
   (return-type "GFileInfo*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
     '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
@@ -1533,6 +1609,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method query_info_async
   (docstring
   "F.query_info_async(callback, attributes, [flags, [io_priority,\n"
@@ -1563,6 +1642,7 @@
   (of-object "GFile")
   (c-name "g_file_query_info_finish")
   (return-type "GFileInfo*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1573,6 +1653,7 @@
   (of-object "GFile")
   (c-name "g_file_query_filesystem_info")
   (return-type "GFileInfo*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1584,6 +1665,7 @@
   (of-object "GFile")
   (c-name "g_file_find_enclosing_mount")
   (return-type "GMount*")
+  (caller-owns-return #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1606,6 +1688,7 @@
   (of-object "GFile")
   (c-name "g_file_find_enclosing_mount_finish")
   (return-type "GMount*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1637,6 +1720,7 @@
   (of-object "GFile")
   (c-name "g_file_enumerate_children")
   (return-type "GFileEnumerator*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
     '("GFileQueryInfoFlags" "flags" (default "G_FILE_QUERY_INFO_NONE"))
@@ -1645,6 +1729,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method enumerate_children_async
   (docstring
 "F.enumerate_children_async(attributes, callback,\n"
@@ -1675,6 +1762,7 @@
   (of-object "GFile")
   (c-name "g_file_enumerate_children_finish")
   (return-type "GFileEnumerator*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1685,6 +1773,7 @@
   (of-object "GFile")
   (c-name "g_file_set_display_name")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "display_name")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1709,6 +1798,7 @@
   (of-object "GFile")
   (c-name "g_file_set_display_name_finish")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "res")
     '("GError**" "error")
@@ -1735,6 +1825,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method copy
   (docstring
 "F.copy(destination, [callback, flags, cancellable, user_data])\n"
@@ -1788,6 +1881,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method copy_async
   (of-object "GFile")
   (docstring
@@ -1824,7 +1920,9 @@
   )
 )
 
-
+;;
+;; wrapped in gfile.override
+;;
 (define-method move
   (docstring
 "F.move(destination, [callback, flags, cancellable, user_data])\n"
@@ -1900,6 +1998,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method query_settable_attributes
   (docstring
   "F.query_settable_attributes([cancellable]) -> list\n\n"
@@ -1921,6 +2022,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method query_writable_namespaces
   (docstring
   "F.query_writable_namespaces([cancellable]) -> list\n\n"
@@ -1941,6 +2045,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method set_attribute
   (docstring
   "F.set_attribute(attribute, type, value_p [,flags [,cancellable ]])->bool\n"
@@ -2078,6 +2185,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method mount_enclosing_volume
   (docstring
 "F.mount_enclosing_volume(mount_operation, callback, [cancellable,\n"
@@ -2114,6 +2224,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method mount_mountable
   (docstring
 "F.mount_mountable(mount_operation, callback, [flags, cancellable,\n"
@@ -2143,12 +2256,16 @@
   (of-object "GFile")
   (c-name "g_file_mount_mountable_finish")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("GAsyncResult*" "result")
     '("GError**" "error")
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method unmount_mountable
   (docstring
 "F.unmount_mountable(callback, [flags, cancellable, user_data])\n"
@@ -2204,6 +2321,7 @@
   )
 )
 
+
 (define-method copy_attributes
   (of-object "GFile")
   (c-name "g_file_copy_attributes")
@@ -2220,6 +2338,7 @@
   (of-object "GFile")
   (c-name "g_file_monitor_directory")
   (return-type "GFileMonitor*")
+  (caller-owns-return #t)
   (parameters
     '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -2231,6 +2350,7 @@
   (of-object "GFile")
   (c-name "g_file_monitor_file")
   (return-type "GFileMonitor*")
+  (caller-owns-return #t)
   (parameters
     '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -2242,12 +2362,16 @@
   (of-object "GFile")
   (c-name "g_file_query_default_handler")
   (return-type "GAppInfo*")
+  (caller-owns-return #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method load_contents
   (docstring
   "F.load_contents([cancellable]) -> contents, length, etag_out\n\n"
@@ -2270,6 +2394,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method load_contents_async
   (docstring
   "F.load_contents_async(callback, [cancellable, [user_data]])->start loading\n\n"
@@ -2293,6 +2420,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method load_contents_finish
   (docstring
   "F.load_contents_finish(res) -> contents, length, etag_out\n\n"
@@ -2338,6 +2468,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method replace_contents
   (docstring
   "F.replace_contents(contents, [etag, [make_backup, [flags, [cancellable]]]])\n"
@@ -2366,6 +2499,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method replace_contents_async
   (docstring
   "F.replace_contents_async(contents, callback, [etag, [make_backup, [flags,\n"
@@ -2396,6 +2532,9 @@
   )
 )
 
+;;
+;; wrapped in gfile.override
+;;
 (define-method replace_contents_finish
   (docstring
   "F.replace_contents_finish(res) -> etag_out\n\n"
@@ -2458,6 +2597,7 @@
   (of-object "GFileInfo")
   (c-name "g_file_info_dup")
   (return-type "GFileInfo*")
+  (caller-owns-return #t)
 )
 
 (define-method copy_into
@@ -2478,6 +2618,8 @@
   )
 )
 
+;;
+;; wrapped in  gfileinfo.override
 (define-method list_attributes
   (docstring
   "INFO.list_attributes(name_space) -> Attribute list\n\n"
@@ -2768,6 +2910,9 @@
   (return-type "goffset")
 )
 
+;;
+;; wrapped in gfileinfo.override
+;;
 (define-method get_modification_time
   (docstring
 "INFO.get_modification_time() -> modification time\n"
@@ -3214,6 +3359,9 @@
   (return-type "GType")
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 ;; Note: the following two methods are renamed for consistency with
 ;; Python file objects' read().  I.e. g_input_stream_read_all() is
 ;; more like Python file.read(), so it is renamed read().  Since now
@@ -3244,6 +3392,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 ;; See comments before the previous method definition.
 (define-method read
   (of-object "GInputStream")
@@ -3291,6 +3442,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method read_async
   (of-object "GInputStream")
   (c-name "g_input_stream_read_async")
@@ -3305,6 +3459,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method read_finish
   (of-object "GInputStream")
   (c-name "g_input_stream_read_finish")
@@ -3338,6 +3495,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method close_async
   (of-object "GInputStream")
   (c-name "g_input_stream_close_async")
@@ -3590,6 +3750,9 @@
   (return-type "GType")
 )
 
+;;
+;; wrapped in gicon.override
+;;
 (define-method load
   (of-object "GLoadableIcon")
   (docstring
@@ -3616,6 +3779,9 @@
   )
 )
 
+;;
+;; wrapped in gicon.override
+;;
 (define-method load_async
   (of-object "GLoadableIcon")
   (docstring
@@ -3638,6 +3804,9 @@
   )
 )
 
+;;
+;; wrapped in gicon.override
+;;
 (define-method load_finish
   (docstring
   "F.load_finish(res) -> start loading\n"
@@ -3723,6 +3892,9 @@
   )
 )
 
+;;
+;; wrapped in ginputstream.override
+;;
 (define-method add_data
   (of-object "GMemoryInputStream")
   (c-name "g_memory_input_stream_add_data")
@@ -3743,6 +3915,9 @@
   (return-type "GType")
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 (define-function memory_output_stream_new
   (c-name "g_memory_output_stream_new")
   (is-constructor-of "GMemoryOutputStream")
@@ -3755,6 +3930,9 @@
   )
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 ;; Note: name clash with gobject.GObject.get_data; renamed.
 (define-method get_contents
   (of-object "GMemoryOutputStream")
@@ -3781,6 +3959,7 @@
   (of-object "GMount")
   (c-name "g_mount_get_root")
   (return-type "GFile*")
+  (caller-owns-return #t)
 )
 
 (define-method get_name
@@ -3793,6 +3972,7 @@
   (of-object "GMount")
   (c-name "g_mount_get_icon")
   (return-type "GIcon*")
+  (caller-owns-return #t)
 )
 
 (define-method get_uuid
@@ -3805,12 +3985,14 @@
   (of-object "GMount")
   (c-name "g_mount_get_volume")
   (return-type "GVolume*")
+  (caller-owns-return #t)
 )
 
 (define-method get_drive
   (of-object "GMount")
   (c-name "g_mount_get_drive")
   (return-type "GDrive*")
+  (caller-owns-return #t)
 )
 
 (define-method can_unmount
@@ -3825,6 +4007,9 @@
   (return-type "gboolean")
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method unmount
   (docstring
 "M.unmount(callback, [flags, cancellable, user_data])\n"
@@ -3853,6 +4038,9 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method eject
   (docstring
 "F.eject(callback, [flags, cancellable, user_data])\n"
@@ -3885,6 +4073,9 @@
   )
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method remount
   (of-object "GMount")
   (docstring
@@ -4044,6 +4235,9 @@
   (return-type "GType")
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 ;; Note: the following two methods are renamed for consistency with
 ;; Python file objects' write().  I.e. g_output_stream_write_all() is
 ;; more like Python file.write(), so it is renamed write().  Since now
@@ -4072,6 +4266,9 @@
   )
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 ;; See comments before the previous method definition.
 (define-method write
   (of-object "GOutputStream")
@@ -4127,6 +4324,9 @@
   )
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 (define-method write_async
   (of-object "GOutputStream")
   (docstring
@@ -4209,6 +4409,9 @@
   )
 )
 
+;;
+;; wrapped in goutputstream.override
+;;
 (define-method close_async
   (of-object "GOutputStream")
   (c-name "g_output_stream_close_async")
@@ -4544,6 +4747,9 @@
   )
 )
 
+;;
+;; wrapped in gicon.override
+;;
 (define-method get_names
   (c-name "g_themed_icon_get_names")
   (of-object "GThemedIcon")
@@ -4600,6 +4806,7 @@
   (of-object "GVfs")
   (c-name "g_vfs_get_file_for_path")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "path")
   )
@@ -4609,6 +4816,7 @@
   (of-object "GVfs")
   (c-name "g_vfs_get_file_for_uri")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "uri")
   )
@@ -4618,6 +4826,7 @@
   (of-object "GVfs")
   (c-name "g_vfs_parse_name")
   (return-type "GFile*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "parse_name")
   )
@@ -4633,6 +4842,9 @@
   (return-type "GVfs*")
 )
 
+;;
+;; wrapped in gio.override
+;;
 (define-method get_supported_uri_schemes
   (docstring
 "VFS.get_supported_uri_schemes() -> [uri, ..]\n"
@@ -4670,6 +4882,7 @@
   (of-object "GVolume")
   (c-name "g_volume_get_icon")
   (return-type "GIcon*")
+  (caller-owns-return #t)
 )
 
 (define-method get_uuid
@@ -4682,12 +4895,14 @@
   (of-object "GVolume")
   (c-name "g_volume_get_drive")
   (return-type "GDrive*")
+  (caller-owns-return #t)
 )
 
 (define-method get_mount
   (of-object "GVolume")
   (c-name "g_volume_get_mount")
   (return-type "GMount*")
+  (caller-owns-return #t)
 )
 
 (define-method can_mount
@@ -4702,6 +4917,9 @@
   (return-type "gboolean")
 )
 
+;;
+;; wrapped in gvolume.override
+;;
 (define-method mount
   (docstring
 "V.mount(mount_operation, callback, [flags, cancellable, user_data])\n"
@@ -4736,6 +4954,9 @@
   )
 )
 
+;;
+;; wrapped in gvolume.override
+;;
 (define-method eject
   (of-object "GVolume")
   (c-name "g_volume_eject")
@@ -4772,18 +4993,27 @@
   (return-type "GVolumeMonitor*")
 )
 
+;;
+;; wrapped in gvolumemonitor.override
+;;
 (define-method get_connected_drives
   (of-object "GVolumeMonitor")
   (c-name "g_volume_monitor_get_connected_drives")
   (return-type "GList*")
 )
 
+;;
+;; wrapped in gvolumemonitor.override
+;;
 (define-method get_volumes
   (of-object "GVolumeMonitor")
   (c-name "g_volume_monitor_get_volumes")
   (return-type "GList*")
 )
 
+;;
+;; wrapped in gvolumemonitor.override
+;;
 (define-method get_mounts
   (of-object "GVolumeMonitor")
   (c-name "g_volume_monitor_get_mounts")
@@ -4794,6 +5024,7 @@
   (of-object "GVolumeMonitor")
   (c-name "g_volume_monitor_get_volume_for_uuid")
   (return-type "GVolume*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "uuid")
   )
@@ -4803,6 +5034,7 @@
   (of-object "GVolumeMonitor")
   (c-name "g_volume_monitor_get_mount_for_uuid")
   (return-type "GMount*")
+  (caller-owns-return #t)
   (parameters
     '("const-char*" "uuid")
   )

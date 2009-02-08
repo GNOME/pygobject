@@ -29,6 +29,7 @@ _wrap_g_file_info_list_attributes(PyGObject *self,
     char *kwlist[] = { "name_space", NULL};
     gchar *name_space;
     gchar **names;
+    gchar **n;
     PyObject *ret;
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
@@ -40,14 +41,16 @@ _wrap_g_file_info_list_attributes(PyGObject *self,
 					name_space);
 
     ret = PyList_New(0);
-    while (names && *names) {
-        PyObject *item = PyString_FromString(names[0]);
+    n = names;
+    while (n && *n) {
+        PyObject *item = PyString_FromString(n[0]);
         PyList_Append(ret, item);
         Py_DECREF(item);
 
-        names++;
+        n++;
     }
-
+    
+    g_strfreev(names);
     return ret;
 }
 %%

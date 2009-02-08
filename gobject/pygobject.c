@@ -231,18 +231,19 @@ build_parameter_list(GObjectClass *class)
     GParamSpec **props;
     guint n_props = 0, i;
     PyObject *prop_str;
-    char *name;
     PyObject *props_list;
 
     props = g_object_class_list_properties(class, &n_props);
     props_list = PyList_New(n_props);
     for (i = 0; i < n_props; i++) {
+	char *name;
 	name = g_strdup(g_param_spec_get_name(props[i]));
 	/* hyphens cannot belong in identifiers */
 	g_strdelimit(name, "-", '_');
 	prop_str = _PyUnicode_FromString(name);
 	
 	PyList_SetItem(props_list, i, prop_str);
+	g_free(name);
     }
 
     if (props)
@@ -400,12 +401,14 @@ static Py_ssize_t
 PyGProps_length(PyGProps *self)
 {
     GObjectClass *class;
+    GParamSpec **props;
     guint n_props;
     
     class = g_type_class_ref(self->gtype);
-    g_object_class_list_properties(class, &n_props);
+    props = g_object_class_list_properties(class, &n_props);
     g_type_class_unref(class);
-    
+    g_free(props);
+
     return (Py_ssize_t)n_props;
 }
 
