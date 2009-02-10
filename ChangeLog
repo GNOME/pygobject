@@ -1,3 +1,9 @@
+2009-02-10  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs:
+	* gio/gio-types.defs:
+	* gio/unix.defs: Add 2.18 gio API.
+
 2009-02-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 568427 – "gio.Error: Too many open files" without too many

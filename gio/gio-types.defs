@@ -83,6 +83,20 @@
   (gtype-id "G_TYPE_CANCELLABLE")
 )
 
+(define-object Emblem
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GEmblem")
+  (gtype-id "G_TYPE_EMBLEM")
+)
+
+(define-object EmblemedIcon
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GEmblemedIcon")
+  (gtype-id "G_TYPE_EMBLEMED_ICON")
+)
+
 (define-object FileEnumerator
   (in-module "gio")
   (parent "GObject")
@@ -473,5 +487,17 @@
     '("none" "G_OUTPUT_STREAM_SPLICE_NONE")
     '("close-source" "G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE")
     '("close-target" "G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET")
+  )
+)
+
+(define-enum EmblemOrigin
+  (in-module "gio")
+  (c-name "GEmblemOrigin")
+  (gtype-id "G_TYPE_EMBLEM_ORIGIN")
+  (values
+    '("unknown" "G_EMBLEM_ORIGIN_UNKNOWN")
+    '("device" "G_EMBLEM_ORIGIN_DEVICE")
+    '("livemetadata" "G_EMBLEM_ORIGIN_LIVEMETADATA")
+    '("tag" "G_EMBLEM_ORIGIN_TAG")
   )
 )

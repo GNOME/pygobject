@@ -589,6 +589,14 @@
   )
 )
 
+(define-function content_type_from_mime_type
+  (c-name "g_content_type_from_mime_type")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "mime_type")
+  )
+)
+
 ;;
 ;; wrapped in gio.override
 ;;
@@ -608,6 +616,14 @@
     '("const-guchar*" "data")
     '("gsize" "data_size")
     '("gboolean*" "result_uncertain")
+  )
+)
+
+(define-function content_type_guess_for_tree
+  (c-name "g_content_type_guess_for_tree")
+  (return-type "char**")
+  (parameters
+    '("GFile*" "root")
   )
 )
 
@@ -1029,6 +1045,85 @@
 
 
 ;; From gdummyfile.h
+
+
+
+;; From gemblemedicon.h
+
+(define-function g_emblemed_icon_get_type
+  (c-name "g_emblemed_icon_get_type")
+  (return-type "GType")
+)
+
+(define-function g_emblemed_icon_new
+  (c-name "g_emblemed_icon_new")
+  (is-constructor-of "GEmblemedIcon")
+  (return-type "GIcon*")
+  (parameters
+    '("GIcon*" "icon")
+    '("GEmblem*" "emblem")
+  )
+)
+
+(define-method get_icon
+  (of-object "GEmblemedIcon")
+  (c-name "g_emblemed_icon_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method get_emblems
+  (of-object "GEmblemedIcon")
+  (c-name "g_emblemed_icon_get_emblems")
+  (return-type "GList*")
+)
+
+(define-method add_emblem
+  (of-object "GEmblemedIcon")
+  (c-name "g_emblemed_icon_add_emblem")
+  (return-type "none")
+  (parameters
+    '("GEmblem*" "emblem")
+  )
+)
+
+
+
+;; From gemblem.h
+
+(define-function g_emblem_get_type
+  (c-name "g_emblem_get_type")
+  (return-type "GType")
+)
+
+(define-function g_emblem_new
+  (c-name "g_emblem_new")
+  (is-constructor-of "GEmblem")
+  (return-type "GEmblem*")
+  (parameters
+    '("GIcon*" "icon")
+  )
+)
+
+(define-function emblem_new_with_origin
+  (c-name "g_emblem_new_with_origin")
+  (return-type "GEmblem*")
+  (parameters
+    '("GIcon*" "icon")
+    '("GEmblemOrigin" "origin")
+  )
+)
+
+(define-method get_icon
+  (of-object "GEmblem")
+  (c-name "g_emblem_get_icon")
+  (return-type "GIcon*")
+)
+
+(define-method get_origin
+  (of-object "GEmblem")
+  (c-name "g_emblem_get_origin")
+  (return-type "GEmblemOrigin")
+)
 
 
 
@@ -1596,6 +1691,16 @@
   )
 )
 
+(define-method query_file_type
+  (of-object "GFile")
+  (c-name "g_file_query_file_type")
+  (return-type "GFileType")
+  (parameters
+    '("GFileQueryInfoFlags" "flags")
+    '("GCancellable*" "cancellable")
+  )
+)
+
 (define-method query_info
   (of-object "GFile")
   (c-name "g_file_query_info")
@@ -1987,6 +2092,16 @@
   )
 )
 
+(define-method make_directory_with_parents
+  (of-object "GFile")
+  (c-name "g_file_make_directory_with_parents")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
 (define-method make_symbolic_link
   (of-object "GFile")
   (c-name "g_file_make_symbolic_link")
@@ -2354,6 +2469,17 @@
   (parameters
     '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
+    '("GError**" "error")
+  )
+)
+
+(define-method monitor
+  (of-object "GFile")
+  (c-name "g_file_monitor")
+  (return-type "GFileMonitor*")
+  (parameters
+    '("GFileMonitorFlags" "flags")
+    '("GCancellable*" "cancellable")
     '("GError**" "error")
   )
 )
@@ -3946,6 +4072,12 @@
   (return-type "gsize")
 )
 
+(define-method get_data_size
+  (of-object "GMemoryOutputStream")
+  (c-name "g_memory_output_stream_get_data_size")
+  (return-type "gsize")
+)
+
 
 
 ;; From gmount.h
@@ -4099,6 +4231,39 @@
   (return-type "gboolean")
   (parameters
     '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method guess_content_type
+  (of-object "GMount")
+  (c-name "g_mount_guess_content_type")
+  (return-type "none")
+  (parameters
+    '("gboolean" "force_rescan")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method guess_content_type_finish
+  (of-object "GMount")
+  (c-name "g_mount_guess_content_type_finish")
+  (return-type "gchar**")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method guess_content_type_sync
+  (of-object "GMount")
+  (c-name "g_mount_guess_content_type_sync")
+  (return-type "gchar**")
+  (parameters
+    '("gboolean" "force_rescan")
+    '("GCancellable*" "cancellable")
     '("GError**" "error")
   )
 )
@@ -4747,6 +4912,15 @@
   )
 )
 
+(define-method prepend_name
+  (of-object "GThemedIcon")
+  (c-name "g_themed_icon_prepend_name")
+  (return-type "none")
+  (parameters
+    '("const-char*" "iconname")
+  )
+)
+
 ;;
 ;; wrapped in gicon.override
 ;;
@@ -4977,6 +5151,27 @@
     '("GAsyncResult*" "result")
     '("GError**" "error")
   )
+)
+
+(define-method get_identifier
+  (of-object "GVolume")
+  (c-name "g_volume_get_identifier")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "kind")
+  )
+)
+
+(define-method enumerate_identifiers
+  (of-object "GVolume")
+  (c-name "g_volume_enumerate_identifiers")
+  (return-type "char**")
+)
+
+(define-method get_activation_root
+  (of-object "GVolume")
+  (c-name "g_volume_get_activation_root")
+  (return-type "GFile*")
 )
 
 
