@@ -8,6 +8,12 @@
 	* tests/Makefile.am:
 	Commit a patch from [dmacks at netspace dot org]
 
+2009-01-04  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 564018 – pygobject libtool-2.2 patch
+
+	* configure.ac: Apply the patch provided by Cygwin Ports
+	maintainer.
 
 2009-01-06  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
