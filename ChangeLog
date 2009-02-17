@@ -1,3 +1,10 @@
+2009-02-17  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
+
+	* gio/gfile.override, gio/gio.defs, gio/gio.override: Bug 556250
+	again.  I screwed up and gave misinformation about how to fix it.
+	It must be pyg_begin/end_allow_threads, pyg_block/unblock_threads
+	is only to be used for async callbacks.
+
 2009-02-10  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 556250 – non-async functions don't release python locks before

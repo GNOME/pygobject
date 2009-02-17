@@ -1987,6 +1987,7 @@
 "(not the on-disk file), see gio.File.dup().")
   (of-object "GFile")
   (c-name "g_file_copy")
+  (unblock-threads #t)
   (return-type "gboolean")
   (parameters
     '("GFile*" "destination")
