@@ -1,3 +1,11 @@
+2009-01-07  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 566744 – _wrap_g_input_stream_read_async() argument parsing
+	has incorrect keyword args
+
+	* gio/ginputstream.override (_wrap_g_input_stream_read_async): Fix
+	keyword list to be in sync with positional arguments.
+
 2009-01-06  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	Bug 566737 – Bad -I ordering can break build

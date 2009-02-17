@@ -218,7 +218,7 @@ _wrap_g_input_stream_read_async(PyGObject *self,
                                 PyObject *args,
                                 PyObject *kwargs)
 {
-    static char *kwlist[] = { "callback", "count", "io_priority",
+    static char *kwlist[] = { "count", "callback", "io_priority",
                               "cancellable", "user_data", NULL };
     long count = -1;
     int io_priority = G_PRIORITY_DEFAULT;
