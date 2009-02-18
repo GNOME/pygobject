@@ -1,3 +1,8 @@
+2009-01-09  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/gobjectmodule.c (pyg_type_register): Add a comment
+	explaining why the two for loops for registering interfaces.
+
 2009-01-07  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 566744 – _wrap_g_input_stream_read_async() argument parsing
