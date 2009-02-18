@@ -1053,6 +1053,73 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     }
 }
 
+
+/*  This implementation is bad, see bug 566571 for an example why.
+ *  Instead of scanning explicitly declared bases for interfaces, we
+ *  should automatically initialize all implemented interfaces to
+ *  prevent bugs like that one.  However, this will lead to
+ *  performance degradation as each virtual method in derived classes
+ *  will round-trip through do_*() stuff, *even* if it is not
+ *  overriden.  We need to teach codegen to retain parent method
+ *  instead of setting virtual to *_proxy_do_*() if corresponding
+ *  do_*() is not overriden.  Ok, that was a messy explanation.
+ */
+static void
+pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
+                        PyObject *bases, gboolean new_interfaces,
+                        GType *parent_interfaces, guint n_parent_interfaces)
+{
+    int i;
+
+    if (!bases) {
+        g_warning("type has no bases");
+        return;
+    }
+
+    for (i = 0; i < PyTuple_GET_SIZE(bases); ++i) {
+        guint k;
+        PyTypeObject *base = (PyTypeObject *) PyTuple_GET_ITEM(bases, i);
+        GType itype;
+        gboolean is_new = TRUE;
+        const GInterfaceInfo *iinfo;
+        GInterfaceInfo iinfo_copy;
+
+        if (!PyType_IsSubtype(base, &PyGInterface_Type))
+            continue;
+
+        itype = pyg_type_from_object((PyObject *) base);
+
+        /* Happens for _implementations_ of an interface. */
+        if (!G_TYPE_IS_INTERFACE(itype))
+            continue;
+
+        for (k = 0; k < n_parent_interfaces; ++k) {
+            if (parent_interfaces[k] == itype) {
+                is_new = FALSE;
+                break;
+            }
+        }
+
+        if ((new_interfaces && !is_new) || (!new_interfaces && is_new))
+            continue;
+
+        iinfo = pyg_lookup_interface_info(itype);
+        if (!iinfo) {
+            gchar *error;
+            error = g_strdup_printf("Interface type %s "
+                                    "has no Python implementation support",
+                                    base->tp_name);
+            PyErr_Warn(PyExc_RuntimeWarning, error);
+            g_free(error);
+            continue;
+        }
+
+        iinfo_copy = *iinfo;
+        iinfo_copy.interface_data = class;
+        g_type_add_interface_static(instance_type, itype, &iinfo_copy);
+    }
+}
+
 int
 pyg_type_register(PyTypeObject *class, const char *type_name)
 {
@@ -1060,7 +1127,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     GType parent_type, instance_type;
     GType *parent_interfaces;
     guint n_parent_interfaces;
-    gint i;
     GTypeQuery query;
     gpointer gclass;
     gpointer has_new_constructor_api;
@@ -1082,9 +1148,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     /* find the GType of the parent */
     parent_type = pyg_type_from_object((PyObject *)class);
-    if (!parent_type) {
+    if (!parent_type)
 	return -1;
-    }
 
     parent_interfaces = g_type_interfaces(parent_type, &n_parent_interfaces);
 
@@ -1165,56 +1230,11 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
      * upstream.  However we have a unit test for this particular
      * problem, which can be found in test_interfaces.py, class
      * TestInterfaceImpl.
+     *
+     * See also comment above pyg_type_add_interfaces().
      */
-
-
-      /* Register interfaces that are already defined by the parent
-       * type and are going to be reimplemented  */
-    if (class->tp_bases) {
-        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
-        {
-            PyTypeObject *base =
-		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
-            GType itype;
-            const GInterfaceInfo *iinfo;
-            GInterfaceInfo iinfo_copy;
-            guint parent_interface_iter;
-
-            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
-                continue;
-
-            itype = pyg_type_from_object((PyObject *) base);
-
-              /* ignore interface unless defined in parent type */
-            if (n_parent_interfaces == 0)
-                continue;
-            for (parent_interface_iter = 0;
-                 parent_interface_iter < n_parent_interfaces;
-                 ++parent_interface_iter)
-            {
-                if (parent_interfaces[parent_interface_iter] == itype)
-                    break;
-            }
-            if (parent_interface_iter == n_parent_interfaces)
-                continue;
-
-            iinfo = pyg_lookup_interface_info(itype);
-            if (!iinfo) {
-                char *msg;
-                msg = g_strdup_printf("Interface type %s "
-                                      "has no python implementation support",
-                                      base->tp_name);
-                PyErr_Warn(PyExc_RuntimeWarning, msg);
-                g_free(msg);
-                continue;
-            }
-
-            iinfo_copy = *iinfo;
-            iinfo_copy.interface_data = class;
-            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
-        }
-    } else
-        g_warning("type has no tp_bases");
+    pyg_type_add_interfaces(class, instance_type, class->tp_bases, FALSE,
+                            parent_interfaces, n_parent_interfaces);
 
     /* we look this up in the instance dictionary, so we don't
      * accidentally get a parent type's __gsignals__ attribute. */
@@ -1260,54 +1280,11 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 	PyErr_Clear();
     }
 
-      /* Register new interfaces, that are _not_ already defined by
-       * the parent type  */
-    if (class->tp_bases) {
-        for (i = 0; i < PyTuple_GET_SIZE(class->tp_bases); ++i)
-        {
-            PyTypeObject *base =
-		(PyTypeObject *) PyTuple_GET_ITEM(class->tp_bases, i);
-            GType itype;
-            const GInterfaceInfo *iinfo;
-            GInterfaceInfo iinfo_copy;
-            guint parent_interface_iter;
-
-            if (((PyTypeObject *) base)->tp_base != &PyGInterface_Type)
-                continue;
-
-            itype = pyg_type_from_object((PyObject *) base);
-
-              /* ignore interface if already defined in parent type */
-            if (n_parent_interfaces != 0) {
-                for (parent_interface_iter = 0;
-                     parent_interface_iter < n_parent_interfaces;
-                     ++parent_interface_iter)
-                {
-                    if (parent_interfaces[parent_interface_iter] == itype)
-                        break;
-                }
-
-                if (parent_interface_iter < n_parent_interfaces)
-                    continue;
-            }
-
-            iinfo = pyg_lookup_interface_info(itype);
-            if (!iinfo) {
-                char *msg;
-                msg = g_strdup_printf("Interface type %s "
-                                      "has no python implementation support",
-                                      base->tp_name);
-                PyErr_Warn(PyExc_RuntimeWarning, msg);
-                g_free(msg);
-                continue;
-            }
-
-            iinfo_copy = *iinfo;
-            iinfo_copy.interface_data = class;
-            g_type_add_interface_static(instance_type, itype, &iinfo_copy);
-        }
-    } else
-        g_warning("type has no tp_bases");
+    /* Register new interfaces, that are _not_ already defined by
+     * the parent type.  FIXME: See above.
+     */
+    pyg_type_add_interfaces(class, instance_type, class->tp_bases, TRUE,
+                            parent_interfaces, n_parent_interfaces);
 
     gclass = g_type_class_ref(instance_type);
     if (pyg_run_class_init(instance_type, gclass, class)) {
