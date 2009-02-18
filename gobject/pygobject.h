@@ -21,7 +21,7 @@ struct _PyGClosure {
     GClosure closure;
     PyObject *callback;
     PyObject *extra_args; /* tuple of extra args to pass to callback */
-    PyObject *swap_data; /* other object for gtk_signal_connect_object */
+    PyObject *swap_data; /* other object for gtk_signal_connect__object */
     PyClosureExceptionHandler exception_handler;
 };
 
