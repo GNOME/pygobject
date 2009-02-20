@@ -75,6 +75,7 @@ _wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     GFile *file;
     Py_ssize_t n_args, n_kwargs;
     char *arg;
+    PyObject *py_ret;
 
     n_args = PyTuple_Size(args);
     n_kwargs = kwargs != NULL ? PyDict_Size(kwargs) : 0;
@@ -114,7 +115,11 @@ _wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 			"could not create GFile object");
         return NULL;
     }
-    return pygobject_new((GObject *)file);
+
+    py_ret = pygobject_new((GObject *)file);
+    g_object_unref(file);
+
+    return py_ret;
 }
 %%
 override g_file_read_async kwargs
@@ -192,9 +197,14 @@ _wrap_g_file_load_contents(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    if (ret)
-        return Py_BuildValue("(s#ks)", contents, length, length, etag_out);
-    else {
+    if (ret) {
+        PyObject *pyret;
+
+        pyret = Py_BuildValue("(s#ks)", contents, length, length, etag_out);
+        g_free(contents);
+	g_free(etag_out);
+        return pyret;
+    } else {
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -269,9 +279,14 @@ _wrap_g_file_load_contents_finish(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    if (ret)
-        return Py_BuildValue("(s#ks)", contents, length, length, etag_out);
-    else {
+    if (ret) {
+        PyObject *pyret;
+
+        pyret = Py_BuildValue("(s#ks)", contents, length, length, etag_out);
+        g_free(contents);
+	g_free(etag_out);
+        return pyret;
+    } else {
         Py_INCREF(Py_None);
         return Py_None;
     }

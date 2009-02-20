@@ -965,13 +965,14 @@ get_type_name_for_class(PyTypeObject *class)
     gint i, name_serial;
     char name_serial_str[16];
     PyObject *module;
-    char *type_name;
+    char *type_name = NULL;
     
     /* make name for new GType */
     name_serial = 1;
     /* give up after 1000 tries, just in case.. */
     while (name_serial < 1000) 
     {
+	g_free(type_name);
 	snprintf(name_serial_str, 16, "-v%i", name_serial);
 	module = PyObject_GetAttrString((PyObject *)class, "__module__");
 	if (module && _PyUnicode_Check(module)) {
