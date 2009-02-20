@@ -7,21 +7,26 @@
 # # ./docextract_to_xml.py -s /gnome/head/cvs/gtk+/gtk/ -s /gnome/head/cvs/gtk+/docs/reference/gtk/tmpl/ > gtk_docs.xml
 
 import getopt
+import re
 import string
 import sys
 
 import docextract
 
 def escape_text(unescaped_text):
-    escaped_text = unescaped_text
+    # Escape every "&" not part of an entity reference
+    escaped_text = re.sub(r'&(?![A-Za-z]+;)', '&amp;', unescaped_text)
+
+    # These weird entities turn up in the output...
+    escaped_text = string.replace(escaped_text, '&mdash;', '&#8212;')
+    escaped_text = string.replace(escaped_text, '&ast;', '*')
+    escaped_text = string.replace(escaped_text, '&percnt;', '%')
+    escaped_text = string.replace(escaped_text, '&commat;', '@')
+
+    # Escape for both tag contents and attribute values
     escaped_text = string.replace(escaped_text, '<', '&lt;')
     escaped_text = string.replace(escaped_text, '>', '&gt;')
-    escaped_text = string.replace(escaped_text, '&', '&amp;')
-    escaped_text = string.replace(escaped_text, '\'', '&apos;')
-    escaped_text = string.replace(escaped_text, '\"', '&quot;')
-
-    #Apparently this is an undefined symbol:
-    escaped_text = string.replace(escaped_text, '&mdash;', ' mdash ')
+    escaped_text = string.replace(escaped_text, '"', '&quot;')
 
     return escaped_text
 

@@ -1,3 +1,9 @@
+2009-01-27  Daniel Elstner  <danielk@openismus.com>
+
+	* codegen/docextract_to_xml.py (escape_text): Do not escape the
+	ampersand "&" in entity references (bug #568485).  Replace some
+	unusual entity references in the output with their literal values.
+
 2009-01-14  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 566571 – gtk.Buildable interface method override is not
