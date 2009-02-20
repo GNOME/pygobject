@@ -1,3 +1,8 @@
+2009-02-20  James Henstridge  <james@jamesh.id.au>
+
+	* ltihooks.py: pull in changes from pygtk (updating license header
+	from GPL to LGPL).
+
 2009-02-18  Andre Klapper  <a9016009@gmx.de>
 
 	* gobject/pygobject.h:
