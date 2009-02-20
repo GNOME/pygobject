@@ -38,7 +38,7 @@ def _get_available_versions():
     versions = {}
     for dir in sys.path:
         if not dir: 
-  	    dir = os.getcwd()
+            dir = os.getcwd()
             
         if not os.path.isdir(dir):
             continue
@@ -58,8 +58,8 @@ def _get_available_versions():
             if not os.listdir(pathname):
                 continue
             
-	    if not versions.has_key(filename[-3:]):
-            	versions[filename[-3:]] = pathname
+            if not versions.has_key(filename[-3:]):
+                versions[filename[-3:]] = pathname
     return versions
 
 def require20():
