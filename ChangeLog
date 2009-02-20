@@ -1,3 +1,22 @@
+2009-01-29  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 567792 – gio.InputStream.read_async can cause memory
+	corruption
+
+	* gio/gio.override (py_decref_callback): Remove (unused now).
+	(pygio_notify_allocate_buffer, pygio_notify_attach_to_result)
+	(pygio_notify_get_attached): New functions.
+	(async_result_callback_marshal): Attach to the result object if
+	asked and then don't free self.  Fix reference leak (spotted by
+	Gustavo).
+
+	* gio/ginputstream.override (async_result_callback_marshal_read):
+	Remove.  Use new attachment functionality in
+	async_result_callback_marshal() instead.
+	(_wrap_g_input_stream_read_async): Use the new functions (also
+	those mentioned in the cleanup log below).
+	(_wrap_g_input_stream_read_finish): Use the new functions.
+
 2009-01-27  Daniel Elstner  <danielk@openismus.com>
 
 	* codegen/docextract_to_xml.py (escape_text): Do not escape the

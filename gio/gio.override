@@ -37,23 +37,18 @@ typedef struct {
     gboolean  referenced;
     PyObject *callback;
     PyObject *data;
+    gboolean  attach_self;
     gpointer  buffer;
     gsize     buffer_size;
 } PyGIONotify;
 
-static void
-py_decref_callback (gpointer data)
+static GQuark
+pygio_notify_get_internal_quark(void)
 {
-    Py_DECREF((PyObject*)data);
-}
-
-static void
-pygio_notify_copy_buffer(PyGIONotify *notify, gpointer buffer, gsize buffer_size)
-{
-    if (buffer_size > 0) {
-	notify->buffer = g_slice_copy(buffer_size, buffer);
-	notify->buffer_size = buffer_size;
-    }
+    static GQuark quark = 0;
+    if (!quark)
+        quark = g_quark_from_string("pygio::notify");
+    return quark;
 }
 
 static PyGIONotify *
@@ -109,6 +104,43 @@ pygio_notify_reference_callback(PyGIONotify *notify)
 }
 
 static void
+pygio_notify_copy_buffer(PyGIONotify *notify, gpointer buffer, gsize buffer_size)
+{
+    if (buffer_size > 0) {
+	notify->buffer = g_slice_copy(buffer_size, buffer);
+	notify->buffer_size = buffer_size;
+    }
+}
+
+static gboolean
+pygio_notify_allocate_buffer(PyGIONotify *notify, gsize buffer_size)
+{
+    if (buffer_size > 0) {
+        notify->buffer = g_slice_alloc(buffer_size);
+        if (!notify->buffer) {
+            PyErr_Format(PyExc_MemoryError, "failed to allocate %d bytes", buffer_size);
+            return FALSE;
+        }
+
+        notify->buffer_size = buffer_size;
+    }
+
+    return TRUE;
+}
+
+static void
+pygio_notify_attach_to_result(PyGIONotify *notify)
+{
+    notify->attach_self = TRUE;
+}
+
+static PyGIONotify *
+pygio_notify_get_attached(PyGObject *result)
+{
+    return g_object_get_qdata(G_OBJECT(result->obj), pygio_notify_get_internal_quark());
+}
+
+static void
 pygio_notify_free(PyGIONotify *notify)
 {
     if (notify) {
@@ -137,13 +169,18 @@ async_result_callback_marshal(GObject *source_object,
     if (!notify->referenced)
         g_warning("pygio_notify_reference_callback() hasn't been called before using the structure");
 
+    if (notify->attach_self) {
+        g_object_set_qdata_full(G_OBJECT(result), pygio_notify_get_internal_quark(),
+                                notify, (GDestroyNotify) pygio_notify_free);
+    }
+
     if (notify->data)
-	ret = PyEval_CallFunction(notify->callback, "(OOO)",
+	ret = PyEval_CallFunction(notify->callback, "NNO",
 				  pygobject_new(source_object),
 				  pygobject_new((GObject *)result),
 				  notify->data);
     else
-	ret = PyObject_CallFunction(notify->callback, "(OO)",
+	ret = PyObject_CallFunction(notify->callback, "NN",
 				    pygobject_new(source_object),
 				    pygobject_new((GObject *)result));
 
@@ -153,7 +190,11 @@ async_result_callback_marshal(GObject *source_object,
     }
 
     Py_XDECREF(ret);
-    pygio_notify_free(notify);
+
+    /* Otherwise the structure is attached to 'result' and will be
+     * freed when that object dies. */
+    if (!notify->attach_self)
+        pygio_notify_free(notify);
 
     pyg_gil_state_release(state);
 }
