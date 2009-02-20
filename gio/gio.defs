@@ -364,6 +364,7 @@
   (of-object "GBufferedInputStream")
   (c-name "g_buffered_input_stream_fill")
   (return-type "gssize")
+  (unblock-threads #t)
   (parameters
     '("gssize" "count")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1391,6 +1392,7 @@
   )
   (c-name "g_file_read")
   (return-type "GFileInputStream*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
@@ -1438,6 +1440,7 @@
   (of-object "GFile")
   (c-name "g_file_append_to")
   (return-type "GFileOutputStream*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
@@ -1450,6 +1453,7 @@
   (of-object "GFile")
   (c-name "g_file_create")
   (return-type "GFileOutputStream*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("GFileCreateFlags" "flags" (default "G_FILE_CREATE_NONE"))
@@ -1462,6 +1466,7 @@
   (of-object "GFile")
   (c-name "g_file_replace")
   (return-type "GFileOutputStream*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("const-char*" "etag")
@@ -1600,6 +1605,7 @@
   (of-object "GFile")
   (c-name "g_file_query_info")
   (return-type "GFileInfo*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
@@ -1653,6 +1659,7 @@
   (of-object "GFile")
   (c-name "g_file_query_filesystem_info")
   (return-type "GFileInfo*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
@@ -1664,6 +1671,7 @@
 (define-method find_enclosing_mount
   (of-object "GFile")
   (c-name "g_file_find_enclosing_mount")
+  (unblock-threads #t)
   (return-type "GMount*")
   (caller-owns-return #t)
   (parameters
@@ -1720,6 +1728,7 @@
   (of-object "GFile")
   (c-name "g_file_enumerate_children")
   (return-type "GFileEnumerator*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("const-char*" "attributes")
@@ -1773,6 +1782,7 @@
   (of-object "GFile")
   (c-name "g_file_set_display_name")
   (return-type "GFile*")
+  (unblock-threads #t)
   (caller-owns-return #t)
   (parameters
     '("const-char*" "display_name")
@@ -1809,6 +1819,7 @@
   (of-object "GFile")
   (c-name "g_file_delete")
   (return-type "gboolean")
+  (unblock-threads #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1819,6 +1830,7 @@
   (of-object "GFile")
   (c-name "g_file_trash")
   (return-type "gboolean")
+  (unblock-threads #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1943,6 +1955,7 @@
   (of-object "GFile")
   (c-name "g_file_make_directory")
   (return-type "gboolean")
+  (unblock-threads #t)
   (parameters
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
@@ -1953,6 +1966,7 @@
   (of-object "GFile")
   (c-name "g_file_make_symbolic_link")
   (return-type "gboolean")
+  (unblock-threads #t)
   (parameters
     '("const-char*" "symlink_value")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))

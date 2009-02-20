@@ -191,8 +191,12 @@ _wrap_g_file_load_contents(PyGObject *self,
     if (!pygio_check_cancellable(pycancellable, &cancellable))
 	return NULL;
 
+    pyg_begin_allow_threads;
+
     ret = g_file_load_contents(G_FILE(self->obj), cancellable,
                                &contents, &length, &etag_out, &error);
+
+    pyg_end_allow_threads;
 
     if (pyg_error_check(&error))
         return NULL;
@@ -556,6 +560,8 @@ _wrap_g_file_copy(PyGObject *self,
     /* No need to reference callback here, because it will be used
      * only while this function is in progress. */
 
+    pyg_begin_allow_threads;
+
     ret = g_file_copy(G_FILE(self->obj),
 		      G_FILE(destination->obj),
 		      flags,
@@ -563,6 +569,8 @@ _wrap_g_file_copy(PyGObject *self,
 		      callback,
 		      notify,
 		      &error);
+
+    pyg_end_allow_threads;
 
     if (pyg_error_check(&error))
         goto error;
@@ -623,6 +631,8 @@ _wrap_g_file_move(PyGObject *self,
     /* No need to reference callback here, because it will be used
      * only while this function is in progress. */
 
+    pyg_begin_allow_threads;
+
     ret = g_file_move(G_FILE(self->obj),
 		      G_FILE(destination->obj),
 		      flags,
@@ -630,6 +640,8 @@ _wrap_g_file_move(PyGObject *self,
 		      callback,
 		      notify,
 		      &error);
+    
+    pyg_end_allow_threads;
 
     if (pyg_error_check(&error))
         goto error;
@@ -1016,9 +1028,13 @@ _wrap_g_file_replace_contents(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!pygio_check_cancellable(pycancellable, &cancellable))
         return NULL;
 
+    pyg_begin_allow_threads;
+
     ret = g_file_replace_contents(G_FILE(self->obj), contents, length, etag,
                                   make_backup, flags, &new_etag, cancellable,
                                   &error);
+
+    pyg_end_allow_threads;
 
     if (pyg_error_check(&error))
         return NULL;
