@@ -1,3 +1,9 @@
+2009-02-18  Andre Klapper  <a9016009@gmx.de>
+
+	* gobject/pygobject.h:
+	Change comment to avoid false positives when grep'ing for 
+	deprecated gtk functions
+
 2009-02-17  Gustavo J. A. M. Carneiro  <gjc@inescporto.pt>
 
 	* gio/gfile.override, gio/gio.defs, gio/gio.override: Bug 556250
