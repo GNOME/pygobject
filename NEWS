@@ -1,3 +1,29 @@
+2.16.1 22-feb-2009
+	- Apply the patch provided by Cygwin Ports maintainer
+	  (Paul Pogonyshev, #564018)
+	- Bad -I ordering can break build, patch from [dmacks netspace org]
+	  (Gian Mario Tagliaretti, #566737)
+	- Fix keyword list to be in sync with positional arguments
+	  (Paul, #566744)
+	- Add a comment explaining why the two for loops for registering
+	  interfaces (Gustavo Carneiro)
+	- Huge cleanup of GIO overrides (Paul, #566706)
+	- gtk.Buildable interface method override is not recognized
+	  (Paul, #566571)
+	- Do not escape the ampersand "&" in entity references. Replace some
+	  unusual entity references in the output with their literal values.
+	  (Daniel Elstner, #568485)
+	- gio.InputStream.read_async can cause memory corruption.
+	  (Paul, #567792)
+	- Inconsistent use of tabs and spaces in pygtk.py (Paul, #569350)
+	- Huge fix of memory leaks in GIO (Paul, Paolo Borelli, Gian, #568427)
+	- non-async functions don't release python locks before calling
+	  blocking C functions (Gian, Gustavo, #556250)
+	- Change comment to avoid false positives when grep'ing for deprecated
+	  gtk functions (Andre Klapper)
+	- ltihooks.py updating license header from GPL to LGPL
+	  (James Henstridge)
+
 2.16.0 04-jan-2009
 	- gobject.timeout_add_seconds() not found in docs
 	  (Paul Pogonyshev, #547119)

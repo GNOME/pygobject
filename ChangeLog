@@ -1,3 +1,8 @@
+=== 2.16.1 ===
+2009-02-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* NEWS: Updated.
+
 2009-02-20  James Henstridge  <james@jamesh.id.au>
 
 	* ltihooks.py: pull in changes from pygtk (updating license header
