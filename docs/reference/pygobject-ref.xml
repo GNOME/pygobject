@@ -24,6 +24,7 @@ module.</para>
 
   <xi:include href="pyglib-classes.xml"/>
   <xi:include href="pygobject-classes.xml"/>
+  <xi:include href="pygio-classes.xml"/>
 
 <!--
   <index>

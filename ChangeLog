@@ -1,5 +1,13 @@
 2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygobject-ref.xml:
+	* docs/reference/pygio-applaunchcontext.xml:
+	* docs/reference/pygio-cancellable.xml: Add few gio classes.
+
+2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gio.defs: add g_cancellable_make_pollfd
 
 2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
