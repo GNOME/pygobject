@@ -498,6 +498,15 @@
   (return-type "int")
 )
 
+(define-method make_pollfd
+  (of-object "GCancellable")
+  (c-name "g_cancellable_make_pollfd")
+  (return-type "none")
+  (parameters
+    '("GPollFD*" "pollfd")
+  )
+)
+
 (define-function cancellable_get_current
   (c-name "g_cancellable_get_current")
   (return-type "GCancellable*")
