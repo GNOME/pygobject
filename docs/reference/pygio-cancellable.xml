@@ -50,6 +50,15 @@
     </methodsynopsis>
     
     </classsynopsis>
+
+<programlisting>
+<emphasis role="bold">Functions</emphasis>
+ 
+<methodsynopsis language="python">
+    <methodname><link linkend="function-gio--cancellable-get-current">gio.cancellable_get_current</link></methodname>
+    <methodparam></methodparam>
+</methodsynopsis></programlisting>
+
     </refsect1>
 
     <refsect1>
@@ -153,6 +162,128 @@
                 The <methodname>get_fd</methodname>() method gets the file descriptor
                 for a cancellable job. This can be used to implement cancellable operations
                 on Unix systems. The returned fd will turn readable when cancellable is cancelled. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giocancellable--is-cancelled">
+            <title>gio.Cancellable.is_cancelled</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>is_cancelled</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara><literal>True</literal> if cancellable is cancelled,
+                <literal>False</literal> if called with <literal>None</literal> or if
+                item is not cancelled. </simpara></listitem>
+            </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_fd</methodname>() method gets the file descriptor
+                for a cancellable job. This can be used to implement cancellable operations
+                on Unix systems. The returned fd will turn readable when cancellable is cancelled. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giocancellable--pop-current">
+            <title>gio.Cancellable.pop_current</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>pop_current</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            </variablelist>
+    
+            <para>
+                The <methodname>pop_current</methodname>() method pops cancellable off
+                the cancellable stack (verifying that cancellable is on the top of the stack).
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giocancellable--push-current">
+            <title>gio.Cancellable.push_current</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>push_current</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            </variablelist>
+    
+            <para>
+                The <methodname>push_current</methodname>() method pushes cancellable onto
+                the cancellable stack. The current cancllable can then be recieved using
+                <methodname><link linkend="function-gio--cancellable-get-current">gio.cancellable_get_current</link></methodname>(). 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giocancellable--reset">
+            <title>gio.Cancellable.reset</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>reset</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            </variablelist>
+    
+            <para>
+                The <methodname>reset</methodname>() method resets cancellable to its uncancelled state.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giocancellable--set-error-if-cancelled">
+            <title>gio.Cancellable.set_error_if_cancelled</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_error_if_cancelled</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if cancellable was cancelled,
+                    <literal>False</literal> if it was not.</simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_error_if_cancelled</methodname>() method, if the cancellable
+                is cancelled, sets the error to notify that the operation was cancelled.
+            </para>
+        </refsect2>
+    </refsect1>
+    
+    <refsect1>
+        <title>Functions</title>
+
+        <refsect2 id="function-gio--cancellable-get-current">
+            <title>gio.cancellable_get_current</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>cancellable_get_current</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>A <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    from the top of the stack, or <literal>None</literal> if the stack is empty.</simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>cancellable_get_current</methodname>() function gets the top cancellable from the stack.
             </para>
         </refsect2>
     </refsect1>

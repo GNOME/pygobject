@@ -8,5 +8,6 @@
 
 <!-- GLIB CLASSES -->
 <xi:include href="pygio-applaunchcontext.xml"/>
+<xi:include href="pygio-cancellable.xml"/>
 
 </chapter>

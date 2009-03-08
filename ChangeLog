@@ -1,5 +1,10 @@
 2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-cancellable.xml: Complete cancellable docs.
+
+2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* docs/Makefile.am:
 	* docs/reference/pygio-classes.xml:
 	* docs/reference/pygobject-ref.xml:
