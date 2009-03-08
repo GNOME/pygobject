@@ -15,6 +15,7 @@ HTML_FILES =					\
 	html/glib-constants.html		\
 	html/glib-functions.html		\
 	html/gobject-class-reference.html	\
+	html/glib-class-reference.html		\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
 	html/index.html				\
@@ -33,6 +34,7 @@ XML_FILES = 					\
 	reference/pygobject-gboxed.xml		\
 	reference/pygobject-ginterface.xml 	\
 	reference/pygobject-gpointer.xml 	\
+	reference/pyglib-classes.xml 		\
 	reference/pyglib-constants.xml 		\
 	reference/pyglib-functions.xml		\
 	reference/pyglib-maincontext.xml 	\

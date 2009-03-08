@@ -22,6 +22,7 @@ module.</para>
 
   <xi:include href="pygobject-introduction.xml"/>
 
+  <xi:include href="pyglib-classes.xml"/>
   <xi:include href="pygobject-classes.xml"/>
 
 <!--

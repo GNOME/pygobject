@@ -1,3 +1,11 @@
+2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pyglib-classes.xml
+	* docs/reference/pygobject-ref.xml
+	* docs/reference/pygobject-classes.xml: Split glib and gobject
+	doc sections.
+
 2009-02-20  James Henstridge  <james@jamesh.id.au>
 
 	* ltihooks.py: pull in changes from pygtk (updating license header

@@ -6,12 +6,6 @@
 
 <title>PyGObject Class Reference</title>
 
-<!-- GLIB CLASSES -->
-<xi:include href="pyglib-maincontext.xml"/>
-<xi:include href="pyglib-mainloop.xml"/>
-<xi:include href="pyglib-functions.xml"/>
-<xi:include href="pyglib-constants.xml"/>
-
 <!-- GOBJECT CLASSES -->
 <xi:include href="pygobject.xml"/>
 <xi:include href="pygobject-gboxed.xml"/>
