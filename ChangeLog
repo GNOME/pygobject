@@ -1,3 +1,10 @@
+2009-03-09  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-constants.xml:
+	* docs/reference/pygio-emblem.xml: Add gio.Emblem and constants in docs.
+
 2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* docs/reference/pygio-classes.xml:

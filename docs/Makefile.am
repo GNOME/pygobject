@@ -14,9 +14,10 @@ HTML_FILES =					\
 	html/class-glibmainloop.html		\
 	html/glib-constants.html		\
 	html/glib-functions.html		\
-	html/gio-applaunchcontext.html		\
 	html/gobject-class-reference.html	\
 	html/glib-class-reference.html		\
+	html/gio-applaunchcontext.html		\
+	html/gio-constants.html			\
 	html/gio-class-reference.html		\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
@@ -42,7 +43,8 @@ XML_FILES = 					\
 	reference/pyglib-maincontext.xml 	\
 	reference/pyglib-mainloop.xml 		\
 	reference/pygio-classes.xml 		\
-	reference/pygio-applaunchcontext.xml
+	reference/pygio-applaunchcontext.xml 	\
+	reference/pygio-constants.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\

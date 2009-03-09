@@ -1,0 +1,59 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="gio-constants">
+  <refnamediv>
+    <refname>gio Constants</refname>
+    <refpurpose>the built-in constants of the gio module</refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Synopsis</title>
+
+<programlisting>
+<xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
+</programlisting>
+
+  </refsect1>
+
+  <refsect1 id="gio-constants-description">
+    <title>Description</title>
+
+    <refsect2 id="gio-emblem-origin-constants">
+      <title id="gio-emblem-origin-constants-title">Gio Emblem Origin Constants</title>
+
+      <para>
+	  GEmblemOrigin is used to add information about the origin of the emblem to GEmblem.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.EMBLEM_ORIGIN_DEVICE</literal></term>
+	  <listitem>
+	    <simpara>Embleme adds device-specific information.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.EMBLEM_ORIGIN_LIVEMETADATA</literal></term>
+	  <listitem>
+	    <simpara>Emblem depicts live metadata, such as "readonly".</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.EMBLEM_ORIGIN_TAG</literal></term>
+	  <listitem>
+	    <simpara>Emblem comes from a user-defined tag, e.g. set by nautilus (in the future).</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.EMBLEM_ORIGIN_UNKNOWN</literal></term>
+	  <listitem>
+	    <simpara>Emblem of unknown origin.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+  </refsect1>
+
+</refentry>
