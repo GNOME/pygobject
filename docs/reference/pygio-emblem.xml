@@ -17,16 +17,16 @@
         <ooclass><classname><link linkend="class-gioicon">gio.Icon</link></classname></ooclass>
     
     <constructorsynopsis language="python">
-	<methodname><link linkend="constructor-giocancellable">gio.Emblem</link></methodname>
+	<methodname><link linkend="constructor-gioemblem">gio.Emblem</link></methodname>
 	<methodparam><parameter role="keyword">icon</parameter></methodparam>
     </constructorsynopsis>
     
     <methodsynopsis language="python">
-        <methodname><link linkend="method-giocancellable--get-icon">get_icon</link></methodname>
+        <methodname><link linkend="method-gioemblem--get-icon">get_icon</link></methodname>
         <methodparam></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
-        <methodname><link linkend="method-giocancellable--get-origin">get_origin</link></methodname>
+        <methodname><link linkend="method-gioemblem--get-origin">get_origin</link></methodname>
         <methodparam></methodparam>
     </methodsynopsis>
     
@@ -49,6 +49,15 @@
   +-- <link linkend="class-gioemblem">gio.Emblem</link>
 </synopsis>
 
+    </refsect1>
+    
+    <refsect1>
+	<title>Implemented Interfaces</title>
+        <para>
+            <link linkend="class-gioemblem"><classname>gio.Emblem</classname></link>
+            implements
+            <link linkend="class-gioicon"><classname>gio.Icon</classname></link>
+        </para>
     </refsect1>
 
     <refsect1>
@@ -98,7 +107,7 @@
     <refsect1>
         <title>Methods</title>
 
-        <refsect2 id="method-giocancellable--get-icon">
+        <refsect2 id="method-gioemblem--get-icon">
             <title>gio.Emblem.get_icon</title>
 
             <programlisting><methodsynopsis language="python">
@@ -120,7 +129,7 @@
             </para>
         </refsect2>
 
-        <refsect2 id="method-giocancellable--get-origin">
+        <refsect2 id="method-gioemblem--get-origin">
             <title>gio.Emblem.get_origin</title>
 
             <programlisting><methodsynopsis language="python">

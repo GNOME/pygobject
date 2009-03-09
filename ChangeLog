@@ -1,34 +1,7 @@
 2009-03-09  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
-	* docs/Makefile.am:
-	* docs/reference/pygio-classes.xml:
-	* docs/reference/pygio-constants.xml:
-	* docs/reference/pygio-emblem.xml: Add gio.Emblem and constants in docs.
-
-2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
-
-	* docs/reference/pygio-classes.xml:
-	* docs/reference/pygio-cancellable.xml: Complete cancellable docs.
-
-2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
-
-	* docs/Makefile.am:
-	* docs/reference/pygio-classes.xml:
-	* docs/reference/pygobject-ref.xml:
-	* docs/reference/pygio-applaunchcontext.xml:
-	* docs/reference/pygio-cancellable.xml: Add few gio classes.
-
-2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
-
-	* gio/gio.defs: add g_cancellable_make_pollfd
-
-2009-03-08  Gian Mario Tagliaretti  <gianmt@gnome.org>
-
-	* docs/Makefile.am:
-	* docs/reference/pyglib-classes.xml
-	* docs/reference/pygobject-ref.xml
-	* docs/reference/pygobject-classes.xml: Split glib and gobject
-	doc sections.
+	* docs/reference/Changelog: Create a dedicated Changelog for the docs
+	and move the latest entries in there.
 
 2009-02-20  James Henstridge  <james@jamesh.id.au>
 

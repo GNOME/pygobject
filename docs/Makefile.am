@@ -17,6 +17,9 @@ HTML_FILES =					\
 	html/gobject-class-reference.html	\
 	html/glib-class-reference.html		\
 	html/gio-applaunchcontext.html		\
+	html/gio-emblem.html			\
+	html/gio-emblemedicon.html		\
+	html/gio-icon.html			\
 	html/gio-constants.html			\
 	html/gio-class-reference.html		\
 	html/gobject-constants.html		\
@@ -44,6 +47,9 @@ XML_FILES = 					\
 	reference/pyglib-mainloop.xml 		\
 	reference/pygio-classes.xml 		\
 	reference/pygio-applaunchcontext.xml 	\
+	reference/pygio-emblem.xml		\
+	reference/pygio-emblemedicon.xml	\
+	reference/pygio-icon.xml		\
 	reference/pygio-constants.xml
 
 XSL_FILES =			\
