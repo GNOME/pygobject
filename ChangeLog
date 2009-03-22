@@ -1,3 +1,16 @@
+2009-03-22  Mark Lee  <marklee@svn.gnome.org>
+
+	Bug 559001 – Allow setting pytype wrapper class
+
+	initial patch by: John Ehresman  <jpe@wingware.com>
+
+	* gobject/pygtype.c (_wrap_g_type_wrapper__set_pytype): New function.
+
+	* tests/test_gtype.py (GTypeTest.assertPyType),
+	(GTypeTest.setInvalidPyType), (GTypeTest.testPyType),
+	(GTypeTest.testInvalidPyType): Two new testcases to test the above,
+	with accompanying helper methods.
+
 2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gio.defs: Add g_file_enumerator_get_container, new in 2.18

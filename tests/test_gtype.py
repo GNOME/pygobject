@@ -28,6 +28,15 @@ class GTypeTest(unittest.TestCase):
                              'got %r while %r was expected' %
                              (val, expected))
 
+    def assertPyType(self, val, pytype):
+        val.pytype = pytype
+        self.assertEqual(val.pytype, pytype,
+                         'got %r while %r was expected' % (val.pytype, pytype))
+
+    def setInvalidPyType(self):
+        val = GType(gobject.TYPE_INT)
+        val.pytype = 1
+
     def testBool(self):
         self.checkType(gobject.TYPE_BOOLEAN, 'gboolean', bool)
 
@@ -63,6 +72,16 @@ class GTypeTest(unittest.TestCase):
 
     def testObject(self):
         self.checkType(gobject.TYPE_OBJECT, 'PyObject')
+
+    def testPyType(self):
+        val = GType(gobject.TYPE_INT)
+        self.assertEqual(val.pytype, None,
+                         'got %r while %r was expected' % (val.pytype, None))
+        for t in [int, None, float]:
+            self.assertPyType(val, t)
+
+    def testInvalidPyType(self):
+        self.assertRaises(TypeError, self.setInvalidPyType)
 
     def testValue(self):
         array = [1, "foo", True]

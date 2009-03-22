@@ -83,6 +83,26 @@ _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
     return py_type;
 }
 
+static int
+_wrap_g_type_wrapper__set_pytype(PyGTypeWrapper *self, PyObject* value, void *closure)
+{
+    PyObject *py_type;
+    
+    py_type = g_type_get_qdata(self->type, pygobject_class_key);
+    Py_CLEAR(py_type);
+    if (value == Py_None)
+	g_type_set_qdata(self->type, pygobject_class_key, NULL);
+    else if (PyType_Check(value)) {
+	Py_INCREF(value);
+	g_type_set_qdata(self->type, pygobject_class_key, value);
+    } else {
+	PyErr_SetString(PyExc_TypeError, "Value must be None or a type object");
+	return -1;
+    }
+
+    return 0;
+}
+
 static PyObject *
 _wrap_g_type_wrapper__get_name(PyGTypeWrapper *self, void *closure)
 {
@@ -143,7 +163,7 @@ _wrap_g_type_wrapper__get_depth(PyGTypeWrapper *self, void *closure)
 }
 
 static PyGetSetDef _PyGTypeWrapper_getsets[] = {
-    { "pytype", (getter)_wrap_g_type_wrapper__get_pytype, (setter)0 },
+    { "pytype", (getter)_wrap_g_type_wrapper__get_pytype, (setter)_wrap_g_type_wrapper__set_pytype },
     { "name",  (getter)_wrap_g_type_wrapper__get_name, (setter)0 },
     { "fundamental",  (getter)_wrap_g_type_wrapper__get_fundamental, (setter)0 },
     { "parent",  (getter)_wrap_g_type_wrapper__get_parent, (setter)0 },
