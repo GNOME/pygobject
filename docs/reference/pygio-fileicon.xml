@@ -1,0 +1,109 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giofileicon">
+    <refnamediv>
+        <refname>gio.FileIcon</refname>
+        <refpurpose>Icons pointing to an image file.</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.FileIcon</classname></ooclass>
+        <ooclass><classname><link linkend="class-gobject">gobject.GObject</link></classname></ooclass>
+        <ooclass><classname><link linkend="class-gioicon">gio.Icon</link></classname></ooclass>
+        <ooclass><classname><link linkend="class-gioloadableicon">gio.LoadableIcon</link></classname></ooclass>
+    
+    <constructorsynopsis language="python">
+	<methodname><link linkend="constructor-giofileicon">gio.FileIcon</link></methodname>
+	<methodparam><parameter role="keyword">file</parameter></methodparam>
+    </constructorsynopsis>
+    
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofileicon--get-file">get_file</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    
+    </classsynopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
+  +-- <link linkend="class-giofileicon">gio.FileIcon</link>
+</synopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            The <link linkend="class-giofileicon"><classname>gio.FileIcon</classname></link>
+            specifies an icon by pointing to an image file to be used as icon.
+        </para>
+    </refsect1>
+
+    <refsect1 id="constructor-giofileicon">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.FileIcon</methodname>
+            <methodparam><parameter role="keyword">file</parameter></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>file</parameter>&nbsp;:</term>
+                <listitem><simpara>a
+                <link linkend="class-giofile"><classname>gio.File</classname></link>
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-giofileicon"><classname>gio.FileIcon</classname></link>
+                for the given file, or <literal>None</literal> on error.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new icon for a file.
+        </para>
+  
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-giofileicon--get-file">
+            <title>gio.FileIcon.get_file</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_file</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a
+                    <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    or <literal>None</literal>.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_file</methodname>() method gets the
+                <link linkend="class-giofile"><classname>gio.File</classname></link>
+                associated with the given icon.
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>

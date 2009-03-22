@@ -1,3 +1,16 @@
+2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-fileicon.xml:
+	* docs/reference/pygio-fileenumerator.xml: Add gio.FileIcon and
+	gio.FileEnumerator in docs.
+
+	* docs/reference/pygio-constants.xml: Add gio.ERROR_* constants.
+
+	* docs/reference/pygio-applaunchcontext.xml:
+	* docs/reference/pygio-emblemedicon.xml: Fix a couple of typos.
+
 2009-03-09  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* docs/Makefile.am:

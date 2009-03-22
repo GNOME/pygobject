@@ -12,6 +12,8 @@
 <xi:include href="pygio-emblem.xml"/>
 <xi:include href="pygio-icon.xml"/>
 <xi:include href="pygio-emblemedicon.xml"/>
+<xi:include href="pygio-fileenumerator.xml"/>
+<xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-constants.xml"/>
 
 </chapter>

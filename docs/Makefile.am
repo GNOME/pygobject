@@ -16,10 +16,13 @@ HTML_FILES =					\
 	html/glib-functions.html		\
 	html/gobject-class-reference.html	\
 	html/glib-class-reference.html		\
-	html/gio-applaunchcontext.html		\
-	html/gio-emblem.html			\
-	html/gio-emblemedicon.html		\
-	html/gio-icon.html			\
+	html/class-gioapplaunchcontext.html	\
+	html/class-giocancellable.html		\
+	html/class-gioemblem.html		\
+	html/class-gioemblemedicon.html		\
+	html/class-giofileenumerator.html	\
+	html/class-giofileicon.html		\
+	html/class-gioicon.html			\
 	html/gio-constants.html			\
 	html/gio-class-reference.html		\
 	html/gobject-constants.html		\
@@ -46,11 +49,13 @@ XML_FILES = 					\
 	reference/pyglib-maincontext.xml 	\
 	reference/pyglib-mainloop.xml 		\
 	reference/pygio-classes.xml 		\
+	reference/pygio-constants.xml		\
 	reference/pygio-applaunchcontext.xml 	\
 	reference/pygio-emblem.xml		\
 	reference/pygio-emblemedicon.xml	\
 	reference/pygio-icon.xml		\
-	reference/pygio-constants.xml
+	reference/pygio-fileenumerator.xml	\
+	reference/pygio-fileicon.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\

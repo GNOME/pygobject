@@ -2,7 +2,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
     "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 
-<refentry id="class-gdkapplaunchcontext">
+<refentry id="class-gioapplaunchcontext">
     <refnamediv>
         <refname>gio.AppLaunchContext</refname>
         <refpurpose>Application launch context.</refpurpose>

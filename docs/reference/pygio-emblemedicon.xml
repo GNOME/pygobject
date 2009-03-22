@@ -72,7 +72,7 @@
         </para>
     </refsect1>
 
-    <refsect1 id="constructor-gioemblem">
+    <refsect1 id="constructor-gioemblemedicon">
         <title>Constructor</title>
   
         <programlisting><constructorsynopsis language="python">

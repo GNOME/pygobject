@@ -13,6 +13,7 @@
 
 <programlisting>
 <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
+<xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
 </programlisting>
 
   </refsect1>
@@ -50,6 +51,215 @@
 	  <term><literal>gio.EMBLEM_ORIGIN_UNKNOWN</literal></term>
 	  <listitem>
 	    <simpara>Emblem of unknown origin.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-error-constants">
+      <title id="gio-error-constants-title">Gio Error Constants</title>
+
+      <para>
+	 GIOError Error codes returned by GIO functions.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.ERROR_ALREADY_MOUNTED</literal></term>
+	  <listitem>
+	    <simpara>File is already mounted.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_BUSY</literal></term>
+	  <listitem>
+	    <simpara>File is busy.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_CANCELLED</literal></term>
+	  <listitem>
+	    <simpara>Operation was cancelled. See
+		<link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>.
+	    </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_CANT_CREATE_BACKUP</literal></term>
+	  <listitem>
+	    <simpara>Backup couldn't be created.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_CLOSED</literal></term>
+	  <listitem>
+	    <simpara>File was closed.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_EXISTS</literal></term>
+	  <listitem>
+	    <simpara>File already exists error.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_FAILED</literal></term>
+	  <listitem>
+	    <simpara>Generic error condition for when any operation fails.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_FAILED_HANDLED</literal></term>
+	  <listitem>
+	    <simpara>Operation failed and a helper program has already interacted with
+	    the user. Do not display any error dialog. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_FILENAME_TOO_LONG</literal></term>
+	  <listitem>
+	    <simpara>Filename is too many characters.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_HOST_NOT_FOUND</literal></term>
+	  <listitem>
+	    <simpara>Host couldn't be found (remote operations).</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_INVALID_ARGUMENT</literal></term>
+	  <listitem>
+	    <simpara>Invalid argument.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_INVALID_FILENAME</literal></term>
+	  <listitem>
+	    <simpara>Filename is invalid or contains invalid characters.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_IS_DIRECTORY</literal></term>
+	  <listitem>
+	    <simpara>File is a directory error.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_DIRECTORY</literal></term>
+	  <listitem>
+	    <simpara>File is not a directory.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_EMPTY</literal></term>
+	  <listitem>
+	    <simpara>File is a directory that isn't empty.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_FOUND</literal></term>
+	  <listitem>
+	    <simpara>File not found error.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_MOUNTABLE_FILE</literal></term>
+	  <listitem>
+	    <simpara>File cannot be mounted.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_MOUNTED</literal></term>
+	  <listitem>
+	    <simpara>File isn't mounted. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_REGULAR_FILE</literal></term>
+	  <listitem>
+	    <simpara>File is not a regular file.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_SUPPORTED</literal></term>
+	  <listitem>
+	    <simpara>Operation not supported for the current backend.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NOT_SYMBOLIC_LINK</literal></term>
+	  <listitem>
+	    <simpara>File is not a symbolic link.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_NO_SPACE</literal></term>
+	  <listitem>
+	    <simpara>No space left on drive. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_PENDING</literal></term>
+	  <listitem>
+	    <simpara>Operations are still pending.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_PERMISSION_DENIED</literal></term>
+	  <listitem>
+	    <simpara>Permission denied.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_READ_ONLY</literal></term>
+	  <listitem>
+	    <simpara>File is read only. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_TIMED_OUT</literal></term>
+	  <listitem>
+	    <simpara>Operation timed out. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_TOO_MANY_LINKS</literal></term>
+	  <listitem>
+	    <simpara>File contains too many symbolic links. </simpara>
+	  </listitem>
+	</varlistentry>
+	<!--
+	<varlistentry>
+	  <term><literal>gio.ERROR_TOO_MANY_OPEN_FILES</literal></term>
+	  <listitem>
+	    <simpara>The current process has too many files open and can't open any
+	    more. Duplicate descriptors do count toward this limit. Since 2.20</simpara>
+	  </listitem>
+	</varlistentry>
+	-->
+	<varlistentry>
+	  <term><literal>gio.ERROR_WOULD_BLOCK</literal></term>
+	  <listitem>
+	    <simpara>Operation would block.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_WOULD_MERGE</literal></term>
+	  <listitem>
+	    <simpara>Operation would merge files.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_WOULD_RECURSE</literal></term>
+	  <listitem>
+	    <simpara>Operation would be recursive.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ERROR_WRONG_ETAG</literal></term>
+	  <listitem>
+	    <simpara>File's Entity Tag was incorrect. </simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
