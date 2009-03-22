@@ -1,3 +1,11 @@
+2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfileenumerator.override (_wrap_g_file_enumerator_close_async)
+	wrap new method.
+
+	* tests/test_gio.py (TestGFileEnumerator.testCloseFilesAsync):
+	Test the above.
+
 2009-03-09  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* docs/reference/Changelog: Create a dedicated Changelog for the docs

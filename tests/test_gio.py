@@ -500,6 +500,21 @@ class TestGFileEnumerator(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
+    def testCloseFilesAsync(self):
+        def callback(enumerator, result):
+            try:
+                enumerator.close_finish(result)
+            finally:
+                loop.quit()
+
+        enumerator = self.file.enumerate_children(
+            "standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
+
+        enumerator.close_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
+
 
 class TestInputStream(unittest.TestCase):
     def setUp(self):
