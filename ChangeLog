@@ -1,5 +1,9 @@
 2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* gio/gio.defs: Add g_file_enumerator_get_container, new in 2.18
+
+2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gfileenumerator.override (_wrap_g_file_enumerator_close_async)
 	wrap new method.
 

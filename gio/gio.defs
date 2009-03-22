@@ -1266,6 +1266,9 @@
   )
 )
 
+;;
+;; wrapped in gfileenumerator.override
+;;
 (define-method close_async
   (of-object "GFileEnumerator")
   (c-name "g_file_enumerator_close_async")
@@ -1307,6 +1310,12 @@
   (parameters
     '("gboolean" "pending")
   )
+)
+
+(define-method get_container
+  (of-object "GFileEnumerator")
+  (c-name "g_file_enumerator_get_container")
+  (return-type "GFile*")
 )
 
 
