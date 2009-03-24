@@ -1,3 +1,10 @@
+2009-03-25  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-simpleasyncresult.xml:
+	Add gio.SimpleAsyncResult in docs.
+
 2009-03-24  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* docs/reference/pygio-classes.xml:

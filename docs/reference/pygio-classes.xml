@@ -17,6 +17,7 @@
 <xi:include href="pygio-fileenumerator.xml"/>
 <xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-icon.xml"/>
+<xi:include href="pygio-simpleasyncresult.xml"/>
 <xi:include href="pygio-constants.xml"/>
 
 </chapter>

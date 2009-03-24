@@ -26,6 +26,7 @@ HTML_FILES =					\
 	html/class-giofileenumerator.html	\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
+	html/class-giosimpleasyncresult.html	\
 	html/gio-constants.html			\
 	html/gio-class-reference.html		\
 	html/gobject-constants.html		\
@@ -61,7 +62,8 @@ XML_FILES = 					\
 	reference/pygio-icon.xml		\
 	reference/pygio-fileattributeinfo.xml	\
 	reference/pygio-fileenumerator.xml	\
-	reference/pygio-fileicon.xml
+	reference/pygio-fileicon.xml 		\
+	reference/pygio-simpleasyncresult.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\
