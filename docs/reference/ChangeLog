@@ -1,5 +1,10 @@
 2009-03-24  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-icon.xml: Fix the order and a typo.
+
+2009-03-24  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* docs/Makefile.am:
 	* docs/reference/pygio-classes.xml:
 	* docs/reference/pygio-asyncresult.xml: Add gio.AsyncResult in docs.

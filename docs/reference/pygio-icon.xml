@@ -100,7 +100,7 @@
         <title>Methods</title>
 
         <refsect2 id="method-gioicon--equal">
-            <title>gio.Emblem.equal</title>
+            <title>gio.Icon.equal</title>
 
             <programlisting><methodsynopsis language="python">
                 <methodname>equal</methodname>
