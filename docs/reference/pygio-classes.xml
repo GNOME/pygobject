@@ -6,12 +6,14 @@
 
 <title>PyGioClass Reference</title>
 
-<!-- GLIB CLASSES -->
+<!-- GIO CLASSES -->
+<xi:include href="pygio-appinfo.xml"/>
 <xi:include href="pygio-applaunchcontext.xml"/>
 <xi:include href="pygio-cancellable.xml"/>
 <xi:include href="pygio-emblem.xml"/>
 <xi:include href="pygio-icon.xml"/>
 <xi:include href="pygio-emblemedicon.xml"/>
+<xi:include href="pygio-fileattributeinfo.xml"/>
 <xi:include href="pygio-fileenumerator.xml"/>
 <xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-constants.xml"/>

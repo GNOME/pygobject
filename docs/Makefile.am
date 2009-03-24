@@ -17,9 +17,11 @@ HTML_FILES =					\
 	html/gobject-class-reference.html	\
 	html/glib-class-reference.html		\
 	html/class-gioapplaunchcontext.html	\
+	html/class-gioappinfo.html		\
 	html/class-giocancellable.html		\
 	html/class-gioemblem.html		\
 	html/class-gioemblemedicon.html		\
+	html/class-giofileattributeinfo.html	\
 	html/class-giofileenumerator.html	\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
@@ -51,9 +53,11 @@ XML_FILES = 					\
 	reference/pygio-classes.xml 		\
 	reference/pygio-constants.xml		\
 	reference/pygio-applaunchcontext.xml 	\
+	reference/pygio-appinfo.xml 		\
 	reference/pygio-emblem.xml		\
 	reference/pygio-emblemedicon.xml	\
 	reference/pygio-icon.xml		\
+	reference/pygio-fileattributeinfo.xml	\
 	reference/pygio-fileenumerator.xml	\
 	reference/pygio-fileicon.xml
 

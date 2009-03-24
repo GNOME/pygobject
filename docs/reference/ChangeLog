@@ -1,3 +1,12 @@
+2009-03-24  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-appinfo.xml:
+	* docs/reference/pygio-constants.xml:
+	* docs/reference/pygio-fileattributeinfo.xml: Add gio.AppInfo and
+	gio.FileAttributeInfo in docs.
+
 2009-03-22  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* docs/Makefile.am:

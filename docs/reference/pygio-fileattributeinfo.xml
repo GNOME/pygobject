@@ -1,0 +1,73 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giofileattributeinfo">
+    <refnamediv>
+        <refname>gio.FileAttributeInfo</refname>
+        <refpurpose>Information about a specific attribute.</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.FileAttributeInfo</classname></ooclass>
+        <ooclass><classname>__builtin__.object</classname></ooclass>    
+    </classsynopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- __builtin__.object
+  +-- <link linkend="class-giofileattributeinfo">gio.FileAttributeInfo</link>
+</synopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            The <link linkend="class-giofileattributeinfo"><classname>gio.FileAttributeInfo</classname></link>
+            contains information about a specific attribute.
+        </para>
+    </refsect1>
+
+    <refsect1 id="attributes-giofileattributeinfo">
+        <title>gio.FileAttributeInfo Attributes</title>
+    
+        <blockquote role="properties">
+            <informaltable pgwide="1" frame="none">
+                <tgroup cols="3">
+                    <colspec column="1" colwidth="1in"/>
+                    <colspec column="2" colwidth="1in"/>
+                    <colspec column="3" colwidth="4in"/>
+                    <tbody>
+                        <row valign="top">
+                            <entry>"name"</entry>
+                            <entry>Read</entry>
+                            <entry>The name of the attribute.</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"type"</entry>
+                            <entry>Read</entry>
+                            <entry>the
+                            <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                            type of the attribute.</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"flags"</entry>
+                            <entry>Read</entry>
+                            <entry>a set of
+                            <xref linkend="gio-file-attribute-flags-constants" endterm="gio-file-attribute-flags-constants-title"></xref>.
+                            </entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+        </blockquote>
+    </refsect1>
+</refentry>

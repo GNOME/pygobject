@@ -12,14 +12,46 @@
     <title>Synopsis</title>
 
 <programlisting>
+<xref linkend="gio-app-info-constants" endterm="gio-app-info-constants-title"></xref>
 <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
+<xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+<xref linkend="gio-file-attribute-flags-constants" endterm="gio-file-attribute-flags-constants-title"></xref>
 </programlisting>
 
   </refsect1>
 
   <refsect1 id="gio-constants-description">
     <title>Description</title>
+
+    <refsect2 id="gio-app-info-constants">
+      <title id="gio-app-info-constants-title">Gio AppInfo Create Flags Constants</title>
+
+      <para>
+	  Flags used when creating a <link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.APP_INFO_CREATE_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.APP_INFO_CREATE_NEEDS_TERMINAL</literal></term>
+	  <listitem>
+	    <simpara>Application opens in a terminal window. </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.APP_INFO_CREATE_SUPPORTS_URIS</literal></term>
+	  <listitem>
+	    <simpara>Application supports URI arguments. </simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
 
     <refsect2 id="gio-emblem-origin-constants">
       <title id="gio-emblem-origin-constants-title">Gio Emblem Origin Constants</title>
@@ -229,7 +261,6 @@
 	    <simpara>File contains too many symbolic links. </simpara>
 	  </listitem>
 	</varlistentry>
-	<!--
 	<varlistentry>
 	  <term><literal>gio.ERROR_TOO_MANY_OPEN_FILES</literal></term>
 	  <listitem>
@@ -237,7 +268,6 @@
 	    more. Duplicate descriptors do count toward this limit. Since 2.20</simpara>
 	  </listitem>
 	</varlistentry>
-	-->
 	<varlistentry>
 	  <term><literal>gio.ERROR_WOULD_BLOCK</literal></term>
 	  <listitem>
@@ -260,6 +290,100 @@
 	  <term><literal>gio.ERROR_WRONG_ETAG</literal></term>
 	  <listitem>
 	    <simpara>File's Entity Tag was incorrect. </simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-attribute-type-constants">
+      <title id="gio-file-attribute-type-constants-title">Gio File Attribute Type Constants</title>
+
+      <para>
+	  The data types for file attributes.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_BOOLEAN</literal></term>
+	  <listitem>
+	    <simpara>a boolean value.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_BYTE_STRING</literal></term>
+	  <listitem>
+	    <simpara>a zero terminated string of non-zero bytes.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_INT32</literal></term>
+	  <listitem>
+	    <simpara>a signed 4-byte/32-bit integer.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_INT64</literal></term>
+	  <listitem>
+	    <simpara>a signed 8-byte/64-bit integer.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_INVALID</literal></term>
+	  <listitem>
+	    <simpara>indicates an invalid or uninitalized type.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_OBJECT</literal></term>
+	  <listitem>
+	    <simpara>a <link linkend="class-gobject">gobject.GObject</link>.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_STRING</literal></term>
+	  <listitem>
+	    <simpara>a null terminated UTF8 string.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_UINT32</literal></term>
+	  <listitem>
+	    <simpara>an unsigned 4-byte/32-bit integer.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TYPE_UINT64</literal></term>
+	  <listitem>
+	    <simpara>an unsigned 8-byte/64-bit integer.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-attribute-flags-constants">
+      <title id="gio-file-attribute-flags-constants-title">Gio File Attribute Flags Constants</title>
+
+      <para>
+	  Flags specifying the behaviour of an attribute.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_INFO_NONE</literal></term>
+	  <listitem>
+	    <simpara>no flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_INFO_COPY_WITH_FILE</literal></term>
+	  <listitem>
+	    <simpara>copy the attribute values when the file is copied.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED</literal></term>
+	  <listitem>
+	    <simpara>copy the attribute values when the file is moved.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
