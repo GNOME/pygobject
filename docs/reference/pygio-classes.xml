@@ -9,6 +9,7 @@
 <!-- GIO CLASSES -->
 <xi:include href="pygio-appinfo.xml"/>
 <xi:include href="pygio-applaunchcontext.xml"/>
+<xi:include href="pygio-asyncresult.xml"/>
 <xi:include href="pygio-cancellable.xml"/>
 <xi:include href="pygio-emblem.xml"/>
 <xi:include href="pygio-icon.xml"/>

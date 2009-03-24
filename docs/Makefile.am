@@ -18,6 +18,7 @@ HTML_FILES =					\
 	html/glib-class-reference.html		\
 	html/class-gioapplaunchcontext.html	\
 	html/class-gioappinfo.html		\
+	html/class-gioasyncresult.html		\
 	html/class-giocancellable.html		\
 	html/class-gioemblem.html		\
 	html/class-gioemblemedicon.html		\
@@ -54,6 +55,7 @@ XML_FILES = 					\
 	reference/pygio-constants.xml		\
 	reference/pygio-applaunchcontext.xml 	\
 	reference/pygio-appinfo.xml 		\
+	reference/pygio-asyncresult.xml 	\
 	reference/pygio-emblem.xml		\
 	reference/pygio-emblemedicon.xml	\
 	reference/pygio-icon.xml		\
