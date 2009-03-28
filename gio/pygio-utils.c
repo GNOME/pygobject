@@ -128,3 +128,81 @@ pygio_pylist_to_uri_glist(PyObject *pyfile_list)
 
     return file_list;
 }
+
+/**
+ * strv_to_pylist:
+ * @strv: array of strings
+ *
+ * Returns: A python list of strings
+ */
+PyObject *
+strv_to_pylist (char **strv)
+{
+    gsize len, i;
+    PyObject *list;
+
+    len = strv ? g_strv_length (strv) : 0;
+    list = PyList_New (len);
+
+    for (i = 0; i < len; i++)
+        PyList_SetItem (list, i, PyString_FromString (strv[i]));
+
+    return list;
+}
+
+/**
+ * pylist_to_strv:
+ * @strvp: a pointer to an array where return strings.
+ *
+ * Returns: TRUE if the list of strings could be converted, FALSE otherwise.
+ */
+gboolean
+pylist_to_strv (PyObject *list,
+                char   ***strvp)
+{
+    int i, len;
+    char **ret;
+
+    *strvp = NULL;
+
+    if (list == Py_None)
+        return TRUE;
+
+    if (!PySequence_Check (list))
+    {
+        PyErr_Format (PyExc_TypeError, "argument must be a list or tuple of strings");
+        return FALSE;
+    }
+
+    if ((len = PySequence_Size (list)) < 0)
+        return FALSE;
+
+    ret = g_new (char*, len + 1);
+    for (i = 0; i <= len; ++i)
+        ret[i] = NULL;
+
+    for (i = 0; i < len; ++i)
+    {
+        PyObject *item = PySequence_GetItem (list, i);
+
+        if (!item)
+        {
+            g_strfreev (ret);
+            return FALSE;
+        }
+
+        if (!PyString_Check (item))
+        {
+            Py_DECREF (item);
+            g_strfreev (ret);
+            PyErr_Format (PyExc_TypeError, "argument must be a list of strings");
+            return FALSE;
+        }
+
+        ret[i] = g_strdup (PyString_AsString (item));
+        Py_DECREF (item);
+    }
+
+    *strvp = ret;
+    return TRUE;
+}

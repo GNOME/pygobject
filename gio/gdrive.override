@@ -1,8 +1,9 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
+ * Copyright (C) 2009  Gian Mario Tagliaretti
  *
- *   gvolume.override: module overrides for GVolume
+ *   gicon.override: module overrides for GIcon and related types
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,80 +20,49 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  */
+
 %%
-override g_volume_mount kwargs
+override g_drive_get_volumes noargs
 static PyObject *
-_wrap_g_volume_mount(PyGObject *self,
-		     PyObject *args,
-		     PyObject *kwargs)
+_wrap_g_drive_get_volumes (PyGObject *self)
 {
-    static char *kwlist[] = { "callback", "flags", "mount_operation",
-			      "cancellable", "user_data", NULL };
-    PyGIONotify *notify;
-    PyObject *py_flags = NULL;
-    PyGObject *mount_operation;
-    PyGObject *py_cancellable = NULL;
-    GMountMountFlags flags = G_MOUNT_MOUNT_NONE;
-    GCancellable *cancellable;
+  GList *list, *l;
+  PyObject *ret;
 
-    notify = pygio_notify_new();
+  pyg_begin_allow_threads;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O!O|OOO:Volume.mount",
-				     kwlist,
-				     &PyGMountOperation_Type,
-				     &mount_operation,
-				     &notify->callback,
-				     &py_flags,
-				     &py_cancellable,
-				     &notify->data))
-        goto error;
+  list = g_drive_get_volumes (G_DRIVE (self->obj));
 
-    if (!pygio_notify_callback_is_valid(notify))
-        goto error;
+  pyg_end_allow_threads;
 
-    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_MOUNT_FLAGS,
-					py_flags, (gpointer)&flags))
-        goto error;
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GVolume *volume = l->data;
+    PyObject *item = pygobject_new((GObject *)volume);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+    g_object_unref(volume);
+  }
+  g_list_free(list);
 
-    if (!pygio_check_cancellable(py_cancellable, &cancellable))
-        goto error;
-
-    pygio_notify_reference_callback(notify);
-
-    g_volume_mount(G_VOLUME(self->obj),
-		   flags,
-		   G_MOUNT_OPERATION(mount_operation->obj),
-		   cancellable,
-		   (GAsyncReadyCallback)async_result_callback_marshal,
-		   notify);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-
- error:
-    pygio_notify_free(notify);
-    return NULL;
+  return ret;
 }
 %%
-override g_volume_eject kwargs
+override g_drive_eject kwargs
 static PyObject *
-_wrap_g_volume_eject(PyGObject *self,
-		     PyObject *args,
-		     PyObject *kwargs)
+_wrap_g_drive_eject(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "callback", "flags",
-			      "cancellable", "user_data", NULL };
+    static char *kwlist[] = { "callback", "flags", "cancellable", "user_data", NULL };
     PyGIONotify *notify;
     PyObject *py_flags = NULL;
-    PyGObject *py_cancellable = NULL;
     GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    PyGObject *py_cancellable = NULL;
     GCancellable *cancellable;
 
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O|OOO:Volume.eject",
+                                     "O|OOO:gio.Drive.eject",
 				     kwlist,
 				     &notify->callback,
 				     &py_flags,
@@ -104,7 +74,7 @@ _wrap_g_volume_eject(PyGObject *self,
         goto error;
 
     if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
-					py_flags, (gpointer)&flags))
+					py_flags, (gpointer) &flags))
         goto error;
 
     if (!pygio_check_cancellable(py_cancellable, &cancellable))
@@ -112,11 +82,11 @@ _wrap_g_volume_eject(PyGObject *self,
 
     pygio_notify_reference_callback(notify);
 
-    g_volume_eject(G_VOLUME(self->obj),
-		   flags,
-		   cancellable,
-		   (GAsyncReadyCallback)async_result_callback_marshal,
-		   notify);
+    g_drive_eject(G_DRIVE(self->obj),
+		  flags,
+		  cancellable,
+		  (GAsyncReadyCallback) async_result_callback_marshal,
+		  notify);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -126,11 +96,55 @@ _wrap_g_volume_eject(PyGObject *self,
     return NULL;
 }
 %%
-override-slot GVolume.tp_repr
+override g_drive_poll_for_media kwargs
 static PyObject *
-_wrap_g_volume_tp_repr(PyGObject *self)
+_wrap_g_drive_poll_for_media(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    char *name = g_volume_get_name(G_VOLUME(self->obj));
+    static char *kwlist[] = { "callback", "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O|OO:gio.Drive.eject",
+				     kwlist,
+				     &notify->callback,
+				     &py_cancellable,
+				     &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    pyg_begin_allow_threads;
+
+    g_drive_poll_for_media(G_DRIVE(self->obj),
+			   cancellable,
+			   (GAsyncReadyCallback) async_result_callback_marshal,
+			   notify);
+    
+    pyg_end_allow_threads;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override-slot GDrive.tp_repr
+static PyObject *
+_wrap_g_drive_tp_repr(PyGObject *self)
+{
+    char *name = g_drive_get_name(G_DRIVE(self->obj));
     gchar *representation;
     PyObject *result;
 
@@ -146,16 +160,16 @@ _wrap_g_volume_tp_repr(PyGObject *self)
     return result;
 }
 %%
-override g_volume_enumerate_identifiers noargs
+override g_drive_enumerate_identifiers noargs
 static PyObject *
-_wrap_g_volume_enumerate_identifiers (PyGObject *self)
+_wrap_g_drive_enumerate_identifiers (PyGObject *self)
 {
     char **ids;
     PyObject *ret;
   
     pyg_begin_allow_threads;
   
-    ids = g_volume_enumerate_identifiers(G_VOLUME (self->obj));
+    ids = g_drive_enumerate_identifiers(G_DRIVE (self->obj));
   
     pyg_end_allow_threads;
   

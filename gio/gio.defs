@@ -954,7 +954,7 @@
 )
 
 ;;
-;; wrapped in gio.override
+;; wrapped in gdrive.override
 ;;
 (define-method get_volumes
   (of-object "GDrive")
@@ -993,15 +993,10 @@
 )
 
 ;;
-;; wrapped in gio.override
+;; wrapped in gdrive.override
 ;;
 (define-method eject
   (of-object "GDrive")
-  (docstring
-   "D.eject(callback, [flags, [cancellable, [user_data]]]) -> start ejecting\n"
-   "Asynchronously ejects a drive. When the operation is finished, callback\n"
-   "will be called. You can then call gio.Drive.eject_finish to obtain the\n"
-   "result of the operation.")
   (c-name "g_drive_eject")
   (return-type "none")
   (parameters
@@ -1023,16 +1018,10 @@
 )
 
 ;;
-;; wrapped in gio.override
+;; wrapped in gdrive.override
 ;;
 (define-method poll_for_media
   (of-object "GDrive")
-  (docstring
-   "D.poll_for_media(callback, [cancellable, [user_data]]) -> start polling\n"
-   "Asynchronously polls drive to see if media has been inserted or removed.\n"
-   "When the operation is finished, callback will be called. You can then\n"
-   "call gio.Drive.poll_for_media_finish to obtain the result of the\n"
-   "operation.")
   (c-name "g_drive_poll_for_media")
   (return-type "none")
   (parameters
@@ -1050,6 +1039,24 @@
     '("GAsyncResult*" "result")
     '("GError**" "error")
   )
+)
+
+(define-method get_identifier
+  (of-object "GDrive")
+  (c-name "g_drive_get_identifier")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "kind")
+  )
+)
+
+;;
+;; wrapped in gdrive.override
+;;
+(define-method enumerate_identifiers
+  (of-object "GDrive")
+  (c-name "g_drive_enumerate_identifiers")
+  (return-type "char**")
 )
 
 
@@ -5196,6 +5203,9 @@
   )
 )
 
+;;
+;; wrapped in gvolume.override
+;;
 (define-method enumerate_identifiers
   (of-object "GVolume")
   (c-name "g_volume_enumerate_identifiers")

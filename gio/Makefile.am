@@ -38,6 +38,7 @@ GIO_OVERRIDES = 			\
 	gio.override			\
 	gappinfo.override		\
 	gapplaunchcontext.override 	\
+        gdrive.override			\
 	gfile.override			\
 	gfileattribute.override		\
 	gfileenumerator.override	\

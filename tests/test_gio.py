@@ -381,7 +381,8 @@ class TestFile(unittest.TestCase):
                 self.assertEqual(info.type, gio.FILE_ATTRIBUTE_TYPE_UINT64)
                 self.assertEqual(info.name, "time::modified")
                 self.assertEqual(info.flags,
-                                 gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED)
+                                 gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED |
+                                 gio.FILE_ATTRIBUTE_INFO_COPY_WITH_FILE)
 
     def testQueryWritableNamespaces(self):
         infolist = self.file.query_writable_namespaces()
@@ -842,3 +843,18 @@ class TestVfs(unittest.TestCase):
     def testGetSupportedURISchemes(self):
         result = self.vfs.get_supported_uri_schemes()
         self.failUnless(type(result), [])
+
+class TestVolume(unittest.TestCase):
+    def setUp(self):
+        self.monitor = gio.volume_monitor_get()
+    
+    def testVolumeEnumerate(self):
+        volumes = self.monitor.get_volumes()
+        self.failUnless(isinstance(volumes, list))
+        for v in volumes:
+            if v is not None:
+                ids = v.enumerate_identifiers()
+                self.failUnless(isinstance(ids, list))
+                for id in ids:
+                    if id is not None:
+                        self.failUnless(isinstance(id, str))

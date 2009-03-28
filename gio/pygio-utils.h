@@ -42,4 +42,8 @@ GList* pygio_pylist_to_gfile_glist(PyObject *pycontext);
 
 GList* pygio_pylist_to_uri_glist(PyObject *pycontext);
 
+PyObject* strv_to_pylist (char **strv);
+
+gboolean pylist_to_strv (PyObject *list, char ***strvp);
+
 #endif /* __PYGIO_UTILS_H__ */

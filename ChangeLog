@@ -1,3 +1,20 @@
+2009-03-28  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/pygio-utils.[hc]: (strv_to_pylist) (pylist_to_strv) add a couple
+	of convinence functions to convert from/to a python list and an array
+	of strings.
+
+	* gio/Makefile.am
+	* gio/gdrive.override:
+	* gio/gio.override: Strip GDrive overrides and
+	wrap g_drive_enumerate_identifiers
+	
+	* tests/test_gio.py:
+	* gio/gvolume.override: wrap g_volume_enumerate_identifiers
+
+	* gio/gio.defs: add missing g_drive_get_identifier and
+	g_drive_enumerate_identifiers
+
 2009-03-22  Mark Lee  <marklee@svn.gnome.org>
 
 	Bug 559001 – Allow setting pytype wrapper class
