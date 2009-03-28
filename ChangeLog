@@ -1,3 +1,7 @@
+2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs: Add g_volume_should_automount
+
 2009-03-28  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/pygio-utils.[hc]: (strv_to_pylist) (pylist_to_strv) add a couple

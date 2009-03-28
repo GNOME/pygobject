@@ -5132,6 +5132,12 @@
   (return-type "gboolean")
 )
 
+(define-method should_automount
+  (of-object "GVolume")
+  (c-name "g_volume_should_automount")
+  (return-type "gboolean")
+)
+
 ;;
 ;; wrapped in gvolume.override
 ;;
