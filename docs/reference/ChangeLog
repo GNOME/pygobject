@@ -2,6 +2,13 @@
 
 	* docs/Makefile.am:
 	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-volumemonitor.xml:
+	Add gio.VolumeMonitor in docs.
+
+2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
 	* docs/reference/pygio-constants.xml:
 	* docs/reference/pygio-volume.xml: Add gio.Volume in docs.
 

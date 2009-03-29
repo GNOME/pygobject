@@ -20,6 +20,7 @@
 <xi:include href="pygio-icon.xml"/>
 <xi:include href="pygio-simpleasyncresult.xml"/>
 <xi:include href="pygio-volume.xml"/>
+<xi:include href="pygio-volumemonitor.xml"/>
 <xi:include href="pygio-constants.xml"/>
 
 </chapter>
