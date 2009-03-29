@@ -1,3 +1,71 @@
+2009-03-29  Tobias Mueller  <tobiasmue@gnome.org>
+
+	* ltihooks.py:
+	* pygtk.py:
+	* COPYING:
+	* gobject/pygparamspec.h:
+	* gobject/pygpointer.c:
+	* gobject/ffi-marshaller.h:
+	* gobject/pygtype.c:
+	* gobject/__init__.py:
+	* gobject/pygpointer.h:
+	* gobject/pygtype.h:
+	* gobject/pygflags.c:
+	* gobject/pyginterface.c:
+	* gobject/pygflags.h:
+	* gobject/pygboxed.c:
+	* gobject/gobjectmodule.c:
+	* gobject/pygenum.c:
+	* gobject/pyginterface.h:
+	* gobject/pygboxed.h:
+	* gobject/pygobject.c:
+	* gobject/constants.py.in:
+	* gobject/pygenum.h:
+	* gobject/propertyhelper.py:
+	* gobject/pygparamspec.c:
+	* gobject/ffi-marshaller.c:
+	* glib/pygmainloop.c:
+	* glib/pygoptioncontext.h:
+	* glib/pygmainloop.h:
+	* glib/pyglib-private.h:
+	* glib/__init__.py:
+	* glib/pygoptiongroup.c:
+	* glib/pygspawn.c:
+	* glib/pygmaincontext.c:
+	* glib/pygoptiongroup.h:
+	* glib/pygspawn.h:
+	* glib/pygmaincontext.h:
+	* glib/option.py:
+	* glib/pygsource.c:
+	* glib/glibmodule.c:
+	* glib/pygiochannel.h:
+	* glib/pygsource.h:
+	* glib/pyglib.c:
+	* glib/pyglib.h:
+	* glib/pyglib-python-compat.h:
+	* glib/pygoptioncontext.c:
+	* gio/gfileinfo.override:
+	* gio/gappinfo.override:
+	* gio/__init__.py:
+	* gio/gfileattribute.override:
+	* gio/gvolume.override:
+	* gio/gio.override:
+	* gio/ginputstream.override:
+	* gio/goutputstream.override:
+	* gio/unix.override:
+	* gio/gfile.override:
+	* gio/gvolumemonitor.override:
+	* gio/gapplaunchcontext.override:
+	* gio/giomodule.c:
+	* gio/gfileenumerator.override:
+	* gio/pygio-utils.c:
+	* gio/unixmodule.c:
+	* gio/pygio-utils.h:
+	* gio/gicon.override:
+	Update the address of the FSF, by replacing old bits of the address 
+	with new ones.
+	Fixes bug 577134
+
 2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gio.defs: Add g_volume_should_automount
