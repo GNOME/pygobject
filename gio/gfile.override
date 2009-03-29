@@ -534,7 +534,7 @@ _wrap_g_file_copy(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O!O|OOO:File.copy",
+                                     "O!|OOOO:File.copy",
 				     kwlist,
 				     &PyGFile_Type,
 				     &destination,
