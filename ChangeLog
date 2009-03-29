@@ -1,5 +1,10 @@
 2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* gio/gvolume.override: (_wrap_g_volume_mount) should accept None
+	for mount_operation.
+
+2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gvolume.override: Swap kwargs names to reflect the code.
 
 2009-03-29  Tobias Mueller  <tobiasmue@gnome.org>
