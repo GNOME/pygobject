@@ -21,7 +21,7 @@
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-giovolumemonitor--get-mount-for-uuid">get_mount_for_uuid</link></methodname>
-        <methodparam></methodparam>
+        <methodparam><parameter role="keyword">uuid</parameter></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-giovolumemonitor--get-mounts">get_mounts</link></methodname>
@@ -29,7 +29,7 @@
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-giovolumemonitor--get-volume-for-uuid">get_volume_for_uuid</link></methodname>
-        <methodparam></methodparam>
+        <methodparam><parameter role="keyword">uuid</parameter></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-giovolumemonitor--get-volumes">get_volumes</link></methodname>

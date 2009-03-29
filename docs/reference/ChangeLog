@@ -1,5 +1,9 @@
 2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* docs/reference/pygio-volumemonitor.xml:
+
+2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* docs/Makefile.am:
 	* docs/reference/pygio-classes.xml:
 	* docs/reference/pygio-volumemonitor.xml:
