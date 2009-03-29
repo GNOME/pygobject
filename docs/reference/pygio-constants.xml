@@ -17,6 +17,8 @@
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
 <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
 <xref linkend="gio-file-attribute-flags-constants" endterm="gio-file-attribute-flags-constants-title"></xref>
+<xref linkend="gio-mount-mount-flags-constants" endterm="gio-mount-mount-flags-constants-title"></xref>
+<xref linkend="gio-mount-unmount-flags-constants" endterm="gio-mount-unmount-flags-constants-title"></xref>
 </programlisting>
 
   </refsect1>
@@ -384,6 +386,46 @@
 	  <term><literal>gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED</literal></term>
 	  <listitem>
 	    <simpara>copy the attribute values when the file is moved.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-mount-mount-flags-constants">
+      <title id="gio-mount-mount-flags-constants-title">Gio Mount Mount Flags Constants</title>
+
+      <para>
+	  Flags used when mounting a mount.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_MOUNT_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-mount-unmount-flags-constants">
+      <title id="gio-mount-unmount-flags-constants-title">Gio Mount Unmount Flags Constants</title>
+
+      <para>
+	  Flags used when unmounting a mount.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_UNMOUNT_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_UNMOUNT_FORCE</literal></term>
+	  <listitem>
+	    <simpara>Unmount even if there are outstanding file operations on the mount.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
