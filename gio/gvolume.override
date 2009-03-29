@@ -26,7 +26,7 @@ _wrap_g_volume_mount(PyGObject *self,
 		     PyObject *args,
 		     PyObject *kwargs)
 {
-    static char *kwlist[] = { "callback", "flags", "mount_operation",
+    static char *kwlist[] = { "mount_operation", "callback", "flags",
 			      "cancellable", "user_data", NULL };
     PyGIONotify *notify;
     PyObject *py_flags = NULL;
