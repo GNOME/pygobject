@@ -1,6 +1,11 @@
 2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override:
+	(_wrap_g_file_query_filesystem_info_async) Fix a typo.
+
+2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override:
 	(_wrap_g_file_query_filesystem_info_async) Wrap new GFile method.
 
 2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>

@@ -1390,7 +1390,7 @@ _wrap_g_file_query_filesystem_info_async(PyGObject *self, PyObject *args, PyObje
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "sO|iOO:GFile.enumerate_children_async",
+				     "sO|iOO:GFile.query_filesystem_info_async",
 				     kwlist,
 				     &attributes,
 				     &notify->callback,
