@@ -1,5 +1,10 @@
 2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* gio/gfile.override:
+	(_wrap_g_file_eject_mountable) Wrap new GFile method.
+
+2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gfile.override: (_wrap_g_file_copy) revert previous commit.
 
 2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
