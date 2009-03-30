@@ -1798,6 +1798,29 @@
   )
 )
 
+(define-method query_filesystem_info_async
+  (of-object "GFile")
+  (c-name "g_file_query_filesystem_info_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attributes")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_filesystem_info_finish
+  (of-object "GFile")
+  (c-name "g_file_query_filesystem_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
 (define-method find_enclosing_mount
   (of-object "GFile")
   (c-name "g_file_find_enclosing_mount")
@@ -5142,18 +5165,6 @@
 ;; wrapped in gvolume.override
 ;;
 (define-method mount
-  (docstring
-"V.mount(mount_operation, callback, [flags, cancellable, user_data])\n"
-"Mounts a volume. Using mount_operation, you can request callbacks\n"
-"when, for instance, passwords are needed during authentication.\n"
-"\n"
-"If cancellable is not None, then the operation can be cancelled by\n"
-" triggering the cancellable object from another thread. If the\n"
-"operation was cancelled, the error gio.ERROR_CANCELLED will be returned.\n"
-"\n"
-"When the operation is finished, callback will be called. You can then\n"
-"call gio.Volume.mount_finish() to get the result of the operation.\n")
-
   (of-object "GVolume")
   (c-name "g_volume_mount")
   (return-type "none")

@@ -1,3 +1,8 @@
+2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs: Add missing g_file_query_filesystem_info_async and
+	g_file_query_filesystem_info_finish
+
 2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override: (_wrap_g_file_mount_mountable)
