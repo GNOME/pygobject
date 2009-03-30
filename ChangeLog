@@ -1,5 +1,10 @@
 2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* gio/gfile.override:
+	(_wrap_g_file_query_filesystem_info_async) Wrap new GFile method.
+
+2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gio.defs: Add missing g_file_query_filesystem_info_async and
 	g_file_query_filesystem_info_finish
 
