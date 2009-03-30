@@ -1,5 +1,10 @@
 2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
+	* gio/gfile.override: (_wrap_g_file_mount_mountable)
+	Swap kwargs names to reflect the code.
+
+2009-03-30  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
 	* gio/gfile.override: (_wrap_g_file_mount_enclosing_volume)
 	Swap kwargs names to reflect the code.
 
