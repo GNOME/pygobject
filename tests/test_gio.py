@@ -404,6 +404,24 @@ class TestFile(unittest.TestCase):
                                               10, gio.FILE_QUERY_INFO_NONE)
                 self.assertEqual(ret, True)
 
+    def testSetAttributesAsync(self):
+        def callback(gfile, result):
+            try:
+                info = gfile.set_attributes_finish(result)
+                usec = info.get_attribute_uint32("time::modified-usec")
+                self.assertEqual(usec, 10)
+            finally:
+                loop.quit()        
+
+        info = gio.FileInfo()
+        info.set_attribute_uint32("time::modified-usec", 10)
+        
+        canc = gio.Cancellable()
+        self.file.set_attributes_async(info, callback)
+        
+        loop = glib.MainLoop()
+        loop.run()
+
     def testReplaceContents(self):
         self.file.replace_contents("testing replace_contents")
         cont, leng, etag = self.file.load_contents()

@@ -1,3 +1,11 @@
+2009-04-04  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override:
+	(_wrap_g_file_set_attributes_async)
+	(_wrap_g_file_set_attributes_finish) Wrap new GFile methods.
+	
+	* tests/test_gio.py: Test the above methods.
+
 2009-03-31  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override:
