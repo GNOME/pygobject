@@ -1,3 +1,12 @@
+2009-04-05  Tristan Hill  <stan@saticed.me.uk>
+
+	reviewed by: Gustavo J. A. M. Carneiro.
+
+	* glib/pygoptioncontext.c (pyg_option_get_context): Add a
+	semi-private method to return the option context C object from an
+	option context wrapper.  Used in gnome-python for fixing Bug
+	#507174.
+
 2009-04-05  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
 
 	* gobject/pygtype.c (pyg_value_from_pyobject): Bug 577999 –

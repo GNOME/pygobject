@@ -281,6 +281,12 @@ pyg_option_context_compare(PyGOptionContext *self, PyGOptionContext *context)
     return -1;
 }
 
+static PyObject *
+pyg_option_get_context(PyGOptionContext *self)
+{
+    return PyCObject_FromVoidPtr(self->context, NULL);
+}
+
 static PyMethodDef pyg_option_context_methods[] = {
     { "parse", (PyCFunction)pyg_option_context_parse, METH_VARARGS | METH_KEYWORDS },
     { "set_help_enabled", (PyCFunction)pyg_option_context_set_help_enabled, METH_VARARGS | METH_KEYWORDS },
@@ -290,6 +296,7 @@ static PyMethodDef pyg_option_context_methods[] = {
     { "set_main_group", (PyCFunction)pyg_option_context_set_main_group, METH_VARARGS | METH_KEYWORDS },
     { "get_main_group", (PyCFunction)pyg_option_context_get_main_group, METH_NOARGS },
     { "add_group", (PyCFunction)pyg_option_context_add_group, METH_VARARGS | METH_KEYWORDS },
+    { "_get_context", (PyCFunction)pyg_option_get_context, METH_NOARGS },
     { NULL, NULL, 0 },
 };
 
