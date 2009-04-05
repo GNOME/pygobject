@@ -85,6 +85,9 @@ class TestProperties(unittest.TestCase):
         obj.props.uint64 = 1
         self.assertEqual(obj.props.uint64, 1L)
 
+        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1L)
+        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1)
+
     def testUInt64DefaultValue(self):
         try:
             class TimeControl(GObject):

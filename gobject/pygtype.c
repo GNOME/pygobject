@@ -716,11 +716,6 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_INT:
 	g_value_set_int(value, _PyLong_AsLong(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
 	break;
     case G_TYPE_UINT:
 	{
@@ -734,21 +729,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 		    return -1;
 	    } else {
 		g_value_set_uint(value, PyLong_AsUnsignedLong(obj));
-		if (PyErr_Occurred()) {
-		    g_value_unset(value);
-		    PyErr_Clear();
-		    return -1;
-		}
 	    }
 	}
 	break;
     case G_TYPE_LONG:
 	g_value_set_long(value, _PyLong_AsLong(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
 	break;
     case G_TYPE_ULONG:
 	{
@@ -762,26 +747,24 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 		    return -1;
 	    } else {
 		g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
-		if (PyErr_Occurred()) {
-		    g_value_unset(value);
-		    PyErr_Clear();
-		    return -1;
-		}
 	    }
 	}
 	break;
     case G_TYPE_INT64:
 	g_value_set_int64(value, PyLong_AsLongLong(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
 	break;
     case G_TYPE_UINT64:
-        if (_PyLong_Check(obj))
-            g_value_set_uint64(value, _PyLong_AsLong(obj));
-        else if (PyLong_Check(obj))
+#if PY_VERSION_HEX < 0x03000000
+        if (PyInt_Check(obj)) {
+            long v = PyInt_AsLong(obj);
+            if (v < 0) {
+                PyErr_SetString(PyExc_OverflowError, "negative value not allowed for uint64 property");
+                return -1;
+            }
+            g_value_set_uint64(value, v);
+        } else
+#endif
+        if (PyLong_Check(obj))
             g_value_set_uint64(value, PyLong_AsUnsignedLongLong(obj));
         else
             return -1;
@@ -808,19 +791,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_FLOAT:
 	g_value_set_float(value, PyFloat_AsDouble(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
 	break;
     case G_TYPE_DOUBLE:
 	g_value_set_double(value, PyFloat_AsDouble(obj));
-	if (PyErr_Occurred()) {
-	    g_value_unset(value);
-	    PyErr_Clear();
-	    return -1;
-	}
 	break;
     case G_TYPE_STRING:
 	if (obj == Py_None)
@@ -914,6 +887,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 		return bm->tovalue(value, obj);
 	    break;
 	}
+    }
+    if (PyErr_Occurred()) {
+        g_value_unset(value);
+        PyErr_Clear();
+        return -1;
     }
     return 0;
 }

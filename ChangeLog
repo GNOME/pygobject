@@ -1,3 +1,9 @@
+2009-04-05  Gustavo J. A. M. Carneiro  <gjc@gnome.org>
+
+	* gobject/pygtype.c (pyg_value_from_pyobject): Bug 577999 –
+	converting a negative long Python value to a GUINT64 GValue
+	doesn't error out as it should.
+
 2009-04-04  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override:
