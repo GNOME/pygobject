@@ -472,6 +472,22 @@ class TestFile(unittest.TestCase):
         self.assertEquals(hash(gio.File('foo')),
                           hash(gio.File('foo')))
 
+    def testSetDisplayNameAsync(self):
+        def callback(gfile, result):
+            try:
+                new_gfile = gfile.set_display_name_finish(result)
+                new_name = new_gfile.get_basename()
+                self.assertEqual(new_name, "new.txt")
+                deleted = new_gfile.delete()
+                self.assertEqual(deleted, True)
+            finally:
+                loop.quit()        
+
+        canc = gio.Cancellable()
+        self.file.set_display_name_async("new.txt", callback, cancellable=canc)
+        
+        loop = glib.MainLoop()
+        loop.run()
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):

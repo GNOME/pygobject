@@ -1,3 +1,10 @@
+2009-04-05  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override:
+	(_wrap_g_file_set_display_name_async) Wrap new GFile method.
+	
+	* tests/test_gio.py: Test the above methods.
+
 2009-04-05  Tristan Hill  <stan@saticed.me.uk>
 
 	reviewed by: Gustavo J. A. M. Carneiro.
