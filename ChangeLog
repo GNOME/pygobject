@@ -1,3 +1,11 @@
+2009-04-09  Jonathan Matthew  <jonathan@d14n.org>
+
+	Bug 575781 – pyg_notify_free needs to ensure it has GIL before calling
+	Py_XDECREF
+
+	* gio/gio.override:  Ensure we're holding the GIL before potentially
+	destroying the callback and data.
+
 2009-04-05  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override:

@@ -145,8 +145,12 @@ pygio_notify_free(PyGIONotify *notify)
 {
     if (notify) {
         if (notify->referenced) {
+            PyGILState_STATE state;
+
+            state = pyg_gil_state_ensure();
             Py_XDECREF(notify->callback);
             Py_XDECREF(notify->data);
+            pyg_gil_state_release(state);
         }
 
         if (notify->buffer)
