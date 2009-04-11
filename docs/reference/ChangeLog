@@ -1,6 +1,15 @@
+2009-04-11  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* docs/Makefile.am:
+	* docs/reference/pygio-classes.xml:
+	* docs/reference/pygio-constants.xml:
+	* docs/reference/pygio-file.xml:
+	* docs/reference/pygio-seekable.xml: Add gio.File and gio.Seekable
+	in docs, gio.File it's not yet completed only the index is.
+
 2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
-	* docs/reference/pygio-volumemonitor.xml:
+	* docs/reference/pygio-volumemonitor.xml: Small fix.
 
 2009-03-29  Gian Mario Tagliaretti  <gianmt@gnome.org>
 

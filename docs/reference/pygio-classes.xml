@@ -14,10 +14,12 @@
 <xi:include href="pygio-drive.xml"/>
 <xi:include href="pygio-emblem.xml"/>
 <xi:include href="pygio-emblemedicon.xml"/>
+<xi:include href="pygio-file.xml"/>
 <xi:include href="pygio-fileattributeinfo.xml"/>
 <xi:include href="pygio-fileenumerator.xml"/>
 <xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-icon.xml"/>
+<xi:include href="pygio-seekable.xml"/>
 <xi:include href="pygio-simpleasyncresult.xml"/>
 <xi:include href="pygio-volume.xml"/>
 <xi:include href="pygio-volumemonitor.xml"/>

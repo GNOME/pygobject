@@ -23,10 +23,12 @@ HTML_FILES =					\
 	html/class-giodrive.html		\
 	html/class-gioemblem.html		\
 	html/class-gioemblemedicon.html		\
+	html/class-giofile.html			\
 	html/class-giofileattributeinfo.html	\
 	html/class-giofileenumerator.html	\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
+	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
 	html/class-giovolume.html		\
 	html/class-giovolumemonitor.html	\
@@ -65,10 +67,12 @@ XML_FILES = 					\
 	reference/pygio-emblem.xml		\
 	reference/pygio-emblemedicon.xml	\
 	reference/pygio-icon.xml		\
+	reference/pygio-file.xml		\
 	reference/pygio-fileattributeinfo.xml	\
 	reference/pygio-fileenumerator.xml	\
 	reference/pygio-fileicon.xml 		\
 	reference/pygio-simpleasyncresult.xml	\
+	reference/pygio-seekable.xml		\
 	reference/pygio-volume.xml 		\
 	reference/pygio-volumemonitor.xml
 

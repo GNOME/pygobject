@@ -1,0 +1,1215 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giofile">
+    <refnamediv>
+        <refname>gio.File</refname>
+        <refpurpose>Information about an installed application and methods to launch it (with file arguments).</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.File</classname></ooclass>
+        <ooclass><classname><link linkend="class-gobjectginterface">gobject.GInterface</link></classname></ooclass>
+    
+    <constructorsynopsis language="python">
+	<methodname><link linkend="constructor-giofile">gio.File</link></methodname>
+	<methodparam><parameter role="keyword">commandline</parameter></methodparam>
+        <methodparam><parameter role="keyword">path</parameter><initializer><literal>None</literal></initializer></methodparam>
+        <methodparam><parameter role="keyword">uri</parameter><initializer>None</initializer></methodparam>
+    </constructorsynopsis>
+
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--append-to">append_to</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--append-to-async">append_to_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--append-to-finish">append_to_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--copy">copy</link></methodname>
+        <methodparam><parameter role="keyword">destination</parameter></methodparam>
+        <methodparam><parameter role="keyword">progress_callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_COPY_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--copy-async">copy_async</link></methodname>
+        <methodparam><parameter role="keyword">destination</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">progress_callback</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">progress_callback_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--copy-attributes">copy_attributes</link></methodname>
+        <methodparam><parameter role="keyword">destination</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_COPY_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--copy-finish">copy_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--create">create</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--create-async">create_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--create-finish">create_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--delete">delete</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--dup">dup</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--eject-mountable">eject_mountable</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--eject-mountable-finish">eject_mountable_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--enumerate-children">enumerate_children</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--enumerate-children-async">enumerate_children_async</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--enumerate-children-finish">enumerate_children_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--equal">equal</link></methodname>
+        <methodparam><parameter role="keyword">file2</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--find-enclosing-mount">find_enclosing_mount</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--find-enclosing-mount-async">find_enclosing_mount_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--find-enclosing-mount-finish">find_enclosing_mount_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-basename">get_basename</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-child">get_child</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-child-for-display-name">get_child_for_display_name</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-parent">get_parent</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-parse-name">get_parse_name</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-path">get_path</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-relative-path">get_relative_path</link></methodname>
+        <methodparam><parameter role="keyword">descendant</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-uri">get_uri</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--get-uri-scheme">get_uri_scheme</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--has-prefix">has_prefix</link></methodname>
+        <methodparam><parameter role="keyword">prefix</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--has-uri-scheme">has_uri_scheme</link></methodname>
+        <methodparam><parameter role="keyword">uri_scheme</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--is-native">is_native</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--load-contents">load_contents</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--load-contents-async">load_contents_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--load-contents-finish">load_contents_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--make-directory">make_directory</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--make-directory-with-parents">make_directory_with_parents</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--make-symbolic-link">make_symbolic_link</link></methodname>
+        <methodparam><parameter role="keyword">symlink_value</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--monitor">monitor</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--monitor-directory">monitor_directory</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--monitor-file">monitor_file</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--mount-enclosing-volume">mount_enclosing_volume</link></methodname>
+        <methodparam><parameter role="keyword">mount_operation</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.MOUNT_MOUNT_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--mount-enclosing-volume-finish">mount_enclosing_volume_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--mount-mountable">mount_mountable</link></methodname>
+        <methodparam><parameter role="keyword">mount_operation</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.MOUNT_MOUNT_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--mount-mountable-finish">mount_mountable_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--move">move</link></methodname>
+        <methodparam><parameter role="keyword">destination</parameter></methodparam>
+        <methodparam><parameter role="keyword">progress_callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_COPY_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-default-handler">query_default_handler</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-exists">query_exists</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-file-type">query_file_type</link></methodname>
+        <methodparam><parameter role="keyword">flags</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-filesystem-info">query_filesystem_info</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-filesystem-info-async">query_filesystem_info_async</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-filesystem-info-finish">query_filesystem_info_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-info">query_info</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-info-async">query_info_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-info-finish">query_info_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-settable-attributes">query_settable_attributes</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--query-writable-namespace">query_writable_namespace</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--read">read</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--read-async">read_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--read-finish">read_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace">replace</link></methodname>
+        <methodparam><parameter role="keyword">etag</parameter></methodparam>
+        <methodparam><parameter role="keyword">make_backup</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace-async">replace_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">etag</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">make_backup</parameter><initializer>True</initializer></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace-contents">replace_contents</link></methodname>
+        <methodparam><parameter role="keyword">contents</parameter></methodparam>
+        <methodparam><parameter role="keyword">etag</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">make_backup</parameter><initializer>True</initializer></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace-contents-async">replace_contents_async</link></methodname>
+        <methodparam><parameter role="keyword">contents</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">etag</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">make_backup</parameter><initializer>True</initializer></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace-contents-finish">replace_contents_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--replace-finish">replace_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--resolve-relative-path">resolve_relative_path</link></methodname>
+        <methodparam><parameter role="keyword">relative_path</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute">set_attribute</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">type</parameter></methodparam>
+        <methodparam><parameter role="keyword">value_p</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-byte-string">set_attribute_byte_string</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-int32">set_attribute_int32</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-int64">set_attribute_int64</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-string">set_attribute_string</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-uint32">set_attribute_uint32</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attribute-uint64">set_attribute_uint64</link></methodname>
+        <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+        <methodparam><parameter role="keyword">value</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attributes-async">set_attributes_async</link></methodname>
+        <methodparam><parameter role="keyword">info</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attributes-finish">set_attributes_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-attributes-from-info">set_attributes_from_info</link></methodname>
+        <methodparam><parameter role="keyword">info</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-display-name">set_dispay_name</link></methodname>
+        <methodparam><parameter role="keyword">display_name</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-display-name-async">set_display_name_async</link></methodname>
+        <methodparam><parameter role="keyword">display_name</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--set-display-name-finish">set_display_name_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--trash">trash</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--unmount-mountable">unmount_mountable</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.MOUNT_UNMOUNT_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofile--unmount-mountable-finish">unmount_mountable_finish</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    
+    </classsynopsis>
+
+<programlisting>
+<emphasis role="bold">Functions</emphasis>
+<methodsynopsis language="python">
+    <methodname><link linkend="function-gio--file-parse-name">gio.file_parse_name</link></methodname>
+    <methodparam><parameter role="keyword">parse_name</parameter></methodparam>
+</methodsynopsis></programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobjectginterface">gobject.GInterface</link>
+  +-- <link linkend="class-giofile">gio.File</link>
+</synopsis>
+
+    </refsect1>
+    
+    <refsect1>
+	<title>Prerequisites</title>
+        <para>
+            <link linkend="class-giofile"><classname>gio.File</classname></link> is implemented by
+            <link linkend="class-gobject"><classname>gobject.GObject</classname></link>
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-giofile"><classname>gio.File</classname></link> is a high
+            level abstraction for manipulating files on a virtual file system.
+            <link linkend="class-giofile"><classname>gio.File</classname></link>s are lightweight,
+            immutable objects that do no I/O upon creation. It is necessary to understand that
+            <link linkend="class-giofile"><classname>gio.File</classname></link>
+            objects do not represent files, merely an identifier for a file. All file content
+            I/O is implemented as streaming operations (see
+            <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link> and
+            <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>). 
+        </para>
+        <para>
+            To construct a <link linkend="class-giofile"><classname>gio.File</classname></link>, you can use
+            it's constructor either with a path, an uri or a commandline argument.
+            <methodname><link linkend="function-gio--file-parse-name">gio.file_parse_name</link></methodname>()
+            from a utf8 string gotten from
+            <methodname><link linkend="method-giofile--get-parse-name">gio.File.get_parse_name</link></methodname>().
+        </para>
+        <para>
+            One way to think of a <link linkend="class-giofile"><classname>gio.File</classname></link> is as
+            an abstraction of a pathname. For normal files the system pathname is what is stored internally,
+            but as <link linkend="class-giofile"><classname>gio.File</classname></link>s are extensible it
+            could also be something else that corresponds to a pathname in a userspace implementation of a filesystem. 
+        </para>
+        <para>
+            <link linkend="class-giofile"><classname>gio.File</classname></link>s make up hierarchies of
+            directories and files that correspond to the files on a filesystem. You can move through the
+            file system with GFile using
+            <methodname><link linkend="method-giofile--get-parent">gio.File.get_parent</link></methodname>()
+            to get an identifier for the parent directory,
+            <methodname><link linkend="method-giofile--get-child">gio.File.get_child</link></methodname>()
+            to get a child within a directory,
+            <methodname><link linkend="method-giofile--resolve-relative-path">gio.File.resolve_relative_path</link></methodname>()
+            to resolve a relative path between two <link linkend="class-giofile"><classname>gio.File</classname></link>s.
+            There can be multiple hierarchies, so you may not end up at the same root if you repeatedly call
+            <methodname><link linkend="method-giofile--get-parent">gio.File.get_parent</link></methodname>()
+            on two different files. 
+        </para>
+        <para>
+            All <link linkend="class-giofile"><classname>gio.File</classname></link>s have a basename (get with
+            <methodname><link linkend="method-giofile--get-basename">gio.File.get_basename</link></methodname>()
+            ). These names are byte strings that are used to identify the file on the filesystem
+            (relative to its parent directory) and there is no guarantees that they have any particular charset
+            encoding or even make any sense at all. If you want to use filenames in a user interface you should
+            use the display name that you can get by requesting the gio.FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME attribute with
+            <methodname><link linkend="method-giofile--query-info">gio.File.query_info</link></methodname>().
+            This is guaranteed to be in utf8 and can be used in a user interface. But always store the real basename or the
+            GFile to use to actually access the file, because there is no way to go from a display name to the actual name. 
+        </para>
+        <para>
+            Using <link linkend="class-giofile"><classname>gio.File</classname></link> as an identifier has the same
+            weaknesses as using a path in that there may be multiple aliases for the same file. For instance,
+            hard or soft links may cause two different <link linkend="class-giofile"><classname>gio.File</classname></link>s
+            to refer to the same file. Other possible causes for aliases are: case insensitive filesystems, short and
+            long names on Fat/NTFS, or bind mounts in Linux. If you want to check if two GFiles point to the same file
+            you can query for the gio.FILE_ATTRIBUTE_ID_FILE attribute. Note that
+            <link linkend="class-giofile"><classname>gio.File</classname></link> does some trivial canonicalization
+            of pathnames passed in, so that trivial differences in the path string used at creation
+            (duplicated slashes, slash at end of path, "." or ".." path segments, etc) does not create different
+            <link linkend="class-giofile"><classname>gio.File</classname></link>s. 
+        </para>
+        <para>
+            Many <link linkend="class-giofile"><classname>gio.File</classname></link> operations have both synchronous
+            and asynchronous versions to suit your application. Asynchronous versions of synchronous functions simply
+            have _async() appended to their function names. The asynchronous I/O functions call a
+            GAsyncReadyCallback which is then used to finalize the operation, producing a GAsyncResult
+            which is then passed to the function's matching _finish() operation. 
+        </para>
+        <para>
+            Some <link linkend="class-giofile"><classname>gio.File</classname></link> operations do not have
+            synchronous analogs, as they may take a very long time to finish, and blocking may leave an application
+            unusable. Notable cases include:
+            <methodname><link linkend="method-giofile--mount-mountable">gio.File.mount_mountable</link></methodname>()
+            to mount a mountable file.
+            <methodname><link linkend="method-giofile--unmount-mountable">gio.File.unmount_mountable</link></methodname>()
+            to unmount a mountable file.
+            <methodname><link linkend="method-giofile--eject-mountable">gio.File.eject_mountable</link></methodname>()
+            to eject a mountable file. 
+        </para>
+        <para>
+            One notable feature of <link linkend="class-giofile"><classname>gio.File</classname></link>s are
+            entity tags, or "etags" for short. Entity tags are somewhat like a more abstract
+            version of the traditional mtime, and can be used to quickly determine if the file
+            has been modified from the version on the file system. See the HTTP 1.1
+            specification for HTTP Etag headers, which are a very similar concept. 
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-giofile--append-to">
+            <title>gio.File.append_to</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>append_to</methodname>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a
+                    <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>append_to</methodname>() method gets an output stream for
+                appending data to the file. If the file doesn't already exist it is created. 
+            </para>
+            <para>
+                By default files created are generally readable by everyone, but if you pass
+                gio.FILE_CREATE_PRIVATE in flags the file will be made readable only to the
+                current user, to the level that is supported on the target filesystem. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be
+                cancelled by triggering the cancellable object from another thread. If
+                the operation was cancelled, the error gio.ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                Some file systems don't allow all file names, and may return an
+                gio.ERROR_INVALID_FILENAME error. If the file is a directory the
+                gio.ERROR_IS_DIRECTORY error will be returned. Other errors are possible too,
+                and depend on what kind of filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--append-to-async">
+            <title>gio.File.append_to_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>append_to_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>append_to_async</methodname>() method asynchronously opens file for appending. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--append-to">gio.File.append_to</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--append-to-finish">gio.File.append_to_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--append-to-finish">
+            <title>gio.Volume.append_to_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>append_to_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a valid
+                    <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>append_to_finish</methodname>() method finishes an asynchronous
+                file append operation started with
+                <methodname><link linkend="method-giofile--append-to-async">gio.File.append_to_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--copy">
+            <title>gio.File.copy</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>copy</methodname>
+                <methodparam><parameter role="keyword">destination</parameter></methodparam>
+                <methodparam><parameter role="keyword">progress_callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_COPY_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>destination</parameter>&nbsp;:</term>
+                    <listitem><simpara>destination <link linkend="class-giofile"><classname>gio.File</classname></link>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>progress_callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>function to callback with progress information.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to the progress callback function.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> on success,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>copy</methodname>() method copies the file source to
+                the location specified by destination. Can not handle recursive copies of directories. 
+            </para>
+            <para>
+                If the flag gio.FILE_COPY_OVERWRITE is specified an already existing
+                destination file is overwritten. 
+            </para>
+            <para>
+                If the flag gio.FILE_COPY_NOFOLLOW_SYMLINKS is specified then symlinks will
+                be copied as symlinks, otherwise the target of the source symlink will be copied. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                If progress_callback is not <literal>None</literal>, then the operation can be
+                monitored by setting this to a GFileProgressCallback function. user_data
+                will be passed to this function. It is guaranteed that this callback will be
+                called after all data has been transferred with the total number of bytes
+                copied during the operation. 
+            </para>
+            <para>
+                If the source file does not exist then the gio.ERROR_NOT_FOUND error is returned,
+                independent on the status of the destination. 
+            </para>
+            <para>
+                If gio.FILE_COPY_OVERWRITE is not specified and the target exists,
+                then the error gio.ERROR_EXISTS is returned. 
+            </para>
+            <para>
+                If trying to overwrite a file over a directory the gio.ERROR_IS_DIRECTORY error
+                is returned. If trying to overwrite a directory with a directory the
+                gio.ERROR_WOULD_MERGE error is returned. 
+            </para>
+            <para>
+                If the source is a directory and the target does not exist, or gio.FILE_COPY_OVERWRITE
+                is specified and the target is a file, then the gio.ERROR_WOULD_RECURSE error is returned. 
+            </para>
+            <para>
+                If you are interested in copying the
+                <link linkend="class-giofile"><classname>gio.File</classname></link> object
+                itself (not the on-disk file), see
+                <methodname><link linkend="method-giofile--dup">gio.File.dup</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--copy-async">
+            <title>gio.File.copy_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>append_to_async</methodname>
+                <methodparam><parameter role="keyword">destination</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">progress_callback</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">progress_callback_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>destination</parameter>&nbsp;:</term>
+                    <listitem><simpara>destination <link linkend="class-giofile"><classname>gio.File</classname></link>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>progress_callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>function to callback with progress information.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>progress_callback_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to the progress callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>copy_async</methodname>() method copies the file source to
+                the location specified by destination asynchronously. For details of the behaviour,
+                see <methodname><link linkend="method-giofile--copy">gio.File.copy</link></methodname>(). 
+            </para>
+            <para>
+                If progress_callback is not <literal>None</literal>, then that function that will
+                be called just like in
+                <methodname><link linkend="method-giofile--copy">gio.File.copy</link></methodname>(),
+                however the callback will run in the main loop, not in the thread that is doing the I/O operation. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--copy-finish">gio.File.copy_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--copy-attributes">
+            <title>gio.File.copy_attributes</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>copy_attributes</methodname>
+                <methodparam><parameter role="keyword">destination</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_COPY_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>destination</parameter>&nbsp;:</term>
+                    <listitem><simpara>destination <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    to copy attributes to.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attributes were copied successfully,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>copy_attributes</methodname>() method copies the file attributes
+                from source to destination. 
+            </para>
+            <para>
+                Normally only a subset of the file attributes are copied, those that are copies
+                in a normal file copy operation (which for instance does not include e.g. owner).
+                However if gio.FILE_COPY_ALL_METADATA is specified in flags, then all the metadata
+                that is possible to copy is copied. This is useful when implementing move by copy + delete source.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--copy-finish">
+            <title>gio.Volume.copy_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>copy_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> on success,
+                    <literal>False</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>copy_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--copy-async">gio.File.copy_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--create">
+            <title>gio.File.create</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>create</methodname>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a
+                    <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>create</methodname>() method creates a new file and returns
+                an output stream for writing to it. The file must not already exist. 
+            </para>
+            <para>
+                By default files created are generally readable by everyone, but if you pass
+                gio.FILE_CREATE_PRIVATE in flags the file will be made readable only to the
+                current user, to the level that is supported on the target filesystem. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be
+                cancelled by triggering the cancellable object from another thread. If the
+                operation was cancelled, the error gio.ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                If a file or directory with this name already exists the gio.ERROR_EXISTS
+                error will be returned. Some file systems don't allow all file names, and
+                may return an gio.ERROR_INVALID_FILENAME error, and if the name is to long
+                gio.ERROR_FILENAME_TOO_LONG will be returned. Other errors are possible too,
+                and depend on what kind of filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--create-async">
+            <title>gio.File.create_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>create_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>create_async</methodname>() method asynchronously creates a new
+                file and returns an output stream for writing to it. The file must not already exist. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--create">gio.File.create</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--create-finish">gio.File.create_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--create-finish">
+            <title>gio.Volume.create_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>create_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a
+                    <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>create_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--create-async">gio.File.create_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--delete">
+            <title>gio.Volume.delete</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>delete</methodname>
+                <methodparam><parameter role="keyword">cancellable</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the file was deleted,
+                    <literal>False</literal> otherwise.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>deleted</methodname>() method deletes a file. If the file is a
+                directory, it will only be deleted if it is empty. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was
+                cancelled, the error gio.ERROR_CANCELLED will be returned.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--dup">
+            <title>gio.Volume.dup</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>dup</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a new <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    that is a duplicate of the given <link linkend="class-giofile"><classname>gio.File</classname></link>.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>dup</methodname>() method duplicates a
+                <link linkend="class-giofile"><classname>gio.File</classname></link>
+                handle. This operation does not duplicate the actual file or directory represented
+                by the <link linkend="class-giofile"><classname>gio.File</classname></link>; see
+                <methodname><link linkend="method-giofile--copy">gio.File.copy</link></methodname>()
+                if attempting to copy a file. 
+            </para>
+            <para>
+                This call does no blocking i/o.
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>

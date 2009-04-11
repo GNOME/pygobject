@@ -17,6 +17,10 @@
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
 <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
 <xref linkend="gio-file-attribute-flags-constants" endterm="gio-file-attribute-flags-constants-title"></xref>
+<xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+<xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>
+<xref linkend="gio-file-monitor-flags-constants" endterm="gio-file-monitor-flags-constants-title"></xref>
+<xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
 <xref linkend="gio-mount-mount-flags-constants" endterm="gio-mount-mount-flags-constants-title"></xref>
 <xref linkend="gio-mount-unmount-flags-constants" endterm="gio-mount-unmount-flags-constants-title"></xref>
 </programlisting>
@@ -386,6 +390,144 @@
 	  <term><literal>gio.FILE_ATTRIBUTE_INFO_COPY_WHEN_MOVED</literal></term>
 	  <listitem>
 	    <simpara>copy the attribute values when the file is moved.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-create-flags-constants">
+      <title id="gio-file-create-flags-constants-title">Gio File Create Flags Constants</title>
+
+      <para>
+	  Flags used when an operation may create a file.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_CREATE_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_CREATE_PRIVATE</literal></term>
+	  <listitem>
+	    <simpara>Create a file that can only be accessed by the current user.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_CREATE_REPLACE_DESTINATION</literal></term>
+	  <listitem>
+	    <simpara>
+		Replace the destination as if it didn't exist before. Don't try
+		to keep any old permissions, replace instead of following links. This is
+		generally useful if you're doing a "copy over" rather than a "save new version of"
+		replace operation. You can think of it as "unlink destination" before writing
+		to it, although the implementation may not be exactly like that.
+	    </simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-copy-flags-constants">
+      <title id="gio-file-copy-flags-constants-title">Gio File Copy Flags Constants</title>
+
+      <para>
+	  Flags used when copying or moving files.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_OVERWRITE</literal></term>
+	  <listitem>
+	    <simpara>Overwrite any existing files.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_BACKUP</literal></term>
+	  <listitem>
+	    <simpara>Make a backup of any existing files.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_NOFOLLOW_SYMLINKS</literal></term>
+	  <listitem>
+	    <simpara>Don't follow symlinks.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_ALL_METADATA</literal></term>
+	  <listitem>
+	    <simpara>Copy all file metadata instead of just default set used for copy
+	    (see <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>).</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_NO_FALLBACK_FOR_MOVE</literal></term>
+	  <listitem>
+	    <simpara>Don't use copy and delete fallback if native move not supported.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_COPY_TARGET_DEFAULT_PERMS</literal></term>
+	  <listitem>
+	    <simpara>Leaves target file with default perms, instead of setting the source file perms.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-monitor-flags-constants">
+      <title id="gio-file-monitor-flags-constants-title">Gio File Copy Monitor Constants</title>
+
+      <para>
+            Flags used to set what a
+            <link linkend="class-giofilemonitor"><classname>gio.FileMonitor</classname></link>
+            will watch for.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_MONITOR_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_MONITOR_WATCH_MOUNTS</literal></term>
+	  <listitem>
+	    <simpara>Watch for mount events.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-query-info-flags-constants">
+      <title id="gio-file-query-info-flags-constants-title">Gio File Create Flags Constants</title>
+
+      <para>
+	  Flags used when querying a
+	  <link linkend="class-giofile"><classname>gio.FileInfo</classname></link>.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_QUERY_INFO_NONE</literal></term>
+	  <listitem>
+	    <simpara>No flags set.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS</literal></term>
+	  <listitem>
+	    <simpara>Don't follow symlinks.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
