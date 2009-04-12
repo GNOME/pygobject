@@ -1,3 +1,8 @@
+2009-04-12  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gio.defs: (g_file_monitor) should accept None
+	for cancellable and set the default flag to G_FILE_MONITOR_NONE.
+
 2009-04-09  Jonathan Matthew  <jonathan@d14n.org>
 
 	Bug 575781 – pyg_notify_free needs to ensure it has GIL before calling

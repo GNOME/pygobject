@@ -2542,8 +2542,8 @@
   (c-name "g_file_monitor")
   (return-type "GFileMonitor*")
   (parameters
-    '("GFileMonitorFlags" "flags")
-    '("GCancellable*" "cancellable")
+    '("GFileMonitorFlags" "flags" (default "G_FILE_MONITOR_NONE"))
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
