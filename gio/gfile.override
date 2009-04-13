@@ -601,10 +601,12 @@ _wrap_g_file_copy_async(PyGObject *self,
   int io_priority = G_PRIORITY_DEFAULT;
   PyGObject *pycancellable = NULL;
   GCancellable *cancellable;
-  GFileProgressCallback callback = NULL;
+  GFileProgressCallback progress_callback = NULL;
 
+  /* After the creation, referencing/freeing will automatically be
+   * done on the master and the slave. */
   notify = pygio_notify_new();
-  progress_notify = pygio_notify_new();
+  progress_notify = pygio_notify_new_slave(notify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
                                    "O!O|OiOOOO:File.copy_async",
@@ -627,7 +629,7 @@ _wrap_g_file_copy_async(PyGObject *self,
       goto error;
 
   if (pygio_notify_using_optional_callback(progress_notify)) {
-      callback = (GFileProgressCallback)file_progress_callback_marshal;
+      progress_callback = (GFileProgressCallback) file_progress_callback_marshal;
       if (!pygio_notify_callback_is_valid_full(progress_notify, "progress_callback"))
           goto error;
   }
@@ -636,15 +638,13 @@ _wrap_g_file_copy_async(PyGObject *self,
       goto error;
 
   pygio_notify_reference_callback(notify);
-  pygio_notify_reference_callback(progress_notify);
 
-  /* FIXME: 'progress_notify' is not properly freed up as far as I see. */
   g_file_copy_async(G_FILE(self->obj),
                     G_FILE(destination->obj),
                     flags,
                     io_priority,
                     cancellable,
-                    callback,
+                    progress_callback,
                     progress_notify,
                     (GAsyncReadyCallback)async_result_callback_marshal,
                     notify);
@@ -654,7 +654,6 @@ _wrap_g_file_copy_async(PyGObject *self,
 
  error:
   pygio_notify_free(notify);
-  pygio_notify_free(progress_notify);
   return NULL;
 }
 %%

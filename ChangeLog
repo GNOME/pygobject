@@ -1,3 +1,16 @@
+2009-04-13  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 578870 – memory leak in gio.File.copy_async
+
+	* gio/gio.override (PyGIONotify): Add 'slaves' field.
+	(pygio_notify_new_slave): New function.
+	(pygio_notify_reference_callback): Recurse for slaves, if any.
+	(pygio_notify_free): Likewise.
+
+	* gio/gfile.override (file_progress_callback_marshal): Use new
+	chaining functionality to avoid leaking the second PyGIONotify
+	structure.  Rename 'callback' as 'progress_callback' for clarity.
+
 2009-04-12  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gio.defs: (g_file_monitor) should accept None

@@ -33,14 +33,20 @@ headers
 
 #define BUFSIZE 8192
 
-typedef struct {
+typedef struct _PyGIONotify PyGIONotify;
+
+struct _PyGIONotify {
     gboolean  referenced;
     PyObject *callback;
     PyObject *data;
     gboolean  attach_self;
     gpointer  buffer;
     gsize     buffer_size;
-} PyGIONotify;
+
+    /* If a structure has any 'slaves', those will reference their
+     * callbacks and be freed together with the 'master'. */
+    PyGIONotify *slaves;
+};
 
 static GQuark
 pygio_notify_get_internal_quark(void)
@@ -55,6 +61,18 @@ static PyGIONotify *
 pygio_notify_new(void)
 {
     return g_slice_new0(PyGIONotify);
+}
+
+static PyGIONotify *
+pygio_notify_new_slave(PyGIONotify* master)
+{
+    PyGIONotify *slave = pygio_notify_new();
+
+    while (master->slaves)
+        master = master->slaves;
+    master->slaves = slave;
+
+    return slave;
 }
 
 static gboolean
@@ -100,6 +118,9 @@ pygio_notify_reference_callback(PyGIONotify *notify)
         notify->referenced = TRUE;
         Py_XINCREF(notify->callback);
         Py_XINCREF(notify->data);
+
+        if (notify->slaves)
+            pygio_notify_reference_callback(notify->slaves);
     }
 }
 
@@ -144,6 +165,9 @@ static void
 pygio_notify_free(PyGIONotify *notify)
 {
     if (notify) {
+        if (notify->slaves)
+            pygio_notify_free(notify->slaves);
+
         if (notify->referenced) {
             PyGILState_STATE state;
 
