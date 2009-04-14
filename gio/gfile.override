@@ -589,10 +589,9 @@ _wrap_g_file_copy_async(PyGObject *self,
 			PyObject *args,
 			PyObject *kwargs)
 {
-  /* FIXME: Double-check argument order. */
-  static char *kwlist[] = { "destination", "callback", "flags", "io_priority",
-			    "user_data", "cancellable", "progress_callback", 
-                            "progress_callback_data", NULL };
+  static char *kwlist[] = { "destination", "callback", "progress_callback",
+                            "flags", "io_priority", "cancellable",
+                            "user_data", "progress_callback_data", NULL };
   PyGIONotify *notify, *progress_notify;
   PyObject *py_flags = NULL;
   PyGObject *destination = NULL;
@@ -609,16 +608,16 @@ _wrap_g_file_copy_async(PyGObject *self,
   progress_notify = pygio_notify_new_slave(notify);
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                   "O!O|OiOOOO:File.copy_async",
+                                   "O!O|OOiOOO:File.copy_async",
                                    kwlist,
-				   &PyGFile_Type,
-				   &destination,
+                                   &PyGFile_Type,
+                                   &destination,
                                    &notify->callback,
-				   &py_flags,
-                                   &io_priority,
-                                   &notify->data,
-                                   &pycancellable,
                                    &progress_notify->callback,
+                                   &py_flags,
+                                   &io_priority,
+                                   &pycancellable,
+                                   &notify->data,
                                    &progress_notify->data))
       goto error;
 

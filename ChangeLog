@@ -1,3 +1,8 @@
+2009-04-14  Gian Mario Tagliaretti  <gianmt@gnome.org>
+
+	* gio/gfile.override: (_wrap_g_file_copy_async) change argument order
+	to keep it consistent with the other methods.
+
 2009-04-13  Paul Pogonyshev  <pogonyshev@gmx.net>
 
 	Bug 578870 – memory leak in gio.File.copy_async
