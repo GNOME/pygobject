@@ -16,7 +16,6 @@ codegendir=${datadir}/pygobject/2.0/codegen
 
 Name: PyGObject
 Description: Python bindings for GObject
-Requires: gobject-2.0
+Requires: gobject-2.0 @LIBFFI_PC@
 Version: @VERSION@
-Libs: -L${libdir} @FFI_LIBS@
 Cflags: -I${pygtkincludedir}

@@ -169,11 +169,13 @@ if test x"$with_libffi" = xyes && test x"$have_libffi" = xno ; then
 fi
 if test x"$have_libffi" = xyes; then
   AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
+  LIBFFI_PC=libffi
 fi
 AC_MSG_RESULT([$have_libffi])
 AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
+AC_SUBST(LIBFFI_PC)
 
 dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,

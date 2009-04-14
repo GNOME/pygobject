@@ -1,8 +1,7 @@
 Name: PyGObject
 Description: Python bindings for GObject
-Requires: gobject-2.0
+Requires: gobject-2.0 @LIBFFI_PC@
 Version: @VERSION@
-Libs: @FFI_LIBS@
 Cflags: -I${pc_top_builddir}/${pcfiledir}/gobject
 
 # you can use the --variable=pygtkincludedir argument to
