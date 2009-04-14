@@ -1,3 +1,10 @@
+2009-04-15  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 555613 – gio.VolumeMonitor segfaults
+
+	* gio/gvolumemonitor.override (_wrap_g_volume_monitor_tp_new): New
+	function, return the singleton object.
+
 2009-04-14  James Westby  <jw+debian@jameswestby.net>
 
 	Bug 573753 – DeprecationWarning under python 2.6
