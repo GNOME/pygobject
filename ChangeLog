@@ -1,3 +1,11 @@
+2009-04-14  Krzesimir Nowak  <krnowak@svn.gnome.org>
+
+	Bug 576566 – several scripts from codegen directory are not
+	distributed
+
+	* codegen/Makefile.am (codegen_PYTHON): List several missing
+	scripts.
+
 2009-04-14  Gian Mario Tagliaretti  <gianmt@gnome.org>
 
 	* gio/gfile.override: (_wrap_g_file_copy_async) change argument order
