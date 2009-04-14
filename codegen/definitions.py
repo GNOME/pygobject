@@ -39,7 +39,7 @@ class ReturnType(str):
     def __new__(cls, *args, **kwds):
         return str.__new__(cls, *args[:1])
     def __init__(self, type_name, optional=False):
-        str.__init__(self, type_name)
+        str.__init__(self)
         self.optional = optional
 
 # Parameter for property based constructors

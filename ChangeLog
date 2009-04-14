@@ -1,3 +1,10 @@
+2009-04-14  James Westby  <jw+debian@jameswestby.net>
+
+	Bug 573753 – DeprecationWarning under python 2.6
+
+	* codegen/definitions.py (ReturnType.__init__): Don't pass
+	'type_name' argument to super __init__.
+
 2009-04-14  Krzesimir Nowak  <krnowak@svn.gnome.org>
 
 	Bug 576566 – several scripts from codegen directory are not
