@@ -1,0 +1,24 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">PyGObject</name>
+  <shortdesc xml:lang="en">Python bindings GLib, GObject and GIO</shortdesc>
+  <homepage rdf:resource="http://www.pygtk.org" />
+  <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Johan Dahlin</foaf:name>
+      <gnome:userid>johan</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Gustavo J Carneiro</foaf:name>
+      <gnome:userid>gjc</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+</Project>
