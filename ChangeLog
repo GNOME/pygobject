@@ -1,3 +1,10 @@
+2009-04-17  Paul Pogonyshev  <pogonyshev@gmx.net>
+
+	Bug 568499 – CellRendererPixbuf stock-size property has wrong type
+
+	* gobject/pygtype.c (pyg_enum_get_value): Also accept long
+	integers.
+
 2009-04-15  Götz Waschk  <waschk@mandriva.org>
 
 	Bug 550231 – missing dep on libffi in pygobject-2.0.pc
