@@ -15,12 +15,14 @@
 <xref linkend="gio-app-info-constants" endterm="gio-app-info-constants-title"></xref>
 <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
+<xref linkend="gio-file-attribute-constants" endterm="gio-file-attribute-constants-title"></xref>
 <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
 <xref linkend="gio-file-attribute-flags-constants" endterm="gio-file-attribute-flags-constants-title"></xref>
 <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
 <xref linkend="gio-file-copy-flags-constants" endterm="gio-file-copy-flags-constants-title"></xref>
 <xref linkend="gio-file-monitor-flags-constants" endterm="gio-file-monitor-flags-constants-title"></xref>
 <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+<xref linkend="gio-file-type-constants" endterm="gio-file-type-constants-title"></xref>
 <xref linkend="gio-mount-mount-flags-constants" endterm="gio-mount-mount-flags-constants-title"></xref>
 <xref linkend="gio-mount-unmount-flags-constants" endterm="gio-mount-unmount-flags-constants-title"></xref>
 </programlisting>
@@ -301,6 +303,489 @@
       </variablelist>
     </refsect2>
 
+    <refsect2 id="gio-file-attribute-constants">
+      <title id="gio-file-attribute-constants-title">Gio File Attribute Constants</title>
+
+      <para>
+	  The file attributes.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_TYPE</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::type" A key in the "standard" namespace for storing file types. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32. The value for this key should contain a
+                <xref linkend="gio-file-type-constants" endterm="gio-file-type-constants-title"></xref>
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_IS_HIDDEN</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::is-hidden" A key in the "standard" namespace for checking if a file is hidden. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_IS_BACKUP</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::is-backup" A key in the "standard" namespace for checking if a file is a backup file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_IS_SYMLINK</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::is-symlink" A key in the "standard" namespace for checking if the file is a symlink.
+                Typically the actual type is something else, if we followed the symlink to get the type. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_IS_VIRTUAL</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::is-virtual" A key in the "standard" namespace for checking if a file is virtual. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_NAME</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::name" A key in the "standard" namespace for getting the name of the file.
+                The name is the on-disk filename which may not be in any known encoding,
+                and can thus not be generally displayed as is. Use
+                gio.FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME if you need to display the name in a user
+                interface. Corresponding GFileAttributeType is gio.FILE_ATTRIBUTE_TYPE_BYTE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::display-name" A key in the "standard" namespace for getting the display
+                name of the file. A display name is guaranteed to be in UTF8 and can thus be displayed
+                in the UI. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_EDIT_NAME</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::edit-name" A key in the "standard" namespace for edit name of the file.
+                An edit name is similar to the display name, but it is meant to be used when you want
+                to rename the file in the UI. The display name might contain information you don't
+                want in the new filename (such as "(invalid unicode)" if the filename was in an
+                invalid encoding). Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_COPY_NAME</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::copy-name" A key in the "standard" namespace for getting the copy
+                name of the file. The copy name is an optional version of the name. If available
+                it's always in UTF8, and corresponds directly to the original filename (only transcoded
+                to UTF8). This is useful if you want to copy the file to another filesystem that might
+                have a different encoding. If the filename is not a valid string in the encoding selected
+                for the filesystem it is in then the copy name will not be set. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_ICON</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::icon" A key in the "standard" namespace for getting the icon for the file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_OBJECT. The value for this key should contain a
+                <link linkend="class-gioicon"><classname>gio.Icon</classname></link>.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::content-type" A key in the "standard" namespace for getting the content type of the file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING. The value for this key should contain a valid content type.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::fast-content-type" A key in the "standard" namespace for getting the fast
+                content type. The fast content type isn't as reliable as the regular one, as it
+                only uses the filename to guess it, but it is faster to calculate than the regular
+                content type. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_SIZE</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::size" A key in the "standard" namespace for getting the file's size (in bytes). Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT64.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::symlink-target" A key in the "standard" namespace for getting the target URI
+                for the file, in the case of gio.FILE_TYPE_SHORTCUT or gio.FILE_TYPE_MOUNTABLE files. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_SORT_ORDER</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::sort-order" A key in the "standard" namespace for setting the sort order of a file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_INT32. An example use would be in file managers, which would use this
+                key to set the order files are displayed. Files with smaller sort order should be sorted first,
+                and files without sort order as if sort order was zero.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ETAG_VALUE</literal></term>
+	  <listitem>
+	    <simpara>
+                "etag::value" A key in the "etag" namespace for getting the value of the file's entity tag. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ID_FILE</literal></term>
+	  <listitem>
+	    <simpara>
+                "id::file" A key in the "id" namespace for getting a file identifier. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING. An example use would be during listing files,
+                to avoid recursive directory scanning.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ID_FILESYSTEM</literal></term>
+	  <listitem>
+	    <simpara>
+                "id::filesystem" A key in the "id" namespace for getting the file system identifier. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING. An example use would be during drag and
+                drop to see if the source and target are on the same filesystem (default to move) or not (default to copy).
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_READ</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-read" A key in the "access" namespace for getting read privileges. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to read the file.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_WRITE</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-write" A key in the "access" namespace for getting write privileges.Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to write to the file.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-execute" A key in the "access" namespace for getting execution privileges. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to execute the file.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_DELETE</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-delete" A key in the "access" namespace for checking deletion privileges. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to delete the file.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_TRASH</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-trash" A key in the "access" namespace for checking trashing privileges. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to move the file to the trash.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_ACCESS_CAN_RENAME</literal></term>
+	  <listitem>
+	    <simpara>
+                "access::can-rename" A key in the "access" namespace for checking renaming privileges. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_BOOLEAN. This attribute will be <literal>True</literal>
+                if the user is able to rename the file.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_MOUNTABLE_CAN_MOUNT</literal></term>
+	  <listitem>
+	    <simpara>
+                "mountable::can-mount" A key in the "mountable" namespace for checking if
+                a file (of type G_FILE_TYPE_MOUNTABLE) is mountable. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_MOUNTABLE_CAN_UNMOUNT</literal></term>
+	  <listitem>
+	    <simpara>
+                "mountable::can-unmount" A key in the "mountable" namespace for checking if a file
+                (of type G_FILE_TYPE_MOUNTABLE) is unmountable. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_MOUNTABLE_CAN_EJECT</literal></term>
+	  <listitem>
+	    <simpara>
+                "mountable::can-eject" A key in the "mountable" namespace for checking if a file
+                (of type G_FILE_TYPE_MOUNTABLE) can be ejected. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_MOUNTABLE_UNIX_DEVICE</literal></term>
+	  <listitem>
+	    <simpara>
+                "mountable::unix-device" A key in the "mountable" namespace for getting the unix device. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_MOUNTABLE_HAL_UDI</literal></term>
+	  <listitem>
+	    <simpara>
+                "mountable::hal-udi" A key in the "mountable" namespace for getting the
+                HAL UDI for the mountable file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_MODIFIED</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::modified" A key in the "time" namespace for getting the time the file was last modified. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT64, and contains the UNIX time since the file was modified.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_MODIFIED_USEC</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::modified-usec" A key in the "time" namespace for getting the miliseconds
+                of the time the file was last modified. This should be used in conjunction
+                with G_FILE_ATTRIBUTE_TIME_MODIFIED. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_ACCESS</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::access" A key in the "time" namespace for getting the time the file was last accessed. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT64, and contains the UNIX time since the file was last accessed.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_ACCESS_USEC</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::access-usec" A key in the "time" namespace for getting the microseconds of
+                the time the file was last accessed. This should be used in conjunction
+                with G_FILE_ATTRIBUTE_TIME_ACCESS. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_CHANGED</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::changed" A key in the "time" namespace for getting the time the
+                file was last changed. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT64, and contains the UNIX time since the file was last changed.
+                This corresponds to the traditional UNIX ctime.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_CHANGED_USEC</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::changed-usec" A key in the "time" namespace for getting the microseconds
+                of the time the file was last changed. This should be used in conjunction
+                with G_FILE_ATTRIBUTE_TIME_CHANGED. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_CREATED</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::created" A key in the "time" namespace for getting the time the file was created. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT64, and contains the UNIX time since the file was created.
+                This corresponds to the NTFS ctime.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TIME_CREATED_USEC</literal></term>
+	  <listitem>
+	    <simpara>
+                "time::created-usec" A key in the "time" namespace for getting the microseconds of the time the
+                file was created. This should be used in conjunction with G_FILE_ATTRIBUTE_TIME_CREATED. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_DEVICE</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::device" A key in the "unix" namespace for getting the device id of the device the file
+                is located on (see stat() documentation). This attribute is only available
+                for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_INODE</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::inode" A key in the "unix" namespace for getting the inode of the file. This attribute is only
+                available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT64.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_MODE</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::mode" A key in the "unix" namespace for getting the mode of the file (e.g.
+                whether the file is a regular file, symlink, etc). See lstat() documentation.
+                This attribute is only available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_NLINK</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::nlink" A key in the "unix" namespace for getting the number of hard links
+                for a file. See lstat() documentation. This attribute is only available for UNIX
+                file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_UID</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::uid" A key in the "unix" namespace for getting the user ID for the file. This attribute
+                is only available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
     <refsect2 id="gio-file-attribute-type-constants">
       <title id="gio-file-attribute-type-constants-title">Gio File Attribute Type Constants</title>
 
@@ -485,7 +970,7 @@
     </refsect2>
 
     <refsect2 id="gio-file-monitor-flags-constants">
-      <title id="gio-file-monitor-flags-constants-title">Gio File Copy Monitor Constants</title>
+      <title id="gio-file-monitor-flags-constants-title">Gio File Monitor Flags Constants</title>
 
       <para>
             Flags used to set what a
@@ -510,7 +995,7 @@
     </refsect2>
 
     <refsect2 id="gio-file-query-info-flags-constants">
-      <title id="gio-file-query-info-flags-constants-title">Gio File Create Flags Constants</title>
+      <title id="gio-file-query-info-flags-constants-title">Gio File Query Info Flags Constants</title>
 
       <para>
 	  Flags used when querying a
@@ -528,6 +1013,59 @@
 	  <term><literal>gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS</literal></term>
 	  <listitem>
 	    <simpara>Don't follow symlinks.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-file-type-constants">
+      <title id="gio-file-type-constants-title">Gio File Type Constants</title>
+
+      <para>
+	  Indicates the file's on-disk type.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_DIRECTORY</literal></term>
+	  <listitem>
+	    <simpara>File handle represents a directory.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_MOUNTABLE</literal></term>
+	  <listitem>
+	    <simpara>File is a mountable location.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_REGULAR</literal></term>
+	  <listitem>
+	    <simpara>File handle represents a regular file.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_SHORTCUT</literal></term>
+	  <listitem>
+	    <simpara>File is a shortcut (Windows systems).</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_SPECIAL</literal></term>
+	  <listitem>
+	    <simpara>File is a "special" file, such as a socket, fifo, block device, or character device.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_SYMBOLIC_LINK</literal></term>
+	  <listitem>
+	    <simpara>File handle represents a symbolic link (Unix systems).</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_TYPE_UNKNOWN</literal></term>
+	  <listitem>
+	    <simpara>File's type is unknown.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
