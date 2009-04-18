@@ -1,0 +1,7 @@
+# Configuration-generated files.
+fixxref.py
+reference/entities.docbook
+
+# Documentation build output.
+html
+reference/builddate.xml
