@@ -56,3 +56,10 @@ check-local: $(top_srcdir)/glib/__init__.py $(top_srcdir)/gobject/__init__.py $(
 	@rm -fr $(top_builddir)/glib/*.pyc
 	@rm -fr $(top_builddir)/gobject/*.pyc
 	@rm -fr $(top_builddir)/gio/*.pyc
+
+
+all: $(LTLIBRARIES:.la=.so)
+clean-local:
+	rm -f $(LTLIBRARIES:.la=.so)
+.la.so:
+	$(LN_S) .libs/$@ $@

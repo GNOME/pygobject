@@ -5,13 +5,11 @@ def importModules(buildDir, srcDir):
     # Be very careful when you change this code, it's
     # fragile and the order is really significant
 
-    # ltihooks
     sys.path.insert(0, srcDir)
     sys.path.insert(0, buildDir)
     sys.path.insert(0, os.path.join(buildDir, 'glib'))
     sys.path.insert(0, os.path.join(buildDir, 'gobject'))
     sys.path.insert(0, os.path.join(buildDir, 'gio'))
-    import ltihooks
 
     # testhelper
     sys.path.insert(0, os.path.join(buildDir, 'tests'))
@@ -21,9 +19,6 @@ def importModules(buildDir, srcDir):
     glib = importModule('glib', buildDir, 'glib')
     gobject = importModule('gobject', buildDir, 'gobject')
     gio = importModule('gio', buildDir, 'gio')
-
-    ltihooks.uninstall()
-    del ltihooks
 
     globals().update(locals())
 

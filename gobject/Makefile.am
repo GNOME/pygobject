@@ -71,3 +71,10 @@ endif
 if PLATFORM_WIN32
 _gobject_la_CFLAGS += -DPLATFORM_WIN32
 endif
+
+
+all: $(pygobject_LTLIBRARIES:.la=.so)
+clean-local:
+	rm -f $(pygobject_LTLIBRARIES:.la=.so)
+.la.so:
+	$(LN_S) .libs/$@ $@

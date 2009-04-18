@@ -21,13 +21,6 @@
 
 # this can go when things are a little further along
 
-try:
-    import ltihooks
-    ltihooks # pyflakes
-    del ltihooks
-except ImportError:
-    pass
-
 import sys
 
 from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \

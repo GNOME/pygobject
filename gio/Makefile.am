@@ -93,3 +93,12 @@ endif
 	    --prefix py$(*F) $*.defs) > $(*D)/gen-$(*F).c \
 	&& cp $(*D)/gen-$(*F).c $(*D)/$(*F).c \
 	&& rm -f $(*D)/gen-$(*F).c
+
+
+if BUILD_GIO
+all: $(pkgpyexec_LTLIBRARIES:.la=.so)
+clean-local:
+	rm -f $(pkgpyexec_LTLIBRARIES:.la=.so)
+.la.so:
+	$(LN_S) .libs/$@ $@
+endif

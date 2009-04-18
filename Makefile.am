@@ -33,7 +33,6 @@ pkgpyexec_LTLIBRARIES =
 # python
 pyexec_PYTHON = pygtk.py
 pyexec_LTLIBRARIES =
-noinst_PYTHON = ltihooks.py
 
 # linker flags
 common_ldflags = -module -avoid-version

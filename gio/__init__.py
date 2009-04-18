@@ -19,14 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 # USA
 
-# this can go when things are a little further along
-try:
-    import ltihooks
-    ltihooks # pyflakes
-    del ltihooks
-except ImportError:
-    pass
-
 from gobject import GObjectMeta
 from _gio import *
 from _gio import \
