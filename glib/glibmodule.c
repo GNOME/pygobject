@@ -406,6 +406,66 @@ pyglib_get_current_time(PyObject *unused)
     return pyglib_float_from_timeval(timeval);
 }
 
+static PyObject*
+pyglib_get_user_cache_dir(PyObject *self)
+{
+    const char *path = g_get_user_cache_dir();
+
+    if (path)
+        return _PyUnicode_FromString(path);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+static PyObject*
+pyglib_get_user_config_dir(PyObject *self)
+{
+    const char *path = g_get_user_config_dir();
+
+    if (path)
+        return _PyUnicode_FromString(path);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+static PyObject*
+pyglib_get_user_data_dir(PyObject *self)
+{
+    const char *path = g_get_user_data_dir();
+
+    if (path)
+        return _PyUnicode_FromString(path);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+static PyObject *
+pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "directory", NULL };
+    guint directory;
+    const char *path;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "i:glib.get_user_special_dir", kwlist,
+                                     &directory))
+        return NULL;
+
+    path = g_get_user_special_dir(directory);
+    if (path)
+        return _PyUnicode_FromString(path);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
 static PyObject *
 pyglib_main_depth(PyObject *unused)
 {
@@ -602,6 +662,14 @@ static PyMethodDef _glib_functions[] = {
       (PyCFunction)pyglib_set_prgname, METH_O },
     { "get_current_time",
       (PyCFunction)pyglib_get_current_time, METH_NOARGS },
+    { "get_user_cache_dir",
+      (PyCFunction)pyglib_get_user_cache_dir, METH_NOARGS },
+    { "get_user_config_dir",
+      (PyCFunction)pyglib_get_user_config_dir, METH_NOARGS },
+    { "get_user_data_dir",
+      (PyCFunction)pyglib_get_user_data_dir, METH_NOARGS },
+    { "get_user_special_dir",
+      (PyCFunction)pyglib_get_user_special_dir, METH_VARARGS },
     { "markup_escape_text",
       (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
@@ -749,6 +817,23 @@ pyglib_register_constants(PyObject *m)
 			    G_OPTION_ERROR_BAD_VALUE);
     PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
 			    G_OPTION_ERROR_FAILED);
+ 
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_DESKTOP",
+                            G_USER_DIRECTORY_DESKTOP);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_DOCUMENTS",
+                            G_USER_DIRECTORY_DOCUMENTS);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_DOWNLOAD",
+                            G_USER_DIRECTORY_DOWNLOAD);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_MUSIC",
+                            G_USER_DIRECTORY_MUSIC);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_PICTURES",
+                            G_USER_DIRECTORY_PICTURES);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_PUBLIC_SHARE",
+                            G_USER_DIRECTORY_PUBLIC_SHARE);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_TEMPLATES",
+                            G_USER_DIRECTORY_TEMPLATES);
+    PyModule_AddIntConstant(m, "USER_DIRECTORY_VIDEOS",
+                            G_USER_DIRECTORY_VIDEOS);
 
     PyModule_AddStringConstant(m, "OPTION_REMAINING",
 			       G_OPTION_REMAINING);

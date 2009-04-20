@@ -71,6 +71,19 @@ linkend="function-glib--spawn-async">glib.spawn_async</link></methodname>
 linkend="function-glib--get-current-time">glib.get_current_time</link></methodname>
       </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
+          linkend="function-glib--get-user-cache-dir">glib.get_user_cache_dir</link></methodname>
+      </methodsynopsis><methodsynopsis language="python">
+	<methodname><link
+          linkend="function-glib--get-user-config-dir">glib.get_user_config_dir</link></methodname>
+      </methodsynopsis><methodsynopsis language="python">
+	<methodname><link
+          linkend="function-glib--get-user-data-dir">glib.get_user_data_dir</link></methodname>
+      </methodsynopsis><methodsynopsis language="python">
+	<methodname><link
+          linkend="function-glib--get-user-special-dir">glib.get_user_special_dir</link></methodname>
+	<methodparam><parameter role="keyword">directory</parameter></methodparam>
+      </methodsynopsis><methodsynopsis language="python">
+	<methodname><link
 linkend="function-glib--main-depth">glib.main_depth</link></methodname>
       </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
@@ -715,6 +728,142 @@ microseconds from the epoch.</simpara></listitem>
 reurns the current time of day as the number of seconds and microseconds
 from the epoch.</para>
 
+    </refsect2>
+
+    <refsect2 id="function-glib--get-user-cache-dir">
+      <title>glib.get_user_cache_dir</title>
+      
+      <programlisting><methodsynopsis language="python">
+        <methodname>glib.get_user_cache_dir</methodname>
+      </methodsynopsis></programlisting>
+      <variablelist role="params">
+        <varlistentry>
+          <term><emphasis>Returns</emphasis>&nbsp;:</term>
+          <listitem>
+            <simpara>
+              a strings with a path to user's cache directory.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <note>
+        <para>This function is available in PyGObject 2.18 and above.</para>
+      </note>
+
+      <para>Returns a base directory in which to store non-essential,
+        cached data specific to particular user.</para>
+
+      <para>On UNIX platforms this is determined using the mechanisms
+        described in the
+        <ulink url="http://www.freedesktop.org/Standards/basedir-spec">XDG
+          Base Directory Specification</ulink>.</para>
+    </refsect2>
+
+    <refsect2 id="function-glib--get-user-config-dir">
+      <title>glib.get_user_config_dir</title>
+      
+      <programlisting><methodsynopsis language="python">
+        <methodname>glib.get_user_config_dir</methodname>
+      </methodsynopsis></programlisting>
+      <variablelist role="params">
+        <varlistentry>
+          <term><emphasis>Returns</emphasis>&nbsp;:</term>
+          <listitem>
+            <simpara>
+              a strings with a path to user's configuration directory.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <note>
+        <para>This function is available in PyGObject 2.18 and above.</para>
+      </note>
+
+      <para>Returns a base directory in which to store user-specific
+        application configuration information such as user preferences
+        and settings. </para>
+
+      <para>On UNIX platforms this is determined using the mechanisms
+        described in the
+        <ulink url="http://www.freedesktop.org/Standards/basedir-spec">XDG
+          Base Directory Specification</ulink>.</para>
+    </refsect2>
+
+    <refsect2 id="function-glib--get-user-data-dir">
+      <title>glib.get_user_data_dir</title>
+      
+      <programlisting><methodsynopsis language="python">
+        <methodname>glib.get_user_data_dir</methodname>
+      </methodsynopsis></programlisting>
+      <variablelist role="params">
+        <varlistentry>
+          <term><emphasis>Returns</emphasis>&nbsp;:</term>
+          <listitem>
+            <simpara>
+              a strings with a path to user's data directory.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <note>
+        <para>This function is available in PyGObject 2.18 and above.</para>
+      </note>
+
+      <para>Returns a base directory in which to access application
+        data such as icons that is customized for a particular
+        user</para>
+
+      <para>On UNIX platforms this is determined using the mechanisms
+        described in the
+        <ulink url="http://www.freedesktop.org/Standards/basedir-spec">XDG
+          Base Directory Specification</ulink>.</para>
+    </refsect2>
+
+    <refsect2 id="function-glib--get-user-special-dir">
+      <title>glib.get_user_special_dir</title>
+      
+      <programlisting><methodsynopsis language="python">
+        <methodname>glib.get_user_special_dir</methodname>
+        <methodparam><parameter>directory</parameter></methodparam>
+      </methodsynopsis></programlisting>
+      <variablelist role="params">
+        <varlistentry>
+          <term><emphasis>directory</emphasis>&nbsp;:</term>
+          <listitem>
+            <simpara>
+              the logical id of special directory,
+              see <link linkend="glib-user-directory-constants">User
+              Directory constants</link> for the list of supported
+              values
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis>Returns</emphasis>&nbsp;:</term>
+          <listitem>
+            <simpara>
+              a strings with a path to the requested directory.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <note>
+        <para>This function is available in PyGObject 2.18 and above.</para>
+      </note>
+
+      <para>Returns the full path of a special directory using its
+        logical id.</para>
+
+      <para>On Unix this is done using the XDG special user
+        directories.  For compatibility with existing practise,
+        <link linkend="glib-user-directory-constants">glib.USER_DIRECTORY_DESKTOP</link>
+        falls back to <literal>$HOME/Desktop</literal> when XDG
+        special user directories have not been set up.</para>
+
+      <para>Depending on the platform, the user might be able to
+        change the path of the special directory without requiring the
+        session to restart; GLib will not reflect any change once the
+        special directories are loaded.</para>
     </refsect2>
 
     <refsect2 id="function-glib--main-depth">

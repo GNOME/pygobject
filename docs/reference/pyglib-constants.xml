@@ -15,6 +15,7 @@
 <xref linkend="glib-io-condition-constants" endterm="glib-io-condition-constants-title"></xref>
 <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
 <xref linkend="glib-spawn-flag-constants" endterm="glib-spawn-flag-constants-title"></xref>
+<xref linkend="glib-user-directory-constants" endterm="glib-user-directory-constants-title"></xref>
 <xref linkend="glib-version-constants" endterm="glib-version-constants-title"></xref>
 </programlisting>
 
@@ -190,6 +191,65 @@ of <parameter>argv</parameter> to the child.</simpara>
 	</varlistentry>
       </variablelist>
 
+    </refsect2>
+
+    <refsect2 id="glib-user-directory-constants">
+      <title id="glib-user-directory-constants-title">Glib User Directory Constants</title>
+
+      <para>The User Directory constants are integer values that are currently used only as arguments to
+        <link linkend="function-glib--get-user-special-dir"><function>glib.get_user_special_dir</function>()</link>
+        function.  See function documentation for details.</para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_DESKTOP</literal></term>
+	  <listitem>
+	    <simpara>the user's Desktop directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_DOCUMENTS</literal></term>
+	  <listitem>
+	    <simpara>the user's Documents directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_DOWNLOAD</literal></term>
+	  <listitem>
+	    <simpara>the user's Downloads directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_MUSIC</literal></term>
+	  <listitem>
+	    <simpara>the user's Music directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_PICTURES</literal></term>
+	  <listitem>
+	    <simpara>the user's Pictures directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_PUBLIC_SHARE</literal></term>
+	  <listitem>
+	    <simpara>the user's shared directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_TEMPLATES</literal></term>
+	  <listitem>
+	    <simpara>the user's Templates directory</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>glib.USER_DIRECTORY_VIDEOS</literal></term>
+	  <listitem>
+	    <simpara>the user's Movies directory</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
     </refsect2>
 
     <refsect2 id="glib-version-constants">
