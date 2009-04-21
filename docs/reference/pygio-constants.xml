@@ -783,6 +783,258 @@
             </simpara>
 	  </listitem>
 	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_GID</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::gid" A key in the "unix" namespace for getting the group ID for the file.
+                This attribute is only available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_RDEV</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::rdev" A key in the "unix" namespace for getting the device ID for the file
+                (if it is a special file). See lstat() documentation. This attribute is only available
+                for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_BLOCK_SIZE</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::block-size" A key in the "unix" namespace for getting the block size for
+                the file system. This attribute is only available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is gio.FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_BLOCKS</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::blocks" A key in the "unix" namespace for getting the number of blocks allocated
+                for the file. This attribute is only available for UNIX file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT64.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT</literal></term>
+	  <listitem>
+	    <simpara>
+                "unix::is-mountpoint" A key in the "unix" namespace for checking if the file represents
+                a UNIX mount point. This attribute is <literal>True</literal> if the file is a UNIX mount point.
+                This attribute is only available for UNIX file systems. Corresponding
+                GFileAttributeType
+                is gio.FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_DOS_IS_ARCHIVE</literal></term>
+	  <listitem>
+	    <simpara>
+                "dos::is-archive" A key in the "dos" namespace for checking if the file's archive
+                flag is set. This attribute is <literal>True</literal> if the archive flag is set.
+                This attribute is only available for DOS file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_DOS_IS_SYSTEM</literal></term>
+	  <listitem>
+	    <simpara>
+                "dos::is-system" A key in the "dos" namespace for checking if the file's backup
+                flag is set. This attribute is <literal>True</literal> if the backup flag is set.
+                This attribute is only available for DOS file systems. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref> is
+                G_FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_OWNER_USER</literal></term>
+	  <listitem>
+	    <simpara>
+                "owner::user" A key in the "owner" namespace for getting the user name
+                of the file's owner. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_OWNER_USER_REAL</literal></term>
+	  <listitem>
+	    <simpara>
+                "owner::user-real" A key in the "owner" namespace for getting the real name
+                of the user that owns the file. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref> is
+                G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_OWNER_GROUP</literal></term>
+	  <listitem>
+	    <simpara>
+                "owner::group" A key in the "owner" namespace for getting the file owner's
+                group. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_THUMBNAIL_PATH</literal></term>
+	  <listitem>
+	    <simpara>
+                "thumbnail::path" A key in the "thumbnail" namespace for getting the path
+                to the thumbnail image. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_BYTE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_THUMBNAILING_FAILED</literal></term>
+	  <listitem>
+	    <simpara>
+                "thumbnail::failed" A key in the "thumbnail" namespace for checking if thumbnailing failed. This attribute
+                is <literal>True</literal> if thumbnailing failed. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref> is
+                G_FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_PREVIEW_ICON</literal></term>
+	  <listitem>
+	    <simpara>
+                "preview::icon" A key in the "preview" namespace for getting a
+                <link linkend="class-gioicon"><classname>gio.Icon</classname></link>
+                that can be used to get preview of the file. For example, it
+                may be a low resolution thumbnail without metadata. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref> is
+                G_FILE_ATTRIBUTE_TYPE_OBJECT. The value for this key should contain a GIcon.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_FILESYSTEM_SIZE</literal></term>
+	  <listitem>
+	    <simpara>
+                "filesystem::size" A key in the "filesystem" namespace for getting the total
+                size (in bytes) of the file system, used in
+                <methodname><link linkend="method-giofile--query-filesystem-info">query_filesystem_info</link></methodname>().
+                Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT64.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_FILESYSTEM_FREE</literal></term>
+	  <listitem>
+	    <simpara>
+                "filesystem::free" A key in the "filesystem" namespace for getting the number of bytes of free space left
+                on the file system. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT64.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_FILESYSTEM_TYPE</literal></term>
+	  <listitem>
+	    <simpara>
+                "filesystem::type" A key in the "filesystem" namespace for getting the file system's type. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_FILESYSTEM_READONLY</literal></term>
+	  <listitem>
+	    <simpara>
+                "filesystem::readonly" A key in the "filesystem" namespace for checking if the
+                file system is read only. Is set to <literal>True</literal> if the file system
+                is read only. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_BOOLEAN.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_GVFS_BACKEND</literal></term>
+	  <listitem>
+	    <simpara>
+                "gvfs::backend" A key in the "gvfs" namespace that gets the name of the current GVFS backend in use. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_SELINUX_CONTEXT</literal></term>
+	  <listitem>
+	    <simpara>
+                "selinux::context" A key in the "selinux" namespace for getting the file's SELinux context. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+                Note that this attribute is only available if GLib has been built with SELinux support.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_TRASH_ITEM_COUNT</literal></term>
+	  <listitem>
+	    <simpara>
+                "trash::item-count" A key in the "trash" namespace. When requested against "trash:///" returns the number
+                of (toplevel) items in the trash folder. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_UINT32.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_FILESYSTEM_USE_PREVIEW</literal></term>
+	  <listitem>
+	    <simpara>
+                "filesystem::use-preview" A key in the "filesystem" namespace for hinting a file manager
+                application whether it should preview (e.g. thumbnail) files on the file system.
+                The value for this key contain a GFilesystemPreviewType.
+            </simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.FILE_ATTRIBUTE_STANDARD_DESCRIPTION</literal></term>
+	  <listitem>
+	    <simpara>
+                "standard::description" A key in the "standard" namespace for getting the description
+                of the file. The description is a utf8 string that describes the file, generally containing
+                the filename, but can also contain furter information. Example descriptions could be
+                "filename (on hostname)" for a remote file or "filename (in trash)" for a
+                file in the trash. This is useful for instance as the window title when
+                displaying a directory or for a bookmarks menu. Corresponding
+                <xref linkend="gio-file-attribute-type-constants" endterm="gio-file-attribute-type-constants-title"></xref>
+                is G_FILE_ATTRIBUTE_TYPE_STRING.
+            </simpara>
+	  </listitem>
+	</varlistentry>
       </variablelist>
     </refsect2>
 
