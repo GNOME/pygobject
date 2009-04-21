@@ -422,8 +422,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     0
 };
 
-struct empty {} _empty;
-PYGLIB_DEFINE_TYPE("gobject.GPropsDescr", PyGPropsDescr_Type, _empty);
+PYGLIB_DEFINE_TYPE("gobject.GPropsDescr", PyGPropsDescr_Type, PyObject);
 
 static PyObject *
 pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
