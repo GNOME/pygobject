@@ -1079,16 +1079,20 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
 
     for (i = 0; i < PyTuple_GET_SIZE(bases); ++i) {
         guint k;
-        PyTypeObject *base = (PyTypeObject *) PyTuple_GET_ITEM(bases, i);
+        PyObject *base = PyTuple_GET_ITEM(bases, i);
         GType itype;
         gboolean is_new = TRUE;
         const GInterfaceInfo *iinfo;
         GInterfaceInfo iinfo_copy;
 
-        if (!PyType_IsSubtype(base, &PyGInterface_Type))
+        /* 'base' can also be a PyClassObject, see bug #566571. */
+        if (!PyType_Check(base))
             continue;
 
-        itype = pyg_type_from_object((PyObject *) base);
+        if (!PyType_IsSubtype((PyTypeObject*) base, &PyGInterface_Type))
+            continue;
+
+        itype = pyg_type_from_object(base);
 
         /* Happens for _implementations_ of an interface. */
         if (!G_TYPE_IS_INTERFACE(itype))
@@ -1109,7 +1113,7 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
             gchar *error;
             error = g_strdup_printf("Interface type %s "
                                     "has no Python implementation support",
-                                    base->tp_name);
+                                    ((PyTypeObject *) base)->tp_name);
             PyErr_Warn(PyExc_RuntimeWarning, error);
             g_free(error);
             continue;
