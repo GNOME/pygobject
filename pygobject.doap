@@ -8,6 +8,7 @@
   <shortdesc xml:lang="en">Python bindings GLib, GObject and GIO</shortdesc>
   <homepage rdf:resource="http://www.pygtk.org" />
   <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
+  <category rdf:resource="http://api.gnome.org/doap-extensions#bindings" />
 
   <maintainer>
     <foaf:Person>
