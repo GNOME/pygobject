@@ -19,7 +19,7 @@
 	<methodname><link linkend="constructor-gioappinfo">gio.AppInfo</link></methodname>
 	<methodparam><parameter role="keyword">commandline</parameter></methodparam>
         <methodparam><parameter role="keyword">application_name</parameter><initializer><literal>None</literal></initializer></methodparam>
-        <methodparam><parameter role="keyword">content_type</parameter><initializer>gio.APP_INFO_CREATE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.APP_INFO_CREATE_NONE</initializer></methodparam>
     </constructorsynopsis>
 
     <methodsynopsis language="python">
@@ -164,6 +164,48 @@
             is equal to the result of
             <methodname><link linkend="method-giofile--get-uri">gio.File.get_uri</link></methodname>().
         </para>
+    </refsect1>
+
+    <refsect1 id="constructor-gioappinfo">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.AppInfo</methodname>
+            <methodparam><parameter role="keyword">commandline</parameter></methodparam>
+            <methodparam><parameter role="keyword">application_name</parameter><initializer><literal>None</literal></initializer></methodparam>
+            <methodparam><parameter role="keyword">flags</parameter><initializer>gio.APP_INFO_CREATE_NONE</initializer></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>commandline</parameter>&nbsp;:</term>
+                <listitem><simpara>the commandline to use 
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><parameter>application_name</parameter>&nbsp;:</term>
+                <listitem><simpara>the application name, or <literal>None</literal> to use commandline.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><parameter>flags</parameter>&nbsp;:</term>
+                <listitem><simpara>flags that can specify details of the created,
+                from <xref linkend="gio-app-info-constants" endterm="gio-app-info-constants-title"></xref>
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>
+                for given command.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new <link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>
+            from the given information.
+        </para>
+  
     </refsect1>
 
     <refsect1>
