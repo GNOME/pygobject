@@ -604,6 +604,46 @@
         </para>
     </refsect1>
 
+    <refsect1 id="constructor-giofile">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.File</methodname>
+            <methodparam><parameter role="keyword">commandline</parameter></methodparam>
+            <methodparam><parameter role="keyword">path</parameter><initializer><literal>None</literal></initializer></methodparam>
+            <methodparam><parameter role="keyword">uri</parameter><initializer>None</initializer></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>commandline</parameter>&nbsp;:</term>
+                <listitem><simpara>a command line string. 
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><parameter>path</parameter>&nbsp;:</term>
+                <listitem><simpara>a string containing a relative or absolute path.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><parameter>uri</parameter>&nbsp;:</term>
+                <listitem><simpara>a string containing a URI.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-giofile"><classname>gio.File</classname></link>.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new <link linkend="class-giofile"><classname>gio.File</classname></link> either from a commandline,
+            a path or an uri.
+        </para>
+  
+    </refsect1>
+
     <refsect1>
         <title>Methods</title>
 
@@ -2811,6 +2851,1683 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If the file does not exist, the gio.ERROR_NOT_FOUND error will be returned. Other errors
                 are possible too, and depend on what kind of filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-filesystem-info-async">
+            <title>gio.File.query_filesystem_info_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_filesystem_info_async</methodname>
+                <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attributes</parameter>&nbsp;:</term>
+                    <listitem><simpara>an attribute query string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_filesystem_info_async</methodname>() method asynchronously
+                gets the requested information about the filesystem that the specified file is on.
+                The result is a GFileInfo object that contains key-value attributes
+                (such as type or size for the file). 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--query-filesystem-info">query_filesystem_info</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--query-filesystem-info-finish">gio.File.query_filesystem_info_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-filesystem-info-finish">
+            <title>gio.File.query_filesystem_info_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_filesystem_info_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                    or <literal>None</literal> if an error occurred.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_filesystem_info_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--query-filesystem-info-async">gio.File.query_filesystem_info_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-info">
+            <title>gio.File.query_filesystem_info</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info</methodname>
+                <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attributes</parameter>&nbsp;:</term>
+                    <listitem><simpara>an attribute query string.                    
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>
+                    a <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                    for the given file or <literal>None</literal> if there was an error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info</methodname>() method gets the requested
+                information about specified file. The result is a
+                <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                object that contains key-value attributes (such as the type or size of the file). 
+            </para>
+            <para>
+                The attribute value is a string that specifies the file attributes that should
+                be gathered. It is not an error if it's not possible to read a particular
+                requested attribute from a file - it just won't be set. attribute should be
+                a comma-separated list of attribute or attribute wildcards. The wildcard "*"
+                means all attributes, and a wildcard like "standard::*" means all attributes
+                in the standard namespace. An example attribute query be "standard::*,owner::user".
+                The standard attributes are available as defines, like gio.FILE_ATTRIBUTE_STANDARD_NAME. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                For symlinks, normally the information about the target of the symlink is returned,
+                rather than information about the symlink itself. However if you pass
+                gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS in flags the information about
+                the symlink itself will be returned. Also, for symlinks that point to non-existing
+                files the information about the symlink itself will be returned. 
+            </para>
+            <para>
+                If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will be
+                returned. Other errors are possible too, and depend on what kind of
+                filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-info-async">
+            <title>gio.File.query_info_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>attributes</parameter>&nbsp;:</term>
+                    <listitem><simpara>an attribute query string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>
+                    a <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info_async</methodname>() method Asynchronously gets the
+                requested information about specified file. The result is a
+                <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                object that contains key-value attributes (such as type or size for the file). 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--query-info">query_info</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--query-info-finish">gio.File.query_info_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-info-finish">
+            <title>gio.File.query_info_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                    for the given file or <literal>None</literal> if an error occurred.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--query-info-async">gio.File.query_info_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-settable-attributes">
+            <title>gio.File.query_settable_attributes</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_settable_attributes</methodname>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a list of
+                    <link linkend="class-giofileattributeinfo"><classname>gio.FileAttributeInfo</classname></link>
+                    describing the settable attributes.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_settable_attributes</methodname>() method obtain the
+                list of settable attributes for the file. 
+            </para>
+            <para>
+                Returns the type and full attribute name of all the attributes that can be
+                set on this file. This doesn't mean setting it will always succeed though,
+                you might get an access failure, or some specific file may not support a specific attribute. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--query-writable-namespace">
+            <title>gio.File.query_writable_namespace</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_writable_namespace</methodname>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a list of
+                    <link linkend="class-giofileattributeinfo"><classname>gio.FileAttributeInfo</classname></link>
+                    describing the writable namespaces.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_writable_namespace</methodname>() method obtain the
+                list of attribute namespaces where new attributes can be created by a user.
+                An example of this is extended attributes (in the "xattr" namespace). 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--read">
+            <title>gio.File.read</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>read</methodname>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a 
+                    <link linkend="class-giofileinputstream"><classname>gio.FileInputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>read</methodname>() method opens a file for reading. The result
+                is a <link linkend="class-giofileinputstream"><classname>gio.FileInputStream</classname></link>
+                that can be used to read the contents of the file. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will be returned.
+                If the file is a directory, the gio.IO_ERROR_IS_DIRECTORY error will be returned.
+                Other errors are possible too, and depend on what kind of filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--read-async">
+            <title>gio.File.read_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>read_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>read_async</methodname>() method asynchronously opens file for reading. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--read">read</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--read-finish">gio.File.read_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--read-finish">
+            <title>gio.File.read_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>read_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinputstream"><classname>gio.FileInputStream</classname></link>
+                    file or <literal>None</literal> if an error occurred.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>read_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--read-async">gio.File.read_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace">
+            <title>gio.File.replace</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace</methodname>
+                <methodparam><parameter role="keyword">etag</parameter></methodparam>
+                <methodparam><parameter role="keyword">make_backup</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>etag</parameter>&nbsp;:</term>
+                    <listitem><simpara>an optional entity tag for the current
+                    <link linkend="class-giofile"><classname>gio.File</classname></link>,
+                    or <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>make_backup</parameter>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if a backup should be created. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a 
+                    <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace</methodname>() method returns an output stream for
+                overwriting the file, possibly creating a backup copy of the file first.
+                If the file doesn't exist, it will be created. 
+            </para>
+            <para>
+                This will try to replace the file in the safest way possible so that any
+                errors during the writing will not affect an already existing copy of the file.
+                For instance, for local files it may write to a temporary file and then atomically
+                rename over the destination when the stream is closed. 
+            </para>
+            <para>
+                By default files created are generally readable by everyone, but if you pass
+                gio.FILE_CREATE_PRIVATE in flags the file will be made readable only to
+                the current user, to the level that is supported on the target filesystem. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                If you pass in a non-<literal>None</literal> etag value, then this value is compared
+                to the current entity tag of the file, and if they differ an gio.IO_ERROR_WRONG_ETAG error
+                is returned. This generally means that the file has been changed since you last read it.
+                You can get the new etag from
+                <methodname><link linkend="method-giofileoutputstream--get-etag">gio.FileOutputStream.get_etag</link></methodname>()
+                after you've finished writing and closed the GFileOutputStream. When you load a new file you can use
+                <methodname><link linkend="method-giofileinputstream--query-info">gio.FileInputStream.query_info</link></methodname>()
+                to get the etag of the file. 
+            </para>
+            <para>
+                If make_backup is <literal>True</literal>, this function will attempt to make a backup
+                of the current file before overwriting it. If this fails a gio.IO_ERROR_CANT_CREATE_BACKUP
+                error will be returned. If you want to replace anyway, try again
+                with make_backup set to <literal>False</literal>. 
+            </para>
+            <para>
+                If the file is a directory the gio.IO_ERROR_IS_DIRECTORY error will be returned, and
+                if the file is some other form of non-regular file then a gio.IO_ERROR_NOT_REGULAR_FILE
+                error will be returned. Some file systems don't allow all file names, and may return an
+                gio.IO_ERROR_INVALID_FILENAME error, and if the name is to long gio.IO_ERROR_FILENAME_TOO_LONG
+                will be returned. Other errors are possible too, and depend on what kind of filesystem the file is on.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace-async">
+            <title>gio.File.replace_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">etag</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">make_backup</parameter><initializer>True</initializer></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>etag</parameter>&nbsp;:</term>
+                    <listitem><simpara>an optional entity tag for the current
+                    <link linkend="class-giofile"><classname>gio.File</classname></link>,
+                    or <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>make_backup</parameter>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if a backup should be created. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace_async</methodname>() method asynchronously overwrites the file,
+                replacing the contents, possibly creating a backup copy of the file first. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--replace">replace</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--replace-finish">gio.File.replace_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace-contents">
+            <title>gio.File.replace_contents</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace_contents</methodname>
+                <methodparam><parameter role="keyword">contents</parameter></methodparam>
+                <methodparam><parameter role="keyword">etag</parameter></methodparam>
+                <methodparam><parameter role="keyword">make_backup</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>contents</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the new contents for file. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>etag</parameter>&nbsp;:</term>
+                    <listitem><simpara>the old entity tag for the document
+                    or <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>make_backup</parameter>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if a backup should be created. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>the new entity tag  for the document.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace_contents</methodname>() method replaces the contents
+                of file with contents of length bytes. If etag is specified (not NULL) any existing
+                file must have that etag, or the error gio.IO_ERROR_WRONG_ETAG will be returned. 
+            </para>
+            <para>
+                If make_backup is <literal>True</literal>, this function will attempt to make a backup of file. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+            <para>
+                The returned etag can be used to verify that the file hasn't changed the next time it is saved over.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace-contents-async">
+            <title>gio.File.replace_contents_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace_contents_async</methodname>
+                <methodparam><parameter role="keyword">contents</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">etag</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">make_backup</parameter><initializer>True</initializer></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_CREATE_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>contents</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the new contents for file. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>etag</parameter>&nbsp;:</term>
+                    <listitem><simpara>an optional entity tag for the current
+                    <link linkend="class-giofile"><classname>gio.File</classname></link>,
+                    or <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>make_backup</parameter>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if a backup should be created. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-create-flags-constants" endterm="gio-file-create-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace_contents_async</methodname>() method starts an asynchronous
+                replacement of file with the given contents of length bytes. etag will
+                replace the document's current entity tag. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--replace-contents">replace_contents</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--replace-contents-finish">gio.File.replace_contents_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace-contents-finish">
+            <title>gio.File.replace_contents_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace_contents_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>the new entity tag  for the document.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace_contents_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--replace-contents-async">gio.File.replace_contents_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--replace-finish">
+            <title>gio.File.replace_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>replace_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+                    or <literal>None</literal> if an error occurred.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>replace_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--replace-async">gio.File.replace_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--resolve-relative-path">
+            <title>gio.File.resolve_relative_path</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>resolve_relative_path</methodname>
+                <methodparam><parameter role="keyword">relative_path</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">relative_path</parameter>&nbsp;:</term>
+                  <listitem><simpara>a given relative path string. 
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    to the resolved path. <literal>None</literal> if relative_path is <literal>None</literal>
+                    or if file is invalid.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>resolve_relative_path</methodname>() method resolves a
+                relative path for file to an absolute path. 
+            </para>
+            <para>
+                This call does no blocking i/o.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute">
+            <title>gio.File.set_attribute</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+                <methodparam><parameter role="keyword">value_p</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>the type of the attribute .
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value_p</parameter>&nbsp;:</term>
+                    <listitem><simpara>the value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute</methodname>() method sets an attribute in
+                the file with attribute name attribute to value. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-byte-string">
+            <title>gio.File.set_attribute_byte_string</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_byte_string</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_byte_string</methodname>() method Sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_BYTE_STRING to value. If attribute is of a different type,
+                this operation will fail, returning <literal>False</literal>. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-int32">
+            <title>gio.File.set_attribute_int32</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_int32</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>an int containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_int32</methodname>() method sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_INT32 to value. If attribute is of a different type,
+                this operation will fail. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-int64">
+            <title>gio.File.set_attribute_int64</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_int64</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>a long containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_int64</methodname>() method sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_INT64 to value. If attribute is of a different type,
+                this operation will fail. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-string">
+            <title>gio.File.set_attribute_string</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_string</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_string</methodname>() method sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_STRING to value. If attribute is of a different type,
+                this operation will fail. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-uint32">
+            <title>gio.File.set_attribute_uint32</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_uint32</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>an int containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_uint32</methodname>() method sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_UINT32 to value. If attribute is of a different type,
+                this operation will fail. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attribute-uint64">
+            <title>gio.File.set_attribute_uint64</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attribute_uint64</methodname>
+                <methodparam><parameter role="keyword">attribute</parameter></methodparam>
+                <methodparam><parameter role="keyword">value</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>attribute</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string containing the attribute's name. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>value</parameter>&nbsp;:</term>
+                    <listitem><simpara>a long containing the attribute's new value.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attribute was set,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attribute_uint64</methodname>() method sets attribute of type
+                gio.FILE_ATTRIBUTE_TYPE_UINT64 to value. If attribute is of a different type,
+                this operation will fail. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
+                the cancellable object from another thread. If the operation was cancelled, the error
+                gio.IO_ERROR_CANCELLED will be returned. 
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attributes-async">
+            <title>gio.File.set_attributes_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attributes_async</methodname>
+                <methodparam><parameter role="keyword">info</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>info</parameter>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attributes_async</methodname>() method asynchronously
+                sets the attributes of file with info. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--set-attributes-from-info">set_attributes_from_info</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--set-attributes-finish">gio.File.set_attributes_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attributes-finish">
+            <title>gio.File.set_attributes_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attributes_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attributes were set correctly,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attributes_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--set-attributes-async">gio.File.set_attributes_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-attributes-from-info">
+            <title>gio.File.set_attributes_from_info</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_attributes_from_info</methodname>
+                <methodparam><parameter role="keyword">info</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>info</parameter>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the attributes were set correctly,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_attributes_from_info</methodname>() method tries to set
+                all attributes in the GFileInfo on the target values, not stopping on the first error. 
+            </para>
+                If there is any error during this operation then error will be set to the
+                first error. Error on particular fields are flagged by setting the "status"
+                field in the attribute value to gio.FILE_ATTRIBUTE_STATUS_ERROR_SETTING,
+                which means you can also detect further errors. 
+            <para>
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.IO_ERROR_CANCELLED will be returned.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-display-name">
+            <title>gio.File.set_display_name</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_display_name</methodname>
+                <methodparam><parameter role="keyword">display_name</parameter></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>display_name</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string conaining the name to display.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    specifying what file was renamed to, or <literal>None</literal> if there was an error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_display_name</methodname>() method renames file to
+                the specified display name. 
+            </para>
+            <para>
+                The display name is converted from UTF8 to the correct encoding for the
+                target filesystem if possible and the file is renamed to this. 
+            </para>
+            <para>
+                If you want to implement a rename operation in the user interface the
+                edit name (gio.FILE_ATTRIBUTE_STANDARD_EDIT_NAME) should be used as the
+                initial value in the rename widget, and then the result after editing
+                should be passed to
+                <methodname><link linkend="method-giofile--set-display-name">gio.File.set_dispay_name</link></methodname>(). 
+            </para>
+            <para>
+                On success the resulting converted filename is returned. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.IO_ERROR_CANCELLED will be returned.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-display-name-async">
+            <title>gio.File.set_display_name_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_display_name_async</methodname>
+                <methodparam><parameter role="keyword">display_name</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>display_name</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string conaining the name to display.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_display_name_async</methodname>() method asynchronously
+                sets the display name for a given GFile. 
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-giofile--set-display-name">set_display_name</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--set-display-name-finish">gio.File.set_display_name_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--set-display-name-finish">
+            <title>gio.File.set_display_name_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_display_name_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofile"><classname>gio.File</classname></link>
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_display_name_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--set-display-name-async">gio.File.set_display_name_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--trash">
+            <title>gio.File.trash</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>trash</methodname>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> on successful trash, <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>trash</methodname>() method sends file to the "Trashcan", if possible.
+                This is similar to deleting it, but the user can recover it before emptying the trashcan.
+                Not all file systems support trashing, so this call can return the gio.IO_ERROR_NOT_SUPPORTED error. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.IO_ERROR_CANCELLED will be returned.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--unmount-mountable">
+            <title>gio.File.unmount_mountable</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>unmount_mountable</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>flags</parameter>&nbsp;:</term>
+                    <listitem><simpara>a set of
+                    <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>unmount_mountable</methodname>() method unmounts a file of type gio.FILE_TYPE_MOUNTABLE. 
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.IO_ERROR_CANCELLED will be returned.
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-giofile--unmount-mountable-finish">gio.File.unmount_mountable_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofile--unmount-mountable-finish">
+            <title>gio.File.unmount_mountable_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>unmount_mountable_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the operation finished successfully,
+                    <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>unmount_mountable_finish</methodname>() method finishes an asynchronous
+                copy operation started with
+                <methodname><link linkend="method-giofile--unmount-mountable">gio.File.unmount_mountable</link></methodname>().
+            </para>
+        </refsect2>
+    </refsect1>
+    
+    <refsect1>
+        <title>Functions</title>
+
+        <refsect2 id="function-gio--file-parse-name">
+            <title>gio.file_parse_name</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>file_parse_name</methodname>
+                <methodparam><parameter role="keyword">parse_name</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>parse_name</parameter>&nbsp;:</term>
+                    <listitem><simpara>a file name or path to be parsed.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a new <link linkend="class-giofile"><classname>gio.File</classname></link>.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>parse_name</methodname>() function constructs a
+                <link linkend="class-giofile"><classname>gio.File</classname></link>
+                with the given parse_name (i.e. something given by g_file_get_parse_name()).
+                This operation never fails, but the returned object might not support any I/O
+                operation if the parse_name cannot be parsed.
             </para>
         </refsect2>
     </refsect1>
