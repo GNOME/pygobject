@@ -19,6 +19,7 @@
 <xi:include href="pygio-fileenumerator.xml"/>
 <xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-icon.xml"/>
+<xi:include href="pygio-mount.xml"/>
 <xi:include href="pygio-seekable.xml"/>
 <xi:include href="pygio-simpleasyncresult.xml"/>
 <xi:include href="pygio-volume.xml"/>

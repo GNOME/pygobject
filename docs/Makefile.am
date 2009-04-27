@@ -28,6 +28,7 @@ HTML_FILES =					\
 	html/class-giofileenumerator.html	\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
+        html/class-giomount.html		\
 	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
 	html/class-giovolume.html		\
@@ -66,13 +67,14 @@ XML_FILES = 					\
 	reference/pygio-drive.xml 		\
 	reference/pygio-emblem.xml		\
 	reference/pygio-emblemedicon.xml	\
-	reference/pygio-icon.xml		\
 	reference/pygio-file.xml		\
 	reference/pygio-fileattributeinfo.xml	\
 	reference/pygio-fileenumerator.xml	\
 	reference/pygio-fileicon.xml 		\
-	reference/pygio-simpleasyncresult.xml	\
+	reference/pygio-icon.xml		\
+	reference/pygio-mount.xml		\
 	reference/pygio-seekable.xml		\
+	reference/pygio-simpleasyncresult.xml	\
 	reference/pygio-volume.xml 		\
 	reference/pygio-volumemonitor.xml
 
