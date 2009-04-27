@@ -1015,7 +1015,7 @@ override g_file_query_info_async kwargs
 static PyObject *
 _wrap_g_file_query_info_async(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "callback", "attributes", "flags",
+    static char *kwlist[] = { "attributes", "callback", "flags",
                               "io_priority", "cancellable", "user_data", NULL };
     GCancellable *cancellable;
     PyGObject *pycancellable = NULL;
@@ -1028,14 +1028,35 @@ _wrap_g_file_query_info_async(PyGObject *self, PyObject *args, PyObject *kwargs)
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "Os|OiOO:File.query_info_async",
-                                      kwlist,
-                                      &notify->callback,
-                                      &attributes,
-                                      &flags, &io_priority,
-                                      &pycancellable,
-                                      &notify->data))
-        goto error;
+                                     "sO|OiOO:File.query_info_async",
+                                     kwlist,
+                                     &attributes,
+                                     &notify->callback,
+                                     &flags, &io_priority,
+                                     &pycancellable,
+                                     &notify->data)) {
+        /* To preserve compatibility with 2.16 we also allow swapped
+         * 'attributes' and 'callback'.  FIXME: Remove for 3.0. */
+        static char *old_kwlist[] = { "callback", "attributes", "flags",
+                                      "io_priority", "cancellable", "user_data", NULL };
+        PyObject *exc_type, *exc_value, *exc_traceback;
+
+        PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                         "Os|OiOO:File.query_info_async",
+                                         old_kwlist,
+                                         &notify->callback,
+                                         &attributes,
+                                         &flags, &io_priority,
+                                         &pycancellable,
+                                         &notify->data)
+            || !pygio_notify_callback_is_valid(notify)) {
+            /* Report the error with new parameters. */
+            PyErr_Restore(exc_type, exc_value, exc_traceback);
+            goto error;
+        }
+    }
 
     if (!pygio_notify_callback_is_valid(notify))
         goto error;

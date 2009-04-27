@@ -221,7 +221,7 @@ class TestFile(unittest.TestCase):
             finally:
                 loop.quit()
 
-        self.file.query_info_async(callback, "standard")
+        self.file.query_info_async("standard", callback)
 
         loop = glib.MainLoop()
         loop.run()

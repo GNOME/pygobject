@@ -1750,7 +1750,7 @@
 ;;
 (define-method query_info_async
   (docstring
-  "F.query_info_async(callback, attributes, [flags, [io_priority,\n"
+  "F.query_info_async(attributes, callback, [flags, [io_priority,\n"
   "                   [cancellable, [user_data]]]]) -> query attributes\n"
   "\n"
   "Asynchronously gets the requested information about specified file.\n"

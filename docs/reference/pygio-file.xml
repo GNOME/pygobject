@@ -302,8 +302,8 @@
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-giofile--query-info-async">query_info_async</link></methodname>
-        <methodparam><parameter role="keyword">callback</parameter></methodparam>
         <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
         <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
         <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
         <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
@@ -3019,8 +3019,8 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 
             <programlisting><methodsynopsis language="python">
                 <methodname>query_info_async</methodname>
-                <methodparam><parameter role="keyword">callback</parameter></methodparam>
                 <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
                 <methodparam><parameter role="keyword">flags</parameter><initializer>gio.FILE_QUERY_INFO_NONE</initializer></methodparam>
                 <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
                 <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
@@ -3029,13 +3029,13 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             
             <variablelist>
                 <varlistentry>
-                    <term><parameter>callback</parameter>&nbsp;:</term>
-                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    <term><parameter>attributes</parameter>&nbsp;:</term>
+                    <listitem><simpara>an attribute query string.
                     </simpara></listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term><parameter>attributes</parameter>&nbsp;:</term>
-                    <listitem><simpara>an attribute query string.
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
                     </simpara></listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3065,7 +3065,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             </variablelist>
     
             <para>
-                The <methodname>query_info_async</methodname>() method Asynchronously gets the
+                The <methodname>query_info_async</methodname>() method asynchronously gets the
                 requested information about specified file. The result is a
                 <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>
                 object that contains key-value attributes (such as type or size for the file). 
