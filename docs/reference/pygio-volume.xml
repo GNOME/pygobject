@@ -121,7 +121,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term><link linkend="signal-giovolume--changed">"removed"</link></term>
+                <term><link linkend="signal-giovolume--removed">"removed"</link></term>
                 <listitem>
                     <methodsynopsis language="python"><methodname>callback</methodname>
                         <methodparam><parameter>volume</parameter></methodparam>
