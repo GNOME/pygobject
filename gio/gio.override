@@ -236,6 +236,7 @@ include
   gfileenumerator.override
   gfileinfo.override
   gicon.override
+  gmount.override
   ginputstream.override
   goutputstream.override
   gvolume.override
