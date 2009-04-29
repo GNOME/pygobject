@@ -62,4 +62,4 @@ all: $(LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 .la.so:
-	$(LN_S) .libs/$@ $@
+	$(LN_S) .libs/$@ $@ || true
