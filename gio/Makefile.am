@@ -45,6 +45,7 @@ GIO_OVERRIDES = 			\
 	gfileinfo.override		\
 	gicon.override			\
 	ginputstream.override 		\
+	gmount.override			\
 	goutputstream.override 		\
 	gvolume.override		\
 	gvolumemonitor.override
