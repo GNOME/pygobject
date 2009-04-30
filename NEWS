@@ -1,3 +1,96 @@
+2.17.0 30-apr-2009
+        - Write a good part of the docs for gio (Gian)
+        - Wrap g_mount_guess_content_type g_mount_guess_content_type_finish
+          g_mount_guess_content_type_sync (Gian, #580802)
+        - Swap first two arguments of gio.File.query_info_async (Paul, #580490)
+        - Fix a crash in pyg_type_add_interfaces (Paul, #566571)
+        - Remove an empty structure, use sizeof(PyObject)
+          instead (Paul, #560591)
+        - Wrap four g_get_user_*_dir() functions (Paul, #575999)
+        - Remove 'ltihooks.py' as using deprecated Python module (Paul)
+        - Code maintenance: add .gitignore files (Paul)
+        - CellRendererPixbuf stock-size property has wrong type (Paul, #568499)
+        - Add a doap file after git migration (Johan Dahlin)
+        - missing dep on libffi in pygobject-2.0.pc (Götz Waschk, #550231)
+        - g_volume_monitor_tp_new new function, return the singleton object.
+          (Paul, #555613)
+        - Remove a DeprecationWarning under python 2.6 (James Westby, #573753)
+        - several scripts from codegen directory are not distributed
+          (Krzesimir Nowak)
+        - g_file_copy_async change argument order to keep it consistent with the
+          other methods (Gian)
+        - memory leak in gio.File.copy_async (Paul Pogonyshev, #578870)
+        - g_file_monitor should accept None for cancellable and set the default
+          flag to G_FILE_MONITOR_NONE (Gian)
+        - pyg_notify_free needs to ensure it has GIL before calling Py_XDECREF
+          (Jonathan Matthew)
+        - Wrap g_file_set_display_name_async (Gian)
+        - Add a semi-private method to return the option context C object from
+          an option context wrapper (Tristan Hill)
+        - Converting a negative long Python value to a GUINT64 GValue doesn't
+          error out as it should (Gustavo J. A. M. Carneiro, #577999)
+        - Wrap g_file_set_attributes_async and
+          g_file_set_attributes_finish (Gian)
+        - g_file_query_filesystem_info_async fix a typo (Gian)
+        - Wrap g_file_query_filesystem_info_async (Gian)
+        - Add missing g_file_query_filesystem_info_async and
+	  g_file_query_filesystem_info_finish (Gian)
+        - Wrap g_file_eject_mountable (Gian)
+        - g_file_copy callback cannot be optional (Gian)
+        - Swap various kwargs names to reflect the code (Gian)
+        - Update the address of the FSF (Tobias Mueller, #577134)
+        - Add g_volume_should_automount (Gian)
+        - Wrap g_drive_enumerate_identifiers and g_volume_enumerate_identifiers
+          (Gian)
+	- Add a couple of convinence functions to convert from/to a python list
+	  and an array of strings (Gian)
+	- Allow setting pytype wrapper class (Mark Lee, John Ehresman, #559001)
+	- Wrap g_file_enumerator_close_async (Gian Mario Tagliaretti)
+
+2.16.1 22-feb-2009
+        - Apply the patch provided by Cygwin Ports maintainer
+          (Paul Pogonyshev, #564018)
+        - Bad -I ordering can break build, patch from [dmacks netspace org]
+          (Gian Mario Tagliaretti, #566737)
+        - Fix keyword list to be in sync with positional arguments
+          (Paul, #566744)
+        - Add a comment explaining why the two for loops for registering
+          interfaces (Gustavo Carneiro)
+        - Huge cleanup of GIO overrides (Paul, #566706)
+        - gtk.Buildable interface method override is not recognized
+          (Paul, #566571)
+        - Do not escape the ampersand "&" in entity references. Replace some
+          unusual entity references in the output with their literal values.
+          (Daniel Elstner, #568485)
+        - gio.InputStream.read_async can cause memory corruption.
+          (Paul, #567792)
+        - Inconsistent use of tabs and spaces in pygtk.py (Paul, #569350)
+        - Huge fix of memory leaks in GIO (Paul, Paolo Borelli, Gian, #568427)
+        - non-async functions don't release python locks before calling
+          blocking C functions (Gian, Gustavo, #556250)
+        - Change comment to avoid false positives when grep'ing for deprecated
+          gtk functions (Andre Klapper)
+        - ltihooks.py updating license header from GPL to LGPL
+          (James Henstridge)
+
+2.16.0 04-jan-2009
+        - gobject.timeout_add_seconds() not found in docs
+          (Paul Pogonyshev, #547119)
+        - _wrap_g_output_stream_write_async not adding a reference to the
+          buffer passed (Paul, #564102)
+        - gio.VolumeMonitor segfaults (Gian Mario Tagliaretti, #555613)
+        - Test if `domain' is not-null before using it to avoids segfaults
+          (Paul, #561826)
+        - g_output_stream_write_all use gsize instead of gssize (Gian)
+        - add __repr__ to gio.Drive, gio.Mount and gio.Volume
+          (Paul, #530935)
+        - Missing AC_CONFIG_MACRO_DIR([m4]) (Loïc Minier, #551227)
+        - Make codegen not import when corresponding argument types are not
+          registered (Paul, #551056)
+        - Fix typos breaking compilation (Frederic Peters #551212)
+        - GFile load_contents methods chop data at first \0
+          (Jonathan Matthew, #551059) 
+
 2.15.4 3-sep-2008
         - Fix typo in GPointer type registration (Loïc Minier,#550463)
         - support G_TYPE_CLOSURE in codegen (Gian)
