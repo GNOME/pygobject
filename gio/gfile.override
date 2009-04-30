@@ -1056,6 +1056,10 @@ _wrap_g_file_query_info_async(PyGObject *self, PyObject *args, PyObject *kwargs)
             PyErr_Restore(exc_type, exc_value, exc_traceback);
             goto error;
         }
+
+        Py_XDECREF(exc_type);
+        Py_XDECREF(exc_value);
+        Py_XDECREF(exc_traceback);
     }
 
     if (!pygio_notify_callback_is_valid(notify))
