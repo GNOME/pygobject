@@ -29,6 +29,7 @@ HTML_FILES =					\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
         html/class-giomount.html		\
+	html/class-giomountoperation.html	\
 	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
 	html/class-giovolume.html		\
@@ -73,6 +74,7 @@ XML_FILES = 					\
 	reference/pygio-fileicon.xml 		\
 	reference/pygio-icon.xml		\
 	reference/pygio-mount.xml		\
+	reference/pygio-mountoperation.xml	\
 	reference/pygio-seekable.xml		\
 	reference/pygio-simpleasyncresult.xml	\
 	reference/pygio-volume.xml 		\

@@ -13,6 +13,7 @@
 
 <programlisting>
 <xref linkend="gio-app-info-constants" endterm="gio-app-info-constants-title"></xref>
+<xref linkend="gio-ask-password-flags-constants" endterm="gio-ask-password-flags-constants-title"></xref>
 <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
 <xref linkend="gio-file-attribute-constants" endterm="gio-file-attribute-constants-title"></xref>
@@ -24,13 +25,57 @@
 <xref linkend="gio-file-query-info-flags-constants" endterm="gio-file-query-info-flags-constants-title"></xref>
 <xref linkend="gio-file-type-constants" endterm="gio-file-type-constants-title"></xref>
 <xref linkend="gio-mount-mount-flags-constants" endterm="gio-mount-mount-flags-constants-title"></xref>
+<xref linkend="gio-mount-operation-result-constants" endterm="gio-mount-operation-result-constants-title"></xref>
 <xref linkend="gio-mount-unmount-flags-constants" endterm="gio-mount-unmount-flags-constants-title"></xref>
+<xref linkend="gio-password-save-constants" endterm="gio-password-save-constants-title"></xref>
 </programlisting>
 
   </refsect1>
 
   <refsect1 id="gio-constants-description">
     <title>Description</title>
+
+    <refsect2 id="gio-ask-password-flags-constants">
+      <title id="gio-ask-password-flags-constants-title">Gio Ask Password Flags Constants</title>
+
+      <para>
+	  Flags that are used to request specific information from the user, or to
+	  notify the user of their choices in an authentication situation.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.ASK_PASSWORD_ANONYMOUS_SUPPORTED</literal></term>
+	  <listitem>
+	    <simpara>operation supports anonymous users.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ASK_PASSWORD_NEED_DOMAIN</literal></term>
+	  <listitem>
+	    <simpara>operation requires a domain.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ASK_PASSWORD_NEED_PASSWORD</literal></term>
+	  <listitem>
+	    <simpara>operation requires a password.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ASK_PASSWORD_NEED_USERNAME</literal></term>
+	  <listitem>
+	    <simpara>operation requires a username.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.ASK_PASSWORD_SAVING_SUPPORTED</literal></term>
+	  <listitem>
+	    <simpara>operation supports saving settings.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
 
     <refsect2 id="gio-app-info-constants">
       <title id="gio-app-info-constants-title">Gio AppInfo Create Flags Constants</title>
@@ -1358,6 +1403,68 @@
 	  <term><literal>gio.MOUNT_UNMOUNT_FORCE</literal></term>
 	  <listitem>
 	    <simpara>Unmount even if there are outstanding file operations on the mount.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-mount-operation-result-constants">
+      <title id="gio-mount-operation-result-constants-title">Gio Mount Operation Result Constants</title>
+
+      <para>
+	  returned as a result when a request for information is send by the mounting operation.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_OPERATION_HANDLED</literal></term>
+	  <listitem>
+	    <simpara>The request was fulfilled and the user specified data is now available.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_OPERATION_ABORTED</literal></term>
+	  <listitem>
+	    <simpara>The user requested the mount operation to be aborted.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.MOUNT_OPERATION_UNHANDLED</literal></term>
+	  <listitem>
+	    <simpara>The request was unhandled (i.e. not implemented).</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-password-save-constants">
+      <title id="gio-password-save-constants-title">Gio Password Save Constants</title>
+
+      <para>
+	  is used to indicate the lifespan of a saved password.
+      </para>
+      <para>
+	  Gvfs stores passwords in the Gnome keyring when this flag allows it to,
+	  and later retrieves it again from there.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.PASSWORD_SAVE_FOR_SESSION</literal></term>
+	  <listitem>
+	    <simpara>save a password for the session.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.PASSWORD_SAVE_NEVER</literal></term>
+	  <listitem>
+	    <simpara>never save a password.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.PASSWORD_SAVE_PERMANENTLY</literal></term>
+	  <listitem>
+	    <simpara>save a password permanently.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
