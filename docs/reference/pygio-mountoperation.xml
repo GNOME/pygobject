@@ -5,7 +5,7 @@
 <refentry id="class-giomountoperation">
     <refnamediv>
         <refname>gio.MountOperation</refname>
-        <refpurpose>Application launch context.</refpurpose>
+        <refpurpose>Authentication methods for mountable locations.</refpurpose>
     </refnamediv>
 
     <refsect1>
