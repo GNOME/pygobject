@@ -23,6 +23,7 @@
 <xi:include href="pygio-mountoperation.xml"/>
 <xi:include href="pygio-seekable.xml"/>
 <xi:include href="pygio-simpleasyncresult.xml"/>
+<xi:include href="pygio-themedicon.xml"/>
 <xi:include href="pygio-volume.xml"/>
 <xi:include href="pygio-volumemonitor.xml"/>
 <xi:include href="pygio-constants.xml"/>

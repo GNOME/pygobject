@@ -32,6 +32,7 @@ HTML_FILES =					\
 	html/class-giomountoperation.html	\
 	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
+	html/class-giothemedicon.html		\
 	html/class-giovolume.html		\
 	html/class-giovolumemonitor.html	\
 	html/gio-constants.html			\
@@ -77,6 +78,7 @@ XML_FILES = 					\
 	reference/pygio-mountoperation.xml	\
 	reference/pygio-seekable.xml		\
 	reference/pygio-simpleasyncresult.xml	\
+	reference/pygio-themedicon.xml		\
 	reference/pygio-volume.xml 		\
 	reference/pygio-volumemonitor.xml
 

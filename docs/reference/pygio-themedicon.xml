@@ -1,0 +1,204 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giothemedicon">
+    <refnamediv>
+        <refname>gio.ThemedIcon</refname>
+        <refpurpose>Icon theming support.</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.ThemedIcon</classname></ooclass>
+        <ooclass><classname><link linkend="class-gobject">gobject.GObject</link></classname></ooclass>
+    
+    <constructorsynopsis language="python">
+    <methodname><link linkend="constructor-giothemedicon">gio.ThemedIcon</link></methodname>
+    <methodparam></methodparam>
+    </constructorsynopsis>
+    
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giothemedicon--append-name">append_name</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giothemedicon--get-names">get_names</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giothemedicon--prepend-name">prepend_name</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    
+    </classsynopsis>
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
+  +-- <link linkend="class-giothemedicon">gio.ThemedIcon</link>
+</synopsis>
+
+    </refsect1>
+
+    <refsect1 id="properties-giomountoperation">
+        <title>gio.ThemedIcon Properties</title>
+    
+        <blockquote role="properties">
+            <informaltable pgwide="1" frame="none">
+                <tgroup cols="3">
+                    <colspec column="1" colwidth="1in"/>
+                    <colspec column="2" colwidth="1in"/>
+                    <colspec column="3" colwidth="4in"/>
+                    <tbody>
+                        <row valign="top">
+                            <entry>"name"</entry>
+                            <entry>Write/Contruct Only</entry>
+                            <entry>
+                                The icon name. Default value: <literal>None</literal>
+                            </entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"names"</entry>
+                            <entry>Read/Write/Contruct Only</entry>
+                            <entry>
+                                A list of icon names.
+                            </entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"use-default-fallbacks"</entry>
+                            <entry>Read/Write/Contruct Only</entry>
+                            <entry>
+                                Whether to use the default fallbacks found by shortening the
+                                icon name at '-' characters. If the "names" array has more
+                                than one element, ignores any past the first.
+                            </entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+        </blockquote>
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-giothemedicon"><classname>gio.ThemedIcon</classname></link>
+            is an implementation of <link linkend="class-gioicon"><classname>gio.Icon</classname></link>
+            that supports icon themes. GThemedIcon contains a list of all of the icons present in an icon
+            theme, so that icons can be looked up quickly.
+        </para>
+        <para>
+            <link linkend="class-giothemedicon"><classname>gio.ThemedIcon</classname></link>
+            does not provide actual pixmaps for icons, just the icon names. Ideally something like
+            <methodname><link linkend="method-gtkicontheme--choose-icon">gtk.IconTheme.choose_icon</link></methodname>()
+            should be used to resolve the list of names so that fallback icons work nicely
+            with themes that inherit other themes
+        </para>
+    </refsect1>
+
+    <refsect1 id="constructor-giothemedicon">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.ThemedIcon</methodname>
+            <methodparam><parameter>name</parameter></methodparam>
+            <methodparam><parameter>use_default_fallbacks</parameter><initializer><literal>False</literal></initializer></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>name</parameter>&nbsp;:</term>
+                <listitem><simpara>a string containing an icon name.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-giothemedicon"><classname>gio.ThemedIcon</classname></link>.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new themed icon from icon name, if instead of an icon name you
+            provide a list of icon names, the <link linkend="class-giothemedicon"><classname>gio.ThemedIcon</classname></link>
+            will be constructed using the items in the list.
+        </para>
+  
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-giothemedicon--append-name">
+            <title>gio.ThemedIcon.append_name</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>append_name</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>name</emphasis>&nbsp;:</term>
+                    <listitem><simpara>name of icon to append to list of icons from within icon.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>append_name</methodname>() method appends a name to
+                the list of icons from within icon.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giothemedicon--get-names">
+            <title>gio.ThemedIcon.get_names</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_names</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a list of icon names.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_names</methodname>() method gets the names
+                of icons from within icon.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giothemedicon--prepend-name">
+            <title>gio.ThemedIcon.prepend_name</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>prepend_name</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>name</emphasis>&nbsp;:</term>
+                    <listitem><simpara>name of icon to prepend to list of icons from within icon.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>prepend_name</methodname>() method prepends a name to
+                the list of icons from within icon.
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>
