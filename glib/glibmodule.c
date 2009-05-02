@@ -669,7 +669,7 @@ static PyMethodDef _glib_functions[] = {
     { "get_user_data_dir",
       (PyCFunction)pyglib_get_user_data_dir, METH_NOARGS },
     { "get_user_special_dir",
-      (PyCFunction)pyglib_get_user_special_dir, METH_VARARGS },
+      (PyCFunction)pyglib_get_user_special_dir, METH_VARARGS|METH_KEYWORDS },
     { "markup_escape_text",
       (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
