@@ -1,0 +1,198 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-gioloadableicon">
+    <refnamediv>
+        <refname>gio.LoadableIcon</refname>
+        <refpurpose>Interface for icons.</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.LoadableIcon</classname></ooclass>
+        <ooclass><classname><link linkend="class-gobjectginterface">gobject.GInterface</link></classname></ooclass>
+
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-gioloadableicon--load">load</link></methodname>
+        <methodparam><parameter role="keyword">size</parameter><initializer>0</initializer></methodparam>
+	<methodparam><parameter role="keyword">cancellable</parameter><initializer><literal>None</literal></initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-gioloadableicon--load-async">load_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+	<methodparam><parameter role="keyword">size</parameter><initializer>0</initializer></methodparam>
+	<methodparam><parameter role="keyword">cancellable</parameter><initializer><literal>None</literal></initializer></methodparam>
+	<methodparam><parameter role="keyword">user_data</parameter><initializer><literal>None</literal></initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-gioloadableicon--load-finish">load_finish</link></methodname>
+	<methodparam><parameter role="keyword">res</parameter></methodparam>
+    </methodsynopsis>
+    
+    </classsynopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobjectginterface">gobject.GInterface</link>
+  +-- <link linkend="class-gioloadableicon">gio.LoadableIcon</link>
+</synopsis>
+
+    </refsect1>
+    
+    <refsect1>
+	<title>Prerequisites</title>
+        <para>
+            <link linkend="class-gioloadableicon"><classname>gio.LoadableIcon</classname></link> requires
+            <link linkend="class-gioicon"><classname>gio.Icon</classname></link>. and
+	    <link linkend="class-gobject"><classname>gobject.GObject</classname></link>
+        </para>
+    </refsect1>
+    
+    <refsect1>
+	<title>Known Implementation</title>
+        <para>
+            <link linkend="class-gioloadableicon"><classname>gio.LoadableIcon</classname></link> is implemented by
+            <link linkend="class-giofileicon"><classname>gio.FileIcon</classname></link>
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-gioloadableicon"><classname>gio.LoadableIcon</classname></link>
+            extends the <link linkend="class-gioicon"><classname>gio.Icon</classname></link>
+	    interface and adds the ability to load icons from streams.
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-gioloadableicon--load">
+            <title>gio.LoadableIcon.load</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>load</methodname>
+                <methodparam><parameter role="keyword">size</parameter><initializer>0</initializer></methodparam>
+		<methodparam><parameter role="keyword">cancellable</parameter><initializer><literal>None</literal></initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>size</parameter>&nbsp;:</term>
+                    <listitem><simpara>an integer
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a 2 tuple containing a
+		    <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
+		    to read the icon from and a string containing the icon type.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>load</methodname>() method loads a loadable icon.
+		For the asynchronous version of this function, see
+		<methodname><link linkend="method-gioloadableicon--load-async">gio.LoadableIcon.load_async</link></methodname>().
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-gioloadableicon--load-async">
+            <title>gio.LoadableIcon.load_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>load_async</methodname>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+		<methodparam><parameter role="keyword">size</parameter><initializer>0</initializer></methodparam>
+		<methodparam><parameter role="keyword">cancellable</parameter><initializer><literal>None</literal></initializer></methodparam>
+		<methodparam><parameter role="keyword">user_data</parameter><initializer><literal>None</literal></initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>size</parameter>&nbsp;:</term>
+                    <listitem><simpara>an integer
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>load_async</methodname>() method loads an icon asynchronously.
+            </para>
+            <para>
+                For more details, see
+                <methodname><link linkend="method-gioloadableicon--load">gio.LoadableIcon.load</link></methodname>()
+                which is the synchronous version of this call. 
+            </para>
+            <para>
+                When the operation is finished, callback will be called. You can then call
+                <methodname><link linkend="method-gioloadableicon--load-finish">gio.LoadableIcon.load_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-gioloadableicon--load-finish">
+            <title>gio.LoadableIcon.load_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>load_finish</methodname>
+                <methodparam><parameter role="keyword">res</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>res</parameter>&nbsp;:</term>
+                    <listitem><simpara>a
+		    <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a 2 tuple containing a
+		    <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
+		    to read the icon from and a string containing the icon type.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>load_finish</methodname>() method finishes an asynchronous
+                icon load started in 
+                <methodname><link linkend="method-gioloadableicon--load-async">gio.LoadableIcon.load_async</link></methodname>().
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>
