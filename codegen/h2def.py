@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- Mode: Python; py-indent-offset: 4 -*-
-# Search through a header file looking for function prototypes.
-# For each prototype, generate a scheme style definition.
 # GPL'ed
 # Toby D. Reeves <toby@max.rl.plh.af.mil>
 #
@@ -9,6 +7,63 @@
 # Havoc's new defs format.  Info on this format can be seen at:
 #   http://mail.gnome.org/archives/gtk-devel-list/2000-January/msg00070.html
 # Updated to be PEP-8 compatible and refactored to use OOP
+#
+# Scan the given public .h files of a GTK module (or module using
+# GTK object conventions) and generates a set of scheme defs.
+#
+# h2def searches through a header file looking for function prototypes and
+# generates a scheme style defenition for each prototype.
+# Basically the operation of h2def is:
+#
+# - read each .h file into a buffer which is scrubbed of extraneous data
+# - find all object defenitions:
+#   - find all structures that may represent a GtkObject
+#   - find all structures that might represent a class
+#   - find all structures that may represent a GtkObject subclass
+#   - find all structures that might represent a class/Iface inherited from
+#     GTypeInterface
+# - find all enum defenitions
+# - write out the defs
+#
+# The command line options are:
+#
+#   -s --separate    Create separate files for objects and function/method defs
+#                    using the given name as the base name (optional). If this
+#                    is not specified the combined object and function defs
+#                    will be output to sys.stdout.
+#   -f --defsfilter  Extract defs from the given file to filter the output defs
+#                    that is don't output defs that are defined in the
+#                    defsfile. More than one deffile may be specified.
+#   -m --modulename  The prefix to be stripped from the front of function names
+#                    for the given module
+#   -n --namespace   The module or namespace name to be used, for example
+#                    WebKit where h2def is unable to detect the module name
+#                    automatically. it also sets the gtype-id prefix.
+#   --onlyenums      Only produce defs for enums and flags
+#   --onlyobjdefs    Only produce defs for objects
+#   -v               Verbose output
+#
+# Examples:
+#
+# python h2def.py /usr/local/include/pango-1.0/pango/*.h >/tmp/pango.defs
+#
+# - Outputs all defs for the pango module.
+#
+# python h2def.py -m gdk -s /tmp/gdk-2.10 \
+#            -f /usr/tmp/pygtk/gtk/gdk-base.defs \
+#            /usr/local/include/gtk-2.0/gdk/*.h \
+#            /usr/local/include/gtk-2.0/gdk-pixbuf/*.h
+#
+# - Outputs the gdk module defs that are not contained in the defs file
+#   /usr/tmp/pygtk/gtk/gdk-base.defs. Two output files are created:
+#   /tmp/gdk-2.10-types.defs and /tmp/gdk-2.10.defs.
+#
+# python h2def.py -n WebKit /usr/incude/webkit-1.0/webkit/*.h \
+#            >/tmp/webkit.defs
+#
+# - Outputs all the defs for webkit module, setting the module name to WebKit
+#   and the gtype-id prefix to WEBKIT_ which can't be detected automatically.
+#
 
 import getopt
 import os
@@ -33,13 +88,16 @@ def to_upper_str(name):
     name = _upperstr_pat3.sub(r'\1_\2', name, count=1)
     return string.upper(name)
 
-def typecode(typename):
+def typecode(typename, namespace=None):
     """create a typecode (eg. GTK_TYPE_WIDGET) from a typename"""
+    if namespace:
+      return string.replace(string.upper(namespace) + "_" + to_upper_str(typename[len(namespace):]), '_', '_TYPE_', 1)
+
     return string.replace(to_upper_str(typename), '_', '_TYPE_', 1)
 
 
 # ------------------ Find object definitions -----------------
-
+# Strips the comments from buffer
 def strip_comments(buf):
     parts = []
     lastpos = 0
@@ -57,6 +115,12 @@ def strip_comments(buf):
             break
     return string.join(parts, '')
 
+# Strips the dll API from buffer, for example WEBKIT_API
+def strip_dll_api(buf):
+    pat = re.compile("[A-Z]*_API ")
+    buf = pat.sub("", buf)
+    return buf
+
 obj_name_pat = "[A-Z][a-z]*[A-Z][A-Za-z0-9]*"
 
 split_prefix_pat = re.compile('([A-Z]+[a-z]*)([A-Za-z0-9]+)')
@@ -68,6 +132,9 @@ def find_obj_defs(buf, objdefs=[]):
 
     # filter out comments from buffer.
     buf = strip_comments(buf)
+
+    # filter out dll api
+    buf = strip_dll_api(buf)
 
     maybeobjdefs = []  # contains all possible objects from file
 
@@ -174,6 +241,9 @@ def find_enum_defs(buf, enums=[]):
     # bulk comments
     buf = strip_comments(buf)
 
+    # strip dll api macros
+    buf = strip_dll_api(buf)
+
     # strip # directives
     pat = re.compile(r"""^[#].*?$""", re.MULTILINE)
     buf = pat.sub('', buf)
@@ -209,6 +279,9 @@ def clean_func(buf):
     """
     # bulk comments
     buf = strip_comments(buf)
+
+    # dll api
+    buf = strip_dll_api(buf)
 
     # compact continued lines
     pat = re.compile(r"""\\\n""", re.MULTILINE)
@@ -272,13 +345,14 @@ pointer_pat = re.compile('.*\*$')
 func_new_pat = re.compile('(\w+)_new$')
 
 class DefsWriter:
-    def __init__(self, fp=None, prefix=None, verbose=False,
+    def __init__(self, fp=None, prefix=None, ns=None, verbose=False,
                  defsfilter=None):
         if not fp:
             fp = sys.stdout
 
         self.fp = fp
         self.prefix = prefix
+        self.namespace = ns
         self.verbose = verbose
 
         self._enums = {}
@@ -315,10 +389,14 @@ class DefsWriter:
                     continue
             name = cname
             module = None
-            m = split_prefix_pat.match(cname)
-            if m:
-                module = m.group(1)
-                name = m.group(2)
+            if self.namespace:
+                module = self.namespace
+                name = cname[len(self.namespace):]
+            else:
+                m = split_prefix_pat.match(cname)
+                if m:
+                    module = m.group(1)
+                    name = m.group(2)
             if isflags:
                 fp.write('(define-flags ' + name + '\n')
             else:
@@ -326,7 +404,7 @@ class DefsWriter:
             if module:
                 fp.write('  (in-module "' + module + '")\n')
             fp.write('  (c-name "' + cname + '")\n')
-            fp.write('  (gtype-id "' + typecode(cname) + '")\n')
+            fp.write('  (gtype-id "' + typecode(cname, self.namespace) + '")\n')
             prefix = entries[0]
             for ent in entries:
                 # shorten prefix til we get a match ...
@@ -354,19 +432,23 @@ class DefsWriter:
             if filter:
                 if klass in filter:
                     continue
-            m = split_prefix_pat.match(klass)
-            cmodule = None
-            cname = klass
-            if m:
-                cmodule = m.group(1)
-                cname = m.group(2)
+            if self.namespace:
+                cname = klass[len(self.namespace):]
+                cmodule = self.namespace
+            else:
+                m = split_prefix_pat.match(klass)
+                cname = klass
+                cmodule = None
+                if m:
+                    cmodule = m.group(1)
+                    cname = m.group(2)
             fp.write('(define-object ' + cname + '\n')
             if cmodule:
                 fp.write('  (in-module "' + cmodule + '")\n')
             if parent:
                 fp.write('  (parent "' + parent + '")\n')
             fp.write('  (c-name "' + klass + '")\n')
-            fp.write('  (gtype-id "' + typecode(klass) + '")\n')
+            fp.write('  (gtype-id "' + typecode(klass, self.namespace) + '")\n')
             # should do something about accessible fields
             fp.write(')\n\n')
 
@@ -482,11 +564,12 @@ def main(args):
     onlyobjdefs = False
     separate = False
     modulename = None
+    namespace = None
     defsfilter = None
-    opts, args = getopt.getopt(args[1:], 'vs:m:f:',
+    opts, args = getopt.getopt(args[1:], 'vs:m:n:f:',
                                ['onlyenums', 'onlyobjdefs',
-                                'modulename=', 'separate=',
-                                'defsfilter='])
+                                'modulename=', 'namespace=',
+                                'separate=', 'defsfilter='])
     for o, v in opts:
         if o == '-v':
             verbose = True
@@ -498,6 +581,8 @@ def main(args):
             separate = v
         if o in ('-m', '--modulename'):
             modulename = v
+        if o in ('-n', '--namespace'):
+            namespace = v
         if o in ('-f', '--defsfilter'):
             defsfilter = v
 
@@ -518,8 +603,8 @@ def main(args):
         methods = file(separate + '.defs', 'w')
         types = file(separate + '-types.defs', 'w')
 
-        dw = DefsWriter(methods, prefix=modulename, verbose=verbose,
-                        defsfilter=defsfilter)
+        dw = DefsWriter(methods, prefix=modulename, ns=namespace,
+                        verbose=verbose, defsfilter=defsfilter)
         dw.write_obj_defs(objdefs, types)
         dw.write_enum_defs(enums, types)
         print "Wrote %s-types.defs" % separate
@@ -528,8 +613,8 @@ def main(args):
             dw.write_def(filename)
         print "Wrote %s.defs" % separate
     else:
-        dw = DefsWriter(prefix=modulename, verbose=verbose,
-                        defsfilter=defsfilter)
+        dw = DefsWriter(prefix=modulename, ns=namespace,
+                        verbose=verbose, defsfilter=defsfilter)
 
         if onlyenums:
             dw.write_enum_defs(enums)
