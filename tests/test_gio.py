@@ -580,6 +580,26 @@ class TestInputStream(unittest.TestCase):
                                              50),
                           some_data)
 
+    def testSkip(self):
+        self.stream.skip(2)
+        res = self.stream.read()
+        self.assertEqual(res, "sting")
+        
+    def testSkipAsync(self):
+        def callback(stream, result):
+            try:
+                size = stream.skip_finish(result)
+                self.assertEqual(size, 2)
+                res = stream.read()
+                self.assertEqual(res, "sting")
+            finally:
+                loop.quit()
+        
+        self.stream.skip_async(2, callback)
+
+        loop = glib.MainLoop()
+        loop.run()
+
     def test_read_part(self):
         self.assertEquals(self._read_in_loop(self.stream,
                                              lambda: self.stream.read_part()),
