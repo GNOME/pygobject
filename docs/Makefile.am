@@ -28,6 +28,7 @@ HTML_FILES =					\
 	html/class-giofileenumerator.html	\
 	html/class-giofileicon.html		\
 	html/class-gioicon.html			\
+	html/class-gioinputstream.html		\
 	html/class-gioloadableicon.html		\
         html/class-giomount.html		\
 	html/class-giomountoperation.html	\
@@ -75,6 +76,7 @@ XML_FILES = 					\
 	reference/pygio-fileenumerator.xml	\
 	reference/pygio-fileicon.xml 		\
 	reference/pygio-icon.xml		\
+	reference/pygio-inputstream.xml		\
 	reference/pygio-loadableicon.xml	\
 	reference/pygio-mount.xml		\
 	reference/pygio-mountoperation.xml	\
