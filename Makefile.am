@@ -15,9 +15,13 @@ EXTRA_DIST = 				\
 	pygobject_postinstall.py	\
 	pygtk.py			\
 	dsextras.py			\
+	ChangeLog.pre-2.18		\
 	m4/as-ac-expand.m4		\
 	m4/jhflags.m4			\
 	m4/python.m4
+
+BUILT_EXTRA_DIST = 		\
+	ChangeLog
 
 INCLUDES = -I$(top_srcdir)/gobject $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 
@@ -86,3 +90,31 @@ release-tag:
               $$ROOT \
               svn+ssh://johan@svn.gnome.org/svn/pygobject/tags/PYGOBJECT_$$SVNVERSION
 
+
+.PHONY: ChangeLog
+
+ChangeLog:
+	@echo Creating $@
+	@if test -d "$(srcdir)/.git"; then \
+	  (GIT_DIR=$(top_srcdir)/.git ./missing --run git log PYGOBJECT_2_17_0^^.. --stat) | fmt --split-only > $@.tmp \
+	  && mv -f $@.tmp $@ \
+	  || ($(RM) $@.tmp; \
+	      echo Failed to generate ChangeLog, your ChangeLog may be outdated >&2; \
+	      (test -f $@ || echo git-log is required to generate this file >> $@)); \
+	else \
+	  test -f $@ || \
+	  (echo A git checkout and git-log is required to generate ChangeLog >&2 && \
+	  echo A git checkout and git-log is required to generate this file >> $@); \
+	fi
+
+
+distclean-local:
+	if test $(srcdir) = .; then :; else \
+	    rm -f $(BUILT_EXTRA_DIST); \
+	fi
+
+dist-hook: $(BUILT_EXTRA_DIST)
+	files='$(BUILT_EXTRA_DIST)'; \
+	for f in $$files; do \
+	  if test -f $$f; then d=.; else d=$(srcdir); fi; \
+	  rm -f $(distdir)/$$f && cp $$d/$$f $(distdir) || exit 1; done

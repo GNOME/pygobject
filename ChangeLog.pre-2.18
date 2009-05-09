@@ -1,3 +1,5 @@
+=== ChangeLog discontinued ===
+
 2009-05-04  Siavash Safi  <siavash@siavashs.org>
 
 	Bug 579275 – Patch which removes dll api in headers and adds
