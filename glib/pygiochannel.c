@@ -109,17 +109,9 @@ py_io_channel_set_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwar
 }
 
 static PyObject*
-py_io_channel_get_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_buffer_size(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
-    int size;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:glib.IOChannel.get_buffer_size", kwlist))
-        return NULL;
-	
-    size = g_io_channel_get_buffer_size(self->channel);
-    
-    return _PyLong_FromLong(size);
+    return _PyLong_FromLong(g_io_channel_get_buffer_size(self->channel));
 }
 
 static PyObject*
@@ -138,17 +130,9 @@ py_io_channel_set_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject*
-py_io_channel_get_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_buffered(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
-    int buffered;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, ":glib.IOChannel.get_buffered", kwlist))
-        return NULL;
-	
-    buffered = g_io_channel_get_buffered(self->channel);
-    
-    return _PyLong_FromLong(buffered);
+    return _PyLong_FromLong(g_io_channel_get_buffered(self->channel));
 }
 
 static PyObject*
@@ -170,15 +154,9 @@ py_io_channel_set_encoding(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject*
-py_io_channel_get_encoding(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_encoding(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
-    const char* encoding;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, ":glib.IOChannel.get_encoding", kwlist))
-        return NULL;
-	
-    encoding = g_io_channel_get_encoding(self->channel);
+    const char* encoding = g_io_channel_get_encoding(self->channel);
     
     if (encoding == NULL) {
 	Py_INCREF(Py_None);
@@ -322,15 +300,10 @@ normal_exit:
 }
 
 static PyObject*
-py_io_channel_flush(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_flush(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
     GError* error = NULL;
     GIOStatus status;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, ":glib.IOChannel.flush",
-                                     kwlist))
-        return NULL;
 	
     pyglib_unblock_threads();
     status = g_io_channel_flush(self->channel, &error);
@@ -361,31 +334,15 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject*
-py_io_channel_get_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_flags(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
-    GIOFlags flags;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, ":glib.IOChannel.get_flags",
-                                     kwlist))
-        return NULL;
-	
-    flags = g_io_channel_get_flags(self->channel);
-    return _PyLong_FromLong(flags);
+    return _PyLong_FromLong(g_io_channel_get_flags(self->channel));
 }
 
 static PyObject*
-py_io_channel_get_buffer_condition(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_buffer_condition(PyGIOChannel* self)
 {
-    static char *kwlist[] = { NULL };
-    GIOCondition cond;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, ":glib.IOChannel.get_buffer_condition",
-                                     kwlist))
-        return NULL;
-	
-    cond = g_io_channel_get_buffer_condition(self->channel);
-    return _PyLong_FromLong(cond);
+    return _PyLong_FromLong(g_io_channel_get_buffer_condition(self->channel));
 }
 
 static PyObject*
@@ -404,7 +361,7 @@ py_io_channel_set_close_on_unref(PyGIOChannel* self, PyObject *args, PyObject *k
 }
 
 static PyObject*
-py_io_channel_get_close_on_unref(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
+py_io_channel_get_close_on_unref(PyGIOChannel* self)
 {
     if (g_io_channel_get_close_on_unref(self->channel)) {
         Py_INCREF(Py_True);
@@ -686,23 +643,23 @@ static PyMemberDef py_io_channel_members[] = {
 
 static PyMethodDef py_io_channel_methods[] = {
     { "close", (PyCFunction)py_io_channel_shutdown, METH_KEYWORDS },
-    { "flush", (PyCFunction)py_io_channel_flush, METH_KEYWORDS },
+    { "flush", (PyCFunction)py_io_channel_flush, METH_NOARGS },
     { "set_encoding", (PyCFunction)py_io_channel_set_encoding, METH_KEYWORDS },
-    { "get_encoding", (PyCFunction)py_io_channel_get_encoding, METH_KEYWORDS },
+    { "get_encoding", (PyCFunction)py_io_channel_get_encoding, METH_NOARGS },
     { "set_buffered", (PyCFunction)py_io_channel_set_buffered, METH_KEYWORDS },
-    { "get_buffered", (PyCFunction)py_io_channel_get_buffered, METH_KEYWORDS },
+    { "get_buffered", (PyCFunction)py_io_channel_get_buffered, METH_NOARGS },
     { "set_buffer_size", (PyCFunction)py_io_channel_set_buffer_size, METH_KEYWORDS },
-    { "get_buffer_size", (PyCFunction)py_io_channel_get_buffer_size, METH_KEYWORDS },
+    { "get_buffer_size", (PyCFunction)py_io_channel_get_buffer_size, METH_NOARGS },
     { "read", (PyCFunction)py_io_channel_read_chars, METH_KEYWORDS },
     { "readline", (PyCFunction)py_io_channel_read_line, METH_KEYWORDS },
     { "readlines", (PyCFunction)py_io_channel_read_lines, METH_KEYWORDS },
     { "write", (PyCFunction)py_io_channel_write_chars, METH_KEYWORDS },
     { "writelines", (PyCFunction)py_io_channel_write_lines, METH_KEYWORDS },
     { "set_flags", (PyCFunction)py_io_channel_set_flags, METH_KEYWORDS },
-    { "get_flags", (PyCFunction)py_io_channel_get_flags, METH_KEYWORDS },
-    { "get_buffer_condition", (PyCFunction)py_io_channel_get_buffer_condition, METH_KEYWORDS },
-    { "set_close_on_unref", (PyCFunction)py_io_channel_set_close_on_unref, METH_NOARGS },
-    { "get_close_on_unref", (PyCFunction)py_io_channel_get_close_on_unref, METH_KEYWORDS },
+    { "get_flags", (PyCFunction)py_io_channel_get_flags, METH_NOARGS },
+    { "get_buffer_condition", (PyCFunction)py_io_channel_get_buffer_condition, METH_NOARGS },
+    { "set_close_on_unref", (PyCFunction)py_io_channel_set_close_on_unref, METH_KEYWORDS },
+    { "get_close_on_unref", (PyCFunction)py_io_channel_get_close_on_unref, METH_NOARGS },
     { "add_watch", (PyCFunction)py_io_channel_add_watch, METH_KEYWORDS },
     { "seek", (PyCFunction)py_io_channel_seek, METH_KEYWORDS },
 #ifdef G_OS_WIN32
