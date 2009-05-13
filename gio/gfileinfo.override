@@ -1,8 +1,9 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * pygobject - Python bindings for GObject
  * Copyright (C) 2008  Johan Dahlin
+ *               2009  Gian Mario Tagliaretti
  *
- *   gfile.override: module overrides for GInputStream
+ *   gfileinfo.override: module overrides for GFileInfo
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +20,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  * USA
  */
+
+%%
+headers
+
+#ifndef G_TYPE_FILE_ATTRIBUTE_MATCHER
+#define G_TYPE_FILE_ATTRIBUTE_MATCHER (_g_file_attribute_matcher_get_type ())
+
+static GType _g_file_attribute_matcher_get_type (void)
+{
+  static GType our_type = 0;
+  
+  if (our_type == 0)
+    our_type = g_boxed_type_register_static ("GFileAttributeMatcher",
+                                (GBoxedCopyFunc)g_file_attribute_matcher_ref,
+                                (GBoxedFreeFunc)g_file_attribute_matcher_unref);
+
+  return our_type;
+}
+#endif
+
 %%
 override g_file_info_list_attributes kwargs
 static PyObject *
@@ -66,5 +87,4 @@ _wrap_g_file_info_get_modification_time(PyGObject *self, PyObject *unused)
 
 /* GFileInfo.get_attribute_data: No ArgType for GFileAttributeType* */
 /* GFileInfo.set_attribute: No ArgType for gpointer */
-/* GFileInfo.set_attribute_mask: No ArgType for GFileAttributeMatcher* */
 /* GFileInfo.set_modification_time: No ArgType for GTimeVal* */

@@ -245,6 +245,8 @@ include
 ignore-glob
   *_get_type
   *free
+  *_ref
+  *_unref
   g_async_result_get_user_data
   g_file_new_from_commandline_arg
   g_file_new_from_path

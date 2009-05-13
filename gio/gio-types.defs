@@ -66,6 +66,13 @@
   (gtype-id "G_TYPE_VOLUME")
 )
 
+; boxed definitions ...
+
+(define-boxed FileAttributeMatcher
+  (in-module "gio")
+  (c-name "GFileAttributeMatcher")
+  (gtype-id "G_TYPE_FILE_ATTRIBUTE_MATCHER")
+)
 
 ; object definitions ...
 
