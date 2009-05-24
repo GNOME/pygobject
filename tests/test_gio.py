@@ -816,6 +816,26 @@ class TestOutputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+    
+    def testSpliceAsync(self):
+        _f = open("stream.txt", "w+")
+        _f.write("testing")
+        _f.seek(0)
+        instream = gio.unix.InputStream(_f.fileno(), False)
+        
+        def callback(stream, result):
+            try:
+                size = stream.splice_finish(result)
+                self.assertEqual(size, 7)
+                
+            finally:
+                os.unlink("stream.txt")
+                loop.quit()
+
+        self.stream.splice_async(instream, callback)
+
+        loop = glib.MainLoop()
+        loop.run()
 
 class TestMemoryOutputStream(unittest.TestCase):
     def setUp(self):
