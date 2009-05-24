@@ -1,0 +1,140 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giooutputstream">
+    <refnamediv>
+        <refname>gio.OutputStream</refname>
+        <refpurpose>Base class for implementing streaming input</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.OutputStream</classname></ooclass>
+        <ooclass><classname><link linkend="class-gobject">gobject.GObject</link></classname></ooclass>
+
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--clear-pending">clear_pending</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--close">close</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--close-async">close_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--close-finish">close_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--flush">flush</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--flush-async">flush_async</link></methodname>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--flush-finish">flush_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--has-pending">has_pending</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--is-closed">is_closed</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--set-pending">set_pending</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--splice">splice</link></methodname>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.OUTPUT_STREAM_SPLICE_NONE</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--splice-async">splice_async</link></methodname>
+        <methodparam><parameter role="keyword">source</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">flags</parameter><initializer>gio.OUTPUT_STREAM_SPLICE_NONE</initializer></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--splice-finish">splice_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--write">write</link></methodname>
+        <methodparam><parameter role="keyword">buffer</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--write-async">write_async</link></methodname>
+        <methodparam><parameter role="keyword">buffer</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giooutputstream--write-finish">write_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+
+    </classsynopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
+  +-- <link linkend="class-giooutputstream">gio.OutputStream</link>
+</synopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>
+            has functions to write from a stream (
+            <methodname><link linkend="method-giooutputstream--write">gio.OutputStream.write</link></methodname>()
+            ), to close a stream (
+            <methodname><link linkend="method-giooutputstream--close">gio.OutputStream.close</link></methodname>()
+            ) and to flush pending writes (
+            <methodname><link linkend="method-giooutputstream--flush">gio.OutputStream.flush</link></methodname>()
+            ).
+        </para>
+        <para>
+            To copy the content of an input stream to an output stream without manually
+            handling the reads and writes, use
+            <methodname><link linkend="method-giooutputstream--splice">gio.OutputStream.splice</link></methodname>().
+        </para>
+        <para>
+            All of these functions have async variants too.
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+        <para> Unfinished section, you may want to see the relevant C API docs for methods descriptions.</para>
+    </refsect1>
+</refentry>

@@ -34,6 +34,7 @@ HTML_FILES =					\
 	html/class-gioloadableicon.html		\
         html/class-giomount.html		\
 	html/class-giomountoperation.html	\
+	html/class-giooutputstream.html		\
 	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
 	html/class-giothemedicon.html		\
@@ -84,6 +85,7 @@ XML_FILES = 					\
 	reference/pygio-loadableicon.xml	\
 	reference/pygio-mount.xml		\
 	reference/pygio-mountoperation.xml	\
+	reference/pygio-outputstream.xml	\
 	reference/pygio-seekable.xml		\
 	reference/pygio-simpleasyncresult.xml	\
 	reference/pygio-themedicon.xml		\
