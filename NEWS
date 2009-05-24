@@ -1,3 +1,17 @@
+2.18.0 24-may-2009
+        - Improve gio docs with some more classes (Gian)
+        - Wrap gio.OutputStream.splice_async() (Gian)
+        - Add Python ver into installed libpyglib name (Emilio Pozuelo Monfort)
+        - Wrap gio.OutputStream.flush_async() (Gian)
+        - Use 'Requires.private' for libffi in '.pc' files (Josselin Mouette)
+        - Add wrapper for gio.FileAttributeMatcher (Gian)
+        - Mark relevant glib.IOChannel methods as METH_NOARGS (Paul)
+        - Retire hand-written ChangeLog; autocreate from Git history (Paul)
+        - Wrap gio.InputStream.skip_async() (Gian)
+        - Add in codegen -n --namespace option and the code to remove dll
+          API in headers, added documentation (Siavash Safi)
+        - Properly mark glib.get_user_special_dir() as a keywords method (Paul)
+
 2.17.0 30-apr-2009
         - Write a good part of the docs for gio (Gian)
         - Wrap g_mount_guess_content_type g_mount_guess_content_type_finish
