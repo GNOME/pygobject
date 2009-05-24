@@ -267,6 +267,32 @@
   )
 )
 
+(define-function app_info_reset_type_associations
+  (c-name "g_app_info_reset_type_associations")
+  (return-type "none")
+  (parameters
+    '("const-char*" "content_type")
+  )
+)
+
+(define-method can_delete
+  (of-object "GAppInfo")
+  (c-name "g_app_info_can_delete")
+  (return-type "gboolean")
+)
+
+(define-method delete
+  (of-object "GAppInfo")
+  (c-name "g_app_info_delete")
+  (return-type "gboolean")
+)
+
+(define-method get_commandline
+  (of-object "GAppInfo")
+  (c-name "g_app_info_get_commandline")
+  (return-type "const-char*")
+)
+
 
 
 ;; From gasynchelper.h
@@ -797,6 +823,53 @@
     '("const-gchar*" "stop_chars")
     '("gsize*" "length")
     '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
+    '("GError**" "error")
+  )
+)
+
+(define-method read_until_async
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_until_async")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "stop_chars")
+    '("gint" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method read_until_finish
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_until_finish")
+  (return-type "char*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("gsize*" "length")
+    '("GError**" "error")
+  )
+)
+
+(define-method read_line_async
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_line_async")
+  (return-type "none")
+  (parameters
+    '("gint" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method read_line_finish
+  (of-object "GDataInputStream")
+  (c-name "g_data_input_stream_read_line_finish")
+  (return-type "char*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("gsize*" "length")
     '("GError**" "error")
   )
 )
@@ -3540,6 +3613,21 @@
   )
 )
 
+(define-method to_string
+  (of-object "GIcon")
+  (c-name "g_icon_to_string")
+  (return-type "gchar*")
+)
+
+(define-function icon_new_for_string
+  (c-name "g_icon_new_for_string")
+  (return-type "GIcon*")
+  (parameters
+    '("const-gchar*" "str")
+    '("GError**" "error")
+  )
+)
+
 
 
 ;; From ginputstream.h
@@ -4330,6 +4418,24 @@
     '("GCancellable*" "cancellable")
     '("GError**" "error")
   )
+)
+
+(define-method is_shadowed
+  (of-object "GMount")
+  (c-name "g_mount_is_shadowed")
+  (return-type "gboolean")
+)
+
+(define-method shadow
+  (of-object "GMount")
+  (c-name "g_mount_shadow")
+  (return-type "none")
+)
+
+(define-method unshadow
+  (of-object "GMount")
+  (c-name "g_mount_unshadow")
+  (return-type "none")
 )
 
 

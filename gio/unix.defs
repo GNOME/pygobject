@@ -300,6 +300,28 @@
   )
 )
 
+(define-method set_close_fd
+  (of-object "GUnixInputStream")
+  (c-name "g_unix_input_stream_set_close_fd")
+  (return-type "none")
+  (parameters
+    '("gboolean" "close_fd")
+  )
+)
+
+(define-method get_close_fd
+  (of-object "GUnixInputStream")
+  (c-name "g_unix_input_stream_get_close_fd")
+  (return-type "gboolean")
+)
+
+(define-method get_fd
+  (of-object "GUnixInputStream")
+  (c-name "g_unix_input_stream_get_fd")
+  (return-type "gint")
+)
+
+
 
 ;; From gunixoutputstream.h
 
@@ -318,13 +340,23 @@
   )
 )
 
+(define-method set_close_fd
+  (of-object "GUnixOutputStream")
+  (c-name "g_unix_output_stream_set_close_fd")
+  (return-type "none")
+  (parameters
+    '("gboolean" "close_fd")
+  )
+)
 
+(define-method get_close_fd
+  (of-object "GUnixOutputStream")
+  (c-name "g_unix_output_stream_get_close_fd")
+  (return-type "gboolean")
+)
 
-;; From gunixvolume.h
-
-
-
-;; From gunixvolumemonitor.h
-
-
-
+(define-method get_fd
+  (of-object "GUnixOutputStream")
+  (c-name "g_unix_output_stream_get_fd")
+  (return-type "gint")
+)
