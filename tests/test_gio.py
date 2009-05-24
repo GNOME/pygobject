@@ -804,7 +804,18 @@ class TestOutputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+        
+    def testFlushAsync(self):
+        def callback(stream, result):
+            try:
+                self.failUnless(stream.flush_finish(result))
+            finally:
+                loop.quit()
 
+        self.stream.flush_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
 
 class TestMemoryOutputStream(unittest.TestCase):
     def setUp(self):
