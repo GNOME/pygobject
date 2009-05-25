@@ -74,6 +74,10 @@
         <methodparam><parameter role="keyword">cancellable</parameter><initializer><literal>None</literal></initializer></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
+        <methodname><link linkend="method-giomount--is-shadowed">is_shadowed</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
         <methodname><link linkend="method-giomount--remount">remount</link></methodname>
         <methodparam><parameter role="keyword">callback</parameter></methodparam>
         <methodparam><parameter role="keyword">flags</parameter><initializer><literal>gio.MOUNT_UNMOUNT_NONE</literal></initializer></methodparam>
@@ -86,6 +90,10 @@
         <methodparam><parameter role="keyword">result</parameter></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
+        <methodname><link linkend="method-giomount--shadow">shadow</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
         <methodname><link linkend="method-giomount--unmount">unmount</link></methodname>
         <methodparam><parameter role="keyword">callback</parameter></methodparam>
         <methodparam><parameter role="keyword">flags</parameter><initializer><literal>gio.MOUNT_UNMOUNT_NONE</literal></initializer></methodparam>
@@ -95,6 +103,10 @@
     <methodsynopsis language="python">
         <methodname><link linkend="method-giomount--unmount-finish">unmount_finish</link></methodname>
         <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giomount--unshadow">unshadow</link></methodname>
+        <methodparam></methodparam>
     </methodsynopsis>
     
     </classsynopsis>
@@ -124,6 +136,16 @@
         <para><link linkend="signal-prototypes-gobject">gobject.GObject Signal Prototypes</link></para>
   
         <variablelist>
+            <varlistentry>
+                <term><link linkend="signal-giomount--aborted">"aborted"</link></term>
+                <listitem>
+                    <methodsynopsis language="python"><methodname>callback</methodname>
+                        <methodparam><parameter>mount</parameter></methodparam>
+                        <methodparam><parameter>user_param1</parameter></methodparam>
+                        <methodparam><parameter>...</parameter></methodparam>
+                    </methodsynopsis>
+                </listitem>
+            </varlistentry>
             <varlistentry>
                 <term><link linkend="signal-giomount--changed">"changed"</link></term>
                 <listitem>
@@ -565,6 +587,58 @@
                 for the asynchronous version.
             </para>
         </refsect2>
+        
+        <refsect2 id="method-giomount--is-shadowed">
+            <title>gio.Mount.is_shadowed</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>is_shadowed</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if mount is shadowed.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>is_shadowed</methodname>() method determines if mount
+                is shadowed. Applications or libraries should avoid displaying mount
+                in the user interface if it is shadowed.
+            </para>
+            <para>
+                A mount is said to be shadowed if there exists one or more user visible
+                objects (currently
+                <link linkend="class-giomount"><classname>gio.Mount</classname></link>
+                objects) with a root that is inside the root of mount.
+            </para>
+            <para>
+                One application of shadow mounts is when exposing a single file system
+                that is used to address several logical volumes. In this situation, a
+                <link linkend="class-giovolumemonitor"><classname>gio.VolumeMonitor</classname></link>
+                implementation would create two
+                <link linkend="class-giovolume"><classname>gio.Volume</classname></link>
+                objects (for example, one for the camera functionality of the device
+                and one for a SD card reader on the device) with activation URIs
+                gphoto2://[usb:001,002]/store1/ and gphoto2://[usb:001,002]/store2/.
+                When the underlying mount (with root gphoto2://[usb:001,002]/) is
+                mounted, said
+                <link linkend="class-giovolumemonitor"><classname>gio.VolumeMonitor</classname></link>
+                implementation would create two
+                <link linkend="class-giomount"><classname>gio.Mount</classname></link>
+                objects (each with their root matching the corresponding volume
+                activation root) that would shadow the original mount.
+            </para>
+            <para>
+                The proxy monitor in GVfs 2.26 and later, automatically creates and
+                manage shadow mounts (and shadows the underlying mount) if the activation
+                root on a <link linkend="class-giovolume"><classname>gio.Volume</classname></link>
+                is set.
+            </para>
+        </refsect2>
 
         <refsect2 id="method-giomount--remount">
             <title>gio.Mount.remount</title>
@@ -651,6 +725,29 @@
                 The <methodname>remount_finish</methodname>() method finishes remounting a mount.
             </para>
         </refsect2>
+        
+        <refsect2 id="method-giomount--shadow">
+            <title>gio.Mount.shadow</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>shadow</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            </variablelist>
+    
+            <para>
+                The <methodname>shadow</methodname>() method increments the shadow
+                count on mount. Usually used by
+                <link linkend="class-giovolumemonitor"><classname>gio.VolumeMonitor</classname></link>
+                implementations when creating a shadow mount for mount, see
+                <methodname><link linkend="method-giomount--is-shadowed">gio.Mount.is_shadowed</link></methodname>()
+                for more information. The caller will need to emit the "changed"
+                signal on mount manually.
+            </para>
+            
+        </refsect2>
 
         <refsect2 id="method-giomount--unmount">
             <title>gio.Mount.unmount</title>
@@ -730,11 +827,70 @@
                 The <methodname>unmount_finish</methodname>() method finishes unmounting a mount.
             </para>
         </refsect2>
+        
+        <refsect2 id="method-giomount--unshadow">
+            <title>gio.Mount.unshadow</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>unshadow</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+            </variablelist>
+    
+            <para>
+                The <methodname>unshadow</methodname>() method decrements the shadow
+                count on mount. Usually used by
+                <link linkend="class-giovolumemonitor"><classname>gio.VolumeMonitor</classname></link>
+                implementations when destroying a shadow mount for mount, see
+                <methodname><link linkend="method-giomount--is-shadowed">gio.Mount.is_shadowed</link></methodname>()
+                for more information. The caller will need to emit the "changed"
+                signal on mount manually.
+            </para>
+            
+        </refsect2>
     </refsect1>
 
     <refsect1>
         <title>Signals</title>
     
+        <refsect2 id="signal-giomount--aborted">
+            <title>The "aborted" gio.Mount Signal</title>
+      
+            <programlisting><methodsynopsis language="python"><methodname>callback</methodname>
+                <methodparam><parameter>mount</parameter></methodparam>
+                <methodparam><parameter>user_param1</parameter></methodparam>
+                <methodparam><parameter>...</parameter></methodparam>
+            </methodsynopsis></programlisting>
+      
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>mount</parameter>&nbsp;:</term>
+                    <listitem><simpara>the mount</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_param1</parameter>&nbsp;:</term>
+                    <listitem><simpara>the first user parameter (if any) specified
+                    with the <link
+                    linkend="method-gobject--connect"><methodname>connect</methodname>()</link>
+                    method</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>...</parameter>&nbsp;:</term>
+                    <listitem><simpara>additional user parameters (if any)</simpara></listitem>
+                </varlistentry>
+            </variablelist>
+      
+            <para>
+                Emitted by the backend when e.g. a device becomes unavailable while a
+                mount operation is in progress.
+            </para>
+            <para>
+                Implementations of <link linkend="class-giomountoperation"><classname>gio.MountOperation</classname></link>
+                should handle this signal by dismissing open password dialogs.
+            </para>
+        </refsect2>
         <refsect2 id="signal-giomount--changed">
             <title>The "changed" gio.Mount Signal</title>
       

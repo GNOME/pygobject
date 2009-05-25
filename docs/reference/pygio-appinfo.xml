@@ -27,7 +27,15 @@
         <methodparam><parameter role="keyword">content_type</parameter></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
+        <methodname><link linkend="method-gioappinfo--can-delete">can_delete</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
         <methodname><link linkend="method-gioappinfo--can-remove-supports-type">can_remove_supports_type</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-gioappinfo--delete">delete</link></methodname>
         <methodparam></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
@@ -37,6 +45,10 @@
     <methodsynopsis language="python">
         <methodname><link linkend="method-gioappinfo--equal">equal</link></methodname>
         <methodparam><parameter role="keyword">appinfo2</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-gioappinfo--get-commandline">get_commandline</link></methodname>
+        <methodparam></methodparam>
     </methodsynopsis>
     <methodsynopsis language="python">
         <methodname><link linkend="method-gioappinfo--get-description">get_description</link></methodname>
@@ -111,6 +123,9 @@
 </methodsynopsis><methodsynopsis language="python">
     <methodname><link linkend="function-gio--app-info-get-default-for-uri-scheme">gio.app_info_get_default_for_uri_scheme</link></methodname>
     <methodparam><parameter role="keyword">uri_scheme</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--app-info-reset-type-association">gio.app_info_reset_type_association</link></methodname>
+    <methodparam><parameter role="keyword">content_type</parameter></methodparam>
 </methodsynopsis></programlisting>
 
     </refsect1>
@@ -233,6 +248,30 @@
             </para>
         </refsect2>
         
+        <refsect2 id="method-gioappinfo--can-delete">
+            <title>gio.AppInfo.can_delete</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>can_delete</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if appinfo can be deleted.
+		    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>can_delete</methodname>() method obtains the information
+		whether the <link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>
+		can be deleted. See
+		<methodname><link linkend="method-gioappinfo--delete">gio.AppInfo.delete</link></methodname>().
+            </para>
+        </refsect2>
+        
         <refsect2 id="method-gioappinfo--can-remove-supports-type">
             <title>gio.AppInfo.can_remove_supports_type</title>
 
@@ -254,6 +293,34 @@
                 The <methodname>can_remove_supports_type</methodname>() method checks if a
                 supported content type can be removed from an application.
             </para>
+        </refsect2>
+        
+        <refsect2 id="method-gioappinfo--delete">
+            <title>gio.AppInfo.delete</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>delete</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if appinfo has been deleted.
+		    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>delete</methodname>() method tries to delete an
+		<link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>.
+            </para>
+	    <para>
+		On some platforms, there may be a difference between user-defined
+		<link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>s
+		which can be deleted, and system-wide ones which cannot. See
+		<methodname><link linkend="method-gioappinfo--can-delete">gio.AppInfo.can_delete</link></methodname>().
+	    </para>
         </refsect2>
         
         <refsect2 id="method-gioappinfo--dup">
@@ -302,6 +369,29 @@
             <para>
                 The <methodname>equal</methodname>() method checks if two
                 <link linkend="class-gioappinfo"><classname>gio.AppInfo</classname></link>s are equal.
+            </para>
+        </refsect2>
+        
+        <refsect2 id="method-gioappinfo--get-commandline">
+            <title>gio.AppInfo.get_commandline</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_commandline</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a string containing the appinfo's commandline, or
+		    <literal>None</literal> if this information is not available.
+		    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_commandline</methodname>() method gets the
+		commandline with which the application will be started.
             </para>
         </refsect2>
         
@@ -773,6 +863,31 @@
                 the default application for launching applications using this URI scheme. A URI
                 scheme is the initial part of the URI, up to but not including the
                 ':', e.g. "http", "ftp" or "sip".
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--app-info-reset-type-association">
+            <title>gio.app_info_reset_type_association</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>app_info_reset_type_association</methodname>
+                <methodparam><parameter role="keyword">content_type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>content_type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type</simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>app_info_reset_type_association</methodname>() function
+		removes all changes to the type associations done by
+		<methodname><link linkend="method-gioappinfo--set-as-default-for-type">set_as_default_for_type</link></methodname>(),
+		<methodname><link linkend="method-gioappinfo--set-as-default-for-extension">set_as_default_for_extension</link></methodname>(),
+		<methodname><link linkend="method-gioappinfo--add-supports-type">add_supports_type</link></methodname>() or
+		<methodname><link linkend="method-gioappinfo--remove-supports-type">remove_supports_type</link></methodname>().
             </para>
         </refsect2>
     </refsect1>
