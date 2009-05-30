@@ -790,7 +790,7 @@
 )
 
 ;;
-;; wrapped in ginputstream.override
+;; wrapped in gdatainputstream.override
 ;;
 (define-method read_line
   (of-object "GDataInputStream")
@@ -808,7 +808,7 @@
 )
 
 ;;
-;; wrapped in ginputstream.override
+;; wrapped in gdatainputstream.override
 ;;
 (define-method read_until
   (of-object "GDataInputStream")

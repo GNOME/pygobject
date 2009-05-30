@@ -691,19 +691,60 @@ class TestDataInputStream(unittest.TestCase):
         self.data_stream = gio.DataInputStream(self.base_stream)
 
     def test_read_line(self):
-        # Currently fails because GIO itself is buggy.  See bug 547481.
-        return
         self.base_stream.add_data('foo\nbar\n\nbaz')
-        self.assertEquals('foo\n', self.data_stream.read_line())
-        self.assertEquals('bar\n', self.data_stream.read_line())
-        self.assertEquals('\n', self.data_stream.read_line())
+        self.assertEquals('foo', self.data_stream.read_line())
+        self.assertEquals('bar', self.data_stream.read_line())
+        self.assertEquals('', self.data_stream.read_line())
         self.assertEquals('baz', self.data_stream.read_line())
+
+    def test_read_line_async(self):
+        def do_read_line_async():
+            loop = glib.MainLoop()
+            line = []
+
+            def callback(stream, result):
+                try:
+                    line.append(stream.read_line_finish(result))
+                finally:
+                    loop.quit()
+
+            self.data_stream.read_line_async(callback)
+            loop.run()
+            return line[0]
+
+        self.base_stream.add_data('foo\nbar\n\nbaz')
+        self.assertEquals('foo', do_read_line_async())
+        self.assertEquals('bar', do_read_line_async())
+        self.assertEquals('', do_read_line_async())
+        self.assertEquals('baz', do_read_line_async())
 
     def test_read_until(self):
         self.base_stream.add_data('sentence.end of line\nthe rest')
         self.assertEquals('sentence', self.data_stream.read_until('.!?'))
         self.assertEquals('end of line', self.data_stream.read_until('\n\r'))
         self.assertEquals('the rest', self.data_stream.read_until('#$%^&'))
+
+    def test_read_until_async(self):
+        def do_read_until_async(stop_chars):
+            loop = glib.MainLoop()
+            data = []
+
+            def callback(stream, result):
+                try:
+                    data.append(stream.read_until_finish(result))
+                finally:
+                    loop.quit()
+
+            self.data_stream.read_until_async(stop_chars, callback)
+            loop.run()
+            return data[0]
+
+        # Note the weird difference between synchronous and
+        # asynchronous version.  See bug #584284.
+        self.base_stream.add_data('sentence.end of line\nthe rest')
+        self.assertEquals('sentence', do_read_until_async('.!?'))
+        self.assertEquals('.end of line', do_read_until_async('\n\r'))
+        self.assertEquals('\nthe rest', do_read_until_async('#$%^&'))
 
 
 class TestMemoryInputStream(unittest.TestCase):
