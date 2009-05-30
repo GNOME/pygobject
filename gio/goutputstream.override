@@ -259,8 +259,8 @@ _wrap_g_output_stream_flush_async(PyGObject *self,
 override g_output_stream_splice_async kwargs
 static PyObject *
 _wrap_g_output_stream_splice_async(PyGObject *self,
-                                  PyObject *args,
-                                  PyObject *kwargs)
+                                   PyObject *args,
+                                   PyObject *kwargs)
 {
     static char *kwlist[] = { "source", "callback", "flags", "io_priority",
                               "cancellable", "user_data", NULL };
@@ -276,12 +276,12 @@ _wrap_g_output_stream_splice_async(PyGObject *self,
     notify = pygio_notify_new();
   
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O!O|iOO:OutputStream.splice_async",
+                                     "O!O|OiOO:OutputStream.splice_async",
                                      kwlist,
                                      &PyGInputStream_Type,
                                      &source,
                                      &notify->callback,
-                                     &flags,
+                                     &py_flags,
                                      &io_priority,
                                      &pycancellable,
                                      &notify->data))
