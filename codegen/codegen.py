@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import getopt
 import keyword
 import os

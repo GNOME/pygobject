@@ -4,27 +4,28 @@ bin_SCRIPTS = pygobject-codegen-$(PLATFORM_VERSION)
 
 codegendir = $(pkgdatadir)/$(PLATFORM_VERSION)/codegen
 
-codegen_PYTHON = \
-	__init__.py \
-	argtypes.py \
-	reversewrapper.py \
+codegen_SCRIPTS = \
 	code-coverage.py \
 	codegen.py \
-	definitions.py \
+	createdefs.py \
 	defsconvert.py \
 	defsgen.py \
-	defsparser.py \
-	docextract.py \
 	docextract_to_xml.py \
 	docgen.py \
 	h2def.py \
-	defsgen.py \
-	createdefs.py \
 	mergedefs.py \
 	missingdefs.py \
 	mkskel.py \
-	override.py \
 	scanvirtuals.py \
 	scmexpr.py
 
-EXTRA_DIST = README.defs pygobject-codegen-$(PLATFORM_VERSION).in
+codegen_PYTHON = \
+	__init__.py \
+	argtypes.py \
+	definitions.py \
+	defsparser.py \
+	docextract.py \
+	override.py \
+	reversewrapper.py
+
+EXTRA_DIST = $(codegen_SCRIPTS) README.defs pygobject-codegen-$(PLATFORM_VERSION).in
