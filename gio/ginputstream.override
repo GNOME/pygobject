@@ -230,7 +230,7 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
     PyGIONotify *notify;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O!:GInputStream.read_finish",
+                                     "O!:gio.InputStream.read_finish",
                                      kwlist, &PyGAsyncResult_Type, &result))
         return NULL;
 

@@ -70,7 +70,7 @@ _wrap_g_file_enumerator_next_files_async(PyGObject *self, PyObject *args, PyObje
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "iO|iOO:GFileEnumerator.enumerate_children_async",
+				     "iO|iOO:gio.FileEnumerator.enumerate_next_files_async",
 				     kwlist,
 				     &num_files,
 				     &notify->callback,
@@ -113,7 +113,7 @@ _wrap_g_file_enumerator_next_files_finish(PyGObject *self, PyObject *args, PyObj
     PyObject *ret;
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "O!:GFileEnumerator.next_files_finish",
+				     "O!:gio.FileEnumerator.next_files_finish",
 				     kwlist,
 				     &PyGAsyncResult_Type, &result))
         return NULL;
@@ -153,7 +153,7 @@ _wrap_g_file_enumerator_close_async(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O|iOO:GFileEnumerator.close_async",
+                                     "O|iOO:gio.FileEnumerator.close_async",
                                      kwlist,
                                      &notify->callback,
                                      &io_priority,

@@ -81,20 +81,20 @@ _wrap__file_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     n_kwargs = kwargs != NULL ? PyDict_Size(kwargs) : 0;
 
     if (n_args == 1 && n_kwargs == 0) {
-	if (!PyArg_ParseTuple(args, "s:GFile", &arg))
+	if (!PyArg_ParseTuple(args, "s:gio.File.__init__", &arg))
 	    return NULL;
 	file = g_file_new_for_commandline_arg(arg);
     } else if (n_args == 0 && n_kwargs == 1) {
 	if (PyDict_GetItemString(kwargs, "path")) {
 	    char *kwlist[] = { "path", NULL };
 	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-					     "s:gio.File", kwlist, &arg))
+					     "s:gio.File.__init__", kwlist, &arg))
 		return NULL;
 	    file = g_file_new_for_path(arg);
 	} else if (PyDict_GetItemString(kwargs, "uri")) {
 	    char *kwlist[] = { "uri", NULL };
 	    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-					     "s:gio.File", kwlist, &arg))
+					     "s:gio.File.__init__", kwlist, &arg))
 		return NULL;
 	    file = g_file_new_for_uri(arg);
 	} else {
@@ -313,7 +313,7 @@ _wrap_g_file_enumerate_children_async(PyGObject *self, PyObject *args, PyObject 
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "sO|OiOO:GFile.enumerate_children_async",
+				     "sO|OiOO:gio.File.enumerate_children_async",
 				     kwlist,
 				     &attributes,
 				     &notify->callback,
@@ -742,7 +742,7 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
     PyGObject *pycancellable = NULL;
     GFileAttributeType type;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"sOO|OO:GFile.set_attribute",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"sOO|OO:gio.File.set_attribute",
                                      kwlist, &attribute, &py_type, &value_p,
                                      &py_flags, &pycancellable))
         return NULL;
@@ -784,7 +784,7 @@ _wrap_g_file_query_settable_attributes(PyGObject *self,
     PyObject *py_ret;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|O:GFile.query_settable_attributes",
+                                     "|O:gio.File.query_settable_attributes",
                                      kwlist, &pycancellable))
         return NULL;
 
@@ -830,7 +830,7 @@ _wrap_g_file_query_writable_namespaces(PyGObject *self,
     PyObject *py_ret;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|O:GFile.query_writable_namespaces",
+                                     "|O:gio.File.query_writable_namespaces",
                                      kwlist, &pycancellable))
         return NULL;
 
@@ -1413,7 +1413,7 @@ _wrap_g_file_query_filesystem_info_async(PyGObject *self, PyObject *args, PyObje
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "sO|iOO:GFile.query_filesystem_info_async",
+				     "sO|iOO:gio.File.query_filesystem_info_async",
 				     kwlist,
 				     &attributes,
 				     &notify->callback,
@@ -1464,7 +1464,7 @@ _wrap_g_file_set_attributes_async(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "O!O|OiOO:GFile.set_attributes_async",
+				     "O!O|OiOO:gio.File.set_attributes_async",
 				     kwlist,
 				     &PyGFileInfo_Type,
 				     &info,
@@ -1555,7 +1555,7 @@ _wrap_g_file_set_display_name_async(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "sO|iOO:GFile.set_display_name_async",
+				     "sO|iOO:gio.File.set_display_name_async",
 				     kwlist,
 				     &display_name,
 				     &notify->callback,
