@@ -60,15 +60,23 @@ class Property(object):
             self.argname = old.argname
 
 
-class Definition:
+class Definition(object):
     docstring = "NULL"
+
+    def py_name(self):
+        return '%s.%s' % (self.module, self.name)
+
+    py_name = property(py_name)
+
     def __init__(self, *args):
         """Create a new defs object of this type.  The arguments are the
         components of the definition"""
         raise RuntimeError, "this is an abstract class"
+
     def merge(self, old):
         """Merge in customisations from older version of definition"""
         raise RuntimeError, "this is an abstract class"
+
     def write_defs(self, fp=sys.stdout):
         """write out this definition in defs file format"""
         raise RuntimeError, "this is an abstract class"

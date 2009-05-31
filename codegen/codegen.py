@@ -249,10 +249,11 @@ class Wrapper:
     def get_initial_class_substdict(self): return {}
 
     def get_initial_constructor_substdict(self, constructor):
-        return { 'name': '%s.__init__' % self.objinfo.c_name,
+        return { 'name': '%s.__init__' % self.objinfo.py_name,
                  'errorreturn': '-1' }
+
     def get_initial_method_substdict(self, method):
-        substdict = { 'name': '%s.%s' % (self.objinfo.c_name, method.name) }
+        substdict = { 'name': '%s.%s' % (self.objinfo.py_name, method.name) }
         if method.unblock_threads:
             substdict['begin_allow_threads'] = 'pyg_begin_allow_threads;'
             substdict['end_allow_threads'] = 'pyg_end_allow_threads;'
@@ -467,7 +468,7 @@ class Wrapper:
 
     def _get_class_virtual_substdict(self, meth, cname, parent):
         substdict = self.get_initial_method_substdict(meth)
-        substdict['virtual'] = substdict['name'].split('.')[1]
+        substdict['virtual'] = meth.name
         substdict['cname'] = cname
         substdict['class_cast_macro'] = parent.typecode.replace(
             '_TYPE_', '_', 1) + "_CLASS"
@@ -1133,7 +1134,7 @@ class GInterfaceWrapper(GObjectWrapper):
 
     def _get_class_virtual_substdict(self, meth, cname, parent):
         substdict = self.get_initial_method_substdict(meth)
-        substdict['virtual'] = substdict['name'].split('.')[1]
+        substdict['virtual'] = meth.name
         substdict['cname'] = cname
         substdict['typecode'] = self.objinfo.typecode
         substdict['vtable'] = self.objinfo.vtable
