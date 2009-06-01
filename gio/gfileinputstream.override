@@ -38,13 +38,13 @@ _wrap_g_file_input_stream_query_info_async(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "sO|iOO:gio.File.query_info_async",
-                                     kwlist,
-                                     &attributes,
-                                     &notify->callback,
-                                     &io_priority,
-                                     &pycancellable,
-                                     &notify->data))
+                                "sO|iOO:gio.FileInputStream.query_info_async",
+                                kwlist,
+                                &attributes,
+                                &notify->callback,
+                                &io_priority,
+                                &pycancellable,
+                                &notify->data))
 
     if (!pygio_notify_callback_is_valid(notify))
         goto error;
