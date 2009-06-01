@@ -19,6 +19,7 @@
 <xi:include href="pygio-fileenumerator.xml"/>
 <xi:include href="pygio-fileicon.xml"/>
 <xi:include href="pygio-fileinfo.xml"/>
+<xi:include href="pygio-fileinputstream.xml"/>
 <xi:include href="pygio-filemonitor.xml"/>
 <xi:include href="pygio-icon.xml"/>
 <xi:include href="pygio-inputstream.xml"/>
