@@ -22,6 +22,7 @@
 <xi:include href="pygio-fileinputstream.xml"/>
 <xi:include href="pygio-filemonitor.xml"/>
 <xi:include href="pygio-fileoutputstream.xml"/>
+<xi:include href="pygio-filterinputstream.xml"/>
 <xi:include href="pygio-icon.xml"/>
 <xi:include href="pygio-inputstream.xml"/>
 <xi:include href="pygio-loadableicon.xml"/>
