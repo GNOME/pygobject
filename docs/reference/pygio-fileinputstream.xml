@@ -46,6 +46,15 @@
 </synopsis>
 
     </refsect1>
+    
+    <refsect1>
+	<title>Implemented Interfaces</title>
+        <para>
+            <link linkend="class-giofileinputstream"><classname>gio.FileInputStream</classname></link>
+            implements
+            <link linkend="class-gioseekable"><classname>gio.Seekable</classname></link>
+        </para>
+    </refsect1>
 
     <refsect1>
         <title>Description</title>
@@ -71,22 +80,6 @@
 
     <refsect1>
         <title>Methods</title>
-
-        <refsect2 id="method-giofileinputstream--clear-pending">
-            <title>gio.FileInputStream.clear_pending</title>
-
-            <programlisting><methodsynopsis language="python">
-                <methodname>clear_pending</methodname>
-                <methodparam></methodparam>
-            </methodsynopsis></programlisting>
-            
-            <variablelist>
-            </variablelist>
-    
-            <para>
-                The <methodname>clear_pending</methodname>() method clears the pending flag on stream.
-            </para>
-        </refsect2>
 
         <refsect2 id="method-giofileinputstream--query-info">
             <title>gio.FileInputStream.query_info</title>
