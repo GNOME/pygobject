@@ -3572,6 +3572,21 @@
   (return-type "GInputStream*")
 )
 
+(define-method get_close_base_stream
+  (of-object "GFilterInputStream")
+  (c-name "g_filter_input_stream_get_close_base_stream")
+  (return-type "gboolean")
+)
+
+(define-method set_close_base_stream
+  (of-object "GFilterInputStream")
+  (c-name "g_filter_input_stream_set_close_base_stream")
+  (return-type "none")
+  (parameters
+    '("gboolean" "close_base")
+  )
+)
+
 
 
 ;; From gfilteroutputstream.h
@@ -3585,6 +3600,21 @@
   (of-object "GFilterOutputStream")
   (c-name "g_filter_output_stream_get_base_stream")
   (return-type "GOutputStream*")
+)
+
+(define-method get_close_base_stream
+  (of-object "GFilterOutputStream")
+  (c-name "g_filter_output_stream_get_close_base_stream")
+  (return-type "gboolean")
+)
+
+(define-method set_close_base_stream
+  (of-object "GFilterOutputStream")
+  (c-name "g_filter_output_stream_set_close_base_stream")
+  (return-type "none")
+  (parameters
+    '("gboolean" "close_base")
+  )
 )
 
 
