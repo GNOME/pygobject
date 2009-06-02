@@ -39,12 +39,13 @@ GIO_OVERRIDES = 			\
 	gappinfo.override		\
 	gapplaunchcontext.override 	\
 	gdatainputstream.override	\
-        gdrive.override			\
+	gdrive.override			\
 	gfile.override			\
 	gfileattribute.override		\
 	gfileenumerator.override	\
 	gfileinfo.override		\
 	gfileinputstream.override	\
+	gfileoutputstream.override	\
 	gicon.override			\
 	ginputstream.override 		\
 	gmount.override			\

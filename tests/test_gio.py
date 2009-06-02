@@ -1011,3 +1011,30 @@ class TestFileInputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+class TestFileOutputStream(unittest.TestCase):
+    def setUp(self):
+        self._f = open("file.txt", "w+")
+        self._f.write("testing")
+        self._f.seek(0)
+        self.file = gio.File("file.txt")
+
+    def tearDown(self):
+        self._f.close()
+        if os.path.exists('file.txt'):
+            os.unlink("file.txt")
+
+    def testQueryInfoAsync(self):
+        def callback(stream, result):
+            try:
+                info = stream.query_info_finish(result)
+                self.failUnless(isinstance(info, gio.FileInfo))
+                self.failUnless(info.get_attribute_uint64("standard::size"), 7)
+            finally:
+                loop.quit()
+
+        outputstream = self.file.append_to()
+        outputstream.query_info_async("standard", callback)
+
+        loop = glib.MainLoop()
+        loop.run()

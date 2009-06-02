@@ -30,6 +30,7 @@ HTML_FILES =					\
 	html/class-giofileinfo.html		\
 	html/class-giofileinputstream.html	\
 	html/class-giofilemonitor.html		\
+	html/class-giofileoutputstream.html	\
 	html/class-gioicon.html			\
 	html/class-gioinputstream.html		\
 	html/class-gioloadableicon.html		\
@@ -82,6 +83,7 @@ XML_FILES = 					\
 	reference/pygio-fileinfo.xml 		\
 	reference/pygio-fileinputstream.xml 	\
 	reference/pygio-filemonitor.xml		\
+	reference/pygio-fileoutputstream.xml 	\
 	reference/pygio-icon.xml		\
 	reference/pygio-inputstream.xml		\
 	reference/pygio-loadableicon.xml	\

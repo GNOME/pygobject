@@ -1,0 +1,257 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giofileoutputstream">
+    <refnamediv>
+        <refname>gio.FileOutputStream</refname>
+        <refpurpose>Base class for implementing streaming input</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.FileOutputStream</classname></ooclass>
+        <ooclass><classname><link linkend="class-giooutputstream">gio.OutputStream</link></classname></ooclass>
+
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofileoutputstream--get-etag">get_etag</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofileoutputstream--query-info">query_info</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofileoutputstream--query-info-async">query_info_async</link></methodname>
+        <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+        <methodparam><parameter role="keyword">callback</parameter></methodparam>
+        <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+        <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+        <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giofileoutputstream--query-info-finish">query_info_finish</link></methodname>
+        <methodparam><parameter role="keyword">result</parameter></methodparam>
+    </methodsynopsis>
+
+    </classsynopsis>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
+  +-- <link linkend="class-giooutputstream">gio.OutputStream</link>
+    +-- <link linkend="class-giofileoutputstream">gio.FileOutputStream</link>
+</synopsis>
+
+    </refsect1>
+    
+    <refsect1>
+	<title>Implemented Interfaces</title>
+        <para>
+            <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+            implements
+            <link linkend="class-gioseekable"><classname>gio.Seekable</classname></link>
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+            provides output streams that write their content to a file.
+        </para>
+        <para>
+            <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+            implements <link linkend="class-gioseekable"><classname>gio.Seekable</classname></link>,
+            which allows the output stream to jump to arbitrary positions in the file and to truncate
+            the file, provided the filesystem of the file supports these operations. In addition to the
+            generic gio.Seekable. API,
+            <link linkend="class-giofileoutputstream"><classname>gio.FileOutputStream</classname></link>
+            has its own API for seeking and positioning. To find the position of a file output stream, use
+            <methodname><link linkend="method-gioseekable--tell">gio.Seekable.tell</link></methodname>().
+            To find out if a file output stream supports seeking, use
+            <methodname><link linkend="method-gioseekable--can_seek">gio.Seekable.can_seek</link></methodname>().
+            To position a file output stream, use
+            <methodname><link linkend="method-gioseekable--seek">gio.Seekable.seek</link></methodname>().
+            To find out if a file output stream supports truncating, use
+            <methodname><link linkend="method-gioseekable--can_truncate">gio.FileOutputStream.can_truncate</link></methodname>().
+            To truncate a file output stream, use
+            <methodname><link linkend="method-gioseekable--truncate">gio.Seekable.truncate</link></methodname>().
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-giofileoutputstream--get-etag">
+            <title>gio.FileOutputStream.get_etag</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_etag</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>the entity tag for the stream.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_etag</methodname>() method gets the entity tag
+                for the file when it has been written. This must be called after the
+                stream has been written and closed, as the etag can change while writing.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofileoutputstream--query-info">
+            <title>gio.FileOutputStream.query_info</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info</methodname>
+                <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">attributes</parameter>&nbsp;:</term>
+                  <listitem><simpara>a file attribute query string.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                  <term><parameter role="keyword">cancellable</parameter>&nbsp;:</term>
+                  <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>,
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info</methodname>() method queries a file input stream
+                the given attributes. This function blocks while querying the stream.
+                For the asynchronous (non-blocking) version of this function, see
+                <methodname><link linkend="method-giofileoutputstream--query-info-async">gio.FileOutputStream.query_info_async</link></methodname>().
+                While the stream is blocked, the stream will set the pending flag internally,
+                and any other operations on the stream will fail with gio.ERROR_PENDING.
+            </para>
+            <para>
+                Can fail if the stream was already closed (with error being set to gio.ERROR_CLOSED),
+                the stream has pending operations (with error being set to gio.ERROR_PENDING), or
+                if querying info is not supported for the stream's interface (with error being set to
+                gio.ERROR_NOT_SUPPORTED). In all cases of failure, NULL will be returned.
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled by
+                triggering the cancellable object from another thread. If the operation was cancelled,
+                the error gio.ERROR_CANCELLED will be set, and <literal>None</literal> will be returned.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofileoutputstream--query-info-async">
+            <title>gio.FileOutputStream.query_info_async</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info_async</methodname>
+                <methodparam><parameter role="keyword">attributes</parameter></methodparam>
+                <methodparam><parameter role="keyword">callback</parameter></methodparam>
+                <methodparam><parameter role="keyword">io_priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
+                <methodparam><parameter role="keyword">cancellable</parameter><initializer>None</initializer></methodparam>
+                <methodparam><parameter role="keyword">user_data</parameter><initializer>None</initializer></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">attributes</parameter>&nbsp;:</term>
+                  <listitem><simpara>a file attribute query string.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>callback</parameter>&nbsp;:</term>
+                    <listitem><simpara>a GAsyncReadyCallback to call when the request is satisfied.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>io_priority</parameter>&nbsp;:</term>
+                    <listitem><simpara>the
+                    <xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
+                    of the request. 
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>cancellable</parameter>&nbsp;:</term>
+                    <listitem><simpara>optional
+                    <link linkend="class-giocancellable"><classname>gio.Cancellable</classname></link>
+                    object, <literal>None</literal> to ignore.</simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>user_data</parameter>&nbsp;:</term>
+                    <listitem><simpara>the data to pass to callback function.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info_async</methodname>() method queries the stream
+                information asynchronously. When the operation is finished callback will be
+                called. You can then call
+                <methodname><link linkend="method-giofileoutputstream--query-info-finish">gio.FileOutputStream.query_info_finish</link></methodname>()
+                to get the result of the operation.
+            </para>
+            <para>
+                For the synchronous version of this function, see
+                <methodname><link linkend="method-giofileoutputstream--query-info">gio.FileOutputStream.query_info</link></methodname>().
+            </para>
+            <para>
+                If cancellable is not <literal>None</literal>, then the operation can be cancelled
+                by triggering the cancellable object from another thread. If the operation was
+                cancelled, the error gio.ERROR_CANCELLED will be set
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giofileoutputstream--query-info-finish">
+            <title>gio.FileOutputStream.query_info_finish</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>query_info_finish</methodname>
+                <methodparam><parameter role="keyword">result</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">result</parameter>&nbsp;:</term>
+                  <listitem><simpara>a <link linkend="class-gioasyncresult"><classname>gio.AsyncResult</classname></link>.
+                  </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a <link linkend="class-giofileinfo"><classname>gio.FileInfo</classname></link>,
+                    or <literal>None</literal> on error.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>query_info_finish</methodname>() method finishes an asynchronous
+                file append operation started with
+                <methodname><link linkend="method-giofileoutputstream--query-info-async">gio.FileOutputStream.query_info_async</link></methodname>().
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>
