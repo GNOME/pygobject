@@ -42,7 +42,7 @@
 
     </refsect1>
 
-    <refsect1 id="properties-giofilterinputstream">
+    <refsect1 id="properties-giofilteroutputstream">
         <title>gio.FilterOutputStream Properties</title>
     
         <blockquote role="properties">
@@ -74,7 +74,7 @@
         <title>Description</title>
 
         <para>
-            Filter Input Stream.
+            Filter Output Stream.
         </para>
     </refsect1>
 
@@ -93,7 +93,7 @@
                 <varlistentry>
                     <term><emphasis>Returns</emphasis>&nbsp;:</term>
                     <listitem><simpara>A
-                    <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
+                    <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>
                     </simpara></listitem>
                 </varlistentry>
             </variablelist>
