@@ -39,8 +39,7 @@ class DynamicImporter(object):
         from .module import DynamicModule
         module_name = 'girepository.overrides.%s' % (name,)
         try:
-            d = {}
-            module = __import__(module_name, d, d, ' ', 2)
+            module = __import__(module_name)
             modtype = getattr(module, name + 'Module')
         except ImportError, e:
             modtype = DynamicModule
