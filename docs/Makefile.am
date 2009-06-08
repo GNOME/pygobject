@@ -37,6 +37,7 @@ HTML_FILES =					\
 	html/class-gioinputstream.html		\
 	html/class-gioloadableicon.html		\
 	html/class-giomemoryinputstream.html	\
+	html/class-giomemoryoutputstream.html	\
 	html/class-giomount.html		\
 	html/class-giomountoperation.html	\
 	html/class-giooutputstream.html		\
@@ -93,6 +94,7 @@ XML_FILES = 					\
 	reference/pygio-inputstream.xml		\
 	reference/pygio-loadableicon.xml	\
 	reference/pygio-memoryinputstream.xml 	\
+	reference/pygio-memoryoutputstream.xml 	\
 	reference/pygio-mount.xml		\
 	reference/pygio-mountoperation.xml	\
 	reference/pygio-outputstream.xml	\
