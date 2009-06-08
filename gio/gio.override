@@ -240,6 +240,7 @@ include
   gfileoutputstream.override
   gicon.override
   gmemoryinputstream.override
+  gmemoryoutputstream.override
   gmount.override
   ginputstream.override
   goutputstream.override
