@@ -293,40 +293,6 @@ _wrap_g_input_stream_close_async(PyGObject *self,
     return NULL;
 }
 %%
-override g_memory_input_stream_add_data kwargs
-static PyObject *
-_wrap_g_memory_input_stream_add_data(PyGObject *self,
-                                     PyObject *args,
-                                     PyObject *kwargs)
-{
-    static char *kwlist[] = { "data", NULL };
-    PyObject *data;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gio.MemoryInputStream.add_data",
-                                     kwlist, &data))
-        return NULL;
-
-    if (data != Py_None) {
-        char *copy;
-        int length;
-
-        if (!PyString_Check(data)) {
-            PyErr_SetString(PyExc_TypeError, "data must be a string or None");
-            return NULL;
-        }
-
-        length = PyString_Size(data);
-        copy = g_malloc(length);
-        memcpy(copy, PyString_AsString(data), length);
-
-        g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(self->obj),
-                                       copy, length, (GDestroyNotify) g_free);
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-%%
 override g_input_stream_skip_async kwargs
 static PyObject *
 _wrap_g_input_stream_skip_async(PyGObject *self,

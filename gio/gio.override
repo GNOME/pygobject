@@ -239,6 +239,7 @@ include
   gfileinputstream.override
   gfileoutputstream.override
   gicon.override
+  gmemoryinputstream.override
   gmount.override
   ginputstream.override
   goutputstream.override

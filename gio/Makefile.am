@@ -48,6 +48,7 @@ GIO_OVERRIDES = 			\
 	gfileoutputstream.override	\
 	gicon.override			\
 	ginputstream.override 		\
+	gmemoryinputstream.override	\
 	gmount.override			\
 	goutputstream.override 		\
 	gvolume.override		\

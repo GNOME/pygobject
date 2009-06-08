@@ -759,6 +759,10 @@ class TestMemoryInputStream(unittest.TestCase):
         self.stream.add_data(None)
         self.stream.add_data('spam')
         self.assertEquals('ham spam', self.stream.read())
+    
+    def test_new_from_data(self):
+        stream = gio.memory_input_stream_new_from_data('spam')
+        self.assertEquals('spam', stream.read())
 
 
 class TestOutputStream(unittest.TestCase):
