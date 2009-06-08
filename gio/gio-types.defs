@@ -195,6 +195,13 @@
   (gtype-id "G_TYPE_FILTER_OUTPUT_STREAM")
 )
 
+(define-object BufferedOutputStream
+  (in-module "gio")
+  (parent "GFilterOutputStream")
+  (c-name "GBufferedOutputStream")
+  (gtype-id "G_TYPE_BUFFERED_OUTPUT_STREAM")
+)
+
 (define-object DataOutputStream
   (in-module "gio")
   (parent "GFilterOutputStream")
