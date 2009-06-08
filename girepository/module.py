@@ -94,7 +94,7 @@ class DynamicModule(object):
 
     def _get_parent_for_object(self, object_info):
         parent_info = object_info.getParent()
-        
+
         if isinstance(parent_info, UnresolvedInfo):
             namespace = parent_info.getNamespace()
             __import__(namespace)

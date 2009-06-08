@@ -26,7 +26,7 @@ from . import repo
 from .repository import repository
 
 class Callable(object):
-    
+
     # Types of callables
     INSTANCE_METHOD = 'method'
     STATIC_METHOD = 'static'
@@ -141,7 +141,7 @@ class Function(Callable):
 
 
 class Method(Callable):
-    
+
     def __init__(self, info, className, call_type=Callable.INSTANCE_METHOD):
         Callable.__init__(self, info)
         self.object = None
@@ -281,7 +281,7 @@ def buildType(info, bases):
     newType = PyBankMeta(className, bases, namespace)
 
     _classDict[fullName] = newType
-    
+
     return newType
 
 class BaseBlob(object):

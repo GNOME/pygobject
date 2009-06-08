@@ -24,42 +24,42 @@ static PyMethodDef _PyGIRepository_methods[];
 
 PyTypeObject PyGIRepository_Type = {
     PyObject_HEAD_INIT(NULL)
-    0,			
-    "bank.IRepository",	
-    sizeof(PyGIRepository),	
-    0,			
+    0,
+    "bank.IRepository",
+    sizeof(PyGIRepository),
+    0,
     /* methods */
-    (destructor)0,	
-    (printfunc)0,	
-    (getattrfunc)0,	
-    (setattrfunc)0,	
+    (destructor)0,
+    (printfunc)0,
+    (getattrfunc)0,
+    (setattrfunc)0,
     (cmpfunc)0,
-    (reprfunc)0,	
-    0,			
-    0,		
-    0,		
-    (hashfunc)0,		
-    (ternaryfunc)0,		
-    (reprfunc)0,		
-    (getattrofunc)0,		
-    (setattrofunc)0,		
-    0,				
-    Py_TPFLAGS_DEFAULT, 
+    (reprfunc)0,
+    0,
+    0,
+    0,
+    (hashfunc)0,
+    (ternaryfunc)0,
+    (reprfunc)0,
+    (getattrofunc)0,
+    (setattrofunc)0,
+    0,
+    Py_TPFLAGS_DEFAULT,
     NULL,
-    (traverseproc)0,		
+    (traverseproc)0,
     (inquiry)0,
-    (richcmpfunc)0,	
+    (richcmpfunc)0,
     0,
     (getiterfunc)0,
     (iternextfunc)0,
     _PyGIRepository_methods,
-    0,				
-    0,		       	
-    NULL,		
-    NULL,		
-    (descrgetfunc)0,	
-    (descrsetfunc)0,	
-    0,                 
+    0,
+    0,
+    NULL,
+    NULL,
+    (descrgetfunc)0,
+    (descrsetfunc)0,
+    0,
     (initproc)0,
 };
 
@@ -85,7 +85,7 @@ _wrap_g_irepository_require(PyGIRepository *self,
 	flags |= G_IREPOSITORY_LOAD_FLAG_LAZY;
 
     /* TODO - handle versioning in some way, need to figure out what
-     * this looks like Python side. 
+     * this looks like Python side.
      */
     ret = g_irepository_require(self->repo, namespace, NULL, flags, &error);
 
@@ -111,7 +111,7 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self,
     static char *kwlist[] = { "namespace", "name", NULL };
     char *namespace, *name;
     GIBaseInfo *info;
-    
+
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "ss:GIRepository.findByName",
 				     kwlist, &namespace, &name))
@@ -122,7 +122,7 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self,
 	Py_INCREF(Py_None);
 	return Py_None;
     }
-    
+
     return pyg_info_new(info);
 }
 
@@ -132,7 +132,7 @@ _wrap_g_irepository_get_namespaces(PyGIRepository *self)
     char ** namespaces;
     int i, length;
     PyObject *retval;
-    
+
     namespaces = g_irepository_get_loaded_namespaces(self->repo);
 
     length = g_strv_length(namespaces);
@@ -155,7 +155,7 @@ _wrap_g_irepository_get_infos(PyGIRepository *self,
     char *namespace;
     int i, length;
     PyObject *retval;
-    
+
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "s:GIRepository.getInfos",
 				     kwlist, &namespace))
@@ -181,7 +181,6 @@ _wrap_g_irepository_is_registered(PyGIRepository *self,
     static char *kwlist[] = { "namespace", NULL };
     char *namespace;
  
-    
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "s:GIRepository.isRegistered",
 				     kwlist, &namespace))

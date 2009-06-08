@@ -1,5 +1,5 @@
 /* -*- Mode: C; c-basic-offset: 4 -*- */
-/* 
+/*
  * Copyright (C) 2005  Johan Dahlin <johan@gnome.org>
  *
  * This library is free software; you can redistribute it and/or

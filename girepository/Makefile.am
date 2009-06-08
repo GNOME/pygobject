@@ -31,7 +31,7 @@ common_ldflags += -no-undefined
 endif
 
 CLEANFILES =
-EXTRA_DIST = 
+EXTRA_DIST =
 
 # repo module
 repo_la_CFLAGS = -O0
