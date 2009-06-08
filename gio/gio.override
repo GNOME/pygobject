@@ -230,6 +230,7 @@ async_result_callback_marshal(GObject *source_object,
 include
   gappinfo.override
   gapplaunchcontext.override
+  gbufferedinputstream.override
   gdatainputstream.override
   gdrive.override
   gfile.override

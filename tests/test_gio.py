@@ -1042,3 +1042,28 @@ class TestFileOutputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+class TestBufferedInputStream(unittest.TestCase):
+    def setUp(self):
+        self._f = open("buffer.txt", "w+")
+        self._f.write("testing")
+        self._f.seek(0)
+        stream = gio.unix.InputStream(self._f.fileno(), False)
+        self.buffered = gio.BufferedInputStream(stream)
+
+    def tearDown(self):
+        self._f.close()
+        os.unlink("buffer.txt")
+
+    def test_fill_async(self):
+        def callback(stream, result):
+            try:
+                size = stream.fill_finish(result)
+                self.failUnlessEqual(size, 4)
+            finally:
+                loop.quit()
+
+        self.buffered.fill_async(4, callback)
+
+        loop = glib.MainLoop()
+        loop.run()
