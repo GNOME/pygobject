@@ -54,7 +54,7 @@ _wrap_g_buffered_input_stream_fill_async(PyGObject *self,
 
     pygio_notify_reference_callback(notify);
 
-    g_buffered_input_stream_fill_async(G_INPUT_STREAM(self->obj),
+    g_buffered_input_stream_fill_async(G_BUFFERED_INPUT_STREAM(self->obj),
                             count,
                             io_priority,
                             cancellable,
