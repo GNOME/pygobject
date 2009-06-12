@@ -19,6 +19,7 @@ HTML_FILES =					\
 	html/class-gioapplaunchcontext.html	\
 	html/class-gioappinfo.html		\
 	html/class-gioasyncresult.html		\
+	html/class-giobufferedinputstream.html	\
 	html/class-giocancellable.html		\
 	html/class-giodrive.html		\
 	html/class-gioemblem.html		\
@@ -76,6 +77,7 @@ XML_FILES = 					\
 	reference/pygio-applaunchcontext.xml 	\
 	reference/pygio-appinfo.xml 		\
 	reference/pygio-asyncresult.xml 	\
+	reference/pygio-bufferedinputstream.xml \
 	reference/pygio-cancellable.xml 	\
 	reference/pygio-drive.xml 		\
 	reference/pygio-emblem.xml		\
