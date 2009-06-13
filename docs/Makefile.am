@@ -20,6 +20,7 @@ HTML_FILES =					\
 	html/class-gioappinfo.html		\
 	html/class-gioasyncresult.html		\
 	html/class-giobufferedinputstream.html	\
+	html/class-giobufferedoutputstream.html	\
 	html/class-giocancellable.html		\
 	html/class-giodrive.html		\
 	html/class-gioemblem.html		\
@@ -57,53 +58,54 @@ HTML_FILES =					\
 	html/pygobject-introduction.html
 
 
-XML_FILES = 					\
-	reference/pygobject.xml			\
-	reference/pygobject-introduction.xml 	\
-	reference/pygobject-classes.xml 	\
-	reference/pygobject-constants.xml 	\
-	reference/pygobject-ref.xml		\
-	reference/pygobject-functions.xml	\
-	reference/pygobject-gboxed.xml		\
-	reference/pygobject-ginterface.xml 	\
-	reference/pygobject-gpointer.xml 	\
-	reference/pyglib-classes.xml 		\
-	reference/pyglib-constants.xml 		\
-	reference/pyglib-functions.xml		\
-	reference/pyglib-maincontext.xml 	\
-	reference/pyglib-mainloop.xml 		\
-	reference/pygio-classes.xml 		\
-	reference/pygio-constants.xml		\
-	reference/pygio-applaunchcontext.xml 	\
-	reference/pygio-appinfo.xml 		\
-	reference/pygio-asyncresult.xml 	\
-	reference/pygio-bufferedinputstream.xml \
-	reference/pygio-cancellable.xml 	\
-	reference/pygio-drive.xml 		\
-	reference/pygio-emblem.xml		\
-	reference/pygio-emblemedicon.xml	\
-	reference/pygio-file.xml		\
-	reference/pygio-fileattributeinfo.xml	\
-	reference/pygio-fileenumerator.xml	\
-	reference/pygio-fileicon.xml 		\
-	reference/pygio-fileinfo.xml 		\
-	reference/pygio-fileinputstream.xml 	\
-	reference/pygio-filemonitor.xml		\
-	reference/pygio-fileoutputstream.xml 	\
-	reference/pygio-filterinputstream.xml 	\
-	reference/pygio-filteroutputstream.xml 	\
-	reference/pygio-icon.xml		\
-	reference/pygio-inputstream.xml		\
-	reference/pygio-loadableicon.xml	\
-	reference/pygio-memoryinputstream.xml 	\
-	reference/pygio-memoryoutputstream.xml 	\
-	reference/pygio-mount.xml		\
-	reference/pygio-mountoperation.xml	\
-	reference/pygio-outputstream.xml	\
-	reference/pygio-seekable.xml		\
-	reference/pygio-simpleasyncresult.xml	\
-	reference/pygio-themedicon.xml		\
-	reference/pygio-volume.xml 		\
+XML_FILES = 						\
+	reference/pygobject.xml				\
+	reference/pygobject-introduction.xml 		\
+	reference/pygobject-classes.xml 		\
+	reference/pygobject-constants.xml 		\
+	reference/pygobject-ref.xml			\
+	reference/pygobject-functions.xml		\
+	reference/pygobject-gboxed.xml			\
+	reference/pygobject-ginterface.xml 		\
+	reference/pygobject-gpointer.xml 		\
+	reference/pyglib-classes.xml 			\
+	reference/pyglib-constants.xml 			\
+	reference/pyglib-functions.xml			\
+	reference/pyglib-maincontext.xml 		\
+	reference/pyglib-mainloop.xml 			\
+	reference/pygio-classes.xml 			\
+	reference/pygio-constants.xml			\
+	reference/pygio-applaunchcontext.xml 		\
+	reference/pygio-appinfo.xml 			\
+	reference/pygio-asyncresult.xml 		\
+	reference/pygio-bufferedinputstream.xml 	\
+	reference/pygio-bufferedoutputstream.xml	\
+	reference/pygio-cancellable.xml 		\
+	reference/pygio-drive.xml 			\
+	reference/pygio-emblem.xml			\
+	reference/pygio-emblemedicon.xml		\
+	reference/pygio-file.xml			\
+	reference/pygio-fileattributeinfo.xml		\
+	reference/pygio-fileenumerator.xml		\
+	reference/pygio-fileicon.xml 			\
+	reference/pygio-fileinfo.xml 			\
+	reference/pygio-fileinputstream.xml 		\
+	reference/pygio-filemonitor.xml			\
+	reference/pygio-fileoutputstream.xml 		\
+	reference/pygio-filterinputstream.xml 		\
+	reference/pygio-filteroutputstream.xml 		\
+	reference/pygio-icon.xml			\
+	reference/pygio-inputstream.xml			\
+	reference/pygio-loadableicon.xml		\
+	reference/pygio-memoryinputstream.xml 		\
+	reference/pygio-memoryoutputstream.xml 		\
+	reference/pygio-mount.xml			\
+	reference/pygio-mountoperation.xml		\
+	reference/pygio-outputstream.xml		\
+	reference/pygio-seekable.xml			\
+	reference/pygio-simpleasyncresult.xml		\
+	reference/pygio-themedicon.xml			\
+	reference/pygio-volume.xml 			\
 	reference/pygio-volumemonitor.xml
 
 XSL_FILES =			\

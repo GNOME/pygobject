@@ -1,0 +1,275 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="class-giobufferedoutputstream">
+    <refnamediv>
+        <refname>gio.BufferedOutputStream</refname>
+        <refpurpose>Buffered Output Stream</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+    <classsynopsis language="python">
+        <ooclass><classname>gio.BufferedOutputStream</classname></ooclass>
+        <ooclass><classname><link linkend="class-giofilteroutputstream">gio.FilterOutputStream</link></classname></ooclass>
+
+    <constructorsynopsis language="python">
+	<methodname><link linkend="constructor-giobufferedoutputstream">gio.BufferedOutputStream</link></methodname>
+	<methodparam><parameter role="keyword">base_stream</parameter></methodparam>
+    </constructorsynopsis>
+
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giobufferedoutputstream--get-auto-grow">get_auto_grow</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giobufferedoutputstream--get-buffer-size">get_buffer_size</link></methodname>
+        <methodparam></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giobufferedoutputstream--set-auto-grow">set_auto_grow</link></methodname>
+        <methodparam><parameter role="keyword">auto_grow</parameter></methodparam>
+    </methodsynopsis>
+    <methodsynopsis language="python">
+        <methodname><link linkend="method-giobufferedoutputstream--set-buffer-size">set_buffer_size</link></methodname>
+        <methodparam><parameter role="keyword">size</parameter></methodparam>
+    </methodsynopsis>
+
+    </classsynopsis>
+
+<programlisting>
+<emphasis role="bold">Functions</emphasis>
+ 
+<methodsynopsis language="python">
+    <methodname><link linkend="function-gio--buffered-output-stream-new-sized">gio.buffered_output_stream_new_sized</link></methodname>
+    <methodparam><parameter role="keyword">size</parameter></methodparam>
+</methodsynopsis></programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Ancestry</title>
+
+<synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
+  +-- <link linkend="class-giooutputstream">gio.OutputStream</link>
+    +-- <link linkend="class-giofilteroutputstream">gio.FilterOutputStream</link>
+      +-- <link linkend="class-giobufferedoutputstream">gio.BufferedOutputStream</link>
+</synopsis>
+
+    </refsect1>
+
+    <refsect1 id="properties-giobufferedoutputstream">
+        <title>gio.BufferedOutputStream Properties</title>
+    
+        <blockquote role="properties">
+            <informaltable pgwide="1" frame="none">
+                <tgroup cols="3">
+                    <colspec column="1" colwidth="1in"/>
+                    <colspec column="2" colwidth="1in"/>
+                    <colspec column="3" colwidth="4in"/>
+                    <tbody>
+                        <row valign="top">
+                            <entry>"auto-grow"</entry>
+                            <entry>Read - Write</entry>
+                            <entry>Whether the buffer should automatically grow. Default value: <literal>False</literal>.</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"buffer-size"</entry>
+                            <entry>Read - Write - Construct</entry>
+                            <entry>The size of the backend buffer. Allowed values: >= 1. Default value: 4096.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+        </blockquote>
+  
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            <link linkend="class-giobufferedoutputstream"><classname>gio.BufferedOutputStream</classname></link>
+            implements <link linkend="class-giofilteroutputstream"><classname>gio.FilterOutputStream</classname></link>
+            and provides for buffered writes.
+        </para>
+        <para>
+            By default,
+            <link linkend="class-giobufferedoutputstream"><classname>gio.BufferedOutputStream</classname></link>'s
+            buffer size is set at 4 kilobytes.
+        </para>
+        <para>
+            To create a buffered output stream, use
+            <methodname><link linkend="constructor-giobufferedoutputstream">gio.BufferedOutputStream</link></methodname>(),
+            or <methodname><link linkend="function-gio--buffered-output-stream-new-sized">gio.buffered_output_stream_new_sized</link></methodname>()
+            to specify the buffer's size at construction.
+        </para>
+        <para>
+            To get the size of a buffer within a buffered output stream, use
+            <methodname><link linkend="method-giobufferedoutputstream--get-buffer-size">gio.BufferedOutputStream.get_buffer_size</link></methodname>().
+            To change the size of a buffered output stream's buffer, use
+            <methodname><link linkend="method-giobufferedoutputstream--set-buffer-size">gio.BufferedOutputStream.set_buffer_size</link></methodname>().
+            Note that the buffer's size cannot be reduced below the size of the data within the buffer.
+        </para>
+    </refsect1>
+
+    <refsect1 id="constructor-giobufferedoutputstream">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.BufferedOutputStream</methodname>
+            <methodparam><parameter role="keyword">base_stream</parameter></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>base_stream</parameter>&nbsp;:</term>
+                <listitem><simpara>a
+                <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>
+                for the given base_stream.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new buffered output stream for a base stream.
+        </para>
+  
+    </refsect1>
+
+    <refsect1>
+        <title>Methods</title>
+
+        <refsect2 id="method-giobufferedoutputstream--get-auto-grow">
+            <title>gio.BufferedOutputStream.get_auto_grow</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_auto_grow</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the stream's
+		    buffer automatically grows, <literal>False</literal> otherwise.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_auto_grow</methodname>() method checks if the
+		buffer automatically grows as data is added.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giobufferedoutputstream--get-buffer-size">
+            <title>gio.BufferedOutputStream.get_buffer_size</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>get_buffer_size</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>the current buffer size.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>get_buffer_size</methodname>() method gets the size
+                of the buffer in the stream.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giobufferedoutputstream--set-auto-grow">
+            <title>gio.BufferedOutputStream.set_auto_grow</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_auto_grow</methodname>
+                <methodparam><parameter role="keyword">auto_grow</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">auto_grow</parameter>&nbsp;:</term>
+                  <listitem><simpara>a boolean.
+                  </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_auto_grow</methodname>() method sets whether or not
+		the stream's buffer should automatically grow. If auto_grow is true,
+		then each write will just make the buffer larger, and you must manually
+		flush the buffer to actually write out the data to the underlying stream.
+            </para>
+        </refsect2>
+
+        <refsect2 id="method-giobufferedoutputstream--set-buffer-size">
+            <title>gio.BufferedOutputStream.set_buffer_size</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>set_buffer_size</methodname>
+                <methodparam><parameter role="keyword">size</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                  <term><parameter role="keyword">size</parameter>&nbsp;:</term>
+                  <listitem><simpara>the new buffer size.
+                  </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+    
+            <para>
+                The <methodname>set_buffer_size</methodname>() method sets the size of
+		the internal buffer to size.
+            </para>
+        </refsect2>
+    </refsect1>
+    
+    <refsect1>
+        <title>Functions</title>
+
+        <refsect2 id="function-gio--buffered-output-stream-new-sized">
+            <title>gio.buffered_output_stream_new_sized</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>buffered_output_stream_new_sized</methodname>
+                <methodparam><parameter role="keyword">size</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>size</parameter>&nbsp;:</term>
+                    <listitem><simpara>the requested buffer size.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>A new
+                    <link linkend="class-giooutputstream"><classname>gio.OutputStream</classname></link>
+		    with an internal buffer set to size..
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>buffered_output_stream_new_sized</methodname>() function creates
+                a new <link linkend="class-giobufferedoutputstream"><classname>gio.BufferedOutputStream</classname></link>
+                from the given base_stream, with a buffer set to size.
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>

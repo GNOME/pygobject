@@ -11,6 +11,7 @@
 <xi:include href="pygio-applaunchcontext.xml"/>
 <xi:include href="pygio-asyncresult.xml"/>
 <xi:include href="pygio-bufferedinputstream.xml"/>
+<xi:include href="pygio-bufferedoutputstream.xml"/>
 <xi:include href="pygio-cancellable.xml"/>
 <xi:include href="pygio-drive.xml"/>
 <xi:include href="pygio-emblem.xml"/>
