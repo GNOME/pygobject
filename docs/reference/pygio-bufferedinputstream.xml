@@ -77,8 +77,8 @@
 
     </refsect1>
 
-    <refsect1 id="properties-giofilterinputstream">
-        <title>gio.FilterInputStream Properties</title>
+    <refsect1 id="properties-giobufferedinputstream">
+        <title>gio.BufferedInputStream Properties</title>
     
         <blockquote role="properties">
             <informaltable pgwide="1" frame="none">
@@ -125,6 +125,36 @@
             <methodname><link linkend="method-giobufferedinputstream--set-buffer-size">set_buffer_size</link></methodname>().
             Note that the buffer's size cannot be reduced below the size of the data within the buffer.
         </para>
+    </refsect1>
+
+    <refsect1 id="constructor-giobufferedinputstream">
+        <title>Constructor</title>
+  
+        <programlisting><constructorsynopsis language="python">
+            <methodname>gio.BufferedInputStream</methodname>
+            <methodparam><parameter role="keyword">base_stream</parameter></methodparam>
+        </constructorsynopsis></programlisting>
+        <variablelist>
+            <varlistentry>
+                <term><parameter>base_stream</parameter>&nbsp;:</term>
+                <listitem><simpara>a
+                <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                <listitem><simpara>a new
+                <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
+                for the given base_stream.
+                </simpara></listitem>
+            </varlistentry>
+        </variablelist>
+    
+        <para>
+            Creates a new <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
+            from the given base_stream, with a buffer set to the default size (4 kilobytes).
+        </para>
+  
     </refsect1>
 
     <refsect1>
