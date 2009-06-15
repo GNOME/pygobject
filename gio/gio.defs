@@ -1189,8 +1189,9 @@
   (c-name "g_emblem_new")
   (is-constructor-of "GEmblem")
   (return-type "GEmblem*")
-  (parameters
-    '("GIcon*" "icon")
+  (properties
+    '("icon")
+    '("origin" (optional))
   )
 )
 

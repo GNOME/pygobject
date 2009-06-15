@@ -19,6 +19,7 @@
     <constructorsynopsis language="python">
 	<methodname><link linkend="constructor-gioemblem">gio.Emblem</link></methodname>
 	<methodparam><parameter role="keyword">icon</parameter></methodparam>
+	<methodparam><parameter role="keyword">origin</parameter><initializer><literal>gio.EMBLEM_ORIGIN_UNKNOWN</literal></initializer></methodparam>
     </constructorsynopsis>
     
     <methodsynopsis language="python">
@@ -37,6 +38,7 @@
  
 <methodsynopsis language="python">
     <methodname><link linkend="function-gio--emblem-new-with-origin">gio.emblem_new_with_origin</link></methodname>
+    <methodparam><parameter role="keyword">icon</parameter></methodparam>
     <methodparam><parameter role="keyword">origin</parameter></methodparam>
 </methodsynopsis></programlisting>
 
@@ -60,6 +62,33 @@
         </para>
     </refsect1>
 
+    <refsect1 id="properties-gioemblem">
+        <title>gio.Emblem Properties</title>
+    
+        <blockquote role="properties">
+            <informaltable pgwide="1" frame="none">
+                <tgroup cols="3">
+                    <colspec column="1" colwidth="1in"/>
+                    <colspec column="2" colwidth="1in"/>
+                    <colspec column="3" colwidth="4in"/>
+                    <tbody>
+                        <row valign="top">
+                            <entry>"icon"</entry>
+                            <entry>Read - Write - Construct Only</entry>
+                            <entry>The actual icon of the emblem.</entry>
+                        </row>
+                        <row valign="top">
+                            <entry>"origin"</entry>
+                            <entry>Read - Write - Construct Only</entry>
+                            <entry>Tells which origin the emblem is derived from.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+        </blockquote>
+  
+    </refsect1>
+
     <refsect1>
         <title>Description</title>
 
@@ -67,7 +96,7 @@
             The <link linkend="class-gioemblem"><classname>gio.Emblem</classname></link>
             class is an implementation of <classname><link linkend="class-gioicon">gio.Icon</link></classname>
             that supports having an emblem, which is an icon with additional properties.
-            It can than be added to a
+            It can then be added to a
             <link linkend="class-gioemblemedicon"><classname>gio.EmblemedIcon</classname></link>.
         </para>
         <para>
@@ -82,6 +111,7 @@
         <programlisting><constructorsynopsis language="python">
             <methodname>gio.Emblem</methodname>
             <methodparam><parameter role="keyword">icon</parameter></methodparam>
+            <methodparam><parameter role="keyword">origin</parameter><initializer><literal>gio.EMBLEM_ORIGIN_UNKNOWN</literal></initializer></methodparam>
         </constructorsynopsis></programlisting>
         <variablelist>
             <varlistentry>
@@ -91,12 +121,22 @@
                 </simpara></listitem>
             </varlistentry>
             <varlistentry>
+                <term><parameter>origin</parameter>&nbsp;:</term>
+                <listitem><simpara>
+                <link linkend="gio-emblem-origin-constants">origin</link> of the emblem.
+                </simpara></listitem>
+            </varlistentry>
+            <varlistentry>
                 <term><emphasis>Returns</emphasis>&nbsp;:</term>
                 <listitem><simpara>a new
                 <link linkend="class-gioemblem"><classname>gio.Emblem</classname></link>.
                 </simpara></listitem>
             </varlistentry>
         </variablelist>
+
+        <note>
+          Parameter <parameter>origin</parameter> is available since PyGObject 2.20.
+        </note>
     
         <para>
             Creates a new <link linkend="class-gioemblem"><classname>gio.Emblem</classname></link> for icon.
@@ -159,6 +199,7 @@
 
             <programlisting><methodsynopsis language="python">
                 <methodname>emblem_new_with_origin</methodname>
+                <methodparam><parameter role="keyword">icon</parameter></methodparam>
                 <methodparam><parameter role="keyword">origin</parameter></methodparam>
             </methodsynopsis></programlisting>
             
@@ -166,7 +207,7 @@
                 <varlistentry>
                     <term><parameter>origin</parameter>&nbsp;:</term>
                     <listitem><simpara>a <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
-                    defining the emblem's origin .
+                    defining the emblem's origin.
                     </simpara></listitem>
                 </varlistentry>
                 <varlistentry>
@@ -175,6 +216,12 @@
                     </simpara></listitem>
                 </varlistentry>
             </variablelist>
+
+            <note>
+              While this method is not deprecated, with 2.20 and up it is recommended
+              to use the constructor instead.
+            </note>
+
 
             <para>
                 The <methodname>emblem_new_with_origin</methodname>() function creates
