@@ -22,7 +22,7 @@ pygirepository_PYTHON = \
 	btypes.py
 
 pygioverridesdir = $(pkgpyexecdir)/overrides
-pygioverrides_PYTHON = overrides/*.py
+pygioverrides_PYTHON = $(srcdir)/overrides/*.py
 
 # linker flags
 common_ldflags = -module -avoid-version
