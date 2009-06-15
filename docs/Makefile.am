@@ -22,6 +22,7 @@ HTML_FILES =					\
 	html/class-giobufferedinputstream.html	\
 	html/class-giobufferedoutputstream.html	\
 	html/class-giocancellable.html		\
+	html/class-giodatainputstream.html	\
 	html/class-giodrive.html		\
 	html/class-gioemblem.html		\
 	html/class-gioemblemedicon.html		\
@@ -81,6 +82,7 @@ XML_FILES = 						\
 	reference/pygio-bufferedinputstream.xml 	\
 	reference/pygio-bufferedoutputstream.xml	\
 	reference/pygio-cancellable.xml 		\
+	reference/pygio-datainputstream.xml 		\
 	reference/pygio-drive.xml 			\
 	reference/pygio-emblem.xml			\
 	reference/pygio-emblemedicon.xml		\

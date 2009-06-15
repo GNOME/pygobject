@@ -14,6 +14,8 @@
 <programlisting>
 <xref linkend="gio-app-info-constants" endterm="gio-app-info-constants-title"></xref>
 <xref linkend="gio-ask-password-flags-constants" endterm="gio-ask-password-flags-constants-title"></xref>
+<xref linkend="gio-data-stream-byte-order-constants" endterm="gio-data-stream-byte-order-constants-title"></xref>
+<xref linkend="gio-data-stream-newline-type-constants" endterm="gio-data-stream-newline-type-constants-title"></xref>
 <xref linkend="gio-emblem-origin-constants" endterm="gio-emblem-origin-constants-title"></xref>
 <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
 <xref linkend="gio-file-attribute-constants" endterm="gio-file-attribute-constants-title"></xref>
@@ -101,6 +103,70 @@
 	  <term><literal>gio.APP_INFO_CREATE_SUPPORTS_URIS</literal></term>
 	  <listitem>
 	    <simpara>Application supports URI arguments. </simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-data-stream-byte-order-constants">
+      <title id="gio-data-stream-byte-order-constants-title">Gio Data Stream Byte Order Constants</title>
+
+      <para>
+	  Used to ensure proper endianness of streaming data sources across various machine architectures.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_BYTE_ORDER_BIG_ENDIAN</literal></term>
+	  <listitem>
+	    <simpara>Selects Big Endian byte order.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_BYTE_ORDER_HOST_ENDIAN</literal></term>
+	  <listitem>
+	    <simpara>Selects endianness based on host machine's architecture.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_BYTE_ORDER_LITTLE_ENDIAN</literal></term>
+	  <listitem>
+	    <simpara>Selects Little Endian byte order.</simpara>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="gio-data-stream-newline-type-constants">
+      <title id="gio-data-stream-newline-type-constants-title">Gio Data Stream Newline Type Constants</title>
+
+      <para>
+	  Used when checking for or setting the line endings for a given file.
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_NEWLINE_TYPE_LF</literal></term>
+	  <listitem>
+	    <simpara>Selects "LF" line endings, common on most modern UNIX platforms.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_NEWLINE_TYPE_CR</literal></term>
+	  <listitem>
+	    <simpara>Selects "CR" line endings.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_NEWLINE_TYPE_CR_LF</literal></term>
+	  <listitem>
+	    <simpara>Selects "CR, LF" line ending, common on Microsoft Windows.</simpara>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><literal>gio.DATA_STREAM_NEWLINE_TYPE_ANY</literal></term>
+	  <listitem>
+	    <simpara>Automatically try to handle any line ending type.</simpara>
 	  </listitem>
 	</varlistentry>
       </variablelist>
