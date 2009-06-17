@@ -228,19 +228,11 @@ class TestGIEverything(unittest.TestCase):
     def testUtf8Inout(self):
         self.assertEquals(utf8_nonconst, Everything.test_utf8_inout(utf8_const))
 
-# FIXME
-# ======================================================================
-# FAIL: testFilenameReturn (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 175, in testFilenameReturn
-#     self.assertEquals('\u00e5\u00e4\u00f6', filenames[0])
-# AssertionError: '\\u00e5\\u00e4\\u00f6' != '<unhandled return value!>'
-#    def testFilenameReturn(self):
-#        filenames = Everything.test_filename_return()
-#        self.assertEquals(2, len(filenames))
-#        self.assertEquals('\u00e5\u00e4\u00f6', filenames[0])
-#        self.assertEquals('/etc/fstab', filenames[1])
+    def testFilenameReturn(self):
+        filenames = Everything.test_filename_return()
+        self.assertEquals(2, len(filenames))
+        self.assertEquals('\xc3\xa5\xc3\xa4\xc3\xb6', filenames[0])
+        self.assertEquals('/etc/fstab', filenames[1])
 
 # FIXME
 # ======================================================================
