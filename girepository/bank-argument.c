@@ -287,6 +287,7 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_DOUBLE:
         obj = PyFloat_FromDouble(arg->v_double);
         break;
+    case GI_TYPE_TAG_FILENAME:
     case GI_TYPE_TAG_UTF8:
         if (arg->v_string == NULL)
             obj = Py_None;
