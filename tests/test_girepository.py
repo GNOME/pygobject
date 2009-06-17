@@ -24,6 +24,9 @@ UINT16_MAX = 65535
 UINT32_MAX = 4294967295
 UINT64_MAX = 18446744073709551615L
 
+utf8_const = 'const \xe2\x99\xa5 utf8'
+utf8_nonconst = 'nonconst \xe2\x99\xa5 utf8'
+
 class SignalHandler:
     def __init__(self):
         self.counter = 0
@@ -204,6 +207,26 @@ class TestGIEverything(unittest.TestCase):
 #	def testGType(self):
 #	    self.assertEqual(gobject.TYPE_INT, Everything.test_gtype(gobject.TYPE_INT))
 #	    self.assertRaises(TypeError, Everything.test_gtype, 'a')
+
+# UTF-8
+
+    def testUtf8ConstReturn(self):
+        self.assertEquals(utf8_const, Everything.test_utf8_const_return())
+
+    def testUtf8NonconstReturn(self):
+        self.assertEquals(utf8_nonconst, Everything.test_utf8_nonconst_return())
+
+    def testUtf8NonconstIn(self):
+        Everything.test_utf8_nonconst_in(utf8_nonconst)
+
+    def testUtf8ConstIn(self):
+        Everything.test_utf8_const_in(utf8_const)
+
+    def testUtf8Out(self):
+        self.assertEquals(utf8_nonconst, Everything.test_utf8_out())
+
+    def testUtf8Inout(self):
+        self.assertEquals(utf8_nonconst, Everything.test_utf8_inout(utf8_const))
 
 # FIXME
 # ======================================================================
