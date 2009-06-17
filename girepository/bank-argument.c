@@ -38,7 +38,7 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
         if (object == Py_None)
             arg.v_pointer = NULL;
         else
-            arg.v_pointer = PyString_AsString(object);
+            arg.v_pointer = g_strdup(PyString_AsString(object));
         break;
     case GI_TYPE_TAG_UINT8:
         arg.v_uint8 = PyInt_AsLong(object);
