@@ -139,7 +139,7 @@ def find_obj_defs(buf, objdefs=[]):
     maybeobjdefs = []  # contains all possible objects from file
 
     # first find all structures that look like they may represent a GtkObject
-    pat = re.compile("struct _(" + obj_name_pat + ")\s*{\s*" +
+    pat = re.compile("struct\s+_(" + obj_name_pat + ")\s*{\s*" +
                      "(" + obj_name_pat + ")\s+", re.MULTILINE)
     pos = 0
     while pos < len(buf):
@@ -160,7 +160,7 @@ def find_obj_defs(buf, objdefs=[]):
         pos = m.end()
 
     # now find all structures that look like they might represent a class:
-    pat = re.compile("struct _(" + obj_name_pat + ")Class\s*{\s*" +
+    pat = re.compile("struct\s+_(" + obj_name_pat + ")Class\s*{\s*" +
                      "(" + obj_name_pat + ")Class\s+", re.MULTILINE)
     pos = 0
     while pos < len(buf):
@@ -189,7 +189,7 @@ def find_obj_defs(buf, objdefs=[]):
 
     # now find all structures that look like they might represent
     # a class inherited from GTypeInterface:
-    pat = re.compile("struct _(" + obj_name_pat + ")Class\s*{\s*" +
+    pat = re.compile("struct\s+_(" + obj_name_pat + ")Class\s*{\s*" +
                      "GTypeInterface\s+", re.MULTILINE)
     pos = 0
     while pos < len(buf):
@@ -205,7 +205,7 @@ def find_obj_defs(buf, objdefs=[]):
 
     # now find all structures that look like they might represent
     # an Iface inherited from GTypeInterface:
-    pat = re.compile("struct _(" + obj_name_pat + ")Iface\s*{\s*" +
+    pat = re.compile("struct\s+_(" + obj_name_pat + ")Iface\s*{\s*" +
                      "GTypeInterface\s+", re.MULTILINE)
     pos = 0
     while pos < len(buf):
