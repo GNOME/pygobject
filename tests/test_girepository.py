@@ -374,6 +374,29 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(NotImplementedError, Everything.TestInterface)
         self.assertEquals(Everything.TestInterface.__gtype__.name, 'EverythingTestInterface')
 
+    def testConstructor(self):
+        self.assertTrue(isinstance(Everything.TestObj("foo"), Everything.TestObj))
+        self.assertRaises(TypeError, Everything.TestObj)
+        self.assertRaises(TypeError, Everything.TestObj.__init__, None, 'foo')
+        self.assertRaises(TypeError, Everything.TestObj, 'foo', 'bar')
+        self.assertRaises(TypeError, Everything.TestObj, 42)
+
+    def testlInstanceMethod(self):
+        o = Everything.TestObj('foo')
+        self.assertEquals(42, o.do_matrix('matrix'))
+        self.assertRaises(TypeError, o.do_matrix)
+        self.assertRaises(TypeError, o.do_matrix, 'matrix', 'foo')
+        self.assertRaises(TypeError, Everything.TestObj.do_matrix, 'matrix')
+        self.assertRaises(TypeError, Everything.TestObj.do_matrix, None, 'matrix')
+
+    def testStaticMethod(self):
+        self.assertEquals(42, Everything.TestObj.static_method(42))
+        self.assertRaises(TypeError, Everything.TestObj.static_method)
+        self.assertRaises(TypeError, Everything.TestObj.static_method, 'foo')
+        self.assertRaises(TypeError, Everything.TestObj.static_method, 'foo', 'bar')
+        o = Everything.TestObj('foo')
+        self.assertEquals(42, o.static_method(42))
+
     def testSubclass(self):
         class TestSubclass(Everything.TestObj):
             def __init__(self):
