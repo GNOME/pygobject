@@ -48,6 +48,8 @@ HTML_FILES =					\
 	html/class-gioseekable.html		\
 	html/class-giosimpleasyncresult.html	\
 	html/class-giothemedicon.html		\
+	html/class-giounixinputstream.html	\
+	html/class-giounixoutputstream.html	\
 	html/class-giovolume.html		\
 	html/class-giovolumemonitor.html	\
 	html/gio-constants.html			\
@@ -109,6 +111,8 @@ XML_FILES = 						\
 	reference/pygio-seekable.xml			\
 	reference/pygio-simpleasyncresult.xml		\
 	reference/pygio-themedicon.xml			\
+	reference/pygio-unixinputstream.xml 		\
+	reference/pygio-unixoutputstream.xml 		\
 	reference/pygio-volume.xml 			\
 	reference/pygio-volumemonitor.xml
 
