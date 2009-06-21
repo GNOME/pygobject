@@ -115,6 +115,13 @@ linkend="function-gobject---install-metaclass">gobject._install_metaclass</link>
     <para>These functions are part of the <literal>PyGTK</literal> gobject
 module but are not directly associated with a specific class.</para>
 
+    <note>
+      <para>Many functions that previously were in this namespace got moved
+        to <link linkend="glib-functions"><literal>glib</literal></link> namespace
+        instead.  They are still available in <literal>gobject</literal> for backward
+        compatibility, but not documented here.</para>
+    </note>
+
   </refsect1>
 
   <refsect1>
