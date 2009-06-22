@@ -53,6 +53,7 @@ HTML_FILES =					\
 	html/class-giovolume.html		\
 	html/class-giovolumemonitor.html	\
 	html/gio-constants.html			\
+	html/gio-functions.html			\
 	html/gio-class-reference.html		\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
@@ -79,6 +80,7 @@ XML_FILES = 						\
 	reference/pyglib-mainloop.xml 			\
 	reference/pygio-classes.xml 			\
 	reference/pygio-constants.xml			\
+	reference/pygio-functions.xml			\
 	reference/pygio-applaunchcontext.xml 		\
 	reference/pygio-appinfo.xml 			\
 	reference/pygio-asyncresult.xml 		\

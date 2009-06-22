@@ -1,0 +1,395 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id="gio-functions">
+    <refnamediv>
+        <refname>gio Functions</refname>
+        <refpurpose></refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Synopsis</title>
+
+<programlisting><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-can-be-executable">gio.content_type_can_be_executable</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-equals">gio.content_type_equals</link></methodname>
+    <methodparam><parameter role="keyword">type1</parameter></methodparam>
+    <methodparam><parameter role="keyword">type2</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-from-mime-type">gio.content_type_from_mime_type</link></methodname>
+    <methodparam><parameter role="keyword">mime_type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-get-description">gio.content_type_get_description</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-get-icon">gio.content_type_get_icon</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-get-mime-type">gio.content_type_get_mime_type</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-guess">gio.content_type_guess</link></methodname>
+    <methodparam><parameter role="keyword">filename</parameter></methodparam>
+    <methodparam><parameter role="keyword">data</parameter></methodparam>
+    <methodparam><parameter role="keyword">want_uncertain</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-is-a">gio.content_type_is_a</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+    <methodparam><parameter role="keyword">supertype</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-type-is-unknown">gio.content_type_is_unknown</link></methodname>
+    <methodparam><parameter role="keyword">type</parameter></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--content-types-get-registered">gio.content_types_get_registered</link></methodname>
+    <methodparam></methodparam>
+</methodsynopsis><methodsynopsis language="python">
+    <methodname><link linkend="function-gio--io-error-from-errno">gio.io_error_from_errno</link></methodname>
+    <methodparam><parameter role="keyword">err_no</parameter></methodparam>
+</methodsynopsis></programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+           These functions are part of the <literal>PyGObject</literal> gio module
+	   but are not directly associated with a specific class
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Functions</title>
+
+        <refsect2 id="function-gio--content-type-can-be-executable">
+            <title>gio.content_type_can_be_executable</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_can_be_executable</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the file type corresponds
+		    to a type that can be executable, <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_can_be_executable</methodname>() function checks
+		if a content type can be executable. Note that for instance things like text files
+		can be executables (i.e. scripts and batch files).
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-equals">
+            <title>gio.content_type_equals</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_equals</methodname>
+                <methodparam><parameter role="keyword">type1</parameter></methodparam>
+                <methodparam><parameter role="keyword">type2</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type1</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>type2</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the two strings are
+		    identical or equivalent, <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_equals</methodname>() function compares
+		two content types for equality.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-from-mime-type">
+            <title>gio.content_type_from_mime_type</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_from_mime_type</methodname>
+                <methodparam><parameter role="keyword">mime_type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>mime_type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a mime type string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>The content type or <literal>None</literal> when does not know. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_from_mime_type</methodname>() function tries
+		to find a content type based on the mime type name.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-get-description">
+            <title>gio.content_type_get_description</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_get_description</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a short description of the content type type. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_get_description</methodname>() function
+		gets the human readable description of the content type.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-get-icon">
+            <title>gio.content_type_get_icon</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_get_icon</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>A <link linkend="class-gioicon"><classname>gio.Icon</classname></link>
+		    corresponding to the content type. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_get_icon</methodname>() function
+		gets the icon for a content type.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-get-mime-type">
+            <title>gio.content_type_get_mime_type</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_get_mime_type</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string.
+                    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>the registered mime-type for the given type,
+		    or <literal>None</literal> if unknown. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_get_mime_type</methodname>() function
+		gets the mime-type for the content type. If one is registered
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-guess">
+            <title>gio.content_type_guess</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_guess</methodname>
+                <methodparam><parameter role="keyword">filename</parameter></methodparam>
+                <methodparam><parameter role="keyword">data</parameter></methodparam>
+                <methodparam><parameter role="keyword">want_uncertain</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>filename</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string, or <literal>None</literal>. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>data</parameter>&nbsp;:</term>
+                    <listitem><simpara>a stream of data, or <literal>None</literal>. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>want_uncertain</parameter>&nbsp;:</term>
+                    <listitem><simpara>a flag indicating the certainty of the result.
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a string indicating a guessed content type for the given data.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_guess</methodname>() function guesses
+		the content type based on example data. If the function is uncertain,
+		result_uncertain will be set to <literal>True</literal>. Either filename
+		or data may be <literal>None</literal>, in which case the guess will be
+		based solely on the other argument.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-is-a">
+            <title>gio.content_type_is_a</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_is_a</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+                <methodparam><parameter role="keyword">supertype</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><parameter>supertype</parameter>&nbsp;:</term>
+                    <listitem><simpara>a string.
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if type is a kind of
+		    supertype, <literal>False</literal> otherwise. 
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_is_a</methodname>() function determines
+		if type is a subset of supertype.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-type-is-unknown">
+            <title>gio.content_type_is_unknown</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_type_is_unknown</methodname>
+                <methodparam><parameter role="keyword">type</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>type</parameter>&nbsp;:</term>
+                    <listitem><simpara>a content type string. 
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara><literal>True</literal> if the type is the unknown type.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_type_is_unknown</methodname>() function checks if
+		the content type is the generic "unknown" type. On unix this is the
+		"application/octet-stream" mimetype, while on win32 it is "*".
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--content-types-get-registered">
+            <title>gio.content_types_get_registered</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>content_types_get_registered</methodname>
+                <methodparam></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a list of the registered content types.
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>content_types_get_registered</methodname>() function
+		gets a list of strings containing all the registered content types
+		known to the system.
+            </para>
+        </refsect2>
+
+        <refsect2 id="function-gio--io-error-from-errno">
+            <title>gio.io_error_from_errno</title>
+
+            <programlisting><methodsynopsis language="python">
+                <methodname>io_error_from_errno</methodname>
+                <methodparam><parameter role="keyword">err_no</parameter></methodparam>
+            </methodsynopsis></programlisting>
+            
+            <variablelist>
+                <varlistentry>
+                    <term><parameter>err_no</parameter>&nbsp;:</term>
+                    <listitem><simpara>Error number.
+		    </simpara></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><emphasis>Returns</emphasis>&nbsp;:</term>
+                    <listitem><simpara>a
+		    <xref linkend="gio-error-constants" endterm="gio-error-constants-title"></xref>
+                    </simpara></listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>
+                The <methodname>io_error_from_errno</methodname>() function converts
+		error codes into GIO error codes.
+            </para>
+        </refsect2>
+    </refsect1>
+</refentry>

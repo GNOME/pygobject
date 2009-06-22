@@ -43,6 +43,7 @@
 <xi:include href="pygio-unixoutputstream.xml"/>
 <xi:include href="pygio-volume.xml"/>
 <xi:include href="pygio-volumemonitor.xml"/>
+<xi:include href="pygio-functions.xml"/>
 <xi:include href="pygio-constants.xml"/>
 
 </chapter>
