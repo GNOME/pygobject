@@ -27,6 +27,14 @@ UINT64_MAX = 18446744073709551615L
 utf8_const = 'const \xe2\x99\xa5 utf8'
 utf8_nonconst = 'nonconst \xe2\x99\xa5 utf8'
 
+def createStructA():
+    a = Everything.TestStructA()
+    a.some_int = 3
+    a.some_int8 = 1
+    a.some_double = 4.15
+    a.some_enum= Everything.TestEnum.VALUE3
+    return a
+
 class SignalHandler:
     def __init__(self):
         self.counter = 0
@@ -296,52 +304,27 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, o.connect, 'invalid-signal', signal_handler)
         self.assertRaises(TypeError, o.emit, 'invalid-signal')
 
-    def createStructA(self):
-        a = Everything.TestStructA()
-        a.some_int = 3
-        a.some_int8 = 1
-        a.some_double = 4.15
-        a.some_enum= Everything.TestEnum.VALUE3
-
+    def testStructA(self):
+        a = createStructA()
         self.assertEquals(a.some_int, 3)
         self.assertEquals(a.some_int8, 1)
         self.assertEquals(a.some_double, 4.15)
         self.assertEquals(a.some_enum, Everything.TestEnum.VALUE3)
 
-        return a
+        a_out = Everything.TestStructA()
+        a.clone(a_out)
+        self.assertEquals(a, a_out)
 
-# FIXME
-# ======================================================================
-# ERROR: testStructA (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 258, in testStructA
-#     a_out = a.clone()
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 116, in __call__
-#     self, requiredArgs, len(totalInArgs)))
-# TypeError: <method clone of Everything.TestStructA object> requires 2 arguments, passed 1 instead.
-#    def testStructA(self):
-#        a = self.createStructA()
-#        a_out = a.clone()
-#        self.assertEquals(a, a_out)
+    def testStructB(self):
+        b = Everything.TestStructB()
+        b.some_int8 = 3
+        a = createStructA()
+        b.nested_a = a
+        self.assertEquals(a, b.nested_a)
 
-# FIXME
-# ======================================================================
-# ERROR: testStructB (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 264, in testStructB
-#     b.nested_a = self.createStructA()
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 186, in __set__
-#     return self._info.setValue(obj, value)
-# RuntimeError: Failed to set value for field
-#	def testStructB(self):
-#        b = Everything.TestStructB()
-#        b.some_int8 = 3
-#        b.nested_a = self.createStructA()
-#        b_out = b.clone()
-#        self.assertEquals(b, b_out)
-#        self.assertEquals(b.nested_a, b_out.nested_a)
+        b_out = Everything.TestStructB()
+        b.clone(b_out)
+        self.assertEquals(b, b_out)
 
     def testInterface(self):
         self.assertTrue(issubclass(Everything.TestInterface, gobject.GInterface))
