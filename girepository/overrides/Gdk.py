@@ -1,4 +1,4 @@
-from bank.module import DynamicModule
+from girepository.module import DynamicModule
 
 class GdkModule(DynamicModule):
     def created(self):
