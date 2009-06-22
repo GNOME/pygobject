@@ -97,6 +97,11 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
         interface_type = g_base_info_get_type(interface_info);
         if (interface_type == GI_INFO_TYPE_ENUM) {
             arg.v_int = PyInt_AsLong(object);
+        } else if (interface_type == GI_INFO_TYPE_STRUCT || interface_type == GI_INFO_TYPE_BOXED) {
+            PyObject *py_buffer;
+            py_buffer = PyObject_GetAttrString(object, "__buffer__");
+            g_assert(py_buffer != NULL);
+            (*py_buffer->ob_type->tp_as_buffer->bf_getreadbuffer)(py_buffer, 0, &arg.v_pointer);
         } else if (object == Py_None)
             arg.v_pointer = NULL;
         else
