@@ -328,329 +328,380 @@ _wrap_g_function_info_is_method(PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 {
+    gboolean is_method;
+    gboolean is_constructor;
+
+    guint n_args;
+    guint n_in_args;
+    guint n_out_args;
+    Py_ssize_t n_py_args;
+    guint n_return_values;
+
+    GICallableInfo *callable_info;
+    GITypeInfo *return_info;
+    GITypeTag return_tag;
+
     GArgument *in_args;
     GArgument *out_args;
     GArgument *out_values;
     GArgument return_arg;
-    int n_args;
-    int expected_in_argc;
-    int expected_out_argc;
-    int i;
-    int argv_pos;
-    int in_args_pos;
-    int out_args_pos;
-    GError *error;
-    gboolean failed;
-    GIFunctionInfoFlags flags;
-    gboolean is_method;
-    gboolean is_constructor;
-    gboolean invoke_ok;
-    GITypeInfo *return_info;
-    GITypeTag return_tag;
-    PyObject **return_values;
-    int n_return_values;
-    int next_rval;
-    PyObject *retval;
-    PyObject *py_arg;
+    PyObject *return_value;
 
-    flags = g_function_info_get_flags((GIFunctionInfo*)self->info);
-    is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
-    is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+    guint i;
 
-    expected_in_argc = 0;
-    expected_out_argc = 0;
+    callable_info = (GICallableInfo *)self->info;
 
-    n_args = g_callable_info_get_n_args( (GICallableInfo*) self->info);
+    {
+        GIFunctionInfoFlags flags;
+
+        flags = g_function_info_get_flags((GIFunctionInfo *)callable_info);
+        is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
+        is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+    }
+
+    /* Count arguments. */
+    n_args = g_callable_info_get_n_args(callable_info);
+    n_py_args = PyTuple_Size(args);
+    n_in_args = is_method ? 1 : 0;  /* The first argument is the instance. */
+    n_out_args = 0;
+
     for (i = 0; i < n_args; i++) {
         GIDirection direction;
         GIArgInfo *arg_info;
 
-        arg_info = g_callable_info_get_arg( (GICallableInfo*) self->info, i);
+        arg_info = g_callable_info_get_arg(callable_info, i);
         direction = g_arg_info_get_direction(arg_info);
-        if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
-            expected_in_argc += 1;
-        if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
-            expected_out_argc += 1;
-        g_base_info_unref( (GIBaseInfo*) arg_info);
-    }
-    /*
-    g_debug("Call is to %s %s.%s with expected: %d in args, %d out args, %d total args",
-                      is_method ? "method" : "function",
-                      g_base_info_get_namespace( (GIBaseInfo*) self->info),
-                      g_base_info_get_name( (GIBaseInfo*) self->info),
-                      expected_in_argc,
-                      expected_out_argc,
-                      n_args);
-    */
-    if (is_method)
-        expected_in_argc += 1;
 
-    in_args = g_newa(GArgument, expected_in_argc);
-    out_args = g_newa(GArgument, expected_out_argc);
+        if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
+            n_in_args += 1;
+        }
+        if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+            n_out_args += 1;
+        }
+
+        g_base_info_unref((GIBaseInfo *)arg_info);
+    }
+
+    /* Get the arguments. */
+    in_args = g_newa(GArgument, n_in_args);
+    out_args = g_newa(GArgument, n_out_args);
     /* each out arg is a pointer, they point to these values */
     /* FIXME: This will break for caller-allocates funcs:
        http://bugzilla.gnome.org/show_bug.cgi?id=573314 */
-    out_values = g_newa(GArgument, expected_out_argc);
+    out_values = g_newa(GArgument, n_out_args);
 
-    failed = FALSE;
-    in_args_pos = 0; /* index into in_args */
-    out_args_pos = 0; /* into out_args */
-    argv_pos = 0; /* index into argv */
+    {
+        guint in_args_pos = 0;
+        guint out_args_pos = 0;
+        Py_ssize_t py_args_pos = 0;
 
-    if (is_method && !is_constructor) {
-        GIBaseInfo *container = g_base_info_get_container((GIBaseInfo *) self->info);
-        GIInfoType type = g_base_info_get_type(container);
+        if (is_method && !is_constructor) {
+            /* Get the instance. */
+            GIBaseInfo *container;
+            GIInfoType container_info_type;
+            PyObject *py_arg;
 
-        py_arg = PyTuple_GetItem(args, 0);
-        if (!py_arg) {
-            PyErr_SetString(PyExc_ValueError, "Calling a method without passing an instance");
-            return NULL;
-        }
-        if (py_arg == Py_None) {
-            in_args[0].v_pointer = NULL;
-        } else if (type == GI_INFO_TYPE_STRUCT || type == GI_INFO_TYPE_BOXED) {
-            PyObject *pybuffer = PyObject_GetAttrString((PyObject *)py_arg,
-                                                        "__buffer__");
-            PyBufferProcs *buffer_procs = pybuffer->ob_type->tp_as_buffer;
-            (*buffer_procs->bf_getreadbuffer)(pybuffer, 0, &in_args[0].v_pointer);
-        } else { /* by fallback is always object */
-            in_args[0].v_pointer = pygobject_get(py_arg);
-        }
-        ++in_args_pos;
-    }
+            container = g_base_info_get_container((GIBaseInfo *)callable_info);
+            container_info_type = g_base_info_get_type(container);
 
-    for (i = 0; i < n_args; i++) {
-        GIDirection direction;
-        GIArgInfo *arg_info;
-        GArgument *out_value;
+            py_arg = PyTuple_GetItem(args, py_args_pos);
+            g_assert(py_arg != NULL);
 
-        arg_info = g_callable_info_get_arg( (GICallableInfo*) self->info, i);
-        direction = g_arg_info_get_direction(arg_info);
-
-        out_value = NULL;
-        if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
-            g_assert(out_args_pos < expected_out_argc);
-
-            out_value = &out_values[out_args_pos];
-            out_args[out_args_pos].v_pointer = out_value;
-            ++out_args_pos;
-        }
-
-        if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
-            if (is_method || is_constructor)
-                py_arg = PyTuple_GetItem(args, i + 1);
-            else
-                py_arg = PyTuple_GetItem(args, i);
-
-            GArgument in_value = pyg_argument_from_pyobject(py_arg, g_arg_info_get_type(arg_info));
-
-            ++argv_pos;
-
-            if (direction == GI_DIRECTION_IN) {
-                in_args[in_args_pos] = in_value;
-            } else {
-                /* INOUT means we pass a pointer */
-                g_assert(out_value != NULL);
-                *out_value = in_value;
-                in_args[in_args_pos].v_pointer = out_value;
+            if (py_arg == Py_None) {
+                in_args[in_args_pos].v_pointer = NULL;
+            } else if (container_info_type == GI_INFO_TYPE_STRUCT || container_info_type == GI_INFO_TYPE_BOXED) {
+                PyObject *py_buffer;
+                PyBufferProcs *py_buffer_procs;
+                py_buffer = PyObject_GetAttrString((PyObject *)py_arg, "__buffer__");
+                if (py_buffer == NULL) {
+                    g_base_info_unref(container);
+                    return NULL;
+                }
+                py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
+                (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &in_args[in_args_pos].v_pointer);
+            } else { /* by fallback is always object */
+                in_args[in_args_pos].v_pointer = pygobject_get(py_arg);
             }
 
-            ++in_args_pos;
+            g_base_info_unref(container);
+
+            in_args_pos += 1;
+            py_args_pos += 1;
+        } else if (is_constructor) {
+            /* Skip the first argument. */
+            py_args_pos += 1;
         }
 
-        g_base_info_unref( (GIBaseInfo*) arg_info);
+        for (i = 0; i < n_args; i++) {
+            GIDirection direction;
+            GIArgInfo *arg_info;
+            GArgument *out_value = NULL;
 
-        if (failed)
-            break;
+            arg_info = g_callable_info_get_arg(callable_info, i);
+            direction = g_arg_info_get_direction(arg_info);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+                g_assert(out_args_pos < n_out_args);
+
+                out_value = &out_values[out_args_pos];
+                out_args[out_args_pos].v_pointer = out_value;
+                out_args_pos += 1;
+            }
+
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
+                PyObject *py_arg;
+
+                g_assert(py_args_pos < n_py_args);
+                py_arg = PyTuple_GetItem(args, py_args_pos);
+                g_assert(py_arg != NULL);
+
+                GArgument in_value = pyg_argument_from_pyobject(py_arg, g_arg_info_get_type(arg_info));
+
+                g_assert(in_args_pos < n_in_args);
+                if (direction == GI_DIRECTION_IN) {
+                    /* Pass the value. */
+                    in_args[in_args_pos] = in_value;
+                } else {
+                    /* Pass a pointer to the value. */
+                    g_assert(out_value != NULL);
+                    *out_value = in_value;
+                    in_args[in_args_pos].v_pointer = out_value;
+                }
+
+                in_args_pos += 1;
+                py_args_pos += 1;
+            }
+
+            g_base_info_unref((GIBaseInfo *)arg_info);
+        }
+
+        g_assert(in_args_pos == n_in_args);
+        g_assert(out_args_pos == n_out_args);
+        g_assert(py_args_pos == n_py_args);
     }
 
-    if (failed) {
-        PyErr_SetString(PyExc_ValueError, "Failed to convert all args.");
-        return NULL;
+    /* Invoke the callable. */
+    {
+        GError *error = NULL;
+
+        if (!g_function_info_invoke((GIFunctionInfo *)callable_info,
+                    in_args, n_in_args,
+                    out_args, n_out_args,
+                    &return_arg,
+                    &error)) {
+            g_assert(error != NULL);
+            PyErr_Format(PyExc_RuntimeError, "Error invoking %s.%s(): %s",
+                    g_base_info_get_namespace((GIBaseInfo *)callable_info),
+                    g_base_info_get_name((GIBaseInfo *)callable_info),
+                    error->message);
+            g_error_free(error);
+            return NULL;
+        }
     }
 
-    g_assert(in_args_pos == expected_in_argc);
-    g_assert(out_args_pos == expected_out_argc);
-
-    error = NULL;
-    invoke_ok = g_function_info_invoke( (GIFunctionInfo*) self->info,
-                                        in_args, expected_in_argc,
-                                        out_args, expected_out_argc,
-                                        &return_arg,
-                                        &error);
-
-    return_info = g_callable_info_get_return_type( (GICallableInfo*) self->info);
-    g_assert(return_info != NULL);
-
-    if (!invoke_ok) {
-        char buf[256];
-        snprintf(buf, sizeof(buf), "Error invoking %s.%s: %s",
-                 g_base_info_get_namespace( (GIBaseInfo*) self->info),
-                 g_base_info_get_name( (GIBaseInfo*) self->info),
-                 error->message);
-
-        g_assert(error != NULL);
-        PyErr_SetString(PyExc_RuntimeError, buf);
-        g_error_free(error);
-
-        return NULL;
-    }
-
+    /* Get return value. */
+    return_info = g_callable_info_get_return_type(callable_info);
     return_tag = g_type_info_get_tag(return_info);
 
-    if (is_constructor) {
-        py_arg = PyTuple_GetItem(args, 0);
-
-        if (return_tag == GI_TYPE_TAG_INTERFACE) {
-            GIBaseInfo *interface_info = g_type_info_get_interface(return_info);
-            GIInfoType interface_type = g_base_info_get_type(interface_info);
-
-            if (interface_type == GI_INFO_TYPE_STRUCT || interface_type == GI_INFO_TYPE_BOXED) {
-                // FIXME: We should reuse this. Perhaps by separating the
-                // wrapper creation from the binding to the wrapper.
-                gsize size = g_struct_info_get_size ((GIStructInfo*)return_info);
-                PyObject *buffer = PyBuffer_FromReadWriteMemory(return_arg.v_pointer, size);
-
-                //PyObject *dict = PyObject_GetDict(py_arg);
-                PyObject_SetAttrString(py_arg, "__buffer__", buffer);
-
-                Py_INCREF(py_arg);
-                return py_arg;
-            } else {
-                PyGObject *self = (PyGObject *) py_arg;
-                if (self->obj != NULL) {
-                    PyErr_SetString(PyExc_ValueError, "Calling constructor on an instance that isn't a GObject");
-                    return NULL;
-                }
-                self->obj = return_arg.v_pointer;
-                g_object_ref(return_arg.v_pointer);
-                pygobject_register_wrapper(py_arg);
-                Py_INCREF(py_arg);
-                return py_arg;
-            }
-        } else {
-            PyErr_SetString(PyExc_NotImplementedError, "");
-            return NULL;
-        }
-    }
-
-    retval = NULL;
-
-    next_rval = 0; /* index into return_values */
-
-    n_return_values = expected_out_argc;
-    if (return_tag != GI_TYPE_TAG_VOID)
+    n_return_values = n_out_args;
+    if (return_tag != GI_TYPE_TAG_VOID) {
         n_return_values += 1;
 
-    return_values = g_newa(PyObject*, n_return_values);
-    if (!is_constructor && n_return_values > 0) {
-        if (return_tag != GI_TYPE_TAG_VOID) {
-            PyObject *obj = pyg_argument_to_pyobject(&return_arg, return_info);
-            if (obj == NULL) {
-                return NULL;
-            }
-            return_values[next_rval] = obj;
-
-            ++next_rval;
-        }
-    }
-
-    /* We walk over all args, release in args (if allocated) and convert
-     * all out args
-     */
-    in_args_pos = is_method ? 1 : 0; /* index into in_args */
-    out_args_pos = 0; /* into out_args */
-
-    for (i = 0; i < n_args; i++) {
-        GIDirection direction;
-        GIArgInfo *arg_info;
-        GITypeInfo *arg_type_info;
-
-        arg_info = g_callable_info_get_arg( (GICallableInfo*) self->info, i);
-        direction = g_arg_info_get_direction(arg_info);
-
-        arg_type_info = g_arg_info_get_type(arg_info);
-
-        if (direction == GI_DIRECTION_IN) {
-            g_assert(in_args_pos < expected_in_argc);
-
-            ++in_args_pos;
+        if (!is_constructor) {
+            /* Convert the return value. */
+            return_value = pyg_argument_to_pyobject(&return_arg, return_info);
+            g_assert(return_value != NULL);
         } else {
-            /* INOUT or OUT */
-            if (direction == GI_DIRECTION_INOUT)
-                g_assert(in_args_pos < expected_in_argc);
-            g_assert(next_rval < n_return_values);
-            g_assert(out_args_pos < expected_out_argc);
+            /* Wrap the return value inside the first argument. */
 
-            PyObject *obj;
-            GITypeTag type_tag = g_type_info_get_tag(arg_type_info);
+            g_assert(n_py_args > 0);
+            return_value = PyTuple_GetItem(args, 0);
+            g_assert(return_value != NULL);
 
-            if (type_tag == GI_TYPE_TAG_ARRAY) {
-                GArgument *arg = out_args[out_args_pos].v_pointer;
-                gint length_arg_index = g_type_info_get_array_length(arg_type_info);
-                GArgument *length_arg;
+            Py_INCREF(return_value);
 
-                if (is_method)
-                    length_arg_index--;
+            if (return_tag == GI_TYPE_TAG_INTERFACE) {
+                GIBaseInfo *interface_info;
+                GIInfoType interface_info_type;
 
-                if (length_arg_index == -1) {
-                    PyErr_SetString(PyExc_NotImplementedError, "Need a field to specify the array length");
-                    return NULL;
+                interface_info = g_type_info_get_interface(return_info);
+                interface_info_type = g_base_info_get_type(interface_info);
+
+                if (interface_info_type == GI_INFO_TYPE_STRUCT || interface_info_type == GI_INFO_TYPE_BOXED) {
+                    /* FIXME: We should reuse this. Perhaps by separating the
+                     * wrapper creation from the binding to the wrapper.
+                     */
+                    gsize size;
+                    PyObject *buffer;
+                    int retval;
+
+                    size = g_struct_info_get_size ((GIStructInfo *)return_info);
+                    g_assert(size > 0);
+
+                    buffer = PyBuffer_FromReadWriteMemory(return_arg.v_pointer, size);
+
+                    retval = PyObject_SetAttrString(return_value, "__buffer__", buffer);
+                    g_assert(retval != -1);
+                } else {
+                    PyGObject *gobject;
+
+                    gobject = (PyGObject *) return_value;
+                    gobject->obj = return_arg.v_pointer;
+
+                    g_object_ref(gobject->obj);
+                    pygobject_register_wrapper(return_value);
                 }
 
-                length_arg = out_args[length_arg_index].v_pointer;
-
-                if (length_arg == NULL) {
-                    PyErr_SetString(PyExc_RuntimeError, "Failed to get the length of the array");
-                    return NULL;
-                }
-
-                obj = pyarray_to_pyobject(arg->v_pointer, length_arg->v_int, arg_type_info);
-            } else
-                obj = pyg_argument_to_pyobject(out_args[out_args_pos].v_pointer, arg_type_info);
-            if (obj == NULL) {
+                g_base_info_unref(interface_info);
+            } else {
+                /* TODO */
+                g_base_info_unref((GIBaseInfo *)return_info);
+                PyErr_SetString(PyExc_NotImplementedError, "constructor return_tag != GI_TYPE_TAG_INTERFACE");
                 return NULL;
             }
-            return_values[next_rval] = obj;
-
-            if (direction == GI_DIRECTION_INOUT)
-                ++in_args_pos;
-
-            ++out_args_pos;
-
-            ++next_rval;
         }
-
-        g_base_info_unref( (GIBaseInfo*) arg_type_info);
-        g_base_info_unref( (GIBaseInfo*) arg_info);
+    } else {
+        return_value = NULL;
     }
 
-    g_assert(next_rval == n_return_values);
-    g_assert(out_args_pos == expected_out_argc);
-    g_assert(in_args_pos == expected_in_argc);
+    /* Get output arguments and release input arguments. */
+    {
+        guint in_args_pos;
+        guint out_args_pos;
+        guint return_values_pos;
 
-    if (n_return_values > 0) {
-        if (n_return_values == 0) {
-            retval = Py_None;
-            Py_INCREF(retval);
-        } else if (n_return_values == 1) {
-            retval = return_values[0];
-        } else {
-            retval = PyTuple_New(n_return_values);
-            for (i = 0; i < n_return_values; i++) {
-                PyTuple_SetItem(retval, i, return_values[i]);
+        return_values_pos = 0;
+
+        if (n_return_values > 1) {
+            /* Return a tuple. */
+            PyObject *return_values;
+
+            return_values = PyTuple_New(n_return_values);
+            if (return_values == NULL) {
+                g_base_info_unref((GIBaseInfo *)return_info);
+                return NULL;
             }
+
+            if (return_tag != GI_TYPE_TAG_VOID) {
+                /* Put the return value first. */
+                int retval;
+                g_assert(return_value != NULL);
+                retval = PyTuple_SetItem(return_values, return_values_pos, return_value);
+                g_assert(retval == 0);
+                return_values_pos += 1;
+            }
+
+            return_value = return_values;
         }
+
+        in_args_pos = is_method ? 1 : 0;
+        out_args_pos = 0;
+
+        for (i = 0; i < n_args; i++) {
+            GIDirection direction;
+            GIArgInfo *arg_info;
+            GITypeInfo *arg_type_info;
+
+            arg_info = g_callable_info_get_arg(callable_info, i);
+            arg_type_info = g_arg_info_get_type(arg_info);
+
+            direction = g_arg_info_get_direction(arg_info);
+
+            if (direction == GI_DIRECTION_IN) {
+                g_assert(in_args_pos < n_in_args);
+
+                /* TODO: Release if allocated. */
+
+                in_args_pos += 1;
+            } else {
+                PyObject *obj;
+                GITypeTag type_tag;
+                int retval;
+
+                if (direction == GI_DIRECTION_INOUT) {
+                    g_assert(in_args_pos < n_in_args);
+                }
+                g_assert(out_args_pos < n_out_args);
+
+                type_tag = g_type_info_get_tag(arg_type_info);
+
+                if (type_tag == GI_TYPE_TAG_ARRAY) {
+                    /* FIXME: Verify all that... */
+
+                    gint length_arg_index;
+                    GArgument *length_arg;
+                    GArgument *arg;
+
+                    length_arg_index = g_type_info_get_array_length(arg_type_info);
+
+                    if (is_method) {
+                        /* XXX: Why? */
+                        length_arg_index -= 1;
+                    }
+
+                    if (length_arg_index == -1) {
+                        g_base_info_unref((GIBaseInfo *)arg_type_info);
+                        g_base_info_unref((GIBaseInfo *)arg_info);
+                        g_base_info_unref((GIBaseInfo *)return_info);
+                        PyErr_SetString(PyExc_NotImplementedError, "Need a field to specify the array length");
+                        return NULL;
+                    }
+
+                    length_arg = out_args[length_arg_index].v_pointer;
+
+                    if (length_arg == NULL) {
+                        g_base_info_unref((GIBaseInfo *)arg_type_info);
+                        g_base_info_unref((GIBaseInfo *)arg_info);
+                        g_base_info_unref((GIBaseInfo *)return_info);
+                        PyErr_SetString(PyExc_RuntimeError, "Failed to get the length of the array");
+                        return NULL;
+                    }
+
+                    arg = (GArgument *)out_args[out_args_pos].v_pointer;
+                    obj = pyarray_to_pyobject(arg->v_pointer, length_arg->v_int, arg_type_info);
+                } else {
+                    obj = pyg_argument_to_pyobject(out_args[out_args_pos].v_pointer, arg_type_info);
+                }
+
+                g_assert(obj != NULL);
+                g_assert(return_values_pos < n_return_values);
+
+                if (n_return_values > 1) {
+                    g_assert(return_value != NULL);
+
+                    retval = PyTuple_SetItem(return_value, return_values_pos, obj);
+                    g_assert(retval == 0);
+                } else {
+                    g_assert(return_value == NULL);
+                    return_value = obj;
+                }
+
+                if (direction == GI_DIRECTION_INOUT) {
+                    in_args_pos += 1;
+                }
+                out_args_pos += 1;
+                return_values_pos += 1;
+            }
+
+            g_base_info_unref((GIBaseInfo *)arg_type_info);
+            g_base_info_unref((GIBaseInfo *)arg_info);
+        }
+
+        if (n_return_values > 1) {
+            g_assert(return_values_pos == n_return_values);
+        }
+        g_assert(out_args_pos == n_out_args);
+        g_assert(in_args_pos == n_in_args);
     }
 
-    g_base_info_unref( (GIBaseInfo*) return_info);
+    g_base_info_unref((GIBaseInfo *)return_info);
 
-    if (retval == NULL) {
+    if (return_value == NULL) {
         Py_INCREF(Py_None);
-        retval = Py_None;
+        return_value = Py_None;
     }
 
-    return retval;
+    return return_value;
 }
 
 static PyMethodDef _PyGIFunctionInfo_methods[] = {
