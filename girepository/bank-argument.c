@@ -21,6 +21,288 @@
 #include "bank.h"
 #include <pygobject.h>
 
+GQuark
+pyg_argument_from_pyobject_error_quark(void)
+{
+  return g_quark_from_static_string ("pyg-argument-from-pyobject-quark");
+}
+
+gboolean
+pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError **error)
+{
+    gboolean retval;
+    GITypeTag type_tag;
+    const gchar *py_type_name_expected;
+
+    type_tag = g_type_info_get_tag(type_info);
+
+    retval = TRUE;
+
+    switch(type_tag) {
+        case GI_TYPE_TAG_VOID:
+            /* No check possible. */
+            break;
+        case GI_TYPE_TAG_BOOLEAN:
+            /* No check; every Python object has a truth value. */
+            break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_INT:
+        {
+            long value;
+            gint value_max, value_min;
+
+            if (!(PyInt_Check(object) || PyLong_Check(object))) {
+                py_type_name_expected = "int or long";
+                goto check_error_type;
+            }
+
+            if (type_tag == GI_TYPE_TAG_INT8) {
+                value_min = -128;
+                value_max = 127;
+            } else if (type_tag == GI_TYPE_TAG_INT16) {
+                value_min = -32768;
+                value_max = 32767;
+            } else if (type_tag == GI_TYPE_TAG_INT32) {
+                value_min = -2147483648;
+                value_max = 2147483647;
+            } else if (type_tag == GI_TYPE_TAG_INT) {
+                value_min = G_MININT;
+                value_max = G_MAXINT;
+            } else {
+                g_assert_not_reached();
+                value_max = 0;
+                value_min = 0;
+            }
+
+            value = PyInt_AsLong(object);
+            if (PyErr_Occurred() || value < value_min || value > value_max) {
+                PyErr_Clear();
+                g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                        "Must range from %i to %i", value_min, value_max);
+                retval = FALSE;
+            }
+            break;
+        }
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_UINT:
+        {
+            guint value_max;
+
+            if (type_tag == GI_TYPE_TAG_UINT8) {
+                value_max = 255;
+            } else if (type_tag == GI_TYPE_TAG_UINT16) {
+                value_max = 65535;
+            } else if (type_tag == GI_TYPE_TAG_UINT32) {
+                value_max = 4294967295;
+            } else if (type_tag == GI_TYPE_TAG_UINT) {
+                value_max = G_MAXUINT;
+            } else {
+                g_assert_not_reached();
+                value_max = 0;
+            }
+
+            if (PyInt_Check(object)) {
+                long value = PyInt_AsLong(object);
+                if (PyErr_Occurred() || value < 0 || value > value_max) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from 0 to %u", value_max);
+                    retval = FALSE;
+                }
+            } else if (PyLong_Check(object)) {
+                unsigned long value = PyLong_AsUnsignedLong(object);
+                if (PyErr_Occurred() || value > value_max) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from 0 to %u", value_max);
+                    retval = FALSE;
+                }
+            } else {
+                py_type_name_expected = "int or long";
+                goto check_error_type;
+            }
+            break;
+        }
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_LONG:
+        case GI_TYPE_TAG_SSIZE:
+            if (PyLong_Check(object)) {
+                gint64 value_min, value_max;
+
+                PyErr_Clear();
+                if (type_tag == GI_TYPE_TAG_INT64) {
+                    (void) PyLong_AsLongLong(object);
+                    value_min = -9223372036854775808u;
+                    value_max = 9223372036854775807;
+                } else {
+                    (void) PyLong_AsLong(object);
+
+                    /* Could be different from above on a 64 bit arch. */
+                    value_min = G_MINLONG;
+                    value_max = G_MAXLONG;
+                }
+                if (PyErr_Occurred()) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from %" G_GINT64_FORMAT " to %" G_GINT64_FORMAT, value_min, value_max);
+                    retval = FALSE;
+                }
+            } else if (!PyInt_Check(object)) {
+                /* Python Integer objects are implemented with longs, so no possible error if it is one. */
+                py_type_name_expected = "int or long";
+                goto check_error_type;
+            }
+            break;
+        case GI_TYPE_TAG_UINT64:
+        case GI_TYPE_TAG_ULONG:
+        case GI_TYPE_TAG_SIZE:
+        {
+            guint64 value_max;
+
+            if (type_tag == GI_TYPE_TAG_INT64) {
+                value_max = 18446744073709551615u;
+            } else {
+                /* Could be different from above on a 64 bit arch. */
+                value_max = G_MAXULONG;
+            }
+
+            if (PyLong_Check(object)) {
+                PyErr_Clear();
+                if (type_tag == GI_TYPE_TAG_UINT64) {
+                    (void) PyLong_AsUnsignedLongLong(object);
+                } else {
+                    (void) PyLong_AsUnsignedLong(object);
+                }
+                if (PyErr_Occurred()) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from 0 to %" G_GUINT64_FORMAT, value_max);
+                    retval = FALSE;
+                }
+            } else if (PyInt_Check(object)) {
+                long value;
+                value = PyInt_AsLong(object);
+                if (PyErr_Occurred() || value < 0) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from 0 to %" G_GUINT64_FORMAT, value_max);
+                    retval = FALSE;
+                }
+            } else {
+                py_type_name_expected = "int or long";
+                goto check_error_type;
+            }
+            break;
+        }
+        case GI_TYPE_TAG_FLOAT:
+        case GI_TYPE_TAG_DOUBLE:
+        {
+            gdouble value;
+
+            if (!PyFloat_Check(object)) {
+                py_type_name_expected = "float";
+                goto check_error_type;
+            }
+
+            value = PyFloat_AsDouble(object);
+            if (type_tag == GI_TYPE_TAG_FLOAT) {
+                if (PyErr_Occurred() || value < -G_MAXFLOAT || value > G_MAXFLOAT) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from %f to %f", -G_MAXFLOAT, G_MAXFLOAT);
+                    retval = FALSE;
+                }
+            } else if (type_tag == GI_TYPE_TAG_DOUBLE) {
+                if (PyErr_Occurred()) {
+                    PyErr_Clear();
+                    g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+                            "Must range from %f to %f", -G_MAXDOUBLE, G_MAXDOUBLE);
+                    retval = FALSE;
+                }
+            }
+            break;
+        }
+        case GI_TYPE_TAG_UTF8:
+            if (!PyString_Check(object)) {
+                py_type_name_expected = "string";
+                goto check_error_type;
+            }
+            break;
+        case GI_TYPE_TAG_ARRAY:
+        {
+            gint size;
+
+            if (!PyTuple_Check(object)) {
+                py_type_name_expected = "tuple";
+                goto check_error_type;
+            }
+
+            size = g_type_info_get_array_fixed_size(type_info);
+            if (size != -1 && PyTuple_Size(object) != size) {
+                /* FIXME: Set another more appropriate error. */
+                g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE, "FIXME");
+                retval = FALSE;
+                break;
+            }
+
+            /* TODO: to complete */
+
+            break;
+        }
+        case GI_TYPE_TAG_INTERFACE:
+        {
+            GIBaseInfo *interface_info;
+            GIInfoType interface_info_type;
+
+            interface_info = g_type_info_get_interface(type_info);
+            interface_info_type = g_base_info_get_type(interface_info);
+
+            if (interface_info_type == GI_INFO_TYPE_ENUM) {
+                (void) PyInt_AsLong(object);
+                if (PyErr_Occurred()) {
+                    PyErr_Clear();
+                    py_type_name_expected = "int";
+                    goto check_error_type;
+                }
+                /* XXX: What if the value doesn't correspond to any enum field? */
+            } else {
+                /* TODO */
+            }
+
+            g_base_info_unref(interface_info);
+
+            break;
+        }
+        case GI_TYPE_TAG_TIME_T:
+        case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
+        case GI_TYPE_TAG_GHASH:
+        case GI_TYPE_TAG_ERROR:
+            /* TODO */
+        default:
+            g_assert_not_reached();
+    }
+
+    g_assert(error == NULL || (retval == (*error == NULL)));
+    return retval;
+
+check_error_type:
+    {
+        PyObject *py_type;
+        py_type = PyObject_Type(object);
+        g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE,
+                "Must be %s, not %s", py_type_name_expected, ((PyTypeObject *)py_type)->tp_name);
+        Py_XDECREF(py_type);
+        return FALSE;
+    }
+}
+
 GArgument
 pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
 {

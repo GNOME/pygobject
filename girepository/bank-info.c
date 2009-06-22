@@ -382,6 +382,77 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
         g_base_info_unref((GIBaseInfo *)arg_info);
     }
 
+    {
+        Py_ssize_t py_args_pos;
+
+        /* Check the argument count. */
+        if (n_py_args != n_in_args + (is_constructor ? 1 : 0)) {
+            PyErr_Format(PyExc_TypeError, "%s.%s() takes exactly %i argument(s) (%zd given)",
+                    g_base_info_get_namespace((GIBaseInfo *)callable_info),
+                    g_base_info_get_name((GIBaseInfo *)callable_info),
+                    n_in_args + (is_constructor ? 1 : 0), n_py_args);
+            return NULL;
+        }
+
+        /* Check argument types. */
+        py_args_pos = (is_method || is_constructor) ? 1 : 0;
+        /* TODO: check the methods' first argument. */
+        for (i = 0; i < n_args; i++) {
+            GIArgInfo *arg_info;
+            GITypeInfo *type_info;
+            GIDirection direction;
+            PyObject *py_arg;
+            GError *error;
+
+            arg_info = g_callable_info_get_arg(callable_info, i);
+            direction = g_arg_info_get_direction(arg_info);
+            if (!(direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)) {
+                g_base_info_unref((GIBaseInfo *)arg_info);
+                continue;
+            }
+
+            g_assert(py_args_pos < n_py_args);
+
+            py_arg = PyTuple_GetItem(args, py_args_pos);
+            g_assert(py_arg != NULL);
+
+            error = NULL;
+            type_info = g_arg_info_get_type(arg_info);
+            if (!pyg_argument_from_pyobject_check(py_arg, type_info, &error)) {
+                PyObject *py_error_type;
+                switch(error->code) {
+                    case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE:
+                        py_error_type = PyExc_TypeError;
+                        break;
+                    case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE:
+                        py_error_type = PyExc_ValueError;
+                        break;
+                    default:
+                        g_assert_not_reached();
+                        py_error_type = NULL;
+                }
+
+                PyErr_Format(py_error_type, "%s.%s() argument %zd: %s",
+                        g_base_info_get_namespace((GIBaseInfo *)self->info),
+                        g_base_info_get_name((GIBaseInfo *)self->info),
+                        py_args_pos, error->message);
+
+                g_clear_error(&error);
+            }
+
+            g_base_info_unref((GIBaseInfo *)type_info);
+            g_base_info_unref((GIBaseInfo *)arg_info);
+
+            if (PyErr_Occurred()) {
+                return NULL;
+            }
+
+            py_args_pos += 1;
+        }
+
+        g_assert(py_args_pos == n_py_args);
+    }
+
     /* Get the arguments. */
     in_args = g_newa(GArgument, n_in_args);
     out_args = g_newa(GArgument, n_out_args);

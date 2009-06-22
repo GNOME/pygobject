@@ -37,95 +37,9 @@ class Callable(object):
         self.info = info
         self.call_type = None
 
-    def type_check(self, name, value, argType):
-        tag = argType.getTag()
-        if tag == repo.TYPE_TAG_UTF8:
-            if not isinstance(value, basestring) and value is not None:
-                raise TypeError("%s must be string, not %s" % (
-                        name, type(value).__name__))
-        elif tag in (repo.TYPE_TAG_INT,
-                     repo.TYPE_TAG_INT8,
-                     repo.TYPE_TAG_UINT,
-                     repo.TYPE_TAG_UINT8,
-                     repo.TYPE_TAG_INT16,
-                     repo.TYPE_TAG_UINT16,
-                     repo.TYPE_TAG_INT32):
-            try:
-                int(value)
-            except ValueError:
-                raise TypeError("%s must be int, not %s" % (name, type(value).__name__))
-            if tag in (repo.TYPE_TAG_UINT,
-                       repo.TYPE_TAG_UINT8,
-                       repo.TYPE_TAG_UINT16) and value < 0:
-                raise TypeError("%s must be an unsigned value, not %s", name, value)
-        elif tag in (repo.TYPE_TAG_UINT32,
-                     repo.TYPE_TAG_INT64,
-                     repo.TYPE_TAG_UINT64,
-                     repo.TYPE_TAG_LONG,
-                     repo.TYPE_TAG_ULONG,
-                     repo.TYPE_TAG_SIZE,
-                     repo.TYPE_TAG_SSIZE):
-            try:
-                long(value)
-            except ValueError:
-                raise TypeError("%s must be int or long, not %s" % (name, type(value).__name__))
-            if tag in (repo.TYPE_TAG_UINT32,
-                       repo.TYPE_TAG_UINT64,
-                       repo.TYPE_TAG_ULONG,
-                       repo.TYPE_TAG_SIZE) and value < 0:
-                raise TypeError("%s must be an unsigned value, not %s", name, value)
-        elif tag in (repo.TYPE_TAG_FLOAT,
-                     repo.TYPE_TAG_DOUBLE):
-            try:
-                float(value)
-            except ValueError:
-                raise TypeError("%s must be float, not %s" % (name, type(value).__name__))
-        elif tag == repo.TYPE_TAG_INTERFACE:
-            # TODO
-            pass
-        elif tag == repo.TYPE_TAG_BOOLEAN:
-            try:
-                bool(value)
-            except ValueError:
-                raise TypeError("%s must be bool, not %s" % (name, type(value).__name__))
-        elif tag == repo.TYPE_TAG_ARRAY:
-            if value is not None:
-                raise TypeError("Must pass None for arrays currently")
-        elif tag == repo.TYPE_TAG_ERROR:
-            # TODO
-            pass
-        elif tag == repo.TYPE_TAG_VOID:
-            # TODO
-            pass
-        else:
-            raise NotImplementedError('type checking for tag %d' % tag)
-
     def __call__(self, *args, **kwargs):
-        infoArgs = list(self.info.getArgs())
-        requiredArgs = 0
-        for arg in infoArgs:
-            direct = arg.getDirection()
-            if direct in [repo.DIRECTION_IN, repo.DIRECTION_INOUT]:
-                requiredArgs += 1
-
-        is_method = self.call_type in [self.INSTANCE_METHOD, self.CLASS_METHOD]
-        if is_method:
-            requiredArgs += 1
-
         # TODO: put the kwargs in their right positions
         totalInArgs = args + tuple(kwargs.values())
-
-        if len(totalInArgs) != requiredArgs:
-            raise TypeError('%r requires %d arguments, passed %d instead.' % (
-                self, requiredArgs, len(totalInArgs)))
-
-        for i, value in enumerate(totalInArgs):
-            if not is_method or i > 0:
-                off = is_method and 1 or 0
-                infoArg = infoArgs[i - off]
-                argType = infoArg.getType()
-                name = infoArg.getName()
-                self.type_check(name, value, argType)
 
         retval = self.info.invoke(*totalInArgs)
 

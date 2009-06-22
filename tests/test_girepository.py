@@ -89,27 +89,27 @@ class TestGIEverything(unittest.TestCase):
 
     def testUInt(self):
         self.assertEqual(3, Everything.test_uint(3))
-        self.assertRaises(TypeError, Everything.test_uint, -3)
+        self.assertRaises(ValueError, Everything.test_uint, -3)
 
     def testUInt8(self):
         self.assertEqual(3, Everything.test_uint8(3))
         self.assertEqual(UINT8_MAX, Everything.test_uint8(UINT8_MAX))
-        self.assertRaises(TypeError, Everything.test_uint8, -3)
+        self.assertRaises(ValueError, Everything.test_uint8, -3)
 
     def testUInt16(self):
         self.assertEqual(3, Everything.test_uint16(3))
         self.assertEqual(UINT16_MAX, Everything.test_uint16(UINT16_MAX))
-        self.assertRaises(TypeError, Everything.test_uint16, -3)
+        self.assertRaises(ValueError, Everything.test_uint16, -3)
 
     def testUInt32(self):
         self.assertEqual(3, Everything.test_uint32(3))
         self.assertEqual(UINT32_MAX, Everything.test_uint32(UINT32_MAX))
-        self.assertRaises(TypeError, Everything.test_uint32, -3)
+        self.assertRaises(ValueError, Everything.test_uint32, -3)
 
     def testUInt64(self):
         self.assertEqual(3, Everything.test_uint64(3))
         self.assertEqual(UINT64_MAX, Everything.test_uint64(UINT64_MAX))
-        self.assertRaises(TypeError, Everything.test_uint64, -3)
+        self.assertRaises(ValueError, Everything.test_uint64, -3)
 
     def testLong(self):
         self.assertEqual(3, Everything.test_long(3))
@@ -118,7 +118,7 @@ class TestGIEverything(unittest.TestCase):
 
     def testULong(self):
         self.assertEqual(3, Everything.test_ulong(3))
-        self.assertRaises(TypeError, Everything.test_ulong, -3)
+        self.assertRaises(ValueError, Everything.test_ulong, -3)
 
 	def testSSize(self):
 	    self.assertEqual(3, Everything.test_ssize(3))
