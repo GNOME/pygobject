@@ -1,5 +1,5 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
- * vim: set ts=8 sts=4 sw=4 noet ai cindent :
+ * vim: set ts=8 sts=4 sw=4 et ai cindent :
  *
  * Copyright (C) 2005  Johan Dahlin <johan@gnome.org>
  *
