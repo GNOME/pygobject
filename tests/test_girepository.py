@@ -64,52 +64,100 @@ class TestGIEverything(unittest.TestCase):
         self.assertEqual(-3, Everything.test_int8(-3))
         self.assertEqual(INT8_MIN, Everything.test_int8(INT8_MIN))
         self.assertEqual(INT8_MAX, Everything.test_int8(INT8_MAX))
+        self.assertEqual(INT8_MIN, Everything.test_int8(long(INT8_MIN)))
+        self.assertEqual(INT8_MAX, Everything.test_int8(long(INT8_MAX)))
         self.assertRaises(TypeError, Everything.test_int, 'a')
+        self.assertRaises(ValueError, Everything.test_int8, INT8_MIN-1)
+        self.assertRaises(ValueError, Everything.test_int8, INT8_MAX+1)
+        self.assertRaises(ValueError, Everything.test_int8, long(INT8_MIN-1))
+        self.assertRaises(ValueError, Everything.test_int8, long(INT8_MAX+1))
 
     def testInt16(self):
         self.assertEqual(3, Everything.test_int16(3))
         self.assertEqual(-3, Everything.test_int16(-3))
         self.assertEqual(INT16_MIN, Everything.test_int16(INT16_MIN))
         self.assertEqual(INT16_MAX, Everything.test_int16(INT16_MAX))
+        self.assertEqual(INT16_MIN, Everything.test_int16(long(INT16_MIN)))
+        self.assertEqual(INT16_MAX, Everything.test_int16(long(INT16_MAX)))
         self.assertRaises(TypeError, Everything.test_int, 'a')
+        self.assertRaises(ValueError, Everything.test_int16, INT16_MIN-1)
+        self.assertRaises(ValueError, Everything.test_int16, INT16_MAX+1)
+        self.assertRaises(ValueError, Everything.test_int16, long(INT16_MIN-1))
+        self.assertRaises(ValueError, Everything.test_int16, long(INT16_MAX+1))
 
     def testInt32(self):
         self.assertEqual(3, Everything.test_int32(3))
         self.assertEqual(-3, Everything.test_int32(-3))
         self.assertEqual(INT32_MIN, Everything.test_int32(INT32_MIN))
         self.assertEqual(INT32_MAX, Everything.test_int32(INT32_MAX))
+        self.assertEqual(INT32_MIN, Everything.test_int32(long(INT32_MIN)))
+        self.assertEqual(INT32_MAX, Everything.test_int32(long(INT32_MAX)))
         self.assertRaises(TypeError, Everything.test_int, 'a')
+        self.assertRaises(ValueError, Everything.test_int32, INT32_MIN-1)
+        self.assertRaises(ValueError, Everything.test_int32, INT32_MAX+1)
+        self.assertRaises(ValueError, Everything.test_int32, long(INT32_MIN-1))
+        self.assertRaises(ValueError, Everything.test_int32, long(INT32_MAX+1))
 
     def testInt64(self):
         self.assertEqual(3, Everything.test_int64(3))
         self.assertEqual(-3, Everything.test_int64(-3))
         self.assertEqual(INT64_MIN, Everything.test_int64(INT64_MIN))
         self.assertEqual(INT64_MAX, Everything.test_int64(INT64_MAX))
+        self.assertEqual(INT64_MIN, Everything.test_int64(long(INT64_MIN)))
+        self.assertEqual(INT64_MAX, Everything.test_int64(long(INT64_MAX)))
         self.assertRaises(TypeError, Everything.test_int, 'a')
+        self.assertRaises(ValueError, Everything.test_int64, INT64_MIN-1)
+        self.assertRaises(ValueError, Everything.test_int64, INT64_MAX+1)
 
     def testUInt(self):
         self.assertEqual(3, Everything.test_uint(3))
+        self.assertEqual(3, Everything.test_uint(3L))
+        self.assertRaises(TypeError, Everything.test_uint, 'a')
         self.assertRaises(ValueError, Everything.test_uint, -3)
+        self.assertRaises(ValueError, Everything.test_uint, -3L)
 
     def testUInt8(self):
         self.assertEqual(3, Everything.test_uint8(3))
+        self.assertEqual(3, Everything.test_uint8(3L))
         self.assertEqual(UINT8_MAX, Everything.test_uint8(UINT8_MAX))
+        self.assertEqual(UINT8_MAX, Everything.test_uint8(long(UINT8_MAX)))
+        self.assertRaises(TypeError, Everything.test_uint8, 'a')
         self.assertRaises(ValueError, Everything.test_uint8, -3)
+        self.assertRaises(ValueError, Everything.test_uint8, -3L)
+        self.assertRaises(ValueError, Everything.test_uint8, UINT8_MAX+1)
+        self.assertRaises(ValueError, Everything.test_uint8, long(UINT8_MAX+1))
 
     def testUInt16(self):
         self.assertEqual(3, Everything.test_uint16(3))
+        self.assertEqual(3, Everything.test_uint16(3L))
         self.assertEqual(UINT16_MAX, Everything.test_uint16(UINT16_MAX))
+        self.assertEqual(UINT16_MAX, Everything.test_uint16(long(UINT16_MAX)))
+        self.assertRaises(TypeError, Everything.test_uint16, 'a')
         self.assertRaises(ValueError, Everything.test_uint16, -3)
+        self.assertRaises(ValueError, Everything.test_uint16, -3L)
+        self.assertRaises(ValueError, Everything.test_uint16, UINT16_MAX+1)
+        self.assertRaises(ValueError, Everything.test_uint16, long(UINT16_MAX+1))
 
     def testUInt32(self):
         self.assertEqual(3, Everything.test_uint32(3))
+        self.assertEqual(3, Everything.test_uint32(3L))
         self.assertEqual(UINT32_MAX, Everything.test_uint32(UINT32_MAX))
+        self.assertEqual(UINT32_MAX, Everything.test_uint32(long(UINT32_MAX)))
+        self.assertRaises(TypeError, Everything.test_uint32, 'a')
         self.assertRaises(ValueError, Everything.test_uint32, -3)
+        self.assertRaises(ValueError, Everything.test_uint32, -3L)
+        self.assertRaises(ValueError, Everything.test_uint32, UINT32_MAX+1)
+        self.assertRaises(ValueError, Everything.test_uint32, long(UINT32_MAX+1))
 
     def testUInt64(self):
         self.assertEqual(3, Everything.test_uint64(3))
+        self.assertEqual(3, Everything.test_uint64(3L))
         self.assertEqual(UINT64_MAX, Everything.test_uint64(UINT64_MAX))
+        self.assertEqual(UINT64_MAX, Everything.test_uint64(long(UINT64_MAX)))
+        self.assertRaises(TypeError, Everything.test_uint64, 'a')
         self.assertRaises(ValueError, Everything.test_uint64, -3)
+        self.assertRaises(ValueError, Everything.test_uint64, -3L)
+        self.assertRaises(ValueError, Everything.test_uint64, UINT64_MAX+1)
 
     def testLong(self):
         self.assertEqual(3, Everything.test_long(3))
@@ -118,16 +166,22 @@ class TestGIEverything(unittest.TestCase):
 
     def testULong(self):
         self.assertEqual(3, Everything.test_ulong(3))
+        self.assertEqual(3, Everything.test_ulong(3L))
+        self.assertRaises(TypeError, Everything.test_ulong, 'a')
         self.assertRaises(ValueError, Everything.test_ulong, -3)
+        self.assertRaises(ValueError, Everything.test_ulong, -3L)
 
-	def testSSize(self):
-	    self.assertEqual(3, Everything.test_ssize(3))
-	    self.assertEqual(-3, Everything.test_ssize(-3))
-	    self.assertRaises(TypeError, Everything.test_ssize, 'a')
+    def testSSize(self):
+        self.assertEqual(3, Everything.test_ssize(3))
+        self.assertEqual(3, Everything.test_ssize(3L))
+        self.assertEqual(-3, Everything.test_ssize(-3))
+        self.assertRaises(TypeError, Everything.test_ssize, 'a')
 
     def testSize(self):
         self.assertEqual(3, Everything.test_size(3))
-        self.assertRaises(TypeError, Everything.test_size, -3)
+        self.assertEqual(3, Everything.test_size(3L))
+        self.assertRaises(TypeError, Everything.test_ssize, 'a')
+        self.assertRaises(ValueError, Everything.test_size, -3)
 
     def testFloat(self):
         self.assertAlmostEqual(3.14, Everything.test_float(3.14), 6)
