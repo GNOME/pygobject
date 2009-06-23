@@ -103,59 +103,23 @@ class TestGIEverything(unittest.TestCase):
         self.assertEqual(UINT64_MAX, Everything.test_uint64(UINT64_MAX))
         self.assertRaises(TypeError, Everything.test_uint64, -3)
 
-# FIXME
-# ======================================================================
-# ERROR: testLong (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 128, in testLong
-#     self.assertEqual(3, Everything.test_long(3))
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#     self.type_check(name, value, argType)
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 97, in type_check
-#     raise NotImplementedError('type checking for tag %d' % tag)
-# NotImplementedError: type checking for tag 12
-#    def testLong(self):
-#        self.assertEqual(3, Everything.test_long(3))
-#        self.assertEqual(-3, Everything.test_long(-3))
-#        self.assertRaises(TypeError, Everything.test_long, 'a')
+    def testLong(self):
+        self.assertEqual(3, Everything.test_long(3))
+        self.assertEqual(-3, Everything.test_long(-3))
+        self.assertRaises(TypeError, Everything.test_long, 'a')
 
     def testULong(self):
         self.assertEqual(3, Everything.test_ulong(3))
         self.assertRaises(TypeError, Everything.test_ulong, -3)
 
-# FIXME
-# ======================================================================
-# ERROR: testSSize (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 137, in testSSize
-#     self.assertEqual(3, Everything.test_ssize(3))
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#     self.type_check(name, value, argType)
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 97, in type_check
-#     raise NotImplementedError('type checking for tag %d' % tag)
-# NotImplementedError: type checking for tag 14
-#	def testSSize(self):
-#	    self.assertEqual(3, Everything.test_ssize(3))
-#	    self.assertEqual(-3, Everything.test_ssize(-3))
-#	    self.assertRaises(TypeError, Everything.test_ssize, 'a')
+	def testSSize(self):
+	    self.assertEqual(3, Everything.test_ssize(3))
+	    self.assertEqual(-3, Everything.test_ssize(-3))
+	    self.assertRaises(TypeError, Everything.test_ssize, 'a')
 
-# FIXME
-# ======================================================================
-# ERROR: testSSize (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 137, in testSSize
-#     self.assertEqual(3, Everything.test_ssize(3))
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#     self.type_check(name, value, argType)
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 97, in type_check
-#     raise NotImplementedError('type checking for tag %d' % tag)
-# NotImplementedError: type checking for tag 14
-#    def testSize(self):
-#        self.assertEqual(3, Everything.test_size(3))
-#        self.assertRaises(TypeError, Everything.test_size, -3)
+    def testSize(self):
+        self.assertEqual(3, Everything.test_size(3))
+        self.assertRaises(TypeError, Everything.test_size, -3)
 
     def testFloat(self):
         self.assertAlmostEqual(3.14, Everything.test_float(3.14), 6)

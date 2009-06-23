@@ -61,14 +61,18 @@ class Callable(object):
         elif tag in (repo.TYPE_TAG_UINT32,
                      repo.TYPE_TAG_INT64,
                      repo.TYPE_TAG_UINT64,
-                     repo.TYPE_TAG_ULONG):
+                     repo.TYPE_TAG_LONG,
+                     repo.TYPE_TAG_ULONG,
+                     repo.TYPE_TAG_SIZE,
+                     repo.TYPE_TAG_SSIZE):
             try:
                 long(value)
             except ValueError:
                 raise TypeError("%s must be int or long, not %s" % (name, type(value).__name__))
             if tag in (repo.TYPE_TAG_UINT32,
                        repo.TYPE_TAG_UINT64,
-                       repo.TYPE_TAG_ULONG) and value < 0:
+                       repo.TYPE_TAG_ULONG,
+                       repo.TYPE_TAG_SIZE) and value < 0:
                 raise TypeError("%s must be an unsigned value, not %s", name, value)
         elif tag in (repo.TYPE_TAG_FLOAT,
                      repo.TYPE_TAG_DOUBLE):

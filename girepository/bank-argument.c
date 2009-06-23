@@ -66,9 +66,11 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
     case GI_TYPE_TAG_INT:
         arg.v_int = PyInt_AsLong(object);
         break;
+    case GI_TYPE_TAG_SSIZE:
     case GI_TYPE_TAG_LONG:
         arg.v_long = PyInt_AsLong(object);
         break;
+    case GI_TYPE_TAG_SIZE:
     case GI_TYPE_TAG_ULONG:
         arg.v_ulong = PyInt_AsLong(object);
         break;
@@ -268,6 +270,12 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
         break;
     case GI_TYPE_TAG_ULONG:
         obj = PyInt_FromLong(arg->v_ulong);
+        break;
+    case GI_TYPE_TAG_SSIZE:
+        obj = PyInt_FromLong(arg->v_ssize);
+        break;
+    case GI_TYPE_TAG_SIZE:
+        obj = PyInt_FromLong(arg->v_size);
         break;
     case GI_TYPE_TAG_INT8:
         obj = PyInt_FromLong(arg->v_int8);
