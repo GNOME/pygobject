@@ -55,6 +55,7 @@ HTML_FILES =					\
 	html/gio-constants.html			\
 	html/gio-functions.html			\
 	html/gio-class-reference.html		\
+	html/giounix-class-reference.html	\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
 	html/index.html				\
@@ -79,6 +80,7 @@ XML_FILES = 						\
 	reference/pyglib-maincontext.xml 		\
 	reference/pyglib-mainloop.xml 			\
 	reference/pygio-classes.xml 			\
+	reference/pygiounix-classes.xml			\
 	reference/pygio-constants.xml			\
 	reference/pygio-functions.xml			\
 	reference/pygio-applaunchcontext.xml 		\

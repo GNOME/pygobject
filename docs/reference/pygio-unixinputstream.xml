@@ -4,7 +4,7 @@
 
 <refentry id="class-giounixinputstream">
     <refnamediv>
-        <refname>gio.UnixInputStream</refname>
+        <refname>gio.unix.InputStream</refname>
         <refpurpose>Streaming input operations for UNIX file descriptors.</refpurpose>
     </refnamediv>
 
@@ -12,11 +12,11 @@
         <title>Synopsis</title>
 
     <classsynopsis language="python">
-        <ooclass><classname>gio.UnixInputStream</classname></ooclass>
+        <ooclass><classname>gio.unix.InputStream</classname></ooclass>
         <ooclass><classname><link linkend="class-gioinputstream">gio.InputStream</link></classname></ooclass>
 
     <constructorsynopsis language="python">
-	<methodname><link linkend="constructor-giounixinputstream">gio.UnixInputStream</link></methodname>
+	<methodname><link linkend="constructor-giounixinputstream">gio.unix.InputStream</link></methodname>
 	<methodparam><parameter role="keyword">fd</parameter></methodparam>
 	<methodparam><parameter role="keyword">close_fd</parameter></methodparam>
     </constructorsynopsis>
@@ -43,13 +43,13 @@
 
 <synopsis>+-- <link linkend="class-gobject">gobject.GObject</link>
   +-- <link linkend="class-gioinputstream">gio.InputStream</link>
-    +-- <link linkend="class-giounixinputstream">gio.UnixInputStream</link>
+    +-- <link linkend="class-giounixinputstream">gio.unix.InputStream</link>
 </synopsis>
 
     </refsect1>
 
     <refsect1 id="properties-giounixinputstream">
-        <title>gio.UnixInputStream Properties</title>
+        <title>gio.unix.InputStream Properties</title>
     
         <blockquote role="properties">
             <informaltable pgwide="1" frame="none">
@@ -80,13 +80,13 @@
         <title>Description</title>
 
         <para>
-            <link linkend="class-giounixinputstream"><classname>gio.UnixInputStream</classname></link>
+            <link linkend="class-giounixinputstream"><classname>gio.unix.InputStream</classname></link>
             implements <link linkend="class-gioinputstream"><classname>gio.InputStream</classname></link>
 	    for reading from a UNIX file descriptor, including asynchronous operations.
 	    The file descriptor must be selectable, so it doesn't work with opened files.
 	</para>
 	<para>
-	    Note that <link linkend="class-giounixinputstream"><classname>gio.UnixInputStream</classname></link>
+	    Note that <link linkend="class-giounixinputstream"><classname>gio.unix.InputStream</classname></link>
 	    belongs to the UNIX-specific GIO interfaces, thus you have to use the gio-unix-2.0.pc pkg-config file
 	    when using it.
         </para>
@@ -96,7 +96,7 @@
         <title>Constructor</title>
   
         <programlisting><constructorsynopsis language="python">
-            <methodname>gio.UnixInputStream</methodname>
+            <methodname>gio.unix.InputStream</methodname>
             <methodparam><parameter role="keyword">fd</parameter></methodparam>
 	    <methodparam><parameter role="keyword">close_fd</parameter></methodparam>
         </constructorsynopsis></programlisting>
@@ -115,13 +115,13 @@
             <varlistentry>
                 <term><emphasis>Returns</emphasis>&nbsp;:</term>
                 <listitem><simpara>a new
-                <link linkend="class-giounixinputstream"><classname>gio.UnixInputStream</classname></link>
+                <link linkend="class-giounixinputstream"><classname>gio.unix.InputStream</classname></link>
                 </simpara></listitem>
             </varlistentry>
         </variablelist>
     
         <para>
-            Creates a new <link linkend="class-giounixinputstream"><classname>gio.UnixInputStream</classname></link>
+            Creates a new <link linkend="class-giounixinputstream"><classname>gio.unix.InputStream</classname></link>
             from the given fd.
         </para>
 	<para>
@@ -134,7 +134,7 @@
         <title>Methods</title>
 
         <refsect2 id="method-giounixinputstream--get-close-fd">
-            <title>gio.UnixInputStream.get_close_fd</title>
+            <title>gio.unix.InputStream.get_close_fd</title>
 
             <programlisting><methodsynopsis language="python">
                 <methodname>get_close_fd</methodname>
@@ -156,7 +156,7 @@
         </refsect2>
 
         <refsect2 id="method-giounixinputstream--get-fd">
-            <title>gio.UnixInputStream.get_fd</title>
+            <title>gio.unix.InputStream.get_fd</title>
 
             <programlisting><methodsynopsis language="python">
                 <methodname>get_fd</methodname>
@@ -178,7 +178,7 @@
         </refsect2>
 
         <refsect2 id="method-giounixinputstream--set-close-fd">
-            <title>gio.UnixInputStream.set_close_fd</title>
+            <title>gio.unix.InputStream.set_close_fd</title>
 
             <programlisting><methodsynopsis language="python">
                 <methodname>set_close_fd</methodname>
