@@ -268,6 +268,9 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_array_int_in, 0)
         self.assertRaises(TypeError, Everything.test_array_int_in, (2, 'a'))
 
+    def testArrayIntOut(self):
+        self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_int_out())
+
     def testArrayInt8In(self):
         self.assertEquals(5, Everything.test_array_gint8_in((1, 2, 3, -1)))
         self.assertEquals(-1, Everything.test_array_gint8_in((INT8_MAX, INT8_MIN)))
@@ -331,6 +334,15 @@ class TestGIEverything(unittest.TestCase):
 
     def testStrvOutarg(self):
         self.assertEquals(("1", "2", "3"), Everything.test_strv_outarg())
+
+    def testArrayFixedSizeIntIn(self):
+        self.assertEquals(9, Everything.test_array_fixed_size_int_in((1, 2, 3, 4, -1)))
+
+    def testArrayFixedSizeIntOut(self):
+        self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_fixed_size_int_out())
+
+    def testArrayFixedSizeIntReturn(self):
+        self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_fixed_size_int_return())
 
 
 # Interface
