@@ -198,6 +198,16 @@ class TestGIEverything(unittest.TestCase):
         self.assertEquals('\xc3\xa5\xc3\xa4\xc3\xb6', filenames[0])
         self.assertEquals('/etc/fstab', filenames[1])
 
+
+# Multiple output arguments
+
+    def testUtf8OutOut(self):
+        self.assertEquals(("first", "second"), Everything.test_utf8_out_out())
+
+    def testUtf8OutNonconstReturn(self):
+        self.assertEquals(("first", "second"), Everything.test_utf8_out_nonconst_return())
+
+
 # FIXME
 # ======================================================================
 # ERROR: testStrv (__main__.TestGIEverything)
