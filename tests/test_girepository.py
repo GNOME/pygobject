@@ -218,21 +218,11 @@ class TestGIEverything(unittest.TestCase):
 #        self.assertEquals(now.tm_year, bounced.tm_yday)
 #        self.assertEquals(now.tm_year, bounced.tm_isdst)
 
-# FIXME
-# ======================================================================
-# ERROR: testGType (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 169, in testGType
-#     self.assertEqual(gobject.TYPE_INT, Everything.test_gtype(gobject.TYPE_INT))
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#     self.type_check(name, value, argType)
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 97, in type_check
-#     raise NotImplementedError('type checking for tag %d' % tag)
-# NotImplementedError: type checking for tag 19
-#	def testGType(self):
-#	    self.assertEqual(gobject.TYPE_INT, Everything.test_gtype(gobject.TYPE_INT))
-#	    self.assertRaises(TypeError, Everything.test_gtype, 'a')
+    def testGType(self):
+        self.assertEqual(gobject.TYPE_INT, Everything.test_gtype(gobject.TYPE_INT))
+        self.assertEqual(Everything.TestObj.__gtype__, Everything.test_gtype(Everything.TestObj))
+        self.assertRaises(TypeError, Everything.test_gtype, 'a')
+
 
 # UTF-8
 

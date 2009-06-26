@@ -277,8 +277,17 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
 
             break;
         }
-        case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_GTYPE:
+        {
+            GType gtype;
+            gtype = pyg_type_from_object(object);
+            if (gtype == 0) {
+                py_type_name_expected = "GType";
+                goto check_error_type;
+            }
+            break;
+        }
+        case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
@@ -398,6 +407,9 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
             arg.v_pointer = NULL;
             break;
         }
+    case GI_TYPE_TAG_GTYPE:
+        arg.v_int = pyg_type_from_object(object);
+        break;
     default:
         g_print("<PyO->GArg> GITypeTag %s is unhandled\n",
                 g_type_tag_to_string(type_tag));
@@ -659,6 +671,13 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
         g_warning("pyg_argument_to_pyobject: use pyarray_to_pyobject instead for arrays");
         obj = Py_None;
         break;
+    case GI_TYPE_TAG_GTYPE:
+    {
+        GType gtype;
+        gtype = arg->v_int;
+        obj = pyg_type_wrapper_new(gtype);
+        break;
+    }
     default:
         g_print("<GArg->PyO> GITypeTag %s is unhandled\n",
                 g_type_tag_to_string(type_tag));
