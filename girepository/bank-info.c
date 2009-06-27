@@ -602,17 +602,22 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     /* FIXME: We should reuse this. Perhaps by separating the
                      * wrapper creation from the binding to the wrapper.
                      */
+                    GIStructInfo *struct_info;
                     gsize size;
                     PyObject *buffer;
                     int retval;
 
-                    size = g_struct_info_get_size ((GIStructInfo *)return_info);
+                    struct_info = g_interface_info_get_iface_struct((GIInterfaceInfo *)interface_info);
+
+                    size = g_struct_info_get_size (struct_info);
                     g_assert(size > 0);
 
                     buffer = PyBuffer_FromReadWriteMemory(return_arg.v_pointer, size);
 
                     retval = PyObject_SetAttrString(return_value, "__buffer__", buffer);
                     g_assert(retval != -1);
+
+                    g_base_info_unref((GIBaseInfo *)struct_info);
                 } else {
                     PyGObject *gobject;
 
@@ -798,7 +803,7 @@ _wrap_g_registered_type_info_get_g_type (PyGIBaseInfo* self)
     int gtype;
 
     gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo*)self->info);
-    return PyInt_FromLong(gtype);
+    return pyg_type_wrapper_new(gtype);
 }
 
 static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
@@ -1272,6 +1277,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
     GIInfoType container_type;
     GITypeInfo *field_type_info;
     PyObject *retval;
+    GError *error;
 
     retval = Py_None;
 
@@ -1306,6 +1312,31 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
         (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &buffer);
     } else {
         buffer = ((PyGObject *) obj)->obj;
+    }
+
+    /* Check the value. */
+    error = NULL;
+    if (!pyg_argument_from_pyobject_check(value, field_type_info, &error)) {
+        PyObject *py_error_type;
+        switch(error->code) {
+            case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE:
+                py_error_type = PyExc_TypeError;
+                break;
+            case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE:
+                py_error_type = PyExc_ValueError;
+                break;
+            default:
+                g_assert_not_reached();
+                py_error_type = NULL;
+        }
+
+        PyErr_Format(py_error_type, "%s.set_value() argument 1: %s",
+                g_base_info_get_namespace((GIBaseInfo *)self->info), error->message);
+
+        g_clear_error(&error);
+
+        retval = NULL;
+        goto field_info_set_value_return;
     }
 
     arg = pyg_argument_from_pyobject(value, field_type_info);

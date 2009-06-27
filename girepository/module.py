@@ -194,7 +194,7 @@ class DynamicModule(object):
 
         namespace = repository.get_c_prefix(boxed_info.getNamespace())
         full_name = namespace + name
-        boxed_info.getGType()
+
         gtype = None
         try:
             gtype = gobject.GType.from_name(full_name)
@@ -203,6 +203,7 @@ class DynamicModule(object):
         else:
             if gtype.pytype is not None:
                 return gtype.pytype
+
         # Check if the klass is already created, eg
         # present in our namespace, this is necessary since we're
         # not always entering here through the __getattr__ hook.
@@ -215,9 +216,13 @@ class DynamicModule(object):
             bases += gobject.Boxed
 
         klass = buildType(boxed_info, bases)
-        if gtype is not None:
-            klass.__gtype__ = gtype
-            gtype.pytype = klass
+
+        if gtype is None:
+            gtype = boxed_info.getGType()
+
+        klass.__gtype__ = gtype
+        gtype.pytype = klass
+
         self.__dict__[name] = klass
 
         return klass

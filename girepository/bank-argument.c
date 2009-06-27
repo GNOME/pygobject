@@ -265,12 +265,22 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
                 (void) PyInt_AsLong(object);
                 if (PyErr_Occurred()) {
                     PyErr_Clear();
+                    g_base_info_unref(interface_info);
                     py_type_name_expected = "int";
                     goto check_error_type;
                 }
                 /* XXX: What if the value doesn't correspond to any enum field? */
-            } else {
-                /* TODO */
+            } else if (interface_info_type == GI_INFO_TYPE_STRUCT || interface_info_type == GI_INFO_TYPE_BOXED) {
+                GType gtype;
+                GType object_gtype;
+
+                gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
+                object_gtype = pyg_type_from_object(object);
+                if (object_gtype != gtype) {
+                    g_base_info_unref(interface_info);
+                    py_type_name_expected = g_type_name(gtype);
+                    goto check_error_type;
+                }
             }
 
             g_base_info_unref(interface_info);
@@ -304,7 +314,11 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
 check_error_type:
     {
         PyObject *py_type;
+
         py_type = PyObject_Type(object);
+
+        g_assert(py_type_name_expected != NULL);
+
         g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE,
                 "Must be %s, not %s", py_type_name_expected, ((PyTypeObject *)py_type)->tp_name);
         Py_XDECREF(py_type);
