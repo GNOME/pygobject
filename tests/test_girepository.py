@@ -355,6 +355,10 @@ class TestGIEverything(unittest.TestCase):
         self.assertEquals(a.some_double, 4.15)
         self.assertEquals(a.some_enum, Everything.TestEnum.VALUE3)
 
+        self.assertRaises(TypeError, setattr, a, 'some_int', 'a')
+        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MIN-1)
+        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MAX+1)
+
         a_out = Everything.TestStructA()
         a.clone(a_out)
         self.assertEquals(a, a_out)
@@ -365,6 +369,10 @@ class TestGIEverything(unittest.TestCase):
         a = createStructA()
         b.nested_a = a
         self.assertEquals(a, b.nested_a)
+
+        self.assertRaises(TypeError, setattr, b, 'nested_a', 'a')
+        # FIXME: Doesn't work because there is no other GType than Void associated with non-boxed structures.
+        #self.assertRaises(TypeError, setattr, b, 'nested_a', Everything.TestStructB())
 
         b_out = Everything.TestStructB()
         b.clone(b_out)
