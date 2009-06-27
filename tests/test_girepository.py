@@ -370,6 +370,49 @@ class TestGIEverything(unittest.TestCase):
         b.clone(b_out)
         self.assertEquals(b, b_out)
 
+
+# Plain-old-data boxed types
+
+    def testSimpleBoxedA(self):
+        a = Everything.TestSimpleBoxedA()
+        a.some_int = 42
+        a.some_int8 = 7
+        a.some_double = 3.14
+        a.some_enum = Everything.TestEnum.VALUE3
+
+        self.assertEquals(42, a.some_int)
+        self.assertEquals(7, a.some_int8)
+        self.assertAlmostEquals(3.14, a.some_double)
+        self.assertEquals(Everything.TestEnum.VALUE3, a.some_enum)
+
+        self.assertRaises(TypeError, setattr, a, 'some_int', 'a')
+        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MIN-1)
+        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MAX+1)
+
+        a_out = a.copy()
+        self.assertTrue(a.equals(a_out))
+        self.assertEquals(a, a_out)
+
+        a_const = Everything.test_simple_boxed_a_const_return()
+        self.assertEquals(5, a_const.some_int)
+        self.assertEquals(6, a_const.some_int8)
+        self.assertAlmostEquals(7.0, a_const.some_double)
+
+    def testSimpleBoxedB(self):
+        a_const = Everything.test_simple_boxed_a_const_return()
+
+        b = Everything.TestSimpleBoxedB()
+        b.some_int = 42
+        b.nested_a = a_const.copy()
+
+        self.assertEquals(a_const, b.nested_a)
+
+        self.assertRaises(TypeError, setattr, b, 'nested_a', 'a')
+
+        b_out = b.copy()
+        self.assertEquals(b, b_out)
+
+
     def testInterface(self):
         self.assertTrue(issubclass(Everything.TestInterface, gobject.GInterface))
         self.assertRaises(NotImplementedError, Everything.TestInterface)
