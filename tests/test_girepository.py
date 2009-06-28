@@ -497,7 +497,13 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.TestObj, 'foo', 'bar')
         self.assertRaises(TypeError, Everything.TestObj, 42)
 
-    def testlInstanceMethod(self):
+    def testInstanceMethod(self):
+        o = Everything.TestObj('foo')
+        self.assertEquals(-1, o.instance_method())
+        self.assertRaises(TypeError, o.instance_method, 'foo')
+        self.assertRaises(TypeError, Everything.TestObj.instance_method, gobject.GObject())
+
+    def testlVirtualMethod(self):
         o = Everything.TestObj('foo')
         self.assertEquals(42, o.do_matrix('matrix'))
         self.assertRaises(TypeError, o.do_matrix)
@@ -513,12 +519,24 @@ class TestGIEverything(unittest.TestCase):
         o = Everything.TestObj('foo')
         self.assertEquals(42, o.static_method(42))
 
-    def testSubclass(self):
-        class TestSubclass(Everything.TestObj):
-            def __init__(self):
-                Everything.TestObj.__init__(self, 'foo')
-        s = TestSubclass()
-        self.assertEquals(s.do_matrix('matrix'), 42)
+    def testSubObj(self):
+        self.assertTrue(issubclass(Everything.TestSubObj, Everything.TestObj))
+        self.assertEquals(42, Everything.TestSubObj.static_method(42))
+
+        self.assertRaises(TypeError, Everything.TestSubObj, 'foo')
+
+        s = Everything.TestSubObj()
+        self.assertTrue(isinstance(s, Everything.TestSubObj))
+        self.assertTrue(isinstance(s, Everything.TestObj))
+
+        self.assertTrue(hasattr(s, 'set_bare'))
+
+        self.assertEquals(42, s.do_matrix('foo'))
+
+        self.assertTrue(hasattr(s, 'unset_bare'))
+
+        self.assertEquals(0, s.instance_method())
+        self.assertRaises(TypeError, Everything.TestObj.instance_method, Everything.TestObj('foo'))
 
 
 if __name__ == '__main__':
