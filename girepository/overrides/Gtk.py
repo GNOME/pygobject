@@ -1,8 +1,10 @@
+import sys
+
 from girepository.module import DynamicModule
 
 class GtkModule(DynamicModule):
     def created(self):
-        self.init_check(0, None)
-        #if self.init_check(len(sys.argv), sys.argv):
-        #    raise RuntimeError("could not open display")
+        initialized, argv = self.init_check(tuple(sys.argv))
+        if not initialized:
+            raise RuntimeError("Gtk couldn't be initialized")
 
