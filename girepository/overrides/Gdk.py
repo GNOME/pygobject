@@ -1,8 +1,12 @@
+import sys
+
 from girepository.module import DynamicModule
 
 class GdkModule(DynamicModule):
     def created(self):
-        self.init_check(0, None)
+        initialized, argv = self.init_check(tuple(sys.argv))
+        if not initialized:
+            raise RuntimeError("Gdk couldn't be initialized")
 
     def rectangle_new(self, x, y, width, height):
         rectangle = self.Rectangle()
