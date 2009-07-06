@@ -50,6 +50,7 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
         case GI_TYPE_TAG_INT:
+        case GI_TYPE_TAG_SHORT:
         {
             long value;
             gint value_max, value_min;
@@ -71,6 +72,9 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
             } else if (type_tag == GI_TYPE_TAG_INT) {
                 value_min = G_MININT;
                 value_max = G_MAXINT;
+            } else if (type_tag == GI_TYPE_TAG_SHORT) {
+                value_min = G_MINSHORT;
+                value_max = G_MAXSHORT;
             } else {
                 g_assert_not_reached();
                 value_max = 0;
@@ -90,6 +94,7 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_UINT:
+        case GI_TYPE_TAG_USHORT:
         {
             guint value_max;
 
@@ -101,6 +106,8 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
                 value_max = 4294967295;
             } else if (type_tag == GI_TYPE_TAG_UINT) {
                 value_max = G_MAXUINT;
+            } else if (type_tag == GI_TYPE_TAG_USHORT) {
+                value_max = G_MAXUSHORT;
             } else {
                 g_assert_not_reached();
                 value_max = 0;
@@ -395,6 +402,9 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
         else
             arg.v_pointer = g_strdup(PyString_AsString(object));
         break;
+    case GI_TYPE_TAG_USHORT:
+        arg.v_ushort = PyInt_AsLong(object);
+        break;
     case GI_TYPE_TAG_UINT8:
         arg.v_uint8 = PyInt_AsLong(object);
         break;
@@ -414,6 +424,9 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
             Py_DECREF(long_obj);
         } else
             arg.v_uint64 = PyLong_AsUnsignedLongLong(object);
+        break;
+    case GI_TYPE_TAG_SHORT:
+        arg.v_short = PyInt_AsLong(object);
         break;
     case GI_TYPE_TAG_INT8:
         arg.v_int8 = PyInt_AsLong(object);
@@ -767,6 +780,9 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
     case GI_TYPE_TAG_BOOLEAN:
         obj = PyBool_FromLong(arg->v_boolean);
         break;
+    case GI_TYPE_TAG_USHORT:
+        obj = PyInt_FromLong(arg->v_ushort);
+        break;
     case GI_TYPE_TAG_UINT8:
         obj = PyInt_FromLong(arg->v_uint8);
         break;
@@ -781,6 +797,9 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
         break;
     case GI_TYPE_TAG_UINT64:
         obj = PyLong_FromUnsignedLongLong(arg->v_uint64);
+        break;
+    case GI_TYPE_TAG_SHORT:
+        obj = PyInt_FromLong(arg->v_short);
         break;
     case GI_TYPE_TAG_INT:
         obj = PyInt_FromLong(arg->v_int);

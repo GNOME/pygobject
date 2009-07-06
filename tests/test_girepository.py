@@ -4,6 +4,7 @@ import unittest
 
 import time
 import gobject
+from gobject import constants
 
 import girepository
 import GLib
@@ -53,6 +54,21 @@ class TestGIEverything(unittest.TestCase):
         self.assertFalse(Everything.test_boolean(False))
         self.assertFalse(Everything.test_boolean(0))
         self.assertTrue(Everything.test_boolean(2))
+
+    def testShort(self):
+        self.assertEqual(3, Everything.test_short(3))
+        self.assertEqual(3, Everything.test_short(3L))
+        self.assertEqual(-3, Everything.test_short(-3))
+        self.assertEqual(-3, Everything.test_short(-3L))
+        self.assertEqual(constants.G_MINSHORT, Everything.test_short(constants.G_MINSHORT))
+        self.assertEqual(constants.G_MAXSHORT, Everything.test_short(constants.G_MAXSHORT))
+        self.assertEqual(constants.G_MINSHORT, Everything.test_short(long(constants.G_MINSHORT)))
+        self.assertEqual(constants.G_MAXSHORT, Everything.test_short(long(constants.G_MAXSHORT)))
+        self.assertRaises(TypeError, Everything.test_short, 'a')
+        self.assertRaises(ValueError, Everything.test_short, constants.G_MINSHORT-1)
+        self.assertRaises(ValueError, Everything.test_short, constants.G_MAXSHORT+1)
+        self.assertRaises(ValueError, Everything.test_short, long(constants.G_MINSHORT-1))
+        self.assertRaises(ValueError, Everything.test_short, long(constants.G_MAXSHORT+1))
 
     def testInt(self):
         self.assertEqual(3, Everything.test_int(3))
@@ -108,6 +124,18 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_int, 'a')
         self.assertRaises(ValueError, Everything.test_int64, INT64_MIN-1)
         self.assertRaises(ValueError, Everything.test_int64, INT64_MAX+1)
+
+    def testUShort(self):
+        self.assertEqual(3, Everything.test_ushort(3))
+        self.assertEqual(3, Everything.test_ushort(3L))
+        self.assertEqual(constants.G_MAXUSHORT, Everything.test_ushort(constants.G_MAXUSHORT))
+        self.assertEqual(constants.G_MAXUSHORT, Everything.test_ushort(long(constants.G_MAXUSHORT)))
+        self.assertRaises(TypeError, Everything.test_ushort, 'a')
+        self.assertRaises(ValueError, Everything.test_ushort, -3)
+        self.assertRaises(ValueError, Everything.test_ushort, -3L)
+        self.assertRaises(ValueError, Everything.test_ushort, constants.G_MAXUSHORT+1)
+        self.assertRaises(ValueError, Everything.test_ushort, long(constants.G_MAXUSHORT+1))
+
 
     def testUInt(self):
         self.assertEqual(3, Everything.test_uint(3))

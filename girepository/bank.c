@@ -114,6 +114,8 @@ register_constants(PyObject *m)
     /* FIXME: Removed from metadata format, fix properly by introducing
        special-case struct */
 /*     PyModule_AddIntConstant(m, "TYPE_TAG_GSTRING", GI_TYPE_TAG_GSTRING); */
+    PyModule_AddIntConstant(m, "TYPE_TAG_SHORT", GI_TYPE_TAG_SHORT);
+    PyModule_AddIntConstant(m, "TYPE_TAG_USHORT", GI_TYPE_TAG_USHORT);
     PyModule_AddIntConstant(m, "TYPE_TAG_INT", GI_TYPE_TAG_INT);
     PyModule_AddIntConstant(m, "TYPE_TAG_UINT", GI_TYPE_TAG_UINT);
     PyModule_AddIntConstant(m, "TYPE_TAG_LONG", GI_TYPE_TAG_LONG);
