@@ -266,6 +266,33 @@ pyg_info_new(void *info)
     return (PyObject*)self;
 }
 
+GIBaseInfo *
+pyg_base_info_from_object(PyObject *object)
+{
+    PyObject *py_info;
+    GIBaseInfo *info;
+
+    g_return_val_if_fail(object != NULL, NULL);
+
+    py_info = PyObject_GetAttrString(object, "__info__");
+    if (py_info == NULL) {
+        PyErr_Clear();
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(py_info, (PyTypeObject *)&PyGIBaseInfo_Type)) {
+        Py_DECREF(py_info);
+        return NULL;
+    }
+
+    info = ((PyGIBaseInfo *)py_info)->info;
+    g_base_info_ref(info);
+
+    Py_DECREF(py_info);
+
+    return info;
+}
+
+
 static PyMethodDef _PyGIBaseInfo_methods[] = {
     { "getName", (PyCFunction)_wrap_g_base_info_get_name, METH_NOARGS },
     { "getType", (PyCFunction)_wrap_g_base_info_get_type, METH_NOARGS },

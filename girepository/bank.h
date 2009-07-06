@@ -41,6 +41,8 @@ extern PyTypeObject PyGIRepository_Type;
 
 PyObject * pyg_info_new(gpointer info);
 
+GIBaseInfo* pyg_base_info_from_object(PyObject *object);
+
 typedef struct {
     PyObject_HEAD
     GIBaseInfo *info;

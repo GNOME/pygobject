@@ -284,26 +284,52 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
             interface_info = g_type_info_get_interface(type_info);
             interface_info_type = g_base_info_get_type(interface_info);
 
-            if (interface_info_type == GI_INFO_TYPE_ENUM) {
-                (void) PyInt_AsLong(object);
-                if (PyErr_Occurred()) {
-                    PyErr_Clear();
-                    g_base_info_unref(interface_info);
-                    py_type_name_expected = "int";
-                    goto check_error_type;
+            switch (interface_info_type) {
+                case GI_INFO_TYPE_ENUM:
+                {
+                    (void) PyInt_AsLong(object);
+                    if (PyErr_Occurred()) {
+                        PyErr_Clear();
+                        py_type_name_expected = "int";
+                        goto check_error_type;
+                    }
+                    /* XXX: What if the value doesn't correspond to any enum field? */
+                    break;
                 }
-                /* XXX: What if the value doesn't correspond to any enum field? */
-            } else if (interface_info_type == GI_INFO_TYPE_STRUCT || interface_info_type == GI_INFO_TYPE_BOXED) {
-                GType gtype;
-                GType object_gtype;
+                case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_BOXED:
+                {
+                    GType gtype;
 
-                gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
-                object_gtype = pyg_type_from_object(object);
-                if (object_gtype != gtype) {
-                    g_base_info_unref(interface_info);
-                    py_type_name_expected = g_type_name(gtype);
-                    goto check_error_type;
+                    gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
+
+                    if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
+                        if (!PyCallable_Check(object)) {
+                            g_base_info_unref(interface_info);
+                            py_type_name_expected = "callable";
+                            goto check_error_type;
+                        }
+                    } else {
+                        GIBaseInfo *info;
+
+                        info = pyg_base_info_from_object(object);
+                        if (info == NULL || !g_base_info_equals(info, interface_info)) {
+                            py_type_name_expected = g_base_info_get_name(interface_info);
+                            if (info != NULL) {
+                                g_base_info_unref(info);
+                            }
+                            g_base_info_unref(interface_info);
+                            goto check_error_type;
+                        }
+
+                        g_base_info_unref(info);
+                    }
+
+                    break;
                 }
+                default:
+                    /* TODO: To complete with other types. */
+                    g_assert_not_reached();
             }
 
             g_base_info_unref(interface_info);
@@ -354,8 +380,6 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
 {
     GArgument arg;
     GITypeTag type_tag;
-    GIBaseInfo* interface_info;
-    GIInfoType interface_type;
 
     type_tag = g_type_info_get_tag((GITypeInfo*)type_info);
     switch (type_tag) {
@@ -421,20 +445,49 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
         arg.v_double = PyFloat_AsDouble(object);
         break;
     case GI_TYPE_TAG_INTERFACE:
+    {
+        GIBaseInfo* interface_info;
+        GIInfoType interface_info_type;
+
         interface_info = g_type_info_get_interface(type_info);
-        interface_type = g_base_info_get_type(interface_info);
-        if (interface_type == GI_INFO_TYPE_ENUM) {
-            arg.v_int = PyInt_AsLong(object);
-        } else if (interface_type == GI_INFO_TYPE_STRUCT || interface_type == GI_INFO_TYPE_BOXED) {
-            PyObject *py_buffer;
-            py_buffer = PyObject_GetAttrString(object, "__buffer__");
-            g_assert(py_buffer != NULL);
-            (*py_buffer->ob_type->tp_as_buffer->bf_getreadbuffer)(py_buffer, 0, &arg.v_pointer);
-        } else if (object == Py_None)
-            arg.v_pointer = NULL;
-        else
-            arg.v_pointer = pygobject_get(object);
+        interface_info_type = g_base_info_get_type(interface_info);
+
+        switch (interface_info_type) {
+            case GI_INFO_TYPE_ENUM:
+                arg.v_int = PyInt_AsLong(object);
+                break;
+            case GI_INFO_TYPE_STRUCT:
+            {
+                GType gtype;
+                PyObject *py_buffer;
+
+                gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
+
+                if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
+                    arg.v_pointer = pyg_closure_new(object, NULL, NULL);
+                    break;
+                }
+
+                py_buffer = PyObject_GetAttrString(object, "__buffer__");
+                g_assert(py_buffer != NULL);
+                (*py_buffer->ob_type->tp_as_buffer->bf_getreadbuffer)(py_buffer, 0, &arg.v_pointer);
+
+                break;
+            }
+            case GI_INFO_TYPE_OBJECT:
+                if (object == Py_None) {
+                    arg.v_pointer = NULL;
+                    break;
+                }
+                arg.v_pointer = pygobject_get(object);
+                break;
+            default:
+                /* TODO: To complete with other types. */
+                g_assert_not_reached();
+        }
+        g_base_info_unref((GIBaseInfo *)interface_info);
         break;
+    }
     case GI_TYPE_TAG_ARRAY:
     {
         gsize length;

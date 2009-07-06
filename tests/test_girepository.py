@@ -365,20 +365,11 @@ class TestGIEverything(unittest.TestCase):
         self.assertEquals(retval[1], '2')
         self.assertEquals(retval[2], '3')
 
-# XXX Currently causes a segfault.
-#    def testClosure(self):
-#        def someCallback():
-#            return 3
-#        self.assertEquals(3, Everything.test_closure(someCallback))
-#        someLambda = lambda: 3
-#        self.assertEquals(3, Everything.test_closure(someLambda))
+    def testClosure(self):
+        self.assertEquals(3, Everything.test_closure(lambda: 3))
 
-#    def testClosureOneArg(self):
-#        def someCallback(arg):
-#            return arg
-#        self.assertEquals(3, Everything.test_closure_one_arg(someCallback, 3))
-#        someLambda = lambda x: x
-#        self.assertEquals(3, Everything.test_closure_one_arg(someLambda, 3))
+    def testClosureOneArg(self):
+        self.assertEquals(3, Everything.test_closure_one_arg(lambda x: x, 3))
 
 #    def testIntValueArg(self):
 #        i = Everything.test_int_value_arg(42)
