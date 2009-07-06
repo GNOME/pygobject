@@ -303,7 +303,10 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
 
                     gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
 
-                    if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
+                    if (g_type_is_a(gtype, G_TYPE_VALUE)) {
+                        /* Nothing to check. */
+                        break;
+                    } else if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
                         if (!PyCallable_Check(object)) {
                             g_base_info_unref(interface_info);
                             py_type_name_expected = "callable";
@@ -463,7 +466,24 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
 
                 gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
 
-                if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
+                if (g_type_is_a(gtype, G_TYPE_VALUE)) {
+                    GValue *value;
+                    int retval;
+                    PyObject *py_type;
+
+                    value = g_slice_new0(GValue);
+
+                    py_type = PyObject_Type(object);
+                    g_assert(py_type != NULL);
+
+                    g_value_init(value, pyg_type_from_object(py_type));
+
+                    retval = pyg_value_from_pyobject(value, object);
+                    g_assert(retval == 0);
+
+                    arg.v_pointer = value;
+                    break;
+                } else if (g_type_is_a(gtype, G_TYPE_CLOSURE)) {
                     arg.v_pointer = pyg_closure_new(object, NULL, NULL);
                     break;
                 }
@@ -722,12 +742,12 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
 {
     GITypeTag type_tag;
     PyObject *obj;
-    GIBaseInfo* interface_info;
-    GIInfoType interface_type;
     GITypeInfo *param_info;
 
     g_return_val_if_fail(type_info != NULL, NULL);
     type_tag = g_type_info_get_tag(type_info);
+
+    obj = NULL;
 
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:
@@ -803,71 +823,119 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
             obj = PyString_FromString(arg->v_string);
         break;
     case GI_TYPE_TAG_INTERFACE:
+    {
+        GIBaseInfo* interface_info;
+        GIInfoType interface_info_type;
+
         interface_info = g_type_info_get_interface(type_info);
-        interface_type = g_base_info_get_type(interface_info);
+        interface_info_type = g_base_info_get_type(interface_info);
 
-        if (interface_type == GI_INFO_TYPE_STRUCT || interface_type == GI_INFO_TYPE_BOXED) {
-            // Create new struct based on arg->v_pointer
-            const gchar *module_name = g_base_info_get_namespace(interface_info);
-            const gchar *type_name = g_base_info_get_name(interface_info);
-            PyObject *module = PyImport_ImportModule(module_name);
-            PyObject *tp = PyObject_GetAttrString(module, type_name);
-            gsize size;
-            PyObject *buffer;
-            PyObject **dict;
-
-            if (tp == NULL) {
-                char buf[256];
-                snprintf(buf, sizeof(buf), "Type %s.%s not defined", module_name, type_name);
-                PyErr_SetString(PyExc_TypeError, buf);
-                return NULL;
-            }
-
-            obj = PyObject_GC_New(PyObject, (PyTypeObject *) tp);
-            if (obj == NULL)
-                return NULL;
-
-            // FIXME: Any better way to initialize the dict pointer?
-            dict = (PyObject **) ((char *)obj + ((PyTypeObject *) tp)->tp_dictoffset);
-            *dict = NULL;
-
-            size = g_struct_info_get_size ((GIStructInfo*)interface_info);
-            buffer = PyBuffer_FromReadWriteMemory(arg->v_pointer, size);
-            if (buffer == NULL)
-                return NULL;
-
-            PyObject_SetAttrString(obj, "__buffer__", buffer);
-
-        } else if (interface_type == GI_INFO_TYPE_ENUM) {
-	    obj = PyInt_FromLong(arg->v_int);
-        } else if ( arg->v_pointer == NULL ) {
+        if (arg->v_pointer == NULL) {
             obj = Py_None;
-        } else {
-            GValue value;
-            GObject* gobj = arg->v_pointer;
-            GType gtype = G_OBJECT_TYPE(gobj);
-            GIRepository *repo = g_irepository_get_default();
-            GIBaseInfo *object_info = g_irepository_find_by_gtype(repo, gtype);
-            const gchar *module_name;
-            const gchar *type_name;
-
-            if (object_info != NULL) {
-                // It's a pybank class, we should make sure it is initialized.
-
-                module_name = g_base_info_get_namespace(object_info);
-                type_name = g_base_info_get_name(object_info);
-
-                // This will make sure the wrapper class is registered.
-                char buf[250];
-                snprintf(buf, sizeof(buf), "%s.%s", module_name, type_name);
-                PyRun_SimpleString(buf);
-            }
-
-            value.g_type = gtype;
-            value.data[0].v_pointer = gobj;
-            obj = pyg_value_as_pyobject(&value, FALSE);
         }
+
+        switch (interface_info_type) {
+            case GI_INFO_TYPE_ENUM:
+               obj = PyInt_FromLong(arg->v_int);
+                break;
+            case GI_INFO_TYPE_STRUCT:
+            {
+                GType gtype;
+                const gchar *module_name;
+                const gchar *type_name;
+                PyObject *module;
+                PyObject *type;
+                gsize size;
+                PyObject *buffer;
+                PyObject **dict;
+                int retval;
+
+                gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
+
+                if (g_type_is_a(gtype, G_TYPE_VALUE)) {
+                    obj = pyg_value_as_pyobject(arg->v_pointer, FALSE);
+                    g_value_unset(arg->v_pointer);
+                    break;
+                }
+
+                /* Wrap the structure. */
+                module_name = g_base_info_get_namespace(interface_info);
+                type_name = g_base_info_get_name(interface_info);
+
+                module = PyImport_ImportModule(module_name);
+                if (module == NULL) {
+                    PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
+                    break;
+                }
+
+                type = PyObject_GetAttrString(module, type_name);
+                if (type == NULL) {
+                    PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
+                    Py_DECREF(module);
+                    break;
+                }
+
+                obj = PyObject_GC_New(PyObject, (PyTypeObject *)type);
+                if (obj == NULL) {
+                    Py_DECREF(type);
+                    Py_DECREF(module);
+                    break;
+                }
+
+                /* FIXME: Any better way to initialize the dict pointer? */
+                dict = (PyObject **)((char *)obj + ((PyTypeObject *)type)->tp_dictoffset);
+                *dict = NULL;
+
+                size = g_struct_info_get_size ((GIStructInfo *)interface_info);
+                buffer = PyBuffer_FromReadWriteMemory(arg->v_pointer, size);
+                if (buffer == NULL) {
+                    Py_DECREF(obj);
+                    Py_DECREF(type);
+                    Py_DECREF(module);
+                    break;
+                }
+
+                retval = PyObject_SetAttrString(obj, "__buffer__", buffer);
+                g_assert(retval == 0);
+
+                break;
+            }
+            case GI_INFO_TYPE_OBJECT:
+            {
+                const gchar *module_name;
+                const gchar *type_name;
+                PyObject *type;
+                PyObject *module;
+
+                /* Make sure the class is initialized */
+                module_name = g_base_info_get_namespace(interface_info);
+                type_name = g_base_info_get_name(interface_info);
+
+                module = PyImport_ImportModule(module_name);
+                if (module == NULL) {
+                    PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
+                    break;
+                }
+
+                type = PyObject_GetAttrString(module, type_name);
+                if (type == NULL) {
+                    PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
+                    break;
+                }
+
+                obj = pygobject_new(arg->v_pointer);
+
+                break;
+            }
+            default:
+                /* TODO: To complete with other types. */
+                g_assert_not_reached();
+        }
+
+        g_base_info_unref((GIBaseInfo *)interface_info);
+
         break;
+    }
     case GI_TYPE_TAG_ARRAY:
         g_warning("pyg_argument_to_pyobject: use pyarray_to_pyobject instead for arrays");
         obj = Py_None;
@@ -886,10 +954,7 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
         break;
     }
 
-    if (obj != NULL)
-        Py_INCREF(obj);
-
+    Py_XINCREF(obj);
     return obj;
 }
-
 

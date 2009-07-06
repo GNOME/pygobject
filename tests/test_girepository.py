@@ -371,25 +371,11 @@ class TestGIEverything(unittest.TestCase):
     def testClosureOneArg(self):
         self.assertEquals(3, Everything.test_closure_one_arg(lambda x: x, 3))
 
-#    def testIntValueArg(self):
-#        i = Everything.test_int_value_arg(42)
-#        self.assertEquals(42, i)
+    def testIntValueArg(self):
+        self.assertEquals(42, Everything.test_int_value_arg(42))
 
-# FIXME
-# ======================================================================
-# ERROR: testValueReturn (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 219, in testValueReturn
-#     self.assertEquals(42, i)
-#   File "/opt/gnome-introspection/lib64/python2.5/unittest.py", line 332, in failUnlessEqual
-#     if not first == second:
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 297, in __eq__
-#     if getattr(self, field.getName()) != getattr(other, field.getName()):
-# AttributeError: 'int' object has no attribute 'g_type'
-# 	def testValueReturn(self):
-#        i = Everything.test_value_return(42)
-#        self.assertEquals(42, i)
+    def testValueReturn(self):
+        self.assertEquals(42, Everything.test_value_return(42))
 
     def testEnum(self):
         self.assertEqual('value1', Everything.test_enum_param(Everything.TestEnum.VALUE1))
