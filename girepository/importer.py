@@ -36,6 +36,10 @@ class DynamicImporter(object):
             return DynamicImporter(name, path)
 
     def load_module(self, name):
+        module = repository.get_module(name)
+        if module is not None:
+            return module
+
         from .module import DynamicModule
         module_name = 'girepository.overrides.%s' % (name,)
         try:
