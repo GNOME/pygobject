@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- Mode: Python; py-indent-offset: 4 -*-
 #
-# Copyright (C) 2006-2008 John Finlay.
+# Copyright (C) 2006-2009 John Finlay.
 #
 # Scan the given public .h files of a GTK module (or module using
 # GTK object conventions) and generates a set of scheme defs.
@@ -130,8 +130,8 @@ clean_patterns = [
     (re.compile(r"\\\n", re.MULTILINE), ''),
     # remove preprocess directives
     (re.compile(r"""^[#].*?$""", re.MULTILINE), ''),
-    # strip DECLS macros
-    (re.compile(r"""G_BEGIN_DECLS|BEGIN_LIBGTOP_DECLS|G_END_DECLS""",
+    # strip DECLS macros and Windows DLL API macros
+    (re.compile(r"""G_BEGIN_DECLS|BEGIN_LIBGTOP_DECLS|G_END_DECLS|[A-Z]+_API """,
                 re.MULTILINE), ''),
     # remove extern "C"
     (re.compile(r'^\s*(extern)\s+"C"\s+{', re.MULTILINE), ''),
