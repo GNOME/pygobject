@@ -21,6 +21,8 @@
 #include "bank.h"
 #include <pygobject.h>
 
+static PyTypeObject *PyGObject_Type = NULL;
+
 static void      pyg_base_info_dealloc(PyGIBaseInfo *self);
 static void      pyg_base_info_free(PyObject *op);
 static PyObject* pyg_base_info_repr(PyGIBaseInfo *self);
@@ -469,8 +471,133 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
         }
 
         /* Check argument types. */
-        py_args_pos = (is_method || is_constructor) ? 1 : 0;
-        /* TODO: check the methods' first argument. */
+        py_args_pos = 0;
+        if (is_constructor) {
+            PyObject *py_arg;
+
+            g_assert(n_py_args > 0);
+            py_arg = PyTuple_GetItem(args, py_args_pos);
+            g_assert(py_arg != NULL);
+
+            if (PyGObject_Type == NULL) {
+                PyObject *module;
+                if ((module = PyImport_ImportModule("gobject")) != NULL) {
+                    PyGObject_Type = (PyTypeObject *)PyObject_GetAttrString(module, "GObject");
+                }
+            }
+
+            if (!PyType_Check(py_arg)) {
+                PyErr_Format(PyExc_TypeError, "%s.%s() argument %zd: Must be type, not %s",
+                    g_base_info_get_namespace(self->info), g_base_info_get_name(self->info),
+                    py_args_pos, ((PyTypeObject *)py_arg)->tp_name);
+            } else if (!PyType_IsSubtype((PyTypeObject *)py_arg, PyGObject_Type)) {
+                PyErr_Format(PyExc_TypeError, "%s.%s() argument %zd: Must be a non-strict subclass of %s",
+                    g_base_info_get_namespace(self->info), g_base_info_get_name(self->info),
+                    py_args_pos, PyGObject_Type->tp_name);
+            } else {
+                GIBaseInfo *interface_info;
+                GType interface_g_type;
+                GType arg_g_type;
+
+                interface_info = g_type_info_get_interface(return_info);
+
+                interface_g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
+                arg_g_type = pyg_type_from_object(py_arg);
+
+                if (!g_type_is_a(arg_g_type, interface_g_type)) {
+                    PyErr_Format(PyExc_TypeError, "%s.%s() argument %zd: Must be a non-strict subclass of %s",
+                        g_base_info_get_namespace(self->info), g_base_info_get_name(self->info),
+                        py_args_pos, g_type_name(interface_g_type));
+                }
+
+                g_base_info_unref(interface_info);
+            }
+
+            if (PyErr_Occurred()) {
+                g_base_info_unref((GIBaseInfo *)return_info);
+                return NULL;
+            }
+
+            py_args_pos += 1;
+        } else if (is_method) {
+            PyObject *py_arg;
+            GIBaseInfo *container_info;
+            GIInfoType container_info_type;
+
+            g_assert(n_py_args > 0);
+            py_arg = PyTuple_GetItem(args, py_args_pos);
+            g_assert(py_arg != NULL);
+
+            container_info = g_base_info_get_container(self->info);
+            container_info_type = g_base_info_get_type(container_info);
+
+            /* FIXME: this could take place in pyg_argument_from_pyobject, but we need to create an
+               independant function because it needs a GITypeInfo to be passed. */
+
+            switch(container_info_type) {
+                case GI_INFO_TYPE_OBJECT:
+                {
+                    PyObject *py_type;
+                    GType container_g_type;
+                    GType arg_g_type;
+
+                    py_type = PyObject_Type(py_arg);
+                    g_assert(py_type != NULL);
+
+                    container_g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)container_info);
+                    arg_g_type = pyg_type_from_object(py_arg);
+
+                    /* Note: If the first argument is not an instance, its type hasn't got a gtype. */
+                    if (!g_type_is_a(arg_g_type, container_g_type)) {
+                        PyErr_Format(PyExc_TypeError, "%s.%s() argument %zd: Must be %s, not %s",
+                            g_base_info_get_namespace(self->info), g_base_info_get_name(self->info),
+                            py_args_pos, g_base_info_get_name(container_info), ((PyTypeObject *)py_type)->tp_name);
+                    }
+
+                    Py_DECREF(py_type);
+
+                    break;
+                }
+                case GI_INFO_TYPE_BOXED:
+                case GI_INFO_TYPE_STRUCT:
+                {
+                    GIBaseInfo *info;
+
+                    info = pyg_base_info_from_object(py_arg);
+                    if (info == NULL || !g_base_info_equals(info, container_info)) {
+                        PyObject *py_type;
+
+                        py_type = PyObject_Type(py_arg);
+                        g_assert(py_type != NULL);
+
+                        PyErr_Format(PyExc_TypeError, "%s.%s() argument %zd: Must be %s, not %s",
+                            g_base_info_get_namespace(self->info), g_base_info_get_name(self->info),
+                            py_args_pos, g_base_info_get_name(container_info), ((PyTypeObject *)py_type)->tp_name);
+
+                        Py_DECREF(py_type);
+                    }
+
+                    if (info != NULL) {
+                        g_base_info_unref(info);
+                    }
+
+                    break;
+                }
+                case GI_INFO_TYPE_UNION:
+                    /* TODO */
+                default:
+                    /* The other info types haven't got methods. */
+                    g_assert_not_reached();
+            }
+
+            g_base_info_unref(container_info);
+
+            if (PyErr_Occurred()) {
+                return NULL;
+            }
+
+            py_args_pos += 1;
+        }
         for (i = 0; i < n_args; i++) {
             GIArgInfo *arg_info;
             GITypeInfo *type_info;
@@ -758,58 +885,32 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
             g_assert(return_value != NULL);
         } else {
-            /* Wrap the return value inside the first argument. */
+            /* Instanciate the class passed as first argument and attach the GObject instance. */
+            PyTypeObject *py_type;
+            PyGObject *self;
 
             g_assert(n_py_args > 0);
-            return_value = PyTuple_GetItem(args, 0);
-            g_assert(return_value != NULL);
+            py_type = (PyTypeObject *)PyTuple_GetItem(args, 0);
+            g_assert(py_type != NULL);
 
-            Py_INCREF(return_value);
-
-            if (return_tag == GI_TYPE_TAG_INTERFACE) {
-                GIBaseInfo *interface_info;
-                GIInfoType interface_info_type;
-
-                interface_info = g_type_info_get_interface(return_info);
-                interface_info_type = g_base_info_get_type(interface_info);
-
-                if (interface_info_type == GI_INFO_TYPE_STRUCT || interface_info_type == GI_INFO_TYPE_BOXED) {
-                    /* FIXME: We should reuse this. Perhaps by separating the
-                     * wrapper creation from the binding to the wrapper.
-                     */
-                    GIStructInfo *struct_info;
-                    gsize size;
-                    PyObject *buffer;
-                    int retval;
-
-                    struct_info = g_interface_info_get_iface_struct((GIInterfaceInfo *)interface_info);
-
-                    size = g_struct_info_get_size (struct_info);
-                    g_assert(size > 0);
-
-                    buffer = PyBuffer_FromReadWriteMemory(return_arg.v_pointer, size);
-
-                    retval = PyObject_SetAttrString(return_value, "__buffer__", buffer);
-                    g_assert(retval != -1);
-
-                    g_base_info_unref((GIBaseInfo *)struct_info);
-                } else {
-                    PyGObject *gobject;
-
-                    gobject = (PyGObject *) return_value;
-                    gobject->obj = return_arg.v_pointer;
-
-                    g_object_ref(gobject->obj);
-                    pygobject_register_wrapper(return_value);
-                }
-
-                g_base_info_unref(interface_info);
-            } else {
-                /* TODO */
-                g_base_info_unref((GIBaseInfo *)return_info);
-                PyErr_SetString(PyExc_NotImplementedError, "constructor return_tag != GI_TYPE_TAG_INTERFACE");
-                return NULL;
+            if (py_type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+                Py_INCREF(py_type);
             }
+            self = PyObject_GC_New(PyGObject, py_type);
+            self->inst_dict = NULL;
+            self->weakreflist = NULL;
+            self->private_flags.flags = 0;
+
+            self->obj = return_arg.v_pointer;
+
+            if (g_object_is_floating(self->obj)) {
+                g_object_ref_sink(self->obj);
+            }
+            pygobject_register_wrapper((PyObject *)self);
+
+            PyObject_GC_Track((PyObject *)self);
+
+            return_value = (PyObject *)self;
         }
     } else {
         return_value = NULL;

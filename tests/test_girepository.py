@@ -426,6 +426,9 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, o.connect, 'invalid-signal', signal_handler)
         self.assertRaises(TypeError, o.emit, 'invalid-signal')
 
+
+# Structures
+
     def testStructA(self):
         a = createStructA()
         self.assertEquals(a.some_int, 3)
@@ -441,6 +444,9 @@ class TestGIEverything(unittest.TestCase):
         a.clone(a_out)
         self.assertEquals(a, a_out)
 
+        # Test instance checking by passing a wrong instance.
+        self.assertRaises(TypeError, Everything.TestStructA.clone, 'a', a_out)
+
     def testStructB(self):
         b = Everything.TestStructB()
         b.some_int8 = 3
@@ -448,9 +454,9 @@ class TestGIEverything(unittest.TestCase):
         b.nested_a = a
         self.assertEquals(a, b.nested_a)
 
+        # Test assignment checking.
         self.assertRaises(TypeError, setattr, b, 'nested_a', 'a')
-        # FIXME: Doesn't work because there is no other GType than Void associated with non-boxed structures.
-        #self.assertRaises(TypeError, setattr, b, 'nested_a', Everything.TestStructB())
+        self.assertRaises(TypeError, setattr, b, 'nested_a', Everything.TestStructB())
 
         b_out = Everything.TestStructB()
         b.clone(b_out)
@@ -479,6 +485,11 @@ class TestGIEverything(unittest.TestCase):
         self.assertTrue(a.equals(a_out))
         self.assertEquals(a, a_out)
 
+        # Test instance checking by passing a wrong instance.
+        self.assertRaises(TypeError, Everything.TestSimpleBoxedA.copy, 'a')
+        self.assertRaises(TypeError, Everything.TestSimpleBoxedA.copy, gobject.GObject())
+
+        # Test boxed as return value.
         a_const = Everything.test_simple_boxed_a_const_return()
         self.assertEquals(5, a_const.some_int)
         self.assertEquals(6, a_const.some_int8)
@@ -499,58 +510,137 @@ class TestGIEverything(unittest.TestCase):
         self.assertEquals(b, b_out)
 
 
-    def testInterface(self):
-        self.assertTrue(issubclass(Everything.TestInterface, gobject.GInterface))
-        self.assertRaises(NotImplementedError, Everything.TestInterface)
-        self.assertEquals(Everything.TestInterface.__gtype__.name, 'EverythingTestInterface')
+# GObject
 
-    def testConstructor(self):
-        self.assertTrue(isinstance(Everything.TestObj("foo"), Everything.TestObj))
+    def testObj(self):
+        # Test inheritance.
+        self.assertTrue(issubclass(Everything.TestObj, gobject.GObject))
+        self.assertEquals(Everything.TestObj.__gtype__, Everything.TestObj.__info__.getGType())
+
+    def testDefaultConstructor(self):
+        # Test instanciation.
+        obj = Everything.TestObj('foo')
+        self.assertTrue(isinstance(obj, Everything.TestObj))
+
+        # Test the argument count.
         self.assertRaises(TypeError, Everything.TestObj)
-        self.assertRaises(TypeError, Everything.TestObj.__init__, None, 'foo')
         self.assertRaises(TypeError, Everything.TestObj, 'foo', 'bar')
-        self.assertRaises(TypeError, Everything.TestObj, 42)
+
+    def testAlternateConstructor(self):
+        # Test instanciation.
+        obj = Everything.TestObj.new_from_file('foo')
+        self.assertTrue(isinstance(obj, Everything.TestObj))
+
+        obj = obj.new_from_file('foo')
+        self.assertTrue(isinstance(obj, Everything.TestObj))
+
+        # Test the argument count.
+        self.assertRaises(TypeError, Everything.TestObj.new_from_file)
+        self.assertRaises(TypeError, Everything.TestObj.new_from_file, 'foo', 'bar')
 
     def testInstanceMethod(self):
-        o = Everything.TestObj('foo')
-        self.assertEquals(-1, o.instance_method())
-        self.assertRaises(TypeError, o.instance_method, 'foo')
-        self.assertRaises(TypeError, Everything.TestObj.instance_method, gobject.GObject())
+        obj = Everything.TestObj('foo')
 
-    def testlVirtualMethod(self):
-        o = Everything.TestObj('foo')
-        self.assertEquals(42, o.do_matrix('matrix'))
-        self.assertRaises(TypeError, o.do_matrix)
-        self.assertRaises(TypeError, o.do_matrix, 'matrix', 'foo')
+        # Test call.
+        self.assertEquals(-1, obj.instance_method())
+
+        # Test argument count.
+        self.assertRaises(TypeError, obj.instance_method, 'foo')
+
+        # Test instance checking by passing a wrong instance.
+        obj = gobject.GObject()
+        self.assertRaises(TypeError, Everything.TestObj.instance_method)
+
+    def testVirtualMethod(self):
+        obj = Everything.TestObj('foo')
+
+        # Test call.
+        self.assertEquals(42, obj.do_matrix('matrix'))
+
+        # Test argument count.
+        self.assertRaises(TypeError, obj.do_matrix)
+        self.assertRaises(TypeError, obj.do_matrix, 'matrix', 'foo')
         self.assertRaises(TypeError, Everything.TestObj.do_matrix, 'matrix')
-        self.assertRaises(TypeError, Everything.TestObj.do_matrix, None, 'matrix')
+
+        # Test instance checking by passing a wrong instance.
+        obj = gobject.GObject()
+        self.assertRaises(TypeError, Everything.TestObj.do_matrix, obj, 'matrix')
 
     def testStaticMethod(self):
+        obj = Everything.TestObj('foo')
+
+        # Test calls.
         self.assertEquals(42, Everything.TestObj.static_method(42))
+        self.assertEquals(42, obj.static_method(42))
+
+        # Test argument count.
         self.assertRaises(TypeError, Everything.TestObj.static_method)
-        self.assertRaises(TypeError, Everything.TestObj.static_method, 'foo')
         self.assertRaises(TypeError, Everything.TestObj.static_method, 'foo', 'bar')
-        o = Everything.TestObj('foo')
-        self.assertEquals(42, o.static_method(42))
+
+
+# Inheritance
 
     def testSubObj(self):
+        # Test subclassing.
         self.assertTrue(issubclass(Everything.TestSubObj, Everything.TestObj))
+
+        # Test static method.
         self.assertEquals(42, Everything.TestSubObj.static_method(42))
 
-        self.assertRaises(TypeError, Everything.TestSubObj, 'foo')
+        # Test constructor.
+        subobj = Everything.TestSubObj()
+        self.assertTrue(isinstance(subobj, Everything.TestSubObj))
+        self.assertTrue(isinstance(subobj, Everything.TestObj))
 
-        s = Everything.TestSubObj()
-        self.assertTrue(isinstance(s, Everything.TestSubObj))
-        self.assertTrue(isinstance(s, Everything.TestObj))
+        # Test alternate constructor.
+        subobj = Everything.TestSubObj.new_from_file('foo')
+        self.assertTrue(isinstance(subobj, Everything.TestSubObj))
 
-        self.assertTrue(hasattr(s, 'set_bare'))
+        # Test method inheritance.
+        self.assertTrue(hasattr(subobj, 'set_bare'))
+        self.assertEquals(42, subobj.do_matrix('foo'))
 
-        self.assertEquals(42, s.do_matrix('foo'))
+        # Test method overriding.
+        self.assertEquals(0, subobj.instance_method())
 
-        self.assertTrue(hasattr(s, 'unset_bare'))
+        # Test instance checking by passing a wrong instance.
+        obj = Everything.TestObj('foo')
+        self.assertRaises(TypeError, Everything.TestSubObj.instance_method, obj)
 
-        self.assertEquals(0, s.instance_method())
-        self.assertRaises(TypeError, Everything.TestObj.instance_method, Everything.TestObj('foo'))
+    def testPythonSubObj(self):
+        class PythonSubObj(Everything.TestObj):
+            def __new__(cls):
+                return super(PythonSubObj, cls).__new__(cls, 'foo')
+        gobject.type_register(PythonSubObj)
+
+        # Test subclassing.
+        self.assertTrue(issubclass(PythonSubObj, Everything.TestObj))
+        self.assertTrue(PythonSubObj.__gtype__ != Everything.TestObj.__gtype__)
+        self.assertTrue(PythonSubObj.__gtype__.is_a(Everything.TestObj.__gtype__))
+
+        # Test static method.
+        self.assertEquals(42, PythonSubObj.static_method(42))
+
+        # Test instanciation.
+        subobj = PythonSubObj()
+        self.assertTrue(isinstance(subobj, PythonSubObj))
+
+        subobj = PythonSubObj.new_from_file('foo')
+        self.assertTrue(isinstance(subobj, PythonSubObj))
+
+        # Test method inheritance.
+        self.assertTrue(hasattr(subobj, 'set_bare'))
+        self.assertEquals(42, subobj.do_matrix('foo'))
+
+
+# Interface
+
+    def testInterface(self):
+        self.assertTrue(issubclass(Everything.TestInterface, gobject.GInterface))
+        self.assertEquals(Everything.TestInterface.__gtype__.name, 'EverythingTestInterface')
+
+        # Test instanciation.
+        self.assertRaises(NotImplementedError, Everything.TestInterface)
 
 
 if __name__ == '__main__':

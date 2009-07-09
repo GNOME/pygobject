@@ -3,7 +3,10 @@ import sys
 from girepository.module import DynamicModule
 
 class GdkModule(DynamicModule):
-    def created(self):
+
+    def __init__(self, *args):
+        super(GdkModule, self).__init__(*args)
+
         initialized, argv = self.init_check(tuple(sys.argv))
         if not initialized:
             raise RuntimeError("Gdk couldn't be initialized")
