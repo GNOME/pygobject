@@ -260,23 +260,81 @@ class TestGIEverything(unittest.TestCase):
         self.assertEquals(("first", "second"), Everything.test_utf8_out_nonconst_return())
 
 
-# FIXME
-# ======================================================================
-# ERROR: testStrv (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 179, in testStrv
-#     self.assertTrue(Everything.test_strv_in(('1', '2', '3')))
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#     self.type_check(name, value, argType)
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 89, in type_check
-#     raise TypeError("Must pass None for arrays currently")
-# TypeError: Must pass None for arrays currently
-#    def testStrv(self):
-#        self.assertTrue(Everything.test_strv_in(('1', '2', '3')))
-#        self.assertTrue(Everything.test_strv_in(['1', '2', '3'])) # XXX valid?
-#        self.assertRaises(TypeError, Everything.test_strv_in(('1', 2, 3)))
-#        self.assertEquals((1, 2, 3), Everything.test_strv_out())
+# Arrays
+
+    def testArrayIntIn(self):
+        self.assertEquals(5, Everything.test_array_int_in((1, 2, 3, -1)))
+
+        self.assertRaises(TypeError, Everything.test_array_int_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_int_in, (2, 'a'))
+
+    def testArrayInt8In(self):
+        self.assertEquals(5, Everything.test_array_gint8_in((1, 2, 3, -1)))
+        self.assertEquals(-1, Everything.test_array_gint8_in((INT8_MAX, INT8_MIN)))
+
+        self.assertRaises(TypeError, Everything.test_array_gint8_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_gint8_in, (2, 'a'))
+        self.assertRaises(ValueError, Everything.test_array_gint8_in, (INT8_MAX+1,))
+        self.assertRaises(ValueError, Everything.test_array_gint8_in, (INT8_MIN-1,))
+
+    def testArrayInt16In(self):
+        self.assertEquals(5, Everything.test_array_gint16_in((1, 2, 3, -1)))
+        self.assertEquals(-1, Everything.test_array_gint16_in((INT16_MAX, INT16_MIN)))
+
+        self.assertRaises(TypeError, Everything.test_array_gint16_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_gint16_in, (2, 'a'))
+        self.assertRaises(ValueError, Everything.test_array_gint16_in, (INT16_MAX+1,))
+        self.assertRaises(ValueError, Everything.test_array_gint16_in, (INT16_MIN-1,))
+
+    def testArrayInt32In(self):
+        self.assertEquals(5, Everything.test_array_gint32_in((1, 2, 3, -1)))
+        self.assertEquals(-1, Everything.test_array_gint32_in((INT32_MAX, INT32_MIN)))
+
+        self.assertRaises(TypeError, Everything.test_array_gint32_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_gint32_in, (2, 'a'))
+        self.assertRaises(ValueError, Everything.test_array_gint32_in, (INT32_MAX+1,))
+        self.assertRaises(ValueError, Everything.test_array_gint32_in, (INT32_MIN-1,))
+
+    def testArrayInt32In(self):
+        self.assertEquals(5, Everything.test_array_gint32_in((1, 2, 3, -1)))
+        self.assertEquals(-1, Everything.test_array_gint32_in((INT32_MAX, INT32_MIN)))
+
+        self.assertRaises(TypeError, Everything.test_array_gint32_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_gint32_in, (2, 'a'))
+        self.assertRaises(ValueError, Everything.test_array_gint32_in, (INT32_MAX+1,))
+        self.assertRaises(ValueError, Everything.test_array_gint32_in, (INT32_MIN-1,))
+
+    def testArrayInt64In(self):
+        self.assertEquals(5, Everything.test_array_gint64_in((1, 2, 3, -1)))
+        self.assertEquals(-1, Everything.test_array_gint64_in((INT64_MAX, INT64_MIN)))
+
+        self.assertRaises(TypeError, Everything.test_array_gint64_in, 0)
+        self.assertRaises(TypeError, Everything.test_array_gint64_in, (2, 'a'))
+        self.assertRaises(ValueError, Everything.test_array_gint64_in, (INT64_MAX+1,))
+        self.assertRaises(ValueError, Everything.test_array_gint64_in, (INT64_MIN-1,))
+
+    def testStrvIn(self):
+        self.assertTrue(Everything.test_strv_in(('1', '2', '3')))
+        self.assertFalse(Everything.test_strv_in(('1', '2')))
+        self.assertFalse(Everything.test_strv_in(('1', '2', '3', '4')))
+
+        self.assertRaises(TypeError, Everything.test_strv_in, '1')
+        self.assertRaises(TypeError, Everything.test_strv_in, ('1', 2, 3))
+
+    def testArrayGTypeIn(self):
+        # TODO
+        pass
+
+    def testStrvOut(self):
+        self.assertEquals(("thanks", "for", "all", "the", "fish"), Everything.test_strv_out())
+        self.assertEquals(("thanks", "for", "all", "the", "fish"), Everything.test_strv_out_c())
+
+    def testStrvOutarg(self):
+        self.assertEquals(("1", "2", "3"), Everything.test_strv_outarg())
+
+
+# Interface
+# GSList
 
     def testGList(self):
         retval = Everything.test_glist_nothing_return()
@@ -456,21 +514,6 @@ class TestGIEverything(unittest.TestCase):
         s = TestSubclass()
         self.assertEquals(s.do_matrix('matrix'), 42)
 
-# FIXME
-# ======================================================================
-# ERROR: testArrayOut (__main__.TestGIEverything)
-# ----------------------------------------------------------------------
-# Traceback (most recent call last):
-#   File "test_girepository.py", line 282, in testArrayOut
-# 	b, n_ints, ints = Everything.test_array_int_full_out2()
-#   File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/module.py", line 56, in __getattr__
-# 	self.__class__.__name__, name))
-# AttributeError: 'DynamicModule' object has no attribute 'test_array_int_full_out2'
-#	def testArrayOut(self):
-#	    b, n_ints, ints = Everything.test_array_int_full_out2()
-#	    self.assertEquals(b, True)
-#	    self.assertEquals(n_ints, 5)
-#	    self.assertEquals(ints, [1, 2, 3, 4, 5])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGIEverything)

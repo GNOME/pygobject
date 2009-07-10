@@ -335,6 +335,8 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
     guint n_in_args;
     guint n_out_args;
     Py_ssize_t n_py_args;
+    gsize n_aux_in_args;
+    gsize n_aux_out_args;
     guint n_return_values;
 
     GICallableInfo *callable_info;
@@ -343,6 +345,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
     GArgument *in_args;
     GArgument *out_args;
+    GArgument **aux_args;
     GArgument *out_values;
     GArgument return_arg;
     PyObject *return_value;
@@ -364,13 +367,22 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
     n_py_args = PyTuple_Size(args);
     n_in_args = is_method ? 1 : 0;  /* The first argument is the instance. */
     n_out_args = 0;
+    n_aux_in_args = 0;
+    n_aux_out_args = 0;
+    aux_args = g_newa(GArgument *, n_args);
 
     for (i = 0; i < n_args; i++) {
         GIDirection direction;
         GIArgInfo *arg_info;
+        GITypeInfo *arg_type_info;
+        GITypeTag arg_type_tag;
 
         arg_info = g_callable_info_get_arg(callable_info, i);
+
+        arg_type_info = g_arg_info_get_type(arg_info);
         direction = g_arg_info_get_direction(arg_info);
+
+        arg_type_tag = g_type_info_get_tag(arg_type_info);
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             n_in_args += 1;
@@ -379,18 +391,53 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             n_out_args += 1;
         }
 
+        aux_args[i] = NULL;
+        if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
+            gint length_arg_pos;
+
+            length_arg_pos = g_type_info_get_array_length(arg_type_info);
+            if (length_arg_pos != -1) {
+                /* Tag the argument as auxiliary. Later, it'll be changed into a pointer to (in|out)_args[(in|out)_args_pos].
+                 * We cannot do it now since we don't know how much space to allocate (n_(in|out)_args) yet.
+                 */
+                aux_args[length_arg_pos] = (GArgument *)!NULL;
+
+                if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
+                    n_aux_in_args += 1;
+                }
+                if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+                    n_aux_out_args += 1;
+                }
+            }
+        }
+
+        g_base_info_unref((GIBaseInfo *)arg_type_info);
         g_base_info_unref((GIBaseInfo *)arg_info);
+    }
+
+    return_info = g_callable_info_get_return_type((GICallableInfo *)self->info);
+    return_tag = g_type_info_get_tag(return_info);
+
+    /* Tag the return value's auxiliary argument too, if applicable. */
+    if (return_tag == GI_TYPE_TAG_ARRAY) {
+        gint length_arg_pos;
+        length_arg_pos = g_type_info_get_array_length(return_info);
+        if (length_arg_pos != -1) {
+            aux_args[length_arg_pos] = (GArgument *)!NULL;
+            n_aux_out_args += 1;
+        }
     }
 
     {
         Py_ssize_t py_args_pos;
 
         /* Check the argument count. */
-        if (n_py_args != n_in_args + (is_constructor ? 1 : 0)) {
-            PyErr_Format(PyExc_TypeError, "%s.%s() takes exactly %i argument(s) (%zd given)",
+        if (n_py_args != n_in_args + (is_constructor ? 1 : 0) - n_aux_in_args) {
+            g_base_info_unref((GIBaseInfo *)return_info);
+            PyErr_Format(PyExc_TypeError, "%s.%s() takes exactly %zd argument(s) (%zd given)",
                     g_base_info_get_namespace((GIBaseInfo *)callable_info),
                     g_base_info_get_name((GIBaseInfo *)callable_info),
-                    n_in_args + (is_constructor ? 1 : 0), n_py_args);
+                    n_in_args + (is_constructor ? 1 : 0) - n_aux_in_args, n_py_args);
             return NULL;
         }
 
@@ -403,6 +450,11 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             GIDirection direction;
             PyObject *py_arg;
             GError *error;
+
+            if (aux_args[i] != NULL) {
+                /* No check needed for auxiliary arguments. */
+                continue;
+            }
 
             arg_info = g_callable_info_get_arg(callable_info, i);
             direction = g_arg_info_get_direction(arg_info);
@@ -424,6 +476,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE:
                         py_error_type = PyExc_TypeError;
                         break;
+                    case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_SIZE:
                     case PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE:
                         py_error_type = PyExc_ValueError;
                         break;
@@ -444,6 +497,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             g_base_info_unref((GIBaseInfo *)arg_info);
 
             if (PyErr_Occurred()) {
+                g_base_info_unref((GIBaseInfo *)return_info);
                 return NULL;
             }
 
@@ -453,7 +507,6 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
         g_assert(py_args_pos == n_py_args);
     }
 
-    /* Get the arguments. */
     in_args = g_newa(GArgument, n_in_args);
     out_args = g_newa(GArgument, n_out_args);
     /* each out arg is a pointer, they point to these values */
@@ -461,6 +514,46 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
        http://bugzilla.gnome.org/show_bug.cgi?id=573314 */
     out_values = g_newa(GArgument, n_out_args);
 
+    /* Link aux_args to in_args. */
+    {
+        gsize in_args_pos;
+        gsize out_args_pos;
+
+        in_args_pos = is_method ? 1 : 0;
+        out_args_pos = 0;
+
+        for (i = 0; i < n_args; i++) {
+            GIArgInfo *arg_info;
+            GIDirection direction;
+
+            arg_info = g_callable_info_get_arg((GICallableInfo *)self->info, i);
+            direction = g_arg_info_get_direction(arg_info);
+
+            if (direction == GI_DIRECTION_IN) {
+                if (aux_args[i] != NULL) {
+                    g_assert(in_args_pos < n_in_args);
+                    aux_args[i] = &in_args[in_args_pos];
+                }
+                in_args_pos += 1;
+            } else {
+                if (aux_args[i] != NULL) {
+                    g_assert(out_args_pos < n_out_args);
+                    aux_args[i] = &out_values[out_args_pos];
+                }
+                out_args_pos += 1;
+                if (direction == GI_DIRECTION_INOUT) {
+                    in_args_pos += 1;
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)arg_info);
+        }
+
+        g_assert(in_args_pos == n_in_args);
+        g_assert(out_args_pos == n_out_args);
+    }
+
+    /* Get the arguments. */
     {
         guint in_args_pos = 0;
         guint out_args_pos = 0;
@@ -486,6 +579,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                 py_buffer = PyObject_GetAttrString((PyObject *)py_arg, "__buffer__");
                 if (py_buffer == NULL) {
                     g_base_info_unref(container);
+                    g_base_info_unref((GIBaseInfo *)return_info);
                     return NULL;
                 }
                 py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
@@ -521,6 +615,23 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
             if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
                 PyObject *py_arg;
+                GITypeInfo *arg_type_info;
+                GITypeTag arg_type_tag;
+
+                g_assert(in_args_pos < n_in_args);
+                if (direction == GI_DIRECTION_INOUT) {
+                    in_args[in_args_pos].v_pointer = out_value;
+                }
+
+                if (aux_args[i] != NULL) {
+                    /* Auxiliary argument has already been set or will be set later. */
+                    in_args_pos += 1;
+                    g_base_info_unref((GIBaseInfo *)arg_info);
+                    continue;
+                }
+
+                arg_type_info = g_arg_info_get_type(arg_info);
+                arg_type_tag = g_type_info_get_tag(arg_type_info);
 
                 g_assert(py_args_pos < n_py_args);
                 py_arg = PyTuple_GetItem(args, py_args_pos);
@@ -528,7 +639,6 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
                 GArgument in_value = pyg_argument_from_pyobject(py_arg, g_arg_info_get_type(arg_info));
 
-                g_assert(in_args_pos < n_in_args);
                 if (direction == GI_DIRECTION_IN) {
                     /* Pass the value. */
                     in_args[in_args_pos] = in_value;
@@ -536,8 +646,26 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     /* Pass a pointer to the value. */
                     g_assert(out_value != NULL);
                     *out_value = in_value;
-                    in_args[in_args_pos].v_pointer = out_value;
                 }
+
+                if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
+                    gint length_arg_pos;
+                    length_arg_pos = g_type_info_get_array_length(arg_type_info);
+                    if (length_arg_pos != -1) {
+                        GArgument *length_arg;
+                        Py_ssize_t size;
+
+                        size = PyTuple_Size(py_arg);
+                        if (size > 0) {
+                            g_assert(in_value.v_pointer != NULL);
+                        }
+                        length_arg = aux_args[length_arg_pos];
+                        g_assert(length_arg != NULL);
+                        length_arg->v_size = size;
+                    }
+                }
+
+                g_base_info_unref((GIBaseInfo *)arg_type_info);
 
                 in_args_pos += 1;
                 py_args_pos += 1;
@@ -553,14 +681,16 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
     /* Invoke the callable. */
     {
-        GError *error = NULL;
+        GError *error;
+
+        error = NULL;
 
         if (!g_function_info_invoke((GIFunctionInfo *)callable_info,
                     in_args, n_in_args,
                     out_args, n_out_args,
                     &return_arg,
                     &error)) {
-            g_assert(error != NULL);
+            g_base_info_unref((GIBaseInfo *)return_info);
             PyErr_Format(PyExc_RuntimeError, "Error invoking %s.%s(): %s",
                     g_base_info_get_namespace((GIBaseInfo *)callable_info),
                     g_base_info_get_name((GIBaseInfo *)callable_info),
@@ -570,17 +700,35 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
         }
     }
 
-    /* Get return value. */
-    return_info = g_callable_info_get_return_type(callable_info);
-    return_tag = g_type_info_get_tag(return_info);
-
-    n_return_values = n_out_args;
+    n_return_values = n_out_args - n_aux_out_args;
     if (return_tag != GI_TYPE_TAG_VOID) {
         n_return_values += 1;
 
         if (!is_constructor) {
             /* Convert the return value. */
-            return_value = pyg_argument_to_pyobject(&return_arg, return_info);
+            if (return_tag == GI_TYPE_TAG_ARRAY) {
+                gssize length;
+                length = g_type_info_get_array_fixed_size(return_info);
+                if (length < 0) {
+                    gint length_arg_pos;
+                    GArgument *length_arg;
+
+                    length_arg_pos = g_type_info_get_array_length(return_info);
+
+                    if (length_arg_pos >= 0) {
+                        length_arg = aux_args[length_arg_pos];
+                        g_assert(length_arg != NULL);
+                        length = length_arg->v_int;
+                    }
+                }
+                if (length < 0) {
+                    g_assert(g_type_info_is_zero_terminated(return_info));
+                }
+                return_value = pyg_array_to_pyobject(return_arg.v_pointer, length, return_info);
+            } else {
+                return_value = pyg_argument_to_pyobject(&return_arg, return_info);
+            }
+
             g_assert(return_value != NULL);
         } else {
             /* Wrap the return value inside the first argument. */
@@ -692,57 +840,57 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             } else {
                 PyObject *obj;
                 GITypeTag type_tag;
-                int retval;
+                GArgument *arg;
 
                 if (direction == GI_DIRECTION_INOUT) {
                     g_assert(in_args_pos < n_in_args);
                 }
                 g_assert(out_args_pos < n_out_args);
 
+                if (aux_args[i] != NULL) {
+                    if (direction == GI_DIRECTION_INOUT) {
+                        in_args_pos += 1;
+                    }
+                    out_args_pos += 1;
+                    g_base_info_unref((GIBaseInfo *)arg_type_info);
+                    g_base_info_unref((GIBaseInfo *)arg_info);
+                    continue;
+                }
+
+                arg = (GArgument *)out_args[out_args_pos].v_pointer;
+
                 type_tag = g_type_info_get_tag(arg_type_info);
 
                 if (type_tag == GI_TYPE_TAG_ARRAY) {
-                    /* FIXME: Verify all that... */
+                    gssize length;
 
-                    gint length_arg_index;
-                    GArgument *length_arg;
-                    GArgument *arg;
+                    length = g_type_info_get_array_fixed_size(arg_type_info);
+                    if (length < 0) {
+                        gint length_arg_pos;
+                        GArgument *length_arg;
 
-                    length_arg_index = g_type_info_get_array_length(arg_type_info);
+                        length_arg_pos = g_type_info_get_array_length(arg_type_info);
 
-                    if (is_method) {
-                        /* XXX: Why? */
-                        length_arg_index -= 1;
+                        if (length_arg_pos >= 0) {
+                            length_arg = aux_args[length_arg_pos];
+                            g_assert(length_arg != NULL);
+                            length = length_arg->v_int;
+                        }
+                    }
+                    if (length < 0) {
+                        g_assert(g_type_info_is_zero_terminated(arg_type_info));
                     }
 
-                    if (length_arg_index == -1) {
-                        g_base_info_unref((GIBaseInfo *)arg_type_info);
-                        g_base_info_unref((GIBaseInfo *)arg_info);
-                        g_base_info_unref((GIBaseInfo *)return_info);
-                        PyErr_SetString(PyExc_NotImplementedError, "Need a field to specify the array length");
-                        return NULL;
-                    }
-
-                    length_arg = out_args[length_arg_index].v_pointer;
-
-                    if (length_arg == NULL) {
-                        g_base_info_unref((GIBaseInfo *)arg_type_info);
-                        g_base_info_unref((GIBaseInfo *)arg_info);
-                        g_base_info_unref((GIBaseInfo *)return_info);
-                        PyErr_SetString(PyExc_RuntimeError, "Failed to get the length of the array");
-                        return NULL;
-                    }
-
-                    arg = (GArgument *)out_args[out_args_pos].v_pointer;
-                    obj = pyarray_to_pyobject(arg->v_pointer, length_arg->v_int, arg_type_info);
+                    obj = pyg_array_to_pyobject(arg->v_pointer, length, arg_type_info);
                 } else {
-                    obj = pyg_argument_to_pyobject(out_args[out_args_pos].v_pointer, arg_type_info);
+                    obj = pyg_argument_to_pyobject(arg, arg_type_info);
                 }
 
                 g_assert(obj != NULL);
                 g_assert(return_values_pos < n_return_values);
 
                 if (n_return_values > 1) {
+                    int retval;
                     g_assert(return_value != NULL);
 
                     retval = PyTuple_SetItem(return_value, return_values_pos, obj);

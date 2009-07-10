@@ -76,14 +76,17 @@ GArgument pyg_argument_from_pyobject(PyObject *object,
 				     GITypeInfo *info);
 PyObject*  pyg_argument_to_pyobject(GArgument *arg,
 				    GITypeInfo *info);
-PyObject*  pyarray_to_pyobject(gpointer array, int length, GITypeInfo *info);
+
+PyObject* pyg_array_to_pyobject(gpointer items, gsize length, GITypeInfo *info);
+gpointer pyg_array_from_pyobject(PyObject *object, GITypeInfo *type_info, gsize *length);
 
 #define PyG_ARGUMENT_FROM_PYOBJECT_ERROR pyg_argument_from_pyobject_error_quark()
 GQuark pyg_argument_from_pyobject_error_quark(void);
 
 typedef enum {
     PyG_ARGUMENT_FROM_PYOBJECT_ERROR_TYPE,
-    PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE
+    PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE,
+    PyG_ARGUMENT_FROM_PYOBJECT_ERROR_SIZE
 } PyGArgumentFromPyObjectError;
 
 gboolean pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError **error);

@@ -20,6 +20,7 @@
 
 #include "bank.h"
 #include <pygobject.h>
+#include <string.h>
 
 GQuark
 pyg_argument_from_pyobject_error_quark(void)
@@ -234,7 +235,11 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
             break;
         case GI_TYPE_TAG_ARRAY:
         {
-            gint size;
+            gssize size;
+            gssize required_size;
+            Py_ssize_t object_size;
+            GITypeInfo *item_type_info;
+            gsize i;
 
             if (!PyTuple_Check(object)) {
                 py_type_name_expected = "tuple";
@@ -242,14 +247,32 @@ pyg_argument_from_pyobject_check(PyObject *object, GITypeInfo *type_info, GError
             }
 
             size = g_type_info_get_array_fixed_size(type_info);
-            if (size != -1 && PyTuple_Size(object) != size) {
-                /* FIXME: Set another more appropriate error. */
-                g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_VALUE, "FIXME");
+            required_size = g_type_info_get_array_fixed_size(type_info);
+            object_size = PyTuple_Size(object);
+            if (required_size != -1 && object_size != required_size) {
+                g_set_error(error, PyG_ARGUMENT_FROM_PYOBJECT_ERROR, PyG_ARGUMENT_FROM_PYOBJECT_ERROR_SIZE,
+                        "Must contain %zd items, not %zd", required_size, object_size);
                 retval = FALSE;
                 break;
             }
 
-            /* TODO: to complete */
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+
+            for (i = 0; i < object_size; i++) {
+                PyObject *item;
+
+                item = PyTuple_GetItem(object, i);
+                g_assert(item != NULL);
+
+                g_assert(error == NULL || *error == NULL);
+                if (!pyg_argument_from_pyobject_check(item, item_type_info, error)) {
+                    g_prefix_error(error, "Item %zu: ", i);
+                    retval = FALSE;
+                    break;
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)item_type_info);
 
             break;
         }
@@ -413,8 +436,11 @@ pyg_argument_from_pyobject(PyObject *object, GITypeInfo *type_info)
             arg.v_pointer = pygobject_get(object);
         break;
     case GI_TYPE_TAG_ARRAY:
-        arg.v_pointer = NULL;
+    {
+        gsize length;
+        arg.v_pointer = pyg_array_from_pyobject(object, type_info, &length);
         break;
+    }
     case GI_TYPE_TAG_ERROR:
         /* Allow NULL GError, otherwise fall through */
         if (object == Py_None) {
@@ -483,51 +509,159 @@ glist_to_pyobject(GITypeTag list_tag, GITypeInfo *type_info, GList *list, GSList
     return py_list;
 }
 
-PyObject *
-pyarray_to_pyobject(gpointer array, int length, GITypeInfo *type_info)
+static
+gsize
+pyg_type_get_size(GITypeTag type_tag)
 {
-    PyObject *py_list;
-    PyObject *child_obj;
-    GITypeInfo *element_type = g_type_info_get_param_type (type_info, 0);
-    GITypeTag type_tag = g_type_info_get_tag(element_type);
     gsize size;
-    char buf[256];
-    int i;
 
-    if (array == NULL)
-        return Py_None;
+    switch(type_tag) {
+        case GI_TYPE_TAG_VOID:
+            size = sizeof(void);
+            break;
+        case GI_TYPE_TAG_BOOLEAN:
+            size = sizeof(gboolean);
+            break;
+        case GI_TYPE_TAG_INT:
+        case GI_TYPE_TAG_UINT:
+            size = sizeof(gint);
+            break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+            size = sizeof(gint8);
+            break;
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+            size = sizeof(gint16);
+            break;
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+            size = sizeof(gint32);
+            break;
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+            size = sizeof(gint64);
+            break;
+        case GI_TYPE_TAG_LONG:
+        case GI_TYPE_TAG_ULONG:
+            size = sizeof(glong);
+            break;
+        case GI_TYPE_TAG_SIZE:
+        case GI_TYPE_TAG_SSIZE:
+            size = sizeof(gsize);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            size = sizeof(gfloat);
+            break;
+        case GI_TYPE_TAG_DOUBLE:
+            size = sizeof(gdouble);
+            break;
+        case GI_TYPE_TAG_UTF8:
+            size = sizeof(gchar *);
+            break;
+        default:
+            /* TODO: Complete with other types */
+            g_assert_not_reached();
+    }
 
-    // FIXME: Doesn't seem right to have this here:
-    switch (type_tag) {
-    case GI_TYPE_TAG_INT:
-        size = sizeof(int);
-        break;
-    case GI_TYPE_TAG_INTERFACE:
-        size = sizeof(gpointer);
-        break;
-    default:
-        snprintf(buf, sizeof(buf), "Unimplemented type: %s\n", g_type_tag_to_string(type_tag));
-        PyErr_SetString(PyExc_TypeError, buf);
+    return size;
+}
+
+gpointer
+pyg_array_from_pyobject(PyObject *object, GITypeInfo *type_info, gsize *length)
+{
+    gpointer items;
+    gpointer current_item;
+    gssize item_size;
+    gboolean is_zero_terminated;
+    GITypeInfo *item_type_info;
+    GITypeTag type_tag;
+    gsize i;
+
+    is_zero_terminated = g_type_info_is_zero_terminated(type_info);
+    item_type_info = g_type_info_get_param_type(type_info, 0);
+
+    type_tag = g_type_info_get_tag(item_type_info);
+    item_size = pyg_type_get_size(type_tag);
+
+    *length = PyTuple_Size(object);
+    items = g_try_malloc(*length * (item_size + (is_zero_terminated ? 1 : 0)));
+
+    if (items == NULL) {
+        g_base_info_unref((GIBaseInfo *)item_type_info);
         return NULL;
     }
 
-    if ((py_list = PyList_New(0)) == NULL) {
+    current_item = items;
+    for (i = 0; i < *length; i++) {
+        GArgument arg;
+        PyObject *py_item;
+
+        py_item = PyTuple_GetItem(object, i);
+        g_assert(py_item != NULL);
+
+        arg = pyg_argument_from_pyobject(py_item, item_type_info);
+
+        g_memmove(current_item, &arg, item_size);
+
+        current_item += item_size;
+    }
+
+    if (is_zero_terminated) {
+        memset(current_item, 0, item_size);
+    }
+
+    g_base_info_unref((GIBaseInfo *)item_type_info);
+
+    return items;
+}
+
+PyObject *
+pyg_array_to_pyobject(gpointer items, gsize length, GITypeInfo *type_info)
+{
+    PyObject *py_items;
+    gsize item_size;
+    GITypeInfo *item_type_info;
+    GITypeTag type_tag;
+    gsize i;
+    gpointer current_item;
+
+    if (g_type_info_is_zero_terminated(type_info)) {
+        length = g_strv_length(items);
+    }
+
+    py_items = PyTuple_New(length);
+    if (py_items == NULL) {
         return NULL;
     }
 
-    for( i = 0; i < length; i++ ) {
-        gpointer current_element = array + i * size;
+    item_type_info = g_type_info_get_param_type (type_info, 0);
+    type_tag = g_type_info_get_tag(item_type_info);
+    item_size = pyg_type_get_size(type_tag);
 
-        child_obj = pyg_argument_to_pyobject((GArgument *)&current_element, element_type);
-        if (child_obj == NULL) {
-            Py_DECREF(py_list);
+    current_item = items;
+    for(i = 0; i < length; i++) {
+        PyObject *item;
+        int retval;
+
+        item = pyg_argument_to_pyobject((GArgument *)current_item, item_type_info);
+        if (item == NULL) {
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+            Py_DECREF(py_items);
             return NULL;
         }
-        PyList_Append(py_list, child_obj);
-        Py_DECREF(child_obj);
+
+        retval = PyTuple_SetItem(py_items, i, item);
+        if (retval) {
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+            Py_DECREF(py_items);
+            return NULL;
+        }
+
+        current_item += item_size;
     }
 
-    return py_list;
+    return py_items;
 }
 
 PyObject *
