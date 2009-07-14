@@ -19,7 +19,6 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0/gi
 pygidir = $(pkgpyexecdir)
 pygi_PYTHON = \
 	types.py \
-	repository.py \
 	module.py \
 	importer.py \
 	__init__.py

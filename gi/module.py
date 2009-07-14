@@ -28,8 +28,8 @@ from gobject import \
     GInterface, \
     GEnum
 
-from .repository import repository
 from ._gi import \
+    Repository, \
     UnresolvedInfo, \
     FunctionInfo, \
     RegisteredTypeInfo, \
@@ -44,6 +44,9 @@ from .types import \
     Function
 
 
+repository = Repository.get_default()
+
+
 def get_parent_for_object(object_info):
     parent_object_info = object_info.getParent()
 
@@ -51,14 +54,15 @@ def get_parent_for_object(object_info):
         return object
 
     namespace = parent_object_info.getNamespace()
+    name = parent_object_info.getName()
+
+    module = __import__(namespace)
+
     if isinstance(parent_object_info, UnresolvedInfo):
-        # Import the module and try again.
-        __import__(namespace)
+        # The module has been imported, try again.
         parent_object_info = object_info.getParent()
 
-    module = repository.get_module(namespace)
-    name = parent_object_info.getName()
-    # Workaround for gobject.Object.
+    # Workaround for gobject.Object and gobject.InitiallyUnowned.
     if module == gobject and name == 'Object' or name == 'InitiallyUnowned':
         return GObject
 
@@ -70,7 +74,6 @@ class DynamicModule(object):
     def __init__(self, namespace, path):
         self._namespace = namespace
         self._path = path
-        repository.register(self, namespace, path)
 
     @property
     def __file__(self):
@@ -88,7 +91,7 @@ class DynamicModule(object):
         return "<dyn-module %r from %r>" % (self._namespace, self._path)
 
     def __getattr__(self, name):
-        info = repository.get_by_name(self._namespace, name)
+        info = repository.find_by_name(self._namespace, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
                     self.__class__.__name__, name))

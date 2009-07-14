@@ -30,7 +30,6 @@ from ._gi import \
 	ObjectInfo, \
 	StructInfo, \
 	EnumInfo
-from .repository import repository
 
 
 def Function(info):

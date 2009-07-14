@@ -199,20 +199,21 @@ _wrap_g_irepository_get_c_prefix(PyGIRepository *self,
 }
 
 static PyObject *
-_wrap_g_irepository_get_default(PyObject *_)
+_wrap_g_irepository_get_default(PyObject *self)
 {
-    static PyGIRepository *self = NULL;
+    static PyGIRepository *repository = NULL;
 
-    if (!self) {
-        self = (PyGIRepository *)PyObject_New(PyGIRepository,
-					      &PyGIRepository_Type);
-	if (self == NULL)
-	    return NULL;
+    if (!repository) {
+        repository = (PyGIRepository *)PyObject_New(PyGIRepository, &PyGIRepository_Type);
+        if (repository == NULL) {
+            return NULL;
+        }
 
-	self->repository = g_irepository_get_default();
+        repository->repository = g_irepository_get_default();
     }
 
-    return (PyObject*)self;
+    Py_INCREF((PyObject *)repository);
+    return (PyObject *)repository;
 }
 
 static PyMethodDef _PyGIRepository_methods[] = {

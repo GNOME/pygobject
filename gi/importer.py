@@ -21,9 +21,17 @@
 # USA
 
 import sys
+import gobject
 
-from .repository import repository
+from ._gi import Repository
 from .module import DynamicModule
+
+
+repository = Repository.get_default()
+modules = {
+    'GObject': gobject
+}
+
 
 class DynamicImporter(object):
     def __init__(self, name, path):
@@ -39,17 +47,20 @@ class DynamicImporter(object):
             return DynamicImporter(name, path)
 
     def load_module(self, name):
-        module = repository.get_module(name)
-        if module is not None:
-            return module
+        if name in modules:
+            return modules[name]
 
         module_name = 'gi.overrides.%s' % (name,)
         try:
-            module = __import__(module_name, {}, {}, ['%sModule' % (name,)])
-            modtype = getattr(module, name + 'Module')
+            overrides_module = __import__(module_name, {}, {}, ['%sModule' % (name,)])
+            module_type = getattr(overrides_module, name + 'Module')
         except ImportError, e:
-            modtype = DynamicModule
-        return modtype(name, self.path)
+            module_type = DynamicModule
+
+        module = module_type(name, self.path)
+        modules[name] = module
+
+        return module
 
 
 def install_importhook():
