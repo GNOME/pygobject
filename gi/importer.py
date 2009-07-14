@@ -1,6 +1,9 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# vim: tabstop=4 shiftwidth=4 expandtab
 #
-# Copyright (C) 2005,2007 Johan Dahlin <johan@gnome.org>
+# Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+#
+#   importer.py: dynamic importer for introspected libraries.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -14,13 +17,13 @@
 #
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
+# USA
 
-import os
 import sys
 
 from .repository import repository
+from .module import DynamicModule
 
 class DynamicImporter(object):
     def __init__(self, name, path):
@@ -40,8 +43,7 @@ class DynamicImporter(object):
         if module is not None:
             return module
 
-        from .module import DynamicModule
-        module_name = 'girepository.overrides.%s' % (name,)
+        module_name = 'gi.overrides.%s' % (name,)
         try:
             module = __import__(module_name, {}, {}, ['%sModule' % (name,)])
             modtype = getattr(module, name + 'Module')

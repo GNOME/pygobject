@@ -1,7 +1,9 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
- * vim: set ts=8 sts=4 sw=4 et ai cindent :
- * 
- * Copyright (C) 2005  Johan Dahlin <johan@gnome.org>
+ * vim: tabstop=4 shiftwidth=4 expandtab
+ *
+ * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ *
+ *   pygirepository.c: GIRepository wrapper.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,58 +17,48 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
  */
 
-#include "bank.h"
+#include "pygi-private.h"
 
 static PyMethodDef _PyGIRepository_methods[];
 
 PyTypeObject PyGIRepository_Type = {
     PyObject_HEAD_INIT(NULL)
     0,
-    "bank.IRepository",
-    sizeof(PyGIRepository),
-    0,
-    /* methods */
-    (destructor)0,
-    (printfunc)0,
-    (getattrfunc)0,
-    (setattrfunc)0,
-    (cmpfunc)0,
-    (reprfunc)0,
-    0,
-    0,
-    0,
-    (hashfunc)0,
-    (ternaryfunc)0,
-    (reprfunc)0,
-    (getattrofunc)0,
-    (setattrofunc)0,
-    0,
-    Py_TPFLAGS_DEFAULT,
-    NULL,
-    (traverseproc)0,
-    (inquiry)0,
-    (richcmpfunc)0,
-    0,
-    (getiterfunc)0,
-    (iternextfunc)0,
-    _PyGIRepository_methods,
-    0,
-    0,
-    NULL,
-    NULL,
-    (descrgetfunc)0,
-    (descrsetfunc)0,
-    0,
-    (initproc)0,
+    "gi.Repository",         /* tp_name */
+    sizeof(PyGIRepository),  /* tp_basicsize */
+    0,                       /* tp_itemsize */
+    (destructor)NULL,        /* tp_dealloc */
+    (printfunc)NULL,         /* tp_print */
+    (getattrfunc)NULL,       /* tp_getattr */
+    (setattrfunc)NULL,       /* tp_setattr */
+    (cmpfunc)NULL,           /* tp_compare */
+    (reprfunc)NULL,          /* tp_repr */
+    NULL,                    /* tp_as_number */
+    NULL,                    /* tp_as_sequence */
+    NULL,                    /* tp_as_mapping */
+    (hashfunc)NULL,          /* tp_hash */
+    (ternaryfunc)NULL,       /* tp_call */
+    (reprfunc)NULL,          /* tp_str */
+    (getattrofunc)NULL,      /* tp_getattro */
+    (setattrofunc)NULL,      /* tp_setattro */
+    NULL,                    /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,      /* tp_flags */
+    NULL,                    /* tp_doc */
+    (traverseproc)NULL,      /* tp_traverse */
+    (inquiry)NULL,           /* tp_clear */
+    (richcmpfunc)NULL,       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    (getiterfunc)NULL,       /* tp_iter */
+    (iternextfunc)NULL,      /* tp_iternext */
+    _PyGIRepository_methods, /* tp_methods */
 };
 
 static PyObject *
-_wrap_g_irepository_require(PyGIRepository *self,
-			    PyObject *args,
-			    PyObject *kwargs)
+_wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", "lazy", NULL };
     gchar *namespace;
@@ -87,7 +79,7 @@ _wrap_g_irepository_require(PyGIRepository *self,
     /* TODO - handle versioning in some way, need to figure out what
      * this looks like Python side.
      */
-    ret = g_irepository_require(self->repo, namespace, NULL, flags, &error);
+    ret = g_irepository_require(self->repository, namespace, NULL, flags, &error);
 
     if (ret == NULL) {
 #if 0
@@ -117,7 +109,7 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self,
 				     kwlist, &namespace, &name))
         return NULL;
 
-    info = g_irepository_find_by_name (self->repo, namespace, name);
+    info = g_irepository_find_by_name (self->repository, namespace, name);
     if (!info) {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -133,7 +125,7 @@ _wrap_g_irepository_get_namespaces(PyGIRepository *self)
     int i, length;
     PyObject *retval;
 
-    namespaces = g_irepository_get_loaded_namespaces(self->repo);
+    namespaces = g_irepository_get_loaded_namespaces(self->repository);
 
     length = g_strv_length(namespaces);
     retval = PyTuple_New(length);
@@ -161,12 +153,12 @@ _wrap_g_irepository_get_infos(PyGIRepository *self,
 				     kwlist, &namespace))
         return NULL;
 
-    length = g_irepository_get_n_infos(self->repo, namespace);
+    length = g_irepository_get_n_infos(self->repository, namespace);
 
     retval = PyTuple_New(length);
 
     for (i = 0; i < length; i++) {
-	GIBaseInfo *info = g_irepository_get_info(self->repo, namespace, i);
+	GIBaseInfo *info = g_irepository_get_info(self->repository, namespace, i);
 	PyTuple_SetItem(retval, i, pyg_info_new(info));
     }
 
@@ -180,13 +172,13 @@ _wrap_g_irepository_is_registered(PyGIRepository *self,
 {
     static char *kwlist[] = { "namespace", NULL };
     char *namespace;
- 
+
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
 				     "s:GIRepository.isRegistered",
 				     kwlist, &namespace))
         return NULL;
 
-    return PyBool_FromLong(g_irepository_is_registered(self->repo, namespace, NULL));
+    return PyBool_FromLong(g_irepository_is_registered(self->repository, namespace, NULL));
 }
 
 static PyObject *
@@ -203,7 +195,7 @@ _wrap_g_irepository_get_c_prefix(PyGIRepository *self,
 				     kwlist, &namespace))
         return NULL;
 
-    return PyString_FromString(g_irepository_get_c_prefix(self->repo, namespace));
+    return PyString_FromString(g_irepository_get_c_prefix(self->repository, namespace));
 }
 
 static PyObject *
@@ -217,7 +209,7 @@ _wrap_g_irepository_get_default(PyObject *_)
 	if (self == NULL)
 	    return NULL;
 
-	self->repo = g_irepository_get_default();
+	self->repository = g_irepository_get_default();
     }
 
     return (PyObject*)self;
@@ -233,4 +225,19 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "getCPrefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
+
+void
+pygi_repository_register_types(PyObject *m)
+{
+    PyGIRepository_Type.ob_type = &PyType_Type;
+    PyGIRepository_Type.tp_alloc = PyType_GenericAlloc;
+    PyGIRepository_Type.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&PyGIRepository_Type)) {
+        return;
+    }
+    if (PyModule_AddObject(m, "Repository", (PyObject *)&PyGIRepository_Type)) {
+        return;
+    }
+    Py_INCREF(&PyGIRepository_Type);
+}
 

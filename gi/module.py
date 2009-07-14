@@ -1,6 +1,9 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# vim: tabstop=4 shiftwidth=4 expandtab
 #
-# Copyright (C) 2007 Johan Dahlin <johan@gnome.org>
+# Copyright (C) 2007-2009 Johan Dahlin <johan@gnome.org>
+#
+#   module.py: dynamic module for introspected libraries.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -14,8 +17,8 @@
 #
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
+# USA
 
 import os
 
@@ -26,11 +29,7 @@ from gobject import \
     GEnum
 
 from .repository import repository
-from .btypes import \
-    GObjectIntrospectionMeta, \
-    GIStruct, \
-    Function
-from .repo import \
+from ._gi import \
     UnresolvedInfo, \
     FunctionInfo, \
     RegisteredTypeInfo, \
@@ -39,6 +38,10 @@ from .repo import \
     InterfaceInfo, \
     StructInfo, \
     BoxedInfo
+from .types import \
+    GObjectIntrospectionMeta, \
+    GIStruct, \
+    Function
 
 
 def get_parent_for_object(object_info):

@@ -237,7 +237,8 @@ AC_CONFIG_FILES(
   glib/Makefile
   gobject/Makefile
   gio/Makefile
-  girepository/Makefile
+  gi/Makefile
+  gi/overrides/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)
