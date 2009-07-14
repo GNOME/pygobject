@@ -33,3 +33,7 @@ stamp-h1
 *.so
 .deps
 .libs
+
+# Editor-generated files.
+.*.swp
+Session.vim
