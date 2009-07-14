@@ -33,7 +33,6 @@ PyObject* pyg_info_new(gpointer info);
 GIBaseInfo* pyg_base_info_from_object(PyObject *object);
 
 void pygi_info_register_types(PyObject *m);
-void pygi_info_register_constants(PyObject *m);
 
 G_END_DECLS
 

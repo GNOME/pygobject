@@ -1775,48 +1775,4 @@ pygi_info_register_types(PyObject *m)
 #undef REGISTER_TYPE
 }
 
-void
-pygi_info_register_constants(PyObject *m)
-{
-    PyModule_AddIntConstant(m, "TYPE_TAG_VOID", GI_TYPE_TAG_VOID);
-    PyModule_AddIntConstant(m, "TYPE_TAG_BOOLEAN", GI_TYPE_TAG_BOOLEAN);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INT8", GI_TYPE_TAG_INT8);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UINT8", GI_TYPE_TAG_UINT8);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INT16", GI_TYPE_TAG_INT16);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UINT16", GI_TYPE_TAG_UINT16);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INT32", GI_TYPE_TAG_INT32);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UINT32", GI_TYPE_TAG_UINT32);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INT64", GI_TYPE_TAG_INT64);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UINT64", GI_TYPE_TAG_UINT64);
-#if 0
-    /* FIXME: Removed from metadata format, fix properly by introducing
-       special-case struct */
-    PyModule_AddIntConstant(m, "TYPE_TAG_GSTRING", GI_TYPE_TAG_GSTRING);
-#endif
-    PyModule_AddIntConstant(m, "TYPE_TAG_SHORT", GI_TYPE_TAG_SHORT);
-    PyModule_AddIntConstant(m, "TYPE_TAG_USHORT", GI_TYPE_TAG_USHORT);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INT", GI_TYPE_TAG_INT);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UINT", GI_TYPE_TAG_UINT);
-    PyModule_AddIntConstant(m, "TYPE_TAG_LONG", GI_TYPE_TAG_LONG);
-    PyModule_AddIntConstant(m, "TYPE_TAG_ULONG", GI_TYPE_TAG_ULONG);
-    PyModule_AddIntConstant(m, "TYPE_TAG_SSIZE", GI_TYPE_TAG_SSIZE);
-    PyModule_AddIntConstant(m, "TYPE_TAG_SIZE", GI_TYPE_TAG_SIZE);
-    PyModule_AddIntConstant(m, "TYPE_TAG_FLOAT", GI_TYPE_TAG_FLOAT);
-    PyModule_AddIntConstant(m, "TYPE_TAG_DOUBLE", GI_TYPE_TAG_DOUBLE);
-    PyModule_AddIntConstant(m, "TYPE_TAG_TIME_T", GI_TYPE_TAG_TIME_T);
-    PyModule_AddIntConstant(m, "TYPE_TAG_GTYPE", GI_TYPE_TAG_GTYPE);
-    PyModule_AddIntConstant(m, "TYPE_TAG_UTF8", GI_TYPE_TAG_UTF8);
-    PyModule_AddIntConstant(m, "TYPE_TAG_FILENAME", GI_TYPE_TAG_FILENAME);
-    PyModule_AddIntConstant(m, "TYPE_TAG_ARRAY", GI_TYPE_TAG_ARRAY);
-    PyModule_AddIntConstant(m, "TYPE_TAG_INTERFACE", GI_TYPE_TAG_INTERFACE);
-    PyModule_AddIntConstant(m, "TYPE_TAG_GLIST", GI_TYPE_TAG_GLIST);
-    PyModule_AddIntConstant(m, "TYPE_TAG_GSLIST", GI_TYPE_TAG_GSLIST);
-    PyModule_AddIntConstant(m, "TYPE_TAG_GHASH", GI_TYPE_TAG_GHASH);
-    PyModule_AddIntConstant(m, "TYPE_TAG_ERROR", GI_TYPE_TAG_ERROR);
-
-    PyModule_AddIntConstant(m, "DIRECTION_IN", GI_DIRECTION_IN);
-    PyModule_AddIntConstant(m, "DIRECTION_OUT", GI_DIRECTION_OUT);
-    PyModule_AddIntConstant(m, "DIRECTION_INOUT", GI_DIRECTION_INOUT);
-}
-
 #undef PYGIINFO_DEFINE_TYPE
