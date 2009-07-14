@@ -26,7 +26,7 @@ from ._gi import Repository
 
 class _Repository(object):
     def __init__(self):
-        self._repo = Repository.getDefault()
+        self._repo = Repository.get_default()
         self._modules = {}
 
     def register(self, module, namespace, filename):
@@ -39,16 +39,16 @@ class _Repository(object):
         return self._modules.get(namespace)
 
     def get_by_name(self, namespace, name):
-        return self._repo.findByName(namespace, name)
+        return self._repo.find_by_name(namespace, name)
 
     def get_by_typename(self, typename):
         raise NotImplemented
 
     def get_infos(self, namespace):
-        return self._repo.getInfos(namespace)
+        return self._repo.get_infos(namespace)
 
     def get_c_prefix(self, namespace):
-        return self._repo.getCPrefix(namespace)
+        return self._repo.get_c_prefix(namespace)
 
 repository = _Repository()
 repository.register(gobject, 'GObject', None)

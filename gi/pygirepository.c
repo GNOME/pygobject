@@ -69,7 +69,7 @@ _wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwar
     GError *error = NULL;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s|O:GIRepository.require",
+				     "s|O:Repository.require",
 				     kwlist, &namespace, &lazy_obj))
         return NULL;
 
@@ -105,7 +105,7 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self,
     GIBaseInfo *info;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "ss:GIRepository.findByName",
+				     "ss:Repository.find_by_name",
 				     kwlist, &namespace, &name))
         return NULL;
 
@@ -149,7 +149,7 @@ _wrap_g_irepository_get_infos(PyGIRepository *self,
     PyObject *retval;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:GIRepository.getInfos",
+				     "s:Repository.get_infos",
 				     kwlist, &namespace))
         return NULL;
 
@@ -174,7 +174,7 @@ _wrap_g_irepository_is_registered(PyGIRepository *self,
     char *namespace;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:GIRepository.isRegistered",
+				     "s:Repository.is_registered",
 				     kwlist, &namespace))
         return NULL;
 
@@ -191,7 +191,7 @@ _wrap_g_irepository_get_c_prefix(PyGIRepository *self,
 
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:GIRepository.getCPrefix",
+				     "s:Repository.get_c_prefix",
 				     kwlist, &namespace))
         return NULL;
 
@@ -217,12 +217,12 @@ _wrap_g_irepository_get_default(PyObject *_)
 
 static PyMethodDef _PyGIRepository_methods[] = {
     { "require", (PyCFunction)_wrap_g_irepository_require, METH_VARARGS|METH_KEYWORDS },
-    { "getNamespaces", (PyCFunction)_wrap_g_irepository_get_namespaces, METH_NOARGS },
-    { "getInfos", (PyCFunction)_wrap_g_irepository_get_infos, METH_VARARGS|METH_KEYWORDS },
-    { "getDefault", (PyCFunction)_wrap_g_irepository_get_default, METH_STATIC|METH_NOARGS },
-    { "findByName", (PyCFunction)_wrap_g_irepository_find_by_name, METH_VARARGS|METH_KEYWORDS },
-    { "isRegistered", (PyCFunction)_wrap_g_irepository_is_registered, METH_VARARGS|METH_KEYWORDS },
-    { "getCPrefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
+    { "get_namespaces", (PyCFunction)_wrap_g_irepository_get_namespaces, METH_NOARGS },
+    { "get_infos", (PyCFunction)_wrap_g_irepository_get_infos, METH_VARARGS|METH_KEYWORDS },
+    { "get_default", (PyCFunction)_wrap_g_irepository_get_default, METH_STATIC|METH_NOARGS },
+    { "find_by_name", (PyCFunction)_wrap_g_irepository_find_by_name, METH_VARARGS|METH_KEYWORDS },
+    { "is_registered", (PyCFunction)_wrap_g_irepository_is_registered, METH_VARARGS|METH_KEYWORDS },
+    { "get_c_prefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
