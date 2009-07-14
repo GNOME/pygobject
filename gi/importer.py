@@ -21,6 +21,7 @@
 # USA
 
 import sys
+import new
 import gobject
 
 from ._gi import Repository
@@ -28,41 +29,48 @@ from .module import DynamicModule
 
 
 repository = Repository.get_default()
-modules = {
-    'GObject': gobject
-}
+sys.modules['GObject'] = gobject
 
 
 class DynamicImporter(object):
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
 
-    @staticmethod
-    def find_module(name, path=None):
-        if name == 'cairo':
+    # Note: see PEP302 for the Importer Protocol implemented below.
+
+    def find_module(self, fullname, path=None):
+        # Avoid name clashes, and favour static bindings.
+        if fullname == 'cairo':
             return None
-        namespace = repository.require(name)
-        if namespace:
-            return DynamicImporter(name, path)
 
-    def load_module(self, name):
-        if name in modules:
-            return modules[name]
+        if repository.require(fullname):
+            return self
 
-        module_name = 'gi.overrides.%s' % (name,)
+    def load_module(self, fullname):
+        if fullname in sys.modules:
+            return sys.modules[name]
+
+        # Look for an overrides module
+        overrides_name = 'gi.overrides.%s' % fullname
         try:
-            overrides_module = __import__(module_name, {}, {}, ['%sModule' % (name,)])
-            module_type = getattr(overrides_module, name + 'Module')
+            overrides_type_name = '%sModule' % fullname
+            overrides_module = __import__(overrides_name, {}, {}, [overrides_type_name])
+            module_type = getattr(overrides_module, overrides_type_name)
         except ImportError, e:
             module_type = DynamicModule
 
-        module = module_type(name, self.path)
-        modules[name] = module
+        module = module_type.__new__(module_type)
+        module.__dict__ = {
+            '__file__': '<%s>' % fullname,
+            '__name__': fullname,
+            '__loader__': self
+        }
+
+        sys.modules[fullname] = module
+
+        module.__init__()
 
         return module
 
 
 def install_importhook():
-    sys.meta_path.append(DynamicImporter)
+    sys.meta_path.append(DynamicImporter())
 

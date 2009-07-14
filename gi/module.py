@@ -71,27 +71,11 @@ def get_parent_for_object(object_info):
 
 class DynamicModule(object):
 
-    def __init__(self, namespace, path):
-        self._namespace = namespace
-        self._path = path
-
-    @property
-    def __file__(self):
-        return self._namespace
-
-    @property
-    def __name__(self):
-        return self._namespace
-
-    @property
-    def __path__(self):
-        return [os.path.dirname(self.__file__)]
-
-    def __repr__(self):
-        return "<dyn-module %r from %r>" % (self._namespace, self._path)
+    def __str__(self):
+        return "<dynamic module %r>" % self.__name__
 
     def __getattr__(self, name):
-        info = repository.find_by_name(self._namespace, name)
+        info = repository.find_by_name(self.__name__, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
                     self.__class__.__name__, name))
@@ -144,7 +128,7 @@ class DynamicModule(object):
     @property
     def __members__(self):
         r = []
-        for type_info in repository.get_infos(self._namespace):
+        for type_info in repository.get_infos(self.__name__):
             if type_info is None:
                 continue
             r.append(type_info.getName())
