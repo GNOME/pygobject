@@ -198,6 +198,8 @@ struct _PyGObject_Functions {
 				      gpointer data);
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
+
+    PyTypeObject *object_type;
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -264,6 +266,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)
 #define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
 #define pyg_option_group_new       (_PyGObject_API->option_group_new)
+#define PyGObject_Type             (*_PyGObject_API->object_type)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

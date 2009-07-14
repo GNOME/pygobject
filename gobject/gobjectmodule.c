@@ -2503,8 +2503,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_type_register_custom_callback,
   pyg_gerror_exception_check,
 
-  pyglib_option_group_new
-  
+  pyglib_option_group_new,
+
+  &PyGObject_Type
 };
 
 /* for addon libraries ... */
