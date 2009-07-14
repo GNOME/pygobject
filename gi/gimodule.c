@@ -57,7 +57,6 @@ init_gi(void)
         return;
     }
 
-    g_type_init();
     if (pygobject_init(-1, -1, -1) == NULL) {
         return;
     }
