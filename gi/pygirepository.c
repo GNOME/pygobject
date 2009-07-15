@@ -199,6 +199,29 @@ _wrap_g_irepository_get_c_prefix(PyGIRepository *self,
 }
 
 static PyObject *
+_wrap_g_irepository_get_typelib_path(PyGIRepository *self,
+                                     PyObject *args,
+                                     PyObject *kwargs)
+{
+    static char *kwlist[] = { "namespace", NULL };
+    gchar *namespace_;
+    const gchar *typelib_path;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+            "s:Repository.get_typelib_path", kwlist, &namespace_)) {
+        return NULL;
+    }
+
+    typelib_path = g_irepository_get_typelib_path(self->repository, namespace_);
+    if (typelib_path == NULL) {
+        PyErr_Format(PyExc_RuntimeError, "Namespace '%s' not loaded", namespace_);
+        return NULL;
+    }
+
+    return PyString_FromString(typelib_path);
+}
+
+static PyObject *
 _wrap_g_irepository_get_default(PyObject *self)
 {
     static PyGIRepository *repository = NULL;
@@ -224,6 +247,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "find_by_name", (PyCFunction)_wrap_g_irepository_find_by_name, METH_VARARGS|METH_KEYWORDS },
     { "is_registered", (PyCFunction)_wrap_g_irepository_is_registered, METH_VARARGS|METH_KEYWORDS },
     { "get_c_prefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
+    { "get_typelib_path", (PyCFunction)_wrap_g_irepository_get_typelib_path, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 

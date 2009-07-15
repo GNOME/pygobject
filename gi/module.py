@@ -66,7 +66,8 @@ def get_parent_for_object(object_info):
 class DynamicModule(object):
 
     def __str__(self):
-        return "<dynamic module %r>" % self.__name__
+        path = repository.get_typelib_path(self.__namespace__)
+        return "<dynamic module %r from %r>" % (self.__name__,  path)
 
     def __getattr__(self, name):
         info = repository.find_by_name(self.__namespace__, name)
