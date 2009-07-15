@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = overrides
+SUBDIRS = repository overrides
 
 PLATFORM_VERSION = 2.0
 

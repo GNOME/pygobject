@@ -238,6 +238,7 @@ AC_CONFIG_FILES(
   gobject/Makefile
   gio/Makefile
   gi/Makefile
+  gi/repository/Makefile
   gi/overrides/Makefile
   examples/Makefile
   tests/Makefile

@@ -21,7 +21,6 @@
 # USA
 
 import sys
-import new
 import gobject
 
 from ._gi import Repository
@@ -29,30 +28,41 @@ from .module import DynamicModule
 
 
 repository = Repository.get_default()
-sys.modules['GObject'] = gobject
 
 
 class DynamicImporter(object):
 
     # Note: see PEP302 for the Importer Protocol implemented below.
 
-    def find_module(self, fullname, path=None):
-        # Avoid name clashes, and favour static bindings.
-        if fullname == 'cairo':
-            return None
+    def __init__(self, path):
+        self.path = path
 
-        if repository.require(fullname):
+    def find_module(self, fullname, path=None):
+        if not fullname.startswith(self.path):
+            return
+
+        path, namespace = fullname.rsplit('.', 1)
+        if path != self.path:
+            return
+        if repository.require(namespace):
             return self
 
     def load_module(self, fullname):
         if fullname in sys.modules:
             return sys.modules[name]
 
+        path, namespace = fullname.rsplit('.', 1)
+
+        # Workaround for GObject
+        if namespace == 'GObject':
+            sys.modules[fullname] = gobject
+            return gobject
+
         # Look for an overrides module
-        overrides_name = 'gi.overrides.%s' % fullname
+        overrides_name = 'gi.overrides.%s' % namespace
         try:
-            overrides_type_name = '%sModule' % fullname
-            overrides_module = __import__(overrides_name, {}, {}, [overrides_type_name])
+            overrides_type_name = '%sModule' % namespace
+            overrides_module = __import__(overrides_name, fromlist=[overrides_type_name])
             module_type = getattr(overrides_module, overrides_type_name)
         except ImportError, e:
             module_type = DynamicModule
@@ -61,6 +71,7 @@ class DynamicImporter(object):
         module.__dict__ = {
             '__file__': '<%s>' % fullname,
             '__name__': fullname,
+            '__namespace__': namespace,
             '__loader__': self
         }
 
@@ -69,8 +80,4 @@ class DynamicImporter(object):
         module.__init__()
 
         return module
-
-
-def install_importhook():
-    sys.meta_path.append(DynamicImporter())
 

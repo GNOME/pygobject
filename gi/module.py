@@ -43,7 +43,6 @@ from .types import \
     GIStruct, \
     Function
 
-
 repository = Repository.get_default()
 
 
@@ -56,16 +55,11 @@ def get_parent_for_object(object_info):
     namespace = parent_object_info.getNamespace()
     name = parent_object_info.getName()
 
-    module = __import__(namespace)
-
-    if isinstance(parent_object_info, UnresolvedInfo):
-        # The module has been imported, try again.
-        parent_object_info = object_info.getParent()
-
-    # Workaround for gobject.Object and gobject.InitiallyUnowned.
-    if module == gobject and name == 'Object' or name == 'InitiallyUnowned':
+    # Workaround for GObject.Object and GObject.InitiallyUnowned.
+    if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
         return GObject
 
+    module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
 
 
@@ -75,7 +69,7 @@ class DynamicModule(object):
         return "<dynamic module %r>" % self.__name__
 
     def __getattr__(self, name):
-        info = repository.find_by_name(self.__name__, name)
+        info = repository.find_by_name(self.__namespace__, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
                     self.__class__.__name__, name))
@@ -128,7 +122,7 @@ class DynamicModule(object):
     @property
     def __members__(self):
         r = []
-        for type_info in repository.get_infos(self.__name__):
+        for type_info in repository.get_infos(self.__namespace__):
             if type_info is None:
                 continue
             r.append(type_info.getName())

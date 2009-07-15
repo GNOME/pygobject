@@ -6,8 +6,7 @@ import time
 import gobject
 from gobject import constants
 
-import gi
-import Everything
+from gi.repository import Everything
 
 INT8_MIN = -128
 INT16_MIN = -32768

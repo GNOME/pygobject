@@ -886,7 +886,7 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
                 module_name = g_base_info_get_namespace(interface_info);
                 type_name = g_base_info_get_name(interface_info);
 
-                module = PyImport_ImportModule(module_name);
+                module = pygi_repository_get_py_module(module_name);
                 if (module == NULL) {
                     PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
                     break;
@@ -935,7 +935,7 @@ pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
                 module_name = g_base_info_get_namespace(interface_info);
                 type_name = g_base_info_get_name(interface_info);
 
-                module = PyImport_ImportModule(module_name);
+                module = pygi_repository_get_py_module(module_name);
                 if (module == NULL) {
                     PyErr_Format(PyExc_TypeError, "Type %s.%s not defined", module_name, type_name);
                     break;
