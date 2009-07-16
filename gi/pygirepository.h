@@ -26,8 +26,6 @@
 
 G_BEGIN_DECLS
 
-PyObject * pygi_repository_get_py_module(const char * namespace_);
-
 void pygi_repository_register_types(PyObject *m);
 
 G_END_DECLS

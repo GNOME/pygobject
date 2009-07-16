@@ -251,21 +251,6 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { NULL, NULL, 0 }
 };
 
-PyObject *
-pygi_repository_get_py_module(const char * namespace_)
-{
-    PyObject *py_module;
-    gchar *module_name;
-
-    module_name = g_strconcat("gi.repository.", namespace_, NULL);
-
-    py_module = PyImport_ImportModule(module_name);
-
-    g_free(module_name);
-
-    return py_module;
-}
-
 void
 pygi_repository_register_types(PyObject *m)
 {

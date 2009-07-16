@@ -39,4 +39,26 @@ extern PyTypeObject PyGIErrorDomainInfo_Type;
 #endif
 extern PyTypeObject PyGIUnresolvedInfo_Type;
 
+#define PyErr_PREFIX_FROM_FORMAT(format, ...) G_STMT_START { \
+	PyObject *py_error_prefix; \
+	py_error_prefix = PyString_FromFormat(format, ## __VA_ARGS__); \
+	if (py_error_prefix != NULL) { \
+		PyObject *py_error_type, *py_error_value, *py_error_traceback; \
+		PyErr_Fetch(&py_error_type, &py_error_value, &py_error_traceback); \
+		if (PyString_Check(py_error_value)) { \
+			PyString_ConcatAndDel(&py_error_prefix, py_error_value); \
+			if (py_error_prefix != NULL) { \
+				py_error_value = py_error_prefix; \
+			} \
+		} \
+		PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
+	} \
+} G_STMT_END
+
+PyObject * pygi_py_type_find_by_name(const char *namespace_,
+                                     const char *name);
+
+#define pygi_py_type_find_by_gi_info(info) \
+    pygi_py_type_find_by_name(g_base_info_get_namespace(info), g_base_info_get_name(info))
+
 #endif /* __PYGI_PRIVATE_H__ */

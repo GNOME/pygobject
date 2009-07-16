@@ -25,6 +25,35 @@
 
 #include <pygobject.h>
 
+PyObject *
+pygi_py_type_find_by_name(const char *namespace_, const char *name)
+{
+    PyObject *py_module;
+    gchar *module_name;
+
+    module_name = g_strconcat("gi.repository.", namespace_, NULL);
+
+    py_module = PyImport_ImportModule(module_name);
+
+    g_free(module_name);
+
+    if (name != NULL) {
+        PyObject *py_object;
+
+        if (py_module == NULL) {
+            return NULL;
+        }
+
+        py_object = PyObject_GetAttrString(py_module, name);
+
+        Py_DECREF(py_module);
+
+        return py_object;
+    }
+
+    return py_module;
+}
+
 static PyObject *
 _wrap_set_object_has_new_constructor(PyObject *self, PyObject *args)
 {
