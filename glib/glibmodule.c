@@ -613,6 +613,38 @@ pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
     return retval;
 }
 
+static PyObject *
+pyglib_uri_list_extract_uris(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "uri_list", NULL };
+    char *uri_list;
+    char **uris, **tmp;
+    int i = 0, j;
+    PyObject *ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"s:uri_list_extract_uris", kwlist, &uri_list))
+        return NULL;
+
+    uris = (char **)g_uri_list_extract_uris(uri_list);
+    if (!uris) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    tmp = uris;
+    while (*tmp)
+        tmp++, i++;
+
+    ret = PyTuple_New(i);
+    for (j = 0; j < i; j++)
+        PyTuple_SetItem(ret, j, PyString_FromString(uris[j]));
+
+    g_strfreev(uris);
+
+    return ret;
+}
+
+
 static PyMethodDef _glib_functions[] = {
     { "threads_init",
       (PyCFunction) pyglib_threads_init, METH_NOARGS,
@@ -708,6 +740,12 @@ static PyMethodDef _glib_functions[] = {
       (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
     { "find_program_in_path",
       (PyCFunction)pyglib_find_program_in_path, METH_VARARGS|METH_KEYWORDS },
+    { "uri_list_extract_uris",
+      (PyCFunction)pyglib_uri_list_extract_uris, METH_VARARGS|METH_KEYWORDS,
+      "uri_list_extract_uris(uri_list) -> tuple of strings holding URIs\n"
+      "Splits an string containing an URI list conforming to the \n"
+      "text/uri-list mime type defined in RFC 2483 into individual URIs, \n"
+      "discarding any comments. The URIs are not validated." },
     { NULL, NULL, 0 }
 };
 

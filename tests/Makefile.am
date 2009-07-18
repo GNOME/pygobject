@@ -68,7 +68,8 @@ TEST_FILES = \
 	test_signal.py \
 	test_source.py \
 	test_subprocess.py \
-	test_thread.py
+	test_thread.py \
+	test_uris.py
 
 if BUILD_GIO
 TEST_FILES += \
