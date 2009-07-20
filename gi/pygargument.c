@@ -213,7 +213,7 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
             pygi_gi_type_tag_get_py_bounds(type_tag, &lower, &upper);
             if (lower == NULL || upper == NULL) {
                 retval = -1;
-                goto gi_type_info_check_py_object_check_number_clean;
+                goto check_number_clean;
             }
 
             /* Check bounds */
@@ -223,14 +223,14 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
 
                 if (PyErr_Occurred()) {
                     retval = -1;
-                    goto gi_type_info_check_py_object_check_number_error_clean;
+                    goto check_number_error_clean;
                 }
 
                 lower_str = PyObject_Str(lower);
                 upper_str = PyObject_Str(upper);
                 if (lower_str == NULL || upper_str == NULL) {
                     retval = -1;
-                    goto gi_type_info_check_py_object_check_number_error_clean;
+                    goto check_number_error_clean;
                 }
 
                 PyErr_Format(PyExc_ValueError, "Must range from %s to %s",
@@ -239,12 +239,12 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
 
                 retval = 0;
 
-gi_type_info_check_py_object_check_number_error_clean:
+check_number_error_clean:
                 Py_XDECREF(lower_str);
                 Py_XDECREF(upper_str);
             }
 
-gi_type_info_check_py_object_check_number_clean:
+check_number_clean:
             Py_XDECREF(lower);
             Py_XDECREF(upper);
             break;

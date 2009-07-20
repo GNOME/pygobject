@@ -1473,7 +1473,7 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
         gsize size;
         buffer = pygi_py_object_get_buffer(object, &size);
         if (buffer == NULL) {
-            goto field_info_get_value_return;
+            goto return_;
         }
     } else {
         buffer = pygobject_get(object);
@@ -1486,7 +1486,7 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
 
         if (!(g_field_info_get_flags((GIFieldInfo *)self->info) & GI_FIELD_IS_READABLE)) {
             PyErr_SetString(PyExc_RuntimeError, "Field is not readable");
-            goto field_info_get_value_return;
+            goto return_;
         }
 
         info = g_type_info_get_interface (field_type_info);
@@ -1509,7 +1509,7 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
                 g_memmove(value.v_pointer, buffer + offset, size);
 
                 g_base_info_unref(info);
-                goto field_info_get_value_g_argument_to_py_object;
+                goto g_argument_to_py_object;
             }
             case GI_INFO_TYPE_UNION:
             case GI_INFO_TYPE_BOXED:
@@ -1524,19 +1524,19 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
         g_base_info_unref(info);
 
         if (PyErr_Occurred()) {
-            goto field_info_get_value_return;
+            goto return_;
         }
     }
 
     if (!g_field_info_get_field((GIFieldInfo *)self->info, buffer, &value)) {
         PyErr_SetString(PyExc_RuntimeError, "Failed to get value for field");
-        goto field_info_get_value_return;
+        goto return_;
     }
 
-field_info_get_value_g_argument_to_py_object:
+g_argument_to_py_object:
     retval = pyg_argument_to_pyobject(&value, field_type_info);
 
-field_info_get_value_return:
+return_:
     g_base_info_unref((GIBaseInfo *)field_type_info);
 
     Py_XINCREF(retval);
@@ -1572,7 +1572,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
         gsize size;
         buffer = pygi_py_object_get_buffer(object, &size);
         if (buffer == NULL) {
-            goto field_info_set_value_return;
+            goto return_;
         }
     } else {
         buffer = pygobject_get(object);
@@ -1582,13 +1582,13 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
     check_retval = pygi_gi_type_info_check_py_object(field_type_info, py_value);
 
     if (check_retval < 0) {
-        goto field_info_set_value_return;
+        goto return_;
     }
 
     if (!check_retval) {
         PyErr_PREFIX_FROM_FORMAT("%s.set_value() argument 1: ",
                 g_base_info_get_namespace(self->info));
-        goto field_info_set_value_return;
+        goto return_;
     }
 
     value = pyg_argument_from_pyobject(py_value, field_type_info);
@@ -1600,7 +1600,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
 
         if (!(g_field_info_get_flags((GIFieldInfo *)self->info) & GI_FIELD_IS_WRITABLE)) {
             PyErr_SetString(PyExc_RuntimeError, "Field is not writable");
-            goto field_info_set_value_return;
+            goto return_;
         }
 
         info = g_type_info_get_interface(field_type_info);
@@ -1619,7 +1619,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
 
                 retval = Py_None;
                 g_base_info_unref(info);
-                goto field_info_set_value_return;
+                goto return_;
             }
             case GI_INFO_TYPE_UNION:
             case GI_INFO_TYPE_BOXED:
@@ -1636,12 +1636,12 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
 
     if (!g_field_info_set_field((GIFieldInfo *)self->info, buffer, &value)) {
         PyErr_SetString(PyExc_RuntimeError, "Failed to set value for field");
-        goto field_info_set_value_return;
+        goto return_;
     }
 
     retval = Py_None;
 
-field_info_set_value_return:
+return_:
     g_base_info_unref((GIBaseInfo *)field_type_info);
 
     Py_XINCREF(retval);
