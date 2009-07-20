@@ -1470,24 +1470,11 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
 
     if (container_info_type == GI_INFO_TYPE_STRUCT
             || container_info_type == GI_INFO_TYPE_BOXED) {
-        PyBufferProcs *py_buffer_procs;
-        PyObject *py_buffer;
-
-        py_buffer = PyObject_GetAttrString(object, "__buffer__");
-        if (py_buffer == NULL) {
+        gsize size;
+        buffer = pygi_py_object_get_buffer(object, &size);
+        if (buffer == NULL) {
             goto field_info_get_value_return;
         }
-
-        /* We don't need to keep a reference. */
-        Py_DECREF(py_buffer);
-
-        py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
-        if (py_buffer_procs == NULL || py_buffer_procs->bf_getreadbuffer == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to get buffer for struct");
-            goto field_info_get_value_return;
-        }
-
-        (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &buffer);
     } else {
         buffer = pygobject_get(object);
     }
@@ -1582,24 +1569,11 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
 
     if (container_info_type == GI_INFO_TYPE_STRUCT
             || container_info_type == GI_INFO_TYPE_BOXED) {
-        PyObject *py_buffer;
-        PyBufferProcs *py_buffer_procs;
-
-        py_buffer = PyObject_GetAttrString(object, "__buffer__");
-        if (py_buffer == NULL) {
+        gsize size;
+        buffer = pygi_py_object_get_buffer(object, &size);
+        if (buffer == NULL) {
             goto field_info_set_value_return;
         }
-
-        /* We don't need to keep a reference. */
-        Py_DECREF(py_buffer);
-
-        py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
-        if (py_buffer_procs == NULL || py_buffer_procs->bf_getreadbuffer == 0) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to get buffer for struct");
-            goto field_info_set_value_return;
-        }
-
-        (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &buffer);
     } else {
         buffer = pygobject_get(object);
     }

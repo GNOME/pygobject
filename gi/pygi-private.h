@@ -61,4 +61,6 @@ PyObject * pygi_py_type_find_by_name(const char *namespace_,
 #define pygi_py_type_find_by_gi_info(info) \
     pygi_py_type_find_by_name(g_base_info_get_namespace(info), g_base_info_get_name(info))
 
+gpointer pygi_py_object_get_buffer(PyObject *object, gsize *size);
+
 #endif /* __PYGI_PRIVATE_H__ */

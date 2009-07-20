@@ -54,6 +54,36 @@ pygi_py_type_find_by_name(const char *namespace_, const char *name)
     return py_module;
 }
 
+gpointer
+pygi_py_object_get_buffer(PyObject *object, gsize *size)
+{
+    PyBufferProcs *py_buffer_procs;
+    PyObject *py_buffer;
+    gpointer buffer;
+
+    py_buffer = PyObject_GetAttrString(object, "__buffer__");
+    if (py_buffer == NULL) {
+        return NULL;
+    }
+
+    if(!PyBuffer_Check(py_buffer)) {
+        PyErr_Format(PyExc_TypeError, "Must be buffer, not %s",
+                object->ob_type->tp_name);
+    }
+
+    /* We don't need to keep a reference. */
+    Py_DECREF(py_buffer);
+
+    py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
+
+    *size = (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &buffer);
+    if (*size < 0) {
+        return NULL;
+    }
+
+    return buffer;
+}
+
 static PyObject *
 _wrap_set_object_has_new_constructor(PyObject *self, PyObject *args)
 {

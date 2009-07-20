@@ -170,7 +170,6 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
     gint retval;
 
     GITypeTag type_tag;
-    const gchar *type_name_expected;
 
     type_tag = g_type_info_get_tag(type_info);
 
@@ -205,8 +204,10 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
             PyObject *lower, *upper;
 
             if (!PyNumber_Check(object)) {
-                type_name_expected = "int or long";
-                goto gi_type_info_check_py_object_check_type_error;
+                PyErr_Format(PyExc_TypeError, "Must be int or long, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
+                break;
             }
 
             pygi_gi_type_tag_get_py_bounds(type_tag, &lower, &upper);
@@ -250,8 +251,9 @@ gi_type_info_check_py_object_check_number_clean:
         }
         case GI_TYPE_TAG_UTF8:
             if (!PyString_Check(object)) {
-                type_name_expected = "string";
-                goto gi_type_info_check_py_object_check_type_error;
+                PyErr_Format(PyExc_TypeError, "Must be string, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
             }
             break;
         case GI_TYPE_TAG_ARRAY:
@@ -262,8 +264,10 @@ gi_type_info_check_py_object_check_number_clean:
             gsize i;
 
             if (!PyTuple_Check(object)) {
-                type_name_expected = "tuple";
-                goto gi_type_info_check_py_object_check_type_error;
+                PyErr_Format(PyExc_TypeError, "Must be tuple, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
+                break;
             }
 
             object_size = PyTuple_Size(object);
@@ -320,8 +324,9 @@ gi_type_info_check_py_object_check_number_clean:
                     (void) PyInt_AsLong(object);
                     if (PyErr_Occurred()) {
                         PyErr_Clear();
-                        type_name_expected = "int";
-                        goto gi_type_info_check_py_object_check_type_error;
+                        PyErr_Format(PyExc_TypeError, "Must be int, not %s",
+                                object->ob_type->tp_name);
+                        retval = 0;
                     }
                     /* XXX: What if the value doesn't correspond to any enum field? */
                     break;
@@ -337,9 +342,9 @@ gi_type_info_check_py_object_check_number_clean:
                         break;
                     } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
                         if (!PyCallable_Check(object)) {
-                            g_base_info_unref(info);
-                            type_name_expected = "callable";
-                            goto gi_type_info_check_py_object_check_type_error;
+                            PyErr_Format(PyExc_TypeError, "Must be callable, not %s",
+                                    object->ob_type->tp_name);
+                            retval = 0;
                         }
                         break;
                     }
@@ -362,14 +367,15 @@ gi_type_info_check_py_object_check_number_clean:
 
             is_instance = PyObject_IsInstance(object, (PyObject *)&PyGTypeWrapper_Type);
             if (is_instance < 0) {
-                return -1;
+                retval = -1;
+                break;
             }
 
             if (!is_instance && (!PyType_Check(object) || pyg_type_from_object(object) == 0)) {
-                type_name_expected = "GType";
-                goto gi_type_info_check_py_object_check_type_error;
+                PyErr_Format(PyExc_TypeError, "Must be gobject.GType, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
             }
-
             break;
         }
         case GI_TYPE_TAG_TIME_T:
@@ -384,24 +390,6 @@ gi_type_info_check_py_object_check_number_clean:
     }
 
     return retval;
-
-gi_type_info_check_py_object_check_type_error:
-    {
-        PyTypeObject *type;
-
-        type = (PyTypeObject *)PyObject_Type(object);
-        if (type == NULL) {
-            return -1;
-        }
-
-        g_assert(type_name_expected != NULL);
-        PyErr_Format(PyExc_TypeError, "Must be %s, not %s", 
-            type_name_expected, type->tp_name);
-
-        Py_DECREF((PyObject *)type);
-
-        return 0;
-    }
 }
 
 GArgument
