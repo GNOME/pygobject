@@ -31,8 +31,9 @@ G_BEGIN_DECLS
 gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
                                        PyObject *object);
 
-GArgument pyg_argument_from_pyobject(PyObject *object,
-				     GITypeInfo *info);
+GArgument pygi_g_argument_from_py_object(PyObject *object,
+				                         GITypeInfo *type_info);
+
 PyObject*  pyg_argument_to_pyobject(GArgument *arg,
 				    GITypeInfo *info);
 

@@ -552,7 +552,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             container_info = g_base_info_get_container(self->info);
             container_info_type = g_base_info_get_type(container_info);
 
-            /* FIXME: this could take place in pyg_argument_from_pyobject, but we need to create an
+            /* FIXME: this could take place in pygi_g_argument_from_py_object, but we need to create an
                independant function because it needs a GITypeInfo to be passed. */
 
             switch(container_info_type) {
@@ -799,7 +799,15 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                 py_arg = PyTuple_GetItem(args, py_args_pos);
                 g_assert(py_arg != NULL);
 
-                GArgument in_value = pyg_argument_from_pyobject(py_arg, g_arg_info_get_type(arg_info));
+                GArgument in_value = pygi_g_argument_from_py_object(py_arg, g_arg_info_get_type(arg_info));
+
+                if (PyErr_Occurred()) {
+                    /* TODO: Release ressources allocated for previous arguments. */
+                    g_base_info_unref((GIBaseInfo *)arg_type_info);
+                    g_base_info_unref((GIBaseInfo *)arg_info);
+                    g_base_info_unref((GIBaseInfo *)return_info);
+                    return NULL;
+                }
 
                 if (direction == GI_DIRECTION_IN) {
                     /* Pass the value. */
@@ -1591,7 +1599,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
         goto return_;
     }
 
-    value = pyg_argument_from_pyobject(py_value, field_type_info);
+    value = pygi_g_argument_from_py_object(py_value, field_type_info);
 
     /* A few types are not handled by g_field_info_set_field, so do it here. */
     if (!g_type_info_is_pointer(field_type_info)
