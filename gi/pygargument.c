@@ -83,6 +83,7 @@ pygi_gi_registered_type_info_check_py_object(GIRegisteredTypeInfo *info,
     return retval;
 }
 
+static
 void
 pygi_gi_type_tag_get_py_bounds(GITypeTag type_tag, PyObject **lower,
         PyObject **upper)
@@ -394,7 +395,7 @@ check_number_clean:
 
 static
 gsize
-pyg_type_get_size(GITypeTag type_tag)
+pygi_gi_type_tag_get_size(GITypeTag type_tag)
 {
     gsize size;
 
@@ -465,7 +466,7 @@ pyg_array_from_pyobject(PyObject *object, GITypeInfo *type_info, gsize *length)
     item_type_info = g_type_info_get_param_type(type_info, 0);
 
     type_tag = g_type_info_get_tag(item_type_info);
-    item_size = pyg_type_get_size(type_tag);
+    item_size = pygi_gi_type_tag_get_size(type_tag);
 
     *length = PyTuple_Size(object);
     items = g_try_malloc(*length * (item_size + (is_zero_terminated ? 1 : 0)));
@@ -779,7 +780,7 @@ pyg_array_to_pyobject(gpointer items, gsize length, GITypeInfo *type_info)
 
     item_type_info = g_type_info_get_param_type (type_info, 0);
     type_tag = g_type_info_get_tag(item_type_info);
-    item_size = pyg_type_get_size(type_tag);
+    item_size = pygi_gi_type_tag_get_size(type_tag);
 
     current_item = items;
     for(i = 0; i < length; i++) {
