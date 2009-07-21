@@ -615,6 +615,7 @@ class Wrapper:
                         handler, props = argtypes.matcher.get_reverse(
                             param.ptype)
                         props["direction"] = param.pdir
+                        props["nullok"] = param.pnull
                         wrapper.add_parameter(handler(wrapper,
                                                       param.pname, **props))
                     buf = reversewrapper.MemoryCodeSink()
@@ -1168,6 +1169,7 @@ class GInterfaceWrapper(GObjectWrapper):
                         handler, props = argtypes.matcher.get_reverse(
                             param.ptype)
                         props["direction"] = param.pdir
+                        props["nullok"] = param.pnull
                         wrapper.add_parameter(
                             handler(wrapper, param.pname, **props))
                     buf = reversewrapper.MemoryCodeSink()
