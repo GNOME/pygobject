@@ -451,67 +451,6 @@ pygi_gi_type_tag_get_size(GITypeTag type_tag)
     return size;
 }
 
-gpointer
-pyg_array_from_pyobject(PyObject *object, GITypeInfo *type_info, gsize *length)
-{
-    gpointer items;
-    gpointer current_item;
-    gssize item_size;
-    gboolean is_zero_terminated;
-    GITypeInfo *item_type_info;
-    GITypeTag type_tag;
-    gsize i;
-
-    is_zero_terminated = g_type_info_is_zero_terminated(type_info);
-    item_type_info = g_type_info_get_param_type(type_info, 0);
-
-    type_tag = g_type_info_get_tag(item_type_info);
-    item_size = pygi_gi_type_tag_get_size(type_tag);
-
-    *length = PyTuple_Size(object);
-    items = g_try_malloc(*length * (item_size + (is_zero_terminated ? 1 : 0)));
-    if (items == NULL) {
-        PyErr_NoMemory();
-        goto return_;
-    }
-
-    current_item = items;
-    for (i = 0; i < *length; i++) {
-        GArgument arg;
-        PyObject *py_item;
-
-        py_item = PyTuple_GetItem(object, i);
-        if (py_item == NULL) {
-            /* TODO: free the previous items */
-            g_free(items);
-            items = NULL;
-            goto return_;
-        }
-
-        arg = pygi_g_argument_from_py_object(py_item, item_type_info);
-
-        if (PyErr_Occurred()) {
-            /* TODO: free the previous items */
-            g_free(items);
-            items = NULL;
-            goto return_;
-        }
-
-        g_memmove(current_item, &arg, item_size);
-
-        current_item += item_size;
-    }
-
-    if (is_zero_terminated) {
-        memset(current_item, 0, item_size);
-    }
-
-return_:
-    g_base_info_unref((GIBaseInfo *)item_type_info);
-
-    return items;
-}
-
 GArgument
 pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
 {
@@ -676,8 +615,56 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
         }
         case GI_TYPE_TAG_ARRAY:
         {
-            gsize length;
-            arg.v_pointer = pyg_array_from_pyobject(object, type_info, &length);
+            gboolean is_zero_terminated;
+            GITypeInfo *item_type_info;
+            GITypeTag item_type_tag;
+            GArray *array;
+            gsize item_size;
+            gssize length;
+            gsize i;
+
+            is_zero_terminated = g_type_info_is_zero_terminated(type_info);
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+            item_type_tag = g_type_info_get_tag(item_type_info);
+
+            item_size = pygi_gi_type_tag_get_size(item_type_tag);
+            length = PyTuple_Size(object);
+            if (length < 0) {
+                goto array_clean;
+            }
+
+            array = g_array_sized_new(is_zero_terminated, FALSE, item_size, length);
+            if (array == NULL) {
+                PyErr_NoMemory();
+                goto array_clean;
+            }
+
+            for (i = 0; i < length; i++) {
+                PyObject *py_item;
+                GArgument item;
+
+                py_item = PyTuple_GetItem(object, i);
+                if (py_item == NULL) {
+                    /* TODO: free the previous items */
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    goto array_clean;
+                }
+
+                item = pygi_g_argument_from_py_object(py_item, item_type_info);
+                if (PyErr_Occurred()) {
+                    /* TODO: free the previous items */
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    goto array_clean;
+                }
+
+                g_array_insert_val(array, i, item);
+            }
+
+            arg.v_pointer = array;
+
+array_clean:
+            g_base_info_unref((GIBaseInfo *)item_type_info);
             break;
         }
         case GI_TYPE_TAG_ERROR:

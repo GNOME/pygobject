@@ -809,6 +809,26 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     return NULL;
                 }
 
+                if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
+                    GArray *array;
+                    gint length_arg_pos;
+
+                    array = in_value.v_pointer;
+
+                    length_arg_pos = g_type_info_get_array_length(arg_type_info);
+                    if (length_arg_pos != -1) {
+                        GArgument *length_arg;
+
+                        length_arg = aux_args[length_arg_pos];
+                        g_assert(length_arg != NULL);
+                        length_arg->v_size = array->len;
+                    }
+
+                    /* Get rid of the GArray. */
+                    in_value.v_pointer = g_array_free(array, FALSE);
+                    g_assert(in_value.v_pointer != NULL);
+                }
+
                 if (direction == GI_DIRECTION_IN) {
                     /* Pass the value. */
                     in_args[in_args_pos] = in_value;
@@ -816,23 +836,6 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     /* Pass a pointer to the value. */
                     g_assert(out_value != NULL);
                     *out_value = in_value;
-                }
-
-                if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
-                    gint length_arg_pos;
-                    length_arg_pos = g_type_info_get_array_length(arg_type_info);
-                    if (length_arg_pos != -1) {
-                        GArgument *length_arg;
-                        Py_ssize_t size;
-
-                        size = PyTuple_Size(py_arg);
-                        if (size > 0) {
-                            g_assert(in_value.v_pointer != NULL);
-                        }
-                        length_arg = aux_args[length_arg_pos];
-                        g_assert(length_arg != NULL);
-                        length_arg->v_size = size;
-                    }
                 }
 
                 g_base_info_unref((GIBaseInfo *)arg_type_info);
