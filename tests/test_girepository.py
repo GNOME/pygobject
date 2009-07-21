@@ -26,6 +26,8 @@ UINT64_MAX = 18446744073709551615L
 utf8_const = 'const \xe2\x99\xa5 utf8'
 utf8_nonconst = 'nonconst \xe2\x99\xa5 utf8'
 
+test_sequence = ('1', '2', '3')
+
 def createStructA():
     a = Everything.TestStructA()
     a.some_int = 3
@@ -346,7 +348,7 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(ValueError, Everything.test_array_gint64_in, (INT64_MIN-1,))
 
     def testStrvIn(self):
-        self.assertTrue(Everything.test_strv_in(('1', '2', '3')))
+        self.assertTrue(Everything.test_strv_in(test_sequence))
         self.assertFalse(Everything.test_strv_in(('1', '2')))
         self.assertFalse(Everything.test_strv_in(('1', '2', '3', '4')))
 
@@ -375,21 +377,19 @@ class TestGIEverything(unittest.TestCase):
 
 
 # Interface
-# GSList
+# GList
 
     def testGList(self):
-        retval = Everything.test_glist_nothing_return()
-        self.assertTrue(isinstance(retval, list))
-        self.assertEquals(retval[0], '1')
-        self.assertEquals(retval[1], '2')
-        self.assertEquals(retval[2], '3')
+        self.assertEqual(list(test_sequence), Everything.test_glist_nothing_return())
+
+
+# GSList
 
     def testGSList(self):
-        retval = Everything.test_gslist_nothing_return()
-        self.assertTrue(isinstance(retval, list))
-        self.assertEquals(retval[0], '1')
-        self.assertEquals(retval[1], '2')
-        self.assertEquals(retval[2], '3')
+        self.assertEqual(list(test_sequence), Everything.test_gslist_nothing_return())
+
+
+# closure
 
     def testClosure(self):
         self.assertEquals(3, Everything.test_closure(lambda: 3))

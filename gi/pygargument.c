@@ -393,7 +393,6 @@ check_number_clean:
     return retval;
 }
 
-static
 gsize
 pygi_gi_type_tag_get_size(GITypeTag type_tag)
 {
@@ -713,7 +712,7 @@ glist_to_pyobject(GITypeTag list_tag, GITypeInfo *type_info, GList *list, GSList
         for ( ; list != NULL; list = list->next) {
             arg.v_pointer = list->data;
 
-            child_obj = pyg_argument_to_pyobject(&arg, type_info);
+            child_obj = pygi_g_argument_to_py_object(arg, type_info);
 
             if (child_obj == NULL) {
                 g_list_free(list);
@@ -729,7 +728,7 @@ glist_to_pyobject(GITypeTag list_tag, GITypeInfo *type_info, GList *list, GSList
         for ( ; slist != NULL; slist = slist->next) {
             arg.v_pointer = slist->data;
 
-            child_obj = pyg_argument_to_pyobject(&arg, type_info);
+            child_obj = pygi_g_argument_to_py_object(arg, type_info);
 
             if (child_obj == NULL) {
                 g_list_free(list);
@@ -747,250 +746,226 @@ glist_to_pyobject(GITypeTag list_tag, GITypeInfo *type_info, GList *list, GSList
 }
 
 PyObject *
-pyg_array_to_pyobject(gpointer items, gsize length, GITypeInfo *type_info)
-{
-    PyObject *py_items;
-    gsize item_size;
-    GITypeInfo *item_type_info;
-    GITypeTag type_tag;
-    gsize i;
-    gpointer current_item;
-
-    if (g_type_info_is_zero_terminated(type_info)) {
-        length = g_strv_length(items);
-    }
-
-    py_items = PyTuple_New(length);
-    if (py_items == NULL) {
-        return NULL;
-    }
-
-    item_type_info = g_type_info_get_param_type (type_info, 0);
-    type_tag = g_type_info_get_tag(item_type_info);
-    item_size = pygi_gi_type_tag_get_size(type_tag);
-
-    current_item = items;
-    for(i = 0; i < length; i++) {
-        PyObject *item;
-        int retval;
-
-        item = pyg_argument_to_pyobject((GArgument *)current_item, item_type_info);
-        if (item == NULL) {
-            g_base_info_unref((GIBaseInfo *)item_type_info);
-            Py_DECREF(py_items);
-            return NULL;
-        }
-
-        retval = PyTuple_SetItem(py_items, i, item);
-        if (retval) {
-            g_base_info_unref((GIBaseInfo *)item_type_info);
-            Py_DECREF(py_items);
-            return NULL;
-        }
-
-        current_item += item_size;
-    }
-
-    return py_items;
-}
-
-PyObject *
-pyg_argument_to_pyobject(GArgument *arg, GITypeInfo *type_info)
+pygi_g_argument_to_py_object(GArgument arg, GITypeInfo *type_info)
 {
     GITypeTag type_tag;
-    PyObject *obj;
-    GITypeInfo *param_info;
+    PyObject *object;
 
-    g_return_val_if_fail(type_info != NULL, NULL);
     type_tag = g_type_info_get_tag(type_info);
 
-    obj = NULL;
+    object = NULL;
 
     switch (type_tag) {
-    case GI_TYPE_TAG_VOID:
-        // TODO: Should we take this as a buffer?
-        g_warning("pybank doesn't know what to do with void types");
-        obj = Py_None;
-        break;
-    case GI_TYPE_TAG_GLIST:
-    case GI_TYPE_TAG_GSLIST:
-        param_info = g_type_info_get_param_type(type_info, 0);
-        g_assert(param_info != NULL);
-        obj = glist_to_pyobject(type_tag,
-                                param_info,
-                                type_tag == GI_TYPE_TAG_GLIST ? arg->v_pointer : NULL,
-                                type_tag == GI_TYPE_TAG_GSLIST ? arg->v_pointer : NULL);
-        break;
-    case GI_TYPE_TAG_BOOLEAN:
-        obj = PyBool_FromLong(arg->v_boolean);
-        break;
-    case GI_TYPE_TAG_USHORT:
-        obj = PyInt_FromLong(arg->v_ushort);
-        break;
-    case GI_TYPE_TAG_UINT8:
-        obj = PyInt_FromLong(arg->v_uint8);
-        break;
-    case GI_TYPE_TAG_UINT:
-        obj = PyInt_FromLong(arg->v_uint);
-        break;
-    case GI_TYPE_TAG_UINT16:
-        obj = PyInt_FromLong(arg->v_uint16);
-        break;
-    case GI_TYPE_TAG_UINT32:
-        obj = PyLong_FromLongLong(arg->v_uint32);
-        break;
-    case GI_TYPE_TAG_UINT64:
-        obj = PyLong_FromUnsignedLongLong(arg->v_uint64);
-        break;
-    case GI_TYPE_TAG_SHORT:
-        obj = PyInt_FromLong(arg->v_short);
-        break;
-    case GI_TYPE_TAG_INT:
-        obj = PyInt_FromLong(arg->v_int);
-        break;
-    case GI_TYPE_TAG_LONG:
-        obj = PyInt_FromLong(arg->v_long);
-        break;
-    case GI_TYPE_TAG_ULONG:
-        obj = PyInt_FromLong(arg->v_ulong);
-        break;
-    case GI_TYPE_TAG_SSIZE:
-        obj = PyInt_FromLong(arg->v_ssize);
-        break;
-    case GI_TYPE_TAG_SIZE:
-        obj = PyInt_FromLong(arg->v_size);
-        break;
-    case GI_TYPE_TAG_INT8:
-        obj = PyInt_FromLong(arg->v_int8);
-        break;
-    case GI_TYPE_TAG_INT16:
-        obj = PyInt_FromLong(arg->v_int16);
-        break;
-    case GI_TYPE_TAG_INT32:
-        obj = PyInt_FromLong(arg->v_int32);
-        break;
-    case GI_TYPE_TAG_INT64:
-        obj = PyLong_FromLongLong(arg->v_int64);
-        break;
-    case GI_TYPE_TAG_FLOAT:
-        obj = PyFloat_FromDouble(arg->v_float);
-        break;
-    case GI_TYPE_TAG_DOUBLE:
-        obj = PyFloat_FromDouble(arg->v_double);
-        break;
-    case GI_TYPE_TAG_FILENAME:
-    case GI_TYPE_TAG_UTF8:
-        if (arg->v_string == NULL)
-            obj = Py_None;
-        else
-            obj = PyString_FromString(arg->v_string);
-        break;
-    case GI_TYPE_TAG_INTERFACE:
-    {
-        GIBaseInfo* interface_info;
-        GIInfoType interface_info_type;
+        case GI_TYPE_TAG_VOID:
+            Py_INCREF(Py_None);
+            object = Py_None;
+            break;
+        case GI_TYPE_TAG_BOOLEAN:
+            object = PyBool_FromLong(arg.v_boolean);
+            break;
+        case GI_TYPE_TAG_UINT8:
+            object = PyInt_FromLong(arg.v_uint8);
+            break;
+        case GI_TYPE_TAG_UINT16:
+            object = PyInt_FromLong(arg.v_uint16);
+            break;
+        case GI_TYPE_TAG_UINT32:
+            object = PyLong_FromLongLong(arg.v_uint32);
+            break;
+        case GI_TYPE_TAG_UINT64:
+            object = PyLong_FromUnsignedLongLong(arg.v_uint64);
+            break;
+        case GI_TYPE_TAG_USHORT:
+            object = PyInt_FromLong(arg.v_ushort);
+            break;
+        case GI_TYPE_TAG_UINT:
+            object = PyLong_FromLongLong(arg.v_uint);
+            break;
+        case GI_TYPE_TAG_ULONG:
+            object = PyLong_FromUnsignedLongLong(arg.v_ulong);
+            break;
+        case GI_TYPE_TAG_SIZE:
+            object = PyLong_FromUnsignedLongLong(arg.v_size);
+            break;
+        case GI_TYPE_TAG_INT8:
+            object = PyInt_FromLong(arg.v_int8);
+            break;
+        case GI_TYPE_TAG_INT16:
+            object = PyInt_FromLong(arg.v_int16);
+            break;
+        case GI_TYPE_TAG_INT32:
+            object = PyInt_FromLong(arg.v_int32);
+            break;
+        case GI_TYPE_TAG_INT64:
+            object = PyLong_FromLongLong(arg.v_int64);
+            break;
+        case GI_TYPE_TAG_SHORT:
+            object = PyInt_FromLong(arg.v_short);
+            break;
+        case GI_TYPE_TAG_INT:
+            object = PyInt_FromLong(arg.v_int);
+            break;
+        case GI_TYPE_TAG_SSIZE:
+            object = PyInt_FromLong(arg.v_ssize);
+            break;
+        case GI_TYPE_TAG_LONG:
+            object = PyInt_FromLong(arg.v_long);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            object = PyFloat_FromDouble(arg.v_float);
+            break;
+        case GI_TYPE_TAG_DOUBLE:
+            object = PyFloat_FromDouble(arg.v_double);
+            break;
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_UTF8:
+            object = PyString_FromString(arg.v_string);
+            break;
+        case GI_TYPE_TAG_INTERFACE:
+        {
+            GIBaseInfo *info;
+            GIInfoType info_type;
 
-        interface_info = g_type_info_get_interface(type_info);
-        interface_info_type = g_base_info_get_type(interface_info);
+            info = g_type_info_get_interface(type_info);
+            info_type = g_base_info_get_type(info);
 
-        if (arg->v_pointer == NULL) {
-            obj = Py_None;
+            switch (info_type) {
+                case GI_INFO_TYPE_ENUM:
+                    object = PyInt_FromLong(arg.v_int);
+                    break;
+                case GI_INFO_TYPE_STRUCT:
+                {
+                    GType type;
+                    PyObject *py_type = NULL;
+                    gsize size;
+                    PyObject *buffer = NULL;
+
+                    /* Handle special cases first. */
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                    if (g_type_is_a(type, G_TYPE_VALUE)) {
+                        object = pyg_value_as_pyobject(arg.v_pointer, FALSE);
+                        g_value_unset(arg.v_pointer);
+                        break;
+                    }
+
+                    /* Create a Python buffer. */
+                    size = g_struct_info_get_size((GIStructInfo *)info);
+                    buffer = PyBuffer_FromReadWriteMemory(arg.v_pointer, size);
+                    if (buffer == NULL) {
+                        goto struct_error_clean;
+                    }
+
+                    /* Wrap the structure. */
+                    py_type = pygi_py_type_find_by_gi_info(info);
+                    if (py_type == NULL) {
+                        goto struct_error_clean;
+                    }
+
+                    object = PyObject_CallFunction(py_type, "O", buffer);
+                    if (object == NULL) {
+                        goto struct_error_clean;
+                    }
+
+                    Py_DECREF(buffer);
+                    Py_DECREF(py_type);
+
+                    break;
+
+struct_error_clean:
+                    Py_XDECREF(buffer);
+                    Py_XDECREF(py_type);
+                    Py_XDECREF(object);
+                    object = NULL;
+                    break;
+                }
+                case GI_INFO_TYPE_OBJECT:
+                {
+                    PyObject *py_type;
+
+                    /* Make sure the class is initialized. */
+                    py_type = pygi_py_type_find_by_gi_info(info);
+                    if (py_type == NULL) {
+                        break;
+                    }
+
+                    object = pygobject_new(arg.v_pointer);
+
+                    Py_DECREF(py_type);
+
+                    break;
+                }
+                default:
+                    /* TODO: To complete with other types. */
+                    g_assert_not_reached();
+            }
+
+            g_base_info_unref(info);
+
+            break;
         }
+        case GI_TYPE_TAG_ARRAY:
+        {
+            GArray *array;
+            GITypeInfo *item_type_info;
+            GITypeTag item_type_tag;
+            gsize item_size;
+            gsize i;
 
-        switch (interface_info_type) {
-            case GI_INFO_TYPE_ENUM:
-               obj = PyInt_FromLong(arg->v_int);
+            array = arg.v_pointer;
+
+            object = PyTuple_New(array->len);
+            if (object == NULL) {
                 break;
-            case GI_INFO_TYPE_STRUCT:
-            {
-                GType gtype;
-                PyObject *py_type;
-                gsize size;
-                PyObject *buffer;
-                PyObject **dict;
+            }
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+            item_type_tag = g_type_info_get_tag(item_type_info);
+            item_size = pygi_gi_type_tag_get_size(item_type_tag);
+
+            for(i = 0; i < array->len; i++) {
+                GArgument item;
+                PyObject *py_item;
                 int retval;
 
-                gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)interface_info);
-
-                if (g_type_is_a(gtype, G_TYPE_VALUE)) {
-                    obj = pyg_value_as_pyobject(arg->v_pointer, FALSE);
-                    g_value_unset(arg->v_pointer);
+                item = *(GArgument *)(array->data + item_size * i);
+                py_item = pygi_g_argument_to_py_object(item, item_type_info);
+                if (py_item == NULL) {
+                    /* TODO */
                     break;
                 }
 
-                /* Create a Python buffer. */
-                size = g_struct_info_get_size ((GIStructInfo *)interface_info);
-                buffer = PyBuffer_FromReadWriteMemory(arg->v_pointer, size);
-                if (buffer == NULL) {
-                    break;
-                }
-
-                /* Wrap the structure. */
-                py_type = pygi_py_type_find_by_gi_info((GIBaseInfo *)interface_info);
-                g_assert(py_type != NULL);
-
-                obj = PyObject_GC_New(PyObject, (PyTypeObject *)py_type);
-
-                Py_DECREF(py_type);
-
-                if (obj == NULL) {
-                    Py_DECREF(buffer);
-                    break;
-                }
-
-                /* FIXME: Any better way to initialize the dict pointer? */
-                dict = (PyObject **)((char *)obj + ((PyTypeObject *)py_type)->tp_dictoffset);
-                *dict = NULL;
-
-                retval = PyObject_SetAttrString(obj, "__buffer__", buffer);
+                retval = PyTuple_SetItem(object, i, py_item);
                 if (retval < 0) {
-                    Py_DECREF(obj);
-                    obj = NULL;
+                    /* TODO */
+                    break;
                 }
-
-                break;
             }
-            case GI_INFO_TYPE_OBJECT:
-            {
-                PyObject *py_type;
 
-                /* Make sure the class is initialized. */
-                py_type = pygi_py_type_find_by_gi_info((GIBaseInfo *)interface_info);
-                g_assert(py_type != NULL);
-                Py_DECREF(py_type);
-
-                obj = pygobject_new(arg->v_pointer);
-
-                break;
-            }
-            default:
-                /* TODO: To complete with other types. */
-                g_assert_not_reached();
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+            break;
         }
-
-        g_base_info_unref((GIBaseInfo *)interface_info);
-
-        break;
+        case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
+        {
+            GITypeInfo *param_info;
+            param_info = g_type_info_get_param_type(type_info, 0);
+            g_assert(param_info != NULL);
+            object = glist_to_pyobject(type_tag,
+                                       param_info,
+                                       type_tag == GI_TYPE_TAG_GLIST ? arg.v_pointer : NULL,
+                                       type_tag == GI_TYPE_TAG_GSLIST ? arg.v_pointer : NULL);
+            break;
+        }
+        case GI_TYPE_TAG_GTYPE:
+        {
+            object = pyg_type_wrapper_new(arg.v_long);
+            break;
+        }
+        default:
+            /* TODO */
+            g_assert_not_reached();
     }
-    case GI_TYPE_TAG_ARRAY:
-        g_warning("pyg_argument_to_pyobject: use pyarray_to_pyobject instead for arrays");
-        obj = Py_None;
-        break;
-    case GI_TYPE_TAG_GTYPE:
-    {
-        GType gtype;
-        gtype = arg->v_int;
-        obj = pyg_type_wrapper_new(gtype);
-        break;
-    }
-    default:
-        g_print("<GArg->PyO> GITypeTag %s is unhandled\n",
-                g_type_tag_to_string(type_tag));
-        obj = PyString_FromString("<unhandled return value!>"); /*  */
-        break;
-    }
 
-    Py_XINCREF(obj);
-    return obj;
+    return object;
 }
 

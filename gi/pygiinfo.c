@@ -878,28 +878,52 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
         n_return_values += 1;
 
         if (!is_constructor) {
-            /* Convert the return value. */
             if (return_tag == GI_TYPE_TAG_ARRAY) {
+                /* Create a GArray. */
+                GITypeInfo *item_type_info;
+                GITypeTag item_type_tag;
+                gsize item_size;
                 gssize length;
-                length = g_type_info_get_array_fixed_size(return_info);
-                if (length < 0) {
-                    gint length_arg_pos;
-                    GArgument *length_arg;
+                gboolean is_zero_terminated;
+                GArray *array;
 
-                    length_arg_pos = g_type_info_get_array_length(return_info);
+                item_type_info = g_type_info_get_param_type(return_info, 0);
+                item_type_tag = g_type_info_get_tag(item_type_info);
+                item_size = pygi_gi_type_tag_get_size(item_type_tag);
+                is_zero_terminated = g_type_info_is_zero_terminated(return_info);
 
-                    if (length_arg_pos >= 0) {
+                if (is_zero_terminated) {
+                    length = g_strv_length(return_arg.v_pointer);
+                } else {
+                    length = g_type_info_get_array_fixed_size(return_info);
+                    if (length < 0) {
+                        gint length_arg_pos;
+                        GArgument *length_arg;
+
+                        length_arg_pos = g_type_info_get_array_length(return_info);
+                        g_assert(length_arg_pos >= 0);
+
                         length_arg = aux_args[length_arg_pos];
                         g_assert(length_arg != NULL);
+
+                        /* FIXME: Take into account the type of the argument. */
                         length = length_arg->v_int;
                     }
                 }
-                if (length < 0) {
-                    g_assert(g_type_info_is_zero_terminated(return_info));
-                }
-                return_value = pyg_array_to_pyobject(return_arg.v_pointer, length, return_info);
-            } else {
-                return_value = pyg_argument_to_pyobject(&return_arg, return_info);
+                
+                array = g_array_new(is_zero_terminated, FALSE, item_size);
+                array->data = return_arg.v_pointer;
+                array->len = length;
+                
+                return_arg.v_pointer = array;
+
+                g_base_info_unref((GIBaseInfo *)item_type_info);
+            }
+
+            return_value = pygi_g_argument_to_py_object(return_arg, return_info);
+
+            if (return_tag == GI_TYPE_TAG_ARRAY) {
+                return_arg.v_pointer = g_array_free((GArray *)return_arg.v_pointer, FALSE);
             }
 
             g_assert(return_value != NULL);
@@ -1009,28 +1033,51 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                 type_tag = g_type_info_get_tag(arg_type_info);
 
                 if (type_tag == GI_TYPE_TAG_ARRAY) {
+                    /* Create a GArray. */
+                    GITypeInfo *item_type_info;
+                    GITypeTag item_type_tag;
+                    gsize item_size;
                     gssize length;
+                    gboolean is_zero_terminated;
+                    GArray *array;
 
-                    length = g_type_info_get_array_fixed_size(arg_type_info);
-                    if (length < 0) {
-                        gint length_arg_pos;
-                        GArgument *length_arg;
+                    item_type_info = g_type_info_get_param_type(arg_type_info, 0);
+                    item_type_tag = g_type_info_get_tag(item_type_info);
+                    item_size = pygi_gi_type_tag_get_size(item_type_tag);
+                    is_zero_terminated = g_type_info_is_zero_terminated(arg_type_info);
 
-                        length_arg_pos = g_type_info_get_array_length(arg_type_info);
+                    if (is_zero_terminated) {
+                        length = g_strv_length(arg->v_pointer);
+                    } else {
+                        length = g_type_info_get_array_fixed_size(arg_type_info);
+                        if (length < 0) {
+                            gint length_arg_pos;
+                            GArgument *length_arg;
 
-                        if (length_arg_pos >= 0) {
+                            length_arg_pos = g_type_info_get_array_length(arg_type_info);
+                            g_assert(length_arg_pos >= 0);
+
                             length_arg = aux_args[length_arg_pos];
                             g_assert(length_arg != NULL);
+
+                            /* FIXME: Take into account the type of the argument. */
                             length = length_arg->v_int;
                         }
                     }
-                    if (length < 0) {
-                        g_assert(g_type_info_is_zero_terminated(arg_type_info));
-                    }
 
-                    obj = pyg_array_to_pyobject(arg->v_pointer, length, arg_type_info);
-                } else {
-                    obj = pyg_argument_to_pyobject(arg, arg_type_info);
+                    array = g_array_new(is_zero_terminated, FALSE, item_size);
+                    array->data = arg->v_pointer;
+                    array->len = length;
+
+                    arg->v_pointer = array;
+
+                    g_base_info_unref((GIBaseInfo *)item_type_info);
+                }
+
+                obj = pygi_g_argument_to_py_object(*arg, arg_type_info);
+
+                if (type_tag == GI_TYPE_TAG_ARRAY) {
+                    arg->v_pointer = g_array_free((GArray *)arg->v_pointer, FALSE);
                 }
 
                 g_assert(obj != NULL);
@@ -1545,7 +1592,7 @@ _wrap_g_field_info_get_value(PyGIBaseInfo *self, PyObject *args)
     }
 
 g_argument_to_py_object:
-    retval = pyg_argument_to_pyobject(&value, field_type_info);
+    retval = pygi_g_argument_to_py_object(value, field_type_info);
 
 return_:
     g_base_info_unref((GIBaseInfo *)field_type_info);

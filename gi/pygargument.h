@@ -28,17 +28,15 @@
 
 G_BEGIN_DECLS
 
+gsize pygi_gi_type_tag_get_size(GITypeTag type_tag);
+
 gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
                                        PyObject *object);
 
 GArgument pygi_g_argument_from_py_object(PyObject *object,
-				                         GITypeInfo *type_info);
-
-PyObject*  pyg_argument_to_pyobject(GArgument *arg,
-				    GITypeInfo *info);
-
-PyObject* pyg_array_to_pyobject(gpointer items, gsize length, GITypeInfo *info);
-gpointer pyg_array_from_pyobject(PyObject *object, GITypeInfo *type_info, gsize *length);
+                                         GITypeInfo *type_info);
+PyObject * pygi_g_argument_to_py_object(GArgument arg,
+                                        GITypeInfo *type_info);
 
 G_END_DECLS
 
