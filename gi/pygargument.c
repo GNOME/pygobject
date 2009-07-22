@@ -875,20 +875,16 @@ struct_error_clean:
             for(i = 0; i < array->len; i++) {
                 GArgument item;
                 PyObject *py_item;
-                int retval;
 
                 item = *(GArgument *)(array->data + item_size * i);
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
-                    /* TODO */
+                    Py_DECREF(object);
+                    object = NULL;
                     break;
                 }
 
-                retval = PyTuple_SetItem(object, i, py_item);
-                if (retval < 0) {
-                    /* TODO */
-                    break;
-                }
+                PyTuple_SET_ITEM(object, i, py_item);
             }
 
             g_base_info_unref((GIBaseInfo *)item_type_info);
