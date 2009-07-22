@@ -411,6 +411,76 @@ check_number_clean:
 
             break;
         }
+        case GI_TYPE_TAG_GHASH:
+        {
+            GITypeInfo *key_type_info;
+            GITypeInfo *value_type_info;
+            PyObject *keys;
+            PyObject *values;
+            Py_ssize_t length;
+            Py_ssize_t i;
+
+            if (!PyMapping_Check(object)) {
+                PyErr_Format(PyExc_TypeError, "Must be mapping, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
+                break;
+            }
+
+            length = PyMapping_Length(object);
+            if (length < 0) {
+                retval = -1;
+                break;
+            }
+
+            keys = PyMapping_Keys(object);
+            if (keys == NULL) {
+                retval = -1;
+                break;
+            }
+
+            values = PyMapping_Values(object);
+            if (values == NULL) {
+                retval = -1;
+                Py_DECREF(keys);
+                break;
+            }
+
+            key_type_info = g_type_info_get_param_type(type_info, 0);
+            value_type_info = g_type_info_get_param_type(type_info, 1);
+
+            for (i = 0; i < length; i++) {
+                PyObject *key;
+                PyObject *value;
+
+                key = PyList_GET_ITEM(keys, i);
+                value = PyList_GET_ITEM(values, i);
+
+                retval = pygi_gi_type_info_check_py_object(key_type_info, key);
+                if (retval < 0) {
+                    break;
+                }
+                if (!retval) {
+                    PyErr_PREFIX_FROM_FORMAT("Key %zd :", i);
+                    break;
+                }
+
+                retval = pygi_gi_type_info_check_py_object(value_type_info, value);
+                if (retval < 0) {
+                    break;
+                }
+                if (!retval) {
+                    PyErr_PREFIX_FROM_FORMAT("Value %zd :", i);
+                    break;
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)key_type_info);
+            g_base_info_unref((GIBaseInfo *)value_type_info);
+            Py_DECREF(values);
+            Py_DECREF(keys);
+            break;
+        }
         case GI_TYPE_TAG_GTYPE:
         {
             gint is_instance;
@@ -429,7 +499,6 @@ check_number_clean:
             break;
         }
         case GI_TYPE_TAG_TIME_T:
-        case GI_TYPE_TAG_GHASH:
         case GI_TYPE_TAG_ERROR:
             /* TODO */
         default:
@@ -782,6 +851,103 @@ array_clean:
 
             break;
         }
+        case GI_TYPE_TAG_GHASH:
+        {
+            Py_ssize_t length;
+            PyObject *keys;
+            PyObject *values;
+            GITypeInfo *key_type_info;
+            GITypeInfo *value_type_info;
+            GITypeTag key_type_tag;
+            GHashFunc hash_func;
+            GEqualFunc equal_func;
+            GHashTable *hash_table;
+            Py_ssize_t i;
+
+            length = PyMapping_Length(object);
+            if (length < 0) {
+                break;
+            }
+
+            keys = PyMapping_Keys(object);
+            if (keys == NULL) {
+                break;
+            }
+
+            values = PyMapping_Values(object);
+            if (values == NULL) {
+                Py_DECREF(keys);
+                break;
+            }
+
+            key_type_info = g_type_info_get_param_type(type_info, 0);
+            value_type_info = g_type_info_get_param_type(type_info, 1);
+
+            key_type_tag = g_type_info_get_tag(key_type_info);
+
+            switch(key_type_tag) {
+                case GI_TYPE_TAG_UTF8:
+                case GI_TYPE_TAG_FILENAME:
+                    hash_func = g_str_hash;
+                    equal_func = g_str_equal;
+                    break;
+                case GI_TYPE_TAG_SHORT:
+                case GI_TYPE_TAG_USHORT:
+                case GI_TYPE_TAG_INT:
+                case GI_TYPE_TAG_INT8:
+                case GI_TYPE_TAG_UINT8:
+                case GI_TYPE_TAG_INT16:
+                case GI_TYPE_TAG_UINT16:
+                case GI_TYPE_TAG_INT32:
+                    hash_func = g_int_hash;
+                    equal_func = g_int_equal;
+                    break;
+                default:
+                    PyErr_WarnEx(NULL, "No suited hash function available; using pointers", 1);
+                    hash_func = g_direct_hash;
+                    equal_func = g_direct_equal;
+            }
+
+            hash_table = g_hash_table_new(hash_func, equal_func);
+            if (hash_table == NULL) {
+                PyErr_NoMemory();
+                Py_DECREF(keys);
+                Py_DECREF(values);
+                break;
+            }
+
+            for (i = 0; i < length; i++) {
+                PyObject *py_key;
+                PyObject *py_value;
+                GArgument key;
+                GArgument value;
+
+                py_key = PyList_GET_ITEM(keys, i);
+                py_value = PyList_GET_ITEM(values, i);
+
+                key = pygi_g_argument_from_py_object(py_key, key_type_info);
+                if (PyErr_Occurred()) {
+                    /* TODO: free the previous items */
+                    break;
+                }
+
+                value = pygi_g_argument_from_py_object(py_value, value_type_info);
+                if (PyErr_Occurred()) {
+                    /* TODO: free the previous items */
+                    break;
+                }
+
+                g_hash_table_insert(hash_table, key.v_pointer, value.v_pointer);
+            }
+
+            arg.v_pointer = hash_table;
+
+            g_base_info_unref((GIBaseInfo *)key_type_info);
+            g_base_info_unref((GIBaseInfo *)value_type_info);
+            Py_DECREF(keys);
+            Py_DECREF(values);
+            break;
+        }
         case GI_TYPE_TAG_ERROR:
             /* Allow NULL GError, otherwise fall through */
             if (object == Py_None) {
@@ -1059,6 +1225,55 @@ struct_error_clean:
             }
 
             g_base_info_unref((GIBaseInfo *)item_type_info);
+            break;
+        }
+        case GI_TYPE_TAG_GHASH:
+        {
+            GITypeInfo *key_type_info;
+            GITypeInfo *value_type_info;
+            GHashTableIter hash_table_iter;
+            GArgument key;
+            GArgument value;
+
+            object = PyDict_New();
+            if (object == NULL) {
+                break;
+            }
+
+            key_type_info = g_type_info_get_param_type(type_info, 0);
+            value_type_info = g_type_info_get_param_type(type_info, 1);
+
+            g_hash_table_iter_init(&hash_table_iter, (GHashTable *)arg.v_pointer);
+            while (g_hash_table_iter_next(&hash_table_iter, &key.v_pointer, &value.v_pointer)) {
+                PyObject *py_key;
+                PyObject *py_value;
+                int retval;
+
+                py_key = pygi_g_argument_to_py_object(key, key_type_info);
+                if (py_key == NULL) {
+                    break;
+                }
+
+                py_value = pygi_g_argument_to_py_object(value, value_type_info);
+                if (py_value == NULL) {
+                    Py_DECREF(py_key);
+                    break;
+                }
+
+                retval = PyDict_SetItem(object, py_key, py_value);
+
+                Py_DECREF(py_key);
+                Py_DECREF(py_value);
+
+                if (retval < 0) {
+                    Py_DECREF(object);
+                    object = NULL;
+                    break;
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)key_type_info);
+            g_base_info_unref((GIBaseInfo *)value_type_info);
             break;
         }
         case GI_TYPE_TAG_GTYPE:

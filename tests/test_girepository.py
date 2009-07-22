@@ -27,6 +27,7 @@ utf8_const = 'const \xe2\x99\xa5 utf8'
 utf8_nonconst = 'nonconst \xe2\x99\xa5 utf8'
 
 test_sequence = ('1', '2', '3')
+test_dict = {'foo': 'bar', 'baz': 'bat', 'qux': 'quux'}
 
 def createStructA():
     a = Everything.TestStructA()
@@ -407,6 +408,20 @@ class TestGIEverything(unittest.TestCase):
         # Test type checking.
         self.assertRaises(TypeError, Everything.test_gslist_nothing_in, 1)
         self.assertRaises(TypeError, Everything.test_gslist_nothing_in, (1, 2, 3))
+
+
+# GHashTable
+
+    def testGHashTableReturn(self):
+        self.assertEqual(test_dict, Everything.test_ghash_everything_return())
+
+    def testGHashTableIn(self):
+        Everything.test_ghash_nothing_in(test_dict)
+
+        # Test type checking.
+        self.assertRaises(TypeError, Everything.test_ghash_nothing_in, 'foo')
+        self.assertRaises(TypeError, Everything.test_ghash_nothing_in, {'foo': 42})
+        self.assertRaises(TypeError, Everything.test_ghash_nothing_in, {42: 'foo'})
 
 
 # closure
