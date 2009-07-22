@@ -379,14 +379,34 @@ class TestGIEverything(unittest.TestCase):
 # Interface
 # GList
 
-    def testGList(self):
+    def testGListReturn(self):
         self.assertEqual(list(test_sequence), Everything.test_glist_nothing_return())
+
+    def testGListIn(self):
+        Everything.test_glist_nothing_in(test_sequence)
+
+        # Test as string, which implements the sequence protocol too.
+        Everything.test_glist_nothing_in('123')
+
+        # Test type checking.
+        self.assertRaises(TypeError, Everything.test_glist_nothing_in, 1)
+        self.assertRaises(TypeError, Everything.test_glist_nothing_in, (1, 2, 3))
 
 
 # GSList
 
-    def testGSList(self):
+    def testGSListReturn(self):
         self.assertEqual(list(test_sequence), Everything.test_gslist_nothing_return())
+
+    def testGSListIn(self):
+        Everything.test_gslist_nothing_in(test_sequence)
+
+        # Test as string, which implements the sequence protocol too.
+        Everything.test_gslist_nothing_in('123')
+
+        # Test type checking.
+        self.assertRaises(TypeError, Everything.test_gslist_nothing_in, 1)
+        self.assertRaises(TypeError, Everything.test_gslist_nothing_in, (1, 2, 3))
 
 
 # closure

@@ -363,6 +363,54 @@ check_number_clean:
             g_base_info_unref(info);
             break;
         }
+        case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
+        {
+            GITypeInfo *item_type_info;
+            Py_ssize_t length;
+            Py_ssize_t i;
+
+            if (!PySequence_Check(object)) {
+                PyErr_Format(PyExc_TypeError, "Must be sequence, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
+                break;
+            }
+
+            length = PySequence_Length(object);
+            if (length < 0) {
+                retval = -1;
+                break;
+            }
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+
+            for (i = 0; i < length; i++) {
+                PyObject *item;
+
+                item = PySequence_GetItem(object, i);
+                if (item == NULL) {
+                    retval = -1;
+                    break;
+                }
+
+                retval = pygi_gi_type_info_check_py_object(item_type_info, item);
+
+                Py_DECREF(item);
+
+                if (retval < 0) {
+                    break;
+                }
+                if (!retval) {
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
+                    break;
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+
+            break;
+        }
         case GI_TYPE_TAG_GTYPE:
         {
             gint is_instance;
@@ -381,8 +429,6 @@ check_number_clean:
             break;
         }
         case GI_TYPE_TAG_TIME_T:
-        case GI_TYPE_TAG_GLIST:
-        case GI_TYPE_TAG_GSLIST:
         case GI_TYPE_TAG_GHASH:
         case GI_TYPE_TAG_ERROR:
             /* TODO */
@@ -455,8 +501,11 @@ GArgument
 pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
 {
     GArgument arg;
+    GITypeTag type_tag;
 
-    switch (g_type_info_get_tag(type_info))
+    type_tag = g_type_info_get_tag(type_info);
+
+    switch (type_tag)
     {
         case GI_TYPE_TAG_VOID:
             /* Nothing to do */
@@ -683,6 +732,54 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
 
 array_clean:
             g_base_info_unref((GIBaseInfo *)item_type_info);
+            break;
+        }
+        case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
+        {
+            Py_ssize_t length;
+            GITypeInfo *item_type_info;
+            GSList *list = NULL;
+            Py_ssize_t i;
+
+            length = PySequence_Length(object);
+            if (length < 0) {
+                break;
+            }
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+
+            for (i = length - 1; i >= 0; i--) {
+                PyObject *py_item;
+                GArgument item;
+
+                py_item = PySequence_GetItem(object, i);
+                if (py_item == NULL) {
+                    /* TODO: free the previous items */
+                    break;
+                }
+
+                item = pygi_g_argument_from_py_object(py_item, item_type_info);
+
+                Py_DECREF(py_item);
+
+                if (PyErr_Occurred()) {
+                    /* TODO: free the previous items */
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
+                    break;
+                }
+
+                if (type_tag == GI_TYPE_TAG_GLIST) {
+                    list = (GSList *)g_list_prepend((GList *)list, item.v_pointer);
+                } else {
+                    list = g_slist_prepend(list, item.v_pointer);
+                }
+            }
+
+            arg.v_pointer = list;
+
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+
             break;
         }
         case GI_TYPE_TAG_ERROR:
@@ -944,7 +1041,7 @@ struct_error_clean:
 
             item_type_info = g_type_info_get_param_type(type_info, 0);
 
-            for (i = 0; list != NULL; list = (GSList *)list->next, i++) {
+            for (i = 0; list != NULL; list = g_slist_next(list), i++) {
                 GArgument item;
                 PyObject *py_item;
 
@@ -954,6 +1051,7 @@ struct_error_clean:
                 if (py_item == NULL) {
                     Py_DECREF(object);
                     object = NULL;
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
                     break;
                 }
 
