@@ -251,6 +251,7 @@ check_number_clean:
             break;
         }
         case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
             if (!PyString_Check(object)) {
                 PyErr_Format(PyExc_TypeError, "Must be string, not %s",
                         object->ob_type->tp_name);
@@ -380,7 +381,6 @@ check_number_clean:
             break;
         }
         case GI_TYPE_TAG_TIME_T:
-        case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
         case GI_TYPE_TAG_GHASH:
@@ -440,6 +440,7 @@ pygi_gi_type_tag_get_size(GITypeTag type_tag)
             size = sizeof(gdouble);
             break;
         case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
             size = sizeof(gchar *);
             break;
         default:
@@ -612,6 +613,24 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
             g_base_info_unref(info);
             break;
         }
+        case GI_TYPE_TAG_FILENAME:
+        {
+            GError *error = NULL;
+            const gchar *string;
+
+            string = PyString_AsString(object);
+            if (string == NULL) {
+                break;
+            }
+
+            arg.v_string = g_filename_from_utf8(string, -1, NULL, NULL, &error);
+            if (arg.v_string == NULL) {
+                PyErr_SetString(PyExc_Exception, error->message);
+                /* TODO: Convert the error to an exception. */
+            }
+
+            break;
+        }
         case GI_TYPE_TAG_ARRAY:
         {
             gboolean is_zero_terminated;
@@ -767,7 +786,6 @@ pygi_g_argument_to_py_object(GArgument arg, GITypeInfo *type_info)
         case GI_TYPE_TAG_DOUBLE:
             object = PyFloat_FromDouble(arg.v_double);
             break;
-        case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
             object = PyString_FromString(arg.v_string);
             break;
@@ -850,6 +868,24 @@ struct_error_clean:
             }
 
             g_base_info_unref(info);
+
+            break;
+        }
+        case GI_TYPE_TAG_FILENAME:
+        {
+            GError *error = NULL;
+            gchar *string;
+
+            string = g_filename_to_utf8(arg.v_string, -1, NULL, NULL, &error);
+            if (string == NULL) {
+                PyErr_SetString(PyExc_Exception, error->message);
+                /* TODO: Convert the error to an exception. */
+                break;
+            }
+
+            object = PyString_FromString(string);
+
+            g_free(string);
 
             break;
         }
