@@ -695,56 +695,6 @@ array_clean:
     return arg;
 }
 
-static PyObject *
-glist_to_pyobject(GITypeTag list_tag, GITypeInfo *type_info, GList *list, GSList *slist)
-{
-    PyObject *py_list;
-    int i;
-    GArgument arg;
-    PyObject *child_obj;
-
-    if ((py_list = PyList_New(0)) == NULL) {
-        g_list_free(list);
-        return NULL;
-    }
-    i = 0;
-    if (list_tag == GI_TYPE_TAG_GLIST) {
-        for ( ; list != NULL; list = list->next) {
-            arg.v_pointer = list->data;
-
-            child_obj = pygi_g_argument_to_py_object(arg, type_info);
-
-            if (child_obj == NULL) {
-                g_list_free(list);
-                Py_DECREF(py_list);
-                return NULL;
-            }
-            PyList_Append(py_list, child_obj);
-            Py_DECREF(child_obj);
-
-            ++i;
-        }
-    } else {
-        for ( ; slist != NULL; slist = slist->next) {
-            arg.v_pointer = slist->data;
-
-            child_obj = pygi_g_argument_to_py_object(arg, type_info);
-
-            if (child_obj == NULL) {
-                g_list_free(list);
-                Py_DECREF(py_list);
-                return NULL;
-            }
-            PyList_Append(py_list, child_obj);
-            Py_DECREF(child_obj);
-
-            ++i;
-        }
-    }
-    g_list_free(list);
-    return py_list;
-}
-
 PyObject *
 pygi_g_argument_to_py_object(GArgument arg, GITypeInfo *type_info)
 {
@@ -947,13 +897,38 @@ struct_error_clean:
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
         {
-            GITypeInfo *param_info;
-            param_info = g_type_info_get_param_type(type_info, 0);
-            g_assert(param_info != NULL);
-            object = glist_to_pyobject(type_tag,
-                                       param_info,
-                                       type_tag == GI_TYPE_TAG_GLIST ? arg.v_pointer : NULL,
-                                       type_tag == GI_TYPE_TAG_GSLIST ? arg.v_pointer : NULL);
+            GSList *list;
+            gsize length;
+            GITypeInfo *item_type_info;
+            gsize i;
+
+            list = arg.v_pointer;
+            length = g_slist_length(list);
+
+            object = PyList_New(length);
+            if (object == NULL) {
+                break;
+            }
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+
+            for (i = 0; list != NULL; list = (GSList *)list->next, i++) {
+                GArgument item;
+                PyObject *py_item;
+
+                item.v_pointer = list->data;
+
+                py_item = pygi_g_argument_to_py_object(item, item_type_info);
+                if (py_item == NULL) {
+                    Py_DECREF(object);
+                    object = NULL;
+                    break;
+                }
+
+                PyList_SET_ITEM(object, i, py_item);
+            }
+
+            g_base_info_unref((GIBaseInfo *)item_type_info);
             break;
         }
         case GI_TYPE_TAG_GTYPE:
