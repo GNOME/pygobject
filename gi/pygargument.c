@@ -166,7 +166,7 @@ pygi_gi_type_tag_get_py_bounds(GITypeTag type_tag, PyObject **lower,
 }
 
 gint
-pygi_gi_type_info_check_py_object(GITypeInfo *type_info, PyObject *object)
+pygi_gi_type_info_check_py_object(GITypeInfo *type_info, gboolean may_be_null, PyObject *object)
 {
     gint retval;
 
@@ -252,7 +252,7 @@ check_number_clean:
         }
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            if (!PyString_Check(object)) {
+            if (!PyString_Check(object) && (object != Py_None || may_be_null)) {
                 PyErr_Format(PyExc_TypeError, "Must be string, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
@@ -297,7 +297,7 @@ check_number_clean:
                     break;
                 }
 
-                retval = pygi_gi_type_info_check_py_object(item_type_info, item);
+                retval = pygi_gi_type_info_check_py_object(item_type_info, FALSE, item);
                 if (retval < 0) {
                     break;
                 }
@@ -394,7 +394,7 @@ check_number_clean:
                     break;
                 }
 
-                retval = pygi_gi_type_info_check_py_object(item_type_info, item);
+                retval = pygi_gi_type_info_check_py_object(item_type_info, FALSE, item);
 
                 Py_DECREF(item);
 
@@ -456,7 +456,7 @@ check_number_clean:
                 key = PyList_GET_ITEM(keys, i);
                 value = PyList_GET_ITEM(values, i);
 
-                retval = pygi_gi_type_info_check_py_object(key_type_info, key);
+                retval = pygi_gi_type_info_check_py_object(key_type_info, FALSE, key);
                 if (retval < 0) {
                     break;
                 }
@@ -465,7 +465,7 @@ check_number_clean:
                     break;
                 }
 
-                retval = pygi_gi_type_info_check_py_object(value_type_info, value);
+                retval = pygi_gi_type_info_check_py_object(value_type_info, FALSE, value);
                 if (retval < 0) {
                     break;
                 }
@@ -651,6 +651,10 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
             break;
         }
         case GI_TYPE_TAG_UTF8:
+            if (object == Py_None) {
+                arg.v_string = NULL;
+                break;
+            }
             arg.v_string = g_strdup(PyString_AsString(object));
             break;
         case GI_TYPE_TAG_INTERFACE:
@@ -1050,6 +1054,11 @@ pygi_g_argument_to_py_object(GArgument arg, GITypeInfo *type_info)
             object = PyFloat_FromDouble(arg.v_double);
             break;
         case GI_TYPE_TAG_UTF8:
+            if (arg.v_string == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
             object = PyString_FromString(arg.v_string);
             break;
         case GI_TYPE_TAG_INTERFACE:

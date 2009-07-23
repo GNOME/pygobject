@@ -261,11 +261,17 @@ class TestGIEverything(unittest.TestCase):
     def testUtf8NonconstReturn(self):
         self.assertEquals(utf8_nonconst, Everything.test_utf8_nonconst_return())
 
+    def testUtf8NullReturn(self):
+        self.assertEquals(None, Everything.test_utf8_null_return())
+
     def testUtf8NonconstIn(self):
         Everything.test_utf8_nonconst_in(utf8_nonconst)
 
     def testUtf8ConstIn(self):
         Everything.test_utf8_const_in(utf8_const)
+
+    def testUtf8NullIn(self):
+        Everything.test_utf8_null_in(None)
 
     def testUtf8Out(self):
         self.assertEquals(utf8_nonconst, Everything.test_utf8_out())

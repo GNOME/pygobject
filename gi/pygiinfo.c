@@ -623,6 +623,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             GIArgInfo *arg_info;
             GITypeInfo *type_info;
             GIDirection direction;
+            gboolean may_be_null;
             PyObject *py_arg;
             gint retval;
 
@@ -644,8 +645,9 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
             g_assert(py_arg != NULL);
 
             type_info = g_arg_info_get_type(arg_info);
+            may_be_null = g_arg_info_may_be_null(arg_info);
 
-            retval = pygi_gi_type_info_check_py_object(type_info, py_arg);
+            retval = pygi_gi_type_info_check_py_object(type_info, may_be_null, py_arg);
 
             g_base_info_unref((GIBaseInfo *)type_info);
             g_base_info_unref((GIBaseInfo *)arg_info);
@@ -1637,7 +1639,7 @@ _wrap_g_field_info_set_value(PyGIBaseInfo *self, PyObject *args)
     }
 
     /* Check the value. */
-    check_retval = pygi_gi_type_info_check_py_object(field_type_info, py_value);
+    check_retval = pygi_gi_type_info_check_py_object(field_type_info, TRUE, py_value);
 
     if (check_retval < 0) {
         goto return_;

@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 gsize pygi_gi_type_tag_get_size(GITypeTag type_tag);
 
 gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
+                                       gboolean may_be_null,
                                        PyObject *object);
 
 GArgument pygi_g_argument_from_py_object(PyObject *object,
