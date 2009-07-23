@@ -828,7 +828,6 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
                     /* Get rid of the GArray. */
                     in_value.v_pointer = g_array_free(array, FALSE);
-                    g_assert(in_value.v_pointer != NULL);
                 }
 
                 if (direction == GI_DIRECTION_IN) {

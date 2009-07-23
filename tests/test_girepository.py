@@ -299,12 +299,14 @@ class TestGIEverything(unittest.TestCase):
 
     def testArrayIntIn(self):
         self.assertEquals(5, Everything.test_array_int_in((1, 2, 3, -1)))
+        self.assertEquals(0, Everything.test_array_int_in(()))
 
         self.assertRaises(TypeError, Everything.test_array_int_in, 0)
         self.assertRaises(TypeError, Everything.test_array_int_in, (2, 'a'))
 
     def testArrayIntInout(self):
         self.assertEquals((2, 3, 4, 5), Everything.test_array_int_inout((0, 1, 2, 3, 4)))
+        self.assertEquals((), Everything.test_array_int_inout(()))
 
     def testArrayIntOut(self):
         self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_int_out())
