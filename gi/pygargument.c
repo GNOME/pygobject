@@ -685,7 +685,7 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
                         GType object_type;
                         gint retval;
 
-                        object_type = pyg_type_from_object(object->ob_type);
+                        object_type = pyg_type_from_object((PyObject *)object->ob_type);
                         if (object_type == G_TYPE_INVALID) {
                             PyErr_SetString(PyExc_RuntimeError, "Unable to retrieve object's GType");
                             break;
