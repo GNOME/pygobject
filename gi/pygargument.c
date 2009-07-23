@@ -1179,6 +1179,7 @@ struct_error_clean:
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
                     break;
                 }
 
@@ -1215,7 +1216,7 @@ struct_error_clean:
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
-                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
                     break;
                 }
 
