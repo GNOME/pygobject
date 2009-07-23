@@ -611,8 +611,6 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
                     g_assert_not_reached();
             }
 
-            g_base_info_unref(container_info);
-
             if (PyErr_Occurred()) {
                 return NULL;
             }
