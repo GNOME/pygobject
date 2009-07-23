@@ -1178,8 +1178,7 @@ struct_error_clean:
                 item = *(GArgument *)(array->data + item_size * i);
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
-                    Py_DECREF(object);
-                    object = NULL;
+                    Py_CLEAR(object);
                     break;
                 }
 
@@ -1215,8 +1214,7 @@ struct_error_clean:
 
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
-                    Py_DECREF(object);
-                    object = NULL;
+                    Py_CLEAR(object);
                     PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
                     break;
                 }
@@ -1266,8 +1264,7 @@ struct_error_clean:
                 Py_DECREF(py_value);
 
                 if (retval < 0) {
-                    Py_DECREF(object);
-                    object = NULL;
+                    Py_CLEAR(object);
                     break;
                 }
             }
