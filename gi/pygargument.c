@@ -303,7 +303,7 @@ check_number_clean:
                 }
 
                 if (!retval) {
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
                     break;
                 }
             }
@@ -402,7 +402,7 @@ check_number_clean:
                     break;
                 }
                 if (!retval) {
-                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd: ", i);
                     break;
                 }
             }
@@ -790,14 +790,14 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
                 py_item = PyTuple_GetItem(object, i);
                 if (py_item == NULL) {
                     /* TODO: free the previous items */
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
                     goto array_clean;
                 }
 
                 item = pygi_g_argument_from_py_object(py_item, item_type_info);
                 if (PyErr_Occurred()) {
                     /* TODO: free the previous items */
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
                     goto array_clean;
                 }
 
@@ -841,7 +841,7 @@ array_clean:
 
                 if (PyErr_Occurred()) {
                     /* TODO: free the previous items */
-                    PyErr_PREFIX_FROM_FORMAT("Item %zd :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd: ", i);
                     break;
                 }
 
@@ -1191,7 +1191,7 @@ struct_error_clean:
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
                     break;
                 }
 
@@ -1228,7 +1228,7 @@ struct_error_clean:
                 py_item = pygi_g_argument_to_py_object(item, item_type_info);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu :", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
                     break;
                 }
 
