@@ -311,6 +311,9 @@ class TestGIEverything(unittest.TestCase):
     def testArrayIntOut(self):
         self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_int_out())
 
+    def testArrayIntReturn(self):
+        self.assertEquals((0, 1, 2, 3, 4), Everything.test_array_int_full_out())
+
     def testArrayInt8In(self):
         self.assertEquals(5, Everything.test_array_gint8_in((1, 2, 3, -1)))
         self.assertEquals(-1, Everything.test_array_gint8_in((INT8_MAX, INT8_MIN)))
