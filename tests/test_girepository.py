@@ -1,4 +1,5 @@
 # -*- Mode: Python -*-
+# vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
 
