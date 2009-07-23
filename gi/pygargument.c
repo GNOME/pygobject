@@ -260,50 +260,52 @@ check_number_clean:
             break;
         case GI_TYPE_TAG_ARRAY:
         {
-            gssize required_size;
-            Py_ssize_t object_size;
+            gssize fixed_size;
+            Py_ssize_t length;
             GITypeInfo *item_type_info;
-            gsize i;
+            Py_ssize_t i;
 
-            if (!PyTuple_Check(object)) {
-                PyErr_Format(PyExc_TypeError, "Must be tuple, not %s",
+            if (!PySequence_Check(object)) {
+                PyErr_Format(PyExc_TypeError, "Must be sequence, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
                 break;
             }
 
-            object_size = PyTuple_Size(object);
-            if (object_size < 0) {
+            length = PySequence_Length(object);
+            if (length < 0) {
                 retval = -1;
                 break;
             }
 
-            required_size = g_type_info_get_array_fixed_size(type_info);
-            if (required_size >= 0 && object_size != required_size) {
+            fixed_size = g_type_info_get_array_fixed_size(type_info);
+            if (fixed_size >= 0 && length != fixed_size) {
                 PyErr_Format(PyExc_ValueError, "Must contain %zd items, not %zd",
-                        required_size, object_size);
+                        fixed_size, length);
                 retval = 0;
                 break;
             }
 
             item_type_info = g_type_info_get_param_type(type_info, 0);
 
-            for (i = 0; i < object_size; i++) {
+            for (i = 0; i < length; i++) {
                 PyObject *item;
 
-                item = PyTuple_GetItem(object, i);
+                item = PySequence_GetItem(object, i);
                 if (item == NULL) {
                     retval = -1;
                     break;
                 }
 
                 retval = pygi_gi_type_info_check_py_object(item_type_info, FALSE, item);
+
+                Py_DECREF(item);
+
                 if (retval < 0) {
                     break;
                 }
-
                 if (!retval) {
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd: ", i);
                     break;
                 }
             }
@@ -763,42 +765,45 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
             GITypeTag item_type_tag;
             GArray *array;
             gsize item_size;
-            gssize length;
-            gsize i;
+            Py_ssize_t length;
+            Py_ssize_t i;
+
+            length = PySequence_Length(object);
+            if (length < 0) {
+                break;
+            }
 
             is_zero_terminated = g_type_info_is_zero_terminated(type_info);
-
             item_type_info = g_type_info_get_param_type(type_info, 0);
             item_type_tag = g_type_info_get_tag(item_type_info);
-
             item_size = pygi_gi_type_tag_get_size(item_type_tag);
-            length = PyTuple_Size(object);
-            if (length < 0) {
-                goto array_clean;
-            }
 
             array = g_array_sized_new(is_zero_terminated, FALSE, item_size, length);
             if (array == NULL) {
+                g_base_info_unref((GIBaseInfo *)item_type_info);
                 PyErr_NoMemory();
-                goto array_clean;
+                break;
             }
 
             for (i = 0; i < length; i++) {
                 PyObject *py_item;
                 GArgument item;
 
-                py_item = PyTuple_GetItem(object, i);
+                py_item = PySequence_GetItem(object, i);
                 if (py_item == NULL) {
                     /* TODO: free the previous items */
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
-                    goto array_clean;
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd: ", i);
+                    break;
                 }
 
                 item = pygi_g_argument_from_py_object(py_item, item_type_info);
+
+                Py_DECREF(py_item);
+
                 if (PyErr_Occurred()) {
                     /* TODO: free the previous items */
-                    PyErr_PREFIX_FROM_FORMAT("Item %zu: ", i);
-                    goto array_clean;
+                    PyErr_PREFIX_FROM_FORMAT("Item %zd: ", i);
+                    break;
                 }
 
                 g_array_insert_val(array, i, item);
@@ -806,7 +811,6 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info)
 
             arg.v_pointer = array;
 
-array_clean:
             g_base_info_unref((GIBaseInfo *)item_type_info);
             break;
         }

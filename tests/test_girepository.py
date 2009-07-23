@@ -363,10 +363,15 @@ class TestGIEverything(unittest.TestCase):
     def testStrvIn(self):
         self.assertTrue(Everything.test_strv_in(test_sequence))
 
+        # Test with equivalent instances which offer the sequence protocol too.
+        self.assertTrue(Everything.test_strv_in(list(test_sequence)))
+        self.assertTrue(Everything.test_strv_in(''.join(test_sequence)))
+
         # Test an empty one.
         self.assertFalse(Everything.test_strv_in(()))
 
-        self.assertRaises(TypeError, Everything.test_strv_in, '1')
+        # Test type checking.
+        self.assertRaises(TypeError, Everything.test_strv_in, 1)
         self.assertRaises(TypeError, Everything.test_strv_in, ('1', 2, 3))
 
     def testArrayGTypeIn(self):
