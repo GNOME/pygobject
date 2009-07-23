@@ -363,8 +363,10 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_strv_in, ('1', 2, 3))
 
     def testArrayGTypeIn(self):
-        # TODO
-        pass
+        self.assertEqual('[gint,TestObj,]', Everything.test_array_gtype_in((gobject.TYPE_INT, Everything.TestObj)))
+
+        # Test type checking.
+        self.assertRaises(TypeError, Everything.test_array_gtype_in, ('gint', Everything.TestObj))
 
     def testStrvOut(self):
         self.assertEquals(("thanks", "for", "all", "the", "fish"), Everything.test_strv_out())

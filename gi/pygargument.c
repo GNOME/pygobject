@@ -554,6 +554,9 @@ pygi_gi_type_tag_get_size(GITypeTag type_tag)
         case GI_TYPE_TAG_DOUBLE:
             size = sizeof(gdouble);
             break;
+        case GI_TYPE_TAG_GTYPE:
+            size = sizeof(GType);
+            break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
             size = sizeof(gchar *);
