@@ -362,8 +362,9 @@ class TestGIEverything(unittest.TestCase):
 
     def testStrvIn(self):
         self.assertTrue(Everything.test_strv_in(test_sequence))
-        self.assertFalse(Everything.test_strv_in(('1', '2')))
-        self.assertFalse(Everything.test_strv_in(('1', '2', '3', '4')))
+
+        # Test an empty one.
+        self.assertFalse(Everything.test_strv_in(()))
 
         self.assertRaises(TypeError, Everything.test_strv_in, '1')
         self.assertRaises(TypeError, Everything.test_strv_in, ('1', 2, 3))
