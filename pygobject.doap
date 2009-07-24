@@ -12,13 +12,6 @@
 
   <maintainer>
     <foaf:Person>
-      <foaf:name>Johan Dahlin</foaf:name>
-      <foaf:mbox rdf:resource="mailto:johan@gnome.org" />
-      <gnome:userid>johan</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
       <foaf:name>Gustavo J Carneiro</foaf:name>
       <foaf:mbox rdf:resource="mailto:gjc@gnome.org" />
       <gnome:userid>gjc</gnome:userid>
