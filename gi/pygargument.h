@@ -35,9 +35,15 @@ gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
                                        PyObject *object);
 
 GArgument pygi_g_argument_from_py_object(PyObject *object,
-                                         GITypeInfo *type_info);
-PyObject * pygi_g_argument_to_py_object(GArgument arg,
+                                         GITypeInfo *type_info,
+                                         GITransfer transfer);
+PyObject * pygi_g_argument_to_py_object(GArgument *arg,
                                         GITypeInfo *type_info);
+
+void pygi_g_argument_clean(GArgument *arg,
+                           GITypeInfo *type_info,
+                           GITransfer transfer,
+                           GIDirection direction);
 
 G_END_DECLS
 

@@ -63,4 +63,20 @@ PyObject * pygi_py_type_find_by_name(const char *namespace_,
 
 gpointer pygi_py_object_get_buffer(PyObject *object, gsize *size);
 
+#if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 22
+#define g_array_get_element_size(a) \
+	*(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
+#endif
+
+
+/* GArray */
+
+/* Redefine g_array_index because we want it to return the i-th element, casted
+ * to the type t, of the array a, and not the i-th element of the array a casted to the type t. */
+#define _g_array_index(a,t,i) \
+    *(t *)((a)->data + g_array_get_element_size(a) * (i))
+
+GArray * _g_array_values(GArray *array);
+
+
 #endif /* __PYGI_PRIVATE_H__ */
