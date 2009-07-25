@@ -1,3 +1,6 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * vim: tabstop=4 shiftwidth=4 expandtab
+ */
 #ifndef __PYGI_PRIVATE_H__
 #define __PYGI_PRIVATE_H__
 
@@ -40,19 +43,19 @@ extern PyTypeObject PyGIErrorDomainInfo_Type;
 extern PyTypeObject PyGIUnresolvedInfo_Type;
 
 #define PyErr_PREFIX_FROM_FORMAT(format, ...) G_STMT_START { \
-	PyObject *py_error_prefix; \
-	py_error_prefix = PyString_FromFormat(format, ## __VA_ARGS__); \
-	if (py_error_prefix != NULL) { \
-		PyObject *py_error_type, *py_error_value, *py_error_traceback; \
-		PyErr_Fetch(&py_error_type, &py_error_value, &py_error_traceback); \
-		if (PyString_Check(py_error_value)) { \
-			PyString_ConcatAndDel(&py_error_prefix, py_error_value); \
-			if (py_error_prefix != NULL) { \
-				py_error_value = py_error_prefix; \
-			} \
-		} \
-		PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
-	} \
+    PyObject *py_error_prefix; \
+    py_error_prefix = PyString_FromFormat(format, ## __VA_ARGS__); \
+    if (py_error_prefix != NULL) { \
+        PyObject *py_error_type, *py_error_value, *py_error_traceback; \
+        PyErr_Fetch(&py_error_type, &py_error_value, &py_error_traceback); \
+        if (PyString_Check(py_error_value)) { \
+            PyString_ConcatAndDel(&py_error_prefix, py_error_value); \
+            if (py_error_prefix != NULL) { \
+                py_error_value = py_error_prefix; \
+            } \
+        } \
+        PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
+    } \
 } G_STMT_END
 
 PyObject * pygi_py_type_find_by_name(const char *namespace_,
@@ -65,7 +68,7 @@ gpointer pygi_py_object_get_buffer(PyObject *object, gsize *size);
 
 #if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 22
 #define g_array_get_element_size(a) \
-	*(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
+    *(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
 #endif
 
 
