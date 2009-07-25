@@ -50,6 +50,9 @@ init_gio(void)
     m = Py_InitModule("gio._gio", pygio_functions);
     d = PyModule_GetDict(m);
 
+    g_type_init();
+    pyglib_init();
+
     init_pygobject_check(2, 15, 2);
 
     pygio_register_classes(d);
