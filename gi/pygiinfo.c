@@ -962,32 +962,12 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *args)
 
             g_assert(return_value != NULL);
         } else {
-            /* Instanciate the class passed as first argument and attach the GObject instance. */
-            PyTypeObject *py_type;
-            PyGObject *self;
+            PyTypeObject *type;
 
             g_assert(n_py_args > 0);
-            py_type = (PyTypeObject *)PyTuple_GetItem(args, 0);
-            g_assert(py_type != NULL);
+            type = (PyTypeObject *)PyTuple_GET_ITEM(args, 0);
 
-            if (py_type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
-                Py_INCREF(py_type);
-            }
-            self = PyObject_GC_New(PyGObject, py_type);
-            self->inst_dict = NULL;
-            self->weakreflist = NULL;
-            self->private_flags.flags = 0;
-
-            self->obj = return_arg.v_pointer;
-
-            if (g_object_is_floating(self->obj)) {
-                g_object_ref_sink(self->obj);
-            }
-            pygobject_register_wrapper((PyObject *)self);
-
-            PyObject_GC_Track((PyObject *)self);
-
-            return_value = (PyObject *)self;
+            return_value = pygobject_new_from_type(return_arg.v_pointer, TRUE, type);
         }
     } else {
         return_value = NULL;
