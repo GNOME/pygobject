@@ -881,6 +881,49 @@ pygobject_lookup_class(GType gtype)
 }
 
 /**
+ * pygobject_new_from_type:
+ * @obj: a GObject instance.
+ * @sink: whether to sink any floating reference found on the GObject.
+ * @type: a non-strict subtype of PyGObject_Type.
+ *
+ * This function creates a wrapper instance from the given Python type for the
+ * GObject instance. In case of error, it returns NULL and sets an exception.
+ *
+ * Returns: a new reference to the wrapper instance for the object.
+ */
+PyObject *
+pygobject_new_from_type(GObject *obj, gboolean sink, PyTypeObject *type)
+{
+	PyGObject *self;
+
+	/* need to bump type refcount if created with
+	   pygobject_new_with_interfaces(). fixes bug #141042 */
+	if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+		Py_INCREF(type);
+	}
+
+	self = PyObject_GC_New(PyGObject, type);
+	if (self == NULL) {
+		if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+			Py_DECREF(type);
+		}
+		return NULL;
+	}
+
+	self->inst_dict = NULL;
+	self->weakreflist = NULL;
+	self->private_flags.flags = 0;
+
+	self->obj = obj;
+	g_object_ref(self->obj);
+
+	pygobject_register_wrapper_full(self, sink);
+	PyObject_GC_Track((PyObject *)self);
+
+	return (PyObject *)self;
+}
+
+/**
  * pygobject_new_full:
  * @obj: a GObject instance.
  * @sink: whether to sink any floating reference found on the GObject.
@@ -896,7 +939,7 @@ pygobject_lookup_class(GType gtype)
 PyObject *
 pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 {
-    PyGObject *self;
+	PyGObject *self;
 
     if (obj == NULL) {
 	Py_INCREF(Py_None);
@@ -920,21 +963,8 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
                 tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
         }
         g_assert(tp != NULL);
-        
-        /* need to bump type refcount if created with
-           pygobject_new_with_interfaces(). fixes bug #141042 */
-        if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
-            Py_INCREF(tp);
-	self = PyObject_GC_New(PyGObject, tp);
-	if (self == NULL)
-	    return NULL;
-        self->inst_dict = NULL;
-	self->weakreflist = NULL;
-	self->private_flags.flags = 0;
-	self->obj = obj;
-	g_object_ref(obj);
-	pygobject_register_wrapper_full(self, sink);
-	PyObject_GC_Track((PyObject *)self);
+
+		self = (PyGObject *)pygobject_new_from_type(obj, sink, tp);
     }
 
     return (PyObject *)self;

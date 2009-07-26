@@ -201,6 +201,10 @@ struct _PyGObject_Functions {
 
     PyTypeObject *object_type;
     PyTypeObject *type_wrapper_type;
+
+	PyObject *(*object_new_from_type) (GObject *obj,
+									   gboolean sink,
+									   PyTypeObject *type);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -269,6 +273,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_option_group_new       (_PyGObject_API->option_group_new)
 #define PyGObject_Type             (*_PyGObject_API->object_type)
 #define PyGTypeWrapper_Type        (*_PyGObject_API->type_wrapper_type)
+#define pygobject_new_from_type    (_PyGObject_API->object_new_from_type)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \
