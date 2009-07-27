@@ -31,6 +31,7 @@ pygi_gi_registered_type_info_check_py_object(GIRegisteredTypeInfo *info,
         PyObject *object, gboolean is_instance)
 {
     gint retval;
+
     PyObject *type;
     gchar *type_name_expected;
 
@@ -214,7 +215,7 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, gboolean may_be_null, P
             pygi_gi_type_tag_get_py_bounds(type_tag, &lower, &upper);
             if (lower == NULL || upper == NULL) {
                 retval = -1;
-                goto check_number_clean;
+                goto check_number_release;
             }
 
             /* Check bounds */
@@ -224,14 +225,14 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, gboolean may_be_null, P
 
                 if (PyErr_Occurred()) {
                     retval = -1;
-                    goto check_number_error_clean;
+                    goto check_number_error_release;
                 }
 
                 lower_str = PyObject_Str(lower);
                 upper_str = PyObject_Str(upper);
                 if (lower_str == NULL || upper_str == NULL) {
                     retval = -1;
-                    goto check_number_error_clean;
+                    goto check_number_error_release;
                 }
 
                 PyErr_Format(PyExc_ValueError, "Must range from %s to %s",
@@ -240,12 +241,12 @@ pygi_gi_type_info_check_py_object(GITypeInfo *type_info, gboolean may_be_null, P
 
                 retval = 0;
 
-check_number_error_clean:
+check_number_error_release:
                 Py_XDECREF(lower_str);
                 Py_XDECREF(upper_str);
             }
 
-check_number_clean:
+check_number_release:
             Py_XDECREF(lower);
             Py_XDECREF(upper);
             break;
@@ -782,7 +783,7 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info, GITransf
 
 array_item_error:
                 /* Free everything we have converted so far. */
-                pygi_g_argument_clean((GArgument *)array, type_info,
+                pygi_g_argument_release((GArgument *)array, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 array = NULL;
 
@@ -918,7 +919,7 @@ array_item_error:
 
 list_item_error:
                 /* Free everything we have converted so far. */
-                pygi_g_argument_clean((GArgument *)list, type_info,
+                pygi_g_argument_release((GArgument *)list, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 list = NULL;
 
@@ -1026,7 +1027,7 @@ list_item_error:
 
 hash_table_item_error:
                 /* Free everything we have converted so far. */
-                pygi_g_argument_clean((GArgument *)hash_table, type_info,
+                pygi_g_argument_release((GArgument *)hash_table, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 hash_table = NULL;
 
@@ -1369,7 +1370,7 @@ pygi_g_argument_to_py_object(GArgument *arg, GITypeInfo *type_info)
 }
 
 void
-pygi_g_argument_clean(GArgument *arg, GITypeInfo *type_info, GITransfer transfer, GIDirection direction)
+pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transfer, GIDirection direction)
 {
     GITypeTag type_tag;
 
@@ -1436,12 +1437,12 @@ pygi_g_argument_clean(GArgument *arg, GITypeInfo *type_info, GITransfer transfer
                 for (i = 0; i < array->len; i++) {
                     GArgument item;
                     item = _g_array_index(array, GArgument, i);
-                    pygi_g_argument_clean(&item, item_type_info, item_transfer, direction);
+                    pygi_g_argument_release(&item, item_type_info, item_transfer, direction);
                 }
             }
 
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
-                    || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                    || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
                 g_array_free(array, TRUE);
             }
 

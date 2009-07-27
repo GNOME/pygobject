@@ -30,6 +30,10 @@ G_BEGIN_DECLS
 
 gsize pygi_gi_type_tag_get_size(GITypeTag type_tag);
 
+gint pygi_gi_registered_type_info_check_py_object(GIRegisteredTypeInfo *info,
+                                                  PyObject *object,
+                                                  gboolean is_instance);
+
 gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
                                        gboolean may_be_null,
                                        PyObject *object);
@@ -37,13 +41,14 @@ gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
 GArgument pygi_g_argument_from_py_object(PyObject *object,
                                          GITypeInfo *type_info,
                                          GITransfer transfer);
+
 PyObject * pygi_g_argument_to_py_object(GArgument *arg,
                                         GITypeInfo *type_info);
 
-void pygi_g_argument_clean(GArgument *arg,
-                           GITypeInfo *type_info,
-                           GITransfer transfer,
-                           GIDirection direction);
+void pygi_g_argument_release(GArgument *arg,
+                             GITypeInfo *type_info,
+                             GITransfer transfer,
+                             GIDirection direction);
 
 G_END_DECLS
 
