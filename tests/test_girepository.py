@@ -412,10 +412,16 @@ class TestGIEverything(unittest.TestCase):
 # Interface
 # GList
 
-    def testGListReturn(self):
+    def testGListNothingReturn(self):
         self.assertEqual(list(test_sequence), Everything.test_glist_nothing_return())
 
-    def testGListIn(self):
+    def testGListContainerReturn(self):
+        self.assertEqual(list(test_sequence), Everything.test_glist_container_return())
+
+    def testGListEverythingReturn(self):
+        self.assertEqual(list(test_sequence), Everything.test_glist_everything_return())
+
+    def testGListNothingIn(self):
         Everything.test_glist_nothing_in(test_sequence)
 
         # Test as string, which implements the sequence protocol too.
@@ -425,13 +431,25 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_glist_nothing_in, 1)
         self.assertRaises(TypeError, Everything.test_glist_nothing_in, (1, 2, 3))
 
+    def testGListContainerIn(self):
+        Everything.test_glist_container_in(test_sequence)
+
+    def testGListEverythingIn(self):
+        Everything.test_glist_everything_in(test_sequence)
+
 
 # GSList
 
-    def testGSListReturn(self):
+    def testGSListNothingReturn(self):
         self.assertEqual(list(test_sequence), Everything.test_gslist_nothing_return())
 
-    def testGSListIn(self):
+    def testGSListContainerReturn(self):
+        self.assertEqual(list(test_sequence), Everything.test_gslist_container_return())
+
+    def testGSListEverythingReturn(self):
+        self.assertEqual(list(test_sequence), Everything.test_gslist_everything_return())
+
+    def testGSListNothingIn(self):
         Everything.test_gslist_nothing_in(test_sequence)
 
         # Test as string, which implements the sequence protocol too.
@@ -440,6 +458,12 @@ class TestGIEverything(unittest.TestCase):
         # Test type checking.
         self.assertRaises(TypeError, Everything.test_gslist_nothing_in, 1)
         self.assertRaises(TypeError, Everything.test_gslist_nothing_in, (1, 2, 3))
+
+    def testGSListContainerIn(self):
+        Everything.test_gslist_container_in(test_sequence)
+
+    def testGSListEverythingIn(self):
+        Everything.test_gslist_everything_in(test_sequence)
 
 
 # GHashTable

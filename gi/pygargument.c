@@ -1450,8 +1450,50 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
             break;
         }
         case GI_TYPE_TAG_INTERFACE:
+            /* TODO */
+            break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
+        {
+            GSList *list;
+            GITypeInfo *item_type_info;
+
+            list = arg->v_pointer;
+
+            item_type_info = g_type_info_get_param_type(type_info, 0);
+            g_assert(item_type_info != NULL);
+
+            if ((direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING)
+                    || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                GSList *item;
+                GITransfer item_transfer;
+
+                if (direction == GI_DIRECTION_IN) {
+                    item_transfer = GI_TRANSFER_NOTHING;
+                } else {
+                    item_transfer = GI_TRANSFER_EVERYTHING;
+                }
+
+                /* Free the items */
+                for (item = list; item != NULL; item = g_slist_next(item)) {
+                    pygi_g_argument_release((GArgument *)&item->data, item_type_info,
+                        item_transfer, direction);
+                }
+            }
+
+            if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+                    || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
+                if (type_tag == GI_TYPE_TAG_GLIST) {
+                    g_list_free((GList *)list);
+                } else {
+                    /* type_tag == GI_TYPE_TAG_GSLIST */
+                    g_slist_free(list);
+                }
+            }
+
+            g_base_info_unref((GIBaseInfo *)item_type_info);
+            break;
+        }
         case GI_TYPE_TAG_GHASH:
         case GI_TYPE_TAG_ERROR:
             /* TODO */

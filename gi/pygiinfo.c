@@ -508,13 +508,14 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             n_in_args += 1;
-            if (arg_type_tag == GI_TYPE_TAG_ARRAY
-                    && transfer == GI_TRANSFER_CONTAINER) {
-                n_containers += 1;
-            }
         }
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             n_out_args += 1;
+        }
+
+        if ((direction == GI_DIRECTION_INOUT && transfer != GI_TRANSFER_EVERYTHING)
+                || (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER)) {
+            n_containers += 1;
         }
 
         if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
@@ -778,6 +779,18 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
                             containers[containers_pos].v_string = args[i]->v_pointer;
                         case GI_TYPE_TAG_ARRAY:
                             containers[containers_pos].v_pointer = g_array_copy(args[i]->v_pointer);
+                        case GI_TYPE_TAG_INTERFACE:
+                            /* TODO */
+                            break;
+                        case GI_TYPE_TAG_GLIST:
+                            containers[containers_pos].v_pointer = g_list_copy(args[i]->v_pointer);
+                            break;
+                        case GI_TYPE_TAG_GSLIST:
+                            containers[containers_pos].v_pointer = g_slist_copy(args[i]->v_pointer);
+                            break;
+                        case GI_TYPE_TAG_GHASH:
+                            /* TODO */
+                            break;
                         default:
                             break;
                     }
@@ -805,6 +818,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
         }
 
         g_assert(py_args_pos == n_py_args);
+        g_assert(containers_pos == n_containers);
     }
 
     /* Invoke the callable. */
@@ -988,6 +1002,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
         }
 
         g_assert(n_return_values <= 1 || return_values_pos == n_return_values);
+        g_assert(containers_pos == n_containers);
     }
 
 return_:
