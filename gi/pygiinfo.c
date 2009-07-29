@@ -782,8 +782,47 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
                             containers[containers_pos].v_pointer = g_array_copy(args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_INTERFACE:
-                            /* TODO */
+                        {
+                            GIBaseInfo *info;
+                            GIInfoType info_type;
+
+                            info = g_type_info_get_interface(arg_type_infos[i]);
+                            g_assert(info != NULL);
+
+                            info_type = g_base_info_get_type(info);
+
+                            switch (info_type) {
+                                case GI_INFO_TYPE_STRUCT:
+                                {
+                                    GType type;
+
+                                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+
+                                    if (g_type_is_a(type, G_TYPE_VALUE)) {
+                                        GValue *value;
+                                        GValue *new_value;
+
+                                        value = args[i]->v_pointer;
+                                        new_value = g_slice_new0(GValue);
+
+                                        g_value_init(new_value, G_VALUE_TYPE(value));
+                                        g_value_copy(value, new_value);
+
+                                        containers[containers_pos].v_pointer = new_value;
+                                        break;
+                                    }
+
+                                    /* TODO */
+
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+
+                            g_base_info_unref(info);
                             break;
+                        }
                         case GI_TYPE_TAG_GLIST:
                             containers[containers_pos].v_pointer = g_list_copy(args[i]->v_pointer);
                             break;

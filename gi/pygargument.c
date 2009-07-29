@@ -1480,6 +1480,33 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
             info_type = g_base_info_get_type(info);
 
             switch (info_type) {
+                case GI_INFO_TYPE_STRUCT:
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+
+                    if (g_type_is_a(type, G_TYPE_VALUE)) {
+                        GValue *value;
+
+                        value = arg->v_pointer;
+
+                        if ((direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING)
+                                || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                            g_value_unset(value);
+                        }
+
+                        if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+                                || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
+                            g_slice_free(GValue, value);
+                        }
+                        break;
+                    }
+
+                    /* TODO */
+
+                    break;
+                }
                 case GI_INFO_TYPE_OBJECT:
                 {
                     GObject *object;
