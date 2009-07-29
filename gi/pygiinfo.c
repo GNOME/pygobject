@@ -978,7 +978,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
                 if (transfer != GI_TRANSFER_EVERYTHING) {
                     g_assert(containers_pos < n_containers);
                     pygi_g_argument_release(&containers[containers_pos], arg_type_infos[i],
-                        transfer, GI_DIRECTION_IN);
+                        GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                     containers_pos += 1;
                 }
                 if (transfer != GI_TRANSFER_NOTHING) {
@@ -988,7 +988,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
             } else if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER) {
                 g_assert(containers_pos < n_containers);
                 pygi_g_argument_release(&containers[containers_pos], arg_type_infos[i],
-                    transfer, direction);
+                    GI_TRANSFER_NOTHING, direction);
                 containers_pos += 1;
             } else {
                 pygi_g_argument_release(args[i], arg_type_infos[i], transfer, direction);
