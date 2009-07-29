@@ -1415,17 +1415,17 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
         case GI_TYPE_TAG_ARRAY:
         {
             GArray *array;
-            GITypeInfo *item_type_info;
             gsize i;
 
             array = arg->v_pointer;
 
-            item_type_info = g_type_info_get_param_type(type_info, 0);
-            g_assert(item_type_info != NULL);
-
             if ((direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                GITypeInfo *item_type_info;
                 GITransfer item_transfer;
+
+                item_type_info = g_type_info_get_param_type(type_info, 0);
+                g_assert(item_type_info != NULL);
 
                 if (direction == GI_DIRECTION_IN) {
                     item_transfer = GI_TRANSFER_NOTHING;
@@ -1439,6 +1439,8 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
                     item = _g_array_index(array, GArgument, i);
                     pygi_g_argument_release(&item, item_type_info, item_transfer, direction);
                 }
+
+                g_base_info_unref((GIBaseInfo *)item_type_info);
             }
 
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
@@ -1446,7 +1448,6 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
                 g_array_free(array, TRUE);
             }
 
-            g_base_info_unref((GIBaseInfo *)item_type_info);
             break;
         }
         case GI_TYPE_TAG_INTERFACE:
@@ -1456,17 +1457,17 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
         case GI_TYPE_TAG_GSLIST:
         {
             GSList *list;
-            GITypeInfo *item_type_info;
 
             list = arg->v_pointer;
 
-            item_type_info = g_type_info_get_param_type(type_info, 0);
-            g_assert(item_type_info != NULL);
-
             if ((direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
-                GSList *item;
+                GITypeInfo *item_type_info;
                 GITransfer item_transfer;
+                GSList *item;
+
+                item_type_info = g_type_info_get_param_type(type_info, 0);
+                g_assert(item_type_info != NULL);
 
                 if (direction == GI_DIRECTION_IN) {
                     item_transfer = GI_TRANSFER_NOTHING;
@@ -1479,6 +1480,8 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
                     pygi_g_argument_release((GArgument *)&item->data, item_type_info,
                         item_transfer, direction);
                 }
+
+                g_base_info_unref((GIBaseInfo *)item_type_info);
             }
 
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
@@ -1491,7 +1494,6 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
                 }
             }
 
-            g_base_info_unref((GIBaseInfo *)item_type_info);
             break;
         }
         case GI_TYPE_TAG_GHASH:
