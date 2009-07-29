@@ -777,8 +777,10 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
                         case GI_TYPE_TAG_FILENAME:
                         case GI_TYPE_TAG_UTF8:
                             containers[containers_pos].v_string = args[i]->v_pointer;
+                            break;
                         case GI_TYPE_TAG_ARRAY:
                             containers[containers_pos].v_pointer = g_array_copy(args[i]->v_pointer);
+                            break;
                         case GI_TYPE_TAG_INTERFACE:
                             /* TODO */
                             break;
