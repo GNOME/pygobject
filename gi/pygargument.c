@@ -979,13 +979,29 @@ list_item_error:
                 case GI_TYPE_TAG_SHORT:
                 case GI_TYPE_TAG_USHORT:
                 case GI_TYPE_TAG_INT:
+                case GI_TYPE_TAG_UINT:
                 case GI_TYPE_TAG_INT8:
                 case GI_TYPE_TAG_UINT8:
                 case GI_TYPE_TAG_INT16:
                 case GI_TYPE_TAG_UINT16:
                 case GI_TYPE_TAG_INT32:
+                case GI_TYPE_TAG_UINT32:
                     hash_func = g_int_hash;
                     equal_func = g_int_equal;
+                    break;
+                case GI_TYPE_TAG_INT64:
+                case GI_TYPE_TAG_UINT64:
+                case GI_TYPE_TAG_LONG:
+                case GI_TYPE_TAG_ULONG:
+                case GI_TYPE_TAG_SSIZE:
+                case GI_TYPE_TAG_SIZE:
+                    hash_func = g_int64_hash;
+                    equal_func = g_int64_equal;
+                    break;
+                case GI_TYPE_TAG_FLOAT:
+                case GI_TYPE_TAG_DOUBLE:
+                    hash_func = g_double_hash;
+                    equal_func = g_double_equal;
                     break;
                 default:
                     PyErr_WarnEx(NULL, "No suited hash function available; using pointers", 1);
@@ -1497,6 +1513,56 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
             break;
         }
         case GI_TYPE_TAG_GHASH:
+        {
+            GHashTable *hash_table;
+
+            hash_table = arg->v_pointer;
+
+            if (direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING) {
+                /* We created the table without a destroy function, so keys and
+                 * values need to be released. */
+                GITypeInfo *key_type_info;
+                GITypeInfo *value_type_info;
+                GITransfer item_transfer;
+                GHashTableIter hash_table_iter;
+                gpointer key;
+                gpointer value;
+
+                key_type_info = g_type_info_get_param_type(type_info, 0);
+                g_assert(key_type_info != NULL);
+
+                value_type_info = g_type_info_get_param_type(type_info, 1);
+                g_assert(value_type_info != NULL);
+
+                if (direction == GI_DIRECTION_IN) {
+                    item_transfer = GI_TRANSFER_NOTHING;
+                } else {
+                    item_transfer = GI_TRANSFER_EVERYTHING;
+                }
+
+                g_hash_table_iter_init(&hash_table_iter, hash_table);
+                while (g_hash_table_iter_next(&hash_table_iter, &key, &value)) {
+                    pygi_g_argument_release((GArgument *)&key, key_type_info,
+                        item_transfer, direction);
+                    pygi_g_argument_release((GArgument *)&value, value_type_info,
+                        item_transfer, direction);
+                }
+
+                g_base_info_unref((GIBaseInfo *)key_type_info);
+                g_base_info_unref((GIBaseInfo *)value_type_info);
+            } else if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_CONTAINER) {
+                /* Be careful to avoid keys and values being freed if the
+                 * callee gave a destroy function. */
+                g_hash_table_steal_all(hash_table);
+            }
+
+            if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+                    || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
+                g_hash_table_unref(hash_table);
+            }
+
+            break;
+        }
         case GI_TYPE_TAG_ERROR:
             /* TODO */
             break;

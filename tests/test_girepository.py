@@ -468,16 +468,28 @@ class TestGIEverything(unittest.TestCase):
 
 # GHashTable
 
-    def testGHashTableReturn(self):
+    def testGHashTableNothingReturn(self):
+        self.assertEqual(test_dict, Everything.test_ghash_nothing_return())
+
+    def testGHashTableContainerReturn(self):
+        self.assertEqual(test_dict, Everything.test_ghash_container_return())
+
+    def testGHashTableEverythingReturn(self):
         self.assertEqual(test_dict, Everything.test_ghash_everything_return())
 
-    def testGHashTableIn(self):
+    def testGHashTableNothingIn(self):
         Everything.test_ghash_nothing_in(test_dict)
 
         # Test type checking.
         self.assertRaises(TypeError, Everything.test_ghash_nothing_in, 'foo')
         self.assertRaises(TypeError, Everything.test_ghash_nothing_in, {'foo': 42})
         self.assertRaises(TypeError, Everything.test_ghash_nothing_in, {42: 'foo'})
+
+    def testGHashTableContainerIn(self):
+        Everything.test_ghash_container_in(test_dict)
+
+    def testGHashTableEverythingIn(self):
+        Everything.test_ghash_everything_in(test_dict)
 
 
 # closure

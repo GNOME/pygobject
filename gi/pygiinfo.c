@@ -789,7 +789,7 @@ _wrap_g_function_info_invoke(PyGIBaseInfo *self, PyObject *py_args)
                             containers[containers_pos].v_pointer = g_slist_copy(args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_GHASH:
-                            /* TODO */
+                            containers[containers_pos].v_pointer = g_hash_table_copy(args[i]->v_pointer);
                             break;
                         default:
                             break;
