@@ -44,7 +44,15 @@ pygi_py_type_find_by_name(const char *namespace_, const char *name)
             return NULL;
         }
 
-        py_object = PyObject_GetAttrString(py_module, name);
+        if (strcmp(namespace_, "GObject") == 0 &&
+                (strcmp(name, "Object") == 0 || strcmp(name, "InitiallyUnowned") == 0)) {
+            /* Special case for GObject.(Object|InitiallyUnowned) which actually is
+             * gobject.GObject. */
+             py_object = (PyObject *)&PyGObject_Type;
+             Py_INCREF(py_object);
+        } else {
+            py_object = PyObject_GetAttrString(py_module, name);
+        }
 
         Py_DECREF(py_module);
 

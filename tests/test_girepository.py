@@ -678,6 +678,17 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.TestObj.static_method)
         self.assertRaises(TypeError, Everything.TestObj.static_method, 'foo', 'bar')
 
+    def testObjIn(self):
+        obj = Everything.TestObj('foo')
+        bare = Everything.TestObj('bar')
+        obj.set_bare(bare)
+
+    def testObjOut(self):
+        obj = Everything.TestObj('foo')
+        bare = Everything.TestObj('bar')
+        obj.set_bare(bare)
+        self.assertTrue(bare is obj.get_bare())
+
 
 # Inheritance
 

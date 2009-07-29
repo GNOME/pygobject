@@ -867,6 +867,9 @@ array_item_error:
                 }
                 case GI_INFO_TYPE_OBJECT:
                     arg.v_pointer = pygobject_get(object);
+                    if (transfer == GI_TRANSFER_EVERYTHING) {
+                        g_object_ref(arg.v_pointer);
+                    }
                     break;
                 default:
                     /* TODO */
@@ -1467,8 +1470,33 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
             break;
         }
         case GI_TYPE_TAG_INTERFACE:
-            /* TODO */
+        {
+            GIBaseInfo *info;
+            GIInfoType info_type;
+
+            info = g_type_info_get_interface(type_info);
+            g_assert(info != NULL);
+
+            info_type = g_base_info_get_type(info);
+
+            switch (info_type) {
+                case GI_INFO_TYPE_OBJECT:
+                {
+                    GObject *object;
+                    object = arg->v_pointer;
+                    if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
+                        g_object_unref(object);
+                    }
+                    break;
+                }
+                default:
+                    /* TODO */
+                    break;
+            }
+
+            g_base_info_unref(info);
             break;
+        }
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
         {
