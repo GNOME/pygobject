@@ -698,7 +698,9 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info, GITransf
             py_datetime = (PyDateTime_DateTime *)object;
 
             if (py_datetime->hastzinfo) {
-                PyErr_WarnEx(NULL, "tzinfo ignored; only local time is supported", 1);
+                if (PyErr_WarnEx(NULL, "tzinfo ignored; only local time is supported", 1) < 0) {
+                    break;
+                }
             }
 
             datetime.tm_sec = PyDateTime_DATE_GET_SECOND(py_datetime);
@@ -1038,7 +1040,9 @@ list_item_error:
                     equal_func = g_double_equal;
                     break;
                 default:
-                    PyErr_WarnEx(NULL, "No suited hash function available; using pointers", 1);
+                    if (PyErr_WarnEx(NULL, "No suited hash function available; using pointers", 1) < 0) {
+                        goto hash_table_release;
+                    }
                     hash_func = g_direct_hash;
                     equal_func = g_direct_equal;
             }
@@ -1046,9 +1050,7 @@ list_item_error:
             hash_table = g_hash_table_new(hash_func, equal_func);
             if (hash_table == NULL) {
                 PyErr_NoMemory();
-                Py_DECREF(keys);
-                Py_DECREF(values);
-                break;
+                goto hash_table_release;
             }
 
             for (i = 0; i < length; i++) {
@@ -1087,6 +1089,7 @@ hash_table_item_error:
 
             arg.v_pointer = hash_table;
 
+hash_table_release:
             g_base_info_unref((GIBaseInfo *)key_type_info);
             g_base_info_unref((GIBaseInfo *)value_type_info);
             Py_DECREF(keys);
@@ -1459,8 +1462,9 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
             if (transfer == GI_TRANSFER_CONTAINER) {
-                PyErr_WarnEx(NULL, "Invalid 'container' transfer for string", 1);
-                break;
+                if (PyErr_WarnEx(NULL, "Invalid 'container' transfer for string", 1) < 0) {
+                    break;
+                }
             }
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
