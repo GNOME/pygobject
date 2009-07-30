@@ -24,6 +24,9 @@
 #include "pygi-private.h"
 
 #include <string.h>
+#include <time.h>
+
+#include <datetime.h>
 #include <pygobject.h>
 
 gint
@@ -252,8 +255,12 @@ check_number_release:
             break;
         }
         case GI_TYPE_TAG_TIME_T:
-            /* TODO */
-            g_assert_not_reached();
+            if (!PyDateTime_Check(object)) {
+                PyErr_Format(PyExc_TypeError, "Must be datetime.datetime, not %s",
+                        object->ob_type->tp_name);
+                retval = 0;
+                break;
+            }
             break;
         case GI_TYPE_TAG_GTYPE:
         {
@@ -683,9 +690,33 @@ pygi_g_argument_from_py_object(PyObject *object, GITypeInfo *type_info, GITransf
             break;
         }
         case GI_TYPE_TAG_TIME_T:
-            /* TODO */
-            g_assert_not_reached();
+        {
+            PyDateTime_DateTime *py_datetime;
+            struct tm datetime;
+            time_t time_;
+
+            py_datetime = (PyDateTime_DateTime *)object;
+
+            if (py_datetime->hastzinfo) {
+                PyErr_WarnEx(NULL, "tzinfo ignored; only local time is supported", 1);
+            }
+
+            datetime.tm_sec = PyDateTime_DATE_GET_SECOND(py_datetime);
+            datetime.tm_min = PyDateTime_DATE_GET_MINUTE(py_datetime);
+            datetime.tm_hour = PyDateTime_DATE_GET_HOUR(py_datetime);
+            datetime.tm_mday = PyDateTime_GET_DAY(py_datetime);
+            datetime.tm_mon = PyDateTime_GET_MONTH(py_datetime) - 1;
+            datetime.tm_year = PyDateTime_GET_YEAR(py_datetime) - 1900;
+            datetime.tm_isdst = -1;
+
+            time_ = mktime(&datetime);
+            if (time_ == -1) {
+                PyErr_SetString(PyExc_RuntimeError, "datetime conversion failed");
+            }
+
+            arg.v_long = time_;
             break;
+        }
         case GI_TYPE_TAG_GTYPE:
         {
             GType type;
@@ -1149,9 +1180,14 @@ pygi_g_argument_to_py_object(GArgument *arg, GITypeInfo *type_info)
             object = PyFloat_FromDouble(arg->v_double);
             break;
         case GI_TYPE_TAG_TIME_T:
-            /* TODO */
-            g_assert_not_reached();
+        {
+            struct tm *datetime;
+            datetime = localtime(&arg->v_long);
+            object = PyDateTime_FromDateAndTime(datetime->tm_year + 1900,
+                datetime->tm_mon + 1, datetime->tm_mday, datetime->tm_hour,
+                datetime->tm_min, datetime->tm_sec, 0);
             break;
+        }
         case GI_TYPE_TAG_GTYPE:
             object = pyg_type_wrapper_new(arg->v_long);
             break;
@@ -1622,5 +1658,11 @@ pygi_g_argument_release(GArgument *arg, GITypeInfo *type_info, GITransfer transf
             /* TODO */
             break;
     }
+}
+
+void
+pyg_argument_init(void)
+{
+    PyDateTime_IMPORT;
 }
 

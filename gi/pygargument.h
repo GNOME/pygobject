@@ -50,6 +50,8 @@ void pygi_g_argument_release(GArgument *arg,
                              GITransfer transfer,
                              GIDirection direction);
 
+void pyg_argument_init(void);
+
 G_END_DECLS
 
 #endif /* __PYG_ARGUMENT_H__ */

@@ -130,5 +130,6 @@ init_gi(void)
 
     pygi_repository_register_types(m);
     pygi_info_register_types(m);
+    pyg_argument_init();
 }
 

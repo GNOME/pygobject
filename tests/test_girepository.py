@@ -2,8 +2,8 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
+from datetime import datetime
 
-import time
 import gobject
 from gobject import constants
 
@@ -223,30 +223,18 @@ class TestGIEverything(unittest.TestCase):
         self.assertAlmostEqual(-3.14, Everything.test_double(-3.14))
         self.assertRaises(TypeError, Everything.test_double, 'a')
 
-# FIXME
-#======================================================================
-#ERROR: testTimeT (__main__.TestGIEverything)
-#----------------------------------------------------------------------
-#Traceback (most recent call last):
-#  File "test_girepository.py", line 193, in testTimeT
-#    bounced = Everything.test_timet(now)
-#  File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 124, in __call__
-#    self.type_check(name, value, argType)
-#  File "/opt/gnome-introspection/lib64/python2.5/site-packages/gtk-2.0/girepository/btypes.py", line 97, in type_check
-#    raise NotImplementedError('type checking for tag %d' % tag)
-#NotImplementedError: type checking for tag 18
-#    def testTimeT(self):
-#        now = time.time()
-#        bounced = Everything.test_timet(now)
-#        self.assertEquals(now.tm_year, bounced.tm_year)
-#        self.assertEquals(now.tm_year, bounced.tm_mon)
-#        self.assertEquals(now.tm_year, bounced.tm_mday)
-#        self.assertEquals(now.tm_year, bounced.tm_hour)
-#        self.assertEquals(now.tm_year, bounced.tm_min)
-#        self.assertEquals(now.tm_year, bounced.tm_sec)
-#        self.assertEquals(now.tm_year, bounced.tm_wday)
-#        self.assertEquals(now.tm_year, bounced.tm_yday)
-#        self.assertEquals(now.tm_year, bounced.tm_isdst)
+    def testTimeT(self):
+        now = datetime.now()
+        retval = Everything.test_timet(now)
+
+        # We can't do a direct comparison because we lost the microseconds precision.
+        self.assertEquals(retval.year, now.year)
+        self.assertEquals(retval.month, now.month)
+        self.assertEquals(retval.day, now.day)
+        self.assertEquals(retval.hour, now.hour)
+        self.assertEquals(retval.minute, now.minute)
+        self.assertEquals(retval.second, now.second)
+        self.assertEquals(retval.tzinfo, now.tzinfo)
 
     def testGType(self):
         self.assertEqual(gobject.TYPE_INT, Everything.test_gtype(gobject.TYPE_INT))
