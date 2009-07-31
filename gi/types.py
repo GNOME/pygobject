@@ -28,8 +28,7 @@ from ._gi import \
 	setObjectHasNewConstructor, \
 	InterfaceInfo, \
 	ObjectInfo, \
-	StructInfo, \
-	EnumInfo
+	StructInfo
 
 
 def Function(info):
@@ -76,9 +75,6 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
                 cls._setup_fields()
                 cls._setup_methods()
 
-            if isinstance(cls.__info__, EnumInfo):
-                cls._setup_values()
-
     def _setup_methods(cls):
         constructor_infos = []
         method_infos = cls.__info__.getMethods()
@@ -118,11 +114,6 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
         for field_info in cls.__info__.getFields():
             name = field_info.getName().replace('-', '_')
             setattr(cls, name, Field(field_info))
-
-    def _setup_values(cls):
-        for value_info in cls.__info__.getValues():
-            name = value_info.getName().upper()
-            setattr(cls, name, value_info.getValue())
 
 
 class GIStruct(object):

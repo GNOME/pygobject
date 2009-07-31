@@ -91,9 +91,14 @@ class DynamicModule(object):
             elif type_.is_a(gobject.TYPE_FLAGS):
                 value = gobject.flags_from_g_type(type_)
             else:
-                raise TypeError, "Must be either a subtype of gobject.TYPE_ENUM, or gobject.TYPE_FLAGS"
+                raise TypeError, "Must be a subtype of either gobject.TYPE_ENUM, or gobject.TYPE_FLAGS"
             value.__info__ = info
             value.__module__ = info.getNamespace()
+
+            for value_info in info.getValues():
+                name = value_info.getName().upper()
+                setattr(value, name, value(value_info.getValue()))
+
         elif isinstance(info, RegisteredTypeInfo):
             # Check if there is already a Python wrapper.
             gtype = info.getGType()
