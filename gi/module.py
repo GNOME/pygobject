@@ -84,6 +84,16 @@ class DynamicModule(object):
                 '__module__': info.getNamespace()
             }
             value = GObjectIntrospectionMeta(name, bases, dict_)
+        elif isinstance(info, EnumInfo):
+            type_ = info.getGType()
+            if type_.is_a(gobject.TYPE_ENUM):
+                value = gobject.enum_from_g_type(type_)
+            elif type_.is_a(gobject.TYPE_FLAGS):
+                value = gobject.flags_from_g_type(type_)
+            else:
+                raise TypeError, "Must be either a subtype of gobject.TYPE_ENUM, or gobject.TYPE_FLAGS"
+            value.__info__ = info
+            value.__module__ = info.getNamespace()
         elif isinstance(info, RegisteredTypeInfo):
             # Check if there is already a Python wrapper.
             gtype = info.getGType()
@@ -97,8 +107,6 @@ class DynamicModule(object):
                 bases = (parent,)
             elif isinstance(info, InterfaceInfo):
                 bases = (GInterface,)
-            elif isinstance(info, EnumInfo):
-                bases = (GEnum,)
             elif isinstance(info, BoxedInfo):
                 bases = (GBoxed,)
             else:

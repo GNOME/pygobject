@@ -1985,6 +1985,38 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
+static PyObject *
+_wrap_pyg_enum_from_g_type(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "type", NULL };
+    PyObject *py_g_type;
+    GType g_type;
+    PyObject *type;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:gobject.enum_from_g_type",
+                                     kwlist, &PyGTypeWrapper_Type, &py_g_type)) {
+        return NULL;
+    }
+
+    g_type = pyg_type_from_object(py_g_type);
+
+    if (!g_type_is_a(g_type, G_TYPE_ENUM)) {
+        PyErr_SetString(PyExc_TypeError,
+            "gobject.enum_from_g_type() argument 0: Must be a subtype of gobject.TYPE_ENUM");
+        return NULL;
+    }
+
+    type = (PyObject *)g_type_get_qdata(g_type, pygenum_class_key);
+    if (type == NULL) {
+        type = pyg_enum_add(NULL, g_type_name(g_type), NULL, g_type);
+    } else {
+        Py_INCREF(type);
+    }
+
+    return type;
+}
+
 static PyMethodDef _gobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -2018,6 +2050,8 @@ static PyMethodDef _gobject_functions[] = {
       (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
     { "_install_metaclass",
       (PyCFunction)pyg__install_metaclass, METH_O },
+    { "enum_from_g_type",
+      (PyCFunction)_wrap_pyg_enum_from_g_type, METH_VARARGS|METH_KEYWORDS },
 
     { NULL, NULL, 0 }
 };
