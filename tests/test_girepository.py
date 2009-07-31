@@ -494,10 +494,36 @@ class TestGIEverything(unittest.TestCase):
     def testValueReturn(self):
         self.assertEquals(42, Everything.test_value_return(42))
 
+
+# Enum
+
     def testEnum(self):
-        self.assertEqual('value1', Everything.test_enum_param(Everything.TestEnum.VALUE1))
-        self.assertEqual('value2', Everything.test_enum_param(Everything.TestEnum.VALUE2))
-        self.assertEqual('value3', Everything.test_enum_param(Everything.TestEnum.VALUE3))
+        self.assertTrue(issubclass(Everything.TestEnum, gobject.GEnum))
+
+        # Test instantiation.
+        self.assertTrue(isinstance(Everything.TestEnum(42), Everything.TestEnum))
+
+        # Test attributes.
+        self.assertTrue(isinstance(Everything.TestEnum.VALUE3, Everything.TestEnum))
+
+        # Test numeric equivalence.
+        self.assertEquals(Everything.TestEnum.VALUE3, 42)
+
+
+# Flags
+
+    def testFlags(self):
+        self.assertTrue(issubclass(Everything.TestFlags, gobject.GFlags))
+
+        # Test instantiation.
+        self.assertTrue(isinstance(Everything.TestFlags(1 << 2), Everything.TestFlags))
+
+        # Test attributes.
+        self.assertTrue(isinstance(Everything.TestFlags.FLAG3, Everything.TestFlags))
+
+        # Test numeric equivalence.
+        self.assertEquals(Everything.TestFlags.FLAG3, 1 << 2)
+
 
     def testSignal(self):
         h = SignalHandler()
