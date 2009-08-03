@@ -139,21 +139,33 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject 
 static PyObject *
 _wrap_g_irepository_get_namespaces(PyGIRepository *self)
 {
-    char ** namespaces;
-    int i, length;
-    PyObject *retval;
+    char **namespaces;
+    gsize n_namespaces;
+    gsize i;
+    PyObject *py_namespaces;
 
     namespaces = g_irepository_get_loaded_namespaces(self->repository);
 
-    length = g_strv_length(namespaces);
-    retval = PyTuple_New(length);
+    n_namespaces = g_strv_length(namespaces);
+    py_namespaces = PyTuple_New(n_namespaces);
+    if (py_namespaces == NULL) {
+        goto return_;
+    }
 
-    for (i = 0; i < length; i++)
-	PyTuple_SetItem(retval, i, PyString_FromString(namespaces[i]));
+    for (i = 0; i < n_namespaces; i++) {
+        PyObject *namespace_;
+        namespace_ = PyString_FromString(namespaces[i]);
+        if (namespace_ == NULL) {
+            Py_CLEAR(py_namespaces);
+            break;
+        }
+	    PyTuple_SET_ITEM(py_namespaces, i, namespace_);
+    }
 
+return_:
     g_strfreev (namespaces);
 
-    return retval;
+    return py_namespaces;
 }
 
 static PyObject *
