@@ -1200,17 +1200,20 @@ PYGIINFO_DEFINE_TYPE("ObjectInfo", GIObjectInfo, PyGIRegisteredTypeInfo_Type);
 static PyObject *
 _wrap_g_object_info_get_parent(PyGIBaseInfo *self)
 {
-    GIObjectInfo *parent_info;
+    GIBaseInfo *info;
+    PyObject *py_info;
 
-    g_base_info_ref(self->info);
-    parent_info = g_object_info_get_parent((GIObjectInfo*)self->info);
-    g_base_info_unref(self->info);
+    info = (GIBaseInfo *)g_object_info_get_parent((GIObjectInfo*)self->info);
 
-    if (parent_info)
-        return pyg_info_new(parent_info);
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    py_info = pyg_info_new(info);
+
+    g_base_info_unref(info);
+
+    return py_info;
 }
 
 static PyObject *
