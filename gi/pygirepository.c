@@ -110,26 +110,30 @@ _wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwar
 }
 
 static PyObject *
-_wrap_g_irepository_find_by_name(PyGIRepository *self,
-				 PyObject *args,
-				 PyObject *kwargs)
+_wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", "name", NULL };
-    char *namespace, *name;
+
+    const char *namespace_;
+    const char *name;
     GIBaseInfo *info;
+    PyObject *py_info;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "ss:Repository.find_by_name",
-				     kwlist, &namespace, &name))
+            "ss:Repository.find_by_name", kwlist, &namespace_, &name)) {
         return NULL;
-
-    info = g_irepository_find_by_name (self->repository, namespace, name);
-    if (!info) {
-	Py_INCREF(Py_None);
-	return Py_None;
     }
 
-    return pyg_info_new(info);
+    info = g_irepository_find_by_name(self->repository, namespace_, name);
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    py_info = pyg_info_new(info);
+
+    g_base_info_unref(info);
+
+    return py_info;
 }
 
 static PyObject *
