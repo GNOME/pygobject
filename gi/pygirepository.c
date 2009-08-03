@@ -58,6 +58,24 @@ PyTypeObject PyGIRepository_Type = {
 };
 
 static PyObject *
+_wrap_g_irepository_get_default(PyObject *self)
+{
+    static PyGIRepository *repository = NULL;
+
+    if (!repository) {
+        repository = (PyGIRepository *)PyObject_New(PyGIRepository, &PyGIRepository_Type);
+        if (repository == NULL) {
+            return NULL;
+        }
+
+        repository->repository = g_irepository_get_default();
+    }
+
+    Py_INCREF((PyObject *)repository);
+    return (PyObject *)repository;
+}
+
+static PyObject *
 _wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", "lazy", NULL };
@@ -221,29 +239,11 @@ _wrap_g_irepository_get_typelib_path(PyGIRepository *self,
     return PyString_FromString(typelib_path);
 }
 
-static PyObject *
-_wrap_g_irepository_get_default(PyObject *self)
-{
-    static PyGIRepository *repository = NULL;
-
-    if (!repository) {
-        repository = (PyGIRepository *)PyObject_New(PyGIRepository, &PyGIRepository_Type);
-        if (repository == NULL) {
-            return NULL;
-        }
-
-        repository->repository = g_irepository_get_default();
-    }
-
-    Py_INCREF((PyObject *)repository);
-    return (PyObject *)repository;
-}
-
 static PyMethodDef _PyGIRepository_methods[] = {
+    { "get_default", (PyCFunction)_wrap_g_irepository_get_default, METH_STATIC|METH_NOARGS },
     { "require", (PyCFunction)_wrap_g_irepository_require, METH_VARARGS|METH_KEYWORDS },
     { "get_namespaces", (PyCFunction)_wrap_g_irepository_get_namespaces, METH_NOARGS },
     { "get_infos", (PyCFunction)_wrap_g_irepository_get_infos, METH_VARARGS|METH_KEYWORDS },
-    { "get_default", (PyCFunction)_wrap_g_irepository_get_default, METH_STATIC|METH_NOARGS },
     { "find_by_name", (PyCFunction)_wrap_g_irepository_find_by_name, METH_VARARGS|METH_KEYWORDS },
     { "is_registered", (PyCFunction)_wrap_g_irepository_is_registered, METH_VARARGS|METH_KEYWORDS },
     { "get_c_prefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
@@ -255,14 +255,11 @@ void
 pygi_repository_register_types(PyObject *m)
 {
     PyGIRepository_Type.ob_type = &PyType_Type;
-    PyGIRepository_Type.tp_alloc = PyType_GenericAlloc;
-    PyGIRepository_Type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&PyGIRepository_Type)) {
         return;
     }
     if (PyModule_AddObject(m, "Repository", (PyObject *)&PyGIRepository_Type)) {
         return;
     }
-    Py_INCREF(&PyGIRepository_Type);
 }
 
