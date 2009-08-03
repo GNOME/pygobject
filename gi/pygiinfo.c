@@ -1443,11 +1443,9 @@ _wrap_g_value_info_get_value(PyGIBaseInfo *self)
 {
     glong value;
 
-    g_base_info_ref(self->info);
-    value = g_value_info_get_value((GIValueInfo*)self->info);
-    g_base_info_unref(self->info);
+    value = g_value_info_get_value((GIValueInfo *)self->info);
 
-    return PyLong_FromLong(value);
+    return PyInt_FromLong(value);
 }
 
 
