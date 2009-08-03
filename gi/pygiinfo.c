@@ -1041,12 +1041,12 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
 PYGIINFO_DEFINE_TYPE("RegisteredTypeInfo", GIRegisteredTypeInfo, PyGIBaseInfo_Type);
 
 static PyObject *
-_wrap_g_registered_type_info_get_g_type (PyGIBaseInfo* self)
+_wrap_g_registered_type_info_get_g_type(PyGIBaseInfo *self)
 {
-    int gtype;
+    GType type;
 
-    gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo*)self->info);
-    return pyg_type_wrapper_new(gtype);
+    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
+    return pyg_type_wrapper_new(type);
 }
 
 static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
