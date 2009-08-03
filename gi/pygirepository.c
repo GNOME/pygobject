@@ -23,6 +23,8 @@
 
 #include "pygi-private.h"
 
+PyObject *PyGIRepositoryError;
+
 static PyMethodDef _PyGIRepository_methods[];
 
 PyTypeObject PyGIRepository_Type = {
@@ -78,39 +80,33 @@ _wrap_g_irepository_get_default(PyObject *self)
 static PyObject *
 _wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
-    static char *kwlist[] = { "namespace", "lazy", NULL };
-    gchar *namespace;
-    PyObject *lazy_obj = NULL;
-    int flags = 0;
-    GTypelib *ret;
-    PyObject *pyret;
-    GError *error = NULL;
+    static char *kwlist[] = { "namespace", "version", "lazy", NULL };
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s|O:Repository.require",
-				     kwlist, &namespace, &lazy_obj))
+    const char *namespace_;
+    const char *version = NULL;
+    PyObject *lazy = NULL;
+    GIRepositoryLoadFlags flags = 0;
+    GTypelib *typelib;
+    GError *error;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|sO:Repository.require",
+            kwlist, &namespace_, &version, &lazy)) {
         return NULL;
-
-    if (lazy_obj != NULL && PyObject_IsTrue(lazy_obj))
-	flags |= G_IREPOSITORY_LOAD_FLAG_LAZY;
-
-    /* TODO - handle versioning in some way, need to figure out what
-     * this looks like Python side.
-     */
-    ret = g_irepository_require(self->repository, namespace, NULL, flags, &error);
-
-    if (ret == NULL) {
-#if 0
-	g_print ("ERROR: %s (FIXME: raise GError exception)\n",
-		 error->message);
-	g_clear_error (&error);
-#endif
-	Py_INCREF(Py_None);
-	return Py_None;
     }
-    pyret = PyBool_FromLong(ret != NULL);
-    Py_INCREF(pyret);
-    return pyret;
+
+    if (lazy != NULL && PyObject_IsTrue(lazy)) {
+        flags |= G_IREPOSITORY_LOAD_FLAG_LAZY;
+    }
+
+    error = NULL;
+    typelib = g_irepository_require(self->repository, namespace_, version, flags, &error);
+    if (error != NULL) {
+        PyErr_SetString(PyGIRepositoryError, error->message);
+        g_error_free(error);
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -259,6 +255,11 @@ pygi_repository_register_types(PyObject *m)
         return;
     }
     if (PyModule_AddObject(m, "Repository", (PyObject *)&PyGIRepository_Type)) {
+        return;
+    }
+
+    PyGIRepositoryError = PyErr_NewException("gi.RepositoryError", NULL, NULL);
+    if (PyModule_AddObject(m, "RepositoryError", PyGIRepositoryError)) {
         return;
     }
 }

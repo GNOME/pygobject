@@ -23,7 +23,7 @@
 import sys
 import gobject
 
-from ._gi import Repository
+from ._gi import Repository, RepositoryError
 from .module import DynamicModule
 
 
@@ -44,7 +44,11 @@ class DynamicImporter(object):
         path, namespace = fullname.rsplit('.', 1)
         if path != self.path:
             return
-        if repository.require(namespace):
+        try:
+            repository.require(namespace)
+        except RepositoryError:
+            pass
+        else:
             return self
 
     def load_module(self, fullname):
