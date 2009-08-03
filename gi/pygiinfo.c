@@ -53,57 +53,37 @@ PyTypeObject Py##cname##_Type = { \
     (traverseproc)NULL,                       /* tp_traverse */ \
     (inquiry)NULL,                            /* tp_clear */ \
     (richcmpfunc)NULL,                        /* tp_richcompare */ \
-    offsetof(PyGIBaseInfo, weakreflist),      /* tp_weaklistoffset */ \
+    offsetof(PyGIBaseInfo, inst_weakreflist), /* tp_weaklistoffset */ \
     (getiterfunc)NULL,                        /* tp_iter */ \
     (iternextfunc)NULL,                       /* tp_iternext */ \
     _Py##cname##_methods,                     /* tp_methods */ \
     NULL,                                     /* tp_members */ \
     NULL,                                     /* tp_getset */ \
-    &base,                                    /* tp_base */ \
-    NULL,                                     /* tp_dict */ \
-    (descrgetfunc)NULL,                       /* tp_descr_get */ \
-    (descrsetfunc)NULL,                       /* tp_descr_set */ \
-    offsetof(PyGIBaseInfo, instance_dict),    /* tp_dictoffset */ \
+    &base                                     /* tp_base */ \
 }
 
 
 /* BaseInfo */
 
 static void
-pygi_base_info_clear(PyGIBaseInfo *self)
+pygi_base_info_dealloc(PyGIBaseInfo *self)
 {
     PyObject_GC_UnTrack((PyObject *)self);
 
-    Py_CLEAR(self->instance_dict);
+    PyObject_ClearWeakRefs((PyObject *)self);
 
     if (self->info) {
         g_base_info_unref(self->info);
         self->info = NULL;
     }
 
-    PyObject_GC_Del(self);
-}
-
-static void
-pygi_base_info_dealloc(PyGIBaseInfo *self)
-{
-    PyObject_ClearWeakRefs((PyObject *)self);
-    pygi_base_info_clear(self);
+    self->ob_type->tp_free((PyObject *)self);
 }
 
 static int
-pygi_base_info_traverse(PyGIBaseInfo *self, visitproc visit, void *data)
+pygi_base_info_traverse(PyGIBaseInfo *self, visitproc visit, void *arg)
 {
-    if (self->instance_dict) {
-        return visit(self->instance_dict, data);
-    }
     return 0;
-}
-
-static void
-pygi_base_info_free(PyObject *self)
-{
-    PyObject_GC_Del(self);
 }
 
 static PyObject *
@@ -114,7 +94,6 @@ pygi_base_info_repr(PyGIBaseInfo *self)
 }
 
 static PyMethodDef _PyGIBaseInfo_methods[];
-static PyGetSetDef _PyGIBaseInfo_getsets[];
 
 PyTypeObject PyGIBaseInfo_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -141,43 +120,13 @@ PyTypeObject PyGIBaseInfo_Type = {
         Py_TPFLAGS_HAVE_GC,                    /* tp_flags */
     NULL,                                      /* tp_doc */
     (traverseproc)pygi_base_info_traverse,     /* tp_traverse */
-    (inquiry)pygi_base_info_clear,             /* tp_clear */
+    (inquiry)NULL,                             /* tp_clear */
     (richcmpfunc)NULL,                         /* tp_richcompare */
-    offsetof(PyGIBaseInfo, weakreflist),       /* tp_weaklistoffset */
+    offsetof(PyGIBaseInfo, inst_weakreflist),  /* tp_weaklistoffset */
     (getiterfunc)NULL,                         /* tp_iter */
     (iternextfunc)NULL,                        /* tp_iternext */
     _PyGIBaseInfo_methods,                     /* tp_methods */
-    NULL,                                      /* tp_members */
-    _PyGIBaseInfo_getsets,                     /* tp_getset */
-    NULL,                                      /* tp_base */
-    NULL,                                      /* tp_dict */
-    (descrgetfunc)NULL,                        /* tp_descr_get */
-    (descrsetfunc)NULL,                        /* tp_descr_set */
-    offsetof(PyGIBaseInfo, instance_dict),     /* tp_dictoffset */
-    (initproc)NULL,                            /* tp_init */
-    (allocfunc)NULL,                           /* tp_alloc */
-    (newfunc)NULL,                             /* tp_new */
-    (freefunc)pygi_base_info_free,             /* tp_free */
 };
-
-static PyObject *
-pygi_base_info_get_dict(PyGIBaseInfo *self, void *closure)
-{
-    if (self->instance_dict == NULL) {
-        self->instance_dict = PyDict_New();
-        if (self->instance_dict == NULL) {
-            return NULL;
-        }
-    }
-    Py_INCREF(self->instance_dict);
-    return self->instance_dict;
-}
-
-static PyGetSetDef _PyGIBaseInfo_getsets[] = {
-    { "__dict__", (getter)pygi_base_info_get_dict, (setter)0 },
-    { NULL, 0, 0 }
-};
-
 
 static PyObject *
 _wrap_g_base_info_get_name(PyGIBaseInfo *self)
@@ -273,14 +222,9 @@ pyg_info_new(GIBaseInfo *info)
         return NULL;
     }
 
-    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
-        Py_INCREF(type);
-    }
-
     self->info = g_base_info_ref(info);
 
-    self->instance_dict = NULL;
-    self->weakreflist = NULL;
+    self->inst_weakreflist = NULL;
 
     PyObject_GC_Track((PyObject *)self);
 
@@ -1674,13 +1618,10 @@ pygi_info_register_types(PyObject *m)
 {
 #define REGISTER_TYPE(m, type, name) \
     type.ob_type = &PyType_Type; \
-    type.tp_alloc = PyType_GenericAlloc; \
-    type.tp_new = PyType_GenericNew; \
     if (PyType_Ready(&type)) \
         return; \
     if (PyModule_AddObject(m, name, (PyObject *)&type)) \
-        return; \
-    Py_INCREF(&type)
+        return
 
     REGISTER_TYPE(m, PyGIBaseInfo_Type, "BaseInfo");
     REGISTER_TYPE(m, PyGIUnresolvedInfo_Type, "UnresolvedInfo");

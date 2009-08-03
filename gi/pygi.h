@@ -36,8 +36,7 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     GIBaseInfo *info;
-    PyObject *instance_dict;
-    PyObject *weakreflist;
+    PyObject *inst_weakreflist;
 } PyGIBaseInfo;
 
 G_END_DECLS
