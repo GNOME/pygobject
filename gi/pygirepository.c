@@ -137,38 +137,6 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject 
 }
 
 static PyObject *
-_wrap_g_irepository_get_namespaces(PyGIRepository *self)
-{
-    char **namespaces;
-    gsize n_namespaces;
-    gsize i;
-    PyObject *py_namespaces;
-
-    namespaces = g_irepository_get_loaded_namespaces(self->repository);
-
-    n_namespaces = g_strv_length(namespaces);
-    py_namespaces = PyTuple_New(n_namespaces);
-    if (py_namespaces == NULL) {
-        goto return_;
-    }
-
-    for (i = 0; i < n_namespaces; i++) {
-        PyObject *namespace_;
-        namespace_ = PyString_FromString(namespaces[i]);
-        if (namespace_ == NULL) {
-            Py_CLEAR(py_namespaces);
-            break;
-        }
-	    PyTuple_SET_ITEM(py_namespaces, i, namespace_);
-    }
-
-return_:
-    g_strfreev (namespaces);
-
-    return py_namespaces;
-}
-
-static PyObject *
 _wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
@@ -214,39 +182,6 @@ _wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kw
 }
 
 static PyObject *
-_wrap_g_irepository_is_registered(PyGIRepository *self,
-				  PyObject *args,
-				  PyObject *kwargs)
-{
-    static char *kwlist[] = { "namespace", NULL };
-    char *namespace;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:Repository.is_registered",
-				     kwlist, &namespace))
-        return NULL;
-
-    return PyBool_FromLong(g_irepository_is_registered(self->repository, namespace, NULL));
-}
-
-static PyObject *
-_wrap_g_irepository_get_c_prefix(PyGIRepository *self,
-				 PyObject *args,
-				 PyObject *kwargs)
-{
-    static char *kwlist[] = { "namespace", NULL };
-    char *namespace;
-
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:Repository.get_c_prefix",
-				     kwlist, &namespace))
-        return NULL;
-
-    return PyString_FromString(g_irepository_get_c_prefix(self->repository, namespace));
-}
-
-static PyObject *
 _wrap_g_irepository_get_typelib_path(PyGIRepository *self,
                                      PyObject *args,
                                      PyObject *kwargs)
@@ -272,11 +207,8 @@ _wrap_g_irepository_get_typelib_path(PyGIRepository *self,
 static PyMethodDef _PyGIRepository_methods[] = {
     { "get_default", (PyCFunction)_wrap_g_irepository_get_default, METH_STATIC|METH_NOARGS },
     { "require", (PyCFunction)_wrap_g_irepository_require, METH_VARARGS|METH_KEYWORDS },
-    { "get_namespaces", (PyCFunction)_wrap_g_irepository_get_namespaces, METH_NOARGS },
     { "get_infos", (PyCFunction)_wrap_g_irepository_get_infos, METH_VARARGS|METH_KEYWORDS },
     { "find_by_name", (PyCFunction)_wrap_g_irepository_find_by_name, METH_VARARGS|METH_KEYWORDS },
-    { "is_registered", (PyCFunction)_wrap_g_irepository_is_registered, METH_VARARGS|METH_KEYWORDS },
-    { "get_c_prefix", (PyCFunction)_wrap_g_irepository_get_c_prefix, METH_VARARGS|METH_KEYWORDS },
     { "get_typelib_path", (PyCFunction)_wrap_g_irepository_get_typelib_path, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
