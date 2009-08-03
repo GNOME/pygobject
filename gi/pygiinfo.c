@@ -109,13 +109,8 @@ pygi_base_info_free(PyObject *self)
 static PyObject *
 pygi_base_info_repr(PyGIBaseInfo *self)
 {
-    gchar buf[256];
-
-    g_snprintf(buf, sizeof(buf),
-               "<%s object (%s) at 0x%lx>",
-               self->ob_type->tp_name,
-               g_base_info_get_name(self->info), (long)self);
-    return PyString_FromString(buf);
+    return PyString_FromFormat("<%s object (%s) at 0x%p>",
+            self->ob_type->tp_name, g_base_info_get_name(self->info), (void *)self);
 }
 
 static PyMethodDef _PyGIBaseInfo_methods[];
