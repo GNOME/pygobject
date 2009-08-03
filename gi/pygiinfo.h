@@ -28,7 +28,7 @@
 
 G_BEGIN_DECLS
 
-PyObject* pyg_info_new(gpointer info);
+PyObject* pyg_info_new(GIBaseInfo *info);
 
 gchar * pygi_gi_base_info_get_fullname(GIBaseInfo *info);
 

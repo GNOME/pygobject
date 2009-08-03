@@ -203,45 +203,40 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
 };
 
 PyObject *
-pyg_info_new(void *info)
+pyg_info_new(GIBaseInfo *info)
 {
+    GIInfoType info_type;
+    PyTypeObject *type;
     PyGIBaseInfo *self;
-    GIInfoType type_info;
-    PyTypeObject *tp;
 
-    if (info == NULL) {
-        PyErr_SetString(PyExc_TypeError, "NULL value sent to pyg_info_new");
-        return NULL;
-    }
+    info_type = g_base_info_get_type(info);
 
-    type_info = g_base_info_get_type((GIBaseInfo*)info);
-
-    switch (type_info)
+    switch (info_type)
     {
         case GI_INFO_TYPE_INVALID:
             PyErr_SetString(PyExc_RuntimeError, "Invalid info type");
             return NULL;
         case GI_INFO_TYPE_FUNCTION:
-            tp = &PyGIFunctionInfo_Type;
+            type = &PyGIFunctionInfo_Type;
             break;
         case GI_INFO_TYPE_CALLBACK:
             PyErr_SetString(PyExc_NotImplementedError, "GICallbackInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_STRUCT:
-            tp = &PyGIStructInfo_Type;
+            type = &PyGIStructInfo_Type;
             break;
         case GI_INFO_TYPE_BOXED:
             PyErr_SetString(PyExc_NotImplementedError, "GIBoxedInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_ENUM:
         case GI_INFO_TYPE_FLAGS:
-            tp = &PyGIEnumInfo_Type;
+            type = &PyGIEnumInfo_Type;
             break;
         case GI_INFO_TYPE_OBJECT:
-            tp = &PyGIObjectInfo_Type;
+            type = &PyGIObjectInfo_Type;
             break;
         case GI_INFO_TYPE_INTERFACE:
-            tp = &PyGIInterfaceInfo_Type;
+            type = &PyGIInterfaceInfo_Type;
             break;
         case GI_INFO_TYPE_CONSTANT:
             PyErr_SetString(PyExc_NotImplementedError, "GIConstantInfo bindings not implemented");
@@ -253,7 +248,7 @@ pyg_info_new(void *info)
             PyErr_SetString(PyExc_NotImplementedError, "GIUnionInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_VALUE:
-            tp = &PyGIValueInfo_Type;
+            type = &PyGIValueInfo_Type;
             break;
         case GI_INFO_TYPE_SIGNAL:
             PyErr_SetString(PyExc_NotImplementedError, "GISignalInfo bindings not implemented");
@@ -265,7 +260,7 @@ pyg_info_new(void *info)
             PyErr_SetString(PyExc_NotImplementedError, "GIPropertyInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_FIELD:
-            tp = &PyGIFieldInfo_Type;
+            type = &PyGIFieldInfo_Type;
             break;
         case GI_INFO_TYPE_ARG:
             PyErr_SetString(PyExc_NotImplementedError, "GIArgInfo bindings not implemented");
@@ -274,16 +269,18 @@ pyg_info_new(void *info)
             PyErr_SetString(PyExc_NotImplementedError, "GITypeInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_UNRESOLVED:
-            tp = &PyGIUnresolvedInfo_Type;
+            type = &PyGIUnresolvedInfo_Type;
             break;
     }
 
-    if (tp->tp_flags & Py_TPFLAGS_HEAPTYPE)
-        Py_INCREF(tp);
-
-    self = (PyGIBaseInfo*)PyObject_GC_New(PyGIBaseInfo, tp);
-    if (self == NULL)
+    self = (PyGIBaseInfo *)PyObject_GC_New(PyGIBaseInfo, type);
+    if (self == NULL) {
         return NULL;
+    }
+
+    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
+        Py_INCREF(type);
+    }
 
     self->info = g_base_info_ref(info);
 
@@ -292,7 +289,7 @@ pyg_info_new(void *info)
 
     PyObject_GC_Track((PyObject *)self);
 
-    return (PyObject*)self;
+    return (PyObject *)self;
 }
 
 gchar *
