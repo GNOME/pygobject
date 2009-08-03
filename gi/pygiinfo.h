@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 PyObject* pyg_info_new(gpointer info);
 
 gchar * pygi_gi_base_info_get_fullname(GIBaseInfo *info);
-GIBaseInfo* pyg_base_info_from_object(PyObject *object);
 
 void pygi_info_register_types(PyObject *m);
 

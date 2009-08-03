@@ -36,8 +36,7 @@ from ._gi import \
     EnumInfo, \
     ObjectInfo, \
     InterfaceInfo, \
-    StructInfo, \
-    BoxedInfo
+    StructInfo
 from .types import \
     GObjectIntrospectionMeta, \
     GIStruct, \
@@ -112,8 +111,6 @@ class DynamicModule(object):
                 bases = (parent,)
             elif isinstance(info, InterfaceInfo):
                 bases = (GInterface,)
-            elif isinstance(info, BoxedInfo):
-                bases = (GBoxed,)
             else:
                 raise NotImplementedError(info)
 
