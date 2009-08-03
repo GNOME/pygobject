@@ -331,15 +331,25 @@ PYGIINFO_DEFINE_TYPE("FunctionInfo", GIFunctionInfo, PyGICallableInfo_Type);
 static PyObject *
 _wrap_g_function_info_is_constructor(PyGIBaseInfo *self)
 {
-    return PyInt_FromLong(g_function_info_get_flags((GIFunctionInfo*)self->info) &
-                          GI_FUNCTION_IS_CONSTRUCTOR);
+    GIFunctionInfoFlags flags;
+    gboolean is_constructor;
+
+    flags = g_function_info_get_flags((GIFunctionInfo*)self->info);
+    is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;
+
+    return PyBool_FromLong(is_constructor);
 }
 
 static PyObject *
 _wrap_g_function_info_is_method(PyGIBaseInfo *self)
 {
-    return PyInt_FromLong(g_function_info_get_flags((GIFunctionInfo*)self->info) &
-                          GI_FUNCTION_IS_METHOD);
+    GIFunctionInfoFlags flags;
+    gboolean is_method;
+
+    flags = g_function_info_get_flags((GIFunctionInfo*)self->info);
+    is_method = flags & GI_FUNCTION_IS_METHOD;
+
+    return PyBool_FromLong(is_method);
 }
 
 static
