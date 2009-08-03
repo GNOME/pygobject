@@ -1148,34 +1148,51 @@ static PyMethodDef _PyGIStructInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
+
 /* EnumInfo */
 PYGIINFO_DEFINE_TYPE("EnumInfo", GIEnumInfo, PyGIRegisteredTypeInfo_Type);
 
 static PyObject *
 _wrap_g_enum_info_get_values(PyGIBaseInfo *self)
 {
-    int n_values, i;
-    GIValueInfo  *value;
-    PyObject *list;
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
 
-    g_base_info_ref(self->info);
-    n_values = g_enum_info_get_n_values((GIEnumInfo*)self->info);
-    list = PyList_New(n_values);
-    for (i = 0; i < n_values; i++)
-        {
-            value = g_enum_info_get_value((GIEnumInfo*)self->info, i);
-            PyList_SetItem(list, i, pyg_info_new(value));
-            g_base_info_unref((GIBaseInfo*)value);
+    n_infos = g_enum_info_get_n_values((GIEnumInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_enum_info_get_value((GIEnumInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = pyg_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
         }
-    g_base_info_unref(self->info);
 
-    return list;
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
 }
 
 static PyMethodDef _PyGIEnumInfo_methods[] = {
     { "get_values", (PyCFunction)_wrap_g_enum_info_get_values, METH_NOARGS },
     { NULL, NULL, 0 }
 };
+
 
 /* ObjectInfo */
 PYGIINFO_DEFINE_TYPE("ObjectInfo", GIObjectInfo, PyGIRegisteredTypeInfo_Type);
