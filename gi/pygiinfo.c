@@ -1255,22 +1255,37 @@ _wrap_g_object_info_get_methods(PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_object_info_get_fields(PyGIBaseInfo *self)
 {
-    int i, length;
-    PyObject *retval;
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
 
-    g_base_info_ref(self->info);
-    length = g_object_info_get_n_fields((GIObjectInfo*)self->info);
-    retval = PyTuple_New(length);
+    n_infos = g_object_info_get_n_fields((GIObjectInfo *)self->info);
 
-    for (i = 0; i < length; i++) {
-        GIFieldInfo *field;
-        field = g_object_info_get_field((GIObjectInfo*)self->info, i);
-        PyTuple_SetItem(retval, i, pyg_info_new(field));
-        g_base_info_unref((GIBaseInfo*)field);
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
     }
-    g_base_info_unref(self->info);
 
-    return retval;
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_object_info_get_field((GIObjectInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = pyg_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
 }
 
 static PyObject *
