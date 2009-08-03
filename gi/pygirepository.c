@@ -182,12 +182,10 @@ _wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kw
 }
 
 static PyObject *
-_wrap_g_irepository_get_typelib_path(PyGIRepository *self,
-                                     PyObject *args,
-                                     PyObject *kwargs)
+_wrap_g_irepository_get_typelib_path(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
-    gchar *namespace_;
+    const char *namespace_;
     const gchar *typelib_path;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
