@@ -630,7 +630,7 @@ class TestGIEverything(unittest.TestCase):
     def testObj(self):
         # Test inheritance.
         self.assertTrue(issubclass(Everything.TestObj, gobject.GObject))
-        self.assertEquals(Everything.TestObj.__gtype__, Everything.TestObj.__info__.getGType())
+        self.assertEquals(Everything.TestObj.__gtype__, Everything.TestObj.__info__.get_g_type())
 
     def testDefaultConstructor(self):
         # Test instanciation.

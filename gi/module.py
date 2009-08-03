@@ -46,13 +46,13 @@ repository = Repository.get_default()
 
 
 def get_parent_for_object(object_info):
-    parent_object_info = object_info.getParent()
+    parent_object_info = object_info.get_parent()
 
     if not parent_object_info:
         return object
 
-    namespace = parent_object_info.getNamespace()
-    name = parent_object_info.getName()
+    namespace = parent_object_info.get_namespace()
+    name = parent_object_info.get_name()
 
     # Workaround for GObject.Object and GObject.InitiallyUnowned.
     if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
@@ -77,14 +77,14 @@ class DynamicModule(object):
         if isinstance(info, StructInfo):
             # FIXME: This could be wrong for structures that are registered (like GValue or GClosure).
             bases = (GIStruct,)
-            name = info.getName()
+            name = info.get_name()
             dict_ = {
                 '__info__': info,
-                '__module__': info.getNamespace()
+                '__module__': info.get_namespace()
             }
             value = GObjectIntrospectionMeta(name, bases, dict_)
         elif isinstance(info, EnumInfo):
-            type_ = info.getGType()
+            type_ = info.get_g_type()
             if type_.is_a(gobject.TYPE_ENUM):
                 value = gobject.enum_from_g_type(type_)
             elif type_.is_a(gobject.TYPE_FLAGS):
@@ -92,15 +92,15 @@ class DynamicModule(object):
             else:
                 raise TypeError, "Must be a subtype of either gobject.TYPE_ENUM, or gobject.TYPE_FLAGS"
             value.__info__ = info
-            value.__module__ = info.getNamespace()
+            value.__module__ = info.get_namespace()
 
-            for value_info in info.getValues():
-                name = value_info.getName().upper()
-                setattr(value, name, value(value_info.getValue()))
+            for value_info in info.get_values():
+                name = value_info.get_name().upper()
+                setattr(value, name, value(value_info.get_value()))
 
         elif isinstance(info, RegisteredTypeInfo):
             # Check if there is already a Python wrapper.
-            gtype = info.getGType()
+            gtype = info.get_g_type()
             if gtype.pytype is not None:
                 self.__dict__[name] = gtype.pytype
                 return
@@ -114,10 +114,10 @@ class DynamicModule(object):
             else:
                 raise NotImplementedError(info)
 
-            name = info.getName()
+            name = info.get_name()
             dict_ = {
                 '__info__': info,
-                '__module__': info.getNamespace(),
+                '__module__': info.get_namespace(),
                 '__gtype__': gtype
             }
             value = GObjectIntrospectionMeta(name, bases, dict_)
@@ -136,6 +136,6 @@ class DynamicModule(object):
         for type_info in repository.get_infos(self.__namespace__):
             if type_info is None:
                 continue
-            r.append(type_info.getName())
+            r.append(type_info.get_name())
         return r
 

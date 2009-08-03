@@ -36,8 +36,8 @@ def Function(info):
     def function(*args):
         return info.invoke(*args)
     function.__info__ = info
-    function.__name__ = info.getName()
-    function.__module__ = info.getNamespace()
+    function.__name__ = info.get_name()
+    function.__module__ = info.get_namespace()
 
     return function
 
@@ -48,10 +48,10 @@ class Field(object):
         self.info = info
 
     def __get__(self, instance, owner):
-        return self.info.getValue(instance)
+        return self.info.get_value(instance)
 
     def __set__(self, instance, value):
-        return self.info.setValue(instance, value)
+        return self.info.set_value(instance, value)
 
 
 class GObjectIntrospectionMeta(gobject.GObjectMeta):
@@ -63,7 +63,7 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
             setObjectHasNewConstructor(cls.__gtype__)
 
         # Only set up the wrapper methods and fields in their base classes.
-        if cls.__name__ == cls.__info__.getName():
+        if cls.__name__ == cls.__info__.get_name():
             if isinstance(cls.__info__, InterfaceInfo):
                 cls._setup_methods()
 
@@ -77,22 +77,22 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
 
     def _setup_methods(cls):
         constructor_infos = []
-        method_infos = cls.__info__.getMethods()
-        if hasattr(cls.__info__, 'getInterfaces'):
-            method_infos += reduce(lambda x, y: x + y, [interface_info.getMethods() for interface_info in cls.__info__.getInterfaces()], ())
+        method_infos = cls.__info__.get_methods()
+        if hasattr(cls.__info__, 'get_interfaces'):
+            method_infos += reduce(lambda x, y: x + y, [interface_info.get_methods() for interface_info in cls.__info__.get_interfaces()], ())
 
         for method_info in method_infos:
-            name = method_info.getName()
+            name = method_info.get_name()
             function = Function(method_info)
-            if method_info.isMethod():
+            if method_info.is_method():
                 method = instancemethod(function, None, cls)
-            elif method_info.isConstructor():
+            elif method_info.is_constructor():
                 method = classmethod(function)
             else:
                 method = staticmethod(function)
             setattr(cls, name, method)
 
-            if method_info.isConstructor():
+            if method_info.is_constructor():
                 constructor_infos.append(method_info)
 
         default_constructor_info = None
@@ -100,7 +100,7 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
             (default_constructor_info,) = constructor_infos
         else:
             for constructor_info in constructor_infos:
-                if constructor_info.getName() == 'new':
+                if constructor_info.get_name() == 'new':
                     default_constructor_info = constructor_info
                     break
 
@@ -111,8 +111,8 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
             cls.__init__ = lambda self, *args, **kwargs: super(cls, self).__init__()
 
     def _setup_fields(cls):
-        for field_info in cls.__info__.getFields():
-            name = field_info.getName().replace('-', '_')
+        for field_info in cls.__info__.get_fields():
+            name = field_info.get_name().replace('-', '_')
             setattr(cls, name, Field(field_info))
 
 
@@ -120,12 +120,12 @@ class GIStruct(object):
 
     def __init__(self, buffer=None):
         if buffer is None:
-            buffer = self.__info__.newBuffer()
+            buffer = self.__info__.new_buffer()
         self.__buffer__ = buffer
 
     def __eq__(self, other):
-        for field_info in self.__info__.getFields():
-            name = field_info.getName()
+        for field_info in self.__info__.get_fields():
+            name = field_info.get_name()
             if getattr(self, name) != getattr(other, name):
                 return False
         return True
