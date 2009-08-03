@@ -1339,22 +1339,37 @@ PYGIINFO_DEFINE_TYPE("InterfaceInfo", GIInterfaceInfo, PyGIRegisteredTypeInfo_Ty
 static PyObject *
 _wrap_g_interface_info_get_methods(PyGIBaseInfo *self)
 {
-    int i, length;
-    PyObject *retval;
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
 
-    g_base_info_ref(self->info);
-    length = g_interface_info_get_n_methods((GIInterfaceInfo*)self->info);
-    retval = PyTuple_New(length);
+    n_infos = g_interface_info_get_n_methods((GIInterfaceInfo *)self->info);
 
-    for (i = 0; i < length; i++) {
-        GIFunctionInfo *function;
-        function = g_interface_info_get_method((GIInterfaceInfo*)self->info, i);
-        PyTuple_SetItem(retval, i, pyg_info_new(function));
-        g_base_info_unref((GIBaseInfo*)function);
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
     }
-    g_base_info_unref(self->info);
 
-    return retval;
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_interface_info_get_method((GIInterfaceInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = pyg_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
 }
 
 static void
