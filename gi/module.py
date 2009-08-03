@@ -134,8 +134,6 @@ class DynamicModule(object):
     def __members__(self):
         r = []
         for type_info in repository.get_infos(self.__namespace__):
-            if type_info is None:
-                continue
             r.append(type_info.get_name())
         return r
 

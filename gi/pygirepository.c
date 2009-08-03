@@ -169,30 +169,48 @@ return_:
 }
 
 static PyObject *
-_wrap_g_irepository_get_infos(PyGIRepository *self,
-			      PyObject *args,
-			      PyObject *kwargs)
+_wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
-    char *namespace;
-    int i, length;
-    PyObject *retval;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:Repository.get_infos",
-				     kwlist, &namespace))
+    const char *namespace_;
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s:Repository.get_infos",
+            kwlist, &namespace_)) {
         return NULL;
-
-    length = g_irepository_get_n_infos(self->repository, namespace);
-
-    retval = PyTuple_New(length);
-
-    for (i = 0; i < length; i++) {
-	GIBaseInfo *info = g_irepository_get_info(self->repository, namespace, i);
-	PyTuple_SetItem(retval, i, pyg_info_new(info));
     }
 
-    return retval;
+    n_infos = g_irepository_get_n_infos(self->repository, namespace_);
+    if (n_infos < 0) {
+        PyErr_Format(PyExc_RuntimeError, "Namespace '%s' not loaded", namespace_);
+        return NULL;
+    }
+
+    infos = PyTuple_New(n_infos);
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = g_irepository_get_info(self->repository, namespace_, i);
+        g_assert(info != NULL);
+
+        py_info = pyg_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
 }
 
 static PyObject *
