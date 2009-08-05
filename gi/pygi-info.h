@@ -28,11 +28,14 @@
 
 G_BEGIN_DECLS
 
-PyObject* pyg_info_new(GIBaseInfo *info);
 
-gchar * pygi_gi_base_info_get_fullname(GIBaseInfo *info);
+/* Private */
 
-void pygi_info_register_types(PyObject *m);
+PyObject* _pygi_info_new (GIBaseInfo *info);
+
+gchar* _pygi_g_base_info_get_fullname (GIBaseInfo *info);
+
+void _pygi_info_register_types (PyObject *m);
 
 G_END_DECLS
 

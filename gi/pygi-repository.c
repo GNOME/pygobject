@@ -60,7 +60,7 @@ PyTypeObject PyGIRepository_Type = {
 };
 
 static PyObject *
-_wrap_g_irepository_get_default(PyObject *self)
+_wrap_g_irepository_get_default (PyObject *self)
 {
     static PyGIRepository *repository = NULL;
 
@@ -78,7 +78,9 @@ _wrap_g_irepository_get_default(PyObject *self)
 }
 
 static PyObject *
-_wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwargs)
+_wrap_g_irepository_require (PyGIRepository *self,
+                             PyObject       *args,
+                             PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", "version", "lazy", NULL };
 
@@ -110,7 +112,9 @@ _wrap_g_irepository_require(PyGIRepository *self, PyObject *args, PyObject *kwar
 }
 
 static PyObject *
-_wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject *kwargs)
+_wrap_g_irepository_find_by_name (PyGIRepository *self,
+                                  PyObject       *args,
+                                  PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", "name", NULL };
 
@@ -129,7 +133,7 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject 
         Py_RETURN_NONE;
     }
 
-    py_info = pyg_info_new(info);
+    py_info = _pygi_info_new(info);
 
     g_base_info_unref(info);
 
@@ -137,7 +141,9 @@ _wrap_g_irepository_find_by_name(PyGIRepository *self, PyObject *args, PyObject 
 }
 
 static PyObject *
-_wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kwargs)
+_wrap_g_irepository_get_infos (PyGIRepository *self,
+                               PyObject       *args,
+                               PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
 
@@ -166,7 +172,7 @@ _wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kw
         info = g_irepository_get_info(self->repository, namespace_, i);
         g_assert(info != NULL);
 
-        py_info = pyg_info_new(info);
+        py_info = _pygi_info_new(info);
 
         g_base_info_unref(info);
 
@@ -182,7 +188,9 @@ _wrap_g_irepository_get_infos(PyGIRepository *self, PyObject *args, PyObject *kw
 }
 
 static PyObject *
-_wrap_g_irepository_get_typelib_path(PyGIRepository *self, PyObject *args, PyObject *kwargs)
+_wrap_g_irepository_get_typelib_path (PyGIRepository *self,
+                                      PyObject       *args,
+                                      PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
     const char *namespace_;
@@ -212,7 +220,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
 };
 
 void
-pygi_repository_register_types(PyObject *m)
+_pygi_repository_register_types (PyObject *m)
 {
     PyGIRepository_Type.ob_type = &PyType_Type;
     if (PyType_Ready(&PyGIRepository_Type)) {

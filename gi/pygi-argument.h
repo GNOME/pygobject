@@ -28,29 +28,36 @@
 
 G_BEGIN_DECLS
 
-gsize pygi_gi_type_tag_get_size(GITypeTag type_tag);
 
-gint pygi_gi_registered_type_info_check_py_object(GIRegisteredTypeInfo *info,
-                                                  PyObject *object,
-                                                  gboolean is_instance);
+/* Private */
 
-gint pygi_gi_type_info_check_py_object(GITypeInfo *type_info,
-                                       gboolean may_be_null,
-                                       PyObject *object);
+gint _pygi_g_type_info_check_object(GITypeInfo *type_info,
+                                    gboolean    may_be_null,
+                                    PyObject   *object);
 
-GArgument pygi_g_argument_from_py_object(PyObject *object,
-                                         GITypeInfo *type_info,
-                                         GITransfer transfer);
+gint _pygi_g_registered_type_info_check_object(GIRegisteredTypeInfo *info,
+                                               gboolean              is_instance,
+                                               PyObject             *object);
 
-PyObject * pygi_g_argument_to_py_object(GArgument *arg,
-                                        GITypeInfo *type_info);
 
-void pygi_g_argument_release(GArgument *arg,
-                             GITypeInfo *type_info,
-                             GITransfer transfer,
-                             GIDirection direction);
+GArray* _pygi_argument_to_array (GArgument  *arg,
+                                 GArgument  *args[],
+                                 GITypeInfo *type_info);
 
-void pyg_argument_init(void);
+GArgument _pygi_argument_from_object (PyObject   *object,
+                                      GITypeInfo *type_info,
+                                      GITransfer  transfer);
+
+PyObject* _pygi_argument_to_object (GArgument  *arg,
+                                    GITypeInfo *type_info);
+
+
+void _pygi_argument_release(GArgument   *arg,
+                            GITypeInfo  *type_info,
+                            GITransfer   transfer,
+                            GIDirection  direction);
+
+void _pygi_argument_init(void);
 
 G_END_DECLS
 

@@ -4,8 +4,12 @@
 #ifndef __PYGI_PRIVATE_H__
 #define __PYGI_PRIVATE_H__
 
+#ifdef __PYGI_H__
+#   error "Import pygi.h or pygi-private.h, but not both"
+#endif
+
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#   include <config.h>
 #endif
 
 #include <Python.h>
@@ -15,6 +19,11 @@
 #include "pygi-repository.h"
 #include "pygi-info.h"
 #include "pygi-argument.h"
+
+G_BEGIN_DECLS
+
+
+/* Python types */
 
 extern PyTypeObject PyGIRepository_Type;
 
@@ -30,7 +39,26 @@ extern PyTypeObject PyGIValueInfo_Type;
 extern PyTypeObject PyGIFieldInfo_Type;
 extern PyTypeObject PyGIUnresolvedInfo_Type;
 
-#define PyErr_PREFIX_FROM_FORMAT(format, ...) G_STMT_START { \
+
+/* Errors */
+
+extern PyObject *PyGIRepositoryError;
+
+
+/* Functions (defined in gimodule.c) */
+
+PyObject* pygi_type_find_by_name (const char *namespace_,
+                                  const char *name);
+PyObject* pygi_type_find_by_info (GIBaseInfo *info);
+
+
+/* Private */
+
+gpointer _pygi_object_get_buffer (PyObject *object,
+                                  gsize    *size);
+
+
+#define _PyGI_ERROR_PREFIX(format, ...) G_STMT_START { \
     PyObject *py_error_prefix; \
     py_error_prefix = PyString_FromFormat(format, ## __VA_ARGS__); \
     if (py_error_prefix != NULL) { \
@@ -46,26 +74,20 @@ extern PyTypeObject PyGIUnresolvedInfo_Type;
     } \
 } G_STMT_END
 
-PyObject * pygi_py_type_find_by_name(const char *namespace_,
-                                     const char *name);
-
-#define pygi_py_type_find_by_gi_info(info) \
-    pygi_py_type_find_by_name(g_base_info_get_namespace(info), g_base_info_get_name(info))
-
-gpointer pygi_py_object_get_buffer(PyObject *object, gsize *size);
-
-#if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 22
-#define g_array_get_element_size(a) \
-    *(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
-#endif
-
 
 /* GArray */
+
+#if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 22
+#   define g_array_get_element_size(a) \
+        *(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
+#endif
 
 /* Redefine g_array_index because we want it to return the i-th element, casted
  * to the type t, of the array a, and not the i-th element of the array a casted to the type t. */
 #define _g_array_index(a,t,i) \
     *(t *)((a)->data + g_array_get_element_size(a) * (i))
 
+
+G_END_DECLS
 
 #endif /* __PYGI_PRIVATE_H__ */

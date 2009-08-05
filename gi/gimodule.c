@@ -26,7 +26,8 @@
 #include <pygobject.h>
 
 PyObject *
-pygi_py_type_find_by_name(const char *namespace_, const char *name)
+pygi_type_find_by_name (const char *namespace_,
+                        const char *name)
 {
     PyObject *py_module;
     gchar *module_name;
@@ -62,8 +63,21 @@ pygi_py_type_find_by_name(const char *namespace_, const char *name)
     return py_module;
 }
 
+PyObject *
+pygi_type_find_by_info (GIBaseInfo *info)
+{
+    const char *namespace_;
+    const char *name;
+
+    namespace_ = g_base_info_get_namespace(info);
+    name = g_base_info_get_name(info);
+
+    return pygi_type_find_by_name(namespace_, name);
+}
+
 gpointer
-pygi_py_object_get_buffer(PyObject *object, gsize *size)
+_pygi_object_get_buffer (PyObject *object,
+                         gsize    *size)
 {
     PyBufferProcs *py_buffer_procs;
     PyObject *py_buffer;
@@ -128,8 +142,8 @@ init_gi(void)
         return;
     }
 
-    pygi_repository_register_types(m);
-    pygi_info_register_types(m);
-    pyg_argument_init();
+    _pygi_repository_register_types(m);
+    _pygi_info_register_types(m);
+    _pygi_argument_init();
 }
 

@@ -39,6 +39,13 @@ typedef struct {
     PyObject *inst_weakreflist;
 } PyGIBaseInfo;
 
+
+#ifndef __PYGI_PRIVATE_H__
+
+/* TODO: Public API goes here. */
+
+#endif
+
 G_END_DECLS
 
 #endif /* __PYGI_H__ */

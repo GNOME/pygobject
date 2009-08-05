@@ -26,7 +26,9 @@
 
 G_BEGIN_DECLS
 
-void pygi_repository_register_types(PyObject *m);
+/* Private */
+
+void _pygi_repository_register_types (PyObject *m);
 
 G_END_DECLS
 
