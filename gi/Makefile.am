@@ -24,13 +24,6 @@ pygi_PYTHON = \
 	importer.py \
 	__init__.py
 
-# gi overrides extension modules
-pygioverridesdir = $(pkgpyexecdir)/overrides
-
-# gi overrides scripts
-pygioverrides_PYTHON = \
-	$(srcdir)/overrides/
-
 # linker flags
 common_ldflags = -module -avoid-version
 if PLATFORM_WIN32
@@ -52,9 +45,9 @@ _gi_la_SOURCES = \
 	pygi-private.h \
 	gimodule.c
 
-if BUILD_GOBJECT_INTROSPECTION
 pygi_LTLIBRARIES = _gi.la
 
+if BUILD_GOBJECT_INTROSPECTION
 all: $(pygi_LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(pygi_LTLIBRARIES:.la=.so)
