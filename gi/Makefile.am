@@ -37,7 +37,7 @@ common_ldflags += -no-undefined
 endif
 
 # repo module
-_gi_la_CFLAGS = -O0
+_gi_la_CFLAGS = -O0 -Werror
 _gi_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gi
 _gi_la_LIBADD = $(GOBJECT_INTROSPECTION_LIBS)
 _gi_la_SOURCES = \
