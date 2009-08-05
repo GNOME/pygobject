@@ -48,7 +48,6 @@ _gi_la_SOURCES = \
 	pygargument.c \
 	pygargument.h \
 	pygi.h \
-	pygi-private.c \
 	pygi-private.h \
 	gimodule.c
 

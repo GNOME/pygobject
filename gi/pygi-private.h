@@ -67,7 +67,5 @@ gpointer pygi_py_object_get_buffer(PyObject *object, gsize *size);
 #define _g_array_index(a,t,i) \
     *(t *)((a)->data + g_array_get_element_size(a) * (i))
 
-GArray * _g_array_values(GArray *array);
-
 
 #endif /* __PYGI_PRIVATE_H__ */
