@@ -128,10 +128,15 @@ static PyMethodDef _pygi_functions[] = {
     { NULL, NULL, 0 }
 };
 
+struct PyGI_API PyGI_API = {
+    pygi_type_find_by_info
+};
+
 PyMODINIT_FUNC
 init_gi(void)
 {
     PyObject *m;
+    PyObject *api;
 
     m = Py_InitModule("_gi", _pygi_functions);
     if (m == NULL) {
@@ -145,5 +150,11 @@ init_gi(void)
     _pygi_repository_register_types(m);
     _pygi_info_register_types(m);
     _pygi_argument_init();
+
+    api = PyCObject_FromVoidPtr((void *)&PyGI_API, NULL);
+    if (api == NULL) {
+        return;
+    }
+    PyModule_AddObject(m, "_API", api);
 }
 

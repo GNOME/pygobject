@@ -10,6 +10,7 @@ INCLUDES = \
 	$(PYGOBJECT_CFLAGS) \
 	$(GOBJECT_INTROSPECTION_CFLAGS)
 
+pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygi.h
 
 # gi extension modules
