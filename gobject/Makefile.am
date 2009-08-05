@@ -38,11 +38,19 @@ _gobject_la_CFLAGS = \
 	$(FFI_CFLAGS) \
 	$(GLIB_CFLAGS) \
 	 -DPY_SSIZE_T_CLEAN
+if BUILD_GOBJECT_INTROSPECTION
+_gobject_la_CFLAGS += \
+	$(GOBJECT_INTROSPECTION_CFLAGS)
+endif
 _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_gobject|PyInit__gobject"
 _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
+if BUILD_GOBJECT_INTROSPECTION
+_gobject_la_LIBADD += \
+	$(GOBJECT_INTROSPECTION_LIBS)
+endif
 _gobject_la_SOURCES =           \
         gobjectmodule.c         \
         pygboxed.c              \
