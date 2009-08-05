@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
  *
- *   pygiinfo.c: GI.*Info wrappers.
+ *   pygi-info.c: GI.*Info wrappers.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

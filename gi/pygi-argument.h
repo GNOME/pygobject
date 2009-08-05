@@ -19,8 +19,8 @@
  * USA
  */
 
-#ifndef __PYG_ARGUMENT_H__
-#define __PYG_ARGUMENT_H__
+#ifndef __PYGI_ARGUMENT_H__
+#define __PYGI_ARGUMENT_H__
 
 #include <Python.h>
 
@@ -54,4 +54,4 @@ void pyg_argument_init(void);
 
 G_END_DECLS
 
-#endif /* __PYG_ARGUMENT_H__ */
+#endif /* __PYGI_ARGUMENT_H__ */

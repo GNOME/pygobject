@@ -12,9 +12,9 @@
 
 #include "pygi.h"
 
-#include "pygirepository.h"
-#include "pygiinfo.h"
-#include "pygargument.h"
+#include "pygi-repository.h"
+#include "pygi-info.h"
+#include "pygi-argument.h"
 
 extern PyTypeObject PyGIRepository_Type;
 

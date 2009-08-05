@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
  *
- *   pygirepository.c: GIRepository wrapper.
+ *   pygi-repository.c: GIRepository wrapper.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

@@ -41,12 +41,12 @@ _gi_la_CFLAGS = -O0
 _gi_la_LDFLAGS = $(common_ldflags) -export-symbols-regex init_gi
 _gi_la_LIBADD = $(GOBJECT_INTROSPECTION_LIBS)
 _gi_la_SOURCES = \
-	pygirepository.c \
-	pygirepository.h \
-	pygiinfo.c \
-	pygiinfo.h \
-	pygargument.c \
-	pygargument.h \
+	pygi-repository.c \
+	pygi-repository.h \
+	pygi-info.c \
+	pygi-info.h \
+	pygi-argument.c \
+	pygi-argument.h \
 	pygi.h \
 	pygi-private.h \
 	gimodule.c
