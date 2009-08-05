@@ -206,6 +206,9 @@ PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_in
 AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
 AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
 AM_CONDITIONAL(BUILD_GOBJECT_INTROSPECTION, $have_gobject_introspection)
+if test "$have_gobject_introspection" = true; then
+ AC_DEFINE(HAVE_GIREPOSITORY_H,1,[Define to 1 if you have the <girepository.h> header file.])
+fi
 if test -n "$export_dynamic"; then
   GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
 fi
