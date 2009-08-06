@@ -364,7 +364,7 @@ check_number_release:
         }
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            if (!PyString_Check(object) && (object != Py_None || may_be_null)) {
+            if (!PyString_Check(object) && (!may_be_null || object != Py_None)) {
                 PyErr_Format(PyExc_TypeError, "Must be string, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
@@ -470,6 +470,9 @@ check_number_release:
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_OBJECT:
+                    if (may_be_null && object == Py_None) {
+                        break;
+                    }
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 default:
@@ -944,12 +947,22 @@ array_item_error:
                         break;
                     }
 
+                    if (object == Py_None) {
+                        arg.v_pointer = NULL;
+                        break;
+                    }
+
                     buffer = _pygi_object_get_buffer(object, &size);
 
                     arg.v_pointer = buffer;
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
+                    if (object == Py_None) {
+                        arg.v_pointer = NULL;
+                        break;
+                    }
+
                     arg.v_pointer = pygobject_get(object);
                     if (transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_ref(arg.v_pointer);
