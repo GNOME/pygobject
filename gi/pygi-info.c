@@ -285,6 +285,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     gsize n_aux_out_args;
     gsize n_return_values;
 
+    glong error_arg_pos;
+
     GIArgInfo **arg_infos;
     GITypeInfo **arg_type_infos;
     GITypeInfo *return_type_info;
@@ -318,6 +320,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     n_containers = 0;
     n_aux_in_args = 0;
     n_aux_out_args = 0;
+
+    error_arg_pos = -1;
 
     arg_infos = g_newa(GIArgInfo *, n_args);
     arg_type_infos = g_newa(GITypeInfo *, n_args);
@@ -357,11 +361,16 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             n_containers += 1;
         }
 
-        if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
-            gint length_arg_pos;
+        switch (arg_type_tag) {
+            case GI_TYPE_TAG_ARRAY:
+            {
+                gint length_arg_pos;
 
-            length_arg_pos = g_type_info_get_array_length(arg_type_infos[i]);
-            if (length_arg_pos >= 0) {
+                length_arg_pos = g_type_info_get_array_length(arg_type_infos[i]);
+                if (length_arg_pos < 0) {
+                    break;
+                }
+
                 g_assert(length_arg_pos < n_args);
                 args_is_auxiliary[length_arg_pos] = TRUE;
 
@@ -371,7 +380,17 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
                     n_aux_out_args += 1;
                 }
+
+                break;
             }
+            case GI_TYPE_TAG_ERROR:
+                if (error_arg_pos >= 0) {
+                    PyErr_WarnEx(NULL, "Two or more error arguments; taking the last one", 1);
+                }
+                error_arg_pos = i;
+                break;
+            default:
+                break;
         }
     }
 
@@ -403,7 +422,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         n_py_args = PyTuple_Size(py_args);
         g_assert(n_py_args >= 0);
 
-        n_py_args_expected = n_in_args + (is_constructor ? 1 : 0) - n_aux_in_args;
+        n_py_args_expected = n_in_args
+            + (is_constructor ? 1 : 0)
+            - n_aux_in_args
+            - (error_arg_pos >= 0 ? 1 : 0);
 
         if (n_py_args != n_py_args_expected) {
             gchar *fullname;
@@ -451,13 +473,17 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
         for (i = 0; i < n_args; i++) {
             GIDirection direction;
+            GITypeTag type_tag;
             gboolean may_be_null;
             PyObject *py_arg;
             gint retval;
 
             direction = g_arg_info_get_direction(arg_infos[i]);
+            type_tag = g_type_info_get_tag(arg_type_infos[i]);
 
-            if (direction == GI_DIRECTION_OUT || args_is_auxiliary[i]) {
+            if (direction == GI_DIRECTION_OUT
+                    || args_is_auxiliary[i]
+                    || type_tag == GI_TYPE_TAG_ERROR) {
                 continue;
             }
 
@@ -591,6 +617,18 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 GITypeTag arg_type_tag;
                 GITransfer transfer;
 
+                arg_type_tag = g_type_info_get_tag(arg_type_infos[i]);
+
+                if (arg_type_tag == GI_TYPE_TAG_ERROR) {
+                    GError **error;
+
+                    error = g_slice_new(GError *);
+                    *error = NULL;
+
+                    args[i]->v_pointer = error;
+                    continue;
+                }
+
                 transfer = g_arg_info_get_ownership_transfer(arg_infos[i]);
 
                 g_assert(py_args_pos < n_py_args);
@@ -603,8 +641,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     /* TODO: Release ressources allocated for previous arguments. */
                     return NULL;
                 }
-
-                arg_type_tag = g_type_info_get_tag(arg_type_infos[i]);
 
                 if ((direction == GI_DIRECTION_INOUT && transfer != GI_TRANSFER_EVERYTHING)
                         || (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER)) {
@@ -723,6 +759,22 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             }
 
             g_error_free(error);
+
+            /* TODO: Release input arguments. */
+
+            goto return_;
+        }
+    }
+
+    if (error_arg_pos >= 0) {
+        GError **error;
+
+        error = args[error_arg_pos]->v_pointer;
+
+        if (*error != NULL) {
+            /* TODO: Raises the right error, out of the error domain, if
+             * applicable. */
+            PyErr_SetString(PyExc_Exception, (*error)->message);
 
             /* TODO: Release input arguments. */
 

@@ -1720,9 +1720,17 @@ _pygi_argument_release (GArgument   *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            /* TODO */
-            g_assert_not_reached();
+        {
+            GError **error;
+
+            error = arg->v_pointer;
+
+            if (*error != NULL) {
+                g_error_free(*error);
+            }
+            g_slice_free(GError *, error);
             break;
+        }
     }
 }
 
