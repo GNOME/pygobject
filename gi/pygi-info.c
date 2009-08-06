@@ -323,7 +323,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     arg_type_infos = g_newa(GITypeInfo *, n_args);
 
     args_is_auxiliary = g_newa(gboolean, n_args);
-    memset(args_is_auxiliary, 0, sizeof(args_is_auxiliary));
+    memset(args_is_auxiliary, 0, sizeof(args_is_auxiliary) * n_args);
 
     if (is_method) {
         /* The first argument is the instance. */
