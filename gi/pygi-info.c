@@ -152,7 +152,7 @@ PyObject *
 _pygi_info_new (GIBaseInfo *info)
 {
     GIInfoType info_type;
-    PyTypeObject *type;
+    PyTypeObject *type = NULL;
     PyGIBaseInfo *self;
 
     info_type = g_base_info_get_type(info);

@@ -32,7 +32,7 @@
 static gsize
 _pygi_gi_type_tag_size (GITypeTag type_tag)
 {
-    gsize size;
+    gsize size = 0;
 
     switch(type_tag) {
 
@@ -114,6 +114,8 @@ _pygi_gi_type_tag_py_bounds (GITypeTag   type_tag,
                              PyObject  **lower,
                              PyObject  **upper)
 {
+    *lower = *upper = NULL;
+
     switch(type_tag) {
         case GI_TYPE_TAG_INT8:
             *lower = PyInt_FromLong(-128);
@@ -186,7 +188,6 @@ _pygi_gi_type_tag_py_bounds (GITypeTag   type_tag,
             break;
         default:
             PyErr_SetString(PyExc_TypeError, "Non-numeric type tag");
-            *lower = *upper = NULL;
             return;
     }
 }
@@ -199,7 +200,7 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
     gint retval;
 
     PyObject *type;
-    gchar *type_name_expected;
+    gchar *type_name_expected = NULL;
 
     type = pygi_type_find_by_info((GIBaseInfo *)info);
     if (type == NULL) {
