@@ -25,6 +25,9 @@
 #endif
 
 #include <pyglib.h>
+#if HAVE_GIREPOSITORY_H
+#   include <pygi.h>
+#endif
 #include "pygobject-private.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
@@ -957,10 +960,29 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
         if (inst_data)
             tp = inst_data->type;
         else {
+#if HAVE_GIREPOSITORY_H
+            GIRepository *repository;
+            GType g_type;
+            GIBaseInfo *info;
+
+            repository = g_irepository_get_default();
+
+            g_type = G_OBJECT_TYPE(obj);
+            info = g_irepository_find_by_gtype(repository, g_type);
+
+            if (info != NULL) {
+                pygi_import();
+                tp = (PyTypeObject *)pygi_type_find_by_info(info);
+                g_base_info_unref(info);
+            } else {
+#endif
             if (g_class)
                 tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
             else
                 tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
+#if HAVE_GIREPOSITORY_H
+            }
+#endif
         }
         g_assert(tp != NULL);
 
