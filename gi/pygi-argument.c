@@ -98,8 +98,10 @@ _pygi_gi_type_tag_size (GITypeTag type_tag)
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
         case GI_TYPE_TAG_GHASH:
-        case GI_TYPE_TAG_ERROR:
             /* TODO */
+            g_assert_not_reached();
+            break;
+        case GI_TYPE_TAG_ERROR:
             g_assert_not_reached();
             break;
     }
@@ -600,7 +602,6 @@ check_number_release:
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            /* TODO */
             g_assert_not_reached();
             break;
     }
@@ -1147,12 +1148,6 @@ hash_table_release:
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            /* Allow NULL GError, otherwise fall through */
-            if (object == Py_None) {
-                arg.v_pointer = NULL;
-                break;
-            }
-            /* TODO */
             g_assert_not_reached();
             break;
     }
@@ -1470,7 +1465,6 @@ _pygi_argument_to_object (GArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            /* TODO */
             g_assert_not_reached();
             break;
     }
@@ -1714,6 +1708,7 @@ _pygi_argument_release (GArgument   *arg,
         }
         case GI_TYPE_TAG_ERROR:
             /* TODO */
+            g_assert_not_reached();
             break;
     }
 }

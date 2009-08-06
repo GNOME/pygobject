@@ -716,13 +716,16 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
             fullname = _pygi_g_base_info_get_fullname(self->info);
             if (fullname != NULL) {
+                /* FIXME: Raise the right error, out of the error domain. */
                 PyErr_Format(PyExc_RuntimeError, "Error invoking %s(): %s",
                     fullname, error->message);
                 g_free(fullname);
             }
 
             g_error_free(error);
-            /* TODO */
+
+            /* TODO: Release input arguments. */
+
             goto return_;
         }
     }
