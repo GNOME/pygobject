@@ -49,7 +49,7 @@ extern PyObject *PyGIRepositoryError;
 
 PyObject* pygi_type_find_by_name (const char *namespace_,
                                   const char *name);
-PyObject* pygi_type_find_by_info (GIBaseInfo *info);
+PyObject* pygi_type_find_by_gi_info (GIBaseInfo *info);
 
 
 /* Private */

@@ -972,7 +972,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 
             if (info != NULL) {
                 pygi_import();
-                tp = (PyTypeObject *)pygi_type_find_by_info(info);
+                tp = (PyTypeObject *)pygi_type_find_by_gi_info(info);
                 g_base_info_unref(info);
             } else {
 #endif

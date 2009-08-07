@@ -202,7 +202,7 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
     PyObject *type;
     gchar *type_name_expected = NULL;
 
-    type = pygi_type_find_by_info((GIBaseInfo *)info);
+    type = pygi_type_find_by_gi_info((GIBaseInfo *)info);
     if (type == NULL) {
         return FALSE;
     }
@@ -1351,7 +1351,7 @@ _pygi_argument_to_object (GArgument  *arg,
                     }
 
                     /* Wrap the structure. */
-                    py_type = pygi_type_find_by_info(info);
+                    py_type = pygi_type_find_by_gi_info(info);
                     if (py_type == NULL) {
                         Py_DECREF(buffer);
                         break;
@@ -1369,7 +1369,7 @@ _pygi_argument_to_object (GArgument  *arg,
                     PyObject *py_type;
 
                     /* Make sure the class is initialized. */
-                    py_type = pygi_type_find_by_info(info);
+                    py_type = pygi_type_find_by_gi_info(info);
                     if (py_type == NULL) {
                         break;
                     }

@@ -64,7 +64,7 @@ pygi_type_find_by_name (const char *namespace_,
 }
 
 PyObject *
-pygi_type_find_by_info (GIBaseInfo *info)
+pygi_type_find_by_gi_info (GIBaseInfo *info)
 {
     const char *namespace_;
     const char *name;
@@ -129,7 +129,7 @@ static PyMethodDef _pygi_functions[] = {
 };
 
 struct PyGI_API PyGI_API = {
-    pygi_type_find_by_info
+    pygi_type_find_by_gi_info
 };
 
 PyMODINIT_FUNC

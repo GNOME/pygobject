@@ -41,7 +41,7 @@ typedef struct {
 
 
 struct PyGI_API {
-    PyObject* (*type_find_by_info) (GIBaseInfo *info);
+    PyObject* (*type_find_by_gi_info) (GIBaseInfo *info);
 };
 
 
@@ -49,7 +49,7 @@ struct PyGI_API {
 
 struct PyGI_API *PyGI_API = NULL;
 
-#define pygi_type_find_by_info (PyGI_API->type_find_by_info)
+#define pygi_type_find_by_gi_info (PyGI_API->type_find_by_gi_info)
 
 static int
 pygi_import (void)
