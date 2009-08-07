@@ -31,13 +31,13 @@ G_BEGIN_DECLS
 
 /* Private */
 
-gint _pygi_g_type_info_check_object(GITypeInfo *type_info,
-                                    gboolean    may_be_null,
-                                    PyObject   *object);
+gint _pygi_g_type_info_check_object (GITypeInfo *type_info,
+                                     gboolean    may_be_null,
+                                     PyObject   *object);
 
-gint _pygi_g_registered_type_info_check_object(GIRegisteredTypeInfo *info,
-                                               gboolean              is_instance,
-                                               PyObject             *object);
+gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
+                                                gboolean              is_instance,
+                                                PyObject             *object);
 
 
 GArray* _pygi_argument_to_array (GArgument  *arg,
@@ -52,12 +52,12 @@ PyObject* _pygi_argument_to_object (GArgument  *arg,
                                     GITypeInfo *type_info);
 
 
-void _pygi_argument_release(GArgument   *arg,
-                            GITypeInfo  *type_info,
-                            GITransfer   transfer,
-                            GIDirection  direction);
+void _pygi_argument_release (GArgument   *arg,
+                             GITypeInfo  *type_info,
+                             GITransfer   transfer,
+                             GIDirection  direction);
 
-void _pygi_argument_init(void);
+void _pygi_argument_init (void);
 
 G_END_DECLS
 
