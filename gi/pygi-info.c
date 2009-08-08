@@ -219,16 +219,12 @@ _pygi_info_new (GIBaseInfo *info)
             break;
     }
 
-    self = (PyGIBaseInfo *)PyObject_GC_New(PyGIBaseInfo, type);
+    self = (PyGIBaseInfo *)type->tp_alloc(type, 0);
     if (self == NULL) {
         return NULL;
     }
 
     self->info = g_base_info_ref(info);
-
-    self->inst_weakreflist = NULL;
-
-    PyObject_GC_Track((PyObject *)self);
 
     return (PyObject *)self;
 }
