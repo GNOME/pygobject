@@ -48,13 +48,13 @@ _wrap_g_file_info_list_attributes(PyGObject *self,
 				  PyObject  *kwargs)
 {
     char *kwlist[] = { "name_space", NULL};
-    gchar *name_space;
+    gchar *name_space = NULL;
     gchar **names;
     gchar **n;
     PyObject *ret;
     
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:gio.FileInfo.list_attributes",
+				     "|z:gio.FileInfo.list_attributes",
 				     kwlist, &name_space))
 	return NULL;
 
