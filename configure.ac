@@ -200,17 +200,20 @@ if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
-dnl gobject_introspection
-PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version,
-	have_gobject_introspection=true, have_gobject_introspection=false)
-AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
-AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
-AM_CONDITIONAL(BUILD_GOBJECT_INTROSPECTION, $have_gobject_introspection)
-if test "$have_gobject_introspection" = true; then
- AC_DEFINE(HAVE_GIREPOSITORY_H,1,[Define to 1 if you have the <girepository.h> header file.])
-fi
-if test -n "$export_dynamic"; then
-  GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
+dnl gi
+AC_ARG_ENABLE(gi,
+  AC_HELP_STRING([--enable-gi], [Enable gobject-introspection bindings building]),
+  enable_gi=$enableval,
+  enable_gi=no)
+AM_CONDITIONAL(BUILD_GI, test "$enable_gi" != no)
+if test "$enable_gi" != no; then
+  PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
+  AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
+  AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
+  AC_DEFINE(HAVE_PYGI_H,1,[Define to 1 if you have the <pygi.h> header file.])
+  if test -n "$export_dynamic"; then
+    GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
+  fi
 fi
 
 dnl add required cflags ...

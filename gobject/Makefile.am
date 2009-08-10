@@ -38,7 +38,7 @@ _gobject_la_CFLAGS = \
 	$(FFI_CFLAGS) \
 	$(GLIB_CFLAGS) \
 	 -DPY_SSIZE_T_CLEAN
-if BUILD_GOBJECT_INTROSPECTION
+if BUILD_GI
 _gobject_la_CFLAGS += \
 	-I$(top_srcdir)/gi \
 	$(GOBJECT_INTROSPECTION_CFLAGS)
@@ -48,7 +48,7 @@ _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
-if BUILD_GOBJECT_INTROSPECTION
+if BUILD_GI
 _gobject_la_LIBADD += \
 	$(GOBJECT_INTROSPECTION_LIBS)
 endif

@@ -25,7 +25,7 @@
 #endif
 
 #include <pyglib.h>
-#if HAVE_GIREPOSITORY_H
+#if HAVE_PYGI_H
 #   include <pygi.h>
 #endif
 #include "pygobject-private.h"
@@ -960,7 +960,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
         if (inst_data)
             tp = inst_data->type;
         else {
-#if HAVE_GIREPOSITORY_H
+#if HAVE_PYGI_H
             GIRepository *repository;
             GType g_type;
             GIBaseInfo *info;
@@ -980,7 +980,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
                 tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
             else
                 tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
-#if HAVE_GIREPOSITORY_H
+#if HAVE_PYGI_H
             }
 #endif
         }
