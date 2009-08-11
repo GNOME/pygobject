@@ -39,7 +39,7 @@ from ._gi import \
     StructInfo
 from .types import \
     GObjectMeta, \
-    GBoxedMeta, \
+    StructMeta, \
     Function
 
 repository = Repository.get_default()
@@ -107,7 +107,7 @@ class DynamicModule(object):
                 metaclass = GObjectMeta
             elif isinstance(info, StructInfo):
                 bases = (GBoxed,)
-                metaclass = GBoxedMeta
+                metaclass = StructMeta
             else:
                 raise NotImplementedError(info)
 

@@ -124,7 +124,7 @@ static PyMethodDef _pygi_functions[] = {
 
 struct PyGI_API PyGI_API = {
     pygi_type_find_by_gi_info,
-    pygi_boxed_new
+    pygi_boxed_new_from_type
 };
 
 PyMODINIT_FUNC

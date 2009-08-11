@@ -205,7 +205,7 @@ pyg_boxed_new_ (PyTypeObject *type,
         return NULL;
     }
 
-    return pygi_boxed_new(type, NULL, TRUE);
+    return pygi_boxed_new_from_type(type, NULL, TRUE);
 }
 #endif /* HAVE_PYGI_H */
 

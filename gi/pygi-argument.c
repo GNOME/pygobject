@@ -946,12 +946,16 @@ array_item_error:
                         break;
                     }
 
-                    if (object == Py_None) {
-                        arg.v_pointer = NULL;
-                        break;
+                    arg.v_pointer = pyg_boxed_get(object, void);
+
+                    if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        if (transfer == GI_TRANSFER_EVERYTHING) {
+                            arg.v_pointer = g_boxed_copy(type, arg.v_pointer);
+                        }
+                    } else if (transfer == GI_TRANSFER_EVERYTHING) {
+                        PyErr_SetString(PyExc_RuntimeError, "non-boxed types ownership cannot be transferred");
                     }
 
-                    arg.v_pointer = pyg_boxed_get(object, void);
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
@@ -1167,7 +1171,8 @@ hash_table_release:
 
 PyObject *
 _pygi_argument_to_object (GArgument  *arg,
-                          GITypeInfo *type_info)
+                          GITypeInfo *type_info,
+                          GITransfer transfer)
 {
     GITypeTag type_tag;
     PyObject *object;
@@ -1280,6 +1285,7 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             GArray *array;
             GITypeInfo *item_type_info;
+            GITransfer item_transfer;
             gsize i;
 
             array = arg->v_pointer;
@@ -1292,12 +1298,14 @@ _pygi_argument_to_object (GArgument  *arg,
             item_type_info = g_type_info_get_param_type(type_info, 0);
             g_assert(item_type_info != NULL);
 
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
             for(i = 0; i < array->len; i++) {
                 GArgument item;
                 PyObject *py_item;
 
                 item = _g_array_index(array, GArgument, i);
-                py_item = _pygi_argument_to_object(&item, item_type_info);
+                py_item = _pygi_argument_to_object(&item, item_type_info, item_transfer);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
                     _PyGI_ERROR_PREFIX("Item %zu: ", i);
@@ -1327,7 +1335,7 @@ _pygi_argument_to_object (GArgument  *arg,
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
-                    PyObject *py_type = NULL;
+                    PyObject *py_type;
 
                     /* Handle special cases first. */
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
@@ -1335,6 +1343,11 @@ _pygi_argument_to_object (GArgument  *arg,
                         object = pyg_value_as_pyobject(arg->v_pointer, FALSE);
                         g_value_unset(arg->v_pointer);
                         break;
+                    } else if (!g_type_is_a(type, G_TYPE_BOXED)) {
+                        if (transfer == GI_TRANSFER_EVERYTHING) {
+                            PyErr_SetString(PyExc_RuntimeError, "non-boxed types ownership cannot be transferred");
+                            break;
+                        }
                     }
 
                     py_type = pygi_type_find_by_gi_info(info);
@@ -1342,7 +1355,7 @@ _pygi_argument_to_object (GArgument  *arg,
                         break;
                     }
 
-                    object = pygi_boxed_new((PyTypeObject *)py_type, arg->v_pointer, TRUE /* FIXME */);
+                    object = pygi_boxed_new_from_type((PyTypeObject *)py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING);
 
                     Py_DECREF(py_type);
 
@@ -1379,6 +1392,7 @@ _pygi_argument_to_object (GArgument  *arg,
             GSList *list;
             gsize length;
             GITypeInfo *item_type_info;
+            GITransfer item_transfer;
             gsize i;
 
             list = arg->v_pointer;
@@ -1392,13 +1406,15 @@ _pygi_argument_to_object (GArgument  *arg,
             item_type_info = g_type_info_get_param_type(type_info, 0);
             g_assert(item_type_info != NULL);
 
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
             for (i = 0; list != NULL; list = g_slist_next(list), i++) {
                 GArgument item;
                 PyObject *py_item;
 
                 item.v_pointer = list->data;
 
-                py_item = _pygi_argument_to_object(&item, item_type_info);
+                py_item = _pygi_argument_to_object(&item, item_type_info, item_transfer);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
                     _PyGI_ERROR_PREFIX("Item %zu: ", i);
@@ -1415,6 +1431,7 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             GITypeInfo *key_type_info;
             GITypeInfo *value_type_info;
+            GITransfer item_transfer;
             GHashTableIter hash_table_iter;
             GArgument key;
             GArgument value;
@@ -1430,18 +1447,20 @@ _pygi_argument_to_object (GArgument  *arg,
             value_type_info = g_type_info_get_param_type(type_info, 1);
             g_assert(value_type_info != NULL);
 
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
             g_hash_table_iter_init(&hash_table_iter, (GHashTable *)arg->v_pointer);
             while (g_hash_table_iter_next(&hash_table_iter, &key.v_pointer, &value.v_pointer)) {
                 PyObject *py_key;
                 PyObject *py_value;
                 int retval;
 
-                py_key = _pygi_argument_to_object(&key, key_type_info);
+                py_key = _pygi_argument_to_object(&key, key_type_info, item_transfer);
                 if (py_key == NULL) {
                     break;
                 }
 
-                py_value = _pygi_argument_to_object(&value, value_type_info);
+                py_value = _pygi_argument_to_object(&value, value_type_info, item_transfer);
                 if (py_value == NULL) {
                     Py_DECREF(py_key);
                     break;

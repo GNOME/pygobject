@@ -777,12 +777,67 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
     /* Convert the return value. */
     if (is_constructor) {
-        PyTypeObject *type;
+        PyTypeObject *py_type;
+        GIBaseInfo *info;
+        GIInfoType info_type;
+        GITransfer transfer;
 
         g_assert(n_py_args > 0);
-        type = (PyTypeObject *)PyTuple_GET_ITEM(py_args, 0);
+        py_type = (PyTypeObject *)PyTuple_GET_ITEM(py_args, 0);
 
-        return_value = pygobject_new_from_type(type, return_arg.v_pointer, TRUE);
+        info = g_type_info_get_interface(return_type_info);
+        g_assert(info != NULL);
+
+        info_type = g_base_info_get_type(info);
+
+        g_base_info_unref(info);
+
+        transfer = g_callable_info_get_caller_owns((GICallableInfo *)self->info);
+
+        switch (info_type) {
+            case GI_INFO_TYPE_UNION:
+                PyErr_SetString(PyExc_NotImplementedError, "creating unions is not supported yet");
+                /* TODO */
+                goto return_;
+            case GI_INFO_TYPE_STRUCT:
+            {
+                GType type;
+
+                type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+
+                if (transfer == GI_TRANSFER_EVERYTHING && !g_type_is_a(type, G_TYPE_BOXED)) {
+                    gboolean is_simple;
+
+                    is_simple = _pygi_g_struct_info_is_simple((GIStructInfo *)info);
+
+                    if (is_simple) {
+                        PyErr_Format(PyExc_TypeError,
+                                "cannot create '%s' instances; non-boxed simple structures do not accept specific constructors",
+                                py_type->tp_name);
+                        /* TODO */
+                        goto return_;
+                    }
+                }
+                return_value = pygi_boxed_new_from_type(py_type, return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                break;
+            }
+            case GI_INFO_TYPE_OBJECT:
+                return_value = pygobject_new_from_type(py_type, return_arg.v_pointer, TRUE);
+                break;
+            case GI_INFO_TYPE_INTERFACE:
+                /* Isn't instantiable. */
+            default:
+                /* Other types don't have methods. */
+                g_assert_not_reached();
+        }
+
+        _pygi_argument_release(&return_arg, return_type_info, transfer,
+            GI_DIRECTION_OUT);
+
+        if (return_value == NULL) {
+            /* TODO */
+            goto return_;
+        }
     } else {
         GITransfer transfer;
 
@@ -798,16 +853,13 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             return_arg.v_pointer = array;
         }
 
-        return_value = _pygi_argument_to_object(&return_arg, return_type_info);
+        transfer = g_callable_info_get_caller_owns((GICallableInfo *)self->info);
+
+        return_value = _pygi_argument_to_object(&return_arg, return_type_info, transfer);
         if (return_value == NULL) {
             /* TODO */
             goto return_;
         }
-
-        transfer = g_callable_info_get_caller_owns((GICallableInfo *)self->info);
-
-        _pygi_argument_release(&return_arg, return_type_info, transfer,
-            GI_DIRECTION_OUT);
 
         if (return_type_tag == GI_TYPE_TAG_ARRAY
                 && transfer == GI_TRANSFER_NOTHING) {
@@ -882,7 +934,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 /* Convert the argument. */
                 PyObject *obj;
 
-                obj = _pygi_argument_to_object(args[i], arg_type_infos[i]);
+                obj = _pygi_argument_to_object(args[i], arg_type_infos[i], transfer);
                 if (obj == NULL) {
                     /* TODO */
                     goto return_;
@@ -1371,182 +1423,210 @@ static PyObject *
 _wrap_g_field_info_get_value (PyGIBaseInfo *self,
                               PyObject     *args)
 {
-    PyObject *retval;
+    PyObject *instance;
     GIBaseInfo *container_info;
     GIInfoType container_info_type;
+    gpointer pointer;
     GITypeInfo *field_type_info;
     GArgument value;
-    PyObject *object;
-    gpointer buffer;
+    PyObject *py_value = NULL;
 
-    retval = NULL;
-
-    if (!PyArg_ParseTuple(args, "O:FieldInfo.get_value", &object)) {
+    if (!PyArg_ParseTuple(args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
     }
 
     container_info = g_base_info_get_container(self->info);
-    container_info_type = g_base_info_get_type(container_info);
+    g_assert(container_info != NULL);
 
-    field_type_info = g_field_info_get_type((GIFieldInfo *)self->info);
-
-    if (container_info_type == GI_INFO_TYPE_STRUCT
-            || container_info_type == GI_INFO_TYPE_BOXED) {
-        buffer = pyg_boxed_get(object, void);
-        if (buffer == NULL) {
-            goto return_;
-        }
-    } else {
-        buffer = pygobject_get(object);
+    /* Check the instance. */
+    if (!_pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)container_info, TRUE, instance)) {
+        _PyGI_ERROR_PREFIX("argument 1: ");
+        return NULL;
     }
+
+    /* Get the pointer to the container. */
+    container_info_type = g_base_info_get_type(container_info);
+    switch (container_info_type) {
+        case GI_INFO_TYPE_UNION:
+            PyErr_SetString(PyExc_NotImplementedError, "getting a field from an union is not supported yet");
+            return NULL;
+        case GI_INFO_TYPE_STRUCT:
+            pointer = pyg_boxed_get(instance, void);
+            break;
+        case GI_INFO_TYPE_OBJECT:
+            pointer = pygobject_get(instance);
+            break;
+        default:
+            /* Other types don't have fields. */
+            g_assert_not_reached();
+    }
+
+    /* Get the field's value. */
+    field_type_info = g_field_info_get_type((GIFieldInfo *)self->info);
 
     /* A few types are not handled by g_field_info_get_field, so do it here. */
     if (!g_type_info_is_pointer(field_type_info)
             && g_type_info_get_tag(field_type_info) == GI_TYPE_TAG_INTERFACE) {
         GIBaseInfo *info;
+        GIInfoType info_type;
 
         if (!(g_field_info_get_flags((GIFieldInfo *)self->info) & GI_FIELD_IS_READABLE)) {
-            PyErr_SetString(PyExc_RuntimeError, "Field is not readable");
-            goto return_;
+            PyErr_SetString(PyExc_RuntimeError, "field is not readable");
+            goto out;
         }
 
-        info = g_type_info_get_interface (field_type_info);
-        switch(g_base_info_get_type(info))
-        {
+        info = g_type_info_get_interface(field_type_info);
+
+        info_type = g_base_info_get_type(info);
+
+        g_base_info_unref(info);
+
+        switch(info_type) {
+            case GI_INFO_TYPE_UNION:
+                PyErr_SetString(PyExc_NotImplementedError, "getting an union is not supported yet");
+                goto out;
             case GI_INFO_TYPE_STRUCT:
             {
                 gsize offset;
-                gsize size;
 
                 offset = g_field_info_get_offset((GIFieldInfo *)self->info);
-                size = g_struct_info_get_size((GIStructInfo *)info);
-                g_assert(size > 0);
 
-                value.v_pointer = g_try_malloc(size);
-                if (value.v_pointer == NULL) {
-                    PyErr_SetString(PyExc_MemoryError, "Failed to allocate memory");
-                    break;
-                }
-                g_memmove(value.v_pointer, buffer + offset, size);
+                value.v_pointer = pointer + offset;
 
-                g_base_info_unref(info);
-                goto g_argument_to_py_object;
+                goto argument_to_object;
             }
-            case GI_INFO_TYPE_UNION:
-            case GI_INFO_TYPE_BOXED:
-                /* TODO */
-                g_assert_not_reached();
-                break;
             default:
                 /* Fallback. */
                 break;
         }
-
-        g_base_info_unref(info);
-
-        if (PyErr_Occurred()) {
-            goto return_;
-        }
     }
 
-    if (!g_field_info_get_field((GIFieldInfo *)self->info, buffer, &value)) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to get value for field");
-        goto return_;
+    if (!g_field_info_get_field((GIFieldInfo *)self->info, pointer, &value)) {
+        PyErr_SetString(PyExc_RuntimeError, "unable to get the value");
+        goto out;
     }
 
-g_argument_to_py_object:
-    retval = _pygi_argument_to_object(&value, field_type_info);
+argument_to_object:
+    py_value = _pygi_argument_to_object(&value, field_type_info, GI_TRANSFER_NOTHING);
 
-return_:
+out:
     g_base_info_unref((GIBaseInfo *)field_type_info);
 
-    Py_XINCREF(retval);
-    return retval;
+    return py_value;
 }
 
 static PyObject *
 _wrap_g_field_info_set_value (PyGIBaseInfo *self,
                               PyObject     *args)
 {
-    PyObject *object;
+    PyObject *instance;
     PyObject *py_value;
-    GArgument value;
-    gpointer buffer;
     GIBaseInfo *container_info;
     GIInfoType container_info_type;
+    gpointer pointer;
     GITypeInfo *field_type_info;
-    PyObject *retval;
-    gint check_retval;
+    GArgument value;
+    PyObject *retval = NULL;
 
-    retval = NULL;
-
-    if (!PyArg_ParseTuple(args, "OO:FieldInfo.set_value", &object, &py_value)) {
+    if (!PyArg_ParseTuple(args, "OO:FieldInfo.set_value", &instance, &py_value)) {
         return NULL;
     }
 
     container_info = g_base_info_get_container(self->info);
+    g_assert(container_info != NULL);
+
+    /* Check the instance. */
+    if (!_pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)container_info, TRUE, instance)) {
+        _PyGI_ERROR_PREFIX("argument 1: ");
+        return NULL;
+    }
+
+    /* Get the pointer to the container. */
     container_info_type = g_base_info_get_type(container_info);
+    switch (container_info_type) {
+        case GI_INFO_TYPE_UNION:
+            PyErr_SetString(PyExc_NotImplementedError, "setting a field in an union is not supported yet");
+            return NULL;
+        case GI_INFO_TYPE_STRUCT:
+            pointer = pyg_boxed_get(instance, void);
+            break;
+        case GI_INFO_TYPE_OBJECT:
+            pointer = pygobject_get(instance);
+            break;
+        default:
+            /* Other types don't have fields. */
+            g_assert_not_reached();
+    }
 
     field_type_info = g_field_info_get_type((GIFieldInfo *)self->info);
 
-    if (container_info_type == GI_INFO_TYPE_STRUCT
-            || container_info_type == GI_INFO_TYPE_BOXED) {
-        buffer = pyg_boxed_get(object, void);
-        if (buffer == NULL) {
-            goto return_;
-        }
-    } else {
-        buffer = pygobject_get(object);
-    }
-
     /* Check the value. */
-    check_retval = _pygi_g_type_info_check_object(field_type_info, TRUE, py_value);
+    {
+        gboolean retval;
 
-    if (check_retval < 0) {
-        goto return_;
+        retval = _pygi_g_type_info_check_object(field_type_info, TRUE, py_value);
+        if (retval < 0) {
+            goto out;
+        }
+
+        if (!retval) {
+            _PyGI_ERROR_PREFIX("argument 2: ");
+            goto out;
+        }
     }
 
-    if (!check_retval) {
-        _PyGI_ERROR_PREFIX("%s.set_value() argument 1: ",
-                g_base_info_get_namespace(self->info));
-        goto return_;
-    }
-
-    value = _pygi_argument_from_object(py_value, field_type_info, GI_TRANSFER_NOTHING);
-
+    /* Set the field's value. */
     /* A few types are not handled by g_field_info_set_field, so do it here. */
     if (!g_type_info_is_pointer(field_type_info)
             && g_type_info_get_tag(field_type_info) == GI_TYPE_TAG_INTERFACE) {
         GIBaseInfo *info;
+        GIInfoType info_type;
 
         if (!(g_field_info_get_flags((GIFieldInfo *)self->info) & GI_FIELD_IS_WRITABLE)) {
-            PyErr_SetString(PyExc_RuntimeError, "Field is not writable");
-            goto return_;
+            PyErr_SetString(PyExc_RuntimeError, "field is not writable");
+            goto out;
         }
 
         info = g_type_info_get_interface(field_type_info);
-        switch (g_base_info_get_type(info))
-        {
+
+        info_type = g_base_info_get_type(info);
+
+        switch (info_type) {
+            case GI_INFO_TYPE_UNION:
+                PyErr_SetString(PyExc_NotImplementedError, "setting an union is not supported yet");
+                goto out;
             case GI_INFO_TYPE_STRUCT:
             {
+                gboolean is_simple;
                 gsize offset;
-                gsize size;
+                gssize size;
+
+                is_simple = _pygi_g_struct_info_is_simple((GIStructInfo *)info);
+
+                if (!is_simple) {
+                    PyErr_SetString(PyExc_TypeError,
+                            "cannot set a structure which has no well-defined ownership transfer rules");
+                    g_base_info_unref(info);
+                    goto out;
+                }
+
+                value = _pygi_argument_from_object(py_value, field_type_info, GI_TRANSFER_NOTHING);
+                if (PyErr_Occurred()) {
+                    g_base_info_unref(info);
+                    goto out;
+                }
 
                 offset = g_field_info_get_offset((GIFieldInfo *)self->info);
                 size = g_struct_info_get_size((GIStructInfo *)info);
                 g_assert(size > 0);
 
-                g_memmove(buffer + offset, value.v_pointer, size);
+                g_memmove(pointer + offset, value.v_pointer, size);
+
+                g_base_info_unref(info);
 
                 retval = Py_None;
-                g_base_info_unref(info);
-                goto return_;
+                goto out;
             }
-            case GI_INFO_TYPE_UNION:
-            case GI_INFO_TYPE_BOXED:
-                /* TODO */
-                g_assert_not_reached();
-                break;
             default:
                 /* Fallback. */
                 break;
@@ -1555,14 +1635,20 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
         g_base_info_unref(info);
     }
 
-    if (!g_field_info_set_field((GIFieldInfo *)self->info, buffer, &value)) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to set value for field");
-        goto return_;
+    value = _pygi_argument_from_object(py_value, field_type_info, GI_TRANSFER_EVERYTHING);
+    if (PyErr_Occurred()) {
+        goto out;
+    }
+
+    if (!g_field_info_set_field((GIFieldInfo *)self->info, pointer, &value)) {
+        _pygi_argument_release(&value, field_type_info, GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+        PyErr_SetString(PyExc_RuntimeError, "unable to set value for field");
+        goto out;
     }
 
     retval = Py_None;
 
-return_:
+out:
     g_base_info_unref((GIBaseInfo *)field_type_info);
 
     Py_XINCREF(retval);

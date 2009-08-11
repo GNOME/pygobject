@@ -42,18 +42,6 @@ def Function(info):
     return function
 
 
-class Field(object):
-
-    def __init__(self, info):
-        self.info = info
-
-    def __get__(self, instance, owner):
-        return self.info.get_value(instance)
-
-    def __set__(self, instance, value):
-        return self.info.set_value(instance, value)
-
-
 class MetaClassHelper(object):
 
     def _setup_methods(cls):
@@ -94,7 +82,7 @@ class MetaClassHelper(object):
     def _setup_fields(cls):
         for field_info in cls.__info__.get_fields():
             name = field_info.get_name().replace('-', '_')
-            setattr(cls, name, Field(field_info))
+            setattr(cls, name, property(field_info.get_value, field_info.set_value))
 
 
 class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
@@ -115,10 +103,10 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             cls._setup_fields()
 
 
-class GBoxedMeta(type, MetaClassHelper):
+class StructMeta(type, MetaClassHelper):
 
     def __init__(cls, name, bases, dict_):
-        super(GBoxedMeta, cls).__init__(name, bases, dict_)
+        super(StructMeta, cls).__init__(name, bases, dict_)
 
         # Avoid touching anything else than the base class.
         if cls.__name__ != cls.__info__.get_name():

@@ -49,7 +49,8 @@ GArgument _pygi_argument_from_object (PyObject   *object,
                                       GITransfer  transfer);
 
 PyObject* _pygi_argument_to_object (GArgument  *arg,
-                                    GITypeInfo *type_info);
+                                    GITypeInfo *type_info,
+                                    GITransfer  transfer);
 
 
 void _pygi_argument_release (GArgument   *arg,
