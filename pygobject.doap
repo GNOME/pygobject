@@ -17,4 +17,18 @@
       <gnome:userid>gjc</gnome:userid>
     </foaf:Person>
   </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Paul Pogonyshev</foaf:name>
+      <foaf:mbox rdf:resource="mailto:pogonyshev@gmx.net" />
+      <gnome:userid>paulp</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Gian Mario Tagliaretti</foaf:name>
+      <foaf:mbox rdf:resource="mailto:gianmt@gnome.org" />
+      <gnome:userid>gianmt</gnome:userid>
+    </foaf:Person>
+  </maintainer>
 </Project>
