@@ -62,11 +62,8 @@ pyg_boxed_hash(PyGBoxed *self)
 static PyObject *
 pyg_boxed_repr(PyGBoxed *self)
 {
-    gchar buf[128];
-
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
-	       (long)self->boxed);
-    return _PyUnicode_FromString(buf);
+    return PyString_FromFormat("<%s object at 0x%p (%s at 0x%p)>",
+            self->ob_type->tp_name, self, g_type_name(self->gtype), self->boxed);
 }
 
 static int
