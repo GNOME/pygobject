@@ -782,7 +782,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         g_assert(n_py_args > 0);
         type = (PyTypeObject *)PyTuple_GET_ITEM(py_args, 0);
 
-        return_value = pygobject_new_from_type(return_arg.v_pointer, TRUE, type);
+        return_value = pygobject_new_from_type(type, return_arg.v_pointer, TRUE);
     } else {
         GITransfer transfer;
 

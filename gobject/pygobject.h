@@ -202,9 +202,9 @@ struct _PyGObject_Functions {
     PyTypeObject *object_type;
     PyTypeObject *type_wrapper_type;
 
-	PyObject *(*object_new_from_type) (GObject *obj,
-									   gboolean sink,
-									   PyTypeObject *type);
+    PyObject *(*object_new_from_type) (PyTypeObject *type,
+                                       GObject *obj,
+                                       gboolean sink);
 };
 
 #ifndef _INSIDE_PYGOBJECT_

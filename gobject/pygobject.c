@@ -885,9 +885,9 @@ pygobject_lookup_class(GType gtype)
 
 /**
  * pygobject_new_from_type:
+ * @type: a non-strict subtype of PyGObject_Type.
  * @obj: a GObject instance.
  * @sink: whether to sink any floating reference found on the GObject.
- * @type: a non-strict subtype of PyGObject_Type.
  *
  * This function creates a wrapper instance from the given Python type for the
  * GObject instance. In case of error, it returns NULL and sets an exception.
@@ -895,7 +895,7 @@ pygobject_lookup_class(GType gtype)
  * Returns: a new reference to the wrapper instance for the object.
  */
 PyObject *
-pygobject_new_from_type(GObject *obj, gboolean sink, PyTypeObject *type)
+pygobject_new_from_type(PyTypeObject *type, GObject *obj, gboolean sink)
 {
 	PyGObject *self;
 
@@ -986,7 +986,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
         }
         g_assert(tp != NULL);
 
-		self = (PyGObject *)pygobject_new_from_type(obj, sink, tp);
+		self = (PyGObject *)pygobject_new_from_type(tp, obj, sink);
     }
 
     return (PyObject *)self;
