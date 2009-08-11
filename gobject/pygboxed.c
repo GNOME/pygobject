@@ -66,24 +66,6 @@ pyg_boxed_repr(PyGBoxed *self)
             self->ob_type->tp_name, self, g_type_name(self->gtype), self->boxed);
 }
 
-static int
-pyg_boxed_init(PyGBoxed *self, PyObject *args, PyObject *kwargs)
-{
-    gchar buf[512];
-
-    if (!PyArg_ParseTuple(args, ":GBoxed.__init__"))
-	return -1;
-
-    self->boxed = NULL;
-    self->gtype = 0;
-    self->free_on_dealloc = FALSE;
-
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
-	       Py_TYPE(self)->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
-    return -1;
-}
-
 static void
 pyg_boxed_free(PyObject *op)
 {
@@ -210,9 +192,13 @@ pygobject_boxed_register_types(PyObject *d)
     PyGBoxed_Type.tp_repr = (reprfunc)pyg_boxed_repr;
     PyGBoxed_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGBoxed_Type.tp_methods = pygboxed_methods;
-    PyGBoxed_Type.tp_init = (initproc)pyg_boxed_init;
     PyGBoxed_Type.tp_free = (freefunc)pyg_boxed_free;
     PyGBoxed_Type.tp_hash = (hashfunc)pyg_boxed_hash;
     
     PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
+
+    /* We don't want instances to be created in Python, but
+     * PYGOBJECT_REGISTER_GTYPE assigned PyObject_GenericNew as instance
+     * constructor. It's not too late to revert it to NULL, though. */
+    PyGBoxed_Type.tp_new = (newfunc)NULL;
 }
