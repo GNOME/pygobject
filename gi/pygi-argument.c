@@ -114,8 +114,6 @@ _pygi_gi_type_tag_py_bounds (GITypeTag   type_tag,
                              PyObject  **lower,
                              PyObject  **upper)
 {
-    *lower = *upper = NULL;
-
     switch(type_tag) {
         case GI_TYPE_TAG_INT8:
             *lower = PyInt_FromLong(-128);
@@ -188,6 +186,7 @@ _pygi_gi_type_tag_py_bounds (GITypeTag   type_tag,
             break;
         default:
             PyErr_SetString(PyExc_TypeError, "Non-numeric type tag");
+            *lower = *upper = NULL;
             return;
     }
 }
@@ -308,11 +307,12 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
             /* Check bounds */
             if (PyObject_Compare(lower, object) > 0
                 || PyObject_Compare(upper, object) < 0) {
-                PyObject *lower_str, *upper_str;
+                PyObject *lower_str;
+                PyObject *upper_str;
 
                 if (PyErr_Occurred()) {
                     retval = -1;
-                    goto check_number_error_release;
+                    goto check_number_release;
                 }
 
                 lower_str = PyObject_Str(lower);
