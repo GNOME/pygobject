@@ -1,7 +1,11 @@
 PyGObject
 =====
-Original author: James Henstridge <james@daa.com.au>
-Current maintainer: Johan Dahlin <johan@gnome.org>
+Original authors:   James Henstridge <james@daa.com.au>
+                    Johan Dahlin <johan@gnome.org>
+
+Current maintainers:  Gustavo J A M Carneiro <gjc@gnome.org>
+                      Paul Pogonyshev <pogonyshev@gmx.net>
+                      Gian Mario Tagliaretti <gianmt@gnome.org>
 
 This archive contains bindings for the GLib, GObject and GIO,
 to be used in Python. It is a fairly complete set of bindings,
@@ -39,6 +43,8 @@ Requirements
   * C compiler (GCC and MSVC supported)
   * Python 2.3.5 or higher
   * Glib 2.14.0 or higher
+  * GIO 2.16.0 or higher
+  * GIO-unix 2.16.0 or higher
   * libffi (optional)
 
 Copyright Information
