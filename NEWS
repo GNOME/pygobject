@@ -1,3 +1,32 @@
+2.19.0 10-aug-2009
+        - Add macros to help with Python list to/from GList/GSList conversions.
+          (John Finlay)
+        - GIO docs practically completed (Gian)
+        - GFileInfo.list_attributes should accept None/NULL (Gian)
+        - Strip out Windows DLL API macros (John Finlay)
+        - Document that many functions got moved gobject -> glib (Paul)
+        - Allow h2def.py to work when there are tabs or multiple spaces after
+          the struct keyword. (Murray Cumming)
+        - Fix build when builddir is not the same as srcdir
+          (Theppitak Karoonboonyanan)
+        - Make gio.Emblem constructor new-style (Paul)
+        - Cleanup GIO overrides to use Python function/method names (Paul)
+        - Make codegen report errors using Python function/method names (Paul)
+        - Fix object type in gio.BufferedInputStream_fill_async (Gian)
+        - Wrap gio.BufferedInputStream.fill_async (Gian)
+        - Add gio.BufferedOutputStream which was forgotten in the types (Gian)
+        - Split overrides for gio.MemoryOutputStream (Gian)
+        - Wrap gio.memory_input_stream_new_from_data (Gian)
+        - Introduces the girepository module from the former PyBank
+          (Simon van der Linden)
+        - Add API appeared in 2.20 but not marked as such in gio docs (Gian)
+        - Wrap gio.FileOutputStream.query_info_async (Gian)
+        - Wrap gio.FileInputStream.query_async (Gian)
+        - Install executable codegen parts with executing permissions (Paul)
+        - Wrap gio.DataInputStream.read_line_async and read_until_async (Paul)
+        - Fix gio.OutputStream.splice_async (Paul)
+        - Add GIO 2.20 API and update docs (Gian)
+
 2.18.0 24-may-2009
         - Improve gio docs with some more classes (Gian)
         - Wrap gio.OutputStream.splice_async() (Gian)
