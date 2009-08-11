@@ -25,6 +25,9 @@
 #endif
 
 #include <pyglib.h>
+#if HAVE_PYGI_H
+#    include <pygi.h>
+#endif
 #include "pygobject-private.h"
 #include "pygboxed.h"
 
@@ -38,7 +41,12 @@ pyg_boxed_dealloc(PyGBoxed *self)
 {
     if (self->free_on_dealloc && self->boxed) {
 	PyGILState_STATE state = pyglib_gil_state_ensure();
-	g_boxed_free(self->gtype, self->boxed);
+        if (!g_type_is_a(self->gtype, G_TYPE_BOXED)) {
+            /* Void pointers are also allowed. */
+            g_free(self->boxed);
+        } else {
+            g_boxed_free(self->gtype, self->boxed);
+        }
 	pyglib_gil_state_release(state);
     }
 
@@ -181,6 +189,26 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     return (PyObject *)self;
 }
 
+#if HAVE_PYGI_H
+static PyObject *
+pyg_boxed_new_ (PyTypeObject *type,
+                PyObject     *args,
+                PyObject     *kwds)
+{
+    static char *kwlist[] = { NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist)) {
+        return NULL;
+    }
+
+    if (pygi_import() < 0) {
+        return NULL;
+    }
+
+    return pygi_boxed_new(type, NULL, TRUE);
+}
+#endif /* HAVE_PYGI_H */
+
 void
 pygobject_boxed_register_types(PyObject *d)
 {
@@ -194,11 +222,16 @@ pygobject_boxed_register_types(PyObject *d)
     PyGBoxed_Type.tp_methods = pygboxed_methods;
     PyGBoxed_Type.tp_free = (freefunc)pyg_boxed_free;
     PyGBoxed_Type.tp_hash = (hashfunc)pyg_boxed_hash;
-    
+#if HAVE_PYGI_H
+    PyGBoxed_Type.tp_new = (newfunc)pyg_boxed_new_;
+#endif
+
     PYGOBJECT_REGISTER_GTYPE(d, PyGBoxed_Type, "GBoxed", G_TYPE_BOXED);
 
+#if !HAVE_PYGI_H
     /* We don't want instances to be created in Python, but
      * PYGOBJECT_REGISTER_GTYPE assigned PyObject_GenericNew as instance
      * constructor. It's not too late to revert it to NULL, though. */
     PyGBoxed_Type.tp_new = (newfunc)NULL;
+#endif
 }

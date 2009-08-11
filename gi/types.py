@@ -54,26 +54,7 @@ class Field(object):
         return self.info.set_value(instance, value)
 
 
-class GObjectIntrospectionMeta(gobject.GObjectMeta):
-
-    def __init__(cls, name, bases, dict_):
-        super(GObjectIntrospectionMeta, cls).__init__(name, bases, dict_)
-
-        if hasattr(cls, '__gtype__'):
-            setObjectHasNewConstructor(cls.__gtype__)
-
-        # Only set up the wrapper methods and fields in their base classes.
-        if cls.__name__ == cls.__info__.get_name():
-            if isinstance(cls.__info__, InterfaceInfo):
-                cls._setup_methods()
-
-            if isinstance(cls.__info__, ObjectInfo):
-                cls._setup_fields()
-                cls._setup_methods()
-
-            if isinstance(cls.__info__, StructInfo):
-                cls._setup_fields()
-                cls._setup_methods()
+class MetaClassHelper(object):
 
     def _setup_methods(cls):
         constructor_infos = []
@@ -116,20 +97,33 @@ class GObjectIntrospectionMeta(gobject.GObjectMeta):
             setattr(cls, name, Field(field_info))
 
 
-class GIStruct(object):
+class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
-    def __init__(self, buffer=None):
-        if buffer is None:
-            buffer = self.__info__.new_buffer()
-        self.__buffer__ = buffer
+    def __init__(cls, name, bases, dict_):
+        super(GObjectMeta, cls).__init__(name, bases, dict_)
 
-    def __eq__(self, other):
-        for field_info in self.__info__.get_fields():
-            name = field_info.get_name()
-            if getattr(self, name) != getattr(other, name):
-                return False
-        return True
+        # Avoid touching anything else than the base class.
+        if cls.__name__ != cls.__info__.get_name():
+            return;
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        if hasattr(cls, '__gtype__'):
+            setObjectHasNewConstructor(cls.__gtype__)
+
+        cls._setup_methods()
+
+        if isinstance(cls.__info__, ObjectInfo):
+            cls._setup_fields()
+
+
+class GBoxedMeta(type, MetaClassHelper):
+
+    def __init__(cls, name, bases, dict_):
+        super(GBoxedMeta, cls).__init__(name, bases, dict_)
+
+        # Avoid touching anything else than the base class.
+        if cls.__name__ != cls.__info__.get_name():
+            return;
+
+        cls._setup_fields()
+        cls._setup_methods()
 

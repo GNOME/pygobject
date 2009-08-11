@@ -906,8 +906,6 @@ array_item_error:
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
-                    gsize size;
-                    gpointer buffer;
 
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
@@ -953,9 +951,7 @@ array_item_error:
                         break;
                     }
 
-                    buffer = _pygi_object_get_buffer(object, &size);
-
-                    arg.v_pointer = buffer;
+                    arg.v_pointer = pyg_boxed_get(object, void);
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
@@ -1332,8 +1328,6 @@ _pygi_argument_to_object (GArgument  *arg,
                 {
                     GType type;
                     PyObject *py_type = NULL;
-                    gsize size;
-                    PyObject *buffer = NULL;
 
                     /* Handle special cases first. */
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
@@ -1343,23 +1337,13 @@ _pygi_argument_to_object (GArgument  *arg,
                         break;
                     }
 
-                    /* Create a Python buffer. */
-                    size = g_struct_info_get_size((GIStructInfo *)info);
-                    buffer = PyBuffer_FromReadWriteMemory(arg->v_pointer, size);
-                    if (buffer == NULL) {
-                        break;
-                    }
-
-                    /* Wrap the structure. */
                     py_type = pygi_type_find_by_gi_info(info);
                     if (py_type == NULL) {
-                        Py_DECREF(buffer);
                         break;
                     }
 
-                    object = PyObject_CallFunction(py_type, "O", buffer);
+                    object = pygi_boxed_new((PyTypeObject *)py_type, arg->v_pointer, TRUE /* FIXME */);
 
-                    Py_DECREF(buffer);
                     Py_DECREF(py_type);
 
                     break;

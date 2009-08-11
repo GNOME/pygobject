@@ -583,11 +583,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     g_assert_not_reached();
                     break;
                 case GI_INFO_TYPE_STRUCT:
-                {
-                    gsize size;
-                    in_args[0].v_pointer = _pygi_object_get_buffer(py_arg, &size);
+                    in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
                     break;
-                }
                 case GI_INFO_TYPE_OBJECT:
                     in_args[0].v_pointer = pygobject_get(py_arg);
                     break;
@@ -1053,19 +1050,9 @@ _wrap_g_struct_info_get_methods (PyGIBaseInfo *self)
     return infos;
 }
 
-static PyObject *
-_wrap_g_struct_info_new_buffer (PyGIBaseInfo *self)
-{
-    gsize size = g_struct_info_get_size ((GIStructInfo*)self->info);
-    PyObject *buffer = PyBuffer_New (size);
-    Py_INCREF(buffer);
-    return buffer;
-}
-
 static PyMethodDef _PyGIStructInfo_methods[] = {
     { "get_fields", (PyCFunction)_wrap_g_struct_info_get_fields, METH_NOARGS },
     { "get_methods", (PyCFunction)_wrap_g_struct_info_get_methods, METH_NOARGS },
-    { "new_buffer", (PyCFunction)_wrap_g_struct_info_new_buffer, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1405,8 +1392,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
 
     if (container_info_type == GI_INFO_TYPE_STRUCT
             || container_info_type == GI_INFO_TYPE_BOXED) {
-        gsize size;
-        buffer = _pygi_object_get_buffer(object, &size);
+        buffer = pyg_boxed_get(object, void);
         if (buffer == NULL) {
             goto return_;
         }
@@ -1505,8 +1491,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
 
     if (container_info_type == GI_INFO_TYPE_STRUCT
             || container_info_type == GI_INFO_TYPE_BOXED) {
-        gsize size;
-        buffer = _pygi_object_get_buffer(object, &size);
+        buffer = pyg_boxed_get(object, void);
         if (buffer == NULL) {
             goto return_;
         }

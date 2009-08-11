@@ -39,17 +39,30 @@ typedef struct {
     PyObject *inst_weakreflist;
 } PyGIBaseInfo;
 
+#define PyGIBaseInfo_GET_GI_INFO(object) g_base_info_ref(((PyGIBaseInfo *)object)->info)
+
 
 struct PyGI_API {
+    /* Misc */
     PyObject* (*type_find_by_gi_info) (GIBaseInfo *info);
+
+    /* Boxed */
+    PyObject* (*boxed_new) (PyTypeObject *type,
+                            gpointer      pointer,
+                            gboolean      own_pointer);
 };
 
 
 #ifndef __PYGI_PRIVATE_H__
 
-struct PyGI_API *PyGI_API = NULL;
+static struct PyGI_API *PyGI_API = NULL;
 
+/* Misc */
 #define pygi_type_find_by_gi_info (PyGI_API->type_find_by_gi_info)
+
+/* Boxed */
+#define pygi_boxed_new (PyGI_API->boxed_new)
+
 
 static int
 pygi_import (void)

@@ -30,13 +30,6 @@ utf8_nonconst = 'nonconst \xe2\x99\xa5 utf8'
 test_sequence = ('1', '2', '3')
 test_dict = {'foo': 'bar', 'baz': 'bat', 'qux': 'quux'}
 
-def createStructA():
-    a = Everything.TestStructA()
-    a.some_int = 3
-    a.some_int8 = 1
-    a.some_double = 4.15
-    a.some_enum= Everything.TestEnum.VALUE3
-    return a
 
 class SignalHandler:
     def __init__(self):
@@ -545,7 +538,19 @@ class TestGIEverything(unittest.TestCase):
 # Structures
 
     def testStructA(self):
-        a = createStructA()
+        # Test inheritance.
+        self.assertTrue(issubclass(Everything.TestStructA, gobject.GBoxed))
+
+        # Test instanciation.
+        a = Everything.TestStructA()
+        self.assertTrue(isinstance(a, Everything.TestStructA))
+
+        # Test fields.
+        a.some_int = 3
+        a.some_int8 = 1
+        a.some_double = 4.15
+        a.some_enum= Everything.TestEnum.VALUE3
+
         self.assertEquals(a.some_int, 3)
         self.assertEquals(a.some_int8, 1)
         self.assertEquals(a.some_double, 4.15)
@@ -555,74 +560,38 @@ class TestGIEverything(unittest.TestCase):
         self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MIN-1)
         self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MAX+1)
 
+        # Test method call and marshalling.
         a_out = Everything.TestStructA()
         a.clone(a_out)
-        self.assertEquals(a, a_out)
+
+        self.assertEquals(a.some_int, a_out.some_int)
+        self.assertEquals(a.some_int8, a_out.some_int8)
+        self.assertEquals(a.some_double, a_out.some_double)
+        self.assertEquals(a.some_enum, a_out.some_enum)
 
         # Test instance checking by passing a wrong instance.
         self.assertRaises(TypeError, Everything.TestStructA.clone, 'a', a_out)
 
     def testStructB(self):
         b = Everything.TestStructB()
-        b.some_int8 = 3
-        a = createStructA()
+        a = Everything.TestStructA()
+
+        # Test nested structures.
         b.nested_a = a
-        self.assertEquals(a, b.nested_a)
+        a_out = b.nested_a
+
+        self.assertTrue(isinstance(b.nested_a, Everything.TestStructA))
+        self.assertEquals(a.some_int, a_out.some_int)
+        self.assertEquals(a.some_int8, a_out.some_int8)
+        self.assertEquals(a.some_double, a_out.some_double)
+        self.assertEquals(a.some_enum, a_out.some_enum)
 
         # Test assignment checking.
         self.assertRaises(TypeError, setattr, b, 'nested_a', 'a')
         self.assertRaises(TypeError, setattr, b, 'nested_a', Everything.TestStructB())
 
-        b_out = Everything.TestStructB()
-        b.clone(b_out)
-        self.assertEquals(b, b_out)
-
-
-# Plain-old-data boxed types
-
-    def testSimpleBoxedA(self):
-        a = Everything.TestSimpleBoxedA()
-        a.some_int = 42
-        a.some_int8 = 7
-        a.some_double = 3.14
-        a.some_enum = Everything.TestEnum.VALUE3
-
-        self.assertEquals(42, a.some_int)
-        self.assertEquals(7, a.some_int8)
-        self.assertAlmostEquals(3.14, a.some_double)
-        self.assertEquals(Everything.TestEnum.VALUE3, a.some_enum)
-
-        self.assertRaises(TypeError, setattr, a, 'some_int', 'a')
-        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MIN-1)
-        self.assertRaises(ValueError, setattr, a, 'some_int8', INT8_MAX+1)
-
-        a_out = a.copy()
-        self.assertTrue(a.equals(a_out))
-        self.assertEquals(a, a_out)
-
-        # Test instance checking by passing a wrong instance.
-        self.assertRaises(TypeError, Everything.TestSimpleBoxedA.copy, 'a')
-        self.assertRaises(TypeError, Everything.TestSimpleBoxedA.copy, gobject.GObject())
-
-        # Test boxed as return value.
-        a_const = Everything.test_simple_boxed_a_const_return()
-        self.assertEquals(5, a_const.some_int)
-        self.assertEquals(6, a_const.some_int8)
-        self.assertAlmostEquals(7.0, a_const.some_double)
-
-    def testSimpleBoxedB(self):
-        a_const = Everything.test_simple_boxed_a_const_return()
-
-        b = Everything.TestSimpleBoxedB()
-        b.some_int = 42
-        b.nested_a = a_const.copy()
-
-        self.assertEquals(a_const, b.nested_a)
-
-        self.assertRaises(TypeError, setattr, b, 'nested_a', 'a')
-
-        b_out = b.copy()
-        self.assertEquals(b, b_out)
+    def testStructC(self):
+        self.assertRaises(TypeError, Everything.TestStructC)
 
 
 # GObject

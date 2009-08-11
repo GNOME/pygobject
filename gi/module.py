@@ -26,7 +26,7 @@ import gobject
 from gobject import \
     GObject, \
     GInterface, \
-    GEnum
+    GBoxed
 
 from ._gi import \
     Repository, \
@@ -38,8 +38,8 @@ from ._gi import \
     InterfaceInfo, \
     StructInfo
 from .types import \
-    GObjectIntrospectionMeta, \
-    GIStruct, \
+    GObjectMeta, \
+    GBoxedMeta, \
     Function
 
 repository = Repository.get_default()
@@ -74,16 +74,7 @@ class DynamicModule(object):
             raise AttributeError("%r object has no attribute %r" % (
                     self.__class__.__name__, name))
 
-        if isinstance(info, StructInfo):
-            # FIXME: This could be wrong for structures that are registered (like GValue or GClosure).
-            bases = (GIStruct,)
-            name = info.get_name()
-            dict_ = {
-                '__info__': info,
-                '__module__': info.get_namespace()
-            }
-            value = GObjectIntrospectionMeta(name, bases, dict_)
-        elif isinstance(info, EnumInfo):
+        if isinstance(info, EnumInfo):
             type_ = info.get_g_type()
             if type_.is_a(gobject.TYPE_ENUM):
                 value = gobject.enum_from_g_type(type_)
@@ -99,29 +90,38 @@ class DynamicModule(object):
                 setattr(value, name, value(value_info.get_value()))
 
         elif isinstance(info, RegisteredTypeInfo):
+            g_type = info.get_g_type()
+
             # Check if there is already a Python wrapper.
-            gtype = info.get_g_type()
-            if gtype.pytype is not None:
-                self.__dict__[name] = gtype.pytype
-                return
+            if g_type != gobject.TYPE_NONE and g_type.pytype is not None:
+                self.__dict__[name] = g_type.pytype
+                return gtype.pytype
 
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
-                parent = get_parent_for_object(info)
-                bases = (parent,)
+                bases = (get_parent_for_object(info),)
+                metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
+                # FIXME
                 bases = (GInterface,)
+                metaclass = GObjectMeta
+            elif isinstance(info, StructInfo):
+                bases = (GBoxed,)
+                metaclass = GBoxedMeta
             else:
                 raise NotImplementedError(info)
 
             name = info.get_name()
             dict_ = {
                 '__info__': info,
-                '__module__': info.get_namespace(),
-                '__gtype__': gtype
+                '__module__': self.__namespace__,
+                '__gtype__': g_type
             }
-            value = GObjectIntrospectionMeta(name, bases, dict_)
-            gtype.pytype = value
+            value = metaclass(name, bases, dict_)
+
+            if g_type != gobject.TYPE_NONE:
+                g_type.pytype = value
+
         elif isinstance(info, FunctionInfo):
             value = Function(info)
         else:

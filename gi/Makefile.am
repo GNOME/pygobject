@@ -42,6 +42,8 @@ _gi_la_SOURCES = \
 	pygi-info.h \
 	pygi-argument.c \
 	pygi-argument.h \
+	pygi-boxed.c \
+	pygi-boxed.h \
 	pygi.h \
 	pygi-private.h \
 	gimodule.c

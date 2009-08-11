@@ -75,35 +75,29 @@ pygi_type_find_by_gi_info (GIBaseInfo *info)
     return pygi_type_find_by_name(namespace_, name);
 }
 
-gpointer
-_pygi_object_get_buffer (PyObject *object,
-                         gsize    *size)
+GIBaseInfo *
+_pygi_object_get_gi_info (PyObject     *object,
+                          PyTypeObject *type)
 {
-    PyBufferProcs *py_buffer_procs;
-    PyObject *py_buffer;
-    gpointer buffer;
+    PyObject *py_info;
+    GIBaseInfo *info = NULL;
 
-    py_buffer = PyObject_GetAttrString(object, "__buffer__");
-    if (py_buffer == NULL) {
-        return NULL;
+    py_info = PyObject_GetAttrString(object, "__info__");
+    if (py_info == NULL) {
+        goto out;
+    }
+    if (!PyObject_TypeCheck(py_info, type)) {
+        PyErr_Format(PyExc_TypeError, "attribute '__info__' must be %s, not %s",
+            type->tp_name, py_info->ob_type->tp_name);
+        goto out;
     }
 
-    if(!PyBuffer_Check(py_buffer)) {
-        PyErr_Format(PyExc_TypeError, "Must be buffer, not %s",
-                object->ob_type->tp_name);
-    }
+    info = PyGIBaseInfo_GET_GI_INFO(py_info);
 
-    /* We don't need to keep a reference. */
-    Py_DECREF(py_buffer);
+out:
+    Py_XDECREF(py_info);
 
-    py_buffer_procs = py_buffer->ob_type->tp_as_buffer;
-
-    *size = (*py_buffer_procs->bf_getreadbuffer)(py_buffer, 0, &buffer);
-    if (*size < 0) {
-        return NULL;
-    }
-
-    return buffer;
+    return info;
 }
 
 static PyObject *
@@ -129,7 +123,8 @@ static PyMethodDef _pygi_functions[] = {
 };
 
 struct PyGI_API PyGI_API = {
-    pygi_type_find_by_gi_info
+    pygi_type_find_by_gi_info,
+    pygi_boxed_new
 };
 
 PyMODINIT_FUNC
