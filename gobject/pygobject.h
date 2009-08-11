@@ -200,7 +200,6 @@ struct _PyGObject_Functions {
     PyObject* (*option_group_new) (GOptionGroup *group);
 };
 
-
 #ifndef _INSIDE_PYGOBJECT_
 
 #if defined(NO_IMPORT) || defined(NO_IMPORT_PYGOBJECT)
@@ -387,6 +386,247 @@ pygobject_init(int req_major, int req_minor, int req_micro)
         return;                                                                 \
 } G_STMT_END
 
+/**
+ * PYLIST_FROMGLIBLIST:
+ * @type: the type of the GLib list e.g. #GList or #GSList
+ * @prefix: the prefix of functions that manipulate a list of the type
+ * given by type.
+ *
+ * A macro that creates a type specific code block which converts a GLib
+ * list (#GSList or #GList) to a Python list. The first two args of the macro
+ * are used to specify the type and list function prefix so that the type
+ * specific macros can be generated.
+ *
+ * The rest of the args are for the standard args for the type specific
+ * macro(s) created from this macro.
+ */
+ #define PYLIST_FROMGLIBLIST(type,prefix,py_list,list,item_convert_func,\
+                            list_free,list_item_free)  \
+G_STMT_START \
+{ \
+    gint i, len; \
+    PyObject *item; \
+    void (*glib_list_free)(type*) = list_free; \
+    GFunc glib_list_item_free = (GFunc)list_item_free;  \
+ \
+    len = prefix##_length(list); \
+    py_list = PyList_New(len); \
+    for (i = 0; i < len; i++) { \
+        gpointer list_item = prefix##_nth_data(list, i); \
+ \
+        item = item_convert_func; \
+        PyList_SetItem(py_list, i, item); \
+    } \
+    if (glib_list_item_free != NULL) \
+        prefix##_foreach(list, glib_list_item_free, NULL); \
+    if (glib_list_free != NULL) \
+        glib_list_free(list); \
+} G_STMT_END
+
+/**
+ * PYLIST_FROMGLIST:
+ * @py_list: the name of the Python list
+ *
+ * @list: the #GList to be converted to a Python list
+ *
+ * @item_convert_func: the function that converts a list item to a Python
+ * object. The function must refer to the list item using "@list_item" and
+ * must return a #PyObject* object. An example conversion function is:
+ * [[
+ * PyString_FromString(list_item)
+ * ]]
+ * A more elaborate function is:
+ * [[
+ * pyg_boxed_new(GTK_TYPE_RECENT_INFO, list_item, TRUE, TRUE)
+ * ]]
+ * @list_free: the name of a function that takes a single arg (the list) and
+ * frees its memory. Can be NULL if the list should not be freed. An example
+ * is:
+ * [[
+ * g_list_free
+ * ]]
+ * @list_item_free: the name of a #GFunc function that frees the memory used
+ * by the items in the list or %NULL if the list items do not have to be
+ * freed. A simple example is:
+ * [[
+ * g_free
+ * ]]
+ *
+ * A macro that adds code that converts a #GList to a Python list.
+ *
+ */
+#define PYLIST_FROMGLIST(py_list,list,item_convert_func,list_free,\
+                         list_item_free) \
+        PYLIST_FROMGLIBLIST(GList,g_list,py_list,list,item_convert_func,\
+                            list_free,list_item_free)
+
+/**
+ * PYLIST_FROMGSLIST:
+ * @py_list: the name of the Python list
+ *
+ * @list: the #GSList to be converted to a Python list
+ *
+ * @item_convert_func: the function that converts a list item to a Python
+ * object. The function must refer to the list item using "@list_item" and
+ * must return a #PyObject* object. An example conversion function is:
+ * [[
+ * PyString_FromString(list_item)
+ * ]]
+ * A more elaborate function is:
+ * [[
+ * pyg_boxed_new(GTK_TYPE_RECENT_INFO, list_item, TRUE, TRUE)
+ * ]]
+ * @list_free: the name of a function that takes a single arg (the list) and
+ * frees its memory. Can be %NULL if the list should not be freed. An example
+ * is:
+ * [[
+ * g_list_free
+ * ]]
+ * @list_item_free: the name of a #GFunc function that frees the memory used
+ * by the items in the list or %NULL if the list items do not have to be
+ * freed. A simple example is:
+ * [[
+ * g_free
+ * ]]
+ *
+ * A macro that adds code that converts a #GSList to a Python list.
+ *
+ */
+#define PYLIST_FROMGSLIST(py_list,list,item_convert_func,list_free,\
+                          list_item_free) \
+        PYLIST_FROMGLIBLIST(GSList,g_slist,py_list,list,item_convert_func,\
+                            list_free,list_item_free)
+
+/**
+ * PYLIST_ASGLIBLIST
+ * @type: the type of the GLib list e.g. GList or GSList
+ * @prefix: the prefix of functions that manipulate a list of the type
+ * given by type e.g. g_list or g_slist
+ *
+ * A macro that creates a type specific code block to be used to convert a
+ * Python list to a GLib list (GList or GSList). The first two args of the
+ * macro are used to specify the type and list function prefix so that the
+ * type specific macros can be generated.
+ *
+ * The rest of the args are for the standard args for the type specific
+ * macro(s) created from this macro.
+ */
+#define PYLIST_ASGLIBLIST(type,prefix,py_list,list,check_func,\
+                           convert_func,child_free_func,errormsg,errorreturn) \
+G_STMT_START \
+{ \
+    Py_ssize_t i, n_list; \
+    GFunc glib_child_free_func = (GFunc)child_free_func;        \
+ \
+    if (!(py_list = PySequence_Fast(py_list, ""))) { \
+        errormsg; \
+        return errorreturn; \
+    } \
+    n_list = PySequence_Fast_GET_SIZE(py_list); \
+    for (i = 0; i < n_list; i++) { \
+        PyObject *py_item = PySequence_Fast_GET_ITEM(py_list, i); \
+ \
+        if (!check_func) { \
+            if (glib_child_free_func) \
+                    prefix##_foreach(list, glib_child_free_func, NULL); \
+            prefix##_free(list); \
+            Py_DECREF(py_list); \
+            errormsg; \
+            return errorreturn; \
+        } \
+        list = prefix##_prepend(list, convert_func); \
+    }; \
+        Py_DECREF(py_list); \
+        list =  prefix##_reverse(list); \
+} \
+G_STMT_END
+/**
+ * PYLIST_ASGLIST
+ * @py_list: the Python list to be converted
+ * @list: the #GList list to be converted
+ * @check_func: the expression that takes a #PyObject* arg (must be named
+ * @py_item) and returns an int value indicating if the Python object matches
+ * the required list item type (0 - %False or 1 - %True). An example is:
+ * [[
+ * (PyString_Check(py_item)||PyUnicode_Check(py_item))
+ * ]]
+ * @convert_func: the function that takes a #PyObject* arg (must be named
+ * py_item) and returns a pointer to the converted list object. An example
+ * is:
+ * [[
+ * pygobject_get(py_item)
+ * ]]
+ * @child_free_func: the name of a #GFunc function that frees a GLib list
+ * item or %NULL if the list item does not have to be freed. This function is
+ * used to help free the items in a partially created list if there is an
+ * error. An example is:
+ * [[
+ * g_free
+ * ]]
+ * @errormsg: a function that sets up a Python error message. An example is:
+ * [[
+ * PyErr_SetString(PyExc_TypeError, "strings must be a sequence of" "strings
+ * or unicode objects")
+ * ]]
+ * @errorreturn: the value to return if an error occurs, e.g.:
+ * [[
+ * %NULL
+ * ]]
+ *
+ * A macro that creates code that converts a Python list to a #GList. The
+ * returned list must be freed using the appropriate list free function when
+ * it's no longer needed. If an error occurs the child_free_func is used to
+ * release the memory used by the list items and then the list memory is
+ * freed.
+ */
+#define PYLIST_ASGLIST(py_list,list,check_func,convert_func,child_free_func,\
+                       errormsg,errorreturn) \
+        PYLIST_ASGLIBLIST(GList,g_list,py_list,list,check_func,convert_func,\
+                          child_free_func,errormsg,errorreturn)
+
+/**
+ * PYLIST_ASGSLIST
+ * @py_list: the Python list to be converted
+ * @list: the #GSList list to be converted
+ * @check_func: the expression that takes a #PyObject* arg (must be named
+ * @py_item) and returns an int value indicating if the Python object matches
+ * the required list item type (0 - %False or 1 - %True). An example is:
+ * [[
+ * (PyString_Check(py_item)||PyUnicode_Check(py_item))
+ * ]]
+ * @convert_func: the function that takes a #PyObject* arg (must be named
+ * py_item) and returns a pointer to the converted list object. An example
+ * is:
+ * [[
+ * pygobject_get(py_item)
+ * ]]
+ * @child_free_func: the name of a #GFunc function that frees a GLib list
+ * item or %NULL if the list item does not have to be freed. This function is
+ * used to help free the items in a partially created list if there is an
+ * error. An example is:
+ * [[
+ * g_free
+ * ]]
+ * @errormsg: a function that sets up a Python error message. An example is:
+ * [[
+ * PyErr_SetString(PyExc_TypeError, "strings must be a sequence of" "strings
+ * or unicode objects")
+ * ]]
+ * @errorreturn: the value to return if an error occurs, e.g.:
+ * [[
+ * %NULL
+ * ]]
+ *
+ * A macro that creates code that converts a Python list to a #GSList. The
+ * returned list must be freed using the appropriate list free function when
+ * it's no longer needed. If an error occurs the child_free_func is used to
+ * release the memory used by the list items and then the list memory is
+ * freed.
+ */
+#define PYLIST_ASGSLIST(py_list,list,check_func,convert_func,child_free_func,\
+                        errormsg,errorreturn) \
+        PYLIST_ASGLIBLIST(GSList,g_slist,py_list,list,check_func,convert_func,\
+                          child_free_func,errormsg,errorreturn)
 
 #endif /* !_INSIDE_PYGOBJECT_ */
 
