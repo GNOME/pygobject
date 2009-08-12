@@ -30,16 +30,11 @@
 #include <pygobject.h>
 
 static gsize
-_pygi_gi_type_tag_size (GITypeTag type_tag)
+_pygi_g_type_tag_size (GITypeTag type_tag)
 {
     gsize size = 0;
 
     switch(type_tag) {
-
-        /* Basic types */
-        case GI_TYPE_TAG_VOID:
-            size = sizeof(void);
-            break;
         case GI_TYPE_TAG_BOOLEAN:
             size = sizeof(gboolean);
             break;
@@ -87,32 +82,132 @@ _pygi_gi_type_tag_size (GITypeTag type_tag)
         case GI_TYPE_TAG_GTYPE:
             size = sizeof(GType);
             break;
+        case GI_TYPE_TAG_VOID:
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            size = sizeof(gchar *);
-            break;
-
-        /* Non-basic types */
         case GI_TYPE_TAG_ARRAY:
         case GI_TYPE_TAG_INTERFACE:
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
         case GI_TYPE_TAG_GHASH:
-            /* TODO */
-            g_assert_not_reached();
-            break;
         case GI_TYPE_TAG_ERROR:
-            g_assert_not_reached();
+            PyErr_Format(PyExc_TypeError,
+                "Unable to know the size (assuming %s is not a pointer)",
+                g_type_tag_to_string(type_tag));
             break;
     }
 
     return size;
 }
 
+static gsize
+_pygi_g_type_info_size (GITypeInfo *type_info)
+{
+    gsize size = 0;
+    gboolean is_pointer;
+
+    is_pointer = g_type_info_is_pointer(type_info);
+
+    if (is_pointer) {
+        size = sizeof(gpointer);
+    } else {
+        GITypeTag type_tag;
+
+        type_tag = g_type_info_get_tag(type_info);
+        switch(type_tag) {
+            case GI_TYPE_TAG_BOOLEAN:
+            case GI_TYPE_TAG_INT8:
+            case GI_TYPE_TAG_UINT8:
+            case GI_TYPE_TAG_INT16:
+            case GI_TYPE_TAG_UINT16:
+            case GI_TYPE_TAG_INT32:
+            case GI_TYPE_TAG_UINT32:
+            case GI_TYPE_TAG_INT64:
+            case GI_TYPE_TAG_UINT64:
+            case GI_TYPE_TAG_SHORT:
+            case GI_TYPE_TAG_USHORT:
+            case GI_TYPE_TAG_INT:
+            case GI_TYPE_TAG_UINT:
+            case GI_TYPE_TAG_LONG:
+            case GI_TYPE_TAG_ULONG:
+            case GI_TYPE_TAG_SIZE:
+            case GI_TYPE_TAG_SSIZE:
+            case GI_TYPE_TAG_FLOAT:
+            case GI_TYPE_TAG_DOUBLE:
+            case GI_TYPE_TAG_TIME_T:
+            case GI_TYPE_TAG_GTYPE:
+                size = _pygi_g_type_tag_size(type_tag);
+                g_assert(size > 0);
+                break;
+            case GI_TYPE_TAG_INTERFACE:
+            {
+                GIBaseInfo *info;
+                GIInfoType info_type;
+
+                info = g_type_info_get_interface(type_info);
+                info_type = g_base_info_get_type(info);
+
+                switch (info_type) {
+                    case GI_INFO_TYPE_STRUCT:
+                        size = g_struct_info_get_size((GIStructInfo *)info);
+                        break;
+                    case GI_INFO_TYPE_UNION:
+                        size = g_union_info_get_size((GIUnionInfo *)info);
+                        break;
+                    case GI_INFO_TYPE_ENUM:
+                    case GI_INFO_TYPE_FLAGS:
+                    {
+                        GITypeTag type_tag;
+
+                        type_tag = g_enum_info_get_storage_type((GIEnumInfo *)info);
+                        size = _pygi_g_type_tag_size(type_tag);
+                        break;
+                    }
+                    case GI_INFO_TYPE_BOXED:
+                    case GI_INFO_TYPE_OBJECT:
+                    case GI_INFO_TYPE_INTERFACE:
+                    case GI_INFO_TYPE_CALLBACK:
+                        /* Should have been catched by is_pointer above. */
+                    case GI_INFO_TYPE_VFUNC:
+                    case GI_INFO_TYPE_INVALID:
+                    case GI_INFO_TYPE_FUNCTION:
+                    case GI_INFO_TYPE_CONSTANT:
+                    case GI_INFO_TYPE_ERROR_DOMAIN:
+                    case GI_INFO_TYPE_VALUE:
+                    case GI_INFO_TYPE_SIGNAL:
+                    case GI_INFO_TYPE_PROPERTY:
+                    case GI_INFO_TYPE_FIELD:
+                    case GI_INFO_TYPE_ARG:
+                    case GI_INFO_TYPE_TYPE:
+                    case GI_INFO_TYPE_UNRESOLVED:
+                        g_assert_not_reached();
+                        break;
+                }
+
+                g_base_info_unref(info);
+                break;
+            }
+            case GI_TYPE_TAG_ARRAY:
+            case GI_TYPE_TAG_VOID:
+            case GI_TYPE_TAG_UTF8:
+            case GI_TYPE_TAG_FILENAME:
+            case GI_TYPE_TAG_GLIST:
+            case GI_TYPE_TAG_GSLIST:
+            case GI_TYPE_TAG_GHASH:
+            case GI_TYPE_TAG_ERROR:
+                /* Should have been catched by is_pointer above. */
+                g_assert_not_reached();
+                break;
+        }
+    }
+
+    return size;
+}
+
 static void
-_pygi_gi_type_tag_py_bounds (GITypeTag   type_tag,
-                             PyObject  **lower,
-                             PyObject  **upper)
+_pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
+                            PyObject  **lower,
+                            PyObject  **upper)
 {
     switch(type_tag) {
         case GI_TYPE_TAG_INT8:
@@ -298,7 +393,7 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                 break;
             }
 
-            _pygi_gi_type_tag_py_bounds(type_tag, &lower, &upper);
+            _pygi_g_type_tag_py_bounds(type_tag, &lower, &upper);
             if (lower == NULL || upper == NULL) {
                 retval = -1;
                 goto check_number_release;
@@ -621,7 +716,6 @@ _pygi_argument_to_array (GArgument  *arg,
     /* Create a GArray. */
     GITypeInfo *item_type_info;
     gboolean is_zero_terminated;
-    GITypeTag item_type_tag;
     gsize item_size;
     gssize length;
     GArray *g_array;
@@ -630,8 +724,7 @@ _pygi_argument_to_array (GArgument  *arg,
     item_type_info = g_type_info_get_param_type(type_info, 0);
     g_assert(item_type_info != NULL);
 
-    item_type_tag = g_type_info_get_tag(item_type_info);
-    item_size = _pygi_gi_type_tag_size(item_type_tag);
+    item_size = _pygi_g_type_info_size(item_type_info);
 
     g_base_info_unref((GIBaseInfo *)item_type_info);
 
@@ -823,7 +916,6 @@ _pygi_argument_from_object (PyObject   *object,
         {
             gboolean is_zero_terminated;
             GITypeInfo *item_type_info;
-            GITypeTag item_type_tag;
             GArray *array;
             gsize item_size;
             Py_ssize_t length;
@@ -838,8 +930,7 @@ _pygi_argument_from_object (PyObject   *object,
             item_type_info = g_type_info_get_param_type(type_info, 0);
             g_assert(item_type_info != NULL);
 
-            item_type_tag = g_type_info_get_tag(item_type_info);
-            item_size = _pygi_gi_type_tag_size(item_type_tag);
+            item_size = _pygi_g_type_info_size(item_type_info);
 
             array = g_array_sized_new(is_zero_terminated, FALSE, item_size, length);
             if (array == NULL) {
