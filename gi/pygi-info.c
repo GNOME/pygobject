@@ -586,6 +586,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
                     break;
                 case GI_INFO_TYPE_OBJECT:
+                case GI_INFO_TYPE_INTERFACE:
                     in_args[0].v_pointer = pygobject_get(py_arg);
                     break;
                 default:

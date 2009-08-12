@@ -61,6 +61,16 @@ def get_parent_for_object(object_info):
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
 
+def get_interfaces_for_object(object_info):
+    interfaces = []
+    for interface_info in object_info.get_interfaces():
+        namespace = interface_info.get_namespace()
+        name = interface_info.get_name()
+
+        module = __import__('gi.repository.%s' % namespace, fromlist=[name])
+        interfaces.append(getattr(module, name))
+    return interfaces
+
 
 class DynamicModule(object):
 
@@ -99,10 +109,12 @@ class DynamicModule(object):
 
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
-                bases = (get_parent_for_object(info),)
+                parent = get_parent_for_object(info)
+                interfaces = tuple(interface for interface in get_interfaces_for_object(info)
+                        if not issubclass(parent, interface))
+                bases = (parent,) + interfaces
                 metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
-                # FIXME
                 bases = (GInterface,)
                 metaclass = GObjectMeta
             elif isinstance(info, StructInfo):

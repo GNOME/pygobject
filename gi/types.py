@@ -47,8 +47,6 @@ class MetaClassHelper(object):
     def _setup_methods(cls):
         constructor_infos = []
         method_infos = cls.__info__.get_methods()
-        if hasattr(cls.__info__, 'get_interfaces'):
-            method_infos += reduce(lambda x, y: x + y, [interface_info.get_methods() for interface_info in cls.__info__.get_interfaces()], ())
 
         for method_info in method_infos:
             name = method_info.get_name()
@@ -94,13 +92,12 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
         if cls.__name__ != cls.__info__.get_name():
             return;
 
-        if hasattr(cls, '__gtype__'):
-            setObjectHasNewConstructor(cls.__gtype__)
-
         cls._setup_methods()
 
-        if isinstance(cls.__info__, ObjectInfo):
+        if (isinstance(cls.__info__, ObjectInfo)):
             cls._setup_fields()
+            if hasattr(cls, '__gtype__'):
+                setObjectHasNewConstructor(cls.__gtype__)
 
 
 class StructMeta(type, MetaClassHelper):
