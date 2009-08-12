@@ -901,6 +901,8 @@ pygobject_lookup_class(GType gtype)
             g_base_info_unref(info);
             if (py_type)
                 return py_type;
+            else
+                PyErr_Clear();
         }
 
     }
