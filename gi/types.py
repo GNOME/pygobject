@@ -25,7 +25,6 @@ from new import instancemethod
 import gobject
 
 from ._gi import \
-	setObjectHasNewConstructor, \
 	InterfaceInfo, \
 	ObjectInfo, \
 	StructInfo
@@ -96,8 +95,6 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
         if (isinstance(cls.__info__, ObjectInfo)):
             cls._setup_fields()
-            if hasattr(cls, '__gtype__'):
-                setObjectHasNewConstructor(cls.__gtype__)
 
         cls.__info__.register_type(cls)
 

@@ -100,25 +100,7 @@ out:
     return info;
 }
 
-static PyObject *
-_wrap_set_object_has_new_constructor(PyObject *self, PyObject *args)
-{
-    PyObject *py_g_type;
-    GType g_type;
-
-    if (!PyArg_ParseTuple(args, "O:setObjectHasNewConstructor", &py_g_type)) {
-        return NULL;
-    }
-
-    g_type = pyg_type_from_object(py_g_type);
-    pyg_set_object_has_new_constructor(g_type);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static PyMethodDef _pygi_functions[] = {
-    { "setObjectHasNewConstructor", (PyCFunction)_wrap_set_object_has_new_constructor, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

@@ -1303,7 +1303,9 @@ _wrap_g_object_info_register_type (PyGIBaseInfo *self,
     }
 
     g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
+
     pyg_register_object_type(g_type, type);
+    pyg_set_object_has_new_constructor(g_type);
 
     Py_RETURN_NONE;
 }
