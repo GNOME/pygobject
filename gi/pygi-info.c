@@ -831,9 +831,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 g_assert_not_reached();
         }
 
-        _pygi_argument_release(&return_arg, return_type_info, transfer,
-            GI_DIRECTION_OUT);
-
         if (return_value == NULL) {
             /* TODO */
             goto return_;
