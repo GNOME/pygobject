@@ -1362,21 +1362,8 @@ _pygi_argument_to_object (GArgument  *arg,
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
-                {
-                    PyObject *py_type;
-
-                    /* Make sure the class is initialized. */
-                    py_type = pygi_type_find_by_gi_info(info);
-                    if (py_type == NULL) {
-                        break;
-                    }
-
                     object = pygobject_new(arg->v_pointer);
-
-                    Py_DECREF(py_type);
-
                     break;
-                }
                 default:
                     /* TODO: To complete with other types. */
                     g_assert_not_reached();
