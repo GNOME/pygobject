@@ -28,6 +28,8 @@ extern GQuark pyginterface_info_key;
 
 extern PyTypeObject PyGInterface_Type;
 
+void pyg_register_interface_type (GType         g_type,
+                                  PyTypeObject *type);
 void pyg_register_interface(PyObject *dict,
 			    const gchar *class_name,
 			    GType gtype,

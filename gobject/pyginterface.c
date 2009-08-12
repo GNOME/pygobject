@@ -53,6 +53,14 @@ pyg_interface_free(PyObject *op)
     PyObject_FREE(op);
 }
 
+void
+pyg_register_interface_type (GType         g_type,
+							 PyTypeObject *type)
+{
+	Py_INCREF((PyObject *)type);
+    g_type_set_qdata(g_type, pyginterface_type_key, type);
+}
+
 /**
  * pyg_register_interface:
  * @dict: a module dictionary.
@@ -84,10 +92,11 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
         Py_DECREF(o);
     }
 
-    g_type_set_qdata(gtype, pyginterface_type_key, type);
-    
+	pyg_register_interface_type(type, gtype);
+
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
-    
+
+	Py_DECREF(type);
 }
 
 void

@@ -2576,7 +2576,10 @@ struct _PyGObject_Functions pygobject_api_functions = {
   &PyGObject_Type,
   &PyGTypeWrapper_Type,
 
-  pygobject_new_from_type
+  pygobject_new_from_type,
+
+  &PyGInterface_Type,
+  pyg_register_interface_type
 };
 
 /* for addon libraries ... */

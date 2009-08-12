@@ -1330,66 +1330,35 @@ _wrap_g_interface_info_get_methods (PyGIBaseInfo *self)
     return infos;
 }
 
-static void
-initialize_interface (GTypeInterface *iface,
-                      PyTypeObject   *pytype)
-{
-    // TODO: Implement this when g-i adds supports for vfunc offsets:
-    // http://bugzilla.gnome.org/show_bug.cgi?id=560281
-    /*
-    GIRepository *repo = g_irepository_get_default();
-    GIBaseInfo *iface_info = g_irepository_find_by_gtype(repo, G_TYPE_FROM_INTERFACE(iface));
-    int length, i;
-    GTypeInterface *parent_iface = g_type_interface_peek_parent(iface);
-
-    length = g_interface_info_get_n_methods((GIInterfaceInfo *) iface_info);
-
-    for (i = 0; i < length; i++) {
-        GIFunctionInfo *method = g_interface_info_get_method((GIInterfaceInfo *) iface_info, i);
-        const gchar *method_name = g_base_info_get_name((GIBaseInfo *) method);
-        gchar pymethod_name[250];
-        PyObject *py_method;
-        void *method_ptr = iface + i * sizeof(void*);
-
-        printf("%s\n", method_name);
-
-        g_snprintf(pymethod_name, sizeof(pymethod_name), "do_%s", pymethod_name);
-        py_method = PyObject_GetAttrString((PyObject *) pytype, pymethod_name);
-        if (py_method && !PyObject_TypeCheck(py_method, &PyCFunction_Type)) {
-            method_ptr = interface_method;
-        } else {
-            PyErr_Clear();
-            if (parent_iface) {
-                method_ptr = parent_iface + i * sizeof(void*);
-            }
-            Py_XDECREF(py_method);
-        }
-
-        g_base_info_unref((GIBaseInfo *) method);
-    }
-    */
-}
-
 static PyObject *
-_wrap_g_interface_info_register (PyGIBaseInfo *self)
+_wrap_g_interface_info_register_type (PyGIBaseInfo *self,
+                                      PyObject     *args,
+                                      PyObject     *kwargs)
 {
-    GType gtype;
-    GInterfaceInfo *info_struct = g_new0(GInterfaceInfo, 1);
+    static char *kwlist[] = { "type", NULL };
+    PyTypeObject *type;
+    GType g_type;
 
-    info_struct->interface_init = (GInterfaceInitFunc) initialize_interface;
-    info_struct->interface_finalize = NULL;
-    info_struct->interface_data = NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                "O!:InterfaceInfo.register_type",
+                kwlist, &PyType_Type, &type)) {
+        return NULL;
+    }
 
-    gtype = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *) self->info);
-    pyg_register_interface_info(gtype, info_struct);
+    if (!PyType_IsSubtype(type, &PyGInterface_Type)) {
+        PyErr_SetString(PyExc_TypeError, "argument 1: Must be a subtype of gobject.GInterface");
+        return NULL;
+    }
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
+    pyg_register_interface_type(g_type, type);
+
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef _PyGIInterfaceInfo_methods[] = {
     { "get_methods", (PyCFunction)_wrap_g_interface_info_get_methods, METH_NOARGS },
-    { "register", (PyCFunction)_wrap_g_interface_info_register, METH_NOARGS },
+    { "register_type", (PyCFunction)_wrap_g_interface_info_register_type, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
