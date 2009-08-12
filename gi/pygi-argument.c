@@ -1429,8 +1429,13 @@ _pygi_argument_to_object (GArgument  *arg,
 
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
-                    object = PyInt_FromLong(arg->v_int);
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                    object = pyg_enum_from_gtype(type, arg->v_int);
                     break;
+                }
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
