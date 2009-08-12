@@ -111,3 +111,6 @@ class StructMeta(type, MetaClassHelper):
         cls._setup_fields()
         cls._setup_methods()
 
+        if cls.__gtype__.is_a(gobject.GBoxed):
+            cls.__info__.register_type(cls)
+

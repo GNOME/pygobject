@@ -87,12 +87,19 @@ pyg_boxed_copy(PyGBoxed *self)
 }
 
 
-
 static PyMethodDef pygboxed_methods[] = {
     { "copy", (PyCFunction) pyg_boxed_copy, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
+
+void
+pyg_register_boxed_type (GType         g_type,
+                         PyTypeObject *type)
+{
+    Py_INCREF((PyObject *)type);
+    g_type_set_qdata(g_type, pygboxed_type_key, type);
+}
 
 /**
  * pyg_register_boxed:
@@ -129,9 +136,11 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 			 o=pyg_type_wrapper_new(boxed_type));
     Py_DECREF(o);
 
-    g_type_set_qdata(boxed_type, pygboxed_type_key, type);
+    pyg_register_boxed_type (boxed_type, type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
+
+    Py_DECREF((PyObject *)type);
 }
 
 /**

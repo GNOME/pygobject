@@ -2580,7 +2580,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_new_from_type,
 
   &PyGInterface_Type,
-  pyg_register_interface_type
+  pyg_register_interface_type,
+
+  pyg_register_boxed_type
 };
 
 /* for addon libraries ... */
