@@ -536,14 +536,22 @@ check_number_release:
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
                 {
-                    (void) PyInt_AsLong(object);
-                    if (PyErr_Occurred()) {
-                        PyErr_Clear();
-                        PyErr_Format(PyExc_TypeError, "Must be int, not %s",
-                                object->ob_type->tp_name);
+                    PyTypeObject *type;
+
+                    type = (PyTypeObject *)pygi_type_find_by_gi_info(info);
+                    if (type == NULL) {
+                        retval = -1;
+                        break;
+                    }
+
+                    if (!PyObject_TypeCheck(object, type)) {
+                        PyErr_Format(PyExc_TypeError, "Must be %s, not %s",
+                                type->tp_name, object->ob_type->tp_name);
                         retval = 0;
                     }
-                    /* XXX: What if the value doesn't correspond to any enum field? */
+
+                    Py_DECREF(type);
+
                     break;
                 }
                 case GI_INFO_TYPE_STRUCT:
