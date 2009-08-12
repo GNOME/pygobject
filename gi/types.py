@@ -99,8 +99,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             if hasattr(cls, '__gtype__'):
                 setObjectHasNewConstructor(cls.__gtype__)
 
-        if (isinstance(cls.__info__, InterfaceInfo)):
-            cls.__info__.register_type(cls)
+        cls.__info__.register_type(cls)
 
 
 class StructMeta(type, MetaClassHelper):

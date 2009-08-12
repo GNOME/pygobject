@@ -92,7 +92,7 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
         Py_DECREF(o);
     }
 
-	pyg_register_interface_type(type, gtype);
+	pyg_register_interface_type(gtype, type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 

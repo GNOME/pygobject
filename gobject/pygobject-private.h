@@ -157,6 +157,8 @@ void          pygobject_register_sinkfunc(GType type,
 					  void (* sinkfunc)(GObject *object));
 int           pyg_type_register          (PyTypeObject *class,
 					  const gchar *type_name);
+void          pyg_register_object_type   (GType g_type,
+                                          PyTypeObject *type);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;

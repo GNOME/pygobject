@@ -199,9 +199,11 @@ struct _PyGObject_Functions {
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
 
-    PyTypeObject *object_type;
     PyTypeObject *type_wrapper_type;
 
+    PyTypeObject *object_type;
+    void      (*register_object_type) (GType         g_type,
+                                       PyTypeObject *type);
     PyObject *(*object_new_from_type) (PyTypeObject *type,
                                        GObject *obj,
                                        gboolean sink);
@@ -275,8 +277,10 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)
 #define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
 #define pyg_option_group_new       (_PyGObject_API->option_group_new)
-#define PyGObject_Type             (*_PyGObject_API->object_type)
 #define PyGTypeWrapper_Type        (*_PyGObject_API->type_wrapper_type)
+
+#define PyGObject_Type             (*_PyGObject_API->object_type)
+#define pyg_register_object_type   (_PyGObject_API->register_object_type)
 #define pygobject_new_from_type    (_PyGObject_API->object_new_from_type)
 
 #define PyGInterface_Type          (*_PyGObject_API->interface_type)

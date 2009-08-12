@@ -648,6 +648,14 @@ pyg_type_get_bases(GType gtype)
     return bases;
 }
 
+void
+pyg_register_object_type (GType         g_type,
+                          PyTypeObject *type)
+{
+    Py_INCREF(type);
+    g_type_set_qdata(g_type, pygobject_class_key, type);
+}
+
 /**
  * pygobject_new_with_interfaces
  * @gtype: the GType of the GObject subclass.
@@ -748,8 +756,7 @@ pygobject_new_with_interfaces(GType gtype)
     }
 
     /* stash a pointer to the python class with the GType */
-    Py_INCREF(type);
-    g_type_set_qdata(gtype, pygobject_class_key, type);
+    pyg_register_object_type(gtype, type);
 
     pyglib_gil_state_release(state);
 
