@@ -865,21 +865,43 @@ pygobject_lookup_class(GType gtype)
     PyTypeObject *py_type;
 
     if (gtype == G_TYPE_INTERFACE)
-	return &PyGInterface_Type;
-    
+        return &PyGInterface_Type;
+
     py_type = pyg_type_get_custom(g_type_name(gtype));
     if (py_type)
-	return py_type;
+        return py_type;
 
     py_type = g_type_get_qdata(gtype, pygobject_class_key);
-    if (py_type == NULL) {
-	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
-	if (py_type == NULL) {
-	    py_type = pygobject_new_with_interfaces(gtype);
-	    g_type_set_qdata(gtype, pyginterface_type_key, py_type);
-	}
+    if (py_type)
+        return py_type;
+
+    py_type = g_type_get_qdata(gtype, pyginterface_type_key);
+    if (py_type)
+        return py_type;
+
+#if HAVE_PYGI_H
+    {
+        GIRepository *repository;
+        GIBaseInfo *info;
+
+        repository = g_irepository_get_default();
+
+        info = g_irepository_find_by_gtype(repository, gtype);
+
+        if (info != NULL) {
+            pygi_import();
+            py_type = (PyTypeObject *)pygi_type_find_by_gi_info(info);
+            g_base_info_unref(info);
+            if (py_type)
+                return py_type;
+        }
+
     }
-    
+#endif
+
+    py_type = pygobject_new_with_interfaces(gtype);
+    g_type_set_qdata(gtype, pyginterface_type_key, py_type);
+
     return py_type;
 }
 
@@ -960,29 +982,10 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
         if (inst_data)
             tp = inst_data->type;
         else {
-#if HAVE_PYGI_H
-            GIRepository *repository;
-            GType g_type;
-            GIBaseInfo *info;
-
-            repository = g_irepository_get_default();
-
-            g_type = G_OBJECT_TYPE(obj);
-            info = g_irepository_find_by_gtype(repository, g_type);
-
-            if (info != NULL) {
-                pygi_import();
-                tp = (PyTypeObject *)pygi_type_find_by_gi_info(info);
-                g_base_info_unref(info);
-            } else {
-#endif
             if (g_class)
                 tp = pygobject_lookup_class(G_OBJECT_CLASS_TYPE(g_class));
             else
                 tp = pygobject_lookup_class(G_OBJECT_TYPE(obj));
-#if HAVE_PYGI_H
-            }
-#endif
         }
         g_assert(tp != NULL);
 
