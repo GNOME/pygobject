@@ -652,7 +652,7 @@ void
 pyg_register_object_type (GType         g_type,
                           PyTypeObject *type)
 {
-    Py_INCREF(type);
+    Py_INCREF((PyObject *)type);
     g_type_set_qdata(g_type, pygobject_class_key, type);
 }
 

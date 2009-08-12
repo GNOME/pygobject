@@ -209,7 +209,7 @@ struct _PyGObject_Functions {
                                        gboolean sink);
 
     PyTypeObject *interface_type;
-    void      (*register_interface_type) (GType        g_type,
+    void      (*register_interface_type) (GType         g_type,
                                           PyTypeObject *type);
 };
 

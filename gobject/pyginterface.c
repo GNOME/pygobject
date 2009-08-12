@@ -96,7 +96,7 @@ pyg_register_interface(PyObject *dict, const gchar *class_name,
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 
-	Py_DECREF(type);
+	Py_DECREF((PyObject *)type);
 }
 
 void
