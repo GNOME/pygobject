@@ -178,6 +178,30 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     }
 
     tp = g_type_get_qdata(boxed_type, pygboxed_type_key);
+
+#if HAVE_PYGI_H
+    if (tp == NULL) {
+        GIRepository *repository;
+        GIBaseInfo *info;
+
+        repository = g_irepository_get_default();
+
+        info = g_irepository_find_by_gtype(repository, boxed_type);
+
+        if (info != NULL) {
+            pygi_import();
+            tp = (PyTypeObject *)pygi_type_find_by_gi_info(info);
+            g_base_info_unref(info);
+            if (tp == NULL) {
+                PyErr_Clear();
+            } else {
+                /* Note: The type is registered, so at least a reference remains. */
+                Py_DECREF((PyObject *)tp);
+            }
+        }
+    }
+#endif
+
     if (!tp)
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
     self = PyObject_NEW(PyGBoxed, tp);
