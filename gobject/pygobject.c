@@ -899,10 +899,13 @@ pygobject_lookup_class(GType gtype)
             pygi_import();
             py_type = (PyTypeObject *)pygi_type_find_by_gi_info(info);
             g_base_info_unref(info);
-            if (py_type)
+            if (py_type != NULL) {
+                /* Note: The type is registered, so at least a reference remains. */
+                Py_DECREF((PyObject *)py_type);
                 return py_type;
-            else
+            } else {
                 PyErr_Clear();
+            }
         }
 
     }
