@@ -202,11 +202,11 @@ fi
 
 dnl gi
 AC_ARG_ENABLE(gi,
-  AC_HELP_STRING([--enable-gi], [Enable gobject-introspection bindings building]),
-  enable_gi=$enableval,
-  enable_gi=no)
-AM_CONDITIONAL(BUILD_GI, test "$enable_gi" != no)
-if test "$enable_gi" != no; then
+  AC_HELP_STRING([--enable-introspection], [Enable gobject-introspection bindings building]),
+  enable_introspection=$enableval,
+  enable_introspection=no)
+AM_CONDITIONAL(BUILD_GI, test "$enable_introspection" != no)
+if test "$enable_introspection" != no; then
   PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
   AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
   AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
