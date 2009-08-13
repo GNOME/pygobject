@@ -288,8 +288,8 @@ _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
 
 gint
 _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
-                                           gboolean is_instance,
-                                           PyObject *object)
+                                           gboolean              is_instance,
+                                           PyObject             *object)
 {
     gint retval;
 
@@ -350,17 +350,14 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                                 gboolean    may_be_null,
                                 PyObject   *object)
 {
-    gint retval;
-
     GITypeTag type_tag;
+    gint retval = 1;
 
     type_tag = g_type_info_get_tag(type_info);
 
-    retval = 1;
-
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
-            /* No check possible. */
+            PyErr_WarnEx(NULL, "unable to check an argument whose type is 'void'", 1);
             break;
         case GI_TYPE_TAG_BOOLEAN:
             /* No check; every Python object has a truth value. */
@@ -534,11 +531,14 @@ check_number_release:
             info_type = g_base_info_get_type(info);
 
             switch (info_type) {
+                case GI_INFO_TYPE_CALLBACK:
+                    /* TODO */
+                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
+                    break;
                 case GI_INFO_TYPE_ENUM:
-                {
+                case GI_INFO_TYPE_FLAGS:
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
-                }
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
@@ -556,6 +556,8 @@ check_number_release:
                         }
                         break;
                     }
+
+                    /* Fallback. */
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_OBJECT:
@@ -564,8 +566,11 @@ check_number_release:
                     }
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
+                case GI_INFO_TYPE_UNION:
+                    /* TODO */
+                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
+                    break;
                 default:
-                    /* TODO: To complete with other types. */
                     g_assert_not_reached();
             }
 
@@ -694,7 +699,8 @@ check_number_release:
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            g_assert_not_reached();
+            PyErr_SetString(PyExc_NotImplementedError, "Error marshalling is not supported yet");
+            /* TODO */
             break;
     }
 
@@ -706,7 +712,6 @@ _pygi_argument_to_array (GArgument  *arg,
                          GArgument  *args[],
                          GITypeInfo *type_info)
 {
-    /* Create a GArray. */
     GITypeInfo *item_type_info;
     gboolean is_zero_terminated;
     gsize item_size;
@@ -751,17 +756,36 @@ _pygi_argument_from_object (PyObject   *object,
 {
     GArgument arg;
     GITypeTag type_tag;
+    gboolean is_pointer;
 
     type_tag = g_type_info_get_tag(type_info);
+    is_pointer = g_type_info_is_pointer(type_info);
 
-    switch (type_tag)
-    {
+    if (is_pointer && object == Py_None) {
+        arg.v_pointer = NULL;
+        return arg;
+    }
+
+    switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            /* Nothing to do */
+            PyErr_WarnEx(NULL, "Unable to marshal an argument whose type is 'void'; ignoring", 1);
             break;
         case GI_TYPE_TAG_BOOLEAN:
-            arg.v_boolean = PyObject_IsTrue(object);
+        {
+            gboolean value;
+
+            value = PyObject_IsTrue(object);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(gboolean);
+                *(gboolean *)arg.v_pointer = value;
+            } else {
+                arg.v_boolean = value;
+            }
+
             break;
+        }
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:
         case GI_TYPE_TAG_INT16:
@@ -774,12 +798,24 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_SSIZE:
         {
             PyObject *int_;
+            glong value;
+
             int_ = PyNumber_Int(object);
             if (int_ == NULL) {
                 break;
             }
-            arg.v_long = PyInt_AsLong(int_);
+
+            value = PyInt_AsLong(int_);
             Py_DECREF(int_);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(glong);
+                *(glong *)arg.v_pointer = value;
+            } else {
+                arg.v_long = value;
+            }
+
             break;
         }
         case GI_TYPE_TAG_UINT32:
@@ -789,45 +825,93 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_SIZE:
         {
             PyObject *long_;
+            guint64 value;
+
             long_ = PyNumber_Long(object);
             if (long_ == NULL) {
                 break;
             }
-            arg.v_uint64 = PyLong_AsUnsignedLongLong(long_);
+
+            value = PyLong_AsUnsignedLongLong(long_);
             Py_DECREF(long_);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(guint64);
+                *(guint64 *)arg.v_pointer = value;
+            } else {
+                arg.v_uint64 = value;
+            }
+
             break;
         }
         case GI_TYPE_TAG_INT64:
         {
             PyObject *long_;
+            gint64 value;
+
             long_ = PyNumber_Long(object);
             if (long_ == NULL) {
                 break;
             }
-            arg.v_int64 = PyLong_AsLongLong(long_);
+
+            value = PyLong_AsLongLong(long_);
             Py_DECREF(long_);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(gint64);
+                *(gint64 *)arg.v_pointer = value;
+            } else {
+                arg.v_int64 = value;
+            }
+
             break;
         }
         case GI_TYPE_TAG_FLOAT:
         {
             PyObject *float_;
+            gfloat value;
+
             float_ = PyNumber_Float(object);
             if (float_ == NULL) {
                 break;
             }
-            arg.v_float = (float)PyFloat_AsDouble(float_);
+
+            value = (float)PyFloat_AsDouble(float_);
             Py_DECREF(float_);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(gfloat);
+                *(gfloat *)arg.v_pointer = value;
+            } else {
+                arg.v_float = value;
+            }
+
             break;
         }
         case GI_TYPE_TAG_DOUBLE:
         {
             PyObject *float_;
+            gdouble value;
+
             float_ = PyNumber_Float(object);
             if (float_ == NULL) {
                 break;
             }
-            arg.v_double = PyFloat_AsDouble(float_);
+
+            value = PyFloat_AsDouble(float_);
             Py_DECREF(float_);
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(gdouble);
+                *(gdouble *)arg.v_pointer = value;
+            } else {
+                arg.v_double = value;
+            }
+
             break;
         }
         case GI_TYPE_TAG_TIME_T:
@@ -855,9 +939,17 @@ _pygi_argument_from_object (PyObject   *object,
             time_ = mktime(&datetime);
             if (time_ == -1) {
                 PyErr_SetString(PyExc_RuntimeError, "datetime conversion failed");
+                break;
             }
 
-            arg.v_long = time_;
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(time_t);
+                *(time_t *)arg.v_pointer = time_;
+            } else {
+                arg.v_long = time_;
+            }
+
             break;
         }
         case GI_TYPE_TAG_GTYPE:
@@ -865,21 +957,22 @@ _pygi_argument_from_object (PyObject   *object,
             GType type;
 
             type = pyg_type_from_object(object);
-            if (type == G_TYPE_INVALID) {
-                PyErr_SetString(PyExc_RuntimeError, "GType conversion failed");
+
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                arg.v_pointer = g_slice_new(GType);
+                *(GType *)arg.v_pointer = type;
+            } else {
+                arg.v_long = type;
             }
 
-            arg.v_long = type;
             break;
         }
         case GI_TYPE_TAG_UTF8:
         {
             const gchar *string;
 
-            if (object == Py_None) {
-                arg.v_string = NULL;
-                break;
-            }
+            g_assert(is_pointer);
 
             string = PyString_AsString(object);
 
@@ -891,6 +984,8 @@ _pygi_argument_from_object (PyObject   *object,
         {
             GError *error = NULL;
             const gchar *string;
+
+            g_assert(is_pointer);
 
             string = PyString_AsString(object);
             if (string == NULL) {
@@ -907,11 +1002,12 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_ARRAY:
         {
+            Py_ssize_t length;
             gboolean is_zero_terminated;
             GITypeInfo *item_type_info;
-            GArray *array;
             gsize item_size;
-            Py_ssize_t length;
+            GArray *array;
+            GITransfer item_transfer;
             Py_ssize_t i;
 
             length = PySequence_Length(object);
@@ -921,7 +1017,6 @@ _pygi_argument_from_object (PyObject   *object,
 
             is_zero_terminated = g_type_info_is_zero_terminated(type_info);
             item_type_info = g_type_info_get_param_type(type_info, 0);
-            g_assert(item_type_info != NULL);
 
             item_size = _pygi_g_type_info_size(item_type_info);
 
@@ -932,6 +1027,8 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
             for (i = 0; i < length; i++) {
                 PyObject *py_item;
                 GArgument item;
@@ -941,8 +1038,7 @@ _pygi_argument_from_object (PyObject   *object,
                     goto array_item_error;
                 }
 
-                item = _pygi_argument_from_object(py_item, item_type_info,
-                        transfer == GI_TRANSFER_EVERYTHING ? GI_TRANSFER_EVERYTHING : GI_TRANSFER_NOTHING);
+                item = _pygi_argument_from_object(py_item, item_type_info, item_transfer);
 
                 Py_DECREF(py_item);
 
@@ -955,7 +1051,7 @@ _pygi_argument_from_object (PyObject   *object,
 
 array_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release((GArgument *)array, type_info,
+                _pygi_argument_release((GArgument *)&array, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 array = NULL;
 
@@ -971,22 +1067,18 @@ array_item_error:
         case GI_TYPE_TAG_INTERFACE:
         {
             GIBaseInfo *info;
+            GIInfoType info_type;
 
             info = g_type_info_get_interface(type_info);
-            g_assert(info != NULL);
+            info_type = g_base_info_get_type(info);
 
-            switch (g_base_info_get_type(info)) {
-                case GI_INFO_TYPE_ENUM:
-                {
-                    PyObject *int_;
-                    int_ = PyNumber_Int(object);
-                    if (int_ == NULL) {
-                        break;
-                    }
-                    arg.v_long = PyInt_AsLong(int_);
-                    Py_DECREF(int_);
+            switch (info_type) {
+                case GI_INFO_TYPE_CALLBACK:
+                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
+                    /* TODO */
                     break;
-                }
+                case GI_INFO_TYPE_BOXED:
+                    g_assert(is_pointer);
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
@@ -1001,9 +1093,12 @@ array_item_error:
 
                         object_type = pyg_type_from_object((PyObject *)object->ob_type);
                         if (object_type == G_TYPE_INVALID) {
-                            PyErr_SetString(PyExc_RuntimeError, "Unable to retrieve object's GType");
+                            PyErr_SetString(PyExc_RuntimeError, "unable to retrieve object's GType");
                             break;
                         }
+
+                        g_assert(is_pointer);
+                        g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
 
                         value = g_slice_new0(GValue);
                         g_value_init(value, object_type);
@@ -1020,9 +1115,12 @@ array_item_error:
                     } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
                         GClosure *closure;
 
+                        g_assert(is_pointer);
+                        g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+
                         closure = pyg_closure_new(object, NULL, NULL);
                         if (closure == NULL) {
-                            PyErr_SetString(PyExc_RuntimeError, "GClosure creation failed");
+                            PyErr_SetString(PyExc_RuntimeError, "PyObject conversion to GClosure failed");
                             break;
                         }
 
@@ -1033,28 +1131,55 @@ array_item_error:
                     arg.v_pointer = pyg_boxed_get(object, void);
 
                     if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        g_assert(is_pointer);
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy(type, arg.v_pointer);
                         }
-                    } else if (transfer == GI_TRANSFER_EVERYTHING) {
-                        PyErr_SetString(PyExc_RuntimeError, "non-boxed types ownership cannot be transferred");
+                        break;
+                    }
+
+                    g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
+
+                    break;
+                }
+                case GI_INFO_TYPE_ENUM:
+                case GI_INFO_TYPE_FLAGS:
+                {
+                    PyObject *int_;
+                    glong value;
+
+                    int_ = PyNumber_Int(object);
+                    if (int_ == NULL) {
+                        break;
+                    }
+
+                    value = PyInt_AsLong(int_);
+                    Py_DECREF(int_);
+
+                    if (is_pointer) {
+                        g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                        arg.v_pointer = g_slice_new(glong);
+                        *(glong *)arg.v_pointer = value;
+                    } else {
+                        arg.v_long = value;
                     }
 
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
-                    if (object == Py_None) {
-                        arg.v_pointer = NULL;
-                        break;
-                    }
+                    g_assert(is_pointer);
 
                     arg.v_pointer = pygobject_get(object);
                     if (transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_ref(arg.v_pointer);
                     }
+
+                    break;
+                case GI_INFO_TYPE_UNION:
+                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
+                    /* TODO */
                     break;
                 default:
-                    /* TODO */
                     g_assert_not_reached();
             }
             g_base_info_unref(info);
@@ -1066,7 +1191,10 @@ array_item_error:
             Py_ssize_t length;
             GITypeInfo *item_type_info;
             GSList *list = NULL;
+            GITransfer item_transfer;
             Py_ssize_t i;
+
+            g_assert(is_pointer);
 
             length = PySequence_Length(object);
             if (length < 0) {
@@ -1075,6 +1203,8 @@ array_item_error:
 
             item_type_info = g_type_info_get_param_type(type_info, 0);
             g_assert(item_type_info != NULL);
+
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
             for (i = length - 1; i >= 0; i--) {
                 PyObject *py_item;
@@ -1085,8 +1215,7 @@ array_item_error:
                     goto list_item_error;
                 }
 
-                item = _pygi_argument_from_object(py_item, item_type_info,
-                        transfer == GI_TRANSFER_EVERYTHING ? GI_TRANSFER_EVERYTHING : GI_TRANSFER_NOTHING);
+                item = _pygi_argument_from_object(py_item, item_type_info, item_transfer);
 
                 Py_DECREF(py_item);
 
@@ -1104,7 +1233,7 @@ array_item_error:
 
 list_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release((GArgument *)list, type_info,
+                _pygi_argument_release((GArgument *)&list, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 list = NULL;
 
@@ -1129,7 +1258,10 @@ list_item_error:
             GHashFunc hash_func;
             GEqualFunc equal_func;
             GHashTable *hash_table;
+            GITransfer item_transfer;
             Py_ssize_t i;
+
+            g_assert(is_pointer);
 
             length = PyMapping_Length(object);
             if (length < 0) {
@@ -1202,6 +1334,8 @@ list_item_error:
                 goto hash_table_release;
             }
 
+            item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
             for (i = 0; i < length; i++) {
                 PyObject *py_key;
                 PyObject *py_value;
@@ -1211,15 +1345,14 @@ list_item_error:
                 py_key = PyList_GET_ITEM(keys, i);
                 py_value = PyList_GET_ITEM(values, i);
 
-                key = _pygi_argument_from_object(py_key, key_type_info,
-                        transfer == GI_TRANSFER_EVERYTHING ? GI_TRANSFER_EVERYTHING : GI_TRANSFER_NOTHING);
+                key = _pygi_argument_from_object(py_key, key_type_info, item_transfer);
                 if (PyErr_Occurred()) {
                     goto hash_table_item_error;
                 }
 
-                value = _pygi_argument_from_object(py_value, value_type_info,
-                        transfer == GI_TRANSFER_EVERYTHING ? GI_TRANSFER_EVERYTHING : GI_TRANSFER_NOTHING);
+                value = _pygi_argument_from_object(py_value, value_type_info, item_transfer);
                 if (PyErr_Occurred()) {
+                    _pygi_argument_release(&key, type_info, GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                     goto hash_table_item_error;
                 }
 
@@ -1228,7 +1361,7 @@ list_item_error:
 
 hash_table_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release((GArgument *)hash_table, type_info,
+                _pygi_argument_release((GArgument *)&hash_table, type_info,
                         GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 hash_table = NULL;
 
@@ -1246,7 +1379,8 @@ hash_table_release:
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            g_assert_not_reached();
+            PyErr_SetString(PyExc_NotImplementedError, "error marshalling is not supported yet");
+            /* TODO */
             break;
     }
 
@@ -1267,6 +1401,7 @@ _pygi_argument_to_object (GArgument  *arg,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
+            PyErr_WarnEx(NULL, "Unable to marshal an argument whose type is 'void'; returning None", 1);
             Py_INCREF(Py_None);
             object = Py_None;
             break;
@@ -1331,9 +1466,14 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             struct tm *datetime;
             datetime = localtime(&arg->v_long);
-            object = PyDateTime_FromDateAndTime(datetime->tm_year + 1900,
-                datetime->tm_mon + 1, datetime->tm_mday, datetime->tm_hour,
-                datetime->tm_min, datetime->tm_sec, 0);
+            object = PyDateTime_FromDateAndTime(
+                    datetime->tm_year + 1900,
+                    datetime->tm_mon + 1,
+                    datetime->tm_mday,
+                    datetime->tm_hour,
+                    datetime->tm_min,
+                    datetime->tm_sec,
+                    0);
             break;
         }
         case GI_TYPE_TAG_GTYPE:
@@ -1413,12 +1553,10 @@ _pygi_argument_to_object (GArgument  *arg,
             info_type = g_base_info_get_type(info);
 
             switch (info_type) {
-                case GI_INFO_TYPE_ENUM:
+                case GI_INFO_TYPE_CALLBACK:
                 {
-                    GType type;
-
-                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
-                    object = pyg_enum_from_gtype(type, arg->v_int);
+                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
+                    /* TODO */
                     break;
                 }
                 case GI_INFO_TYPE_STRUCT:
@@ -1450,16 +1588,42 @@ _pygi_argument_to_object (GArgument  *arg,
 
                     break;
                 }
+                case GI_INFO_TYPE_BOXED:
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                    object = pyg_boxed_new(type, arg->v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
+                    break;
+                }
+                case GI_INFO_TYPE_ENUM:
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                    object = pyg_enum_from_gtype(type, arg->v_int);
+                    break;
+                }
+                case GI_INFO_TYPE_FLAGS:
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                    object = pyg_flags_from_gtype(type, arg->v_int);
+                    break;
+                }
                 case GI_INFO_TYPE_OBJECT:
                     object = pygobject_new(arg->v_pointer);
                     break;
+                case GI_INFO_TYPE_UNION:
+                    /* TODO */
+                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
+                    break;
                 default:
-                    /* TODO: To complete with other types. */
                     g_assert_not_reached();
             }
 
             g_base_info_unref(info);
-
             break;
         }
         case GI_TYPE_TAG_GLIST:
@@ -1558,8 +1722,8 @@ _pygi_argument_to_object (GArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
+            /* Errors should be handled in the invoke wrapper. */
             g_assert_not_reached();
-            break;
     }
 
     return object;
