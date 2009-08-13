@@ -536,22 +536,7 @@ check_number_release:
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
                 {
-                    PyTypeObject *type;
-
-                    type = (PyTypeObject *)pygi_type_find_by_gi_info(info);
-                    if (type == NULL) {
-                        retval = -1;
-                        break;
-                    }
-
-                    if (!PyObject_TypeCheck(object, type)) {
-                        PyErr_Format(PyExc_TypeError, "Must be %s, not %s",
-                                type->tp_name, object->ob_type->tp_name);
-                        retval = 0;
-                    }
-
-                    Py_DECREF(type);
-
+                    retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 }
                 case GI_INFO_TYPE_STRUCT:
