@@ -357,7 +357,11 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
 
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
-            PyErr_WarnEx(NULL, "unable to check an argument whose type is 'void'", 1);
+            if (object != Py_None) {
+                PyErr_Format(PyExc_TypeError, "Must be %s, not %s",
+                        Py_None->ob_type->tp_name, object->ob_type->tp_name);
+                retval = 0;
+            }
             break;
         case GI_TYPE_TAG_BOOLEAN:
             /* No check; every Python object has a truth value. */
@@ -768,7 +772,7 @@ _pygi_argument_from_object (PyObject   *object,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            PyErr_WarnEx(NULL, "Unable to marshal an argument whose type is 'void'; ignoring", 1);
+            arg.v_pointer = NULL;
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
@@ -1401,7 +1405,6 @@ _pygi_argument_to_object (GArgument  *arg,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            PyErr_WarnEx(NULL, "Unable to marshal an argument whose type is 'void'; returning None", 1);
             Py_INCREF(Py_None);
             object = Py_None;
             break;
