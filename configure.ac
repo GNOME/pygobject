@@ -201,7 +201,7 @@ if test -n "$export_dynamic"; then
 fi
 
 dnl gi
-AC_ARG_ENABLE(gi,
+AC_ARG_ENABLE(introspection,
   AC_HELP_STRING([--enable-introspection], [Enable gobject-introspection bindings building]),
   enable_introspection=$enableval,
   enable_introspection=no)
