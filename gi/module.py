@@ -96,9 +96,11 @@ class DynamicModule(object):
             g_type = info.get_g_type()
 
             # Check if there is already a Python wrapper.
-            if g_type != gobject.TYPE_NONE and g_type.pytype is not None:
-                self.__dict__[name] = g_type.pytype
-                return gtype.pytype
+            if g_type != gobject.TYPE_NONE:
+                type_ = g_type.pytype
+                if type_ is not None:
+                    self.__dict__[name] = type_
+                    return type_
 
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
@@ -124,6 +126,7 @@ class DynamicModule(object):
             }
             value = metaclass(name, bases, dict_)
 
+            # Register the new Python wrapper.
             if g_type != gobject.TYPE_NONE:
                 g_type.pytype = value
 

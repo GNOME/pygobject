@@ -1100,41 +1100,9 @@ _wrap_g_struct_info_get_methods (PyGIBaseInfo *self)
     return infos;
 }
 
-static PyObject *
-_wrap_g_struct_info_register_type (PyGIBaseInfo *self,
-                                   PyObject     *args,
-                                   PyObject     *kwargs)
-{
-    static char *kwlist[] = { "type", NULL };
-    PyTypeObject *type;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                "O!:StructInfo.register_type",
-                kwlist, &PyType_Type, &type)) {
-        return NULL;
-    }
-
-    if (!PyType_IsSubtype(type, &PyGBoxed_Type)) {
-        PyErr_SetString(PyExc_TypeError, "argument 1: Must be a subtype of gobject.GBoxed");
-        return NULL;
-    }
-
-    g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
-    if (!g_type_is_a(g_type, G_TYPE_BOXED)) {
-        PyErr_Format(PyExc_TypeError, "unable to register type; %s is not a boxed type", g_type_name(g_type));
-        return NULL;
-    }
-
-    pyg_register_boxed_type(g_type, type);
-
-    Py_RETURN_NONE;
-}
-
 static PyMethodDef _PyGIStructInfo_methods[] = {
     { "get_fields", (PyCFunction)_wrap_g_struct_info_get_fields, METH_NOARGS },
     { "get_methods", (PyCFunction)_wrap_g_struct_info_get_methods, METH_NOARGS },
-    { "register_type", (PyCFunction)_wrap_g_struct_info_register_type, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
@@ -1314,40 +1282,11 @@ _wrap_g_object_info_get_interfaces (PyGIBaseInfo *self)
     return infos;
 }
 
-static PyObject *
-_wrap_g_object_info_register_type (PyGIBaseInfo *self,
-                                   PyObject     *args,
-                                   PyObject     *kwargs)
-{
-    static char *kwlist[] = { "type", NULL };
-    PyTypeObject *type;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                "O!:ObjectInfo.register_type",
-                kwlist, &PyType_Type, &type)) {
-        return NULL;
-    }
-
-    if (!PyType_IsSubtype(type, &PyGObject_Type)) {
-        PyErr_SetString(PyExc_TypeError, "argument 1: Must be a subtype of gobject.GObject");
-        return NULL;
-    }
-
-    g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
-
-    pyg_register_object_type(g_type, type);
-    pyg_set_object_has_new_constructor(g_type);
-
-    Py_RETURN_NONE;
-}
-
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction)_wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction)_wrap_g_object_info_get_methods, METH_NOARGS },
     { "get_fields", (PyCFunction)_wrap_g_object_info_get_fields, METH_NOARGS },
     { "get_interfaces", (PyCFunction)_wrap_g_object_info_get_interfaces, METH_NOARGS },
-    { "register_type", (PyCFunction)_wrap_g_object_info_register_type, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
@@ -1391,35 +1330,8 @@ _wrap_g_interface_info_get_methods (PyGIBaseInfo *self)
     return infos;
 }
 
-static PyObject *
-_wrap_g_interface_info_register_type (PyGIBaseInfo *self,
-                                      PyObject     *args,
-                                      PyObject     *kwargs)
-{
-    static char *kwlist[] = { "type", NULL };
-    PyTypeObject *type;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                "O!:InterfaceInfo.register_type",
-                kwlist, &PyType_Type, &type)) {
-        return NULL;
-    }
-
-    if (!PyType_IsSubtype(type, &PyGInterface_Type)) {
-        PyErr_SetString(PyExc_TypeError, "argument 1: Must be a subtype of gobject.GInterface");
-        return NULL;
-    }
-
-    g_type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)self->info);
-    pyg_register_interface_type(g_type, type);
-
-    Py_RETURN_NONE;
-}
-
 static PyMethodDef _PyGIInterfaceInfo_methods[] = {
     { "get_methods", (PyCFunction)_wrap_g_interface_info_get_methods, METH_NOARGS },
-    { "register_type", (PyCFunction)_wrap_g_interface_info_register_type, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 

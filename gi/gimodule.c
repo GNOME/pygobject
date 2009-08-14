@@ -100,7 +100,35 @@ out:
     return info;
 }
 
+static PyObject *
+_wrap_pyg_set_object_has_new_constructor (PyObject *self,
+                                          PyObject *args,
+                                          PyObject *kwargs)
+{
+    static char *kwlist[] = { "g_type", NULL };
+    PyObject *py_g_type;
+    GType g_type;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                "O!:set_object_has_new_constructor",
+                kwlist, &PyGTypeWrapper_Type, &py_g_type)) {
+        return NULL;
+    }
+
+    g_type = pyg_type_from_object(py_g_type);
+    if (!g_type_is_a(g_type, G_TYPE_OBJECT)) {
+        PyErr_SetString(PyExc_TypeError, "must be a subtype of GObject");
+        return NULL;
+    }
+
+    pyg_set_object_has_new_constructor(g_type);
+
+    Py_RETURN_NONE;
+}
+
+
 static PyMethodDef _pygi_functions[] = {
+    { "set_object_has_new_constructor", (PyCFunction)_wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 

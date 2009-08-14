@@ -25,7 +25,7 @@ from __future__ import absolute_import
 import gobject
 from new import instancemethod
 
-from ._gi import InterfaceInfo, ObjectInfo, StructInfo
+from ._gi import InterfaceInfo, ObjectInfo, StructInfo, set_object_has_new_constructor
 
 
 def Function(info):
@@ -93,8 +93,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
         if (isinstance(cls.__info__, ObjectInfo)):
             cls._setup_fields()
-
-        cls.__info__.register_type(cls)
+            set_object_has_new_constructor(cls.__info__.get_g_type())
 
 
 class StructMeta(type, MetaClassHelper):
@@ -108,7 +107,4 @@ class StructMeta(type, MetaClassHelper):
 
         cls._setup_fields()
         cls._setup_methods()
-
-        if cls.__gtype__.is_a(gobject.GBoxed):
-            cls.__info__.register_type(cls)
 

@@ -157,8 +157,6 @@ void          pygobject_register_sinkfunc(GType type,
 					  void (* sinkfunc)(GObject *object));
 int           pyg_type_register          (PyTypeObject *class,
 					  const gchar *type_name);
-void          pyg_register_object_type   (GType         g_type,
-                                          PyTypeObject *type);
 
 /* from pygboxed.c */
 extern PyTypeObject PyGBoxed_Type;
@@ -227,6 +225,9 @@ pyg_object_peek_inst_data(GObject *obj)
     return ((PyGObjectData *) 
             g_object_get_qdata(obj, pygobject_instance_data_key));
 }
+
+/* pyginterface */
+extern PyTypeObject PyGInterface_Type;
 
 
 #endif

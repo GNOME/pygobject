@@ -202,18 +202,11 @@ struct _PyGObject_Functions {
     PyTypeObject *type_wrapper_type;
 
     PyTypeObject *object_type;
-    void      (*register_object_type) (GType         g_type,
-                                       PyTypeObject *type);
     PyObject *(*object_new_from_type) (PyTypeObject *type,
                                        GObject *obj,
                                        gboolean sink);
 
     PyTypeObject *interface_type;
-    void      (*register_interface_type) (GType         g_type,
-                                          PyTypeObject *type);
-
-    void      (*register_boxed_type) (GType         g_type,
-                                      PyTypeObject *type);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -283,13 +276,9 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define PyGTypeWrapper_Type        (*_PyGObject_API->type_wrapper_type)
 
 #define PyGObject_Type             (*_PyGObject_API->object_type)
-#define pyg_register_object_type   (_PyGObject_API->register_object_type)
 #define pygobject_new_from_type    (_PyGObject_API->object_new_from_type)
 
 #define PyGInterface_Type          (*_PyGObject_API->interface_type)
-#define pyg_register_interface_type (_PyGObject_API->register_interface_type)
-
-#define pyg_register_boxed_type    (_PyGObject_API->register_boxed_type)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

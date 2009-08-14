@@ -70,14 +70,47 @@ pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
     PyObject_DEL(self);
 }
 
+static GQuark
+_pyg_type_key (GType type) {
+    GQuark key;
+
+    if (g_type_is_a(type, G_TYPE_INTERFACE)) {
+        key = pyginterface_type_key;
+    } else if (g_type_is_a(type, G_TYPE_ENUM)) {
+        key = pygenum_class_key;
+    } else if (g_type_is_a(type, G_TYPE_FLAGS)) {
+        key = pygflags_class_key;
+    } else if (g_type_is_a(type, G_TYPE_POINTER)) {
+        key = pygpointer_class_key;
+    } else if (g_type_is_a(type, G_TYPE_BOXED)) {
+        key = pygboxed_type_key;
+    } else if (g_type_is_a(type, G_TYPE_OBJECT)) {
+        key = pygobject_class_key;
+    } else {
+        PyErr_Format(PyExc_TypeError,
+                "type '%s' do not accept Python wrappers",
+                g_type_name(type));
+        key = 0;
+    }
+
+    return key;
+}
+
 static PyObject *
 _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
 {
+    GQuark key;
     PyObject *py_type;
-    
-    py_type = g_type_get_qdata(self->type, pygobject_class_key);
-    if (!py_type)
-      py_type = Py_None;
+
+    key = _pyg_type_key(self->type);
+    if (key == 0) {
+        return NULL;
+    }
+
+    py_type = g_type_get_qdata(self->type, key);
+    if (py_type == NULL) {
+        Py_RETURN_NONE;
+    }
 
     Py_INCREF(py_type);
     return py_type;
@@ -86,19 +119,48 @@ _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
 static int
 _wrap_g_type_wrapper__set_pytype(PyGTypeWrapper *self, PyObject* value, void *closure)
 {
+    GQuark key;
+    PyTypeObject *base_type;
     PyObject *py_type;
     
-    py_type = g_type_get_qdata(self->type, pygobject_class_key);
-    Py_CLEAR(py_type);
-    if (value == Py_None)
-	g_type_set_qdata(self->type, pygobject_class_key, NULL);
-    else if (PyType_Check(value)) {
-	Py_INCREF(value);
-	g_type_set_qdata(self->type, pygobject_class_key, value);
-    } else {
-	PyErr_SetString(PyExc_TypeError, "Value must be None or a type object");
-	return -1;
+    key = _pyg_type_key(self->type);
+    if (key == 0) {
+        return -1;
     }
+
+    if (g_type_is_a(self->type, G_TYPE_INTERFACE)) {
+        base_type = &PyGInterface_Type;
+    } else if (g_type_is_a(self->type, G_TYPE_ENUM)) {
+        base_type = &PyGEnum_Type;
+    } else if (g_type_is_a(self->type, G_TYPE_FLAGS)) {
+        base_type = &PyGFlags_Type;
+    } else if (g_type_is_a(self->type, G_TYPE_POINTER)) {
+        base_type = &PyGPointer_Type;
+    } else if (g_type_is_a(self->type, G_TYPE_BOXED)) {
+        base_type = &PyGBoxed_Type;
+    } else if (g_type_is_a(self->type, G_TYPE_OBJECT)) {
+        base_type = &PyGObject_Type;
+    } else {
+        base_type = NULL;
+        g_assert_not_reached();
+    }
+
+    if (!PyType_Check(value)) {
+        PyErr_Format(PyExc_TypeError, "must be %s or None, not %s",
+                base_type->tp_name, Py_TYPE(value)->tp_name);
+        return -1;
+    }
+
+    Py_INCREF(value);
+
+    py_type = g_type_get_qdata(self->type, key);
+    Py_CLEAR(py_type);
+
+    if (value == Py_None) {
+        Py_CLEAR(value);
+    }
+
+    g_type_set_qdata(self->type, key, value);
 
     return 0;
 }

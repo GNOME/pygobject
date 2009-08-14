@@ -22,9 +22,6 @@
 #ifndef __PYGOBJECT_BOXED_H__ 
 #define __PYGOBJECT_BOXED_H__
 
-void pyg_register_boxed_type (GType         g_type,
-                              PyTypeObject *type);
-
 void pygobject_boxed_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_BOXED_H__ */

@@ -93,14 +93,6 @@ static PyMethodDef pygboxed_methods[] = {
 };
 
 
-void
-pyg_register_boxed_type (GType         g_type,
-                         PyTypeObject *type)
-{
-    Py_INCREF((PyObject *)type);
-    g_type_set_qdata(g_type, pygboxed_type_key, type);
-}
-
 /**
  * pyg_register_boxed:
  * @dict: the module dictionary to store the wrapper class.
@@ -136,7 +128,8 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
 			 o=pyg_type_wrapper_new(boxed_type));
     Py_DECREF(o);
 
-    pyg_register_boxed_type (boxed_type, type);
+    Py_INCREF((PyObject *)type);
+    g_type_set_qdata(boxed_type, pygboxed_type_key, type);
 
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 
