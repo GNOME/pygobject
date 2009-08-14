@@ -782,7 +782,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(gboolean);
+                arg.v_pointer = g_try_new(gboolean, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(gboolean *)arg.v_pointer = value;
             } else {
                 arg.v_boolean = value;
@@ -814,7 +818,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(glong);
+                arg.v_pointer = g_try_new(glong, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(glong *)arg.v_pointer = value;
             } else {
                 arg.v_long = value;
@@ -841,7 +849,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(guint64);
+                arg.v_pointer = g_try_new(guint64, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(guint64 *)arg.v_pointer = value;
             } else {
                 arg.v_uint64 = value;
@@ -864,7 +876,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(gint64);
+                arg.v_pointer = g_try_new(gint64, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(gint64 *)arg.v_pointer = value;
             } else {
                 arg.v_int64 = value;
@@ -887,7 +903,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(gfloat);
+                arg.v_pointer = g_try_new(gfloat, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(gfloat *)arg.v_pointer = value;
             } else {
                 arg.v_float = value;
@@ -910,7 +930,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(gdouble);
+                arg.v_pointer = g_try_new(gdouble, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(gdouble *)arg.v_pointer = value;
             } else {
                 arg.v_double = value;
@@ -948,7 +972,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(time_t);
+                arg.v_pointer = g_try_new(time_t, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(time_t *)arg.v_pointer = time_;
             } else {
                 arg.v_long = time_;
@@ -964,7 +992,11 @@ _pygi_argument_from_object (PyObject   *object,
 
             if (is_pointer) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                arg.v_pointer = g_slice_new(GType);
+                arg.v_pointer = g_try_new(GType, 1);
+                if (arg.v_pointer == NULL) {
+                    PyErr_NoMemory();
+                    break;
+                }
                 *(GType *)arg.v_pointer = type;
             } else {
                 arg.v_long = type;
@@ -1816,8 +1848,14 @@ _pygi_argument_release (GArgument   *arg,
                         GIDirection  direction)
 {
     GITypeTag type_tag;
+    gboolean is_pointer;
 
     type_tag = g_type_info_get_tag(type_info);
+    is_pointer = g_type_info_is_pointer(type_info);
+
+    if (is_pointer && arg->v_pointer == NULL) {
+        return;
+    }
 
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -1842,15 +1880,16 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_DOUBLE:
         case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_GTYPE:
-            /* Values, nothing to free. */
+            if (is_pointer) {
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+                        || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                    g_free(arg->v_pointer);
+                }
+            }
             break;
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
-            if (transfer == GI_TRANSFER_CONTAINER) {
-                if (PyErr_WarnEx(NULL, "Invalid 'container' transfer for string", 1) < 0) {
-                    break;
-                }
-            }
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
                 g_free(arg->v_string);
