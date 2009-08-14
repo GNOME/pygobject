@@ -1190,7 +1190,11 @@ array_item_error:
 
                     if (is_pointer) {
                         g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                        arg.v_pointer = g_slice_new(glong);
+                        arg.v_pointer = g_try_new(glong, 1);
+                        if (arg.v_pointer == NULL) {
+                            PyErr_NoMemory();
+                            break;
+                        }
                         *(glong *)arg.v_pointer = value;
                     } else {
                         arg.v_long = value;
@@ -1890,6 +1894,7 @@ _pygi_argument_release (GArgument   *arg,
             break;
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
+            g_assert(is_pointer);
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
                 g_free(arg->v_string);
@@ -1900,6 +1905,8 @@ _pygi_argument_release (GArgument   *arg,
             GArray *array;
             gsize i;
 
+            g_assert(is_pointer);
+
             array = arg->v_pointer;
 
             if ((direction == GI_DIRECTION_IN && transfer != GI_TRANSFER_EVERYTHING)
@@ -1908,13 +1915,8 @@ _pygi_argument_release (GArgument   *arg,
                 GITransfer item_transfer;
 
                 item_type_info = g_type_info_get_param_type(type_info, 0);
-                g_assert(item_type_info != NULL);
 
-                if (direction == GI_DIRECTION_IN) {
-                    item_transfer = GI_TRANSFER_NOTHING;
-                } else {
-                    item_transfer = GI_TRANSFER_EVERYTHING;
-                }
+                item_transfer = direction == GI_DIRECTION_IN ? GI_TRANSFER_NOTHING : GI_TRANSFER_EVERYTHING;
 
                 /* Free the items */
                 for (i = 0; i < array->len; i++) {
@@ -1939,11 +1941,13 @@ _pygi_argument_release (GArgument   *arg,
             GIInfoType info_type;
 
             info = g_type_info_get_interface(type_info);
-            g_assert(info != NULL);
-
             info_type = g_base_info_get_type(info);
 
             switch (info_type) {
+                case GI_INFO_TYPE_CALLBACK:
+                    /* TODO */
+                    break;
+                case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
@@ -1952,6 +1956,8 @@ _pygi_argument_release (GArgument   *arg,
 
                     if (g_type_is_a(type, G_TYPE_VALUE)) {
                         GValue *value;
+
+                        g_assert(is_pointer);
 
                         value = arg->v_pointer;
 
@@ -1964,25 +1970,40 @@ _pygi_argument_release (GArgument   *arg,
                                 || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
                             g_slice_free(GValue, value);
                         }
-                        break;
+                    } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
+                        g_assert(is_pointer);
+                        if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING) {
+                            g_closure_unref(arg->v_pointer);
+                        }
+                    } else if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        g_assert(is_pointer);
+                    } else if (type == G_TYPE_NONE) {
+                        g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
                     }
-
-                    /* TODO */
 
                     break;
                 }
+                case GI_INFO_TYPE_ENUM:
+                case GI_INFO_TYPE_FLAGS:
+                    if (is_pointer) {
+                        g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                        if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+                                || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
+                            g_free(arg->v_pointer);
+                        }
+                    }
+                    break;
                 case GI_INFO_TYPE_OBJECT:
-                {
-                    GObject *object;
-                    object = arg->v_pointer;
+                    g_assert(is_pointer);
                     if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
-                        g_object_unref(object);
+                        g_object_unref(arg->v_pointer);
                     }
                     break;
-                }
-                default:
+                case GI_INFO_TYPE_UNION:
                     /* TODO */
                     break;
+                default:
+                    g_assert_not_reached();
             }
 
             g_base_info_unref(info);
@@ -1992,6 +2013,8 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_GSLIST:
         {
             GSList *list;
+
+            g_assert(is_pointer);
 
             list = arg->v_pointer;
 
@@ -2004,11 +2027,7 @@ _pygi_argument_release (GArgument   *arg,
                 item_type_info = g_type_info_get_param_type(type_info, 0);
                 g_assert(item_type_info != NULL);
 
-                if (direction == GI_DIRECTION_IN) {
-                    item_transfer = GI_TRANSFER_NOTHING;
-                } else {
-                    item_transfer = GI_TRANSFER_EVERYTHING;
-                }
+                item_transfer = direction == GI_DIRECTION_IN ? GI_TRANSFER_NOTHING : GI_TRANSFER_EVERYTHING;
 
                 /* Free the items */
                 for (item = list; item != NULL; item = g_slist_next(item)) {
@@ -2034,6 +2053,8 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_GHASH:
         {
             GHashTable *hash_table;
+
+            g_assert(is_pointer);
 
             hash_table = arg->v_pointer;
 
@@ -2084,14 +2105,17 @@ _pygi_argument_release (GArgument   *arg,
         }
         case GI_TYPE_TAG_ERROR:
         {
-            GError **error;
+            GError *error;
 
-            error = arg->v_pointer;
+            g_assert(is_pointer);
 
-            if (*error != NULL) {
-                g_error_free(*error);
+            error = *(GError **)arg->v_pointer;
+
+            if (error != NULL) {
+                g_error_free(error);
             }
-            g_slice_free(GError *, error);
+
+            g_slice_free(GError *, arg->v_pointer);
             break;
         }
     }
