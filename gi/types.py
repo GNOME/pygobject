@@ -20,14 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from new import instancemethod
+from __future__ import absolute_import
 
 import gobject
+from new import instancemethod
 
-from ._gi import \
-	InterfaceInfo, \
-	ObjectInfo, \
-	StructInfo
+from ._gi import InterfaceInfo, ObjectInfo, StructInfo
 
 
 def Function(info):

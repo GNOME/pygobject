@@ -20,27 +20,20 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import os
+from __future__ import absolute_import
 
+import os
 import gobject
-from gobject import \
-    GObject, \
-    GInterface, \
-    GBoxed
 
 from ._gi import \
     Repository, \
-    UnresolvedInfo, \
     FunctionInfo, \
     RegisteredTypeInfo, \
     EnumInfo, \
     ObjectInfo, \
     InterfaceInfo, \
     StructInfo
-from .types import \
-    GObjectMeta, \
-    StructMeta, \
-    Function
+from .types import GObjectMeta, StructMeta, Function
 
 repository = Repository.get_default()
 
@@ -56,7 +49,7 @@ def get_parent_for_object(object_info):
 
     # Workaround for GObject.Object and GObject.InitiallyUnowned.
     if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
-        return GObject
+        return gobject.GObject
 
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
@@ -115,10 +108,10 @@ class DynamicModule(object):
                 bases = (parent,) + interfaces
                 metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
-                bases = (GInterface,)
+                bases = (gobject.GInterface,)
                 metaclass = GObjectMeta
             elif isinstance(info, StructInfo):
-                bases = (GBoxed,)
+                bases = (gobject.GBoxed,)
                 metaclass = StructMeta
             else:
                 raise NotImplementedError(info)
