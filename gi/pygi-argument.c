@@ -351,9 +351,15 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                                 PyObject   *object)
 {
     GITypeTag type_tag;
+    gboolean is_pointer;
     gint retval = 1;
 
     type_tag = g_type_info_get_tag(type_info);
+    is_pointer = g_type_info_is_pointer(type_info);
+
+    if (is_pointer && may_be_null && object == Py_None) {
+        return retval;
+    }
 
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -565,9 +571,6 @@ check_number_release:
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_OBJECT:
-                    if (may_be_null && object == Py_None) {
-                        break;
-                    }
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 case GI_INFO_TYPE_UNION:
