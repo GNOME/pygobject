@@ -740,13 +740,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	Py_DECREF(tmp);
 	break;
     case G_TYPE_UCHAR:
-	if ((tmp = PyObject_Str(obj)))
-	    g_value_set_char(value, _PyUnicode_AsString(tmp)[0]);
-	else {
+	if (_PyLong_Check(obj)) {
+	    glong val; 
+	    val = _PyLong_AsLong(obj);
+	    if (val >= 0 && val <= 255)
+	      g_value_set_uchar(value, (guchar)_PyLong_AsLong (obj));
+	    else
+	      return -1;
+	} else if ((tmp = PyObject_Str(obj))) {
+	    g_value_set_uchar(value, _PyUnicode_AsString(tmp)[0]);
+	    Py_DECREF(tmp);
+	} else {
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
 	break;
     case G_TYPE_BOOLEAN:
 	g_value_set_boolean(value, PyObject_IsTrue(obj));
