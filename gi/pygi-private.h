@@ -19,7 +19,6 @@
 #include "pygi-repository.h"
 #include "pygi-info.h"
 #include "pygi-argument.h"
-#include "pygi-boxed.h"
 
 G_BEGIN_DECLS
 
