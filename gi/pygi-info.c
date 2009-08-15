@@ -583,8 +583,22 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     g_assert_not_reached();
                     break;
                 case GI_INFO_TYPE_STRUCT:
-                    in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
+                {
+                    GType type;
+
+                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)container_info);
+
+                    if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
+                    } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                        in_args[0].v_pointer = pyg_pointer_get(py_arg, void);
+                    } else {
+                        PyErr_Format(PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name(type));
+                        goto return_;
+                    }
+
                     break;
+                }
                 case GI_INFO_TYPE_OBJECT:
                 case GI_INFO_TYPE_INTERFACE:
                     in_args[0].v_pointer = pygobject_get(py_arg);
@@ -806,20 +820,18 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
                 type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
-                if (transfer == GI_TRANSFER_EVERYTHING && !g_type_is_a(type, G_TYPE_BOXED)) {
-                    gboolean is_simple;
-
-                    is_simple = _pygi_g_struct_info_is_simple((GIStructInfo *)info);
-
-                    if (is_simple) {
-                        PyErr_Format(PyExc_TypeError,
-                                "cannot create '%s' instances; non-boxed simple structures do not accept specific constructors",
-                                py_type->tp_name);
-                        /* TODO */
-                        goto return_;
-                    }
+                if (g_type_is_a(type, G_TYPE_BOXED)) {
+                    g_warn_if_fail(transfer == GI_TRANSFER_EVERYTHING);
+                    return_value = pyg_boxed_new(type, return_arg.v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
+                } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                    g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                    return_value = pyg_pointer_new_from_type(py_type, return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                } else {
+                    PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", py_type->tp_name);
+                    /* TODO */
+                    goto return_;
                 }
-                return_value = pygi_boxed_new_from_type(py_type, return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+
                 break;
             }
             case GI_INFO_TYPE_OBJECT:
@@ -1105,6 +1117,119 @@ static PyMethodDef _PyGIStructInfo_methods[] = {
     { "get_methods", (PyCFunction)_wrap_g_struct_info_get_methods, METH_NOARGS },
     { NULL, NULL, 0 }
 };
+
+gboolean
+pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
+{
+    gboolean is_simple;
+    gsize n_field_infos;
+    gsize i;
+
+    is_simple = TRUE;
+
+    n_field_infos = g_struct_info_get_n_fields(struct_info);
+
+    for (i = 0; i < n_field_infos && is_simple; i++) {
+        GIFieldInfo *field_info;
+        GITypeInfo *field_type_info;
+        gboolean is_pointer;
+
+        field_info = g_struct_info_get_field(struct_info, i);
+        field_type_info = g_field_info_get_type(field_info);
+        is_pointer = g_type_info_is_pointer(field_type_info);
+
+        if (is_pointer) {
+            is_simple = FALSE;
+        } else {
+            GITypeTag field_type_tag;
+
+            field_type_tag = g_type_info_get_tag(field_type_info);
+
+            switch (field_type_tag) {
+                case GI_TYPE_TAG_BOOLEAN:
+                case GI_TYPE_TAG_INT8:
+                case GI_TYPE_TAG_UINT8:
+                case GI_TYPE_TAG_INT16:
+                case GI_TYPE_TAG_UINT16:
+                case GI_TYPE_TAG_INT32:
+                case GI_TYPE_TAG_UINT32:
+                case GI_TYPE_TAG_SHORT:
+                case GI_TYPE_TAG_USHORT:
+                case GI_TYPE_TAG_INT:
+                case GI_TYPE_TAG_UINT:
+                case GI_TYPE_TAG_INT64:
+                case GI_TYPE_TAG_UINT64:
+                case GI_TYPE_TAG_LONG:
+                case GI_TYPE_TAG_ULONG:
+                case GI_TYPE_TAG_SSIZE:
+                case GI_TYPE_TAG_SIZE:
+                case GI_TYPE_TAG_FLOAT:
+                case GI_TYPE_TAG_DOUBLE:
+                case GI_TYPE_TAG_TIME_T:
+                    break;
+                case GI_TYPE_TAG_VOID:
+                case GI_TYPE_TAG_GTYPE:
+                case GI_TYPE_TAG_ERROR:
+                case GI_TYPE_TAG_UTF8:
+                case GI_TYPE_TAG_FILENAME:
+                case GI_TYPE_TAG_ARRAY:
+                case GI_TYPE_TAG_GLIST:
+                case GI_TYPE_TAG_GSLIST:
+                case GI_TYPE_TAG_GHASH:
+                    /* Should have been catched by is_pointer above. */
+                    g_assert_not_reached();
+                    break;
+                case GI_TYPE_TAG_INTERFACE:
+                {
+                    GIBaseInfo *info;
+                    GIInfoType info_type;
+
+                    info = g_type_info_get_interface(field_type_info);
+                    info_type = g_base_info_get_type(info);
+
+                    switch (info_type) {
+                        case GI_INFO_TYPE_BOXED:
+                        case GI_INFO_TYPE_STRUCT:
+                            is_simple = pygi_g_struct_info_is_simple((GIStructInfo *)info);
+                            break;
+                        case GI_INFO_TYPE_UNION:
+                            /* TODO */
+                            is_simple = FALSE;
+                            break;
+                        case GI_INFO_TYPE_ENUM:
+                        case GI_INFO_TYPE_FLAGS:
+                            break;
+                        case GI_INFO_TYPE_OBJECT:
+                        case GI_INFO_TYPE_VFUNC:
+                        case GI_INFO_TYPE_CALLBACK:
+                        case GI_INFO_TYPE_INVALID:
+                        case GI_INFO_TYPE_INTERFACE:
+                        case GI_INFO_TYPE_FUNCTION:
+                        case GI_INFO_TYPE_CONSTANT:
+                        case GI_INFO_TYPE_ERROR_DOMAIN:
+                        case GI_INFO_TYPE_VALUE:
+                        case GI_INFO_TYPE_SIGNAL:
+                        case GI_INFO_TYPE_PROPERTY:
+                        case GI_INFO_TYPE_FIELD:
+                        case GI_INFO_TYPE_ARG:
+                        case GI_INFO_TYPE_TYPE:
+                        case GI_INFO_TYPE_UNRESOLVED:
+                            is_simple = FALSE;
+                            break;
+                    }
+
+                    g_base_info_unref(info);
+                    break;
+	            }
+            }
+        }
+
+        g_base_info_unref((GIBaseInfo *)field_type_info);
+        g_base_info_unref((GIBaseInfo *)field_info);
+    }
+
+    return is_simple;
+}
 
 
 /* EnumInfo */
@@ -1541,7 +1666,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
                 gsize offset;
                 gssize size;
 
-                is_simple = _pygi_g_struct_info_is_simple((GIStructInfo *)info);
+                is_simple = pygi_g_struct_info_is_simple((GIStructInfo *)info);
 
                 if (!is_simple) {
                     PyErr_SetString(PyExc_TypeError,

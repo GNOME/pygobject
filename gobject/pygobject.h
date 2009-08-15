@@ -64,6 +64,7 @@ typedef struct {
     PyObject_HEAD
     gpointer pointer;
     GType gtype;
+	gboolean free_on_dealloc;
 } PyGPointer;
 
 #define pyg_pointer_get(v,t)      ((t *)((PyGPointer *)(v))->pointer)
@@ -207,6 +208,10 @@ struct _PyGObject_Functions {
                                        gboolean sink);
 
     PyTypeObject *interface_type;
+
+    PyObject* (*pointer_new_from_type) (PyTypeObject *type,
+                                        gpointer      pointer,
+                                        gboolean      free_on_dealloc);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -279,6 +284,8 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_new_from_type    (_PyGObject_API->object_new_from_type)
 
 #define PyGInterface_Type          (*_PyGObject_API->interface_type)
+
+#define pyg_pointer_new_from_type  (_PyGObject_API->pointer_new_from_type)
 
 #define pyg_block_threads()   G_STMT_START {   \
     if (_PyGObject_API->block_threads != NULL) \

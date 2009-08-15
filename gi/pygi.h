@@ -43,13 +43,14 @@ typedef struct {
 
 
 struct PyGI_API {
+    /* Info */
+    PyTypeObject *StructInfo_Type;
+    gboolean (*g_struct_info_is_simple) (GIStructInfo *struct_info);
+
     /* Misc */
     PyObject* (*type_find_by_gi_info) (GIBaseInfo *info);
-
-    /* Boxed */
-    PyObject* (*boxed_new_from_type) (PyTypeObject *type,
-                                      gpointer      pointer,
-                                      gboolean      own_pointer);
+    GIBaseInfo* (*object_get_gi_info) (PyObject     *object,
+                                       PyTypeObject *type);
 };
 
 
@@ -57,11 +58,13 @@ struct PyGI_API {
 
 static struct PyGI_API *PyGI_API = NULL;
 
+/* Info */
+#define PyGIStructInfo_Type (*PyGI_API->StructInfo_Type)
+#define pygi_g_struct_info_is_simple (PyGI_API->g_struct_info_is_simple)
+
 /* Misc */
 #define pygi_type_find_by_gi_info (PyGI_API->type_find_by_gi_info)
-
-/* Boxed */
-#define pygi_boxed_new_from_type (PyGI_API->boxed_new_from_type)
+#define pygi_object_get_gi_info (PyGI_API->object_get_gi_info)
 
 
 static int

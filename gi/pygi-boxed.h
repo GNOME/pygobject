@@ -26,14 +26,9 @@
 
 G_BEGIN_DECLS
 
-PyObject* pygi_boxed_new_from_type (PyTypeObject *type,
-                                    gpointer      pointer,
-                                    gboolean      own_pointer);
-
 
 /* Private */
 
-gboolean _pygi_g_struct_info_is_simple (GIStructInfo *struct_info);
 
 G_END_DECLS
 

@@ -1168,9 +1168,9 @@ array_item_error:
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy(type, arg.v_pointer);
                         }
-                    } else if (type == G_TYPE_NONE) {
+                    } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                         g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
-                        arg.v_pointer = pyg_boxed_get(object, void);
+                        arg.v_pointer = pyg_pointer_get(object, void);
                     } else {
                         PyErr_Format(PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name(type));
                     }
@@ -1691,6 +1691,8 @@ _pygi_argument_to_object (GArgument  *arg,
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
                         g_assert(is_pointer);
                         object = pyg_boxed_new(type, arg->v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
+                    } else if (g_type_is_a(type, G_TYPE_POINTER)) {
+                        object = pyg_pointer_new(type, arg->v_pointer);
                     } else if (type == G_TYPE_NONE) {
                         PyObject *py_type;
 
@@ -1699,7 +1701,7 @@ _pygi_argument_to_object (GArgument  *arg,
                             break;
                         }
 
-                        object = pygi_boxed_new_from_type((PyTypeObject *)py_type, arg->v_pointer,
+                        object = pyg_pointer_new_from_type((PyTypeObject *)py_type, arg->v_pointer,
                                 transfer == GI_TRANSFER_EVERYTHING);
 
                         Py_DECREF(py_type);
@@ -1980,7 +1982,7 @@ _pygi_argument_release (GArgument   *arg,
                         }
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
                         g_assert(is_pointer);
-                    } else if (type == G_TYPE_NONE) {
+                    } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                         g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
                     }
 

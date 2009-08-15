@@ -52,11 +52,11 @@ PyObject* pygi_type_find_by_name (const char *namespace_,
                                   const char *name);
 PyObject* pygi_type_find_by_gi_info (GIBaseInfo *info);
 
+GIBaseInfo* pygi_object_get_gi_info (PyObject     *object,
+                                     PyTypeObject *type);
+
 
 /* Private */
-
-GIBaseInfo* _pygi_object_get_gi_info (PyObject     *object,
-                                      PyTypeObject *type);
 
 
 #define _PyGI_ERROR_PREFIX(format, ...) G_STMT_START { \

@@ -113,7 +113,12 @@ class DynamicModule(object):
                 bases = (gobject.GInterface,)
                 metaclass = GObjectMeta
             elif isinstance(info, StructInfo):
-                bases = (gobject.GBoxed,)
+                if g_type.is_a(gobject.TYPE_BOXED):
+                    bases = (gobject.GBoxed,)
+                elif g_type.is_a(gobject.TYPE_POINTER) or g_type == gobject.TYPE_NONE:
+                    bases = (gobject.GPointer,)
+                else:
+                    raise TypeError, "unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name())
                 metaclass = StructMeta
             else:
                 raise NotImplementedError(info)

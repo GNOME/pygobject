@@ -539,7 +539,7 @@ class TestGIEverything(unittest.TestCase):
 
     def testStructA(self):
         # Test inheritance.
-        self.assertTrue(issubclass(Everything.TestStructA, gobject.GBoxed))
+        self.assertTrue(issubclass(Everything.TestStructA, gobject.GPointer))
 
         # Test instanciation.
         a = Everything.TestStructA()

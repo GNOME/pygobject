@@ -76,7 +76,7 @@ pygi_type_find_by_gi_info (GIBaseInfo *info)
 }
 
 GIBaseInfo *
-_pygi_object_get_gi_info (PyObject     *object,
+pygi_object_get_gi_info (PyObject     *object,
                           PyTypeObject *type)
 {
     PyObject *py_info;
@@ -133,8 +133,10 @@ static PyMethodDef _pygi_functions[] = {
 };
 
 struct PyGI_API PyGI_API = {
+    &PyGIStructInfo_Type,
+    pygi_g_struct_info_is_simple,
     pygi_type_find_by_gi_info,
-    pygi_boxed_new_from_type
+    pygi_object_get_gi_info
 };
 
 PyMODINIT_FUNC

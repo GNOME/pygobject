@@ -25,6 +25,9 @@
 #endif
 
 #include <pyglib.h>
+#if HAVE_PYGI_H
+#   include <pygi.h>
+#endif
 #include "pygobject-private.h"
 #include "pygpointer.h"
 
@@ -35,6 +38,9 @@ PYGLIB_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
 static void
 pyg_pointer_dealloc(PyGPointer *self)
 {
+    if (self->free_on_dealloc) {
+        g_free(self->pointer);
+    }
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -60,23 +66,6 @@ pyg_pointer_repr(PyGPointer *self)
     g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
 	       (long)self->pointer);
     return _PyUnicode_FromString(buf);
-}
-
-static int
-pyg_pointer_init(PyGPointer *self, PyObject *args, PyObject *kwargs)
-{
-    gchar buf[512];
-
-    if (!PyArg_ParseTuple(args, ":GPointer.__init__"))
-	return -1;
-
-    self->pointer = NULL;
-    self->gtype = 0;
-
-    g_snprintf(buf, sizeof(buf), "%s can not be constructed",
-	       Py_TYPE(self)->tp_name);
-    PyErr_SetString(PyExc_NotImplementedError, buf);
-    return -1;
 }
 
 static void
@@ -125,6 +114,33 @@ pyg_register_pointer(PyObject *dict, const gchar *class_name,
     PyDict_SetItemString(dict, (char *)class_name, (PyObject *)type);
 }
 
+PyObject *
+pyg_pointer_new_from_type (PyTypeObject *type,
+                           gpointer      pointer,
+                           gboolean      free_on_dealloc)
+{
+    PyGPointer *self;
+    GType g_type;
+
+    if (!PyType_IsSubtype(type, &PyGPointer_Type)) {
+        PyErr_SetString(PyExc_TypeError, "must be a subtype of gobject.GPointer");
+        return NULL;
+    }
+
+    self = (PyGPointer *)type->tp_alloc(type, 0);
+    if (self == NULL) {
+        return NULL;
+    }
+
+    g_type = pyg_type_from_object((PyObject *)type);
+
+    self->pointer = pointer;
+    self->gtype = g_type;
+    self->free_on_dealloc = free_on_dealloc;
+
+    return (PyObject *)self;
+}
+
 /**
  * pyg_pointer_new:
  * @pointer_type: the GType of the pointer value.
@@ -155,20 +171,106 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     }
 
     tp = g_type_get_qdata(pointer_type, pygpointer_class_key);
+
+#if HAVE_PYGI_H
+    if (tp == NULL) {
+        GIRepository *repository;
+        GIBaseInfo *info;
+
+        repository = g_irepository_get_default();
+
+        info = g_irepository_find_by_gtype(repository, pointer_type);
+
+        if (info != NULL) {
+            if (pygi_import() < 0) {
+                PyErr_WarnEx(NULL, "unable to import gi", 1);
+                PyErr_Clear();
+            } else {
+                tp = (PyTypeObject *)pygi_type_find_by_gi_info(info);
+                g_base_info_unref(info);
+                if (tp == NULL) {
+                    PyErr_Clear();
+                } else {
+                    /* Note: The type is registered, so at least a reference remains. */
+                    Py_DECREF((PyObject *)tp);
+                }
+            }
+        }
+    }
+#endif
+
     if (!tp)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
-    self = PyObject_NEW(PyGPointer, tp);
+
+    self = (PyGPointer *)pyg_pointer_new_from_type(tp, pointer, FALSE);
 
     pyglib_gil_state_release(state);
 
-    if (self == NULL)
-	return NULL;
+    if (self == NULL) {
+        return NULL;
+    }
 
-    self->pointer = pointer;
+    /* In case the g_type has no wrapper, we don't want self->gtype to be G_TYPE_POINTER. */
     self->gtype = pointer_type;
 
     return (PyObject *)self;
 }
+
+
+#if HAVE_PYGI_H
+static PyObject *
+_pyg_pointer_new (PyTypeObject *type,
+                  PyObject     *args,
+                  PyObject     *kwargs)
+{
+    static char *kwlist[] = { NULL };
+
+    GIBaseInfo *info;
+    gboolean is_simple;
+    gsize size;
+    gpointer pointer;
+    PyObject *self = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "", kwlist)) {
+        return NULL;
+    }
+
+    if (pygi_import() < 0) {
+        return NULL;
+    }
+
+    info = pygi_object_get_gi_info((PyObject *)type, &PyGIStructInfo_Type);
+    if (info == NULL) {
+        if (PyErr_ExceptionMatches(PyExc_AttributeError)) {
+            PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", type->tp_name);
+        }
+        return NULL;
+    }
+
+    is_simple = pygi_g_struct_info_is_simple((GIStructInfo *)info);
+    if (!is_simple) {
+        PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", type->tp_name);
+        goto out;
+    }
+
+    size = g_struct_info_get_size((GIStructInfo *)info);
+    pointer = g_try_malloc(size);
+    if (pointer == NULL) {
+        PyErr_NoMemory();
+        goto out;
+    }
+
+    self = pyg_pointer_new_from_type(type, pointer, TRUE);
+    if (self == NULL) {
+        g_free(pointer);
+    }
+
+out:
+    g_base_info_unref(info);
+
+    return (PyObject *)self;
+}
+#endif
 
 void
 pygobject_pointer_register_types(PyObject *d)
@@ -180,7 +282,18 @@ pygobject_pointer_register_types(PyObject *d)
     PyGPointer_Type.tp_repr = (reprfunc)pyg_pointer_repr;
     PyGPointer_Type.tp_hash = (hashfunc)pyg_pointer_hash;
     PyGPointer_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
-    PyGPointer_Type.tp_init = (initproc)pyg_pointer_init;
     PyGPointer_Type.tp_free = (freefunc)pyg_pointer_free;
+
+#if HAVE_PYGI_H
+    PyGPointer_Type.tp_new = (newfunc)_pyg_pointer_new;
+#endif
+
     PYGOBJECT_REGISTER_GTYPE(d, PyGPointer_Type, "GPointer", G_TYPE_POINTER); 
+
+#if !HAVE_PYGI_H
+    /* We don't want instances to be created in Python, but
+     * PYGOBJECT_REGISTER_GTYPE assigned PyObject_GenericNew as instance
+     * constructor. It's not too late to revert it to NULL, though. */
+    PyGPointer_Type.tp_new = (newfunc)NULL;
+#endif
 }

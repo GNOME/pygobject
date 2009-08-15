@@ -28,6 +28,8 @@
 
 G_BEGIN_DECLS
 
+gboolean pygi_g_struct_info_is_simple (GIStructInfo *struct_info);
+
 
 /* Private */
 
