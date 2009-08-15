@@ -77,11 +77,6 @@ GIBaseInfo* pygi_object_get_gi_info (PyObject     *object,
 
 /* GArray */
 
-#if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 22
-#   define g_array_get_element_size(a) \
-        *(guint *)((gpointer)(a) + sizeof(guint8 *) + sizeof(guint) * 2)
-#endif
-
 /* Redefine g_array_index because we want it to return the i-th element, casted
  * to the type t, of the array a, and not the i-th element of the array a casted to the type t. */
 #define _g_array_index(a,t,i) \

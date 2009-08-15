@@ -11,7 +11,7 @@ dnl versions of packages we require ...
 m4_define(glib_required_version, 2.14.0)
 m4_define(gio_required_version, 2.16.0)
 m4_define(giounix_required_version, 2.16.0)
-m4_define(gobject_introspection_required_version, 0.6.3)
+m4_define(gobject_introspection_required_version, 0.6.4)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -207,6 +207,8 @@ AC_ARG_ENABLE(introspection,
   enable_introspection=no)
 AM_CONDITIONAL(BUILD_GI, test "$enable_introspection" != no)
 if test "$enable_introspection" != no; then
+  JD_PATH_PYTHON(2.5.2)
+  PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, glib-2.0 >= 2.21.5)
   PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
   AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
   AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
