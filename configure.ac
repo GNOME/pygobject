@@ -208,7 +208,7 @@ AC_ARG_ENABLE(introspection,
 AM_CONDITIONAL(BUILD_GI, test "$enable_introspection" != no)
 if test "$enable_introspection" != no; then
   JD_PATH_PYTHON(2.5.2)
-  PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, glib-2.0 >= 2.21.5)
+  PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.21.5)
   PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
   AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
   AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
