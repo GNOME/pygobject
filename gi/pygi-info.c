@@ -265,6 +265,182 @@ _wrap_g_function_info_is_method (PyGIBaseInfo *self)
     return PyBool_FromLong(is_method);
 }
 
+gsize
+_pygi_g_type_tag_size (GITypeTag type_tag)
+{
+    gsize size = 0;
+
+    switch(type_tag) {
+        case GI_TYPE_TAG_BOOLEAN:
+            size = sizeof(gboolean);
+            break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+            size = sizeof(gint8);
+            break;
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+            size = sizeof(gint16);
+            break;
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+            size = sizeof(gint32);
+            break;
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+            size = sizeof(gint64);
+            break;
+        case GI_TYPE_TAG_SHORT:
+        case GI_TYPE_TAG_USHORT:
+            size = sizeof(gshort);
+            break;
+        case GI_TYPE_TAG_INT:
+        case GI_TYPE_TAG_UINT:
+            size = sizeof(gint);
+            break;
+        case GI_TYPE_TAG_LONG:
+        case GI_TYPE_TAG_ULONG:
+            size = sizeof(glong);
+            break;
+        case GI_TYPE_TAG_SIZE:
+        case GI_TYPE_TAG_SSIZE:
+            size = sizeof(gsize);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            size = sizeof(gfloat);
+            break;
+        case GI_TYPE_TAG_DOUBLE:
+            size = sizeof(gdouble);
+            break;
+        case GI_TYPE_TAG_TIME_T:
+            size = sizeof(time_t);
+            break;
+        case GI_TYPE_TAG_GTYPE:
+            size = sizeof(GType);
+            break;
+        case GI_TYPE_TAG_VOID:
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_ARRAY:
+        case GI_TYPE_TAG_INTERFACE:
+        case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
+        case GI_TYPE_TAG_GHASH:
+        case GI_TYPE_TAG_ERROR:
+            PyErr_Format(PyExc_TypeError,
+                "Unable to know the size (assuming %s is not a pointer)",
+                g_type_tag_to_string(type_tag));
+            break;
+    }
+
+    return size;
+}
+
+gsize
+_pygi_g_type_info_size (GITypeInfo *type_info)
+{
+    gsize size = 0;
+    gboolean is_pointer;
+
+    is_pointer = g_type_info_is_pointer(type_info);
+
+    if (is_pointer) {
+        size = sizeof(gpointer);
+    } else {
+        GITypeTag type_tag;
+
+        type_tag = g_type_info_get_tag(type_info);
+        switch(type_tag) {
+            case GI_TYPE_TAG_BOOLEAN:
+            case GI_TYPE_TAG_INT8:
+            case GI_TYPE_TAG_UINT8:
+            case GI_TYPE_TAG_INT16:
+            case GI_TYPE_TAG_UINT16:
+            case GI_TYPE_TAG_INT32:
+            case GI_TYPE_TAG_UINT32:
+            case GI_TYPE_TAG_INT64:
+            case GI_TYPE_TAG_UINT64:
+            case GI_TYPE_TAG_SHORT:
+            case GI_TYPE_TAG_USHORT:
+            case GI_TYPE_TAG_INT:
+            case GI_TYPE_TAG_UINT:
+            case GI_TYPE_TAG_LONG:
+            case GI_TYPE_TAG_ULONG:
+            case GI_TYPE_TAG_SIZE:
+            case GI_TYPE_TAG_SSIZE:
+            case GI_TYPE_TAG_FLOAT:
+            case GI_TYPE_TAG_DOUBLE:
+            case GI_TYPE_TAG_TIME_T:
+            case GI_TYPE_TAG_GTYPE:
+                size = _pygi_g_type_tag_size(type_tag);
+                g_assert(size > 0);
+                break;
+            case GI_TYPE_TAG_INTERFACE:
+            {
+                GIBaseInfo *info;
+                GIInfoType info_type;
+
+                info = g_type_info_get_interface(type_info);
+                info_type = g_base_info_get_type(info);
+
+                switch (info_type) {
+                    case GI_INFO_TYPE_STRUCT:
+                        size = g_struct_info_get_size((GIStructInfo *)info);
+                        break;
+                    case GI_INFO_TYPE_UNION:
+                        size = g_union_info_get_size((GIUnionInfo *)info);
+                        break;
+                    case GI_INFO_TYPE_ENUM:
+                    case GI_INFO_TYPE_FLAGS:
+                    {
+                        GITypeTag type_tag;
+
+                        type_tag = g_enum_info_get_storage_type((GIEnumInfo *)info);
+                        size = _pygi_g_type_tag_size(type_tag);
+                        break;
+                    }
+                    case GI_INFO_TYPE_BOXED:
+                    case GI_INFO_TYPE_OBJECT:
+                    case GI_INFO_TYPE_INTERFACE:
+                    case GI_INFO_TYPE_CALLBACK:
+                        /* Should have been catched by is_pointer above. */
+                    case GI_INFO_TYPE_VFUNC:
+                    case GI_INFO_TYPE_INVALID:
+                    case GI_INFO_TYPE_FUNCTION:
+                    case GI_INFO_TYPE_CONSTANT:
+                    case GI_INFO_TYPE_ERROR_DOMAIN:
+                    case GI_INFO_TYPE_VALUE:
+                    case GI_INFO_TYPE_SIGNAL:
+                    case GI_INFO_TYPE_PROPERTY:
+                    case GI_INFO_TYPE_FIELD:
+                    case GI_INFO_TYPE_ARG:
+                    case GI_INFO_TYPE_TYPE:
+                    case GI_INFO_TYPE_UNRESOLVED:
+                        g_assert_not_reached();
+                        break;
+                }
+
+                g_base_info_unref(info);
+                break;
+            }
+            case GI_TYPE_TAG_ARRAY:
+            case GI_TYPE_TAG_VOID:
+            case GI_TYPE_TAG_UTF8:
+            case GI_TYPE_TAG_FILENAME:
+            case GI_TYPE_TAG_GLIST:
+            case GI_TYPE_TAG_GSLIST:
+            case GI_TYPE_TAG_GHASH:
+            case GI_TYPE_TAG_ERROR:
+                /* Should have been catched by is_pointer above. */
+                g_assert_not_reached();
+                break;
+        }
+    }
+
+    return size;
+}
+
+
 static PyObject *
 _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                               PyObject     *py_args)
@@ -275,7 +451,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     gsize n_args;
     gsize n_in_args;
     gsize n_out_args;
-    gsize n_containers;
+    gsize n_backup_args;
     Py_ssize_t n_py_args;
     gsize n_aux_in_args;
     gsize n_aux_out_args;
@@ -294,7 +470,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     GArgument *in_args;
     GArgument *out_args;
     GArgument *out_values;
-    GArgument *containers;
+    GArgument *backup_args;
     GArgument return_arg;
 
     PyObject *return_value = NULL;
@@ -313,7 +489,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     n_args = g_callable_info_get_n_args((GICallableInfo *)self->info);
     n_in_args = 0;
     n_out_args = 0;
-    n_containers = 0;
+    n_backup_args = 0;
     n_aux_in_args = 0;
     n_aux_out_args = 0;
 
@@ -347,14 +523,16 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             n_in_args += 1;
+            if (transfer == GI_TRANSFER_CONTAINER) {
+                n_backup_args += 1;
+            }
         }
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             n_out_args += 1;
         }
 
-        if ((direction == GI_DIRECTION_INOUT && transfer != GI_TRANSFER_EVERYTHING)
-                || (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER)) {
-            n_containers += 1;
+        if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
+            n_backup_args += 1;
         }
 
         switch (arg_type_tag) {
@@ -380,9 +558,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 break;
             }
             case GI_TYPE_TAG_ERROR:
-                if (error_arg_pos >= 0) {
-                    PyErr_WarnEx(NULL, "Two or more error arguments; taking the last one", 1);
-                }
+                g_warn_if_fail(error_arg_pos < 0);
                 error_arg_pos = i;
                 break;
             default:
@@ -515,7 +691,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     in_args = g_newa(GArgument, n_in_args);
     out_args = g_newa(GArgument, n_out_args);
     out_values = g_newa(GArgument, n_out_args);
-    containers = g_newa(GArgument, n_containers);
+    backup_args = g_newa(GArgument, n_backup_args);
 
     /* Bind args so we can use an unique index. */
     {
@@ -556,10 +732,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     /* Convert the input arguments. */
     {
         Py_ssize_t py_args_pos;
-        gsize containers_pos;
+        gsize backup_args_pos;
 
         py_args_pos = 0;
-        containers_pos = 0;
+        backup_args_pos = 0;
 
         if (is_constructor) {
             /* Skip the first argument. */
@@ -650,74 +826,61 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     return NULL;
                 }
 
-                if ((direction == GI_DIRECTION_INOUT && transfer != GI_TRANSFER_EVERYTHING)
-                        || (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER)) {
-                    /* We need to keep a copy of the container to be able to
-                     * release the items after the call. */
-                    g_assert(containers_pos < n_containers);
-                    switch(arg_type_tag) {
-                        case GI_TYPE_TAG_FILENAME:
-                        case GI_TYPE_TAG_UTF8:
-                            containers[containers_pos].v_string = args[i]->v_pointer;
-                            break;
+                if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
+                    /* We need to keep a copy of the argument to be able to release it later. */
+                    g_assert(backup_args_pos < n_backup_args);
+                    backup_args[backup_args_pos] = *args[i];
+                    backup_args_pos += 1;
+                } else if (transfer == GI_TRANSFER_CONTAINER) {
+                    /* We need to keep a copy of the items to be able to release them later. */
+                    switch (arg_type_tag) {
                         case GI_TYPE_TAG_ARRAY:
-                            containers[containers_pos].v_pointer = g_array_copy(args[i]->v_pointer);
-                            break;
-                        case GI_TYPE_TAG_INTERFACE:
                         {
-                            GIBaseInfo *info;
-                            GIInfoType info_type;
+                            GArray *array;
+                            gsize item_size;
+                            GArray *new_array;
 
-                            info = g_type_info_get_interface(arg_type_infos[i]);
-                            g_assert(info != NULL);
+                            array = args[i]->v_pointer;
 
-                            info_type = g_base_info_get_type(info);
+                            item_size = g_array_get_element_size(array);
 
-                            switch (info_type) {
-                                case GI_INFO_TYPE_STRUCT:
-                                {
-                                    GType type;
+                            new_array = g_array_sized_new(FALSE, FALSE, item_size, array->len);
+                            g_array_append_vals(new_array, array->data, array->len);
 
-                                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                            g_assert(backup_args_pos < n_backup_args);
+                            backup_args[backup_args_pos].v_pointer = new_array;
 
-                                    if (g_type_is_a(type, G_TYPE_VALUE)) {
-                                        GValue *value;
-                                        GValue *new_value;
-
-                                        value = args[i]->v_pointer;
-                                        new_value = g_slice_new0(GValue);
-
-                                        g_value_init(new_value, G_VALUE_TYPE(value));
-                                        g_value_copy(value, new_value);
-
-                                        containers[containers_pos].v_pointer = new_value;
-                                        break;
-                                    }
-
-                                    /* TODO */
-
-                                    break;
-                                }
-                                default:
-                                    break;
-                            }
-
-                            g_base_info_unref(info);
                             break;
                         }
                         case GI_TYPE_TAG_GLIST:
-                            containers[containers_pos].v_pointer = g_list_copy(args[i]->v_pointer);
+                            g_assert(backup_args_pos < n_backup_args);
+                            backup_args[backup_args_pos].v_pointer = g_list_copy(args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_GSLIST:
-                            containers[containers_pos].v_pointer = g_slist_copy(args[i]->v_pointer);
+                            g_assert(backup_args_pos < n_backup_args);
+                            backup_args[backup_args_pos].v_pointer = g_slist_copy(args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_GHASH:
-                            containers[containers_pos].v_pointer = g_hash_table_copy(args[i]->v_pointer);
+                        {
+                            GHashTable *hash_table;
+                            GList *keys;
+                            GList *values;
+
+                            hash_table = args[i]->v_pointer;
+
+                            keys = g_hash_table_get_keys(hash_table);
+                            values = g_hash_table_get_values(hash_table);
+
+                            g_assert(backup_args_pos < n_backup_args);
+                            backup_args[backup_args_pos].v_pointer = g_list_concat(keys, values);
+
                             break;
+                        }
                         default:
-                            break;
+                            g_warn_if_reached();
                     }
-                    containers_pos += 1;
+
+                    backup_args_pos += 1;
                 }
 
                 if (arg_type_tag == GI_TYPE_TAG_ARRAY) {
@@ -741,7 +904,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         }
 
         g_assert(py_args_pos == n_py_args);
-        g_assert(containers_pos == n_containers);
+        g_assert(backup_args_pos == n_backup_args);
     }
 
     /* Invoke the callable. */
@@ -880,10 +1043,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
     /* Convert output arguments and release arguments. */
     {
-        gsize containers_pos;
+        gsize backup_args_pos;
         gsize return_values_pos;
 
-        containers_pos = 0;
+        backup_args_pos = 0;
         return_values_pos = 0;
 
         if (n_return_values > 1) {
@@ -964,22 +1127,69 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             }
 
             /* Release the argument. */
-            if (direction == GI_DIRECTION_INOUT) {
-                if (transfer != GI_TRANSFER_EVERYTHING) {
-                    g_assert(containers_pos < n_containers);
-                    _pygi_argument_release(&containers[containers_pos], arg_type_infos[i],
-                        GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
-                    containers_pos += 1;
+
+            if ((direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+                    && transfer == GI_TRANSFER_CONTAINER) {
+                /* Release the items we kept in another container. */
+                switch (type_tag) {
+                    case GI_TYPE_TAG_ARRAY:
+                    case GI_TYPE_TAG_GLIST:
+                    case GI_TYPE_TAG_GSLIST:
+                        g_assert(backup_args_pos < n_backup_args);
+                        _pygi_argument_release(&backup_args[backup_args_pos], arg_type_infos[i],
+                            transfer, GI_DIRECTION_IN);
+                        break;
+                    case GI_TYPE_TAG_GHASH:
+                    {
+                        GITypeInfo *key_type_info;
+                        GITypeInfo *value_type_info;
+                        GList *item;
+                        gsize length;
+                        gsize j;
+
+                        key_type_info = g_type_info_get_param_type(arg_type_infos[i], 0);
+                        value_type_info = g_type_info_get_param_type(arg_type_infos[i], 1);
+
+                        g_assert(backup_args_pos < n_backup_args);
+                        item = backup_args[backup_args_pos].v_pointer;
+
+                        length = g_list_length(item) / 2;
+
+                        for (j = 0; j < length; j++, item = g_list_next(item)) {
+                            _pygi_argument_release((GArgument *)&item->data, key_type_info,
+                                GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                        }
+
+                        for (j = 0; j < length; j++, item = g_list_next(item)) {
+                            _pygi_argument_release((GArgument *)&item->data, value_type_info,
+                                GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                        }
+
+                        g_list_free(backup_args[backup_args_pos].v_pointer);
+
+                        break;
+                    }
+                    default:
+                        g_warn_if_reached();
                 }
-                if (transfer != GI_TRANSFER_NOTHING) {
-                    _pygi_argument_release(args[i], arg_type_infos[i], transfer,
+
+                if (direction == GI_DIRECTION_INOUT) {
+                    /* Release the output argument. */
+                    _pygi_argument_release(args[i], arg_type_infos[i], GI_TRANSFER_CONTAINER,
                         GI_DIRECTION_OUT);
                 }
-            } else if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_CONTAINER) {
-                g_assert(containers_pos < n_containers);
-                _pygi_argument_release(&containers[containers_pos], arg_type_infos[i],
-                    GI_TRANSFER_NOTHING, direction);
-                containers_pos += 1;
+
+                backup_args_pos += 1;
+            } else if (direction == GI_DIRECTION_INOUT) {
+                if (transfer == GI_TRANSFER_NOTHING) {
+                    g_assert(backup_args_pos < n_backup_args);
+                    _pygi_argument_release(&backup_args[backup_args_pos], arg_type_infos[i],
+                        GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                    backup_args_pos += 1;
+                }
+
+                _pygi_argument_release(args[i], arg_type_infos[i], transfer,
+                    GI_DIRECTION_OUT);
             } else {
                 _pygi_argument_release(args[i], arg_type_infos[i], transfer, direction);
             }
@@ -992,7 +1202,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         }
 
         g_assert(n_return_values <= 1 || return_values_pos == n_return_values);
-        g_assert(containers_pos == n_containers);
+        g_assert(backup_args_pos == n_backup_args);
     }
 
 return_:
