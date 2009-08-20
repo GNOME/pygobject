@@ -22,7 +22,6 @@
 %%
 modulename gio
 %%
-import gobject.GObject as PyGObject_Type
 %%
 headers
 #define NO_IMPORT_PYGOBJECT
