@@ -186,7 +186,7 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
         return retval;
     }
 
-    switch(type_tag) {
+    switch (type_tag) {
         case GI_TYPE_TAG_VOID:
             if (object != Py_None) {
                 PyErr_Format(PyExc_TypeError, "Must be %s, not %s",
@@ -216,7 +216,7 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
         {
-            PyObject *lower, *upper;
+            PyObject *number, *lower, *upper;
 
             if (!PyNumber_Check(object)) {
                 PyErr_Format(PyExc_TypeError, "Must be int or long, not %s",
@@ -225,15 +225,22 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                 break;
             }
 
+            if (type_tag == GI_TYPE_TAG_FLOAT || type_tag == GI_TYPE_TAG_DOUBLE) {
+                number = PyNumber_Float(object);
+            } else {
+                number = PyNumber_Int(object);
+            }
+
             _pygi_g_type_tag_py_bounds(type_tag, &lower, &upper);
-            if (lower == NULL || upper == NULL) {
+
+            if (lower == NULL || upper == NULL || number == NULL) {
                 retval = -1;
                 goto check_number_release;
             }
 
             /* Check bounds */
-            if (PyObject_Compare(lower, object) > 0
-                || PyObject_Compare(upper, object) < 0) {
+            if (PyObject_Compare(lower, number) > 0
+                || PyObject_Compare(upper, number) < 0) {
                 PyObject *lower_str;
                 PyObject *upper_str;
 
@@ -261,6 +268,7 @@ check_number_error_release:
             }
 
 check_number_release:
+            Py_XDECREF(number);
             Py_XDECREF(lower);
             Py_XDECREF(upper);
             break;
