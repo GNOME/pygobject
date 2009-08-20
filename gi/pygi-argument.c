@@ -552,7 +552,6 @@ _pygi_argument_to_array (GArgument  *arg,
 
     is_zero_terminated = g_type_info_is_zero_terminated(type_info);
     item_type_info = g_type_info_get_param_type(type_info, 0);
-    g_assert(item_type_info != NULL);
 
     item_size = _pygi_g_type_info_size(item_type_info);
 

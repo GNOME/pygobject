@@ -512,10 +512,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         GITypeTag arg_type_tag;
 
         arg_infos[i] = g_callable_info_get_arg((GICallableInfo *)self->info, i);
-        g_assert(arg_infos[i] != NULL);
-
         arg_type_infos[i] = g_arg_info_get_type(arg_infos[i]);
-        g_assert(arg_type_infos[i] != NULL);
 
         direction = g_arg_info_get_direction(arg_infos[i]);
         transfer = g_arg_info_get_ownership_transfer(arg_infos[i]);
@@ -567,8 +564,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     }
 
     return_type_info = g_callable_info_get_return_type((GICallableInfo *)self->info);
-    g_assert(return_type_info != NULL);
-
     return_type_tag = g_type_info_get_tag(return_type_info);
 
     if (return_type_tag == GI_TYPE_TAG_ARRAY) {
@@ -600,14 +595,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             - (error_arg_pos >= 0 ? 1 : 0);
 
         if (n_py_args != n_py_args_expected) {
-            gchar *fullname;
-            fullname = _pygi_g_base_info_get_fullname(self->info);
-            if (fullname != NULL) {
-                PyErr_Format(PyExc_TypeError,
-                    "%s() takes exactly %zd argument(s) (%zd given)",
-                    fullname, n_py_args_expected, n_py_args);
-            }
-            goto return_;
+            PyErr_Format(PyExc_TypeError,
+                "takes exactly %zd argument(s) (%zd given)",
+                n_py_args_expected, n_py_args);
+            goto out;
         }
 
         /* Check argument types. */
@@ -618,7 +609,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             gint retval;
 
             container_info = g_base_info_get_container(self->info);
-            g_assert(container_info != NULL);
 
             g_assert(py_args_pos < n_py_args);
             py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
@@ -629,15 +619,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     (GIRegisteredTypeInfo *)container_info, is_method, py_arg);
 
             if (retval < 0) {
-                goto return_;
+                goto out;
             } else if (!retval) {
-                gchar *fullname;
-                fullname = _pygi_g_base_info_get_fullname(self->info);
-                if (fullname != NULL) {
-                    _PyGI_ERROR_PREFIX("%s() argument %zd: ", fullname, py_args_pos);
-                    g_free(fullname);
-                }
-                goto return_;
+                _PyGI_ERROR_PREFIX("argument %zd: ", py_args_pos);
+                goto out;
             }
 
             py_args_pos += 1;
@@ -668,17 +653,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     may_be_null, py_arg);
 
             if (retval < 0) {
-                goto return_;
+                goto out;
             } else if (!retval) {
-                gchar *fullname;
-                fullname = _pygi_g_base_info_get_fullname(self->info);
-                if (fullname != NULL) {
-                    _PyGI_ERROR_PREFIX("%s() argument %zd: ",
-                        _pygi_g_base_info_get_fullname(self->info),
-                        py_args_pos);
-                    g_free(fullname);
-                }
-                goto return_;
+                _PyGI_ERROR_PREFIX("argument %zd: ", py_args_pos);
+                goto out;
             }
 
             py_args_pos += 1;
@@ -752,11 +730,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             g_assert(py_args_pos < n_py_args);
             py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
 
-            g_assert(n_in_args > 0);
             switch(container_info_type) {
                 case GI_INFO_TYPE_UNION:
-                    /* TODO */
-                    g_assert_not_reached();
+                    PyErr_SetString(PyExc_NotImplementedError, "calling methods on unions is not supported yet.");
+                    goto out;
                     break;
                 case GI_INFO_TYPE_STRUCT:
                 {
@@ -765,18 +742,21 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)container_info);
 
                     if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        g_assert(n_in_args > 0);
                         in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
                     } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                        g_assert(n_in_args > 0);
                         in_args[0].v_pointer = pyg_pointer_get(py_arg, void);
                     } else {
                         PyErr_Format(PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name(type));
-                        goto return_;
+                        goto out;
                     }
 
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
                 case GI_INFO_TYPE_INTERFACE:
+                    g_assert(n_in_args > 0);
                     in_args[0].v_pointer = pygobject_get(py_arg);
                     break;
                 default:
@@ -818,12 +798,11 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 g_assert(py_args_pos < n_py_args);
                 py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
 
-                *args[i] = _pygi_argument_from_object(py_arg, arg_type_infos[i],
-                        transfer);
+                *args[i] = _pygi_argument_from_object(py_arg, arg_type_infos[i], transfer);
 
                 if (PyErr_Occurred()) {
-                    /* TODO: Release ressources allocated for previous arguments. */
-                    return NULL;
+                    /* TODO: release previous input arguments. */
+                    goto out;
                 }
 
                 if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
@@ -917,23 +896,14 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         retval = g_function_info_invoke((GIFunctionInfo *)self->info,
                 in_args, n_in_args, out_args, n_out_args, &return_arg, &error);
         if (!retval) {
-            gchar *fullname;
-
             g_assert(error != NULL);
-
-            fullname = _pygi_g_base_info_get_fullname(self->info);
-            if (fullname != NULL) {
-                /* FIXME: Raise the right error, out of the error domain. */
-                PyErr_Format(PyExc_RuntimeError, "Error invoking %s(): %s",
-                    fullname, error->message);
-                g_free(fullname);
-            }
-
+            /* TODO: raise the right error, out of the error domain. */
+            PyErr_SetString(PyExc_RuntimeError, error->message);
             g_error_free(error);
 
-            /* TODO: Release input arguments. */
+            /* TODO: release input arguments. */
 
-            goto return_;
+            goto out;
         }
     }
 
@@ -943,13 +913,13 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         error = args[error_arg_pos]->v_pointer;
 
         if (*error != NULL) {
-            /* TODO: Raises the right error, out of the error domain, if
-             * applicable. */
+            /* TODO: raise the right error, out of the error domain, if applicable. */
             PyErr_SetString(PyExc_Exception, (*error)->message);
+            g_error_free(*error);
 
-            /* TODO: Release input arguments. */
+            /* TODO: release input arguments. */
 
-            goto return_;
+            goto out;
         }
     }
 
@@ -974,9 +944,9 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
         switch (info_type) {
             case GI_INFO_TYPE_UNION:
-                PyErr_SetString(PyExc_NotImplementedError, "creating unions is not supported yet");
                 /* TODO */
-                goto return_;
+                PyErr_SetString(PyExc_NotImplementedError, "creating unions is not supported yet");
+                goto out;
             case GI_INFO_TYPE_STRUCT:
             {
                 GType type;
@@ -984,55 +954,59 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
                 if (g_type_is_a(type, G_TYPE_BOXED)) {
+                    if (return_arg.v_pointer == NULL) {
+                        PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                        break;
+                    }
                     g_warn_if_fail(transfer == GI_TRANSFER_EVERYTHING);
                     return_value = pyg_boxed_new(type, return_arg.v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
                 } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                    if (return_arg.v_pointer == NULL) {
+                        PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                        break;
+                    }
                     g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
                     return_value = pyg_pointer_new_from_type(py_type, return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
                 } else {
                     PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", py_type->tp_name);
-                    /* TODO */
-                    goto return_;
+                    goto out;
                 }
 
                 break;
             }
             case GI_INFO_TYPE_OBJECT:
+                if (return_arg.v_pointer == NULL) {
+                    PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                    break;
+                }
                 return_value = pygobject_new_from_type(py_type, return_arg.v_pointer, TRUE);
                 break;
-            case GI_INFO_TYPE_INTERFACE:
-                /* Isn't instantiable. */
             default:
-                /* Other types don't have methods. */
+                /* Other types don't have neither methods nor constructors. */
                 g_assert_not_reached();
         }
 
         if (return_value == NULL) {
-            /* TODO */
-            goto return_;
+            /* TODO: release arguments. */
+            goto out;
         }
     } else {
         GITransfer transfer;
 
         if (return_type_tag == GI_TYPE_TAG_ARRAY) {
-            GArray *array;
-
-            array = _pygi_argument_to_array(&return_arg, args, return_type_info);
-            if (array == NULL) {
-                /* TODO */
-                goto return_;
-            }
-
-            return_arg.v_pointer = array;
+            /* Create a #GArray. */
+            return_arg.v_pointer = _pygi_argument_to_array(&return_arg, args, return_type_info);
         }
 
         transfer = g_callable_info_get_caller_owns((GICallableInfo *)self->info);
 
         return_value = _pygi_argument_to_object(&return_arg, return_type_info, transfer);
         if (return_value == NULL) {
-            /* TODO */
-            goto return_;
+            /* TODO: release argument. */
+            goto out;
         }
+
+        _pygi_argument_release(&return_arg, return_type_info, transfer, GI_DIRECTION_OUT);
 
         if (return_type_tag == GI_TYPE_TAG_ARRAY
                 && transfer == GI_TRANSFER_NOTHING) {
@@ -1055,8 +1029,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
             return_values = PyTuple_New(n_return_values);
             if (return_values == NULL) {
-                /* TODO */
-                return NULL;
+                /* TODO: release arguments. */
+                goto out;
             }
 
             if (return_type_tag == GI_TYPE_TAG_VOID) {
@@ -1064,10 +1038,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 Py_DECREF(return_value);
             } else {
                 /* Put the return value first. */
-                int retval;
                 g_assert(return_value != NULL);
-                retval = PyTuple_SetItem(return_values, return_values_pos, return_value);
-                g_assert(retval == 0);
+                PyTuple_SET_ITEM(return_values, return_values_pos, return_value);
                 return_values_pos += 1;
             }
 
@@ -1080,8 +1052,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             GITransfer transfer;
 
             if (args_is_auxiliary[i]) {
-                /* Auxiliary arguments are handled at the same time as their
-                 * relatives. */
+                /* Auxiliary arguments are handled at the same time as their relatives. */
                 continue;
             }
 
@@ -1092,15 +1063,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
             if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
-                GArray *array;
-
-                array = _pygi_argument_to_array(args[i], args, arg_type_infos[i]);
-                if (array == NULL) {
-                    /* TODO */
-                    goto return_;
-                }
-
-                args[i]->v_pointer = array;
+                /* Create a #GArray. */
+                args[i]->v_pointer = _pygi_argument_to_array(args[i], args, arg_type_infos[i]);
             }
 
             if (direction == GI_DIRECTION_INOUT || direction == GI_DIRECTION_OUT) {
@@ -1109,8 +1073,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
                 obj = _pygi_argument_to_object(args[i], arg_type_infos[i], transfer);
                 if (obj == NULL) {
-                    /* TODO */
-                    goto return_;
+                    /* TODO: release arguments. */
+                    goto out;
                 }
 
                 g_assert(return_values_pos < n_return_values);
@@ -1205,7 +1169,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         g_assert(backup_args_pos == n_backup_args);
     }
 
-return_:
+out:
     g_base_info_unref((GIBaseInfo *)return_type_info);
 
     for (i = 0; i < n_args; i++) {
