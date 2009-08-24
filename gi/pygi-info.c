@@ -185,8 +185,8 @@ _pygi_info_new (GIBaseInfo *info)
             type = &PyGIInterfaceInfo_Type;
             break;
         case GI_INFO_TYPE_CONSTANT:
-            PyErr_SetString(PyExc_NotImplementedError, "GIConstantInfo bindings not implemented");
-            return NULL;
+            type = &PyGIConstantInfo_Type;
+            break;
         case GI_INFO_TYPE_ERROR_DOMAIN:
             PyErr_SetString(PyExc_NotImplementedError, "GIErrorDomainInfo bindings not implemented");
             return NULL;
@@ -1581,11 +1581,48 @@ _wrap_g_object_info_get_interfaces (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_object_info_get_constants (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_object_info_get_n_constants((GIObjectInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_object_info_get_constant((GIObjectInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction)_wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction)_wrap_g_object_info_get_methods, METH_NOARGS },
     { "get_fields", (PyCFunction)_wrap_g_object_info_get_fields, METH_NOARGS },
     { "get_interfaces", (PyCFunction)_wrap_g_object_info_get_interfaces, METH_NOARGS },
+    { "get_constants", (PyCFunction)_wrap_g_object_info_get_constants, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1629,11 +1666,76 @@ _wrap_g_interface_info_get_methods (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_interface_info_get_constants (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_interface_info_get_n_constants((GIInterfaceInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_interface_info_get_constant((GIInterfaceInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGIInterfaceInfo_methods[] = {
     { "get_methods", (PyCFunction)_wrap_g_interface_info_get_methods, METH_NOARGS },
+    { "get_constants", (PyCFunction)_wrap_g_interface_info_get_constants, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
+/* GIConstantInfo */
+_PyGI_DEFINE_INFO_TYPE("ConstantInfo", GIConstantInfo, PyGIBaseInfo_Type);
+
+static PyObject *
+_wrap_g_constant_info_get_value (PyGIBaseInfo *self)
+{
+    GITypeInfo *type_info;
+    GArgument value;
+    PyObject *py_value;
+
+    if (g_constant_info_get_value((GIConstantInfo *)self->info, &value) < 0) {
+        PyErr_SetString(PyExc_RuntimeError, "unable to get value");
+        return NULL;
+    }
+
+    type_info = g_constant_info_get_type((GIConstantInfo *)self->info);
+
+    py_value = _pygi_argument_to_object(&value, type_info, GI_TRANSFER_NOTHING);
+
+    g_base_info_unref((GIBaseInfo *)type_info);
+
+    return py_value;
+}
+
+static PyMethodDef _PyGIConstantInfo_methods[] = {
+    { "get_value", (PyCFunction)_wrap_g_constant_info_get_value, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
 
 /* GIValueInfo */
 _PyGI_DEFINE_INFO_TYPE("ValueInfo", GIValueInfo, PyGIBaseInfo_Type);
@@ -1954,6 +2056,7 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE(m, PyGIEnumInfo_Type, "EnumInfo");
     _PyGI_REGISTER_TYPE(m, PyGIObjectInfo_Type, "ObjectInfo");
     _PyGI_REGISTER_TYPE(m, PyGIInterfaceInfo_Type, "InterfaceInfo");
+    _PyGI_REGISTER_TYPE(m, PyGIConstantInfo_Type, "ConstantInfo");
     _PyGI_REGISTER_TYPE(m, PyGIValueInfo_Type, "ValueInfo");
     _PyGI_REGISTER_TYPE(m, PyGIFieldInfo_Type, "FieldInfo");
 

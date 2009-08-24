@@ -79,6 +79,12 @@ class MetaClassHelper(object):
             name = field_info.get_name().replace('-', '_')
             setattr(cls, name, property(field_info.get_value, field_info.set_value))
 
+    def _setup_constants(cls):
+        for constant_info in cls.__info__.get_constants():
+            name = constant_info.get_name()
+            value = constant_info.get_value()
+            setattr(cls, name, value)
+
 
 class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
@@ -90,6 +96,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             return;
 
         cls._setup_methods()
+        cls._setup_constants()
 
         if (isinstance(cls.__info__, ObjectInfo)):
             cls._setup_fields()

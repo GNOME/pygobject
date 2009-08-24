@@ -35,6 +35,7 @@ extern PyTypeObject PyGIStructInfo_Type;
 extern PyTypeObject PyGIEnumInfo_Type;
 extern PyTypeObject PyGIObjectInfo_Type;
 extern PyTypeObject PyGIInterfaceInfo_Type;
+extern PyTypeObject PyGIConstantInfo_Type;
 extern PyTypeObject PyGIValueInfo_Type;
 extern PyTypeObject PyGIFieldInfo_Type;
 extern PyTypeObject PyGIUnresolvedInfo_Type;

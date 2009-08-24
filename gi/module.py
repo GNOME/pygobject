@@ -32,6 +32,7 @@ from ._gi import \
     EnumInfo, \
     ObjectInfo, \
     InterfaceInfo, \
+    ConstantInfo, \
     StructInfo
 from .types import GObjectMeta, StructMeta, Function
 
@@ -137,6 +138,8 @@ class DynamicModule(object):
 
         elif isinstance(info, FunctionInfo):
             value = Function(info)
+        elif isinstance(info, ConstantInfo):
+            value = info.get_value()
         else:
             raise NotImplementedError(info)
 
