@@ -33,6 +33,20 @@ gboolean pygi_g_struct_info_is_simple (GIStructInfo *struct_info);
 
 /* Private */
 
+extern PyTypeObject PyGIBaseInfo_Type;
+extern PyTypeObject PyGICallableInfo_Type;
+extern PyTypeObject PyGIFunctionInfo_Type;
+extern PyTypeObject PyGIRegisteredTypeInfo_Type;
+extern PyTypeObject PyGIStructInfo_Type;
+extern PyTypeObject PyGIEnumInfo_Type;
+extern PyTypeObject PyGIObjectInfo_Type;
+extern PyTypeObject PyGIInterfaceInfo_Type;
+extern PyTypeObject PyGIConstantInfo_Type;
+extern PyTypeObject PyGIValueInfo_Type;
+extern PyTypeObject PyGIFieldInfo_Type;
+extern PyTypeObject PyGIUnresolvedInfo_Type;
+
+
 PyObject* _pygi_info_new (GIBaseInfo *info);
 
 gchar* _pygi_g_base_info_get_fullname (GIBaseInfo *info);

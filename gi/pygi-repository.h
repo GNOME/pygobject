@@ -28,6 +28,10 @@ G_BEGIN_DECLS
 
 /* Private */
 
+extern PyTypeObject PyGIRepository_Type;
+
+extern PyObject *PyGIRepositoryError;
+
 void _pygi_repository_register_types (PyObject *m);
 
 G_END_DECLS
