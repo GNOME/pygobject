@@ -44,7 +44,7 @@
                                            glossary|index|refentry|
                                            bridgehead|sect1"/>
 
-    <book title="{$title}" link="{$link}" author="{$author}" name="{$gtkdoc.bookname}">
+    <book title="{$title}" link="{$link}" author="{$author}" name="{$gtkdoc.bookname}" language="python">
       <xsl:if test="$toc.nodes">
         <chapters>
           <xsl:apply-templates select="$toc.nodes"
