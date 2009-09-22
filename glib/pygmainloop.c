@@ -259,6 +259,7 @@ pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
 
     self->signal_source = pyg_signal_watch_new();
     g_source_attach(self->signal_source, context);
+    g_source_unref(self->signal_source);
 
     return 0;
 }
