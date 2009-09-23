@@ -1,3 +1,9 @@
+2.20.0 23-sep-2009
+        - Allow to use automake 1.11 (Paolo Borelli)
+        - Specify programming language in .devhelp file (Frédéric Péters)
+        - Plug reference leak of GSource in pyg_main_loop_init (Paul)
+        - Updated uninstalled.pc file (Brian Cameron)
+
 2.19.0 10-aug-2009
         - Add macros to help with Python list to/from GList/GSList conversions.
           (John Finlay)
