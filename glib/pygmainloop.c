@@ -24,6 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
+#include <fcntl.h>
 
 #include <Python.h>
 #include <pythread.h>
@@ -34,10 +35,10 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 
+static int pipe_fds[2];
 
 typedef struct {
     GSource source;
-    int fds[2];
     GPollFD fd;
 } PySignalWatchSource;
 
@@ -119,16 +120,15 @@ static gboolean
 pyg_signal_watch_prepare(GSource *source,
 			 int     *timeout)
 {
-#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
-    PySignalWatchSource *real_source = (PySignalWatchSource *)source;
-#endif
-    
     /* Python only invokes signal handlers from the main thread,
      * so if a thread other than the main thread receives the signal
      * from the kernel, PyErr_CheckSignals() from that thread will
      * do nothing.
      */
 
+#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
+    return FALSE;
+#else /* !HAVE_PYSIGNAL_SETWAKEUPFD */
     /* On Windows g_poll() won't be interrupted by a signal
      * (AFAIK), so we need the timeout there too, even if there's
      * only one thread.
@@ -136,37 +136,16 @@ pyg_signal_watch_prepare(GSource *source,
 #ifndef PLATFORM_WIN32
     if (!pyglib_threads_enabled())
 	return FALSE;
-#endif
+#endif /* PLATFORM_WIN32 */
 
-#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
-    if (real_source->fds[0] != 0)
-	return FALSE;
-
-    /* Unfortunately we need to create a new pipe here instead of
-     * reusing the pipe inside the GMainContext.
-     * Ideally an api should be added to GMainContext which allows us
-     * to reuse that pipe which would suit us perfectly fine.     
-     */
-    if (pipe(real_source->fds) < 0)
-	g_error("Cannot create main loop pipe: %s\n",
-		g_strerror(errno));
-
-    real_source->fd.fd = real_source->fds[0];
-    real_source->fd.events = G_IO_IN | G_IO_HUP | G_IO_ERR;
-    g_source_add_poll(source, &real_source->fd);
-
-    PySignal_SetWakeupFd(real_source->fds[1]);
-
-#else /* !HAVE_PYSIGNAL_SETWAKEUPFD */
     /* If we're using 2.5 or an earlier version of python we
      * will default to a timeout every second, be aware,
      * this will cause unnecessary wakeups, see
      * http://bugzilla.gnome.org/show_bug.cgi?id=481569
      */
     *timeout = 1000;
-#endif /* HAVE_PYSIGNAL_SETWAKEUPFD */
-
     return FALSE;
+#endif /* HAVE_PYSIGNAL_SETWAKEUPFD */
 }
 
 static gboolean
@@ -174,6 +153,14 @@ pyg_signal_watch_check(GSource *source)
 {
     PyGILState_STATE state;
     GMainLoop *main_loop;
+
+#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
+    PySignalWatchSource *real_source = (PySignalWatchSource *)source;
+    GPollFD *poll_fd = &real_source->fd;
+    unsigned char dummy;
+    if (poll_fd->revents & G_IO_IN)
+	read(poll_fd->fd, &dummy, 1);
+#endif
 
     state = pyglib_gil_state_ensure();
 
@@ -199,32 +186,50 @@ pyg_signal_watch_dispatch(GSource     *source,
     return TRUE;
 }
 
-static void
-pyg_signal_watch_finalize(GSource *source)
-{
-    PySignalWatchSource *real_source = (PySignalWatchSource*)source;
-
-    if (source != NULL) {
-	if (real_source->fds[0] != 0)
-	    close(real_source->fds[0]);
-	
-	if (real_source->fds[1] != 0)
-	    close(real_source->fds[1]);
-    }
-}
-
 static GSourceFuncs pyg_signal_watch_funcs =
 {
     pyg_signal_watch_prepare,
     pyg_signal_watch_check,
-    pyg_signal_watch_dispatch,
-    pyg_signal_watch_finalize
+    pyg_signal_watch_dispatch
 };
 
 static GSource *
 pyg_signal_watch_new(void)
 {
-    return g_source_new(&pyg_signal_watch_funcs, sizeof(PySignalWatchSource));
+    GSource *source = g_source_new(&pyg_signal_watch_funcs,
+	sizeof(PySignalWatchSource));
+
+#ifdef HAVE_PYSIGNAL_SETWAKEUPFD
+    PySignalWatchSource *real_source = (PySignalWatchSource *)source;
+    int flag;
+
+    /* Unfortunately we need to create a new pipe here instead of
+     * reusing the pipe inside the GMainContext.
+     * Ideally an api should be added to GMainContext which allows us
+     * to reuse that pipe which would suit us perfectly fine.
+     * XXX More efficient than a pipe, we could use an eventfd on Linux
+     * kernels that support it.
+     */
+    gint already_piped = (pipe_fds[0] > 0);
+    if (!already_piped) {
+	if (pipe(pipe_fds) < 0)
+	    g_error("Cannot create main loop pipe: %s\n",
+	            g_strerror(errno));
+
+        /* Make the write end of the fd non blocking */
+        flag = fcntl(pipe_fds[1], F_GETFL, 0);
+        flag |= O_NONBLOCK;
+        fcntl(pipe_fds[1], F_SETFL, flag);
+    }
+
+    real_source->fd.fd = pipe_fds[0];
+    real_source->fd.events = G_IO_IN | G_IO_HUP | G_IO_ERR;
+    g_source_add_poll(source, &real_source->fd);
+
+    if (!already_piped)
+      PySignal_SetWakeupFd(pipe_fds[1]);
+#endif
+    return source;
 }
 
 PYGLIB_DEFINE_TYPE("glib.MainLoop", PyGMainLoop_Type, PyGMainLoop)
