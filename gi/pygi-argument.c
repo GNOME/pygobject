@@ -418,6 +418,7 @@ check_number_release:
                     /* Fallback. */
                 }
                 case GI_INFO_TYPE_BOXED:
+                case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
@@ -1063,6 +1064,7 @@ array_item_error:
 
                     break;
                 }
+                case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     g_assert(is_pointer);
 
@@ -1839,6 +1841,7 @@ _pygi_argument_release (GArgument   *arg,
                         }
                     }
                     break;
+                case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     g_assert(is_pointer);
                     if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
