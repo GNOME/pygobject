@@ -70,12 +70,36 @@ pyg_type_wrapper_dealloc(PyGTypeWrapper *self)
     PyObject_DEL(self);
 }
 
+static GQuark
+_pyg_type_key(GType type) {
+    GQuark key;
+
+    if (g_type_is_a(type, G_TYPE_INTERFACE)) {
+        key = pyginterface_type_key;
+    } else if (g_type_is_a(type, G_TYPE_ENUM)) {
+        key = pygenum_class_key;
+    } else if (g_type_is_a(type, G_TYPE_FLAGS)) {
+        key = pygflags_class_key;
+    } else if (g_type_is_a(type, G_TYPE_POINTER)) {
+        key = pygpointer_class_key;
+    } else if (g_type_is_a(type, G_TYPE_BOXED)) {
+        key = pygboxed_type_key;
+    } else {
+        key = pygobject_class_key;
+    }
+
+    return key;
+}
+
 static PyObject *
 _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
 {
+    GQuark key;
     PyObject *py_type;
-    
-    py_type = g_type_get_qdata(self->type, pygobject_class_key);
+
+    key = _pyg_type_key(self->type);
+
+    py_type = g_type_get_qdata(self->type, key);
     if (!py_type)
       py_type = Py_None;
 
@@ -86,15 +110,18 @@ _wrap_g_type_wrapper__get_pytype(PyGTypeWrapper *self, void *closure)
 static int
 _wrap_g_type_wrapper__set_pytype(PyGTypeWrapper *self, PyObject* value, void *closure)
 {
+    GQuark key;
     PyObject *py_type;
-    
-    py_type = g_type_get_qdata(self->type, pygobject_class_key);
+
+    key = _pyg_type_key(self->type);
+
+    py_type = g_type_get_qdata(self->type, key);
     Py_CLEAR(py_type);
     if (value == Py_None)
-	g_type_set_qdata(self->type, pygobject_class_key, NULL);
+	g_type_set_qdata(self->type, key, NULL);
     else if (PyType_Check(value)) {
 	Py_INCREF(value);
-	g_type_set_qdata(self->type, pygobject_class_key, value);
+	g_type_set_qdata(self->type, key, value);
     } else {
 	PyErr_SetString(PyExc_TypeError, "Value must be None or a type object");
 	return -1;
