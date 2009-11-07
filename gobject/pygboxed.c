@@ -194,7 +194,8 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 
     if (!tp)
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
-    self = PyObject_NEW(PyGBoxed, tp);
+
+    self = (PyGBoxed *)tp->tp_alloc(tp, 0);
 
     if (self == NULL) {
 	pyglib_gil_state_release(state);
