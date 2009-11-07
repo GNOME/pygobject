@@ -200,14 +200,19 @@ if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
-dnl gobject_introspection
-PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version,
-	have_gobject_introspection=true, have_gobject_introspection=false)
-AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
-AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
-AM_CONDITIONAL(BUILD_GOBJECT_INTROSPECTION, $have_gobject_introspection)
-if test -n "$export_dynamic"; then
-  GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
+dnl gi
+AC_ARG_ENABLE(introspection,
+  AC_HELP_STRING([--enable-introspection], [Enable gobject-introspection bindings building]),
+  enable_introspection=$enableval,
+  enable_introspection=no)
+AM_CONDITIONAL(BUILD_GIREPOSITORY, test "$enable_introspection" != no)
+if test "$enable_introspection" != no; then
+  PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
+  AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
+  AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
+  if test -n "$export_dynamic"; then
+    GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
+  fi
 fi
 
 dnl add required cflags ...

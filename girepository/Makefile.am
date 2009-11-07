@@ -1,16 +1,15 @@
 AUTOMAKE_OPTIONS = 1.7
 PLATFORM_VERSION = 2.0
 
+pkgpyexecdir = $(pyexecdir)/gtk-2.0/girepository
+
+if BUILD_GIREPOSITORY
+
 INCLUDES = \
 	-I$(top_srcdir)/gobject \
 	$(PYTHON_INCLUDES) \
 	$(PYGOBJECT_CFLAGS) \
 	$(GOBJECT_INTROSPECTION_CFLAGS)
-
-pkginclude_HEADERS = bank.h
-
-# girepository extension modules
-pkgpyexecdir = $(pyexecdir)/gtk-2.0/girepository
 
 # girepository python scripts
 pygirepositorydir = $(pkgpyexecdir)
@@ -44,7 +43,6 @@ repo_la_SOURCES = \
 	bank.c \
 	bank.h
 
-if BUILD_GOBJECT_INTROSPECTION
 pygirepository_LTLIBRARIES = repo.la
 
 all: $(pygirepository_LTLIBRARIES:.la=.so)
@@ -52,4 +50,5 @@ clean-local:
 	rm -f $(pygirepository_LTLIBRARIES:.la=.so)
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
-endif
+
+endif # BUILD_GIREPOSITORY
