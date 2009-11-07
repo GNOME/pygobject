@@ -28,6 +28,9 @@
 #include "pygobject-private.h"
 #include "pygpointer.h"
 
+#include "pygi-external.h"
+
+
 GQuark pygpointer_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
@@ -155,6 +158,14 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     }
 
     tp = g_type_get_qdata(pointer_type, pygpointer_class_key);
+
+    if (tp == NULL) {
+        tp = (PyTypeObject *)pygi_type_import_by_g_type(pointer_type);
+        if (tp == NULL) {
+            PyErr_Clear();
+        }
+    }
+
     if (!tp)
 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
     self = PyObject_NEW(PyGPointer, tp);

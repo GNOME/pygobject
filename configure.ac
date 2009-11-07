@@ -215,6 +215,14 @@ if test "$enable_introspection" != no; then
   fi
 fi
 
+AC_ARG_ENABLE(pygi,
+  AC_HELP_STRING([--enable-pygi], [Use PyGI to create wrappers for introspection-enabled types]),
+  enable_pygi=$enableval,
+  enable_pygi=no)
+if test "$enable_pygi" != no; then
+    AC_DEFINE(ENABLE_PYGI,1,Use PyGI to create wrappers for introspection-enabled types)
+fi
+
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])

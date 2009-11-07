@@ -28,6 +28,8 @@
 #include "pygobject-private.h"
 #include "pygboxed.h"
 
+#include "pygi-external.h"
+
 GQuark pygboxed_type_key;
 GQuark pygboxed_marshal_key;
 
@@ -182,6 +184,14 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
     }
 
     tp = g_type_get_qdata(boxed_type, pygboxed_type_key);
+
+    if (tp == NULL) {
+        tp = (PyTypeObject *)pygi_type_import_by_g_type(boxed_type);
+        if (tp == NULL) {
+            PyErr_Clear();
+        }
+    }
+
     if (!tp)
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
     self = PyObject_NEW(PyGBoxed, tp);
