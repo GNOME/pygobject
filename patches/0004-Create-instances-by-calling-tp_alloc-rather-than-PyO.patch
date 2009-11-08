@@ -1,4 +1,4 @@
-From 55390cf85f4c532a8e281cfd96d601b0ce62fb03 Mon Sep 17 00:00:00 2001
+From 44378cd12b9ffb9a323bc529403266c27baad1a5 Mon Sep 17 00:00:00 2001
 From: Simon van der Linden <svdlinden@src.gnome.org>
 Date: Sat, 7 Nov 2009 23:42:07 +0100
 Subject: [PATCH 4/4] Create instances by calling tp_alloc rather than PyObject_NEW
