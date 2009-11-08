@@ -1,0 +1,29 @@
+From 55390cf85f4c532a8e281cfd96d601b0ce62fb03 Mon Sep 17 00:00:00 2001
+From: Simon van der Linden <svdlinden@src.gnome.org>
+Date: Sat, 7 Nov 2009 23:42:07 +0100
+Subject: [PATCH 4/4] Create instances by calling tp_alloc rather than PyObject_NEW
+
+PyObject_NEW calls a generic allocator and should only be called by tp_new, knowing
+that the type's free function agrees. In pyg_boxed_new, we may allocate
+PyGBoxed subtypes, so the subtype's allocation function must be called instead.
+---
+ gobject/pygboxed.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/gobject/pygboxed.c b/gobject/pygboxed.c
+index b9cf6b3..220bf27 100644
+--- a/gobject/pygboxed.c
++++ b/gobject/pygboxed.c
+@@ -198,7 +198,8 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
+ 
+     if (!tp)
+ 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
+-    self = PyObject_NEW(PyGBoxed, tp);
++
++    self = (PyGBoxed *)tp->tp_alloc(tp, 0);
+ 
+     if (self == NULL) {
+ 	pyglib_gil_state_release(state);
+-- 
+1.6.3.3
+

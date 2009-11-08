@@ -1,0 +1,138 @@
+From 91da6efa5457a17d94d1cf5c2e4e91da078da214 Mon Sep 17 00:00:00 2001
+From: Simon van der Linden <svdlinden@src.gnome.org>
+Date: Sat, 7 Nov 2009 16:43:35 +0100
+Subject: [PATCH 3/4] Add capabilities to import wrappers from pygi
+
+At instance creation for boxed and pointers, at lookup for objects,
+when the gtype has no wrapper yet, a wrapper may be imported from pygi.
+
+The feature is turned on at configure time by --enable-pygi.
+
+Because we couldn't create a circular build dependency, PyGI's import function and
+API definition had to be copied in this tree.
+---
+ configure.ac         |    8 ++++++++
+ gobject/pygboxed.c   |   14 ++++++++++++++
+ gobject/pygobject.c  |   14 ++++++++++++++
+ gobject/pygpointer.c |   15 +++++++++++++++
+ 4 files changed, 51 insertions(+), 0 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 0bf7610..dc8dea6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -215,6 +215,14 @@ if test "$enable_introspection" != no; then
+   fi
+ fi
+ 
++AC_ARG_ENABLE(pygi,
++  AC_HELP_STRING([--enable-pygi], [Use PyGI to create wrappers for introspection-enabled types]),
++  enable_pygi=$enableval,
++  enable_pygi=no)
++if test "$enable_pygi" != no; then
++    AC_DEFINE(ENABLE_PYGI,1,Use PyGI to create wrappers for introspection-enabled types)
++fi
++
+ dnl add required cflags ...
+ if test "x$GCC" = "xyes"; then
+   JH_ADD_CFLAG([-Wall])
+diff --git a/gobject/pygboxed.c b/gobject/pygboxed.c
+index eb274a2..b9cf6b3 100644
+--- a/gobject/pygboxed.c
++++ b/gobject/pygboxed.c
+@@ -28,6 +28,10 @@
+ #include "pygobject-private.h"
+ #include "pygboxed.h"
+ 
++#if ENABLE_PYGI
++#    include "pygi-external.h"
++#endif
++
+ GQuark pygboxed_type_key;
+ GQuark pygboxed_marshal_key;
+ 
+@@ -182,6 +186,16 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
+     }
+ 
+     tp = g_type_get_qdata(boxed_type, pygboxed_type_key);
++
++#if ENABLE_PYGI
++    if (tp == NULL && _pygi_import() == 0) {
++        tp = (PyTypeObject *)pygi_type_import_by_g_type(boxed_type);
++        if (tp == NULL) {
++            PyErr_Clear();
++        }
++    }
++#endif /* ENABLE_PYGI */
++
+     if (!tp)
+ 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
+     self = PyObject_NEW(PyGBoxed, tp);
+diff --git a/gobject/pygobject.c b/gobject/pygobject.c
+index b4274e1..19c90ff 100644
+--- a/gobject/pygobject.c
++++ b/gobject/pygobject.c
+@@ -29,6 +29,10 @@
+ #include "pyginterface.h"
+ #include "pygparamspec.h"
+ 
++#if ENABLE_PYGI
++#    include "pygi-external.h"
++#endif
++
+ 
+ static void pygobject_dealloc(PyGObject *self);
+ static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);
+@@ -871,6 +875,16 @@ pygobject_lookup_class(GType gtype)
+     py_type = g_type_get_qdata(gtype, pygobject_class_key);
+     if (py_type == NULL) {
+ 	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
++
++#if ENABLE_PYGI
++    if (py_type == NULL && _pygi_import() == 0) {
++        py_type = (PyTypeObject *)pygi_type_import_by_g_type(gtype);
++        if (py_type == NULL) {
++            PyErr_Clear();
++        }
++    }
++#endif /* ENABLE_PYGI */
++
+ 	if (py_type == NULL) {
+ 	    py_type = pygobject_new_with_interfaces(gtype);
+ 	    g_type_set_qdata(gtype, pyginterface_type_key, py_type);
+diff --git a/gobject/pygpointer.c b/gobject/pygpointer.c
+index ee0a8da..cdcb320 100644
+--- a/gobject/pygpointer.c
++++ b/gobject/pygpointer.c
+@@ -28,6 +28,11 @@
+ #include "pygobject-private.h"
+ #include "pygpointer.h"
+ 
++#if ENABLE_PYGI
++#    include "pygi-external.h"
++#endif
++
++
+ GQuark pygpointer_class_key;
+ 
+ PYGLIB_DEFINE_TYPE("gobject.GPointer", PyGPointer_Type, PyGPointer);
+@@ -155,6 +160,16 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
+     }
+ 
+     tp = g_type_get_qdata(pointer_type, pygpointer_class_key);
++
++#if ENABLE_PYGI
++    if (tp == NULL && _pygi_import() == 0) {
++        tp = (PyTypeObject *)pygi_type_import_by_g_type(pointer_type);
++        if (tp == NULL) {
++            PyErr_Clear();
++        }
++    }
++#endif /* ENABLE_PYGI */
++
+     if (!tp)
+ 	tp = (PyTypeObject *)&PyGPointer_Type; /* fallback */
+     self = PyObject_NEW(PyGPointer, tp);
+-- 
+1.6.3.3
+
