@@ -116,10 +116,13 @@ linkend="function-gobject---install-metaclass">gobject._install_metaclass</link>
 module but are not directly associated with a specific class.</para>
 
     <note>
-      <para>Many functions that previously were in this namespace got moved
-        to <link linkend="glib-functions"><literal>glib</literal></link> namespace
-        instead.  They are still available in <literal>gobject</literal> for backward
-        compatibility, but not documented here.</para>
+      <para>
+        Many functions that previously were in this namespace got moved to <link
+        linkend="glib-functions"><literal>glib</literal></link> namespace instead.  They
+        are still available in <literal>gobject</literal> for backward compatibility, but
+        not documented here.  If you miss documentation for some function, be sure to
+        check <link linkend="glib-functions"><literal>glib</literal></link> first.
+      </para>
     </note>
 
   </refsect1>
@@ -752,31 +755,6 @@ abstract class or a type that is not a descendant of <link
 linkend="class-gobject"><classname>gobject.GObject</classname></link>. A set
 of property-value pairs may be specified to set the value of the object's
 properties.</para>
-
-    </refsect2>
-
-    <refsect2 id="function-gobject--threads-init">
-      <title>gobject.threads_init</title>
-      
-      <programlisting><methodsynopsis language="python">
-        <methodname>gobject.threads_init</methodname>
-        <methodparam><parameter></parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist role="params">
-        <varlistentry>
-          <term><emphasis>Returns</emphasis>&nbsp;:</term>
-          <listitem><simpara></simpara></listitem>
-        </varlistentry>
-      </variablelist>
-      <note>
-        <para>This function is available in PyGTK 2.4 and above.</para>
-      </note>
-
-      <para>The <function>threads_init</function>() function initializes the
-      the use of Python threading in the gobject module. This function is
-      different than the <link
-      linkend="function-gdk--threads-init"><function>gtk.gdk.threads_init</function>()</link>
-      function as that function also initializes the gdk threads.</para>
 
     </refsect2>
 

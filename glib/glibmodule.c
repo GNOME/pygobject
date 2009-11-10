@@ -90,6 +90,16 @@ get_handler_priority(gint *priority, PyObject *kwargs)
 }
 
 static PyObject *
+pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    if (!pyglib_enable_threads())
+        return NULL;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
 pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
@@ -586,6 +596,12 @@ pyglib_set_prgname(PyObject *self, PyObject *arg)
 }
 
 static PyMethodDef _glib_functions[] = {
+    { "threads_init",
+      (PyCFunction) pyglib_threads_init, METH_NOARGS,
+      "threads_init()\n"
+      "Initialize GLib for use from multiple threads. If you also use GTK+\n"
+      "itself (i.e. GUI, not just PyGObject), use gtk.gdk.threads_init()\n"
+      "instead." },
     { "idle_add",
       (PyCFunction)pyglib_idle_add, METH_VARARGS|METH_KEYWORDS,
       "idle_add(callable, user_data=None, priority=None) -> source id\n"
