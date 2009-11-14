@@ -18,9 +18,12 @@ AM_PROG_LIBTOOL
 # Python
 AM_PATH_PYTHON(2.5.2)
 
-AC_PATH_TOOL(PYTHON_CONFIG, "/python${PYTHON_VERSION}-config")
+AC_PATH_TOOL(PYTHON_CONFIG, "python${PYTHON_VERSION}-config")
 if test -z "$PYTHON_CONFIG"; then
-	AC_MSG_ERROR(Python development tools not found)
+	AC_PATH_TOOL(PYTHON_CONFIG, "python-config-${PYTHON_VERSION}")
+	if test -z "$PYTHON_CONFIG"; then
+		AC_MSG_ERROR(Python development tools not found)
+	fi
 fi
 PYTHON_INCLUDES=`$PYTHON_CONFIG --includes`
 AC_SUBST(PYTHON_INCLUDES)
