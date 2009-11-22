@@ -366,5 +366,11 @@ class TestProperty(unittest.TestCase):
         else:
             raise AssertionError
 
+    # Bug 587637.
+    def test_float_min(self):
+        gobject.property(type=float, minimum=-1)
+        gobject.property(type=gobject.TYPE_FLOAT, minimum=-1)
+        gobject.property(type=gobject.TYPE_DOUBLE, minimum=-1)
+
 if __name__ == '__main__':
     unittest.main()

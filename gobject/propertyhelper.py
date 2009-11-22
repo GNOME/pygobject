@@ -224,10 +224,11 @@ class property(object):
         ptype = self.type
         if ptype in [TYPE_UINT, TYPE_ULONG, TYPE_UINT64]:
             return 0
+        # Remember that G_MINFLOAT and G_MINDOUBLE are something different.
         elif ptype == TYPE_FLOAT:
-            return G_MINFLOAT
+            return -G_MAXFLOAT
         elif ptype == TYPE_DOUBLE:
-            return G_MINDOUBLE
+            return -G_MAXDOUBLE
         elif ptype == TYPE_INT:
             return G_MININT
         elif ptype == TYPE_LONG:
