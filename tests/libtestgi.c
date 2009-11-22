@@ -2726,6 +2726,11 @@ test_gi_gclosure_in (GClosure *closure)
     g_value_unset(&return_value);
 }
 
+gpointer
+test_gi_pointer_in_return (gpointer pointer)
+{
+    return pointer;
+}
 
 GType
 test_gi_enum_get_type (void)

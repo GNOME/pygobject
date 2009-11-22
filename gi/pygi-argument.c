@@ -197,11 +197,7 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            if (object != Py_None) {
-                PyErr_Format(PyExc_TypeError, "Must be %s, not %s",
-                        Py_None->ob_type->tp_name, object->ob_type->tp_name);
-                retval = 0;
-            }
+            /* No check; VOID means undefined type */
             break;
         case GI_TYPE_TAG_BOOLEAN:
             /* No check; every Python object has a truth value. */
@@ -624,7 +620,8 @@ _pygi_argument_from_object (PyObject   *object,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            arg.v_pointer = NULL;
+            g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+            arg.v_pointer = object;
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
@@ -1274,8 +1271,13 @@ _pygi_argument_to_object (GArgument  *arg,
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            Py_INCREF(Py_None);
-            object = Py_None;
+            if (is_pointer) {
+                /* Raw Python objects are passed to void* args */
+                g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
+                object = arg->v_pointer;
+            } else
+                object = Py_None;
+            Py_INCREF(object);
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
@@ -1711,6 +1713,8 @@ _pygi_argument_release (GArgument   *arg,
 
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
+            /* Don't do anything, it's transparent to the C side */
+            break;
         case GI_TYPE_TAG_BOOLEAN:
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:

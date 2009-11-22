@@ -1018,6 +1018,11 @@ class TestGClosure(unittest.TestCase):
         self.assertRaises(TypeError, TestGI.gclosure_in, None)
 
 
+class TestPointer(unittest.TestCase):
+    def test_pointer_in_return(self):
+        self.assertEquals(TestGI.pointer_in_return(42), 42)
+
+
 class TestGEnum(unittest.TestCase):
 
     def test_enum(self):

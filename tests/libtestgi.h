@@ -447,6 +447,11 @@ void test_gi_gvalue_inout (GValue **value);
 void test_gi_gclosure_in (GClosure *closure);
 
 
+/* Pointer */
+
+gpointer test_gi_pointer_in_return (gpointer pointer);
+
+
 /* GEnum */
 
 typedef enum
