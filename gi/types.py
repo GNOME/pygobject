@@ -29,7 +29,8 @@ from ._gi import \
     InterfaceInfo, \
     ObjectInfo, \
     StructInfo, \
-    set_object_has_new_constructor
+    set_object_has_new_constructor, \
+    register_interface_info
 
 
 class Boxed(gobject.GBoxed):
@@ -125,6 +126,8 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             cls._setup_fields()
             cls._setup_constructors()
             set_object_has_new_constructor(cls.__info__.get_g_type())
+        elif (isinstance(cls.__info__, InterfaceInfo)):
+            register_interface_info(cls.__info__.get_g_type())
 
 
 class StructMeta(type, MetaClassHelper):

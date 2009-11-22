@@ -97,12 +97,45 @@ _wrap_pyg_set_object_has_new_constructor (PyObject *self,
     Py_RETURN_NONE;
 }
 
+static void
+initialize_interface (GTypeInterface *iface, PyTypeObject *pytype)
+{
+    // pygobject prints a warning if interface_init is NULL
+}
+
+static PyObject *
+_wrap_pyg_register_interface_info(PyObject *self, PyObject *args)
+{
+    PyObject *py_g_type;
+    GType g_type;
+    GInterfaceInfo *info;
+
+    if (!PyArg_ParseTuple(args, "O!:register_interface_info",
+                          &PyGTypeWrapper_Type, &py_g_type)) {
+        return NULL;
+    }
+
+    g_type = pyg_type_from_object(py_g_type);
+    if (!g_type_is_a(g_type, G_TYPE_INTERFACE)) {
+        PyErr_SetString(PyExc_TypeError, "must be an interface");
+        return NULL;
+    }
+
+    info = g_new0(GInterfaceInfo, 1);
+    info->interface_init = (GInterfaceInitFunc) initialize_interface;
+
+    pyg_register_interface_info(g_type, info);
+
+    Py_RETURN_NONE;
+}
+
 
 static PyMethodDef _pygi_functions[] = {
     { "enum_add", (PyCFunction)_wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction)_wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
 
     { "set_object_has_new_constructor", (PyCFunction)_wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
+    { "register_interface_info", (PyCFunction)_wrap_pyg_register_interface_info, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
