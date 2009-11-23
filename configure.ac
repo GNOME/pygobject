@@ -11,7 +11,6 @@ dnl versions of packages we require ...
 m4_define(glib_required_version, 2.14.0)
 m4_define(gio_required_version, 2.16.0)
 m4_define(giounix_required_version, 2.16.0)
-m4_define(gobject_introspection_required_version, 0.6.3)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -200,21 +199,6 @@ if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
-dnl gi
-AC_ARG_ENABLE(introspection,
-  AC_HELP_STRING([--enable-introspection], [Enable gobject-introspection bindings building]),
-  enable_introspection=$enableval,
-  enable_introspection=no)
-AM_CONDITIONAL(BUILD_GIREPOSITORY, test "$enable_introspection" != no)
-if test "$enable_introspection" != no; then
-  PKG_CHECK_MODULES(GOBJECT_INTROSPECTION, gobject-introspection-1.0 >= gobject_introspection_required_version)
-  AC_SUBST(GOBJECT_INTROSPECTION_CFLAGS)
-  AC_SUBST(GOBJECT_INTROSPECTION_LIBS)
-  if test -n "$export_dynamic"; then
-    GOBJECT_INTROSPECTION_LIBS=`echo $GOBJECT_INTROSPECTION_LIBS | sed -e "s/$export_dynamic//"`
-  fi
-fi
-
 AC_ARG_ENABLE(pygi,
   AC_HELP_STRING([--enable-pygi], [Use PyGI to create wrappers for introspection-enabled types]),
   enable_pygi=$enableval,
@@ -250,7 +234,6 @@ AC_CONFIG_FILES(
   glib/Makefile
   gobject/Makefile
   gio/Makefile
-  girepository/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)
