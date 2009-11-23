@@ -39,6 +39,17 @@ class DynamicImporter(object):
     def __init__(self, path):
         self.path = path
 
+    def _create_module(self, module_type, name, namespace):
+        module = module_type.__new__(module_type)
+        module.__dict__ = {
+            '__file__': '<%s>' % name,
+            '__name__': name,
+            '__namespace__': namespace,
+            '__loader__': self
+        }
+        module.__init__()
+        return module
+
     def find_module(self, fullname, path=None):
         if not fullname.startswith(self.path):
             return
@@ -64,26 +75,23 @@ class DynamicImporter(object):
             sys.modules[fullname] = gobject
             return gobject
 
+        module_type = DynamicModule
+        module = self._create_module(module_type, fullname, namespace)
+        sys.modules[fullname] = module
+
         # Look for an overrides module
         overrides_name = 'gi.overrides.%s' % namespace
+        overrides_type_name = '%sModule' % namespace
         try:
-            overrides_type_name = '%sModule' % namespace
+
             overrides_module = __import__(overrides_name, fromlist=[overrides_type_name])
             module_type = getattr(overrides_module, overrides_type_name)
         except ImportError, e:
-            module_type = DynamicModule
+            pass
 
-        module = module_type.__new__(module_type)
-        module.__dict__ = {
-            '__file__': '<%s>' % fullname,
-            '__name__': fullname,
-            '__namespace__': namespace,
-            '__loader__': self
-        }
-
-        sys.modules[fullname] = module
-
-        module.__init__()
+        if module_type is not DynamicModule:
+            module = self._create_module(module_type, fullname, namespace)
+            sys.modules[fullname] = module
 
         return module
 
