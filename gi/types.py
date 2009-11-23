@@ -99,16 +99,16 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
         # Avoid touching anything else than the base class.
         if cls.__info__.get_g_type().pytype is not None:
-            return;
+            return
 
         cls._setup_methods()
         cls._setup_constants()
 
-        if (isinstance(cls.__info__, ObjectInfo)):
+        if isinstance(cls.__info__, ObjectInfo):
             cls._setup_fields()
             cls._setup_constructors()
             set_object_has_new_constructor(cls.__info__.get_g_type())
-        elif (isinstance(cls.__info__, InterfaceInfo)):
+        elif isinstance(cls.__info__, InterfaceInfo):
             register_interface_info(cls.__info__.get_g_type())
 
 
@@ -141,7 +141,7 @@ class StructMeta(type, MetaClassHelper):
         # Avoid touching anything else than the base class.
         g_type = cls.__info__.get_g_type()
         if g_type != gobject.TYPE_INVALID and g_type.pytype is not None:
-            return;
+            return
 
         cls._setup_fields()
         cls._setup_methods()
