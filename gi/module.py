@@ -92,10 +92,10 @@ class DynamicModule(object):
             g_type = info.get_g_type()
             value = g_type.pytype
 
-            if value is None: 
+            if value is None:
                 if g_type.is_a(gobject.TYPE_ENUM):
                     value = enum_add(g_type)
-                else: 
+                else:
                     value = flags_add(g_type)
 
                 value.__info__ = info
