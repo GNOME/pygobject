@@ -31,3 +31,10 @@ Makefile.in
 *.typelib
 
 .*.swp
+
+*~
+*.orig
+*.rej
+
+tests/tmp-introspect*
+
