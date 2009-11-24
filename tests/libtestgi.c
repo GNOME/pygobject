@@ -2822,6 +2822,12 @@ test_gi_flags_in (TestGIFlags flags_)
     g_assert(flags_ == TESTGI_FLAGS_VALUE2);
 }
 
+void
+test_gi_flags_in_zero (TestGIFlags flags)
+{
+    g_assert(flags == 0);
+}
+
 /**
  * test_gi_flags_in_ptr:
  * @flags_: (in) (transfer none):

@@ -384,8 +384,25 @@ check_number_release:
                     PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
                     break;
                 case GI_INFO_TYPE_ENUM:
+                    retval = _pygi_g_registered_type_info_check_object(
+                            (GIRegisteredTypeInfo *)info, TRUE, object);
+                    break;
                 case GI_INFO_TYPE_FLAGS:
-                    retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
+                    if (PyNumber_Check(object)) {
+                        /* Accept 0 as a valid flag value */
+                        PyObject *number = PyNumber_Int(object);
+                        if (number == NULL)
+                            PyErr_Clear();
+                        else {
+                            long value = PyInt_AsLong(number);
+                            if (value == 0)
+                                break;
+                            else if (value == -1)
+                                PyErr_Clear();
+                        }
+                    }
+                    retval = _pygi_g_registered_type_info_check_object(
+                            (GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 case GI_INFO_TYPE_STRUCT:
                 {

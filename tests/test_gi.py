@@ -1065,6 +1065,7 @@ class TestGFlags(unittest.TestCase):
 
     def test_flags_in(self):
         TestGI.flags_in(TestGI.Flags.VALUE2)
+        TestGI.flags_in_zero(Number(0))
 
         self.assertRaises(TypeError, TestGI.flags_in, 1 << 1)
         self.assertRaises(TypeError, TestGI.flags_in, 'TestGI.Flags.VALUE2')

@@ -489,6 +489,7 @@ GType test_gi_flags_get_type (void) G_GNUC_CONST;
 TestGIFlags test_gi_flags_return (void);
 
 void test_gi_flags_in (TestGIFlags flags_);
+void test_gi_flags_in_zero (TestGIFlags flags);
 void test_gi_flags_in_ptr (TestGIFlags *flags_);
 
 void test_gi_flags_out (TestGIFlags *flags_);
