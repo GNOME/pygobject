@@ -66,7 +66,7 @@ class DynamicImporter(object):
 
     def load_module(self, fullname):
         if fullname in sys.modules:
-            return sys.modules[name]
+            return sys.modules[fullname]
 
         path, namespace = fullname.rsplit('.', 1)
 
