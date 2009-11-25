@@ -42,7 +42,8 @@ gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
 GArray* _pygi_argument_to_array (GArgument  *arg,
                                  GArgument  *args[],
-                                 GITypeInfo *type_info);
+                                 GITypeInfo *type_info,
+                                 gboolean    is_method);
 
 GArgument _pygi_argument_from_object (PyObject   *object,
                                       GITypeInfo *type_info,

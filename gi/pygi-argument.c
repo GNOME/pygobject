@@ -597,7 +597,8 @@ check_number_release:
 GArray *
 _pygi_argument_to_array (GArgument  *arg,
                          GArgument  *args[],
-                         GITypeInfo *type_info)
+                         GITypeInfo *type_info,
+                         gboolean is_method)
 {
     GITypeInfo *item_type_info;
     gboolean is_zero_terminated;
@@ -622,10 +623,18 @@ _pygi_argument_to_array (GArgument  *arg,
             length_arg_pos = g_type_info_get_array_length(type_info);
             g_assert(length_arg_pos >= 0);
 
+            if (is_method) {
+                length_arg_pos--;
+            }
+
+            g_assert (length_arg_pos >= 0);
+
             /* FIXME: Take into account the type of the argument. */
             length = args[length_arg_pos]->v_int;
         }
     }
+
+    g_assert (length >= 0);
 
     g_array = g_array_new(is_zero_terminated, FALSE, item_size);
 

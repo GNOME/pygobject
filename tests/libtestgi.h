@@ -596,6 +596,10 @@ void test_gi_object_method (TestGIObject *object);
 void test_gi_object_overridden_method (TestGIObject *object);
 TestGIObject *test_gi_object_new (gint int_);
 
+void test_gi_object_method_array_in (TestGIObject *object, const gint *ints, gint length);
+void test_gi_object_method_array_out (TestGIObject *object, gint **ints, gint *length);
+void test_gi_object_method_array_inout (TestGIObject *object, gint **ints, gint *length);
+const gint *test_gi_object_method_array_return (TestGIObject *object, gint *length);
 
 TestGIObject *test_gi__object_none_return (void);
 TestGIObject *test_gi__object_full_return (void);

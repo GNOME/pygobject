@@ -584,6 +584,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 gint length_arg_pos;
 
                 length_arg_pos = g_type_info_get_array_length(arg_type_infos[i]);
+
+                if (is_method)
+                    length_arg_pos--; // length_arg_pos refers to C args
+
                 if (length_arg_pos < 0) {
                     break;
                 }
@@ -615,6 +619,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     if (return_type_tag == GI_TYPE_TAG_ARRAY) {
         gint length_arg_pos;
         length_arg_pos = g_type_info_get_array_length(return_type_info);
+
+        if (is_method)
+            length_arg_pos--; // length_arg_pos refers to C args
+
         if (length_arg_pos >= 0) {
             g_assert(length_arg_pos < n_args);
             args_is_auxiliary[length_arg_pos] = TRUE;
@@ -894,6 +902,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     array = args[i]->v_pointer;
 
                     length_arg_pos = g_type_info_get_array_length(arg_type_infos[i]);
+                    if (is_method)
+                        length_arg_pos--; // length_arg_pos refers to C args
                     if (length_arg_pos >= 0) {
                         /* Set the auxiliary argument holding the length. */
                         args[length_arg_pos]->v_size = array->len;
@@ -1031,7 +1041,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
         if (return_type_tag == GI_TYPE_TAG_ARRAY) {
             /* Create a #GArray. */
-            return_arg.v_pointer = _pygi_argument_to_array(&return_arg, args, return_type_info);
+            return_arg.v_pointer = _pygi_argument_to_array(&return_arg, args, return_type_info, is_method);
         }
 
         transfer = g_callable_info_get_caller_owns((GICallableInfo *)self->info);
@@ -1100,7 +1110,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
                 /* Create a #GArray. */
-                args[i]->v_pointer = _pygi_argument_to_array(args[i], args, arg_type_infos[i]);
+                args[i]->v_pointer = _pygi_argument_to_array(args[i], args, arg_type_infos[i], is_method);
             }
 
             if (direction == GI_DIRECTION_INOUT || direction == GI_DIRECTION_OUT) {

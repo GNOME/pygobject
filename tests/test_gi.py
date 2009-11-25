@@ -822,6 +822,21 @@ class TestArray(unittest.TestCase):
     def test_array_inout(self):
         self.assertEquals((-2, -1, 0, 1, 2), TestGI.array_inout(Sequence((-1, 0, 1, 2))))
 
+    def test_method_array_in(self):
+        object_ = TestGI.Object()
+        object_.method_array_in(Sequence((-1, 0, 1, 2)))
+
+    def test_method_array_out(self):
+        object_ = TestGI.Object()
+        self.assertEquals((-1, 0, 1, 2), object_.method_array_out())
+
+    def test_method_array_inout(self):
+        object_ = TestGI.Object()
+        self.assertEquals((-2, -1, 0, 1, 2), object_.method_array_inout(Sequence((-1, 0, 1, 2))))
+
+    def test_method_array_return(self):
+        object_ = TestGI.Object()
+        self.assertEquals((-1, 0, 1, 2), object_.method_array_return())
 
     def test_array_fixed_out_struct(self):
         struct1, struct2 = TestGI.array_fixed_out_struct()

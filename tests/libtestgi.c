@@ -3245,6 +3245,66 @@ test_gi_object_new (gint int_)
     return g_object_new (TESTGI_TYPE_OBJECT, "int", int_, NULL);
 }
 
+/**
+ * test_gi_object_method_array_in:
+ * @ints: (array length=length):
+ */
+void
+test_gi_object_method_array_in (TestGIObject *object, const gint *ints, gint length)
+{
+    g_assert(length == 4);
+    g_assert(ints[0] == -1);
+    g_assert(ints[1] == 0);
+    g_assert(ints[2] == 1);
+    g_assert(ints[3] == 2);
+}
+
+/**
+ * test_gi_object_method_array_out:
+ * @ints: (out) (array length=length) (transfer none):
+ */
+void
+test_gi_object_method_array_out (TestGIObject *object, gint **ints, gint *length)
+{
+    static gint values[] = {-1, 0, 1, 2};
+
+    *length = 4;
+    *ints = values;
+}
+
+/**
+ * test_gi_object_method_array_inout:
+ * @ints: (inout) (array length=length) (transfer none):
+ * @length: (inout):
+ */
+void
+test_gi_object_method_array_inout (TestGIObject *object, gint **ints, gint *length)
+{
+    static gint values[] = {-2, -1, 0, 1, 2};
+
+    g_assert(*length == 4);
+    g_assert((*ints)[0] == -1);
+    g_assert((*ints)[1] == 0);
+    g_assert((*ints)[2] == 1);
+    g_assert((*ints)[3] == 2);
+
+    *length = 5;
+    *ints = values;
+}
+
+/**
+ * test_gi_object_method_array_return:
+ * Returns: (array length=length):
+ */
+const gint *
+test_gi_object_method_array_return (TestGIObject *object, gint *length)
+{
+    static gint ints[] = {-1, 0, 1, 2};
+
+    *length = 4;
+    return ints;
+}
+
 
 /**
  * test_gi__object_none_return:
