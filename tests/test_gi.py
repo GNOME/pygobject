@@ -1422,6 +1422,25 @@ class TestGObject(unittest.TestCase):
 #        self.assertEquals(object_.__grefcount__, 1)
 
 
+class TestPythonGObject(unittest.TestCase):
+
+    class Object(TestGI.Object):
+        __gtype_name__ = "Object"
+
+        def method(self):
+            # Don't call super, which asserts that self.int == 42.
+            pass
+
+    def test_object(self):
+        self.assertTrue(issubclass(self.Object, TestGI.Object))
+
+        object_ = self.Object(int = 42)
+        self.assertTrue(isinstance(object_, self.Object))
+
+    def test_object_method(self):
+        self.Object(int = 0).method()
+
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):

@@ -116,7 +116,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
 
         # Avoid touching anything else than the base class.
-        if cls.__name__ != cls.__info__.get_name():
+        if cls.__info__.get_g_type().pytype is not None:
             return;
 
         cls._setup_methods()
@@ -157,7 +157,8 @@ class StructMeta(type, MetaClassHelper):
         super(StructMeta, cls).__init__(name, bases, dict_)
 
         # Avoid touching anything else than the base class.
-        if cls.__name__ != cls.__info__.get_name():
+        g_type = cls.__info__.get_g_type()
+        if g_type != gobject.TYPE_INVALID and g_type.pytype is not None:
             return;
 
         cls._setup_fields()
