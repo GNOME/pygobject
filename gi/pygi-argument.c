@@ -189,11 +189,6 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
     gint retval = 1;
 
     type_tag = g_type_info_get_tag(type_info);
-    is_pointer = g_type_info_is_pointer(type_info);
-
-    if (is_pointer && may_be_null && object == Py_None) {
-        return retval;
-    }
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -222,6 +217,10 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
         case GI_TYPE_TAG_DOUBLE:
         {
             PyObject *number, *lower, *upper;
+
+            if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                break;
+            }
 
             if (!PyNumber_Check(object)) {
                 PyErr_Format(PyExc_TypeError, "Must be number, not %s",
@@ -279,16 +278,22 @@ check_number_release:
             break;
         }
         case GI_TYPE_TAG_TIME_T:
+            if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                break;
+            }
             if (!PyDateTime_Check(object)) {
                 PyErr_Format(PyExc_TypeError, "Must be datetime.datetime, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
-                break;
             }
             break;
         case GI_TYPE_TAG_GTYPE:
         {
             gint is_instance;
+
+            if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                break;
+            }
 
             is_instance = PyObject_IsInstance(object, (PyObject *)&PyGTypeWrapper_Type);
             if (is_instance < 0) {
@@ -318,7 +323,7 @@ check_number_release:
             GITypeInfo *item_type_info;
             Py_ssize_t i;
 
-            if (!PySequence_Check(object)) {
+            if (!PySequence_Check(object) && (!may_be_null || object != Py_None)) {
                 PyErr_Format(PyExc_TypeError, "Must be sequence, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
@@ -384,10 +389,16 @@ check_number_release:
                     PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
                     break;
                 case GI_INFO_TYPE_ENUM:
+                    if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                        break;
+                    }
                     retval = _pygi_g_registered_type_info_check_object(
                             (GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 case GI_INFO_TYPE_FLAGS:
+                    if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                        break;
+                    }
                     if (PyNumber_Check(object)) {
                         /* Accept 0 as a valid flag value */
                         PyObject *number = PyNumber_Int(object);
@@ -407,6 +418,10 @@ check_number_release:
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
+
+                    if (g_type_info_is_pointer(type_info) && may_be_null && object == Py_None) {
+                        break;
+                    }
 
                     /* Handle special cases. */
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
@@ -433,6 +448,9 @@ check_number_release:
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
+                    if (may_be_null && object == Py_None) {
+                        break;
+                    }
                     retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 case GI_INFO_TYPE_UNION:
@@ -453,7 +471,7 @@ check_number_release:
             GITypeInfo *item_type_info;
             Py_ssize_t i;
 
-            if (!PySequence_Check(object)) {
+            if (!PySequence_Check(object) && (!may_be_null || object != Py_None)) {
                 PyErr_Format(PyExc_TypeError, "Must be sequence, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
@@ -503,7 +521,7 @@ check_number_release:
             GITypeInfo *value_type_info;
             Py_ssize_t i;
 
-            if (!PyMapping_Check(object)) {
+            if (!PyMapping_Check(object) && (!may_be_null || object != Py_None)) {
                 PyErr_Format(PyExc_TypeError, "Must be mapping, not %s",
                         object->ob_type->tp_name);
                 retval = 0;
@@ -624,16 +642,8 @@ _pygi_argument_from_object (PyObject   *object,
 {
     GArgument arg;
     GITypeTag type_tag;
-    gboolean is_pointer;
 
     type_tag = g_type_info_get_tag(type_info);
-    is_pointer = g_type_info_is_pointer(type_info);
-
-    if (object == Py_None && is_pointer
-            && type_tag != GI_TYPE_TAG_BOOLEAN) { /* We want None == FALSE. */
-        arg.v_pointer = NULL;
-        return arg;
-    }
 
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -646,7 +656,7 @@ _pygi_argument_from_object (PyObject   *object,
 
             value = PyObject_IsTrue(object);
 
-            if (is_pointer) {
+            if (g_type_info_is_pointer(type_info)) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
                 arg.v_pointer = g_try_new(gboolean, 1);
                 if (arg.v_pointer == NULL) {
@@ -673,6 +683,14 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *int_;
             glong value;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             int_ = PyNumber_Int(object);
             if (int_ == NULL) {
@@ -704,6 +722,14 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *number;
             guint64 value;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             number = PyNumber_Int(object);
             if (number == NULL) {
@@ -736,6 +762,14 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *number;
             gint64 value;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             number = PyNumber_Int(object);
             if (number == NULL) {
@@ -768,6 +802,14 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *float_;
             gfloat value;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             float_ = PyNumber_Float(object);
             if (float_ == NULL) {
@@ -795,6 +837,14 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *float_;
             gdouble value;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             float_ = PyNumber_Float(object);
             if (float_ == NULL) {
@@ -823,6 +873,14 @@ _pygi_argument_from_object (PyObject   *object,
             PyDateTime_DateTime *py_datetime;
             struct tm datetime;
             time_t time_;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             py_datetime = (PyDateTime_DateTime *)object;
 
@@ -863,6 +921,14 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_GTYPE:
         {
             GType type;
+            gboolean is_pointer;
+
+            is_pointer = g_type_info_is_pointer(type_info);
+
+            if (is_pointer && object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
 
             type = pyg_type_from_object(object);
 
@@ -884,8 +950,6 @@ _pygi_argument_from_object (PyObject   *object,
         {
             const gchar *string;
 
-            g_assert(is_pointer);
-
             string = PyString_AsString(object);
 
             /* Don't need to check for errors, since g_strdup is NULL-proof. */
@@ -896,8 +960,6 @@ _pygi_argument_from_object (PyObject   *object,
         {
             GError *error = NULL;
             const gchar *string;
-
-            g_assert(is_pointer);
 
             string = PyString_AsString(object);
             if (string == NULL) {
@@ -994,6 +1056,11 @@ array_item_error:
                 {
                     GType type;
 
+                    if (object == Py_None) {
+                        arg.v_pointer = NULL;
+                        break;
+                    }
+
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
                     /* Handle special cases first. */
@@ -1008,7 +1075,6 @@ array_item_error:
                             break;
                         }
 
-                        g_assert(is_pointer);
                         g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
 
                         value = g_slice_new0(GValue);
@@ -1025,7 +1091,6 @@ array_item_error:
                     } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
                         GClosure *closure;
 
-                        g_assert(is_pointer);
                         g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
 
                         closure = pyg_closure_new(object, NULL, NULL);
@@ -1036,13 +1101,12 @@ array_item_error:
 
                         arg.v_pointer = closure;
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
-                        g_assert(is_pointer);
                         arg.v_pointer = pyg_boxed_get(object, void);
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy(type, arg.v_pointer);
                         }
                     } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
-                        g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
+                        g_warn_if_fail(!g_type_info_is_pointer(type_info) || transfer == GI_TRANSFER_NOTHING);
                         arg.v_pointer = pyg_pointer_get(object, void);
                     } else {
                         PyErr_Format(PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name(type));
@@ -1055,6 +1119,14 @@ array_item_error:
                 {
                     PyObject *int_;
                     glong value;
+                    gboolean is_pointer;
+
+                    is_pointer = g_type_info_is_pointer(type_info);
+
+                    if (is_pointer && object == Py_None) {
+                        arg.v_pointer = NULL;
+                        break;
+                    }
 
                     int_ = PyNumber_Int(object);
                     if (int_ == NULL) {
@@ -1080,8 +1152,6 @@ array_item_error:
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    g_assert(is_pointer);
-
                     arg.v_pointer = pygobject_get(object);
                     if (transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_ref(arg.v_pointer);
@@ -1106,8 +1176,6 @@ array_item_error:
             GSList *list = NULL;
             GITransfer item_transfer;
             Py_ssize_t i;
-
-            g_assert(is_pointer);
 
             length = PySequence_Length(object);
             if (length < 0) {
@@ -1174,7 +1242,6 @@ list_item_error:
             GITransfer item_transfer;
             Py_ssize_t i;
 
-            g_assert(is_pointer);
 
             length = PyMapping_Length(object);
             if (length < 0) {
@@ -1276,156 +1343,358 @@ _pygi_argument_to_object (GArgument  *arg,
                           GITransfer transfer)
 {
     GITypeTag type_tag;
-    gboolean is_pointer;
     PyObject *object = NULL;
 
     type_tag = g_type_info_get_tag(type_info);
-    is_pointer = g_type_info_is_pointer(type_info);
-
-    if (is_pointer && arg->v_pointer == NULL) {
-        Py_RETURN_NONE;
-    }
-
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            if (is_pointer) {
+            if (g_type_info_is_pointer(type_info)) {
                 /* Raw Python objects are passed to void* args */
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
                 object = arg->v_pointer;
             } else
                 object = Py_None;
-            Py_INCREF(object);
+            Py_XINCREF(object);
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
             gboolean value;
-            value = is_pointer ? *(gboolean *)arg->v_pointer : arg->v_boolean;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gboolean *)arg->v_pointer;
+            } else {
+                value = arg->v_boolean;
+            }
+
             object = PyBool_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_INT8:
         {
             gint8 value;
-            value = is_pointer ? *(gint8 *)arg->v_pointer : arg->v_int8;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gint8 *)arg->v_pointer;
+            } else {
+                value = arg->v_int8;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_UINT8:
         {
             guint8 value;
-            value = is_pointer ? *(guint8 *)arg->v_pointer : arg->v_uint8;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(guint8 *)arg->v_pointer;
+            } else {
+                value = arg->v_uint8;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_INT16:
         {
             gint16 value;
-            value = is_pointer ? *(gint16 *)arg->v_pointer : arg->v_int16;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gint16 *)arg->v_pointer;
+            } else {
+                value = arg->v_int16;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_UINT16:
         {
             guint16 value;
-            value = is_pointer ? *(guint16 *)arg->v_pointer : arg->v_uint16;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(guint16 *)arg->v_pointer;
+            } else {
+                value = arg->v_uint16;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_INT32:
         {
             gint32 value;
-            value = is_pointer ? *(gint32 *)arg->v_pointer : arg->v_int32;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gint32 *)arg->v_pointer;
+            } else {
+                value = arg->v_int32;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_UINT32:
         {
             guint32 value;
-            value = is_pointer ? *(guint32 *)arg->v_pointer : arg->v_uint32;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(guint32 *)arg->v_pointer;
+            } else {
+                value = arg->v_uint32;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_INT64:
         {
             gint64 value;
-            value = is_pointer ? *(gint64 *)arg->v_pointer : arg->v_int64;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gint64 *)arg->v_pointer;
+            } else {
+                value = arg->v_int64;
+            }
+
             object = PyLong_FromLongLong(value);
             break;
         }
         case GI_TYPE_TAG_UINT64:
         {
             guint64 value;
-            value = is_pointer ? *(guint64 *)arg->v_pointer : arg->v_uint64;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(guint64 *)arg->v_pointer;
+            } else {
+                value = arg->v_uint64;
+            }
+
             object = PyLong_FromUnsignedLongLong(value);
             break;
         }
         case GI_TYPE_TAG_SHORT:
         {
             gshort value;
-            value = is_pointer ? *(gshort *)arg->v_pointer : arg->v_short;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gshort *)arg->v_pointer;
+            } else {
+                value = arg->v_short;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_USHORT:
         {
             gushort value;
-            value = is_pointer ? *(gushort *)arg->v_pointer : arg->v_ushort;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gushort *)arg->v_pointer;
+            } else {
+                value = arg->v_ushort;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_INT:
         {
             gint value;
-            value = is_pointer ? *(gint *)arg->v_pointer : arg->v_int;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gint *)arg->v_pointer;
+            } else {
+                value = arg->v_int;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_UINT:
         {
             guint value;
-            value = is_pointer ? *(guint *)arg->v_pointer : arg->v_uint;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(guint *)arg->v_pointer;
+            } else {
+                value = arg->v_uint;
+            }
+
             object = PyLong_FromLongLong(value);
             break;
         }
         case GI_TYPE_TAG_LONG:
         {
             glong value;
-            value = is_pointer ? *(glong *)arg->v_pointer : arg->v_long;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(glong *)arg->v_pointer;
+            } else {
+                value = arg->v_long;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_ULONG:
         {
             gulong value;
-            value = is_pointer ? *(gulong *)arg->v_pointer : arg->v_ulong;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gulong *)arg->v_pointer;
+            } else {
+                value = arg->v_ulong;
+            }
+
             object = PyLong_FromUnsignedLongLong(value);
             break;
         }
         case GI_TYPE_TAG_SSIZE:
         {
             gssize value;
-            value = is_pointer ? *(gssize *)arg->v_pointer : arg->v_ssize;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gssize *)arg->v_pointer;
+            } else {
+                value = arg->v_ssize;
+            }
+
             object = PyInt_FromLong(value);
             break;
         }
         case GI_TYPE_TAG_SIZE:
         {
             gsize value;
-            value = is_pointer ? *(gsize *)arg->v_pointer : arg->v_size;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gsize *)arg->v_pointer;
+            } else {
+                value = arg->v_size;
+            }
+
             object = PyLong_FromUnsignedLongLong(value);
             break;
         }
         case GI_TYPE_TAG_FLOAT:
         {
             gfloat value;
-            value = is_pointer ? *(gfloat *)arg->v_pointer : arg->v_float;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gfloat *)arg->v_pointer;
+            } else {
+                value = arg->v_float;
+            }
+
             object = PyFloat_FromDouble(value);
             break;
         }
         case GI_TYPE_TAG_DOUBLE:
         {
             gdouble value;
-            value = is_pointer ? *(gdouble *)arg->v_pointer : arg->v_double;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                value = *(gdouble *)arg->v_pointer;
+            } else {
+                value = arg->v_double;
+            }
+
             object = PyFloat_FromDouble(value);
             break;
         }
@@ -1433,7 +1702,18 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             time_t *time_;
             struct tm *datetime;
-            time_ = is_pointer ? arg->v_pointer : &arg->v_long;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                time_ = arg->v_pointer;
+            } else {
+                time_ = (time_t *)&arg->v_long;
+            }
+
             datetime = localtime(time_);
             object = PyDateTime_FromDateAndTime(
                     datetime->tm_year + 1900,
@@ -1448,12 +1728,28 @@ _pygi_argument_to_object (GArgument  *arg,
         case GI_TYPE_TAG_GTYPE:
         {
             GType type;
-            type = is_pointer ? *(GType *)arg->v_pointer : arg->v_long;
+
+            if (g_type_info_is_pointer(type_info)) {
+                if (arg->v_pointer == NULL) {
+                    object = Py_None;
+                    Py_INCREF(object);
+                    break;
+                }
+                type = *(GType *)arg->v_pointer;
+            } else {
+                type = (GType)arg->v_long;
+            }
+
             object = pyg_type_wrapper_new(type);
             break;
         }
         case GI_TYPE_TAG_UTF8:
-            g_assert(is_pointer);
+            if (arg->v_string == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
+
             object = PyString_FromString(arg->v_string);
             break;
         case GI_TYPE_TAG_FILENAME:
@@ -1461,7 +1757,11 @@ _pygi_argument_to_object (GArgument  *arg,
             GError *error = NULL;
             gchar *string;
 
-            g_assert(is_pointer);
+            if (arg->v_string == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
 
             string = g_filename_to_utf8(arg->v_string, -1, NULL, NULL, &error);
             if (string == NULL) {
@@ -1483,6 +1783,12 @@ _pygi_argument_to_object (GArgument  *arg,
             GITypeTag item_type_tag;
             GITransfer item_transfer;
             gsize i, item_size;
+
+            if (arg->v_pointer == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
 
             array = arg->v_pointer;
 
@@ -1552,14 +1858,17 @@ _pygi_argument_to_object (GArgument  *arg,
                 {
                     GType type;
 
+                    if (arg->v_pointer == NULL) {
+                        object = Py_None;
+                        Py_INCREF(object);
+                        break;
+                    }
+
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
                     if (g_type_is_a(type, G_TYPE_VALUE)) {
-                        g_assert(is_pointer);
                         object = pyg_value_as_pyobject(arg->v_pointer, FALSE);
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
                         PyObject *py_type;
-
-                        g_assert(is_pointer);
 
                         py_type = _pygi_type_get_from_g_type(type);
                         if (py_type == NULL) {
@@ -1573,8 +1882,6 @@ _pygi_argument_to_object (GArgument  *arg,
                         Py_DECREF(py_type);
                     } else if (g_type_is_a(type, G_TYPE_POINTER)) {
                         PyObject *py_type;
-
-                        g_assert(is_pointer);
 
                         py_type = _pygi_type_get_from_g_type(type);
 
@@ -1607,11 +1914,21 @@ _pygi_argument_to_object (GArgument  *arg,
                 case GI_INFO_TYPE_ENUM:
                 case GI_INFO_TYPE_FLAGS:
                 {
-                    GType type;
                     glong value;
+                    GType type;
+
+                    if (g_type_info_is_pointer(type_info)) {
+                        if (arg->v_pointer == NULL) {
+                            object = Py_None;
+                            Py_INCREF(object);
+                            break;
+                        }
+                        value = *(glong *)arg->v_pointer;
+                    } else {
+                        value = arg->v_long;
+                    }
 
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
-                    value = is_pointer ? *(glong *)arg->v_pointer : arg->v_long;
 
                     if (info_type == GI_INFO_TYPE_ENUM) {
                         object = pyg_enum_from_gtype(type, value);
@@ -1622,7 +1939,11 @@ _pygi_argument_to_object (GArgument  *arg,
                     break;
                 }
                 case GI_INFO_TYPE_OBJECT:
-                    g_assert(is_pointer);
+                    if (arg->v_pointer == NULL) {
+                        object = Py_None;
+                        Py_INCREF(object);
+                        break;
+                    }
                     object = pygobject_new(arg->v_pointer);
                     break;
                 case GI_INFO_TYPE_UNION:
@@ -1645,7 +1966,11 @@ _pygi_argument_to_object (GArgument  *arg,
             GITransfer item_transfer;
             gsize i;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
 
             list = arg->v_pointer;
             length = g_slist_length(list);
@@ -1688,7 +2013,11 @@ _pygi_argument_to_object (GArgument  *arg,
             GArgument key;
             GArgument value;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                object = Py_None;
+                Py_INCREF(object);
+                break;
+            }
 
             object = PyDict_New();
             if (object == NULL) {
@@ -1750,14 +2079,8 @@ _pygi_argument_release (GArgument   *arg,
                         GIDirection  direction)
 {
     GITypeTag type_tag;
-    gboolean is_pointer;
 
     type_tag = g_type_info_get_tag(type_info);
-    is_pointer = g_type_info_is_pointer(type_info);
-
-    if (is_pointer && arg->v_pointer == NULL) {
-        return;
-    }
 
     switch(type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -1784,7 +2107,7 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_DOUBLE:
         case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_GTYPE:
-            if (is_pointer) {
+            if (g_type_info_is_pointer(type_info)) {
                 g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
                 if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                         || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
@@ -1794,7 +2117,6 @@ _pygi_argument_release (GArgument   *arg,
             break;
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
-            g_assert(is_pointer);
             if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
                 g_free(arg->v_string);
@@ -1805,7 +2127,9 @@ _pygi_argument_release (GArgument   *arg,
             GArray *array;
             gsize i;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                return;
+            }
 
             array = arg->v_pointer;
 
@@ -1852,12 +2176,14 @@ _pygi_argument_release (GArgument   *arg,
                 {
                     GType type;
 
+                    if (arg->v_pointer == NULL) {
+                        return;
+                    }
+
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
                     if (g_type_is_a(type, G_TYPE_VALUE)) {
                         GValue *value;
-
-                        g_assert(is_pointer);
 
                         value = arg->v_pointer;
 
@@ -1871,21 +2197,19 @@ _pygi_argument_release (GArgument   *arg,
                             g_slice_free(GValue, value);
                         }
                     } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
-                        g_assert(is_pointer);
                         if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING) {
                             g_closure_unref(arg->v_pointer);
                         }
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
-                        g_assert(is_pointer);
                     } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
-                        g_warn_if_fail(!is_pointer || transfer == GI_TRANSFER_NOTHING);
+                        g_warn_if_fail(!g_type_info_is_pointer(type_info) || transfer == GI_TRANSFER_NOTHING);
                     }
 
                     break;
                 }
                 case GI_INFO_TYPE_ENUM:
                 case GI_INFO_TYPE_FLAGS:
-                    if (is_pointer) {
+                    if (g_type_info_is_pointer(type_info)) {
                         g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
                         if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                                 || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
@@ -1895,7 +2219,9 @@ _pygi_argument_release (GArgument   *arg,
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    g_assert(is_pointer);
+                    if (arg->v_pointer == NULL) {
+                        return;
+                    }
                     if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_unref(arg->v_pointer);
                     }
@@ -1915,7 +2241,9 @@ _pygi_argument_release (GArgument   *arg,
         {
             GSList *list;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                return;
+            }
 
             list = arg->v_pointer;
 
@@ -1955,7 +2283,9 @@ _pygi_argument_release (GArgument   *arg,
         {
             GHashTable *hash_table;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                return;
+            }
 
             hash_table = arg->v_pointer;
 
@@ -2008,7 +2338,9 @@ _pygi_argument_release (GArgument   *arg,
         {
             GError *error;
 
-            g_assert(is_pointer);
+            if (arg->v_pointer == NULL) {
+                return;
+            }
 
             error = *(GError **)arg->v_pointer;
 
