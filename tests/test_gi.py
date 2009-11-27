@@ -823,6 +823,14 @@ class TestArray(unittest.TestCase):
         self.assertEquals((-2, -1, 0, 1, 2), TestGI.array_inout(Sequence((-1, 0, 1, 2))))
 
 
+    def test_array_fixed_out_struct(self):
+        struct1, struct2 = TestGI.array_fixed_out_struct()
+
+        self.assertEquals(7, struct1.long_)
+        self.assertEquals(6, struct1.int8)
+        self.assertEquals(6, struct2.long_)
+        self.assertEquals(7, struct2.int8)
+
     def test_array_zero_terminated_return(self):
         self.assertEquals(('0', '1', '2'), TestGI.array_zero_terminated_return())
 

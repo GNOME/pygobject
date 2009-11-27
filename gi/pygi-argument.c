@@ -1480,8 +1480,9 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             GArray *array;
             GITypeInfo *item_type_info;
+            GITypeTag item_type_tag;
             GITransfer item_transfer;
-            gsize i;
+            gsize i, item_size;
 
             array = arg->v_pointer;
 
@@ -1493,13 +1494,31 @@ _pygi_argument_to_object (GArgument  *arg,
             item_type_info = g_type_info_get_param_type(type_info, 0);
             g_assert(item_type_info != NULL);
 
+            item_type_tag = g_type_info_get_tag(item_type_info);
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+            item_size = g_array_get_element_size(array);
 
             for(i = 0; i < array->len; i++) {
                 GArgument item;
                 PyObject *py_item;
+                gboolean is_struct = FALSE;
 
-                item = _g_array_index(array, GArgument, i);
+                if (item_type_tag == GI_TYPE_TAG_INTERFACE) {
+                    GIBaseInfo *iface_info = g_type_info_get_interface(item_type_info);
+                    switch (g_base_info_get_type(iface_info)) {
+                        case GI_INFO_TYPE_STRUCT:
+                        case GI_INFO_TYPE_BOXED:
+                            is_struct = TRUE;
+                    }
+                    g_base_info_unref((GIBaseInfo *)iface_info);
+                }
+
+                if (is_struct) {
+                    item.v_pointer = &_g_array_index(array, GArgument, i);
+                } else {
+                    memcpy(&item, &_g_array_index(array, GArgument, i), item_size);
+                }
+
                 py_item = _pygi_argument_to_object(&item, item_type_info, item_transfer);
                 if (py_item == NULL) {
                     Py_CLEAR(object);
@@ -1789,9 +1808,9 @@ _pygi_argument_release (GArgument   *arg,
 
                 /* Free the items */
                 for (i = 0; i < array->len; i++) {
-                    GArgument item;
-                    item = _g_array_index(array, GArgument, i);
-                    _pygi_argument_release(&item, item_type_info, item_transfer, direction);
+                    GArgument *item;
+                    item = &_g_array_index(array, GArgument, i);
+                    _pygi_argument_release(item, item_type_info, item_transfer, direction);
                 }
 
                 g_base_info_unref((GIBaseInfo *)item_type_info);

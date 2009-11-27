@@ -7,6 +7,7 @@
 #ifndef __TEST_GI_H__
 #define __TEST_GI_H__
 
+typedef struct _TestGISimpleStruct TestGISimpleStruct;
 
 /* Constants */
 
@@ -345,6 +346,8 @@ void test_gi_array_fixed_short_in (const gshort *shorts);
 
 void test_gi_array_fixed_out (gint **ints);
 
+void test_gi_array_fixed_out_struct (TestGISimpleStruct **structs);
+
 void test_gi_array_fixed_inout (gint **ints);
 
 /* Variable-size */
@@ -499,10 +502,10 @@ void test_gi_flags_inout (TestGIFlags *flags_);
 
 /* Structure */
 
-typedef struct {
+struct _TestGISimpleStruct {
     glong long_;
     gint8 int8;
-} TestGISimpleStruct;
+};
 
 typedef struct {
     TestGISimpleStruct simple_struct;

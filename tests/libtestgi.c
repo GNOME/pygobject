@@ -1781,6 +1781,28 @@ test_gi_array_fixed_out (gint **ints)
 }
 
 /**
+ * test_gi_array_fixed_out_struct:
+ * @structs: (out) (array fixed-size=2) (transfer none):
+ */
+void
+test_gi_array_fixed_out_struct (TestGISimpleStruct **structs)
+{
+    static TestGISimpleStruct *values;
+
+    if (values == NULL) {
+        values = g_new(TestGISimpleStruct, 2);
+
+        values[0].long_ = 7;
+        values[0].int8 = 6;
+
+        values[1].long_ = 6;
+        values[1].int8 = 7;
+    }
+
+    *structs = values;
+}
+
+/**
  * test_gi_array_fixed_inout:
  * @ints: (inout) (array fixed-size=4) (transfer none):
  */
@@ -1857,7 +1879,6 @@ test_gi_array_inout (gint **ints, gint *length)
     *length = 5;
     *ints = values;
 }
-
 
 /**
  * test_gi_array_zero_terminated_return:
