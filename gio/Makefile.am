@@ -77,7 +77,7 @@ endif
 GIOUNIX_DEFS = unix.defs unix-types.defs unix.override
 CLEANFILES += unix.c
 EXTRA_DIST += $(GIOUNIX_DEFS) unix.override
-giounix.c: $(GIOUNIX_DEFS) unix.override
+unix.c: $(GIOUNIX_DEFS) unix.override
 unix_la_CFLAGS = $(GIOUNIX_CFLAGS)
 unix_la_LDFLAGS = $(common_ldflags) -export-symbols-regex initunix
 unix_la_LIBADD = $(GIOUNIX_LIBS)
