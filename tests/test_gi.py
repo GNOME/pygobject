@@ -83,8 +83,8 @@ class TestBoolean(unittest.TestCase):
 
 class TestInt8(unittest.TestCase):
 
-    MAX = 2 ** 7 - 1
-    MIN = - (2 ** 7)
+    MAX = gobject.G_MAXINT8
+    MIN = gobject.G_MININT8
 
     def test_int8_return(self):
         self.assertEquals(self.MAX, TestGI.int8_return_max())
@@ -125,7 +125,7 @@ class TestInt8(unittest.TestCase):
 
 class TestUInt8(unittest.TestCase):
 
-    MAX = 2 ** 8 - 1
+    MAX = gobject.G_MAXUINT8
 
     def test_uint8_return(self):
         self.assertEquals(self.MAX, TestGI.uint8_return())
@@ -155,8 +155,8 @@ class TestUInt8(unittest.TestCase):
 
 class TestInt16(unittest.TestCase):
 
-    MAX = 2 ** 15 - 1
-    MIN = - (2 ** 15)
+    MAX = gobject.G_MAXINT16
+    MIN = gobject.G_MININT16
 
     def test_int16_return(self):
         self.assertEquals(self.MAX, TestGI.int16_return_max())
@@ -197,7 +197,7 @@ class TestInt16(unittest.TestCase):
 
 class TestUInt16(unittest.TestCase):
 
-    MAX = 2 ** 16 - 1
+    MAX = gobject.G_MAXUINT16
 
     def test_uint16_return(self):
         self.assertEquals(self.MAX, TestGI.uint16_return())
@@ -226,8 +226,8 @@ class TestUInt16(unittest.TestCase):
 
 class TestInt32(unittest.TestCase):
 
-    MAX = 2 ** 31 - 1
-    MIN = - (2 ** 31)
+    MAX = gobject.G_MAXINT32
+    MIN = gobject.G_MININT32
 
     def test_int32_return(self):
         self.assertEquals(self.MAX, TestGI.int32_return_max())
@@ -268,7 +268,7 @@ class TestInt32(unittest.TestCase):
 
 class TestUInt32(unittest.TestCase):
 
-    MAX = 2 ** 32 - 1
+    MAX = gobject.G_MAXUINT32
 
     def test_uint32_return(self):
         self.assertEquals(self.MAX, TestGI.uint32_return())
