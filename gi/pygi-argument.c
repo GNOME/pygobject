@@ -52,21 +52,21 @@ _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
             *lower = PyInt_FromLong(0);
             break;
         case GI_TYPE_TAG_INT32:
-            *lower = PyInt_FromLong(-2147483648);
-            *upper = PyInt_FromLong(2147483647);
+            *lower = PyInt_FromLong(G_MININT32);
+            *upper = PyInt_FromLong(G_MAXINT32);
             break;
         case GI_TYPE_TAG_UINT32:
             /* Note: On 32-bit archs, this number doesn't fit in a long. */
-            *upper = PyLong_FromLongLong(4294967295);
+            *upper = PyLong_FromLongLong(G_MAXUINT32);
             *lower = PyInt_FromLong(0);
             break;
         case GI_TYPE_TAG_INT64:
             /* Note: On 32-bit archs, these numbers don't fit in a long. */
-            *lower = PyLong_FromLongLong(-9223372036854775808u);
-            *upper = PyLong_FromLongLong(9223372036854775807);
+            *lower = PyLong_FromLongLong(G_MININT64);
+            *upper = PyLong_FromLongLong(G_MAXINT64);
             break;
         case GI_TYPE_TAG_UINT64:
-            *upper = PyLong_FromUnsignedLongLong(18446744073709551615u);
+            *upper = PyLong_FromUnsignedLongLong(G_MAXUINT64);
             *lower = PyInt_FromLong(0);
             break;
         case GI_TYPE_TAG_SHORT:
@@ -1342,7 +1342,7 @@ _pygi_argument_to_object (GArgument  *arg,
         {
             guint32 value;
             value = is_pointer ? *(guint32 *)arg->v_pointer : arg->v_uint32;
-            object = PyInt_FromLong(value);
+            object = PyLong_FromLongLong(value);
             break;
         }
         case GI_TYPE_TAG_INT64:
