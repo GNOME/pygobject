@@ -8,6 +8,12 @@
   (gtype-id "G_TYPE_APP_INFO")
 )
 
+(define-interface AsyncInitable
+  (in-module "gio")
+  (c-name "GAsyncInitable")
+  (gtype-id "G_TYPE_ASYNC_INITABLE")
+)
+
 (define-interface AsyncResult
   (in-module "gio")
   (c-name "GAsyncResult")
@@ -42,6 +48,12 @@
   (gtype-id "G_TYPE_ICON")
 )
 
+(define-interface Initable
+  (in-module "gio")
+  (c-name "GInitable")
+  (gtype-id "G_TYPE_INITABLE")
+)
+
 (define-interface LoadableIcon
   (in-module "gio")
   (c-name "GLoadableIcon")
@@ -72,6 +84,12 @@
   (in-module "gio")
   (c-name "GFileAttributeMatcher")
   (gtype-id "G_TYPE_FILE_ATTRIBUTE_MATCHER")
+)
+
+(define-boxed SrvTarget
+  (in-module "gio")
+  (c-name "GSrvTarget")
+  (gtype-id "G_TYPE_SRV_TARGET")
 )
 
 ; object definitions ...
@@ -139,6 +157,13 @@
   (gtype-id "G_TYPE_FILE_INPUT_STREAM")
 )
 
+(define-object FileIOStream
+  (in-module "gio")
+  (parent "GIOStream")
+  (c-name "GFileIOStream")
+  (gtype-id "G_TYPE_FILE_IO_STREAM")
+)
+
 (define-object FilterInputStream
   (in-module "gio")
   (parent "GInputStream")
@@ -172,6 +197,117 @@
   (parent "GObject")
   (c-name "GMountOperation")
   (gtype-id "G_TYPE_MOUNT_OPERATION")
+)
+
+(define-object InetAddress
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GInetAddress")
+  (gtype-id "G_TYPE_INET_ADDRESS")
+)
+
+(define-object NetworkAddress
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GNetworkAddress")
+  (gtype-id "G_TYPE_NETWORK_ADDRESS")
+)
+
+(define-object NetworkService
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GNetworkService")
+  (gtype-id "G_TYPE_NETWORK_SERVICE")
+)
+
+(define-object Resolver
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GResolver")
+  (gtype-id "G_TYPE_RESOLVER")
+)
+
+(define-object Socket
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocket")
+  (gtype-id "G_TYPE_SOCKET")
+)
+
+(define-object SocketAddress
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocketAddress")
+  (gtype-id "G_TYPE_SOCKET_ADDRESS")
+)
+
+(define-object SocketAddressEnumerator
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocketAddressEnumerator")
+  (gtype-id "G_TYPE_SOCKET_ADDRESS_ENUMERATOR")
+)
+
+(define-object SocketClient
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocketClient")
+  (gtype-id "G_TYPE_SOCKET_CLIENT")
+)
+
+(define-object SocketConnectable
+  (in-module "gio")
+  (c-name "GSocketConnectable")
+  (gtype-id "G_TYPE_SOCKET_CONNECTABLE")
+)
+
+(define-object SocketConnection
+  (in-module "gio")
+  (parent "GIOStream")
+  (c-name "GSocketConnection")
+  (gtype-id "G_TYPE_SOCKET_CONNECTION")
+)
+
+(define-object SocketControlMessage
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocketControlMessage")
+  (gtype-id "G_TYPE_SOCKET_CONTROL_MESSAGE")
+)
+
+(define-object SocketListener
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GSocketListener")
+  (gtype-id "G_TYPE_SOCKET_LISTENER")
+)
+
+(define-object SocketService
+  (in-module "gio")
+  (parent "GSocketListener")
+  (c-name "GSocketService")
+  (gtype-id "G_TYPE_SOCKET_SERVICE")
+)
+
+(define-object TcpConnection
+  (in-module "gio")
+  (parent "GSocketConnection")
+  (c-name "GTcpConnection")
+  (gtype-id "G_TYPE_TCP_CONNECTION")
+)
+
+(define-object ThreadedSocketService
+  (in-module "gio")
+  (parent "GSocketService")
+  (c-name "GThreadedSocketService")
+  (gtype-id "G_TYPE_THREADED_SOCKET_SERVICE")
+)
+
+(define-object IOStream
+  (in-module "gio")
+  (parent "GObject")
+  (c-name "GIOStream")
+  (gtype-id "G_TYPE_IO_STREAM")
 )
 
 (define-object OutputStream
@@ -260,6 +396,8 @@
   (gtype-id "G_TYPE_THEMED_ICON")
   (implements "GIcon")
 )
+
+
 
 ;; Enumerations and flags ...
 

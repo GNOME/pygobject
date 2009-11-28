@@ -1,5 +1,7 @@
 ;; -*- scheme -*-
 
+(include "gio-types.defs")
+
 ;; From gappinfo.h
 
 (define-function app_info_get_type
@@ -141,8 +143,6 @@
   (c-name "g_app_info_should_show")
   (return-type "gboolean")
 )
-
-(include "gio-types.defs")
 
 (define-method set_as_default_for_type
   (of-object "GAppInfo")
@@ -295,7 +295,86 @@
 
 
 
-;; From gasynchelper.h
+;; From gasyncinitable.h
+
+(define-function g_async_initable_get_type
+  (c-name "g_async_initable_get_type")
+  (return-type "GType")
+)
+
+(define-method init_async
+  (of-object "GAsyncInitable")
+  (c-name "g_async_initable_init_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method init_finish
+  (of-object "GAsyncInitable")
+  (c-name "g_async_initable_init_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_async_initable_new_async
+  (c-name "g_async_initable_new_async")
+  (return-type "none")
+  (parameters
+    '("GType" "object_type")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+    '("const-gchar*" "first_property_name")
+  )
+  (varargs #t)
+)
+
+(define-function g_async_initable_newv_async
+  (c-name "g_async_initable_newv_async")
+  (return-type "none")
+  (parameters
+    '("GType" "object_type")
+    '("guint" "n_parameters")
+    '("GParameter*" "parameters")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-function g_async_initable_new_valist_async
+  (c-name "g_async_initable_new_valist_async")
+  (return-type "none")
+  (parameters
+    '("GType" "object_type")
+    '("const-gchar*" "first_property_name")
+    '("va_list" "var_args")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method new_finish
+  (of-object "GAsyncInitable")
+  (c-name "g_async_initable_new_finish")
+  (return-type "GObject*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
 
 
 
@@ -559,6 +638,41 @@
 (define-method cancel
   (of-object "GCancellable")
   (c-name "g_cancellable_cancel")
+  (return-type "none")
+)
+
+(define-method connect
+  (of-object "GCancellable")
+  (c-name "g_cancellable_connect")
+  (return-type "gulong")
+  (parameters
+    '("GCallback" "callback")
+    '("gpointer" "data")
+    '("GDestroyNotify" "data_destroy_func")
+  )
+)
+
+(define-method disconnect
+  (of-object "GCancellable")
+  (c-name "g_cancellable_disconnect")
+  (return-type "none")
+  (parameters
+    '("gulong" "handler_id")
+  )
+)
+
+(define-method make_pollfd
+  (of-object "GCancellable")
+  (c-name "g_cancellable_make_pollfd")
+  (return-type "gboolean")
+  (parameters
+    '("GPollFD*" "pollfd")
+  )
+)
+
+(define-method release_fd
+  (of-object "GCancellable")
+  (c-name "g_cancellable_release_fd")
   (return-type "none")
 )
 
@@ -1132,9 +1246,98 @@
   (return-type "char**")
 )
 
+(define-method can_start
+  (of-object "GDrive")
+  (c-name "g_drive_can_start")
+  (return-type "gboolean")
+)
 
+(define-method can_start_degraded
+  (of-object "GDrive")
+  (c-name "g_drive_can_start_degraded")
+  (return-type "gboolean")
+)
 
-;; From gdummyfile.h
+(define-method can_stop
+  (of-object "GDrive")
+  (c-name "g_drive_can_stop")
+  (return-type "gboolean")
+)
+
+(define-method eject_with_operation
+  (of-object "GDrive")
+  (c-name "g_drive_eject_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_with_operation_finish
+  (of-object "GDrive")
+  (c-name "g_drive_eject_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_start_stop_type
+  (of-object "GDrive")
+  (c-name "g_drive_get_start_stop_type")
+  (return-type "GDriveStartStopType")
+)
+
+(define-method start
+  (of-object "GDrive")
+  (c-name "g_drive_start")
+  (return-type "none")
+  (parameters
+    '("GDriveStartFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method start_finish
+  (of-object "GDrive")
+  (c-name "g_drive_start_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method stop
+  (of-object "GDrive")
+  (c-name "g_drive_stop")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method stop_finish
+  (of-object "GDrive")
+  (c-name "g_drive_stop_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
 
 
 
@@ -2815,6 +3018,229 @@
   )
 )
 
+(define-method create_readwrite
+  (of-object "GFile")
+  (c-name "g_file_create_readwrite")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method create_readwrite_async
+  (of-object "GFile")
+  (c-name "g_file_create_readwrite_async")
+  (return-type "none")
+  (parameters
+    '("GFileCreateFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method create_readwrite_finish
+  (of-object "GFile")
+  (c-name "g_file_create_readwrite_finish")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method eject_mountable_with_operation
+  (of-object "GFile")
+  (c-name "g_file_eject_mountable_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_mountable_with_operation_finish
+  (of-object "GFile")
+  (c-name "g_file_eject_mountable_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method open_readwrite
+  (of-object "GFile")
+  (c-name "g_file_open_readwrite")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method open_readwrite_async
+  (of-object "GFile")
+  (c-name "g_file_open_readwrite_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method open_readwrite_finish
+  (of-object "GFile")
+  (c-name "g_file_open_readwrite_finish")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method poll_mountable
+  (of-object "GFile")
+  (c-name "g_file_poll_mountable")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method poll_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_poll_mountable_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_readwrite
+  (of-object "GFile")
+  (c-name "g_file_replace_readwrite")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method replace_readwrite_async
+  (of-object "GFile")
+  (c-name "g_file_replace_readwrite_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "etag")
+    '("gboolean" "make_backup")
+    '("GFileCreateFlags" "flags")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method replace_readwrite_finish
+  (of-object "GFile")
+  (c-name "g_file_replace_readwrite_finish")
+  (return-type "GFileIOStream*")
+  (parameters
+    '("GAsyncResult*" "res")
+    '("GError**" "error")
+  )
+)
+
+(define-method start_mountable
+  (of-object "GFile")
+  (c-name "g_file_start_mountable")
+  (return-type "none")
+  (parameters
+    '("GDriveStartFlags" "flags")
+    '("GMountOperation*" "start_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method start_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_start_mountable_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method stop_mountable
+  (of-object "GFile")
+  (c-name "g_file_stop_mountable")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method stop_mountable_finish
+  (of-object "GFile")
+  (c-name "g_file_stop_mountable_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method supports_thread_contexts
+  (of-object "GFile")
+  (c-name "g_file_supports_thread_contexts")
+  (return-type "gboolean")
+)
+
+(define-method unmount_mountable_with_operation
+  (of-object "GFile")
+  (c-name "g_file_unmount_mountable_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method unmount_mountable_with_operation_finish
+  (of-object "GFile")
+  (c-name "g_file_unmount_mountable_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
 
 
 ;; From gfileicon.h
@@ -2882,6 +3308,15 @@
   )
 )
 
+(define-method has_namespace
+  (of-object "GFileInfo")
+  (c-name "g_file_info_has_namespace")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "name_space")
+  )
+)
+
 ;;
 ;; wrapped in  gfileinfo.override
 (define-method list_attributes
@@ -2933,6 +3368,16 @@
   (return-type "GFileAttributeStatus")
   (parameters
     '("const-char*" "attribute")
+  )
+)
+
+(define-method set_attribute_status
+  (of-object "GFileInfo")
+  (c-name "g_file_info_set_attribute_status")
+  (return-type "gboolean")
+  (parameters
+    '("const-char*" "attribute")
+    '("GFileAttributeStatus" "status")
   )
 )
 
@@ -3012,6 +3457,15 @@
   (of-object "GFileInfo")
   (c-name "g_file_info_get_attribute_object")
   (return-type "GObject*")
+  (parameters
+    '("const-char*" "attribute")
+  )
+)
+
+(define-method get_attribute_stringv
+  (of-object "GFileInfo")
+  (c-name "g_file_info_get_attribute_stringv")
+  (return-type "char**")
   (parameters
     '("const-char*" "attribute")
   )
@@ -3426,6 +3880,56 @@
     '("GError**" "error")
   )
 )
+
+
+
+;; From gfileiostream.h
+
+(define-function g_file_io_stream_get_type
+  (c-name "g_file_io_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method query_info
+  (of-object "GFileIOStream")
+  (c-name "g_file_io_stream_query_info")
+  (return-type "GFileInfo*")
+  (parameters
+    '("const-char*" "attributes")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method query_info_async
+  (of-object "GFileIOStream")
+  (c-name "g_file_io_stream_query_info_async")
+  (return-type "none")
+  (parameters
+    '("const-char*" "attributes")
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method query_info_finish
+  (of-object "GFileIOStream")
+  (c-name "g_file_io_stream_query_info_finish")
+  (return-type "GFileInfo*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_etag
+  (of-object "GFileIOStream")
+  (c-name "g_file_io_stream_get_etag")
+  (return-type "char*")
+)
+
 
 
 
@@ -4136,6 +4640,270 @@
 
 
 
+;; From ginetaddress.h
+
+(define-function g_inet_address_get_type
+  (c-name "g_inet_address_get_type")
+  (return-type "GType")
+)
+
+(define-function g_inet_address_new_from_string
+  (c-name "g_inet_address_new_from_string")
+  (return-type "GInetAddress*")
+  (parameters
+    '("const-gchar*" "string")
+  )
+)
+
+(define-function g_inet_address_new_from_bytes
+  (c-name "g_inet_address_new_from_bytes")
+  (return-type "GInetAddress*")
+  (parameters
+    '("const-guint8*" "bytes")
+    '("GSocketFamily" "family")
+  )
+)
+
+(define-function g_inet_address_new_loopback
+  (c-name "g_inet_address_new_loopback")
+  (return-type "GInetAddress*")
+  (parameters
+    '("GSocketFamily" "family")
+  )
+)
+
+(define-function g_inet_address_new_any
+  (c-name "g_inet_address_new_any")
+  (return-type "GInetAddress*")
+  (parameters
+    '("GSocketFamily" "family")
+  )
+)
+
+(define-method to_string
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_to_string")
+  (return-type "gchar*")
+)
+
+
+;; FIXME codegen barfs on this one
+;;
+;;(define-method to_bytes
+;;  (of-object "GInetAddress")
+;;  (c-name "g_inet_address_to_bytes")
+;;  (return-type "const-guint8*")
+;;)
+
+(define-method get_native_size
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_native_size")
+  (return-type "gsize")
+)
+
+(define-method get_family
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_family")
+  (return-type "GSocketFamily")
+)
+
+(define-method get_is_any
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_any")
+  (return-type "gboolean")
+)
+
+(define-method get_is_loopback
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_loopback")
+  (return-type "gboolean")
+)
+
+(define-method get_is_link_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_link_local")
+  (return-type "gboolean")
+)
+
+(define-method get_is_site_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_site_local")
+  (return-type "gboolean")
+)
+
+(define-method get_is_multicast
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_multicast")
+  (return-type "gboolean")
+)
+
+(define-method get_is_mc_global
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_mc_global")
+  (return-type "gboolean")
+)
+
+(define-method get_is_mc_link_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_mc_link_local")
+  (return-type "gboolean")
+)
+
+(define-method get_is_mc_node_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_mc_node_local")
+  (return-type "gboolean")
+)
+
+(define-method get_is_mc_org_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_mc_org_local")
+  (return-type "gboolean")
+)
+
+(define-method get_is_mc_site_local
+  (of-object "GInetAddress")
+  (c-name "g_inet_address_get_is_mc_site_local")
+  (return-type "gboolean")
+)
+
+
+
+;; From ginitable.h
+
+(define-function g_initable_get_type
+  (c-name "g_initable_get_type")
+  (return-type "GType")
+)
+
+(define-method init
+  (of-object "GInitable")
+  (c-name "g_initable_init")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_initable_new
+  (c-name "g_initable_new")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "object_type")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+    '("const-gchar*" "first_property_name")
+  )
+  (varargs #t)
+)
+
+(define-function g_initable_newv
+  (c-name "g_initable_newv")
+  (return-type "gpointer")
+  (parameters
+    '("GType" "object_type")
+    '("guint" "n_parameters")
+    '("GParameter*" "parameters")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_initable_new_valist
+  (c-name "g_initable_new_valist")
+  (return-type "GObject*")
+  (parameters
+    '("GType" "object_type")
+    '("const-gchar*" "first_property_name")
+    '("va_list" "var_args")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From giostream.h
+
+(define-function g_io_stream_get_type
+  (c-name "g_io_stream_get_type")
+  (return-type "GType")
+)
+
+(define-method get_input_stream
+  (of-object "GIOStream")
+  (c-name "g_io_stream_get_input_stream")
+  (return-type "GInputStream*")
+)
+
+(define-method get_output_stream
+  (of-object "GIOStream")
+  (c-name "g_io_stream_get_output_stream")
+  (return-type "GOutputStream*")
+)
+
+(define-method close
+  (of-object "GIOStream")
+  (c-name "g_io_stream_close")
+  (return-type "gboolean")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method close_async
+  (of-object "GIOStream")
+  (c-name "g_io_stream_close_async")
+  (return-type "none")
+  (parameters
+    '("int" "io_priority")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method close_finish
+  (of-object "GIOStream")
+  (c-name "g_io_stream_close_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method is_closed
+  (of-object "GIOStream")
+  (c-name "g_io_stream_is_closed")
+  (return-type "gboolean")
+)
+
+(define-method has_pending
+  (of-object "GIOStream")
+  (c-name "g_io_stream_has_pending")
+  (return-type "gboolean")
+)
+
+(define-method set_pending
+  (of-object "GIOStream")
+  (c-name "g_io_stream_set_pending")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method clear_pending
+  (of-object "GIOStream")
+  (c-name "g_io_stream_clear_pending")
+  (return-type "none")
+)
+
+
+
 ;; From glocaldirectorymonitor.h
 
 (define-function local_directory_monitor_get_type
@@ -4469,6 +5237,52 @@
   (return-type "none")
 )
 
+(define-method unmount_with_operation
+  (of-object "GMount")
+  (c-name "g_mount_unmount_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method unmount_with_operation_finish
+  (of-object "GMount")
+  (c-name "g_mount_unmount_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method eject_with_operation
+  (of-object "GMount")
+  (c-name "g_mount_eject_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_with_operation_finish
+  (of-object "GMount")
+  (c-name "g_mount_eject_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
 
 
 ;; From gmountoperation.h
@@ -4590,6 +5404,85 @@
 (define-function native_volume_monitor_get_type
   (c-name "g_native_volume_monitor_get_type")
   (return-type "GType")
+)
+
+
+
+;; From gnetworkaddress.h
+
+(define-function g_network_address_get_type
+  (c-name "g_network_address_get_type")
+  (return-type "GType")
+)
+
+(define-function g_network_address_new
+  (c-name "g_network_address_new")
+  (is-constructor-of "GNetworkAddress")
+  (return-type "GSocketConnectable*")
+  (parameters
+    '("const-gchar*" "hostname")
+    '("guint16" "port")
+  )
+)
+
+(define-function g_network_address_parse
+  (c-name "g_network_address_parse")
+  (return-type "GSocketConnectable*")
+  (parameters
+    '("const-gchar*" "host_and_port")
+    '("guint16" "default_port")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_hostname
+  (of-object "GNetworkAddress")
+  (c-name "g_network_address_get_hostname")
+  (return-type "const-gchar*")
+)
+
+(define-method get_port
+  (of-object "GNetworkAddress")
+  (c-name "g_network_address_get_port")
+  (return-type "guint16")
+)
+
+
+
+;; From gnetworkservice.h
+
+(define-function g_network_service_get_type
+  (c-name "g_network_service_get_type")
+  (return-type "GType")
+)
+
+(define-function g_network_service_new
+  (c-name "g_network_service_new")
+  (is-constructor-of "GNetworkService")
+  (return-type "GSocketConnectable*")
+  (parameters
+    '("const-gchar*" "service")
+    '("const-gchar*" "protocol")
+    '("const-gchar*" "domain")
+  )
+)
+
+(define-method get_service
+  (of-object "GNetworkService")
+  (c-name "g_network_service_get_service")
+  (return-type "const-gchar*")
+)
+
+(define-method get_protocol
+  (of-object "GNetworkService")
+  (c-name "g_network_service_get_protocol")
+  (return-type "const-gchar*")
+)
+
+(define-method get_domain
+  (of-object "GNetworkService")
+  (c-name "g_network_service_get_domain")
+  (return-type "const-gchar*")
 )
 
 
@@ -4829,7 +5722,147 @@
 
 
 
-;; From gpollfilemonitor.h
+;; From gresolver.h
+
+(define-function g_resolver_get_type
+  (c-name "g_resolver_get_type")
+  (return-type "GType")
+)
+
+(define-function g_resolver_get_default
+  (c-name "g_resolver_get_default")
+  (return-type "GResolver*")
+)
+
+(define-method set_default
+  (of-object "GResolver")
+  (c-name "g_resolver_set_default")
+  (return-type "none")
+)
+
+(define-method lookup_by_name
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_name")
+  (return-type "GList*")
+  (parameters
+    '("const-gchar*" "hostname")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method lookup_by_name_async
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_name_async")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "hostname")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method lookup_by_name_finish
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_name_finish")
+  (return-type "GList*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_resolver_free_addresses
+  (c-name "g_resolver_free_addresses")
+  (return-type "none")
+  (parameters
+    '("GList*" "addresses")
+  )
+)
+
+(define-method lookup_by_address
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_address")
+  (return-type "gchar*")
+  (parameters
+    '("GInetAddress*" "address")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method lookup_by_address_async
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_address_async")
+  (return-type "none")
+  (parameters
+    '("GInetAddress*" "address")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method lookup_by_address_finish
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_by_address_finish")
+  (return-type "gchar*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method lookup_service
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_service")
+  (return-type "GList*")
+  (parameters
+    '("const-gchar*" "service")
+    '("const-gchar*" "protocol")
+    '("const-gchar*" "domain")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method lookup_service_async
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_service_async")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "service")
+    '("const-gchar*" "protocol")
+    '("const-gchar*" "domain")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method lookup_service_finish
+  (of-object "GResolver")
+  (c-name "g_resolver_lookup_service_finish")
+  (return-type "GList*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_resolver_free_targets
+  (c-name "g_resolver_free_targets")
+  (return-type "none")
+  (parameters
+    '("GList*" "targets")
+  )
+)
+
+(define-function g_resolver_error_quark
+  (c-name "g_resolver_error_quark")
+  (return-type "GQuark")
+)
 
 
 
@@ -5080,6 +6113,934 @@
 
 
 
+;; From gsocketaddressenumerator.h
+
+(define-function g_socket_address_enumerator_get_type
+  (c-name "g_socket_address_enumerator_get_type")
+  (return-type "GType")
+)
+
+(define-method next
+  (of-object "GSocketAddressEnumerator")
+  (c-name "g_socket_address_enumerator_next")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method next_async
+  (of-object "GSocketAddressEnumerator")
+  (c-name "g_socket_address_enumerator_next_async")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method next_finish
+  (of-object "GSocketAddressEnumerator")
+  (c-name "g_socket_address_enumerator_next_finish")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gsocketaddress.h
+
+(define-function g_socket_address_get_type
+  (c-name "g_socket_address_get_type")
+  (return-type "GType")
+)
+
+(define-method get_family
+  (of-object "GSocketAddress")
+  (c-name "g_socket_address_get_family")
+  (return-type "GSocketFamily")
+)
+
+(define-function g_socket_address_new_from_native
+  (c-name "g_socket_address_new_from_native")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("gpointer" "native")
+    '("gsize" "len")
+  )
+)
+
+(define-method to_native
+  (of-object "GSocketAddress")
+  (c-name "g_socket_address_to_native")
+  (return-type "gboolean")
+  (parameters
+    '("gpointer" "dest")
+    '("gsize" "destlen")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_native_size
+  (of-object "GSocketAddress")
+  (c-name "g_socket_address_get_native_size")
+  (return-type "gssize")
+)
+
+
+
+;; From gsocketclient.h
+
+(define-function g_socket_client_get_type
+  (c-name "g_socket_client_get_type")
+  (return-type "GType")
+)
+
+(define-function g_socket_client_new
+  (c-name "g_socket_client_new")
+  (is-constructor-of "GSocketClient")
+  (return-type "GSocketClient*")
+)
+
+(define-method get_family
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_get_family")
+  (return-type "GSocketFamily")
+)
+
+(define-method set_family
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_set_family")
+  (return-type "none")
+  (parameters
+    '("GSocketFamily" "family")
+  )
+)
+
+(define-method get_socket_type
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_get_socket_type")
+  (return-type "GSocketType")
+)
+
+(define-method set_socket_type
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_set_socket_type")
+  (return-type "none")
+  (parameters
+    '("GSocketType" "type")
+  )
+)
+
+(define-method get_protocol
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_get_protocol")
+  (return-type "GSocketProtocol")
+)
+
+(define-method set_protocol
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_set_protocol")
+  (return-type "none")
+  (parameters
+    '("GSocketProtocol" "protocol")
+  )
+)
+
+(define-method get_local_address
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_get_local_address")
+  (return-type "GSocketAddress*")
+)
+
+(define-method set_local_address
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_set_local_address")
+  (return-type "none")
+  (parameters
+    '("GSocketAddress*" "address")
+  )
+)
+
+(define-method connect
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GSocketConnectable*" "connectable")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect_to_host
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_host")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("const-gchar*" "host_and_port")
+    '("guint16" "default_port")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect_to_service
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_service")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "service")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect_async
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_async")
+  (return-type "none")
+  (parameters
+    '("GSocketConnectable*" "connectable")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method connect_finish
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_finish")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect_to_host_async
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_host_async")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "host_and_port")
+    '("guint16" "default_port")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method connect_to_host_finish
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_host_finish")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect_to_service_async
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_service_async")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "domain")
+    '("const-gchar*" "service")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method connect_to_service_finish
+  (of-object "GSocketClient")
+  (c-name "g_socket_client_connect_to_service_finish")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
+
+
+;; From gsocketconnectable.h
+
+(define-function g_socket_connectable_get_type
+  (c-name "g_socket_connectable_get_type")
+  (return-type "GType")
+)
+
+(define-method enumerate
+  (of-object "GSocketConnectable")
+  (c-name "g_socket_connectable_enumerate")
+  (return-type "GSocketAddressEnumerator*")
+)
+
+
+
+;; From gsocketconnection.h
+
+(define-function g_socket_connection_get_type
+  (c-name "g_socket_connection_get_type")
+  (return-type "GType")
+)
+
+(define-method get_socket
+  (of-object "GSocketConnection")
+  (c-name "g_socket_connection_get_socket")
+  (return-type "GSocket*")
+)
+
+(define-method get_local_address
+  (of-object "GSocketConnection")
+  (c-name "g_socket_connection_get_local_address")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method get_remote_address
+  (of-object "GSocketConnection")
+  (c-name "g_socket_connection_get_remote_address")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-function g_socket_connection_factory_register_type
+  (c-name "g_socket_connection_factory_register_type")
+  (return-type "none")
+  (parameters
+    '("GType" "g_type")
+    '("GSocketFamily" "family")
+    '("GSocketType" "type")
+    '("gint" "protocol")
+  )
+)
+
+(define-function g_socket_connection_factory_lookup_type
+  (c-name "g_socket_connection_factory_lookup_type")
+  (return-type "GType")
+  (parameters
+    '("GSocketFamily" "family")
+    '("GSocketType" "type")
+    '("gint" "protocol_id")
+  )
+)
+
+(define-method connection_factory_create_connection
+  (of-object "GSocket")
+  (c-name "g_socket_connection_factory_create_connection")
+  (return-type "GSocketConnection*")
+)
+
+
+
+;; From gsocketcontrolmessage.h
+
+(define-function g_socket_control_message_get_type
+  (c-name "g_socket_control_message_get_type")
+  (return-type "GType")
+)
+
+(define-method get_size
+  (of-object "GSocketControlMessage")
+  (c-name "g_socket_control_message_get_size")
+  (return-type "gsize")
+)
+
+(define-method get_level
+  (of-object "GSocketControlMessage")
+  (c-name "g_socket_control_message_get_level")
+  (return-type "int")
+)
+
+(define-method get_msg_type
+  (of-object "GSocketControlMessage")
+  (c-name "g_socket_control_message_get_msg_type")
+  (return-type "int")
+)
+
+(define-method serialize
+  (of-object "GSocketControlMessage")
+  (c-name "g_socket_control_message_serialize")
+  (return-type "none")
+  (parameters
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_socket_control_message_deserialize
+  (c-name "g_socket_control_message_deserialize")
+  (return-type "GSocketControlMessage*")
+  (parameters
+    '("int" "level")
+    '("int" "type")
+    '("gsize" "size")
+    '("gpointer" "data")
+  )
+)
+
+
+
+;; From gsocket.h
+
+(define-function g_socket_get_type
+  (c-name "g_socket_get_type")
+  (return-type "GType")
+)
+
+(define-function g_socket_new
+  (c-name "g_socket_new")
+  (is-constructor-of "GSocket")
+  (return-type "GSocket*")
+  (parameters
+    '("GSocketFamily" "family")
+    '("GSocketType" "type")
+    '("GSocketProtocol" "protocol")
+    '("GError**" "error")
+  )
+)
+
+(define-function g_socket_new_from_fd
+  (c-name "g_socket_new_from_fd")
+  (return-type "GSocket*")
+  (parameters
+    '("gint" "fd")
+    '("GError**" "error")
+  )
+)
+
+(define-method get_fd
+  (of-object "GSocket")
+  (c-name "g_socket_get_fd")
+  (return-type "int")
+)
+
+(define-method get_family
+  (of-object "GSocket")
+  (c-name "g_socket_get_family")
+  (return-type "GSocketFamily")
+)
+
+(define-method get_socket_type
+  (of-object "GSocket")
+  (c-name "g_socket_get_socket_type")
+  (return-type "GSocketType")
+)
+
+(define-method get_protocol
+  (of-object "GSocket")
+  (c-name "g_socket_get_protocol")
+  (return-type "GSocketProtocol")
+)
+
+(define-method get_local_address
+  (of-object "GSocket")
+  (c-name "g_socket_get_local_address")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method get_remote_address
+  (of-object "GSocket")
+  (c-name "g_socket_get_remote_address")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method set_blocking
+  (of-object "GSocket")
+  (c-name "g_socket_set_blocking")
+  (return-type "none")
+  (parameters
+    '("gboolean" "blocking")
+  )
+)
+
+(define-method get_blocking
+  (of-object "GSocket")
+  (c-name "g_socket_get_blocking")
+  (return-type "gboolean")
+)
+
+(define-method set_keepalive
+  (of-object "GSocket")
+  (c-name "g_socket_set_keepalive")
+  (return-type "none")
+  (parameters
+    '("gboolean" "keepalive")
+  )
+)
+
+(define-method get_keepalive
+  (of-object "GSocket")
+  (c-name "g_socket_get_keepalive")
+  (return-type "gboolean")
+)
+
+(define-method get_listen_backlog
+  (of-object "GSocket")
+  (c-name "g_socket_get_listen_backlog")
+  (return-type "gint")
+)
+
+(define-method set_listen_backlog
+  (of-object "GSocket")
+  (c-name "g_socket_set_listen_backlog")
+  (return-type "none")
+  (parameters
+    '("gint" "backlog")
+  )
+)
+
+(define-method is_connected
+  (of-object "GSocket")
+  (c-name "g_socket_is_connected")
+  (return-type "gboolean")
+)
+
+(define-method bind
+  (of-object "GSocket")
+  (c-name "g_socket_bind")
+  (return-type "gboolean")
+  (parameters
+    '("GSocketAddress*" "address")
+    '("gboolean" "allow_reuse")
+    '("GError**" "error")
+  )
+)
+
+(define-method connect
+  (of-object "GSocket")
+  (c-name "g_socket_connect")
+  (return-type "gboolean")
+  (parameters
+    '("GSocketAddress*" "address")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method check_connect_result
+  (of-object "GSocket")
+  (c-name "g_socket_check_connect_result")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method condition_check
+  (of-object "GSocket")
+  (c-name "g_socket_condition_check")
+  (return-type "GIOCondition")
+  (parameters
+    '("GIOCondition" "condition")
+  )
+)
+
+(define-method condition_wait
+  (of-object "GSocket")
+  (c-name "g_socket_condition_wait")
+  (return-type "gboolean")
+  (parameters
+    '("GIOCondition" "condition")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method accept
+  (of-object "GSocket")
+  (c-name "g_socket_accept")
+  (return-type "GSocket*")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method listen
+  (of-object "GSocket")
+  (c-name "g_socket_listen")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method receive
+  (of-object "GSocket")
+  (c-name "g_socket_receive")
+  (return-type "gssize")
+  (parameters
+    '("gchar*" "buffer")
+    '("gsize" "size")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method receive_from
+  (of-object "GSocket")
+  (c-name "g_socket_receive_from")
+  (return-type "gssize")
+  (parameters
+    '("GSocketAddress**" "address")
+    '("gchar*" "buffer")
+    '("gsize" "size")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method send
+  (of-object "GSocket")
+  (c-name "g_socket_send")
+  (return-type "gssize")
+  (parameters
+    '("const-gchar*" "buffer")
+    '("gsize" "size")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method send_to
+  (of-object "GSocket")
+  (c-name "g_socket_send_to")
+  (return-type "gssize")
+  (parameters
+    '("GSocketAddress*" "address")
+    '("const-gchar*" "buffer")
+    '("gsize" "size")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method receive_message
+  (of-object "GSocket")
+  (c-name "g_socket_receive_message")
+  (return-type "gssize")
+  (parameters
+    '("GSocketAddress**" "address")
+    '("GInputVector*" "vectors")
+    '("gint" "num_vectors")
+    '("GSocketControlMessage***" "messages")
+    '("gint*" "num_messages")
+    '("gint*" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method send_message
+  (of-object "GSocket")
+  (c-name "g_socket_send_message")
+  (return-type "gssize")
+  (parameters
+    '("GSocketAddress*" "address")
+    '("GOutputVector*" "vectors")
+    '("gint" "num_vectors")
+    '("GSocketControlMessage**" "messages")
+    '("gint" "num_messages")
+    '("gint" "flags")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method close
+  (of-object "GSocket")
+  (c-name "g_socket_close")
+  (return-type "gboolean")
+  (parameters
+    '("GError**" "error")
+  )
+)
+
+(define-method shutdown
+  (of-object "GSocket")
+  (c-name "g_socket_shutdown")
+  (return-type "gboolean")
+  (parameters
+    '("gboolean" "shutdown_read")
+    '("gboolean" "shutdown_write")
+    '("GError**" "error")
+  )
+)
+
+(define-method is_closed
+  (of-object "GSocket")
+  (c-name "g_socket_is_closed")
+  (return-type "gboolean")
+)
+
+(define-method create_source
+  (of-object "GSocket")
+  (c-name "g_socket_create_source")
+  (return-type "GSource*")
+  (parameters
+    '("GIOCondition" "condition")
+    '("GCancellable*" "cancellable")
+  )
+)
+
+(define-method speaks_ipv4
+  (of-object "GSocket")
+  (c-name "g_socket_speaks_ipv4")
+  (return-type "gboolean")
+)
+
+
+
+;; From gsocketlistener.h
+
+(define-function g_socket_listener_get_type
+  (c-name "g_socket_listener_get_type")
+  (return-type "GType")
+)
+
+(define-function g_socket_listener_new
+  (c-name "g_socket_listener_new")
+  (is-constructor-of "GSocketListener")
+  (return-type "GSocketListener*")
+)
+
+(define-method set_backlog
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_set_backlog")
+  (return-type "none")
+  (parameters
+    '("int" "listen_backlog")
+  )
+)
+
+(define-method add_socket
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_add_socket")
+  (return-type "gboolean")
+  (parameters
+    '("GSocket*" "socket")
+    '("GObject*" "source_object")
+    '("GError**" "error")
+  )
+)
+
+(define-method add_address
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_add_address")
+  (return-type "gboolean")
+  (parameters
+    '("GSocketAddress*" "address")
+    '("GSocketType" "type")
+    '("GSocketProtocol" "protocol")
+    '("GObject*" "source_object")
+    '("GSocketAddress**" "effective_address")
+    '("GError**" "error")
+  )
+)
+
+(define-method add_inet_port
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_add_inet_port")
+  (return-type "gboolean")
+  (parameters
+    '("guint16" "port")
+    '("GObject*" "source_object")
+    '("GError**" "error")
+  )
+)
+
+(define-method accept_socket
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept_socket")
+  (return-type "GSocket*")
+  (parameters
+    '("GObject**" "source_object")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method accept_socket_async
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept_socket_async")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method accept_socket_finish
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept_socket_finish")
+  (return-type "GSocket*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GObject**" "source_object")
+    '("GError**" "error")
+  )
+)
+
+(define-method accept
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GObject**" "source_object")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method accept_async
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept_async")
+  (return-type "none")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method accept_finish
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_accept_finish")
+  (return-type "GSocketConnection*")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GObject**" "source_object")
+    '("GError**" "error")
+  )
+)
+
+(define-method close
+  (of-object "GSocketListener")
+  (c-name "g_socket_listener_close")
+  (return-type "none")
+)
+
+
+
+;; From gsocketservice.h
+
+(define-function g_socket_service_get_type
+  (c-name "g_socket_service_get_type")
+  (return-type "GType")
+)
+
+(define-function g_socket_service_new
+  (c-name "g_socket_service_new")
+  (is-constructor-of "GSocketService")
+  (return-type "GSocketService*")
+)
+
+(define-method start
+  (of-object "GSocketService")
+  (c-name "g_socket_service_start")
+  (return-type "none")
+)
+
+(define-method stop
+  (of-object "GSocketService")
+  (c-name "g_socket_service_stop")
+  (return-type "none")
+)
+
+(define-method is_active
+  (of-object "GSocketService")
+  (c-name "g_socket_service_is_active")
+  (return-type "gboolean")
+)
+
+
+
+;; From gsrvtarget.h
+
+(define-function g_srv_target_get_type
+  (c-name "g_srv_target_get_type")
+  (return-type "GType")
+)
+
+(define-function g_srv_target_new
+  (c-name "g_srv_target_new")
+  (is-constructor-of "GSrvTarget")
+  (return-type "GSrvTarget*")
+  (parameters
+    '("const-gchar*" "hostname")
+    '("guint16" "port")
+    '("guint16" "priority")
+    '("guint16" "weight")
+  )
+)
+
+(define-method copy
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_copy")
+  (return-type "GSrvTarget*")
+)
+
+(define-method free
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_free")
+  (return-type "none")
+)
+
+(define-method get_hostname
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_get_hostname")
+  (return-type "const-gchar*")
+)
+
+(define-method get_port
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_get_port")
+  (return-type "guint16")
+)
+
+(define-method get_priority
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_get_priority")
+  (return-type "guint16")
+)
+
+(define-method get_weight
+  (of-object "GSrvTarget")
+  (c-name "g_srv_target_get_weight")
+  (return-type "guint16")
+)
+
+(define-function g_srv_target_list_sort
+  (c-name "g_srv_target_list_sort")
+  (return-type "GList*")
+  (parameters
+    '("GList*" "targets")
+  )
+)
+
+
+
 ;; From gthemedicon.h
 
 (define-function themed_icon_get_type
@@ -5141,7 +7102,22 @@
 )
 
 
-;; From gunionvolumemonitor.h
+
+;; From gthreadedsocketservice.h
+
+(define-function g_threaded_socket_service_get_type
+  (c-name "g_threaded_socket_service_get_type")
+  (return-type "GType")
+)
+
+(define-function g_threaded_socket_service_new
+  (c-name "g_threaded_socket_service_new")
+  (is-constructor-of "GThreadedSocketService")
+  (return-type "GSocketService*")
+  (parameters
+    '("int" "max_threads")
+  )
+)
 
 
 
@@ -5372,6 +7348,29 @@
   (return-type "GFile*")
 )
 
+(define-method eject_with_operation
+  (of-object "GVolume")
+  (c-name "g_volume_eject_with_operation")
+  (return-type "none")
+  (parameters
+    '("GMountUnmountFlags" "flags")
+    '("GMountOperation*" "mount_operation")
+    '("GCancellable*" "cancellable")
+    '("GAsyncReadyCallback" "callback")
+    '("gpointer" "user_data")
+  )
+)
+
+(define-method eject_with_operation_finish
+  (of-object "GVolume")
+  (c-name "g_volume_eject_with_operation_finish")
+  (return-type "gboolean")
+  (parameters
+    '("GAsyncResult*" "result")
+    '("GError**" "error")
+  )
+)
+
 
 
 ;; From gvolumemonitor.h
@@ -5440,3 +7439,4 @@
     '("GMount*" "mount")
   )
 )
+
