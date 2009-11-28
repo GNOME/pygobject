@@ -636,6 +636,22 @@ GType test_gi_sub_object_get_type (void) G_GNUC_CONST;
 void test_gi_sub_object_sub_method (TestGISubObject *object);
 void test_gi_sub_object_overwritten_method (TestGISubObject *object);
 
+/* Interfaces */
+
+#define TESTGI_TYPE_INTERFACE              (test_gi_interface_get_type ())
+#define TESTGI_INTERFACE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), TESTGI_TYPE_INTERFACE, TestGIInterface))
+#define TESTGI_IS_INTERFACE(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), TESTGI_TYPE_INTERFACE))
+#define TESTGI_INTERFACE_GET_IFACE(obj)    (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TESTGI_TYPE_INTERFACE, TestGIInterfaceIface))
+
+typedef struct _TestGIInterface TestGIInterface;
+typedef struct _TestGIInterfaceIface TestGIInterfaceIface;
+
+struct _TestGIInterfaceIface {
+    GTypeInterface base_iface;
+};
+
+GType test_gi_interface_get_type (void) G_GNUC_CONST;
+
 
 /* Multiple output arguments */
 

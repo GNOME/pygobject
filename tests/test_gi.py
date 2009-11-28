@@ -1450,3 +1450,24 @@ class TestMultiOutputArgs(unittest.TestCase):
         self.assertEquals((6, 7), TestGI.int_return_out())
 
 
+# Interface
+
+class TestInterfaces(unittest.TestCase):
+
+    def test_wrapper(self):
+        self.assertTrue(issubclass(TestGI.Interface, gobject.GInterface))
+        self.assertEquals(TestGI.Interface.__gtype__.name, 'TestGIInterface')
+        self.assertRaises(NotImplementedError, TestGI.Interface)
+
+    def test_implementation(self):
+
+        class TestInterfaceImpl(gobject.GObject, TestGI.Interface):
+            __gtype_name__ = 'TestInterfaceImpl'
+            def __init__(self):
+                gobject.GObject.__init__(self)
+
+        self.assertTrue(issubclass(TestInterfaceImpl, TestGI.Interface))
+
+        instance = TestInterfaceImpl()
+        self.assertTrue(isinstance(instance, TestGI.Interface))
+

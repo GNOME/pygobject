@@ -3394,6 +3394,29 @@ test_gi_sub_object_overwritten_method (TestGISubObject *object)
     g_assert(TESTGI_OBJECT(object)->int_ == 0);
 }
 
+/* Interfaces */
+
+static void
+test_gi_interface_class_init(void *g_iface)
+{
+}
+
+GType
+test_gi_interface_get_type(void)
+{
+    static GType type = 0;
+    if (type == 0) {
+        type = g_type_register_static_simple (G_TYPE_INTERFACE,
+                                              "TestGIInterface",
+                                              sizeof (TestGIInterfaceIface),
+                                              (GClassInitFunc) test_gi_interface_class_init,
+                                              0, NULL, 0);
+    }
+
+    return type;
+}
+
+
 /**
  * test_gi_int_out_out:
  * int0: (out):
