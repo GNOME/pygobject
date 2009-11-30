@@ -36,7 +36,7 @@ CPPFLAGS="${save_CPPFLAGS}"
 
 # GNOME
 PKG_CHECK_MODULES(GNOME,
-	glib-2.0 >= 2.22
+	glib-2.0 >= 2.20
 	gobject-introspection-1.0 >= 0.6.4
 	pygobject-2.0 >= 2.20
 )
