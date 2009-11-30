@@ -35,12 +35,12 @@ from ._gi import \
     ConstantInfo, \
     StructInfo, \
     Struct, \
+    Boxed, \
     enum_add, \
     flags_add
 from .types import \
     GObjectMeta, \
     StructMeta, \
-    Boxed, \
     Function
 
 repository = Repository.get_default()

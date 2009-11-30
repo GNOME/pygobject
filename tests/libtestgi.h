@@ -544,26 +544,26 @@ void test_gi__pointer_struct_inout (TestGIPointerStruct **struct_);
 
 typedef struct {
     glong long_;
-} TestGIBoxedStruct;
+} TestGIBoxedWithoutConstructorStruct;
 
-GType test_gi_boxed_struct_get_type (void) G_GNUC_CONST;
+GType test_gi_boxed_without_constructor_struct_get_type (void) G_GNUC_CONST;
 
 
 typedef struct {
     glong long_;
-} TestGIBoxedInstantiableStruct;
+} TestGIBoxedStruct;
 
-GType test_gi_boxed_instantiable_struct_get_type (void) G_GNUC_CONST;
+GType test_gi_boxed_struct_get_type (void) G_GNUC_CONST;
 
-TestGIBoxedInstantiableStruct *test_gi_boxed_instantiable_struct_new (void);
+TestGIBoxedStruct *test_gi_boxed_struct_new (void);
 
-TestGIBoxedInstantiableStruct *test_gi__boxed_instantiable_struct_return (void);
+TestGIBoxedStruct *test_gi__boxed_struct_return (void);
 
-void test_gi__boxed_instantiable_struct_in (TestGIBoxedInstantiableStruct *struct_);
+void test_gi__boxed_struct_in (TestGIBoxedStruct *struct_);
 
-void test_gi__boxed_instantiable_struct_out (TestGIBoxedInstantiableStruct **struct_);
+void test_gi__boxed_struct_out (TestGIBoxedStruct **struct_);
 
-void test_gi__boxed_instantiable_struct_inout (TestGIBoxedInstantiableStruct **struct_);
+void test_gi__boxed_struct_inout (TestGIBoxedStruct **struct_);
 
 
 /* Object */

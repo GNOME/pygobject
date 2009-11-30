@@ -166,6 +166,7 @@ init_gi(void)
     _pygi_repository_register_types(m);
     _pygi_info_register_types(m);
     _pygi_struct_register_types(m);
+    _pygi_boxed_register_types(m);
     _pygi_argument_init();
 
     api = PyCObject_FromVoidPtr((void *)&PyGI_API, NULL);

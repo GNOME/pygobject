@@ -33,24 +33,6 @@ from ._gi import \
     register_interface_info
 
 
-class Boxed(gobject.GBoxed):
-    # Instances of boxed structures cannot be constructed unless they have a
-    # specific constructor.
-    #
-    # To achieve this behavior, PyGBoxed_Type's constructor creates an
-    # instance, and the initializer eventually raises an exception. If things
-    # had been implemented correctly, PyGBoxed_Type.tp_new would have been set to
-    # NULL, and neither a creator nor an initializer wouldn't have been needed.
-    #
-    # In order to keep the code generic, we need to revert the right behavior.
-
-    def __new__(cls):
-        raise TypeError, "instances of '%s' cannot be created" % cls.__name__
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-
 def Function(info):
 
     def function(*args):

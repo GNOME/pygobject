@@ -21,6 +21,7 @@
 #include "pygi-repository.h"
 #include "pygi-info.h"
 #include "pygi-struct.h"
+#include "pygi-boxed.h"
 #include "pygi-argument.h"
 #include "pygi-type.h"
 

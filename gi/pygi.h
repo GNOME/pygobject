@@ -44,6 +44,12 @@ typedef struct {
     gboolean free_on_dealloc;
 } PyGIStruct;
 
+typedef struct {
+    PyGBoxed base;
+    gboolean slice_allocated;
+    gsize size;
+} PyGIBoxed;
+
 
 struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);

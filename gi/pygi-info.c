@@ -981,7 +981,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                         break;
                     }
                     g_warn_if_fail(transfer == GI_TRANSFER_EVERYTHING);
-                    return_value = pyg_boxed_new(type, return_arg.v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
+                    return_value = _pygi_boxed_new(py_type, return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
                 } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                     if (return_arg.v_pointer == NULL) {
                         PyErr_SetString(PyExc_TypeError, "constructor returned NULL");

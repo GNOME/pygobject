@@ -34,6 +34,8 @@ _gi_la_SOURCES = \
 	pygi-argument.h \
 	pygi-type.c \
 	pygi-type.h \
+	pygi-boxed.c \
+	pygi-boxed.h \
 	pygi.h \
 	pygi-private.h \
 	pygobject-external.h \

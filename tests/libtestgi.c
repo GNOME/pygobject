@@ -3023,6 +3023,39 @@ test_gi__pointer_struct_inout (TestGIPointerStruct **struct_)
 }
 
 
+TestGIBoxedWithoutConstructorStruct *
+test_gi_boxed_without_constructor_struct_copy (TestGIBoxedWithoutConstructorStruct *struct_)
+{
+    TestGIBoxedWithoutConstructorStruct *new_struct;
+
+    new_struct = g_slice_new (TestGIBoxedWithoutConstructorStruct);
+
+    *new_struct = *struct_;
+
+    return new_struct;
+}
+
+static void
+test_gi_boxed_without_constructor_struct_free (TestGIBoxedWithoutConstructorStruct *struct_)
+{
+    g_slice_free (TestGIBoxedWithoutConstructorStruct, struct_);
+}
+
+GType
+test_gi_boxed_without_constructor_struct_get_type (void)
+{
+    static GType type = 0;
+
+    if (type == 0) {
+        type = g_boxed_type_register_static ("TestGIBoxedWithoutConstructorStruct",
+                (GBoxedCopyFunc) test_gi_boxed_without_constructor_struct_copy,
+                (GBoxedFreeFunc) test_gi_boxed_without_constructor_struct_free);
+    }
+
+    return type;
+}
+
+
 TestGIBoxedStruct *
 test_gi_boxed_struct_copy (TestGIBoxedStruct *struct_)
 {
@@ -3055,56 +3088,23 @@ test_gi_boxed_struct_get_type (void)
     return type;
 }
 
-
-TestGIBoxedInstantiableStruct *
-test_gi_boxed_instantiable_struct_copy (TestGIBoxedInstantiableStruct *struct_)
+TestGIBoxedStruct *
+test_gi_boxed_struct_new (void)
 {
-    TestGIBoxedInstantiableStruct *new_struct;
-
-    new_struct = g_slice_new (TestGIBoxedInstantiableStruct);
-
-    *new_struct = *struct_;
-
-    return new_struct;
-}
-
-static void
-test_gi_boxed_instantiable_struct_free (TestGIBoxedInstantiableStruct *struct_)
-{
-    g_slice_free (TestGIBoxedInstantiableStruct, struct_);
-}
-
-GType
-test_gi_boxed_instantiable_struct_get_type (void)
-{
-    static GType type = 0;
-
-    if (type == 0) {
-        type = g_boxed_type_register_static ("TestGIBoxedInstantiableStruct",
-                (GBoxedCopyFunc) test_gi_boxed_instantiable_struct_copy,
-                (GBoxedFreeFunc) test_gi_boxed_instantiable_struct_free);
-    }
-
-    return type;
-}
-
-TestGIBoxedInstantiableStruct *
-test_gi_boxed_instantiable_struct_new (void)
-{
-    return g_slice_new (TestGIBoxedInstantiableStruct);
+    return g_slice_new (TestGIBoxedStruct);
 }
 
 /**
- * test_gi__boxed_instantiable_struct_return:
+ * test_gi__boxed_struct_return:
  * Returns: (transfer none):
  */
-TestGIBoxedInstantiableStruct *
-test_gi__boxed_instantiable_struct_return (void)
+TestGIBoxedStruct *
+test_gi__boxed_struct_return (void)
 {
-    static TestGIBoxedInstantiableStruct *struct_ = NULL;
+    static TestGIBoxedStruct *struct_ = NULL;
 
     if (struct_ == NULL) {
-        struct_ = g_new(TestGIBoxedInstantiableStruct, 1);
+        struct_ = g_new(TestGIBoxedStruct, 1);
 
         struct_->long_ = 42;
     }
@@ -3113,26 +3113,26 @@ test_gi__boxed_instantiable_struct_return (void)
 }
 
 /**
- * test_gi__boxed_instantiable_struct_in:
+ * test_gi__boxed_struct_in:
  * @struct_: (transfer none):
  */
 void
-test_gi__boxed_instantiable_struct_in (TestGIBoxedInstantiableStruct *struct_)
+test_gi__boxed_struct_in (TestGIBoxedStruct *struct_)
 {
     g_assert(struct_->long_ == 42);
 }
 
 /**
- * test_gi__boxed_instantiable_struct_out:
+ * test_gi__boxed_struct_out:
  * @struct_: (out) (transfer none):
  */
 void
-test_gi__boxed_instantiable_struct_out (TestGIBoxedInstantiableStruct **struct_)
+test_gi__boxed_struct_out (TestGIBoxedStruct **struct_)
 {
-    static TestGIBoxedInstantiableStruct *new_struct = NULL;
+    static TestGIBoxedStruct *new_struct = NULL;
 
     if (new_struct == NULL) {
-        new_struct = g_new(TestGIBoxedInstantiableStruct, 1);
+        new_struct = g_new(TestGIBoxedStruct, 1);
 
         new_struct->long_ = 42;
     }
@@ -3141,11 +3141,11 @@ test_gi__boxed_instantiable_struct_out (TestGIBoxedInstantiableStruct **struct_)
 }
 
 /**
- * test_gi__boxed_instantiable_struct_inout:
+ * test_gi__boxed_struct_inout:
  * @struct_: (inout) (transfer none):
  */
 void
-test_gi__boxed_instantiable_struct_inout (TestGIBoxedInstantiableStruct **struct_)
+test_gi__boxed_struct_inout (TestGIBoxedStruct **struct_)
 {
     g_assert((*struct_)->long_ == 42);
 

@@ -1228,54 +1228,61 @@ class TestStructure(unittest.TestCase):
         del in_struct
         del out_struct
 
+    def test_boxed_without_constructor_struct(self):
+        self.assertTrue(issubclass(TestGI.BoxedWithoutConstructorStruct, gobject.GBoxed))
 
-    def test_boxed_struct(self):
-        self.assertTrue(issubclass(TestGI.BoxedStruct, gobject.GBoxed))
+        struct = TestGI.BoxedWithoutConstructorStruct()
 
-        self.assertRaises(TypeError, TestGI.BoxedStruct)
-
-    def test_boxed_instantiable_struct(self):
-        struct = TestGI.BoxedInstantiableStruct()
-
-        self.assertTrue(isinstance(struct, TestGI.BoxedInstantiableStruct))
+        self.assertTrue(isinstance(struct, TestGI.BoxedWithoutConstructorStruct))
 
         new_struct = struct.copy()
-        self.assertTrue(isinstance(new_struct, TestGI.BoxedInstantiableStruct))
+        self.assertTrue(isinstance(new_struct, TestGI.BoxedWithoutConstructorStruct))
 
         del struct
         del new_struct
 
-    def test_boxed_instantiable_struct_return(self):
-        struct = TestGI.boxed_instantiable_struct_return()
+    def test_boxed_struct(self):
+        struct = TestGI.BoxedStruct()
 
-        self.assertTrue(isinstance(struct, TestGI.BoxedInstantiableStruct))
+        self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
+
+        new_struct = struct.copy()
+        self.assertTrue(isinstance(new_struct, TestGI.BoxedStruct))
+
+        del struct
+        del new_struct
+
+    def test_boxed_struct_return(self):
+        struct = TestGI.boxed_struct_return()
+
+        self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
         self.assertEquals(42, struct.long_)
 
         del struct
 
-    def test_boxed_instantiable_struct_in(self):
-        struct = TestGI.BoxedInstantiableStruct()
+    def test_boxed_struct_in(self):
+        struct = TestGI.BoxedStruct()
         struct.long_ = 42
 
-        TestGI.boxed_instantiable_struct_in(struct)
+        TestGI.boxed_struct_in(struct)
 
         del struct
 
-    def test_boxed_instantiable_struct_out(self):
-        struct = TestGI.boxed_instantiable_struct_out()
+    def test_boxed_struct_out(self):
+        struct = TestGI.boxed_struct_out()
 
-        self.assertTrue(isinstance(struct, TestGI.BoxedInstantiableStruct))
+        self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
         self.assertEquals(42, struct.long_)
 
         del struct
 
-    def test_boxed_instantiable_struct_inout(self):
-        in_struct = TestGI.BoxedInstantiableStruct()
+    def test_boxed_struct_inout(self):
+        in_struct = TestGI.BoxedStruct()
         in_struct.long_ = 42
 
-        out_struct = TestGI.boxed_instantiable_struct_inout(in_struct)
+        out_struct = TestGI.boxed_struct_inout(in_struct)
 
-        self.assertTrue(isinstance(out_struct, TestGI.BoxedInstantiableStruct))
+        self.assertTrue(isinstance(out_struct, TestGI.BoxedStruct))
         self.assertEquals(0, out_struct.long_)
 
         del in_struct

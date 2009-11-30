@@ -1557,8 +1557,20 @@ _pygi_argument_to_object (GArgument  *arg,
                         g_assert(is_pointer);
                         object = pyg_value_as_pyobject(arg->v_pointer, FALSE);
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
+                        PyObject *py_type;
+
                         g_assert(is_pointer);
-                        object = pyg_boxed_new(type, arg->v_pointer, FALSE, transfer == GI_TRANSFER_EVERYTHING);
+
+                        py_type = _pygi_type_get_from_g_type(type);
+                        if (py_type == NULL) {
+                            PyErr_Format(PyExc_ValueError, "couldn't find a wrapper for type '%s'",
+                                         g_type_name(type));
+                            break;
+                        }
+
+                        object = _pygi_boxed_new((PyTypeObject *)py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+
+                        Py_DECREF(py_type);
                     } else if (g_type_is_a(type, G_TYPE_POINTER)) {
                         PyObject *py_type;
 
