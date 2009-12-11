@@ -4,7 +4,6 @@ import sys
 import unittest
 import glob
 
-sys.path.insert(0, "../")
 
 loader = unittest.TestLoader()
 

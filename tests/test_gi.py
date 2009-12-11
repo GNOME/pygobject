@@ -9,6 +9,9 @@ import gobject
 
 from datetime import datetime
 
+import sys
+sys.path.insert(0, "../")
+
 from gi.repository import TestGI
 
 
