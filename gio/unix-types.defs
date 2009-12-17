@@ -1,5 +1,12 @@
 ;; -*- scheme -*-
 
+(define-object Connection
+  (in-module "giounix")
+  (parent "GSocketConnection")
+  (c-name "GUnixConnection")
+  (gtype-id "G_TYPE_UNIX_CONNECTION")
+)
+
 (define-object DesktopAppInfo
   (docstring
   "DesktopAppInfo(desktop_id) -> gio.unix.DesktopAppInfo\n\n"
@@ -10,6 +17,13 @@
   (parent "GObject")
   (c-name "GDesktopAppInfo")
   (gtype-id "G_TYPE_DESKTOP_APP_INFO")
+)
+
+(define-object FDMessage
+  (in-module "giounix")
+  (parent "GSocketControlMessage")
+  (c-name "GUnixFDMessage")
+  (gtype-id "G_TYPE_UNIX_FD_MESSAGE")
 )
 
 (define-object InputStream
@@ -31,3 +45,11 @@
   (c-name "GUnixMountEntry")
   (gtype-id "GIO_UNIX_MOUNT_ENTRY_TYPE")
 )
+
+(define-object SocketAddress
+  (in-module "giounix")
+  (parent "GSocketAddress")
+  (c-name "GUnixSocketAddress")
+  (gtype-id "G_TYPE_UNIX_SOCKET_ADDRESS")
+)
+

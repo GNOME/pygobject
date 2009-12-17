@@ -2,6 +2,36 @@
 
 (include "unix-types.defs")
 
+;; From gunixconnection.h
+
+(define-function g_unix_connection_get_type
+  (c-name "g_unix_connection_get_type")
+  (return-type "GType")
+)
+
+(define-method send_fd
+  (of-object "GUnixConnection")
+  (c-name "g_unix_connection_send_fd")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "fd")
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+(define-method receive_fd
+  (of-object "GUnixConnection")
+  (c-name "g_unix_connection_receive_fd")
+  (return-type "gint")
+  (parameters
+    '("GCancellable*" "cancellable")
+    '("GError**" "error")
+  )
+)
+
+
+
 ;; From gdesktopappinfo.h
 
 (define-function desktop_app_info_get_type
@@ -48,7 +78,39 @@
   )
 )
 
-;; From gunixmount.h
+
+
+;; From gunixfdmessage.h
+
+(define-function g_unix_fd_message_get_type
+  (c-name "g_unix_fd_message_get_type")
+  (return-type "GType")
+)
+
+(define-function g_unix_fd_message_new
+  (c-name "g_unix_fd_message_new")
+  (is-constructor-of "GUnixFdMessage")
+  (return-type "GSocketControlMessage*")
+)
+
+(define-method steal_fds
+  (of-object "GUnixFDMessage")
+  (c-name "g_unix_fd_message_steal_fds")
+  (return-type "gint*")
+  (parameters
+    '("gint*" "length")
+  )
+)
+
+(define-method append_fd
+  (of-object "GUnixFDMessage")
+  (c-name "g_unix_fd_message_append_fd")
+  (return-type "gboolean")
+  (parameters
+    '("gint" "fd")
+    '("GError**" "error")
+  )
+)
 
 
 
@@ -360,3 +422,54 @@
   (c-name "g_unix_output_stream_get_fd")
   (return-type "gint")
 )
+
+
+
+;; From gunixsocketaddress.h
+
+(define-function g_unix_socket_address_get_type
+  (c-name "g_unix_socket_address_get_type")
+  (return-type "GType")
+)
+
+(define-function g_unix_socket_address_new
+  (c-name "g_unix_socket_address_new")
+  (is-constructor-of "GUnixSocketAddress")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("const-gchar*" "path")
+  )
+)
+
+(define-function g_unix_socket_address_new_abstract
+  (c-name "g_unix_socket_address_new_abstract")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("const-gchar*" "path")
+    '("int" "path_len")
+  )
+)
+
+(define-method get_path
+  (of-object "GUnixSocketAddress")
+  (c-name "g_unix_socket_address_get_path")
+  (return-type "const-char*")
+)
+
+(define-method get_path_len
+  (of-object "GUnixSocketAddress")
+  (c-name "g_unix_socket_address_get_path_len")
+  (return-type "gsize")
+)
+
+(define-method get_is_abstract
+  (of-object "GUnixSocketAddress")
+  (c-name "g_unix_socket_address_get_is_abstract")
+  (return-type "gboolean")
+)
+
+(define-function g_unix_socket_address_abstract_names_supported
+  (c-name "g_unix_socket_address_abstract_names_supported")
+  (return-type "gboolean")
+)
+

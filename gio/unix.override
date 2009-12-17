@@ -23,10 +23,14 @@
 headers
 #define NO_IMPORT_PYGOBJECT
 #include <pygobject.h>
+#include <gio/gio.h>
 #include <gio/gdesktopappinfo.h>
 #include <gio/gunixinputstream.h>
 #include <gio/gunixmounts.h>
 #include <gio/gunixoutputstream.h>
+#include <gio/gunixconnection.h>
+#include <gio/gunixfdmessage.h>
+#include <gio/gunixsocketaddress.h>
 
 #define GIO_UNIX_MOUNT_ENTRY_TYPE (_gio_unix_mount_entry_get_type ())
 
@@ -46,6 +50,10 @@ modulename gio.unix
 import gobject.GObject as PyGObject_Type
 import gio.InputStream as PyGInputStream_Type
 import gio.OutputStream as PyGOutputStream_Type
+import gio.SocketAddress as PyGSocketAddress_Type
+import gio.Cancellable as PyGCancellable_Type
+import gio.SocketConnection as PyGSocketConnection_Type
+import gio.SocketControlMessage as PyGSocketControlMessage_Type
 %%
 ignore-glob
   *_get_type
