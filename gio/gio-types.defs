@@ -72,6 +72,12 @@
   (gtype-id "G_TYPE_SEEKABLE")
 )
 
+(define-interface SocketConnectable
+  (in-module "gio")
+  (c-name "GSocketConnectable")
+  (gtype-id "G_TYPE_SOCKET_CONNECTABLE")
+)
+
 (define-interface Volume
   (in-module "gio")
   (c-name "GVolume")
@@ -253,12 +259,6 @@
   (parent "GObject")
   (c-name "GSocketClient")
   (gtype-id "G_TYPE_SOCKET_CLIENT")
-)
-
-(define-object SocketConnectable
-  (in-module "gio")
-  (c-name "GSocketConnectable")
-  (gtype-id "G_TYPE_SOCKET_CONNECTABLE")
 )
 
 (define-object SocketConnection
