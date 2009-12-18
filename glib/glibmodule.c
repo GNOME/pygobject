@@ -595,6 +595,24 @@ pyglib_set_prgname(PyObject *self, PyObject *arg)
     return Py_None;
 }
 
+static PyObject *
+pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "program", NULL };
+    char *program, *ret;
+    PyObject *retval;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "s:glib.find_program_in_path", kwlist,
+                                     &program))
+        return NULL;
+
+    ret = g_find_program_in_path(program);
+    retval = _PyUnicode_FromString(ret);
+    g_free(ret);
+    return retval;
+}
+
 static PyMethodDef _glib_functions[] = {
     { "threads_init",
       (PyCFunction) pyglib_threads_init, METH_NOARGS,
@@ -688,6 +706,8 @@ static PyMethodDef _glib_functions[] = {
       (PyCFunction)pyglib_get_user_special_dir, METH_VARARGS|METH_KEYWORDS },
     { "markup_escape_text",
       (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
+    { "find_program_in_path",
+      (PyCFunction)pyglib_find_program_in_path, METH_VARARGS|METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
