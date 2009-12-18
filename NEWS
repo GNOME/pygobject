@@ -1,3 +1,21 @@
+2.21.0 18-dec-2009
+        - pygmainloop: fix use of PySignal_WakeUpFD API for nested loops
+          (Philippe Normad, #481569)
+        - Add capabilities to import wrappers from pygi (Simon van der Linden)
+        - Move threads_init() function from 'gobject' to 'glib' (Paul)
+        - Fix wrong minimum checking in float properties (Paul, #587637)
+        - Wrap new API added in GIO 2.22 (Gian Mario)
+        - Fix bad name when rebuilding the unix source module (Gian Mario)
+        - Add the missing limit constants from glibconfig.h
+          (Tomeu Vizoso, #603244)
+        - Suppress warnings about format conversion
+          (Simon van der Linden, #603355)
+        - Properly define Connectable as interface type and not object type
+          (Gian Mario)
+        - Wrap new API added in GIO-UNIX 2.22 (Gian Mario)
+        - Wrap g_find_program_in_path (Gian Mario, #598435)
+        - Add pygi-external.h into Makefile SOURCES (Gian Mario)
+
 2.20.0 23-sep-2009
         - Allow to use automake 1.11 (Paolo Borelli)
         - Specify programming language in .devhelp file (Frédéric Péters)
