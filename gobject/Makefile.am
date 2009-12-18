@@ -61,7 +61,8 @@ _gobject_la_SOURCES =           \
         pygpointer.c            \
         pygpointer.h            \
         pygtype.c               \
-        pygtype.h
+        pygtype.h		\
+	pygi-external.h
 _gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI
