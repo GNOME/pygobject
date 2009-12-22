@@ -6,5 +6,6 @@ pygioverridesdir = $(pkgpyexecdir)/overrides
 pygioverrides_PYTHON = \
 	Gtk.py \
 	Gdk.py \
+	keysyms.py \
 	__init__.py
 

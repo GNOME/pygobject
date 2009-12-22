@@ -4,6 +4,8 @@ from ..module import DynamicModule
 
 class GtkModule(DynamicModule):
 
+    import keysyms
+
     def __init__(self):
         super(GtkModule, self).__init__()
 
