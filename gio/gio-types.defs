@@ -406,8 +406,32 @@
   (c-name "GAppInfoCreateFlags")
   (gtype-id "G_TYPE_APP_INFO_CREATE_FLAGS")
   (values
-    '("one" "G_APP_INFO_CREATE_NONE")
-    '("eeds-terminal" "G_APP_INFO_CREATE_NEEDS_TERMINAL")
+    '("none" "G_APP_INFO_CREATE_NONE")
+    '("needs-terminal" "G_APP_INFO_CREATE_NEEDS_TERMINAL")
+    '("supports-uris" "G_APP_INFO_CREATE_SUPPORTS_URIS")
+  )
+)
+
+(define-flags ConverterFlags
+  (in-module "gio")
+  (c-name "GConverterFlags")
+  (gtype-id "G_TYPE_CONVERTER_FLAGS")
+  (values
+    '("no-flags" "G_CONVERTER_NO_FLAGS")
+    '("input-at-end" "G_CONVERTER_INPUT_AT_END")
+    '("flush" "G_CONVERTER_FLUSH")
+  )
+)
+
+(define-enum ConverterResult
+  (in-module "gio")
+  (c-name "GConverterResult")
+  (gtype-id "G_TYPE_CONVERTER_RESULT")
+  (values
+    '("error" "G_CONVERTER_ERROR")
+    '("converted" "G_CONVERTER_CONVERTED")
+    '("finished" "G_CONVERTER_FINISHED")
+    '("flushed" "G_CONVERTER_FLUSHED")
   )
 )
 
@@ -448,6 +472,7 @@
     '("uint64" "G_FILE_ATTRIBUTE_TYPE_UINT64")
     '("int64" "G_FILE_ATTRIBUTE_TYPE_INT64")
     '("object" "G_FILE_ATTRIBUTE_TYPE_OBJECT")
+    '("stringv" "G_FILE_ATTRIBUTE_TYPE_STRINGV")
   )
 )
 
@@ -478,8 +503,8 @@
   (c-name "GFileQueryInfoFlags")
   (gtype-id "G_TYPE_FILE_QUERY_INFO_FLAGS")
   (values
-    '("ne" "G_FILE_QUERY_INFO_NONE")
-    '("follow-symlinks" "G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS")
+    '("none" "G_FILE_QUERY_INFO_NONE")
+    '("nofollow-symlinks" "G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS")
   )
 )
 
@@ -490,6 +515,16 @@
   (values
     '("none" "G_FILE_CREATE_NONE")
     '("private" "G_FILE_CREATE_PRIVATE")
+    '("replace-destination" "G_FILE_CREATE_REPLACE_DESTINATION")
+  )
+)
+
+(define-enum MountMountFlags
+  (in-module "gio")
+  (c-name "GMountMountFlags")
+  (gtype-id "G_TYPE_MOUNT_MOUNT_FLAGS")
+  (values
+    '("none" "G_MOUNT_MOUNT_NONE")
   )
 )
 
@@ -500,6 +535,28 @@
   (values
     '("none" "G_MOUNT_UNMOUNT_NONE")
     '("force" "G_MOUNT_UNMOUNT_FORCE")
+  )
+)
+
+(define-enum DriveStartFlags
+  (in-module "gio")
+  (c-name "GDriveStartFlags")
+  (gtype-id "G_TYPE_DRIVE_START_FLAGS")
+  (values
+    '("none" "G_DRIVE_START_NONE")
+  )
+)
+
+(define-enum DriveStartStopType
+  (in-module "gio")
+  (c-name "GDriveStartStopType")
+  (gtype-id "G_TYPE_DRIVE_START_STOP_TYPE")
+  (values
+    '("unknown" "G_DRIVE_START_STOP_TYPE_UNKNOWN")
+    '("shutdown" "G_DRIVE_START_STOP_TYPE_SHUTDOWN")
+    '("network" "G_DRIVE_START_STOP_TYPE_NETWORK")
+    '("multidisk" "G_DRIVE_START_STOP_TYPE_MULTIDISK")
+    '("password" "G_DRIVE_START_STOP_TYPE_PASSWORD")
   )
 )
 
@@ -514,6 +571,7 @@
     '("nofollow-symlinks" "G_FILE_COPY_NOFOLLOW_SYMLINKS")
     '("all-metadata" "G_FILE_COPY_ALL_METADATA")
     '("no-fallback-for-move" "G_FILE_COPY_NO_FALLBACK_FOR_MOVE")
+    '("target-default-perms" "G_FILE_COPY_TARGET_DEFAULT_PERMS")
   )
 )
 
@@ -539,6 +597,17 @@
     '("special" "G_FILE_TYPE_SPECIAL")
     '("shortcut" "G_FILE_TYPE_SHORTCUT")
     '("mountable" "G_FILE_TYPE_MOUNTABLE")
+  )
+)
+
+(define-enum FilesystemPreviewType
+  (in-module "gio")
+  (c-name "GFilesystemPreviewType")
+  (gtype-id "G_TYPE_FILESYSTEM_PREVIEW_TYPE")
+  (values
+    '("if-always" "G_FILESYSTEM_PREVIEW_TYPE_IF_ALWAYS")
+    '("if-local" "G_FILESYSTEM_PREVIEW_TYPE_IF_LOCAL")
+    '("never" "G_FILESYSTEM_PREVIEW_TYPE_NEVER")
   )
 )
 
@@ -593,6 +662,11 @@
     '("host-not-found" "G_IO_ERROR_HOST_NOT_FOUND")
     '("would-merge" "G_IO_ERROR_WOULD_MERGE")
     '("failed-handled" "G_IO_ERROR_FAILED_HANDLED")
+    '("too-many-open-files" "G_IO_ERROR_TOO_MANY_OPEN_FILES")
+    '("not-initialized" "G_IO_ERROR_NOT_INITIALIZED")
+    '("address-in-use" "G_IO_ERROR_ADDRESS_IN_USE")
+    '("partial-input" "G_IO_ERROR_PARTIAL_INPUT")
+    '("invalid-data" "G_IO_ERROR_INVALID_DATA")
   )
 )
 
@@ -651,5 +725,76 @@
     '("device" "G_EMBLEM_ORIGIN_DEVICE")
     '("livemetadata" "G_EMBLEM_ORIGIN_LIVEMETADATA")
     '("tag" "G_EMBLEM_ORIGIN_TAG")
+  )
+)
+
+(define-enum ResolverError
+  (in-module "gio")
+  (c-name "GResolverError")
+  (gtype-id "G_TYPE_RESOLVER_ERROR")
+  (values
+    '("not-found" "G_RESOLVER_ERROR_NOT_FOUND")
+    '("temporary-failure" "G_RESOLVER_ERROR_TEMPORARY_FAILURE")
+    '("internal" "G_RESOLVER_ERROR_INTERNAL")
+  )
+)
+
+(define-enum SocketFamily
+  (in-module "gio")
+  (c-name "GSocketFamily")
+  (gtype-id "G_TYPE_SOCKET_FAMILY")
+  (values
+    '("invalid" "G_SOCKET_FAMILY_INVALID")
+    '("unix" "G_SOCKET_FAMILY_UNIX")
+    '("ipv4" "G_SOCKET_FAMILY_IPV4")
+    '("ipv6" "G_SOCKET_FAMILY_IPV6")
+  )
+)
+
+(define-enum SocketType
+  (in-module "gio")
+  (c-name "GSocketType")
+  (gtype-id "G_TYPE_SOCKET_TYPE")
+  (values
+    '("invalid" "G_SOCKET_TYPE_INVALID")
+    '("stream" "G_SOCKET_TYPE_STREAM")
+    '("datagram" "G_SOCKET_TYPE_DATAGRAM")
+    '("seqpacket" "G_SOCKET_TYPE_SEQPACKET")
+  )
+)
+
+(define-enum SocketMsgFlags
+  (in-module "gio")
+  (c-name "GSocketMsgFlags")
+  (gtype-id "G_TYPE_SOCKET_MSG_FLAGS")
+  (values
+    '("none" "G_SOCKET_MSG_NONE")
+    '("oob" "G_SOCKET_MSG_OOB")
+    '("peek" "G_SOCKET_MSG_PEEK")
+    '("dontroute" "G_SOCKET_MSG_DONTROUTE")
+  )
+)
+
+(define-enum SocketProtocol
+  (in-module "gio")
+  (c-name "GSocketProtocol")
+  (gtype-id "G_TYPE_SOCKET_PROTOCOL")
+  (values
+    '("unknown" "G_SOCKET_PROTOCOL_UNKNOWN")
+    '("default" "G_SOCKET_PROTOCOL_DEFAULT")
+    '("tcp" "G_SOCKET_PROTOCOL_TCP")
+    '("udp" "G_SOCKET_PROTOCOL_UDP")
+    '("sctp" "G_SOCKET_PROTOCOL_SCTP")
+  )
+)
+
+(define-enum ZlibCompressorFormat
+  (in-module "gio")
+  (c-name "GZlibCompressorFormat")
+  (gtype-id "G_TYPE_ZLIB_COMPRESSOR_FORMAT")
+  (values
+    '("zlib" "G_ZLIB_COMPRESSOR_FORMAT_ZLIB")
+    '("gzip" "G_ZLIB_COMPRESSOR_FORMAT_GZIP")
+    '("raw" "G_ZLIB_COMPRESSOR_FORMAT_RAW")
   )
 )
