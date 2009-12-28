@@ -294,3 +294,17 @@ _wrap_g_themed_icon_tp_repr(PyGObject *self)
     g_string_free(representation, TRUE);
     return result;
 }
+%%
+override g_emblemed_icon_get_emblems noargs
+static PyObject *
+_wrap_g_emblemed_icon_get_emblems(PyGObject *self)
+{
+    GList *list;
+    PyObject *ret;
+
+    list = g_emblemed_icon_get_emblems(G_EMBLEMED_ICON(self->obj));
+    
+    PYLIST_FROMGLIST(ret, list, pygobject_new(list_item), NULL, NULL);
+
+    return ret;
+}

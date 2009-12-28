@@ -102,3 +102,10 @@ class TestThemedIcon(unittest.TestCase):
         self.assertEquals(self.icon.get_names(), ['open'])
         self.icon.append_name('close')
         self.assertEquals(self.icon.get_names(), ['open', 'close'])
+
+class TestEmblemedIcon(unittest.TestCase):
+    def test_emblemed_icon(self):
+        icon = gio.FileIcon(gio.File('foo.png'))
+        emblem = gio.Emblem(icon)
+        emblemed = gio.EmblemedIcon(icon, emblem)
+        self.assertEquals(emblemed.get_emblems()[0], emblem)
