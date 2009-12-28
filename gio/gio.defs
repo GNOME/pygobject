@@ -661,15 +661,6 @@
   )
 )
 
-(define-method make_pollfd
-  (of-object "GCancellable")
-  (c-name "g_cancellable_make_pollfd")
-  (return-type "gboolean")
-  (parameters
-    '("GPollFD*" "pollfd")
-  )
-)
-
 (define-method release_fd
   (of-object "GCancellable")
   (c-name "g_cancellable_release_fd")
