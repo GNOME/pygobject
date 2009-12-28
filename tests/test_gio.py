@@ -1072,3 +1072,24 @@ class TestBufferedInputStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+class TestIOStream(unittest.TestCase):
+    def setUp(self):
+        self.file = gio.File("file.txt")
+        self.iofile = self.file.create_readwrite(gio.FILE_CREATE_NONE)
+
+    def tearDown(self):
+        if os.path.exists('file.txt'):
+            os.unlink("file.txt")
+
+    def testIOStreamCloseAsync(self):
+        def callback(stream, result):
+            try:
+                self.failUnless(stream.close_finish(result))
+            finally:
+                loop.quit()
+
+        self.iofile.close_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
