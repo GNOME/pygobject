@@ -84,7 +84,38 @@ _wrap_g_file_info_get_modification_time(PyGObject *self, PyObject *unused)
     g_file_info_get_modification_time(G_FILE_INFO(self->obj), &timeval);
     return pyglib_float_from_timeval(timeval);
 }
+%%
+override g_file_info_set_modification_time kwargs
+static PyObject *
+_wrap_g_file_info_set_modification_time(PyGObject *self, 
+                                        PyObject  *args, 
+                                        PyObject  *kwargs)
+{
+    char *kwlist[] = { "mtime", NULL};
+    double py_mtime = 0.0;
+    GTimeVal ttime, *mtime;
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "d:gio.FileInfo.set_modification_time",
+                                     kwlist, &py_mtime))
+        return NULL;
+
+    if (py_mtime > 0.0) {
+	ttime.tv_sec = (glong) py_mtime;
+	ttime.tv_usec = (glong)((py_mtime - ttime.tv_sec) * G_USEC_PER_SEC);
+        mtime = &ttime;
+    } else if (py_mtime == 0.0) {
+	mtime = NULL;
+    } else {
+        PyErr_SetString(PyExc_ValueError, "mtime must be >= 0.0");
+        return NULL;
+    }
+    
+    g_file_info_set_modification_time(G_FILE_INFO(self->obj), mtime);
+    
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 /* GFileInfo.get_attribute_data: No ArgType for GFileAttributeType* */
 /* GFileInfo.set_attribute: No ArgType for gpointer */
-/* GFileInfo.set_modification_time: No ArgType for GTimeVal* */

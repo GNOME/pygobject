@@ -945,9 +945,14 @@ class TestFileInfo(unittest.TestCase):
         self.failUnless(attributes)
         self.failUnless('standard::name' in attributes)
 
-    def testModificationTime(self):
+    def testGetModificationTime(self):
         mtime = self.fileinfo.get_modification_time()
         self.assertEqual(type(mtime), float)
+
+    def testSetModificationTime(self):
+        self.fileinfo.set_modification_time(1000)
+        mtime = self.fileinfo.get_modification_time()
+        self.assertEqual(mtime, 1000)
 
 
 class TestAppInfo(unittest.TestCase):
