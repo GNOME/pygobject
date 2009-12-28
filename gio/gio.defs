@@ -3015,7 +3015,7 @@
   (return-type "GFileIOStream*")
   (parameters
     '("GFileCreateFlags" "flags")
-    '("GCancellable*" "cancellable")
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
