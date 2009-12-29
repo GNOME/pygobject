@@ -5778,7 +5778,7 @@
   (return-type "gchar*")
   (parameters
     '("GInetAddress*" "address")
-    '("GCancellable*" "cancellable")
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
