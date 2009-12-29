@@ -31,3 +31,17 @@ class TestResolver(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+    def test_resolver_lookup_by_address_async(self):
+        def callback(resolver, result):
+            try:
+                dns = resolver.lookup_by_address_finish(result)
+                self.failUnlessEqual(dns, "google-public-dns-b.google.com")
+            finally:
+                loop.quit()
+
+        address = gio.inet_address_new_from_string("8.8.4.4")
+        self.resolver.lookup_by_address_async(callback, address)
+
+        loop = glib.MainLoop()
+        loop.run()
