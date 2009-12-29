@@ -69,7 +69,12 @@ _wrap_g_drive_eject(PyGObject *self, PyObject *args, PyObject *kwargs)
 				     &py_cancellable,
 				     &notify->data))
         goto error;
-
+    
+    if (PyErr_Warn(PyExc_DeprecationWarning,
+                   "gio.Drive.ejectis deprecated, \
+                   use gtk.Drive.eject_with_operation instead") < 0)
+        return NULL;
+      
     if (!pygio_notify_callback_is_valid(notify))
         goto error;
 

@@ -7313,6 +7313,7 @@
     '("GAsyncResult*" "result")
     '("GError**" "error")
   )
+  (deprecated "use gio.Drive.eject_with_operation_finish instead.")
 )
 
 (define-method get_identifier
