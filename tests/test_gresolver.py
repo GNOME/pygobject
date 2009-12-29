@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from common import gio
+from common import gio, glib
 
 
 class TestResolver(unittest.TestCase):
@@ -18,4 +18,16 @@ class TestResolver(unittest.TestCase):
         address = gio.inet_address_new_from_string("8.8.8.8")
         dns = self.resolver.lookup_by_address(address, cancellable=None)
         self.failUnlessEqual(dns, "google-public-dns-a.google.com")
-        
+    
+    def test_resolver_lookup_by_name_async(self):
+        def callback(resolver, result):
+            try:
+                addresses = resolver.lookup_by_name_finish(result)
+                self.failUnless(isinstance(addresses[0], gio.InetAddress))
+            finally:
+                loop.quit()
+
+        self.resolver.lookup_by_name_async(callback, "pygtk.org")
+
+        loop = glib.MainLoop()
+        loop.run()
