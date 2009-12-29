@@ -1093,3 +1093,21 @@ class TestIOStream(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+
+    def testQueryInfoAsync(self):
+        def callback(stream, result):
+            try:
+                info = stream.query_info_finish(result)
+                self.failUnless(isinstance(info, gio.FileInfo))
+                self.failUnless(info.get_attribute_uint64("standard::size"), 7)
+            finally:
+                loop.quit()
+        
+        ostream = self.iofile.get_output_stream()
+        ostream.write("testing")
+
+        self.iofile.query_info_async("standard", callback)
+
+        loop = glib.MainLoop()
+        loop.run()

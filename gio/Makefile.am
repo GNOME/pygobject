@@ -46,6 +46,7 @@ GIO_OVERRIDES = 			\
 	gfileenumerator.override	\
 	gfileinfo.override		\
 	gfileinputstream.override	\
+	gfileiostream.override		\
 	gfileoutputstream.override	\
 	gicon.override			\
 	giostream.override		\
