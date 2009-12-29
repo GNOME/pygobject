@@ -29,6 +29,8 @@
 #include "pygobject-private.h"
 #include "pygflags.h"
 
+#include "pygi-external.h"
+
 GQuark pygflags_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
@@ -170,13 +172,18 @@ pyg_flags_from_gtype (GType gtype, int value)
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
     
+    /* Get a wrapper class by:
+     * 1. check for one attached to the gtype
+     * 2. lookup one in a typelib
+     * 3. creating a new one
+     */
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygflags_class_key);
-    if (pyclass == NULL) {
-	pyclass = pyg_flags_add(NULL, g_type_name(gtype), NULL, gtype);
-	if (!pyclass)
-	    return _PyLong_FromLong(value);
-    }
-
+    if (!pyclass)
+        pyclass = pygi_type_import_by_g_type(gtype);
+    if (!pyclass)
+        pyclass = pyg_flags_add(NULL, g_type_name(gtype), NULL, gtype);
+    if (!pyclass)
+	return _PyLong_FromLong(value);
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__flags_values__");

@@ -28,6 +28,8 @@
 #include <pyglib.h>
 #include "pygobject-private.h"
 
+#include "pygi-external.h"
+
 GQuark pygenum_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
@@ -150,13 +152,19 @@ pyg_enum_from_gtype (GType gtype, int value)
     PyObject *pyclass, *values, *retval, *intvalue;
 
     g_return_val_if_fail(gtype != G_TYPE_INVALID, NULL);
-    
+
+    /* Get a wrapper class by:
+     * 1. check for one attached to the gtype
+     * 2. lookup one in a typelib
+     * 3. creating a new one
+     */
     pyclass = (PyObject*)g_type_get_qdata(gtype, pygenum_class_key);
-    if (pyclass == NULL) {
-	pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
-	if (!pyclass)
-	    return _PyLong_FromLong(value);
-    }
+    if (!pyclass)
+        pyclass = pygi_type_import_by_g_type(gtype);
+    if (!pyclass)
+        pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
+    if (!pyclass)
+	return _PyLong_FromLong(value);
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
