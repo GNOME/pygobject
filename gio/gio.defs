@@ -5720,7 +5720,7 @@
   (return-type "GType")
 )
 
-(define-function g_resolver_get_default
+(define-function resolver_get_default
   (c-name "g_resolver_get_default")
   (return-type "GResolver*")
 )
