@@ -247,6 +247,7 @@ include
   gmount.override
   ginputstream.override
   goutputstream.override
+  gresolver.override
   gvolume.override
   gvolumemonitor.override
 %%
