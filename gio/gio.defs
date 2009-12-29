@@ -297,7 +297,7 @@
 
 ;; From gasyncinitable.h
 
-(define-function g_async_initable_get_type
+(define-function async_initable_get_type
   (c-name "g_async_initable_get_type")
   (return-type "GType")
 )
@@ -324,7 +324,7 @@
   )
 )
 
-(define-function g_async_initable_new_async
+(define-function async_initable_new_async
   (c-name "g_async_initable_new_async")
   (return-type "none")
   (parameters
@@ -338,7 +338,7 @@
   (varargs #t)
 )
 
-(define-function g_async_initable_newv_async
+(define-function async_initable_newv_async
   (c-name "g_async_initable_newv_async")
   (return-type "none")
   (parameters
@@ -352,7 +352,7 @@
   )
 )
 
-(define-function g_async_initable_new_valist_async
+(define-function async_initable_new_valist_async
   (c-name "g_async_initable_new_valist_async")
   (return-type "none")
   (parameters
@@ -1334,12 +1334,12 @@
 
 ;; From gemblemedicon.h
 
-(define-function g_emblemed_icon_get_type
+(define-function emblemed_icon_get_type
   (c-name "g_emblemed_icon_get_type")
   (return-type "GType")
 )
 
-(define-function g_emblemed_icon_new
+(define-function emblemed_icon_new
   (c-name "g_emblemed_icon_new")
   (is-constructor-of "GEmblemedIcon")
   (return-type "GIcon*")
@@ -1374,12 +1374,12 @@
 
 ;; From gemblem.h
 
-(define-function g_emblem_get_type
+(define-function emblem_get_type
   (c-name "g_emblem_get_type")
   (return-type "GType")
 )
 
-(define-function g_emblem_new
+(define-function emblem_new
   (c-name "g_emblem_new")
   (is-constructor-of "GEmblem")
   (return-type "GEmblem*")
@@ -3876,7 +3876,7 @@
 
 ;; From gfileiostream.h
 
-(define-function g_file_io_stream_get_type
+(define-function file_io_stream_get_type
   (c-name "g_file_io_stream_get_type")
   (return-type "GType")
 )
@@ -4633,7 +4633,7 @@
 
 ;; From ginetaddress.h
 
-(define-function g_inet_address_get_type
+(define-function inet_address_get_type
   (c-name "g_inet_address_get_type")
   (return-type "GType")
 )
@@ -4762,7 +4762,7 @@
 
 ;; From ginitable.h
 
-(define-function g_initable_get_type
+(define-function initable_get_type
   (c-name "g_initable_get_type")
   (return-type "GType")
 )
@@ -4777,7 +4777,7 @@
   )
 )
 
-(define-function g_initable_new
+(define-function initable_new
   (c-name "g_initable_new")
   (return-type "gpointer")
   (parameters
@@ -4789,7 +4789,7 @@
   (varargs #t)
 )
 
-(define-function g_initable_newv
+(define-function initable_newv
   (c-name "g_initable_newv")
   (return-type "gpointer")
   (parameters
@@ -4801,7 +4801,7 @@
   )
 )
 
-(define-function g_initable_new_valist
+(define-function initable_new_valist
   (c-name "g_initable_new_valist")
   (return-type "GObject*")
   (parameters
@@ -4817,7 +4817,7 @@
 
 ;; From giostream.h
 
-(define-function g_io_stream_get_type
+(define-function io_stream_get_type
   (c-name "g_io_stream_get_type")
   (return-type "GType")
 )
@@ -5401,12 +5401,12 @@
 
 ;; From gnetworkaddress.h
 
-(define-function g_network_address_get_type
+(define-function network_address_get_type
   (c-name "g_network_address_get_type")
   (return-type "GType")
 )
 
-(define-function g_network_address_new
+(define-function network_address_new
   (c-name "g_network_address_new")
   (is-constructor-of "GNetworkAddress")
   (return-type "GSocketConnectable*")
@@ -5416,7 +5416,7 @@
   )
 )
 
-(define-function g_network_address_parse
+(define-function network_address_parse
   (c-name "g_network_address_parse")
   (return-type "GSocketConnectable*")
   (parameters
@@ -5442,12 +5442,12 @@
 
 ;; From gnetworkservice.h
 
-(define-function g_network_service_get_type
+(define-function network_service_get_type
   (c-name "g_network_service_get_type")
   (return-type "GType")
 )
 
-(define-function g_network_service_new
+(define-function network_service_new
   (c-name "g_network_service_new")
   (is-constructor-of "GNetworkService")
   (return-type "GSocketConnectable*")
@@ -5715,7 +5715,7 @@
 
 ;; From gresolver.h
 
-(define-function g_resolver_get_type
+(define-function resolver_get_type
   (c-name "g_resolver_get_type")
   (return-type "GType")
 )
@@ -5764,7 +5764,7 @@
   )
 )
 
-(define-function g_resolver_free_addresses
+(define-function resolver_free_addresses
   (c-name "g_resolver_free_addresses")
   (return-type "none")
   (parameters
@@ -5842,7 +5842,7 @@
   )
 )
 
-(define-function g_resolver_free_targets
+(define-function resolver_free_targets
   (c-name "g_resolver_free_targets")
   (return-type "none")
   (parameters
@@ -5850,7 +5850,7 @@
   )
 )
 
-(define-function g_resolver_error_quark
+(define-function resolver_error_quark
   (c-name "g_resolver_error_quark")
   (return-type "GQuark")
 )
@@ -6106,7 +6106,7 @@
 
 ;; From gsocketaddressenumerator.h
 
-(define-function g_socket_address_enumerator_get_type
+(define-function socket_address_enumerator_get_type
   (c-name "g_socket_address_enumerator_get_type")
   (return-type "GType")
 )
@@ -6146,7 +6146,7 @@
 
 ;; From gsocketaddress.h
 
-(define-function g_socket_address_get_type
+(define-function socket_address_get_type
   (c-name "g_socket_address_get_type")
   (return-type "GType")
 )
@@ -6157,7 +6157,7 @@
   (return-type "GSocketFamily")
 )
 
-(define-function g_socket_address_new_from_native
+(define-function socket_address_new_from_native
   (c-name "g_socket_address_new_from_native")
   (return-type "GSocketAddress*")
   (parameters
@@ -6187,12 +6187,12 @@
 
 ;; From gsocketclient.h
 
-(define-function g_socket_client_get_type
+(define-function socket_client_get_type
   (c-name "g_socket_client_get_type")
   (return-type "GType")
 )
 
-(define-function g_socket_client_new
+(define-function socket_client_new
   (c-name "g_socket_client_new")
   (is-constructor-of "GSocketClient")
   (return-type "GSocketClient*")
@@ -6365,7 +6365,7 @@
 
 ;; From gsocketconnectable.h
 
-(define-function g_socket_connectable_get_type
+(define-function socket_connectable_get_type
   (c-name "g_socket_connectable_get_type")
   (return-type "GType")
 )
@@ -6380,7 +6380,7 @@
 
 ;; From gsocketconnection.h
 
-(define-function g_socket_connection_get_type
+(define-function socket_connection_get_type
   (c-name "g_socket_connection_get_type")
   (return-type "GType")
 )
@@ -6409,7 +6409,7 @@
   )
 )
 
-(define-function g_socket_connection_factory_register_type
+(define-function socket_connection_factory_register_type
   (c-name "g_socket_connection_factory_register_type")
   (return-type "none")
   (parameters
@@ -6420,7 +6420,7 @@
   )
 )
 
-(define-function g_socket_connection_factory_lookup_type
+(define-function socket_connection_factory_lookup_type
   (c-name "g_socket_connection_factory_lookup_type")
   (return-type "GType")
   (parameters
@@ -6440,7 +6440,7 @@
 
 ;; From gsocketcontrolmessage.h
 
-(define-function g_socket_control_message_get_type
+(define-function socket_control_message_get_type
   (c-name "g_socket_control_message_get_type")
   (return-type "GType")
 )
@@ -6472,7 +6472,7 @@
   )
 )
 
-(define-function g_socket_control_message_deserialize
+(define-function socket_control_message_deserialize
   (c-name "g_socket_control_message_deserialize")
   (return-type "GSocketControlMessage*")
   (parameters
@@ -6487,12 +6487,12 @@
 
 ;; From gsocket.h
 
-(define-function g_socket_get_type
+(define-function socket_get_type
   (c-name "g_socket_get_type")
   (return-type "GType")
 )
 
-(define-function g_socket_new
+(define-function socket_new
   (c-name "g_socket_new")
   (is-constructor-of "GSocket")
   (return-type "GSocket*")
@@ -6504,7 +6504,7 @@
   )
 )
 
-(define-function g_socket_new_from_fd
+(define-function socket_new_from_fd
   (c-name "g_socket_new_from_fd")
   (return-type "GSocket*")
   (parameters
@@ -6804,12 +6804,12 @@
 
 ;; From gsocketlistener.h
 
-(define-function g_socket_listener_get_type
+(define-function socket_listener_get_type
   (c-name "g_socket_listener_get_type")
   (return-type "GType")
 )
 
-(define-function g_socket_listener_new
+(define-function socket_listener_new
   (c-name "g_socket_listener_new")
   (is-constructor-of "GSocketListener")
   (return-type "GSocketListener*")
@@ -6936,12 +6936,12 @@
 
 ;; From gsocketservice.h
 
-(define-function g_socket_service_get_type
+(define-function socket_service_get_type
   (c-name "g_socket_service_get_type")
   (return-type "GType")
 )
 
-(define-function g_socket_service_new
+(define-function socket_service_new
   (c-name "g_socket_service_new")
   (is-constructor-of "GSocketService")
   (return-type "GSocketService*")
@@ -6969,12 +6969,12 @@
 
 ;; From gsrvtarget.h
 
-(define-function g_srv_target_get_type
+(define-function srv_target_get_type
   (c-name "g_srv_target_get_type")
   (return-type "GType")
 )
 
-(define-function g_srv_target_new
+(define-function srv_target_new
   (c-name "g_srv_target_new")
   (is-constructor-of "GSrvTarget")
   (return-type "GSrvTarget*")
@@ -7022,7 +7022,7 @@
   (return-type "guint16")
 )
 
-(define-function g_srv_target_list_sort
+(define-function srv_target_list_sort
   (c-name "g_srv_target_list_sort")
   (return-type "GList*")
   (parameters
@@ -7096,12 +7096,12 @@
 
 ;; From gthreadedsocketservice.h
 
-(define-function g_threaded_socket_service_get_type
+(define-function threaded_socket_service_get_type
   (c-name "g_threaded_socket_service_get_type")
   (return-type "GType")
 )
 
-(define-function g_threaded_socket_service_new
+(define-function threaded_socket_service_new
   (c-name "g_threaded_socket_service_new")
   (is-constructor-of "GThreadedSocketService")
   (return-type "GSocketService*")
