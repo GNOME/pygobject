@@ -4638,7 +4638,7 @@
   (return-type "GType")
 )
 
-(define-function g_inet_address_new_from_string
+(define-function inet_address_new_from_string
   (c-name "g_inet_address_new_from_string")
   (return-type "GInetAddress*")
   (parameters
@@ -4646,7 +4646,7 @@
   )
 )
 
-(define-function g_inet_address_new_from_bytes
+(define-function inet_address_new_from_bytes
   (c-name "g_inet_address_new_from_bytes")
   (return-type "GInetAddress*")
   (parameters
@@ -4655,7 +4655,7 @@
   )
 )
 
-(define-function g_inet_address_new_loopback
+(define-function inet_address_new_loopback
   (c-name "g_inet_address_new_loopback")
   (return-type "GInetAddress*")
   (parameters
@@ -4663,7 +4663,7 @@
   )
 )
 
-(define-function g_inet_address_new_any
+(define-function inet_address_new_any
   (c-name "g_inet_address_new_any")
   (return-type "GInetAddress*")
   (parameters
