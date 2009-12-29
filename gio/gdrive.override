@@ -3,7 +3,7 @@
  * Copyright (C) 2008  Johan Dahlin
  * Copyright (C) 2009  Gian Mario Tagliaretti
  *
- *   gicon.override: module overrides for GIcon and related types
+ *   gdrive.override: module overrides for GDrive and related types
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
