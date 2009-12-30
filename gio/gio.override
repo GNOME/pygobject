@@ -248,6 +248,7 @@ include
   ginputstream.override
   goutputstream.override
   gresolver.override
+  gsocket.override
   gvolume.override
   gvolumemonitor.override
 %%

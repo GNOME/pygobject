@@ -56,6 +56,7 @@ GIO_OVERRIDES = 			\
 	gmount.override			\
 	goutputstream.override 		\
 	gresolver.override		\
+	gsocket.override		\
 	gvolume.override		\
 	gvolumemonitor.override
 
