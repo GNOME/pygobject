@@ -39,3 +39,30 @@ _wrap_g_socket_condition_check(PyGObject *self,
     
     return pyg_flags_from_gtype(G_TYPE_IO_CONDITION, ret);
 }
+%%
+override g_socket_condition_wait kwargs
+static PyObject *
+_wrap_g_socket_condition_wait(PyGObject *self,
+                              PyObject *args,
+                              PyObject *kwargs)
+{
+    static char *kwlist[] = { "condition", "cancellable", NULL };
+    gboolean ret;
+    gint condition;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+    GError *error;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "i|O:gio.Socket.condition_wait",
+                                     kwlist, &condition, &cancellable))
+        return NULL;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        return NULL;
+    
+    ret = g_socket_condition_wait(G_SOCKET(self->obj), condition,
+                                  cancellable, &error);
+    
+    return PyBool_FromLong(ret);
+}
