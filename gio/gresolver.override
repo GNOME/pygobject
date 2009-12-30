@@ -183,3 +183,45 @@ _wrap_g_resolver_lookup_by_address_async(PyGObject *self,
     pygio_notify_free(notify);
     return NULL;
 }
+%%
+override g_resolver_lookup_service kwargs
+static PyObject *
+_wrap_g_resolver_lookup_service(PyGObject *self,
+                                PyObject *args,
+                                PyObject *kwargs)
+{
+    static char *kwlist[] = { "service", "protocol",
+                              "domain", "cancellable", NULL };
+    gchar *service, *protocol, *domain;
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable;
+    GList *targets;
+    GError *error = NULL;
+    PyObject *ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                    "sss|O:gio.Resolver.lookup_service",
+                                    kwlist,
+                                    &service,
+                                    &protocol,
+                                    &domain,
+                                    &pycancellable))
+        return NULL;
+    
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+	return NULL;
+    
+    targets = g_resolver_lookup_service(G_RESOLVER(self->obj),
+                                        service, protocol, domain,
+                                        cancellable, &error);
+    
+    if (targets) {
+        PYLIST_FROMGLIST(ret, targets,
+                        pyg_boxed_new(G_TYPE_SRV_TARGET, list_item, TRUE, TRUE),
+                        g_resolver_free_targets, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}

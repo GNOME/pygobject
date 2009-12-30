@@ -45,3 +45,8 @@ class TestResolver(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+    def test_resolver_lookup_service(self):
+        targets = self.resolver.lookup_service("xmpp-client", "tcp", "google.com")
+        self.failUnless(isinstance(targets[0], gio.SrvTarget))
+
