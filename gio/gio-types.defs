@@ -212,6 +212,13 @@
   (gtype-id "G_TYPE_INET_ADDRESS")
 )
 
+(define-object InetSocketAddress
+  (in-module "gio")
+  (parent "GSocketAddress")
+  (c-name "GInetSocketAddress")
+  (gtype-id "G_TYPE_INET_SOCKET_ADDRESS")
+)
+
 (define-object NetworkAddress
   (in-module "gio")
   (parent "GObject")

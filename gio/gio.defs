@@ -4156,6 +4156,37 @@
 
 
 
+;; From ginetsocketaddress.h
+
+(define-function inet_socket_address_get_type
+  (c-name "g_inet_socket_address_get_type")
+  (return-type "GType")
+)
+
+(define-function inet_socket_address_new
+  (c-name "g_inet_socket_address_new")
+  (is-constructor-of "GInetSocketAddress")
+  (return-type "GSocketAddress*")
+  (parameters
+    '("GInetAddress*" "address")
+    '("guint16" "port")
+  )
+)
+
+(define-method get_address
+  (of-object "GInetSocketAddress")
+  (c-name "g_inet_socket_address_get_address")
+  (return-type "GInetAddress*")
+)
+
+(define-method get_port
+  (of-object "GInetSocketAddress")
+  (c-name "g_inet_socket_address_get_port")
+  (return-type "guint16")
+)
+
+
+
 ;; From ginputstream.h
 
 (define-function input_stream_get_type
