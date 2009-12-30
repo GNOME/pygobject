@@ -6116,7 +6116,7 @@
   (c-name "g_socket_address_enumerator_next")
   (return-type "GSocketAddress*")
   (parameters
-    '("GCancellable*" "cancellable")
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
