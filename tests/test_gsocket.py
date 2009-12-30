@@ -23,3 +23,19 @@ class TestSocket(unittest.TestCase):
 
     def tearDown(self):
         self.sock.close()
+
+class TestSocketAddress(unittest.TestCase):
+    def test_socket_address_enumerator_next_async(self):
+        def callback(enumerator, result):
+            try:
+                address = enumerator.next_finish(result)
+                self.failUnless(isinstance(address, gio.SocketAddress))
+            finally:
+                loop.quit()
+
+        socket = gio.NetworkAddress("www.pygtk.org", 80)
+        enumerator = socket.enumerate()
+        enumerator.next_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
