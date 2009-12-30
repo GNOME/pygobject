@@ -50,3 +50,16 @@ class TestResolver(unittest.TestCase):
         targets = self.resolver.lookup_service("xmpp-client", "tcp", "google.com")
         self.failUnless(isinstance(targets[0], gio.SrvTarget))
 
+    def test_resolver_lookup_service_async(self):
+        def callback(resolver, result):
+            try:
+                targets = resolver.lookup_service_finish(result)
+                self.failUnless(isinstance(targets[0], gio.SrvTarget))
+            finally:
+                loop.quit()
+
+        self.resolver.lookup_service_async(callback, "xmpp-client", "tcp", "google.com")
+
+        loop = glib.MainLoop()
+        loop.run()
+

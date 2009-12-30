@@ -273,3 +273,40 @@ _wrap_g_resolver_lookup_service_async(PyGObject *self,
     pygio_notify_free(notify);
     return NULL;
 }
+%%
+override g_resolver_lookup_service_finish kwargs
+static PyObject *
+_wrap_g_resolver_lookup_service_finish(PyGObject *self,
+                                       PyObject *args,
+                                       PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *result;
+    GList *targets;
+    PyObject *ret;
+    GError *error = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:gio.Resolver.lookup_service_finish",
+                                     kwlist,
+                                     &PyGAsyncResult_Type,
+                                     &result))
+        return NULL;
+    
+    targets = g_resolver_lookup_service_finish(G_RESOLVER(self->obj),
+                                               G_ASYNC_RESULT(result->obj),
+                                               &error);
+    
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (targets) {
+        PYLIST_FROMGLIST(ret, targets,
+                        pyg_boxed_new(G_TYPE_SRV_TARGET, list_item, TRUE, TRUE),
+                        g_resolver_free_targets, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
