@@ -66,3 +66,8 @@ _wrap_g_socket_condition_wait(PyGObject *self,
     
     return PyBool_FromLong(ret);
 }
+
+/* Could not write method GSocket.receive_from: No ArgType for GSocketAddress** */
+/* Could not write method GSocket.receive_message: No ArgType for GSocketAddress** */
+/* Could not write method GSocket.send_message: No ArgType for GOutputVector* */
+/* Could not write method GSocket.create_source: No ArgType for GIOCondition */
