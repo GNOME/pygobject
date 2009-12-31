@@ -39,3 +39,12 @@ class TestSocketAddress(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+class TestSocketListener(unittest.TestCase):
+    def test_socket_listener_add_address(self):
+        address = gio.inet_address_new_from_string("127.0.0.1")
+        inetsock = gio.InetSocketAddress(address, 1024)
+        
+        listener = gio.SocketListener()
+        effective = listener.add_address(inetsock, gio.SOCKET_TYPE_STREAM, gio.SOCKET_PROTOCOL_TCP)
+        self.failUnless(isinstance(effective, gio.InetSocketAddress))

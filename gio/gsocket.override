@@ -248,13 +248,68 @@ _wrap_g_socket_client_connect_to_service_async(PyGObject *self,
     pygio_notify_free(notify);
     return NULL;
 }
+%%
+override g_socket_listener_add_address kwargs
+static PyObject *
+_wrap_g_socket_listener_add_address(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "address", "type", "protocol",
+                              "source_object", NULL };
+    GSocketProtocol protocol;
+    PyObject *py_type = NULL, *py_protocol = NULL;
+    GError *error = NULL;
+    gboolean ret;
+    GSocketType type;
+    GSocketAddress *effective_address;
+    PyGObject *address, *py_source_object = NULL;
+    GObject *source_object;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!OO|O!:gio.SocketListener.add_address",
+                                     kwlist,
+                                     &PyGSocketAddress_Type, &address,
+                                     &py_type, &py_protocol,
+                                     &PyGObject_Type, &source_object,
+                                     &PyGSocketAddress_Type, &effective_address))
+        return NULL;
+
+    if (pyg_enum_get_value(G_TYPE_SOCKET_TYPE, py_type, (gpointer)&type))
+        return NULL;
+
+    if (pyg_enum_get_value(G_TYPE_SOCKET_PROTOCOL, py_protocol, (gpointer)&protocol))
+        return NULL;
+    
+    if (py_source_object == NULL || (PyObject*)py_source_object == Py_None)
+        source_object = NULL;
+    else if (pygobject_check(py_source_object, &PyGObject_Type))
+        source_object = G_OBJECT(py_source_object->obj);
+    else {
+      PyErr_SetString(PyExc_TypeError, "source_object should be a gobject.GObject or None");
+      return NULL;
+    }
+    
+    ret = g_socket_listener_add_address(G_SOCKET_LISTENER(self->obj),
+                                        G_SOCKET_ADDRESS(address->obj),
+                                        type, protocol,
+                                        source_object,
+                                        &effective_address,
+                                        &error);
+    
+    if (pyg_error_check(&error))
+        return NULL;
+    
+    if (ret)
+        return pygobject_new((GObject *)effective_address);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
 
 /* Could not write method GSocket.receive_from: No ArgType for GSocketAddress** */
 /* Could not write method GSocket.receive_message: No ArgType for GSocketAddress** */
 /* Could not write method GSocket.send_message: No ArgType for GOutputVector* */
 /* Could not write method GSocket.create_source: No ArgType for GIOCondition */
 /* Could not write method GSocketControlMessage.serialize: No ArgType for gpointer */
-/* Could not write method GSocketListener.add_address: No ArgType for GSocketAddress** */
 /* Could not write method GSocketListener.accept_socket: No ArgType for GObject** */
 /* Could not write method GSocketListener.accept_socket_async: No ArgType for GAsyncReadyCallback */
 /* Could not write method GSocketListener.accept_socket_finish: No ArgType for GObject** */
