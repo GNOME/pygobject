@@ -201,6 +201,53 @@ _wrap_g_socket_client_connect_to_host_async(PyGObject *self,
     pygio_notify_free(notify);
     return NULL;
 }
+%%
+override g_socket_client_connect_to_service_async kwargs
+static PyObject *
+_wrap_g_socket_client_connect_to_service_async(PyGObject *self,
+                                               PyObject *args,
+                                               PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "domain", "service",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+    gchar *domain, *service;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                            "Oss|OO:gio.SocketClient.connect_to_service_async",
+                            kwlist,
+                            &notify->callback,
+                            &domain,
+                            &service,
+                            &py_cancellable,
+                            &notify->data))
+        goto error;
+      
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_socket_client_connect_to_service_async(G_SOCKET_CLIENT(self->obj),
+                          domain, service,
+                          cancellable,
+                          (GAsyncReadyCallback) async_result_callback_marshal,
+                          notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
 
 /* Could not write method GSocket.receive_from: No ArgType for GSocketAddress** */
 /* Could not write method GSocket.receive_message: No ArgType for GSocketAddress** */
