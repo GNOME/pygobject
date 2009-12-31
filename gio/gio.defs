@@ -6307,7 +6307,7 @@
   (parameters
     '("const-gchar*" "host_and_port")
     '("guint16" "default_port")
-    '("GCancellable*" "cancellable")
+    '("GCancellable*" "cancellable" (null-ok) (default "NULL"))
     '("GError**" "error")
   )
 )
