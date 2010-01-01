@@ -98,3 +98,27 @@ class TestSocketListener(unittest.TestCase):
 
         loop = glib.MainLoop()
         loop.run()
+
+    def test_socket_listener_accept_socket_async(self):
+        def callback(listener, result):
+            try:
+                socket, source = listener.accept_socket_finish(result)
+                self.failUnless(isinstance(socket, gio.Socket))
+            finally:
+                loop.quit()
+
+        address = gio.inet_address_new_from_string("127.0.0.1")
+        inetsock = gio.InetSocketAddress(address, 1024)
+        
+        listener = gio.SocketListener()
+        listener.add_address(inetsock,
+                             gio.SOCKET_TYPE_STREAM,
+                             gio.SOCKET_PROTOCOL_TCP)
+
+        client = gio.SocketClient()
+        client.connect_to_host("127.0.0.1:1024", 1024)
+        
+        listener.accept_socket_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
