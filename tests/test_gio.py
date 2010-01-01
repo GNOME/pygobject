@@ -92,6 +92,30 @@ class TestFile(unittest.TestCase):
         loop = glib.MainLoop()
         loop.run()
 
+    def testCreateReadWriteAsync(self):
+        def callback(file, result):
+            try:
+                iostream = file.create_readwrite_finish(result)
+                self.failUnless(isinstance(iostream, gio.FileIOStream))
+
+                ostream = iostream.get_output_stream()
+                self.failUnless(isinstance(ostream, gio.OutputStream))
+
+                w = ostream.write("testing")
+                cont, leng, etag = file.load_contents()
+                self.assertEqual(cont, "testing")
+            finally:
+                if os.path.exists('temp.txt'):
+                    os.unlink("temp.txt")
+                loop.quit()
+
+        gfile = gio.File("temp.txt")
+        gfile.create_readwrite_async(callback, gio.FILE_CREATE_NONE,
+                                     glib.PRIORITY_HIGH)
+
+        loop = glib.MainLoop()
+        loop.run()
+
     def testCreateAsyncNoargs(self):
         def callback(file, result):
             try:
