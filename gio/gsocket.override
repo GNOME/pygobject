@@ -350,6 +350,48 @@ _wrap_g_socket_listener_accept(PyGObject *self, PyObject *args, PyObject *kwargs
     return Py_BuildValue("(NN)", py_connection, py_source_object);
 }
 %%
+override g_socket_listener_accept_async kwargs
+static PyObject *
+_wrap_g_socket_listener_accept_async(PyGObject *self,
+                                     PyObject *args,
+                                     PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                            "O|OO:gio.SocketListener.accept_async",
+                            kwlist,
+                            &notify->callback,
+                            &py_cancellable,
+                            &notify->data))
+        goto error;
+      
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_socket_listener_accept_async(G_SOCKET_LISTENER(self->obj),
+                          cancellable,
+                          (GAsyncReadyCallback) async_result_callback_marshal,
+                          notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
 override g_socket_listener_accept_socket kwargs
 static PyObject *
 _wrap_g_socket_listener_accept_socket(PyGObject *self,
