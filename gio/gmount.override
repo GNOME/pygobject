@@ -363,7 +363,7 @@ _wrap_g_mount_unmount_with_operation(PyGObject *self,
     notify = pygio_notify_new();
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                "O|OOOO:gio.Mount.unmount_mountable_with_operation",
+                                "O|OOOO:gio.Mount.unmount_with_operation",
                                 kwlist,
                                 &notify->callback,
                                 &py_flags,
@@ -384,7 +384,7 @@ _wrap_g_mount_unmount_with_operation(PyGObject *self,
 
     pygio_notify_reference_callback(notify);
 
-    g_file_unmount_mountable_with_operation(G_FILE(self->obj),
+    g_mount_unmount_with_operation(G_MOUNT(self->obj),
                              flags,
 			     G_MOUNT_OPERATION(mount_operation->obj),
                              cancellable,
