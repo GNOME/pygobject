@@ -565,8 +565,11 @@ _wrap_g_socket_listener_accept_socket_finish(PyGObject *self,
     return Py_BuildValue("(NN)", py_socket, py_source_object);
 }
 
+/* Could not write method GSocketAddress.to_native: No ArgType for gpointer */
 /* Could not write method GSocket.receive_from: No ArgType for GSocketAddress** */
 /* Could not write method GSocket.receive_message: No ArgType for GSocketAddress** */
 /* Could not write method GSocket.send_message: No ArgType for GOutputVector* */
 /* Could not write method GSocket.create_source: No ArgType for GIOCondition */
 /* Could not write method GSocketControlMessage.serialize: No ArgType for gpointer */
+/* Could not write function socket_address_new_from_native: No ArgType for gpointer */
+/* Could not write function socket_control_message_deserialize: No ArgType for gpointer */
