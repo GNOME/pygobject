@@ -392,6 +392,48 @@ _wrap_g_socket_listener_accept_async(PyGObject *self,
     return NULL;
 }
 %%
+override g_socket_listener_accept_finish kwargs
+static PyObject *
+_wrap_g_socket_listener_accept_finish(PyGObject *self,
+                                      PyObject *args,
+                                      PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    GError *error = NULL;
+    PyGObject *result;
+    PyObject *py_connection, *py_source_object;
+    GObject *source_object;
+    GSocketConnection *connection;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!:gio.SocketListener.accept_finish",
+                                     kwlist,
+                                     &PyGAsyncResult_Type, &result))
+        return NULL;
+
+    connection = g_socket_listener_accept_finish(G_SOCKET_LISTENER(self->obj),
+                                                 G_ASYNC_RESULT(result->obj),
+                                                 &source_object,
+                                                 &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (connection)
+        py_connection = pygobject_new((GObject *)connection);
+    else {
+        py_connection = Py_None;
+        Py_INCREF(py_connection);
+    }
+
+    if (source_object)
+        py_source_object = pygobject_new((GObject *)source_object);
+    else {
+        py_source_object= Py_None;
+        Py_INCREF(py_source_object);
+    }
+    return Py_BuildValue("(NN)", py_connection, py_source_object);
+}
+%%
 override g_socket_listener_accept_socket kwargs
 static PyObject *
 _wrap_g_socket_listener_accept_socket(PyGObject *self,
@@ -446,5 +488,3 @@ _wrap_g_socket_listener_accept_socket(PyGObject *self,
 /* Could not write method GSocketControlMessage.serialize: No ArgType for gpointer */
 /* Could not write method GSocketListener.accept_socket_async: No ArgType for GAsyncReadyCallback */
 /* Could not write method GSocketListener.accept_socket_finish: No ArgType for GObject** */
-/* Could not write method GSocketListener.accept_async: No ArgType for GAsyncReadyCallback */
-/* Could not write method GSocketListener.accept_finish: No ArgType for GObject** */

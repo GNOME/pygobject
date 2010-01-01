@@ -74,3 +74,27 @@ class TestSocketListener(unittest.TestCase):
 
         socket, source = listener.accept_socket(cancellable=None)
         self.failUnless(isinstance(socket, gio.Socket))
+
+    def test_socket_listener_accept_async(self):
+        def callback(listener, result):
+            try:
+                connection, source = listener.accept_finish(result)
+                self.failUnless(isinstance(connection, gio.TcpConnection))
+            finally:
+                loop.quit()
+
+        address = gio.inet_address_new_from_string("127.0.0.1")
+        inetsock = gio.InetSocketAddress(address, 1024)
+        
+        listener = gio.SocketListener()
+        listener.add_address(inetsock,
+                             gio.SOCKET_TYPE_STREAM,
+                             gio.SOCKET_PROTOCOL_TCP)
+
+        client = gio.SocketClient()
+        client.connect_to_host("127.0.0.1:1024", 1024)
+        
+        listener.accept_async(callback)
+
+        loop = glib.MainLoop()
+        loop.run()
