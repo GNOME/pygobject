@@ -1193,6 +1193,62 @@ class TestStructure(unittest.TestCase):
         del in_struct
         del out_struct
 
+    def test_union(self):
+        union = GIMarshallingTests.Union()
+
+        self.assertTrue(isinstance(union, GIMarshallingTests.Union))
+
+        new_union = union.copy()
+        self.assertTrue(isinstance(new_union, GIMarshallingTests.Union))
+
+        del union
+        del new_union
+
+    def test_union_return(self):
+        union = GIMarshallingTests.union_return()
+
+        self.assertTrue(isinstance(union, GIMarshallingTests.Union))
+        self.assertEquals(42, union.long_)
+
+        del union
+
+    def test_union_in(self):
+        union = GIMarshallingTests.Union()
+        union.long_ = 42
+
+        GIMarshallingTests.union_in(union)
+
+        del union
+
+    def test_union_out(self):
+        union = GIMarshallingTests.union_out()
+
+        self.assertTrue(isinstance(union, GIMarshallingTests.Union))
+        self.assertEquals(42, union.long_)
+
+        del union
+
+    def test_union_inout(self):
+        in_union = GIMarshallingTests.Union()
+        in_union.long_ = 42
+
+        out_union = GIMarshallingTests.union_inout(in_union)
+
+        self.assertTrue(isinstance(out_union, GIMarshallingTests.Union))
+        self.assertEquals(0, out_union.long_)
+
+        del in_union
+        del out_union
+
+    def test_union_method(self):
+        union = GIMarshallingTests.Union()
+        union.long_ = 42
+
+        union.method()
+
+        del union
+
+        self.assertRaises(TypeError, GIMarshallingTests.Union.method)
 
 class TestGObject(unittest.TestCase):
 

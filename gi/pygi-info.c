@@ -204,8 +204,8 @@ _pygi_info_new (GIBaseInfo *info)
             PyErr_SetString(PyExc_NotImplementedError, "GIErrorDomainInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_UNION:
-            PyErr_SetString(PyExc_NotImplementedError, "GIUnionInfo bindings not implemented");
-            return NULL;
+            type = &PyGIUnionInfo_Type;
+            break;
         case GI_INFO_TYPE_VALUE:
             type = &PyGIValueInfo_Type;
             break;
@@ -792,9 +792,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
             switch(container_info_type) {
                 case GI_INFO_TYPE_UNION:
-                    PyErr_SetString(PyExc_NotImplementedError, "calling methods on unions is not supported yet.");
-                    goto out;
-                    break;
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
@@ -1931,8 +1928,6 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     container_info_type = g_base_info_get_type(container_info);
     switch (container_info_type) {
         case GI_INFO_TYPE_UNION:
-            PyErr_SetString(PyExc_NotImplementedError, "getting a field from an union is not supported yet");
-            return NULL;
         case GI_INFO_TYPE_STRUCT:
             pointer = pyg_boxed_get(instance, void);
             break;
@@ -2028,8 +2023,6 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     container_info_type = g_base_info_get_type(container_info);
     switch (container_info_type) {
         case GI_INFO_TYPE_UNION:
-            PyErr_SetString(PyExc_NotImplementedError, "setting a field in an union is not supported yet");
-            return NULL;
         case GI_INFO_TYPE_STRUCT:
             pointer = pyg_boxed_get(instance, void);
             break;
@@ -2159,6 +2152,88 @@ static PyMethodDef _PyGIVFuncInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
+
+/* GIUnionInfo */
+_PyGI_DEFINE_INFO_TYPE("UnionInfo", GIUnionInfo, PyGIRegisteredTypeInfo_Type);
+
+static PyObject *
+_wrap_g_union_info_get_fields (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_union_info_get_n_fields((GIUnionInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_union_info_get_field((GIUnionInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
+static PyObject *
+_wrap_g_union_info_get_methods (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_union_info_get_n_methods((GIUnionInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_union_info_get_method((GIUnionInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
+static PyMethodDef _PyGIUnionInfo_methods[] = {
+    { "get_fields", (PyCFunction)_wrap_g_union_info_get_fields, METH_NOARGS },
+    { "get_methods", (PyCFunction)_wrap_g_union_info_get_methods, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
 /* Private */
 
 gchar *
@@ -2209,6 +2284,7 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE(m, PyGIValueInfo_Type, "ValueInfo");
     _PyGI_REGISTER_TYPE(m, PyGIFieldInfo_Type, "FieldInfo");
     _PyGI_REGISTER_TYPE(m, PyGIVFuncInfo_Type, "VFuncInfo");
+    _PyGI_REGISTER_TYPE(m, PyGIUnionInfo_Type, "UnionInfo");
 
 #undef _PyGI_REGISTER_TYPE
 }

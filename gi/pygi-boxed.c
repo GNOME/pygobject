@@ -63,7 +63,7 @@ _boxed_new (PyTypeObject *type,
         return NULL;
     }
 
-    info = _pygi_object_get_gi_info((PyObject *)type, &PyGIStructInfo_Type);
+    info = _pygi_object_get_gi_info((PyObject *)type, &PyGIBaseInfo_Type);
     if (info == NULL) {
         if (PyErr_ExceptionMatches(PyExc_AttributeError)) {
             PyErr_Format(PyExc_TypeError, "missing introspection information");
@@ -71,7 +71,21 @@ _boxed_new (PyTypeObject *type,
         return NULL;
     }
 
-    size = g_struct_info_get_size((GIStructInfo *)info);
+    switch (g_base_info_get_type(info)) {
+        case GI_INFO_TYPE_UNION:
+            size = g_union_info_get_size((GIUnionInfo *)info);
+            break;
+        case GI_INFO_TYPE_BOXED:
+        case GI_INFO_TYPE_STRUCT:
+            size = g_struct_info_get_size((GIStructInfo *)info);
+            break;
+        default:
+            PyErr_Format(PyExc_TypeError,
+                         "info should be Boxed or Union, not '%d'",
+                         g_base_info_get_type(info));
+            return NULL;
+    }
+
     boxed = g_slice_alloc0(size);
     if (boxed == NULL) {
         PyErr_NoMemory();

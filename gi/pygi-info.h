@@ -46,6 +46,7 @@ extern PyTypeObject PyGIValueInfo_Type;
 extern PyTypeObject PyGIFieldInfo_Type;
 extern PyTypeObject PyGIUnresolvedInfo_Type;
 extern PyTypeObject PyGIVFuncInfo_Type;
+extern PyTypeObject PyGIUnionInfo_Type;
 
 #define PyGIBaseInfo_GET_GI_INFO(object) g_base_info_ref(((PyGIBaseInfo *)object)->info)
 

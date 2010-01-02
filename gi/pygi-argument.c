@@ -441,11 +441,8 @@ check_number_release:
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
-                    break;
                 case GI_INFO_TYPE_UNION:
-                    /* TODO */
-                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
+                    retval = _pygi_g_registered_type_info_check_object((GIRegisteredTypeInfo *)info, TRUE, object);
                     break;
                 default:
                     g_assert_not_reached();
@@ -910,6 +907,7 @@ array_item_error:
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_UNION:
                 {
                     GType type;
 
@@ -1004,10 +1002,6 @@ array_item_error:
                         g_object_ref(arg.v_pointer);
                     }
 
-                    break;
-                case GI_INFO_TYPE_UNION:
-                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
-                    /* TODO */
                     break;
                 default:
                     g_assert_not_reached();
@@ -1445,6 +1439,7 @@ _pygi_argument_to_object (GArgument  *arg,
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_UNION:
                 {
                     GType type;
 
@@ -1461,11 +1456,8 @@ _pygi_argument_to_object (GArgument  *arg,
                         PyObject *py_type;
 
                         py_type = _pygi_type_get_from_g_type(type);
-                        if (py_type == NULL) {
-                            PyErr_Format(PyExc_ValueError, "couldn't find a wrapper for type '%s'",
-                                         g_type_name(type));
+                        if (py_type == NULL)
                             break;
-                        }
 
                         object = _pygi_boxed_new((PyTypeObject *)py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING);
 
@@ -1546,10 +1538,6 @@ _pygi_argument_to_object (GArgument  *arg,
                         break;
                     }
                     object = pygobject_new(arg->v_pointer);
-                    break;
-                case GI_INFO_TYPE_UNION:
-                    /* TODO */
-                    PyErr_SetString(PyExc_NotImplementedError, "union marshalling is not supported yet");
                     break;
                 default:
                     g_assert_not_reached();
@@ -1769,6 +1757,7 @@ _pygi_argument_release (GArgument   *arg,
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_UNION:
                 {
                     GType type;
 
@@ -1818,9 +1807,6 @@ _pygi_argument_release (GArgument   *arg,
                     if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_unref(arg->v_pointer);
                     }
-                    break;
-                case GI_INFO_TYPE_UNION:
-                    /* TODO */
                     break;
                 default:
                     g_assert_not_reached();

@@ -34,6 +34,7 @@ from ._gi import \
     InterfaceInfo, \
     ConstantInfo, \
     StructInfo, \
+    UnionInfo, \
     Struct, \
     Boxed, \
     enum_add, \
@@ -125,7 +126,7 @@ class DynamicModule(object):
             elif isinstance(info, InterfaceInfo):
                 bases = (gobject.GInterface,)
                 metaclass = GObjectMeta
-            elif isinstance(info, StructInfo):
+            elif isinstance(info, (StructInfo, UnionInfo)):
                 if g_type.is_a(gobject.TYPE_BOXED):
                     bases = (Boxed,)
                 elif g_type.is_a(gobject.TYPE_POINTER) or g_type == gobject.TYPE_NONE:
