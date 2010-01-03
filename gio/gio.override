@@ -23,6 +23,7 @@
 modulename gio
 %%
 import gobject.GObject as PyGObject_Type
+import glib.PollFD as PyGPollFD_Type
 %%
 headers
 #define NO_IMPORT_PYGOBJECT
@@ -30,6 +31,7 @@ headers
 #include <gio/gio.h>
 #include "pygio-utils.h"
 #include "pyglib.h"
+#include "pygsource.h"
 
 #define BUFSIZE 8192
 
@@ -231,6 +233,7 @@ include
   gappinfo.override
   gapplaunchcontext.override
   gbufferedinputstream.override
+  gcancellable.override
   gdatainputstream.override
   gdrive.override
   gfile.override
