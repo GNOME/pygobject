@@ -55,23 +55,22 @@ uninstall-local:
 	rm -f $(DESTDIR)$(pythondir)/pygtk.pth $(DESTDIR)$(pyexecdir)/pygtk.pth
 
 EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM).egg
-TMPDIR = `pwd`/$(PACKAGE)-$(PACKAGE_VERSION)
 
+egg: EGG_TMPDIR:=$(TMPDIR)/$(PACKAGE)-$(PACKAGE_VERSION)
 egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
-	rm -fr $(TMPDIR)
+	rm -fr $(EGG_TMPDIR)
 	echo $(EGG_NAME)
-	mkdir -p $(TMPDIR)
-	mkdir -p $(TMPDIR)/EGG-INFO
-	make -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(TMPDIR)
-	$(INSTALL) dsextras.py $(TMPDIR)
-	rm -fr $(TMPDIR)/gobject.la
-	$(INSTALL) PKG-INFO $(TMPDIR)/EGG-INFO
-	echo "gobject.so" >> $(TMPDIR)/EGG-INFO/native_libs.txt
-	echo "gobject" >> $(TMPDIR)/EGG-INFO/top_level.txt
-	echo "dsextras.py" >> $(TMPDIR)/EGG-INFO/top_level.txt
-	cd $(TMPDIR) && zip -rq $(EGG_NAME) .
-	mv $(TMPDIR)/$(EGG_NAME) .
-	rm -fr $(TMPDIR)
+	$(MKDIR_P) $(EGG_TMPDIR)
+	$(MKDIR_P) $(EGG_TMPDIR)/EGG-INFO
+	$(MAKE) -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(EGG_TMPDIR)
+	$(INSTALL) dsextras.py $(EGG_TMPDIR)
+	rm -fr $(EGG_TMPDIR)/gobject.la
+	$(INSTALL) PKG-INFO $(EGG_TMPDIR)/EGG-INFO
+	echo "gobject.so" >> $(EGG_TMPDIR)/EGG-INFO/native_libs.txt
+	( echo "gobject" ; echo "dsextras.py" ) >> $(EGG_TMPDIR)/EGG-INFO/top_level.txt
+	cd $(EGG_TMPDIR) && zip -rq $(EGG_NAME) .
+	mv $(EGG_TMPDIR)/$(EGG_NAME) .
+	rm -fr $(EGG_TMPDIR)
 
 doc-dist:
 	mkdir pygobject
