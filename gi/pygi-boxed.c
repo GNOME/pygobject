@@ -55,7 +55,6 @@ _boxed_new (PyTypeObject *type,
     static char *kwlist[] = { NULL };
 
     GIBaseInfo *info;
-    gboolean is_simple;
     gsize size;
     gpointer boxed;
     PyGIBoxed *self = NULL;
@@ -145,7 +144,6 @@ _pygi_boxed_new (PyTypeObject *type,
                  gboolean      free_on_dealloc)
 {
     PyGIBoxed *self;
-    GType g_type;
 
     if (!boxed) {
         Py_RETURN_NONE;

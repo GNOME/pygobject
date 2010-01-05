@@ -185,7 +185,6 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                                 PyObject   *object)
 {
     GITypeTag type_tag;
-    gboolean is_pointer;
     gint retval = 1;
 
     type_tag = g_type_info_get_tag(type_info);
@@ -1824,6 +1823,8 @@ _pygi_argument_to_object (GArgument  *arg,
                         case GI_INFO_TYPE_STRUCT:
                         case GI_INFO_TYPE_BOXED:
                             is_struct = TRUE;
+                        default:
+                            break;
                     }
                     g_base_info_unref((GIBaseInfo *)iface_info);
                 }

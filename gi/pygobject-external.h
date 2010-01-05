@@ -32,7 +32,7 @@ static PyTypeObject *_PyGTypeWrapper_Type;
 #define PyGObject_Type (*_PyGObject_Type)
 #define PyGTypeWrapper_Type (*_PyGTypeWrapper_Type)
 
-
+__attribute__((unused))
 static int
 _pygobject_import (void)
 {
