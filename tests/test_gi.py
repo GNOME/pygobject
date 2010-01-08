@@ -1120,6 +1120,9 @@ class TestStructure(unittest.TestCase):
         struct = TestGI.SimpleStruct()
         self.assertTrue(isinstance(struct, TestGI.SimpleStruct))
 
+        self.assertEquals(0, struct.long_)
+        self.assertEquals(0, struct.int8)
+
         struct.long_ = 6
         struct.int8 = 7
 
@@ -1251,6 +1254,8 @@ class TestStructure(unittest.TestCase):
 
         struct = TestGI.BoxedStruct()
         self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
+
+        self.assertEquals(0, struct.long_)
 
         del struct
 

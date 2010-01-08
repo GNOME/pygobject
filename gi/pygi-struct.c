@@ -72,7 +72,7 @@ _struct_new (PyTypeObject *type,
     }
 
     size = g_struct_info_get_size((GIStructInfo *)info);
-    pointer = g_try_malloc(size);
+    pointer = g_try_malloc0(size);
     if (pointer == NULL) {
         PyErr_NoMemory();
         goto out;
