@@ -544,13 +544,6 @@ void test_gi__pointer_struct_inout (TestGIPointerStruct **struct_);
 
 typedef struct {
     glong long_;
-} TestGIBoxedWithoutConstructorStruct;
-
-GType test_gi_boxed_without_constructor_struct_get_type (void) G_GNUC_CONST;
-
-
-typedef struct {
-    glong long_;
 } TestGIBoxedStruct;
 
 GType test_gi_boxed_struct_get_type (void) G_GNUC_CONST;

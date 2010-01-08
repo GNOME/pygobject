@@ -61,6 +61,13 @@ def Constructor(info):
 
 class MetaClassHelper(object):
 
+    def _setup_constructors(cls):
+        for method_info in cls.__info__.get_methods():
+            if method_info.is_constructor():
+                name = method_info.get_name()
+                constructor = classmethod(Constructor(method_info))
+                setattr(cls, name, constructor)
+
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
             name = method_info.get_name()
@@ -87,13 +94,6 @@ class MetaClassHelper(object):
 
 class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
-    def _setup_constructors(cls):
-        for method_info in cls.__info__.get_methods():
-            if method_info.is_constructor():
-                name = method_info.get_name()
-                constructor = classmethod(Constructor(method_info))
-                setattr(cls, name, constructor)
-
     def __init__(cls, name, bases, dict_):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
 
@@ -113,27 +113,6 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
 
 class StructMeta(type, MetaClassHelper):
-
-    def _setup_constructors(cls):
-        constructor_infos = []
-        default_constructor_info = None
-
-        for method_info in cls.__info__.get_methods():
-            if method_info.is_constructor():
-                name = method_info.get_name()
-                constructor = classmethod(Function(method_info))
-
-                setattr(cls, name, constructor)
-
-                constructor_infos.append(method_info)
-                if name == "new":
-                    default_constructor_info = method_info
-
-        if default_constructor_info is None and constructor_infos:
-            default_constructor_info = constructor_infos[0]
-
-        if default_constructor_info is not None:
-            cls.__new__ = staticmethod(Function(default_constructor_info))
 
     def __init__(cls, name, bases, dict_):
         super(StructMeta, cls).__init__(name, bases, dict_)

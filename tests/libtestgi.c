@@ -3023,39 +3023,6 @@ test_gi__pointer_struct_inout (TestGIPointerStruct **struct_)
 }
 
 
-TestGIBoxedWithoutConstructorStruct *
-test_gi_boxed_without_constructor_struct_copy (TestGIBoxedWithoutConstructorStruct *struct_)
-{
-    TestGIBoxedWithoutConstructorStruct *new_struct;
-
-    new_struct = g_slice_new (TestGIBoxedWithoutConstructorStruct);
-
-    *new_struct = *struct_;
-
-    return new_struct;
-}
-
-static void
-test_gi_boxed_without_constructor_struct_free (TestGIBoxedWithoutConstructorStruct *struct_)
-{
-    g_slice_free (TestGIBoxedWithoutConstructorStruct, struct_);
-}
-
-GType
-test_gi_boxed_without_constructor_struct_get_type (void)
-{
-    static GType type = 0;
-
-    if (type == 0) {
-        type = g_boxed_type_register_static ("TestGIBoxedWithoutConstructorStruct",
-                (GBoxedCopyFunc) test_gi_boxed_without_constructor_struct_copy,
-                (GBoxedFreeFunc) test_gi_boxed_without_constructor_struct_free);
-    }
-
-    return type;
-}
-
-
 TestGIBoxedStruct *
 test_gi_boxed_struct_copy (TestGIBoxedStruct *struct_)
 {

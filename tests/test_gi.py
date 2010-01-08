@@ -1246,29 +1246,28 @@ class TestStructure(unittest.TestCase):
         del in_struct
         del out_struct
 
-    def test_boxed_without_constructor_struct(self):
-        self.assertTrue(issubclass(TestGI.BoxedWithoutConstructorStruct, gobject.GBoxed))
+    def test_boxed_struct(self):
+        self.assertTrue(issubclass(TestGI.BoxedStruct, gobject.GBoxed))
 
-        struct = TestGI.BoxedWithoutConstructorStruct()
-
-        self.assertTrue(isinstance(struct, TestGI.BoxedWithoutConstructorStruct))
-
-        new_struct = struct.copy()
-        self.assertTrue(isinstance(new_struct, TestGI.BoxedWithoutConstructorStruct))
+        struct = TestGI.BoxedStruct()
+        self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
 
         del struct
-        del new_struct
 
-    def test_boxed_struct(self):
-        struct = TestGI.BoxedStruct()
-
+    def test_boxed_struct_new(self):
+        struct = TestGI.BoxedStruct.new()
         self.assertTrue(isinstance(struct, TestGI.BoxedStruct))
+
+        del struct
+
+    def test_boxed_struct_copy(self):
+        struct = TestGI.BoxedStruct()
 
         new_struct = struct.copy()
         self.assertTrue(isinstance(new_struct, TestGI.BoxedStruct))
 
-        del struct
         del new_struct
+        del struct
 
     def test_boxed_struct_return(self):
         struct = TestGI.boxed_struct_return()
