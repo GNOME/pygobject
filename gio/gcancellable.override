@@ -32,6 +32,7 @@ _wrap_g_cancellable_make_pollfd (PyGObject *self)
     ret = g_cancellable_make_pollfd(G_CANCELLABLE(self->obj), &pollfd);
   
     pypollfd = PyObject_NEW(PyGPollFD, &PyGPollFD_Type);
+    pypollfd->fd_obj = NULL;
     pypollfd->pollfd = pollfd;
     return (PyObject *) pypollfd;
 }
