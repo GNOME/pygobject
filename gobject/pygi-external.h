@@ -49,7 +49,6 @@ _pygi_import (void)
 
     return 0;
 #else
-    PyErr_SetString(PyExc_ImportError, "PyGI support not enabled");
     return -1;
 #endif /* ENABLE_PYGI */
 }

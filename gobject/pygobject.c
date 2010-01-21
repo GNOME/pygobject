@@ -874,12 +874,8 @@ pygobject_lookup_class(GType gtype)
     if (py_type == NULL) {
 	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
 
-    if (py_type == NULL) {
+    if (py_type == NULL)
         py_type = (PyTypeObject *)pygi_type_import_by_g_type(gtype);
-        if (py_type == NULL) {
-            PyErr_Clear();
-        }
-    }
 
 	if (py_type == NULL) {
 	    py_type = pygobject_new_with_interfaces(gtype);
