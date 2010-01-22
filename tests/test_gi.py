@@ -1500,3 +1500,39 @@ class TestInterfaces(unittest.TestCase):
         instance = TestInterfaceImpl()
         self.assertTrue(isinstance(instance, TestGI.Interface))
 
+
+class TestOverrides(unittest.TestCase):
+
+    def test_constant(self):
+        self.assertEquals(TestGI.OVERRIDES_CONSTANT, 7)
+
+    def test_struct(self):
+        # Test that the constructor has been overridden.
+        struct = TestGI.OverridesStruct(42)
+
+        # Test that the method has been overridden.
+        self.assertEquals(6, struct.method())
+
+        del struct
+
+        # Test that the overrides wrapper has been registered.
+        struct = TestGI.overrides_struct_return()
+
+        self.assertTrue(isinstance(struct, TestGI.OverridesStruct))
+
+        del struct
+
+    def test_struct(self):
+        # Test that the constructor has been overridden.
+        object_ = TestGI.OverridesObject(42)
+
+        # Test that the alternate constructor has been overridden.
+        object_ = TestGI.OverridesObject.new(42)
+
+        # Test that the method has been overridden.
+        self.assertEquals(6, object_.method())
+
+        # Test that the overrides wrapper has been registered.
+        object_ = TestGI.overrides_object_return()
+
+        self.assertTrue(isinstance(object_, TestGI.OverridesObject))

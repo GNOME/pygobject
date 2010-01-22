@@ -75,15 +75,11 @@ def get_interfaces_for_object(object_info):
 
 class DynamicModule(object):
 
-    def __str__(self):
-        path = repository.get_typelib_path(self.__namespace__)
-        return "<dynamic module %r from %r>" % (self.__name__,  path)
+    def __init__(self, namespace):
+        self._namespace = namespace
 
     def __getattr__(self, name):
-        if self.__dict__.has_key(name):
-            return self.__dict__[name]
-
-        info = repository.find_by_name(self.__namespace__, name)
+        info = repository.find_by_name(self._namespace, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
                     self.__class__.__name__, name))
@@ -139,7 +135,7 @@ class DynamicModule(object):
             name = info.get_name()
             dict_ = {
                 '__info__': info,
-                '__module__': self.__namespace__,
+                '__module__': self._namespace,
                 '__gtype__': g_type
             }
             value = metaclass(name, bases, dict_)
@@ -158,10 +154,29 @@ class DynamicModule(object):
         self.__dict__[name] = value
         return value
 
-    @property
-    def __members__(self):
-        r = []
-        for type_info in repository.get_infos(self.__namespace__):
-            r.append(type_info.get_name())
-        return r
+    def __repr__(self):
+        path = repository.get_typelib_path(self._namespace)
+        return "<DynamicModule %r from %r>" % (self._namespace, path)
+
+
+class ModuleProxy(object):
+
+    def __init__(self, name, namespace, dynamic_module, overrides_module):
+        self.__name__ = name
+
+        self._namespace = namespace
+        self._dynamic_module = dynamic_module
+        self._overrides_module = overrides_module
+
+    def __getattr__(self, name):
+        attribute = getattr(self._overrides_module, name, None)
+        exports = getattr(self._overrides_module, '__all__', ())
+        if attribute is not None and attribute not in exports:
+            attribute = None
+        if attribute is None:
+            attribute = getattr(self._dynamic_module, name)
+        return attribute
+
+    def __str__(self):
+        return "<ModuleProxy %r>" % self.__name__
 

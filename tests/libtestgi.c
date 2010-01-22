@@ -3477,3 +3477,108 @@ test_gi_int_return_ptr_null (void)
     return NULL;
 }
 
+
+TestGIOverridesStruct *
+test_gi_overrides_struct_copy (TestGIOverridesStruct *struct_)
+{
+    TestGIOverridesStruct *new_struct;
+
+    new_struct = g_slice_new (TestGIOverridesStruct);
+
+    *new_struct = *struct_;
+
+    return new_struct;
+}
+
+static void
+test_gi_overrides_struct_free (TestGIOverridesStruct *struct_)
+{
+    g_slice_free (TestGIOverridesStruct, struct_);
+}
+
+GType
+test_gi_overrides_struct_get_type (void)
+{
+    static GType type = 0;
+
+    if (type == 0) {
+        type = g_boxed_type_register_static ("TestGIOverridesStruct",
+                (GBoxedCopyFunc) test_gi_overrides_struct_copy,
+                (GBoxedFreeFunc) test_gi_overrides_struct_free);
+    }
+
+    return type;
+}
+
+TestGIOverridesStruct *
+test_gi_overrides_struct_new (void)
+{
+    return g_slice_new (TestGIOverridesStruct);
+}
+
+glong
+test_gi_overrides_struct_method (TestGIOverridesStruct *struct_)
+{
+    return 42;
+}
+
+
+/**
+ * test_gi__overrides_struct_return:
+ *
+ * Returns: (transfer full):
+ */
+TestGIOverridesStruct *
+test_gi__overrides_struct_return (void)
+{
+    return test_gi_overrides_struct_new();
+}
+
+
+G_DEFINE_TYPE (TestGIOverridesObject, test_gi_overrides_object, G_TYPE_OBJECT);
+
+static void
+test_gi_overrides_object_init (TestGIOverridesObject *object)
+{
+}
+
+static void
+test_gi_overrides_object_finalize (GObject *object)
+{
+	G_OBJECT_CLASS (test_gi_overrides_object_parent_class)->finalize (object);
+}
+
+static void
+test_gi_overrides_object_class_init (TestGIOverridesObjectClass *klass)
+{
+	GObjectClass* object_class = G_OBJECT_CLASS (klass);
+#if 0
+	GObjectClass* parent_class = G_OBJECT_CLASS (klass);
+#endif
+
+	object_class->finalize = test_gi_overrides_object_finalize;
+}
+
+TestGIOverridesObject *
+test_gi_overrides_object_new (void)
+{
+    return g_object_new (TESTGI_TYPE_OVERRIDES_OBJECT, NULL);
+}
+
+glong
+test_gi_overrides_object_method (TestGIOverridesObject *object)
+{
+    return 42;
+}
+
+
+/**
+ * test_gi__overrides_object_return:
+ *
+ * Returns: (transfer full):
+ */
+TestGIOverridesObject *
+test_gi__overrides_object_return (void)
+{
+    return g_object_new (TESTGI_TYPE_OVERRIDES_OBJECT, NULL);
+}

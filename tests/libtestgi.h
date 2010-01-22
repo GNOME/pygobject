@@ -662,4 +662,53 @@ gint *test_gi_int_return_ptr_null (void);
 void test_gi_int_in_ptr_null (gint *int_);
 
 
+/* Overrides */
+
+#define TESTGI_OVERRIDES_CONSTANT 42
+
+
+typedef struct {
+    glong long_;
+} TestGIOverridesStruct;
+
+GType test_gi_overrides_struct_get_type (void) G_GNUC_CONST;
+
+TestGIOverridesStruct *test_gi_overrides_struct_new (void);
+
+glong test_gi_overrides_struct_method (TestGIOverridesStruct *struct_);
+
+TestGIOverridesStruct *test_gi__overrides_struct_return (void);
+
+
+#define TESTGI_TYPE_OVERRIDES_OBJECT             (test_gi_overrides_object_get_type ())
+#define TESTGI_OVERRIDES_OBJECT(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), TESTGI_TYPE_OVERRIDES_OBJECT, TestGIOverridesObject))
+#define TESTGI_OVERRIDES_OBJECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), TESTGI_TYPE_OVERRIDES_OBJECT, TestGIOverridesObjectClass))
+#define TESTGI_IS_OVERRIDES_OBJECT(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TESTGI_TYPE_OVERRIDES_OBJECT))
+#define TESTGI_IS_OVERRIDES_OBJECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), TESTGI_TYPE_OVERRIDES_OBJECT))
+#define TESTGI_OVERRIDES_OBJECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), TESTGI_TYPE_OVERRIDES_OBJECT, TestGIOverridesObjectClass))
+
+typedef struct _TestGIOverridesObjectClass TestGIOverridesObjectClass;
+typedef struct _TestGIOverridesObject TestGIOverridesObject;
+
+struct _TestGIOverridesObjectClass
+{
+	GObjectClass parent_class;
+};
+
+struct _TestGIOverridesObject
+{
+	GObject parent_instance;
+
+    glong long_;
+};
+
+GType test_gi_overrides_object_get_type (void) G_GNUC_CONST;
+
+TestGIOverridesObject *test_gi_overrides_object_new (void);
+
+glong test_gi_overrides_object_method (TestGIOverridesObject *object);
+
+
+TestGIOverridesObject *test_gi__overrides_object_return (void);
+
 #endif /* __TEST_GI_H__ */

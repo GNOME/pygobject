@@ -26,10 +26,11 @@ import sys
 import gobject
 
 from ._gi import Repository, RepositoryError
-from .module import DynamicModule
+from .module import DynamicModule, ModuleProxy
 
 
 repository = Repository.get_default()
+modules = {}
 
 
 class DynamicImporter(object):
@@ -38,17 +39,6 @@ class DynamicImporter(object):
 
     def __init__(self, path):
         self.path = path
-
-    def _create_module(self, module_type, name, namespace):
-        module = module_type.__new__(module_type)
-        module.__dict__ = {
-            '__file__': '<%s>' % name,
-            '__name__': name,
-            '__namespace__': namespace,
-            '__loader__': self
-        }
-        module.__init__()
-        return module
 
     def find_module(self, fullname, path=None):
         if not fullname.startswith(self.path):
@@ -75,23 +65,21 @@ class DynamicImporter(object):
             sys.modules[fullname] = gobject
             return gobject
 
-        module_type = DynamicModule
-        module = self._create_module(module_type, fullname, namespace)
+        dynamic_module = DynamicModule(namespace)
+        modules[namespace] = dynamic_module
+
+        overrides_modules = __import__('gi.overrides', fromlist=[namespace])
+        overrides_module = getattr(overrides_modules, namespace, None)
+
+        if overrides_module is not None:
+            module = ModuleProxy(fullname, namespace, dynamic_module, overrides_module)
+        else:
+            module = dynamic_module
+
+        module.__file__ = '<%s>' % fullname
+        module.__loader__ = self
+
         sys.modules[fullname] = module
-
-        # Look for an overrides module
-        overrides_name = 'gi.overrides.%s' % namespace
-        overrides_type_name = '%sModule' % namespace
-        try:
-
-            overrides_module = __import__(overrides_name, fromlist=[overrides_type_name])
-            module_type = getattr(overrides_module, overrides_type_name)
-        except ImportError, e:
-            pass
-
-        if module_type is not DynamicModule:
-            module = self._create_module(module_type, fullname, namespace)
-            sys.modules[fullname] = module
 
         return module
 
