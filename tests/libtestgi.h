@@ -20,9 +20,6 @@ typedef struct _TestGISimpleStruct TestGISimpleStruct;
 gboolean test_gi_boolean_return_true (void);
 gboolean test_gi_boolean_return_false (void);
 
-gboolean *test_gi_boolean_return_ptr_true (void);
-gboolean *test_gi_boolean_return_ptr_false (void);
-
 void test_gi_boolean_in_true (gboolean bool_);
 void test_gi_boolean_in_false (gboolean bool_);
 
@@ -32,23 +29,14 @@ void test_gi_boolean_out_false (gboolean *bool_);
 void test_gi_boolean_inout_true_false (gboolean *bool_);
 void test_gi_boolean_inout_false_true (gboolean *bool_);
 
-void test_gi_boolean_in_ptr_true (gboolean *bool_);
-void test_gi_boolean_in_ptr_false (gboolean *bool_);
-
 
 /* Integers */
 
 gint8 test_gi_int8_return_max (void);
 gint8 test_gi_int8_return_min (void);
 
-gint8 *test_gi_int8_return_ptr_max (void);
-gint8 *test_gi_int8_return_ptr_min (void);
-
 void test_gi_int8_in_max (gint8 int8);
 void test_gi_int8_in_min (gint8 int8);
-
-void test_gi_int8_in_ptr_max (gint8 *int8);
-void test_gi_int8_in_ptr_min (gint8 *int8);
 
 void test_gi_int8_out_max (gint8 *int8);
 void test_gi_int8_out_min (gint8 *int8);
@@ -58,10 +46,8 @@ void test_gi_int8_inout_min_max (gint8 *int8);
 
 
 guint8 test_gi_uint8_return (void);
-guint8 *test_gi_uint8_return_ptr (void);
 
 void test_gi_uint8_in (guint8 uint8);
-void test_gi_uint8_in_ptr (guint8 *uint8);
 
 void test_gi_uint8_out (guint8 *uint8);
 void test_gi_uint8_inout (guint8 *uint8);
@@ -70,14 +56,8 @@ void test_gi_uint8_inout (guint8 *uint8);
 gint16 test_gi_int16_return_max (void);
 gint16 test_gi_int16_return_min (void);
 
-gint16 *test_gi_int16_return_ptr_max (void);
-gint16 *test_gi_int16_return_ptr_min (void);
-
 void test_gi_int16_in_max (gint16 int16);
 void test_gi_int16_in_min (gint16 int16);
-
-void test_gi_int16_in_ptr_max (gint16 *int16);
-void test_gi_int16_in_ptr_min (gint16 *int16);
 
 void test_gi_int16_out_max (gint16 *int16);
 void test_gi_int16_out_min (gint16 *int16);
@@ -87,10 +67,8 @@ void test_gi_int16_inout_min_max (gint16 *int16);
 
 
 guint16 test_gi_uint16_return (void);
-guint16 *test_gi_uint16_return_ptr (void);
 
 void test_gi_uint16_in (guint16 uint16);
-void test_gi_uint16_in_ptr (guint16 *uint16);
 
 void test_gi_uint16_out (guint16 *uint16);
 void test_gi_uint16_inout (guint16 *uint16);
@@ -99,14 +77,8 @@ void test_gi_uint16_inout (guint16 *uint16);
 gint32 test_gi_int32_return_max (void);
 gint32 test_gi_int32_return_min (void);
 
-gint32 *test_gi_int32_return_ptr_max (void);
-gint32 *test_gi_int32_return_ptr_min (void);
-
 void test_gi_int32_in_max (gint32 int32);
 void test_gi_int32_in_min (gint32 int32);
-
-void test_gi_int32_in_ptr_max (gint32 *int32);
-void test_gi_int32_in_ptr_min (gint32 *int32);
 
 void test_gi_int32_out_max (gint32 *int32);
 void test_gi_int32_out_min (gint32 *int32);
@@ -116,10 +88,8 @@ void test_gi_int32_inout_min_max (gint32 *int32);
 
 
 guint32 test_gi_uint32_return (void);
-guint32 *test_gi_uint32_return_ptr (void);
 
 void test_gi_uint32_in (guint32 uint32);
-void test_gi_uint32_in_ptr (guint32 *uint32);
 
 void test_gi_uint32_out (guint32 *uint32);
 void test_gi_uint32_inout (guint32 *uint32);
@@ -128,14 +98,8 @@ void test_gi_uint32_inout (guint32 *uint32);
 gint64 test_gi_int64_return_max (void);
 gint64 test_gi_int64_return_min (void);
 
-gint64 *test_gi_int64_return_ptr_max (void);
-gint64 *test_gi_int64_return_ptr_min (void);
-
 void test_gi_int64_in_max (gint64 int64);
 void test_gi_int64_in_min (gint64 int64);
-
-void test_gi_int64_in_ptr_max (gint64 *int64);
-void test_gi_int64_in_ptr_min (gint64 *int64);
 
 void test_gi_int64_out_max (gint64 *int64);
 void test_gi_int64_out_min (gint64 *int64);
@@ -145,10 +109,8 @@ void test_gi_int64_inout_min_max (gint64 *int64);
 
 
 guint64 test_gi_uint64_return (void);
-guint64 *test_gi_uint64_return_ptr (void);
 
 void test_gi_uint64_in (guint64 uint64);
-void test_gi_uint64_in_ptr (guint64 *uint64);
 
 void test_gi_uint64_out (guint64 *uint64);
 void test_gi_uint64_inout (guint64 *uint64);
@@ -157,14 +119,8 @@ void test_gi_uint64_inout (guint64 *uint64);
 gshort test_gi_short_return_max (void);
 gshort test_gi_short_return_min (void);
 
-gshort *test_gi_short_return_ptr_max (void);
-gshort *test_gi_short_return_ptr_min (void);
-
 void test_gi_short_in_max (gshort short_);
 void test_gi_short_in_min (gshort short_);
-
-void test_gi_short_in_ptr_max (gshort *short_);
-void test_gi_short_in_ptr_min (gshort *short_);
 
 void test_gi_short_out_max (gshort *short_);
 void test_gi_short_out_min (gshort *short_);
@@ -174,10 +130,8 @@ void test_gi_short_inout_min_max (gshort *short_);
 
 
 gushort test_gi_ushort_return (void);
-gushort *test_gi_ushort_return_ptr (void);
 
 void test_gi_ushort_in (gushort ushort);
-void test_gi_ushort_in_ptr (gushort *ushort);
 
 void test_gi_ushort_out (gushort *ushort);
 void test_gi_ushort_inout (gushort *ushort);
@@ -186,14 +140,8 @@ void test_gi_ushort_inout (gushort *ushort);
 gint test_gi_int_return_max (void);
 gint test_gi_int_return_min (void);
 
-gint *test_gi_int_return_ptr_max (void);
-gint *test_gi_int_return_ptr_min (void);
-
 void test_gi_int_in_max (gint int_);
 void test_gi_int_in_min (gint int_);
-
-void test_gi_int_in_ptr_max (gint *int_);
-void test_gi_int_in_ptr_min (gint *int_);
 
 void test_gi_int_out_max (gint *int_);
 void test_gi_int_out_min (gint *int_);
@@ -203,10 +151,8 @@ void test_gi_int_inout_min_max (gint *int_);
 
 
 guint test_gi_uint_return (void);
-guint *test_gi_uint_return_ptr (void);
 
 void test_gi_uint_in (guint uint);
-void test_gi_uint_in_ptr (guint *uint);
 
 void test_gi_uint_out (guint *uint);
 void test_gi_uint_inout (guint *uint);
@@ -215,14 +161,8 @@ void test_gi_uint_inout (guint *uint);
 glong test_gi_long_return_max (void);
 glong test_gi_long_return_min (void);
 
-glong *test_gi_long_return_ptr_max (void);
-glong *test_gi_long_return_ptr_min (void);
-
 void test_gi_long_in_max (glong long_);
 void test_gi_long_in_min (glong long_);
-
-void test_gi_long_in_ptr_max (glong *long_);
-void test_gi_long_in_ptr_min (glong *long_);
 
 void test_gi_long_out_max (glong *long_);
 void test_gi_long_out_min (glong *long_);
@@ -232,10 +172,8 @@ void test_gi_long_inout_min_max (glong *long_);
 
 
 gulong test_gi_ulong_return (void);
-gulong *test_gi_ulong_return_ptr (void);
 
 void test_gi_ulong_in (gulong ulong);
-void test_gi_ulong_in_ptr (gulong *ulong);
 
 void test_gi_ulong_out (gulong *ulong);
 void test_gi_ulong_inout (gulong *ulong);
@@ -244,14 +182,8 @@ void test_gi_ulong_inout (gulong *ulong);
 gssize test_gi_ssize_return_max (void);
 gssize test_gi_ssize_return_min (void);
 
-gssize *test_gi_ssize_return_ptr_max (void);
-gssize *test_gi_ssize_return_ptr_min (void);
-
 void test_gi_ssize_in_max (gssize ssize);
 void test_gi_ssize_in_min (gssize ssize);
-
-void test_gi_ssize_in_ptr_max (gssize *ssize);
-void test_gi_ssize_in_ptr_min (gssize *ssize);
 
 void test_gi_ssize_out_max (gssize *ssize);
 void test_gi_ssize_out_min (gssize *ssize);
@@ -261,10 +193,8 @@ void test_gi_ssize_inout_min_max (gssize *ssize);
 
 
 gsize test_gi_size_return (void);
-gsize *test_gi_size_return_ptr (void);
 
 void test_gi_size_in (gsize size);
-void test_gi_size_in_ptr (gsize *size);
 
 void test_gi_size_out (gsize *size);
 void test_gi_size_inout (gsize *size);
@@ -273,10 +203,8 @@ void test_gi_size_inout (gsize *size);
 /* Floating-point */
 
 gfloat test_gi_float_return (void);
-gfloat *test_gi_float_return_ptr (void);
 
 void test_gi_float_in (gfloat float_);
-void test_gi_float_in_ptr (gfloat *float_);
 
 void test_gi_float_out (gfloat *float_);
 
@@ -284,10 +212,8 @@ void test_gi_float_inout (gfloat *float_);
 
 
 gdouble test_gi_double_return (void);
-gdouble *test_gi_double_return_ptr (void);
 
 void test_gi_double_in (gdouble double_);
-void test_gi_double_in_ptr (gdouble *double_);
 
 void test_gi_double_out (gdouble *double_);
 
@@ -297,10 +223,8 @@ void test_gi_double_inout (gdouble *double_);
 /* Timestamps */
 
 time_t test_gi_time_t_return (void);
-time_t *test_gi_time_t_return_ptr (void);
 
 void test_gi_time_t_in (time_t time_t_);
-void test_gi_time_t_in_ptr (time_t *time_t_);
 
 void test_gi_time_t_out (time_t *time_t_);
 
@@ -310,10 +234,8 @@ void test_gi_time_t_inout (time_t *time_t_);
 /* GType */
 
 GType test_gi_gtype_return (void);
-GType *test_gi_gtype_return_ptr (void);
 
 void test_gi_gtype_in (GType gtype);
-void test_gi_gtype_in_ptr (GType *gtype);
 
 void test_gi_gtype_out (GType *gtype);
 
@@ -470,7 +392,6 @@ GType test_gi_enum_get_type (void) G_GNUC_CONST;
 TestGIEnum test_gi_enum_return (void);
 
 void test_gi_enum_in (TestGIEnum enum_);
-void test_gi_enum_in_ptr (TestGIEnum *enum_);
 
 void test_gi_enum_out (TestGIEnum *enum_);
 
@@ -493,7 +414,6 @@ TestGIFlags test_gi_flags_return (void);
 
 void test_gi_flags_in (TestGIFlags flags_);
 void test_gi_flags_in_zero (TestGIFlags flags);
-void test_gi_flags_in_ptr (TestGIFlags *flags_);
 
 void test_gi_flags_out (TestGIFlags *flags_);
 
@@ -654,12 +574,6 @@ GType test_gi_interface_get_type (void) G_GNUC_CONST;
 
 void test_gi_int_out_out (gint *int0, gint *int1);
 gint test_gi_int_return_out (gint *int_);
-
-
-/* Nullable arguments */
-
-gint *test_gi_int_return_ptr_null (void);
-void test_gi_int_in_ptr_null (gint *int_);
 
 
 /* Overrides */

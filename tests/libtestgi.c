@@ -21,28 +21,6 @@ test_gi_boolean_return_false (void)
     return FALSE;
 }
 
-/**
- * test_gi_boolean_return_ptr_true:
- * Returns: (transfer none):
- */
-gboolean *
-test_gi_boolean_return_ptr_true (void)
-{
-    static gboolean bool_ = TRUE;
-    return &bool_;
-}
-
-/**
- * test_gi_boolean_return_ptr_false:
- * Returns: (transfer none):
- */
-gboolean *
-test_gi_boolean_return_ptr_false (void)
-{
-    static gboolean bool_ = FALSE;
-    return &bool_;
-}
-
 void
 test_gi_boolean_in_true (gboolean bool_)
 {
@@ -53,26 +31,6 @@ void
 test_gi_boolean_in_false (gboolean bool_)
 {
     g_assert (bool_ == FALSE);
-}
-
-/**
- * test_gi_boolean_in_ptr_true:
- * bool_: (in):
- */
-void
-test_gi_boolean_in_ptr_true (gboolean *bool_)
-{
-    g_assert (*bool_ == TRUE);
-}
-
-/**
- * test_gi_boolean_in_ptr_false:
- * bool_: (in):
- */
-void
-test_gi_boolean_in_ptr_false (gboolean *bool_)
-{
-    g_assert (*bool_ == FALSE);
 }
 
 /**
@@ -132,28 +90,6 @@ test_gi_int8_return_min (void)
     return G_MININT8;
 }
 
-/**
- * test_gi_int8_return_ptr_max:
- * Returns: (transfer none):
- */
-gint8 *
-test_gi_int8_return_ptr_max (void)
-{
-    static gint8 int8 = G_MAXINT8;
-    return &int8;
-}
-
-/**
- * test_gi_int8_return_ptr_min:
- * Returns: (transfer none):
- */
-gint8 *
-test_gi_int8_return_ptr_min (void)
-{
-    static gint8 int8 = G_MININT8;
-    return &int8;
-}
-
 void
 test_gi_int8_in_max (gint8 int8)
 {
@@ -164,26 +100,6 @@ void
 test_gi_int8_in_min (gint8 int8)
 {
     g_assert(int8 == G_MININT8);
-}
-
-/**
- * test_gi_int8_in_ptr_max:
- * int8: (in):
- */
-void
-test_gi_int8_in_ptr_max (gint8 *int8)
-{
-    g_assert(*int8 == G_MAXINT8);
-}
-
-/**
- * test_gi_int8_in_ptr_min:
- * int8: (in):
- */
-void
-test_gi_int8_in_ptr_min (gint8 *int8)
-{
-    g_assert(*int8 == G_MININT8);
 }
 
 /**
@@ -235,31 +151,10 @@ test_gi_uint8_return (void)
     return G_MAXUINT8;
 }
 
-/**
- * test_gi_uint8_return_ptr:
- * Returns: (transfer none):
- */
-guint8 *
-test_gi_uint8_return_ptr (void)
-{
-    static guint8 uint8 = G_MAXUINT8;
-    return &uint8;
-}
-
 void
 test_gi_uint8_in (guint8 uint8)
 {
     g_assert(uint8 == G_MAXUINT8);
-}
-
-/**
- * test_gi_uint8_in_ptr:
- * uint8: (in):
- */
-void
-test_gi_uint8_in_ptr (guint8 *uint8)
-{
-    g_assert(*uint8 == G_MAXUINT8);
 }
 
 /**
@@ -296,28 +191,6 @@ test_gi_int16_return_min (void)
     return G_MININT16;
 }
 
-/**
- * test_gi_int16_return_ptr_max:
- * Returns: (transfer none):
- */
-gint16 *
-test_gi_int16_return_ptr_max (void)
-{
-    static gint16 int16 = G_MAXINT16;
-    return &int16;
-}
-
-/**
- * test_gi_int16_return_ptr_min:
- * Returns: (transfer none):
- */
-gint16 *
-test_gi_int16_return_ptr_min (void)
-{
-    static gint16 int16 = G_MININT16;
-    return &int16;
-}
-
 void
 test_gi_int16_in_max (gint16 int16)
 {
@@ -328,26 +201,6 @@ void
 test_gi_int16_in_min (gint16 int16)
 {
     g_assert(int16 == G_MININT16);
-}
-
-/**
- * test_gi_int16_in_ptr_max:
- * int16: (in):
- */
-void
-test_gi_int16_in_ptr_max (gint16 *int16)
-{
-    g_assert(*int16 == G_MAXINT16);
-}
-
-/**
- * test_gi_int16_in_ptr_min:
- * int16: (in):
- */
-void
-test_gi_int16_in_ptr_min (gint16 *int16)
-{
-    g_assert(*int16 == G_MININT16);
 }
 
 /**
@@ -399,31 +252,10 @@ test_gi_uint16_return (void)
     return G_MAXUINT16;
 }
 
-/**
- * test_gi_uint16_return_ptr:
- * Returns: (transfer none):
- */
-guint16 *
-test_gi_uint16_return_ptr (void)
-{
-    static guint16 uint16 = G_MAXUINT16;
-    return &uint16;
-}
-
 void
 test_gi_uint16_in (guint16 uint16)
 {
     g_assert(uint16 == G_MAXUINT16);
-}
-
-/**
- * test_gi_uint16_in_ptr:
- * uint16: (in):
- */
-void
-test_gi_uint16_in_ptr (guint16 *uint16)
-{
-    g_assert(*uint16 == G_MAXUINT16);
 }
 
 /**
@@ -460,28 +292,6 @@ test_gi_int32_return_min (void)
     return G_MININT32;
 }
 
-/**
- * test_gi_int32_return_ptr_max:
- * Returns: (transfer none):
- */
-gint32 *
-test_gi_int32_return_ptr_max (void)
-{
-    static gint32 int32 = G_MAXINT32;
-    return &int32;
-}
-
-/**
- * test_gi_int32_return_ptr_min:
- * Returns: (transfer none):
- */
-gint32 *
-test_gi_int32_return_ptr_min (void)
-{
-    static gint32 int32 = G_MININT32;
-    return &int32;
-}
-
 void
 test_gi_int32_in_max (gint32 int32)
 {
@@ -492,26 +302,6 @@ void
 test_gi_int32_in_min (gint32 int32)
 {
     g_assert(int32 == G_MININT32);
-}
-
-/**
- * test_gi_int32_in_ptr_max:
- * int32: (in):
- */
-void
-test_gi_int32_in_ptr_max (gint32 *int32)
-{
-    g_assert(*int32 == G_MAXINT32);
-}
-
-/**
- * test_gi_int32_in_ptr_min:
- * int32: (in):
- */
-void
-test_gi_int32_in_ptr_min (gint32 *int32)
-{
-    g_assert(*int32 == G_MININT32);
 }
 
 /**
@@ -563,31 +353,10 @@ test_gi_uint32_return (void)
     return G_MAXUINT32;
 }
 
-/**
- * test_gi_uint32_return_ptr:
- * Returns: (transfer none):
- */
-guint32 *
-test_gi_uint32_return_ptr (void)
-{
-    static guint32 uint32 = G_MAXUINT32;
-    return &uint32;
-}
-
 void
 test_gi_uint32_in (guint32 uint32)
 {
     g_assert(uint32 == G_MAXUINT32);
-}
-
-/**
- * test_gi_uint32_in_ptr:
- * uint32: (in):
- */
-void
-test_gi_uint32_in_ptr (guint32 *uint32)
-{
-    g_assert(*uint32 == G_MAXUINT32);
 }
 
 /**
@@ -624,28 +393,6 @@ test_gi_int64_return_min (void)
     return G_MININT64;
 }
 
-/**
- * test_gi_int64_return_ptr_max:
- * Returns: (transfer none):
- */
-gint64 *
-test_gi_int64_return_ptr_max (void)
-{
-    static gint64 int64 = G_MAXINT64;
-    return &int64;
-}
-
-/**
- * test_gi_int64_return_ptr_min:
- * Returns: (transfer none):
- */
-gint64 *
-test_gi_int64_return_ptr_min (void)
-{
-    static gint64 int64 = G_MININT64;
-    return &int64;
-}
-
 void
 test_gi_int64_in_max (gint64 int64)
 {
@@ -656,26 +403,6 @@ void
 test_gi_int64_in_min (gint64 int64)
 {
     g_assert(int64 == G_MININT64);
-}
-
-/**
- * test_gi_int64_in_ptr_max:
- * int64: (in):
- */
-void
-test_gi_int64_in_ptr_max (gint64 *int64)
-{
-    g_assert(*int64 == G_MAXINT64);
-}
-
-/**
- * test_gi_int64_in_ptr_min:
- * int64: (in):
- */
-void
-test_gi_int64_in_ptr_min (gint64 *int64)
-{
-    g_assert(*int64 == G_MININT64);
 }
 
 /**
@@ -727,31 +454,10 @@ test_gi_uint64_return (void)
     return G_MAXUINT64;
 }
 
-/**
- * test_gi_uint64_return_ptr:
- * Returns: (transfer none):
- */
-guint64 *
-test_gi_uint64_return_ptr (void)
-{
-    static guint64 uint64 = G_MAXUINT64;
-    return &uint64;
-}
-
 void
 test_gi_uint64_in (guint64 uint64)
 {
     g_assert(uint64 == G_MAXUINT64);
-}
-
-/**
- * test_gi_uint64_in_ptr:
- * uint64: (in):
- */
-void
-test_gi_uint64_in_ptr (guint64 *uint64)
-{
-    g_assert(*uint64 == G_MAXUINT64);
 }
 
 /**
@@ -788,28 +494,6 @@ test_gi_short_return_min (void)
     return G_MINSHORT;
 }
 
-/**
- * test_gi_short_return_ptr_max:
- * Returns: (transfer none):
- */
-gshort *
-test_gi_short_return_ptr_max (void)
-{
-    static gshort short_ = G_MAXSHORT;
-    return &short_;
-}
-
-/**
- * test_gi_short_return_ptr_min:
- * Returns: (transfer none):
- */
-gshort *
-test_gi_short_return_ptr_min (void)
-{
-    static gshort short_ = G_MINSHORT;
-    return &short_;
-}
-
 void
 test_gi_short_in_max (gshort short_)
 {
@@ -820,26 +504,6 @@ void
 test_gi_short_in_min (gshort short_)
 {
     g_assert(short_ == G_MINSHORT);
-}
-
-/**
- * test_gi_short_in_ptr_max:
- * short_: (in):
- */
-void
-test_gi_short_in_ptr_max (gshort *short_)
-{
-    g_assert(*short_ == G_MAXSHORT);
-}
-
-/**
- * test_gi_short_in_ptr_min:
- * short_: (in):
- */
-void
-test_gi_short_in_ptr_min (gshort *short_)
-{
-    g_assert(*short_ == G_MINSHORT);
 }
 
 /**
@@ -891,31 +555,10 @@ test_gi_ushort_return (void)
     return G_MAXUSHORT;
 }
 
-/**
- * test_gi_ushort_return_ptr:
- * Returns: (transfer none):
- */
-gushort *
-test_gi_ushort_return_ptr (void)
-{
-    static gushort ushort = G_MAXUSHORT;
-    return &ushort;
-}
-
 void
 test_gi_ushort_in (gushort ushort)
 {
     g_assert(ushort == G_MAXUSHORT);
-}
-
-/**
- * test_gi_ushort_in_ptr:
- * ushort: (in):
- */
-void
-test_gi_ushort_in_ptr (gushort *ushort)
-{
-    g_assert(*ushort == G_MAXUSHORT);
 }
 
 /**
@@ -952,28 +595,6 @@ test_gi_int_return_min (void)
     return G_MININT;
 }
 
-/**
- * test_gi_int_return_ptr_max:
- * Returns: (transfer none):
- */
-gint *
-test_gi_int_return_ptr_max (void)
-{
-    static gint int_ = G_MAXINT;
-    return &int_;
-}
-
-/**
- * test_gi_int_return_ptr_min:
- * Returns: (transfer none):
- */
-gint *
-test_gi_int_return_ptr_min (void)
-{
-    static gint int_ = G_MININT;
-    return &int_;
-}
-
 void
 test_gi_int_in_max (gint int_)
 {
@@ -984,26 +605,6 @@ void
 test_gi_int_in_min (gint int_)
 {
     g_assert(int_ == G_MININT);
-}
-
-/**
- * test_gi_int_in_ptr_max:
- * int_: (in):
- */
-void
-test_gi_int_in_ptr_max (gint *int_)
-{
-    g_assert(*int_ == G_MAXINT);
-}
-
-/**
- * test_gi_int_in_ptr_min:
- * int_: (in):
- */
-void
-test_gi_int_in_ptr_min (gint *int_)
-{
-    g_assert(*int_ == G_MININT);
 }
 
 /**
@@ -1055,31 +656,10 @@ test_gi_uint_return (void)
     return G_MAXUINT;
 }
 
-/**
- * test_gi_uint_return_ptr:
- * Returns: (transfer none):
- */
-guint *
-test_gi_uint_return_ptr (void)
-{
-    static guint uint = G_MAXUINT;
-    return &uint;
-}
-
 void
 test_gi_uint_in (guint uint)
 {
     g_assert(uint == G_MAXUINT);
-}
-
-/**
- * test_gi_uint_in_ptr:
- * uint: (in):
- */
-void
-test_gi_uint_in_ptr (guint *uint)
-{
-    g_assert(*uint == G_MAXUINT);
 }
 
 /**
@@ -1116,28 +696,6 @@ test_gi_long_return_min (void)
     return G_MINLONG;
 }
 
-/**
- * test_gi_long_return_ptr_max:
- * Returns: (transfer none):
- */
-glong *
-test_gi_long_return_ptr_max (void)
-{
-    static glong long_ = G_MAXLONG;
-    return &long_;
-}
-
-/**
- * test_gi_long_return_ptr_min:
- * Returns: (transfer none):
- */
-glong *
-test_gi_long_return_ptr_min (void)
-{
-    static glong long_ = G_MINLONG;
-    return &long_;
-}
-
 void
 test_gi_long_in_max (glong long_)
 {
@@ -1148,26 +706,6 @@ void
 test_gi_long_in_min (glong long_)
 {
     g_assert(long_ == G_MINLONG);
-}
-
-/**
- * test_gi_long_in_ptr_max:
- * long_: (in):
- */
-void
-test_gi_long_in_ptr_max (glong *long_)
-{
-    g_assert(*long_ == G_MAXLONG);
-}
-
-/**
- * test_gi_long_in_ptr_min:
- * long_: (in):
- */
-void
-test_gi_long_in_ptr_min (glong *long_)
-{
-    g_assert(*long_ == G_MINLONG);
 }
 
 /**
@@ -1219,31 +757,10 @@ test_gi_ulong_return (void)
     return G_MAXULONG;
 }
 
-/**
- * test_gi_ulong_return_ptr:
- * Returns: (transfer none):
- */
-gulong *
-test_gi_ulong_return_ptr (void)
-{
-    static gulong ulong = G_MAXULONG;
-    return &ulong;
-}
-
 void
 test_gi_ulong_in (gulong ulong)
 {
     g_assert(ulong == G_MAXULONG);
-}
-
-/**
- * test_gi_ulong_in_ptr:
- * ulong: (in):
- */
-void
-test_gi_ulong_in_ptr (gulong *ulong)
-{
-    g_assert(*ulong == G_MAXULONG);
 }
 
 /**
@@ -1280,28 +797,6 @@ test_gi_ssize_return_min (void)
     return G_MINSSIZE;
 }
 
-/**
- * test_gi_ssize_return_ptr_max:
- * Returns: (transfer none):
- */
-gssize *
-test_gi_ssize_return_ptr_max (void)
-{
-    static gssize ssize = G_MAXSSIZE;
-    return &ssize;
-}
-
-/**
- * test_gi_ssize_return_ptr_min:
- * Returns: (transfer none):
- */
-gssize *
-test_gi_ssize_return_ptr_min (void)
-{
-    static gssize ssize = G_MINSSIZE;
-    return &ssize;
-}
-
 void
 test_gi_ssize_in_max (gssize ssize)
 {
@@ -1312,26 +807,6 @@ void
 test_gi_ssize_in_min (gssize ssize)
 {
     g_assert(ssize == G_MINSSIZE);
-}
-
-/**
- * test_gi_ssize_in_ptr_max:
- * ssize: (in):
- */
-void
-test_gi_ssize_in_ptr_max (gssize *ssize)
-{
-    g_assert(*ssize == G_MAXSSIZE);
-}
-
-/**
- * test_gi_ssize_in_ptr_min:
- * ssize: (in):
- */
-void
-test_gi_ssize_in_ptr_min (gssize *ssize)
-{
-    g_assert(*ssize == G_MINSSIZE);
 }
 
 /**
@@ -1383,31 +858,10 @@ test_gi_size_return (void)
     return G_MAXSIZE;
 }
 
-/**
- * test_gi_size_return_ptr:
- * Returns: (transfer none):
- */
-gsize *
-test_gi_size_return_ptr (void)
-{
-    static gsize size = G_MAXSIZE;
-    return &size;
-}
-
 void
 test_gi_size_in (gsize size)
 {
     g_assert(size == G_MAXSIZE);
-}
-
-/**
- * test_gi_size_in_ptr:
- * size: (in):
- */
-void
-test_gi_size_in_ptr (gsize *size)
-{
-    g_assert(*size == G_MAXSIZE);
 }
 
 /**
@@ -1438,31 +892,10 @@ test_gi_float_return (void)
     return G_MAXFLOAT;
 }
 
-/**
- * test_gi_float_return_ptr:
- * Returns: (transfer none):
- */
-gfloat *
-test_gi_float_return_ptr (void)
-{
-    static gfloat float_ = G_MAXFLOAT;
-    return &float_;
-}
-
 void
 test_gi_float_in (gfloat float_)
 {
     g_assert(float_ == G_MAXFLOAT);
-}
-
-/**
- * test_gi_float_in_ptr:
- * float_: (in):
- */
-void
-test_gi_float_in_ptr (gfloat *float_)
-{
-    g_assert(*float_ == G_MAXFLOAT);
 }
 
 /**
@@ -1493,31 +926,10 @@ test_gi_double_return (void)
     return G_MAXDOUBLE;
 }
 
-/**
- * test_gi_double_return_ptr:
- * Returns: (transfer none):
- */
-gdouble *
-test_gi_double_return_ptr (void)
-{
-    static gdouble double_ = G_MAXDOUBLE;
-    return &double_;
-}
-
 void
 test_gi_double_in (gdouble double_)
 {
     g_assert(double_ == G_MAXDOUBLE);
-}
-
-/**
- * test_gi_double_in_ptr:
- * double_: (in):
- */
-void
-test_gi_double_in_ptr (gdouble *double_)
-{
-    g_assert(*double_ == G_MAXDOUBLE);
 }
 
 /**
@@ -1548,31 +960,10 @@ test_gi_time_t_return (void)
     return 1234567890;
 }
 
-/**
- * test_gi_time_t_return_ptr:
- * Returns: (transfer none):
- */
-time_t *
-test_gi_time_t_return_ptr (void)
-{
-    static time_t time_t_ = 1234567890;
-    return &time_t_;
-}
-
 void
 test_gi_time_t_in (time_t time_t_)
 {
     g_assert(time_t_ == 1234567890);
-}
-
-/**
- * test_gi_time_t_in_ptr:
- * time_t_: (in):
- */
-void
-test_gi_time_t_in_ptr (time_t *time_t_)
-{
-    g_assert(*time_t_ == 1234567890);
 }
 
 /**
@@ -1603,31 +994,10 @@ test_gi_gtype_return (void)
     return G_TYPE_NONE;
 }
 
-/**
- * test_gi_gtype_return_ptr:
- * Returns: (transfer none):
- */
-GType *
-test_gi_gtype_return_ptr (void)
-{
-    static GType gtype = G_TYPE_NONE;
-    return &gtype;
-}
-
 void
 test_gi_gtype_in (GType gtype)
 {
     g_assert(gtype == G_TYPE_NONE);
-}
-
-/**
- * test_gi_gtype_in_ptr:
- * gtype: (in):
- */
-void
-test_gi_gtype_in_ptr (GType *gtype)
-{
-    g_assert(*gtype == G_TYPE_NONE);
 }
 
 /**
@@ -2783,16 +2153,6 @@ test_gi_enum_in (TestGIEnum enum_)
 }
 
 /**
- * test_gi_enum_in_ptr:
- * @enum_: (in) (transfer none):
- */
-void
-test_gi_enum_in_ptr (TestGIEnum *enum_)
-{
-    g_assert(*enum_ == TESTGI_ENUM_VALUE3);
-}
-
-/**
  * test_gi_enum_out:
  * @enum_: (out):
  */
@@ -2847,16 +2207,6 @@ void
 test_gi_flags_in_zero (TestGIFlags flags)
 {
     g_assert(flags == 0);
-}
-
-/**
- * test_gi_flags_in_ptr:
- * @flags_: (in) (transfer none):
- */
-void
-test_gi_flags_in_ptr (TestGIFlags *flags_)
-{
-    g_assert(*flags_ == TESTGI_FLAGS_VALUE2);
 }
 
 /**
@@ -3465,16 +2815,6 @@ test_gi_int_return_out (gint *int_)
 {
     *int_ = 7;
     return 6;
-}
-
-/**
- * test_gi_ptr_return_null:
- * Returns: (allow-none):
- */
-gint *
-test_gi_int_return_ptr_null (void)
-{
-    return NULL;
 }
 
 

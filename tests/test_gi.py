@@ -59,21 +59,12 @@ class TestBoolean(unittest.TestCase):
         self.assertEquals(True, TestGI.boolean_return_true())
         self.assertEquals(False, TestGI.boolean_return_false())
 
-    def test_boolean_return_ptr(self):
-        self.assertEquals(True, TestGI.boolean_return_ptr_true())
-        self.assertEquals(False, TestGI.boolean_return_ptr_false())
-
     def test_boolean_in(self):
         TestGI.boolean_in_true(True)
         TestGI.boolean_in_false(False)
 
         TestGI.boolean_in_true(1)
         TestGI.boolean_in_false(0)
-
-    def test_boolean_in_ptr(self):
-        TestGI.boolean_in_ptr_true(True)
-        TestGI.boolean_in_ptr_false(False)
-        TestGI.boolean_in_ptr_false(None)
 
     def test_boolean_out(self):
         self.assertEquals(True, TestGI.boolean_out_true())
@@ -93,10 +84,6 @@ class TestInt8(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.int8_return_max())
         self.assertEquals(self.MIN, TestGI.int8_return_min())
 
-    def test_int8_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.int8_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.int8_return_ptr_min())
-
     def test_int8_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -111,11 +98,6 @@ class TestInt8(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.int8_in_min, min)
 
         self.assertRaises(TypeError, TestGI.int8_in_max, "self.MAX")
-
-    def test_int8_in_ptr(self):
-        TestGI.int8_in_ptr_max(Number(self.MAX))
-        TestGI.int8_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.int8_in_ptr_max, None)
 
     def test_int8_out(self):
         self.assertEquals(self.MAX, TestGI.int8_out_max())
@@ -132,10 +114,6 @@ class TestUInt8(unittest.TestCase):
 
     def test_uint8_return(self):
         self.assertEquals(self.MAX, TestGI.uint8_return())
-
-# Blocked by https://bugzilla.gnome.org/show_bug.cgi?id=596420
-#    def test_uint8_return_ptr(self):
-#        self.assertEquals(self.MAX, TestGI.uint8_return_ptr())
 
     def test_uint8_in(self):
         number = Number(self.MAX)
@@ -165,10 +143,6 @@ class TestInt16(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.int16_return_max())
         self.assertEquals(self.MIN, TestGI.int16_return_min())
 
-    def test_int16_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.int16_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.int16_return_ptr_min())
-
     def test_int16_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -183,11 +157,6 @@ class TestInt16(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.int16_in_min, min)
 
         self.assertRaises(TypeError, TestGI.int16_in_max, "self.MAX")
-
-    def test_int16_in_ptr(self):
-        TestGI.int16_in_ptr_max(Number(self.MAX))
-        TestGI.int16_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.int16_in_ptr_max, None)
 
     def test_int16_out(self):
         self.assertEquals(self.MAX, TestGI.int16_out_max())
@@ -204,9 +173,6 @@ class TestUInt16(unittest.TestCase):
 
     def test_uint16_return(self):
         self.assertEquals(self.MAX, TestGI.uint16_return())
-
-    def test_uint16_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.uint16_return_ptr())
 
     def test_uint16_in(self):
         number = Number(self.MAX)
@@ -236,10 +202,6 @@ class TestInt32(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.int32_return_max())
         self.assertEquals(self.MIN, TestGI.int32_return_min())
 
-    def test_int32_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.int32_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.int32_return_ptr_min())
-
     def test_int32_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -254,11 +216,6 @@ class TestInt32(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.int32_in_min, min)
 
         self.assertRaises(TypeError, TestGI.int32_in_max, "self.MAX")
-
-    def test_int32_in_ptr(self):
-        TestGI.int32_in_ptr_max(Number(self.MAX))
-        TestGI.int32_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.int32_in_ptr_max, None)
 
     def test_int32_out(self):
         self.assertEquals(self.MAX, TestGI.int32_out_max())
@@ -275,9 +232,6 @@ class TestUInt32(unittest.TestCase):
 
     def test_uint32_return(self):
         self.assertEquals(self.MAX, TestGI.uint32_return())
-
-    def test_uint32_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.uint32_return_ptr())
 
     def test_uint32_in(self):
         number = Number(self.MAX)
@@ -307,10 +261,6 @@ class TestInt64(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.int64_return_max())
         self.assertEquals(self.MIN, TestGI.int64_return_min())
 
-    def test_int64_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.int64_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.int64_return_ptr_min())
-
     def test_int64_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -325,11 +275,6 @@ class TestInt64(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.int64_in_min, min)
 
         self.assertRaises(TypeError, TestGI.int64_in_max, "self.MAX")
-
-    def test_int64_in_ptr(self):
-        TestGI.int64_in_ptr_max(Number(self.MAX))
-        TestGI.int64_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.int64_in_ptr_max, None)
 
     def test_int64_out(self):
         self.assertEquals(self.MAX, TestGI.int64_out_max())
@@ -346,9 +291,6 @@ class TestUInt64(unittest.TestCase):
 
     def test_uint64_return(self):
         self.assertEquals(self.MAX, TestGI.uint64_return())
-
-    def test_uint64_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.uint64_return_ptr())
 
     def test_uint64_in(self):
         number = Number(self.MAX)
@@ -378,10 +320,6 @@ class TestShort(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.short_return_max())
         self.assertEquals(self.MIN, TestGI.short_return_min())
 
-    def test_short_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.short_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.short_return_ptr_min())
-
     def test_short_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -396,11 +334,6 @@ class TestShort(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.short_in_min, min)
 
         self.assertRaises(TypeError, TestGI.short_in_max, "self.MAX")
-
-    def test_short_in_ptr(self):
-        TestGI.short_in_ptr_max(Number(self.MAX))
-        TestGI.short_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.short_in_ptr_max, None)
 
     def test_short_out(self):
         self.assertEquals(self.MAX, TestGI.short_out_max())
@@ -417,9 +350,6 @@ class TestUShort(unittest.TestCase):
 
     def test_ushort_return(self):
         self.assertEquals(self.MAX, TestGI.ushort_return())
-
-    def test_ushort_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.ushort_return_ptr())
 
     def test_ushort_in(self):
         number = Number(self.MAX)
@@ -449,10 +379,6 @@ class TestInt(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.int_return_max())
         self.assertEquals(self.MIN, TestGI.int_return_min())
 
-    def test_int_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.int_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.int_return_ptr_min())
-
     def test_int_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -467,11 +393,6 @@ class TestInt(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.int_in_min, min)
 
         self.assertRaises(TypeError, TestGI.int_in_max, "self.MAX")
-
-    def test_int_in_ptr(self):
-        TestGI.int_in_ptr_max(Number(self.MAX))
-        TestGI.int_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.int_in_ptr_max, None)
 
     def test_int_out(self):
         self.assertEquals(self.MAX, TestGI.int_out_max())
@@ -488,9 +409,6 @@ class TestUInt(unittest.TestCase):
 
     def test_uint_return(self):
         self.assertEquals(self.MAX, TestGI.uint_return())
-
-    def test_uint_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.uint_return_ptr())
 
     def test_uint_in(self):
         number = Number(self.MAX)
@@ -520,10 +438,6 @@ class TestLong(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.long_return_max())
         self.assertEquals(self.MIN, TestGI.long_return_min())
 
-    def test_long_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.long_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.long_return_ptr_min())
-
     def test_long_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -538,11 +452,6 @@ class TestLong(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.long_in_min, min)
 
         self.assertRaises(TypeError, TestGI.long_in_max, "self.MAX")
-
-    def test_long_in_ptr(self):
-        TestGI.long_in_ptr_max(Number(self.MAX))
-        TestGI.long_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.long_in_ptr_max, None)
 
     def test_long_out(self):
         self.assertEquals(self.MAX, TestGI.long_out_max())
@@ -559,9 +468,6 @@ class TestULong(unittest.TestCase):
 
     def test_ulong_return(self):
         self.assertEquals(self.MAX, TestGI.ulong_return())
-
-    def test_ulong_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.ulong_return_ptr())
 
     def test_ulong_in(self):
         number = Number(self.MAX)
@@ -591,10 +497,6 @@ class TestSSize(unittest.TestCase):
         self.assertEquals(self.MAX, TestGI.ssize_return_max())
         self.assertEquals(self.MIN, TestGI.ssize_return_min())
 
-    def test_ssize_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.ssize_return_ptr_max())
-        self.assertEquals(self.MIN, TestGI.ssize_return_ptr_min())
-
     def test_ssize_in(self):
         max = Number(self.MAX)
         min = Number(self.MIN)
@@ -609,11 +511,6 @@ class TestSSize(unittest.TestCase):
         self.assertRaises(ValueError, TestGI.ssize_in_min, min)
 
         self.assertRaises(TypeError, TestGI.ssize_in_max, "self.MAX")
-
-    def test_ssize_in_ptr(self):
-        TestGI.ssize_in_ptr_max(Number(self.MAX))
-        TestGI.ssize_in_ptr_min(Number(self.MIN))
-        self.assertRaises(TypeError, TestGI.ssize_in_ptr_max, None)
 
     def test_ssize_out(self):
         self.assertEquals(self.MAX, TestGI.ssize_out_max())
@@ -630,9 +527,6 @@ class TestSize(unittest.TestCase):
 
     def test_size_return(self):
         self.assertEquals(self.MAX, TestGI.size_return())
-
-    def test_size_return_ptr(self):
-        self.assertEquals(self.MAX, TestGI.size_return_ptr())
 
     def test_size_in(self):
         number = Number(self.MAX)
@@ -661,17 +555,10 @@ class TestFloat(unittest.TestCase):
     def test_float_return(self):
         self.assertAlmostEquals(self.MAX, TestGI.float_return())
 
-    def test_float_return_ptr(self):
-        self.assertAlmostEquals(self.MAX, TestGI.float_return_ptr())
-
     def test_float_in(self):
         TestGI.float_in(Number(self.MAX))
 
         self.assertRaises(TypeError, TestGI.float_in, "self.MAX")
-
-    def test_float_in_ptr(self):
-        TestGI.float_in_ptr(Number(self.MAX))
-        self.assertRaises(TypeError, TestGI.float_in_ptr, None)
 
     def test_float_out(self):
         self.assertAlmostEquals(self.MAX, TestGI.float_out())
@@ -688,17 +575,10 @@ class TestDouble(unittest.TestCase):
     def test_double_return(self):
         self.assertAlmostEquals(self.MAX, TestGI.double_return())
 
-    def test_double_return_ptr(self):
-        self.assertAlmostEquals(self.MAX, TestGI.double_return_ptr())
-
     def test_double_in(self):
         TestGI.double_in(Number(self.MAX))
 
         self.assertRaises(TypeError, TestGI.double_in, "self.MAX")
-
-    def test_double_in_ptr(self):
-        TestGI.double_in_ptr(Number(self.MAX))
-        self.assertRaises(TypeError, TestGI.double_in_ptr, None)
 
     def test_double_out(self):
         self.assertAlmostEquals(self.MAX, TestGI.double_out())
@@ -714,17 +594,10 @@ class TestTimeT(unittest.TestCase):
     def test_time_t_return(self):
         self.assertEquals(self.DATETIME, TestGI.time_t_return())
 
-    def test_time_t_return_ptr(self):
-        self.assertEquals(self.DATETIME, TestGI.time_t_return_ptr())
-
     def test_time_t_in(self):
         TestGI.time_t_in(self.DATETIME)
 
         self.assertRaises(TypeError, TestGI.time_t_in, "self.DATETIME")
-
-    def test_time_t_in_ptr(self):
-        TestGI.time_t_in_ptr(self.DATETIME)
-        self.assertRaises(TypeError, TestGI.time_t_in_ptr, None)
 
     def test_time_t_out(self):
         self.assertEquals(self.DATETIME, TestGI.time_t_out())
@@ -738,17 +611,10 @@ class TestGType(unittest.TestCase):
     def test_gtype_return(self):
         self.assertEquals(gobject.TYPE_NONE, TestGI.gtype_return())
 
-    def test_gtype_return_ptr(self):
-        self.assertEquals(gobject.TYPE_NONE, TestGI.gtype_return_ptr())
-
     def test_gtype_in(self):
         TestGI.gtype_in(gobject.TYPE_NONE)
 
         self.assertRaises(TypeError, TestGI.gtype_in, "gobject.TYPE_NONE")
-
-    def test_gtype_in_ptr(self):
-        TestGI.gtype_in_ptr(gobject.TYPE_NONE)
-        self.assertRaises(TypeError, TestGI.gtype_in_ptr, None)
 
     def test_gtype_out(self):
         self.assertEquals(gobject.TYPE_NONE, TestGI.gtype_out())
@@ -1064,11 +930,6 @@ class TestGEnum(unittest.TestCase):
         self.assertRaises(TypeError, TestGI.enum_in, 42)
         self.assertRaises(TypeError, TestGI.enum_in, 'TestGI.Enum.VALUE3')
 
-    def test_enum_in_ptr(self):
-        TestGI.enum_in_ptr(TestGI.Enum.VALUE3)
-
-        self.assertRaises(TypeError, TestGI.enum_in_ptr, None)
-
     def test_enum_out(self):
         enum = TestGI.enum_out()
         self.assertTrue(isinstance(enum, TestGI.Enum))
@@ -1095,11 +956,6 @@ class TestGFlags(unittest.TestCase):
 
         self.assertRaises(TypeError, TestGI.flags_in, 1 << 1)
         self.assertRaises(TypeError, TestGI.flags_in, 'TestGI.Flags.VALUE2')
-
-    def test_flags_in_ptr(self):
-        TestGI.flags_in_ptr(TestGI.Flags.VALUE2)
-
-        self.assertRaises(TypeError, TestGI.flags_in_ptr, None)
 
     def test_flags_out(self):
         flags = TestGI.flags_out()

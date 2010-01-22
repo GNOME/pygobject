@@ -664,7 +664,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         for (i = 0; i < n_args; i++) {
             GIDirection direction;
             GITypeTag type_tag;
-            gboolean may_be_null;
             PyObject *py_arg;
             gint retval;
 
@@ -680,10 +679,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             g_assert(py_args_pos < n_py_args);
             py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
 
-            may_be_null = g_arg_info_may_be_null(arg_infos[i]);
-
-            retval = _pygi_g_type_info_check_object(arg_type_infos[i],
-                    may_be_null, py_arg);
+            retval = _pygi_g_type_info_check_object(arg_type_infos[i], py_arg);
 
             if (retval < 0) {
                 goto out;
@@ -1955,7 +1951,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     {
         gboolean retval;
 
-        retval = _pygi_g_type_info_check_object(field_type_info, TRUE, py_value);
+        retval = _pygi_g_type_info_check_object(field_type_info, py_value);
         if (retval < 0) {
             goto out;
         }

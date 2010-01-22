@@ -32,7 +32,6 @@ G_BEGIN_DECLS
 /* Private */
 
 gint _pygi_g_type_info_check_object (GITypeInfo *type_info,
-                                     gboolean    may_be_null,
                                      PyObject   *object);
 
 gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
