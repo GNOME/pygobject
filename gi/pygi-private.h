@@ -46,26 +46,6 @@ G_BEGIN_DECLS
     } \
 } G_STMT_END
 
-#if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION == 20
-/* Private stuff copied from glib-2.20.x sources */
-struct _GRealArray
-{
-    guint8 *data;
-    guint   len;
-    guint   alloc;
-    guint   elt_size;
-    guint   zero_terminated : 1;
-    guint   clear : 1;
-};
-
-static inline guint
-g_array_get_element_size (GArray *array)
-{
-    struct _GRealArray *rarray = (struct _GRealArray*) array;
-    return rarray->elt_size;
-}
-#endif
-
 /* Redefine g_array_index because we want it to return the i-th element, casted
  * to the type t, of the array a, and not the i-th element of the array a
  * casted to the type t. */
