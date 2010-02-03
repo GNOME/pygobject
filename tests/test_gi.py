@@ -1366,6 +1366,8 @@ class TestOverrides(unittest.TestCase):
         # Test that the constructor has been overridden.
         struct = TestGI.OverridesStruct(42)
 
+        self.assertTrue(isinstance(struct, TestGI.OverridesStruct))
+
         # Test that the method has been overridden.
         self.assertEquals(6, struct.method())
 
@@ -1378,12 +1380,16 @@ class TestOverrides(unittest.TestCase):
 
         del struct
 
-    def test_struct(self):
+    def test_object(self):
         # Test that the constructor has been overridden.
         object_ = TestGI.OverridesObject(42)
 
+        self.assertTrue(isinstance(object_, TestGI.OverridesObject))
+
         # Test that the alternate constructor has been overridden.
         object_ = TestGI.OverridesObject.new(42)
+
+        self.assertTrue(isinstance(object_, TestGI.OverridesObject))
 
         # Test that the method has been overridden.
         self.assertEquals(6, object_.method())
