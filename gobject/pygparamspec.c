@@ -32,12 +32,17 @@
 
 PYGLIB_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);
 
-static int
-pyg_param_spec_compare(PyGParamSpec *self, PyGParamSpec *v)
+static PyObject*
+pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->pspec == v->pspec) return 0;
-    if (self->pspec > v->pspec) return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGParamSpec_Type)
+	return _pyglib_generic_ptr_richcompare(((PyGParamSpec*)self)->pspec,
+					       ((PyGParamSpec*)other)->pspec,
+					       op);
+    else {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
 }
 
 static long
@@ -387,9 +392,11 @@ pygobject_paramspec_register_types(PyObject *d)
     Py_TYPE(&PyGParamSpec_Type) = &PyType_Type;
     PyGParamSpec_Type.tp_dealloc = (destructor)pyg_param_spec_dealloc;
     PyGParamSpec_Type.tp_getattr = (getattrfunc)pyg_param_spec_getattr;
-    PyGParamSpec_Type.tp_compare = (cmpfunc)pyg_param_spec_compare;
+    PyGParamSpec_Type.tp_richcompare = pyg_param_spec_richcompare;
+    PyGParamSpec_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGParamSpec_Type.tp_repr = (reprfunc)pyg_param_spec_repr;
     PyGParamSpec_Type.tp_hash = (hashfunc)pyg_param_spec_hash;
+    
 
     if (PyType_Ready(&PyGParamSpec_Type))
 	return;

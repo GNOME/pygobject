@@ -783,7 +783,10 @@ static void
 pygobject_inherit_slots(PyTypeObject *type, PyObject *bases, gboolean check_for_present)
 {
     static int slot_offsets[] = { offsetof(PyTypeObject, tp_richcompare),
+#if PY_VERSION_HEX < 0x03000000
 				  offsetof(PyTypeObject, tp_compare),
+#endif
+				  offsetof(PyTypeObject, tp_richcompare),
 				  offsetof(PyTypeObject, tp_hash),
 				  offsetof(PyTypeObject, tp_iter),
 				  offsetof(PyTypeObject, tp_repr),
@@ -1009,12 +1012,29 @@ pygobject_dealloc(PyGObject *self)
     PyObject_GC_Del(self);
 }
 
-static int
-pygobject_compare(PyGObject *self, PyGObject *v)
+static PyObject*
+pygobject_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->obj == v->obj) return 0;
-    if (self->obj > v->obj)  return -1;
-    return 1;
+    int isinst;
+    
+    isinst = PyObject_IsInstance(self, (PyObject*)&PyGObject_Type);
+    if (isinst == -1)
+	return NULL;
+    if (!isinst) {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
+    isinst = PyObject_IsInstance(other, (PyObject*)&PyGObject_Type);
+    if (isinst == -1)
+	return NULL;
+    if (!isinst) {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
+	
+    return _pyglib_generic_ptr_richcompare(((PyGObject*)self)->obj,
+                                           ((PyGObject*)other)->obj,
+			 		   op);
 }
 
 static long
@@ -2240,7 +2260,7 @@ pygobject_object_register_types(PyObject *d)
 						      pyobject_copy,
 						      pyobject_free);
     PyGObject_Type.tp_dealloc = (destructor)pygobject_dealloc;
-    PyGObject_Type.tp_compare = (cmpfunc)pygobject_compare;
+    PyGObject_Type.tp_richcompare = pygobject_richcompare;
     PyGObject_Type.tp_repr = (reprfunc)pygobject_repr;
     PyGObject_Type.tp_hash = (hashfunc)pygobject_hash;
     PyGObject_Type.tp_setattro = (setattrofunc)pygobject_setattro;

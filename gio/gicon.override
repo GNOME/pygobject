@@ -177,11 +177,11 @@ _wrap_g_file_icon_tp_repr(PyGObject *self)
     PyObject *result;
 
     if (uri) {
-	representation = g_strdup_printf("<%s at %p: %s>", self->ob_type->tp_name, self, uri);
+	representation = g_strdup_printf("<%s at %p: %s>", Py_TYPE(self)->tp_name, self, uri);
 	g_free(uri);
     }
     else
-	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", self->ob_type->tp_name, self);
+	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", Py_TYPE(self)->tp_name, self);
 
     result = PyString_FromString(representation);
     g_free(representation);
@@ -275,7 +275,7 @@ _wrap_g_themed_icon_tp_repr(PyGObject *self)
     GString *representation = g_string_new(NULL);
     PyObject *result;
 
-    g_string_append_printf(representation, "<%s at %p: ", self->ob_type->tp_name, self);
+    g_string_append_printf(representation, "<%s at %p: ", Py_TYPE(self)->tp_name, self);
 
     if (names) {
 	gboolean first_name = TRUE;

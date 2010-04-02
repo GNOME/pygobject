@@ -76,7 +76,7 @@ class FileOutput:
     # handle writing to the file, and keep track of the line number ...
     def write(self, str):
         self.fp.write(str)
-        self.lineno = self.lineno + string.count(str, '\n')
+        self.lineno = self.lineno + str.count('\n')
     def writelines(self, sequence):
         for line in sequence:
             self.write(line)
@@ -96,8 +96,7 @@ class FileOutput:
 class Wrapper:
     type_tmpl = (
         'PyTypeObject G_GNUC_INTERNAL Py%(typename)s_Type = {\n'
-        '    PyObject_HEAD_INIT(NULL)\n'
-        '    0,                                 /* ob_size */\n'
+        '    PyVarObject_HEAD_INIT(NULL, 0)'
         '    "%(classname)s",                   /* tp_name */\n'
         '    sizeof(%(tp_basicsize)s),          /* tp_basicsize */\n'
         '    0,                                 /* tp_itemsize */\n'
@@ -106,7 +105,7 @@ class Wrapper:
         '    (printfunc)0,                      /* tp_print */\n'
         '    (getattrfunc)%(tp_getattr)s,       /* tp_getattr */\n'
         '    (setattrfunc)%(tp_setattr)s,       /* tp_setattr */\n'
-        '    (cmpfunc)%(tp_compare)s,           /* tp_compare */\n'
+        '    NULL, //%(tp_compare)s,                    /* tp_compare */\n'
         '    (reprfunc)%(tp_repr)s,             /* tp_repr */\n'
         '    (PyNumberMethods*)%(tp_as_number)s,     /* tp_as_number */\n'
         '    (PySequenceMethods*)%(tp_as_sequence)s, /* tp_as_sequence */\n'

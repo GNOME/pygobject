@@ -31,7 +31,7 @@ _wrap__install_app_info_meta(PyObject *self, PyObject *args)
 	return NULL;
 
     Py_INCREF(metaclass);
-    PyGAppInfo_Type.ob_type = (PyTypeObject*)metaclass;
+    Py_TYPE(&PyGAppInfo_Type) = (PyTypeObject*)metaclass;
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -199,7 +199,7 @@ _wrap_g_app_info_tp_repr(PyGObject *self)
     PyObject *result;
 
     representation = g_strdup_printf("<%s at %p: %s>",
-				     self->ob_type->tp_name, self,
+				     Py_TYPE(self)->tp_name, self,
 				     name ? name : "UNKNOWN NAME");
 
     result = PyString_FromString(representation);

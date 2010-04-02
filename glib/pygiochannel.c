@@ -43,12 +43,17 @@ py_io_channel_next(PyGIOChannel *self)
     return ret_obj;
 }
 
-static int
-py_io_channel_compare(PyGIOChannel *self, PyGIOChannel *v)
+static PyObject*
+py_io_channel_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->channel == v->channel) return 0;
-    if (self->channel > v->channel) return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGIOChannel_Type)
+        return _pyglib_generic_ptr_richcompare(((PyGIOChannel*)self)->channel,
+                                               ((PyGIOChannel*)other)->channel,
+                                               op);
+    else {
+       Py_INCREF(Py_NotImplemented);
+       return Py_NotImplemented;
+    }
 }
 
 static PyObject*
@@ -731,7 +736,7 @@ pyglib_iochannel_register_types(PyObject *d)
     PyGIOChannel_Type.tp_members = py_io_channel_members;
     PyGIOChannel_Type.tp_methods = py_io_channel_methods;
     PyGIOChannel_Type.tp_hash = (hashfunc)py_io_channel_hash;
-    PyGIOChannel_Type.tp_compare = (cmpfunc)py_io_channel_compare;
+    PyGIOChannel_Type.tp_richcompare = py_io_channel_richcompare;
     PyGIOChannel_Type.tp_iter = (getiterfunc)py_io_channel_get_iter;
     PyGIOChannel_Type.tp_iternext = (iternextfunc)py_io_channel_next;
 

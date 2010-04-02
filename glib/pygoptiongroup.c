@@ -240,16 +240,17 @@ pyg_option_group_set_translation_domain(PyGOptionGroup *self,
     return Py_None;
 }
 
-static int
-pyg_option_group_compare(PyGOptionGroup *self, PyGOptionGroup *group)
+static PyObject*
+pyg_option_group_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->group == group->group)
-	return 0;
-
-    if (self->group > group->group)
-        return 1;
-
-    return -1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGOptionGroup_Type)
+	return _pyglib_generic_ptr_richcompare(((PyGOptionGroup*)self)->group,
+					       ((PyGOptionGroup*)other)->group,
+					       op);
+    else {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
 }
 
 static PyMethodDef pyg_option_group_methods[] = {
@@ -262,7 +263,7 @@ void
 pyglib_option_group_register_types(PyObject *d)
 {
     PyGOptionGroup_Type.tp_dealloc = (destructor)pyg_option_group_dealloc;
-    PyGOptionGroup_Type.tp_compare = (cmpfunc)pyg_option_group_compare;
+    PyGOptionGroup_Type.tp_richcompare = pyg_option_group_richcompare;
     PyGOptionGroup_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGOptionGroup_Type.tp_methods = pyg_option_group_methods;
     PyGOptionGroup_Type.tp_init = (initproc)pyg_option_group_init;

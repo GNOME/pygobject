@@ -53,6 +53,8 @@ PyObject * pyglib_float_from_timeval(GTimeVal timeval);
 
 /* Private: for gobject <-> glib interaction only. */
 void _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback);
+PyObject* _pyglib_generic_ptr_richcompare(void* a, void *b, int op);
+PyObject* _pyglib_generic_long_richcompare(long a, long b, int op);
 
 #define pyglib_begin_allow_threads		\
     G_STMT_START {                              \

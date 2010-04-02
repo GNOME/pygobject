@@ -62,7 +62,7 @@ _wrap__install_file_meta(PyObject *self, PyObject *args)
 	return NULL;
 
     Py_INCREF(metaclass);
-    PyGFile_Type.ob_type = (PyTypeObject*)metaclass;
+    Py_TYPE(&PyGFile_Type) = (PyTypeObject*)metaclass;
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -1498,11 +1498,11 @@ _wrap_g_file_tp_repr(PyGObject *self)
     PyObject *result;
 
     if (uri) {
-	representation = g_strdup_printf("<%s at %p: %s>", self->ob_type->tp_name, self, uri);
+	representation = g_strdup_printf("<%s at %p: %s>", Py_TYPE(self)->tp_name, self, uri);
 	g_free(uri);
     }
     else
-	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", self->ob_type->tp_name, self);
+	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", Py_TYPE(self)->tp_name, self);
 
     result = PyString_FromString(representation);
     g_free(representation);

@@ -47,13 +47,19 @@ pyg_boxed_dealloc(PyGBoxed *self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int
-pyg_boxed_compare(PyGBoxed *self, PyGBoxed *v)
+static PyObject*
+pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->boxed == v->boxed) return 0;
-    if (self->boxed > v->boxed)  return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGBoxed_Type)
+	return _pyglib_generic_ptr_richcompare(((PyGBoxed*)self)->boxed,
+					       ((PyGBoxed*)other)->boxed,
+					       op);
+    else {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
 }
+
 
 static long
 pyg_boxed_hash(PyGBoxed *self)
@@ -216,7 +222,7 @@ pygobject_boxed_register_types(PyObject *d)
     pygboxed_marshal_key     = g_quark_from_static_string("PyGBoxed::marshal");
 
     PyGBoxed_Type.tp_dealloc = (destructor)pyg_boxed_dealloc;
-    PyGBoxed_Type.tp_compare = (cmpfunc)pyg_boxed_compare;
+    PyGBoxed_Type.tp_richcompare = pyg_boxed_richcompare;
     PyGBoxed_Type.tp_repr = (reprfunc)pyg_boxed_repr;
     PyGBoxed_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGBoxed_Type.tp_methods = pygboxed_methods;

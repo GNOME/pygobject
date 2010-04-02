@@ -83,8 +83,7 @@ static const PyGetSetDef pyg_file_attribute_info_getsets[] = {
 };
 
 PyTypeObject PyGFileAttributeInfo_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                  /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gio.FileAttributeInfo",            /* tp_name */
     sizeof(PyGFileAttributeInfo),      /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -93,7 +92,7 @@ PyTypeObject PyGFileAttributeInfo_Type = {
     (printfunc)0,                       /* tp_print */
     (getattrfunc)0,                     /* tp_getattr */
     (setattrfunc)0,                     /* tp_setattr */
-    (cmpfunc)0,                         /* tp_compare */
+    NULL,                               /* tp_compare */
     (reprfunc)0,                        /* tp_repr */
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */

@@ -51,12 +51,17 @@ pyg_main_context_dealloc(PyGMainContext *self)
     PyObject_Del(self);
 }
 
-static int
-pyg_main_context_compare(PyGMainContext *self, PyGMainContext *v)
+static PyObject*
+pyg_main_context_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->context == v->context) return 0;
-    if (self->context > v->context) return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGMainContext_Type)
+	return _pyglib_generic_ptr_richcompare(((PyGMainContext*)self)->context,
+					       ((PyGMainContext*)other)->context,
+					       op);
+    else {
+	Py_INCREF(Py_NotImplemented);
+	return Py_NotImplemented;
+    }
 }
 
 static PyObject *
@@ -91,7 +96,7 @@ void
 pyglib_maincontext_register_types(PyObject *d)
 {
     PyGMainContext_Type.tp_dealloc = (destructor)pyg_main_context_dealloc;
-    PyGMainContext_Type.tp_compare = (cmpfunc)pyg_main_context_compare;
+    PyGMainContext_Type.tp_richcompare = pyg_main_context_richcompare;
     PyGMainContext_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGMainContext_Type.tp_methods = _PyGMainContext_methods;
     PyGMainContext_Type.tp_init = (initproc)pyg_main_context_init;
