@@ -507,7 +507,7 @@
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
             <para>
                 When the operation is finished, callback will be called. You can then call
@@ -541,7 +541,7 @@
                 The <methodname>guess_content_type_finish</methodname>() method finishes guessing content
                 types of mount. If any errors occured during the operation, error will be set to
                 contain the errors and FALSE will be returned. In particular, you may get an
-                gio.IO_ERROR_NOT_SUPPORTED if the mount does not support content guessing.
+                gio.ERROR_NOT_SUPPORTED if the mount does not support content guessing.
             </para>
         </refsect2>
 
@@ -579,7 +579,7 @@
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
             <para>
                 This is an synchronous operation and as such may block doing IO; see
@@ -690,7 +690,7 @@
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
             <para>
                 When the operation is finished, callback will be called. You can then call
@@ -792,7 +792,7 @@
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
             <para>
                 When the operation is finished, callback will be called. You can then call

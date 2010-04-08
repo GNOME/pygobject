@@ -2664,7 +2664,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             </para>
             <para>
                 If the source is a directory and the target does not exist, or gio.FILE_COPY_OVERWRITE is specified
-                and the target is a file, then the G_IO_ERROR_WOULD_RECURSE error may be returned
+                and the target is a file, then the gio.ERROR_WOULD_RECURSE error may be returned
                 (if the native move operation isn't available).
             </para>
         </refsect2>
@@ -2846,7 +2846,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
             <para>
                 If the file does not exist, the gio.ERROR_NOT_FOUND error will be returned. Other errors
@@ -2998,7 +2998,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
             <para>
                 For symlinks, normally the information about the target of the symlink is returned,
@@ -3008,7 +3008,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
                 files the information about the symlink itself will be returned. 
             </para>
             <para>
-                If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will be
+                If the file does not exist, the gio.ERROR_NOT_FOUND error will be
                 returned. Other errors are possible too, and depend on what kind of
                 filesystem the file is on.
             </para>
@@ -3147,7 +3147,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3183,7 +3183,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3219,11 +3219,11 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
             <para>
-                If the file does not exist, the gio.IO_ERROR_NOT_FOUND error will be returned.
-                If the file is a directory, the gio.IO_ERROR_IS_DIRECTORY error will be returned.
+                If the file does not exist, the gio.ERROR_NOT_FOUND error will be returned.
+                If the file is a directory, the gio.ERROR_IS_DIRECTORY error will be returned.
                 Other errors are possible too, and depend on what kind of filesystem the file is on.
             </para>
         </refsect2>
@@ -3373,11 +3373,11 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
             <para>
                 If you pass in a non-<literal>None</literal> etag value, then this value is compared
-                to the current entity tag of the file, and if they differ an gio.IO_ERROR_WRONG_ETAG error
+                to the current entity tag of the file, and if they differ an gio.ERROR_WRONG_ETAG error
                 is returned. This generally means that the file has been changed since you last read it.
                 You can get the new etag from
                 <methodname><link linkend="method-giofileoutputstream--get-etag">gio.FileOutputStream.get_etag</link></methodname>()
@@ -3387,15 +3387,15 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             </para>
             <para>
                 If make_backup is <literal>True</literal>, this function will attempt to make a backup
-                of the current file before overwriting it. If this fails a gio.IO_ERROR_CANT_CREATE_BACKUP
+                of the current file before overwriting it. If this fails a gio.ERROR_CANT_CREATE_BACKUP
                 error will be returned. If you want to replace anyway, try again
                 with make_backup set to <literal>False</literal>. 
             </para>
             <para>
-                If the file is a directory the gio.IO_ERROR_IS_DIRECTORY error will be returned, and
-                if the file is some other form of non-regular file then a gio.IO_ERROR_NOT_REGULAR_FILE
+                If the file is a directory the gio.ERROR_IS_DIRECTORY error will be returned, and
+                if the file is some other form of non-regular file then a gio.ERROR_NOT_REGULAR_FILE
                 error will be returned. Some file systems don't allow all file names, and may return an
-                gio.IO_ERROR_INVALID_FILENAME error, and if the name is to long gio.IO_ERROR_FILENAME_TOO_LONG
+                gio.ERROR_INVALID_FILENAME error, and if the name is to long gio.ERROR_FILENAME_TOO_LONG
                 will be returned. Other errors are possible too, and depend on what kind of filesystem the file is on.
             </para>
         </refsect2>
@@ -3525,7 +3525,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 The <methodname>replace_contents</methodname>() method replaces the contents
                 of file with contents of length bytes. If etag is specified (not NULL) any existing
-                file must have that etag, or the error gio.IO_ERROR_WRONG_ETAG will be returned. 
+                file must have that etag, or the error gio.ERROR_WRONG_ETAG will be returned. 
             </para>
             <para>
                 If make_backup is <literal>True</literal>, this function will attempt to make a backup of file. 
@@ -3533,7 +3533,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
             <para>
                 The returned etag can be used to verify that the file hasn't changed the next time it is saved over.
@@ -3765,7 +3765,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3819,7 +3819,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3873,7 +3873,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3927,7 +3927,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -3981,7 +3981,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -4035,7 +4035,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -4089,7 +4089,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled by triggering
                 the cancellable object from another thread. If the operation was cancelled, the error
-                gio.IO_ERROR_CANCELLED will be returned. 
+                gio.ERROR_CANCELLED will be returned. 
             </para>
         </refsect2>
 
@@ -4237,7 +4237,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
         </refsect2>
 
@@ -4291,7 +4291,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
         </refsect2>
 
@@ -4408,12 +4408,12 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 The <methodname>trash</methodname>() method sends file to the "Trashcan", if possible.
                 This is similar to deleting it, but the user can recover it before emptying the trashcan.
-                Not all file systems support trashing, so this call can return the gio.IO_ERROR_NOT_SUPPORTED error. 
+                Not all file systems support trashing, so this call can return the gio.ERROR_NOT_SUPPORTED error. 
             </para>
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
         </refsect2>
 
@@ -4459,7 +4459,7 @@ URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
             <para>
                 If cancellable is not <literal>None</literal>, then the operation can be cancelled
                 by triggering the cancellable object from another thread. If the operation was cancelled,
-                the error gio.IO_ERROR_CANCELLED will be returned.
+                the error gio.ERROR_CANCELLED will be returned.
             </para>
             <para>
                 When the operation is finished, callback will be called. You can then call
