@@ -44,7 +44,7 @@ _gi_la_SOURCES = \
 pygi_LTLIBRARIES = _gi.la
 
 .la.so:
-	$(LN_S) .libs/$@ $@ || true
+	rm -f $@ && $(LN_S) .libs/$@ $@
 
 all: $(pygi_LTLIBRARIES:.la=.so)
 clean-local:
