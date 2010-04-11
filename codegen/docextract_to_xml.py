@@ -20,6 +20,11 @@ def usage():
         '[-i | --with-signals ]\n')
     sys.exit(1)
 
+# Translates special texts to &... HTML acceptable format.  Also replace
+# occurrences of '/*' and '*/' with '/ *' and '* /' respectively to avoid
+# comment errors (note the spaces).  Some function descriptions include C++
+# multi-line comments which cause errors when the description is included in a
+# C++ Doxygen comment block.
 def escape_text(unescaped_text):
     # Escape every "&" not part of an entity reference
     escaped_text = re.sub(r'&(?![A-Za-z]+;)', '&amp;', unescaped_text)
@@ -34,6 +39,10 @@ def escape_text(unescaped_text):
     escaped_text = string.replace(escaped_text, '<', '&lt;')
     escaped_text = string.replace(escaped_text, '>', '&gt;')
     escaped_text = string.replace(escaped_text, '"', '&quot;')
+
+    # Replace C++ comment begin and ends to ones that don't affect Doxygen.
+    escaped_text = string.replace(escaped_text, '/*', '/ *')
+    escaped_text = string.replace(escaped_text, '*/', '* /')
 
     return escaped_text
 
