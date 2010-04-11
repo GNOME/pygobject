@@ -347,6 +347,10 @@ def process_final_sections(fp, line, cur_doc):
                     # In case more lines need to be appended.
                     append_func = cur_doc.append_to_description
 
+                # Stop final section pattern matching for loop since a match
+                # has already been found.
+                break
+
         # Remove the no colon return pattern (which was temporarily added in
         # the just executed loop) from the list of final section patterns.
         final_section_patterns.pop()
