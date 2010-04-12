@@ -126,6 +126,8 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 {
     const gchar *name;
     GType type;
+    PyObject *repr;
+    const char *repr_ptr;
 #if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_from_name is deprecated; "
@@ -137,9 +139,11 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     type = _pyg_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
+    repr = PyObject_Repr((PyObject*)self);
+    repr_ptr = (repr ? PyString_AsString(repr) : "<?>");
     PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
-		 _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		 name);
+		 (repr_ptr ? repr_ptr : "<?>"), name);
+    Py_CLEAR(repr);
     return NULL;
 }
 
@@ -1921,9 +1925,11 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     }
 
     if (!g_signal_parse_name(name, gtype, &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char *repr_ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (repr_ptr ? repr_ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1960,9 +1966,11 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     }
     
     if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char *repr_ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (repr_ptr ? repr_ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
 

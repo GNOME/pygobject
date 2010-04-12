@@ -1468,9 +1468,11 @@ pygobject_connect(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (ptr ? ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1517,9 +1519,11 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (ptr ? ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1566,9 +1570,11 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (ptr ? ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1615,9 +1621,11 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (ptr ? ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1714,9 +1722,11 @@ pygobject_emit(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+		     (ptr ? ptr : "<?>"), name);
+	Py_CLEAR(repr);
 	return NULL;
     }
     g_signal_query(signal_id, &query);
@@ -1790,9 +1800,11 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     signal);
+		     (ptr ? ptr : "<?>"), signal);
+	Py_CLEAR(repr);
 	return NULL;
     }
     g_signal_stop_emission(self->obj, signal_id, detail);
@@ -1938,8 +1950,11 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	PyObject *repr = PyObject_Repr(pyfunc);
+	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     (ptr ? ptr : "<?>"));
+	Py_CLEAR(repr);
 	return NULL;
     }
     
@@ -1970,8 +1985,11 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	PyObject *repr = PyObject_Repr(pyfunc);
+	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     (ptr ? ptr : "<?>"));
+	Py_CLEAR(repr);
 	return NULL;
     }
     
@@ -2002,8 +2020,11 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	PyObject *repr = PyObject_Repr(pyfunc);
+	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     (ptr ? ptr : "<?>"));
+	Py_CLEAR(repr);
 	return NULL;
     }
     
