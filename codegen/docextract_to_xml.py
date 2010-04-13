@@ -34,6 +34,10 @@ def escape_text(unescaped_text):
     escaped_text = string.replace(escaped_text, '&ast;', '*')
     escaped_text = string.replace(escaped_text, '&percnt;', '%')
     escaped_text = string.replace(escaped_text, '&commat;', '@')
+    escaped_text = string.replace(escaped_text, '&num;', '')
+    # This represents a '/' before or after an '*' so replace with slash but
+    # with spaces.
+    escaped_text = string.replace(escaped_text, '&sol;', ' / ')
 
     # Escape for both tag contents and attribute values
     escaped_text = string.replace(escaped_text, '<', '&lt;')
