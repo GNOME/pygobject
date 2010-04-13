@@ -2530,6 +2530,22 @@ pygobject_register_api(PyObject *d)
 static void
 pygobject_register_constants(PyObject *m)
 {
+    /* PyFloat_ return a new ref, and add object takes the ref */
+    PyModule_AddObject(m, "G_MINFLOAT", PyFloat_FromDouble(G_MINFLOAT));
+    PyModule_AddObject(m, "G_MAXFLOAT", PyFloat_FromDouble(G_MAXFLOAT));
+    PyModule_AddObject(m, "G_MINDOUBLE", PyFloat_FromDouble(G_MINDOUBLE));
+    PyModule_AddObject(m, "G_MAXDOUBLE", PyFloat_FromDouble(G_MAXDOUBLE));
+
+    PyModule_AddIntConstant(m, "G_MINSHORT", G_MINSHORT);
+    PyModule_AddIntConstant(m, "G_MAXSHORT", G_MAXSHORT);
+    PyModule_AddIntConstant(m, "G_MAXUSHORT", G_MAXUSHORT);
+    PyModule_AddIntConstant(m, "G_MININT", G_MININT);
+    PyModule_AddIntConstant(m, "G_MAXINT", G_MAXINT);
+    PyModule_AddIntConstant(m, "G_MAXUINT", G_MAXUINT);
+    PyModule_AddIntConstant(m, "G_MINLONG", G_MINLONG);
+    PyModule_AddIntConstant(m, "G_MAXLONG", G_MAXLONG);
+    PyModule_AddObject(m, "G_MAXULONG", PyLong_FromUnsignedLong(G_MAXULONG));
+
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_CLEANUP", G_SIGNAL_RUN_CLEANUP);

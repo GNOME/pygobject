@@ -48,3 +48,19 @@ TYPE_OBJECT = _gobject.type_from_name('GObject')
 TYPE_PYOBJECT = _gobject.type_from_name('PyObject')
 TYPE_UNICHAR = TYPE_UINT
 
+# do a little dance to maintain API compatibility
+# as these were origianally defined here, and are
+# now defined in gobjectmodule.c
+G_MINFLOAT = _gobject.G_MINFLOAT
+G_MAXFLOAT = _gobject.G_MAXFLOAT
+G_MINDOUBLE = _gobject.G_MINDOUBLE
+G_MAXDOUBLE = _gobject.G_MAXDOUBLE
+G_MINSHORT = _gobject.G_MINSHORT
+G_MAXSHORT = _gobject.G_MAXSHORT
+G_MAXUSHORT = _gobject.G_MAXUSHORT
+G_MININT = _gobject.G_MININT
+G_MAXINT = _gobject.G_MAXINT
+G_MAXUINT = _gobject.G_MAXUINT
+G_MINLONG = _gobject.G_MINLONG
+G_MAXLONG = _gobject.G_MAXLONG
+G_MAXULONG = _gobject.G_MAXULONG

@@ -19,19 +19,6 @@ if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
 
-constants.py: generate-constants$(EXEEXT) constants.py.in
-	rm -f constants.py
-	cp $(srcdir)/constants.py.in constants.py
-	chmod 644 constants.py
-	$(top_builddir)/gobject/generate-constants$(EXEEXT) >> constants.py
-	chmod 444 constants.py
-
-generate_constants_CFLAGS = $(GLIB_CFLAGS) $(PYTHON_INCLUDES)
-
-noinst_PROGRAMS = generate-constants
-CLEANFILES = constants.py
-EXTRA_DIST = constants.py.in
-
 _gobject_la_CFLAGS = \
 	-I$(top_srcdir)/glib \
 	$(PYTHON_INCLUDES) \
