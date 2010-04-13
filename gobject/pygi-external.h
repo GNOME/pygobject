@@ -39,7 +39,7 @@ _pygi_import (void)
         Py_DECREF(module);
         Py_DECREF(api);
         PyErr_Format(PyExc_TypeError, "gi._API must be cobject, not %s",
-            api->ob_type->tp_name);
+            Py_TYPE(api)->tp_name);
         return -1;
     }
 
