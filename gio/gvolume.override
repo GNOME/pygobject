@@ -154,7 +154,7 @@ _wrap_g_volume_tp_repr(PyGObject *self)
     else
 	representation = g_strdup_printf("<%s at %p: UNKNOWN NAME>", Py_TYPE(self)->tp_name, self);
 
-    result = PyString_FromString(representation);
+    result = _PyUnicode_FromString(representation);
     g_free(representation);
     return result;
 }

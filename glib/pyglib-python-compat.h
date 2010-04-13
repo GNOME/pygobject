@@ -58,6 +58,7 @@ typedef inquiry lenfunc;
 #define _PyByteArray_Resize _PyString_Resize
 #define _PyByteArray_AsString PyString_AsString
 #define _PyByteArray_Size PyString_Size
+#define _PyByteArray_Check PyString_Check
 
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
