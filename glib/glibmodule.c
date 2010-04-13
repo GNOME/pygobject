@@ -557,16 +557,16 @@ pyglib_get_application_name(PyObject *self)
 static PyObject*
 pyglib_set_application_name(PyObject *self, PyObject *arg)
 {
-    if (!PyString_Check(arg)) {
+    if (!_PyUnicode_Check(arg)) {
 	PyObject *repr = PyObject_Repr(arg);
-	const char *repr_ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
 		     (repr_ptr ? repr_ptr : "<?>"));
 	Py_CLEAR(repr);
 	return NULL;
     }
-    g_set_application_name(PyString_AS_STRING(arg));
+    g_set_application_name(_PyUnicode_AS_STRING(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -587,16 +587,16 @@ pyglib_get_prgname(PyObject *self)
 static PyObject*
 pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
-    if (!PyString_Check(arg)) {
+    if (!_PyUnicode_Check(arg)) {
 	PyObject *repr = PyObject_Repr(arg);
-	const char *repr_ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
 		     (repr_ptr ? repr_ptr : "<?>"));
 	Py_CLEAR(repr);
 	return NULL;
     }
-    g_set_prgname(PyString_AS_STRING(arg));
+    g_set_prgname(_PyUnicode_AS_STRING(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }

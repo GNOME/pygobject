@@ -1723,7 +1723,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyObject *repr = PyObject_Repr((PyObject*)self);
-	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
 		     (ptr ? ptr : "<?>"), name);
 	Py_CLEAR(repr);
@@ -1801,7 +1801,7 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
 	PyObject *repr = PyObject_Repr((PyObject*)self);
-	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
 		     (ptr ? ptr : "<?>"), signal);
 	Py_CLEAR(repr);
@@ -1951,7 +1951,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyObject *repr = PyObject_Repr(pyfunc);
-	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
 		     (ptr ? ptr : "<?>"));
 	Py_CLEAR(repr);
@@ -1986,7 +1986,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyObject *repr = PyObject_Repr(pyfunc);
-	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
 		     (ptr ? ptr : "<?>"));
 	Py_CLEAR(repr);
@@ -2021,7 +2021,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
 	PyObject *repr = PyObject_Repr(pyfunc);
-	const char* ptr = (repr ? PyString_AsString(repr) : "<?>");
+	const char* ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
 		     (ptr ? ptr : "<?>"));
 	Py_CLEAR(repr);
