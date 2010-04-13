@@ -57,8 +57,7 @@ def _get_available_versions():
             # skip empty directories
             if not os.listdir(pathname):
                 continue
-            
-            if not versions.has_key(filename[-3:]):
+            if filename[-3:] not in versions:
                 versions[filename[-3:]] = pathname
     return versions
 
@@ -77,11 +76,11 @@ def require(version):
                "a different version of gtk was already required"
         return
 
-    assert not sys.modules.has_key('gtk'), \
+    assert 'gtk' not in sys.modules, \
            "pygtk.require() must be called before importing gtk"
 
     versions = _get_available_versions()
-    assert versions.has_key(version), \
+    assert version in versions, \
            "required version '%s' not found on system" % version
 
     # remove any pygtk dirs first ...

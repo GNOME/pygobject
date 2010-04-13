@@ -66,7 +66,7 @@ def list_files(dir):
     that matches *.glade. It also looks up the full path"""
     if dir.find(os.sep) != -1:
         parts = dir.split(os.sep)
-        dir = string.join(parts[:-1], os.sep)
+        dir = os.sep.join(parts[:-1])
         pattern = parts[-1]
     else:
         pattern = dir
@@ -421,7 +421,7 @@ class TemplateExtension(PkgConfigExtension):
         if load_types:
             del kwargs['load_types']
 
-        if kwargs.has_key('output'):
+        if 'output' in kwargs:
             kwargs['name'] = kwargs['output']
             del kwargs['output']
 
