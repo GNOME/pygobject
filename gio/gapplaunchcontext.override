@@ -53,7 +53,7 @@ _wrap_g_app_launch_context_get_display(PyGObject *self,
     g_list_free(file_list);
 
     if (ret)
-        return PyString_FromString(ret);
+        return _PyUnicode_FromString(ret);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -92,7 +92,7 @@ _wrap_g_app_launch_context_get_startup_notify_id(PyGObject *self,
     g_list_free(file_list);
 
     if (ret)
-        return PyString_FromString(ret);
+        return _PyUnicode_FromString(ret);
 
     Py_INCREF(Py_None);
     return Py_None;

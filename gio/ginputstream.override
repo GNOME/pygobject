@@ -47,7 +47,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!pygio_check_cancellable(pycancellable, &cancellable))
         return NULL;
 
-    v = PyString_FromStringAndSize((char *)NULL, buffersize);
+    v = _PyByteArray_FromStringAndSize((char *)NULL, buffersize);
     if (v == NULL)
         return NULL;
 
@@ -57,7 +57,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
             pyg_begin_allow_threads;
             errno = 0;
             chunksize = g_input_stream_read(G_INPUT_STREAM(self->obj),
-                                            PyString_AS_STRING((PyStringObject *)v) + bytesread,
+                                            _PyByteArray_AsString(v) + bytesread,
                                             buffersize - bytesread, cancellable,
                                             &error);
             pyg_end_allow_threads;
@@ -81,7 +81,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
 
             if (count < 0) {
 		buffersize += BUFSIZE;
-		if (_PyString_Resize(&v, buffersize) < 0)
+		if (_PyByteArray_Resize(&v, buffersize) < 0)
 		    return NULL;
 	    }
             else {
@@ -91,7 +91,7 @@ _wrap_g_input_stream_read(PyGObject *self, PyObject *args, PyObject *kwargs)
         }
 
     if (bytesread != buffersize)
-        _PyString_Resize(&v, bytesread);
+        _PyByteArray_Resize(&v, bytesread);
 
     return v;
 }
@@ -119,7 +119,7 @@ _wrap_g_input_stream_read_all(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!pygio_check_cancellable(pycancellable, &cancellable))
         return NULL;
 
-    v = PyString_FromStringAndSize((char *)NULL, buffersize);
+    v = _PyByteArray_FromStringAndSize((char *)NULL, buffersize);
     if (v == NULL)
         return NULL;
 
@@ -129,7 +129,7 @@ _wrap_g_input_stream_read_all(PyGObject *self, PyObject *args, PyObject *kwargs)
             pyg_begin_allow_threads;
             errno = 0;
             g_input_stream_read_all(G_INPUT_STREAM(self->obj),
-				    PyString_AS_STRING((PyStringObject *)v) + bytesread,
+				    _PyByteArray_AsString(v) + bytesread,
 				    buffersize - bytesread,
 				    &chunksize,
 				    cancellable, &error);
@@ -148,7 +148,7 @@ _wrap_g_input_stream_read_all(PyGObject *self, PyObject *args, PyObject *kwargs)
 
             if (count < 0) {
 		buffersize += BUFSIZE;
-		if (_PyString_Resize(&v, buffersize) < 0)
+		if (_PyByteArray_Resize(&v, buffersize) < 0)
 		    return NULL;
 	    }
             else {
@@ -158,7 +158,7 @@ _wrap_g_input_stream_read_all(PyGObject *self, PyObject *args, PyObject *kwargs)
         }
 
     if (bytesread != buffersize)
-        _PyString_Resize(&v, bytesread);
+        _PyByteArray_Resize(&v, bytesread);
 
     return v;
 }
@@ -241,10 +241,10 @@ _wrap_g_input_stream_read_finish(PyGObject *self,
         return NULL;
 
     if (bytesread == 0)
-        return PyString_FromString("");
+        return _PyByteArray_FromStringAndSize("", 0);
 
     notify = pygio_notify_get_attached(result);
-    return PyString_FromStringAndSize(notify->buffer, bytesread);
+    return _PyByteArray_FromStringAndSize(notify->buffer, bytesread);
 }
 %%
 override g_input_stream_close_async kwargs

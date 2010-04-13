@@ -353,7 +353,7 @@ _wrap_g_content_type_guess(PyGObject *self, PyObject *args, PyObject *kwargs)
 	ret = Py_BuildValue("zN", type, PyBool_FromLong(result_uncertain));
     
     } else {
-        ret = PyString_FromString(type);
+        ret = _PyUnicode_FromString(type);
     }
 
     g_free(type);
@@ -371,7 +371,7 @@ _wrap_g_vfs_get_supported_uri_schemes(PyGObject *self)
 
     ret = PyList_New(0);
     while (names && *names) {
-        PyObject *item = PyString_FromString(names[0]);
+        PyObject *item = _PyUnicode_FromString(names[0]);
         PyList_Append(ret, item);
         Py_DECREF(item);
 
@@ -393,7 +393,7 @@ _wrap_g_content_types_get_registered(PyObject *self)
     ret = PyList_New(0);
     for (l = list; l; l = l->next) {
 	char *content_type = l->data;
-	PyObject *string = PyString_FromString(content_type);
+	PyObject *string = _PyUnicode_FromString(content_type);
 	PyList_Append(ret, string);
 	Py_DECREF(string);
 	g_free(content_type);

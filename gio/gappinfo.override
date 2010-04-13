@@ -202,7 +202,7 @@ _wrap_g_app_info_tp_repr(PyGObject *self)
 				     Py_TYPE(self)->tp_name, self,
 				     name ? name : "UNKNOWN NAME");
 
-    result = PyString_FromString(representation);
+    result = _PyUnicode_FromString(representation);
     g_free(representation);
     return result;
 }
