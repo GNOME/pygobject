@@ -422,10 +422,10 @@ def parse_tmpl(fp, doc_dict):
             cur_doc = None # don't worry about unused params.
         elif cur_doc:
             if line[:10] == '@Returns: ':
-                if string.strip(line[10:]):
+                if line[10:].strip():
                     cur_doc.append_to_return(line[10:])
             elif line[0] == '@':
-                pos = string.find(line, ':')
+                pos = line.find(':')
                 if pos >= 0:
                     cur_doc.append_to_named_param(line[1:pos], line[pos+1:])
                 else:
