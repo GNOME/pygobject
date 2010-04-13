@@ -5,6 +5,8 @@
 """Python Bindings for GObject."""
 
 from distutils.command.build import build
+from distutils.command.build_clib import build_clib
+from distutils.sysconfig import get_python_inc
 from distutils.core import setup
 import glob
 import os
@@ -12,7 +14,8 @@ import sys
 
 from dsextras import get_m4_define, getoutput, have_pkgconfig, \
      GLOBAL_INC, GLOBAL_MACROS, InstallLib, InstallData, BuildExt, \
-     PkgConfigExtension
+     PkgConfigExtension, TemplateExtension, \
+     pkgc_get_libraries, pkgc_get_library_dirs, pkgc_get_include_dirs
 
 if '--yes-i-know-its-not-supported' in sys.argv:
     sys.argv.remove('--yes-i-know-its-not-supported')
@@ -39,7 +42,7 @@ MICRO_VERSION = int(get_m4_define('pygobject_micro_version'))
 
 VERSION = "%d.%d.%d" % (MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
-GOBJECT_REQUIRED  = get_m4_define('glib_required_version')
+GLIB_REQUIRED  = get_m4_define('glib_required_version')
 
 PYGOBJECT_SUFFIX = '2.0'
 PYGOBJECT_SUFFIX_LONG = 'gtk-' + PYGOBJECT_SUFFIX
@@ -49,11 +52,12 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MINOR_VERSION', MINOR_VERSION),
                   ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION)]
 
-if sys.platform == 'win33':
+if sys.platform == 'win32':
     GLOBAL_MACROS.append(('VERSION', '"""%s"""' % VERSION))
 else:
     GLOBAL_MACROS.append(('VERSION', '"%s"' % VERSION))
 
+DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
 INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
 XSL_DIR = os.path.join('share', 'pygobject','xsl')
 HTML_DIR = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
@@ -91,6 +95,7 @@ class PyGObjectInstallData(InstallData):
     def run(self):
         self.add_template_option('VERSION', VERSION)
         self.add_template_option('FFI_LIBS', '')
+        self.add_template_option('LIBFFI_PC', '')
         self.prepare()
 
         # Install templates
@@ -110,45 +115,111 @@ class PyGObjectBuild(build):
 PyGObjectBuild.user_options.append(('enable-threading', None,
                                 'enable threading support'))
 
+# glib
+glib = PkgConfigExtension(name='glib._glib',
+                          pkc_name='glib-2.0',
+                          pkc_version=GLIB_REQUIRED,
+                          pygobject_pkc=None,
+                          include_dirs=['glib'],
+                          libraries=['pyglib'],
+                          sources=['glib/glibmodule.c',
+                                   'glib/pygiochannel.c',
+                                   'glib/pygmaincontext.c',
+                                   'glib/pygmainloop.c',
+                                   'glib/pygoptioncontext.c',
+                                   'glib/pygoptiongroup.c',
+                                   'glib/pygsource.c',
+                                   'glib/pygspawn.c',
+                                   ])
+
 # GObject
-gobject = PkgConfigExtension(name='gobject._gobject', pkc_name='gobject-2.0',
-                             pkc_version=GOBJECT_REQUIRED,
+gobject = PkgConfigExtension(name='gobject._gobject',
+                             pkc_name='gobject-2.0',
+                             pkc_version=GLIB_REQUIRED,
                              pygobject_pkc=None,
+                             include_dirs=['glib'],
+                             libraries=['pyglib'],
                              sources=['gobject/gobjectmodule.c',
                                       'gobject/pygboxed.c',
                                       'gobject/pygenum.c',
                                       'gobject/pygflags.c',
+                                      'gobject/pyginterface.c',
                                       'gobject/pygobject.c',
-                                      'gobject/pygmaincontext.c',
-                                      'gobject/pygmainloop.c',
-                                      'gobject/pygoptioncontext.c',
-                                      'gobject/pygoptiongroup.c',
                                       'gobject/pygparamspec.c',
                                       'gobject/pygpointer.c',
                                       'gobject/pygtype.c',
-                                      'gobject/pygsource.c',
-                                      'gobject/pygiochannel.c',
                                       ])
 
+# gio
+gio = TemplateExtension(name='gio',
+                        pkc_name='gio-2.0',
+                        pkc_version=GLIB_REQUIRED,
+                        output='gio._gio',
+                        defs=('gio/gio.defs', ['gio/gio-types.defs']),
+                        include_dirs=['glib'],
+                        libraries=['pyglib'],
+                        sources=['gio/giomodule.c',
+                                 'gio/gio.c',
+                                 'gio/pygio-utils.c'],
+                        register=[('gio/gio.defs', ['gio/gio-types.defs'])],
+                        override='gio/gio.override')
+
+clibs = []
 data_files = []
 ext_modules = []
-py_modules = []
-py_modules.append('dsextras')
+
+#Install dsextras and codegen so that the pygtk installer
+#can find them
+py_modules = ['dsextras']
+packages = ['codegen']
 
 if not have_pkgconfig():
     print "Error, could not find pkg-config"
     raise SystemExit
 
+if glib.can_build():
+    #It would have been nice to create another class, such as PkgConfigCLib to
+    #encapsulate this dictionary, but it is impossible. build_clib.py does
+    #a dumb check to see if its only arguments are a 2-tuple containing a
+    #string and a Dictionary type - which makes it impossible to hide behind a
+    #subclass
+    #
+    #So we are stuck with this ugly thing
+    clibs.append((
+        'pyglib',{
+            'sources':['glib/pyglib.c'],
+            'macros':GLOBAL_MACROS,
+            'include_dirs':
+                ['glib', get_python_inc()]+pkgc_get_include_dirs('glib-2.0')}))
+    #this library is not installed, so probbably should not include its header
+    #data_files.append((INCLUDE_DIR, ('glib/pyglib.h',)))
+        
+    ext_modules.append(glib)
+    py_modules += ['glib.__init__', 'glib.option']
+else:
+    print
+    print 'ERROR: Nothing to do, glib could not be found and is essential.'
+    raise SystemExit
+
 if gobject.can_build():
     ext_modules.append(gobject)
-    py_modules.append('gobject.option')
     data_files.append((INCLUDE_DIR, ('gobject/pygobject.h',)))
     data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
     data_files.append((HTML_DIR, ['docs/style.css']))
     data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
+    py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
     print
     print 'ERROR: Nothing to do, gobject could not be found and is essential.'
+    raise SystemExit
+
+if gio.can_build():
+    ext_modules.append(gio)
+    py_modules += ['gio.__init__']
+    data_files.append((DEFS_DIR,('gio/gio-types.defs',)))
+else:
+    print
+    print 'ERROR: Nothing to do, gio could not be found and is essential.'
     raise SystemExit
 
 # Threading support
@@ -199,11 +270,14 @@ setup(name="pygobject",
       description = doclines[0],
       long_description = "\n".join(doclines[2:]),
       py_modules=py_modules,
+      packages=packages,
       ext_modules=ext_modules,
+      libraries=clibs,
       data_files=data_files,
       scripts = ["pygobject_postinstall.py"],
       options=options,
       cmdclass={'install_lib': PyGObjectInstallLib,
                 'install_data': PyGObjectInstallData,
+                'build_clib' : build_clib,
                 'build_ext': BuildExt,
                 'build': PyGObjectBuild})
