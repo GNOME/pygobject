@@ -52,8 +52,13 @@ typedef inquiry lenfunc;
 #define _PyUnicode_FromFormat PyString_FromFormat
 #define _PyUnicode_AS_STRING PyString_AS_STRING
 #define _PyUnicode_GET_SIZE PyString_GET_SIZE
-#define _PyUnicode_Resize _PyString_Resize
 #define _PyUnicode_Type PyString_Type
+
+#define _PyByteArray_FromStringAndSize PyString_FromStringAndSize
+#define _PyByteArray_Resize _PyString_Resize
+#define _PyByteArray_AsString PyString_AsString
+#define _PyByteArray_Size PyString_Size
+
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
 #define _PyLong_AsLong  PyInt_AsLong
@@ -69,6 +74,7 @@ typedef inquiry lenfunc;
 #endif
 
 #else
+
 #undef PYGLIB_MODULE_START
 #undef PYGLIB_MODULE_END
 #undef PYGLIB_DEFINE_TYPE
