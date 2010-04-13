@@ -1,5 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/gobject \
+	-I$(top_srcdir)/glib \
 	$(PYTHON_INCLUDES) \
 	$(GLIB_CFLAGS)
 

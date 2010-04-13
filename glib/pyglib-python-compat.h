@@ -61,6 +61,13 @@ typedef inquiry lenfunc;
 #define _PyLong_Type PyInt_Type
 #define _PyLong_AS_LONG PyInt_AS_LONG
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+
+#ifndef PyVarObject_HEAD_INIT
+#define PyVarObject_HEAD_INIT(base, size) \
+  PyObject_HEAD_INIT(base) \
+  size,
+#endif
+
 #else
 #undef PYGLIB_MODULE_START
 #undef PYGLIB_MODULE_END

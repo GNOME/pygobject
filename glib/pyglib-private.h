@@ -25,8 +25,6 @@
 #include <Python.h>
 #include <glib.h>
 
-#include <pyglib-python-compat.h>
-
 G_BEGIN_DECLS
 
 struct _PyGLib_Functions {

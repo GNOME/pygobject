@@ -26,6 +26,8 @@
 
 #include <glib.h>
 
+#include <pyglib-python-compat.h>
+
 G_BEGIN_DECLS
 
 typedef void (*PyGLibThreadsEnabledFunc) (void);

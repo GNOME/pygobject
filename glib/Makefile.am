@@ -2,7 +2,9 @@ AUTOMAKE_OPTIONS = 1.7
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 
 pkgincludedir = $(includedir)/pygtk-2.0
-pkginclude_HEADERS = pyglib.h
+pkginclude_HEADERS = \
+	pyglib.h \
+	pyglib-python-compat.h
 
 lib_LTLIBRARIES = libpyglib-2.0-@PYTHON_BASENAME@.la
 

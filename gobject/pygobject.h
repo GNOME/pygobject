@@ -7,6 +7,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <pyglib.h>
+
 G_BEGIN_DECLS
 
 /* This is deprecated, don't use */

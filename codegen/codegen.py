@@ -96,7 +96,7 @@ class FileOutput:
 class Wrapper:
     type_tmpl = (
         'PyTypeObject G_GNUC_INTERNAL Py%(typename)s_Type = {\n'
-        '    PyVarObject_HEAD_INIT(NULL, 0)'
+        '    PyVarObject_HEAD_INIT(NULL, 0)\n'
         '    "%(classname)s",                   /* tp_name */\n'
         '    sizeof(%(tp_basicsize)s),          /* tp_basicsize */\n'
         '    0,                                 /* tp_itemsize */\n'
