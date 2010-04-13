@@ -35,6 +35,7 @@ def escape_text(unescaped_text):
     escaped_text = string.replace(escaped_text, '&percnt;', '%')
     escaped_text = string.replace(escaped_text, '&commat;', '@')
     escaped_text = string.replace(escaped_text, '&num;', '')
+    escaped_text = string.replace(escaped_text, '&nbsp;', ' ')
     # This represents a '/' before or after an '*' so replace with slash but
     # with spaces.
     escaped_text = string.replace(escaped_text, '&sol;', ' / ')
