@@ -112,8 +112,7 @@ static const PyMethodDef _PyTestInterface_methods[] = {
 
 /* TestInterface */
 PyTypeObject PyTestInterface_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,					/* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "test.Interface",			/* tp_name */
     sizeof(PyObject),	        /* tp_basicsize */
     0,					/* tp_itemsize */
@@ -122,7 +121,7 @@ PyTypeObject PyTestInterface_Type = {
     (printfunc)0,			/* tp_print */
     (getattrfunc)0,	/* tp_getattr */
     (setattrfunc)0,	/* tp_setattr */
-    (cmpfunc)0,		/* tp_compare */
+    NULL, 		/* tp_compare */
     (reprfunc)0,		/* tp_repr */
     (PyNumberMethods*)0,     /* tp_as_number */
     (PySequenceMethods*)0, /* tp_as_sequence */
@@ -183,8 +182,7 @@ _wrap_TestInterface__do_iface_method(PyObject *cls, PyObject *args, PyObject *kw
 }
 
 PyTypeObject PyTestUnknown_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                 /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "testhelper.Unknown",            /* tp_name */
     sizeof(PyGObject),          /* tp_basicsize */
     0,                                 /* tp_itemsize */
@@ -193,7 +191,7 @@ PyTypeObject PyTestUnknown_Type = {
     (printfunc)0,                      /* tp_print */
     (getattrfunc)0,       /* tp_getattr */
     (setattrfunc)0,       /* tp_setattr */
-    (cmpfunc)0,           /* tp_compare */
+    NULL,                 /* tp_compare */
     (reprfunc)0,             /* tp_repr */
     (PyNumberMethods*)0,     /* tp_as_number */
     (PySequenceMethods*)0, /* tp_as_sequence */
@@ -524,31 +522,28 @@ static PyMethodDef testhelper_functions[] = {
     { NULL, NULL }
 };
 
-void 
-inittesthelper ()
+PYGLIB_INIT_FUNCTION(testhelper, "testhelper", testhelper_functions)
 {
   PyObject *m, *d;
-  PyObject *module;
   
   g_thread_init(NULL);
   init_pygobject();
-  m = Py_InitModule ("testhelper", testhelper_functions);
 
-  d = PyModule_GetDict(m);
+  d = PyModule_GetDict(module);
 
-  if ((module = PyImport_ImportModule("gobject")) != NULL) {
-    PyObject *moddict = PyModule_GetDict(module);
+  if ((m = PyImport_ImportModule("gobject")) != NULL) {
+    PyObject *moddict = PyModule_GetDict(m);
     
     _PyGObject_Type = (PyTypeObject *)PyDict_GetItemString(moddict, "GObject");
     if (_PyGObject_Type == NULL) {
       PyErr_SetString(PyExc_ImportError,
 		      "cannot import name GObject from gobject");
-      return ;
+      return -1;
     }
   } else {
     PyErr_SetString(PyExc_ImportError,
 		    "could not import gobject");
-    return ;
+    return -1;
   }
 
   /* TestInterface */
@@ -566,5 +561,6 @@ inittesthelper ()
   pyg_set_object_has_new_constructor(TEST_TYPE_UNKNOWN);
   //pyg_register_class_init(TEST_TYPE_UNKNOWN, __GtkUIManager_class_init);
 
+  return 0;
 }
 

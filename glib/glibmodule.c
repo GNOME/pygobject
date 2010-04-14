@@ -883,7 +883,8 @@ pyglib_register_constants(PyObject *m)
 			       (char*) g_quark_to_string(G_OPTION_ERROR));
 }
 
-PYGLIB_MODULE_START(_glib, "glib._glib")
+
+PYGLIB_INIT_FUNCTION(_glib, "glib._glib", _glib_functions)
 {
     PyObject *d = PyModule_GetDict(module);
 
@@ -898,5 +899,6 @@ PYGLIB_MODULE_START(_glib, "glib._glib")
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);
     pyglib_option_group_register_types(d);
+
+    return 0;
 }
-PYGLIB_MODULE_END

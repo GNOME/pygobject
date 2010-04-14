@@ -320,7 +320,7 @@ pygobject_init(int req_major, int req_minor, int req_micro)
             Py_XDECREF(traceback);
             PyErr_Format(PyExc_ImportError,
                          "could not import gobject (error was: %s)",
-                         PyString_AsString(py_orig_exc));
+                         _PyUnicode_AsString(py_orig_exc));
             Py_DECREF(py_orig_exc);
         } else {
             PyErr_SetString(PyExc_ImportError,

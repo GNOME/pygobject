@@ -34,7 +34,9 @@ def importModule(module, directory, name=None):
 
     try:
         obj = __import__(module, {}, {}, '')
-    except ImportError, e:
+    except ImportError:
+        raise
+        e = sys.exc_info()[1]
         raise SystemExit('%s could not be imported: %s' % (origName, e))
 
     location = obj.__file__

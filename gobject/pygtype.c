@@ -907,7 +907,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             GString *string;
             char *buffer;
             Py_ssize_t len;
-            if (_PyUnicode_AsStringAndSize(obj, &buffer, &len))
+            buffer = _PyUnicode_AsStringAndSize(obj, &buffer, &len);
+	    if (buffer == NULL)
                 return -1;
             string = g_string_new_len(buffer, len);
 	    g_value_set_boxed(value, string);

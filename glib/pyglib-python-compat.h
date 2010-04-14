@@ -41,6 +41,47 @@ typedef int Py_ssize_t;
 typedef inquiry lenfunc;
 #endif
 
+#if PY_VERSION_HEX < 0x03000000
+
+#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
+static int _pyglib_init_##modname(PyObject *module); \
+void init##modname(void) \
+{ \
+    PyObject *module = Py_InitModule(fullpkgname, functions); \
+    _pyglib_init_##modname(module); \
+} \
+static int _pyglib_init_##modname(PyObject *module)
+
+#else
+
+#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
+static struct PyModuleDef _##modname##module = {     \
+    PyModuleDef_HEAD_INIT,                              \
+    fullpkgname,                                        \
+    NULL,                                               \
+    -1,                                                 \
+    functions,                                          \
+    NULL,                                               \
+    NULL,                                               \
+    NULL,                                               \
+    NULL                                                \
+};                                                      \
+static int _pyglib_init_##modname(PyObject *module); \
+PyObject *PyInit_##modname(void) \
+{ \
+    PyObject *module = PyModule_Create(&_##modname##module);  \
+    if (module == NULL) \
+	return NULL; \
+    if (_pyglib_init_##modname(module) != 0 ) {\
+	Py_DECREF(module); \
+	return NULL; \
+    } \
+    return module; \
+} \
+static int _pyglib_init_##modname(PyObject *module)
+
+#endif
+
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
 #define RO READONLY
@@ -74,12 +115,31 @@ typedef inquiry lenfunc;
   size,
 #endif
 
+#define PYGLIB_MODULE_START(symbol, modname)	        \
+DL_EXPORT(void) init##symbol(void)			\
+{                                                       \
+    PyObject *module;                                   \
+    module = Py_InitModule(modname, symbol##_functions);
+#define PYGLIB_MODULE_END }
+#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
+PyTypeObject symbol = {                                 \
+    PyObject_HEAD_INIT(NULL)                            \
+    0,                                                  \
+    typename,						\
+    sizeof(csymbol),                                    \
+    0,                                                  \
+};
+#define PYGLIB_REGISTER_TYPE(d, type, name)	        \
+    if (!type.tp_alloc)                                 \
+	type.tp_alloc = PyType_GenericAlloc;            \
+    if (!type.tp_new)                                   \
+	type.tp_new = PyType_GenericNew;                \
+    if (PyType_Ready(&type))                            \
+	return;                                         \
+    PyDict_SetItemString(d, name, (PyObject *)&type);
+
 #else
 
-#undef PYGLIB_MODULE_START
-#undef PYGLIB_MODULE_END
-#undef PYGLIB_DEFINE_TYPE
-#undef PYGLIB_REGISTER_TYPE
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
@@ -114,8 +174,8 @@ PyTypeObject symbol = {                                 \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
 #define _PyUnicode_Check PyUnicode_Check
-#define _PyUnicode_AsString PyUnicode_AsString
-#define _PyUnicode_AsStringAndSize(obj, buf, size) PyUnicode_AsStringAndSize(obj, size)
+#define _PyUnicode_AsString _PyUnicode_AsString
+#define _PyUnicode_AsStringAndSize(obj, buf, size) _PyUnicode_AsStringAndSize(obj, size)
 #define _PyUnicode_FromString PyUnicode_FromString
 #define _PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
 #define _PyUnicode_FromFormat PyUnicode_FromFormat
@@ -126,9 +186,16 @@ PyTypeObject symbol = {                                 \
 #define _PyLong_Check PyLong_Check
 #define _PyLong_FromLong PyLong_FromLong
 #define _PyLong_AsLong PyLong_AsLong
-#define _PyLong_AS_LONG PyLong_AS_LONG
+#define _PyLong_AS_LONG(o) PyLong_AS_LONG((PyObject*)(o))
 #define _PyLongObject PyLongObject
 #define _PyLong_Type PyLong_Type
+
+#define _PyByteArray_FromStringAndSize PyByteArray_FromStringAndSize
+#define _PyByteArray_Resize(o, len) PyByteArray_Resize(*o, len)
+#define _PyByteArray_AsString PyByteArray_AsString
+#define _PyByteArray_Size PyByteArray_Size
+#define _PyByteArray_Check PyByteArray_Check
+
 #endif
 
 #endif /* __PYGLIB_PYTHON_COMPAT_H__ */

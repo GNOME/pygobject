@@ -439,7 +439,7 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_warn,		/* nb_multiply */
 	(binaryfunc)pyg_flags_warn,		/* nb_divide */
 	(binaryfunc)pyg_flags_warn,		/* nb_remainder */
-	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
+//	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
 	(ternaryfunc)pyg_flags_warn,		/* nb_power */
 	0,					/* nb_negative */
 	0,					/* nb_positive */
@@ -451,27 +451,6 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_and,		/* nb_and */
 	(binaryfunc)pyg_flags_xor,		/* nb_xor */
 	(binaryfunc)pyg_flags_or,		/* nb_or */
-	0,					/* nb_coerce */
-	0,					/* nb_int */
-	0,					/* nb_long */
-	0,					/* nb_float */
-	0,					/* nb_oct */
-	0,		 			/* nb_hex */
-	0,					/* nb_inplace_add */
-	0,					/* nb_inplace_subtract */
-	0,					/* nb_inplace_multiply */
-	0,					/* nb_inplace_divide */
-	0,					/* nb_inplace_remainder */
-	0,					/* nb_inplace_power */
-	0,					/* nb_inplace_lshift */
-	0,					/* nb_inplace_rshift */
-	0,					/* nb_inplace_and */
-	0,					/* nb_inplace_xor */
-	0,					/* nb_inplace_or */
-	0,					/* nb_floor_divide */
-	0,					/* nb_true_divide */
-	0,					/* nb_inplace_floor_divide */
-	0,					/* nb_inplace_true_divide */
 };
 
 void

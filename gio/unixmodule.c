@@ -34,19 +34,19 @@ void pyunix_add_constants(PyObject *module, const gchar *strip_prefix);
 
 extern PyMethodDef pyunix_functions[];
 
-DL_EXPORT(void)
-initunix(void)
+PYGLIB_INIT_FUNCTION(unix, "gio.unix", pyunix_functions)
 {
-    PyObject *m, *d;
+    PyObject *d, *pyobj_mod;
 
     /* perform any initialisation required by the library here */
 
-    m = Py_InitModule("gio.unix", pyunix_functions);
-    d = PyModule_GetDict(m);
+    d = PyModule_GetDict(module);
 
-    init_pygobject();
-
+    pyobj_mod = pygobject_init(-1, -1, -1);
+    if (pyobj_mod == NULL)
+        return -1;
+        
     pyunix_register_classes(d);
-
+    return 0;
 }
 

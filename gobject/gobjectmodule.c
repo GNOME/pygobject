@@ -2610,7 +2610,8 @@ pygobject_register_warnings(PyObject *d)
 }
 
 
-PYGLIB_MODULE_START(_gobject, "gobject._gobject")
+//PYGLIB_MODULE_START(_gobject, "gobject._gobject")
+PYGLIB_INIT_FUNCTION(_gobject, "gobject._gobject", _gobject_functions)
 {
     PyObject *d;
 
@@ -2638,5 +2639,6 @@ PYGLIB_MODULE_START(_gobject, "gobject._gobject")
 
     pygobject_api_functions.threads_enabled = pyglib_threads_enabled();
     _pyglib_notify_on_enabling_threads(pyg_note_threads_enabled);
+
+    return 0;
 }
-PYGLIB_MODULE_END
