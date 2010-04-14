@@ -29,7 +29,6 @@ try:
     unix # pyflakes
 except ImportError:
     unix = None
-del _gio
 
 class GFileMeta(GObjectMeta):
     __call__ = _file_init
