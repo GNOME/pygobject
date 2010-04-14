@@ -6,6 +6,9 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 SUBDIRS = \
 	repository \
 	overrides
+AM_CFLAGS = \
+	$(PYTHON_INCLUDES) \
+	$(GNOME_CFLAGS)
 
 pygidir = $(pkgpyexecdir)/gi
 pygi_PYTHON = \
@@ -14,9 +17,6 @@ pygi_PYTHON = \
 	importer.py \
 	__init__.py
 
-_gi_la_CFLAGS = \
-	$(PYTHON_INCLUDES) \
-	$(GNOME_CFLAGS)
 _gi_la_LDFLAGS = \
 	-module \
 	-avoid-version \
@@ -43,10 +43,13 @@ _gi_la_SOURCES = \
 
 pygi_LTLIBRARIES = _gi.la
 
-.la.so:
+# This is to ensure we have a symlink to the .so in the
+# build directory, which the Python interpreter can load
+# directly without having to know how to parse .la files.
+_gi.so: _gi.la
 	rm -f $@ && $(LN_S) .libs/$@ $@
 
-all: $(pygi_LTLIBRARIES:.la=.so)
+all-local: _gi.so
 clean-local:
-	rm -f $(pygi_LTLIBRARIES:.la=.so)
+	rm -f _gi.so
 
