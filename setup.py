@@ -207,7 +207,7 @@ if gobject.can_build():
     data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
     data_files.append((HTML_DIR, ['docs/style.css']))
     data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
-    py_modules += ['gobject.__init__', 'gobject.propertyhelper']
+    py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
     print
     print 'ERROR: Nothing to do, gobject could not be found and is essential.'

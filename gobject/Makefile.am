@@ -10,27 +10,14 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 pygobjectdir = $(pkgpyexecdir)/gobject
 pygobject_PYTHON = 	\
 	__init__.py 	\
+	constants.py	\
 	propertyhelper.py
 pygobject_LTLIBRARIES = _gobject.la 
-nodist_pygobject_PYTHON = constants.py
 
 common_ldflags = -module -avoid-version
 if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
-
-constants.py: generate-constants$(EXEEXT) constants.py.in
-	rm -f constants.py
-	cp $(srcdir)/constants.py.in constants.py
-	chmod 644 constants.py
-	$(top_builddir)/gobject/generate-constants$(EXEEXT) >> constants.py
-	chmod 444 constants.py
-
-generate_constants_CFLAGS = $(GLIB_CFLAGS) $(PYTHON_INCLUDES)
-
-noinst_PROGRAMS = generate-constants
-CLEANFILES = constants.py
-EXTRA_DIST = constants.py.in
 
 _gobject_la_CFLAGS = \
 	-I$(top_srcdir)/glib \
@@ -63,7 +50,6 @@ _gobject_la_SOURCES =           \
         pygtype.c               \
         pygtype.h		\
 	pygi-external.h
-_gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI
 _gobject_la_SOURCES += ffi-marshaller.c ffi-marshaller.h
