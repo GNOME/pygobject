@@ -101,6 +101,9 @@ class property(object):
         self.getter = getter
         self.setter = setter
 
+        if sys.version_info >= (3, 0):
+            basestring = str
+        
         if type is None:
             type = object
         self.type = self._type_from_python(type)
@@ -175,7 +178,7 @@ class property(object):
             return TYPE_INT
         elif type == bool:
             return TYPE_BOOLEAN
-        elif type == long:
+        elif sys.version_info < (3, 0) and type == long:
             return TYPE_LONG
         elif type == float:
             return TYPE_DOUBLE
