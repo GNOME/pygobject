@@ -64,16 +64,16 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 PyObject *
 pyg_pid_new(GPid pid)
 {
-    _PyLongObject *pygpid;
-
 #if PY_VERSION_HEX >= 0x03000000
     return PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "Oi", 
-		               &PyGPid_Type, pygpid);
+		               &PyGPid_Type, pid);
 #else
+    _PyLongObject *pygpid;
+
     pygpid = PyObject_NEW(_PyLongObject, &PyGPid_Type);
     pygpid->ob_ival = pid;
-#endif    
     return (PyObject *) pygpid;
+#endif    
 }
 
 static void
