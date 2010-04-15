@@ -28,8 +28,7 @@ PyObject *PyGIRepositoryError;
 static PyMethodDef _PyGIRepository_methods[];
 
 PyTypeObject PyGIRepository_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gi.Repository",         /* tp_name */
     sizeof(PyGIRepository),  /* tp_basicsize */
     0,                       /* tp_itemsize */
@@ -37,7 +36,7 @@ PyTypeObject PyGIRepository_Type = {
     (printfunc)NULL,         /* tp_print */
     (getattrfunc)NULL,       /* tp_getattr */
     (setattrfunc)NULL,       /* tp_setattr */
-    (cmpfunc)NULL,           /* tp_compare */
+    NULL,                    /* tp_compare */
     (reprfunc)NULL,          /* tp_repr */
     NULL,                    /* tp_as_number */
     NULL,                    /* tp_as_sequence */
@@ -207,7 +206,7 @@ _wrap_g_irepository_get_typelib_path (PyGIRepository *self,
         return NULL;
     }
 
-    return PyString_FromString(typelib_path);
+    return PyBytes_FromString(typelib_path);
 }
 
 static PyMethodDef _PyGIRepository_methods[] = {
@@ -222,7 +221,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
 void
 _pygi_repository_register_types (PyObject *m)
 {
-    PyGIRepository_Type.ob_type = &PyType_Type;
+    Py_TYPE(&PyGIRepository_Type) = &PyType_Type;
     if (PyType_Ready(&PyGIRepository_Type)) {
         return;
     }

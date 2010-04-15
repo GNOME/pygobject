@@ -144,23 +144,18 @@ struct PyGI_API PyGI_API = {
 };
 
 
-PyMODINIT_FUNC
-init_gi(void)
+/* Shared Python 2 and Python 3 module-initialization logic */
+static PyObject *
+perform_module_init(PyObject *m)
 {
-    PyObject *m;
     PyObject *api;
 
-    m = Py_InitModule("_gi", _pygi_functions);
-    if (m == NULL) {
-        return;
-    }
-
     if (pygobject_init(-1, -1, -1) == NULL) {
-        return;
+        return NULL;
     }
 
     if (_pygobject_import() < 0) {
-        return;
+        return NULL;
     }
 
     _pygi_repository_register_types(m);
@@ -171,8 +166,61 @@ init_gi(void)
 
     api = PyCObject_FromVoidPtr((void *)&PyGI_API, NULL);
     if (api == NULL) {
-        return;
+        return NULL;
     }
     PyModule_AddObject(m, "_API", api);
+
+    return m;
 }
+
+
+
+#if PY_MAJOR_VERSION >= 3
+/* Module-initialization logic specific to Python 3 */
+struct module_state {
+    /* empty for now */
+};
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_gi",
+    NULL,
+    sizeof(struct module_state),
+    _pygi_functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+extern PyObject * /*PyMODINIT_FUNC */
+PyInit__gi(void)
+{
+    PyObject *m;
+
+    m = PyModule_Create(&moduledef);
+    if (m == NULL) {
+        return NULL;
+    }
+
+    if (perform_module_init(m) == NULL) {
+        Py_DECREF(m);
+    }
+
+    return m;
+}
+#else
+/* Module-initialization logic specific to Python 2 */
+PyMODINIT_FUNC
+init_gi(void)
+{
+    PyObject *m;
+
+    m = Py_InitModule("_gi", _pygi_functions);
+    if (m == NULL) {
+        return;
+    }
+
+    perform_module_init(m);
+}
+#endif
 

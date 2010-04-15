@@ -27,6 +27,28 @@
 
 G_BEGIN_DECLS
 
+#if PY_MAJOR_VERSION >= 3
+
+#define _PyGI_ERROR_PREFIX(format, ...) G_STMT_START { \
+    PyObject *py_error_prefix; \
+    py_error_prefix = PyUnicode_FromFormat(format, ## __VA_ARGS__); \
+    if (py_error_prefix != NULL) { \
+        PyObject *py_error_type, *py_error_value, *py_error_traceback; \
+        PyErr_Fetch(&py_error_type, &py_error_value, &py_error_traceback); \
+        if (PyUnicode_Check(py_error_value)) { \
+            PyObject *new; \
+            new = PyUnicode_Concat(py_error_prefix, py_error_value); \
+            Py_DECREF(py_error_value); \
+            if (new != NULL) { \
+                py_error_value = new; \
+            } \
+        } \
+        PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
+    } \
+} G_STMT_END
+
+#else
+
 #define _PyGI_ERROR_PREFIX(format, ...) G_STMT_START { \
     PyObject *py_error_prefix; \
     py_error_prefix = PyString_FromFormat(format, ## __VA_ARGS__); \
@@ -42,6 +64,8 @@ G_BEGIN_DECLS
         PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
     } \
 } G_STMT_END
+
+#endif
 
 #if GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION == 20
 /* Private stuff copied from glib-2.20.x sources */

@@ -49,7 +49,7 @@ def Constructor(info):
     def constructor(cls, *args):
         cls_name = info.get_container().get_name()
         if cls.__name__ != cls_name:
-            raise TypeError, '%s constructor cannot be used to create instances of a subclass' % cls_name
+            raise TypeError('%s constructor cannot be used to create instances of a subclass' % cls_name)
         return info.invoke(cls, *args)
 
     constructor.__info__ = info

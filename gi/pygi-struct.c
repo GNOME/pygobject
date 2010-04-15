@@ -37,7 +37,7 @@ _struct_dealloc (PyGIStruct *self)
         g_free(((PyGPointer *)self)->pointer);
     }
 
-    ((PyGPointer *)self)->ob_type->tp_free((PyObject *)self);
+    Py_TYPE((PyGPointer *)self)->tp_free((PyObject *)self);
 }
 
 static PyObject *
@@ -100,8 +100,7 @@ _struct_init (PyObject *self,
 
 
 PyTypeObject PyGIStruct_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gi.Struct",                               /* tp_name */
     sizeof(PyGIStruct),                        /* tp_basicsize */
     0,                                         /* tp_itemsize */
@@ -109,7 +108,7 @@ PyTypeObject PyGIStruct_Type = {
     (printfunc)NULL,                           /* tp_print */
     (getattrfunc)NULL,                         /* tp_getattr */
     (setattrfunc)NULL,                         /* tp_setattr */
-    (cmpfunc)NULL,                             /* tp_compare */
+    NULL,                                      /* tp_compare */
     (reprfunc)NULL,                            /* tp_repr */
     NULL,                                      /* tp_as_number */
     NULL,                                      /* tp_as_sequence */
@@ -164,7 +163,7 @@ _pygi_struct_new (PyTypeObject *type,
 void
 _pygi_struct_register_types (PyObject *m)
 {
-    PyGIStruct_Type.ob_type = &PyType_Type;
+    Py_TYPE(&PyGIStruct_Type) = &PyType_Type;
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
     PyGIStruct_Type.tp_new = (newfunc)_struct_new;
     PyGIStruct_Type.tp_init = (initproc)_struct_init;

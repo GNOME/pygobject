@@ -44,7 +44,7 @@ _boxed_dealloc (PyGIBoxed *self)
         }
     }
 
-    ((PyGObject *)self)->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(((PyGObject *)self))->tp_free((PyObject *)self);
 }
 
 static PyObject *
@@ -104,8 +104,7 @@ _boxed_init (PyObject *self,
 
 
 PyTypeObject PyGIBoxed_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gi.Boxed",                                /* tp_name */
     sizeof(PyGIBoxed),                         /* tp_basicsize */
     0,                                         /* tp_itemsize */
@@ -113,7 +112,7 @@ PyTypeObject PyGIBoxed_Type = {
     (printfunc)NULL,                           /* tp_print */
     (getattrfunc)NULL,                         /* tp_getattr */
     (setattrfunc)NULL,                         /* tp_setattr */
-    (cmpfunc)NULL,                             /* tp_compare */
+    NULL,                                      /* tp_compare */
     (reprfunc)NULL,                            /* tp_repr */
     NULL,                                      /* tp_as_number */
     NULL,                                      /* tp_as_sequence */
@@ -171,7 +170,7 @@ _pygi_boxed_new (PyTypeObject *type,
 void
 _pygi_boxed_register_types (PyObject *m)
 {
-    PyGIBoxed_Type.ob_type = &PyType_Type;
+    Py_TYPE(&PyGIBoxed_Type) = &PyType_Type;
     PyGIBoxed_Type.tp_base = &PyGBoxed_Type;
     PyGIBoxed_Type.tp_new = (newfunc)_boxed_new;
     PyGIBoxed_Type.tp_init = (initproc)_boxed_init;

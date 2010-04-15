@@ -20,7 +20,7 @@ pygi_PYTHON = \
 _gi_la_LDFLAGS = \
 	-module \
 	-avoid-version \
-	-export-symbols-regex init_gi
+	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
 	$(GNOME_LIBS)
 _gi_la_SOURCES = \

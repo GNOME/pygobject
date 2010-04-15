@@ -28,8 +28,7 @@
 #define _PyGI_DEFINE_INFO_TYPE(name, cname, base) \
 static PyMethodDef _Py##cname##_methods[]; \
 PyTypeObject Py##cname##_Type = { \
-    PyObject_HEAD_INIT(NULL) \
-    0, \
+    PyVarObject_HEAD_INIT(NULL, 0)  \
     "gi." name,                               /* tp_name */ \
     sizeof(PyGIBaseInfo),                     /* tp_basicsize */ \
     0,                                        /* tp_itemsize */ \
@@ -37,7 +36,7 @@ PyTypeObject Py##cname##_Type = { \
     (printfunc)NULL,                          /* tp_print */ \
     (getattrfunc)NULL,                        /* tp_getattr */ \
     (setattrfunc)NULL,                        /* tp_setattr */ \
-    (cmpfunc)NULL,                            /* tp_compare */ \
+    NULL,                                     /* tp_compare */ \
     (reprfunc)NULL,                           /* tp_repr */ \
     NULL,                                     /* tp_as_number */ \
     NULL,                                     /* tp_as_sequence */ \
@@ -74,7 +73,7 @@ _base_info_dealloc (PyGIBaseInfo *self)
 
     g_base_info_unref(self->info);
 
-    self->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static int
@@ -88,15 +87,20 @@ _base_info_traverse (PyGIBaseInfo *self,
 static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
-    return PyString_FromFormat("<%s object (%s) at 0x%p>",
-            self->ob_type->tp_name, g_base_info_get_name(self->info), (void *)self);
+    return
+#if PY_MAJOR_VERSION >= 3
+            PyUnicode_FromFormat
+#else
+            PyString_FromFormat
+#endif
+            ("<%s object (%s) at 0x%p>",
+            Py_TYPE(self)->tp_name, g_base_info_get_name(self->info), (void *)self);
 }
 
 static PyMethodDef _PyGIBaseInfo_methods[];
 
 PyTypeObject PyGIBaseInfo_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,
+    PyVarObject_HEAD_INIT(NULL, 0)
     "gi.BaseInfo",                             /* tp_name */
     sizeof(PyGIBaseInfo),                      /* tp_basicsize */
     0,                                         /* tp_itemsize */
@@ -104,7 +108,7 @@ PyTypeObject PyGIBaseInfo_Type = {
     (printfunc)NULL,                           /* tp_print */
     (getattrfunc)NULL,                         /* tp_getattr */
     (setattrfunc)NULL,                         /* tp_setattr */
-    (cmpfunc)NULL,                             /* tp_compare */
+    NULL,                                      /* tp_compare */
     (reprfunc)_base_info_repr,             /* tp_repr */
     NULL,                                      /* tp_as_number */
     NULL,                                      /* tp_as_sequence */
@@ -130,13 +134,13 @@ PyTypeObject PyGIBaseInfo_Type = {
 static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
-    return PyString_FromString(g_base_info_get_name(self->info));
+    return PyUnicode_FromString(g_base_info_get_name(self->info));
 }
 
 static PyObject *
 _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return PyString_FromString(g_base_info_get_namespace(self->info));
+    return PyUnicode_FromString(g_base_info_get_namespace(self->info));
 }
 
 static PyObject *
@@ -1793,7 +1797,7 @@ _wrap_g_value_info_get_value (PyGIBaseInfo *self)
 
     value = g_value_info_get_value((GIValueInfo *)self->info);
 
-    return PyInt_FromLong(value);
+    return PyLong_FromLong(value);
 }
 
 
@@ -2087,7 +2091,7 @@ void
 _pygi_info_register_types (PyObject *m)
 {
 #define _PyGI_REGISTER_TYPE(m, type, name) \
-    type.ob_type = &PyType_Type; \
+    Py_TYPE(&type) = &PyType_Type;         \
     if (PyType_Ready(&type)) \
         return; \
     if (PyModule_AddObject(m, name, (PyObject *)&type)) \
