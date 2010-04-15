@@ -36,6 +36,23 @@ GQuark pygflags_class_key;
 PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
 
 static PyObject *
+pyg_flags_val_new(PyObject* subclass, GType gtype, PyObject *intval)
+{     
+    PyObject *item;
+    
+#if PY_VERSION_HEX >= 0x03000000
+    item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
+                               subclass, intval);
+#else
+    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
+    ((PyIntObject*)item)->ob_ival = PyInt_AS_LONG(intval);
+#endif    
+    ((PyGFlags*)item)->gtype = gtype;
+    
+    return item;
+}
+
+static PyObject *
 pyg_flags_richcompare(PyGFlags *self, PyObject *other, int op)
 {
     static char warning[256];
@@ -189,23 +206,16 @@ pyg_flags_from_gtype (GType gtype, int value)
 				  "__flags_values__");
     pyint = PYGLIB_PyLong_FromLong(value);
     retval = PyDict_GetItem(values, pyint);
-    Py_DECREF(pyint);
-
     if (!retval) {
 	PyErr_Clear();
 
-	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
+	retval = pyg_flags_val_new(pyclass, gtype, pyint);
 	g_assert(retval != NULL);
-
-#if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"
-#else
-	((PYGLIB_PyLongObject*)retval)->ob_ival = value;
-#endif
-	((PyGFlags*)retval)->gtype = gtype;
     } else {
 	Py_INCREF(retval);
     }
+    Py_DECREF(pyint);
+    
     return retval;
 }
 
@@ -264,16 +274,9 @@ pyg_flags_add (PyObject *   module,
     values = PyDict_New();
     for (i = 0; i < eclass->n_values; i++) {
       PyObject *item, *intval;
-
-      item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-#if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"
-#else
-      ((PYGLIB_PyLongObject*)item)->ob_ival = eclass->values[i].value;
-#endif
-      ((PyGFlags*)item)->gtype = gtype;
-
+      
       intval = PYGLIB_PyLong_FromLong(eclass->values[i].value);
+      item = pyg_flags_val_new(stub, gtype, intval);
       PyDict_SetItem(values, intval, item);
       Py_DECREF(intval);
 
@@ -281,11 +284,11 @@ pyg_flags_add (PyObject *   module,
 	  char *prefix;
 
 	  prefix = g_strdup(pyg_constant_strip_prefix(eclass->values[i].value_name, strip_prefix));
+	  Py_INCREF(item);
 	  PyModule_AddObject(module, prefix, item);
 	  g_free(prefix);
-
-	  Py_INCREF(item);
       }
+      Py_DECREF(item);
     }
 
     PyDict_SetItemString(((PyTypeObject *)stub)->tp_dict,
@@ -439,7 +442,9 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_warn,		/* nb_multiply */
 	(binaryfunc)pyg_flags_warn,		/* nb_divide */
 	(binaryfunc)pyg_flags_warn,		/* nb_remainder */
-	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
+#if PY_VERSION_HEX < 0x03000000
+        (binaryfunc)pyg_flags_warn,		/* nb_divmod */
+#endif
 	(ternaryfunc)pyg_flags_warn,		/* nb_power */
 	0,					/* nb_negative */
 	0,					/* nb_positive */
@@ -451,27 +456,6 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_and,		/* nb_and */
 	(binaryfunc)pyg_flags_xor,		/* nb_xor */
 	(binaryfunc)pyg_flags_or,		/* nb_or */
-	0,					/* nb_coerce */
-	0,					/* nb_int */
-	0,					/* nb_long */
-	0,					/* nb_float */
-	0,					/* nb_oct */
-	0,		 			/* nb_hex */
-	0,					/* nb_inplace_add */
-	0,					/* nb_inplace_subtract */
-	0,					/* nb_inplace_multiply */
-	0,					/* nb_inplace_divide */
-	0,					/* nb_inplace_remainder */
-	0,					/* nb_inplace_power */
-	0,					/* nb_inplace_lshift */
-	0,					/* nb_inplace_rshift */
-	0,					/* nb_inplace_and */
-	0,					/* nb_inplace_xor */
-	0,					/* nb_inplace_or */
-	0,					/* nb_floor_divide */
-	0,					/* nb_true_divide */
-	0,					/* nb_inplace_floor_divide */
-	0,					/* nb_inplace_true_divide */
 };
 
 void
@@ -480,12 +464,16 @@ pygobject_flags_register_types(PyObject *d)
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
     PyGFlags_Type.tp_base = &PYGLIB_PyLong_Type;
+#if PY_VERSION_HEX < 0x03000000
+    PyGFlags_Type.tp_new = pyg_flags_new;
+#else
+    PyGFlags_Type.tp_new = PyLong_Type.tp_new;
+#endif
     PyGFlags_Type.tp_repr = (reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_as_number = &pyg_flags_as_number;
     PyGFlags_Type.tp_str = (reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGFlags_Type.tp_richcompare = (richcmpfunc)pyg_flags_richcompare;
     PyGFlags_Type.tp_getset = pyg_flags_getsets;
-    PyGFlags_Type.tp_new = pyg_flags_new;
     PYGOBJECT_REGISTER_GTYPE(d, PyGFlags_Type, "GFlags", G_TYPE_FLAGS);
 }

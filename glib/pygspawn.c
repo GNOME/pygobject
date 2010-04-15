@@ -64,12 +64,13 @@ pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 PyObject *
 pyg_pid_new(GPid pid)
 {
-	PYGLIB_PyLongObject *pygpid;
-    pygpid = PyObject_NEW(PYGLIB_PyLongObject, &PyGPid_Type);
+    PYGLIB_PyLongObject *pygpid;
 
 #if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"
+    return PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "Oi", 
+		               &PyGPid_Type, pygpid);
 #else
+    pygpid = PyObject_NEW(PyIntObject, &PyGPid_Type);
     pygpid->ob_ival = pid;
 #endif
     return (PyObject *) pygpid;

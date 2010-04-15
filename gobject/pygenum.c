@@ -35,6 +35,23 @@ GQuark pygenum_class_key;
 PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
 
 static PyObject *
+pyg_enum_val_new(PyObject* subclass, GType gtype, PyObject *intval)
+{     
+    PyObject *item;
+    
+#if PY_VERSION_HEX >= 0x03000000
+    item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
+                               subclass, intval);
+#else
+    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
+    ((PyIntObject*)item)->ob_ival = PyInt_AS_LONG(intval);
+#endif    
+    ((PyGEnum*)item)->gtype = gtype;
+    
+    return item;
+}
+
+static PyObject *
 pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
     static char warning[256];
@@ -61,13 +78,16 @@ pyg_enum_repr(PyGEnum *self)
   const char *value;
   guint index;
   static char tmp[256];
+  long l;
 
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
-  for (index = 0; index < enum_class->n_values; index++)
-      if (PYGLIB_PyLong_AS_LONG(self) == enum_class->values[index].value)
+  l = PYGLIB_PyLong_AS_LONG(self);
+  for (index = 0; index < enum_class->n_values; index++) 
+      if (l == enum_class->values[index].value)
           break;
+
   value = enum_class->values[index].value_name;
   if (value)
       sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
@@ -170,22 +190,15 @@ pyg_enum_from_gtype (GType gtype, int value)
 				  "__enum_values__");
     intvalue = PYGLIB_PyLong_FromLong(value);
     retval = PyDict_GetItem(values, intvalue);
-    Py_DECREF(intvalue);
-    if (!retval) {
-	PyErr_Clear();
-	retval = ((PyTypeObject *)pyclass)->tp_alloc((PyTypeObject *)pyclass, 0);
-	g_assert(retval != NULL);
-
-#if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"
-#else
-	((PYGLIB_PyLongObject*)retval)->ob_ival = value;
-#endif
-	((PyGFlags*)retval)->gtype = gtype;
-	//return _PyLong_FromLong(value);
+    if (retval) {
+	Py_INCREF(retval);
     }
+    else {
+	PyErr_Clear();
+	retval = pyg_enum_val_new(pyclass, gtype, intvalue);
+    }
+    Py_DECREF(intvalue);
 
-    Py_INCREF(retval);
     return retval;
 }
 
@@ -246,16 +259,9 @@ pyg_enum_add (PyObject *   module,
     values = PyDict_New();
     for (i = 0; i < eclass->n_values; i++) {
 	PyObject *item, *intval;
-
-	item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)stub, 0);
-#if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"
-#else
-	((PYGLIB_PyLongObject*)item)->ob_ival = eclass->values[i].value;
-#endif
-	((PyGEnum*)item)->gtype = gtype;
-
+      
         intval = PYGLIB_PyLong_FromLong(eclass->values[i].value);
+	item = pyg_enum_val_new(stub, gtype, intval);
 	PyDict_SetItem(values, intval, item);
         Py_DECREF(intval);
 
@@ -344,13 +350,16 @@ pygobject_enum_register_types(PyObject *d)
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
     PyGEnum_Type.tp_base = &PYGLIB_PyLong_Type;
+#if PY_VERSION_HEX < 0x03000000
+    PyGEnum_Type.tp_new = pyg_enum_new;
+#else
+    PyGEnum_Type.tp_new = PyLong_Type.tp_new;
+#endif
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
     PyGEnum_Type.tp_richcompare = (richcmpfunc)pyg_enum_richcompare;
     PyGEnum_Type.tp_methods = pyg_enum_methods;
     PyGEnum_Type.tp_getset = pyg_enum_getsets;
-    PyGEnum_Type.tp_new = pyg_enum_new;
     PYGOBJECT_REGISTER_GTYPE(d, PyGEnum_Type, "GEnum", G_TYPE_ENUM);
-
 }
