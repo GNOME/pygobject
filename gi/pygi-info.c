@@ -134,13 +134,25 @@ PyTypeObject PyGIBaseInfo_Type = {
 static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
-    return PyUnicode_FromString(g_base_info_get_name(self->info));
+    return 
+#if PY_MAJOR_VERSION >= 3
+        PyUnicode_FromString
+#else 
+        PyString_FromString
+#endif
+        (g_base_info_get_name(self->info));
 }
 
 static PyObject *
 _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return PyUnicode_FromString(g_base_info_get_namespace(self->info));
+    return 
+#if PY_MAJOR_VERSION >= 3
+        PyUnicode_FromString
+#else 
+        PyString_FromString
+#endif
+        (g_base_info_get_namespace(self->info));
 }
 
 static PyObject *
