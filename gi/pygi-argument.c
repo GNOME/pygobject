@@ -714,7 +714,7 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             if (PyLong_Check(number)) {
-                value = PyLong_AS_LONG(number);
+                value = PyLong_AsLong(number);
             } else {
                 value = PyLong_AsUnsignedLongLong(number);
             }
@@ -736,7 +736,7 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             if (PyLong_Check(number)) {
-                value = PyLong_AS_LONG(number);
+                value = PyLong_AsLong(number);
             } else {
                 value = PyLong_AsLongLong(number);
             }
