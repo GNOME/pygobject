@@ -38,7 +38,7 @@ def main():
     for symbol in read_symbols(library, type='T', dynamic=1):
         if symbol[0] == '_': continue
         if symbol not in wrapper_symbols:
-            print symbol
+            print(symbol)
 
 if __name__ == '__main__':
     main()

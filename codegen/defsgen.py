@@ -220,7 +220,7 @@ def find_defs(buf, gobj, modlib, defs):
         func_name = m[1]
         for lib in modlib:
             if hasattr(lib, func_name):
-                objtype = apply(getattr(lib, func_name))
+                objtype = getattr(lib, func_name)()
                 obj_name = gobj.g_type_name(objtype)
                 parent = gobj.g_type_parent(objtype)
                 parent_name = gobj.g_type_name(parent)
@@ -504,7 +504,7 @@ class DefsWriter:
             func = m.group(1) + '_get_type'
             lib = [l for l in self.modlib if hasattr(l, func)]
             if lib:
-                cname = self.gobj.g_type_name(apply(getattr(lib[0], func)))
+                cname = self.gobj.g_type_name(getattr(lib[0], func)())
             if cname and self.gobj.g_type_from_name(r.group(1)):
                 self.fp.write('  (is-constructor-of "' + cname + '")\n')
         self._write_return(ret)

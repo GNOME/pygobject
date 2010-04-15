@@ -48,7 +48,10 @@ def getstatusoutput(cmd):
             text = text[:-1]
         return sts, text
     else:
-        from commands import getstatusoutput
+        try:
+            from subprocess import getstatusoutput
+        except:
+            from commands import getstatusoutput
         return getstatusoutput(cmd)
 
 def have_pkgconfig():
@@ -122,8 +125,8 @@ class BuildExt(build_ext):
             msnative_struct = { '2' : '-fnative-struct',
                                 '3' : '-mms-bitfields' }
             gcc_version = getoutput('gcc -dumpversion')
-            print 'using MinGW GCC version %s with %s option' % \
-                  (gcc_version, msnative_struct[gcc_version[0]])
+            print ('using MinGW GCC version %s with %s option' % \
+                   (gcc_version, msnative_struct[gcc_version[0]]))
             self.extra_compile_args.append(msnative_struct[gcc_version[0]])
 
     def modify_compiler(self):
@@ -307,14 +310,14 @@ class PkgConfigExtension(Extension):
 
             orig_version = getoutput('pkg-config --modversion %s' %
                                      package)
-            if (map(int, orig_version.split('.')) >=
-                map(int, version.split('.'))):
+            if (tuple(map(int, orig_version.split('.'))) >=
+                tuple(map(int, version.split('.')))):
                 self.can_build_ok = 1
                 return 1
             else:
-                print "Warning: Too old version of %s" % self.pkc_name
-                print "         Need %s, but %s is installed" % \
-                      (version, orig_version)
+                print ("Warning: Too old version of %s" % self.pkc_name)
+                print ("         Need %s, but %s is installed" % \
+                       (version, orig_version))
                 self.can_build_ok = 0
                 return 0
 
@@ -343,7 +346,8 @@ try:
     from codegen.codegen import register_types, SourceWriter, \
          FileOutput
     import codegen.createdefs
-except ImportError, e:
+except ImportError:
+    raise
     template_classes_enabled=False
 
 class Template(object):
@@ -445,7 +449,7 @@ class TemplateExtension(PkgConfigExtension):
         if load_types:
             del kwargs['load_types']
 
-        if kwargs.has_key('output'):
+        if 'output' in kwargs:
             kwargs['name'] = kwargs['output']
             del kwargs['output']
 

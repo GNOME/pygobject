@@ -16,11 +16,11 @@ def to_upper_str(name):
     name = _upperstr_pat1.sub(r'\1_\2', name)
     name = _upperstr_pat2.sub(r'\1_\2', name)
     name = _upperstr_pat3.sub(r'\1_\2', name, count=1)
-    return string.upper(name)
+    return name.upper()
 
 def typecode(typename):
     """create a typecode (eg. GTK_TYPE_WIDGET) from a typename"""
-    return string.replace(to_upper_str(typename), '_', '_TYPE_', 1)
+    return to_upper_str(typename).replace('_', '_TYPE_', 1)
 
 
 STATE_START = 0

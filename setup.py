@@ -20,21 +20,24 @@ from dsextras import get_m4_define, getoutput, have_pkgconfig, \
 if '--yes-i-know-its-not-supported' in sys.argv:
     sys.argv.remove('--yes-i-know-its-not-supported')
 else:
-    print '*'*70
-    print 'Building PyGObject using distutils is NOT SUPPORTED.'
-    print "It's mainly included to be able to easily build win32 installers"
-    print "You may continue, but only if you agree to not ask any questions"
-    print "To build PyGObject in a supported way, read the INSTALL file"
-    print
-    print "Build fixes are of course welcome and should be filed in bugzilla"
-    print '*'*70
-    input = raw_input('Not supported, ok [y/N]? ')
+    print ('*'*70)
+    print ('Building PyGObject using distutils is NOT SUPPORTED.')
+    print ("It's mainly included to be able to easily build win32 installers")
+    print ("You may continue, but only if you agree to not ask any questions")
+    print ("To build PyGObject in a supported way, read the INSTALL file")
+    print ("")
+    print ("Build fixes are of course welcome and should be filed in bugzilla")
+    print ('*'*70)
+    if sys.version_info < (3, 0):
+        input = raw_input('Not supported, ok [y/N]? ')
+    else:
+        input = input('Not supported, ok [y/N]? ')
     if not input.startswith('y'):
         raise SystemExit
 
 if sys.version_info[:3] < (2, 3, 5):
-    raise SystemExit, \
-          "Python 2.3.5 or higher is required, %d.%d.%d found" % sys.version_info[:3]
+    raise SystemExit("Python 2.3.5 or higher is required, %d.%d.%d found"
+                     % sys.version_info[:3])
 
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
@@ -174,7 +177,7 @@ py_modules = ['dsextras']
 packages = ['codegen']
 
 if not have_pkgconfig():
-    print "Error, could not find pkg-config"
+    print ("Error, could not find pkg-config")
     raise SystemExit
 
 if glib.can_build():
@@ -197,8 +200,8 @@ if glib.can_build():
     ext_modules.append(glib)
     py_modules += ['glib.__init__', 'glib.option']
 else:
-    print
-    print 'ERROR: Nothing to do, glib could not be found and is essential.'
+    print ("")
+    print ('ERROR: Nothing to do, glib could not be found and is essential.')
     raise SystemExit
 
 if gobject.can_build():
@@ -209,8 +212,8 @@ if gobject.can_build():
     data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
     py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
-    print
-    print 'ERROR: Nothing to do, gobject could not be found and is essential.'
+    print ('')
+    print ('ERROR: Nothing to do, gobject could not be found and is essential.')
     raise SystemExit
 
 if gio.can_build():
@@ -218,8 +221,8 @@ if gio.can_build():
     py_modules += ['gio.__init__']
     data_files.append((DEFS_DIR,('gio/gio-types.defs',)))
 else:
-    print
-    print 'ERROR: Nothing to do, gio could not be found and is essential.'
+    print ('')
+    print ('ERROR: Nothing to do, gio could not be found and is essential.')
     raise SystemExit
 
 # Threading support
@@ -232,7 +235,7 @@ else:
     try:
         import thread
     except ImportError:
-        print "Warning: Could not import thread module, disabling threading"
+        print ("Warning: Could not import thread module, disabling threading")
         enable_threading = False
     else:
         enable_threading = True
