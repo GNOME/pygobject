@@ -49,9 +49,10 @@ def importModule(module, directory, name=None):
                                  module, expected, current))
     return obj
 
-try:
-    _bytes = bytes
-except NameError:
+if sys.version_info >= (3, 0):
+    def _bytes(s):
+        return s.encode('latin1')
+else:
     _bytes = str
 
 try:
