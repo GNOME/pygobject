@@ -255,7 +255,13 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 void
 pyglib_spawn_register_types(PyObject *d)
 {
-    PyGPid_Type.tp_base = &_PyLong_Type;
+#if PY_VERSION_HEX >= 0x03000000
+    PyGPid_Type.tp_base = &PyLong_Type;
+    PyGPid_Type.tp_new = PyLong_Type.tp_new;
+#else
+    PyGPid_Type.tp_base = &PyInt_Type;
+#endif
+    
     PyGPid_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGPid_Type.tp_methods = pyg_pid_methods;
     PyGPid_Type.tp_init = pyg_pid_tp_init;
