@@ -127,7 +127,7 @@ AM_CONDITIONAL(ENABLE_DOCS, test x$enable_docs != xno)
 AM_CHECK_PYMOD(thread,,,enable_thread=no)
 
 AC_MSG_CHECKING(whether to enable threading in pygobject)
-if test "x$enable_thread" != xno; then
+if test "x$enable_thread" != xdisabletest; then
   extra_mods=gthread
   THREADING_CFLAGS=
   AC_MSG_RESULT(yes)
