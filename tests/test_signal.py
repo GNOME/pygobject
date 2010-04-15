@@ -6,6 +6,11 @@ import sys
 
 from common import gobject, testhelper
 
+try:
+    _long = long
+except NameError:
+    _long = int
+
 class C(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
                                    (gobject.TYPE_INT,)) }
@@ -302,7 +307,7 @@ class SigPropClass(gobject.GObject):
         if pspec.name == 'foo':
             self._foo = value
         else:
-            raise AttributeError, 'unknown property %s' % pspec.name
+            raise AttributeError('unknown property %s' % pspec.name)
         try:
             self.emit("my-signal", 1)
         except TypeError:
@@ -326,7 +331,7 @@ class CM(gobject.GObject):
         test1=(f, None, ()),
         test2=(l, None, (str,)),
         test3=(l, int, (double,)),
-        test4=(f, None, (bool, long, float, double, int, uint, ulong)),
+        test4=(f, None, (bool, _long, float, double, int, uint, ulong)),
         test_float=(l, float, (float,)),
         test_double=(l, double, (double, )),
         test_string=(l, str, (str, )),
@@ -349,7 +354,7 @@ class _TestCMarshaller:
         self.assertEqual(rv, 20)
 
     def testTest4(self):
-        self.obj.emit("test4", True, 10L, 3.14, 1.78, 20, 30L, 31L)
+        self.obj.emit("test4", True, _long(10), 3.14, 1.78, 20, _long(30), _long(31))
 
     def testTestReturnFloat(self):
         rv = self.obj.emit("test-float", 1.234)
@@ -371,9 +376,9 @@ if 'generic-c-marshaller' in gobject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
         pass
 else:
-    print
-    print '** WARNING: LIBFFI disabled, not testing'
-    print
+    print ('')
+    print ('** WARNING: LIBFFI disabled, not testing')
+    print ('')
 
 # Test for 374653
 class TestPyGValue(unittest.TestCase):

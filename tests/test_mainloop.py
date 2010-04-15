@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import exceptions
 import os
 import sys
 import select
@@ -31,7 +30,7 @@ class TestMainLoop(unittest.TestCase):
         os.close(pipe_w)
 
         def excepthook(type, value, traceback):
-            assert type is exceptions.Exception
+            assert type is Exception
             assert value.args[0] == "deadbabe"
         sys.excepthook = excepthook
 

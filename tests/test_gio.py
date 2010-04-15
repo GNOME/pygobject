@@ -2,9 +2,14 @@
 
 import os
 import unittest
+import sys
 
 from common import gio, glib
 
+try:
+    _unicode = unicode
+except NameError:
+    _unicode = str
 
 class TestFile(unittest.TestCase):
     def setUp(self):
@@ -194,8 +199,8 @@ class TestFile(unittest.TestCase):
                       gio.File("file:///"),
                       gio.File(uri="file:///"),
                       gio.File(path="/"),
-                      gio.File(u"/"),
-                      gio.File(path=u"/")]:
+                      gio.File(_unicode("/")),
+                      gio.File(path=_unicode("/"))]:
             self.failUnless(isinstance(gfile, gio.File))
             self.assertEquals(gfile.get_path(), "/")
             self.assertEquals(gfile.get_uri(), "file:///")
@@ -263,7 +268,8 @@ class TestFile(unittest.TestCase):
             try:
                 try:
                     retval = gfile.mount_enclosing_volume_finish(result)
-                except gio.Error, e:
+                except gio.Error:
+                    e = sys.exc_info()[1]
                     # If we run the tests too fast
                     if e.code == gio.ERROR_ALREADY_MOUNTED:
                         print ('WARNING: testfile is already mounted, '
@@ -454,7 +460,8 @@ class TestFile(unittest.TestCase):
         caught = False
         try:
             self.file.replace_contents("this won't work", etag="wrong")
-        except gio.Error, e:
+        except gio.Error:
+            e = sys.exc_info()[1]
             self.assertEqual(e.code, gio.ERROR_WRONG_ETAG)
             caught = True
         self.failUnless(caught)

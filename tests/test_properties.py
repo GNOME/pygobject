@@ -12,6 +12,11 @@ from gobject.constants import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
 
+try:
+    _long = long
+except NameError:
+    _long = int
+
 class PropertyObject(GObject):
     normal = gobject.property(type=str)
     construct = gobject.property(
@@ -80,12 +85,18 @@ class TestProperties(unittest.TestCase):
     def testUint64(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.uint64, 0)
-        obj.props.uint64 = 1L
-        self.assertEqual(obj.props.uint64, 1L)
-        obj.props.uint64 = 1
-        self.assertEqual(obj.props.uint64, 1L)
 
-        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1L)
+        obj.props.uint64 = _long(1)
+        self.assertEqual(obj.props.uint64, _long(1))
+        obj.props.uint64 = 1
+        self.assertEqual(obj.props.uint64, _long(1))
+
+        obj.props.uint64 = _long(1)
+        self.assertEqual(obj.props.uint64, _long(1))
+        obj.props.uint64 = 1
+        self.assertEqual(obj.props.uint64, _long(1))
+
+        self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", _long(-1))
         self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1)
 
     def testUInt64DefaultValue(self):
@@ -93,10 +104,12 @@ class TestProperties(unittest.TestCase):
             class TimeControl(GObject):
                 __gproperties__ = {
                     'time': (TYPE_UINT64, 'Time', 'Time',
-                             0L, (1<<64) - 1, 0L,
+                             _long(0), (1<<64) - 1, _long(0),
                              PARAM_READABLE)
                     }
-        except OverflowError, ex:
+        except OverflowError:
+            import sys
+            ex = sys.exc_info()[1]
             self.fail(str(ex))
 
     def testRange(self):
@@ -202,9 +215,9 @@ class TestProperty(unittest.TestCase):
         o.float = 3.14
         self.assertEqual(o.float, 3.14)
 
-        self.assertEqual(o.long, 0L)
-        o.long = 100L
-        self.assertEqual(o.long, 100L)
+        self.assertEqual(o.long, _long(0))
+        o.long = _long(100)
+        self.assertEqual(o.long, _long(100))
 
     def testCustomGetter(self):
         class C(gobject.GObject):
