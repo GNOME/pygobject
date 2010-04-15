@@ -95,6 +95,21 @@ def pkgc_version_check(name, req_version):
         
     return 0
 
+def pkgc_get_libraries(name):
+    """returns a list of libraries as returned by pkg-config --libs-only-l"""
+    output = getoutput('pkg-config --libs-only-l %s' % name)
+    return output.replace('-l', '').split()
+
+def pkgc_get_library_dirs(name):
+    """returns a list of library dirs as returned by pkg-config --libs-only-L"""
+    output = getoutput('pkg-config --libs-only-L %s' % name)
+    return output.replace('-L', '').split()
+
+def pkgc_get_include_dirs(name):
+    """returns a list of include dirs as returned by pkg-config --cflags-only-I"""
+    output = getoutput('pkg-config --cflags-only-I %s' % name)
+    return output.replace('-I', '').split()
+
 class BuildExt(build_ext):
     def init_extra_compile_args(self):
         self.extra_compile_args = []
@@ -220,10 +235,19 @@ class PkgConfigExtension(Extension):
     can_build_ok = None
     def __init__(self, **kwargs):
         name = kwargs['pkc_name']
-        kwargs['include_dirs'] = self.get_include_dirs(name) + GLOBAL_INC
+        if 'include_dirs' in kwargs:
+            kwargs['include_dirs'] += self.get_include_dirs(name) + GLOBAL_INC
+        else:
+            kwargs['include_dirs'] = self.get_include_dirs(name) + GLOBAL_INC
         kwargs['define_macros'] = GLOBAL_MACROS
-        kwargs['libraries'] = self.get_libraries(name)
-        kwargs['library_dirs'] = self.get_library_dirs(name)
+        if 'libraries' in kwargs:
+            kwargs['libraries'] += self.get_libraries(name)
+        else:
+            kwargs['libraries'] = self.get_libraries(name)
+        if 'library_dirs' in kwargs:
+            kwargs['library_dirs'] += self.get_library_dirs(name)
+        else:
+            kwargs['library_dirs'] = self.get_library_dirs(name)
         if 'pygobject_pkc' in kwargs:
             self.pygobject_pkc = kwargs.pop('pygobject_pkc')
         if self.pygobject_pkc:
@@ -290,7 +314,7 @@ class PkgConfigExtension(Extension):
             else:
                 print "Warning: Too old version of %s" % self.pkc_name
                 print "         Need %s, but %s is installed" % \
-                      (package, orig_version)
+                      (version, orig_version)
                 self.can_build_ok = 0
                 return 0
 
