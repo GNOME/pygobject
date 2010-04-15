@@ -49,6 +49,11 @@ __all__ = [
     "make_option",
 ]
 
+try:
+    _basestring = basestring
+except NameError:
+    _basestring = str
+
 class Option(optparse.Option):
     """Represents a command line option
 
@@ -214,7 +219,7 @@ class OptionGroup(optparse.OptionGroup):
     def set_values_to_defaults(self):
         for option in self.option_list:
             default = self.defaults.get(option.dest)
-            if isinstance(default, basestring):
+            if isinstance(default, _basestring):
                 opt_str = option.get_opt_string()
                 self.defaults[option.dest] = option.check_value(
                     opt_str, default)
@@ -292,7 +297,7 @@ class OptionParser(optparse.OptionParser):
         return context
 
     def add_option_group(self, *args, **kwargs):
-        if isinstance(args[0], basestring):
+        if isinstance(args[0], _basestring):
             optparse.OptionParser.add_option_group(self,
                 OptionGroup(self, *args, **kwargs))
             return
