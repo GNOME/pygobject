@@ -30,11 +30,9 @@ else:
     print '*'*70
     input = raw_input('Not supported, ok [y/N]? ')
     if not input.startswith('y'):
-        raise SystemExit
+        raise SystemExit("Aborted")
 
-if sys.version_info[:3] < (2, 3, 5):
-    raise SystemExit, \
-          "Python 2.3.5 or higher is required, %d.%d.%d found" % sys.version_info[:3]
+MIN_PYTHON_VERSION = (2, 3, 5)
 
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
@@ -55,12 +53,18 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
 if sys.platform == 'win32':
     GLOBAL_MACROS.append(('VERSION', '"""%s"""' % VERSION))
 else:
-    GLOBAL_MACROS.append(('VERSION', '"%s"' % VERSION))
+    raise SystemExit("Error: distutils build only supported on windows")
+
+if sys.version_info[:3] < MIN_PYTHON_VERSION:
+    raise SystemExit("Python %s or higher is required, %s found" % (
+        ".".join(map(str,MIN_PYTHON_VERSION)),
+                     ".".join(map(str,sys.version_info[:3]))))
+
+if not have_pkgconfig():
+    raise SystemExit("Error, could not find pkg-config")
 
 DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
 INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
-XSL_DIR = os.path.join('share', 'pygobject','xsl')
-HTML_DIR = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
 
 class PyGObjectInstallLib(InstallLib):
     def run(self):
@@ -107,8 +111,6 @@ class PyGObjectInstallData(InstallData):
         self.install_template('pygobject-2.0.pc.in',
                               os.path.join(self.install_dir,
                                            'lib', 'pkgconfig'))
-        self.install_template('docs/xsl/fixxref.py.in',
-                              os.path.join(self.install_dir, XSL_DIR))
 
 class PyGObjectBuild(build):
     enable_threading = 1
@@ -173,10 +175,6 @@ ext_modules = []
 py_modules = ['dsextras']
 packages = ['codegen']
 
-if not have_pkgconfig():
-    print "Error, could not find pkg-config"
-    raise SystemExit
-
 if glib.can_build():
     #It would have been nice to create another class, such as PkgConfigCLib to
     #encapsulate this dictionary, but it is impossible. build_clib.py does
@@ -197,30 +195,21 @@ if glib.can_build():
     ext_modules.append(glib)
     py_modules += ['glib.__init__', 'glib.option']
 else:
-    print
-    print 'ERROR: Nothing to do, glib could not be found and is essential.'
-    raise SystemExit
+    raise SystemExit("ERROR: Nothing to do, glib could not be found and is essential.")
 
 if gobject.can_build():
     ext_modules.append(gobject)
     data_files.append((INCLUDE_DIR, ('gobject/pygobject.h',)))
-    data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
-    data_files.append((HTML_DIR, ['docs/style.css']))
-    data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
     py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
-    print
-    print 'ERROR: Nothing to do, gobject could not be found and is essential.'
-    raise SystemExit
+    raise SystemExit("ERROR: Nothing to do, gobject could not be found and is essential.")
 
 if gio.can_build():
     ext_modules.append(gio)
     py_modules += ['gio.__init__']
     data_files.append((DEFS_DIR,('gio/gio-types.defs',)))
 else:
-    print
-    print 'ERROR: Nothing to do, gio could not be found and is essential.'
-    raise SystemExit
+    raise SystemExit("ERROR: Nothing to do, gio could not be found and is essential.")
 
 # Threading support
 if '--disable-threading' in sys.argv:
