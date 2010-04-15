@@ -48,3 +48,13 @@ def importModule(module, directory, name=None):
         raise AssertionError('module %s imported from wrong location. Expected %s, got %s' % (
                                  module, expected, current))
     return obj
+
+try:
+    _bytes = bytes
+except NameError:
+    _bytes = str
+
+try:
+    _unicode = unicode
+except NameError:
+    _unicode = str
