@@ -2042,7 +2042,7 @@ static PyMethodDef pygobject_methods[] = {
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "get_properties", (PyCFunction)pygobject_get_properties, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
-    { "set_properties", (PyCFunction)pygobject_set_properties, METH_KEYWORDS },
+    { "set_properties", (PyCFunction)pygobject_set_properties, METH_VARARGS|METH_KEYWORDS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
     { "notify", (PyCFunction)pygobject_notify, METH_VARARGS },
     { "thaw_notify", (PyCFunction)pygobject_thaw_notify, METH_VARARGS },
