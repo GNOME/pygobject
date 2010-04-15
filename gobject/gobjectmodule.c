@@ -2545,6 +2545,22 @@ pygobject_register_constants(PyObject *m)
     PyModule_AddIntConstant(m, "G_MINLONG", G_MINLONG);
     PyModule_AddIntConstant(m, "G_MAXLONG", G_MAXLONG);
     PyModule_AddObject(m, "G_MAXULONG", PyLong_FromUnsignedLong(G_MAXULONG));
+    PyModule_AddIntConstant(m, "G_MININT8", G_MININT8);
+    PyModule_AddIntConstant(m, "G_MAXINT8", G_MAXINT8);
+    PyModule_AddIntConstant(m, "G_MAXUINT8", G_MAXUINT8);
+    PyModule_AddIntConstant(m, "G_MININT16", G_MININT16); 
+    PyModule_AddIntConstant(m, "G_MAXINT16", G_MAXINT16);
+    PyModule_AddIntConstant(m, "G_MAXUINT16", G_MAXUINT16);
+    PyModule_AddIntConstant(m, "G_MININT32", G_MININT32);
+    PyModule_AddIntConstant(m, "G_MAXINT32", G_MAXINT32);
+    PyModule_AddObject(m, "G_MAXUINT32", PyLong_FromUnsignedLong(G_MAXUINT32));
+    PyModule_AddObject(m, "G_MININT64",PyLong_FromLong( G_MININT64));
+    PyModule_AddObject(m, "G_MAXINT64", PyLong_FromLong(G_MAXINT64));
+    PyModule_AddObject(m, "G_MAXUINT64", PyLong_FromUnsignedLong(G_MAXUINT64));
+    PyModule_AddObject(m, "G_MAXSIZE", PyLong_FromUnsignedLong(G_MAXSIZE));
+    PyModule_AddObject(m, "G_MAXSSIZE", PyLong_FromUnsignedLong(G_MAXSSIZE));
+    PyModule_AddObject(m, "G_MINOFFSET", PyLong_FromLong(G_MINOFFSET));
+    PyModule_AddObject(m, "G_MAXOFFSET", PyLong_FromLong(G_MAXOFFSET));
 
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
