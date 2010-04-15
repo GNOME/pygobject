@@ -10,6 +10,7 @@
 
 #include "pyglib.h"
 #include "pyglib-private.h"
+#include "pygsource.h"
 
 typedef struct {
     PyObject_HEAD
