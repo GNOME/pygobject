@@ -40,6 +40,6 @@ static PyObject *
 _wrap_g_memory_output_stream_get_data(PyGObject *self)
 {
     GMemoryOutputStream *stream = G_MEMORY_OUTPUT_STREAM(self->obj);
-    return _PyByteArray_FromStringAndSize(g_memory_output_stream_get_data(stream),
+    return PYGLIB_PyBytes_FromStringAndSize(g_memory_output_stream_get_data(stream),
 				      g_seekable_tell(G_SEEKABLE(stream)));
 }

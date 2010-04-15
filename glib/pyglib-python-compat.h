@@ -95,11 +95,11 @@ static int _pyglib_init_##modname(PyObject *module)
 #define _PyUnicode_GET_SIZE PyString_GET_SIZE
 #define _PyUnicode_Type PyString_Type
 
-#define _PyByteArray_FromStringAndSize PyString_FromStringAndSize
-#define _PyByteArray_Resize _PyString_Resize
-#define _PyByteArray_AsString PyString_AsString
-#define _PyByteArray_Size PyString_Size
-#define _PyByteArray_Check PyString_Check
+#define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
+#define PYGLIB_PyBytes_Resize _PyString_Resize
+#define PYGLIB_PyBytes_AsString PyString_AsString
+#define PYGLIB_PyBytes_Size PyString_Size
+#define PYGLIB_PyBytes_Check PyString_Check
 
 #define _PyLong_Check PyInt_Check
 #define _PyLong_FromLong PyInt_FromLong
@@ -190,11 +190,11 @@ PyTypeObject symbol = {                                 \
 #define _PyLongObject PyLongObject
 #define _PyLong_Type PyLong_Type
 
-#define _PyByteArray_FromStringAndSize PyByteArray_FromStringAndSize
-#define _PyByteArray_Resize(o, len) PyByteArray_Resize(*o, len)
-#define _PyByteArray_AsString PyByteArray_AsString
-#define _PyByteArray_Size PyByteArray_Size
-#define _PyByteArray_Check PyByteArray_Check
+#define PYGLIB_PyBytes_FromStringAndSize PyBytes_FromStringAndSize
+#define PYGLIB_PyBytes_Resize(o, len) _PyBytes_Resize(o, len)
+#define PYGLIB_PyBytes_AsString PyBytes_AsString
+#define PYGLIB_PyBytes_Size PyBytes_Size
+#define PYGLIB_PyBytes_Check PyBytes_Check
 
 #endif
 

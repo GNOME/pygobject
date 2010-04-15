@@ -38,14 +38,14 @@ _wrap_g_memory_input_stream_add_data(PyGObject *self,
         char *copy;
         int length;
 
-        if (!_PyByteArray_Check(data)) {
+        if (!PYGLIB_PyBytes_Check(data)) {
             PyErr_SetString(PyExc_TypeError, "data must be a bytes instance or None");
             return NULL;
         }
 
-        length = _PyByteArray_Size(data);
+        length = PYGLIB_PyBytes_Size(data);
         copy = g_malloc(length);
-        memcpy(copy, _PyByteArray_AsString(data), length);
+        memcpy(copy, PYGLIB_PyBytes_AsString(data), length);
 
         g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(self->obj),
                                        copy, length, (GDestroyNotify) g_free);
@@ -74,14 +74,14 @@ _wrap_g_memory_input_stream_new_from_data(PyGObject *self,
         char *copy;
         int length;
 
-        if (!_PyByteArray_Check(data)) {
+        if (!PYGLIB_PyBytes_Check(data)) {
             PyErr_SetString(PyExc_TypeError, "data must be a string or None");
             return NULL;
         }
 
-        length = _PyByteArray_Size(data);
+        length = PYGLIB_PyBytes_Size(data);
         copy = g_malloc(length);
-        memcpy(copy, _PyByteArray_AsString(data), length);
+        memcpy(copy, PYGLIB_PyBytes_AsString(data), length);
 
         stream = g_memory_input_stream_new_from_data(copy, length,
                                                       (GDestroyNotify) g_free);
