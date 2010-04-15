@@ -65,11 +65,12 @@ PyObject *
 pyg_pid_new(GPid pid)
 {
     _PyLongObject *pygpid;
-    pygpid = PyObject_NEW(_PyLongObject, &PyGPid_Type);
 
 #if PY_VERSION_HEX >= 0x03000000
-#   warning "FIXME: figure out how to subclass long"    
+    return PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "Oi", 
+		               &PyGPid_Type, pygpid);
 #else
+    pygpid = PyObject_NEW(_PyLongObject, &PyGPid_Type);
     pygpid->ob_ival = pid;
 #endif    
     return (PyObject *) pygpid;
