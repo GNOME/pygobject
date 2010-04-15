@@ -28,6 +28,7 @@ AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
 AM_CONFIG_HEADER(config.h)
 
 AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
@@ -228,6 +229,7 @@ AC_CONFIG_FILES(
   pygobject-2.0-uninstalled.pc
   codegen/Makefile
   codegen/pygobject-codegen-2.0
+  codegen/libcodegen/Makefile
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py

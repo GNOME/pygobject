@@ -1,5 +1,7 @@
 PLATFORM_VERSION = 2.0
 
+SUBDIRS = libcodegen
+
 bin_SCRIPTS = pygobject-codegen-$(PLATFORM_VERSION)
 
 codegendir = $(pkgdatadir)/$(PLATFORM_VERSION)/codegen
@@ -18,14 +20,5 @@ codegen_SCRIPTS = \
 	mkskel.py \
 	scanvirtuals.py \
 	scmexpr.py
-
-codegen_PYTHON = \
-	__init__.py \
-	argtypes.py \
-	definitions.py \
-	defsparser.py \
-	docextract.py \
-	override.py \
-	reversewrapper.py
 
 EXTRA_DIST = $(codegen_SCRIPTS) README.defs pygobject-codegen-$(PLATFORM_VERSION).in
