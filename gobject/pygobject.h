@@ -377,10 +377,17 @@ pygobject_init(int req_major, int req_minor, int req_micro)
 }
 
 /* deprecated macro, use pygobject_init() instead. */
+#if PY_VERSION_HEX >= 0x03000000
+#define init_pygobject() G_STMT_START {         \
+    if (!pygobject_init(-1, -1, -1))            \
+        return -1;                              \
+} G_STMT_END
+#else
 #define init_pygobject() G_STMT_START {         \
     if (!pygobject_init(-1, -1, -1))            \
         return;                                 \
 } G_STMT_END
+#endif
 
 /* deprecated macro, use pygobject_init() instead. */
 #define init_pygobject_check(req_major, req_minor, req_micro) G_STMT_START {    \

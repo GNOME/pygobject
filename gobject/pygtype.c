@@ -39,15 +39,6 @@ typedef struct {
 
 PYGLIB_DEFINE_TYPE("gobject.GType", PyGTypeWrapper_Type, PyGTypeWrapper);
 
-static int
-pyg_type_wrapper_compare(PyGTypeWrapper *self, PyGTypeWrapper *v)
-{
-    if (self->type == v->type) return 0;
-    if (self->type > v->type) return -1;
-    return 1;
-}
-
-
 static PyObject*
 pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
 {

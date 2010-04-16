@@ -59,6 +59,15 @@ else:
     _bytes = str
 
 try:
+    # Python 2:
     _unicode = unicode
 except NameError:
+    # Python 3: "unicode" became the "str" type
     _unicode = str
+
+try:
+    # Python 2:
+    _long = long
+except NameError:
+    # Python 3: "long" became the "int" type
+    _long = int

@@ -165,6 +165,11 @@ pyg_option_group_add_entries(PyGOptionGroup *self, PyObject *args,
     for (pos = 0; pos < entry_count; pos++)
     {
         gchar *long_name, *description, *arg_description;
+#if PY_VERSION_HEX >= 0x03000000
+        int short_name;
+#else
+        char short_name;
+#endif
         entry_tuple = PyList_GetItem(list, pos);
         if (!PyTuple_Check(entry_tuple))
         {
@@ -173,9 +178,14 @@ pyg_option_group_add_entries(PyGOptionGroup *self, PyObject *args,
             g_free(entries);
             return NULL;
         }
-        if (!PyArg_ParseTuple(entry_tuple, "scisz",
+        if (!PyArg_ParseTuple(entry_tuple,
+#if PY_VERSION_HEX >= 0x03000000
+            "sCisz",
+#else
+            "scisz",
+#endif
             &long_name,
-            &(entries[pos].short_name),
+            &short_name,
             &(entries[pos].flags),
             &description,
             &arg_description))
@@ -185,6 +195,17 @@ pyg_option_group_add_entries(PyGOptionGroup *self, PyObject *args,
             g_free(entries);
             return NULL;
         }
+#if PY_VERSION_HEX >= 0x03000000
+        if (short_name > 0xff) {
+            PyErr_SetString(PyExc_TypeError,
+                            "GOptionGroup.add_entries expected a shortname in the range 0-255");
+            return NULL;            
+        }
+        entries[pos].short_name = short_name;
+#else
+        entries[pos].short_name = short_name;
+#endif
+
         long_name = g_strdup(long_name);
         self->strings = g_slist_prepend(self->strings, long_name);
         entries[pos].long_name = long_name;

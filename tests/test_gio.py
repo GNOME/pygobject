@@ -4,12 +4,9 @@ import os
 import unittest
 import sys
 
-from common import gio, glib
+from common import gio, glib, _bytes, _unicode, _long
 
-try:
-    _unicode = unicode
-except NameError:
-    _unicode = str
+#is_py3k = (sys.version_info >= (3, 0))
 
 class TestFile(unittest.TestCase):
     def setUp(self):
@@ -29,7 +26,7 @@ class TestFile(unittest.TestCase):
             try:
                 stream = file.read_finish(result)
                 self.failUnless(isinstance(stream, gio.InputStream))
-                self.assertEquals(stream.read(), "testing")
+                self.assertEquals(stream.read(), _bytes("testing"))
             finally:
                 loop.quit()
 
@@ -340,8 +337,8 @@ class TestFile(unittest.TestCase):
                 loop.quit()
 
         def progress(current, total):
-            self.assert_(isinstance(current, long))
-            self.assert_(isinstance(total, long))
+            self.assert_(isinstance(current, _long))
+            self.assert_(isinstance(total, _long))
             self.assert_(0 <= current <= total)
 
         try:
@@ -361,8 +358,8 @@ class TestFile(unittest.TestCase):
         destination = gio.File('copy.txt')
 
         def progress(current, total):
-            self.assert_(isinstance(current, long))
-            self.assert_(isinstance(total, long))
+            self.assert_(isinstance(current, _long))
+            self.assert_(isinstance(total, _long))
             self.assert_(0 <= current <= total)
 
         try:
@@ -594,10 +591,10 @@ class TestInputStream(unittest.TestCase):
         os.unlink("inputstream.txt")
 
     def testRead(self):
-        self.assertEquals(self.stream.read(), "testing")
+        self.assertEquals(self.stream.read(), _bytes("testing"))
 
         self.stream = gio.MemoryInputStream()
-        self.assertEquals(self.stream.read(), '')
+        self.assertEquals(self.stream.read(), _bytes(''))
 
         self.stream = gio.MemoryInputStream()
         some_data = open("test_gio.py", "rb").read()
@@ -614,7 +611,7 @@ class TestInputStream(unittest.TestCase):
     def testSkip(self):
         self.stream.skip(2)
         res = self.stream.read()
-        self.assertEqual(res, "sting")
+        self.assertEqual(res, _bytes("sting"))
         
     def testSkipAsync(self):
         def callback(stream, result):
@@ -622,7 +619,7 @@ class TestInputStream(unittest.TestCase):
                 size = stream.skip_finish(result)
                 self.assertEqual(size, 2)
                 res = stream.read()
-                self.assertEqual(res, "sting")
+                self.assertEqual(res, _bytes("sting"))
             finally:
                 loop.quit()
         
@@ -634,7 +631,7 @@ class TestInputStream(unittest.TestCase):
     def test_read_part(self):
         self.assertEquals(self._read_in_loop(self.stream,
                                              lambda: self.stream.read_part()),
-                          'testing')
+                          _bytes('testing'))
 
         stream = gio.MemoryInputStream()
         some_data = open('test_gio.py', 'rb').read()
@@ -645,7 +642,7 @@ class TestInputStream(unittest.TestCase):
                           some_data)
 
     def _read_in_loop(self, stream, reader, size_limit=0):
-        read_data = ''
+        read_data = _bytes('')
         while True:
             read_part = reader()
             if read_part:
@@ -661,7 +658,7 @@ class TestInputStream(unittest.TestCase):
             self.assertEquals(result.get_op_res_gssize(), 7)
             try:
                 data = stream.read_finish(result)
-                self.assertEquals(data, "testing")
+                self.assertEquals(data, _bytes("testing"))
                 stream.close()
             finally:
                 loop.quit()
@@ -722,7 +719,7 @@ class TestDataInputStream(unittest.TestCase):
         self.data_stream = gio.DataInputStream(self.base_stream)
 
     def test_read_line(self):
-        self.base_stream.add_data('foo\nbar\n\nbaz')
+        self.base_stream.add_data(_bytes('foo\nbar\n\nbaz'))
         self.assertEquals('foo', self.data_stream.read_line())
         self.assertEquals('bar', self.data_stream.read_line())
         self.assertEquals('', self.data_stream.read_line())
@@ -743,14 +740,14 @@ class TestDataInputStream(unittest.TestCase):
             loop.run()
             return line[0]
 
-        self.base_stream.add_data('foo\nbar\n\nbaz')
+        self.base_stream.add_data(_bytes('foo\nbar\n\nbaz'))
         self.assertEquals('foo', do_read_line_async())
         self.assertEquals('bar', do_read_line_async())
         self.assertEquals('', do_read_line_async())
         self.assertEquals('baz', do_read_line_async())
 
     def test_read_until(self):
-        self.base_stream.add_data('sentence.end of line\nthe rest')
+        self.base_stream.add_data(_bytes('sentence.end of line\nthe rest'))
         self.assertEquals('sentence', self.data_stream.read_until('.!?'))
         self.assertEquals('end of line', self.data_stream.read_until('\n\r'))
         self.assertEquals('the rest', self.data_stream.read_until('#$%^&'))
@@ -772,7 +769,7 @@ class TestDataInputStream(unittest.TestCase):
 
         # Note the weird difference between synchronous and
         # asynchronous version.  See bug #584284.
-        self.base_stream.add_data('sentence.end of line\nthe rest')
+        self.base_stream.add_data(_bytes('sentence.end of line\nthe rest'))
         self.assertEquals('sentence', do_read_until_async('.!?'))
         self.assertEquals('.end of line', do_read_until_async('\n\r'))
         self.assertEquals('\nthe rest', do_read_until_async('#$%^&'))
@@ -783,17 +780,17 @@ class TestMemoryInputStream(unittest.TestCase):
         self.stream = gio.MemoryInputStream()
 
     def test_add_data(self):
-        self.stream.add_data('foobar')
-        self.assertEquals('foobar', self.stream.read())
+        self.stream.add_data(_bytes('foobar'))
+        self.assertEquals(_bytes('foobar'), self.stream.read())
 
-        self.stream.add_data('ham ')
+        self.stream.add_data(_bytes('ham '))
         self.stream.add_data(None)
-        self.stream.add_data('spam')
-        self.assertEquals('ham spam', self.stream.read())
+        self.stream.add_data(_bytes('spam'))
+        self.assertEquals(_bytes('ham spam'), self.stream.read())
     
     def test_new_from_data(self):
-        stream = gio.memory_input_stream_new_from_data('spam')
-        self.assertEquals('spam', stream.read())
+        stream = gio.memory_input_stream_new_from_data(_bytes('spam'))
+        self.assertEquals(_bytes('spam'), stream.read())
 
 
 class TestOutputStream(unittest.TestCase):
@@ -919,10 +916,10 @@ class TestMemoryOutputStream(unittest.TestCase):
 
     def test_get_contents(self):
         self.stream.write('foobar')
-        self.assertEquals('foobar', self.stream.get_contents())
+        self.assertEquals(_bytes('foobar'), self.stream.get_contents())
 
         self.stream.write('baz')
-        self.assertEquals('foobarbaz', self.stream.get_contents())
+        self.assertEquals(_bytes('foobarbaz'), self.stream.get_contents())
 
 
 class TestVolumeMonitor(unittest.TestCase):
@@ -957,12 +954,12 @@ class TestContentTypeGuess(unittest.TestCase):
         self.assertEquals('image/svg+xml', mime_type)
 
     def testFromContents(self):
-        mime_type = gio.content_type_guess(data='<html></html>')
+        mime_type = gio.content_type_guess(data=_bytes('<html></html>'))
         self.assertEquals('text/html', mime_type)
 
     def testFromContentsUncertain(self):
         mime_type, result_uncertain = gio.content_type_guess(
-            data='<html></html>', want_uncertain=True)
+            data=_bytes('<html></html>'), want_uncertain=True)
         self.assertEquals('text/html', mime_type)
         self.assertEquals(bool, type(result_uncertain))
 

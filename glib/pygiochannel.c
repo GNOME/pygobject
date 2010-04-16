@@ -279,7 +279,7 @@ static PyObject*
 py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "lines", NULL };
-    char *buf;
+    char *buf = NULL;
     Py_ssize_t buf_len;
     gsize count;
     GError* error = NULL;
