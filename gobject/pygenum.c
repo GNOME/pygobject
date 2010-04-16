@@ -43,8 +43,8 @@ pyg_enum_val_new(PyObject* subclass, GType gtype, PyObject *intval)
     item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
                                subclass, intval);
 #else
-    item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)subclass, 0);
-    ((PyLongObject*)item)->ob_ival = PyInt_AS_LONG(intval);
+    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
+    ((PyIntObject*)item)->ob_ival = PyInt_AS_LONG(intval);
 #endif    
     ((PyGEnum*)item)->gtype = gtype;
     
@@ -348,7 +348,7 @@ pygobject_enum_register_types(PyObject *d)
     pygenum_class_key        = g_quark_from_static_string("PyGEnum::class");
 
 #if PY_VERSION_HEX < 0x03000000
-    PyGEnum_Type.tp_base = PyInt_Type;
+    PyGEnum_Type.tp_base = &PyInt_Type;
     PyGEnum_Type.tp_new = pyg_enum_new;
 #else
     PyGEnum_Type.tp_base = &PyLong_Type;

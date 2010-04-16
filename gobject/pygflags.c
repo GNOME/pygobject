@@ -44,8 +44,8 @@ pyg_flags_val_new(PyObject* subclass, GType gtype, PyObject *intval)
     item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
                                subclass, intval);
 #else
-    item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)subclass, 0);
-    ((PyLongObject*)item)->ob_ival = PyInt_AS_LONG(intval);
+    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
+    ((PyIntObject*)item)->ob_ival = PyInt_AsLong(intval);
 #endif    
     ((PyGFlags*)item)->gtype = gtype;
     
@@ -442,7 +442,9 @@ static PyNumberMethods pyg_flags_as_number = {
 	(binaryfunc)pyg_flags_warn,		/* nb_multiply */
 	(binaryfunc)pyg_flags_warn,		/* nb_divide */
 	(binaryfunc)pyg_flags_warn,		/* nb_remainder */
-//	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
+#if PY_VERSION_HEX < 0x03000000
+	(binaryfunc)pyg_flags_warn,		/* nb_divmod */
+#endif
 	(ternaryfunc)pyg_flags_warn,		/* nb_power */
 	0,					/* nb_negative */
 	0,					/* nb_positive */
@@ -462,8 +464,8 @@ pygobject_flags_register_types(PyObject *d)
     pygflags_class_key = g_quark_from_static_string("PyGFlags::class");
 
 #if PY_VERSION_HEX < 0x03000000
-    PyGFlags_Type.tp_base = PyInt_Type;
-    PyGFlags_Type.tp_new = pyg_enum_new;
+    PyGFlags_Type.tp_base = &PyInt_Type;
+    PyGFlags_Type.tp_new = pyg_flags_new;
 #else
     PyGFlags_Type.tp_base = &PyLong_Type;
     PyGFlags_Type.tp_new = PyLong_Type.tp_new;

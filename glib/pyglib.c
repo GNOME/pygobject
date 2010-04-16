@@ -61,7 +61,7 @@ pyglib_init(void)
 	    Py_XDECREF(traceback);
 	    PyErr_Format(PyExc_ImportError,
 			 "could not import glib (error was: %s)",
-			 _PyUnicode_AsString(py_orig_exc));
+			 PYGLIB_PyUnicode_AsString(py_orig_exc));
 	    Py_DECREF(py_orig_exc);
         } else {
 	    PyErr_SetString(PyExc_ImportError,

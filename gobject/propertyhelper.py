@@ -102,7 +102,9 @@ class property(object):
         self.setter = setter
 
         if sys.version_info >= (3, 0):
-            basestring = str
+            _basestring = str
+        else:
+            _basestring = basestring
         
         if type is None:
             type = object
@@ -110,11 +112,11 @@ class property(object):
         self.default = self._get_default(default)
         self._check_default()
 
-        if not isinstance(nick, basestring):
+        if not isinstance(nick, _basestring):
             raise TypeError("nick must be a string")
         self.nick = nick
 
-        if not isinstance(blurb, basestring):
+        if not isinstance(blurb, _basestring):
             raise TypeError("blurb must be a string")
         self.blurb = blurb
 
