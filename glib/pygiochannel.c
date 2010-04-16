@@ -92,7 +92,7 @@ py_io_channel_shutdown(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(ret);
+    return PYGLIB_PyLong_FromLong(ret);
 }
 
 /* character encoding conversion involved functions.
@@ -116,7 +116,7 @@ py_io_channel_set_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwar
 static PyObject*
 py_io_channel_get_buffer_size(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffer_size(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffer_size(self->channel));
 }
 
 static PyObject*
@@ -137,7 +137,7 @@ py_io_channel_set_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 static PyObject*
 py_io_channel_get_buffered(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffered(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffered(self->channel));
 }
 
 static PyObject*
@@ -272,7 +272,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(count);
+    return PYGLIB_PyLong_FromLong(count);
 }
 
 static PyObject*
@@ -335,7 +335,7 @@ py_io_channel_flush(PyGIOChannel* self)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 static PyObject*
@@ -354,19 +354,19 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 static PyObject*
 py_io_channel_get_flags(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_flags(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_flags(self->channel));
 }
 
 static PyObject*
 py_io_channel_get_buffer_condition(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffer_condition(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffer_condition(self->channel));
 }
 
 static PyObject*
@@ -517,7 +517,7 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
         pyfd = PyList_GET_ITEM(pyfds, i);
         ((PyGPollFD *) pyfd)->pollfd = pollfd[i];
     }
-    return _PyLong_FromLong(result);
+    return PYGLIB_PyLong_FromLong(result);
 }
 
 static PyObject *
@@ -631,7 +631,7 @@ py_io_channel_seek(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 #if 0 // Not wrapped

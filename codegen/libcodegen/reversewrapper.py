@@ -526,7 +526,7 @@ class IntParam(Parameter):
 
     def convert_c2py(self):
         self.wrapper.add_declaration("PyObject *py_%s;" % self.name)
-        self.wrapper.write_code(code=("py_%s = _PyLong_FromLong(%s);" %
+        self.wrapper.write_code(code=("py_%s = PYGLIB_PyLong_FromLong(%s);" %
                                       (self.name, self.name)),
                                 cleanup=("Py_DECREF(py_%s);" % self.name))
         self.wrapper.add_pyargv_item("py_%s" % self.name)
@@ -563,7 +563,7 @@ class IntPtrParam(Parameter):
     def convert_c2py(self):
         if self.props["direction"] == "inout":
             self.wrapper.add_declaration("PyObject *py_%s;" % self.name)
-            self.wrapper.write_code(code=("py_%s = _PyLong_FromLong(*%s);" %
+            self.wrapper.write_code(code=("py_%s = PYGLIB_PyLong_FromLong(*%s);" %
                                           (self.name, self.name)),
                                     cleanup=("Py_DECREF(py_%s);" % self.name))
             self.wrapper.add_pyargv_item("py_%s" % self.name)

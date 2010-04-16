@@ -51,7 +51,7 @@ _wrap_g_output_stream_write(PyGObject *self,
   if (pyg_error_check(&error))
     return NULL;
       
-  return _PyLong_FromLong(written);
+  return PYGLIB_PyLong_FromLong(written);
 }
 %%
 override g_output_stream_write_all kwargs
@@ -85,7 +85,7 @@ _wrap_g_output_stream_write_all(PyGObject *self,
   if (pyg_error_check(&error))
     return NULL;
       
-  return _PyLong_FromLong(written);
+  return PYGLIB_PyLong_FromLong(written);
 }
 %%
 override g_output_stream_write_async kwargs

@@ -44,7 +44,7 @@ pyg_enum_val_new(PyObject* subclass, GType gtype, PyObject *intval)
                                subclass, intval);
 #else
     item = ((PyTypeObject *)stub)->tp_alloc((PyTypeObject *)subclass, 0);
-    ((_PyLongObject*)item)->ob_ival = PyInt_AS_LONG(intval);
+    ((PyLongObject*)item)->ob_ival = PyInt_AS_LONG(intval);
 #endif    
     ((PyGEnum*)item)->gtype = gtype;
     
@@ -56,7 +56,7 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 {
     static char warning[256];
 
-    if (!_PyLong_Check(other)) {
+    if (!PYGLIB_PyLong_Check(other)) {
 	Py_INCREF(Py_NotImplemented);
 	return Py_NotImplemented;
     }
@@ -83,13 +83,13 @@ pyg_enum_repr(PyGEnum *self)
   g_assert(G_IS_ENUM_CLASS(enum_class));
 
   for (index = 0; index < enum_class->n_values; index++)
-      if (_PyLong_AS_LONG(self) == enum_class->values[index].value)
+      if (PYGLIB_PyLong_AS_LONG(self) == enum_class->values[index].value)
           break;
   value = enum_class->values[index].value_name;
   if (value)
       sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
   else
-      sprintf(tmp, "<enum %ld of type %s>", _PyLong_AS_LONG(self), g_type_name(self->gtype));
+      sprintf(tmp, "<enum %ld of type %s>", PYGLIB_PyLong_AS_LONG(self), g_type_name(self->gtype));
 
   g_type_class_unref(enum_class);
 
@@ -151,7 +151,7 @@ pyg_enum_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     g_type_class_unref(eclass);
     
-    intvalue = _PyLong_FromLong(value);
+    intvalue = PYGLIB_PyLong_FromLong(value);
     ret = PyDict_GetItem(values, intvalue);
     Py_DECREF(intvalue);
     Py_DECREF(values);
@@ -181,11 +181,11 @@ pyg_enum_from_gtype (GType gtype, int value)
     if (!pyclass)
         pyclass = pyg_enum_add(NULL, g_type_name(gtype), NULL, gtype);
     if (!pyclass)
-	return _PyLong_FromLong(value);
+	return PYGLIB_PyLong_FromLong(value);
     
     values = PyDict_GetItemString(((PyTypeObject *)pyclass)->tp_dict,
 				  "__enum_values__");
-    intvalue = _PyLong_FromLong(value);
+    intvalue = PYGLIB_PyLong_FromLong(value);
     retval = PyDict_GetItem(values, intvalue);
     if (retval) {
 	Py_INCREF(retval);
@@ -258,7 +258,7 @@ pyg_enum_add (PyObject *   module,
     for (i = 0; i < eclass->n_values; i++) {
 	PyObject *item, *intval;
       
-        intval = _PyLong_FromLong(eclass->values[i].value);
+        intval = PYGLIB_PyLong_FromLong(eclass->values[i].value);
 	item = pyg_enum_val_new(stub, gtype, intval);
 	PyDict_SetItem(values, intval, item);
         Py_DECREF(intval);
@@ -290,7 +290,7 @@ pyg_enum_reduce(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, ":GEnum.__reduce__"))
         return NULL;
 
-    return Py_BuildValue("(O(i)O)", Py_TYPE(self), _PyLong_AsLong(self),
+    return Py_BuildValue("(O(i)O)", Py_TYPE(self), PYGLIB_PyLong_AsLong(self),
                          PyObject_GetAttrString(self, "__dict__"));
 }
 
@@ -304,7 +304,7 @@ pyg_enum_get_value_name(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, _PyLong_AS_LONG(self));
+  enum_value = g_enum_get_value(enum_class, PYGLIB_PyLong_AS_LONG(self));
 
   retval = PYGLIB_PyUnicode_FromString(enum_value->value_name);
   g_type_class_unref(enum_class);
@@ -322,7 +322,7 @@ pyg_enum_get_value_nick(PyGEnum *self, void *closure)
   enum_class = g_type_class_ref(self->gtype);
   g_assert(G_IS_ENUM_CLASS(enum_class));
   
-  enum_value = g_enum_get_value(enum_class, _PyLong_AS_LONG(self));
+  enum_value = g_enum_get_value(enum_class, PYGLIB_PyLong_AS_LONG(self));
 
   retval = PYGLIB_PyUnicode_FromString(enum_value->value_nick);
   g_type_class_unref(enum_class);
@@ -352,7 +352,7 @@ pygobject_enum_register_types(PyObject *d)
     PyGEnum_Type.tp_new = pyg_enum_new;
 #else
     PyGEnum_Type.tp_base = &PyLong_Type;
-    PyGEnum_Type.tp_new = _PyLong_Type.tp_new;
+    PyGEnum_Type.tp_new = PyLong_Type.tp_new;
 #endif
     
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;

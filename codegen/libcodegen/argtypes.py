@@ -184,14 +184,14 @@ class IntArg(ArgType):
         info.add_parselist('i', ['&' + pname], [pname])
     def write_return(self, ptype, ownsreturn, info):
         info.varlist.add('int', 'ret')
-        info.codeafter.append('    return _PyLong_FromLong(ret);')
+        info.codeafter.append('    return PYGLIB_PyLong_FromLong(ret);')
 
 class UIntArg(ArgType):
     dflt = ('    if (py_%(name)s) {\n'
             '        if (PyLong_Check(py_%(name)s))\n'
             '            %(name)s = PyLong_AsUnsignedLong(py_%(name)s);\n'
-            '        else if (_PyLong_Check(py_%(name)s))\n'
-            '            %(name)s = _PyLong_AsLong(py_%(name)s);\n'
+            '        else if (PYGLIB_PyLong_Check(py_%(name)s))\n'
+            '            %(name)s = PYGLIB_PyLong_AsLong(py_%(name)s);\n'
             '        else\n'
             '            PyErr_SetString(PyExc_TypeError, "Parameter \'%(name)s\' must be an int or a long");\n'
             '        if (PyErr_Occurred())\n'
@@ -199,8 +199,8 @@ class UIntArg(ArgType):
             '    }\n')
     before = ('    if (PyLong_Check(py_%(name)s))\n'
               '        %(name)s = PyLong_AsUnsignedLong(py_%(name)s);\n'
-              '    else if (_PyLong_Check(py_%(name)s))\n'
-              '        %(name)s = _PyLong_AsLong(py_%(name)s);\n'
+              '    else if (PYGLIB_PyLong_Check(py_%(name)s))\n'
+              '        %(name)s = PYGLIB_PyLong_AsLong(py_%(name)s);\n'
               '    else\n'
               '        PyErr_SetString(PyExc_TypeError, "Parameter \'%(name)s\' must be an int or a long");\n'
               '    if (PyErr_Occurred())\n'
@@ -276,7 +276,7 @@ class LongArg(ArgType):
         info.add_parselist('l', ['&' + pname], [pname])
     def write_return(self, ptype, ownsreturn, info):
         info.varlist.add(ptype, 'ret')
-        info.codeafter.append('    return _PyLong_FromLong(ret);\n')
+        info.codeafter.append('    return PYGLIB_PyLong_FromLong(ret);\n')
 
 class BoolArg(IntArg):
     def write_return(self, ptype, ownsreturn, info):
@@ -293,7 +293,7 @@ class TimeTArg(ArgType):
         info.add_parselist('i', ['&' + pname], [pname])
     def write_return(self, ptype, ownsreturn, info):
         info.varlist.add('time_t', 'ret')
-        info.codeafter.append('    return _PyLong_FromLong(ret);')
+        info.codeafter.append('    return PYGLIB_PyLong_FromLong(ret);')
 
 class ULongArg(ArgType):
     def write_param(self, ptype, pname, pdflt, pnull, info):

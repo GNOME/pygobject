@@ -80,7 +80,7 @@ get_handler_priority(gint *priority, PyObject *kwargs)
 	return -1;
     }
 
-    *priority = _PyLong_AsLong(val);
+    *priority = PYGLIB_PyLong_AsLong(val);
     if (PyErr_Occurred()) {
 	PyErr_Clear();
 	PyErr_SetString(PyExc_ValueError, "could not get priority value");
@@ -135,7 +135,7 @@ pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_idle_add_full(priority,
 				 _pyglib_handler_marshal, data,
 				 _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 
@@ -175,7 +175,7 @@ pyglib_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_full(priority, interval,
 				    _pyglib_handler_marshal, data,
 				    _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -214,7 +214,7 @@ pyglib_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_seconds_full(priority, interval,
                                             _pyglib_handler_marshal, data,
                                             _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static gboolean
@@ -305,7 +305,7 @@ pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 				     (GDestroyNotify)_pyglib_destroy_notify);
     g_io_channel_unref(iochannel);
     
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -385,7 +385,7 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
         Py_INCREF(child_data->data);
     id = g_child_watch_add_full(priority, pid, child_watch_func,
                                 child_data, child_watch_dnotify);
-    return _PyLong_FromLong(id);
+    return PYGLIB_PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -479,7 +479,7 @@ pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
 static PyObject *
 pyglib_main_depth(PyObject *unused)
 {
-    return _PyLong_FromLong(g_main_depth());
+    return PYGLIB_PyLong_FromLong(g_main_depth());
 }
 
 static PyObject *

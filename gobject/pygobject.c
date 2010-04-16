@@ -1963,7 +1963,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 						  0, 0,
 						  closure,
 						  NULL, NULL);
-    return _PyLong_FromLong(retval);
+    return PYGLIB_PyLong_FromLong(retval);
 }
 
 static PyObject *
@@ -1998,7 +1998,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 					     0, 0,
 					     closure,
 					     NULL, NULL);
-    return _PyLong_FromLong(retval);
+    return PYGLIB_PyLong_FromLong(retval);
 }
 
 static PyObject *
@@ -2033,7 +2033,7 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 					       0, 0,
 					       closure,
 					       NULL, NULL);
-    return _PyLong_FromLong(retval);
+    return PYGLIB_PyLong_FromLong(retval);
 }
 
 static PyMethodDef pygobject_methods[] = {
@@ -2088,7 +2088,7 @@ pygobject_get_dict(PyGObject *self, void *closure)
 static PyObject *
 pygobject_get_refcount(PyGObject *self, void *closure)
 {
-    return _PyLong_FromLong(self->obj->ref_count);
+    return PYGLIB_PyLong_FromLong(self->obj->ref_count);
 }
 
 static int

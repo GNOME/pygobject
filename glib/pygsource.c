@@ -109,7 +109,7 @@ pyg_source_attach(PyGSource *self, PyObject *args, PyObject *kwargs)
     }
 
     id = g_source_attach(self->source, context);
-    return _PyLong_FromLong(id);
+    return PYGLIB_PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -283,7 +283,7 @@ pyg_source_get_priority(PyGSource *self, void *closure)
 {
     CHECK_DESTROYED(self, NULL);
 
-    return _PyLong_FromLong(g_source_get_priority(self->source));
+    return PYGLIB_PyLong_FromLong(g_source_get_priority(self->source));
 }
 
 static int
@@ -296,12 +296,12 @@ pyg_source_set_priority(PyGSource *self, PyObject *value, void *closure)
 	return -1;
     }
 
-    if (!_PyLong_Check(value)) {
+    if (!PYGLIB_PyLong_Check(value)) {
 	PyErr_SetString(PyExc_TypeError, "type mismatch");
 	return -1;
     }
 
-    g_source_set_priority(self->source, _PyLong_AsLong(value));
+    g_source_set_priority(self->source, PYGLIB_PyLong_AsLong(value));
 
     return 0;
 }
@@ -339,7 +339,7 @@ pyg_source_get_id(PyGSource *self, void *closure)
 	return NULL;
     }
 
-    return _PyLong_FromLong(g_source_get_id(self->source));
+    return PYGLIB_PyLong_FromLong(g_source_get_id(self->source));
 }
 
 static PyGetSetDef pyg_source_getsets[] = {
@@ -426,7 +426,7 @@ pyg_source_prepare(GSource *source, gint *timeout)
     }
 
     ret = PyObject_IsTrue(PyTuple_GET_ITEM(t, 0));
-	*timeout = _PyLong_AsLong(PyTuple_GET_ITEM(t, 1));
+	*timeout = PYGLIB_PyLong_AsLong(PyTuple_GET_ITEM(t, 1));
 
 	if (*timeout == -1 && PyErr_Occurred()) {
 	    ret = FALSE;

@@ -32,12 +32,12 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, _PyLongObject)
+PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, PYGLIB_PyLongObject)
 
 static PyObject *
 pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    g_spawn_close_pid(_PyLong_AsLong(self));
+    g_spawn_close_pid(PYGLIB_PyLong_AsLong(self));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -50,8 +50,8 @@ static PyMethodDef pyg_pid_methods[] = {
 static void
 pyg_pid_free(PyObject *gpid)
 {
-    g_spawn_close_pid((GPid) _PyLong_AsLong(gpid));
-    _PyLong_Type.tp_free((void *) gpid);
+    g_spawn_close_pid((GPid) PYGLIB_PyLong_AsLong(gpid));
+    PYGLIB_PyLong_Type.tp_free((void *) gpid);
 }
 
 static int
@@ -68,9 +68,9 @@ pyg_pid_new(GPid pid)
     return PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "Oi", 
 		               &PyGPid_Type, pid);
 #else
-    _PyLongObject *pygpid;
+    PYGLIB_PyLongObject *pygpid;
 
-    pygpid = PyObject_NEW(_PyLongObject, &PyGPid_Type);
+    pygpid = PyObject_NEW(PYGLIB_PyLongObject, &PyGPid_Type);
     pygpid->ob_ival = pid;
     return (PyObject *) pygpid;
 #endif    
@@ -229,21 +229,21 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     if (envp) g_free(envp);
 
     if (standard_input)
-        pystdin = _PyLong_FromLong(*standard_input);
+        pystdin = PYGLIB_PyLong_FromLong(*standard_input);
     else {
         Py_INCREF(Py_None);
         pystdin = Py_None;
     }
 
     if (standard_output)
-        pystdout = _PyLong_FromLong(*standard_output);
+        pystdout = PYGLIB_PyLong_FromLong(*standard_output);
     else {
         Py_INCREF(Py_None);
         pystdout = Py_None;
     }
 
     if (standard_error)
-        pystderr = _PyLong_FromLong(*standard_error);
+        pystderr = PYGLIB_PyLong_FromLong(*standard_error);
     else {
         Py_INCREF(Py_None);
         pystderr = Py_None;

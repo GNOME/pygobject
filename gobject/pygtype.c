@@ -191,7 +191,7 @@ _wrap_g_type_wrapper__get_interfaces(PyGTypeWrapper *self, void *closure)
 static PyObject *
 _wrap_g_type_wrapper__get_depth(PyGTypeWrapper *self, void *closure)
 {
-  return _PyLong_FromLong(g_type_depth(self->type));
+  return PYGLIB_PyLong_FromLong(g_type_depth(self->type));
 }
 
 static PyGetSetDef _PyGTypeWrapper_getsets[] = {
@@ -375,7 +375,7 @@ pyg_type_from_object(PyObject *obj)
     if (PyType_Check(obj)) {
 	PyTypeObject *tp = (PyTypeObject *)obj;
 
-	if (tp == &_PyLong_Type)
+	if (tp == &PYGLIB_PyLong_Type)
 	    return G_TYPE_INT;
 	else if (tp == &PyBool_Type)
 	    return G_TYPE_BOOLEAN;
@@ -445,8 +445,8 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
     if (!obj) {
 	*val = 0;
 	res = 0;
-    } else if (_PyLong_Check(obj)) {
-	*val = _PyLong_AsLong(obj);
+    } else if (PYGLIB_PyLong_Check(obj)) {
+	*val = PYGLIB_PyLong_AsLong(obj);
 	res = 0;
 
 	if (PyObject_TypeCheck(obj, &PyGEnum_Type) && ((PyGEnum *) obj)->gtype != enum_type) {
@@ -518,8 +518,8 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
     if (!obj) {
 	*val = 0;
 	res = 0;
-    } else if (_PyLong_Check(obj)) {
-	*val = _PyLong_AsLong(obj);
+    } else if (PYGLIB_PyLong_Check(obj)) {
+	*val = PYGLIB_PyLong_AsLong(obj);
 	res = 0;
     } else if (PyLong_Check(obj)) {
         *val = PyLong_AsLongLong(obj);
@@ -745,11 +745,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	Py_DECREF(tmp);
 	break;
     case G_TYPE_UCHAR:
-	if (_PyLong_Check(obj)) {
+	if (PYGLIB_PyLong_Check(obj)) {
 	    glong val; 
-	    val = _PyLong_AsLong(obj);
+	    val = PYGLIB_PyLong_AsLong(obj);
 	    if (val >= 0 && val <= 255)
-	      g_value_set_uchar(value, (guchar)_PyLong_AsLong (obj));
+	      g_value_set_uchar(value, (guchar)PYGLIB_PyLong_AsLong (obj));
 	    else
 	      return -1;
 	} else if ((tmp = PyObject_Str(obj))) {
@@ -764,14 +764,14 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_boolean(value, PyObject_IsTrue(obj));
 	break;
     case G_TYPE_INT:
-	g_value_set_int(value, _PyLong_AsLong(obj));
+	g_value_set_int(value, PYGLIB_PyLong_AsLong(obj));
 	break;
     case G_TYPE_UINT:
 	{
-	    if (_PyLong_Check(obj)) {
+	    if (PYGLIB_PyLong_Check(obj)) {
 		glong val;
 
-		val = _PyLong_AsLong(obj);
+		val = PYGLIB_PyLong_AsLong(obj);
 		if (val >= 0 && val <= G_MAXUINT)
 		    g_value_set_uint(value, (guint)val);
 		else
@@ -782,7 +782,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_LONG:
-	g_value_set_long(value, _PyLong_AsLong(obj));
+	g_value_set_long(value, PYGLIB_PyLong_AsLong(obj));
 	break;
     case G_TYPE_ULONG:
 	g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
@@ -966,7 +966,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	return PyBool_FromLong(g_value_get_boolean(value));
     }
     case G_TYPE_INT:
-	return _PyLong_FromLong(g_value_get_int(value));
+	return PYGLIB_PyLong_FromLong(g_value_get_int(value));
     case G_TYPE_UINT:
 	{
 	    /* in Python, the Int object is backed by a long.  If a
@@ -974,19 +974,19 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	       an Int.  Otherwise, use a Long object to avoid overflow.
 	       This matches the ULongArg behavior in codegen/argtypes.h */
 #if (G_MAXUINT <= G_MAXLONG)
-	    return _PyLong_FromLong((glong) g_value_get_uint(value));
+	    return PYGLIB_PyLong_FromLong((glong) g_value_get_uint(value));
 #else
 	    return PyLong_FromUnsignedLong((gulong) g_value_get_uint(value));
 #endif
 	}
     case G_TYPE_LONG:
-	return _PyLong_FromLong(g_value_get_long(value));
+	return PYGLIB_PyLong_FromLong(g_value_get_long(value));
     case G_TYPE_ULONG:
 	{
 	    gulong val = g_value_get_ulong(value);
 
 	    if (val <= G_MAXLONG)
-		return _PyLong_FromLong((glong) val);
+		return PYGLIB_PyLong_FromLong((glong) val);
 	    else
 		return PyLong_FromUnsignedLong(val);
 	}
@@ -995,7 +995,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    gint64 val = g_value_get_int64(value);
 
 	    if (G_MINLONG <= val && val <= G_MAXLONG)
-		return _PyLong_FromLong((glong) val);
+		return PYGLIB_PyLong_FromLong((glong) val);
 	    else
 		return PyLong_FromLongLong(val);
 	}
@@ -1004,7 +1004,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    guint64 val = g_value_get_uint64(value);
 
 	    if (val <= G_MAXLONG)
-		return _PyLong_FromLong((glong) val);
+		return PYGLIB_PyLong_FromLong((glong) val);
 	    else
 		return PyLong_FromUnsignedLongLong(val);
 	}

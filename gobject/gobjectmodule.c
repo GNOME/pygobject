@@ -788,7 +788,7 @@ pyg_param_spec_from_object (PyObject *tuple)
     }
     
     item = PyTuple_GetItem(tuple, val_length-1);
-    if (!_PyLong_Check(item)) {
+    if (!PYGLIB_PyLong_Check(item)) {
 	PyErr_SetString(PyExc_TypeError,
 			"last element in tuple must be an int");
 	return NULL;
@@ -798,7 +798,7 @@ pyg_param_spec_from_object (PyObject *tuple)
     slice = PySequence_GetSlice(tuple, 4, val_length-1);
     pspec = create_property(prop_name, prop_type,
 			    nick, blurb, slice,
-			    _PyLong_AsLong(item));
+			    PYGLIB_PyLong_AsLong(item));
 
     return pspec;
 }
@@ -862,13 +862,13 @@ add_properties (GType instance_type, PyObject *properties)
 	    break;
 	}
 	item = PyTuple_GetItem(value, val_length-1);
-	if (!_PyLong_Check(item)) {
+	if (!PYGLIB_PyLong_Check(item)) {
 	    PyErr_SetString(PyExc_TypeError,
 		"last element in __gproperties__ value tuple must be an int");
 	    ret = FALSE;
 	    break;
 	}
-	flags = _PyLong_AsLong(item);
+	flags = PYGLIB_PyLong_AsLong(item);
 
 	/* slice is the extra items in the tuple */
 	slice = PySequence_GetSlice(value, 3, val_length-1);
@@ -1376,7 +1376,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			      return_type, n_params, param_types);
     g_free(param_types);
     if (signal_id != 0)
-	return _PyLong_FromLong(signal_id);
+	return PYGLIB_PyLong_FromLong(signal_id);
     PyErr_SetString(PyExc_RuntimeError, "could not create signal");
     return NULL;
 }
@@ -1477,7 +1477,7 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     for (i = 0; i < n; i++)
-	PyTuple_SetItem(list, i, _PyLong_FromLong(ids[i]));
+	PyTuple_SetItem(list, i, PYGLIB_PyLong_FromLong(ids[i]));
     g_free(ids);
     if (class)
         g_type_class_unref(class);
@@ -1525,7 +1525,7 @@ pyg_signal_lookup (PyObject *self, PyObject *args, PyObject *kwargs)
         g_type_class_unref(class);
     else
        g_type_default_interface_unref(iface);
-    return _PyLong_FromLong(id);
+    return PYGLIB_PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -1613,10 +1613,10 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
         goto done;
     }
 
-    PyTuple_SET_ITEM(py_query, 0, _PyLong_FromLong(query.signal_id));
+    PyTuple_SET_ITEM(py_query, 0, PYGLIB_PyLong_FromLong(query.signal_id));
     PyTuple_SET_ITEM(py_query, 1, PYGLIB_PyUnicode_FromString(query.signal_name));
     PyTuple_SET_ITEM(py_query, 2, pyg_type_wrapper_new(query.itype));
-    PyTuple_SET_ITEM(py_query, 3, _PyLong_FromLong(query.signal_flags));
+    PyTuple_SET_ITEM(py_query, 3, PYGLIB_PyLong_FromLong(query.signal_flags));
     PyTuple_SET_ITEM(py_query, 4, pyg_type_wrapper_new(query.return_type));
     for (i = 0; i < query.n_params; i++) {
         PyTuple_SET_ITEM(params_list, i,
@@ -2361,12 +2361,12 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     gboolean t;
 
     switch (op) {
-    case Py_EQ: t = _PyLong_AS_LONG(v) == _PyLong_AS_LONG(w); break;
-    case Py_NE: t = _PyLong_AS_LONG(v) != _PyLong_AS_LONG(w); break;
-    case Py_LE: t = _PyLong_AS_LONG(v) <= _PyLong_AS_LONG(w); break;
-    case Py_GE: t = _PyLong_AS_LONG(v) >= _PyLong_AS_LONG(w); break;
-    case Py_LT: t = _PyLong_AS_LONG(v) <  _PyLong_AS_LONG(w); break;
-    case Py_GT: t = _PyLong_AS_LONG(v) >  _PyLong_AS_LONG(w); break;
+    case Py_EQ: t = PYGLIB_PyLong_AS_LONG(v) == PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_NE: t = PYGLIB_PyLong_AS_LONG(v) != PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_LE: t = PYGLIB_PyLong_AS_LONG(v) <= PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_GE: t = PYGLIB_PyLong_AS_LONG(v) >= PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_LT: t = PYGLIB_PyLong_AS_LONG(v) <  PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_GT: t = PYGLIB_PyLong_AS_LONG(v) >  PYGLIB_PyLong_AS_LONG(w); break;
     default: g_assert_not_reached();
     }
 

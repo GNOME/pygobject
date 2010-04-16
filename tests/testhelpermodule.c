@@ -82,7 +82,7 @@ _wrap_test_g_object_new (PyObject * self)
     PyObject *rv;
 
     obj = g_object_new(g_type_from_name("PyGObject"), NULL);
-    rv = _PyLong_FromLong(obj->ref_count); /* should be == 2 at this point */
+    rv = PYGLIB_PyLong_FromLong(obj->ref_count); /* should be == 2 at this point */
     g_object_unref(obj);
     return rv;
 }
