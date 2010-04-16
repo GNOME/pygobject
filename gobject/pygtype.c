@@ -785,19 +785,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_long(value, _PyLong_AsLong(obj));
 	break;
     case G_TYPE_ULONG:
-	{
-	    if (_PyLong_Check(obj)) {
-		glong val;
-
-		val = _PyLong_AsLong(obj);
-		if (val >= 0)
-		    g_value_set_ulong(value, (gulong)val);
-		else
-		    return -1;
-	    } else {
-		g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
-	    }
-	}
+	g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
 	break;
     case G_TYPE_INT64:
 	g_value_set_int64(value, PyLong_AsLongLong(obj));
