@@ -26,7 +26,7 @@ class TestOption(unittest.TestCase):
 
     def _create_group(self):
         def option_callback(option, opt, value, parser):
-            raise StandardError(self.EXCEPTION_MESSAGE)
+            raise Exception(self.EXCEPTION_MESSAGE)
 
         group = OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
@@ -101,7 +101,7 @@ class TestOption(unittest.TestCase):
     def testOptionGroupConstructor(self):
         self.assertRaises(TypeError, OptionGroup)
 
-    def testStandardError(self):
+    def testCallbackFailure(self):
         self._create_group()
         sio = StringIO()
         old_stderr = sys.stderr
@@ -111,6 +111,7 @@ class TestOption(unittest.TestCase):
                 ["test_option.py", "--callback-failure-test"])
         finally:
             sys.stderr = old_stderr
-        assert (sio.getvalue().split('\n')[-2] ==
-                "StandardError: " + self.EXCEPTION_MESSAGE)
+
+        self.assertEquals(sio.getvalue().split('\n')[-2],
+                          'Exception: ' + self.EXCEPTION_MESSAGE)
 
