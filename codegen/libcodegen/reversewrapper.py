@@ -404,13 +404,13 @@ class StringParam(Parameter):
         if self.props.get('optional', False):
             self.wrapper.add_declaration("PyObject *py_%s = NULL;" % self.name)
             self.wrapper.write_code(code=("if (%s)\n"
-                                          "    py_%s = _PyUnicode_FromString(%s);\n"
+                                          "    py_%s = PYGLIB_PyUnicode_FromString(%s);\n"
                                           % (self.name, self.name, self.name)),
                                     cleanup=("Py_XDECREF(py_%s);" % self.name))
             self.wrapper.add_pyargv_item("py_%s" % self.name, optional=True)
         else:
             self.wrapper.add_declaration("PyObject *py_%s;" % self.name)
-            self.wrapper.write_code(code=("py_%s = _PyUnicode_FromString(%s);" %
+            self.wrapper.write_code(code=("py_%s = PYGLIB_PyUnicode_FromString(%s);" %
                                           (self.name, self.name)),
                                     cleanup=("Py_DECREF(py_%s);" % self.name),
                                     failure_expression=("!py_%s" % self.name))

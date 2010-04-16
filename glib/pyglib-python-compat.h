@@ -85,15 +85,15 @@ static int _pyglib_init_##modname(PyObject *module)
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
 #define RO READONLY
-#define _PyUnicode_Check PyString_Check
-#define _PyUnicode_AsString PyString_AsString
-#define _PyUnicode_AsStringAndSize PyString_AsStringAndSize
-#define _PyUnicode_FromString PyString_FromString
-#define _PyUnicode_FromStringAndSize PyString_FromStringAndSize
-#define _PyUnicode_FromFormat PyString_FromFormat
-#define _PyUnicode_AS_STRING PyString_AS_STRING
-#define _PyUnicode_GET_SIZE PyString_GET_SIZE
-#define _PyUnicode_Type PyString_Type
+#define PYGLIB_PyUnicode_Check PyString_Check
+#define PYGLIB_PyUnicode_AsString PyString_AsString
+#define PYGLIB_PyUnicode_AsStringAndSize PyString_AsStringAndSize
+#define PYGLIB_PyUnicode_FromString PyString_FromString
+#define PYGLIB_PyUnicode_FromStringAndSize PyString_FromStringAndSize
+#define PYGLIB_PyUnicode_FromFormat PyString_FromFormat
+#define PYGLIB_PyUnicode_AS_STRING PyString_AS_STRING
+#define PYGLIB_PyUnicode_GET_SIZE PyString_GET_SIZE
+#define PYGLIB_PyUnicode_Type PyString_Type
 
 #define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
 #define PYGLIB_PyBytes_Resize _PyString_Resize
@@ -173,16 +173,16 @@ PyTypeObject symbol = {                                 \
 	    return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
-#define _PyUnicode_Check PyUnicode_Check
-#define _PyUnicode_AsString _PyUnicode_AsString
-#define _PyUnicode_AsStringAndSize(obj, buf, size) _PyUnicode_AsStringAndSize(obj, size)
-#define _PyUnicode_FromString PyUnicode_FromString
-#define _PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
-#define _PyUnicode_FromFormat PyUnicode_FromFormat
-#define _PyUnicode_AS_STRING _PyUnicode_AsString
-#define _PyUnicode_GET_SIZE PyUnicode_GET_SIZE
-#define _PyUnicode_Resize PyUnicode_Resize
-#define _PyUnicode_Type PyUnicode_Type
+#define PYGLIB_PyUnicode_Check PyUnicode_Check
+#define PYGLIB_PyUnicode_AsString _PyUnicode_AsString
+#define PYGLIB_PyUnicode_AsStringAndSize(obj, buf, size) \
+    (((*(buf) = _PyUnicode_AsStringAndSize(obj, size)) != NULL) ? 0 : -1) 
+#define PYGLIB_PyUnicode_FromString PyUnicode_FromString
+#define PYGLIB_PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
+#define PYGLIB_PyUnicode_FromFormat PyUnicode_FromFormat
+#define PYGLIB_PyUnicode_GET_SIZE PyUnicode_GET_SIZE
+#define PYGLIB_PyUnicode_Resize PyUnicode_Resize
+#define PYGLIB_PyUnicode_Type PyUnicode_Type
 #define _PyLong_Check PyLong_Check
 #define _PyLong_FromLong PyLong_FromLong
 #define _PyLong_AsLong PyLong_AsLong

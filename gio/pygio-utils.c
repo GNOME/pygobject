@@ -116,13 +116,13 @@ pygio_pylist_to_uri_glist(PyObject *pyfile_list)
     len = PySequence_Size(pyfile_list);
     for (i = 0; i < len; i++) {
     item = PySequence_GetItem(pyfile_list, i);
-        if (!_PyUnicode_Check(item)) {
+        if (!PYGLIB_PyUnicode_Check(item)) {
             PyErr_SetString(PyExc_TypeError,
                             "files must be strings");
             g_list_free(file_list);
             return NULL;
         }
-        file_list = g_list_prepend(file_list, _PyUnicode_AsString(item));
+        file_list = g_list_prepend(file_list, PYGLIB_PyUnicode_AsString(item));
     }
     file_list = g_list_reverse(file_list);
 
@@ -145,7 +145,7 @@ strv_to_pylist (char **strv)
     list = PyList_New (len);
 
     for (i = 0; i < len; i++)
-        PyList_SetItem (list, i, _PyUnicode_FromString (strv[i]));
+        PyList_SetItem (list, i, PYGLIB_PyUnicode_FromString (strv[i]));
 
     return list;
 }
@@ -191,7 +191,7 @@ pylist_to_strv (PyObject *list,
             return FALSE;
         }
 
-        if (!_PyUnicode_Check (item))
+        if (!PYGLIB_PyUnicode_Check (item))
         {
             Py_DECREF (item);
             g_strfreev (ret);
@@ -199,7 +199,7 @@ pylist_to_strv (PyObject *list,
             return FALSE;
         }
 
-        ret[i] = g_strdup (_PyUnicode_AsString (item));
+        ret[i] = g_strdup (PYGLIB_PyUnicode_AsString (item));
         Py_DECREF (item);
     }
 

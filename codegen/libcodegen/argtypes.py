@@ -109,7 +109,7 @@ class StringArg(ArgType):
             # have to free result ...
             info.varlist.add('gchar', '*ret')
             info.codeafter.append('    if (ret) {\n' +
-                                  '        PyObject *py_ret = _PyUnicode_FromString(ret);\n' +
+                                  '        PyObject *py_ret = PYGLIB_PyUnicode_FromString(ret);\n' +
                                   '        g_free(ret);\n' +
                                   '        return py_ret;\n' +
                                   '    }\n' +
@@ -118,7 +118,7 @@ class StringArg(ArgType):
         else:
             info.varlist.add('const gchar', '*ret')
             info.codeafter.append('    if (ret)\n' +
-                                  '        return _PyUnicode_FromString(ret);\n'+
+                                  '        return PYGLIB_PyUnicode_FromString(ret);\n'+
                                   '    Py_INCREF(Py_None);\n' +
                                   '    return Py_None;')
 
@@ -151,7 +151,7 @@ class CharArg(ArgType):
         info.add_parselist('c', ['&' + pname], [pname])
     def write_return(self, ptype, ownsreturn, info):
         info.varlist.add('gchar', 'ret')
-        info.codeafter.append('    return _PyUnicode_FromStringAndSize(&ret, 1);')
+        info.codeafter.append('    return PYGLIB_PyUnicode_FromStringAndSize(&ret, 1);')
 class GUniCharArg(ArgType):
     ret_tmpl = ('#if !defined(Py_UNICODE_SIZE) || Py_UNICODE_SIZE == 2\n'
                 '    if (ret > 0xffff) {\n'
@@ -694,7 +694,7 @@ class AtomArg(IntArg):
         info.varlist.add('PyObject *', 'py_ret')
         info.varlist.add('gchar *', 'name')
         info.codeafter.append('    name = gdk_atom_name(ret);\n'
-                              '    py_ret = _PyUnicode_FromString(name);\n'
+                              '    py_ret = PYGLIB_PyUnicode_FromString(name);\n'
                               '    g_free(name);\n'
                               '    return py_ret;')
 

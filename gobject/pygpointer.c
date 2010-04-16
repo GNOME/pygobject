@@ -67,7 +67,7 @@ pyg_pointer_repr(PyGPointer *self)
 
     g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
 	       (long)self->pointer);
-    return _PyUnicode_FromString(buf);
+    return PYGLIB_PyUnicode_FromString(buf);
 }
 
 static int

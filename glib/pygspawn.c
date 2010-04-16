@@ -150,7 +150,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     argv = g_new0(char *, len + 1);
     for (i = 0; i < len; ++i) {
         PyObject *tmp = PySequence_ITEM(pyargv, i);
-        if (!_PyUnicode_Check(tmp)) {
+        if (!PYGLIB_PyUnicode_Check(tmp)) {
             PyErr_SetString(PyExc_TypeError,
                             "glib.spawn_async: "
 			    "first argument must be a sequence of strings");
@@ -158,7 +158,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
             Py_XDECREF(tmp);
             return NULL;
         }
-        argv[i] = _PyUnicode_AsString(tmp);
+        argv[i] = PYGLIB_PyUnicode_AsString(tmp);
         Py_DECREF(tmp);
     }
 
@@ -175,7 +175,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         envp = g_new0(char *, len + 1);
         for (i = 0; i < len; ++i) {
             PyObject *tmp = PySequence_ITEM(pyenvp, i);
-            if (!_PyUnicode_Check(tmp)) {
+            if (!PYGLIB_PyUnicode_Check(tmp)) {
                 PyErr_SetString(PyExc_TypeError,
                                 "glib.spawn_async: "
 				"second argument must be a sequence of strings");
@@ -184,7 +184,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
 		g_free(argv);
                 return NULL;
             }
-            envp[i] = _PyUnicode_AsString(tmp);
+            envp[i] = PYGLIB_PyUnicode_AsString(tmp);
             Py_DECREF(tmp);
         }
     }

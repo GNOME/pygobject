@@ -52,7 +52,7 @@ pyg_file_attribute_info__get_name(PyObject *self, void *closure)
 
     ret = ((PyGFileAttributeInfo*)self)->info->name;
     if (ret)
-        return _PyUnicode_FromString(ret);
+        return PYGLIB_PyUnicode_FromString(ret);
     Py_INCREF(Py_None);
     return Py_None;
 }

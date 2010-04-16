@@ -1342,7 +1342,7 @@ _wrap_g_file_replace_contents(PyGObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
 
     if (ret) {
-        py_ret = _PyUnicode_FromString(new_etag);
+        py_ret = PYGLIB_PyUnicode_FromString(new_etag);
     } else {
         py_ret = Py_None;
         Py_INCREF(py_ret);
@@ -1378,7 +1378,7 @@ _wrap_g_file_replace_contents_finish(PyGObject *self, PyObject *args, PyObject *
         return NULL;
 
     if (ret) {
-        py_ret = _PyUnicode_FromString(etag_out);
+        py_ret = PYGLIB_PyUnicode_FromString(etag_out);
         return py_ret;
     } else {
         py_ret = Py_None;
@@ -1504,7 +1504,7 @@ _wrap_g_file_tp_repr(PyGObject *self)
     else
 	representation = g_strdup_printf("<%s at %p: UNKNOWN URI>", Py_TYPE(self)->tp_name, self);
 
-    result = _PyUnicode_FromString(representation);
+    result = PYGLIB_PyUnicode_FromString(representation);
     g_free(representation);
     return result;
 }

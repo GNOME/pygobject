@@ -116,7 +116,7 @@ pyg_type_name (PyObject *self, PyObject *args)
 	return NULL;
     name = g_type_name(type);
     if (name)
-	return _PyUnicode_FromString(name);
+	return PYGLIB_PyUnicode_FromString(name);
     PyErr_SetString(PyExc_RuntimeError, "unknown typecode");
     return NULL;
 }
@@ -140,7 +140,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     if (type != 0)
 	return pyg_type_wrapper_new(type);
     repr = PyObject_Repr((PyObject*)self);
-    repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
+    repr_ptr = (repr ? PYGLIB_PyUnicode_AsString(repr) : "<?>");
     PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
 		 (repr_ptr ? repr_ptr : "<?>"), name);
     Py_CLEAR(repr);
@@ -342,7 +342,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
 
     state = pyglib_gil_state_ensure();
     if (ihint->detail)
-        py_detail = _PyUnicode_FromString(g_quark_to_string(ihint->detail));
+        py_detail = PYGLIB_PyUnicode_FromString(g_quark_to_string(ihint->detail));
     else {
         Py_INCREF(Py_None);
         py_detail = Py_None;
@@ -501,17 +501,17 @@ add_signals (GType instance_type, PyObject *signals)
 	const gchar *signal_name;
         gchar *signal_name_canon, *c;
 
-	if (!_PyUnicode_Check(key)) {
+	if (!PYGLIB_PyUnicode_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ keys must be strings");
 	    ret = FALSE;
 	    break;
 	}
-	signal_name = _PyUnicode_AsString (key);
+	signal_name = PYGLIB_PyUnicode_AsString (key);
 
 	if (value == Py_None ||
-	    (_PyUnicode_Check(value) &&
-	     !strcmp(_PyUnicode_AsString(value), "override")))
+	    (PYGLIB_PyUnicode_Check(value) &&
+	     !strcmp(PYGLIB_PyUnicode_AsString(value), "override")))
         {
               /* canonicalize signal name, replacing '-' with '_' */
             signal_name_canon = g_strdup(signal_name);
@@ -823,13 +823,13 @@ add_properties (GType instance_type, PyObject *properties)
 	
 	/* values are of format (type,nick,blurb, type_specific_args, flags) */
 	
-	if (!_PyUnicode_Check(key)) {
+	if (!PYGLIB_PyUnicode_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ keys must be strings");
 	    ret = FALSE;
 	    break;
 	}
-	prop_name = _PyUnicode_AsString (key);
+	prop_name = PYGLIB_PyUnicode_AsString (key);
 
 	if (!PyTuple_Check(value)) {
 	    PyErr_SetString(PyExc_TypeError,
@@ -882,14 +882,14 @@ add_properties (GType instance_type, PyObject *properties)
             PyObject *type, *value, *traceback;
 	    ret = FALSE;
             PyErr_Fetch(&type, &value, &traceback);
-            if (_PyUnicode_Check(value)) {
+            if (PYGLIB_PyUnicode_Check(value)) {
                 char msg[256];
                 g_snprintf(msg, 256,
 			   "%s (while registering property '%s' for GType '%s')",
-                           _PyUnicode_AsString(value),
+                           PYGLIB_PyUnicode_AsString(value),
 			   prop_name, g_type_name(instance_type));
                 Py_DECREF(value);
-                value = _PyUnicode_FromString(msg);
+                value = PYGLIB_PyUnicode_FromString(msg);
             }
             PyErr_Restore(type, value, traceback);
 	    break;
@@ -979,8 +979,8 @@ get_type_name_for_class(PyTypeObject *class)
 	g_free(type_name);
 	snprintf(name_serial_str, 16, "-v%i", name_serial);
 	module = PyObject_GetAttrString((PyObject *)class, "__module__");
-	if (module && _PyUnicode_Check(module)) {
-	    type_name = g_strconcat(_PyUnicode_AsString(module), ".",
+	if (module && PYGLIB_PyUnicode_Check(module)) {
+	    type_name = g_strconcat(PYGLIB_PyUnicode_AsString(module), ".",
 				    class->tp_name,
 				    name_serial > 1 ? name_serial_str : NULL,
 				    NULL);
@@ -1421,7 +1421,7 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     if (list != NULL) {
 	for (i = 0; i < n; i++)
 	    PyTuple_SetItem(list, i,
-			    _PyUnicode_FromString(g_signal_name(ids[i])));
+			    PYGLIB_PyUnicode_FromString(g_signal_name(ids[i])));
     }
     
     g_free(ids);
@@ -1540,7 +1540,7 @@ pyg_signal_name (PyObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     signal_name = g_signal_name(id);
     if (signal_name)
-        return _PyUnicode_FromString(signal_name);
+        return PYGLIB_PyUnicode_FromString(signal_name);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -1614,7 +1614,7 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     PyTuple_SET_ITEM(py_query, 0, _PyLong_FromLong(query.signal_id));
-    PyTuple_SET_ITEM(py_query, 1, _PyUnicode_FromString(query.signal_name));
+    PyTuple_SET_ITEM(py_query, 1, PYGLIB_PyUnicode_FromString(query.signal_name));
     PyTuple_SET_ITEM(py_query, 2, pyg_type_wrapper_new(query.itype));
     PyTuple_SET_ITEM(py_query, 3, _PyLong_FromLong(query.signal_flags));
     PyTuple_SET_ITEM(py_query, 4, pyg_type_wrapper_new(query.return_type));
@@ -1727,7 +1727,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	params = g_new0(GParameter, PyDict_Size(kwargs));
 	while (PyDict_Next (kwargs, &pos, &key, &value)) {
 	    GParamSpec *pspec;
-	    const gchar *key_str = _PyUnicode_AsString (key);
+	    const gchar *key_str = PYGLIB_PyUnicode_AsString (key);
 
 	    pspec = g_object_class_find_property (class, key_str);
 	    if (!pspec) {
@@ -1930,7 +1930,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 
     if (!g_signal_parse_name(name, gtype, &sigid, &detail, TRUE)) {
 	PyObject *repr = PyObject_Repr((PyObject*)self);
-	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? PYGLIB_PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
 		     (repr_ptr ? repr_ptr : "<?>"), name);
 	Py_CLEAR(repr);
@@ -1971,7 +1971,7 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
 	PyObject *repr = PyObject_Repr((PyObject*)self);
-	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? PYGLIB_PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
 		     (repr_ptr ? repr_ptr : "<?>"), name);
 	Py_CLEAR(repr);

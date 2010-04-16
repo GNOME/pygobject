@@ -38,7 +38,7 @@ py_io_channel_next(PyGIOChannel *self)
         return NULL;
     }
 
-    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
+    ret_obj = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
 }
@@ -168,7 +168,7 @@ py_io_channel_get_encoding(PyGIOChannel* self)
 	return Py_None;
     }
 
-    return _PyUnicode_FromString(encoding);
+    return PYGLIB_PyUnicode_FromString(encoding);
 }
 
 #define CHUNK_SIZE (8 * 1024)
@@ -187,7 +187,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     if (max_count == 0)
-	return _PyUnicode_FromString("");
+	return PYGLIB_PyUnicode_FromString("");
     
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
@@ -298,13 +298,16 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             PyErr_Clear();
             goto normal_exit;
         }
-        if (!_PyUnicode_Check(value)) {
+        if (!PYGLIB_PyUnicode_Check(value)) {
             PyErr_SetString(PyExc_TypeError, "glib.IOChannel.writelines must"
                             " be sequence/iterator of strings");
             Py_DECREF(iter);
             return NULL;
         }
-        _PyUnicode_AsStringAndSize(value, &buf, &buf_len);
+        if (PYGLIB_PyUnicode_AsStringAndSize(value, &buf, &buf_len) != 0) {
+            Py_DECREF(iter);
+            return NULL;
+        }
         pyglib_unblock_threads();
         status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
         pyglib_unblock_threads();
@@ -558,7 +561,7 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
                                     &terminator_pos, &error);
     if (pyglib_error_check(&error))
         return NULL;
-    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
+    ret_obj = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
 }
@@ -587,7 +590,7 @@ py_io_channel_read_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             Py_DECREF(line);
             return NULL;
         }
-        line = _PyUnicode_FromStringAndSize(str_return, length);
+        line = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
         g_free(str_return);
         if (PyList_Append(list, line)) {
             Py_DECREF(line);

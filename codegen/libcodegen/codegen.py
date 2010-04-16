@@ -740,19 +740,19 @@ _wrap__get_symbol_names(PyObject *self)
 """)
         for obj, bases in writer.get_classes():
             self.fp.write('    PyList_Append(pylist, '
-                          '_PyUnicode_FromString("%s"));\n' % (obj.name))
+                          'PYGLIB_PyUnicode_FromString("%s"));\n' % (obj.name))
 
         for name, cname, flags, docstring in functions:
             self.fp.write('    PyList_Append(pylist, '
-                          '_PyUnicode_FromString("%s"));\n' % (name))
+                          'PYGLIB_PyUnicode_FromString("%s"));\n' % (name))
 
         for enum in writer.get_enums():
             self.fp.write('    PyList_Append(pylist, '
-                          '_PyUnicode_FromString("%s"));\n' % (enum.name))
+                          'PYGLIB_PyUnicode_FromString("%s"));\n' % (enum.name))
             for nick, value in enum.values:
                 name = value[len(self.overrides.modulename)+1:]
                 self.fp.write('    PyList_Append(pylist, '
-                              '_PyUnicode_FromString("%s"));\n' % (name))
+                              'PYGLIB_PyUnicode_FromString("%s"));\n' % (name))
 
         self.fp.write("    return pylist;\n}\n\n");
 
@@ -770,7 +770,7 @@ _wrap__get_symbol(PyObject *self, PyObject *args)
         return NULL;
 
     if (!modulename)
-       modulename = _PyUnicode_FromString("%s");
+       modulename = PYGLIB_PyUnicode_FromString("%s");
 
     if (!module)
        module = PyDict_GetItemString(d, "__module__");

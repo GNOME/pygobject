@@ -160,7 +160,7 @@ _wrap_g_drive_tp_repr(PyGObject *self)
     else
 	representation = g_strdup_printf("<%s at %p: UNKNOWN NAME>", Py_TYPE(self)->tp_name, self);
 
-    result = _PyUnicode_FromString(representation);
+    result = PYGLIB_PyUnicode_FromString(representation);
     g_free(representation);
     return result;
 }

@@ -68,13 +68,13 @@ get_handler_priority(gint *priority, PyObject *kwargs)
     }
     pos = 0;
     PyDict_Next(kwargs, &pos, &key, &val);
-    if (!_PyUnicode_Check(key)) {
+    if (!PYGLIB_PyUnicode_Check(key)) {
 	PyErr_SetString(PyExc_TypeError,
 			"keyword argument name is not a string");
 	return -1;
     }
 
-    if (strcmp(_PyUnicode_AsString(key), "priority") != 0) {
+    if (strcmp(PYGLIB_PyUnicode_AsString(key), "priority") != 0) {
 	PyErr_SetString(PyExc_TypeError,
 			"only 'priority' keyword argument accepted");
 	return -1;
@@ -402,7 +402,7 @@ pyglib_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     text_out = g_markup_escape_text(text_in, text_size);
-    retval = _PyUnicode_FromString(text_out);
+    retval = PYGLIB_PyUnicode_FromString(text_out);
     g_free(text_out);
     return retval;
 }
@@ -422,7 +422,7 @@ pyglib_get_user_cache_dir(PyObject *self)
     const char *path = g_get_user_cache_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -435,7 +435,7 @@ pyglib_get_user_config_dir(PyObject *self)
     const char *path = g_get_user_config_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -448,7 +448,7 @@ pyglib_get_user_data_dir(PyObject *self)
     const char *path = g_get_user_data_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -469,7 +469,7 @@ pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
 
     path = g_get_user_special_dir(directory);
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -535,7 +535,7 @@ pyglib_filename_from_utf8(PyObject *self, PyObject *args)
         g_free(filename);
         return NULL;
     }
-    py_filename = _PyUnicode_FromStringAndSize(filename, bytes_written);
+    py_filename = PYGLIB_PyUnicode_FromStringAndSize(filename, bytes_written);
     g_free(filename);
     return py_filename;
 }
@@ -551,22 +551,22 @@ pyglib_get_application_name(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return _PyUnicode_FromString(name);
+    return PYGLIB_PyUnicode_FromString(name);
 }
 
 static PyObject*
 pyglib_set_application_name(PyObject *self, PyObject *arg)
 {
-    if (!_PyUnicode_Check(arg)) {
+    if (!PYGLIB_PyUnicode_Check(arg)) {
 	PyObject *repr = PyObject_Repr(arg);
-	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? PYGLIB_PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
 		     (repr_ptr ? repr_ptr : "<?>"));
 	Py_CLEAR(repr);
 	return NULL;
     }
-    g_set_application_name(_PyUnicode_AS_STRING(arg));
+    g_set_application_name(PYGLIB_PyUnicode_AsString(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -581,22 +581,22 @@ pyglib_get_prgname(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return _PyUnicode_FromString(name);
+    return PYGLIB_PyUnicode_FromString(name);
 }
 
 static PyObject*
 pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
-    if (!_PyUnicode_Check(arg)) {
+    if (!PYGLIB_PyUnicode_Check(arg)) {
 	PyObject *repr = PyObject_Repr(arg);
-	const char *repr_ptr = (repr ? _PyUnicode_AsString(repr) : "<?>");
+	const char *repr_ptr = (repr ? PYGLIB_PyUnicode_AsString(repr) : "<?>");
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
 		     (repr_ptr ? repr_ptr : "<?>"));
 	Py_CLEAR(repr);
 	return NULL;
     }
-    g_set_prgname(_PyUnicode_AS_STRING(arg));
+    g_set_prgname(PYGLIB_PyUnicode_AsString(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -614,7 +614,7 @@ pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     ret = g_find_program_in_path(program);
-    retval = _PyUnicode_FromString(ret);
+    retval = PYGLIB_PyUnicode_FromString(ret);
     g_free(ret);
     return retval;
 }

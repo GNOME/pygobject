@@ -49,7 +49,7 @@ _wrap_g_data_input_stream_read_line(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    py_line = _PyUnicode_FromStringAndSize(line, length);
+    py_line = PYGLIB_PyUnicode_FromStringAndSize(line, length);
     g_free(line);
     return py_line;
 }
@@ -128,7 +128,7 @@ _wrap_g_data_input_stream_read_line_finish(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    py_line = _PyUnicode_FromStringAndSize(line, length);
+    py_line = PYGLIB_PyUnicode_FromStringAndSize(line, length);
     g_free(line);
     return py_line;
 }
@@ -162,7 +162,7 @@ _wrap_g_data_input_stream_read_until(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    py_line = _PyUnicode_FromStringAndSize(line, length);
+    py_line = PYGLIB_PyUnicode_FromStringAndSize(line, length);
     g_free(line);
     return py_line;
 }
@@ -244,7 +244,7 @@ _wrap_g_data_input_stream_read_until_finish(PyGObject *self,
     if (pyg_error_check(&error))
         return NULL;
 
-    py_line = _PyUnicode_FromStringAndSize(line, length);
+    py_line = PYGLIB_PyUnicode_FromStringAndSize(line, length);
     g_free(line);
     return py_line;
 }

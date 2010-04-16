@@ -64,7 +64,7 @@ _wrap_g_file_info_list_attributes(PyGObject *self,
     ret = PyList_New(0);
     n = names;
     while (n && *n) {
-        PyObject *item = _PyUnicode_FromString(n[0]);
+        PyObject *item = PYGLIB_PyUnicode_FromString(n[0]);
         PyList_Append(ret, item);
         Py_DECREF(item);
 

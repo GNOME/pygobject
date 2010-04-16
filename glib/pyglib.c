@@ -273,7 +273,7 @@ pyglib_error_check(GError **error)
 
     if ((*error)->domain) {
 	PyObject_SetAttrString(exc_instance, "domain",
-			       d=_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
+			       d=PYGLIB_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
 	Py_DECREF(d);
     }
     else
@@ -285,7 +285,7 @@ pyglib_error_check(GError **error)
 
     if ((*error)->message) {
 	PyObject_SetAttrString(exc_instance, "message",
-			       d=_PyUnicode_FromString((*error)->message));
+			       d=PYGLIB_PyUnicode_FromString((*error)->message));
 	Py_DECREF(d);
     } else {
 	PyObject_SetAttrString(exc_instance, "message", Py_None);
@@ -338,13 +338,13 @@ pyglib_gerror_exception_check(GError **error)
     Py_XDECREF(traceback);
 
     py_message = PyObject_GetAttrString(value, "message");
-    if (!py_message || !_PyUnicode_Check(py_message)) {
+    if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
         bad_gerror_message = "glib.GError instances must have a 'message' string attribute";
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
-    if (!py_domain || !_PyUnicode_Check(py_domain)) {
+    if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
         bad_gerror_message = "glib.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         goto bad_gerror;
@@ -358,8 +358,8 @@ pyglib_gerror_exception_check(GError **error)
         goto bad_gerror;
     }
 
-    g_set_error(error, g_quark_from_string(_PyUnicode_AsString(py_domain)),
-                _PyLong_AsLong(py_code), _PyUnicode_AsString(py_message));
+    g_set_error(error, g_quark_from_string(PYGLIB_PyUnicode_AsString(py_domain)),
+                _PyLong_AsLong(py_code), PYGLIB_PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);

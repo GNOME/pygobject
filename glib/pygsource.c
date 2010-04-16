@@ -82,7 +82,7 @@ source_repr(PyGSource *self, const char *type)
 	g_snprintf(buf, sizeof(buf), "<%s glib source at 0x%lx>",
 		   desc, (long) self);
 
-    return _PyUnicode_FromString(buf);
+    return PYGLIB_PyUnicode_FromString(buf);
 }
 
 static PyObject *
@@ -652,7 +652,7 @@ pyg_poll_fd_dealloc(PyGPollFD *self)
 static PyObject *
 pyg_poll_fd_repr(PyGPollFD *self)
 {
-    return _PyUnicode_FromFormat("<GPollFD %d (%d) at 0x%lx>",
+    return PYGLIB_PyUnicode_FromFormat("<GPollFD %d (%d) at 0x%lx>",
 				 self->pollfd.fd, self->pollfd.events,
 				 (long)self);
 }
