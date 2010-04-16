@@ -686,15 +686,22 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_LONG:
         case GI_TYPE_TAG_SSIZE:
         {
+            /* These types will all fit in long on 32 and 64bit archs */
             PyObject *int_;
+            long value;
 
             int_ = PyNumber_Long(object);
             if (int_ == NULL) {
                 break;
             }
 
-            arg.v_long = PyLong_AsLong(int_);
+            value = PyLong_AsLong(int_);
+            if (value == -1 && PyErr_Occurred()) {
+                Py_DECREF(int_);
+                break;
+            }
 
+            arg.v_long = value;
             Py_DECREF(int_);
 
             break;
@@ -705,6 +712,7 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_ULONG:
         case GI_TYPE_TAG_SIZE:
         {
+            /* all of these types fit in a long long type on all archs */
             PyObject *number;
             guint64 value;
 
@@ -712,13 +720,13 @@ _pygi_argument_from_object (PyObject   *object,
             if (number == NULL) {
                 break;
             }
-
-            if (PyLong_Check(number)) {
-                value = PyLong_AsLong(number);
-            } else {
-                value = PyLong_AsUnsignedLongLong(number);
+           
+            value = PyLong_AsUnsignedLongLong(number);
+            if (value == -1 && PyErr_Occurred()) {
+                Py_DECREF(number);
+                break;
             }
-
+           
             arg.v_uint64 = value;
 
             Py_DECREF(number);
