@@ -195,7 +195,7 @@ class TestProperty(unittest.TestCase):
             str = gobject.property(type=str)
             int = gobject.property(type=int)
             float = gobject.property(type=float)
-            long = gobject.property(type=long)
+            long = gobject.property(type=_long)
 
         self.failUnless(hasattr(C.props, 'str'))
         self.failUnless(hasattr(C.props, 'int'))
