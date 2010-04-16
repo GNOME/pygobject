@@ -51,7 +51,10 @@ def importModule(module, directory, name=None):
 
 if sys.version_info >= (3, 0):
     def _bytes(s):
-        return s.encode('latin1')
+        if isinstance(s, str):
+            return s.encode('latin1')
+        else:
+            return bytes(s)
 else:
     _bytes = str
 

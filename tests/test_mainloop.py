@@ -5,7 +5,7 @@ import sys
 import select
 import unittest
 
-from common import glib
+from common import glib, _bytes
 
 class TestMainLoop(unittest.TestCase):
     def testExceptionHandling(self):
@@ -26,7 +26,7 @@ class TestMainLoop(unittest.TestCase):
         glib.child_watch_add(pid, child_died, loop)
 
         os.close(pipe_r)
-        os.write(pipe_w, "Y")
+        os.write(pipe_w, _bytes("Y"))
         os.close(pipe_w)
 
         def excepthook(type, value, traceback):

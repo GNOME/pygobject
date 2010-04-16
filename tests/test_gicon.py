@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from common import gio, glib
+from common import gio, glib, _bytes
 
 
 class TestIcon(unittest.TestCase):
@@ -28,11 +28,11 @@ class TestIcon(unittest.TestCase):
 
 class TestLoadableIcon(unittest.TestCase):
     def setUp(self):
-        self.file = open('temp.svg', 'w')
-        self.svg = ('<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
-                    '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" '
-                    '"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">'
-                    '<svg width="32" height="32"/>')
+        self.file = open('temp.svg', 'wb')
+        self.svg = _bytes('<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
+                          '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" '
+                          '"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">'
+                          '<svg width="32" height="32"/>')
         self.file.write(self.svg)
         self.file.close()
         self.icon = gio.FileIcon(gio.File('temp.svg'))
