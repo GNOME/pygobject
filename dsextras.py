@@ -315,9 +315,15 @@ class PkgConfigExtension(Extension):
                 self.can_build_ok = 1
                 return 1
             else:
+<<<<<<< HEAD:dsextras.py
                 print ("Warning: Too old version of %s" % self.pkc_name)
                 print ("         Need %s, but %s is installed" % \
                        (version, orig_version))
+=======
+                print "Warning: Too old version of %s" % self.pkc_name
+                print "         Need %s, but %s is installed" % \
+                      (version, orig_version)
+>>>>>>> 695ac7bc5c60371a32538d690c7a15509f3c9637:dsextras.py
                 self.can_build_ok = 0
                 return 0
 

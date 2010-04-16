@@ -49,6 +49,9 @@ PYGLIB_INIT_FUNCTION(_gio, "gio._gio", pygio_functions)
 
     d = PyModule_GetDict(module);
 
+    g_type_init();
+    pyglib_init();
+ 
     pygobject_mod = pygobject_init(2, 15, 2);
     if (pygobject_mod == NULL)
         return -1;

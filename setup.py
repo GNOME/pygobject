@@ -33,11 +33,9 @@ else:
     else:
         input = input('Not supported, ok [y/N]? ')
     if not input.startswith('y'):
-        raise SystemExit
+        raise SystemExit("Aborted")
 
-if sys.version_info[:3] < (2, 3, 5):
-    raise SystemExit("Python 2.3.5 or higher is required, %d.%d.%d found"
-                     % sys.version_info[:3])
+MIN_PYTHON_VERSION = (2, 3, 5)
 
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
@@ -59,6 +57,14 @@ if sys.platform == 'win32':
     GLOBAL_MACROS.append(('VERSION', '"""%s"""' % VERSION))
 else:
     GLOBAL_MACROS.append(('VERSION', '"%s"' % VERSION))
+
+if sys.version_info[:3] < MIN_PYTHON_VERSION:
+    raise SystemExit("Python %s or higher is required, %s found" % (
+        ".".join(map(str,MIN_PYTHON_VERSION)),
+                     ".".join(map(str,sys.version_info[:3]))))
+
+if not have_pkgconfig():
+    raise SystemExit("Error, could not find pkg-config")
 
 DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
 INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
@@ -110,8 +116,6 @@ class PyGObjectInstallData(InstallData):
         self.install_template('pygobject-2.0.pc.in',
                               os.path.join(self.install_dir,
                                            'lib', 'pkgconfig'))
-        self.install_template('docs/xsl/fixxref.py.in',
-                              os.path.join(self.install_dir, XSL_DIR))
 
 class PyGObjectBuild(build):
     enable_threading = 1
@@ -176,9 +180,11 @@ ext_modules = []
 py_modules = ['dsextras']
 packages = ['codegen']
 
-if not have_pkgconfig():
-    print ("Error, could not find pkg-config")
-    raise SystemExit
+
+#Install dsextras and codegen so that the pygtk installer
+#can find them
+py_modules = ['dsextras']
+packages = ['codegen']
 
 if glib.can_build():
     #It would have been nice to create another class, such as PkgConfigCLib to

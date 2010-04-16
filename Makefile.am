@@ -8,6 +8,7 @@ PLATFORM_VERSION = 2.0
 CLEANFILES =
 EXTRA_DIST = 				\
 	MANIFEST.in 			\
+	README.win32 			\
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO 			\
 	PKG-INFO.in 			\

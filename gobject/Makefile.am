@@ -10,9 +10,9 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 pygobjectdir = $(pkgpyexecdir)/gobject
 pygobject_PYTHON = 	\
 	__init__.py 	\
+	constants.py	\
 	propertyhelper.py
 pygobject_LTLIBRARIES = _gobject.la 
-nodist_pygobject_PYTHON = constants.py
 
 common_ldflags = -module -avoid-version
 if PLATFORM_WIN32
@@ -50,7 +50,6 @@ _gobject_la_SOURCES =           \
         pygtype.c               \
         pygtype.h		\
 	pygi-external.h
-_gobject_la_DEPENDENCIES = constants.py
 
 if HAVE_LIBFFI
 _gobject_la_SOURCES += ffi-marshaller.c ffi-marshaller.h
