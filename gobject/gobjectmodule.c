@@ -1307,6 +1307,10 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     if (gsignals)
         PyDict_DelItemString(class->tp_dict, "__gsignals__");
 
+#if PY_VERSION_HEX >= 0x02060000
+    PyType_Modified(class);
+#endif
+
     return 0;
 }
 
