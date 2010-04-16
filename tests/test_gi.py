@@ -998,7 +998,8 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_not_simple_struct(self):
-        self.assertRaises(TypeError, GIMarshallingTests.NotSimpleStruct)
+        struct = GIMarshallingTests.NotSimpleStruct()
+        self.assertEquals(None, struct.pointer)
 
     def test_simple_struct_return(self):
         struct = GIMarshallingTests.simple_struct_return()

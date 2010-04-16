@@ -65,12 +65,6 @@ _struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    is_simple = pygi_g_struct_info_is_simple((GIStructInfo *)info);
-    if (!is_simple) {
-        PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", type->tp_name);
-        goto out;
-    }
-
     size = g_struct_info_get_size((GIStructInfo *)info);
     pointer = g_try_malloc0(size);
     if (pointer == NULL) {
