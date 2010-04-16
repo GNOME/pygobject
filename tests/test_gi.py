@@ -27,6 +27,9 @@ class Number(object):
     def __int__(self):
         return int(self.value)
 
+    def __long__(self):
+        return long(self.value)
+
     def __float__(self):
         return float(self.value)
 
