@@ -46,6 +46,34 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(surface.get_width(), 10)
         self.assertEquals(surface.get_height(), 10)
 
+
+class TestNullableArgs(unittest.TestCase):
+    def test_in_nullable_hash(self):
+        Everything.test_ghash_null_in(None)
+
+    def test_in_nullable_list(self):
+        Everything.test_gslist_null_in(None)
+        Everything.test_glist_null_in(None)
+
+    def test_in_nullable_array(self):
+        Everything.test_array_int_null_in(None, -1)
+
+    def test_in_nullable_string(self):
+        Everything.test_utf8_null_in(None)
+
+    def test_out_nullable_hash(self):
+        self.assertEqual(None, Everything.test_ghash_null_out())
+
+    def test_out_nullable_list(self):
+        self.assertEqual(None, Everything.test_gslist_null_out())
+        self.assertEqual(None, Everything.test_glist_null_out())
+
+    def test_out_nullable_array(self):
+        self.assertEqual((None, 0), Everything.test_array_int_null_out())
+
+    def test_out_nullable_string(self):
+        self.assertEqual(None, Everything.test_utf8_null_out())
+
 class TestCallbacks(unittest.TestCase):
     called = False
     def testCallback(self):

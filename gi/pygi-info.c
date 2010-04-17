@@ -692,6 +692,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             GITypeTag type_tag;
             PyObject *py_arg;
             gint retval;
+            gboolean allow_none;
 
             direction = g_arg_info_get_direction(arg_infos[i]);
             type_tag = g_type_info_get_tag(arg_type_infos[i]);
@@ -705,7 +706,11 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
             g_assert(py_args_pos < n_py_args);
             py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
 
-            retval = _pygi_g_type_info_check_object(arg_type_infos[i], py_arg);
+            allow_none = g_arg_info_may_be_null(arg_infos[i]);
+
+            retval = _pygi_g_type_info_check_object(arg_type_infos[i],
+                                                    py_arg,
+                                                    allow_none);
 
             if (retval < 0) {
                 goto out;
@@ -945,11 +950,13 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                     }
 
                     /* Get rid of the GArray. */
-                    args[i]->v_pointer = array->data;
+                    if (array != NULL) {
+                        args[i]->v_pointer = array->data;
 
-                    if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
-                        /* The array hasn't been referenced anywhere, so free it to avoid losing memory. */
-                        g_array_free(array, FALSE);
+                        if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
+                            /* The array hasn't been referenced anywhere, so free it to avoid losing memory. */
+                            g_array_free(array, FALSE);
+                        }
                     }
                 }
 
@@ -1990,7 +1997,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     {
         gboolean retval;
 
-        retval = _pygi_g_type_info_check_object(field_type_info, py_value);
+        retval = _pygi_g_type_info_check_object(field_type_info, py_value, TRUE);
         if (retval < 0) {
             goto out;
         }

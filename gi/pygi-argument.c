@@ -189,10 +189,15 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
 gint
 _pygi_g_type_info_check_object (GITypeInfo *type_info,
-                                PyObject   *object)
+                                PyObject   *object,
+                                gboolean   allow_none)
 {
     GITypeTag type_tag;
     gint retval = 1;
+
+    if (allow_none && object == Py_None) {
+        return retval;
+    }
 
     type_tag = g_type_info_get_tag(type_info);
 
@@ -351,7 +356,7 @@ check_number_release:
                     break;
                 }
 
-                retval = _pygi_g_type_info_check_object(item_type_info, item);
+                retval = _pygi_g_type_info_check_object(item_type_info, item, TRUE);
 
                 Py_DECREF(item);
 
@@ -481,7 +486,7 @@ check_number_release:
                     break;
                 }
 
-                retval = _pygi_g_type_info_check_object(item_type_info, item);
+                retval = _pygi_g_type_info_check_object(item_type_info, item, TRUE);
 
                 Py_DECREF(item);
 
@@ -545,7 +550,7 @@ check_number_release:
                 key = PyList_GET_ITEM(keys, i);
                 value = PyList_GET_ITEM(values, i);
 
-                retval = _pygi_g_type_info_check_object(key_type_info, key);
+                retval = _pygi_g_type_info_check_object(key_type_info, key, TRUE);
                 if (retval < 0) {
                     break;
                 }
@@ -554,7 +559,7 @@ check_number_release:
                     break;
                 }
 
-                retval = _pygi_g_type_info_check_object(value_type_info, value);
+                retval = _pygi_g_type_info_check_object(value_type_info, value, TRUE);
                 if (retval < 0) {
                     break;
                 }
@@ -591,6 +596,10 @@ _pygi_argument_to_array (GArgument  *arg,
     gssize length;
     GArray *g_array;
 
+    if (arg->v_pointer == NULL) {
+        return NULL;
+    }
+ 
     is_zero_terminated = g_type_info_is_zero_terminated(type_info);
     item_type_info = g_type_info_get_param_type(type_info, 0);
 
@@ -788,6 +797,11 @@ _pygi_argument_from_object (PyObject   *object,
         {
             const gchar *string;
 
+            if (object == Py_None){
+                arg.v_string = NULL;
+                break;
+            }
+
             string = PyString_AsString(object);
 
             /* Don't need to check for errors, since g_strdup is NULL-proof. */
@@ -821,6 +835,11 @@ _pygi_argument_from_object (PyObject   *object,
             GArray *array;
             GITransfer item_transfer;
             Py_ssize_t i;
+
+            if (object == Py_None){
+                arg.v_pointer = NULL;
+                break;
+            }
 
             length = PySequence_Length(object);
             if (length < 0) {
@@ -1005,6 +1024,11 @@ array_item_error:
             GITransfer item_transfer;
             Py_ssize_t i;
 
+            if (object == Py_None) {
+                arg.v_pointer = NULL;
+                break;
+            }
+
             length = PySequence_Length(object);
             if (length < 0) {
                 break;
@@ -1070,6 +1094,11 @@ list_item_error:
             GITransfer item_transfer;
             Py_ssize_t i;
 
+
+            if (object == Py_None){
+                arg.v_pointer = NULL;                
+                break;
+            }
 
             length = PyMapping_Length(object);
             if (length < 0) {
@@ -1661,7 +1690,9 @@ _pygi_argument_release (GArgument   *arg,
             break;
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
-            if ((direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+            /* With allow-none support the string could be NULL */
+            if (arg->v_string != NULL && 
+                (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
                 g_free(arg->v_string);
             }
