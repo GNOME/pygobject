@@ -41,6 +41,7 @@ PKG_CHECK_MODULES(GNOME,
 	glib-2.0 >= 2.20
 	gobject-introspection-1.0 >= 0.6.4
 	pygobject-2.0 >= 2.20
+	pycairo >= 1.0.2
 )
 
 INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
@@ -48,12 +49,6 @@ INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspecti
 
 AC_SUBST(INTROSPECTION_SCANNER) 
 AC_SUBST(INTROSPECTION_COMPILER) 
-
-m4_define(pycairo_required_version,    1.0.2)
-PKG_CHECK_MODULES(PYCAIRO, [pycairo >= pycairo_required_version],
-        have_pycairo=true, have_pycairo=false)
-AC_SUBST(PYCAIRO_CFLAGS)
-AC_SUBST(PYCAIRO_LIBS)
 
 AC_OUTPUT(
 	Makefile
