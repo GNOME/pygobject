@@ -12,7 +12,7 @@ from datetime import datetime
 import sys
 sys.path.insert(0, "../")
 
-from gi.repository import GIMarshallingTests, Everything
+from gi.repository import GIMarshallingTests
 
 
 CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
@@ -1401,63 +1401,3 @@ class TestOverrides(unittest.TestCase):
         self.assertTrue(isinstance(object_, GIMarshallingTests.OverridesObject))
 
 
-class TestCallbacks(unittest.TestCase):
-    called = False
-    def testCallback(self):
-        TestCallbacks.called = False
-        def callback():
-            TestCallbacks.called = True
-        
-        Everything.test_simple_callback(callback)
-        self.assertTrue(TestCallbacks.called)
-
-    def testCallbackException(self):
-        """
-        This test ensures that we get errors from callbacks correctly
-        and in particular that we do not segv when callbacks fail
-        """
-        def callback():
-            x = 1 / 0
-            
-        try:
-            Everything.test_simple_callback(callback)
-        except ZeroDivisionError:
-            pass
-
-    def testDoubleCallbackException(self):
-        """
-        This test ensures that we get errors from callbacks correctly
-        and in particular that we do not segv when callbacks fail
-        """
-        def badcallback():
-            x = 1 / 0
-
-        def callback():
-            GIMarshallingTests.boolean_return_true()
-            GIMarshallingTests.boolean_return_false()
-            Everything.test_simple_callback(badcallback())
-
-        try:
-            Everything.test_simple_callback(callback)
-        except ZeroDivisionError:
-            pass
-
-    def testReturnValueCallback(self):
-        TestCallbacks.called = False
-        def callback():
-            TestCallbacks.called = True
-            return 44
-
-        self.assertEquals(Everything.test_callback(callback), 44)
-        self.assertTrue(TestCallbacks.called)
-    
-    def testCallbackAsync(self):
-        TestCallbacks.called = False
-        def callback(foo):
-            TestCallbacks.called = True
-            return foo
-
-        Everything.test_callback_async(callback, 44);
-        i = Everything.test_callback_thaw_async();
-        self.assertEquals(44, i);
-        self.assertTrue(TestCallbacks.called)
