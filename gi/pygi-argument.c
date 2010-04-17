@@ -121,9 +121,16 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
     GType g_type;
     PyObject *py_type;
     gchar *type_name_expected = NULL;
+    GIInfoType interface_type;
+
+    interface_type = g_base_info_get_type(info);
+    if ((interface_type == GI_INFO_TYPE_STRUCT) &&
+            (g_struct_info_is_foreign((GIStructInfo*)info))) {
+        /* TODO: Could we check is the correct foreign type? */
+        return 1;
+    }
 
     g_type = g_registered_type_info_get_g_type(info);
-
     if (g_type != G_TYPE_NONE) {
         py_type = _pygi_type_get_from_g_type(g_type);
     } else {
@@ -131,7 +138,7 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
     }
 
     if (py_type == NULL) {
-        return FALSE;
+        return 0;
     }
 
     g_assert(PyType_Check(py_type));
@@ -932,6 +939,16 @@ array_item_error:
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy(type, arg.v_pointer);
                         }
+                    } else if ((type == G_TYPE_NONE) && (g_struct_info_is_foreign (info))) {
+                        gint retval;
+
+                        retval = pygi_struct_foreign_convert_to_g_argument(
+                                object, type_info, transfer, &arg);
+
+                        if (!retval) {
+                            PyErr_SetString(PyExc_RuntimeError, "PyObject conversion to foreign struct failed");
+                            break;
+                        }
                     } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                         g_warn_if_fail(!g_type_info_is_pointer(type_info) || transfer == GI_TRANSFER_NOTHING);
                         arg.v_pointer = pyg_pointer_get(object, void);
@@ -1433,6 +1450,8 @@ _pygi_argument_to_object (GArgument  *arg,
                         }
 
                         Py_XDECREF(py_type);
+                    } else if ((type == G_TYPE_NONE) && (g_struct_info_is_foreign (info))) {
+                        object = pygi_struct_foreign_convert_from_g_argument(type_info, arg->v_pointer);
                     } else if (type == G_TYPE_NONE) {
                         PyObject *py_type;
 
@@ -1720,6 +1739,10 @@ _pygi_argument_release (GArgument   *arg,
                     } else if (g_type_is_a(type, G_TYPE_CLOSURE)) {
                         if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING) {
                             g_closure_unref(arg->v_pointer);
+                        }
+                    } else if (g_struct_info_is_foreign((GIStructInfo*)info)) {
+                        if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
+                            pygi_struct_foreign_release_g_argument(transfer, type_info, arg);
                         }
                     } else if (g_type_is_a(type, G_TYPE_BOXED)) {
                     } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {

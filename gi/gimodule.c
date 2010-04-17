@@ -25,6 +25,9 @@
 
 #include <pygobject.h>
 
+# include <pycairo.h>
+Pycairo_CAPI_t *Pycairo_CAPI;
+
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
                     PyObject *args,
@@ -162,6 +165,10 @@ init_gi(void)
     if (_pygobject_import() < 0) {
         return;
     }
+
+    Pycairo_IMPORT;
+    if (Pycairo_CAPI == NULL)
+        return;
 
     _pygi_repository_register_types(m);
     _pygi_info_register_types(m);

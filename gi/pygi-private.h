@@ -24,6 +24,7 @@
 #include "pygi-boxed.h"
 #include "pygi-argument.h"
 #include "pygi-type.h"
+#include "pygi-foreign.h"
 
 G_BEGIN_DECLS
 
