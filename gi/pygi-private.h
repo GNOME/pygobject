@@ -25,6 +25,8 @@
 #include "pygi-argument.h"
 #include "pygi-type.h"
 #include "pygi-foreign.h"
+#include "pygi-closure.h"
+#include "pygi-callbacks.h"
 
 G_BEGIN_DECLS
 

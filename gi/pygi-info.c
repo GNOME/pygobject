@@ -503,6 +503,11 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     gsize n_aux_out_args;
     gsize n_return_values;
 
+    guint8 callback_index;
+    guint8 user_data_index;
+    guint8 destroy_notify_index;
+    PyGICClosure *closure;
+
     glong error_arg_pos;
 
     GIArgInfo **arg_infos;
@@ -538,6 +543,10 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     n_backup_args = 0;
     n_aux_in_args = 0;
     n_aux_out_args = 0;
+    
+    /* Check the argument count. */
+    n_py_args = PyTuple_Size(py_args);
+    g_assert(n_py_args >= 0);
 
     error_arg_pos = -1;
 
@@ -547,11 +556,32 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     args_is_auxiliary = g_newa(gboolean, n_args);
     memset(args_is_auxiliary, 0, sizeof(args_is_auxiliary) * n_args);
 
+    if (!_pygi_scan_for_callbacks (self, is_method, &callback_index, &user_data_index,
+                             &destroy_notify_index))
+        return NULL;
+        
+    if (callback_index != G_MAXUINT8) {
+        if (!_pygi_create_callback (self, is_method, 
+                             n_args, n_py_args, py_args, callback_index,
+                             user_data_index,
+                             destroy_notify_index, &closure))
+            return NULL;
+
+        args_is_auxiliary[callback_index] = FALSE;
+        if (destroy_notify_index != G_MAXUINT8) {
+            args_is_auxiliary[destroy_notify_index] = TRUE;
+            n_aux_in_args += 1;
+        }
+    }
+
     if (is_method) {
         /* The first argument is the instance. */
         n_in_args += 1;
     }
 
+    /* We do a first (well, second) pass here over the function to scan for special cases.
+     * This is currently array+length combinations and GError.
+     */
     for (i = 0; i < n_args; i++) {
         GIDirection direction;
         GITransfer transfer;
@@ -559,7 +589,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
         arg_infos[i] = g_callable_info_get_arg((GICallableInfo *)self->info, i);
         arg_type_infos[i] = g_arg_info_get_type(arg_infos[i]);
-
+        
         direction = g_arg_info_get_direction(arg_infos[i]);
         transfer = g_arg_info_get_ownership_transfer(arg_infos[i]);
         arg_type_tag = g_type_info_get_tag(arg_type_infos[i]);
@@ -638,10 +668,6 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     {
         gsize n_py_args_expected;
         Py_ssize_t py_args_pos;
-
-        /* Check the argument count. */
-        n_py_args = PyTuple_Size(py_args);
-        g_assert(n_py_args >= 0);
 
         n_py_args_expected = n_in_args
             + (is_constructor ? 1 : 0)
@@ -799,6 +825,19 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
         for (i = 0; i < n_args; i++) {
             GIDirection direction;
 
+            if (i == callback_index) {
+                args[i]->v_pointer = closure->closure;
+                py_args_pos++;
+                continue;
+            } else if (i == user_data_index) {
+                args[i]->v_pointer = closure;
+                py_args_pos++;
+                continue;
+            } else if (i == destroy_notify_index) {
+                args[i]->v_pointer = _pygi_destroy_notify_create();
+                continue;
+            }
+            
             if (args_is_auxiliary[i]) {
                 continue;
             }

@@ -42,6 +42,10 @@ _gi_la_SOURCES = \
 	pygi-type.h \
 	pygi-boxed.c \
 	pygi-boxed.h \
+	pygi-closure.c \
+	pygi-closure.h \
+	pygi-callbacks.c \
+	pygi-callbacks.h \
 	pygi.h \
 	pygi-private.h \
 	pygobject-external.h \

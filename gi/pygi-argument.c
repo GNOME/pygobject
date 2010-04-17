@@ -29,6 +29,7 @@
 #include <datetime.h>
 #include <pygobject.h>
 
+
 static void
 _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
                             PyObject  **lower,
@@ -379,8 +380,11 @@ check_number_release:
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                    /* TODO */
-                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
+                    if (!PyCallable_Check(object)) {
+                        PyErr_Format(PyExc_TypeError, "Must be callable, not %s",
+                                object->ob_type->tp_name);
+                        retval = 0;
+                    }
                     break;
                 case GI_INFO_TYPE_ENUM:
                     retval = _pygi_g_registered_type_info_check_object(
@@ -882,8 +886,8 @@ array_item_error:
 
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
-                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
-                    /* TODO */
+                    /* This should be handled in invoke() */
+                    g_assert_not_reached();
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
