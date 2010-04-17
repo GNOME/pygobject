@@ -232,7 +232,7 @@ _wrap_g_resolver_lookup_service_async(PyGObject *self,
                                       PyObject *args,
                                       PyObject *kwargs)
 {
-    static char *kwlist[] = { "callback", "service", "protocol", "domain"
+    static char *kwlist[] = { "callback", "service", "protocol", "domain",
                               "cancellable", "user_data", NULL };
     PyGIONotify *notify;
     gchar *service, *protocol, *domain;
