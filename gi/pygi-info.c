@@ -213,8 +213,8 @@ _pygi_info_new (GIBaseInfo *info)
             PyErr_SetString(PyExc_NotImplementedError, "GISignalInfo bindings not implemented");
             return NULL;
         case GI_INFO_TYPE_VFUNC:
-            PyErr_SetString(PyExc_NotImplementedError, "GIVFuncInfo bindings not implemented");
-            return NULL;
+            type = &PyGIVFuncInfo_Type;
+            break;
         case GI_INFO_TYPE_PROPERTY:
             PyErr_SetString(PyExc_NotImplementedError, "GIPropertyInfo bindings not implemented");
             return NULL;
@@ -1709,12 +1709,49 @@ _wrap_g_object_info_get_constants (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_object_info_get_vfuncs (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_object_info_get_n_vfuncs((GIObjectInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_object_info_get_vfunc((GIObjectInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction)_wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction)_wrap_g_object_info_get_methods, METH_NOARGS },
     { "get_fields", (PyCFunction)_wrap_g_object_info_get_fields, METH_NOARGS },
     { "get_interfaces", (PyCFunction)_wrap_g_object_info_get_interfaces, METH_NOARGS },
     { "get_constants", (PyCFunction)_wrap_g_object_info_get_constants, METH_NOARGS },
+    { "get_vfuncs", (PyCFunction)_wrap_g_object_info_get_vfuncs, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1794,9 +1831,46 @@ _wrap_g_interface_info_get_constants (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_interface_info_get_vfuncs (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_interface_info_get_n_vfuncs((GIInterfaceInfo *)self->info);
+
+    infos = PyTuple_New(n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *)g_interface_info_get_vfunc((GIInterfaceInfo *)self->info, i);
+        g_assert(info != NULL);
+
+        py_info = _pygi_info_new(info);
+
+        g_base_info_unref(info);
+
+        if (py_info == NULL) {
+            Py_CLEAR(infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM(infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGIInterfaceInfo_methods[] = {
     { "get_methods", (PyCFunction)_wrap_g_interface_info_get_methods, METH_NOARGS },
     { "get_constants", (PyCFunction)_wrap_g_interface_info_get_constants, METH_NOARGS },
+    { "get_vfuncs", (PyCFunction)_wrap_g_interface_info_get_vfuncs, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -2102,6 +2176,13 @@ static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
+/* GIVFuncInfo */
+_PyGI_DEFINE_INFO_TYPE("VFuncInfo", GIVFuncInfo, PyGIBaseInfo_Type);
+
+static PyMethodDef _PyGIVFuncInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
 /* Private */
 
 gchar *
@@ -2151,6 +2232,7 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE(m, PyGIConstantInfo_Type, "ConstantInfo");
     _PyGI_REGISTER_TYPE(m, PyGIValueInfo_Type, "ValueInfo");
     _PyGI_REGISTER_TYPE(m, PyGIFieldInfo_Type, "FieldInfo");
+    _PyGI_REGISTER_TYPE(m, PyGIVFuncInfo_Type, "VFuncInfo");
 
 #undef _PyGI_REGISTER_TYPE
 }

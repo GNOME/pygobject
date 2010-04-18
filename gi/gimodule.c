@@ -132,6 +132,94 @@ _wrap_pyg_register_interface_info(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+_wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
+{
+    PyGIBaseInfo *py_info;
+    PyObject *py_type;
+    PyObject *py_function;
+    gpointer implementor_class = NULL;
+    GType ancestor_g_type = 0;
+    GType implementor_gtype = 0;
+    gpointer *method_ptr = NULL;
+    int length, i;
+    GIBaseInfo *vfunc_info;
+    GIBaseInfo *ancestor_info;
+    GIStructInfo *struct_info;
+    gboolean is_interface = FALSE;
+    PyGICClosure *closure = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!O!O:hook_up_vfunc_implementation",
+                          &PyGIBaseInfo_Type, &py_info,
+                          &PyGTypeWrapper_Type, &py_type,
+                          &py_function))
+        return NULL;
+
+    implementor_gtype = pyg_type_from_object(py_type);
+    g_assert(G_TYPE_IS_CLASSED(implementor_gtype));
+
+    vfunc_info = py_info->info;
+    ancestor_info = g_base_info_get_container(vfunc_info);
+    is_interface = g_base_info_get_type(ancestor_info) == GI_INFO_TYPE_INTERFACE;
+
+    ancestor_g_type = g_registered_type_info_get_g_type(
+            (GIRegisteredTypeInfo *)ancestor_info);
+
+    implementor_class = g_type_class_ref(implementor_gtype);
+    if (is_interface) {
+        GTypeInstance *implementor_iface_class;
+        implementor_iface_class = g_type_interface_peek(implementor_class,
+                                                        ancestor_g_type);
+        g_type_class_unref (implementor_class);
+        implementor_class = implementor_iface_class;
+
+        struct_info = g_interface_info_get_iface_struct ((GIInterfaceInfo*)ancestor_info);
+    } else
+        struct_info = g_object_info_get_class_struct ((GIObjectInfo*)ancestor_info);
+
+    length = g_struct_info_get_n_fields(struct_info);
+    for (i = 0; i < length; i++) {
+        GIFieldInfo *field_info;
+        GITypeInfo *type_info;
+        GIBaseInfo *interface_info;
+        GICallbackInfo *callback_info;
+        gint offset;
+
+        field_info = g_struct_info_get_field (struct_info, i);
+
+        if (strcmp(g_base_info_get_name((GIBaseInfo*) field_info),
+                   g_base_info_get_name((GIBaseInfo*) vfunc_info)) != 0)
+            continue;
+
+        type_info = g_field_info_get_type (field_info);
+        if (g_type_info_get_tag (type_info) != GI_TYPE_TAG_INTERFACE)
+            continue;
+
+        interface_info = g_type_info_get_interface (type_info);
+        g_assert(g_base_info_get_type(interface_info) == GI_INFO_TYPE_CALLBACK);
+
+        callback_info = (GICallbackInfo*) interface_info;
+        offset = g_field_info_get_offset(field_info);
+        method_ptr = G_STRUCT_MEMBER_P(implementor_class, offset);
+
+        closure = _pygi_make_native_closure((GICallableInfo*)callback_info,
+            GI_SCOPE_TYPE_NOTIFIED, py_function, NULL);
+
+        *method_ptr = closure->closure;
+
+        g_base_info_unref (interface_info);
+        g_base_info_unref (type_info);
+        g_base_info_unref (field_info);
+
+        break;
+    }
+
+    g_base_info_unref (struct_info);
+    g_type_class_unref (implementor_class);
+
+    Py_RETURN_NONE;
+}
+
 
 static PyMethodDef _pygi_functions[] = {
     { "enum_add", (PyCFunction)_wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
@@ -139,6 +227,7 @@ static PyMethodDef _pygi_functions[] = {
 
     { "set_object_has_new_constructor", (PyCFunction)_wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
     { "register_interface_info", (PyCFunction)_wrap_pyg_register_interface_info, METH_VARARGS },
+    { "hook_up_vfunc_implementation", (PyCFunction)_wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

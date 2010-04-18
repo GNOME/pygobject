@@ -202,10 +202,9 @@ _pygi_create_callback (PyGIBaseInfo  *function_info,
         return FALSE;
     }
 
-
     /** Now actually build the closure **/
     *closure_out = _pygi_make_native_closure((GICallableInfo *)callback_info,
-                                             callback_arg,
+                                             g_arg_info_get_scope(callback_arg),
                                              py_function,
                                              py_user_data);
     

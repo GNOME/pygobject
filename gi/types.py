@@ -30,7 +30,8 @@ from ._gi import \
     ObjectInfo, \
     StructInfo, \
     set_object_has_new_constructor, \
-    register_interface_info
+    register_interface_info, \
+    hook_up_vfunc_implementation
 
 
 def Function(info):
@@ -91,6 +92,22 @@ class MetaClassHelper(object):
             value = constant_info.get_value()
             setattr(cls, name, value)
 
+    def _setup_vfuncs(cls):
+        for base in cls.__bases__:
+            if not hasattr(base, '__info__') or \
+                    not hasattr(base.__info__, 'get_vfuncs'):
+                continue
+            for vfunc_info in base.__info__.get_vfuncs():
+                vfunc = getattr(cls, 'do_' + vfunc_info.get_name(), None)
+                if vfunc is None:
+                    raise TypeError('Class implementing %s.%s should implement '
+                            'the method do_%s()' % (base.__info__.get_namespace(),
+                                                    base.__info__.get_name(),
+                                                    vfunc_info.get_name()))
+                else:
+                    hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
+                                                 vfunc)
+
 
 class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
@@ -98,19 +115,18 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
 
         # Avoid touching anything else than the base class.
-        if cls.__info__.get_g_type().pytype is not None:
-            return
+        if cls.__info__.get_g_type().pytype is None:
+            cls._setup_methods()
+            cls._setup_constants()
 
-        cls._setup_methods()
-        cls._setup_constants()
-
-        if isinstance(cls.__info__, ObjectInfo):
-            cls._setup_fields()
-            cls._setup_constructors()
-            set_object_has_new_constructor(cls.__info__.get_g_type())
-        elif isinstance(cls.__info__, InterfaceInfo):
-            register_interface_info(cls.__info__.get_g_type())
-
+            if isinstance(cls.__info__, ObjectInfo):
+                cls._setup_fields()
+                cls._setup_constructors()
+                set_object_has_new_constructor(cls.__info__.get_g_type())
+            elif isinstance(cls.__info__, InterfaceInfo):
+                register_interface_info(cls.__info__.get_g_type())
+        else:
+            cls._setup_vfuncs()
 
 class StructMeta(type, MetaClassHelper):
 

@@ -1313,9 +1313,16 @@ class TestPythonGObject(unittest.TestCase):
     class Object(GIMarshallingTests.Object):
         __gtype_name__ = "Object"
 
+        def __init__(self, int):
+            GIMarshallingTests.Object.__init__(self)
+            self.val = None
+
         def method(self):
             # Don't call super, which asserts that self.int == 42.
             pass
+
+        def do_method_int8_in(self, int8):
+            self.val = int8
 
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
@@ -1325,6 +1332,11 @@ class TestPythonGObject(unittest.TestCase):
 
     def test_object_method(self):
         self.Object(int = 0).method()
+
+    def test_object_vfuncs(self):
+        object_ = self.Object(int = 42)
+        object_.method_int8_in(84)
+        self.assertEqual(object_.val, 84)
 
 
 class TestMultiOutputArgs(unittest.TestCase):
@@ -1351,12 +1363,18 @@ class TestInterfaces(unittest.TestCase):
             __gtype_name__ = 'TestInterfaceImpl'
             def __init__(self):
                 gobject.GObject.__init__(self)
+                self.val = None
+
+            def do_test_int8_in(self, int8):
+                self.val = int8
 
         self.assertTrue(issubclass(TestInterfaceImpl, GIMarshallingTests.Interface))
 
         instance = TestInterfaceImpl()
         self.assertTrue(isinstance(instance, GIMarshallingTests.Interface))
 
+        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
+        self.assertEquals(instance.val, 42)
 
 class TestOverrides(unittest.TestCase):
 

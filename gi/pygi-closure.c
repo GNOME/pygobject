@@ -170,7 +170,7 @@ void _pygi_invoke_closure_free(gpointer data)
 
 PyGICClosure*
 _pygi_make_native_closure (GICallableInfo* info,
-                           GIArgInfo* arg_info,
+                           GIScopeType scope,
                            PyObject *py_function,
                            gpointer py_user_data)
 {
@@ -199,7 +199,7 @@ _pygi_make_native_closure (GICallableInfo* info,
     
     /* Give the closure the information it needs to determine when
        to free itself later */
-    closure->scope = g_arg_info_get_scope(arg_info);
+    closure->scope = scope;
 
     return closure;
 }

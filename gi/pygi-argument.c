@@ -1518,6 +1518,7 @@ _pygi_argument_to_object (GArgument  *arg,
 
                     break;
                 }
+                case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     if (arg->v_pointer == NULL) {
                         object = Py_None;
