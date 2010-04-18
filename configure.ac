@@ -1,4 +1,4 @@
-AC_INIT(pygi, 0.1)
+AC_INIT(pygi, 0.5)
 
 AM_INIT_AUTOMAKE(foreign)
 AC_CONFIG_HEADERS(config.h)
@@ -39,7 +39,7 @@ PKG_CHECK_MODULES(FFI, libffi >= 3.0)
 # GNOME
 PKG_CHECK_MODULES(GNOME,
 	glib-2.0 >= 2.20
-	gobject-introspection-1.0 >= 0.6.4
+	gobject-introspection-1.0 >= 0.6.10
 	pygobject-2.0 >= 2.20
 	pycairo >= 1.0.2
 )

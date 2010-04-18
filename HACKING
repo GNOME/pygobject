@@ -17,3 +17,10 @@ Tests
 
 'make test_gi.TestUtf8.valgrind' executes all the tests in test_gi.TestUtf8 in valgrind
 
+Releasing
+===
+* Bump version in configure.ac
+* Commit & Tag
+* Make distcheck
+* Upload tarball to git servers
+* Email PyGTK-announce & gnome-release mailing list
