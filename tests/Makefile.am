@@ -1,5 +1,6 @@
 noinst_PYTHON = \
 	runtests.py \
+	test_everything.py \
 	test_gi.py
 
 check-local:
