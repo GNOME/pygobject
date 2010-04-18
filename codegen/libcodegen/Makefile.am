@@ -4,10 +4,12 @@ libcodegendir = $(pkgdatadir)/$(PLATFORM_VERSION)/codegen/libcodegen
 libcodegen_SCRIPTS = \
 	__init__.py \
 	argtypes.py \
+	codegen.py \
 	definitions.py \
 	defsparser.py \
 	docextract.py \
 	override.py \
-	reversewrapper.py
+	reversewrapper.py \
+	scmexpr.py
 
 EXTRA_DIST = $(libcodegen_SCRIPTS)
