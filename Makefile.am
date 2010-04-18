@@ -6,7 +6,13 @@ AM_CFLAGS = \
 
 SUBDIRS = \
 	gi \
-	tests
+	tests \
+	examples
+
+EXTRA_DIST = \
+    autogen.sh \
+    pygi-convert.sh \
+    HACKING
 
 check.gdb:
 	cd tests && $(MAKE) check.gdb

@@ -52,6 +52,7 @@ AC_SUBST(INTROSPECTION_COMPILER)
 
 AC_OUTPUT(
 	Makefile
+	examples/Makefile
 	gi/Makefile
 	gi/repository/Makefile
 	gi/overrides/Makefile
