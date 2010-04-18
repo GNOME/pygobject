@@ -1,7 +1,7 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
- *   pygi-closure.c: PyGI C Closure functions
+ *   pygi-callbacks.c: PyGI C Callback Functions and Helpers
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
