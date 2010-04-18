@@ -16,11 +16,15 @@
       <foaf:mbox rdf:resource="mailto:svdlinden@src.gnome.org" />
       <gnome:userid>svdlinden</gnome:userid>
     </foaf:Person>
+  </maintainer>
+  <maintainer>
     <foaf:Person>
       <foaf:name>Tomeu Vizoso</foaf:name>
       <foaf:mbox rdf:resource="mailto:tomeu@sugarlabs.org" />
       <gnome:userid>tomeuv</gnome:userid>
     </foaf:Person>
+  </maintainer>
+  <maintainer>
     <foaf:Person>
       <foaf:name>Zach Goldberg</foaf:name>
       <foaf:mbox rdf:resource="mailto:zach@zachgoldberg.com" />
