@@ -62,7 +62,7 @@ _pygi_closure_handle (ffi_cif *cif,
 
     py_args = PyTuple_New(n_args);
     if (py_args == NULL) {
-        PyErr_Clear();
+        PyErr_Print();
         goto end;
     }
 
@@ -79,7 +79,7 @@ _pygi_closure_handle (ffi_cif *cif,
                 {
                     if (g_type_info_is_pointer(arg_type)) {
                         if (PyTuple_SetItem(py_args, n_in_args, closure->user_data) != 0) {
-                            PyErr_Clear();
+                            PyErr_Print();
                             goto end;
                         }
                         n_in_args++;
@@ -97,7 +97,7 @@ _pygi_closure_handle (ffi_cif *cif,
                                                       arg_transfer);
                     
                     if(PyTuple_SetItem(py_args, n_in_args, pyarg) != 0) {
-                        PyErr_Clear();
+                        PyErr_Print();
                         goto end;
                     }
                     n_in_args++;
@@ -109,7 +109,7 @@ _pygi_closure_handle (ffi_cif *cif,
     }
 
     if(_PyTuple_Resize (&py_args, n_in_args) != 0) {
-        PyErr_Clear();
+        PyErr_Print();
         goto end;
     }
 
@@ -118,6 +118,7 @@ _pygi_closure_handle (ffi_cif *cif,
     Py_DECREF(py_args);
 
     if (retval == NULL) {
+        PyErr_Print();
         goto end;
     }
 
