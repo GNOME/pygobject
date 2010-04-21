@@ -148,7 +148,8 @@ end:
         async_free_list = g_slist_prepend(async_free_list, closure);
         break;
     default:
-        g_assert_not_reached();
+        /* Invalid scope type.  Perhaps a typo in the annotation? */
+        g_warn_if_reached();
     }
 }
 
