@@ -782,6 +782,58 @@ _wrap_g_file_move(PyGObject *self,
 }
 %%
 override g_file_set_attribute kwargs
+static char**
+pyg_strv_from_pyobject(PyObject *value, const char *exc_msg)
+{
+    gchar** strv;
+    Py_ssize_t len, i;
+    PyObject* fast_seq;
+
+    fast_seq = PySequence_Fast(value, exc_msg);
+    if (fast_seq == NULL)
+	return NULL;
+
+    len = PySequence_Length(fast_seq);
+    if (len == -1)
+	return NULL;
+
+    strv = g_malloc(sizeof(char*) * (len + 1));
+    if (strv == NULL) {
+	PyErr_NoMemory();
+	goto failure;
+    }
+
+    for (i = 0; i < len + 1; i++)
+	strv[i] = NULL;
+
+    for (i = 0; i < len; i++) {
+	PyObject* item = PySequence_Fast_GET_ITEM(fast_seq, i);
+	const char *s;
+
+	if (!PyString_Check(item)) {
+	    PyErr_SetString(PyExc_TypeError, exc_msg);
+	    goto failure;
+	}
+
+	s = PyString_AsString(item);
+	if (s == NULL)
+	    goto failure;
+		
+	strv[i] = g_strdup(s);
+	if (strv[i] == NULL) { 
+	    PyErr_NoMemory();
+	    goto failure;
+	}
+    }
+
+    return strv;
+
+ failure:
+    g_strfreev(strv);
+    Py_XDECREF(fast_seq);
+    return NULL;
+}
+
 static PyObject *
 _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -792,12 +844,12 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
     GCancellable *cancellable = NULL;
     GError *error = NULL;
     char *attribute;
-    PyObject *py_type = NULL, *py_flags = NULL, *value_p;
+    PyObject *py_type = NULL, *py_flags = NULL, *value;
     PyGObject *pycancellable = NULL;
     GFileAttributeType type;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,"sOO|OO:gio.File.set_attribute",
-                                     kwlist, &attribute, &py_type, &value_p,
+                                     kwlist, &attribute, &py_type, &value,
                                      &py_flags, &pycancellable))
         return NULL;
 
@@ -812,9 +864,179 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
     if (!pygio_check_cancellable(pycancellable, &cancellable))
         return NULL;
 
-    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
-                               (gpointer)value_p, flags, (GCancellable *)
-                               cancellable, &error);
+    switch (type) {
+    case G_FILE_ATTRIBUTE_TYPE_STRING:
+	{
+	    char* s;
+	    if (!PyString_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be a str when type is FILE_ATTRIBUTE_TYPE_STRING");
+		return NULL;
+	    }
+
+	    s = PyString_AsString(value);
+	    if (s == NULL)
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       s, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+				       
+    case G_FILE_ATTRIBUTE_TYPE_BYTE_STRING:
+	{
+	    char* s;
+	    if (!PyString_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be a bytes instance when type is FILE_ATTRIBUTE_TYPE_BYTE_STRING");
+		return NULL;
+	    }
+
+	    s = PyString_AsString(value);
+	    if (s == NULL)
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       s, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+				       
+
+    case G_FILE_ATTRIBUTE_TYPE_STRINGV:
+	{
+	    gchar** strv;
+	    
+	    strv = pyg_strv_from_pyobject(value, "set_attribute value must be a list of strings when type is FILE_ATTRIBUTE_TYPE_STRINGV");
+	    if (strv == NULL)
+		break;
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       strv, flags, (GCancellable *) cancellable,
+				       &error);
+	    g_strfreev(strv);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_OBJECT:
+	{
+	    GObject* obj;
+
+	    if (!pygobject_check(value, &PyGObject_Type)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be a GObject instance when type is FILE_ATTRIBUTE_TYPE_OBJECT");
+		return NULL;
+	    }
+		
+	    obj = pygobject_get(value);
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       obj, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_BOOLEAN:
+	{
+	    gboolean boolval;
+
+	    boolval = PyObject_IsTrue(value);
+	    if (boolval == -1 && PyErr_Occurred())
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       &boolval, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_UINT32:
+	{
+	    guint32 intval;
+
+	    if (!PyInt_Check(value) && !PyLong_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be an int when type is FILE_ATTRIBUTE_TYPE_UINT32");
+		return NULL;
+	    }
+		
+	    intval = PyLong_AsUnsignedLong(value);
+	    if (intval == -1 && PyErr_Occurred())
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       &intval, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_INT32:
+	{
+	    gint32 intval;
+
+	    if (!PyInt_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be an int when type is FILE_ATTRIBUTE_TYPE_INT32");
+		return NULL;
+	    }
+		
+	    intval = PyInt_AsLong(value);
+	    if (intval == -1 && PyErr_Occurred())
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       &intval, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_UINT64:
+	{
+	    guint64 intval;
+
+	    if (!PyInt_Check(value) && !PyLong_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be a long int when type is FILE_ATTRIBUTE_TYPE_UINT64");
+		return NULL;
+	    }
+		
+	    intval = PyLong_AsLongLong(value);
+	    if (intval == -1 && PyErr_Occurred())
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       &intval, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_INT64:
+	{
+	    gint64 intval;
+
+	    if (!PyInt_Check(value) && !PyLong_Check(value)) {
+		PyErr_Format(PyExc_TypeError, 
+			     "set_attribute value must be a long int when type is FILE_ATTRIBUTE_TYPE_INT64");
+		return NULL;
+	    }
+		
+	    intval = PyLong_AsUnsignedLongLong(value);
+	    if (intval == -1 && PyErr_Occurred())
+		return NULL;
+
+	    ret = g_file_set_attribute(G_FILE(self->obj), attribute, type,
+				       &intval, flags, (GCancellable *) cancellable,
+				       &error);
+	}
+	break;
+
+    case G_FILE_ATTRIBUTE_TYPE_INVALID:
+
+    default:
+        PyErr_SetString(PyExc_TypeError, 
+			"Unknown type specified in set_attribute\n");
+	return NULL;
+    }
 
     if (pyg_error_check(&error))
         return NULL;
