@@ -506,8 +506,8 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
     guint8 callback_index;
     guint8 user_data_index;
     guint8 destroy_notify_index;
-    PyGICClosure *closure;
-
+    PyGICClosure *closure = NULL;
+    
     glong error_arg_pos;
 
     GIArgInfo **arg_infos;
@@ -1256,6 +1256,11 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
 
 out:
     g_base_info_unref((GIBaseInfo *)return_type_info);
+
+    if (closure != NULL) {
+        if (closure->scope == GI_SCOPE_TYPE_CALL) 
+            _pygi_invoke_closure_free(closure);
+    }
 
     for (i = 0; i < n_args; i++) {
         g_base_info_unref((GIBaseInfo *)arg_type_infos[i]);

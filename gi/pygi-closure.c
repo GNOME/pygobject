@@ -133,13 +133,13 @@ end:
         Py_XDECREF(closure->user_data);
 
     /* Now that the closure has finished we can make a decision about how
-       to free it.  Scope call gets free'd now, scope notified will be freed
-       when the notify is called and we can free async anytime we want
-       once we return from this function */
+       to free it.  Scope call gets free'd at the end of wrap_g_function_info_invoke
+       scope notified will be freed,  when the notify is called and we can free async 
+       anytime we want as long as its after we return from this function (you can't free the closure
+       you are currently using!)
+    */
     switch (closure->scope) {
     case GI_SCOPE_TYPE_CALL:
-        _pygi_invoke_closure_free(closure);
-        break;
     case GI_SCOPE_TYPE_NOTIFIED:        
         break;
     case GI_SCOPE_TYPE_ASYNC:

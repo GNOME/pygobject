@@ -134,3 +134,12 @@ class TestCallbacks(unittest.TestCase):
         i = Everything.test_callback_thaw_async();
         self.assertEquals(44, i);
         self.assertTrue(TestCallbacks.called)
+
+    def testCallbackScopeCall(self):
+        TestCallbacks.called = 0
+        def callback():
+            TestCallbacks.called += 1
+            return 0
+
+        Everything.test_multi_callback(callback)
+        self.assertEquals(TestCallbacks.called, 2)
