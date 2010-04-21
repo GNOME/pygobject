@@ -148,8 +148,8 @@ end:
         async_free_list = g_slist_prepend(async_free_list, closure);
         break;
     default:
-        /* Invalid scope type.  Perhaps a typo in the annotation? */
-        g_warn_if_reached();
+       g_error("Invalid scope reached inside %s.  Possibly a bad annotation?",
+               g_base_info_get_name(closure->info));
     }
 }
 
