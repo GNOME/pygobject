@@ -646,6 +646,9 @@ class TestUtf8(unittest.TestCase):
     def test_utf8_full_out(self):
         self.assertEquals(CONSTANT_UTF8, GIMarshallingTests.utf8_full_out())
 
+    def test_utf8_dangling_out(self):
+        GIMarshallingTests.utf8_dangling_out()
+
     def test_utf8_none_inout(self):
         self.assertEquals("", GIMarshallingTests.utf8_none_inout(CONSTANT_UTF8))
 

@@ -758,6 +758,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self,
                 case GI_DIRECTION_OUT:
                     g_assert(out_args_pos < n_out_args);
                     out_args[out_args_pos].v_pointer = &out_values[out_args_pos];
+                    out_values[out_args_pos].v_pointer = NULL;
                     args[i] = &out_values[out_args_pos];
                     out_args_pos += 1;
             }
