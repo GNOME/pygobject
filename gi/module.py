@@ -87,23 +87,23 @@ class DynamicModule(object):
 
         if isinstance(info, EnumInfo):
             g_type = info.get_g_type()
-            value = g_type.pytype
+            wrapper = g_type.pytype
 
-            if value is None:
+            if wrapper is None:
                 if g_type.is_a(gobject.TYPE_ENUM):
-                    value = enum_add(g_type)
+                    wrapper = enum_add(g_type)
                 elif g_type.is_a(gobject.TYPE_NONE):
                     # An enum with a GType of None is an enum without GType
-                    value = Enum
+                    wrapper = Enum
                 else:
-                    value = flags_add(g_type)
+                    wrapper = flags_add(g_type)
 
-                value.__info__ = info
-                value.__module__ = info.get_namespace()
+                wrapper.__info__ = info
+                wrapper.__module__ = info.get_namespace()
 
                 for value_info in info.get_values():
                     name = value_info.get_name().upper()
-                    setattr(value, name, value(value_info.get_value()))
+                    setattr(wrapper, name, wrapper(value_info.get_value()))
 
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
@@ -142,21 +142,21 @@ class DynamicModule(object):
                 '__module__': self._namespace,
                 '__gtype__': g_type
             }
-            value = metaclass(name, bases, dict_)
+            wrapper = metaclass(name, bases, dict_)
 
             # Register the new Python wrapper.
             if g_type != gobject.TYPE_NONE:
-                g_type.pytype = value
+                g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):
-            value = Function(info)
+            wrapper = Function(info)
         elif isinstance(info, ConstantInfo):
-            value = info.get_value()
+            wrapper = info.get_value()
         else:
             raise NotImplementedError(info)
 
-        self.__dict__[name] = value
-        return value
+        self.__dict__[name] = wrapper
+        return wrapper
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
