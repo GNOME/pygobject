@@ -915,10 +915,10 @@ class TestPointer(unittest.TestCase):
         self.assertEquals(GIMarshallingTests.pointer_in_return(42), 42)
 
 
-class TestGEnum(unittest.TestCase):
+class TestEnum(unittest.TestCase):
 
     def test_enum(self):
-        self.assertTrue(issubclass(GIMarshallingTests.Enum, gobject.GEnum))
+        self.assertTrue(issubclass(GIMarshallingTests.Enum, int))
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE1, GIMarshallingTests.Enum))
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE2, GIMarshallingTests.Enum))
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
@@ -939,6 +939,32 @@ class TestGEnum(unittest.TestCase):
         enum = GIMarshallingTests.enum_inout(GIMarshallingTests.Enum.VALUE3)
         self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
         self.assertEquals(enum, GIMarshallingTests.Enum.VALUE1)
+
+
+class TestGEnum(unittest.TestCase):
+
+    def test_genum(self):
+        self.assertTrue(issubclass(GIMarshallingTests.GEnum, gobject.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE1, GIMarshallingTests.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE2, GIMarshallingTests.GEnum))
+        self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
+        self.assertEquals(42, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_genum_in(self):
+        GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
+
+        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
+
+    def test_genum_out(self):
+        genum = GIMarshallingTests.genum_out()
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEquals(genum, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_genum_inout(self):
+        genum = GIMarshallingTests.genum_inout(GIMarshallingTests.GEnum.VALUE3)
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEquals(genum, GIMarshallingTests.GEnum.VALUE1)
 
 
 class TestGFlags(unittest.TestCase):

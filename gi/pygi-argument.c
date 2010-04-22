@@ -1510,7 +1510,27 @@ _pygi_argument_to_object (GArgument  *arg,
 
                     type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
 
-                    if (info_type == GI_INFO_TYPE_ENUM) {
+                    if (type == G_TYPE_NONE) {
+                        /* An enum with a GType of None is an enum without GType */
+                        PyObject *py_type = _pygi_type_import_by_gi_info(info);
+                        PyObject *py_args = NULL;
+
+                        if (!py_type)
+                            return NULL;
+
+                        py_args = PyTuple_New(1);
+                        if (PyTuple_SetItem(py_args, 0, PyLong_FromLong(arg->v_long)) != 0) {
+                            Py_DECREF(py_args);
+                            Py_DECREF(py_type);
+                            return NULL;
+                        }
+
+                        object = PyObject_CallFunction(py_type, "l", arg->v_long);
+
+                        Py_DECREF(py_args);
+                        Py_DECREF(py_type);
+
+                    } else if (info_type == GI_INFO_TYPE_ENUM) {
                         object = pyg_enum_from_gtype(type, arg->v_long);
                     } else {
                         object = pyg_flags_from_gtype(type, arg->v_long);

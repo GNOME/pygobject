@@ -41,7 +41,8 @@ from ._gi import \
 from .types import \
     GObjectMeta, \
     StructMeta, \
-    Function
+    Function, \
+    Enum
 
 repository = Repository.get_default()
 
@@ -91,6 +92,9 @@ class DynamicModule(object):
             if value is None:
                 if g_type.is_a(gobject.TYPE_ENUM):
                     value = enum_add(g_type)
+                elif g_type.is_a(gobject.TYPE_NONE):
+                    # An enum with a GType of None is an enum without GType
+                    value = Enum
                 else:
                     value = flags_add(g_type)
 

@@ -148,3 +148,17 @@ def override(type_):
     if g_type != gobject.TYPE_INVALID:
         g_type.pytype = type_
     return type_
+
+class Enum(int):
+    __info__ = None
+    def __init__(self, value):
+        int.__init__(value)
+
+    def __repr__(self):
+        value_name = str(self)
+        for value_info in self.__info__.get_values():
+            if self == value_info.get_value():
+                value_name = value_info.get_name().upper()
+        return "<enum %s of type %s.%s>" % (value_name,
+                                            self.__info__.get_namespace(),
+                                            self.__info__.get_name())
