@@ -82,6 +82,9 @@ _pygi_closure_handle (ffi_cif *cif,
                             PyErr_Print();
                             goto end;
                         }
+                        
+                        Py_XINCREF(closure->user_data);
+
                         n_in_args++;
                         continue;
                     }

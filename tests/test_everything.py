@@ -143,3 +143,16 @@ class TestCallbacks(unittest.TestCase):
 
         Everything.test_multi_callback(callback)
         self.assertEquals(TestCallbacks.called, 2)
+
+    def testCallbackUserdata(self):
+        TestCallbacks.called = 0
+        def callback(userdata):
+            self.assertEquals(userdata, "Test%d" % TestCallbacks.called)
+            TestCallbacks.called += 1
+            return TestCallbacks.called
+        
+        for i in range(100):
+            val = Everything.test_callback_user_data(callback, "Test%d" % i)
+            self.assertEquals(val, i+1)
+            
+        self.assertEquals(TestCallbacks.called, 100)
