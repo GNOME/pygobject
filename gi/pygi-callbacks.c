@@ -64,7 +64,7 @@ _pygi_destroy_notify_create(void)
 
 
 gboolean
-_pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
+_pygi_scan_for_callbacks (GIFunctionInfo *function_info,
                           gboolean       is_method,
                           guint8        *callback_index,
                           guint8        *user_data_index,
@@ -76,7 +76,7 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
     *user_data_index = G_MAXUINT8;
     *destroy_notify_index = G_MAXUINT8;
 
-    n_args = g_callable_info_get_n_args((GICallableInfo *)function_info->info);
+    n_args = g_callable_info_get_n_args((GICallableInfo *)function_info);
     for (i = 0; i < n_args; i++) {
         GIDirection direction;
         GIArgInfo *arg_info;
@@ -84,7 +84,7 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
         guint8 destroy, closure;
         GITypeTag type_tag;
 
-        arg_info = g_callable_info_get_arg((GICallableInfo*) function_info->info, i);
+        arg_info = g_callable_info_get_arg((GICallableInfo*) function_info, i);
         type_info = g_arg_info_get_type(arg_info);
         type_tag = g_type_info_get_tag(type_info);    
 
@@ -99,8 +99,8 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
                   strcmp(g_base_info_get_name((GIBaseInfo*) interface_info), "DestroyNotify") == 0)) {
                 if (*callback_index != G_MAXUINT8) {
                     PyErr_Format(PyExc_TypeError, "Function %s.%s has multiple callbacks, not supported",
-                              g_base_info_get_namespace((GIBaseInfo*) function_info->info),
-                              g_base_info_get_name((GIBaseInfo*) function_info->info));
+                              g_base_info_get_namespace((GIBaseInfo*) function_info),
+                              g_base_info_get_name((GIBaseInfo*) function_info));
                     g_base_info_unref(interface_info);
                     return FALSE;
                 }
@@ -119,7 +119,7 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
         if (destroy > 0 && destroy < n_args) {
             if (*destroy_notify_index != G_MAXUINT8) {
                 PyErr_Format(PyExc_TypeError, "Function %s has multiple GDestroyNotify, not supported",
-                             g_base_info_get_name((GIBaseInfo*)function_info->info));
+                             g_base_info_get_name((GIBaseInfo*)function_info));
                 return FALSE;
             }
             *destroy_notify_index = destroy;
@@ -128,7 +128,7 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
         if (closure > 0 && closure < n_args) {
             if (*user_data_index != G_MAXUINT8) {
                  PyErr_Format(PyExc_TypeError, "Function %s has multiple user_data arguments, not supported",
-                          g_base_info_get_name((GIBaseInfo*)function_info->info));
+                          g_base_info_get_name((GIBaseInfo*)function_info));
                 return FALSE;
             }
             *user_data_index = closure;
@@ -142,7 +142,7 @@ _pygi_scan_for_callbacks (PyGIBaseInfo  *function_info,
 }
 
 gboolean
-_pygi_create_callback (PyGIBaseInfo  *function_info,
+_pygi_create_callback (GIBaseInfo  *function_info,
                         gboolean       is_method,
                         int            n_args,
                         Py_ssize_t     py_argc,
@@ -161,7 +161,7 @@ _pygi_create_callback (PyGIBaseInfo  *function_info,
     guint8 i, py_argv_pos;
     PyObject *py_user_data;
 
-    callback_arg = g_callable_info_get_arg((GICallableInfo*) function_info->info, callback_index);
+    callback_arg = g_callable_info_get_arg((GICallableInfo*) function_info, callback_index);
     scope = g_arg_info_get_scope(callback_arg);
 
     callback_type = g_arg_info_get_type(callback_arg);
@@ -194,8 +194,8 @@ _pygi_create_callback (PyGIBaseInfo  *function_info,
     if (!found_py_function
         || (py_function == Py_None || !PyCallable_Check(py_function))) {
         PyErr_Format(PyExc_TypeError, "Error invoking %s.%s: Invalid callback given for argument %s",
-                  g_base_info_get_namespace((GIBaseInfo*) function_info->info),
-                  g_base_info_get_name((GIBaseInfo*) function_info->info),
+                  g_base_info_get_namespace((GIBaseInfo*) function_info),
+                  g_base_info_get_name((GIBaseInfo*) function_info),
                   g_base_info_get_name((GIBaseInfo*) callback_arg));
         g_base_info_unref((GIBaseInfo*) callback_info);
         g_base_info_unref((GIBaseInfo*) callback_type);

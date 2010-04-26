@@ -26,13 +26,13 @@ void _pygi_callback_notify_info_free(gpointer user_data);
  
 PyGICClosure*_pygi_destroy_notify_create(void);
 
-gboolean _pygi_scan_for_callbacks (PyGIBaseInfo  *self,
+gboolean _pygi_scan_for_callbacks (GIFunctionInfo *self,
                                    gboolean       is_method,
                                    guint8        *callback_index,
                                    guint8        *user_data_index,
                                    guint8        *destroy_notify_index);
 
-gboolean _pygi_create_callback (PyGIBaseInfo  *self,
+gboolean _pygi_create_callback (GIFunctionInfo *self,
                                 gboolean       is_method,
                                 int            n_args,
                                 Py_ssize_t     py_argc,
