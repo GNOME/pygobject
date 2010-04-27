@@ -19,13 +19,48 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import gobject
+from gi.repository import Gdk
+from gi.repository import GObject
+from ..types import override
 from ..importer import modules
 
 Gtk = modules['Gtk']
 
+class Builder(Gtk.Builder):
 
-__all__ = []
+    def connect_signals(self, obj_or_map):
+        def _full_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
+            handler = None
+            if isinstance(obj_or_map, dict):
+                handler = obj_or_map.get(handler_name, None)
+            else:
+                handler = getattr(obj_or_map, handler_name, None)
 
+            if handler is None:
+                raise AttributeError('Handler %s not found' % handler_name)
+
+            if not callable(handler):
+                raise TypeError('Handler %s is not a method or function' % handler_name)
+
+            # TODO: we need to support bitfields
+            after = False #flags and GObject.ConnectFlags.AFTER
+            if connect_obj is not None:
+                if after:
+                    gobj.connect_object_after(signal_name, handler, connect_obj)
+                else:
+                    gobj.connect_object(signal_name, handler, connect_obj)
+            else:
+                if after:
+                    gobj.connect_after(signal_name, handler)
+                else:
+                    gobj.connect(signal_name, handler)
+
+        self.connect_signals_full(_full_callback,
+                                  obj_or_map);
+
+Builder = override(Builder)
+__all__ = ['Builder']
 
 import sys
 
