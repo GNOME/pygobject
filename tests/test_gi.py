@@ -1409,6 +1409,9 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_int8_in(self, int8):
             self.val = int8
 
+        def do_method_with_default_implementation(self, int8):
+            self.props.int = int8 * 2
+
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
 
@@ -1423,6 +1426,18 @@ class TestPythonGObject(unittest.TestCase):
         object_.method_int8_in(84)
         self.assertEqual(object_.val, 84)
 
+        object_.method_with_default_implementation(42)
+        self.assertEqual(object_.val, 84)
+
+        class ObjectWithoutVFunc(GIMarshallingTests.Object):
+            __gtype_name__ = 'ObjectWithoutVFunc'
+
+            def __init__(self, int):
+                GIMarshallingTests.Object.__init__(self)
+
+        object_ = ObjectWithoutVFunc(int = 42)
+        object_.method_with_default_implementation(84)
+        self.assertEqual(object_.props.int, 84)
 
 class TestMultiOutputArgs(unittest.TestCase):
 
