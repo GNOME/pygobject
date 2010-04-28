@@ -65,5 +65,5 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
 OverridesObject = override(OverridesObject)
 
 
-__all__ = [OVERRIDES_CONSTANT, OverridesStruct, OverridesObject]
+__all__ = ['OVERRIDES_CONSTANT', 'OverridesStruct', 'OverridesObject']
 

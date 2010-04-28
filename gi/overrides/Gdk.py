@@ -44,7 +44,7 @@ class Rectangle(Gdk.Rectangle):
 Rectangle = override(Rectangle)
 
 
-__all__ = [Rectangle]
+__all__ = ['Rectangle']
 
 
 import sys

@@ -174,11 +174,10 @@ class ModuleProxy(object):
         self._overrides_module = overrides_module
 
     def __getattr__(self, name):
-        attribute = getattr(self._overrides_module, name, None)
-        exports = getattr(self._overrides_module, '__all__', ())
-        if attribute is not None and attribute not in exports:
-            attribute = None
-        if attribute is None:
+        override_exports = getattr(self._overrides_module, '__all__', ())
+        if (name in override_exports):
+            attribute = getattr(self._overrides_module, name, None)
+        else:
             attribute = getattr(self._dynamic_module, name)
         return attribute
 
