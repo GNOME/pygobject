@@ -26,7 +26,7 @@ import sys
 import gobject
 
 from ._gi import Repository, RepositoryError
-from .module import DynamicModule, ModuleProxy
+from .module import DynamicModule, DynamicGObjectModule, ModuleProxy
 
 
 repository = Repository.get_default()
@@ -62,8 +62,8 @@ class DynamicImporter(object):
 
         # Workaround for GObject
         if namespace == 'GObject':
-            sys.modules[fullname] = gobject
-            return gobject
+            sys.modules[fullname] = DynamicGObjectModule()
+            return sys.modules[fullname]
 
         dynamic_module = DynamicModule(namespace)
         modules[namespace] = dynamic_module

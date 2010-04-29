@@ -5,7 +5,7 @@ import pygtk
 pygtk.require("2.0")
 
 import unittest
-import gobject
+from gi.repository import GObject
 
 from datetime import datetime
 
@@ -77,8 +77,8 @@ class TestBoolean(unittest.TestCase):
 
 class TestInt8(unittest.TestCase):
 
-    MAX = gobject.G_MAXINT8
-    MIN = gobject.G_MININT8
+    MAX = GObject.G_MAXINT8
+    MIN = GObject.G_MININT8
 
     def test_int8_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.int8_return_max())
@@ -110,7 +110,7 @@ class TestInt8(unittest.TestCase):
 
 class TestUInt8(unittest.TestCase):
 
-    MAX = gobject.G_MAXUINT8
+    MAX = GObject.G_MAXUINT8
 
     def test_uint8_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.uint8_return())
@@ -136,8 +136,8 @@ class TestUInt8(unittest.TestCase):
 
 class TestInt16(unittest.TestCase):
 
-    MAX = gobject.G_MAXINT16
-    MIN = gobject.G_MININT16
+    MAX = GObject.G_MAXINT16
+    MIN = GObject.G_MININT16
 
     def test_int16_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.int16_return_max())
@@ -169,7 +169,7 @@ class TestInt16(unittest.TestCase):
 
 class TestUInt16(unittest.TestCase):
 
-    MAX = gobject.G_MAXUINT16
+    MAX = GObject.G_MAXUINT16
 
     def test_uint16_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.uint16_return())
@@ -195,8 +195,8 @@ class TestUInt16(unittest.TestCase):
 
 class TestInt32(unittest.TestCase):
 
-    MAX = gobject.G_MAXINT32
-    MIN = gobject.G_MININT32
+    MAX = GObject.G_MAXINT32
+    MIN = GObject.G_MININT32
 
     def test_int32_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.int32_return_max())
@@ -228,7 +228,7 @@ class TestInt32(unittest.TestCase):
 
 class TestUInt32(unittest.TestCase):
 
-    MAX = gobject.G_MAXUINT32
+    MAX = GObject.G_MAXUINT32
 
     def test_uint32_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.uint32_return())
@@ -313,8 +313,8 @@ class TestUInt64(unittest.TestCase):
 
 class TestShort(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXSHORT
-    MIN = gobject.constants.G_MINSHORT
+    MAX = GObject.constants.G_MAXSHORT
+    MIN = GObject.constants.G_MINSHORT
 
     def test_short_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.short_return_max())
@@ -346,7 +346,7 @@ class TestShort(unittest.TestCase):
 
 class TestUShort(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXUSHORT
+    MAX = GObject.constants.G_MAXUSHORT
 
     def test_ushort_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.ushort_return())
@@ -372,8 +372,8 @@ class TestUShort(unittest.TestCase):
 
 class TestInt(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXINT
-    MIN = gobject.constants.G_MININT
+    MAX = GObject.constants.G_MAXINT
+    MIN = GObject.constants.G_MININT
 
     def test_int_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.int_return_max())
@@ -405,7 +405,7 @@ class TestInt(unittest.TestCase):
 
 class TestUInt(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXUINT
+    MAX = GObject.constants.G_MAXUINT
 
     def test_uint_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.uint_return())
@@ -431,8 +431,8 @@ class TestUInt(unittest.TestCase):
 
 class TestLong(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXLONG
-    MIN = gobject.constants.G_MINLONG
+    MAX = GObject.constants.G_MAXLONG
+    MIN = GObject.constants.G_MINLONG
 
     def test_long_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.long_return_max())
@@ -464,7 +464,7 @@ class TestLong(unittest.TestCase):
 
 class TestULong(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXULONG
+    MAX = GObject.constants.G_MAXULONG
 
     def test_ulong_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.ulong_return())
@@ -490,8 +490,8 @@ class TestULong(unittest.TestCase):
 
 class TestSSize(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXLONG
-    MIN = gobject.constants.G_MINLONG
+    MAX = GObject.constants.G_MAXLONG
+    MIN = GObject.constants.G_MINLONG
 
     def test_ssize_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.ssize_return_max())
@@ -523,7 +523,7 @@ class TestSSize(unittest.TestCase):
 
 class TestSize(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXULONG
+    MAX = GObject.constants.G_MAXULONG
 
     def test_size_return(self):
         self.assertEquals(self.MAX, GIMarshallingTests.size_return())
@@ -549,8 +549,8 @@ class TestSize(unittest.TestCase):
 
 class TestFloat(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXFLOAT
-    MIN = gobject.constants.G_MINFLOAT
+    MAX = GObject.constants.G_MAXFLOAT
+    MIN = GObject.constants.G_MINFLOAT
 
     def test_float_return(self):
         self.assertAlmostEquals(self.MAX, GIMarshallingTests.float_return())
@@ -569,8 +569,8 @@ class TestFloat(unittest.TestCase):
 
 class TestDouble(unittest.TestCase):
 
-    MAX = gobject.constants.G_MAXDOUBLE
-    MIN = gobject.constants.G_MINDOUBLE
+    MAX = GObject.constants.G_MAXDOUBLE
+    MIN = GObject.constants.G_MINDOUBLE
 
     def test_double_return(self):
         self.assertAlmostEquals(self.MAX, GIMarshallingTests.double_return())
@@ -609,18 +609,18 @@ class TestTimeT(unittest.TestCase):
 class TestGType(unittest.TestCase):
 
     def test_gtype_return(self):
-        self.assertEquals(gobject.TYPE_NONE, GIMarshallingTests.gtype_return())
+        self.assertEquals(GObject.TYPE_NONE, GIMarshallingTests.gtype_return())
 
     def test_gtype_in(self):
-        GIMarshallingTests.gtype_in(gobject.TYPE_NONE)
+        GIMarshallingTests.gtype_in(GObject.TYPE_NONE)
 
-        self.assertRaises(TypeError, GIMarshallingTests.gtype_in, "gobject.TYPE_NONE")
+        self.assertRaises(TypeError, GIMarshallingTests.gtype_in, "GObject.TYPE_NONE")
 
     def test_gtype_out(self):
-        self.assertEquals(gobject.TYPE_NONE, GIMarshallingTests.gtype_out())
+        self.assertEquals(GObject.TYPE_NONE, GIMarshallingTests.gtype_out())
 
     def test_gtype_inout(self):
-        self.assertEquals(gobject.TYPE_INT, GIMarshallingTests.gtype_inout(gobject.TYPE_NONE))
+        self.assertEquals(GObject.TYPE_INT, GIMarshallingTests.gtype_inout(GObject.TYPE_NONE))
 
 
 class TestUtf8(unittest.TestCase):
@@ -947,7 +947,7 @@ class TestEnum(unittest.TestCase):
 class TestGEnum(unittest.TestCase):
 
     def test_genum(self):
-        self.assertTrue(issubclass(GIMarshallingTests.GEnum, gobject.GEnum))
+        self.assertTrue(issubclass(GIMarshallingTests.GEnum, GObject.GEnum))
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE1, GIMarshallingTests.GEnum))
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE2, GIMarshallingTests.GEnum))
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
@@ -973,7 +973,7 @@ class TestGEnum(unittest.TestCase):
 class TestGFlags(unittest.TestCase):
 
     def test_flags(self):
-        self.assertTrue(issubclass(GIMarshallingTests.Flags, gobject.GFlags))
+        self.assertTrue(issubclass(GIMarshallingTests.Flags, GObject.GFlags))
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1, GIMarshallingTests.Flags))
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE2, GIMarshallingTests.Flags))
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE3, GIMarshallingTests.Flags))
@@ -1000,7 +1000,7 @@ class TestGFlags(unittest.TestCase):
 class TestStructure(unittest.TestCase):
 
     def test_simple_struct(self):
-        self.assertTrue(issubclass(GIMarshallingTests.SimpleStruct, gobject.GPointer))
+        self.assertTrue(issubclass(GIMarshallingTests.SimpleStruct, GObject.GPointer))
 
         struct = GIMarshallingTests.SimpleStruct()
         self.assertTrue(isinstance(struct, GIMarshallingTests.SimpleStruct))
@@ -1092,7 +1092,7 @@ class TestStructure(unittest.TestCase):
 
 
     def test_pointer_struct(self):
-        self.assertTrue(issubclass(GIMarshallingTests.PointerStruct, gobject.GPointer))
+        self.assertTrue(issubclass(GIMarshallingTests.PointerStruct, GObject.GPointer))
 
         struct = GIMarshallingTests.PointerStruct()
         self.assertTrue(isinstance(struct, GIMarshallingTests.PointerStruct))
@@ -1136,7 +1136,7 @@ class TestStructure(unittest.TestCase):
         del out_struct
 
     def test_boxed_struct(self):
-        self.assertTrue(issubclass(GIMarshallingTests.BoxedStruct, gobject.GBoxed))
+        self.assertTrue(issubclass(GIMarshallingTests.BoxedStruct, GObject.GBoxed))
 
         struct = GIMarshallingTests.BoxedStruct()
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
@@ -1256,7 +1256,7 @@ class TestStructure(unittest.TestCase):
 class TestGObject(unittest.TestCase):
 
     def test_object(self):
-        self.assertTrue(issubclass(GIMarshallingTests.Object, gobject.GObject))
+        self.assertTrue(issubclass(GIMarshallingTests.Object, GObject.GObject))
 
         object_ = GIMarshallingTests.Object()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
@@ -1279,7 +1279,7 @@ class TestGObject(unittest.TestCase):
 
     def test_object_method(self):
         GIMarshallingTests.Object(int = 42).method()
-        self.assertRaises(TypeError, GIMarshallingTests.Object.method, gobject.GObject())
+        self.assertRaises(TypeError, GIMarshallingTests.Object.method, GObject.GObject())
         self.assertRaises(TypeError, GIMarshallingTests.Object.method)
 
 
@@ -1335,7 +1335,7 @@ class TestGObject(unittest.TestCase):
         object_ = GIMarshallingTests.SubObject(int = 42)
         GIMarshallingTests.object_none_in(object_)
 
-        object_ = gobject.GObject()
+        object_ = GObject.GObject()
         self.assertRaises(TypeError, GIMarshallingTests.object_none_in, object_)
 
         self.assertRaises(TypeError, GIMarshallingTests.object_none_in, None)
@@ -1439,6 +1439,15 @@ class TestPythonGObject(unittest.TestCase):
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
 
+    def test_dynamic_module(self):
+        from gi.module import DynamicGObjectModule
+        import gobject
+        self.assertTrue(isinstance(GObject, DynamicGObjectModule))
+        # compare the same enum from both the pygobject attrs and gi GObject attrs
+        self.assertEquals(GObject.SIGNAL_ACTION, GObject.SignalFlags.ACTION)
+        # compare a static gobject attr with a dynamic GObject attr
+        self.assertEquals(GObject.GObject, gobject.GObject)
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):
@@ -1453,16 +1462,16 @@ class TestMultiOutputArgs(unittest.TestCase):
 class TestInterfaces(unittest.TestCase):
 
     def test_wrapper(self):
-        self.assertTrue(issubclass(GIMarshallingTests.Interface, gobject.GInterface))
+        self.assertTrue(issubclass(GIMarshallingTests.Interface, GObject.GInterface))
         self.assertEquals(GIMarshallingTests.Interface.__gtype__.name, 'GIMarshallingTestsInterface')
         self.assertRaises(NotImplementedError, GIMarshallingTests.Interface)
 
     def test_implementation(self):
 
-        class TestInterfaceImpl(gobject.GObject, GIMarshallingTests.Interface):
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
             __gtype_name__ = 'TestInterfaceImpl'
             def __init__(self):
-                gobject.GObject.__init__(self)
+                GObject.GObject.__init__(self)
                 self.val = None
 
             def do_test_int8_in(self, int8):

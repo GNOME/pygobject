@@ -164,6 +164,36 @@ class DynamicModule(object):
         return "<DynamicModule %r from %r>" % (self._namespace, path)
 
 
+class DynamicGObjectModule(DynamicModule):
+    """Wrapper for the GObject module
+
+    This class allows us to access both the static PyGObject module and the GI GObject module
+    through the same interface.  It is returned when by importing GObject from the gi repository:
+
+    from gi.repository import GObject
+
+    We use this because some PyGI interfaces generated from the GIR require GObject types not wrapped
+    by the static bindings.  This also allows access to module attributes in a way that is more
+    familiar to GI application developers.  Take signal flags as an example.  The G_SIGNAL_RUN_FIRST
+    flag would be accessed as GObject.SIGNAL_RUN_FIRST in the static bindings but in the dynamic bindings
+    can be accessed as GObject.SignalFlags.RUN_FIRST.  The latter follows a GI naming convention which
+    would be familiar to GI application developers in a number of languages.
+    """
+
+    def __init__(self):
+        self._namespace = 'GObject'
+        self._module = gobject
+
+    def __getattr__(self, name):
+        # first see if this attr is in the gobject module
+        attr = getattr(self._module, name, None)
+
+        # if not in module assume request for an attr exported through GI
+        if attr is None:
+            attr = super(DynamicGObjectModule, self).__getattr__(name)
+
+        return attr
+
 class ModuleProxy(object):
 
     def __init__(self, name, namespace, dynamic_module, overrides_module):

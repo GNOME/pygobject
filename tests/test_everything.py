@@ -6,9 +6,9 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
-import gobject
 import cairo
 
+from gi.repository import GObject
 from gi.repository import Everything
 
 class TestEverything(unittest.TestCase):
@@ -76,7 +76,7 @@ class TestNullableArgs(unittest.TestCase):
 
 class TestCallbacks(unittest.TestCase):
     called = False
-    main_loop = gobject.MainLoop()
+    main_loop = GObject.MainLoop()
 
     def testCallback(self):
         TestCallbacks.called = False
@@ -161,7 +161,7 @@ class TestCallbacks(unittest.TestCase):
 
     def testAsyncReadyCallback(self):
         TestCallbacks.called = False
-        TestCallbacks.main_loop = gobject.MainLoop()
+        TestCallbacks.main_loop = GObject.MainLoop()
 
         def callback(obj, result, user_data):
             TestCallbacks.main_loop.quit()
