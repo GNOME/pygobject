@@ -215,7 +215,9 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     }
 
     g_base_info_unref (struct_info);
-    g_type_class_unref (implementor_class);
+
+    if (!is_interface)
+        g_type_class_unref (implementor_class);
 
     Py_RETURN_NONE;
 }
