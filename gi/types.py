@@ -99,7 +99,8 @@ class MetaClassHelper(object):
                 continue
             for vfunc_info in base.__info__.get_vfuncs():
                 vfunc = getattr(cls, 'do_' + vfunc_info.get_name(), None)
-                if vfunc is None and isinstance(base.__info__, InterfaceInfo):
+                if vfunc is None and isinstance(base.__info__, InterfaceInfo) and \
+                        not hasattr(cls, vfunc_info.get_name()):
                     raise TypeError('Class implementing %s.%s should implement '
                             'the method do_%s()' % (base.__info__.get_namespace(),
                                                     base.__info__.get_name(),
