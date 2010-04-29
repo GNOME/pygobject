@@ -1476,6 +1476,16 @@ class TestInterfaces(unittest.TestCase):
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEquals(instance.val, 42)
 
+        class TestInterfaceImplA(TestInterfaceImpl):
+            __gtype_name__ = 'TestInterfaceImplA'
+
+        class TestInterfaceImplB(TestInterfaceImplA):
+            __gtype_name__ = 'TestInterfaceImplB'
+
+        instance = TestInterfaceImplA()
+        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
+        self.assertEquals(instance.val, 42)
+
 class TestOverrides(unittest.TestCase):
 
     def test_constant(self):
