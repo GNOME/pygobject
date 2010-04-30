@@ -76,6 +76,8 @@ class TestNullableArgs(unittest.TestCase):
 
 class TestCallbacks(unittest.TestCase):
     called = False
+    main_loop = gobject.MainLoop()
+
     def testCallback(self):
         TestCallbacks.called = False
         def callback():
@@ -156,3 +158,17 @@ class TestCallbacks(unittest.TestCase):
             self.assertEquals(val, i+1)
             
         self.assertEquals(TestCallbacks.called, 100)
+
+    def testAsyncReadyCallback(self):
+        TestCallbacks.called = False
+        TestCallbacks.main_loop = gobject.MainLoop()
+
+        def callback(obj, result, user_data):
+            TestCallbacks.main_loop.quit()
+            TestCallbacks.called = True
+
+        Everything.test_async_ready_callback(callback)
+
+        TestCallbacks.main_loop.run()
+
+        self.assertTrue(TestCallbacks.called)

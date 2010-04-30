@@ -78,7 +78,13 @@ _pygi_closure_handle (ffi_cif *cif,
             case GI_TYPE_TAG_VOID:
                 {
                     if (g_type_info_is_pointer(arg_type)) {
-                        if (PyTuple_SetItem(py_args, n_in_args, closure->user_data) != 0) {
+                        if (closure->user_data == NULL) {
+                            Py_INCREF(Py_None);
+                            if(PyTuple_SetItem(py_args, n_in_args, Py_None) != 0) {
+                                PyErr_Clear();
+                                goto end;
+                            }
+                        } else if (PyTuple_SetItem(py_args, n_in_args, closure->user_data) != 0) {
                             PyErr_Print();
                             goto end;
                         }
