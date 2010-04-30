@@ -510,7 +510,8 @@ _prepare_invocation_state (struct invocation_state *state,
                     }
 
                     /* Get rid of the GArray. */
-                    if (array != NULL) {
+                    if ((array != NULL) &&
+                        (g_type_info_get_array_type(state->arg_type_infos[i]) == GI_ARRAY_TYPE_C)) {
                         state->args[i]->v_pointer = array->data;
 
                         if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
@@ -654,7 +655,8 @@ _process_invocation_state (struct invocation_state *state,
     } else {
         GITransfer transfer;
 
-        if (state->return_type_tag == GI_TYPE_TAG_ARRAY) {
+        if ((state->return_type_tag == GI_TYPE_TAG_ARRAY) &&
+            (g_type_info_get_array_type(state->return_type_info) == GI_ARRAY_TYPE_C)) {
             /* Create a #GArray. */
             state->return_arg.v_pointer = _pygi_argument_to_array(&state->return_arg, state->args, state->return_type_info, state->is_method);
         }
@@ -722,8 +724,9 @@ _process_invocation_state (struct invocation_state *state,
 
             type_tag = g_type_info_get_tag(state->arg_type_infos[i]);
 
-            if (type_tag == GI_TYPE_TAG_ARRAY
-                    && (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
+            if ((type_tag == GI_TYPE_TAG_ARRAY) &&
+                (g_type_info_get_array_type(state->arg_type_infos[i]) == GI_ARRAY_TYPE_C) &&
+                (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
                 /* Create a #GArray. */
                 state->args[i]->v_pointer = _pygi_argument_to_array(state->args[i], state->args, state->arg_type_infos[i], state->is_method);
             }
