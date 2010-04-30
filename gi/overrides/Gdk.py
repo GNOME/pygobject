@@ -60,8 +60,13 @@ class Color(Gdk.Color):
 
 Color = override(Color)
 
+class Drawable(Gdk.Drawable):
+    def cairo_create(self):
+        return Gdk.cairo_create(self)
 
-__all__ = ['Rectangle', 'Color']
+Drawable = override(Drawable)
+
+__all__ = ['Rectangle', 'Color', 'Drawable']
 
 
 
