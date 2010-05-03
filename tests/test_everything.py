@@ -172,3 +172,13 @@ class TestCallbacks(unittest.TestCase):
         TestCallbacks.main_loop.run()
 
         self.assertTrue(TestCallbacks.called)
+
+    def testCallbackDestroyNotify(self):
+        def callback(user_data):
+            TestCallbacks.called = True
+            return 42
+
+        TestCallbacks.called = False
+        self.assertEquals(Everything.test_callback_destroy_notify(callback, 42), 42)
+        self.assertTrue(TestCallbacks.called)
+        self.assertEquals(Everything.test_callback_thaw_notifications(), 42)

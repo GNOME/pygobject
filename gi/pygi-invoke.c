@@ -391,7 +391,8 @@ _prepare_invocation_state (struct invocation_state *state,
                 py_args_pos++;
                 continue;
             } else if (i == state->destroy_notify_index) {
-                state->args[i]->v_pointer = _pygi_destroy_notify_create();
+                PyGICClosure *destroy_notify = _pygi_destroy_notify_create();
+                state->args[i]->v_pointer = destroy_notify->closure;
                 continue;
             }
             
