@@ -27,6 +27,7 @@
 #include "pygi-foreign.h"
 #include "pygi-closure.h"
 #include "pygi-callbacks.h"
+#include "pygi-invoke.h"
 
 G_BEGIN_DECLS
 

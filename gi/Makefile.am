@@ -30,6 +30,8 @@ _gi_la_SOURCES = \
 	pygi-repository.h \
 	pygi-info.c \
 	pygi-info.h \
+	pygi-invoke.c \
+	pygi-invoke.h \
 	pygi-foreign.c \
 	pygi-foreign.h \
 	pygi-foreign-cairo.c \
