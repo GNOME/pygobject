@@ -144,6 +144,7 @@ _pygi_scan_for_callbacks (GIFunctionInfo *function_info,
 gboolean
 _pygi_create_callback (GIBaseInfo  *function_info,
                         gboolean       is_method,
+                        gboolean       is_constructor,
                         int            n_args,
                         Py_ssize_t     py_argc,
                         PyObject      *py_argv,
@@ -176,7 +177,7 @@ _pygi_create_callback (GIBaseInfo  *function_info,
     py_user_data = NULL;
     
     /* if its a method then we need to skip over 'self' */
-    if (is_method)
+    if (is_method || is_constructor)
         py_argv_pos = 1;
     else
         py_argv_pos = 0;

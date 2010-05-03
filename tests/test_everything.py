@@ -182,3 +182,24 @@ class TestCallbacks(unittest.TestCase):
         self.assertEquals(Everything.test_callback_destroy_notify(callback, 42), 42)
         self.assertTrue(TestCallbacks.called)
         self.assertEquals(Everything.test_callback_thaw_notifications(), 42)
+
+    def testCallbackInMethods(self):
+        object_ = Everything.TestObj()
+
+        def callback():
+            TestCallbacks.called = True
+
+        TestCallbacks.called = False
+        object_.instance_method_callback(callback)
+        self.assertTrue(TestCallbacks.called)
+
+        TestCallbacks.called = False
+        Everything.TestObj.static_method_callback(callback)
+        self.assertTrue(TestCallbacks.called)
+
+        def callbackWithUserData(user_data):
+            TestCallbacks.called = True
+
+        TestCallbacks.called = False
+        obj_ = Everything.TestObj.new_callback(callbackWithUserData, None)
+        self.assertTrue(TestCallbacks.called)

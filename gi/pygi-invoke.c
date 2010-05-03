@@ -106,13 +106,16 @@ _prepare_invocation_state (struct invocation_state *state,
 {
     gsize i;
 
-    if (!_pygi_scan_for_callbacks (function_info, state->is_method,
+    if (!_pygi_scan_for_callbacks (function_info,
+                                   state->is_method,
                                    &state->callback_index, &state->user_data_index,
                                    &state->destroy_notify_index))
         return FALSE;
         
     if (state->callback_index != G_MAXUINT8) {
-        if (!_pygi_create_callback (function_info, state->is_method, 
+        if (!_pygi_create_callback (function_info,
+                                    state->is_method,
+                                    state->is_constructor,
                                     state->n_args, state->n_py_args, 
                                     py_args, state->callback_index,
                                     state->user_data_index,
