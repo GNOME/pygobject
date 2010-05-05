@@ -27,11 +27,13 @@ _pygi_import (void)
 
     module = PyImport_ImportModule("gi");
     if (module == NULL) {
+        PyErr_Clear();
         return -1;
     }
 
     api = PyObject_GetAttrString(module, "_API");
     if (api == NULL) {
+        PyErr_Clear();
         Py_DECREF(module);
         return -1;
     }
