@@ -1,7 +1,8 @@
 noinst_PYTHON = \
 	runtests.py \
 	test_everything.py \
-	test_gi.py
+	test_gi.py \
+	test_overrides.py
 
 check-local:
 	LD_LIBRARY_PATH=$(srcdir)/.libs$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH} \

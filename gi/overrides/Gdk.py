@@ -52,7 +52,7 @@ class Color(Gdk.Color):
         self.g = g
         self.b = b
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         return Gdk.Color.__new__(cls)
 
     def __repr__(self):
