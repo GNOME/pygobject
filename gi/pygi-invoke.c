@@ -841,8 +841,10 @@ _free_invocation_state (struct invocation_state *state)
     }
 
     for (i = 0; i < state->n_args; i++) {
-        g_base_info_unref((GIBaseInfo *)state->arg_type_infos[i]);
-        g_base_info_unref((GIBaseInfo *)state->arg_infos[i]);
+        if (state->arg_type_infos[i] != NULL)
+            g_base_info_unref((GIBaseInfo *)state->arg_type_infos[i]);
+        if (state->arg_infos[i] != NULL)
+            g_base_info_unref((GIBaseInfo *)state->arg_infos[i]);
     }
 
     if (state->arg_infos != NULL) {
