@@ -1433,9 +1433,17 @@ _pygi_argument_to_object (GArgument  *arg,
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
                 {
-                    PyErr_SetString(PyExc_NotImplementedError, "callback marshalling is not supported yet");
-                    /* TODO */
-                    break;
+                  /* There is no way we can support a callback return
+                   * as we are never sure if the callback was set from C
+                   * or Python.  API that return callbacks are broken
+                   * so we print a warning and send back a None
+                   */
+
+                  g_warning("You are trying to use an API which returns a callback."
+                            "Callback returns can not be supported. Returning None instead.");
+                  object = Py_None;
+                  Py_INCREF(object);
+                  break;
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
