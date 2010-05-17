@@ -230,5 +230,6 @@ __all__ = ['ActionGroup', 'Builder', 'UIManager']
 import sys
 
 initialized, argv = Gtk.init_check(sys.argv)
+sys.argv = argv
 if not initialized:
     raise RuntimeError("Gtk couldn't be initialized")
