@@ -65,8 +65,8 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual(None, Everything.test_ghash_null_out())
 
     def test_out_nullable_list(self):
-        self.assertEqual(None, Everything.test_gslist_null_out())
-        self.assertEqual(None, Everything.test_glist_null_out())
+        self.assertEqual([], Everything.test_gslist_null_out())
+        self.assertEqual([], Everything.test_glist_null_out())
 
     def test_out_nullable_array(self):
         self.assertEqual(None, Everything.test_array_int_null_out())

@@ -1563,12 +1563,6 @@ _pygi_argument_to_object (GArgument  *arg,
             GITransfer item_transfer;
             gsize i;
 
-            if (arg->v_pointer == NULL) {
-                object = Py_None;
-                Py_INCREF(object);
-                break;
-            }
-
             list = arg->v_pointer;
             length = g_slist_length(list);
 
