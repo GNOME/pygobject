@@ -46,6 +46,9 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(surface.get_width(), 10)
         self.assertEquals(surface.get_height(), 10)
 
+    def test_floating(self):
+        Everything.TestFloating()
+
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
