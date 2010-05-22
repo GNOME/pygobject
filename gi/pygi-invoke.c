@@ -501,8 +501,12 @@ _prepare_invocation_state (struct invocation_state *state,
                     if (state->is_method)
                         length_arg_pos--; // length_arg_pos refers to C args
                     if (length_arg_pos >= 0) {
+                    	int len = 0;
                         /* Set the auxiliary argument holding the length. */
-                        state->args[length_arg_pos]->v_size = array->len;
+                    	if (array)
+                    		len = array->len;
+
+                        state->args[length_arg_pos]->v_size = len;
                     }
 
                     /* Get rid of the GArray. */
