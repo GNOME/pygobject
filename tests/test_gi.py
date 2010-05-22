@@ -1409,6 +1409,9 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_int8_in(self, int8):
             self.val = int8
 
+        def do_method_int8_out(self):
+            return 42
+
         def do_method_with_default_implementation(self, int8):
             self.props.int = int8 * 2
 
@@ -1425,6 +1428,7 @@ class TestPythonGObject(unittest.TestCase):
         object_ = self.Object(int = 42)
         object_.method_int8_in(84)
         self.assertEqual(object_.val, 84)
+        self.assertEqual(object_.method_int8_out(), 42)
 
         object_.method_with_default_implementation(42)
         self.assertEqual(object_.val, 84)
