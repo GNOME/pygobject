@@ -64,6 +64,9 @@ class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_string(self):
         Everything.test_utf8_null_in(None)
 
+    def test_in_nullable_object(self):
+        Everything.test_object_null_in(None)
+
     def test_out_nullable_hash(self):
         self.assertEqual(None, Everything.test_ghash_null_out())
 
@@ -76,6 +79,9 @@ class TestNullableArgs(unittest.TestCase):
 
     def test_out_nullable_string(self):
         self.assertEqual(None, Everything.test_utf8_null_out())
+
+    def test_out_nullable_object(self):
+        self.assertEqual(None, Everything.test_object_null_out())
 
 class TestCallbacks(unittest.TestCase):
     called = False

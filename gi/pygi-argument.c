@@ -997,6 +997,11 @@ array_item_error:
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
+                    if (object == Py_None) {
+                        arg.v_pointer = NULL;
+                        break;
+                    }
+
                     arg.v_pointer = pygobject_get(object);
                     if (transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_ref(arg.v_pointer);
