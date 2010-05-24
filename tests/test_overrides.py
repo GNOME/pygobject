@@ -10,6 +10,7 @@ import gobject
 import sys
 sys.path.insert(0, "../")
 
+from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 import gi.overrides as overrides
@@ -34,8 +35,8 @@ class TestGtk(unittest.TestCase):
 """
 )
         menubar = ui.get_widget("/menubar1")
-        self.assertEquals(type(menubar), Gtk.MenuBar) 
-        
+        self.assertEquals(type(menubar), Gtk.MenuBar)
+
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         action_group = Gtk.ActionGroup (name = 'TestActionGroup')
@@ -53,7 +54,7 @@ class TestGtk(unittest.TestCase):
         action_group.add_radio_actions([
             ('test-radio-action1', None, 'Test Radio Action 1'),
             ('test-radio-action2', Gtk.STOCK_COPY, 'Test Radio Action 2')], 1, None)
-        
+
         expected_results = (('test-action1', Gtk.Action),
                             ('test-action2', Gtk.Action),
                             ('test-toggle-action1', Gtk.ToggleAction),
@@ -64,4 +65,69 @@ class TestGtk(unittest.TestCase):
         for action, cmp in zip(action_group.list_actions(), expected_results):
             a = (action.get_name(), type(action))
             self.assertEquals(a,cmp)
+
+    def test_builder(self):
+        self.assertEquals(Gtk.Builder, overrides.Gtk.Builder)
+
+        class SignalTest(GObject.GObject):
+            __gtype_name__ = "GIOverrideSignalTest"
+            __gsignals__ = {
+                "test-signal": (gobject.SIGNAL_RUN_FIRST,
+                                gobject.TYPE_NONE,
+                                []),
+            }
+
+
+        class SignalCheck:
+            def __init__(self):
+                self.sentinel = 0
+
+            def on_signal_1(self, *args):
+                self.sentinel += 1
+
+            def on_signal_3(self, *args):
+                self.sentinel += 3
+
+        signal_checker = SignalCheck()
+        builder = Gtk.Builder()
+
+        # add object1 to the builder
+        builder.add_from_string(
+"""
+<interface>
+  <object class="GIOverrideSignalTest" id="object1">
+      <signal name="test-signal" handler="on_signal_1" />
+  </object>
+</interface>
+""")
+
+        # only add object3 to the builder
+        builder.add_objects_from_string(
+"""
+<interface>
+  <object class="GIOverrideSignalTest" id="object2">
+      <signal name="test-signal" handler="on_signal_2" />
+  </object>
+  <object class="GIOverrideSignalTest" id="object3">
+      <signal name="test-signal" handler="on_signal_3" />
+  </object>
+  <object class="GIOverrideSignalTest" id="object4">
+      <signal name="test-signal" handler="on_signal_4" />
+  </object>
+</interface>
+
+""",
+            ['object3'])
+
+        # hook up signals
+        builder.connect_signals(signal_checker)
+
+        # call their notify signals and check sentinel
+        objects = builder.get_objects()
+        self.assertEquals(len(objects), 2)
+        for obj in objects:
+            obj.emit('test-signal')
+
+        self.assertEquals(signal_checker.sentinel, 4)
+
 

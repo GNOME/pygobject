@@ -207,8 +207,7 @@ class Builder(Gtk.Builder):
             if not callable(handler):
                 raise TypeError('Handler %s is not a method or function' % handler_name)
 
-            # TODO: we need to support bitfields
-            after = False #flags and GObject.ConnectFlags.AFTER
+            after = flags or GObject.ConnectFlags.AFTER
             if connect_obj is not None:
                 if after:
                     gobj.connect_object_after(signal_name, handler, connect_obj)
@@ -222,6 +221,22 @@ class Builder(Gtk.Builder):
 
         self.connect_signals_full(_full_callback,
                                   obj_or_map);
+
+    def add_from_string(self, buffer):
+        if not isinstance(buffer, basestring):
+            raise TypeError('buffer must be a string')
+
+        length = len(buffer)
+
+        return Gtk.Builder.add_from_string(self, buffer, length)
+
+    def add_objects_from_string(self, buffer, object_ids):
+        if not isinstance(buffer, basestring):
+            raise TypeError('buffer must be a string')
+
+        length = len(buffer)
+
+        return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
 
 Builder = override(Builder)
 
