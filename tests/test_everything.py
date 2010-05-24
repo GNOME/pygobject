@@ -5,6 +5,7 @@ import unittest
 
 import sys
 sys.path.insert(0, "../")
+from sys import getrefcount
 
 import cairo
 
@@ -167,6 +168,23 @@ class TestCallbacks(unittest.TestCase):
             self.assertEquals(val, i+1)
             
         self.assertEquals(TestCallbacks.called, 100)
+
+    def testCallbackUserdataRefCount(self):
+        TestCallbacks.called = False
+        def callback(userdata):
+            TestCallbacks.called = True
+            return 1
+
+        ud = "Test User Data"
+
+        start_ref_count = getrefcount(ud)
+        for i in range(100):
+            Everything.test_callback_destroy_notify(callback, ud)
+
+        Everything.test_callback_thaw_notifications()
+        end_ref_count = getrefcount(ud)
+
+        self.assertEquals(start_ref_count, end_ref_count)
 
     def testAsyncReadyCallback(self):
         TestCallbacks.called = False
