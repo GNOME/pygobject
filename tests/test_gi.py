@@ -12,6 +12,7 @@ from datetime import datetime
 import sys
 sys.path.insert(0, "../")
 
+import gobject
 from gi.repository import GIMarshallingTests
 
 
@@ -1495,7 +1496,6 @@ class TestPythonGObject(unittest.TestCase):
 
     def test_dynamic_module(self):
         from gi.module import DynamicGObjectModule
-        import gobject
         self.assertTrue(isinstance(GObject, DynamicGObjectModule))
         # compare the same enum from both the pygobject attrs and gi GObject attrs
         self.assertEquals(GObject.SIGNAL_ACTION, GObject.SignalFlags.ACTION)
@@ -1548,6 +1548,17 @@ class TestInterfaces(unittest.TestCase):
         instance = TestInterfaceImplA()
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEquals(instance.val, 42)
+
+        def define_implementor_without_gtype():
+            class TestInterfaceImpl(gobject.GObject, GIMarshallingTests.Interface):
+                def __init__(self):
+                    gobject.GObject.__init__(self)
+                    self.val = None
+
+                def do_test_int8_in(self, int8):
+                    self.val = int8
+        self.assertRaises(RuntimeError, define_implementor_without_gtype)
+
 
 class TestOverrides(unittest.TestCase):
 

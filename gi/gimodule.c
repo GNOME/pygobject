@@ -170,6 +170,15 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
         GTypeInstance *implementor_iface_class;
         implementor_iface_class = g_type_interface_peek(implementor_class,
                                                         ancestor_g_type);
+        if (implementor_iface_class == NULL) {
+            g_type_class_unref (implementor_class);
+            PyErr_Format (PyExc_RuntimeError,
+                    "Couldn't find GType of implementor of interface %s. "
+                    "Forgot to set __gtype_name__?",
+                    g_type_name (ancestor_g_type));
+            return NULL;
+        }
+
         g_type_class_unref (implementor_class);
         implementor_class = implementor_iface_class;
 
