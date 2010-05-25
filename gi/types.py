@@ -123,8 +123,17 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
     def __init__(cls, name, bases, dict_):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
 
-        # Avoid touching anything else than the base class.
-        if cls.__info__.get_g_type().pytype is None:
+        is_gi_defined = False
+        if cls.__module__ == 'gi.repository.' + cls.__info__.get_namespace():
+            is_gi_defined = True
+
+        is_python_defined = False
+        if not is_gi_defined and cls.__module__ != GObjectMeta.__module__:
+            is_python_defined = True
+
+        if is_python_defined:
+            cls._setup_vfuncs()
+        elif is_gi_defined:
             cls._setup_methods()
             cls._setup_constants()
 
@@ -134,8 +143,6 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
                 set_object_has_new_constructor(cls.__info__.get_g_type())
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
-        else:
-            cls._setup_vfuncs()
 
 class StructMeta(type, MetaClassHelper):
 
