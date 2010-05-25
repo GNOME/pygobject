@@ -1602,4 +1602,6 @@ class TestOverrides(unittest.TestCase):
 
         self.assertTrue(isinstance(object_, GIMarshallingTests.OverridesObject))
 
-
+    def test_module_name(self):
+        self.assertEquals(GIMarshallingTests.OverridesStruct.__module__, 'gi.overrides.GIMarshallingTests')
+        self.assertEquals(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')

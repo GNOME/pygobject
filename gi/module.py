@@ -100,7 +100,7 @@ class DynamicModule(object):
                     wrapper = flags_add(g_type)
 
                 wrapper.__info__ = info
-                wrapper.__module__ = info.get_namespace()
+                wrapper.__module__ = 'gi.repository.' + info.get_namespace()
 
                 for value_info in info.get_values():
                     name = value_info.get_name().upper()
@@ -140,7 +140,7 @@ class DynamicModule(object):
             name = info.get_name()
             dict_ = {
                 '__info__': info,
-                '__module__': self._namespace,
+                '__module__': 'gi.repository.' + self._namespace,
                 '__gtype__': g_type
             }
             wrapper = metaclass(name, bases, dict_)
