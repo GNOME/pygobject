@@ -148,6 +148,13 @@ do
   fi
 done
 
+# install pre-commit hook for doing clean commits
+if test ! \( -x .git/hooks/pre-commit -a -L .git/hooks/pre-commit \);
+then
+    rm -f .git/hooks/pre-commit
+    ln -s ../../pre-commit.hook .git/hooks/pre-commit
+fi
+
 conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
