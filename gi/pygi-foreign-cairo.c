@@ -29,16 +29,16 @@ extern Pycairo_CAPI_t *Pycairo_CAPI;
 #include "pygi-foreign-cairo.h"
 
 gboolean
-cairo_context_to_arg(PyObject       *value,
-                     GITypeInfo     *type_info,
-                     GITransfer      transfer,
-                     GArgument      *arg)
+cairo_context_to_arg (PyObject       *value,
+                      GITypeInfo     *type_info,
+                      GITransfer      transfer,
+                      GArgument      *arg)
 {
     cairo_t *cr;
 
     g_assert (transfer == GI_TRANSFER_NOTHING);
 
-    cr = PycairoContext_GET(value);
+    cr = PycairoContext_GET (value);
     if (!cr)
         return FALSE;
 
@@ -47,7 +47,7 @@ cairo_context_to_arg(PyObject       *value,
 }
 
 PyObject *
-cairo_context_from_arg(GITypeInfo *type_info, GArgument  *arg)
+cairo_context_from_arg (GITypeInfo *type_info, GArgument  *arg)
 {
     cairo_t *context = (cairo_t*) arg;
 
@@ -57,25 +57,25 @@ cairo_context_from_arg(GITypeInfo *type_info, GArgument  *arg)
 }
 
 gboolean
-cairo_context_release_arg(GITransfer  transfer, GITypeInfo *type_info,
-                          GArgument  *arg)
+cairo_context_release_arg (GITransfer  transfer, GITypeInfo *type_info,
+                           GArgument  *arg)
 {
-    cairo_destroy((cairo_t*)arg->v_pointer);
+    cairo_destroy ( (cairo_t*) arg->v_pointer);
     return TRUE;
 }
 
 
 gboolean
-cairo_surface_to_arg(PyObject       *value,
-                     GITypeInfo     *type_info,
-                     GITransfer      transfer,
-                     GArgument      *arg)
+cairo_surface_to_arg (PyObject       *value,
+                      GITypeInfo     *type_info,
+                      GITransfer      transfer,
+                      GArgument      *arg)
 {
     cairo_surface_t *surface;
 
     g_assert (transfer == GI_TRANSFER_NOTHING);
 
-    surface = ((PycairoSurface*)value)->surface;
+    surface = ( (PycairoSurface*) value)->surface;
     if (!surface)
         return FALSE;
 
@@ -84,7 +84,7 @@ cairo_surface_to_arg(PyObject       *value,
 }
 
 PyObject *
-cairo_surface_from_arg(GITypeInfo *type_info, GArgument  *arg)
+cairo_surface_from_arg (GITypeInfo *type_info, GArgument  *arg)
 {
     cairo_surface_t *surface = (cairo_surface_t*) arg;
 
@@ -94,10 +94,10 @@ cairo_surface_from_arg(GITypeInfo *type_info, GArgument  *arg)
 }
 
 gboolean
-cairo_surface_release_arg(GITransfer  transfer, GITypeInfo *type_info,
-                          GArgument  *arg)
+cairo_surface_release_arg (GITransfer  transfer, GITypeInfo *type_info,
+                           GArgument  *arg)
 {
-    cairo_surface_destroy((cairo_surface_t*)arg->v_pointer);
+    cairo_surface_destroy ( (cairo_surface_t*) arg->v_pointer);
     return TRUE;
 }
 

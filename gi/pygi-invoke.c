@@ -41,7 +41,7 @@ struct invocation_state
     guint8 user_data_index;
     guint8 destroy_notify_index;
     PyGICClosure *closure;
-    
+
     glong error_arg_pos;
 
     GIArgInfo **arg_infos;
@@ -68,27 +68,27 @@ _initialize_invocation_state (struct invocation_state *state,
 {
     GIFunctionInfoFlags flags;
 
-    flags = g_function_info_get_flags(info);
+    flags = g_function_info_get_flags (info);
     state->is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
     state->is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
 
     /* Count arguments. */
-    state->n_args = g_callable_info_get_n_args((GICallableInfo *)info);
+    state->n_args = g_callable_info_get_n_args ( (GICallableInfo *) info);
     state->n_in_args = 0;
     state->n_out_args = 0;
     state->n_backup_args = 0;
     state->n_aux_in_args = 0;
     state->n_aux_out_args = 0;
-    
+
     /* Check the argument count. */
-    state->n_py_args = PyTuple_Size(py_args);
-    g_assert(state->n_py_args >= 0);
+    state->n_py_args = PyTuple_Size (py_args);
+    g_assert (state->n_py_args >= 0);
 
     state->error_arg_pos = -1;
 
-    state->arg_infos = g_slice_alloc0(sizeof(gpointer) * state->n_args);
-    state->arg_type_infos = g_slice_alloc0(sizeof(gpointer) * state->n_args);
-    state->args_is_auxiliary = g_slice_alloc0(sizeof(gboolean) * state->n_args);
+    state->arg_infos = g_slice_alloc0 (sizeof (gpointer) * state->n_args);
+    state->arg_type_infos = g_slice_alloc0 (sizeof (gpointer) * state->n_args);
+    state->args_is_auxiliary = g_slice_alloc0 (sizeof (gboolean) * state->n_args);
 
     state->return_value = NULL;
     state->closure = NULL;
@@ -111,12 +111,12 @@ _prepare_invocation_state (struct invocation_state *state,
                                    &state->callback_index, &state->user_data_index,
                                    &state->destroy_notify_index))
         return FALSE;
-        
+
     if (state->callback_index != G_MAXUINT8) {
         if (!_pygi_create_callback (function_info,
                                     state->is_method,
                                     state->is_constructor,
-                                    state->n_args, state->n_py_args, 
+                                    state->n_args, state->n_py_args,
                                     py_args, state->callback_index,
                                     state->user_data_index,
                                     state->destroy_notify_index, &state->closure))
@@ -141,15 +141,15 @@ _prepare_invocation_state (struct invocation_state *state,
         GIDirection direction;
         GITransfer transfer;
         GITypeTag arg_type_tag;
-        
-        state->arg_infos[i] = g_callable_info_get_arg((GICallableInfo *)function_info,
-                                                 i);
 
-        state->arg_type_infos[i] = g_arg_info_get_type(state->arg_infos[i]);
-        
-        direction = g_arg_info_get_direction(state->arg_infos[i]);
-        transfer = g_arg_info_get_ownership_transfer(state->arg_infos[i]);
-        arg_type_tag = g_type_info_get_tag(state->arg_type_infos[i]);
+        state->arg_infos[i] = g_callable_info_get_arg ( (GICallableInfo *) function_info,
+                                                        i);
+
+        state->arg_type_infos[i] = g_arg_info_get_type (state->arg_infos[i]);
+
+        direction = g_arg_info_get_direction (state->arg_infos[i]);
+        transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
+        arg_type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             state->n_in_args += 1;
@@ -170,7 +170,7 @@ _prepare_invocation_state (struct invocation_state *state,
             {
                 gint length_arg_pos;
 
-                length_arg_pos = g_type_info_get_array_length(state->arg_type_infos[i]);
+                length_arg_pos = g_type_info_get_array_length (state->arg_type_infos[i]);
 
                 if (state->is_method)
                     length_arg_pos--; // length_arg_pos refers to C args
@@ -179,7 +179,7 @@ _prepare_invocation_state (struct invocation_state *state,
                     break;
                 }
 
-                g_assert(length_arg_pos < state->n_args);
+                g_assert (length_arg_pos < state->n_args);
                 state->args_is_auxiliary[length_arg_pos] = TRUE;
 
                 if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
@@ -192,7 +192,7 @@ _prepare_invocation_state (struct invocation_state *state,
                 break;
             }
             case GI_TYPE_TAG_ERROR:
-                g_warn_if_fail(state->error_arg_pos < 0);
+                g_warn_if_fail (state->error_arg_pos < 0);
                 state->error_arg_pos = i;
                 break;
             default:
@@ -200,18 +200,18 @@ _prepare_invocation_state (struct invocation_state *state,
         }
     }
 
-    state->return_type_info = g_callable_info_get_return_type((GICallableInfo *)function_info);
-    state->return_type_tag = g_type_info_get_tag(state->return_type_info);
+    state->return_type_info = g_callable_info_get_return_type ( (GICallableInfo *) function_info);
+    state->return_type_tag = g_type_info_get_tag (state->return_type_info);
 
     if (state->return_type_tag == GI_TYPE_TAG_ARRAY) {
         gint length_arg_pos;
-        length_arg_pos = g_type_info_get_array_length(state->return_type_info);
+        length_arg_pos = g_type_info_get_array_length (state->return_type_info);
 
         if (state->is_method)
             length_arg_pos--; // length_arg_pos refers to C args
 
         if (length_arg_pos >= 0) {
-            g_assert(length_arg_pos < state->n_args);
+            g_assert (length_arg_pos < state->n_args);
             state->args_is_auxiliary[length_arg_pos] = TRUE;
             state->n_aux_out_args += 1;
         }
@@ -227,14 +227,14 @@ _prepare_invocation_state (struct invocation_state *state,
         Py_ssize_t py_args_pos;
 
         n_py_args_expected = state->n_in_args
-            + (state->is_constructor ? 1 : 0)
-            - state->n_aux_in_args
-            - (state->error_arg_pos >= 0 ? 1 : 0);
+                             + (state->is_constructor ? 1 : 0)
+                             - state->n_aux_in_args
+                             - (state->error_arg_pos >= 0 ? 1 : 0);
 
         if (state->n_py_args != n_py_args_expected) {
-            PyErr_Format(PyExc_TypeError,
-                "takes exactly %zd argument(s) (%zd given)",
-                n_py_args_expected, state->n_py_args);
+            PyErr_Format (PyExc_TypeError,
+                          "takes exactly %zd argument(s) (%zd given)",
+                          n_py_args_expected, state->n_py_args);
             return FALSE;
         }
 
@@ -251,8 +251,8 @@ _prepare_invocation_state (struct invocation_state *state,
             gint retval;
             gboolean allow_none;
 
-            direction = g_arg_info_get_direction(state->arg_infos[i]);
-            type_tag = g_type_info_get_tag(state->arg_type_infos[i]);
+            direction = g_arg_info_get_direction (state->arg_infos[i]);
+            type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
             if (direction == GI_DIRECTION_OUT
                     || state->args_is_auxiliary[i]
@@ -260,33 +260,33 @@ _prepare_invocation_state (struct invocation_state *state,
                 continue;
             }
 
-            g_assert(py_args_pos < state->n_py_args);
-            py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
+            g_assert (py_args_pos < state->n_py_args);
+            py_arg = PyTuple_GET_ITEM (py_args, py_args_pos);
 
-            allow_none = g_arg_info_may_be_null(state->arg_infos[i]);
+            allow_none = g_arg_info_may_be_null (state->arg_infos[i]);
 
-            retval = _pygi_g_type_info_check_object(state->arg_type_infos[i],
-                                                    py_arg,
-                                                    allow_none);
+            retval = _pygi_g_type_info_check_object (state->arg_type_infos[i],
+                                                     py_arg,
+                                                     allow_none);
 
             if (retval < 0) {
                 return FALSE;
             } else if (!retval) {
-                _PyGI_ERROR_PREFIX("argument %zd: ", py_args_pos);
+                _PyGI_ERROR_PREFIX ("argument %zd: ", py_args_pos);
                 return FALSE;
             }
 
             py_args_pos += 1;
         }
 
-        g_assert(py_args_pos == state->n_py_args);
+        g_assert (py_args_pos == state->n_py_args);
     }
 
-    state->args = g_slice_alloc0(sizeof(gpointer) * state->n_args);
-    state->in_args = g_slice_alloc0(sizeof(GArgument) * state->n_in_args);
-    state->out_args = g_slice_alloc0(sizeof(GArgument) * state->n_out_args);
-    state->out_values = g_slice_alloc0(sizeof(GArgument) * state->n_out_args);
-    state->backup_args = g_slice_alloc0(sizeof(GArgument) * state->n_backup_args);
+    state->args = g_slice_alloc0 (sizeof (gpointer) * state->n_args);
+    state->in_args = g_slice_alloc0 (sizeof (GArgument) * state->n_in_args);
+    state->out_args = g_slice_alloc0 (sizeof (GArgument) * state->n_out_args);
+    state->out_values = g_slice_alloc0 (sizeof (GArgument) * state->n_out_args);
+    state->backup_args = g_slice_alloc0 (sizeof (GArgument) * state->n_backup_args);
 
     /* Bind args so we can use an unique index. */
     {
@@ -299,21 +299,21 @@ _prepare_invocation_state (struct invocation_state *state,
         for (i = 0; i < state->n_args; i++) {
             GIDirection direction;
 
-            direction = g_arg_info_get_direction(state->arg_infos[i]);
+            direction = g_arg_info_get_direction (state->arg_infos[i]);
 
             switch (direction) {
                 case GI_DIRECTION_IN:
-                    g_assert(in_args_pos < state->n_in_args);
+                    g_assert (in_args_pos < state->n_in_args);
                     state->args[i] = &state->in_args[in_args_pos];
                     in_args_pos += 1;
                     break;
                 case GI_DIRECTION_INOUT:
-                    g_assert(in_args_pos < state->n_in_args);
-                    g_assert(out_args_pos < state->n_out_args);
+                    g_assert (in_args_pos < state->n_in_args);
+                    g_assert (out_args_pos < state->n_out_args);
                     state->in_args[in_args_pos].v_pointer = &state->out_values[out_args_pos];
                     in_args_pos += 1;
                 case GI_DIRECTION_OUT:
-                    g_assert(out_args_pos < state->n_out_args);
+                    g_assert (out_args_pos < state->n_out_args);
                     state->out_args[out_args_pos].v_pointer = &state->out_values[out_args_pos];
                     state->out_values[out_args_pos].v_pointer = NULL;
                     state->args[i] = &state->out_values[out_args_pos];
@@ -321,8 +321,8 @@ _prepare_invocation_state (struct invocation_state *state,
             }
         }
 
-        g_assert(in_args_pos == state->n_in_args);
-        g_assert(out_args_pos == state->n_out_args);
+        g_assert (in_args_pos == state->n_in_args);
+        g_assert (out_args_pos == state->n_out_args);
     }
 
     /* Convert the input arguments. */
@@ -342,28 +342,28 @@ _prepare_invocation_state (struct invocation_state *state,
             GIInfoType container_info_type;
             PyObject *py_arg;
 
-            container_info = g_base_info_get_container(function_info);
-            container_info_type = g_base_info_get_type(container_info);
+            container_info = g_base_info_get_container (function_info);
+            container_info_type = g_base_info_get_type (container_info);
 
-            g_assert(py_args_pos < state->n_py_args);
-            py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
+            g_assert (py_args_pos < state->n_py_args);
+            py_arg = PyTuple_GET_ITEM (py_args, py_args_pos);
 
-            switch(container_info_type) {
+            switch (container_info_type) {
                 case GI_INFO_TYPE_UNION:
                 case GI_INFO_TYPE_STRUCT:
                 {
                     GType type;
 
-                    type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)container_info);
+                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) container_info);
 
-                    if (g_type_is_a(type, G_TYPE_BOXED)) {
-                        g_assert(state->n_in_args > 0);
-                        state->in_args[0].v_pointer = pyg_boxed_get(py_arg, void);
-                    } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
-                        g_assert(state->n_in_args > 0);
-                        state->in_args[0].v_pointer = pyg_pointer_get(py_arg, void);
+                    if (g_type_is_a (type, G_TYPE_BOXED)) {
+                        g_assert (state->n_in_args > 0);
+                        state->in_args[0].v_pointer = pyg_boxed_get (py_arg, void);
+                    } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                        g_assert (state->n_in_args > 0);
+                        state->in_args[0].v_pointer = pyg_pointer_get (py_arg, void);
                     } else {
-                        PyErr_Format(PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name(type));
+                        PyErr_Format (PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name (type));
                         return FALSE;
                     }
 
@@ -371,8 +371,8 @@ _prepare_invocation_state (struct invocation_state *state,
                 }
                 case GI_INFO_TYPE_OBJECT:
                 case GI_INFO_TYPE_INTERFACE:
-                    g_assert(state->n_in_args > 0);
-                    state->in_args[0].v_pointer = pygobject_get(py_arg);
+                    g_assert (state->n_in_args > 0);
+                    state->in_args[0].v_pointer = pygobject_get (py_arg);
                     break;
                 default:
                     /* Other types don't have methods. */
@@ -398,36 +398,36 @@ _prepare_invocation_state (struct invocation_state *state,
                 state->args[i]->v_pointer = destroy_notify->closure;
                 continue;
             }
-            
+
             if (state->args_is_auxiliary[i]) {
                 continue;
             }
 
-            direction = g_arg_info_get_direction(state->arg_infos[i]);
+            direction = g_arg_info_get_direction (state->arg_infos[i]);
 
             if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
                 PyObject *py_arg;
                 GITypeTag arg_type_tag;
                 GITransfer transfer;
 
-                arg_type_tag = g_type_info_get_tag(state->arg_type_infos[i]);
+                arg_type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
                 if (arg_type_tag == GI_TYPE_TAG_ERROR) {
                     GError **error;
 
-                    error = g_slice_new(GError *);
+                    error = g_slice_new (GError *);
                     *error = NULL;
 
                     state->args[i]->v_pointer = error;
                     continue;
                 }
 
-                transfer = g_arg_info_get_ownership_transfer(state->arg_infos[i]);
+                transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
 
-                g_assert(py_args_pos < state->n_py_args);
-                py_arg = PyTuple_GET_ITEM(py_args, py_args_pos);
+                g_assert (py_args_pos < state->n_py_args);
+                py_arg = PyTuple_GET_ITEM (py_args, py_args_pos);
 
-                *state->args[i] = _pygi_argument_from_object(py_arg, state->arg_type_infos[i], transfer);
+                *state->args[i] = _pygi_argument_from_object (py_arg, state->arg_type_infos[i], transfer);
 
                 if (PyErr_Occurred()) {
                     /* TODO: release previous input arguments. */
@@ -436,7 +436,7 @@ _prepare_invocation_state (struct invocation_state *state,
 
                 if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
                     /* We need to keep a copy of the argument to be able to release it later. */
-                    g_assert(backup_args_pos < state->n_backup_args);
+                    g_assert (backup_args_pos < state->n_backup_args);
                     state->backup_args[backup_args_pos] = *state->args[i];
                     backup_args_pos += 1;
                 } else if (transfer == GI_TRANSFER_CONTAINER) {
@@ -450,23 +450,23 @@ _prepare_invocation_state (struct invocation_state *state,
 
                             array = state->args[i]->v_pointer;
 
-                            item_size = g_array_get_element_size(array);
+                            item_size = g_array_get_element_size (array);
 
-                            new_array = g_array_sized_new(FALSE, FALSE, item_size, array->len);
-                            g_array_append_vals(new_array, array->data, array->len);
+                            new_array = g_array_sized_new (FALSE, FALSE, item_size, array->len);
+                            g_array_append_vals (new_array, array->data, array->len);
 
-                            g_assert(backup_args_pos < state->n_backup_args);
+                            g_assert (backup_args_pos < state->n_backup_args);
                             state->backup_args[backup_args_pos].v_pointer = new_array;
 
                             break;
                         }
                         case GI_TYPE_TAG_GLIST:
-                            g_assert(backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_list_copy(state->args[i]->v_pointer);
+                            g_assert (backup_args_pos < state->n_backup_args);
+                            state->backup_args[backup_args_pos].v_pointer = g_list_copy (state->args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_GSLIST:
-                            g_assert(backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_slist_copy(state->args[i]->v_pointer);
+                            g_assert (backup_args_pos < state->n_backup_args);
+                            state->backup_args[backup_args_pos].v_pointer = g_slist_copy (state->args[i]->v_pointer);
                             break;
                         case GI_TYPE_TAG_GHASH:
                         {
@@ -476,11 +476,11 @@ _prepare_invocation_state (struct invocation_state *state,
 
                             hash_table = state->args[i]->v_pointer;
 
-                            keys = g_hash_table_get_keys(hash_table);
-                            values = g_hash_table_get_values(hash_table);
+                            keys = g_hash_table_get_keys (hash_table);
+                            values = g_hash_table_get_values (hash_table);
 
-                            g_assert(backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_list_concat(keys, values);
+                            g_assert (backup_args_pos < state->n_backup_args);
+                            state->backup_args[backup_args_pos].v_pointer = g_list_concat (keys, values);
 
                             break;
                         }
@@ -497,26 +497,26 @@ _prepare_invocation_state (struct invocation_state *state,
 
                     array = state->args[i]->v_pointer;
 
-                    length_arg_pos = g_type_info_get_array_length(state->arg_type_infos[i]);
+                    length_arg_pos = g_type_info_get_array_length (state->arg_type_infos[i]);
                     if (state->is_method)
                         length_arg_pos--; // length_arg_pos refers to C args
                     if (length_arg_pos >= 0) {
-                    	int len = 0;
+                        int len = 0;
                         /* Set the auxiliary argument holding the length. */
-                    	if (array)
-                    		len = array->len;
+                        if (array)
+                            len = array->len;
 
                         state->args[length_arg_pos]->v_size = len;
                     }
 
                     /* Get rid of the GArray. */
-                    if ((array != NULL) &&
-                        (g_type_info_get_array_type(state->arg_type_infos[i]) == GI_ARRAY_TYPE_C)) {
+                    if ( (array != NULL) &&
+                            (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C)) {
                         state->args[i]->v_pointer = array->data;
 
                         if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
                             /* The array hasn't been referenced anywhere, so free it to avoid losing memory. */
-                            g_array_free(array, FALSE);
+                            g_array_free (array, FALSE);
                         }
                     }
                 }
@@ -525,8 +525,8 @@ _prepare_invocation_state (struct invocation_state *state,
             }
         }
 
-        g_assert(py_args_pos == state->n_py_args);
-        g_assert(backup_args_pos == state->n_backup_args);
+        g_assert (py_args_pos == state->n_py_args);
+        g_assert (backup_args_pos == state->n_backup_args);
     }
 
     return TRUE;
@@ -541,13 +541,13 @@ _invoke_function (struct invocation_state *state,
 
     error = NULL;
 
-    retval = g_function_info_invoke((GIFunctionInfo *)function_info,
-            state->in_args, state->n_in_args, state->out_args, state->n_out_args, &state->return_arg, &error);
+    retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
+                                      state->in_args, state->n_in_args, state->out_args, state->n_out_args, &state->return_arg, &error);
     if (!retval) {
-        g_assert(error != NULL);
+        g_assert (error != NULL);
         /* TODO: raise the right error, out of the error domain. */
-        PyErr_SetString(PyExc_RuntimeError, error->message);
-        g_error_free(error);
+        PyErr_SetString (PyExc_RuntimeError, error->message);
+        g_error_free (error);
 
         /* TODO: release input arguments. */
 
@@ -561,8 +561,8 @@ _invoke_function (struct invocation_state *state,
 
         if (*error != NULL) {
             /* TODO: raise the right error, out of the error domain, if applicable. */
-            PyErr_SetString(PyExc_Exception, (*error)->message);
-            g_error_free(*error);
+            PyErr_SetString (PyExc_Exception, (*error)->message);
+            g_error_free (*error);
 
             /* TODO: release input arguments. */
 
@@ -586,45 +586,45 @@ _process_invocation_state (struct invocation_state *state,
         GIInfoType info_type;
         GITransfer transfer;
 
-        g_assert(state->n_py_args > 0);
-        py_type = (PyTypeObject *)PyTuple_GET_ITEM(py_args, 0);
+        g_assert (state->n_py_args > 0);
+        py_type = (PyTypeObject *) PyTuple_GET_ITEM (py_args, 0);
 
-        info = g_type_info_get_interface(state->return_type_info);
-        g_assert(info != NULL);
+        info = g_type_info_get_interface (state->return_type_info);
+        g_assert (info != NULL);
 
-        info_type = g_base_info_get_type(info);
+        info_type = g_base_info_get_type (info);
 
-        transfer = g_callable_info_get_caller_owns((GICallableInfo *)function_info);
+        transfer = g_callable_info_get_caller_owns ( (GICallableInfo *) function_info);
 
         switch (info_type) {
             case GI_INFO_TYPE_UNION:
                 /* TODO */
-                PyErr_SetString(PyExc_NotImplementedError, "creating unions is not supported yet");
-                g_base_info_unref(info);
+                PyErr_SetString (PyExc_NotImplementedError, "creating unions is not supported yet");
+                g_base_info_unref (info);
                 return FALSE;
             case GI_INFO_TYPE_STRUCT:
             {
                 GType type;
 
-                type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)info);
+                type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
 
-                if (g_type_is_a(type, G_TYPE_BOXED)) {
+                if (g_type_is_a (type, G_TYPE_BOXED)) {
                     if (state->return_arg.v_pointer == NULL) {
-                        PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                        PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
                         break;
                     }
-                    g_warn_if_fail(transfer == GI_TRANSFER_EVERYTHING);
-                    state->return_value = _pygi_boxed_new(py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
-                } else if (g_type_is_a(type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                    g_warn_if_fail (transfer == GI_TRANSFER_EVERYTHING);
+                    state->return_value = _pygi_boxed_new (py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                     if (state->return_arg.v_pointer == NULL) {
-                        PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                        PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
                         break;
                     }
-                    g_warn_if_fail(transfer == GI_TRANSFER_NOTHING);
-                    state->return_value = _pygi_struct_new(py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                    g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+                    state->return_value = _pygi_struct_new (py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
                 } else {
-                    PyErr_Format(PyExc_TypeError, "cannot create '%s' instances", py_type->tp_name);
-                    g_base_info_unref(info);
+                    PyErr_Format (PyExc_TypeError, "cannot create '%s' instances", py_type->tp_name);
+                    g_base_info_unref (info);
                     return FALSE;
                 }
 
@@ -632,10 +632,10 @@ _process_invocation_state (struct invocation_state *state,
             }
             case GI_INFO_TYPE_OBJECT:
                 if (state->return_arg.v_pointer == NULL) {
-                    PyErr_SetString(PyExc_TypeError, "constructor returned NULL");
+                    PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
                     break;
                 }
-                state->return_value = pygobject_new(state->return_arg.v_pointer);
+                state->return_value = pygobject_new (state->return_arg.v_pointer);
                 if (transfer == GI_TRANSFER_EVERYTHING) {
                     /* The new wrapper increased the reference count, so decrease it. */
                     g_object_unref (state->return_arg.v_pointer);
@@ -646,7 +646,7 @@ _process_invocation_state (struct invocation_state *state,
                 g_assert_not_reached();
         }
 
-        g_base_info_unref(info);
+        g_base_info_unref (info);
 
         if (state->return_value == NULL) {
             /* TODO: release arguments. */
@@ -655,26 +655,26 @@ _process_invocation_state (struct invocation_state *state,
     } else {
         GITransfer transfer;
 
-        if ((state->return_type_tag == GI_TYPE_TAG_ARRAY) &&
-            (g_type_info_get_array_type(state->return_type_info) == GI_ARRAY_TYPE_C)) {
+        if ( (state->return_type_tag == GI_TYPE_TAG_ARRAY) &&
+                (g_type_info_get_array_type (state->return_type_info) == GI_ARRAY_TYPE_C)) {
             /* Create a #GArray. */
-            state->return_arg.v_pointer = _pygi_argument_to_array(&state->return_arg, state->args, state->return_type_info, state->is_method);
+            state->return_arg.v_pointer = _pygi_argument_to_array (&state->return_arg, state->args, state->return_type_info, state->is_method);
         }
 
-        transfer = g_callable_info_get_caller_owns((GICallableInfo *)function_info);
+        transfer = g_callable_info_get_caller_owns ( (GICallableInfo *) function_info);
 
-        state->return_value = _pygi_argument_to_object(&state->return_arg, state->return_type_info, transfer);
+        state->return_value = _pygi_argument_to_object (&state->return_arg, state->return_type_info, transfer);
         if (state->return_value == NULL) {
             /* TODO: release argument. */
             return FALSE;
         }
 
-        _pygi_argument_release(&state->return_arg, state->return_type_info, transfer, GI_DIRECTION_OUT);
+        _pygi_argument_release (&state->return_arg, state->return_type_info, transfer, GI_DIRECTION_OUT);
 
         if (state->return_type_tag == GI_TYPE_TAG_ARRAY
                 && transfer == GI_TRANSFER_NOTHING) {
             /* We created a #GArray, so free it. */
-            state->return_arg.v_pointer = g_array_free(state->return_arg.v_pointer, FALSE);
+            state->return_arg.v_pointer = g_array_free (state->return_arg.v_pointer, FALSE);
         }
     }
 
@@ -690,7 +690,7 @@ _process_invocation_state (struct invocation_state *state,
             /* Return a tuple. */
             PyObject *return_values;
 
-            return_values = PyTuple_New(state->n_return_values);
+            return_values = PyTuple_New (state->n_return_values);
             if (return_values == NULL) {
                 /* TODO: release arguments. */
                 return FALSE;
@@ -698,11 +698,11 @@ _process_invocation_state (struct invocation_state *state,
 
             if (state->return_type_tag == GI_TYPE_TAG_VOID) {
                 /* The current return value is None. */
-                Py_DECREF(state->return_value);
+                Py_DECREF (state->return_value);
             } else {
                 /* Put the return value first. */
-                g_assert(state->return_value != NULL);
-                PyTuple_SET_ITEM(return_values, return_values_pos, state->return_value);
+                g_assert (state->return_value != NULL);
+                PyTuple_SET_ITEM (return_values, return_values_pos, state->return_value);
                 return_values_pos += 1;
             }
 
@@ -719,35 +719,35 @@ _process_invocation_state (struct invocation_state *state,
                 continue;
             }
 
-            direction = g_arg_info_get_direction(state->arg_infos[i]);
-            transfer = g_arg_info_get_ownership_transfer(state->arg_infos[i]);
+            direction = g_arg_info_get_direction (state->arg_infos[i]);
+            transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
 
-            type_tag = g_type_info_get_tag(state->arg_type_infos[i]);
+            type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
-            if ((type_tag == GI_TYPE_TAG_ARRAY) &&
-                (g_type_info_get_array_type(state->arg_type_infos[i]) == GI_ARRAY_TYPE_C) &&
-                (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
+            if ( (type_tag == GI_TYPE_TAG_ARRAY) &&
+                    (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C) &&
+                    (direction != GI_DIRECTION_IN || transfer == GI_TRANSFER_NOTHING)) {
                 /* Create a #GArray. */
-                state->args[i]->v_pointer = _pygi_argument_to_array(state->args[i], state->args, state->arg_type_infos[i], state->is_method);
+                state->args[i]->v_pointer = _pygi_argument_to_array (state->args[i], state->args, state->arg_type_infos[i], state->is_method);
             }
 
             if (direction == GI_DIRECTION_INOUT || direction == GI_DIRECTION_OUT) {
                 /* Convert the argument. */
                 PyObject *obj;
 
-                obj = _pygi_argument_to_object(state->args[i], state->arg_type_infos[i], transfer);
+                obj = _pygi_argument_to_object (state->args[i], state->arg_type_infos[i], transfer);
                 if (obj == NULL) {
                     /* TODO: release arguments. */
                     return FALSE;
                 }
 
-                g_assert(return_values_pos < state->n_return_values);
+                g_assert (return_values_pos < state->n_return_values);
 
                 if (state->n_return_values > 1) {
-                    PyTuple_SET_ITEM(state->return_value, return_values_pos, obj);
+                    PyTuple_SET_ITEM (state->return_value, return_values_pos, obj);
                 } else {
                     /* The current return value is None. */
-                    Py_DECREF(state->return_value);
+                    Py_DECREF (state->return_value);
                     state->return_value = obj;
                 }
 
@@ -756,16 +756,16 @@ _process_invocation_state (struct invocation_state *state,
 
             /* Release the argument. */
 
-            if ((direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+            if ( (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
                     && transfer == GI_TRANSFER_CONTAINER) {
                 /* Release the items we kept in another container. */
                 switch (type_tag) {
                     case GI_TYPE_TAG_ARRAY:
                     case GI_TYPE_TAG_GLIST:
                     case GI_TYPE_TAG_GSLIST:
-                        g_assert(backup_args_pos < state->n_backup_args);
-                        _pygi_argument_release(&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                            transfer, GI_DIRECTION_IN);
+                        g_assert (backup_args_pos < state->n_backup_args);
+                        _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
+                                                transfer, GI_DIRECTION_IN);
                         break;
                     case GI_TYPE_TAG_GHASH:
                     {
@@ -775,25 +775,25 @@ _process_invocation_state (struct invocation_state *state,
                         gsize length;
                         gsize j;
 
-                        key_type_info = g_type_info_get_param_type(state->arg_type_infos[i], 0);
-                        value_type_info = g_type_info_get_param_type(state->arg_type_infos[i], 1);
+                        key_type_info = g_type_info_get_param_type (state->arg_type_infos[i], 0);
+                        value_type_info = g_type_info_get_param_type (state->arg_type_infos[i], 1);
 
-                        g_assert(backup_args_pos < state->n_backup_args);
+                        g_assert (backup_args_pos < state->n_backup_args);
                         item = state->backup_args[backup_args_pos].v_pointer;
 
-                        length = g_list_length(item) / 2;
+                        length = g_list_length (item) / 2;
 
-                        for (j = 0; j < length; j++, item = g_list_next(item)) {
-                            _pygi_argument_release((GArgument *)&item->data, key_type_info,
-                                GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                        for (j = 0; j < length; j++, item = g_list_next (item)) {
+                            _pygi_argument_release ( (GArgument *) &item->data, key_type_info,
+                                                     GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                         }
 
-                        for (j = 0; j < length; j++, item = g_list_next(item)) {
-                            _pygi_argument_release((GArgument *)&item->data, value_type_info,
-                                GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                        for (j = 0; j < length; j++, item = g_list_next (item)) {
+                            _pygi_argument_release ( (GArgument *) &item->data, value_type_info,
+                                                     GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                         }
 
-                        g_list_free(state->backup_args[backup_args_pos].v_pointer);
+                        g_list_free (state->backup_args[backup_args_pos].v_pointer);
 
                         break;
                     }
@@ -803,34 +803,34 @@ _process_invocation_state (struct invocation_state *state,
 
                 if (direction == GI_DIRECTION_INOUT) {
                     /* Release the output argument. */
-                    _pygi_argument_release(state->args[i], state->arg_type_infos[i], GI_TRANSFER_CONTAINER,
-                        GI_DIRECTION_OUT);
+                    _pygi_argument_release (state->args[i], state->arg_type_infos[i], GI_TRANSFER_CONTAINER,
+                                            GI_DIRECTION_OUT);
                 }
 
                 backup_args_pos += 1;
             } else if (direction == GI_DIRECTION_INOUT) {
                 if (transfer == GI_TRANSFER_NOTHING) {
-                    g_assert(backup_args_pos < state->n_backup_args);
-                    _pygi_argument_release(&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                        GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
+                    g_assert (backup_args_pos < state->n_backup_args);
+                    _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
+                                            GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                     backup_args_pos += 1;
                 }
 
-                _pygi_argument_release(state->args[i], state->arg_type_infos[i], transfer,
-                    GI_DIRECTION_OUT);
+                _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer,
+                                        GI_DIRECTION_OUT);
             } else {
-                _pygi_argument_release(state->args[i], state->arg_type_infos[i], transfer, direction);
+                _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
             }
 
             if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
                 /* We created a #GArray and it has not been released above, so free it. */
-                state->args[i]->v_pointer = g_array_free(state->args[i]->v_pointer, FALSE);
+                state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
             }
         }
 
-        g_assert(state->n_return_values <= 1 || return_values_pos == state->n_return_values);
-        g_assert(backup_args_pos == state->n_backup_args);
+        g_assert (state->n_return_values <= 1 || return_values_pos == state->n_return_values);
+        g_assert (backup_args_pos == state->n_backup_args);
     }
 
     return TRUE;
@@ -842,55 +842,55 @@ _free_invocation_state (struct invocation_state *state)
     gsize i;
 
     if (state->return_type_info != NULL) {
-        g_base_info_unref((GIBaseInfo *)state->return_type_info);
+        g_base_info_unref ( (GIBaseInfo *) state->return_type_info);
     }
 
     if (state->closure != NULL) {
-        if (state->closure->scope == GI_SCOPE_TYPE_CALL) 
-            _pygi_invoke_closure_free(state->closure);
+        if (state->closure->scope == GI_SCOPE_TYPE_CALL)
+            _pygi_invoke_closure_free (state->closure);
     }
 
     for (i = 0; i < state->n_args; i++) {
         if (state->arg_type_infos[i] != NULL)
-            g_base_info_unref((GIBaseInfo *)state->arg_type_infos[i]);
+            g_base_info_unref ( (GIBaseInfo *) state->arg_type_infos[i]);
         if (state->arg_infos[i] != NULL)
-            g_base_info_unref((GIBaseInfo *)state->arg_infos[i]);
+            g_base_info_unref ( (GIBaseInfo *) state->arg_infos[i]);
     }
 
     if (state->arg_infos != NULL) {
-        g_slice_free1(sizeof(gpointer) * state->n_args, state->arg_infos);
+        g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_infos);
     }
 
     if (state->arg_type_infos != NULL) {
-        g_slice_free1(sizeof(gpointer) * state->n_args, state->arg_type_infos);
+        g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_type_infos);
     }
 
     if (state->args != NULL) {
-        g_slice_free1(sizeof(gpointer) * state->n_args, state->args);
+        g_slice_free1 (sizeof (gpointer) * state->n_args, state->args);
     }
 
     if (state->args_is_auxiliary != NULL) {
-        g_slice_free1(sizeof(gboolean) * state->n_args, state->args_is_auxiliary);
+        g_slice_free1 (sizeof (gboolean) * state->n_args, state->args_is_auxiliary);
     }
 
     if (state->in_args != NULL) {
-        g_slice_free1(sizeof(GArgument) * state->n_in_args, state->in_args);
+        g_slice_free1 (sizeof (GArgument) * state->n_in_args, state->in_args);
     }
 
     if (state->out_args != NULL) {
-        g_slice_free1(sizeof(GArgument) * state->n_out_args, state->out_args);
+        g_slice_free1 (sizeof (GArgument) * state->n_out_args, state->out_args);
     }
 
     if (state->out_values != NULL) {
-        g_slice_free1(sizeof(GArgument) * state->n_out_args, state->out_values);
+        g_slice_free1 (sizeof (GArgument) * state->n_out_args, state->out_values);
     }
 
     if (state->backup_args != NULL) {
-        g_slice_free1(sizeof(GArgument) * state->n_backup_args, state->backup_args);
+        g_slice_free1 (sizeof (GArgument) * state->n_backup_args, state->backup_args);
     }
 
     if (PyErr_Occurred()) {
-        Py_CLEAR(state->return_value);
+        Py_CLEAR (state->return_value);
     }
 }
 

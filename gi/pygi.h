@@ -73,27 +73,27 @@ pygi_import (void)
         return 1;
     }
 
-    module = PyImport_ImportModule("gi");
+    module = PyImport_ImportModule ("gi");
     if (module == NULL) {
         return -1;
     }
 
-    api = PyObject_GetAttrString(module, "_API");
+    api = PyObject_GetAttrString (module, "_API");
     if (api == NULL) {
-        Py_DECREF(module);
+        Py_DECREF (module);
         return -1;
     }
-    if (!PyCObject_Check(api)) {
-        Py_DECREF(module);
-        Py_DECREF(api);
-        PyErr_Format(PyExc_TypeError, "gi._API must be cobject, not %s",
-                api->ob_type->tp_name);
+    if (!PyCObject_Check (api)) {
+        Py_DECREF (module);
+        Py_DECREF (api);
+        PyErr_Format (PyExc_TypeError, "gi._API must be cobject, not %s",
+                      api->ob_type->tp_name);
         return -1;
     }
 
-    PyGI_API = (struct PyGI_API *)PyCObject_AsVoidPtr(api);
+    PyGI_API = (struct PyGI_API *) PyCObject_AsVoidPtr (api);
 
-    Py_DECREF(api);
+    Py_DECREF (api);
 
     return 0;
 }

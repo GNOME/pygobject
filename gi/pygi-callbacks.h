@@ -1,6 +1,6 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,9 +22,9 @@
 
 G_BEGIN_DECLS
 
-void _pygi_callback_notify_info_free(gpointer user_data);
- 
-PyGICClosure*_pygi_destroy_notify_create(void);
+void _pygi_callback_notify_info_free (gpointer user_data);
+
+PyGICClosure*_pygi_destroy_notify_create (void);
 
 gboolean _pygi_scan_for_callbacks (GIFunctionInfo *self,
                                    gboolean       is_method,

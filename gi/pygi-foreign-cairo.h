@@ -26,30 +26,30 @@
 
 #include "pygi-foreign.h"
 
-gboolean cairo_context_to_arg(PyObject       *value,
-                              GITypeInfo     *type_info,
-                              GITransfer      transfer,
-                              GArgument      *arg);
+gboolean cairo_context_to_arg (PyObject       *value,
+                               GITypeInfo     *type_info,
+                               GITransfer      transfer,
+                               GArgument      *arg);
 
-PyObject *cairo_context_from_arg(GITypeInfo *type_info,
-                                 GArgument  *arg);
+PyObject *cairo_context_from_arg (GITypeInfo *type_info,
+                                  GArgument  *arg);
 
-gboolean cairo_context_release_arg(GITransfer  transfer,
-                                   GITypeInfo *type_info,
-                                   GArgument  *arg);
+gboolean cairo_context_release_arg (GITransfer  transfer,
+                                    GITypeInfo *type_info,
+                                    GArgument  *arg);
 
 
-gboolean cairo_surface_to_arg(PyObject       *value,
-                              GITypeInfo     *type_info,
-                              GITransfer      transfer,
-                              GArgument      *arg);
+gboolean cairo_surface_to_arg (PyObject       *value,
+                               GITypeInfo     *type_info,
+                               GITransfer      transfer,
+                               GArgument      *arg);
 
-PyObject *cairo_surface_from_arg(GITypeInfo *type_info,
-                                 GArgument  *arg);
+PyObject *cairo_surface_from_arg (GITypeInfo *type_info,
+                                  GArgument  *arg);
 
-gboolean cairo_surface_release_arg(GITransfer  transfer,
-                                   GITypeInfo *type_info,
-                                   GArgument  *arg);
+gboolean cairo_surface_release_arg (GITransfer  transfer,
+                                    GITypeInfo *type_info,
+                                    GArgument  *arg);
 
 #endif /* __PYGI_FOREIGN_CAIRO_H__ */
 

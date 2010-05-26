@@ -33,22 +33,22 @@ _pygi_type_import_by_gi_info (GIBaseInfo *info)
     PyObject *py_module;
     PyObject *py_object;
 
-    namespace_ = g_base_info_get_namespace(info);
-    name = g_base_info_get_name(info);
+    namespace_ = g_base_info_get_namespace (info);
+    name = g_base_info_get_name (info);
 
-    module_name = g_strconcat("gi.repository.", namespace_, NULL);
+    module_name = g_strconcat ("gi.repository.", namespace_, NULL);
 
-    py_module = PyImport_ImportModule(module_name);
+    py_module = PyImport_ImportModule (module_name);
 
-    g_free(module_name);
-        
+    g_free (module_name);
+
     if (py_module == NULL) {
         return NULL;
     }
 
-    py_object = PyObject_GetAttrString(py_module, name);
+    py_object = PyObject_GetAttrString (py_module, name);
 
-    Py_DECREF(py_module);
+    Py_DECREF (py_module);
 
     return py_object;
 }
@@ -62,34 +62,34 @@ pygi_type_import_by_g_type (GType g_type)
 
     repository = g_irepository_get_default();
 
-    info = g_irepository_find_by_gtype(repository, g_type);
+    info = g_irepository_find_by_gtype (repository, g_type);
     if (info == NULL) {
         return NULL;
     }
 
-    type = _pygi_type_import_by_gi_info(info);
-    g_base_info_unref(info);
+    type = _pygi_type_import_by_gi_info (info);
+    g_base_info_unref (info);
 
     return type;
 }
 
 PyObject *
-_pygi_type_get_from_g_type(GType g_type)
+_pygi_type_get_from_g_type (GType g_type)
 {
     PyObject *py_g_type;
     PyObject *py_type;
 
-    py_g_type = pyg_type_wrapper_new(g_type);
+    py_g_type = pyg_type_wrapper_new (g_type);
     if (py_g_type == NULL) {
         return NULL;
     }
 
-    py_type = PyObject_GetAttrString(py_g_type, "pytype");
+    py_type = PyObject_GetAttrString (py_g_type, "pytype");
     if (py_type == Py_None) {
-        py_type = pygi_type_import_by_g_type(g_type);
+        py_type = pygi_type_import_by_g_type (g_type);
     }
 
-    Py_DECREF(py_g_type);
+    Py_DECREF (py_g_type);
 
     return py_type;
 }

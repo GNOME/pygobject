@@ -43,10 +43,10 @@ gboolean pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
                                                     GITypeInfo         *type_info,
                                                     GITransfer          transfer,
                                                     GArgument          *arg);
-PyObject *pygi_struct_foreign_convert_from_g_argument(GITypeInfo *type_info,
-                                                      GArgument  *arg);
-gboolean pygi_struct_foreign_release_g_argument    (GITransfer          transfer,
-                                                    GITypeInfo         *type_info,
-                                                    GArgument          *arg);
+PyObject *pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
+                                                       GArgument  *arg);
+gboolean pygi_struct_foreign_release_g_argument (GITransfer          transfer,
+                                                 GITypeInfo         *type_info,
+                                                 GArgument          *arg);
 
 #endif /* __PYGI_FOREIGN_H__ */

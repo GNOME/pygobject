@@ -36,46 +36,48 @@ static struct {
     PyGIArgOverrideFromGArgumentFunc from_func;
     PyGIArgOverrideReleaseGArgumentFunc release_func;
 } foreign_structs[] = {
-    { "cairo", "Context", cairo_context_to_arg, cairo_context_from_arg,
-                          cairo_context_release_arg },
-    { "cairo", "Surface", cairo_surface_to_arg, cairo_surface_from_arg,
-                          cairo_surface_release_arg },
+    {   "cairo", "Context", cairo_context_to_arg, cairo_context_from_arg,
+        cairo_context_release_arg
+    },
+    {   "cairo", "Surface", cairo_surface_to_arg, cairo_surface_from_arg,
+        cairo_surface_release_arg
+    },
     { NULL }
 };
 
 static gint
-pygi_struct_foreign_lookup(GITypeInfo *type_info)
+pygi_struct_foreign_lookup (GITypeInfo *type_info)
 {
     GIBaseInfo *base_info;
 
-    base_info = g_type_info_get_interface(type_info);
+    base_info = g_type_info_get_interface (type_info);
     if (base_info) {
         gint i;
-        const gchar *namespace = g_base_info_get_namespace(base_info);
-        const gchar *name = g_base_info_get_name(base_info);
+        const gchar *namespace = g_base_info_get_namespace (base_info);
+        const gchar *name = g_base_info_get_name (base_info);
 
         for (i = 0; foreign_structs[i].namespace; ++i) {
 
-            if ((strcmp(namespace, foreign_structs[i].namespace) == 0) &&
-                (strcmp(name, foreign_structs[i].name) == 0)) {
-                g_base_info_unref(base_info);
+            if ( (strcmp (namespace, foreign_structs[i].namespace) == 0) &&
+                    (strcmp (name, foreign_structs[i].name) == 0)) {
+                g_base_info_unref (base_info);
                 return i;
             }
         }
 
-        PyErr_Format(PyExc_TypeError, "Couldn't find type %s.%s", namespace,
-                     name);
+        PyErr_Format (PyExc_TypeError, "Couldn't find type %s.%s", namespace,
+                      name);
 
-        g_base_info_unref(base_info);
+        g_base_info_unref (base_info);
     }
     return -1;
 }
 
 gboolean
-pygi_struct_foreign_convert_to_g_argument(PyObject      *value,
-                                         GITypeInfo     *type_info,
-                                         GITransfer      transfer,
-                                         GArgument      *arg)
+pygi_struct_foreign_convert_to_g_argument (PyObject      *value,
+                                           GITypeInfo     *type_info,
+                                           GITransfer      transfer,
+                                           GArgument      *arg)
 {
     gint struct_index;
 
@@ -83,15 +85,15 @@ pygi_struct_foreign_convert_to_g_argument(PyObject      *value,
     if (struct_index < 0)
         return FALSE;
 
-    if (!foreign_structs[struct_index].to_func(value, type_info, transfer, arg))
+    if (!foreign_structs[struct_index].to_func (value, type_info, transfer, arg))
         return FALSE;
 
     return TRUE;
 }
 
 PyObject *
-pygi_struct_foreign_convert_from_g_argument(GITypeInfo *type_info,
-                                            GArgument  *arg)
+pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
+                                             GArgument  *arg)
 {
     gint struct_index;
 
@@ -99,13 +101,13 @@ pygi_struct_foreign_convert_from_g_argument(GITypeInfo *type_info,
     if (struct_index < 0)
         return NULL;
 
-    return foreign_structs[struct_index].from_func(type_info, arg);
+    return foreign_structs[struct_index].from_func (type_info, arg);
 }
 
 gboolean
-pygi_struct_foreign_release_g_argument(GITransfer  transfer,
-                                       GITypeInfo *type_info,
-                                       GArgument  *arg)
+pygi_struct_foreign_release_g_argument (GITransfer  transfer,
+                                        GITypeInfo *type_info,
+                                        GArgument  *arg)
 {
     gint struct_index;
 
@@ -116,7 +118,7 @@ pygi_struct_foreign_release_g_argument(GITransfer  transfer,
     if (!foreign_structs[struct_index].release_func)
         return TRUE;
 
-   if (!foreign_structs[struct_index].release_func(transfer, type_info, arg))
+    if (!foreign_structs[struct_index].release_func (transfer, type_info, arg))
         return FALSE;
 
     return TRUE;

@@ -1,6 +1,6 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,19 +33,19 @@ typedef struct _PyGICClosure
 {
     GICallableInfo *info;
     PyObject *function;
-    
+
     ffi_closure *closure;
     ffi_cif cif;
- 
+
     GIScopeType scope;
 
     PyObject* user_data;
-} PyGICClosure; 
- 
-void _pygi_closure_handle(ffi_cif *cif, void *result, void
-                          **args, void *userdata);
- 
-void _pygi_invoke_closure_free(gpointer user_data);
+} PyGICClosure;
+
+void _pygi_closure_handle (ffi_cif *cif, void *result, void
+                           **args, void *userdata);
+
+void _pygi_invoke_closure_free (gpointer user_data);
 
 PyGICClosure* _pygi_make_native_closure (GICallableInfo* info,
                                          GIScopeType scope,
