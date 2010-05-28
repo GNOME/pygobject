@@ -50,6 +50,34 @@ class TestEverything(unittest.TestCase):
     def test_floating(self):
         Everything.TestFloating()
 
+    def test_caller_allocates(self):
+        struct_a = Everything.TestStructA()
+        struct_a.some_int = 10
+        struct_a.some_int8 = 21
+        struct_a.some_double = 3.14
+        struct_a.some_enum = Everything.TestEnum.VALUE3
+
+        struct_a_clone = struct_a.clone()
+        self.assertTrue(struct_a != struct_a_clone)
+        self.assertEquals(struct_a.some_int, struct_a_clone.some_int)
+        self.assertEquals(struct_a.some_int8, struct_a_clone.some_int8)
+        self.assertEquals(struct_a.some_double, struct_a_clone.some_double)
+        self.assertEquals(struct_a.some_enum, struct_a_clone.some_enum)
+
+        struct_b = Everything.TestStructB()
+        struct_b.some_int8 = 8
+        struct_b.nested_a.some_int = 20
+        struct_b.nested_a.some_int8 = 12
+        struct_b.nested_a.some_double = 333.3333
+        struct_b.nested_a.some_enum = Everything.TestEnum.VALUE2
+
+        struct_b_clone = struct_b.clone()
+        self.assertTrue(struct_b != struct_b_clone)
+        self.assertEquals(struct_b.some_int8, struct_b_clone.some_int8)
+        self.assertEquals(struct_b.nested_a.some_int, struct_b_clone.nested_a.some_int)
+        self.assertEquals(struct_b.nested_a.some_int8, struct_b_clone.nested_a.some_int8)
+        self.assertEquals(struct_b.nested_a.some_double, struct_b_clone.nested_a.some_double)
+        self.assertEquals(struct_b.nested_a.some_enum, struct_b_clone.nested_a.some_enum)
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):

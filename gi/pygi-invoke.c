@@ -135,7 +135,7 @@ _prepare_invocation_state (struct invocation_state *state,
     }
 
     /* We do a first (well, second) pass here over the function to scan for special cases.
-     * This is currently array+length combinations and GError.
+     * This is currently array+length combinations, GError and GValue.
      */
     for (i = 0; i < state->n_args; i++) {
         GIDirection direction;
@@ -298,8 +298,11 @@ _prepare_invocation_state (struct invocation_state *state,
 
         for (i = 0; i < state->n_args; i++) {
             GIDirection direction;
+            GIBaseInfo *info;
+            gboolean is_caller_allocates;
 
             direction = g_arg_info_get_direction (state->arg_infos[i]);
+            is_caller_allocates = g_arg_info_is_caller_allocates (state->arg_infos[i]);
 
             switch (direction) {
                 case GI_DIRECTION_IN:
@@ -310,13 +313,51 @@ _prepare_invocation_state (struct invocation_state *state,
                 case GI_DIRECTION_INOUT:
                     g_assert (in_args_pos < state->n_in_args);
                     g_assert (out_args_pos < state->n_out_args);
+
                     state->in_args[in_args_pos].v_pointer = &state->out_values[out_args_pos];
                     in_args_pos += 1;
                 case GI_DIRECTION_OUT:
                     g_assert (out_args_pos < state->n_out_args);
-                    state->out_args[out_args_pos].v_pointer = &state->out_values[out_args_pos];
-                    state->out_values[out_args_pos].v_pointer = NULL;
-                    state->args[i] = &state->out_values[out_args_pos];
+
+                    /* caller allocates only applies to structures but GI has
+                     * no way to denote that yet, so we only use caller allocates
+                     * if we see  a structure
+                     */
+                    if (is_caller_allocates) {
+                        GITypeTag type_tag;
+
+                        is_caller_allocates = FALSE;
+                        type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
+
+                        if (type_tag  == GI_TYPE_TAG_INTERFACE) {
+                            GIInfoType info_type;
+
+                            info = g_type_info_get_interface (state->arg_type_infos[i]);
+                            g_assert (info != NULL);
+                            info_type = g_base_info_get_type (info);
+
+                            if (info_type == GI_INFO_TYPE_STRUCT)
+                                is_caller_allocates = TRUE;
+                        }
+                    }
+
+                    if (is_caller_allocates) {
+                        gsize size;
+                        gpointer value;
+
+                        /* if caller allocates only use one level of indirection */
+                        state->out_args[out_args_pos].v_pointer = NULL;
+                        state->args[i] = &state->out_args[out_args_pos];
+
+                        size = g_struct_info_get_size ( (GIStructInfo *) info);
+
+                        state->args[i]->v_pointer = g_malloc0 (size);
+                    } else {
+                        state->out_args[out_args_pos].v_pointer = &state->out_values[out_args_pos];
+                        state->out_values[out_args_pos].v_pointer = NULL;
+                        state->args[i] = &state->out_values[out_args_pos];
+                    }
+
                     out_args_pos += 1;
             }
         }
@@ -851,6 +892,30 @@ _free_invocation_state (struct invocation_state *state)
     }
 
     for (i = 0; i < state->n_args; i++) {
+
+        /* check for caller-allocated values we need to free */
+        if (g_arg_info_is_caller_allocates (state->arg_infos[i])) {
+            GIBaseInfo *info;
+            GIInfoType info_type;
+
+            info = g_type_info_get_interface (state->arg_type_infos[i]);
+            g_assert (info != NULL);
+            info_type = g_base_info_get_type (info);
+
+            /* caller-allocates applies only to structs right now
+             * the GI scanner is overzealous when marking parameters
+             * as caller-allocates, so we only free if this was a struct
+             */
+            if (info_type == GI_INFO_TYPE_STRUCT) {
+                /* special case GValues so we make sure to unset them */
+                if (g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info) == G_TYPE_VALUE) {
+                    g_value_unset ( (GValue *) state->args[i]);
+                }
+
+                g_free (state->args[i]);
+            }
+        }
+
         if (state->arg_type_infos[i] != NULL)
             g_base_info_unref ( (GIBaseInfo *) state->arg_type_infos[i]);
         if (state->arg_infos[i] != NULL)
