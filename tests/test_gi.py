@@ -734,6 +734,21 @@ class TestArray(unittest.TestCase):
     def test_array_zero_terminated_inout(self):
         self.assertEquals(('-1', '0', '1', '2'), GIMarshallingTests.array_zero_terminated_inout(('0', '1', '2')))
 
+    def test_gstrv_return(self):
+        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_return())
+
+    def test_gstrv_in(self):
+        GIMarshallingTests.gstrv_in(Sequence(('0', '1', '2')))
+
+    def test_gstrv_out(self):
+        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_out())
+
+    def test_gstrv_out(self):
+        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_out())
+
+    def test_gstrv_inout(self):
+        self.assertEquals(('-1', '0', '1', '2'), GIMarshallingTests.gstrv_inout(('0', '1', '2')))
+
 
 class TestGArray(unittest.TestCase):
 
@@ -1193,6 +1208,7 @@ class TestStructure(unittest.TestCase):
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
 
         self.assertEquals(0, struct.long_)
+        self.assertEquals(None, struct.g_strv)
 
         del struct
 
@@ -1216,6 +1232,7 @@ class TestStructure(unittest.TestCase):
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
+        self.assertEquals(('0', '1', '2'), struct.g_strv)
 
         del struct
 
