@@ -5,7 +5,6 @@ import pygtk
 pygtk.require("2.0")
 
 import unittest
-import gobject
 
 import sys
 sys.path.insert(0, "../")
@@ -72,8 +71,8 @@ class TestGtk(unittest.TestCase):
         class SignalTest(GObject.GObject):
             __gtype_name__ = "GIOverrideSignalTest"
             __gsignals__ = {
-                "test-signal": (gobject.SIGNAL_RUN_FIRST,
-                                gobject.TYPE_NONE,
+                "test-signal": (GObject.SIGNAL_RUN_FIRST,
+                                GObject.TYPE_NONE,
                                 []),
             }
 
