@@ -1,4 +1,4 @@
-AC_INIT(pygi, 0.5.2)
+AC_INIT(pygi, 0.6.0)
 
 AM_INIT_AUTOMAKE(foreign)
 AC_CONFIG_HEADERS(config.h)
