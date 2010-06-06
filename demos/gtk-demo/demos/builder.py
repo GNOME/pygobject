@@ -25,7 +25,7 @@ Demonstrates an interface loaded from a XML description.
 """
 
 # See FIXME's
-is_fully_bound = False
+is_fully_bound = True
 
 from gi.repository import Gtk, GdkPixbuf, Gdk
 import os
