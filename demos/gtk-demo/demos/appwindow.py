@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 #
@@ -61,7 +61,7 @@ def activate_action(action):
 def activate_radio_action(action, current):
     global infobar
     global messagelabel
- 
+
     name = current.get_name()
     _type = type(current)
     active = current.get_active()
@@ -81,7 +81,7 @@ def update_statusbar(buffer, statusbar):
     row = iter.get_line()
     col = iter.get_line_offset()
     msg = 'Cursor at row %d column %d - %d chars in document' % (row, col, count)
-    
+
     statusbar.push(0, msg)
 
 def mark_set_callback(buffer, new_location, mark, data):
@@ -109,7 +109,7 @@ def about_cb(widget):
     global window
 
     authors = ['John (J5) Palmieri',
-               'Tomeu Vizoso', 
+               'Tomeu Vizoso',
                'and many more...']
 
     documentors =  ['David Malcolm',
@@ -134,7 +134,7 @@ Boston, MA 02111-1307, USA.
 """
     filename = os.path.join('data', 'gtk-logo-rgb.gif')
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-    transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff) 
+    transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
     Gtk.AboutDialog.set_email_hook(activate_email, None)
     Gtk.AboutDialog.set_url_hook(activate_url, None)
     # FIXME: override Gtk.show_about_dialog
@@ -152,8 +152,8 @@ Boston, MA 02111-1307, USA.
 
     about.set_transient_for(window)
     about.connect('response', widget_destroy)
-    about.show()  
-    
+    about.show()
+
 
 action_entries = (
     ("FileMenu", None, "_File"),                # name, stock id, label
@@ -317,7 +317,7 @@ class ToolMenuAction(Gtk.Action):
 def main():
     global infobar
     global window
-    global messagelabel 
+    global messagelabel
 
     register_stock_icons()
 

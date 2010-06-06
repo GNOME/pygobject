@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 #
@@ -35,7 +35,7 @@ class AssistantApp:
     def __init__(self):
         self.assistant = Gtk.Assistant()
         self.assistant.set_default_size(-1, 300)
- 
+
         self.create_page1()
         self.create_page2()
         self.create_page3()
@@ -44,7 +44,7 @@ class AssistantApp:
         self.assistant.connect('close', self.on_close_cancel)
         self.assistant.connect('apply', self.on_apply)
         self.assistant.connect('prepare', self.on_prepare)
-        
+
         self.assistant.show()
 
     def on_close_cancel(self, assistant):
@@ -66,7 +66,7 @@ class AssistantApp:
         page_number = self.assistant.get_current_page()
         current_page = self.assistant.get_nth_page(page_number)
         text = widget.get_text()
-        
+
         if text:
             self.assistant.set_page_complete(current_page, True)
         else:
@@ -78,7 +78,7 @@ class AssistantApp:
         box.set_border_width(12)
         label = Gtk.Label(label='You must fill out this entry to continue:')
         box.pack_start(label, False, False, 0)
-         
+
         entry = Gtk.Entry()
         box.pack_start(entry, True, True, 0)
         entry.connect('changed', self.on_entry_changed)
@@ -89,7 +89,7 @@ class AssistantApp:
         self.assistant.set_page_type(box, Gtk.AssistantPageType.INTRO)
 
         pixbuf = self.assistant.render_icon(Gtk.STOCK_DIALOG_INFO,
-                                            Gtk.IconSize.DIALOG, 
+                                            Gtk.IconSize.DIALOG,
                                             None)
 
         self.assistant.set_page_header_image(box, pixbuf)
@@ -98,18 +98,18 @@ class AssistantApp:
         box = Gtk.VBox(homogeneous=False,
                        spacing=12)
         box.set_border_width(12)
-        
+
         checkbutton = Gtk.CheckButton(label='This is optional data, you may continue even if you do not check this')
         box.pack_start(checkbutton, False, False, 0)
 
         box.show_all()
 
         self.assistant.append_page(box)
-        self.assistant.set_page_complete(box, True)        
+        self.assistant.set_page_complete(box, True)
         self.assistant.set_page_title(box, 'Page 2')
-        
+
         pixbuf = self.assistant.render_icon(Gtk.STOCK_DIALOG_INFO,
-                                            Gtk.IconSize.DIALOG, 
+                                            Gtk.IconSize.DIALOG,
                                             None)
         self.assistant.set_page_header_image(box, pixbuf)
 
@@ -117,12 +117,12 @@ class AssistantApp:
         label = Gtk.Label(label='This is a confirmation page, press "Apply" to apply changes')
         label.show()
         self.assistant.append_page(label)
-        self.assistant.set_page_complete(label, True)        
+        self.assistant.set_page_complete(label, True)
         self.assistant.set_page_title(label, 'Confirmation')
         self.assistant.set_page_type(label, Gtk.AssistantPageType.CONFIRM)
 
         pixbuf = self.assistant.render_icon(Gtk.STOCK_DIALOG_INFO,
-                                            Gtk.IconSize.DIALOG, 
+                                            Gtk.IconSize.DIALOG,
                                             None)
         self.assistant.set_page_header_image(label, pixbuf)
 
