@@ -264,3 +264,7 @@ class TestCallbacks(unittest.TestCase):
         TestCallbacks.called = False
         obj_ = Everything.TestObj.new_callback(callbackWithUserData, None)
         self.assertTrue(TestCallbacks.called)
+
+    def testCallbackNone(self):
+        # make sure this doesn't assert or crash
+        Everything.test_simple_callback(None)

@@ -161,9 +161,11 @@ _pygi_create_callback (GIBaseInfo  *function_info,
     PyObject *py_function;
     guint8 i, py_argv_pos;
     PyObject *py_user_data;
+    gboolean allow_none;
 
     callback_arg = g_callable_info_get_arg ( (GICallableInfo*) function_info, callback_index);
     scope = g_arg_info_get_scope (callback_arg);
+    allow_none = g_arg_info_may_be_null (callback_arg);
 
     callback_type = g_arg_info_get_type (callback_arg);
     g_assert (g_type_info_get_tag (callback_type) == GI_TYPE_TAG_INTERFACE);
@@ -185,6 +187,11 @@ _pygi_create_callback (GIBaseInfo  *function_info,
     for (i = 0; i < n_args && i < py_argc; i++) {
         if (i == callback_index) {
             py_function = PyTuple_GetItem (py_argv, py_argv_pos);
+            /* if we allow none then set the closure to NULL and return */
+            if (allow_none && py_function == Py_None) {
+                *closure_out = NULL;
+                return TRUE;
+            }
             found_py_function = TRUE;
         } else if (i == user_data_index) {
             py_user_data = PyTuple_GetItem (py_argv, py_argv_pos);

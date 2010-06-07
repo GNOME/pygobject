@@ -113,6 +113,7 @@ _prepare_invocation_state (struct invocation_state *state,
         return FALSE;
 
     if (state->callback_index != G_MAXUINT8) {
+
         if (!_pygi_create_callback (function_info,
                                     state->is_method,
                                     state->is_constructor,
@@ -428,7 +429,11 @@ _prepare_invocation_state (struct invocation_state *state,
             GIDirection direction;
 
             if (i == state->callback_index) {
-                state->args[i]->v_pointer = state->closure->closure;
+                if (state->closure)
+                    state->args[i]->v_pointer = state->closure->closure;
+                else
+                    /* Some callbacks params accept NULL */
+                    state->args[i]->v_pointer = NULL;
                 py_args_pos++;
                 continue;
             } else if (i == state->user_data_index) {
@@ -436,8 +441,11 @@ _prepare_invocation_state (struct invocation_state *state,
                 py_args_pos++;
                 continue;
             } else if (i == state->destroy_notify_index) {
-                PyGICClosure *destroy_notify = _pygi_destroy_notify_create();
-                state->args[i]->v_pointer = destroy_notify->closure;
+                if (state->closure) {
+                    /* No need to clean up if the callback is NULL */
+                    PyGICClosure *destroy_notify = _pygi_destroy_notify_create();
+                    state->args[i]->v_pointer = destroy_notify->closure;
+                }
                 continue;
             }
 
