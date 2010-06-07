@@ -190,7 +190,7 @@ class ClipboardApp:
     def copy_image(self, item, data):
         # get the default clipboard
         atom = Gdk.atom_intern('CLIPBOARD', True)
-        clipboard = Gtk.clipboard_get(atom)
+        clipboard = Gtk.Clipboard.get(atom)
         pixbuf = self.get_image_pixbuf(data)
 
         clipboard.set_image(pixbuf)
@@ -198,7 +198,7 @@ class ClipboardApp:
     def paste_image(self, item, data):
         # get the default clipboard
         atom = Gdk.atom_intern('CLIPBOARD', True)
-        clipboard = Gtk.clipboard_get(atom)
+        clipboard = Gtk.Clipboard.get(atom)
         pixbuf = clipboard.wait_for_image()
 
         if pixbuf != None:
@@ -225,6 +225,9 @@ class ClipboardApp:
         #FIXME: This doesn't work as we pass a None as a function
         #       pointer.  PyGI doesn't correctly check for
         #       allow-none on callback parameters
+        #       Fix is waiting for approval -
+        #       https://bugzilla.gnome.org/show_bug.cgi?id=620906
+
         menu.popup(None, None, None, None, 3, event.button.time)
 
 def main():
