@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Check that the code follows a consistant code style
 #
