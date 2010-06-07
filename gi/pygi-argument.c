@@ -1498,8 +1498,15 @@ _pygi_argument_to_object (GArgument  *arg,
                             break;
                         }
 
+                        if (transfer != GI_TRANSFER_NOTHING)
+                            g_warning ("Transfer mode should be set to None for "
+                                       "struct types as there is no way to free "
+                                       "them safely.  Ignoring transfer mode "
+                                       "to prevent a potential invalid free. "
+                                       "This may cause a leak in your application.");
+
                         object = _pygi_struct_new ( (PyTypeObject *) py_type, arg->v_pointer,
-                                                    transfer == GI_TRANSFER_EVERYTHING);
+                                                    FALSE);
 
                         Py_DECREF (py_type);
                     } else {

@@ -670,8 +670,15 @@ _process_invocation_state (struct invocation_state *state,
                         PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
                         break;
                     }
-                    g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-                    state->return_value = _pygi_struct_new (py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+
+                    if (transfer != GI_TRANSFER_NOTHING)
+                        g_warning ("Transfer mode should be set to None for "
+                                   "struct types as there is no way to free "
+                                   "them safely.  Ignoring transfer mode "
+                                   "to prevent a potential invalid free. "
+                                   "This may cause a leak in your application.");
+
+                    state->return_value = _pygi_struct_new (py_type, state->return_arg.v_pointer, FALSE);
                 } else {
                     PyErr_Format (PyExc_TypeError, "cannot create '%s' instances", py_type->tp_name);
                     g_base_info_unref (info);
