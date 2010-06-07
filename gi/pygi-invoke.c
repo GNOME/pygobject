@@ -233,7 +233,8 @@ _prepare_invocation_state (struct invocation_state *state,
 
         if (state->n_py_args != n_py_args_expected) {
             PyErr_Format (PyExc_TypeError,
-                          "takes exactly %zd argument(s) (%zd given)",
+                          "%s() takes exactly %zd argument(s) (%zd given)",
+                          g_base_info_get_name ( (GIBaseInfo *) function_info),
                           n_py_args_expected, state->n_py_args);
             return FALSE;
         }

@@ -79,6 +79,12 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(struct_b.nested_a.some_double, struct_b_clone.nested_a.some_double)
         self.assertEquals(struct_b.nested_a.some_enum, struct_b_clone.nested_a.some_enum)
 
+    def test_wrong_type_of_arguments(self):
+        try:
+            Everything.test_int8()
+        except TypeError, e:
+            self.assertEquals(e.args, ("test_int8() takes exactly 1 argument(s) (0 given)",))
+
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)
