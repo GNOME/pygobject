@@ -40,7 +40,7 @@ PKG_CHECK_MODULES(FFI, libffi >= 3.0)
 PKG_CHECK_MODULES(GNOME,
 	glib-2.0 >= 2.22.4
 	gobject-introspection-1.0 >= 0.6.14
-	pygobject-2.0 >= 2.20
+	pygobject-2.0 >= 2.21.1
 	pycairo >= 1.0.2
 )
 
