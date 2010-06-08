@@ -18,9 +18,9 @@ class TestGdk(unittest.TestCase):
 
     def test_color(self):
         color = Gdk.Color(100, 200, 300)
-        self.assertEquals(color.r, 100)
-        self.assertEquals(color.g, 200)
-        self.assertEquals(color.b, 300)
+        self.assertEquals(color.red, 100)
+        self.assertEquals(color.green, 200)
+        self.assertEquals(color.blue, 300)
 
 class TestGtk(unittest.TestCase):
     def test_uimanager(self):

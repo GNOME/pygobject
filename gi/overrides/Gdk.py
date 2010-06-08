@@ -46,17 +46,17 @@ Rectangle = override(Rectangle)
 
 class Color(Gdk.Color):
 
-    def __init__(self, r, g, b):
+    def __init__(self, red, green, blue):
         Gdk.Color.__init__(self)
-        self.r = r
-        self.g = g
-        self.b = b
+        self.red = red
+        self.green = green
+        self.blue = blue
 
     def __new__(cls, *args, **kwargs):
         return Gdk.Color.__new__(cls)
 
     def __repr__(self):
-        return '<Gdk.Color(r=%d, g=%d, b=%d)>' % (self.r, self.g, self.b)
+        return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
 
 Color = override(Color)
 
