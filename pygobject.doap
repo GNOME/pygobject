@@ -31,4 +31,11 @@
       <gnome:userid>gianmt</gnome:userid>
     </foaf:Person>
   </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Tomeu Vizoso</foaf:name>
+      <foaf:mbox rdf:resource="mailto:tomeu.vizoso@collabora.co.uk" />
+      <gnome:userid>tomeuv</gnome:userid>
+    </foaf:Person>
+  </maintainer>
 </Project>
