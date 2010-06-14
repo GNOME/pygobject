@@ -190,7 +190,7 @@ _pygi_create_callback (GIBaseInfo  *function_info,
             /* if we allow none then set the closure to NULL and return */
             if (allow_none && py_function == Py_None) {
                 *closure_out = NULL;
-                return TRUE;
+                goto out;
             }
             found_py_function = TRUE;
         } else if (i == user_data_index) {
@@ -215,7 +215,7 @@ _pygi_create_callback (GIBaseInfo  *function_info,
                                                g_arg_info_get_scope (callback_arg),
                                                py_function,
                                                py_user_data);
-
+out:
     g_base_info_unref ( (GIBaseInfo*) callback_info);
     g_base_info_unref ( (GIBaseInfo*) callback_type);
 
