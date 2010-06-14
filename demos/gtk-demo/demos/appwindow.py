@@ -76,8 +76,7 @@ def update_statusbar(buffer, statusbar):
     statusbar.pop(0)
     count = buffer.get_char_count()
 
-    iter = Gtk.TextIter()
-    buffer.get_iter_at_mark(iter, buffer.get_insert())
+    iter = buffer.get_iter_at_mark(buffer.get_insert())
     row = iter.get_line()
     col = iter.get_line_offset()
     msg = 'Cursor at row %d column %d - %d chars in document' % (row, col, count)
