@@ -269,7 +269,9 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     }
     
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    pyg_begin_allow_threads;
     g_object_get_property(self->pygobject->obj, attr_name, &value);
+    pyg_end_allow_threads;
     ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
     
@@ -1048,8 +1050,11 @@ pygobject_clear(PyGObject *self)
         if (self->inst_dict) {
             g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, self);
             self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
-        } else
+        } else {
+            pyg_begin_allow_threads;
             g_object_unref(self->obj);
+            pyg_end_allow_threads;
+        }
         self->obj = NULL;
     }
     Py_CLEAR(self->inst_dict);
@@ -1179,7 +1184,9 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+    pyg_begin_allow_threads;
     g_object_get_property(self->obj, param_name, &value);
+    pyg_end_allow_threads;
     ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
     return ret;
@@ -1229,7 +1236,9 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
         }
         g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
 
+        pyg_begin_allow_threads;
         g_object_get_property(self->obj, property_name, &value);
+        pyg_end_allow_threads;
 
         item = pyg_value_as_pyobject(&value, TRUE);
         PyTuple_SetItem(tuple, i, item);
