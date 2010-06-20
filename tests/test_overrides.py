@@ -129,4 +129,20 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(signal_checker.sentinel, 4)
 
+    def test_dialog(self):
+        self.assertEquals(Gtk.Dialog, overrides.Gtk.Dialog)
+        dialog = Gtk.Dialog (title='Foo',
+                             flags=Gtk.DialogFlags.MODAL,
+                             buttons=('test-button1', 1))
+
+        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+
+        self.assertEquals('Foo', dialog.get_title())
+        self.assertTrue(dialog.get_modal())
+        button = dialog.get_widget_for_response (1)
+        self.assertEquals('test-button1', button.get_label())
+        button = dialog.get_widget_for_response (2)
+        self.assertEquals('test-button2', button.get_label())
+        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 

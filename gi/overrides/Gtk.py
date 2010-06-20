@@ -240,7 +240,51 @@ class Builder(Gtk.Builder):
 
 Builder = override(Builder)
 
-__all__ = ['ActionGroup', 'Builder', 'UIManager']
+class Dialog(Gtk.Dialog):
+
+    def __init__(self, title=None, parent=None, flags=0, buttons=None):
+        Gtk.Dialog.__init__(self)
+        if title:
+            self.set_title(title)
+        if parent:
+            self.set_transient_for(parent)
+        if flags & Gtk.DialogFlags.MODAL:
+            self.set_modal(True)
+        if flags & Gtk.DialogFlags.DESTROY_WITH_PARENT:
+            self.set_destroy_with_parent(True)
+        if flags & Gtk.DialogFlags.NO_SEPARATOR:
+            self.set_has_separator(False)
+        if buttons:
+            self.add_buttons(*buttons)
+
+    def add_buttons(self, *args):
+        """
+        The add_buttons() method adds several buttons to the Gtk.Dialog using
+        the button data passed as arguments to the method. This method is the
+        same as calling the Gtk.Dialog.add_button() repeatedly. The button data
+        pairs - button text (or stock ID) and a response ID integer are passed
+        individually. For example:
+
+        >>> dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+
+        will add "Open" and "Close" buttons to dialog.
+        """
+
+        def buttons(b):
+            while b:
+                t, r = b[0:2]
+                b = b[2:]
+                yield t, r
+
+        try:
+            for text, response in buttons(args):
+                self.add_button(text, response)
+        except (IndexError):
+            raise TypeError('Must pass an even number of arguments')
+
+Dialog = override(Dialog)
+
+__all__ = ['ActionGroup', 'Builder', 'Dialog', 'UIManager']
 
 import sys
 
