@@ -28,7 +28,9 @@ headers
 #include <gio/gunixinputstream.h>
 #include <gio/gunixmounts.h>
 #include <gio/gunixoutputstream.h>
+#define GIO_COMPILATION
 #include <gio/gunixconnection.h>
+#undef GIO_COMPILATION
 #include <gio/gunixfdmessage.h>
 #include <gio/gunixsocketaddress.h>
 
