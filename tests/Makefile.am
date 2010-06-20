@@ -19,7 +19,7 @@ testhelper_la_LIBADD = $(GLIB_LIBS)
 testhelper_la_SOURCES = \
 	testhelpermodule.c \
 	test-thread.c \
-	test-unknown.c 
+	test-unknown.c
 
 tests =  \
 	test_gicon.py \
@@ -31,7 +31,10 @@ tests =  \
 	test_signal.py \
 	test_subprocess.py \
 	test_unknown.py \
-	test_source.py
+	test_source.py \
+	test_everything.py \
+	test_gi.py \
+	test_overrides.py
 
 # This is a hack to make sure a shared library is built
 testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
@@ -53,9 +56,23 @@ check-local: $(top_srcdir)/glib/__init__.py $(top_srcdir)/gobject/__init__.py $(
 	@rm -fr $(top_builddir)/gobject/*.pyc
 	@rm -fr $(top_builddir)/gio/*.pyc
 
-
 all: $(LTLIBRARIES:.la=.so)
+
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
+
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
+
+check.gdb:
+	EXEC_NAME="gdb --args" $(MAKE) check
+
+%.gdb:
+	EXEC_NAME="gdb --args" TEST_NAMES=$* $(MAKE) check
+
+check.valgrind:
+	EXEC_NAME="valgrind" $(MAKE) check
+
+%.valgrind:
+	EXEC_NAME="valgrind" TEST_NAMES=$* $(MAKE) check
+

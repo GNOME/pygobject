@@ -8,7 +8,7 @@ SUBDIRS = \
 	overrides
 AM_CFLAGS = \
 	$(PYTHON_INCLUDES) \
-	$(GNOME_CFLAGS) \
+	$(GI_CFLAGS) \
 	$(PYCAIRO_CFLAGS)
 
 pygidir = $(pkgpyexecdir)/gi
@@ -23,7 +23,7 @@ _gi_la_LDFLAGS = \
 	-avoid-version \
 	-export-symbols-regex init_gi
 _gi_la_LIBADD = \
-	$(GNOME_LIBS) \
+	$(GI_LIBS) \
 	$(PYCAIRO_LIBS)
 _gi_la_SOURCES = \
 	pygi-repository.c \
