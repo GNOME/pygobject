@@ -1,0 +1,26 @@
+Tests
+===
+
+'make check' execute all tests
+
+'make check TEST_NAMES="test_gi"' executes the tests in test_gi.py
+
+'make check TEST_NAMES="test_gi.TestUtf8"' executes the tests in test_gi.TestUtf8
+
+'make check TEST_NAMES="test_gi.TestUtf8.test_utf8_full_return"' executes the test_gi.TestUtf8.test_utf8_full_return test
+
+'make check.gdb' executes all the tests in a gdb session
+
+'make test_gi.TestUtf8.gdb' executes all the tests in test_gi.TestUtf8 in a gdb session
+
+'make check.valgrind' executes all the tests in valgrind
+
+'make test_gi.TestUtf8.valgrind' executes all the tests in test_gi.TestUtf8 in valgrind
+
+Releasing
+===
+* Bump version in configure.ac
+* Commit & Tag
+* Make distcheck
+* Upload tarball to git servers
+* Email PyGTK-announce & gnome-release mailing list
