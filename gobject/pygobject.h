@@ -210,7 +210,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 
 #define pygobject_register_class    (_PyGObject_API->register_class)
 #define pygobject_register_wrapper  (_PyGObject_API->register_wrapper)
-/* This is deprecated, sinkfuncs are not needed anymore */
 #define pygobject_register_sinkfunc (_PyGObject_API->register_sinkfunc)
 #define pygobject_lookup_class      (_PyGObject_API->lookup_class)
 #define pygobject_new               (_PyGObject_API->newgobj)
