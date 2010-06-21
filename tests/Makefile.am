@@ -8,6 +8,7 @@ EXTRA_DIST = \
 	common.py \
 	runtests.py \
 	testmodule.py \
+	test-floating.h \
 	test-thread.h \
 	test-unknown.h
 
@@ -18,6 +19,7 @@ testhelper_la_LDFLAGS = -module -avoid-version
 testhelper_la_LIBADD = $(GLIB_LIBS)
 testhelper_la_SOURCES = \
 	testhelpermodule.c \
+	test-floating.c \
 	test-thread.c \
 	test-unknown.c 
 

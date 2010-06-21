@@ -142,9 +142,17 @@ pygobject_sink(GObject *obj)
 	    if (g_type_is_a(G_OBJECT_TYPE(obj),
 			    g_array_index(sink_funcs, SinkFunc, i).type)) {
 		g_array_index(sink_funcs, SinkFunc, i).sinkfunc(obj);
-		break;
+		return;
 	    }
 	}
+    }
+    if (G_IS_INITIALLY_UNOWNED(obj) && !g_object_is_floating(obj)) {
+        /* GtkWindow and GtkInvisible does not return a ref to caller of
+         * g_object_new.
+         */
+        g_object_ref(obj);
+    } else if (g_object_is_floating(obj)) {
+        g_object_ref_sink(obj);
     }
 }
 
@@ -160,11 +168,16 @@ pygobject_sink(GObject *obj)
  *
  * The sinkfunc should be able to remove the floating reference on
  * instances of the given type, or any subclasses.
+ *
+ * Deprecated: Since 2.22, sinkfuncs are not needed.
  */
 void
 pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
 {
     SinkFunc sf;
+
+    g_message ("pygobject_register_sinkfunc is deprecated (%s)",
+               g_type_name(type));
 
 #if 0
     g_return_if_fail(G_TYPE_IS_OBJECT(type));
@@ -592,27 +605,24 @@ pygobject_switch_to_toggle_ref(PyGObject *self)
  * In the constructor of PyGTK wrappers, this function should be
  * called after setting the obj member.  It will tie the wrapper
  * instance to the GObject so that the same wrapper instance will
- * always be used for this GObject instance.  It may also sink any
- * floating references on the GObject.
+ * always be used for this GObject instance.
  */
-static inline void
-pygobject_register_wrapper_full(PyGObject *self, gboolean sink)
-{
-    GObject *obj = self->obj;
-
-    if (sink)
-        pygobject_sink(obj);
-    g_assert(obj->ref_count >= 1);
-      /* save wrapper pointer so we can access it later */
-    g_object_set_qdata_full(obj, pygobject_wrapper_key, self, NULL);
-    if (self->inst_dict)
-        pygobject_switch_to_toggle_ref(self);
-}
-
 void
 pygobject_register_wrapper(PyObject *self)
 {
-    pygobject_register_wrapper_full((PyGObject *)self, TRUE);
+    PyGObject *gself;
+
+    g_return_if_fail(self != NULL);
+    g_return_if_fail(PyObject_TypeCheck(self, &PyGObject_Type));
+
+    gself = (PyGObject *)self;
+
+    pygobject_sink(gself->obj);
+    g_assert(gself->obj->ref_count >= 1);
+      /* save wrapper pointer so we can access it later */
+    g_object_set_qdata_full(gself->obj, pygobject_wrapper_key, gself, NULL);
+    if (gself->inst_dict)
+        pygobject_switch_to_toggle_ref(gself);
 }
 
 static PyObject *
@@ -891,7 +901,7 @@ pygobject_lookup_class(GType gtype)
 /**
  * pygobject_new_full:
  * @obj: a GObject instance.
- * @sink: whether to sink any floating reference found on the GObject.
+ * @sink: whether to sink any floating reference found on the GObject. DEPRECATED.
  * @g_class: the GObjectClass
  *
  * This function gets a reference to a wrapper for the given GObject
@@ -941,7 +951,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self->private_flags.flags = 0;
 	self->obj = obj;
 	g_object_ref(obj);
-	pygobject_register_wrapper_full(self, sink);
+	pygobject_register_wrapper((PyObject *)self);
 	PyObject_GC_Track((PyObject *)self);
     }
 
