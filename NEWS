@@ -1,3 +1,10 @@
+2.21.3 21-Jan-2010
+        - Proper handling of null-ok in virtual methods (Ludovic L'Hours)
+        - Fall back to use the floating references API in glib if there isn't a sinkfunc defined. (Tomeu Vizoso)
+        - Revert "Drop sinkfuncs." (Tomeu Vizoso)
+        - [giounix] Make it possible to compile on glib 2.20 (Johan Dahlin)
+        - Release the lock when potentially invoking Python code. (Sjoerd Simons)
+
 2.21.2 10-Jan-2010
         - Drop sinkfuncs. (Tomeu Vizoso)
         - Clear error if we failed the import (Colin Walters)
