@@ -289,6 +289,57 @@ class Dialog(Gtk.Dialog):
 Dialog = override(Dialog)
 __all__.append('Dialog')
 
+class TextBuffer(Gtk.TextBuffer):
+    def _get_or_create_tag_table(self):
+        table = self.get_tag_table()
+        if table is None:
+            table = Gtk.TextTagTable()
+            self.set_tag_table(table)
+
+        return table
+
+    def create_tag(self, tag_name=None, **properties):
+        """
+        @tag_name: name of the new tag, or None
+        @properties: keyword list of properties and their values
+
+        Creates a tag and adds it to the tag table of the TextBuffer.
+        Equivalent to creating a Gtk.TextTag and then adding the
+        tag to the buffer's tag table. The returned tag is owned by
+        the buffer's tag table.
+
+        If @tag_name is None, the tag is anonymous.
+
+        If @tag_name is not None, a tag called @tag_name must not already
+        exist in the tag table for this buffer.
+
+        Properties are passed as a keyword list of names and values (e.g.
+        foreground = 'DodgerBlue', weight = Pango.Weight.BOLD)
+
+        Return value: a new tag
+        """
+
+        tag = Gtk.TextTag(name=tag_name, **properties)
+        self._get_or_create_tag_table().add(tag)
+        return tag
+
+    def insert(self, iter, text):
+        if not isinstance(text , basestring):
+            raise TypeError('text must be a string, not %s' % type(text))
+
+        length = len(text)
+        Gtk.TextBuffer.insert(self, iter, text, length)
+
+    def insert_at_cursor(self, text):
+        if not isinstance(text , basestring):
+            raise TypeError('text must be a string, not %s' % type(text))
+
+        length = len(text)
+        Gtk.TextBuffer.insert_at_cursor(self, text, length)
+
+TextBuffer = override(TextBuffer)
+__all__.append('TextBuffer')
+
 import sys
 
 initialized, argv = Gtk.init_check(sys.argv)

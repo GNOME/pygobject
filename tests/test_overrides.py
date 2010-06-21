@@ -146,3 +146,28 @@ class TestGtk(unittest.TestCase):
         button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 
+    def test_text_buffer(self):
+        self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
+        buffer = Gtk.TextBuffer()
+        tag = buffer.create_tag ('title', font = 'Sans 18')
+
+        self.assertEquals(tag.props.name, 'title')
+        self.assertEquals(tag.props.font, 'Sans 18')
+
+        start = Gtk.TextIter()
+        end = Gtk.TextIter()
+
+        (start, end) = buffer.get_bounds()
+
+        buffer.insert(end, 'HelloHello')
+        buffer.insert(end, ' Bob')
+
+        cursor_iter = end.copy()
+        cursor_iter.backward_chars(9)
+        buffer.place_cursor(cursor_iter)
+        buffer.insert_at_cursor(' Jane ')
+
+        (start, end) = buffer.get_bounds()
+        text = buffer.get_text(start, end, False)
+
+        self.assertEquals(text, 'Hello Jane Hello Bob')
