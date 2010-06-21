@@ -4,7 +4,6 @@ autom4te.cache
 compile
 config.guess
 config.h.in
-config.h.in~
 config.lt
 config.sub
 configure
@@ -34,3 +33,7 @@ stamp-h1
 *.so
 .deps
 .libs
+
+# Other generated files.
+*~
+*.orig
