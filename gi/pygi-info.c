@@ -1210,8 +1210,9 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
 argument_to_object:
     py_value = _pygi_argument_to_object (&value, field_type_info, GI_TRANSFER_NOTHING);
 
-    if ( (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) &&
-            (g_type_info_get_array_type (field_type_info) == GI_ARRAY_TYPE_C)) {
+    if ( (value.v_pointer != NULL) &&
+            (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) &&
+               (g_type_info_get_array_type (field_type_info) == GI_ARRAY_TYPE_C)) {
         g_array_free (value.v_pointer, FALSE);
     }
 
