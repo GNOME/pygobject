@@ -660,56 +660,56 @@ class TestUtf8(unittest.TestCase):
 class TestArray(unittest.TestCase):
 
     def test_array_fixed_int_return(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.array_fixed_int_return())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_fixed_int_return())
 
     def test_array_fixed_short_return(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.array_fixed_short_return())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_fixed_short_return())
 
     def test_array_fixed_int_in(self):
-        GIMarshallingTests.array_fixed_int_in(Sequence((-1, 0, 1, 2)))
+        GIMarshallingTests.array_fixed_int_in(Sequence([-1, 0, 1, 2]))
 
-        self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, Sequence((-1, '0', 1, 2)))
+        self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, Sequence([-1, '0', 1, 2]))
 
         self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.array_fixed_int_in, None)
 
     def test_array_fixed_short_in(self):
-        GIMarshallingTests.array_fixed_short_in(Sequence((-1, 0, 1, 2)))
+        GIMarshallingTests.array_fixed_short_in(Sequence([-1, 0, 1, 2]))
 
     def test_array_fixed_out(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.array_fixed_out())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_fixed_out())
 
     def test_array_fixed_inout(self):
-        self.assertEquals((2, 1, 0, -1), GIMarshallingTests.array_fixed_inout((-1, 0, 1, 2)))
+        self.assertEquals([2, 1, 0, -1], GIMarshallingTests.array_fixed_inout([-1, 0, 1, 2]))
 
 
     def test_array_return(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.array_return())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
     def test_array_in(self):
-        GIMarshallingTests.array_in(Sequence((-1, 0, 1, 2)))
+        GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
 
     def test_array_out(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.array_out())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_out())
 
     def test_array_inout(self):
-        self.assertEquals((-2, -1, 0, 1, 2), GIMarshallingTests.array_inout(Sequence((-1, 0, 1, 2))))
+        self.assertEquals([-2, -1, 0, 1, 2], GIMarshallingTests.array_inout(Sequence([-1, 0, 1, 2])))
 
     def test_method_array_in(self):
         object_ = GIMarshallingTests.Object()
-        object_.method_array_in(Sequence((-1, 0, 1, 2)))
+        object_.method_array_in(Sequence([-1, 0, 1, 2]))
 
     def test_method_array_out(self):
         object_ = GIMarshallingTests.Object()
-        self.assertEquals((-1, 0, 1, 2), object_.method_array_out())
+        self.assertEquals([-1, 0, 1, 2], object_.method_array_out())
 
     def test_method_array_inout(self):
         object_ = GIMarshallingTests.Object()
-        self.assertEquals((-2, -1, 0, 1, 2), object_.method_array_inout(Sequence((-1, 0, 1, 2))))
+        self.assertEquals([-2, -1, 0, 1, 2], object_.method_array_inout(Sequence([-1, 0, 1, 2])))
 
     def test_method_array_return(self):
         object_ = GIMarshallingTests.Object()
-        self.assertEquals((-1, 0, 1, 2), object_.method_array_return())
+        self.assertEquals([-1, 0, 1, 2], object_.method_array_return())
 
     def test_array_fixed_out_struct(self):
         struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
@@ -720,84 +720,84 @@ class TestArray(unittest.TestCase):
         self.assertEquals(7, struct2.int8)
 
     def test_array_zero_terminated_return(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.array_zero_terminated_return())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_return())
 
     def test_array_zero_terminated_in(self):
-        GIMarshallingTests.array_zero_terminated_in(Sequence(('0', '1', '2')))
+        GIMarshallingTests.array_zero_terminated_in(Sequence(['0', '1', '2']))
 
     def test_array_zero_terminated_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.array_zero_terminated_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
 
     def test_array_zero_terminated_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.array_zero_terminated_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
 
     def test_array_zero_terminated_inout(self):
-        self.assertEquals(('-1', '0', '1', '2'), GIMarshallingTests.array_zero_terminated_inout(('0', '1', '2')))
+        self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
 
     def test_gstrv_return(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_return())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_return())
 
     def test_gstrv_in(self):
-        GIMarshallingTests.gstrv_in(Sequence(('0', '1', '2')))
+        GIMarshallingTests.gstrv_in(Sequence(['0', '1', '2']))
 
     def test_gstrv_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_out())
 
     def test_gstrv_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.gstrv_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_out())
 
     def test_gstrv_inout(self):
-        self.assertEquals(('-1', '0', '1', '2'), GIMarshallingTests.gstrv_inout(('0', '1', '2')))
+        self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
 
 
 class TestGArray(unittest.TestCase):
 
     def test_garray_int_none_return(self):
-        self.assertEquals((-1, 0, 1, 2), GIMarshallingTests.garray_int_none_return())
+        self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.garray_int_none_return())
 
     def test_garray_utf8_none_return(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_none_return())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_none_return())
 
     def test_garray_utf8_container_return(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_container_return())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_container_return())
 
     def test_garray_utf8_full_return(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_full_return())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_return())
 
     def test_garray_int_none_in(self):
-        GIMarshallingTests.garray_int_none_in(Sequence((-1, 0, 1, 2)))
+        GIMarshallingTests.garray_int_none_in(Sequence([-1, 0, 1, 2]))
 
-        self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, Sequence((-1, '0', 1, 2)))
+        self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, Sequence([-1, '0', 1, 2]))
 
         self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, None)
 
     def test_garray_utf8_none_in(self):
-        GIMarshallingTests.garray_utf8_none_in(Sequence(('0', '1', '2')))
+        GIMarshallingTests.garray_utf8_none_in(Sequence(['0', '1', '2']))
 
     def test_garray_utf8_container_in(self):
-        GIMarshallingTests.garray_utf8_container_in(Sequence(('0', '1', '2')))
+        GIMarshallingTests.garray_utf8_container_in(Sequence(['0', '1', '2']))
 
     def test_garray_utf8_full_in(self):
-        GIMarshallingTests.garray_utf8_full_in(Sequence(('0', '1', '2')))
+        GIMarshallingTests.garray_utf8_full_in(Sequence(['0', '1', '2']))
 
     def test_garray_utf8_none_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_none_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_none_out())
 
     def test_garray_utf8_container_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_container_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_container_out())
 
     def test_garray_utf8_full_out(self):
-        self.assertEquals(('0', '1', '2'), GIMarshallingTests.garray_utf8_full_out())
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_out())
 
     def test_garray_utf8_none_inout(self):
-        self.assertEquals(('-2', '-1', '0', '1'), GIMarshallingTests.garray_utf8_none_inout(Sequence(('0', '1', '2'))))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.garray_utf8_none_inout(Sequence(('0', '1', '2'))))
 
     def test_garray_utf8_container_inout(self):
-        self.assertEquals(('-2', '-1','0', '1'), GIMarshallingTests.garray_utf8_container_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_container_inout(['0', '1', '2']))
 
     def test_garray_utf8_full_inout(self):
-        self.assertEquals(('-2', '-1','0', '1'), GIMarshallingTests.garray_utf8_full_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_full_inout(['0', '1', '2']))
 
 
 class TestGList(unittest.TestCase):
@@ -1208,7 +1208,7 @@ class TestStructure(unittest.TestCase):
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
 
         self.assertEquals(0, struct.long_)
-        self.assertEquals(None, struct.g_strv)
+        self.assertEquals([], struct.g_strv)
 
         del struct
 
@@ -1232,7 +1232,7 @@ class TestStructure(unittest.TestCase):
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
-        self.assertEquals(('0', '1', '2'), struct.g_strv)
+        self.assertEquals(['0', '1', '2'], struct.g_strv)
 
         del struct
 

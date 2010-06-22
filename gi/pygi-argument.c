@@ -1372,14 +1372,13 @@ _pygi_argument_to_object (GArgument  *arg,
             gsize i, item_size;
 
             if (arg->v_pointer == NULL) {
-                object = Py_None;
-                Py_INCREF (object);
+                object = PyList_New (0);
                 break;
             }
 
             array = arg->v_pointer;
 
-            object = PyTuple_New (array->len);
+            object = PyList_New (array->len);
             if (object == NULL) {
                 break;
             }
@@ -1421,7 +1420,7 @@ _pygi_argument_to_object (GArgument  *arg,
                     break;
                 }
 
-                PyTuple_SET_ITEM (object, i, py_item);
+                PyList_SET_ITEM (object, i, py_item);
             }
 
             g_base_info_unref ( (GIBaseInfo *) item_type_info);

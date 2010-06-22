@@ -92,9 +92,12 @@ class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_list(self):
         Everything.test_gslist_null_in(None)
         Everything.test_glist_null_in(None)
+        Everything.test_gslist_null_in([])
+        Everything.test_glist_null_in([])
 
     def test_in_nullable_array(self):
         Everything.test_array_int_null_in(None)
+        Everything.test_array_int_null_in([])
 
     def test_in_nullable_string(self):
         Everything.test_utf8_null_in(None)
@@ -110,7 +113,7 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual([], Everything.test_glist_null_out())
 
     def test_out_nullable_array(self):
-        self.assertEqual(None, Everything.test_array_int_null_out())
+        self.assertEqual([], Everything.test_array_int_null_out())
 
     def test_out_nullable_string(self):
         self.assertEqual(None, Everything.test_utf8_null_out())
