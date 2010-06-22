@@ -154,9 +154,6 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(tag.props.name, 'title')
         self.assertEquals(tag.props.font, 'Sans 18')
 
-        start = Gtk.TextIter()
-        end = Gtk.TextIter()
-
         (start, end) = buffer.get_bounds()
 
         buffer.insert(end, 'HelloHello')
