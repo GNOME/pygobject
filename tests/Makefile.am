@@ -46,7 +46,7 @@ check-local: $(top_srcdir)/glib/__init__.py $(top_srcdir)/gobject/__init__.py $(
 	   cp $(top_srcdir)/gobject/*.py $(top_builddir)/gobject; \
 	   cp $(top_srcdir)/gio/*.py $(top_builddir)/gio; \
 	fi
-	@$(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir)
+	$(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir)
 	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
 	   rm -f $(top_builddir)/glib/*.py; \
 	   rm -f $(top_builddir)/gobject/*.py; \
