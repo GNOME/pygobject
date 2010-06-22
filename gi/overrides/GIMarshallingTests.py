@@ -23,9 +23,10 @@ from ..importer import modules
 
 GIMarshallingTests = modules['GIMarshallingTests']
 
+__all__ = []
 
 OVERRIDES_CONSTANT = 7
-
+__all__.append('OVERRIDES_CONSTANT')
 
 class OverridesStruct(GIMarshallingTests.OverridesStruct):
 
@@ -40,7 +41,7 @@ class OverridesStruct(GIMarshallingTests.OverridesStruct):
         return GIMarshallingTests.OverridesStruct.method(self) / 7
 
 OverridesStruct = override(OverridesStruct)
-
+__all__.append('OverridesStruct')
 
 class OverridesObject(GIMarshallingTests.OverridesObject):
 
@@ -63,7 +64,4 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
         return GIMarshallingTests.OverridesObject.method(self) / 7
 
 OverridesObject = override(OverridesObject)
-
-
-__all__ = ['OVERRIDES_CONSTANT', 'OverridesStruct', 'OverridesObject']
-
+__all__.append('OverridesObject')

@@ -24,6 +24,7 @@ from ..importer import modules
 
 Gdk = modules['Gdk']
 
+__all__ = []
 
 class Rectangle(Gdk.Rectangle):
 
@@ -42,7 +43,7 @@ class Rectangle(Gdk.Rectangle):
 		    self.x, self.y, self.width, self.height)
 
 Rectangle = override(Rectangle)
-
+__all__.append('Rectangle')
 
 class Color(Gdk.Color):
 
@@ -59,15 +60,14 @@ class Color(Gdk.Color):
         return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
 
 Color = override(Color)
+__all__.append('Color')
 
 class Drawable(Gdk.Drawable):
     def cairo_create(self):
         return Gdk.cairo_create(self)
 
 Drawable = override(Drawable)
-
-__all__ = ['Rectangle', 'Color', 'Drawable']
-
+__all__.append('Drawable')
 
 
 import sys

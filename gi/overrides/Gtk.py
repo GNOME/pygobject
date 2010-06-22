@@ -26,6 +26,7 @@ from ..types import override
 from ..importer import modules
 
 Gtk = modules['Gtk']
+__all__ = []
 
 class ActionGroup(Gtk.ActionGroup):
     def add_actions(self, entries):
@@ -179,6 +180,7 @@ class ActionGroup(Gtk.ActionGroup):
             first_action.connect('changed', on_change)
 
 ActionGroup = override(ActionGroup)
+__all__.append('ActionGroup')
 
 class UIManager(Gtk.UIManager):
     def add_ui_from_string(self, buffer):
@@ -190,6 +192,7 @@ class UIManager(Gtk.UIManager):
         return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
 UIManager = override(UIManager)
+__all__.append('UIManager')
 
 class Builder(Gtk.Builder):
 
@@ -239,6 +242,7 @@ class Builder(Gtk.Builder):
         return Gtk.Builder.add_objects_from_string(self, buffer, length, object_ids)
 
 Builder = override(Builder)
+__all__.append('Builder')
 
 class Dialog(Gtk.Dialog):
 
@@ -283,8 +287,7 @@ class Dialog(Gtk.Dialog):
             raise TypeError('Must pass an even number of arguments')
 
 Dialog = override(Dialog)
-
-__all__ = ['ActionGroup', 'Builder', 'Dialog', 'UIManager']
+__all__.append('Dialog')
 
 import sys
 
