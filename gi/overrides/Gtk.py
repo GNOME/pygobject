@@ -29,7 +29,7 @@ Gtk = modules['Gtk']
 __all__ = []
 
 class ActionGroup(Gtk.ActionGroup):
-    def add_actions(self, entries):
+    def add_actions(self, entries, user_data=None):
         """
         The add_actions() method is a convenience method that creates a number
         of gtk.Action  objects based on the information in the list of action
@@ -63,7 +63,7 @@ class ActionGroup(Gtk.ActionGroup):
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
             action = Gtk.Action(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
             if callback is not None:
-                action.connect('activate', callback)
+                action.connect('activate', callback, user_data)
 
             self.add_action_with_accel(action, accelerator)
 
@@ -71,7 +71,7 @@ class ActionGroup(Gtk.ActionGroup):
             # using inner function above since entries can leave out optional arguments
             _process_action(*e)
 
-    def add_toggle_actions(self, entries):
+    def add_toggle_actions(self, entries, user_data=None):
         """
         The add_toggle_actions() method is a convenience method that creates a
         number of gtk.ToggleAction objects based on the information in the list
@@ -109,7 +109,7 @@ class ActionGroup(Gtk.ActionGroup):
             action = Gtk.ToggleAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
             action.set_active(is_active)
             if callback is not None:
-                action.connect('activate', callback)
+                action.connect('activate', callback, user_data)
 
             self.add_action_with_accel(action, accelerator)
 
@@ -118,7 +118,7 @@ class ActionGroup(Gtk.ActionGroup):
             _process_action(*e)
 
 
-    def add_radio_actions(self, entries, value=None, on_change=None):
+    def add_radio_actions(self, entries, value=None, on_change=None, user_data=None):
         """
         The add_radio_actions() method is a convenience method that creates a
         number of gtk.RadioAction objects based on the information in the list
@@ -177,7 +177,7 @@ class ActionGroup(Gtk.ActionGroup):
                 first_action = action
 
         if first_action is not None and on_change is not None:
-            first_action.connect('changed', on_change)
+            first_action.connect('changed', on_change, user_data)
 
 ActionGroup = override(ActionGroup)
 __all__.append('ActionGroup')
