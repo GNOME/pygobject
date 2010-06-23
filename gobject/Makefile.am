@@ -61,6 +61,7 @@ endif
 
 
 all: $(pygobject_LTLIBRARIES:.la=.so)
+check-local: $(pygobject_LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(pygobject_LTLIBRARIES:.la=.so)
 .la.so:

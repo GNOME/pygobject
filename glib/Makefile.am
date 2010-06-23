@@ -51,8 +51,8 @@ if PLATFORM_WIN32
 _glib_la_CFLAGS += -DPLATFORM_WIN32
 endif
 
-
 all: $(pyglib_LTLIBRARIES:.la=.so)
+check-local: $(pyglib_LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(pyglib_LTLIBRARIES:.la=.so)
 .la.so:

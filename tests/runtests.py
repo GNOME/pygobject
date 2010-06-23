@@ -7,16 +7,14 @@ import unittest
 import common
 
 program = None
-if len(sys.argv) < 3:
-    raise ValueError('Need at least 3 parameters: runtests.py <build-dir> '
-                     '<src-dir> <test-module-1> <test-module-2> ...')
+if len(sys.argv) < 2:
+    raise ValueError('Need at least 2 parameters: runtests.py <build-dir> '
+                     '<test-module-1> <test-module-2> ...')
 
 buildDir = sys.argv[1]
-srcDir = sys.argv[2]
-files = sys.argv[3:]
+files = sys.argv[2:]
 
-common.importModules(buildDir=buildDir,
-                     srcDir=srcDir)
+common.importModules(buildDir=buildDir)
 
 dir = os.path.split(os.path.abspath(__file__))[0]
 os.chdir(dir)

@@ -62,6 +62,7 @@ _gi.so: _gi.la
 	rm -f $@ && $(LN_S) .libs/$@ $@
 
 all-local: _gi.so
+check-local: _gi.so
 clean-local:
 	rm -f _gi.so
 

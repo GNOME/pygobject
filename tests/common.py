@@ -1,11 +1,10 @@
 import os
 import sys
 
-def importModules(buildDir, srcDir):
+def importModules(buildDir):
     # Be very careful when you change this code, it's
     # fragile and the order is really significant
 
-    sys.path.insert(0, srcDir)
     sys.path.insert(0, buildDir)
     sys.path.insert(0, os.path.join(buildDir, 'glib'))
     sys.path.insert(0, os.path.join(buildDir, 'gobject'))
