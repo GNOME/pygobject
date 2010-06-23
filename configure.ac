@@ -177,7 +177,6 @@ if test x"$have_libffi" = xyes; then
   AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
   LIBFFI_PC=libffi
 fi
-AC_MSG_RESULT([$have_libffi])
 AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
@@ -203,12 +202,12 @@ if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
-AC_ARG_ENABLE(pygi,
-  AC_HELP_STRING([--enable-pygi], [Use PyGI to create wrappers for introspection-enabled types]),
-  enable_pygi=$enableval,
-  enable_pygi=no)
-if test "$enable_pygi" != no; then
-    AC_DEFINE(ENABLE_PYGI,1,Use PyGI to create wrappers for introspection-enabled types)
+AC_ARG_ENABLE(introspection,
+  AC_HELP_STRING([--enable-introspection], [Use introspection information]),
+  enable_introspection=$enableval,
+  enable_introspection=yes)
+if test "$enable_introspection" != no; then
+    AC_DEFINE(ENABLE_INTROSPECTION,1,Use introspection information)
     PKG_CHECK_MODULES(GI,
         glib-2.0 >= 2.22.4
         gobject-introspection-1.0 >= 0.6.14
@@ -216,6 +215,7 @@ if test "$enable_pygi" != no; then
         pycairo >= 1.0.2
     )
 fi
+AM_CONDITIONAL(ENABLE_INTROSPECTION, test "$enable_introspection" = "yes")
 
 INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
 INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0`
@@ -260,4 +260,5 @@ AC_OUTPUT
 
 echo
 echo "libffi support: $have_libffi"
+echo "introspection support: $enable_introspection"
 echo

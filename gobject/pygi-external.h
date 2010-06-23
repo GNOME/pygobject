@@ -17,7 +17,7 @@ static struct PyGI_API *PyGI_API = NULL;
 static int
 _pygi_import (void)
 {
-#if ENABLE_PYGI
+#if ENABLE_INTROSPECTION
     PyObject *module;
     PyObject *api;
 
@@ -52,7 +52,7 @@ _pygi_import (void)
     return 0;
 #else
     return -1;
-#endif /* ENABLE_PYGI */
+#endif /* ENABLE_INTROSPECTION */
 }
 
 static inline PyObject *

@@ -33,10 +33,14 @@ tests =  \
 	test_signal.py \
 	test_subprocess.py \
 	test_unknown.py \
-	test_source.py \
+	test_source.py
+
+if ENABLE_INTROSPECTION
+tests += \
 	test_everything.py \
 	test_gi.py \
 	test_overrides.py
+endif
 
 # This is a hack to make sure a shared library is built
 testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
@@ -48,7 +52,7 @@ check-local: $(top_srcdir)/glib/__init__.py $(top_srcdir)/gobject/__init__.py $(
 	   cp $(top_srcdir)/gobject/*.py $(top_builddir)/gobject; \
 	   cp $(top_srcdir)/gio/*.py $(top_builddir)/gio; \
 	fi
-	$(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir)
+	$(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py $(top_builddir) $(top_srcdir) $(tests)
 	@if test "$(top_builddir)" != "$(top_srcdir)"; then \
 	   rm -f $(top_builddir)/glib/*.py; \
 	   rm -f $(top_builddir)/gobject/*.py; \
