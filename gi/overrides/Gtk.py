@@ -343,6 +343,6 @@ __all__.append('TextBuffer')
 import sys
 
 initialized, argv = Gtk.init_check(sys.argv)
-sys.argv = argv
+sys.argv = list(argv)
 if not initialized:
     raise RuntimeError("Gtk couldn't be initialized")
