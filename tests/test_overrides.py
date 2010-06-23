@@ -39,20 +39,29 @@ class TestGtk(unittest.TestCase):
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         action_group = Gtk.ActionGroup (name = 'TestActionGroup')
+        callback_data = "callback data"
+
+        def test_action_callback_data(action, user_data):
+            self.assertEquals(user_data, callback_data);
+
+        def test_radio_action_callback_data(action, current, user_data):
+            self.assertEquals(user_data, callback_data);
 
         action_group.add_actions ([
             ('test-action1', None, 'Test Action 1',
-             None, None, None),
+             None, None, test_action_callback_data),
             ('test-action2', Gtk.STOCK_COPY, 'Test Action 2',
-              None, None, None)])
+              None, None, test_action_callback_data)], callback_data)
         action_group.add_toggle_actions([
             ('test-toggle-action1', None, 'Test Toggle Action 1',
-             None, None, None, False),
+             None, None, test_action_callback_data, False),
             ('test-toggle-action2', Gtk.STOCK_COPY, 'Test Toggle Action 2',
-              None, None, None, True)])
+              None, None, test_action_callback_data, True)], callback_data)
         action_group.add_radio_actions([
             ('test-radio-action1', None, 'Test Radio Action 1'),
-            ('test-radio-action2', Gtk.STOCK_COPY, 'Test Radio Action 2')], 1, None)
+            ('test-radio-action2', Gtk.STOCK_COPY, 'Test Radio Action 2')], 1,
+            test_radio_action_callback_data,
+            callback_data)
 
         expected_results = (('test-action1', Gtk.Action),
                             ('test-action2', Gtk.Action),
@@ -64,6 +73,7 @@ class TestGtk(unittest.TestCase):
         for action, cmp in zip(action_group.list_actions(), expected_results):
             a = (action.get_name(), type(action))
             self.assertEquals(a,cmp)
+            action.activate()
 
     def test_builder(self):
         self.assertEquals(Gtk.Builder, overrides.Gtk.Builder)
