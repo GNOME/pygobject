@@ -6,6 +6,9 @@ pkgpyexecdir = $(pyexecdir)/gtk-2.0
 SUBDIRS = \
 	repository \
 	overrides
+
+INCLUDES = -I$(top_srcdir)/gobject
+
 AM_CFLAGS = \
 	$(PYTHON_INCLUDES) \
 	$(GI_CFLAGS) \
