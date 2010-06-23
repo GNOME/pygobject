@@ -16,6 +16,7 @@ AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
 
 AC_DEFINE(PYGOBJECT_MAJOR_VERSION, pygobject_major_version, [pygobject major version])
 AC_SUBST(PYGOBJECT_MAJOR_VERSION, pygobject_major_version)
@@ -24,10 +25,10 @@ AC_SUBST(PYGOBJECT_MINOR_VERSION, pygobject_minor_version)
 AC_DEFINE(PYGOBJECT_MICRO_VERSION, pygobject_micro_version, [pygobject micro version])
 AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
-AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
 AM_CONFIG_HEADER(config.h)
-
-AM_INIT_AUTOMAKE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
+AM_INIT_AUTOMAKE(foreign)
+AM_MAINTAINER_MODE
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
@@ -68,10 +69,13 @@ m4_define([_LT_AC_TAGCONFIG],[])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 dnl when using libtool 2.x create libtool early, because it's used in configure
-m4_ifdef([LT_OUTPUT], [LT_OUTPUT]) 
+m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
+AC_ISC_POSIX
+AC_PROG_CC
+AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
-JD_PATH_PYTHON(2.3.5)
+JD_PATH_PYTHON(2.5.2)
 
 JD_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
@@ -205,7 +209,19 @@ AC_ARG_ENABLE(pygi,
   enable_pygi=no)
 if test "$enable_pygi" != no; then
     AC_DEFINE(ENABLE_PYGI,1,Use PyGI to create wrappers for introspection-enabled types)
+    PKG_CHECK_MODULES(GI,
+        glib-2.0 >= 2.22.4
+        gobject-introspection-1.0 >= 0.6.14
+        pygobject-2.0 >= 2.21.1
+        pycairo >= 1.0.2
+    )
 fi
+
+INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
+INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0`
+
+AC_SUBST(INTROSPECTION_SCANNER)
+AC_SUBST(INTROSPECTION_COMPILER)
 
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
@@ -231,6 +247,9 @@ AC_CONFIG_FILES(
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
+  gi/Makefile
+  gi/repository/Makefile
+  gi/overrides/Makefile
   glib/Makefile
   gobject/Makefile
   gio/Makefile
