@@ -156,6 +156,75 @@ class TestGtk(unittest.TestCase):
         button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 
+    def test_tree_api(self):
+        self.assertEquals(Gtk.TreeStore, overrides.Gtk.TreeStore)
+        self.assertEquals(Gtk.ListStore, overrides.Gtk.ListStore)
+        self.assertEquals(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
+
+        class TestClass(GObject.GObject):
+            __gtype_name__ = "GIOverrideTreeAPITest"
+
+            def __init__(self, tester, int_value, string_value):
+                super(TestClass, self).__init__()
+                self.tester = tester
+                self.int_value = int_value
+                self.string_value = string_value
+
+            def check(self, int_value, string_value):
+                self.tester.assertEquals(int_value, self.int_value)
+                self.tester.assertEquals(string_value, self.string_value)
+
+        # check TreeStore
+        # FIXME: we should be able to pass strings like 'TestClass'
+        tree_store = Gtk.TreeStore(int, str, TestClass)
+        parent = None
+        for i in xrange(100):
+            label = 'this is child #%d' % i
+            testobj = TestClass(self, i, label)
+            parent = tree_store.append(parent, (i, label, testobj))
+
+        # walk the tree to see if the values were stored correctly
+        iter = Gtk.TreeIter()
+        parent = None
+        i = 0
+        while tree_store.iter_children(iter, parent):
+           i = tree_store.get_value(iter, 0)
+           s = tree_store.get_value(iter, 1)
+           obj = tree_store.get_value(iter, 2)
+           obj.check(i, s)
+           parent = iter
+           iter = Gtk.TreeIter()
+
+        self.assertEquals(i, 99)
+
+        # check ListStore
+        # FIXME: we should be able to pass strings like 'TestClass'
+        list_store = Gtk.ListStore(int, str, TestClass)
+        for i in xrange(100):
+            label = 'this is row #%d' % i
+            testobj = TestClass(self, i, label)
+            parent = list_store.append((i, label, testobj))
+
+        # walk the list to see if the values were stored correctly
+        iter = Gtk.TreeIter()
+        i = 0
+        has_more = list_store.get_iter_first(iter)
+        while has_more:
+           i = list_store.get_value(iter, 0)
+           s = list_store.get_value(iter, 1)
+           obj = list_store.get_value(iter, 2)
+           obj.check(i, s)
+           has_more = list_store.iter_next(iter)
+
+        self.assertEquals(i, 99)
+
+        # check to see that we can instantiate a TreeViewColumn
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(title='This is just a test',
+                                    cell_renderer=cell,
+                                    text=0,
+                                    style=2)
+
     def test_text_buffer(self):
         self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()

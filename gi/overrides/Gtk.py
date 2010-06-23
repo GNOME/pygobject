@@ -340,6 +340,65 @@ class TextBuffer(Gtk.TextBuffer):
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
+class ListStore(Gtk.ListStore):
+    def __init__(self, *column_types):
+        Gtk.ListStore.__init__(self)
+        self.set_column_types(column_types)
+
+    def append(self, row):
+        treeiter = Gtk.TreeIter()
+        Gtk.ListStore.append(self, treeiter)
+
+        n_columns = self.get_n_columns();
+        if len(row) != n_columns:
+            raise ValueError('row sequence has the incorrect number of elements')
+
+        for i in range(n_columns):
+            if row[i] is not None:
+                self.set_value(treeiter, i, row[i])
+
+        return treeiter
+
+ListStore = override(ListStore)
+__all__.append('ListStore')
+
+class TreeStore(Gtk.TreeStore):
+
+    def __init__(self, *column_types):
+        Gtk.TreeStore.__init__(self)
+        self.set_column_types(column_types)
+
+    def append(self, parent, row):
+        treeiter = Gtk.TreeIter()
+        Gtk.TreeStore.append(self, treeiter, parent)
+
+        n_columns = self.get_n_columns();
+        if len(row) != n_columns:
+            raise ValueError('row sequence has the incorrect number of elements')
+
+        for i in xrange(n_columns):
+            if row[i] is not None:
+                self.set_value(treeiter, i, row[i])
+
+        return treeiter
+
+TreeStore = override(TreeStore)
+__all__.append('TreeStore')
+
+class TreeViewColumn(Gtk.TreeViewColumn):
+    def __init__(self, title='',
+                 cell_renderer=None,
+                 **attributes):
+        Gtk.TreeViewColumn.__init__(self, title=title)
+        if cell_renderer:
+            self.pack_start(cell_renderer, True)
+
+        for (name, value) in attributes.iteritems():
+            self.add_attribute(cell_renderer, name, value)
+
+TreeViewColumn = override(TreeViewColumn)
+__all__.append('TreeViewColumn')
+
 import sys
 
 initialized, argv = Gtk.init_check(sys.argv)
