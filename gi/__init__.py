@@ -22,3 +22,6 @@ from __future__ import absolute_import
 
 from ._gi import _API
 
+# Force loading the GObject typelib so we have available the wrappers for
+# base classes such as GInitiallyUnowned
+from gi.repository import GObject
