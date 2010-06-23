@@ -57,7 +57,7 @@ class ActionGroup(Gtk.ActionGroup):
         """
         try:
             iter(entries)
-        except:
+        except (TypeError):
             raise TypeError('entries must be iterable')
 
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
@@ -102,7 +102,7 @@ class ActionGroup(Gtk.ActionGroup):
 
         try:
             iter(entries)
-        except:
+        except (TypeError):
             raise TypeError('entries must be iterable')
 
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None, is_active=False):
@@ -148,7 +148,7 @@ class ActionGroup(Gtk.ActionGroup):
         """
         try:
             iter(entries)
-        except:
+        except (TypeError):
             raise TypeError('entries must be iterable')
 
         first_action = None
