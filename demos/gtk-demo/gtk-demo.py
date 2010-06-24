@@ -139,13 +139,13 @@ class GtkDemoApp(object):
         Gtk.Window.set_default_icon_list(list)
 
     def selection_cb(self, selection, model):
-        iter = Gtk.TreeIter()
+        treeiter = Gtk.TreeIter()
 
-        (success, m) = selection.get_selected(iter)
+        (success, m) = selection.get_selected(treeiter)
         if not success:
             return
 
-        demo = model.get_value(iter, 1)
+        demo = model.get_value(treeiter, 1)
         
         title = demo.title
         description = demo.module.description
@@ -174,9 +174,9 @@ class GtkDemoApp(object):
         self.source_buffer.insert(end, code)
 
     def row_activated_cb(self, view, path, col, store):
-        iter = Gtk.TreeIter()
-        store.get_iter(iter, path)
-        demo = store.get_value(iter, 1)
+        treeiter = Gtk.TreeIter()
+        store.get_iter(treeiter, path)
+        demo = store.get_value(treeiter, 1)
         demo.module.main()
 
     def create_tree(self):
