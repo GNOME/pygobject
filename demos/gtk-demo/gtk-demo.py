@@ -139,8 +139,6 @@ class GtkDemoApp(object):
         Gtk.Window.set_default_icon_list(list)
 
     def selection_cb(self, selection, model):
-        start = Gtk.TextIter()
-        end = Gtk.TextIter()
         iter = Gtk.TreeIter()
 
         (success, m) = selection.get_selected(iter)
@@ -154,12 +152,12 @@ class GtkDemoApp(object):
         code = GLib.file_get_contents(demo.filename)[1]
 
         # output and style the title
-        self.info_buffer.get_bounds(start, end)
+        (start, end) = self.info_buffer.get_bounds()
         self.info_buffer.delete(start, end)
-        self.source_buffer.get_bounds(start, end)
+        (start, end) = self.source_buffer.get_bounds()
         self.source_buffer.delete(start, end)
 
-        self.info_buffer.get_iter_at_offset(start, 0)
+        start = self.info_buffer.get_iter_at_offset(0)
         end = start.copy()
         self.info_buffer.insert(end, title)
         start = end.copy()
@@ -171,7 +169,7 @@ class GtkDemoApp(object):
         self.info_buffer.insert(end, description)
 
         # output the code
-        self.source_buffer.get_iter_at_offset(start, 0)
+        start = self.source_buffer.get_iter_at_offset(0)
         end = start.copy()
         self.source_buffer.insert(end, code)
 
