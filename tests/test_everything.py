@@ -93,6 +93,33 @@ class TestEverything(unittest.TestCase):
         except TypeError, e:
             self.assertEquals(e.args, ("test_int8() takes exactly 1 argument(s) (0 given)",))
 
+    def test_gtypes(self):
+        gchararray_gtype = GObject.type_from_name('gchararray')
+        gtype = Everything.test_gtype(str)
+        self.assertEquals(gchararray_gtype, gtype)
+        gtype = Everything.test_gtype('gchararray')
+        self.assertEquals(gchararray_gtype, gtype)
+        gobject_gtype = GObject.GObject.__gtype__
+        gtype = Everything.test_gtype(GObject.GObject)
+        self.assertEquals(gobject_gtype, gtype)
+        gtype = Everything.test_gtype('GObject')
+        self.assertEquals(gobject_gtype, gtype)
+        self.assertRaises(TypeError, Everything.test_gtype, 'invalidgtype')
+
+        class NotARegisteredClass(object):
+            pass
+
+        self.assertRaises(TypeError, Everything.test_gtype, NotARegisteredClass)
+
+        class ARegisteredClass(GObject.GObject):
+            __gtype_name__ = 'EverythingTestsARegisteredClass'
+
+        gtype = Everything.test_gtype('EverythingTestsARegisteredClass')
+        self.assertEquals(ARegisteredClass.__gtype__, gtype)
+        gtype = Everything.test_gtype(ARegisteredClass)
+        self.assertEquals(ARegisteredClass.__gtype__, gtype)
+        self.assertRaises(TypeError, Everything.test_gtype, 'ARegisteredClass')
+
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)

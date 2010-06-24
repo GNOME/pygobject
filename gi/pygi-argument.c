@@ -253,13 +253,7 @@ check_number_release:
         {
             gint is_instance;
 
-            is_instance = PyObject_IsInstance (object, (PyObject *) &PyGTypeWrapper_Type);
-            if (is_instance < 0) {
-                retval = -1;
-                break;
-            }
-
-            if (!is_instance && (!PyType_Check (object) || pyg_type_from_object (object) == 0)) {
+            if (pyg_type_from_object (object) == 0) {
                 PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
                               object->ob_type->tp_name);
                 retval = 0;

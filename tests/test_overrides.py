@@ -176,8 +176,7 @@ class TestGtk(unittest.TestCase):
                 self.tester.assertEquals(string_value, self.string_value)
 
         # check TreeStore
-        # FIXME: we should be able to pass strings like 'TestClass'
-        tree_store = Gtk.TreeStore(int, str, TestClass)
+        tree_store = Gtk.TreeStore(int, 'gchararray', TestClass)
         parent = None
         for i in xrange(100):
             label = 'this is child #%d' % i
@@ -205,8 +204,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(i, 99)
 
         # check ListStore
-        # FIXME: we should be able to pass strings like 'TestClass'
-        list_store = Gtk.ListStore(int, str, TestClass)
+        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest')
         for i in xrange(100):
             label = 'this is row #%d' % i
             testobj = TestClass(self, i, label)
