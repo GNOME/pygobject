@@ -100,6 +100,8 @@ class GtkDemoApp(object):
     def load_demos(self):
         demo_wildcard = os.path.join('demos', '*.py')
         demo_file_list = glob.glob(demo_wildcard)
+        demo_file_list.sort()
+
         for f in demo_file_list:
             base_name = os.path.basename(f)
             if base_name == '__init__.py':
