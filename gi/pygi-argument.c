@@ -643,6 +643,7 @@ _pygi_argument_from_object (PyObject   *object,
     GArgument arg;
     GITypeTag type_tag;
 
+    memset(&arg, 0, sizeof(GArgument));
     type_tag = g_type_info_get_tag (type_info);
 
     switch (type_tag) {

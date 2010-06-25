@@ -351,7 +351,11 @@ _prepare_invocation_state (struct invocation_state *state,
                         state->out_args[out_args_pos].v_pointer = NULL;
                         state->args[i] = &state->out_args[out_args_pos];
 
-                        size = g_struct_info_get_size ( (GIStructInfo *) info);
+                        /* FIXME: Remove when bgo#622711 is fixed */
+                        if (g_registered_type_info_get_g_type (info) == G_TYPE_VALUE)
+                            size = sizeof (GValue);
+                        else
+                            size = g_struct_info_get_size ( (GIStructInfo *) info);
 
                         state->args[i]->v_pointer = g_malloc0 (size);
                     } else {
@@ -979,7 +983,7 @@ _free_invocation_state (struct invocation_state *state)
 PyObject *
 _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
 {
-    struct invocation_state state;
+    struct invocation_state state = { 0, };
 
     _initialize_invocation_state (&state, self->info, py_args);
 

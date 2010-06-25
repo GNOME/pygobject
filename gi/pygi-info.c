@@ -1128,6 +1128,8 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     GArgument value;
     PyObject *py_value = NULL;
 
+    memset(&value, 0, sizeof(GArgument));
+
     if (!PyArg_ParseTuple (args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
     }
