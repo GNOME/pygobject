@@ -231,14 +231,6 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-static void
-_sink_gobject (GObject *obj)
-{
-    if (G_IS_INITIALLY_UNOWNED (obj) || g_object_is_floating (obj)) {
-        g_object_ref_sink (obj);
-    }
-}
-
 static PyMethodDef _pygi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
@@ -276,11 +268,6 @@ init_gi (void)
     Pycairo_IMPORT;
     if (Pycairo_CAPI == NULL)
         return;
-
-    // register our floating object sink while we wait for the pygobject
-    // patch to be approved.  Once the patch is in this becomes a noop
-    // For more details - https://bugzilla.gnome.org/show_bug.cgi?id=583909
-    pygobject_register_sinkfunc (G_TYPE_OBJECT, _sink_gobject);
 
     _pygi_repository_register_types (m);
     _pygi_info_register_types (m);

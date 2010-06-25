@@ -121,6 +121,7 @@ class TestNullableArgs(unittest.TestCase):
     def test_out_nullable_object(self):
         self.assertEqual(None, Everything.test_object_null_out())
 
+
 class TestCallbacks(unittest.TestCase):
     called = False
     main_loop = GObject.MainLoop()
