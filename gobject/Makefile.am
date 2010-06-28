@@ -21,10 +21,16 @@ endif
 
 _gobject_la_CFLAGS = \
 	-I$(top_srcdir)/glib \
+	-I$(top_srcdir)/gi \
 	$(PYTHON_INCLUDES) \
 	$(FFI_CFLAGS) \
 	$(GLIB_CFLAGS) \
 	 -DPY_SSIZE_T_CLEAN
+
+if ENABLE_INTROSPECTION
+_gobject_la_CFLAGS += $(GI_CFLAGS)
+endif
+
 _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_gobject|PyInit__gobject"
 _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \

@@ -29,7 +29,7 @@
 #include "pygobject-private.h"
 #include "pygflags.h"
 
-#include "pygi-external.h"
+#include "pygi.h"
 
 GQuark pygflags_class_key;
 

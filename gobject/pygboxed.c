@@ -28,7 +28,7 @@
 #include "pygobject-private.h"
 #include "pygboxed.h"
 
-#include "pygi-external.h"
+#include "pygi.h"
 
 GQuark pygboxed_type_key;
 GQuark pygboxed_marshal_key;

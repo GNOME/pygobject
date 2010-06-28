@@ -28,7 +28,7 @@
 #include <pyglib.h>
 #include "pygobject-private.h"
 
-#include "pygi-external.h"
+#include "pygi.h"
 
 GQuark pygenum_class_key;
 

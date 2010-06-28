@@ -29,7 +29,7 @@
 #include "pyginterface.h"
 #include "pygparamspec.h"
 
-#include "pygi-external.h"
+#include "pygi.h"
 
 
 static void pygobject_dealloc(PyGObject *self);

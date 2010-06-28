@@ -22,6 +22,7 @@
  */
 
 #include "pygi-private.h"
+#include "pygi.h"
 
 #include <pygobject.h>
 
@@ -241,10 +242,9 @@ static PyMethodDef _pygi_functions[] = {
     { NULL, NULL, 0 }
 };
 
-struct PyGI_API PyGI_API = {
-    pygi_type_import_by_g_type
+static struct PyGI_API CAPI = {
+  pygi_type_import_by_g_type_real,
 };
-
 
 PyMODINIT_FUNC
 init_gi (void)
@@ -275,7 +275,7 @@ init_gi (void)
     _pygi_boxed_register_types (m);
     _pygi_argument_init();
 
-    api = PyCObject_FromVoidPtr ( (void *) &PyGI_API, NULL);
+    api = PyCObject_FromVoidPtr ( (void *) &CAPI, NULL);
     if (api == NULL) {
         return;
     }

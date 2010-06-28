@@ -22,11 +22,12 @@
 #ifndef __PYGI_H__
 #define __PYGI_H__
 
+#include <config.h>
 #include <pygobject.h>
 
-#include <girepository.h>
+#if ENABLE_INTROSPECTION
 
-G_BEGIN_DECLS
+#include <girepository.h>
 
 typedef struct {
     PyObject_HEAD
@@ -55,51 +56,40 @@ struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);
 };
 
-
-#ifndef __PYGI_PRIVATE_H__
-
 static struct PyGI_API *PyGI_API = NULL;
 
-#define pygi_type_import_by_g_type (PyGI_API->type_import_by_g_type)
-
-
 static int
-pygi_import (void)
+_pygi_import (void)
 {
-    PyObject *module;
-    PyObject *api;
-
     if (PyGI_API != NULL) {
         return 1;
     }
 
-    module = PyImport_ImportModule ("gi");
-    if (module == NULL) {
+    PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
+    if (PyGI_API == NULL) {
         return -1;
     }
-
-    api = PyObject_GetAttrString (module, "_API");
-    if (api == NULL) {
-        Py_DECREF (module);
-        return -1;
-    }
-    if (!PyCObject_Check (api)) {
-        Py_DECREF (module);
-        Py_DECREF (api);
-        PyErr_Format (PyExc_TypeError, "gi._API must be cobject, not %s",
-                      api->ob_type->tp_name);
-        return -1;
-    }
-
-    PyGI_API = (struct PyGI_API *) PyCObject_AsVoidPtr (api);
-
-    Py_DECREF (api);
 
     return 0;
 }
 
-#endif /* __PYGI_PRIVATE_H__ */
+static inline PyObject *
+pygi_type_import_by_g_type (GType g_type)
+{
+   if (_pygi_import() < 0) {
+       return NULL;
+   }
+   return PyGI_API->type_import_by_g_type(g_type);
+}
 
-G_END_DECLS
+#else /* ENABLE_INTROSPECTION */
+
+static inline PyObject *
+pygi_type_import_by_g_type (GType g_type)
+{
+    return NULL;
+}
+
+#endif /* ENABLE_INTROSPECTION */
 
 #endif /* __PYGI_H__ */

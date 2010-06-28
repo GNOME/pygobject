@@ -28,7 +28,7 @@
 #include "pygobject-private.h"
 #include "pygpointer.h"
 
-#include "pygi-external.h"
+#include "pygi.h"
 
 
 GQuark pygpointer_class_key;
