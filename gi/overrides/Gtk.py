@@ -340,7 +340,14 @@ class TextBuffer(Gtk.TextBuffer):
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
-class ListStore(Gtk.ListStore):
+class TreeModel(Gtk.TreeModel):
+    def __len__(self):
+        return self.iter_n_children(None)
+
+TreeModel = override(TreeModel)
+__all__.append('TreeModel')
+
+class ListStore(Gtk.ListStore, TreeModel):
     def __init__(self, *column_types):
         Gtk.ListStore.__init__(self)
         self.set_column_types(column_types)
@@ -362,7 +369,7 @@ class ListStore(Gtk.ListStore):
 ListStore = override(ListStore)
 __all__.append('ListStore')
 
-class TreeStore(Gtk.TreeStore):
+class TreeStore(Gtk.TreeStore, TreeModel):
 
     def __init__(self, *column_types):
         Gtk.TreeStore.__init__(self)

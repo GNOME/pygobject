@@ -159,6 +159,7 @@ class TestGtk(unittest.TestCase):
     def test_tree_api(self):
         self.assertEquals(Gtk.TreeStore, overrides.Gtk.TreeStore)
         self.assertEquals(Gtk.ListStore, overrides.Gtk.ListStore)
+        self.assertEquals(Gtk.TreeModel, overrides.Gtk.TreeModel)
         self.assertEquals(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
 
         class TestClass(GObject.GObject):
@@ -183,6 +184,8 @@ class TestGtk(unittest.TestCase):
             testobj = TestClass(self, i, label)
             parent = tree_store.append(parent, (i, label, testobj))
 
+        self.assertEquals(len(tree_store), 100)
+
         # walk the tree to see if the values were stored correctly
         iter = Gtk.TreeIter()
         parent = None
@@ -204,6 +207,8 @@ class TestGtk(unittest.TestCase):
             label = 'this is row #%d' % i
             testobj = TestClass(self, i, label)
             parent = list_store.append((i, label, testobj))
+
+        self.assertEquals(len(list_store), 100)
 
         # walk the list to see if the values were stored correctly
         iter = Gtk.TreeIter()
