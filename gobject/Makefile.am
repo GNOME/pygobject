@@ -54,8 +54,7 @@ _gobject_la_SOURCES =           \
         pygpointer.c            \
         pygpointer.h            \
         pygtype.c               \
-        pygtype.h		\
-	pygi-external.h
+        pygtype.h
 
 if HAVE_LIBFFI
 _gobject_la_SOURCES += ffi-marshaller.c ffi-marshaller.h

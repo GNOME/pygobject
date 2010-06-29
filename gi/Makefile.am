@@ -62,9 +62,7 @@ _gi_cairo_la_LDFLAGS = \
 _gi_cairo_la_LIBADD = \
 	$(GI_LIBS) \
 	$(PYCAIRO_LIBS)
-_gi_cairo_la_SOURCES = \
-	pygi-foreign-cairo.c \
-	pygi-foreign-cairo.h
+_gi_cairo_la_SOURCES = pygi-foreign-cairo.c
 
 pygi_LTLIBRARIES = _gi.la _gi_cairo.la
 
