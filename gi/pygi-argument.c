@@ -962,15 +962,9 @@ array_item_error:
                             arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
                         }
                     } else if ( (type == G_TYPE_NONE) && (g_struct_info_is_foreign (info))) {
-                        gint retval;
-
-                        retval = pygi_struct_foreign_convert_to_g_argument (
+                        PyObject *result;
+                        result = pygi_struct_foreign_convert_to_g_argument (
                                      object, type_info, transfer, &arg);
-
-                        if (!retval) {
-                            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to foreign struct failed");
-                            break;
-                        }
                     } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                         g_warn_if_fail (!g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
                         arg.v_pointer = pyg_pointer_get (object, void);

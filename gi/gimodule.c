@@ -26,9 +26,6 @@
 
 #include <pygobject.h>
 
-# include <pycairo.h>
-Pycairo_CAPI_t *Pycairo_CAPI;
-
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
                     PyObject *args,
@@ -244,6 +241,7 @@ static PyMethodDef _pygi_functions[] = {
 
 static struct PyGI_API CAPI = {
   pygi_type_import_by_g_type_real,
+  pygi_register_foreign_struct_real,
 };
 
 PyMODINIT_FUNC
@@ -264,10 +262,6 @@ init_gi (void)
     if (_pygobject_import() < 0) {
         return;
     }
-
-    Pycairo_IMPORT;
-    if (Pycairo_CAPI == NULL)
-        return;
 
     _pygi_repository_register_types (m);
     _pygi_info_register_types (m);

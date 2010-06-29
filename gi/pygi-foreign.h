@@ -28,25 +28,22 @@
 #include <Python.h>
 #include <girepository.h>
 
-typedef gboolean (*PyGIArgOverrideToGArgumentFunc) (PyObject       *value,
-                                                    GITypeInfo     *type_info,
-                                                    GITransfer      transfer,
-                                                    GArgument      *arg);
+#include "pygi.h"
 
-typedef PyObject * (*PyGIArgOverrideFromGArgumentFunc) (GITypeInfo *type_info,
-                                                        GArgument  *arg);
-typedef gboolean (*PyGIArgOverrideReleaseGArgumentFunc) (GITransfer  transfer,
-                                                         GITypeInfo *type_info,
-                                                         GArgument  *arg);
-
-gboolean pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
-                                                    GITypeInfo         *type_info,
-                                                    GITransfer          transfer,
-                                                    GArgument          *arg);
+PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
+                                                     GITypeInfo         *type_info,
+                                                     GITransfer          transfer,
+                                                     GArgument          *arg);
 PyObject *pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
                                                        GArgument  *arg);
-gboolean pygi_struct_foreign_release_g_argument (GITransfer          transfer,
-                                                 GITypeInfo         *type_info,
-                                                 GArgument          *arg);
+PyObject *pygi_struct_foreign_release_g_argument (GITransfer          transfer,
+                                                  GITypeInfo         *type_info,
+                                                  GArgument          *arg);
+
+void pygi_register_foreign_struct_real (const char* namespace_,
+                                        const char* name,
+                                        PyGIArgOverrideToGArgumentFunc to_func,
+                                        PyGIArgOverrideFromGArgumentFunc from_func,
+                                        PyGIArgOverrideReleaseGArgumentFunc release_func);
 
 #endif /* __PYGI_FOREIGN_H__ */

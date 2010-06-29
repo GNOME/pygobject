@@ -23,12 +23,11 @@
 
 #include <cairo.h>
 #include <pycairo.h>
-extern Pycairo_CAPI_t *Pycairo_CAPI;
+Pycairo_CAPI_t *Pycairo_CAPI;
 
 #include "pygi-foreign.h"
-#include "pygi-foreign-cairo.h"
 
-gboolean
+PyObject *
 cairo_context_to_arg (PyObject       *value,
                       GITypeInfo     *type_info,
                       GITransfer      transfer,
@@ -39,11 +38,12 @@ cairo_context_to_arg (PyObject       *value,
     g_assert (transfer == GI_TRANSFER_NOTHING);
 
     cr = PycairoContext_GET (value);
-    if (!cr)
-        return FALSE;
+    if (!cr) {
+        return NULL;
+    }
 
     arg->v_pointer = cr;
-    return TRUE;
+    Py_RETURN_NONE;
 }
 
 PyObject *
@@ -56,16 +56,16 @@ cairo_context_from_arg (GITypeInfo *type_info, GArgument  *arg)
     return PycairoContext_FromContext (context, &PycairoContext_Type, NULL);
 }
 
-gboolean
+PyObject *
 cairo_context_release_arg (GITransfer  transfer, GITypeInfo *type_info,
                            GArgument  *arg)
 {
     cairo_destroy ( (cairo_t*) arg->v_pointer);
-    return TRUE;
+    Py_RETURN_NONE;
 }
 
 
-gboolean
+PyObject *
 cairo_surface_to_arg (PyObject       *value,
                       GITypeInfo     *type_info,
                       GITransfer      transfer,
@@ -76,11 +76,13 @@ cairo_surface_to_arg (PyObject       *value,
     g_assert (transfer == GI_TRANSFER_NOTHING);
 
     surface = ( (PycairoSurface*) value)->surface;
-    if (!surface)
-        return FALSE;
+    if (!surface) {
+        PyErr_SetString (PyExc_ValueError, "Surface instance wrapping a NULL surface");
+        return NULL;
+    }
 
     arg->v_pointer = surface;
-    return TRUE;
+    Py_RETURN_NONE;
 }
 
 PyObject *
@@ -93,11 +95,37 @@ cairo_surface_from_arg (GITypeInfo *type_info, GArgument  *arg)
     return PycairoSurface_FromSurface (surface, NULL);
 }
 
-gboolean
+PyObject *
 cairo_surface_release_arg (GITransfer  transfer, GITypeInfo *type_info,
                            GArgument  *arg)
 {
     cairo_surface_destroy ( (cairo_surface_t*) arg->v_pointer);
-    return TRUE;
+    Py_RETURN_NONE;
 }
 
+PyMODINIT_FUNC
+init_gi_cairo (void)
+{
+    PyObject *m;
+
+    m = Py_InitModule ("_gi_cairo", NULL);
+    if (m == NULL) {
+        return;
+    }
+
+    Pycairo_IMPORT;
+    if (Pycairo_CAPI == NULL)
+        return;
+
+    pygi_register_foreign_struct ("cairo",
+                                  "Context",
+                                  cairo_context_to_arg,
+                                  cairo_context_from_arg,
+                                  cairo_context_release_arg);
+
+    pygi_register_foreign_struct ("cairo",
+                                  "Surface",
+                                  cairo_surface_to_arg,
+                                  cairo_surface_from_arg,
+                                  cairo_surface_release_arg);
+}

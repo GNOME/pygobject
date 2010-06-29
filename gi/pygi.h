@@ -51,9 +51,23 @@ typedef struct {
     gsize size;
 } PyGIBoxed;
 
+typedef PyObject * (*PyGIArgOverrideToGArgumentFunc) (PyObject       *value,
+                                                      GITypeInfo     *type_info,
+                                                      GITransfer      transfer,
+                                                      GArgument      *arg);
+typedef PyObject * (*PyGIArgOverrideFromGArgumentFunc) (GITypeInfo *type_info,
+                                                        GArgument  *arg);
+typedef PyObject * (*PyGIArgOverrideReleaseGArgumentFunc) (GITransfer  transfer,
+                                                           GITypeInfo *type_info,
+                                                           GArgument  *arg);
 
 struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);
+    void (*register_foreign_struct) (const char* namespace_,
+                                     const char* name,
+                                     PyGIArgOverrideToGArgumentFunc to_func,
+                                     PyGIArgOverrideFromGArgumentFunc from_func,
+                                     PyGIArgOverrideReleaseGArgumentFunc release_func);
 };
 
 static struct PyGI_API *PyGI_API = NULL;
@@ -76,10 +90,28 @@ _pygi_import (void)
 static inline PyObject *
 pygi_type_import_by_g_type (GType g_type)
 {
-   if (_pygi_import() < 0) {
-       return NULL;
-   }
-   return PyGI_API->type_import_by_g_type(g_type);
+    if (_pygi_import() < 0) {
+        return NULL;
+    }
+    return PyGI_API->type_import_by_g_type(g_type);
+}
+
+static inline PyObject *
+pygi_register_foreign_struct (const char* namespace_,
+                              const char* name,
+                              PyGIArgOverrideToGArgumentFunc to_func,
+                              PyGIArgOverrideFromGArgumentFunc from_func,
+                              PyGIArgOverrideReleaseGArgumentFunc release_func)
+{
+    if (_pygi_import() < 0) {
+        return NULL;
+    }
+    PyGI_API->register_foreign_struct(namespace_,
+                                      name,
+                                      to_func,
+                                      from_func,
+                                      release_func);
+    Py_RETURN_NONE;
 }
 
 #else /* ENABLE_INTROSPECTION */

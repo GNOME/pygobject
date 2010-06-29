@@ -27,99 +27,122 @@
 #include <config.h>
 #include <girepository.h>
 
-#include "pygi-foreign-cairo.h"
-
-static struct {
-    char *namespace;
-    char *name;
+typedef struct {
+    const char *namespace;
+    const char *name;
     PyGIArgOverrideToGArgumentFunc to_func;
     PyGIArgOverrideFromGArgumentFunc from_func;
     PyGIArgOverrideReleaseGArgumentFunc release_func;
-} foreign_structs[] = {
-    {   "cairo", "Context", cairo_context_to_arg, cairo_context_from_arg,
-        cairo_context_release_arg
-    },
-    {   "cairo", "Surface", cairo_surface_to_arg, cairo_surface_from_arg,
-        cairo_surface_release_arg
-    },
-    { NULL }
-};
+} PyGIForeignStruct;
 
-static gint
+static GPtrArray *foreign_structs = NULL;
+
+static PyGIForeignStruct *
 pygi_struct_foreign_lookup (GITypeInfo *type_info)
 {
+    gint i;
+    PyObject *module;
+    gchar *module_name;
     GIBaseInfo *base_info;
+    const gchar *namespace;
+    const gchar *name;
 
     base_info = g_type_info_get_interface (type_info);
-    if (base_info) {
-        gint i;
-        const gchar *namespace = g_base_info_get_namespace (base_info);
-        const gchar *name = g_base_info_get_name (base_info);
+    if (base_info == NULL) {
+        PyErr_Format (PyExc_ValueError, "Couldn't resolve the type of this foreign struct");
+        return NULL;
+    }
 
-        for (i = 0; foreign_structs[i].namespace; ++i) {
+    namespace = g_base_info_get_namespace (base_info);
+    name = g_base_info_get_name (base_info);
 
-            if ( (strcmp (namespace, foreign_structs[i].namespace) == 0) &&
-                    (strcmp (name, foreign_structs[i].name) == 0)) {
+    module_name = g_strconcat ("gi._gi_", g_base_info_get_namespace (base_info), NULL);
+    module = PyImport_ImportModule (module_name);
+    g_free (module_name);
+
+    if (foreign_structs != NULL) {
+        for (i = 0; i < foreign_structs->len; i++) {
+            PyGIForeignStruct *foreign_struct = \
+                    g_ptr_array_index (foreign_structs, i);
+
+            if ( (strcmp (namespace, foreign_struct->namespace) == 0) &&
+                    (strcmp (name, foreign_struct->name) == 0)) {
                 g_base_info_unref (base_info);
-                return i;
+                return foreign_struct;
             }
         }
-
-        PyErr_Format (PyExc_TypeError, "Couldn't find type %s.%s", namespace,
-                      name);
-
-        g_base_info_unref (base_info);
     }
-    return -1;
+
+    g_base_info_unref (base_info);
+
+    PyErr_Format (PyExc_TypeError, "Couldn't find conversion for foreign struct '%s.%s'", namespace, name);
+    return NULL;
 }
 
-gboolean
+PyObject *
 pygi_struct_foreign_convert_to_g_argument (PyObject      *value,
                                            GITypeInfo     *type_info,
                                            GITransfer      transfer,
                                            GArgument      *arg)
 {
-    gint struct_index;
+    PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (type_info);
 
-    struct_index = pygi_struct_foreign_lookup (type_info);
-    if (struct_index < 0)
-        return FALSE;
+    if (foreign_struct == NULL)
+        return NULL;
 
-    if (!foreign_structs[struct_index].to_func (value, type_info, transfer, arg))
-        return FALSE;
+    if (!foreign_struct->to_func (value, type_info, transfer, arg))
+        return NULL;
 
-    return TRUE;
+    Py_RETURN_NONE;
 }
 
 PyObject *
 pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
                                              GArgument  *arg)
 {
-    gint struct_index;
+    PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (type_info);
 
-    struct_index = pygi_struct_foreign_lookup (type_info);
-    if (struct_index < 0)
+    if (foreign_struct == NULL)
         return NULL;
 
-    return foreign_structs[struct_index].from_func (type_info, arg);
+    return foreign_struct->from_func (type_info, arg);
 }
 
-gboolean
+PyObject *
 pygi_struct_foreign_release_g_argument (GITransfer  transfer,
                                         GITypeInfo *type_info,
                                         GArgument  *arg)
 {
-    gint struct_index;
+    PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (type_info);
 
-    struct_index = pygi_struct_foreign_lookup (type_info);
-    if (struct_index < 0)
-        return FALSE;
+    if (foreign_struct == NULL)
+        return NULL;
 
-    if (!foreign_structs[struct_index].release_func)
-        return TRUE;
+    if (!foreign_struct->release_func)
+        Py_RETURN_NONE;
 
-    if (!foreign_structs[struct_index].release_func (transfer, type_info, arg))
-        return FALSE;
+    if (!foreign_struct->release_func (transfer, type_info, arg))
+        return NULL;
 
-    return TRUE;
+    Py_RETURN_NONE;
+}
+
+void
+pygi_register_foreign_struct_real (const char* namespace_,
+                                   const char* name,
+                                   PyGIArgOverrideToGArgumentFunc to_func,
+                                   PyGIArgOverrideFromGArgumentFunc from_func,
+                                   PyGIArgOverrideReleaseGArgumentFunc release_func)
+{
+    PyGIForeignStruct *new_struct = g_slice_new0 (PyGIForeignStruct);
+    new_struct->namespace = namespace_;
+    new_struct->name = name;
+    new_struct->to_func = to_func;
+    new_struct->from_func = from_func;
+    new_struct->release_func = release_func;
+
+    if (foreign_structs == NULL)
+        foreign_structs = g_ptr_array_new ();
+
+    g_ptr_array_add (foreign_structs, new_struct);
 }

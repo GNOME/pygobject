@@ -213,6 +213,8 @@ if test "$enable_introspection" != no; then
     PKG_CHECK_MODULES(GI,
         glib-2.0 >= glib_required_version
         gobject-introspection-1.0 >= introspection_required_version
+    )
+    PKG_CHECK_MODULES(PYCAIRO,
         pycairo >= pycairo_required_version
     )
 fi
