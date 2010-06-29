@@ -1,11 +1,34 @@
-2.21.3 21-Jan-2010
+2.21.4 29-Jun-2010
+        - Build the cairo shim as a python module so the _gi module stops linking to it (Tomeu Vizoso)
+        - add drawing area demo (John (J5) Palmieri)
+        - sort the demo list (John (J5) Palmieri)
+        - rename iter to treeiter so we aren't using a python reserved word (John (J5) Palmieri)
+        - Fixup for change in buffer API (John (J5) Palmieri)
+        - add ListStore, TreeStore and TreeViewColumn APIs (John (J5) Palmieri)
+        - Add unit test for add_actions user data. (Ignacio Casal Quinteiro)
+        - Pass user_data param when adding actions (Paolo Borelli)
+        - add an exception type to the try/except block (John (J5) Palmieri)
+        - return PyList instead of PyTuple for array, return empty list for NULL arrays (John (J5) Palmieri)
+        - Fix 'make distcheck' (Tomeu Vizoso)
+        - Allow building pygobject without introspection support by providing --disable-introspection to configure. (Tomeu Vizoso)
+        - Make sure that sys.argv is a list and not a sequence. (Tomeu Vizoso)
+        - Force loading the GObject typelib so we have available the wrappers for base classes such as GInitiallyUnowned. (Tomeu Vizoso)
+        - we shouldn't g_array_free NULL pointers (John (J5) Palmieri)
+        - remove unneeded TextIter creation in the tests (John (J5) Palmieri)
+        - add override for TextBuffer (John (J5) Palmieri)
+        - fix up some build issues (John (J5) Palmieri)
+        - make the overrides file git friendly by appending to __all__ after each override (John (J5) Palmieri)
+        - Override Dialog constructor and add_buttons method (Paolo Borelli)
+        - Merge PyGI (Johan Dahlin)
+
+2.21.3 21-Jun-2010
         - Proper handling of null-ok in virtual methods (Ludovic L'Hours)
         - Fall back to use the floating references API in glib if there isn't a sinkfunc defined. (Tomeu Vizoso)
         - Revert "Drop sinkfuncs." (Tomeu Vizoso)
         - [giounix] Make it possible to compile on glib 2.20 (Johan Dahlin)
         - Release the lock when potentially invoking Python code. (Sjoerd Simons)
 
-2.21.2 10-Jan-2010
+2.21.2 10-Jun-2010
         - Drop sinkfuncs. (Tomeu Vizoso)
         - Clear error if we failed the import (Colin Walters)
         - Added missing , to keyword list of gio.GFile.set_attribute (John Ehresman)
