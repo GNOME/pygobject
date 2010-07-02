@@ -1,7 +1,7 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
- * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ * Copyright (C) 2005-2010 Johan Dahlin <johan@gnome.org>
  *
  *   pygi-info.c: GI.*Info wrappers.
  *
@@ -22,6 +22,7 @@
  */
 
 #include "pygi-private.h"
+#include "pygi-llvm.h"
 
 #include <pygobject.h>
 
@@ -462,6 +463,7 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "is_constructor", (PyCFunction) _wrap_g_function_info_is_constructor, METH_NOARGS },
     { "is_method", (PyCFunction) _wrap_g_function_info_is_method, METH_NOARGS },
     { "invoke", (PyCFunction) _wrap_g_function_info_invoke, METH_VARARGS },
+    { "llvm_compile", (PyCFunction) _wrap_g_function_info_llvm_compile, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

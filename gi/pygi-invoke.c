@@ -1003,4 +1003,3 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
 
     return state.return_value;
 }
-

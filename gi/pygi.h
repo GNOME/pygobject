@@ -123,4 +123,14 @@ pygi_type_import_by_g_type (GType g_type)
 
 #endif /* ENABLE_INTROSPECTION */
 
+/* Don't leak PACKAGE_* defines from config.h,
+ * as there might be other packages (such as llvm) which
+ * want to use them
+ */
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+#undef PACKAGE_VERSION
+
 #endif /* __PYGI_H__ */

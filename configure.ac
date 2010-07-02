@@ -72,10 +72,12 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 dnl when using libtool 2.x create libtool early, because it's used in configure
 m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
-AC_ISC_POSIX
 AC_PROG_CC
-AM_PROG_CC_STDC
 AM_PROG_CC_C_O
+AC_PROG_CXX
+AC_ISC_POSIX
+AC_HEADER_STDC
+AM_PROG_CC_STDC
 
 JD_PATH_PYTHON(2.5.2)
 

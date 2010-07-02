@@ -33,19 +33,26 @@ from ._gi import \
     register_interface_info, \
     hook_up_vfunc_implementation
 
+_gi_llvm = None
+
+def enable_llvm():
+    global _gi_llvm
+    _gi_llvm = True
 
 def Function(info):
-
     def function(*args):
         return info.invoke(*args)
     function.__info__ = info
     function.__name__ = info.get_name()
     function.__module__ = info.get_namespace()
-
-    return function
+    if _gi_llvm:
+        return info.llvm_compile()
+    else:
+        return function
 
 
 def Constructor(info):
+    global _gi_llvm
 
     def constructor(cls, *args):
         cls_name = info.get_container().get_name()
@@ -56,8 +63,10 @@ def Constructor(info):
     constructor.__info__ = info
     constructor.__name__ = info.get_name()
     constructor.__module__ = info.get_namespace()
-
-    return constructor
+    if _gi_llvm:
+        return info.llvm_compile()
+    else:
+        return constructor
 
 
 class MetaClassHelper(object):

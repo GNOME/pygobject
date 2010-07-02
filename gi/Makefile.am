@@ -16,7 +16,10 @@ pygi_PYTHON = \
 	importer.py \
 	__init__.py
 
-_gi_la_CFLAGS = \
+AM_CFLAGS = \
+	$(PYTHON_INCLUDES) \
+	$(GI_CFLAGS)
+AM_CXXFLAGS = \
 	$(PYTHON_INCLUDES) \
 	$(GI_CFLAGS)
 _gi_la_LDFLAGS = \
@@ -52,6 +55,17 @@ _gi_la_SOURCES = \
 	pygi-private.h \
 	pygobject-external.h \
 	gimodule.c
+
+# LLVM
+AM_CXXFLAGS +=		\
+	$(shell llvm-config --cxxflags core engine linker)
+_gi_la_LDFLAGS +=		\
+	$(shell llvm-config --ldflags --libs core engine linker)
+_gi_la_SOURCES += 		\
+	pygi-llvm.cpp		\
+	pygi-llvm.h		\
+	llvm-compiler.cpp	\
+	llvm-compiler.h
 
 _gi_cairo_la_CFLAGS = \
 	$(PYTHON_INCLUDES) \
