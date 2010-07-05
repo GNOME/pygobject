@@ -79,6 +79,7 @@ class DynamicModule(object):
 
     def __init__(self, namespace):
         self._namespace = namespace
+        self.__name__ = 'gi.repository.' + namespace
 
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
