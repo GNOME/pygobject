@@ -78,7 +78,7 @@ _pygi_import (void)
         return 1;
     }
 
-    PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
+    PyGI_API = (struct PyGI_API*) PyCObject_Import((char*)"gi", (char*)"_API");
     if (PyGI_API == NULL) {
         return -1;
     }
