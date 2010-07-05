@@ -90,7 +90,6 @@ PyObject* _PyGObject_New(GObject *o) {
 using namespace pygi;
 
 static llvm::IRBuilder<> Builder(llvm::getGlobalContext());
-// PyObject = { ssize_t ob_refcnt, struct* ob_type }
 // PyTupleObject = { ssize_t ob_refcnt, struct* ob_type, ssize_t ob_size, PyObject* }
 static llvm::Type* pyObjectPtr = NULL;
 static llvm::Type* gObjectPtr = NULL;
@@ -482,9 +481,16 @@ LLVMCompiler::createPyNone()
 void
 LLVMCompiler::loadSymbols()
 {
-  // llvm
-  pyObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
-  gObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
+  // PyObject = { ssize_t ob_refcnt, struct* ob_type }
+  llvm::StructType *pyObject = llvm::StructType::get(mCtx,
+                                                     llvm::TypeBuilder<ssize_t, false>::get(mCtx),
+                                                     llvm::TypeBuilder<void*, false>::get(mCtx), NULL);
+  mModule->addTypeName("PyObject", pyObject);
+  pyObjectPtr = llvm::PointerType::getUnqual(pyObject);
+
+  llvm::StructType *gObject = llvm::StructType::get(mCtx, NULL, NULL);
+  mModule->addTypeName("GObject", gObject);
+  gObjectPtr = llvm::PointerType::getUnqual(gObject);
 
   _PyLong_CheckFunc =
     llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyLong_Check",
