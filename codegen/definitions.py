@@ -12,6 +12,32 @@ def unescape(s):
 def make_docstring(lines):
     return "(char *) " + '\n'.join(['"%s"' % unescape(s) for s in lines])
 
+def field_list_parse_one(outlist, parg):
+    ftype = parg[0]
+    fname = parg[1]
+    getter_propname = ""
+    getter_funcname = ""
+    for farg in parg[2:]:
+        assert isinstance(farg, tuple)
+        if farg[0] == 'getter-propname':
+            getter_propname = farg[1]
+        elif farg[0] == 'getter-funcname':
+            getter_funcname = farg[1]
+    outlist.append((ftype, fname, getter_propname, getter_funcname))
+
+def field_list_print_one(ftype, fname, getter_propname, getter_funcname):
+    if getter_propname or getter_funcname:
+        extra = ' ('
+        if getter_propname:
+            extra += 'getter-propname "%s"' % getter_propname
+        elif getter_funcname:
+            extra += 'getter-funcname "%s"' % getter_funcname
+        extra += ')'
+    else:
+        extra = ''
+
+    return '("%s" "%s"%s)' % (ftype, fname, extra)
+
 # New Parameter class, wich emulates a tuple for compatibility reasons
 class Parameter(object):
     def __init__(self, ptype, pname, pdflt, pnull, pdir=None):
@@ -115,7 +141,7 @@ class ObjectDef(Definition):
                 self.typecode = arg[1]
             elif arg[0] == 'fields':
                 for parg in arg[1:]:
-                    self.fields.append((parg[0], parg[1]))
+                    field_list_parse_one(self.fields, parg)
             elif arg[0] == 'implements':
                 self.implements.append(arg[1])
     def merge(self, old):
@@ -138,8 +164,8 @@ class ObjectDef(Definition):
             fp.write('  (gtype-id "' + self.typecode + '")\n')
         if self.fields:
             fp.write('  (fields\n')
-            for (ftype, fname) in self.fields:
-                fp.write('    \'("' + ftype + '" "' + fname + '")\n')
+            for (ftype, fname, getter_propname, getter_funcname) in self.fields:
+                fp.write('    \'' + field_list_print_one(ftype, fname, getter_propname, getter_funcname) + '\n')
             fp.write('  )\n')
         fp.write(')\n\n')
 
@@ -235,7 +261,7 @@ class BoxedDef(Definition):
                 self.release = arg[1]
             elif arg[0] == 'fields':
                 for parg in arg[1:]:
-                    self.fields.append((parg[0], parg[1]))
+                    field_list_parse_one(self.fields, parg)
     def merge(self, old):
         # currently the .h parser doesn't try to work out what fields of
         # an object structure should be public, so we just copy the list
@@ -255,8 +281,8 @@ class BoxedDef(Definition):
             fp.write('  (release-func "' + self.release + '")\n')
         if self.fields:
             fp.write('  (fields\n')
-            for (ftype, fname) in self.fields:
-                fp.write('    \'("' + ftype + '" "' + fname + '")\n')
+            for (ftype, fname, getter_propname, getter_funcname) in self.fields:
+                fp.write('    \'' + field_list_print_one(ftype, fname, getter_propname, getter_funcname) + '\n')
             fp.write('  )\n')
         fp.write(')\n\n')
 
@@ -276,7 +302,7 @@ class PointerDef(Definition):
                 self.typecode = arg[1]
             elif arg[0] == 'fields':
                 for parg in arg[1:]:
-                    self.fields.append((parg[0], parg[1]))
+                    field_list_parse_one(self.fields, parg)
     def merge(self, old):
         # currently the .h parser doesn't try to work out what fields of
         # an object structure should be public, so we just copy the list
@@ -293,7 +319,7 @@ class PointerDef(Definition):
         if self.fields:
             fp.write('  (fields\n')
             for (ftype, fname) in self.fields:
-                fp.write('    \'("' + ftype + '" "' + fname + '")\n')
+                fp.write('    \'' + field_list_print_one(ftype, fname, getter_propname, getter_funcname) + '\n')
             fp.write('  )\n')
         fp.write(')\n\n')
 

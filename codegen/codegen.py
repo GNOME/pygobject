@@ -156,7 +156,7 @@ class Wrapper:
         '%(funcname)s(PyObject *self, void *closure)\n'
         '{\n'
         '%(varlist)s'
-        '    ret = %(field)s;\n'
+        '    %(assignment)s\n'
         '%(codeafter)s\n'
         '}\n\n'
         )
@@ -243,8 +243,11 @@ class Wrapper:
         return string.lower(string.replace(self.objinfo.typecode,
                                            '_TYPE_', '_', 1))
 
-    def get_field_accessor(self, fieldname):
+    def get_original_type(self):
         raise NotImplementedError
+
+    def get_field_accessor(self, fieldname):
+        return '%s->%s' % (self.get_original_type(), fieldname)
 
     def get_initial_class_substdict(self): return {}
 
@@ -675,6 +678,13 @@ class Wrapper:
 ''' % vars())
             self.fp.write('    return 0;\n}\n')
 
+    def get_field_assignment(self, ftype, cfname, getter_propname, getter_funcname):
+        if getter_funcname:
+            func = '%s_%s(%s);' % (self.get_lower_name(), getter_funcname, self.get_original_type())
+        else:
+            func = self.get_field_accessor(cfname)
+        return 'ret = %s;' % func
+
     def write_getsets(self):
         lower_name = self.get_lower_name()
         getsets_name = lower_name + '_getsets'
@@ -686,7 +696,7 @@ class Wrapper:
         if not self.objinfo.fields:
             return '0'
         getsets = []
-        for ftype, cfname in self.objinfo.fields:
+        for ftype, cfname, getter_propname, getter_funcname in self.objinfo.fields:
             fname = cfname.replace('.', '_')
             gettername = '0'
             settername = '0'
@@ -708,7 +718,7 @@ class Wrapper:
                     self.fp.write(self.getter_tmpl %
                                   { 'funcname': funcname,
                                     'varlist': info.varlist,
-                                    'field': self.get_field_accessor(cfname),
+                                    'assignment' : self.get_field_assignment(ftype, cfname, getter_propname, getter_funcname),
                                     'codeafter': info.get_codeafter() })
                     gettername = funcname
                 except argtypes.ArgTypeError, ex:
@@ -947,6 +957,7 @@ class GObjectWrapper(Wrapper):
         '%(codeafter)s\n'
         '}\n\n'
         )
+
     def __init__(self, parser, objinfo, overrides, fp=FileOutput(sys.stdout)):
         Wrapper.__init__(self, parser, objinfo, overrides, fp)
         if self.objinfo:
@@ -958,9 +969,21 @@ class GObjectWrapper(Wrapper):
                  'tp_weaklistoffset' : 'offsetof(PyGObject, weakreflist)',
                  'tp_dictoffset'     : 'offsetof(PyGObject, inst_dict)' }
 
-    def get_field_accessor(self, fieldname):
+    def get_original_type(self):
         castmacro = string.replace(self.objinfo.typecode, '_TYPE_', '_', 1)
-        return '%s(pygobject_get(self))->%s' % (castmacro, fieldname)
+        return '%s(pygobject_get(self))' % castmacro
+
+    def get_field_assignment(self, ftype, cfname, getter_propname, getter_funcname):
+        py_fname =" %s.%s" % (self.objinfo.c_name, cfname)
+        warn = 'PyErr_Warn(PyExc_DeprecationWarning, "%s should not be accessed directly");\n' % py_fname
+        if getter_funcname:
+            custom = 'ret = %s_%s(%s);' % (self.get_lower_name(), getter_funcname, self.get_original_type())
+        elif getter_propname:
+            custom = 'g_object_get(pygobject_get(self), "%s", &ret, NULL);' % getter_propname
+        else:
+            custom = warn + '    return NULL; /* FIXME-FIELD: %s */' % py_fname
+
+        return custom
 
     def get_initial_constructor_substdict(self, constructor):
         substdict = Wrapper.get_initial_constructor_substdict(self,
@@ -1271,8 +1294,8 @@ class GBoxedWrapper(Wrapper):
                  'tp_weaklistoffset' : '0',
                  'tp_dictoffset'     : '0' }
 
-    def get_field_accessor(self, fieldname):
-        return 'pyg_boxed_get(self, %s)->%s' % (self.objinfo.c_name, fieldname)
+    def get_original_type(self):
+        return 'pyg_boxed_get(self, %s)' % self.objinfo.c_name
 
     def get_initial_constructor_substdict(self, constructor):
         substdict = Wrapper.get_initial_constructor_substdict(
@@ -1318,9 +1341,8 @@ class GPointerWrapper(GBoxedWrapper):
                  'tp_weaklistoffset' : '0',
                  'tp_dictoffset'     : '0' }
 
-    def get_field_accessor(self, fieldname):
-        return 'pyg_pointer_get(self, %s)->%s' % (self.objinfo.c_name,
-                                                  fieldname)
+    def get_original_type(self):
+        return 'pyg_pointer_get(self, %s)' % self.objinfo.c_name
 
     def get_initial_constructor_substdict(self, constructor):
         substdict = Wrapper.get_initial_constructor_substdict(
