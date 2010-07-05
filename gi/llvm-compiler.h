@@ -70,6 +70,11 @@ namespace pygi {
     char * getFunctionName(GIFunctionInfo *info);
     llvm::Value * createPyNone();
     void loadSymbols();
+    llvm::Function * createNativeCall(GIFunctionInfo *functionInfo,
+                                      const llvm::Type *nativeRetvalType,
+                                      std::vector<const llvm::Type*> nativeTypes,
+                                      std::vector<llvm::Value*> nativeArgValues);
+    void * getNativeAddress(GIFunctionInfo *info);
 
   public:
     LLVMCompiler(llvm::LLVMContext &ctx);

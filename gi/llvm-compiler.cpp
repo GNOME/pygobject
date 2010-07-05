@@ -434,8 +434,8 @@ LLVMCompiler::tupleGetItem(llvm::BasicBlock *block,
                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), i));
 }
 
-static void *
-pyg_get_native_address(GIFunctionInfo *info)
+void *
+LLVMCompiler::getNativeAddress(GIFunctionInfo *info)
 {
   void * nativeAddress;
 
@@ -448,18 +448,16 @@ pyg_get_native_address(GIFunctionInfo *info)
   return nativeAddress;
 }
 
-static llvm::Function *
-pyg_create_native_call(llvm::Module *module,
-                       const llvm::Type *nativeRetvalType,
-                       std::vector<const llvm::Type*> nativeTypes,
-                       std::vector<llvm::Value*> nativeArgValues,
-                       GIFunctionInfo *functionInfo)
+llvm::Function *
+LLVMCompiler::createNativeCall(GIFunctionInfo *functionInfo,
+                               const llvm::Type *nativeRetvalType,
+                               std::vector<const llvm::Type*> nativeTypes,
+                               std::vector<llvm::Value*> nativeArgValues)
 {
   std::string symbol(g_function_info_get_symbol(functionInfo));
 
-  // native call
   llvm::FunctionType *nativeFT = llvm::FunctionType::get(nativeRetvalType, nativeTypes, false);
-  return llvm::Function::Create(nativeFT, llvm::Function::ExternalLinkage, symbol, module);
+  return llvm::Function::Create(nativeFT, llvm::Function::ExternalLinkage, symbol, mModule);
 }
 
 char *
@@ -579,8 +577,8 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   // py->native return type
   GIArgInfo *retTypeInfo = g_callable_info_get_return_type(callableInfo);
   const llvm::Type *nativeRetvalType = this->getTypeFromTypeInfo(retTypeInfo);
-  llvm::Function * nativeF = pyg_create_native_call(mModule, nativeRetvalType, nativeTypes, nativeArgValues, info);
-  mEE->updateGlobalMapping(nativeF, pyg_get_native_address(info));
+  llvm::Function * nativeF = this->createNativeCall(info, nativeRetvalType, nativeTypes, nativeArgValues);
+  mEE->updateGlobalMapping(nativeF, this->getNativeAddress(info));
 
   const char *retValName;
   if (g_type_info_get_tag(retTypeInfo) == GI_TYPE_TAG_VOID)
