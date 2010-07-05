@@ -202,25 +202,23 @@ LLVMCompiler::createException(GICallableInfo *callableInfo,
 {
   llvm::Function *parent = block->getParent();
   llvm::BasicBlock* exitBB = llvm::BasicBlock::Create(mCtx, "bb", parent, 0);
+  Builder.SetInsertPoint(exitBB);
 
   llvm::Constant *f = mModule->getOrInsertFunction("PyErr_Format",
         llvm::Type::getVoidTy(mCtx),
         pyObjectPtr, llvm::PointerType::getUnqual(llvm::IntegerType::get(mCtx, 8)), NULL);
 
-  std::vector<llvm::Value*> args;
   llvm::Value *exc = new llvm::GlobalVariable(pyObjectPtr, true, llvm::GlobalValue::ExternalLinkage, 0, "PyExc_TypeError");
-  llvm::Instruction *x = new llvm::LoadInst(exc, "", exitBB);
-  args.push_back(x);
   // FIXME: add "not a, float" to the end
   char *msg = g_strdup_printf("argument %d to %s must be %s",
                               i+1, g_base_info_get_name((GIBaseInfo*)callableInfo),
                               this->formatTypeForException(typeInfo));
-  llvm::Value *format = Builder.CreateGlobalStringPtr(msg, "format");
+  Builder.CreateCall2(f,
+                      Builder.CreateLoad(exc),
+                      Builder.CreateGlobalStringPtr(msg, "format"));
   g_free(msg);
-  args.push_back(format);
-  llvm::CallInst::Create(f, args.begin(), args.end(), "", exitBB);
 
-  llvm::ReturnInst::Create(mCtx, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), exitBB);
+  Builder.CreateRet(llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0));
   return exitBB;
 }
 
@@ -235,9 +233,10 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE: {
     llvm::Constant *f = mModule->getOrInsertFunction("_PyFloat_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = llvm::CallInst::Create(f, value, "l", *block);
+    llvm::Value *v = Builder.CreateCall(f, value, "l");
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
+    Builder.SetInsertPoint((*block));
     break;
   }
   case GI_TYPE_TAG_INT:
@@ -248,14 +247,14 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
   case GI_TYPE_TAG_INT32:
   case GI_TYPE_TAG_UINT32: {
     llvm::Constant *f = mModule->getOrInsertFunction("_PyLong_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = llvm::CallInst::Create(f, value, "l", *block);
+    llvm::Value *v = Builder.CreateCall(f, value);
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     break;
   }
   case GI_TYPE_TAG_UTF8: {
     llvm::Constant *f = mModule->getOrInsertFunction("_PyString_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = llvm::CallInst::Create(f, value, "l", *block);
+    llvm::Value *v = Builder.CreateCall(f, value);
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     break;
@@ -270,13 +269,10 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
     GIInfoType infoType = g_base_info_get_type(ifaceInfo);
     switch (infoType) {
         case GI_INFO_TYPE_OBJECT: {
-           std::vector<llvm::Value*> args;
-           args.push_back(value);
            GType objectType = g_registered_type_info_get_g_type((GIRegisteredTypeInfo*)ifaceInfo);
-           args.push_back(llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), objectType));
            llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr,
                                                            llvm::Type::getInt32Ty(mCtx), NULL);
-           llvm::Value *v = llvm::CallInst::Create(f, value, "l", *block);
+           llvm::Value *v = Builder.CreateCall2(f, value, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), objectType));
            llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
            this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
           break;
@@ -306,8 +302,8 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
     // FIXME: ->ob_fval
     llvm::Constant *f = mModule->getOrInsertFunction("PyFloat_AsDouble",
                                                     llvm::Type::getDoubleTy(mCtx), pyObjectPtr, NULL);
-    llvm::CallInst *r = llvm::CallInst::Create(f, value, "arg", parentBB);
-    retval = Builder.CreateSIToFP(r, llvm::Type::getDoubleTy(mCtx), "arg_sitofp");
+    llvm::Value *v = Builder.CreateCall(f, value);
+    retval = Builder.CreateSIToFP(v, llvm::Type::getDoubleTy(mCtx), "arg_sitofp");
     break;
   }
   case GI_TYPE_TAG_INT:
@@ -320,7 +316,7 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
   case GI_TYPE_TAG_UINT32: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_AsLong",
                                                     llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = llvm::CallInst::Create(f, value, "arg", parentBB);
+    llvm::Value *v = Builder.CreateCall(f, value);
     retval = Builder.CreateIntCast(v, this->getTypeFromTypeInfo(typeInfo), isSigned, "cast");
     break;
   }
@@ -328,7 +324,7 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
     llvm::Constant *f = mModule->getOrInsertFunction("PyString_AsString",
                                                     llvm::PointerType::getUnqual(llvm::IntegerType::get(mCtx, 8)),
                                                     pyObjectPtr, NULL);
-    retval = llvm::CallInst::Create(f, value, "arg", parentBB);
+    retval = Builder.CreateCall(f, value);
     break;
   }
   case GI_TYPE_TAG_ARRAY: {
@@ -343,7 +339,7 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
         case GI_INFO_TYPE_OBJECT: {
            llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_Get",
                                                            gObjectPtr, pyObjectPtr, NULL);
-           retval = llvm::CallInst::Create(f, value, "arg", parentBB);
+           retval = Builder.CreateCall(f, value);
           break;
         }
         default:
@@ -373,7 +369,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
   case GI_TYPE_TAG_DOUBLE: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyFloat_FromDouble",
                                                     pyObjectPtr, llvm::Type::getDoubleTy(mCtx), NULL);
-    retval = llvm::CallInst::Create(llvm::cast<llvm::Function>(f), value, "py_retval", parentBB);
+    retval = Builder.CreateCall(f, value);
     break;
   }
   case GI_TYPE_TAG_INT8:
@@ -386,13 +382,13 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_FromLong",
                                                     pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
     llvm::Value *casted = Builder.CreateIntCast(value, llvm::Type::getInt32Ty(mCtx), isSigned, "cast");
-    retval = llvm::CallInst::Create(llvm::cast<llvm::Function>(f), casted, "py_retval", parentBB);
+    retval = Builder.CreateCall(f, casted);
     break;
   }
   case GI_TYPE_TAG_UTF8: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyString_FromString",
                                                     pyObjectPtr, llvm::PointerType::getUnqual(llvm::IntegerType::get(mCtx, 8)), NULL);
-    retval = llvm::CallInst::Create(llvm::cast<llvm::Function>(f), value, "py_retval", parentBB);
+    retval = Builder.CreateCall(f, value);
     break;
   }
   case GI_TYPE_TAG_ARRAY: {
@@ -407,7 +403,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
         case GI_INFO_TYPE_OBJECT: {
            llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_New",
                                                           pyObjectPtr, gObjectPtr, NULL);
-           retval = llvm::CallInst::Create(llvm::cast<llvm::Function>(f), value, "py_retval", parentBB);
+           retval = Builder.CreateCall(f, value);
           break;
         }
         default:
@@ -431,16 +427,11 @@ LLVMCompiler::tupleGetItem(llvm::BasicBlock *block,
                            llvm::Value *value,
                            unsigned int i)
 {
-  std::vector<llvm::Value*> args;
-  args.push_back(value);
-  args.push_back(llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), i));
-  std::string Name("py_arg");
-
   // FIXME: ->ob_item
   llvm::Constant *f = mModule->getOrInsertFunction("PyTuple_GetItem",
                                                   pyObjectPtr, pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
-  llvm::Value *inst = llvm::CallInst::Create(f, args.begin(), args.end(), Name, block);
-  return llvm::cast<llvm::Value>(inst);
+  return Builder.CreateCall2(f, value,
+                             llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), i));
 }
 
 static void *
@@ -523,7 +514,6 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   }
 
   // wrapper
-
   std::vector<const llvm::Type*> wrapperArgTypes(2, pyObjectPtr);
   llvm::FunctionType *FT = llvm::FunctionType::get(pyObjectPtr, wrapperArgTypes, false);
 
@@ -584,7 +574,7 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   else
      retValName = "retval";
 
-  llvm::Value *nativeCallRetval = llvm::CallInst::Create(nativeF, nativeArgValues.begin(), nativeArgValues.end(), retValName, block);
+  llvm::Value *nativeCallRetval = Builder.CreateCall(nativeF, nativeArgValues.begin(), nativeArgValues.end(), retValName);
 
   // arg->py conversion
   llvm::Value *retval;
