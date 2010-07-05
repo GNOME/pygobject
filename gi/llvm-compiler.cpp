@@ -42,9 +42,10 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Support/IRBuilder.h>
+#include <llvm/Support/TypeBuilder.h>
 #include <llvm/Target/TargetSelect.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define TIMEIT 1
 
 /*
@@ -93,13 +94,20 @@ static llvm::IRBuilder<> Builder(llvm::getGlobalContext());
 // PyTupleObject = { ssize_t ob_refcnt, struct* ob_type, ssize_t ob_size, PyObject* }
 static llvm::Type* pyObjectPtr = NULL;
 static llvm::Type* gObjectPtr = NULL;
+static llvm::Function *_PyGObject_GetFunc = NULL;
+static llvm::Function *_PyGObject_NewFunc = NULL;
+static llvm::Function *_PyLong_CheckFunc = NULL;
+static llvm::Function *_PyFloat_CheckFunc = NULL;
+static llvm::Function *_PyString_CheckFunc = NULL;
+static llvm::Function *_PyGObject_CheckFunc = NULL;
+static llvm::Value *_PyExc_TypeErrorVar = NULL;
 
 LLVMCompiler::LLVMCompiler(llvm::LLVMContext &ctx) :
   mCtx(ctx)
 {
   mModule = new llvm::Module("pygi", mCtx);
   mEE = createExecutionEngine();
-
+  this->loadSymbols();
 }
 
 llvm::ExecutionEngine *
@@ -208,13 +216,12 @@ LLVMCompiler::createException(GICallableInfo *callableInfo,
         llvm::Type::getVoidTy(mCtx),
         pyObjectPtr, llvm::PointerType::getUnqual(llvm::IntegerType::get(mCtx, 8)), NULL);
 
-  llvm::Value *exc = new llvm::GlobalVariable(pyObjectPtr, true, llvm::GlobalValue::ExternalLinkage, 0, "PyExc_TypeError");
   // FIXME: add "not a, float" to the end
   char *msg = g_strdup_printf("argument %d to %s must be %s",
                               i+1, g_base_info_get_name((GIBaseInfo*)callableInfo),
                               this->formatTypeForException(typeInfo));
   Builder.CreateCall2(f,
-                      Builder.CreateLoad(exc),
+                      Builder.CreateLoad(_PyExc_TypeErrorVar),
                       Builder.CreateGlobalStringPtr(msg, "format"));
   g_free(msg);
 
@@ -232,8 +239,7 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
 {
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE: {
-    llvm::Constant *f = mModule->getOrInsertFunction("_PyFloat_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = Builder.CreateCall(f, value, "l");
+    llvm::Value *v = Builder.CreateCall(_PyFloat_CheckFunc, value, "l");
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     Builder.SetInsertPoint((*block));
@@ -246,15 +252,13 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
   case GI_TYPE_TAG_UINT16:
   case GI_TYPE_TAG_INT32:
   case GI_TYPE_TAG_UINT32: {
-    llvm::Constant *f = mModule->getOrInsertFunction("_PyLong_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = Builder.CreateCall(f, value);
+    llvm::Value *v = Builder.CreateCall(_PyLong_CheckFunc, value);
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     break;
   }
   case GI_TYPE_TAG_UTF8: {
-    llvm::Constant *f = mModule->getOrInsertFunction("_PyString_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = Builder.CreateCall(f, value);
+    llvm::Value *v = Builder.CreateCall(_PyString_CheckFunc, value);
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     break;
@@ -270,9 +274,8 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
     switch (infoType) {
         case GI_INFO_TYPE_OBJECT: {
            GType objectType = g_registered_type_info_get_g_type((GIRegisteredTypeInfo*)ifaceInfo);
-           llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr,
-                                                           llvm::Type::getInt32Ty(mCtx), NULL);
-           llvm::Value *v = Builder.CreateCall2(f, value, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), objectType));
+           llvm::Value *v = Builder.CreateCall2(_PyGObject_CheckFunc, value,
+                                                llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), objectType));
            llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
            this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
           break;
@@ -337,9 +340,7 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
     GIInfoType infoType = g_base_info_get_type(ifaceInfo);
     switch (infoType) {
         case GI_INFO_TYPE_OBJECT: {
-           llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_Get",
-                                                           gObjectPtr, pyObjectPtr, NULL);
-           retval = Builder.CreateCall(f, value);
+           retval = Builder.CreateCall(_PyGObject_GetFunc, value);
           break;
         }
         default:
@@ -368,7 +369,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyFloat_FromDouble",
-                                                    pyObjectPtr, llvm::Type::getDoubleTy(mCtx), NULL);
+                                                     pyObjectPtr, llvm::Type::getDoubleTy(mCtx), NULL);
     retval = Builder.CreateCall(f, value);
     break;
   }
@@ -380,7 +381,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
   case GI_TYPE_TAG_UINT16:
   case GI_TYPE_TAG_UINT32: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_FromLong",
-                                                    pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
+                                                     pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
     llvm::Value *casted = Builder.CreateIntCast(value, llvm::Type::getInt32Ty(mCtx), isSigned, "cast");
     retval = Builder.CreateCall(f, casted);
     break;
@@ -401,9 +402,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     GIInfoType infoType = g_base_info_get_type(ifaceInfo);
     switch (infoType) {
         case GI_INFO_TYPE_OBJECT: {
-           llvm::Constant *f = mModule->getOrInsertFunction("_PyGObject_New",
-                                                          pyObjectPtr, gObjectPtr, NULL);
-           retval = Builder.CreateCall(f, value);
+           retval = Builder.CreateCall(_PyGObject_NewFunc, value);
           break;
         }
         default:
@@ -428,8 +427,9 @@ LLVMCompiler::tupleGetItem(llvm::BasicBlock *block,
                            unsigned int i)
 {
   // FIXME: ->ob_item
-  llvm::Constant *f = mModule->getOrInsertFunction("PyTuple_GetItem",
-                                                  pyObjectPtr, pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
+  static llvm::Constant *f =
+      mModule->getOrInsertFunction("PyTuple_GetItem",
+                                   pyObjectPtr, pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
   return Builder.CreateCall2(f, value,
                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), i));
 }
@@ -481,6 +481,42 @@ LLVMCompiler::createPyNone()
   return retval;
 }
 
+void
+LLVMCompiler::loadSymbols()
+{
+  // llvm
+  pyObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
+  gObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
+
+  _PyLong_CheckFunc =
+    llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyLong_Check",
+                                                            llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyLong_CheckFunc), (void*)&_PyLong_Check);
+
+  _PyFloat_CheckFunc =
+    llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyFloat_Check",
+                                                            llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyFloat_CheckFunc), (void*)&_PyFloat_Check);
+
+  _PyString_CheckFunc
+    = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyString_Check",
+                                                              llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyString_CheckFunc), (void*)&_PyString_Check);
+
+  _PyGObject_CheckFunc
+    = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_Check",
+                                                              llvm::Type::getInt32Ty(mCtx), pyObjectPtr,
+                                                              llvm::Type::getInt32Ty(mCtx), NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_CheckFunc), (void*)&_PyGObject_Check);
+
+  _PyGObject_GetFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_Get", pyObjectPtr, gObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_GetFunc), (void*)&_PyGObject_Get);
+  _PyGObject_NewFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_New", pyObjectPtr, gObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_NewFunc), (void*)&_PyGObject_New);
+
+  _PyExc_TypeErrorVar = new llvm::GlobalVariable(pyObjectPtr, true, llvm::GlobalValue::ExternalLinkage, 0, "PyExc_TypeError");
+}
+
 PyCFunction
 LLVMCompiler::compile(GIFunctionInfo *info)
 {
@@ -490,28 +526,6 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   struct timeval start_tv;
   gettimeofday(&start_tv, NULL);
 #endif
-  // llvm
-  static int symbolsLoaded = 0;
-
-  if (!symbolsLoaded) {
-      llvm::Constant *f;
-      pyObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
-      gObjectPtr = llvm::PointerType::getUnqual(llvm::StructType::get(mCtx, NULL, NULL));
-      f = mModule->getOrInsertFunction("_PyLong_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyLong_Check);
-      f = mModule->getOrInsertFunction("_PyFloat_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyFloat_Check);
-      f = mModule->getOrInsertFunction("_PyString_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyString_Check);
-      f = mModule->getOrInsertFunction("_PyGObject_Check", llvm::Type::getInt32Ty(mCtx), pyObjectPtr,
-                                      llvm::Type::getInt32Ty(mCtx), NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyGObject_Check);
-      f = mModule->getOrInsertFunction("_PyGObject_Get", gObjectPtr, pyObjectPtr, NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyGObject_Get);
-      f = mModule->getOrInsertFunction("_PyGObject_New", pyObjectPtr, gObjectPtr, NULL);
-      mEE->updateGlobalMapping(llvm::cast<llvm::Function>(f), (void*)&_PyGObject_New);
-      symbolsLoaded = 1;
-  }
 
   // wrapper
   std::vector<const llvm::Type*> wrapperArgTypes(2, pyObjectPtr);

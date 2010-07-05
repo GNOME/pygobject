@@ -69,6 +69,7 @@ namespace pygi {
     const char * formatTypeForException(GITypeInfo *typeInfo);
     char * getFunctionName(GIFunctionInfo *info);
     llvm::Value * createPyNone();
+    void loadSymbols();
 
   public:
     LLVMCompiler(llvm::LLVMContext &ctx);
