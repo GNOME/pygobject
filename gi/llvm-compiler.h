@@ -40,8 +40,7 @@ namespace pygi {
 
     llvm::ExecutionEngine* createExecutionEngine(void);
 
-    llvm::Value* tupleGetItem(llvm::BasicBlock *block,
-                              llvm::Value *value,
+    llvm::Value* tupleGetItem(llvm::Value *value,
                               unsigned i);
     void typeCheck(GICallableInfo *callableInfo,
                    GIArgInfo *argInfo,
@@ -50,10 +49,8 @@ namespace pygi {
                    llvm::BasicBlock **block,
                    llvm::Value *value);
     llvm::Value* valueAsNative(GITypeInfo *typeInfo,
-                               llvm::BasicBlock *parentBB,
                                llvm::Value *value);
     llvm::Value* valueFromNative(GITypeInfo *typeInfo,
-                                 llvm::BasicBlock *parentBB,
                                  llvm::Value *value);
     const llvm::Type* getTypeFromTypeInfo(GITypeInfo *typeInfo);
     llvm::BasicBlock* createException(GICallableInfo *callableInfo,

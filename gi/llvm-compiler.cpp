@@ -294,7 +294,6 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
 
 llvm::Value *
 LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
-                            llvm::BasicBlock *parentBB,
                             llvm::Value *value)
 {
   llvm::Value *retval;
@@ -360,7 +359,6 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
 
 llvm::Value *
 LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
-                              llvm::BasicBlock *parentBB,
                               llvm::Value *value)
 {
   llvm::Value *retval;
@@ -392,7 +390,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     break;
   }
   case GI_TYPE_TAG_ARRAY: {
-    retval = llvm::ReturnInst::Create(mCtx, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), parentBB);
+    retval = llvm::ConstantExpr::getNullValue(llvm::Type::getInt32Ty(mCtx)->getPointerTo());
     break;
   }
   case GI_TYPE_TAG_INTERFACE: {
@@ -421,8 +419,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
 }
 
 llvm::Value *
-LLVMCompiler::tupleGetItem(llvm::BasicBlock *block,
-                           llvm::Value *value,
+LLVMCompiler::tupleGetItem(llvm::Value *value,
                            unsigned int i)
 {
   // FIXME: ->ob_item
@@ -566,13 +563,13 @@ LLVMCompiler::compile(GIFunctionInfo *info)
       value = wrapperArgValues[1];
     } else {
       // PyTuple_GetItem()
-      value = this->tupleGetItem(block, wrapperArgValues[1], i);
+      value = this->tupleGetItem(wrapperArgValues[1], i);
     }
     // PyXXX_Check()
     this->typeCheck(callableInfo, argInfo, typeInfo, i, &block, value);
 
     // PyXXX_FromXXX
-    llvm::Value *arg = this->valueAsNative(typeInfo, block, value);
+    llvm::Value *arg = this->valueAsNative(typeInfo, value);
     const llvm::Type *type = this->getTypeFromTypeInfo(typeInfo);
     nativeTypes.push_back(type);
     nativeArgValues.push_back(arg);
@@ -599,9 +596,9 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   if (g_type_info_get_tag(retTypeInfo) == GI_TYPE_TAG_VOID) {
     retval = this->createPyNone();
   } else {
-    retval = this->valueFromNative(retTypeInfo, block, nativeCallRetval);
+    retval = this->valueFromNative(retTypeInfo, nativeCallRetval);
   }
-  llvm::ReturnInst::Create(mCtx, retval, block);
+  Builder.CreateRet(retval);
 
   g_base_info_unref((GIBaseInfo*)retTypeInfo);
 
