@@ -399,6 +399,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     switch (infoType) {
         case GI_INFO_TYPE_OBJECT: {
            retval = Builder.CreateCall(_PyGObject_NewFunc, value);
+           this->pyIncRef(retval);
           break;
         }
         default:
@@ -472,6 +473,15 @@ LLVMCompiler::createPyNone()
                                                  0, "_Py_NoneStruct");
   // FIXME: Increase reference count
   return retval;
+}
+
+// (PyObject*(ob))->ob_refcnt++
+void
+LLVMCompiler::pyIncRef(llvm::Value *value)
+{
+  assert(value->getType() == pyObjectPtr);
+  llvm::Value *refCnt = Builder.CreateStructGEP(value, 0, "ob_refcnt");
+  Builder.CreateAdd(Builder.CreateLoad(refCnt), llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 1));
 }
 
 void
@@ -594,6 +604,7 @@ LLVMCompiler::compile(GIFunctionInfo *info)
   llvm::Value *retval;
   if (g_type_info_get_tag(retTypeInfo) == GI_TYPE_TAG_VOID) {
     retval = this->createPyNone();
+    this->pyIncRef(Builder.CreateLoad(retval));
   } else {
     retval = this->valueFromNative(retTypeInfo, nativeCallRetval);
   }

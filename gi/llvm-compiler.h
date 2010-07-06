@@ -66,6 +66,7 @@ namespace pygi {
     const char * formatTypeForException(GITypeInfo *typeInfo);
     char * getFunctionName(GIFunctionInfo *info);
     llvm::Value * createPyNone();
+    void pyIncRef(llvm::Value *value);
     void loadSymbols();
     llvm::Function * createNativeCall(GIFunctionInfo *functionInfo,
                                       const llvm::Type *nativeRetvalType,
