@@ -113,8 +113,13 @@ class GtkDemoApp(object):
                 self.load_demos(f, children)
                 demo = Demo(base_name, None, f, children)
             else:
-                module_name = base_name[0:-3]
-                module = getattr(__import__('demos.' + module_name), module_name)
+                scrub_ext = f[0:-3]
+                split_path = scrub_ext.split(os.sep)
+                module_name = split_path[-1]
+                base_module_name = '.'.join(split_path[:-1])
+                _temp = __import__(base_module_name, globals(), locals(), [module_name], -1)
+                module = getattr(_temp, module_name)
+
                 try:
                     demo = Demo(module.title, module, f)
                 except AttributeError, e:
