@@ -241,7 +241,6 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
     llvm::Value *v = Builder.CreateCall(_PyFloat_CheckFunc, value, "l");
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
-    Builder.SetInsertPoint((*block));
     break;
   }
   case GI_TYPE_TAG_INT:
