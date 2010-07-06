@@ -40,6 +40,10 @@ class Demo(GObject.GObject):
 
         self.children = children
 
+        self.isdir = False
+        if module is None:
+            self.isdir = True
+
 class GtkDemoApp(object):
     def _quit(self, *args):
         Gtk.main_quit()
@@ -93,28 +97,51 @@ class GtkDemoApp(object):
         window.set_default_size (600, 400)
         window.show_all()
 
-        self.selection_cb(self.tree_view.get_selection(), 
+        self.selection_cb(self.tree_view.get_selection(),
                           self.tree_view.get_model())
         Gtk.main()
 
-    def load_demos(self):
-        demo_wildcard = os.path.join('demos', '*.py')
-        demo_file_list = glob.glob(demo_wildcard)
-        demo_file_list.sort()
-
-        for f in demo_file_list:
+    def load_demos_from_list(self, file_list, demo_list):
+        for f in file_list:
             base_name = os.path.basename(f)
             if base_name == '__init__.py':
                 continue
 
-            module_name = base_name[0:-3]
-            module = getattr(__import__('demos.' + module_name), module_name)
-            try:
-	    	demo = Demo(module.title, module, f)
-            except AttributeError, e:
-                raise AttributeError('(%s): %s' % (f, e.message))
-            self._demos.append(demo)
-	
+            demo = None
+            if os.path.isdir(f):
+                children = []
+                self.load_demos(f, children)
+                demo = Demo(base_name, None, f, children)
+            else:
+                module_name = base_name[0:-3]
+                module = getattr(__import__('demos.' + module_name), module_name)
+                try:
+                    demo = Demo(module.title, module, f)
+                except AttributeError, e:
+                    raise AttributeError('(%s): %s' % (f, e.message))
+
+            demo_list.append(demo)
+
+    def load_demos(self, top_dir='demos', demo_list=None):
+        if demo_list is None:
+            demo_list = self._demos
+
+        demo_file_list = []
+        for filename in os.listdir(top_dir):
+            fullname = os.path.join(top_dir, filename)
+            if os.path.isdir(fullname):
+                # make sure this is a module directory
+                init_file = os.path.join(fullname, '__init__.py')
+                if os.path.isfile(init_file):
+                    demo_file_list.append(fullname)
+                    continue
+
+            if filename.endswith('.py'):
+                demo_file_list.append(fullname)
+
+        demo_file_list.sort(lambda a, b: cmp(a.lower(), b.lower()))
+
+        self.load_demos_from_list(demo_file_list, demo_list)
 
     def demo_find_file(self, base=''):
         dir = os.path.join('demos', 'data')
@@ -148,8 +175,12 @@ class GtkDemoApp(object):
             return
 
         demo = model.get_value(treeiter, 1)
-        
+
         title = demo.title
+
+        if demo.isdir:
+            return
+
         description = demo.module.description
         code = GLib.file_get_contents(demo.filename)[1]
 
@@ -192,15 +223,16 @@ class GtkDemoApp(object):
 
         for demo in self._demos:
             children = demo.children
-            parent = tree_store.append(None, 
+            parent = tree_store.append(None,
                                        (demo.title,
                                         demo,
                                         Pango.Style.NORMAL))
             if children:
                 for child_demo in children:
-                    tree_store.append(parent, 
+                    tree_store.append(parent,
                                       (child_demo.title,
-                                       Pango.Style.NORMAL))    
+                                       child_demo,
+                                       Pango.Style.NORMAL))
 
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title = 'Widget (double click for demo)',
@@ -208,7 +240,7 @@ class GtkDemoApp(object):
                                     text = 0,
                                     style = 2)
 
-        
+
         first_iter = Gtk.TreeIter()
         tree_store.get_iter_first(first_iter)
         selection.select_iter(first_iter)
@@ -227,10 +259,10 @@ class GtkDemoApp(object):
         scrolled_window.add(tree_view)
 
         label = Gtk.Label(label = 'Widget (double click for demo)')
-        
+
         box = Gtk.Notebook()
         box.append_page(scrolled_window, label)
-        
+
         tree_view.grab_focus()
 
 	return box
