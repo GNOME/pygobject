@@ -187,16 +187,18 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(len(tree_store), 100)
 
         # walk the tree to see if the values were stored correctly
-        iter = Gtk.TreeIter()
+
         parent = None
         i = 0
-        while tree_store.iter_children(iter, parent):
+
+        (has_children, treeiter) = tree_store.iter_children(parent)
+        while (has_children):
            i = tree_store.get_value(iter, 0)
            s = tree_store.get_value(iter, 1)
            obj = tree_store.get_value(iter, 2)
            obj.check(i, s)
-           parent = iter
-           iter = Gtk.TreeIter()
+           parent = treeiter
+           (has_children, treeiter) = tree_store.iter_children(parent)
 
         self.assertEquals(i, 99)
 
@@ -211,15 +213,14 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(len(list_store), 100)
 
         # walk the list to see if the values were stored correctly
-        iter = Gtk.TreeIter()
         i = 0
-        has_more = list_store.get_iter_first(iter)
+        (has_more, treeiter) = list_store.get_iter_first()
         while has_more:
-           i = list_store.get_value(iter, 0)
-           s = list_store.get_value(iter, 1)
-           obj = list_store.get_value(iter, 2)
+           i = list_store.get_value(treeiter, 0)
+           s = list_store.get_value(treeiter, 1)
+           obj = list_store.get_value(treeiter, 2)
            obj.check(i, s)
-           has_more = list_store.iter_next(iter)
+           (has_more, treeiter) = list_store.iter_next()
 
         self.assertEquals(i, 99)
 

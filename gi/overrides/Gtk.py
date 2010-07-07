@@ -353,8 +353,7 @@ class ListStore(Gtk.ListStore, TreeModel):
         self.set_column_types(column_types)
 
     def append(self, row):
-        treeiter = Gtk.TreeIter()
-        Gtk.ListStore.append(self, treeiter)
+        treeiter = Gtk.ListStore.append(self)
 
         n_columns = self.get_n_columns();
         if len(row) != n_columns:
@@ -376,8 +375,8 @@ class TreeStore(Gtk.TreeStore, TreeModel):
         self.set_column_types(column_types)
 
     def append(self, parent, row):
-        treeiter = Gtk.TreeIter()
-        Gtk.TreeStore.append(self, treeiter, parent)
+
+        treeiter = Gtk.TreeStore.append(self, parent)
 
         n_columns = self.get_n_columns();
         if len(row) != n_columns:
