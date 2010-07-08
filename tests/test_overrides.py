@@ -184,18 +184,20 @@ class TestGtk(unittest.TestCase):
             testobj = TestClass(self, i, label)
             parent = tree_store.append(parent, (i, label, testobj))
 
-        self.assertEquals(len(tree_store), 100)
+        # len gets the number of children in the root node
+        # since we kept appending to the previous node
+        # there should only be one child of the root
+        self.assertEquals(len(tree_store), 1)
 
         # walk the tree to see if the values were stored correctly
-
         parent = None
         i = 0
 
         (has_children, treeiter) = tree_store.iter_children(parent)
         while (has_children):
-           i = tree_store.get_value(iter, 0)
-           s = tree_store.get_value(iter, 1)
-           obj = tree_store.get_value(iter, 2)
+           i = tree_store.get_value(treeiter, 0)
+           s = tree_store.get_value(treeiter, 1)
+           obj = tree_store.get_value(treeiter, 2)
            obj.check(i, s)
            parent = treeiter
            (has_children, treeiter) = tree_store.iter_children(parent)
@@ -215,12 +217,13 @@ class TestGtk(unittest.TestCase):
         # walk the list to see if the values were stored correctly
         i = 0
         (has_more, treeiter) = list_store.get_iter_first()
+
         while has_more:
-           i = list_store.get_value(treeiter, 0)
-           s = list_store.get_value(treeiter, 1)
-           obj = list_store.get_value(treeiter, 2)
-           obj.check(i, s)
-           (has_more, treeiter) = list_store.iter_next()
+            i = list_store.get_value(treeiter, 0)
+            s = list_store.get_value(treeiter, 1)
+            obj = list_store.get_value(treeiter, 2)
+            obj.check(i, s)
+            has_more = list_store.iter_next(treeiter)
 
         self.assertEquals(i, 99)
 
