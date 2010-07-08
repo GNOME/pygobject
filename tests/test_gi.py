@@ -974,8 +974,9 @@ class TestEnum(unittest.TestCase):
 
     def test_enum_in(self):
         GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
+        GIMarshallingTests.enum_in(42)
 
-        self.assertRaises(TypeError, GIMarshallingTests.enum_in, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.enum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.enum_in, 'GIMarshallingTests.Enum.VALUE3')
 
     def test_enum_out(self):
@@ -1000,8 +1001,9 @@ class TestGEnum(unittest.TestCase):
 
     def test_genum_in(self):
         GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
+        GIMarshallingTests.genum_in(42)
 
-        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.genum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
 
     def test_genum_out(self):

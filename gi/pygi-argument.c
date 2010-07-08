@@ -344,8 +344,27 @@ check_number_release:
                     }
                     break;
                 case GI_INFO_TYPE_ENUM:
-                    retval = _pygi_g_registered_type_info_check_object (
-                                 (GIRegisteredTypeInfo *) info, TRUE, object);
+                    retval = 0;
+                    if (PyNumber_Check (object)) {
+                        PyObject *number = PyNumber_Int (object);
+                        if (number == NULL)
+                            PyErr_Clear();
+                        else {
+                            glong value = PyInt_AsLong (number);
+                            int i;
+                            for (i = 0; i < g_enum_info_get_n_values (info); i++) {
+                                GIValueInfo *value_info = g_enum_info_get_value (info, i);
+                                glong enum_value = g_value_info_get_value (value_info);
+                                if (value == enum_value) {
+                                    retval = 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (retval < 1)
+                        retval = _pygi_g_registered_type_info_check_object (
+                                     (GIRegisteredTypeInfo *) info, TRUE, object);
                     break;
                 case GI_INFO_TYPE_FLAGS:
                     if (PyNumber_Check (object)) {
