@@ -1708,8 +1708,8 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:
             /* With allow-none support the string could be NULL */
-            if (arg->v_string != NULL &&
-                    (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
+            if ((arg->v_string != NULL &&
+                    (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING))
                     || (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING)) {
                 g_free (arg->v_string);
             }
