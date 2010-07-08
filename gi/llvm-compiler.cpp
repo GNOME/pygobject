@@ -48,6 +48,8 @@
 #define DEBUG 0
 #define TIMEIT 1
 
+using namespace pygi;
+
 /*
  * PyGI LLVM runtime functions
  */
@@ -113,10 +115,8 @@ PyObject *_PyLong_FromUnsignedLongLong(PY_LONG_LONG v) {
  *
  */
 
-using namespace pygi;
 
 static llvm::IRBuilder<> Builder(llvm::getGlobalContext());
-// PyTupleObject = { ssize_t ob_refcnt, struct* ob_type, ssize_t ob_size, PyObject* }
 static llvm::Type* pyObjectPtr = NULL;
 static llvm::Type* gObjectPtr = NULL;
 static llvm::Type* voidPtr = NULL;
@@ -594,7 +594,6 @@ LLVMCompiler::createPyNone()
                                                  true,
                                                  llvm::GlobalValue::ExternalLinkage,
                                                  0, "_Py_NoneStruct");
-  // FIXME: Increase reference count
   return retval;
 }
 
