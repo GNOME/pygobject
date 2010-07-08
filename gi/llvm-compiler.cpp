@@ -30,7 +30,7 @@
 #define NO_IMPORT_PYGOBJECT
 #include <pygobject.h>
 #include "pygobject-external.h"
-#include "pygi.h"
+#include "pygi-private.h"
 #include "pygi-info.h"
 
 #include <llvm/Analysis/Verifier.h>
@@ -53,7 +53,8 @@
  */
 // FIXME: replace with o->ob_type == &Py_Type
 long _PyLong_Check(PyObject *o) {
-  return PyLong_Check(o) || PyInt_Check(o);
+  int r =  PyLong_Check(o) || PyInt_Check(o);
+  return r;
 }
 
 long _PyFloat_Check(PyObject *o) {
@@ -81,6 +82,31 @@ PyObject* _PyGObject_New(GObject *o) {
    return pygobject_new(o);
 }
 
+PyObject* _PyGBoxed_New(GType gtype,
+                        gpointer boxed) {
+  PyObject *py_type = _pygi_type_get_from_g_type(gtype);
+  if (py_type == NULL)
+    return NULL;
+  PyObject *py_boxed = _pygi_boxed_new((PyTypeObject *)py_type, boxed, TRUE);
+  Py_DECREF(py_type);
+  return py_boxed;
+}
+
+gpointer _PyGBoxed_Get(PyObject *object) {
+  return pyg_boxed_get(object, void);
+}
+
+PY_LONG_LONG _PyLong_AsUnsignedLongLong(PyObject *o) {
+    PY_LONG_LONG i = 0;
+    i = PyLong_AsUnsignedLongLong(o);
+    return i;
+}
+
+PyObject *_PyLong_FromUnsignedLongLong(PY_LONG_LONG v) {
+    PY_LONG_LONG i = 0;
+    PyObject *rv = PyLong_FromUnsignedLongLong(v);
+    return rv;
+}
 
 /*
  * LLVMCompiler
@@ -93,12 +119,17 @@ static llvm::IRBuilder<> Builder(llvm::getGlobalContext());
 // PyTupleObject = { ssize_t ob_refcnt, struct* ob_type, ssize_t ob_size, PyObject* }
 static llvm::Type* pyObjectPtr = NULL;
 static llvm::Type* gObjectPtr = NULL;
+static llvm::Type* voidPtr = NULL;
 static llvm::Function *_PyGObject_GetFunc = NULL;
 static llvm::Function *_PyGObject_NewFunc = NULL;
+static llvm::Function *_PyGBoxed_GetFunc = NULL;
+static llvm::Function *_PyGBoxed_NewFunc = NULL;
 static llvm::Function *_PyLong_CheckFunc = NULL;
 static llvm::Function *_PyFloat_CheckFunc = NULL;
 static llvm::Function *_PyString_CheckFunc = NULL;
 static llvm::Function *_PyGObject_CheckFunc = NULL;
+static llvm::Function *_PyLong_AsUnsignedLongLongFunc = NULL;
+static llvm::Function *_PyLong_FromUnsignedLongLongFunc = NULL;
 static llvm::Value *_PyExc_TypeErrorVar = NULL;
 
 LLVMCompiler::LLVMCompiler(llvm::LLVMContext &ctx) :
@@ -130,12 +161,23 @@ LLVMCompiler::getTypeFromTypeInfo(GITypeInfo *typeInfo)
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_VOID:
     return llvm::Type::getVoidTy(mCtx);
+  case GI_TYPE_TAG_BOOLEAN:
+    return llvm::Type::getInt1Ty(mCtx);
   case GI_TYPE_TAG_DOUBLE:
     return llvm::Type::getDoubleTy(mCtx);
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_UINT8:
     return llvm::Type::getInt8Ty(mCtx);
+  case GI_TYPE_TAG_LONG:
+  case GI_TYPE_TAG_ULONG:
+    if (sizeof(long) == 4)
+        return llvm::Type::getInt32Ty(mCtx);
+    else if (sizeof(long) == 8)
+        return llvm::Type::getInt64Ty(mCtx);
+    else
+        g_assert_not_reached();
   case GI_TYPE_TAG_INT:
+  case GI_TYPE_TAG_UINT:
     if (sizeof(int) == 4)
         return llvm::Type::getInt32Ty(mCtx);
     else if (sizeof(int) == 8)
@@ -145,12 +187,28 @@ LLVMCompiler::getTypeFromTypeInfo(GITypeInfo *typeInfo)
   case GI_TYPE_TAG_INT32:
   case GI_TYPE_TAG_UINT32:
     return llvm::Type::getInt32Ty(mCtx);
+  case GI_TYPE_TAG_INT64:
+  case GI_TYPE_TAG_UINT64:
+    return llvm::Type::getInt64Ty(mCtx);
   case GI_TYPE_TAG_ARRAY:
     return llvm::PointerType::getUnqual(llvm::Type::getInt32Ty(mCtx));
   case GI_TYPE_TAG_UTF8:
     return llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(mCtx));
-  case GI_TYPE_TAG_INTERFACE:
-    return gObjectPtr;
+  case GI_TYPE_TAG_INTERFACE: {
+    GIBaseInfo *ifaceInfo = g_type_info_get_interface(typeInfo);
+    GType type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)ifaceInfo);
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
+      return gObjectPtr;
+    } else if (g_type_is_a(type, G_TYPE_BOXED)) {
+      return voidPtr;
+    } else if (g_type_is_a(type, G_TYPE_VALUE)) {
+      return voidPtr;
+    } else if (g_type_is_a(type, G_TYPE_POINTER)) {
+      return voidPtr;
+    } else {
+      g_error("%s: unsupported info tag: %s %d\n", __FUNCTION__, g_type_name(type), g_base_info_get_type(ifaceInfo));
+    }
+  }
   default:
     g_error("%s: unsupported type tag: %d\n", __FUNCTION__, g_type_info_get_tag(typeInfo));
     return 0;
@@ -194,6 +252,8 @@ LLVMCompiler::formatTypeForException(GITypeInfo *typeInfo)
      return "a number";
   case GI_TYPE_TAG_UTF8:
      return "a string";
+  case GI_TYPE_TAG_INTERFACE:
+     return "an object";
   default:
     g_warning("%s: unsupported type tag: %d\n", __FUNCTION__, g_type_info_get_tag(typeInfo));
     return "an unknown type";
@@ -210,7 +270,6 @@ LLVMCompiler::createException(GICallableInfo *callableInfo,
   llvm::Function *parent = block->getParent();
   llvm::BasicBlock* exitBB = llvm::BasicBlock::Create(mCtx, "bb", parent, 0);
   Builder.SetInsertPoint(exitBB);
-
   llvm::Constant *f = mModule->getOrInsertFunction("PyErr_Format",
         llvm::Type::getVoidTy(mCtx),
         pyObjectPtr, llvm::PointerType::getUnqual(llvm::IntegerType::get(mCtx, 8)), NULL);
@@ -223,8 +282,7 @@ LLVMCompiler::createException(GICallableInfo *callableInfo,
                       Builder.CreateLoad(_PyExc_TypeErrorVar),
                       Builder.CreateGlobalStringPtr(msg, "format"));
   g_free(msg);
-
-  Builder.CreateRet(llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0));
+  Builder.CreateRet(llvm::ConstantExpr::getNullValue(pyObjectPtr));
   return exitBB;
 }
 
@@ -249,7 +307,9 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
   case GI_TYPE_TAG_INT16:
   case GI_TYPE_TAG_UINT16:
   case GI_TYPE_TAG_INT32:
-  case GI_TYPE_TAG_UINT32: {
+  case GI_TYPE_TAG_UINT32:
+  case GI_TYPE_TAG_INT64:
+  case GI_TYPE_TAG_UINT64: {
     llvm::Value *v = Builder.CreateCall(_PyLong_CheckFunc, value);
     llvm::BasicBlock *excBlock = this->createException(callableInfo, argInfo, typeInfo, i, *block);
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
@@ -278,6 +338,10 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
            this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
           break;
         }
+        case GI_INFO_TYPE_STRUCT: {
+          /* FIXME */
+          break;
+        }
         default:
           g_error("%s: unsupported info type: %d\n", __FUNCTION__, infoType);
           break;
@@ -296,6 +360,7 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
                             llvm::Value *value)
 {
   llvm::Value *retval;
+  const llvm::Type *valueType = this->getTypeFromTypeInfo(typeInfo);
   bool isSigned = false;
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE: {
@@ -316,8 +381,23 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
   case GI_TYPE_TAG_UINT32: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_AsLong",
                                                     llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL);
-    llvm::Value *v = Builder.CreateCall(f, value);
-    retval = Builder.CreateIntCast(v, this->getTypeFromTypeInfo(typeInfo), isSigned, "cast");
+    retval = Builder.CreateCall(f, value);
+    if (retval->getType() != valueType)
+        retval = Builder.CreateIntCast(retval, valueType, isSigned, "cast");
+    break;
+  }
+  case GI_TYPE_TAG_INT64: {
+    llvm::Constant *f = mModule->getOrInsertFunction("PyLong_AsLongLong",
+                                                     llvm::Type::getInt64Ty(mCtx), pyObjectPtr, NULL);
+    retval = Builder.CreateCall(f, value);
+    if (retval->getType() != valueType)
+        retval = Builder.CreateIntCast(retval, valueType, true, "cast");
+    break;
+  }
+  case GI_TYPE_TAG_UINT64: {
+    retval = Builder.CreateCall(_PyLong_AsUnsignedLongLongFunc, value);
+    if (retval->getType() != valueType)
+        retval = Builder.CreateIntCast(retval, valueType, false, "cast");
     break;
   }
   case GI_TYPE_TAG_UTF8: {
@@ -340,6 +420,10 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
            retval = Builder.CreateCall(_PyGObject_GetFunc, value);
           break;
         }
+        case GI_INFO_TYPE_STRUCT: {
+           retval = Builder.CreateCall(_PyGBoxed_GetFunc, value);
+           break;
+        }
         default:
           g_error("%s: unsupported info type: %d\n", __FUNCTION__, infoType);
           retval = 0;
@@ -361,6 +445,7 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
                               llvm::Value *value)
 {
   llvm::Value *retval;
+  const llvm::Type *valueType = this->getTypeFromTypeInfo(typeInfo);
   bool isSigned = false;
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE: {
@@ -369,17 +454,35 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     retval = Builder.CreateCall(f, value);
     break;
   }
+  case GI_TYPE_TAG_INT:
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_INT16:
   case GI_TYPE_TAG_INT32:
+  case GI_TYPE_TAG_LONG:
     isSigned = true;
+  case GI_TYPE_TAG_BOOLEAN:
+  case GI_TYPE_TAG_ULONG:
+  case GI_TYPE_TAG_UINT:
   case GI_TYPE_TAG_UINT8:
-  case GI_TYPE_TAG_UINT16:
-  case GI_TYPE_TAG_UINT32: {
+  case GI_TYPE_TAG_UINT16: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_FromLong",
                                                      pyObjectPtr, llvm::Type::getInt32Ty(mCtx), NULL);
     llvm::Value *casted = Builder.CreateIntCast(value, llvm::Type::getInt32Ty(mCtx), isSigned, "cast");
     retval = Builder.CreateCall(f, casted);
+    break;
+  }
+  case GI_TYPE_TAG_INT64:
+    isSigned = true;
+  case GI_TYPE_TAG_UINT32: {
+    llvm::Constant *f = mModule->getOrInsertFunction("PyLong_FromLongLong",
+                                                     pyObjectPtr, llvm::Type::getInt64Ty(mCtx), NULL);
+    llvm::Value *casted = Builder.CreateIntCast(value, llvm::Type::getInt64Ty(mCtx), isSigned, "cast");
+    retval = Builder.CreateCall(f, casted);
+    break;
+  }
+  case GI_TYPE_TAG_UINT64: {
+    llvm::Value *casted = Builder.CreateIntCast(value, llvm::Type::getInt64Ty(mCtx), false, "cast");
+    retval = Builder.CreateCall(_PyLong_FromUnsignedLongLongFunc, casted);
     break;
   }
   case GI_TYPE_TAG_UTF8: {
@@ -397,15 +500,28 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     g_assert(ifaceInfo != NULL);
     GIInfoType infoType = g_base_info_get_type(ifaceInfo);
     switch (infoType) {
-        case GI_INFO_TYPE_OBJECT: {
-           retval = Builder.CreateCall(_PyGObject_NewFunc, value);
-           this->pyIncRef(retval);
-          break;
-        }
-        default:
-          g_error("%s: unsupported info type: %d\n", __FUNCTION__, infoType);
-          retval = 0;
-          break;
+    case GI_INFO_TYPE_OBJECT: {
+      retval = Builder.CreateCall(_PyGObject_NewFunc, value);
+      break;
+    }
+    case GI_INFO_TYPE_BOXED:
+    case GI_INFO_TYPE_UNION:
+    case GI_INFO_TYPE_STRUCT: {
+      GType type = g_registered_type_info_get_g_type((GIRegisteredTypeInfo *)ifaceInfo);
+      if (g_type_is_a(type, G_TYPE_BOXED)) {
+        retval = Builder.CreateCall2(_PyGBoxed_NewFunc,
+                                     llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), type),
+                                     value);
+        this->pyIncRef(retval);
+      } else {
+        g_error("%s: unsupported GType for struct/boxed/union: %s\n", __FUNCTION__, g_type_name(type));
+      }
+      break;
+    }
+    default:
+      g_error("%s: unsupported info type: %d\n", __FUNCTION__, infoType);
+      retval = 0;
+      break;
     }
     g_base_info_unref((GIBaseInfo*)ifaceInfo);
     break;
@@ -497,6 +613,12 @@ LLVMCompiler::loadSymbols()
   mModule->addTypeName("GObject", gObject);
   gObjectPtr = llvm::PointerType::getUnqual(gObject);
 
+  const llvm::Type *void_ = llvm::Type::getInt8Ty(mCtx);
+  mModule->addTypeName("void", gObject);
+  voidPtr = llvm::PointerType::getUnqual(void_);
+
+  const llvm::Type * gType = llvm::Type::getInt32Ty(mCtx);
+
   _PyLong_CheckFunc =
     llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyLong_Check",
                                                             llvm::Type::getInt32Ty(mCtx), pyObjectPtr, NULL));
@@ -514,14 +636,28 @@ LLVMCompiler::loadSymbols()
 
   _PyGObject_CheckFunc
     = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_Check",
-                                                              llvm::Type::getInt32Ty(mCtx), pyObjectPtr,
-                                                              llvm::Type::getInt32Ty(mCtx), NULL));
+                                                              llvm::Type::getInt32Ty(mCtx), pyObjectPtr, gType, NULL));
   mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_CheckFunc), (void*)&_PyGObject_Check);
 
-  _PyGObject_GetFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_Get", pyObjectPtr, gObjectPtr, NULL));
+  _PyLong_AsUnsignedLongLongFunc
+    = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("PyLong_AsUnsignedLongLong",
+                                                              llvm::Type::getInt64Ty(mCtx), pyObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyLong_AsUnsignedLongLongFunc), (void*)&_PyLong_AsUnsignedLongLong);
+
+  _PyLong_FromUnsignedLongLongFunc
+    = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyLong_FromUnsignedLongLong",
+                                                              pyObjectPtr, llvm::Type::getInt64Ty(mCtx), NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyLong_FromUnsignedLongLongFunc), (void*)&_PyLong_FromUnsignedLongLong);
+
+  _PyGObject_GetFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_Get", gObjectPtr, pyObjectPtr, NULL));
   mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_GetFunc), (void*)&_PyGObject_Get);
   _PyGObject_NewFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGObject_New", pyObjectPtr, gObjectPtr, NULL));
   mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGObject_NewFunc), (void*)&_PyGObject_New);
+
+  _PyGBoxed_GetFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGBoxed_Get", voidPtr, pyObjectPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGBoxed_GetFunc), (void*)&_PyGBoxed_Get);
+  _PyGBoxed_NewFunc = llvm::cast<llvm::Function>(mModule->getOrInsertFunction("_PyGBoxed_New", pyObjectPtr, gType, voidPtr, NULL));
+  mEE->updateGlobalMapping(llvm::cast<llvm::Function>(_PyGBoxed_NewFunc), (void*)&_PyGBoxed_New);
 
   _PyExc_TypeErrorVar = new llvm::GlobalVariable(pyObjectPtr, true, llvm::GlobalValue::ExternalLinkage, 0, "PyExc_TypeError");
 }
@@ -611,16 +747,22 @@ LLVMCompiler::compile(GIFunctionInfo *info)
 
   g_base_info_unref((GIBaseInfo*)retTypeInfo);
 
+  // JIT it
+  //llvm::verifyFunction(*wrapperFunc);
+  PyCFunction f = (PyCFunction)mEE->getPointerToFunction(wrapperFunc);
+
+  //printf("PyC: %p %p\n", f, &f);
+  //G_BREAKPOINT();
+#if TIMEIT
+  struct timeval end_tv;
+  gettimeofday(&end_tv, NULL);
+#endif
+
 #if DEBUG
   mModule->dump();
 #endif
 
-  // JIT it
-  PyCFunction f = (PyCFunction)mEE->getPointerToFunction(wrapperFunc);
-
 #if TIMEIT
-  struct timeval end_tv;
-  gettimeofday(&end_tv, NULL);
   g_print("Compiled: %s in %2.2f ms\n", g_function_info_get_symbol(info),
           (end_tv.tv_usec-start_tv.tv_usec)/1000.0);
 #elif DEBUG
