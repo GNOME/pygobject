@@ -550,11 +550,19 @@ void *
 LLVMCompiler::getNativeAddress(GIFunctionInfo *info)
 {
   void * nativeAddress;
+  const char * namespace_ = g_base_info_get_namespace((GIBaseInfo*)info);
+  moduleMapType::iterator i = mGModules.find(namespace_);
+  GModule *module;
+  if (i == mGModules.end()) {
+    const gchar * shlib = g_irepository_get_shared_library(NULL, namespace_);
+    module = g_module_open(shlib, G_MODULE_BIND_LAZY);
+    mGModules.insert(std::make_pair(namespace_, module));
+  } else {
+    module= i->second;
+  }
 
-  const gchar * shlib = g_irepository_get_shared_library(NULL, g_base_info_get_namespace((GIBaseInfo*)info));
   const gchar * symbol = g_function_info_get_symbol(info);
-  GModule *m = g_module_open(shlib, G_MODULE_BIND_LAZY);
-  g_module_symbol(m, symbol, &nativeAddress);
+  g_module_symbol(module, symbol, &nativeAddress);
 
   return nativeAddress;
 }

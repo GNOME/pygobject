@@ -31,12 +31,15 @@
 #include <llvm/Support/IRBuilder.h>
 
 namespace pygi {
+  // typelib namespace -> GModule
+  typedef std::map<std::string, GModule*> moduleMapType;
 
   class LLVMCompiler {
   private:
     llvm::LLVMContext &mCtx;
     llvm::ExecutionEngine *mEE;
     llvm::Module *mModule;
+    moduleMapType mGModules;
 
     llvm::ExecutionEngine* createExecutionEngine(void);
 
