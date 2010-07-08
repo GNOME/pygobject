@@ -439,7 +439,6 @@ LLVMCompiler::getNativeAddress(GIFunctionInfo *info)
   const gchar * symbol = g_function_info_get_symbol(info);
   GModule *m = g_module_open(shlib, G_MODULE_BIND_LAZY);
   g_module_symbol(m, symbol, &nativeAddress);
-  g_module_close(m);
 
   return nativeAddress;
 }
