@@ -113,10 +113,9 @@ class ComboboxApp:
 
         # FIXME: make new_from_indices work
         #        make constructor take list or string of indices
-        iter = Gtk.TreeIter()
         path = Gtk.TreePath.new_from_string('0:8')
-        model.get_iter(iter, path)
-        combo.set_active_iter(iter)
+        (success, treeiter) = model.get_iter(path)
+        combo.set_active_iter(treeiter)
 
         # A GtkComboBoxEntry with validation.
         frame = Gtk.Frame(label='Editable')
@@ -164,29 +163,30 @@ class ComboboxApp:
 
         return store
 
-    def set_sensitive(self, cell_layout, cell, tree_model, iter, data):
+    def set_sensitive(self, cell_layout, cell, tree_model, treeiter, data):
         """
         A GtkCellLayoutDataFunc that demonstrates how one can control
         sensitivity of rows. This particular function does nothing
         useful and just makes the second row insensitive.
         """
 
-        path = tree_model.get_path(iter)
-        indices = path.get_indices()
+        path = tree_model.get_path(treeiter)
+        indices = path.get_indices_with_depth()
 
         sensitive = not(indices[0] == 1)
+
         cell.set_property('sensitive', sensitive)
 
-    def is_separator(self, model, iter, data):
+    def is_separator(self, model, treeiter, data):
         """
         A GtkTreeViewRowSeparatorFunc that demonstrates how rows can be
         rendered as separators. This particular function does nothing
         useful and just turns the fourth row into a separator.
         """
 
-        path = model.get_path(iter)
-        indices = path.get_indices()
+        path = model.get_path(treeiter)
 
+        indices = path.get_indices_with_depth()
         result = (indices[0] == 4)
 
         return result
@@ -251,7 +251,7 @@ class ComboboxApp:
             {'group': None, 'capital': 'Trenton'}
         )
 
-        parent = Gtk.TreeIter()
+        parent = None
 
         store = Gtk.TreeStore(str)
 
@@ -263,8 +263,8 @@ class ComboboxApp:
 
         return store
 
-    def is_capital_sensistive(self, cell_layout, cell, tree_model, iter, data):
-        sensitive = not tree_model.iter_has_child(iter)
+    def is_capital_sensistive(self, cell_layout, cell, tree_model, treeiter, data):
+        sensitive = not tree_model.iter_has_child(treeiter)
         cell.set_property('sensitive', sensitive)
 
 

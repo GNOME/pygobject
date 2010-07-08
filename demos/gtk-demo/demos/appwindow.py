@@ -87,12 +87,16 @@ def mark_set_callback(buffer, new_location, mark, data):
     update_statusbar(buffer, data)
 
 def update_resize_grip(widget, event, statusbar):
-    pass
+    # FIXME: for some reason we get attribute errors in handlers
+    #        if we try to access flags without first evaluating
+    #        the parent struct
+    Gdk.WindowState
+
     # FIXME: event should be a Gdk.EventWindowState but is only a Gdk.Event
-    if event.changed_mask and (Gdk.WindowState.MAXIMIZED or
+    if event.window_state.changed_mask and (Gdk.WindowState.MAXIMIZED or
 			       Gdk.WindowState.FULLSCREEN):
 
-        maximized = event.new_window_state and (Gdk.WindowState.MAXIMIZED or
+        maximized = event.window_state.new_window_state and (Gdk.WindowState.MAXIMIZED or
 					        Gdk.WindowState.FULLSCREEN)
         statusbar.set_has_resize_grip(not maximized)
 

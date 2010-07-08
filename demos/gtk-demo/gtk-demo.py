@@ -173,9 +173,7 @@ class GtkDemoApp(object):
         Gtk.Window.set_default_icon_list(list)
 
     def selection_cb(self, selection, model):
-        treeiter = Gtk.TreeIter()
-
-        (success, m) = selection.get_selected(treeiter)
+        (success, m, treeiter) = selection.get_selected()
         if not success:
             return
 
@@ -212,8 +210,7 @@ class GtkDemoApp(object):
         self.source_buffer.insert(end, code)
 
     def row_activated_cb(self, view, path, col, store):
-        treeiter = Gtk.TreeIter()
-        store.get_iter(treeiter, path)
+        (success, treeiter) = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
         demo.module.main()
 
@@ -246,8 +243,8 @@ class GtkDemoApp(object):
                                     style = 2)
 
 
-        first_iter = Gtk.TreeIter()
-        tree_store.get_iter_first(first_iter)
+
+        (success, first_iter) = tree_store.get_iter_first()
         selection.select_iter(first_iter)
         selection.connect('changed', self.selection_cb, tree_store)
         tree_view.connect('row_activated', self.row_activated_cb, tree_store)
@@ -270,7 +267,7 @@ class GtkDemoApp(object):
 
         tree_view.grab_focus()
 
-	return box
+        return box
 
     def create_text(self, is_source):
         scrolled_window = Gtk.ScrolledWindow(hadjustment = None,
