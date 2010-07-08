@@ -31,9 +31,15 @@ from gi.repository import Gtk, GdkPixbuf, Gdk
 import os
 
 class BuilderApp:
-    def __init__(self):
+    def __init__(self, demoapp):
+        self.demoapp = demoapp
+
         self.builder = Gtk.Builder()
-        filename = os.path.join('data', 'demo.ui')
+        if demoapp is None:
+            filename = os.path.join('data', 'demo.ui')
+        else:
+            filename = demoapp.find_file('demo.ui')
+
         self.builder.add_from_file(filename)
         self.builder.connect_signals(self)
 
@@ -49,8 +55,8 @@ class BuilderApp:
     def quit_activate(self, action):
         Gtk.main_quit()
 
-def main():
-    app = BuilderApp()
+def main(demoapp=None):
+    app = BuilderApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

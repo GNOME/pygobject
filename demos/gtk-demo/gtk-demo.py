@@ -148,7 +148,7 @@ class GtkDemoApp(object):
 
         self.load_demos_from_list(demo_file_list, demo_list)
 
-    def demo_find_file(self, base=''):
+    def find_file(self, base=''):
         dir = os.path.join('demos', 'data')
         logo_file = os.path.join(dir, 'gtk-logo-rgb.gif')
         base_file = os.path.join(dir, base)
@@ -165,7 +165,7 @@ class GtkDemoApp(object):
             raise IOError('Cannot find demo data file "%s"' % base)
 
     def setup_default_icon(self):
-        filename = self.demo_find_file ('gtk-logo-rgb.gif')
+        filename = self.find_file ('gtk-logo-rgb.gif')
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
         transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
         list = []
@@ -212,7 +212,7 @@ class GtkDemoApp(object):
     def row_activated_cb(self, view, path, col, store):
         (success, treeiter) = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
-        demo.module.main()
+        demo.module.main(self)
 
     def create_tree(self):
         tree_store = Gtk.TreeStore(str, Demo, Pango.Style)

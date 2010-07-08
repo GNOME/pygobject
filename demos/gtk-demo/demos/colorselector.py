@@ -113,7 +113,7 @@ class ColorSelectorApp:
 
         dialog.destroy()
 
-def main():
+def main(demoapp=None):
     app = ColorSelectorApp()
     Gtk.main()
 

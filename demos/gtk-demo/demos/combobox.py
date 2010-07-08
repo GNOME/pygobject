@@ -59,7 +59,9 @@ class MaskEntry(Gtk.Entry):
         self.set_background()
 
 class ComboboxApp:
-    def __init__(self):
+    def __init__(self, demoapp):
+        self.demoapp = demoapp
+
         self.window = Gtk.Window()
         self.window.set_title('Combo boxes')
         self.window.set_border_width(10)
@@ -274,8 +276,8 @@ class ComboboxApp:
         entry.append_text('2\302\275')
         entry.append_text('Three')
 
-def main():
-    app = ComboboxApp()
+def main(demoapp=None):
+    app = ComboboxApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

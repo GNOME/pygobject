@@ -33,6 +33,7 @@ import sys, os
 global infobar
 global window
 global messagelabel
+global _demoapp
 
 def widget_destroy(widget, button):
     widget.destroy()
@@ -305,7 +306,12 @@ def register_stock_icons():
 
     factory = Gtk.IconFactory()
     factory.add_default()
-    filename = os.path.join('data', 'gtk-logo-rgb.gif')
+
+    if _demoapp is None:
+        filename = os.path.join('data', 'gtk-logo-rgb.gif')
+    else:
+        filename = _demoapp.find_file('gtk-logo-rgb.gif')
+
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
     icon_set = Gtk.IconSet.new_from_pixbuf(transparent)
@@ -317,10 +323,13 @@ class ToolMenuAction(Gtk.Action):
     def do_create_tool_item(self):
         return Gtk.MenuToolButton()
 
-def main():
+def main(demoapp=None):
     global infobar
     global window
     global messagelabel
+    global _demoapp
+
+    _demoapp = demoapp
 
     register_stock_icons()
 

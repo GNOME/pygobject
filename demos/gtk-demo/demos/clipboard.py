@@ -222,15 +222,9 @@ class ClipboardApp:
         item.show()
         menu.append(item)
 
-        #FIXME: This doesn't work as we pass a None as a function
-        #       pointer.  PyGI doesn't correctly check for
-        #       allow-none on callback parameters
-        #       Fix is waiting for approval -
-        #       https://bugzilla.gnome.org/show_bug.cgi?id=620906
-
         menu.popup(None, None, None, None, 3, event.button.time)
 
-def main():
+def main(demoapp=None):
     app = ClipboardApp()
     Gtk.main()
 
