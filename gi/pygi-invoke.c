@@ -675,11 +675,14 @@ _process_invocation_state (struct invocation_state *state,
                             state->return_type_info, state->return_arg.v_pointer);
                 } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                     if (transfer != GI_TRANSFER_NOTHING)
-                        g_warning ("Transfer mode should be set to None for "
+                        g_warning ("Return argument in %s returns a struct "
+                                   "with a transfer mode of \"full\" "
+                                   "Transfer mode should be set to None for "
                                    "struct types as there is no way to free "
                                    "them safely.  Ignoring transfer mode "
                                    "to prevent a potential invalid free. "
-                                   "This may cause a leak in your application.");
+                                   "This may cause a leak in your application.",
+                                   g_base_info_get_name ( (GIBaseInfo *) function_info) );
 
                     state->return_value = _pygi_struct_new (py_type, state->return_arg.v_pointer, FALSE);
                 } else {
@@ -794,6 +797,36 @@ _process_invocation_state (struct invocation_state *state,
             if (direction == GI_DIRECTION_INOUT || direction == GI_DIRECTION_OUT) {
                 /* Convert the argument. */
                 PyObject *obj;
+
+                /* If we created it, deallocate when it goes out of scope
+                 * otherwise it is unsafe to deallocate random structures
+                 * we are given
+                 */
+                if (type_tag == GI_TYPE_TAG_INTERFACE) {
+                    GIBaseInfo *info;
+                    GIInfoType info_type;
+
+                    info = g_type_info_get_interface (state->arg_type_infos[i]);
+                    g_assert (info != NULL);
+                    info_type = g_base_info_get_type (info);
+
+                    if ( (info_type == GI_INFO_TYPE_STRUCT) &&
+                             !g_struct_info_is_foreign((GIStructInfo *) info) ) {
+                        if (g_arg_info_is_caller_allocates (state->arg_infos[i])) {
+                            transfer = GI_TRANSFER_EVERYTHING;
+                        } else if (transfer == GI_TRANSFER_EVERYTHING) {
+                            transfer = GI_TRANSFER_NOTHING;
+                            g_warning ("Out argument %u in %s returns a struct "
+                                       "with a transfer mode of \"full\". "
+                                       "Transfer mode should be set to \"none\" for "
+                                       "struct type returns as there is no way to free "
+                                       "them safely.  Ignoring transfer mode "
+                                       "to prevent a potential invalid free. "
+                                       "This may cause a leak in your application.",
+                                       i, g_base_info_get_name ( (GIBaseInfo *) function_info) );
+                        }
+                    }
+                }
 
                 obj = _pygi_argument_to_object (state->args[i], state->arg_type_infos[i], transfer);
                 if (obj == NULL) {
@@ -923,15 +956,16 @@ _free_invocation_state (struct invocation_state *state)
 
             /* caller-allocates applies only to structs right now
              * the GI scanner is overzealous when marking parameters
-             * as caller-allocates, so we only free if this was a struct
+             * as caller-allocates
              */
             if (info_type == GI_INFO_TYPE_STRUCT) {
-                /* special case GValues so we make sure to unset them */
+                /* special case GValues since all other structs are returned
+                 * as is and freed when they go out of scope
+                 */
                 if (g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info) == G_TYPE_VALUE) {
                     g_value_unset ( (GValue *) state->args[i]);
+                    g_free (state->args[i]);
                 }
-
-                g_free (state->args[i]);
             }
         }
 
