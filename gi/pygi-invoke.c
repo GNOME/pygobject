@@ -345,7 +345,6 @@ _prepare_invocation_state (struct invocation_state *state,
 
                     if (is_caller_allocates) {
                         gsize size;
-                        gpointer value;
 
                         /* if caller allocates only use one level of indirection */
                         state->out_args[out_args_pos].v_pointer = NULL;

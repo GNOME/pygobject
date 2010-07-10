@@ -280,7 +280,7 @@ _pygi_closure_handle (ffi_cif *cif,
     GITypeInfo *return_type;
     PyObject *retval;
     PyObject *py_args;
-    GArgument *out_args;
+    GArgument *out_args = NULL;
 
     /* Lock the GIL as we are coming into this code without the lock and we
       may be executing python code */

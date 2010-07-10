@@ -42,7 +42,6 @@ _pygi_destroy_notify_create (void)
 {
     if (!global_destroy_notify) {
 
-        ffi_status status;
         PyGICClosure *destroy_notify = g_slice_new0 (PyGICClosure);
 
         g_assert (destroy_notify);
