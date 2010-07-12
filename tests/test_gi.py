@@ -7,8 +7,6 @@ pygtk.require("2.0")
 import unittest
 from gi.repository import GObject
 
-from datetime import datetime
-
 import sys
 sys.path.insert(0, "../")
 
@@ -586,25 +584,6 @@ class TestDouble(unittest.TestCase):
 
     def test_double_inout(self):
         self.assertAlmostEquals(self.MIN, GIMarshallingTests.double_inout(Number(self.MAX)))
-
-
-class TestTimeT(unittest.TestCase):
-
-    DATETIME = datetime.fromtimestamp(1234567890)
-
-    def test_time_t_return(self):
-        self.assertEquals(self.DATETIME, GIMarshallingTests.time_t_return())
-
-    def test_time_t_in(self):
-        GIMarshallingTests.time_t_in(self.DATETIME)
-
-        self.assertRaises(TypeError, GIMarshallingTests.time_t_in, "self.DATETIME")
-
-    def test_time_t_out(self):
-        self.assertEquals(self.DATETIME, GIMarshallingTests.time_t_out())
-
-    def test_time_t_inout(self):
-        self.assertEquals(datetime.fromtimestamp(0), GIMarshallingTests.time_t_inout(self.DATETIME))
 
 
 class TestGType(unittest.TestCase):

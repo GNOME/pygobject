@@ -8,7 +8,7 @@ m4_define(pygobject_micro_version, 4)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
-m4_define(introspection_required_version, 0.6.14)
+m4_define(introspection_required_version, 0.9.1)
 m4_define(pycairo_required_version, 1.0.2)
 m4_define(glib_required_version, 2.22.4)
 m4_define(gio_required_version, 2.22.4)

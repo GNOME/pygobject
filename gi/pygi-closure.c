@@ -72,21 +72,11 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                 case GI_TYPE_TAG_UINT32:
                     g_args[i].v_uint32 = * (guint32 *) args[i];
                     break;
-                case GI_TYPE_TAG_LONG:
                 case GI_TYPE_TAG_INT64:
                     g_args[i].v_int64 = * (glong *) args[i];
                     break;
-                case GI_TYPE_TAG_ULONG:
                 case GI_TYPE_TAG_UINT64:
                     g_args[i].v_uint64 = * (glong *) args[i];
-                    break;
-                case GI_TYPE_TAG_INT:
-                case GI_TYPE_TAG_SSIZE:
-                case GI_TYPE_TAG_SIZE:
-                    g_args[i].v_int32 = * (gint *) args[i];
-                    break;
-                case GI_TYPE_TAG_UINT:
-                    g_args[i].v_uint32 = * (guint *) args[i];
                     break;
                 case GI_TYPE_TAG_FLOAT:
                     g_args[i].v_float = * (gfloat *) args[i];

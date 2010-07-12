@@ -70,33 +70,6 @@ _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
             *upper = PyLong_FromUnsignedLongLong (G_MAXUINT64);
             *lower = PyInt_FromLong (0);
             break;
-        case GI_TYPE_TAG_SHORT:
-            *lower = PyInt_FromLong (G_MINSHORT);
-            *upper = PyInt_FromLong (G_MAXSHORT);
-            break;
-        case GI_TYPE_TAG_USHORT:
-            *upper = PyInt_FromLong (G_MAXUSHORT);
-            *lower = PyInt_FromLong (0);
-            break;
-        case GI_TYPE_TAG_INT:
-            *lower = PyInt_FromLong (G_MININT);
-            *upper = PyInt_FromLong (G_MAXINT);
-            break;
-        case GI_TYPE_TAG_UINT:
-            /* Note: On 32-bit archs, this number doesn't fit in a long. */
-            *upper = PyLong_FromLongLong (G_MAXUINT);
-            *lower = PyInt_FromLong (0);
-            break;
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_SSIZE:
-            *lower = PyInt_FromLong (G_MINLONG);
-            *upper = PyInt_FromLong (G_MAXLONG);
-            break;
-        case GI_TYPE_TAG_ULONG:
-        case GI_TYPE_TAG_SIZE:
-            *upper = PyLong_FromUnsignedLongLong (G_MAXULONG);
-            *lower = PyInt_FromLong (0);
-            break;
         case GI_TYPE_TAG_FLOAT:
             *upper = PyFloat_FromDouble (G_MAXFLOAT);
             *lower = PyFloat_FromDouble (-G_MAXFLOAT);
@@ -216,14 +189,6 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_INT64:
         case GI_TYPE_TAG_UINT64:
-        case GI_TYPE_TAG_SHORT:
-        case GI_TYPE_TAG_USHORT:
-        case GI_TYPE_TAG_INT:
-        case GI_TYPE_TAG_UINT:
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_ULONG:
-        case GI_TYPE_TAG_SSIZE:
-        case GI_TYPE_TAG_SIZE:
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
         {
@@ -284,13 +249,6 @@ check_number_release:
             Py_XDECREF (upper);
             break;
         }
-        case GI_TYPE_TAG_TIME_T:
-            if (!PyDateTime_Check (object)) {
-                PyErr_Format (PyExc_TypeError, "Must be datetime.datetime, not %s",
-                              object->ob_type->tp_name);
-                retval = 0;
-            }
-            break;
         case GI_TYPE_TAG_GTYPE:
         {
             gint is_instance;
@@ -661,11 +619,6 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:
-        case GI_TYPE_TAG_SHORT:
-        case GI_TYPE_TAG_USHORT:
-        case GI_TYPE_TAG_INT:
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_SSIZE:
         {
             PyObject *int_;
 
@@ -682,9 +635,6 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_UINT64:
-        case GI_TYPE_TAG_UINT:
-        case GI_TYPE_TAG_ULONG:
-        case GI_TYPE_TAG_SIZE:
         {
             PyObject *number;
             guint64 value;
@@ -753,35 +703,6 @@ _pygi_argument_from_object (PyObject   *object,
 
             arg.v_double = PyFloat_AsDouble (float_);
             Py_DECREF (float_);
-
-            break;
-        }
-        case GI_TYPE_TAG_TIME_T:
-        {
-            PyDateTime_DateTime *py_datetime;
-            struct tm datetime;
-
-            py_datetime = (PyDateTime_DateTime *) object;
-
-            if (py_datetime->hastzinfo) {
-                if (PyErr_WarnEx (NULL, "tzinfo ignored; only local time is supported", 1) < 0) {
-                    break;
-                }
-            }
-
-            datetime.tm_sec = PyDateTime_DATE_GET_SECOND (py_datetime);
-            datetime.tm_min = PyDateTime_DATE_GET_MINUTE (py_datetime);
-            datetime.tm_hour = PyDateTime_DATE_GET_HOUR (py_datetime);
-            datetime.tm_mday = PyDateTime_GET_DAY (py_datetime);
-            datetime.tm_mon = PyDateTime_GET_MONTH (py_datetime) - 1;
-            datetime.tm_year = PyDateTime_GET_YEAR (py_datetime) - 1900;
-            datetime.tm_isdst = -1;
-
-            arg.v_long = mktime (&datetime);
-            if (arg.v_long == -1) {
-                PyErr_SetString (PyExc_RuntimeError, "datetime conversion failed");
-                break;
-            }
 
             break;
         }
@@ -1252,46 +1173,6 @@ _pygi_argument_to_object (GArgument  *arg,
             object = PyLong_FromUnsignedLongLong (arg->v_uint64);
             break;
         }
-        case GI_TYPE_TAG_SHORT:
-        {
-            object = PyInt_FromLong (arg->v_short);
-            break;
-        }
-        case GI_TYPE_TAG_USHORT:
-        {
-            object = PyInt_FromLong (arg->v_ushort);
-            break;
-        }
-        case GI_TYPE_TAG_INT:
-        {
-            object = PyInt_FromLong (arg->v_int);
-            break;
-        }
-        case GI_TYPE_TAG_UINT:
-        {
-            object = PyLong_FromLongLong (arg->v_uint);
-            break;
-        }
-        case GI_TYPE_TAG_LONG:
-        {
-            object = PyInt_FromLong (arg->v_long);
-            break;
-        }
-        case GI_TYPE_TAG_ULONG:
-        {
-            object = PyLong_FromUnsignedLongLong (arg->v_ulong);
-            break;
-        }
-        case GI_TYPE_TAG_SSIZE:
-        {
-            object = PyInt_FromLong (arg->v_ssize);
-            break;
-        }
-        case GI_TYPE_TAG_SIZE:
-        {
-            object = PyLong_FromUnsignedLongLong (arg->v_size);
-            break;
-        }
         case GI_TYPE_TAG_FLOAT:
         {
             object = PyFloat_FromDouble (arg->v_float);
@@ -1300,24 +1181,6 @@ _pygi_argument_to_object (GArgument  *arg,
         case GI_TYPE_TAG_DOUBLE:
         {
             object = PyFloat_FromDouble (arg->v_double);
-            break;
-        }
-        case GI_TYPE_TAG_TIME_T:
-        {
-            time_t *time_;
-            struct tm *datetime;
-
-            time_ = (time_t *) &arg->v_long;
-
-            datetime = localtime (time_);
-            object = PyDateTime_FromDateAndTime (
-                         datetime->tm_year + 1900,
-                         datetime->tm_mon + 1,
-                         datetime->tm_mday,
-                         datetime->tm_hour,
-                         datetime->tm_min,
-                         datetime->tm_sec,
-                         0);
             break;
         }
         case GI_TYPE_TAG_GTYPE:
@@ -1692,17 +1555,8 @@ _pygi_argument_release (GArgument   *arg,
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_INT64:
         case GI_TYPE_TAG_UINT64:
-        case GI_TYPE_TAG_SHORT:
-        case GI_TYPE_TAG_USHORT:
-        case GI_TYPE_TAG_INT:
-        case GI_TYPE_TAG_UINT:
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_ULONG:
-        case GI_TYPE_TAG_SSIZE:
-        case GI_TYPE_TAG_SIZE:
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
-        case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_GTYPE:
             break;
         case GI_TYPE_TAG_FILENAME:

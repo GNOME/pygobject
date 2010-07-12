@@ -329,30 +329,11 @@ _pygi_g_type_tag_size (GITypeTag type_tag)
         case GI_TYPE_TAG_UINT64:
             size = sizeof (gint64);
             break;
-        case GI_TYPE_TAG_SHORT:
-        case GI_TYPE_TAG_USHORT:
-            size = sizeof (gshort);
-            break;
-        case GI_TYPE_TAG_INT:
-        case GI_TYPE_TAG_UINT:
-            size = sizeof (gint);
-            break;
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_ULONG:
-            size = sizeof (glong);
-            break;
-        case GI_TYPE_TAG_SIZE:
-        case GI_TYPE_TAG_SSIZE:
-            size = sizeof (gsize);
-            break;
         case GI_TYPE_TAG_FLOAT:
             size = sizeof (gfloat);
             break;
         case GI_TYPE_TAG_DOUBLE:
             size = sizeof (gdouble);
-            break;
-        case GI_TYPE_TAG_TIME_T:
-            size = sizeof (time_t);
             break;
         case GI_TYPE_TAG_GTYPE:
             size = sizeof (GType);
@@ -393,17 +374,8 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_INT64:
         case GI_TYPE_TAG_UINT64:
-        case GI_TYPE_TAG_SHORT:
-        case GI_TYPE_TAG_USHORT:
-        case GI_TYPE_TAG_INT:
-        case GI_TYPE_TAG_UINT:
-        case GI_TYPE_TAG_LONG:
-        case GI_TYPE_TAG_ULONG:
-        case GI_TYPE_TAG_SIZE:
-        case GI_TYPE_TAG_SSIZE:
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
-        case GI_TYPE_TAG_TIME_T:
         case GI_TYPE_TAG_GTYPE:
             if (g_type_info_is_pointer (type_info)) {
                 size = sizeof (gpointer);
@@ -780,19 +752,10 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
             case GI_TYPE_TAG_UINT16:
             case GI_TYPE_TAG_INT32:
             case GI_TYPE_TAG_UINT32:
-            case GI_TYPE_TAG_SHORT:
-            case GI_TYPE_TAG_USHORT:
-            case GI_TYPE_TAG_INT:
-            case GI_TYPE_TAG_UINT:
             case GI_TYPE_TAG_INT64:
             case GI_TYPE_TAG_UINT64:
-            case GI_TYPE_TAG_LONG:
-            case GI_TYPE_TAG_ULONG:
-            case GI_TYPE_TAG_SSIZE:
-            case GI_TYPE_TAG_SIZE:
             case GI_TYPE_TAG_FLOAT:
             case GI_TYPE_TAG_DOUBLE:
-            case GI_TYPE_TAG_TIME_T:
                 if (g_type_info_is_pointer (field_type_info)) {
                     is_simple = FALSE;
                 }

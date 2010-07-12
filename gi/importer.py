@@ -21,8 +21,9 @@
 # USA
 
 from __future__ import absolute_import
-
+import logging
 import sys
+
 import gobject
 
 from ._gi import Repository, RepositoryError
@@ -49,8 +50,8 @@ class DynamicImporter(object):
             return
         try:
             repository.require(namespace)
-        except RepositoryError:
-            pass
+        except RepositoryError, e:
+            logging.exception(e)
         else:
             return self
 
