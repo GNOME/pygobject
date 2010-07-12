@@ -1,3 +1,20 @@
+2.21.5 12-Jul-2010
+        - Shut up some compiler warnings (Florian Müllner)
+        - Adjust to API break in GObject-Introspection (Florian Müllner)
+        - pass in the demo app so demos can use utility methods like requesting file paths (John (J5) Palmieri)
+        - demo fixes to keep up with Gtk+ (John (J5) Palmieri)
+        - override test fixes for new GTK+ annotations (John (J5) Palmieri)
+        - Fix warning. (Ignacio Casal Quinteiro)
+        - fix up treeiter usage due to caller-allocates annotations in gtk+ (John (J5) Palmieri)
+        - add entry completion demo (John (J5) Palmieri)
+        - string changes (John (J5) Palmieri)
+        - add the Entry demo directory and the entry_buffer demo (John (J5) Palmieri)
+        - fix loading of demo modules to support sub modules (John (J5) Palmieri)
+        - add the ability to have demos in sub catagories (John (J5) Palmieri)
+        - Add  __name__ to DynamicModule class. (Jose Aliste)
+        - Do not override GdkRectangle. (Ignacio Casal Quinteiro)
+        - Add override for TreeModel implementing __len__() (Philip Withnall)
+
 2.21.4 29-Jun-2010
         - Build the cairo shim as a python module so the _gi module stops linking to it (Tomeu Vizoso)
         - add drawing area demo (John (J5) Palmieri)
