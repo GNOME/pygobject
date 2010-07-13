@@ -95,7 +95,8 @@ _pygi_scan_for_callbacks (GIFunctionInfo *function_info,
             interface_type = g_base_info_get_type (interface_info);
             if (interface_type == GI_INFO_TYPE_CALLBACK &&
                     ! (strcmp (g_base_info_get_namespace ( (GIBaseInfo*) interface_info), "GLib") == 0 &&
-                       strcmp (g_base_info_get_name ( (GIBaseInfo*) interface_info), "DestroyNotify") == 0)) {
+                       (strcmp (g_base_info_get_name ( (GIBaseInfo*) interface_info), "DestroyNotify") == 0 ||
+                       (strcmp (g_base_info_get_name ( (GIBaseInfo*) interface_info), "FreeFunc") == 0)))) {
                 if (*callback_index != G_MAXUINT8) {
                     PyErr_Format (PyExc_TypeError, "Function %s.%s has multiple callbacks, not supported",
                                   g_base_info_get_namespace ( (GIBaseInfo*) function_info),
