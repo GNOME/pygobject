@@ -57,10 +57,10 @@ cairo_context_from_arg (GITypeInfo *type_info, GArgument  *arg)
 }
 
 PyObject *
-cairo_context_release_arg (GITransfer  transfer, GITypeInfo *type_info,
-                           GArgument  *arg)
+cairo_context_release (GIBaseInfo *base_info,
+                       gpointer    struct_)
 {
-    cairo_destroy ( (cairo_t*) arg->v_pointer);
+    cairo_destroy ( (cairo_t*) struct_);
     Py_RETURN_NONE;
 }
 
@@ -96,10 +96,10 @@ cairo_surface_from_arg (GITypeInfo *type_info, GArgument  *arg)
 }
 
 PyObject *
-cairo_surface_release_arg (GITransfer  transfer, GITypeInfo *type_info,
-                           GArgument  *arg)
+cairo_surface_release (GIBaseInfo *base_info,
+                       gpointer    struct_)
 {
-    cairo_surface_destroy ( (cairo_surface_t*) arg->v_pointer);
+    cairo_surface_destroy ( (cairo_surface_t*) struct_);
     Py_RETURN_NONE;
 }
 
@@ -121,11 +121,11 @@ init_gi_cairo (void)
                                   "Context",
                                   cairo_context_to_arg,
                                   cairo_context_from_arg,
-                                  cairo_context_release_arg);
+                                  cairo_context_release);
 
     pygi_register_foreign_struct ("cairo",
                                   "Surface",
                                   cairo_surface_to_arg,
                                   cairo_surface_from_arg,
-                                  cairo_surface_release_arg);
+                                  cairo_surface_release);
 }

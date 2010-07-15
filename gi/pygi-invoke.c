@@ -639,6 +639,11 @@ _process_invocation_state (struct invocation_state *state,
         GIInfoType info_type;
         GITransfer transfer;
 
+        if (state->return_arg.v_pointer == NULL) {
+            PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
+            return FALSE;
+        }
+
         g_assert (state->n_py_args > 0);
         py_type = (PyTypeObject *) PyTuple_GET_ITEM (py_args, 0);
 
@@ -662,18 +667,13 @@ _process_invocation_state (struct invocation_state *state,
                 type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
 
                 if (g_type_is_a (type, G_TYPE_BOXED)) {
-                    if (state->return_arg.v_pointer == NULL) {
-                        PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
-                        break;
-                    }
                     g_warn_if_fail (transfer == GI_TRANSFER_EVERYTHING);
                     state->return_value = _pygi_boxed_new (py_type, state->return_arg.v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                } else if (type == G_TYPE_NONE && g_struct_info_is_foreign (info)) {
+                    state->return_value =
+                        pygi_struct_foreign_convert_from_g_argument (
+                            state->return_type_info, state->return_arg.v_pointer);
                 } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
-                    if (state->return_arg.v_pointer == NULL) {
-                        PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
-                        break;
-                    }
-
                     if (transfer != GI_TRANSFER_NOTHING)
                         g_warning ("Transfer mode should be set to None for "
                                    "struct types as there is no way to free "

@@ -1649,7 +1649,7 @@ _pygi_argument_release (GArgument   *arg,
                         }
                     } else if (g_struct_info_is_foreign ( (GIStructInfo*) info)) {
                         if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
-                            pygi_struct_foreign_release_g_argument (transfer, type_info, arg);
+                            pygi_struct_foreign_release (info, arg->v_pointer);
                         }
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                     } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {

@@ -10,6 +10,7 @@ from sys import getrefcount
 import cairo
 
 from gi.repository import GObject
+from gi.repository import GLib
 from gi.repository import Everything
 
 class TestEverything(unittest.TestCase):
@@ -46,6 +47,13 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(surface.get_format(), cairo.FORMAT_ARGB32)
         self.assertEquals(surface.get_width(), 10)
         self.assertEquals(surface.get_height(), 10)
+
+    def test_gvariant(self):
+        variant = GLib.Variant.new_int32(42);
+        self.assertEquals(variant.get_int32(), 42)
+
+        variant = GLib.Variant.new_strv(['mec', 'mac']);
+        self.assertEquals(variant.get_strv(), ['mec', 'mac'])
 
     def test_floating(self):
         Everything.TestFloating()

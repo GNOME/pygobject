@@ -57,9 +57,8 @@ typedef PyObject * (*PyGIArgOverrideToGArgumentFunc) (PyObject       *value,
                                                       GArgument      *arg);
 typedef PyObject * (*PyGIArgOverrideFromGArgumentFunc) (GITypeInfo *type_info,
                                                         GArgument  *arg);
-typedef PyObject * (*PyGIArgOverrideReleaseGArgumentFunc) (GITransfer  transfer,
-                                                           GITypeInfo *type_info,
-                                                           GArgument  *arg);
+typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
+                                                  gpointer  struct_);
 
 struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);
@@ -67,7 +66,7 @@ struct PyGI_API {
                                      const char* name,
                                      PyGIArgOverrideToGArgumentFunc to_func,
                                      PyGIArgOverrideFromGArgumentFunc from_func,
-                                     PyGIArgOverrideReleaseGArgumentFunc release_func);
+                                     PyGIArgOverrideReleaseFunc release_func);
 };
 
 static struct PyGI_API *PyGI_API = NULL;
@@ -101,7 +100,7 @@ pygi_register_foreign_struct (const char* namespace_,
                               const char* name,
                               PyGIArgOverrideToGArgumentFunc to_func,
                               PyGIArgOverrideFromGArgumentFunc from_func,
-                              PyGIArgOverrideReleaseGArgumentFunc release_func)
+                              PyGIArgOverrideReleaseFunc release_func)
 {
     if (_pygi_import() < 0) {
         return NULL;

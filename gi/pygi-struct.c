@@ -29,13 +29,21 @@
 static void
 _struct_dealloc (PyGIStruct *self)
 {
+    GIBaseInfo *info = _pygi_object_get_gi_info (
+                           (PyObject *) ( (PyObject *) self)->ob_type,
+                           &PyGIStructInfo_Type);
+
     PyObject_GC_UnTrack ( (PyObject *) self);
 
     PyObject_ClearWeakRefs ( (PyObject *) self);
 
-    if (self->free_on_dealloc) {
+    if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
+        pygi_struct_foreign_release (info, ( (PyGPointer *) self)->pointer);
+    } else if (self->free_on_dealloc) {
         g_free ( ( (PyGPointer *) self)->pointer);
     }
+
+    g_base_info_unref (info);
 
     ( (PyGPointer *) self)->ob_type->tp_free ( (PyObject *) self);
 }
