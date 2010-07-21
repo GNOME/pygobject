@@ -56,16 +56,15 @@ _gi_la_SOURCES = \
 	pygobject-external.h \
 	gimodule.c
 
-# LLVM
-AM_CXXFLAGS +=		\
-	$(shell llvm-config --cxxflags core engine linker)
-_gi_la_LDFLAGS +=		\
-	$(shell llvm-config --ldflags --libs core engine linker)
+if HAVE_LLVM
+AM_CXXFLAGS += $(LLVM_CXXFLAGS)
+_gi_la_LDFLAGS += $(LLVM_LDFLAGS)
 _gi_la_SOURCES += 		\
 	pygi-llvm.cpp		\
 	pygi-llvm.h		\
 	llvm-compiler.cpp	\
 	llvm-compiler.h
+endif
 
 _gi_cairo_la_CFLAGS = \
 	$(PYTHON_INCLUDES) \

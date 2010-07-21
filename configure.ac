@@ -179,6 +179,52 @@ AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 AC_SUBST(LIBFFI_PC)
 
+dnl llvm
+AC_ARG_ENABLE(llvm,
+              [AC_HELP_STRING([--disable-llvm]
+                              [disable llvm compiler backend])],,
+              [enable_llvm=auto])
+
+if test "x$enable_llvm" = "xno"; then
+  AM_CONDITIONAL(HAVE_LLVM, false)
+  have_llvm=no
+else
+  AC_PATH_PROG(LLVM_CONFIG, llvm-config, no)
+  if test "x$LLVM_CONFIG" = "xno"; then
+    if test "x$enable_llvm" = "xauto"; then
+      AM_CONDITIONAL(HAVE_LLVM, false)
+      have_llvm=no
+    else
+      AC_MSG_ERROR([
+*** llvm not found.
+])
+    fi
+  else
+    AC_MSG_CHECKING([for llvm 2.7 or higher])
+    LLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags core engine linker | tr -d '\n'`
+    LLVM_LDFLAGS=`$LLVM_CONFIG --ldflags --libs core engine linker | tr -d '\n'`
+
+    LLVM_API_VERSION=`$LLVM_CONFIG --version`
+    LLVM_API_MAJOR=`echo $ECHO_N $LLVM_API_VERSION | awk -F. '{print $1}'`
+    LLVM_API_MINOR=`echo $ECHO_N $LLVM_API_VERSION | awk -F. '{print $2}'`
+    if test ! \( $LLVM_API_MAJOR -gt 2 -o \
+                $LLVM_API_MAJOR -eq 2 -a $LLVM_API_MINOR -ge 7 \) ; then
+      AC_MSG_ERROR([
+*** llvm 2.7 or newer needed, but $LLVM_API_MAJOR.$LLVM_API_MINOR found
+])
+    fi
+    AC_MSG_RESULT([yes, $LLVM_API_MAJOR.$LLVM_API_MINOR found])
+
+    AC_SUBST(LLVM_API_MAJOR)
+    AC_SUBST(LLVM_API_MINOR)
+    AC_SUBST(LLVM_CXXFLAGS)
+    AC_SUBST(LLVM_LDFLAGS)
+
+    AM_CONDITIONAL(HAVE_LLVM, true)
+    have_llvm=yes
+  fi
+fi
+
 dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
 	have_gio=true, have_gio=false)
@@ -257,6 +303,7 @@ AC_CONFIG_FILES(
 AC_OUTPUT
 
 echo
-echo "libffi support: $have_libffi"
 echo "introspection support: $enable_introspection"
+echo "libffi support: $have_libffi"
+echo "llvm support: $have_llvm"
 echo
