@@ -63,15 +63,8 @@ AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
 
 AC_DISABLE_STATIC
 
-dnl XXXX hack to kill off all the libtool tags ...
-dnl it isn't like we are using C++ or Fortran.
-dnl (copied from libglade/configure.in)
-m4_define([_LT_AC_TAGCONFIG],[])
-
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
-dnl when using libtool 2.x create libtool early, because it's used in configure
-m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
