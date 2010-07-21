@@ -168,22 +168,6 @@ LLVMCompiler::getTypeFromTypeInfo(GITypeInfo *typeInfo)
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_UINT8:
     return llvm::Type::getInt8Ty(mCtx);
-  case GI_TYPE_TAG_LONG:
-  case GI_TYPE_TAG_ULONG:
-    if (sizeof(long) == 4)
-        return llvm::Type::getInt32Ty(mCtx);
-    else if (sizeof(long) == 8)
-        return llvm::Type::getInt64Ty(mCtx);
-    else
-        g_assert_not_reached();
-  case GI_TYPE_TAG_INT:
-  case GI_TYPE_TAG_UINT:
-    if (sizeof(int) == 4)
-        return llvm::Type::getInt32Ty(mCtx);
-    else if (sizeof(int) == 8)
-        return llvm::Type::getInt64Ty(mCtx);
-    else
-        g_assert_not_reached();
   case GI_TYPE_TAG_INT32:
   case GI_TYPE_TAG_UINT32:
     return llvm::Type::getInt32Ty(mCtx);
@@ -239,8 +223,6 @@ LLVMCompiler::formatTypeForException(GITypeInfo *typeInfo)
 {
   switch (g_type_info_get_tag(typeInfo)) {
   case GI_TYPE_TAG_DOUBLE:
-  case GI_TYPE_TAG_INT:
-  case GI_TYPE_TAG_UINT:
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_UINT8:
   case GI_TYPE_TAG_INT16:
@@ -301,7 +283,6 @@ LLVMCompiler::typeCheck(GICallableInfo *callableInfo,
     this->createIf(block, llvm::ICmpInst::ICMP_EQ, v, llvm::ConstantInt::get(llvm::Type::getInt32Ty(mCtx), 0), excBlock);
     break;
   }
-  case GI_TYPE_TAG_INT:
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_UINT8:
   case GI_TYPE_TAG_INT16:
@@ -371,7 +352,6 @@ LLVMCompiler::valueAsNative(GITypeInfo *typeInfo,
     retval = Builder.CreateSIToFP(v, llvm::Type::getDoubleTy(mCtx), "arg_sitofp");
     break;
   }
-  case GI_TYPE_TAG_INT:
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_INT16:
   case GI_TYPE_TAG_INT32:
@@ -454,15 +434,11 @@ LLVMCompiler::valueFromNative(GITypeInfo *typeInfo,
     retval = Builder.CreateCall(f, value);
     break;
   }
-  case GI_TYPE_TAG_INT:
   case GI_TYPE_TAG_INT8:
   case GI_TYPE_TAG_INT16:
   case GI_TYPE_TAG_INT32:
-  case GI_TYPE_TAG_LONG:
     isSigned = true;
   case GI_TYPE_TAG_BOOLEAN:
-  case GI_TYPE_TAG_ULONG:
-  case GI_TYPE_TAG_UINT:
   case GI_TYPE_TAG_UINT8:
   case GI_TYPE_TAG_UINT16: {
     llvm::Constant *f = mModule->getOrInsertFunction("PyLong_FromLong",
