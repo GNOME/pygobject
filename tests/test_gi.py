@@ -1374,6 +1374,16 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_with_default_implementation(self, int8):
             self.props.int = int8 * 2
 
+    class SubObject(GIMarshallingTests.SubObject):
+        __gtype_name__ = "SubObject"
+
+        def __init__(self, int):
+            GIMarshallingTests.SubObject.__init__(self)
+            self.val = None
+
+        def do_method_with_default_implementation(self, int8):
+            self.val = int8
+
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
 
@@ -1402,6 +1412,11 @@ class TestPythonGObject(unittest.TestCase):
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
 
+    def test_subobject_parent_vfunc(self):
+        object_ = self.SubObject(int = 81)
+        object_.method_with_default_implementation(87)
+        self.assertEquals(object_.val, 87)
+
     def test_dynamic_module(self):
         from gi.module import DynamicGObjectModule
         self.assertTrue(isinstance(GObject, DynamicGObjectModule))
@@ -1427,6 +1442,16 @@ class TestInterfaces(unittest.TestCase):
         self.assertTrue(issubclass(GIMarshallingTests.Interface, GObject.GInterface))
         self.assertEquals(GIMarshallingTests.Interface.__gtype__.name, 'GIMarshallingTestsInterface')
         self.assertRaises(NotImplementedError, GIMarshallingTests.Interface)
+
+
+    def test_incomplete(self):
+        def create_incomplete():
+            class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+                __type_name__ = 'TestInterfaceImpl'
+                def __init__(self):
+                    GObject.GObject.__init__(self)
+
+        self.assertRaises(TypeError, create_incomplete)
 
     def test_implementation(self):
 
@@ -1467,6 +1492,18 @@ class TestInterfaces(unittest.TestCase):
                     self.val = int8
         self.assertRaises(RuntimeError, define_implementor_without_gtype)
 
+# -- this needs some additions to GIMarshallingTests in gobject-introspection
+#class TestInterfaceClash(unittest.TestCase):
+#
+#    def test_clash(self):
+#        def create_clash():
+#            class TestClash(GObject.GObject, GIMarshallingTests.Interface, GIMarshallingTests.Interface2):
+#                __gtype_name__ = 'TestClash'
+#                def do_test_int8_in(self, int8):
+#                    pass
+#            TestClash()
+#
+#        self.assertRaises(TypeError, create_clash)
 
 class TestOverrides(unittest.TestCase):
 
