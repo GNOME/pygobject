@@ -50,10 +50,19 @@ class TestEverything(unittest.TestCase):
 
     def test_gvariant(self):
         variant = GLib.Variant.new_int32(42);
+        self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEquals(variant.get_int32(), 42)
 
         variant = GLib.Variant.new_strv(['mec', 'mac']);
+        self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEquals(variant.get_strv(), ['mec', 'mac'])
+
+        variant = GLib.Variant.new_tuple(GLib.Variant.new_string('mec'), GLib.Variant.new_string('mac'))
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
+        self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
 
     def test_floating(self):
         Everything.TestFloating()

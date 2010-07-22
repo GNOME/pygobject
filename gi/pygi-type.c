@@ -25,16 +25,12 @@
 
 
 PyObject *
-_pygi_type_import_by_gi_info (GIBaseInfo *info)
+_pygi_type_import_by_name (const char *namespace_,
+                           const char *name)
 {
-    const gchar *namespace_;
-    const gchar *name;
     gchar *module_name;
     PyObject *py_module;
     PyObject *py_object;
-
-    namespace_ = g_base_info_get_namespace (info);
-    name = g_base_info_get_name (info);
 
     module_name = g_strconcat ("gi.repository.", namespace_, NULL);
 
@@ -71,6 +67,13 @@ pygi_type_import_by_g_type_real (GType g_type)
     g_base_info_unref (info);
 
     return type;
+}
+
+PyObject *
+_pygi_type_import_by_gi_info (GIBaseInfo *info)
+{
+    return _pygi_type_import_by_name (g_base_info_get_namespace (info),
+                                      g_base_info_get_name (info));
 }
 
 PyObject *

@@ -235,6 +235,43 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+_wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
+{
+    PyObject *py_values;
+    GVariant **values = NULL;
+    GVariant *variant = NULL;
+    PyObject *py_variant = NULL;
+    PyObject *py_type;
+    gssize i;
+
+    if (!PyArg_ParseTuple (args, "O!:variant_new_tuple",
+                           &PyTuple_Type, &py_values)) {
+        return NULL;
+    }
+
+    py_type = _pygi_type_import_by_name ("GLib", "Variant");
+
+    values = g_newa (GVariant*, PyTuple_Size (py_values));
+
+    for (i = 0; i < PyTuple_Size (py_values); i++) {
+        PyObject *value = PyTuple_GET_ITEM (py_values, i);
+
+        if (!PyObject_IsInstance (value, py_type)) {
+            PyErr_Format (PyExc_TypeError, "argument %d is not a GLib.Variant", i);
+            return NULL;
+        }
+
+        values[i] = (GVariant *) ( (PyGPointer *) value)->pointer;
+    }
+
+    variant = g_variant_new_tuple (values, PyTuple_Size (py_values));
+
+    py_variant = _pygi_struct_new ( (PyTypeObject *) py_type, variant, FALSE);
+
+    return py_variant;
+}
+
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
@@ -242,6 +279,7 @@ static PyMethodDef _gi_functions[] = {
     { "set_object_has_new_constructor", (PyCFunction) _wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
+    { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

@@ -33,6 +33,8 @@ PyObject *pygi_type_import_by_g_type_real (GType g_type);
 
 /* Private */
 
+PyObject *_pygi_type_import_by_name (const char *namespace_, const char *name);
+
 PyObject *_pygi_type_import_by_gi_info (GIBaseInfo *info);
 
 PyObject *_pygi_type_get_from_g_type (GType g_type);
