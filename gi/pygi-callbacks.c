@@ -200,7 +200,8 @@ _pygi_create_callback (GIBaseInfo  *function_info,
 
     if (!found_py_function
             || (py_function == Py_None || !PyCallable_Check (py_function))) {
-        PyErr_Format (PyExc_TypeError, "Error invoking %s.%s: Invalid callback given for argument %s",
+        PyErr_Format (PyExc_TypeError, "Error invoking %s.%s: Unexpected value "
+                      "for argument '%s'",
                       g_base_info_get_namespace ( (GIBaseInfo*) function_info),
                       g_base_info_get_name ( (GIBaseInfo*) function_info),
                       g_base_info_get_name ( (GIBaseInfo*) callback_arg));
