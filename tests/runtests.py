@@ -31,5 +31,5 @@ for name in gettestnames():
         continue
     suite.addTest(loader.loadTestsFromName(name))
 
-testRunner = unittest.TextTestRunner()
+testRunner = unittest.TextTestRunner(verbosity=2)
 testRunner.run(suite)
