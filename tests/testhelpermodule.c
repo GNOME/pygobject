@@ -447,7 +447,7 @@ test4_callback (GObject *object,
   g_return_if_fail (b == TRUE);
   g_return_if_fail (l == 10L);
   g_return_if_fail (f <= 3.14001 && f >= 3.13999);
-  g_return_if_fail (d == 1.78);
+  g_return_if_fail (d <= 1.78001 && d >= 1.77999);
   g_return_if_fail (uint == 20);
   g_return_if_fail (ulong == 30L);
 }
