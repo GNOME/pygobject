@@ -21,7 +21,7 @@
 from ..types import override
 from ..importer import modules
 
-GIMarshallingTests = modules['GIMarshallingTests']
+GIMarshallingTests = modules['GIMarshallingTests'].introspection_module
 
 __all__ = []
 

@@ -27,7 +27,7 @@ import sys
 import gobject
 
 from ._gi import Repository, RepositoryError
-from .module import DynamicModule, DynamicGObjectModule, ModuleProxy
+from .module import DynamicModule, DynamicGObjectModule
 
 
 repository = Repository.get_default()
@@ -48,10 +48,10 @@ class DynamicImporter(object):
         path, namespace = fullname.rsplit('.', 1)
         if path != self.path:
             return
-        try:
-            repository.require(namespace)
-        except RepositoryError, e:
-            logging.exception(e)
+
+        if not repository.enumerate(namespace):
+            logging.error('Could not find any typelib for %s', namespace)
+            return None
         else:
             return self
 
@@ -69,18 +69,10 @@ class DynamicImporter(object):
         dynamic_module = DynamicModule(namespace)
         modules[namespace] = dynamic_module
 
-        overrides_modules = __import__('gi.overrides', fromlist=[namespace])
-        overrides_module = getattr(overrides_modules, namespace, None)
+        dynamic_module.__file__ = '<%s>' % fullname
+        dynamic_module.__loader__ = self
 
-        if overrides_module is not None:
-            module = ModuleProxy(fullname, namespace, dynamic_module, overrides_module)
-        else:
-            module = dynamic_module
+        sys.modules[fullname] = dynamic_module
 
-        module.__file__ = '<%s>' % fullname
-        module.__loader__ = self
-
-        sys.modules[fullname] = module
-
-        return module
+        return dynamic_module
 

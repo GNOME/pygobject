@@ -25,7 +25,7 @@ from gi.repository import GObject
 from ..types import override
 from ..importer import modules
 
-Gtk = modules['Gtk']
+Gtk = modules['Gtk'].introspection_module
 __all__ = []
 
 class ActionGroup(Gtk.ActionGroup):

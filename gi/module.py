@@ -64,6 +64,7 @@ def get_parent_for_object(object_info):
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
 
+
 def get_interfaces_for_object(object_info):
     interfaces = []
     for interface_info in object_info.get_interfaces():
@@ -75,11 +76,18 @@ def get_interfaces_for_object(object_info):
     return interfaces
 
 
-class DynamicModule(object):
+class IntrospectionModule(object):
 
-    def __init__(self, namespace):
+    def __init__(self, namespace, version=None):
+        repository.require(namespace, version)
         self._namespace = namespace
+        self.version = version
         self.__name__ = 'gi.repository.' + namespace
+
+        repository.require(self._namespace, self.version)
+
+        if self.version is None:
+            self.version = repository.get_version(self._namespace)
 
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
@@ -165,7 +173,7 @@ class DynamicModule(object):
         return "<DynamicModule %r from %r>" % (self._namespace, path)
 
 
-class DynamicGObjectModule(DynamicModule):
+class DynamicGObjectModule(IntrospectionModule):
     """Wrapper for the GObject module
 
     This class allows us to access both the static PyGObject module and the GI GObject module
@@ -182,12 +190,11 @@ class DynamicGObjectModule(DynamicModule):
     """
 
     def __init__(self):
-        self._namespace = 'GObject'
-        self._module = gobject
+        IntrospectionModule.__init__(self, namespace='GObject')
 
     def __getattr__(self, name):
         # first see if this attr is in the gobject module
-        attr = getattr(self._module, name, None)
+        attr = getattr(gobject, name, None)
 
         # if not in module assume request for an attr exported through GI
         if attr is None:
@@ -195,23 +202,34 @@ class DynamicGObjectModule(DynamicModule):
 
         return attr
 
-class ModuleProxy(object):
 
-    def __init__(self, name, namespace, dynamic_module, overrides_module):
-        self.__name__ = name
-
+class DynamicModule(object):
+    def __init__(self, namespace):
         self._namespace = namespace
-        self._dynamic_module = dynamic_module
-        self._overrides_module = overrides_module
+        self.introspection_module = None
+        self._version = None
+        self._overrides_module = None
+
+    def require_version(self, version):
+        if self.introspection_module is not None and \
+                self.introspection_module.version != version:
+            raise RuntimeError('Module has been already loaded ')
+        self._version = version
+
+    def _import(self):
+        self.introspection_module = IntrospectionModule(self._namespace,
+                                                        self._version)
+
+        overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
+        self._overrides_module = getattr(overrides_modules, self._namespace, None)
 
     def __getattr__(self, name):
-        override_exports = getattr(self._overrides_module, '__all__', ())
-        if (name in override_exports):
-            attribute = getattr(self._overrides_module, name, None)
-        else:
-            attribute = getattr(self._dynamic_module, name)
-        return attribute
+        if self.introspection_module is None:
+            self._import()
 
-    def __str__(self):
-        return "<ModuleProxy %r>" % self.__name__
+        if self._overrides_module is not None:
+            override_exports = getattr(self._overrides_module, '__all__', ())
+            if name in override_exports:
+                return getattr(self._overrides_module, name, None)
 
+        return getattr(self.introspection_module, name)

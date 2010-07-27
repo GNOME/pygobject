@@ -22,7 +22,7 @@
 from ..types import override
 from ..importer import modules
 
-Gdk = modules['Gdk']
+Gdk = modules['Gdk'].introspection_module
 
 __all__ = []
 
