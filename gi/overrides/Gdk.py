@@ -43,6 +43,25 @@ class Color(Gdk.Color):
 Color = override(Color)
 __all__.append('Color')
 
+if Gdk.version == '2.0':
+    class Rectangle(Gdk.Rectangle):
+
+        def __init__(self, x, y, width, height):
+            Gdk.Rectangle.__init__(self)
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+
+        def __new__(cls, *args, **kwargs):
+            return Gdk.Rectangle.__new__(cls)
+
+        def __repr__(self):
+            return '<Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)>' % (self.x, self.y, self.height, self.width)
+
+    Rectangle = override(Rectangle)
+    __all__.append('Rectangle')
+
 class Drawable(Gdk.Drawable):
     def cairo_create(self):
         return Gdk.cairo_create(self)
