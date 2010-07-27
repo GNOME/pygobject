@@ -62,6 +62,11 @@ typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
 
 struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);
+    PyObject* (*get_property_value) (PyGObject *instance,
+                                     const gchar *attr_name);
+    gint (*set_property_value) (PyGObject *instance,
+                                const gchar *attr_name,
+                                PyObject *value);
     void (*register_foreign_struct) (const char* namespace_,
                                      const char* name,
                                      PyGIArgOverrideToGArgumentFunc to_func,
@@ -96,6 +101,27 @@ pygi_type_import_by_g_type (GType g_type)
 }
 
 static inline PyObject *
+pygi_get_property_value (PyGObject *instance,
+                         const gchar *attr_name)
+{
+    if (_pygi_import() < 0) {
+        return NULL;
+    }
+    return PyGI_API->get_property_value(instance, attr_name);
+}
+
+static inline gint
+pygi_set_property_value (PyGObject *instance,
+                         const gchar *attr_name,
+                         PyObject *value)
+{
+    if (_pygi_import() < 0) {
+        return -1;
+    }
+    return PyGI_API->set_property_value(instance, attr_name, value);
+}
+
+static inline PyObject *
 pygi_register_foreign_struct (const char* namespace_,
                               const char* name,
                               PyGIArgOverrideToGArgumentFunc to_func,
@@ -119,6 +145,21 @@ static inline PyObject *
 pygi_type_import_by_g_type (GType g_type)
 {
     return NULL;
+}
+
+static inline PyObject *
+pygi_get_property_value (PyGObject *instance,
+                         const gchar *attr_name)
+{
+    return -1;
+}
+
+static inline gint
+pygi_set_property_value (PyGObject *instance,
+                         const gchar *attr_name,
+                         PyObject *value)
+{
+    return -1;
 }
 
 #endif /* ENABLE_INTROSPECTION */

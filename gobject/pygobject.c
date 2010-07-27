@@ -288,6 +288,12 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 	return build_parameter_list(class);
     }
 
+    if (self->pygobject != NULL) {
+        ret = pygi_get_property_value (self->pygobject, attr_name);
+        if (ret != NULL)
+            return ret;
+    }
+
     pspec = g_object_class_find_property(class, attr_name);
     g_type_class_unref(class);
 
@@ -379,6 +385,9 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 			"cannot set GOject properties without an instance");
         return -1;
     }
+
+    if (pygi_set_property_value (self->pygobject, attr_name, pvalue) == 0)
+        return 0;
 
     obj = self->pygobject->obj;
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), attr_name);

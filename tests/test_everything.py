@@ -307,3 +307,22 @@ class TestCallbacks(unittest.TestCase):
     def testCallbackNone(self):
         # make sure this doesn't assert or crash
         Everything.test_simple_callback(None)
+
+
+class TestProperties(unittest.TestCase):
+
+    def test_hash_table(self):
+        object_ = Everything.TestObj()
+        self.assertEquals(object_.props.hash_table, None)
+
+        object_.props.hash_table = {'mec': 56}
+        self.assertTrue(isinstance(object_.props.hash_table, dict))
+        self.assertEquals(object_.props.hash_table.items()[0], ('mec', 56))
+
+    def test_list(self):
+        object_ = Everything.TestObj()
+        self.assertEquals(object_.props.list, [])
+
+        object_.props.list = ['1', '2', '3']
+        self.assertTrue(isinstance(object_.props.list, list))
+        self.assertEquals(object_.props.list, ['1', '2', '3'])

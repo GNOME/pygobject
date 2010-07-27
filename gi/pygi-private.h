@@ -28,6 +28,7 @@
 #include "pygi-closure.h"
 #include "pygi-callbacks.h"
 #include "pygi-invoke.h"
+#include "pygi-property.h"
 
 G_BEGIN_DECLS
 

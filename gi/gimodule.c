@@ -241,6 +241,8 @@ static PyMethodDef _pygi_functions[] = {
 
 static struct PyGI_API CAPI = {
   pygi_type_import_by_g_type_real,
+  pygi_get_property_value_real,
+  pygi_set_property_value_real,
   pygi_register_foreign_struct_real,
 };
 

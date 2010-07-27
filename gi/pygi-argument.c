@@ -1499,9 +1499,11 @@ _pygi_argument_to_object (GArgument  *arg,
 
             key_type_info = g_type_info_get_param_type (type_info, 0);
             g_assert (key_type_info != NULL);
+            g_assert (g_type_info_get_tag (key_type_info) != GI_TYPE_TAG_VOID);
 
             value_type_info = g_type_info_get_param_type (type_info, 1);
             g_assert (value_type_info != NULL);
+            g_assert (g_type_info_get_tag (value_type_info) != GI_TYPE_TAG_VOID);
 
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 

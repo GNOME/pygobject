@@ -50,6 +50,8 @@ _gi_la_SOURCES = \
 	pygi-callbacks.h \
 	pygi.h \
 	pygi-private.h \
+	pygi-property.c \
+	pygi-property.h \
 	pygobject-external.h \
 	gimodule.c
 
