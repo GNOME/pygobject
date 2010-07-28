@@ -93,7 +93,7 @@ class IntrospectionModule(object):
         info = repository.find_by_name(self._namespace, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
-                    self.__class__.__name__, name))
+                    self.__name__, name))
 
         if isinstance(info, EnumInfo):
             g_type = info.get_g_type()
@@ -170,7 +170,7 @@ class IntrospectionModule(object):
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
-        return "<DynamicModule %r from %r>" % (self._namespace, path)
+        return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
 
 class DynamicGObjectModule(IntrospectionModule):
