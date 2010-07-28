@@ -49,7 +49,7 @@ class DynamicImporter(object):
         if path != self.path:
             return
 
-        if not repository.enumerate(namespace):
+        if not repository.enumerate_versions(namespace):
             logging.error('Could not find any typelib for %s', namespace)
             return None
         else:

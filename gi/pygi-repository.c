@@ -60,21 +60,21 @@ PyTypeObject PyGIRepository_Type = {
 };
 
 static PyObject *
-_wrap_g_irepository_enumerate (PyGIRepository *self,
-                               PyObject       *args,
-                               PyObject       *kwargs)
+_wrap_g_irepository_enumerate_versions (PyGIRepository *self,
+                                        PyObject       *args,
+                                        PyObject       *kwargs)
 {
     static char *kwlist[] = { "namespace", NULL };
     const char *namespace_;
     GList *versions, *item;
     PyObject *ret = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.enumerate",
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s:Repository.enumerate_versions",
                                       kwlist, &namespace_)) {
         return NULL;
     }
 
-    versions = g_irepository_enumerate (self->repository, namespace_);
+    versions = g_irepository_enumerate_versions (self->repository, namespace_);
     ret = PyList_New(0);
     for (item = versions; item; item = item->next) {
         char *version = item->data;
@@ -263,7 +263,7 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
 }
 
 static PyMethodDef _PyGIRepository_methods[] = {
-    { "enumerate", (PyCFunction) _wrap_g_irepository_enumerate, METH_VARARGS | METH_KEYWORDS },
+    { "enumerate_versions", (PyCFunction) _wrap_g_irepository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
     { "get_default", (PyCFunction) _wrap_g_irepository_get_default, METH_STATIC | METH_NOARGS },
     { "require", (PyCFunction) _wrap_g_irepository_require, METH_VARARGS | METH_KEYWORDS },
     { "get_infos", (PyCFunction) _wrap_g_irepository_get_infos, METH_VARARGS | METH_KEYWORDS },
