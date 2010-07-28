@@ -367,6 +367,7 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
     GParamSpec *pspec;
     char *attr_name;
     GObject *obj;
+    int ret = -1;
     
     if (pvalue == NULL) {
 	PyErr_SetString(PyExc_TypeError, "properties cannot be "
@@ -386,8 +387,12 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
         return -1;
     }
 
-    if (pygi_set_property_value (self->pygobject, attr_name, pvalue) == 0)
+    ret = pygi_set_property_value (self->pygobject, attr_name, pvalue);
+    if (ret == 0)
         return 0;
+    else if (ret == -1)
+        if (PyErr_Occurred())
+            return -1;
 
     obj = self->pygobject->obj;
     pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), attr_name);
