@@ -128,11 +128,6 @@ dist-hook: $(BUILT_EXTRA_DIST)
 check.gdb:
 	cd tests && $(MAKE) check.gdb
 
-%.gdb:
-	cd tests && $(MAKE) $*.gdb
-
 check.valgrind:
 	cd tests && $(MAKE) check.valgrind
 
-%.valgrind:
-	cd tests && $(MAKE) $*.valgrind

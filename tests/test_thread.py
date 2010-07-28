@@ -1,6 +1,9 @@
+# -*- Mode: Python -*-
+
 import unittest
 
-from common import glib, testhelper
+import glib
+import testhelper
 
 
 class TestThread(unittest.TestCase):

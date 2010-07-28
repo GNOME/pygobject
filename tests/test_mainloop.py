@@ -1,12 +1,12 @@
-#!/usr/bin/env python
+# -*- Mode: Python -*-
 
-import exceptions
 import os
 import sys
 import select
 import unittest
 
-from common import glib
+import glib
+
 
 class TestMainLoop(unittest.TestCase):
     def testExceptionHandling(self):
@@ -31,7 +31,7 @@ class TestMainLoop(unittest.TestCase):
         os.close(pipe_w)
 
         def excepthook(type, value, traceback):
-            assert type is exceptions.Exception
+            assert type is Exception
             assert value.args[0] == "deadbabe"
         sys.excepthook = excepthook
 
@@ -48,6 +48,3 @@ class TestMainLoop(unittest.TestCase):
         #
         sys.excepthook = sys.__excepthook__
         assert not got_exception
-
-if __name__ == '__main__':
-    unittest.main()

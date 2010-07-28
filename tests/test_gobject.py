@@ -2,7 +2,8 @@
 
 import unittest
 
-from common import gobject, testhelper
+import gobject
+import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):

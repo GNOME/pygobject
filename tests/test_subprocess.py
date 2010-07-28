@@ -3,7 +3,7 @@
 import sys
 import unittest
 
-from common import glib
+import glib
 
 
 class TestProcess(unittest.TestCase):
@@ -22,6 +22,3 @@ class TestProcess(unittest.TestCase):
         glib.child_watch_add(pid, self._child_watch_cb, 12345)
         self.loop.run()
         self.assertEqual(self.data, 12345)
-
-if __name__ == '__main__':
-    unittest.main()

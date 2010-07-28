@@ -7,9 +7,6 @@ pygtk.require("2.0")
 import unittest
 from gi.repository import GObject
 
-import sys
-sys.path.insert(0, "../")
-
 import gobject
 from gi.repository import GIMarshallingTests
 

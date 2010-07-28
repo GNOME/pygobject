@@ -1,9 +1,9 @@
 # -*- Mode: Python -*-
 
-import os
 import unittest
 
-from common import gio, glib
+import glib
+import gio
 
 
 class TestResolver(unittest.TestCase):

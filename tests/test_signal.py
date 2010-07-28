@@ -4,7 +4,9 @@ import gc
 import unittest
 import sys
 
-from common import gobject, testhelper
+import gobject
+import testhelper
+
 
 class C(gobject.GObject):
     __gsignals__ = { 'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,

@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+# -*- Mode: Python -*-
 
 import unittest
 
-from common import glib
+import glib
 
 
 class Idle(glib.Idle):

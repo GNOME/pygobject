@@ -1,7 +1,10 @@
+# -*- Mode: Python -*-
 
 import unittest
 
-from common import gobject, testhelper
+import gobject
+import testhelper
+
 
 TestInterface = gobject.GType.from_name('TestInterface')
 
