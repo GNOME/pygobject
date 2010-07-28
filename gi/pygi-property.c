@@ -194,6 +194,32 @@ pygi_set_property_value_real (PyGObject *instance,
     // FIXME: Lots of types still unhandled
     type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
+        case GI_TYPE_TAG_INTERFACE:
+        {
+            GIBaseInfo *info;
+            GIInfoType info_type;
+
+            info = g_type_info_get_interface (type_info);
+            g_assert (info != NULL);
+
+            info_type = g_base_info_get_type (info);
+
+            switch (info_type) {
+                case GI_INFO_TYPE_ENUM:
+                    g_value_set_enum (&value, arg.v_int32);
+                    break;
+                case GI_INFO_TYPE_INTERFACE:
+                case GI_INFO_TYPE_OBJECT:
+                    g_value_set_object (&value, arg.v_pointer);
+                    break;
+                default:
+                    PyErr_Format (PyExc_NotImplementedError,
+                                  "Setting properties of type '%s' is not implemented",
+                                  g_info_type_to_string (info_type));
+                    goto out;
+            }
+            break;
+        }
         case GI_TYPE_TAG_GHASH:
             g_value_set_boxed (&value, arg.v_pointer);
             break;
@@ -201,7 +227,16 @@ pygi_set_property_value_real (PyGObject *instance,
             g_value_set_pointer (&value, arg.v_pointer);
             break;
         case GI_TYPE_TAG_INT32:
-            g_value_set_int (&value, arg.v_int);
+            g_value_set_int (&value, arg.v_int32);
+            break;
+        case GI_TYPE_TAG_UINT32:
+            g_value_set_uint (&value, arg.v_uint32);
+            break;
+        case GI_TYPE_TAG_BOOLEAN:
+            g_value_set_boolean (&value, arg.v_boolean);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            g_value_set_float (&value, arg.v_float);
             break;
         default:
             PyErr_Format (PyExc_NotImplementedError,
