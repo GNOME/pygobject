@@ -107,7 +107,7 @@ def expose (da, event):
 
 def main():
     win = Gtk.Window()
-    win.connect('destroy', Gtk.main_quit)
+    win.connect('destroy', lambda w: Gtk.main_quit())
     win.set_default_size(450, 550)
 
     drawingarea = Gtk.DrawingArea()
