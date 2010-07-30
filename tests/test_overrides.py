@@ -22,6 +22,16 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(color.green, 200)
         self.assertEquals(color.blue, 300)
 
+    def test_event(self):
+        event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
+        self.assertEquals(event.type, Gdk.EventType.CONFIGURE)
+        self.assertEquals(event.send_event, 0)
+
+        event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
+        event.x_root, event.y_root = 0, 5
+        self.assertEquals(event.x_root, 0)
+        self.assertEquals(event.y_root, 5)
+
 class TestGtk(unittest.TestCase):
     def test_uimanager(self):
         self.assertEquals(Gtk.UIManager, overrides.Gtk.UIManager)

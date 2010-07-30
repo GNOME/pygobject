@@ -656,10 +656,6 @@ _process_invocation_state (struct invocation_state *state,
 
         switch (info_type) {
             case GI_INFO_TYPE_UNION:
-                /* TODO */
-                PyErr_SetString (PyExc_NotImplementedError, "creating unions is not supported yet");
-                g_base_info_unref (info);
-                return FALSE;
             case GI_INFO_TYPE_STRUCT:
             {
                 GType type;
