@@ -69,50 +69,6 @@ class Drawable(Gdk.Drawable):
 Drawable = override(Drawable)
 __all__.append('Drawable')
 
-class Event(Gdk.Event):
-    _UNION_MEMBERS = {
-        Gdk.EventType.DELETE: 'any',
-        Gdk.EventType.DESTROY: 'any',
-        Gdk.EventType.EXPOSE: 'expose',
-        Gdk.EventType.MOTION_NOTIFY: 'motion',
-        Gdk.EventType.BUTTON_PRESS: 'button',
-        #Gdk.EventType.2BUTTON_PRESS: 'button',
-        #Gdk.EventType.3BUTTON_PRESS: 'button',
-        Gdk.EventType.BUTTON_RELEASE: 'button',
-        Gdk.EventType.KEY_PRESS: 'key',
-        Gdk.EventType.KEY_RELEASE: 'key',
-        Gdk.EventType.ENTER_NOTIFY: 'crossing',
-        Gdk.EventType.LEAVE_NOTIFY: 'crossing',
-        Gdk.EventType.FOCUS_CHANGE: 'focus_change',
-        Gdk.EventType.CONFIGURE: 'configure',
-        Gdk.EventType.MAP: 'any',
-        Gdk.EventType.UNMAP: 'any',
-        Gdk.EventType.PROPERTY_NOTIFY: 'property',
-        Gdk.EventType.SELECTION_CLEAR: 'selection',
-        Gdk.EventType.SELECTION_REQUEST: 'selection',
-        Gdk.EventType.SELECTION_NOTIFY: 'selection',
-        Gdk.EventType.PROXIMITY_IN: 'proximity',
-        Gdk.EventType.PROXIMITY_OUT: 'proximity',
-        Gdk.EventType.DRAG_ENTER: 'dnd',
-        Gdk.EventType.DRAG_LEAVE: 'dnd',
-        Gdk.EventType.DRAG_MOTION: 'dnd',
-        Gdk.EventType.DRAG_STATUS: 'dnd',
-        Gdk.EventType.DROP_START: 'dnd',
-        Gdk.EventType.DROP_FINISHED: 'dnd',
-        Gdk.EventType.CLIENT_EVENT: 'client',
-        Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
-        Gdk.EventType.NO_EXPOSE: 'no_expose'
-    }
-
-    def __getattr__(self, name):
-        real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
-        if real_event:
-            return getattr(getattr(self, real_event), name)
-        else:
-            return getattr(self, name)
-
-Event = override(Event)
-
 
 import sys
 
