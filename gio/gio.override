@@ -330,7 +330,12 @@ _wrap_g_content_type_guess(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     char *kwlist[] = {"filename", "data", "want_uncertain", NULL};
     char *filename = NULL, *data = NULL, *type;
+#ifdef PY_SSIZE_T_CLEAN
+    Py_ssize_t data_size = 0;
+#else
     int data_size = 0;
+#endif
+
     gboolean result_uncertain, want_uncertain = FALSE;
     PyObject *ret;
 
