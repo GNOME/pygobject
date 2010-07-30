@@ -1155,7 +1155,7 @@ _wrap_g_file_append_to_async(PyGObject *self, PyObject *args, PyObject *kwargs)
                                      "O|OiOO:File.append_to_async",
                                       kwlist,
                                       &notify->callback,
-                                      &flags, &io_priority,
+                                      &py_flags, &io_priority,
                                       &pycancellable,
                                       &notify->data))
         goto error;
@@ -1203,7 +1203,7 @@ _wrap_g_file_create_async(PyGObject *self, PyObject *args, PyObject *kwargs)
                                      "O|OiOO:File.create_async",
                                       kwlist,
                                       &notify->callback,
-                                      &flags, &io_priority,
+                                      &py_flags, &io_priority,
                                       &pycancellable,
                                       &notify->data))
         goto error;
@@ -1253,7 +1253,7 @@ _wrap_g_file_create_readwrite_async(PyGObject *self,
                                      "O|OiOO:File.create_readwrite_async",
                                       kwlist,
                                       &notify->callback,
-                                      &flags, &io_priority,
+                                      &py_flags, &io_priority,
                                       &pycancellable,
                                       &notify->data))
         goto error;
@@ -1405,7 +1405,7 @@ _wrap_g_file_replace_async(PyGObject *self, PyObject *args, PyObject *kwargs)
                                       kwlist,
                                       &notify->callback,
                                       &etag, &py_backup,
-                                      &flags, &io_priority,
+                                      &py_flags, &io_priority,
                                       &pycancellable,
                                       &notify->data))
         goto error;
