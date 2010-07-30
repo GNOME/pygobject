@@ -47,6 +47,37 @@ _boxed_dealloc (PyGIBoxed *self)
     ( (PyGObject *) self)->ob_type->tp_free ( (PyObject *) self);
 }
 
+void *
+_pygi_boxed_alloc (GIBaseInfo *info, gsize *size_out)
+{
+    gsize size;
+
+    /* FIXME: Remove when bgo#622711 is fixed */
+    if (g_registered_type_info_get_g_type (info) == G_TYPE_VALUE) {
+        size = sizeof (GValue);
+    } else {
+        switch (g_base_info_get_type (info)) {
+            case GI_INFO_TYPE_UNION:
+                size = g_union_info_get_size ( (GIUnionInfo *) info);
+                break;
+            case GI_INFO_TYPE_BOXED:
+            case GI_INFO_TYPE_STRUCT:
+                size = g_struct_info_get_size ( (GIStructInfo *) info);
+                break;
+            default:
+                PyErr_Format (PyExc_TypeError,
+                              "info should be Boxed or Union, not '%d'",
+                              g_base_info_get_type (info));
+                return NULL;
+        }
+    }
+
+    if( size_out != NULL)
+        *size_out = size;
+
+    return g_slice_alloc0 (size);
+}
+
 static PyObject *
 _boxed_new (PyTypeObject *type,
             PyObject     *args,
@@ -55,7 +86,7 @@ _boxed_new (PyTypeObject *type,
     static char *kwlist[] = { NULL };
 
     GIBaseInfo *info;
-    gsize size;
+    gsize size = 0;
     gpointer boxed;
     PyGIBoxed *self = NULL;
 
@@ -71,22 +102,7 @@ _boxed_new (PyTypeObject *type,
         return NULL;
     }
 
-    switch (g_base_info_get_type (info)) {
-        case GI_INFO_TYPE_UNION:
-            size = g_union_info_get_size ( (GIUnionInfo *) info);
-            break;
-        case GI_INFO_TYPE_BOXED:
-        case GI_INFO_TYPE_STRUCT:
-            size = g_struct_info_get_size ( (GIStructInfo *) info);
-            break;
-        default:
-            PyErr_Format (PyExc_TypeError,
-                          "info should be Boxed or Union, not '%d'",
-                          g_base_info_get_type (info));
-            return NULL;
-    }
-
-    boxed = g_slice_alloc0 (size);
+    boxed = _pygi_boxed_alloc (info, &size);
     if (boxed == NULL) {
         PyErr_NoMemory();
         goto out;

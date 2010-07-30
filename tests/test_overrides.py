@@ -166,31 +166,30 @@ class TestGtk(unittest.TestCase):
         button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 
-    def test_tree_api(self):
+    class TestClass(GObject.GObject):
+        __gtype_name__ = "GIOverrideTreeAPITest"
+
+        def __init__(self, tester, int_value, string_value):
+            super(TestGtk.TestClass, self).__init__()
+            self.tester = tester
+            self.int_value = int_value
+            self.string_value = string_value
+
+        def check(self, int_value, string_value):
+            self.tester.assertEquals(int_value, self.int_value)
+            self.tester.assertEquals(string_value, self.string_value)
+
+    def test_tree_store(self):
         self.assertEquals(Gtk.TreeStore, overrides.Gtk.TreeStore)
         self.assertEquals(Gtk.ListStore, overrides.Gtk.ListStore)
         self.assertEquals(Gtk.TreeModel, overrides.Gtk.TreeModel)
         self.assertEquals(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
 
-        class TestClass(GObject.GObject):
-            __gtype_name__ = "GIOverrideTreeAPITest"
-
-            def __init__(self, tester, int_value, string_value):
-                super(TestClass, self).__init__()
-                self.tester = tester
-                self.int_value = int_value
-                self.string_value = string_value
-
-            def check(self, int_value, string_value):
-                self.tester.assertEquals(int_value, self.int_value)
-                self.tester.assertEquals(string_value, self.string_value)
-
-        # check TreeStore
-        tree_store = Gtk.TreeStore(int, 'gchararray', TestClass)
+        tree_store = Gtk.TreeStore(int, 'gchararray', TestGtk.TestClass)
         parent = None
         for i in xrange(100):
             label = 'this is child #%d' % i
-            testobj = TestClass(self, i, label)
+            testobj = TestGtk.TestClass(self, i, label)
             parent = tree_store.append(parent, (i, label, testobj))
 
         # len gets the number of children in the root node
@@ -213,11 +212,11 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(i, 99)
 
-        # check ListStore
+    def test_list_store(self):
         list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest')
         for i in xrange(100):
             label = 'this is row #%d' % i
-            testobj = TestClass(self, i, label)
+            testobj = TestGtk.TestClass(self, i, label)
             parent = list_store.append((i, label, testobj))
 
         self.assertEquals(len(list_store), 100)
@@ -235,7 +234,7 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(i, 99)
 
-        # check to see that we can instantiate a TreeViewColumn
+    def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title='This is just a test',
                                     cell_renderer=cell,

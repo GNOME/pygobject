@@ -344,19 +344,15 @@ _prepare_invocation_state (struct invocation_state *state,
                     }
 
                     if (is_caller_allocates) {
-                        gsize size;
-
                         /* if caller allocates only use one level of indirection */
                         state->out_args[out_args_pos].v_pointer = NULL;
                         state->args[i] = &state->out_args[out_args_pos];
-
-                        /* FIXME: Remove when bgo#622711 is fixed */
-                        if (g_registered_type_info_get_g_type (info) == G_TYPE_VALUE)
-                            size = sizeof (GValue);
-                        else
-                            size = g_struct_info_get_size ( (GIStructInfo *) info);
-
-                        state->args[i]->v_pointer = g_malloc0 (size);
+                        if (g_type_is_a (g_registered_type_info_get_g_type (info), G_TYPE_BOXED))
+                            state->args[i]->v_pointer = _pygi_boxed_alloc (info, NULL);
+                        else {
+                            gssize size = g_struct_info_get_size ( (GIStructInfo *) info);
+                            state->args[i]->v_pointer = g_malloc0 (size);
+                        }
                     } else {
                         state->out_args[out_args_pos].v_pointer = &state->out_values[out_args_pos];
                         state->out_values[out_args_pos].v_pointer = NULL;
