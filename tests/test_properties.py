@@ -336,6 +336,15 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
+    def testObjectSubclassProperty(self):
+        class ObjectSubclass(GObject):
+            __gtype_name__ = 'ObjectSubclass'
+
+        class PropertyObjectSubclass(GObject):
+            obj = gobject.property(type=ObjectSubclass)
+
+        obj1 = PropertyObjectSubclass(obj=ObjectSubclass())
+
     def testPropertySubclass(self):
         # test for #470718
         class A(GObject):
