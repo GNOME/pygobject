@@ -251,8 +251,6 @@ check_number_release:
         }
         case GI_TYPE_TAG_GTYPE:
         {
-            gint is_instance;
-
             if (pyg_type_from_object (object) == 0) {
                 PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
                               object->ob_type->tp_name);

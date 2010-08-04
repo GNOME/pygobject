@@ -56,7 +56,6 @@ _struct_new (PyTypeObject *type,
     static char *kwlist[] = { NULL };
 
     GIBaseInfo *info;
-    gboolean is_simple;
     gsize size;
     gpointer pointer;
     PyObject *self = NULL;

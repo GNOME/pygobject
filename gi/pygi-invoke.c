@@ -808,7 +808,7 @@ _process_invocation_state (struct invocation_state *state,
                             transfer = GI_TRANSFER_EVERYTHING;
                         } else if (transfer == GI_TRANSFER_EVERYTHING) {
                             transfer = GI_TRANSFER_NOTHING;
-                            g_warning ("Out argument %u in %s returns a struct "
+                            g_warning ("Out argument %ld in %s returns a struct "
                                        "with a transfer mode of \"full\". "
                                        "Transfer mode should be set to \"none\" for "
                                        "struct type returns as there is no way to free "
