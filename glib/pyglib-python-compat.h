@@ -41,31 +41,105 @@ typedef int Py_ssize_t;
 typedef inquiry lenfunc;
 #endif
 
+#if PY_VERSION_HEX < 0x03000000
+
+#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
+static int _pyglib_init_##modname(PyObject *module); \
+void init##modname(void) \
+{ \
+    PyObject *module = Py_InitModule(fullpkgname, functions); \
+    _pyglib_init_##modname(module); \
+} \
+static int _pyglib_init_##modname(PyObject *module)
+
+#else
+
+#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
+static struct PyModuleDef _##modname##module = {     \
+    PyModuleDef_HEAD_INIT,                              \
+    fullpkgname,                                        \
+    NULL,                                               \
+    -1,                                                 \
+    functions,                                          \
+    NULL,                                               \
+    NULL,                                               \
+    NULL,                                               \
+    NULL                                                \
+};                                                      \
+static int _pyglib_init_##modname(PyObject *module); \
+PyObject *PyInit_##modname(void) \
+{ \
+    PyObject *module = PyModule_Create(&_##modname##module);  \
+    if (module == NULL) \
+	return NULL; \
+    if (_pyglib_init_##modname(module) != 0 ) {\
+	Py_DECREF(module); \
+	return NULL; \
+    } \
+    return module; \
+} \
+static int _pyglib_init_##modname(PyObject *module)
+
+#endif
+
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
 #define RO READONLY
-#define _PyUnicode_Check PyString_Check
-#define _PyUnicode_AsString PyString_AsString
-#define _PyUnicode_AsStringAndSize PyString_AsStringAndSize
-#define _PyUnicode_FromString PyString_FromString
-#define _PyUnicode_FromStringAndSize PyString_FromStringAndSize
-#define _PyUnicode_FromFormat PyString_FromFormat
-#define _PyUnicode_AS_STRING PyString_AS_STRING
-#define _PyUnicode_GET_SIZE PyString_GET_SIZE
-#define _PyUnicode_Resize _PyString_Resize
-#define _PyUnicode_Type PyString_Type
-#define _PyLong_Check PyInt_Check
-#define _PyLong_FromLong PyInt_FromLong
-#define _PyLong_AsLong  PyInt_AsLong
-#define _PyLongObject PyIntObject
-#define _PyLong_Type PyInt_Type
-#define _PyLong_AS_LONG PyInt_AS_LONG
+#define PYGLIB_PyUnicode_Check PyString_Check
+#define PYGLIB_PyUnicode_AsString PyString_AsString
+#define PYGLIB_PyUnicode_AsStringAndSize PyString_AsStringAndSize
+#define PYGLIB_PyUnicode_FromString PyString_FromString
+#define PYGLIB_PyUnicode_FromStringAndSize PyString_FromStringAndSize
+#define PYGLIB_PyUnicode_FromFormat PyString_FromFormat
+#define PYGLIB_PyUnicode_AS_STRING PyString_AS_STRING
+#define PYGLIB_PyUnicode_GET_SIZE PyString_GET_SIZE
+#define PYGLIB_PyUnicode_Type PyString_Type
+
+#define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
+#define PYGLIB_PyBytes_Resize _PyString_Resize
+#define PYGLIB_PyBytes_AsString PyString_AsString
+#define PYGLIB_PyBytes_Size PyString_Size
+#define PYGLIB_PyBytes_Check PyString_Check
+
+#define PYGLIB_PyLong_Check PyInt_Check
+#define PYGLIB_PyLong_FromLong PyInt_FromLong
+#define PYGLIB_PyLong_AsLong  PyInt_AsLong
+#define PYGLIB_PyLongObject PyIntObject
+#define PYGLIB_PyLong_Type PyInt_Type
+#define PYGLIB_PyLong_AS_LONG PyInt_AS_LONG
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+
+#ifndef PyVarObject_HEAD_INIT
+#define PyVarObject_HEAD_INIT(base, size) \
+  PyObject_HEAD_INIT(base) \
+  size,
+#endif
+
+#define PYGLIB_MODULE_START(symbol, modname)	        \
+DL_EXPORT(void) init##symbol(void)			\
+{                                                       \
+    PyObject *module;                                   \
+    module = Py_InitModule(modname, symbol##_functions);
+#define PYGLIB_MODULE_END }
+#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
+PyTypeObject symbol = {                                 \
+    PyObject_HEAD_INIT(NULL)                            \
+    0,                                                  \
+    typename,						\
+    sizeof(csymbol),                                    \
+    0,                                                  \
+};
+#define PYGLIB_REGISTER_TYPE(d, type, name)	        \
+    if (!type.tp_alloc)                                 \
+	type.tp_alloc = PyType_GenericAlloc;            \
+    if (!type.tp_new)                                   \
+	type.tp_new = PyType_GenericNew;                \
+    if (PyType_Ready(&type))                            \
+	return;                                         \
+    PyDict_SetItemString(d, name, (PyObject *)&type);
+
 #else
-#undef PYGLIB_MODULE_START
-#undef PYGLIB_MODULE_END
-#undef PYGLIB_DEFINE_TYPE
-#undef PYGLIB_REGISTER_TYPE
+
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
@@ -99,22 +173,29 @@ PyTypeObject symbol = {                                 \
 	    return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
-#define _PyUnicode_Check PyUnicode_Check
-#define _PyUnicode_AsString PyUnicode_AsString
-#define _PyUnicode_AsStringAndSize(obj, buf, size) PyUnicode_AsStringAndSize(obj, size)
-#define _PyUnicode_FromString PyUnicode_FromString
-#define _PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
-#define _PyUnicode_FromFormat PyUnicode_FromFormat
-#define _PyUnicode_AS_STRING _PyUnicode_AsString
-#define _PyUnicode_GET_SIZE PyUnicode_GET_SIZE
-#define _PyUnicode_Resize PyUnicode_Resize
-#define _PyUnicode_Type PyUnicode_Type
-#define _PyLong_Check PyLong_Check
-#define _PyLong_FromLong PyLong_FromLong
-#define _PyLong_AsLong PyLong_AsLong
-#define _PyLong_AS_LONG PyLong_AS_LONG
-#define _PyLongObject PyLongObject
-#define _PyLong_Type PyLong_Type
+#define PYGLIB_PyUnicode_Check PyUnicode_Check
+#define PYGLIB_PyUnicode_AsString _PyUnicode_AsString
+#define PYGLIB_PyUnicode_AsStringAndSize(obj, buf, size) \
+    (((*(buf) = _PyUnicode_AsStringAndSize(obj, size)) != NULL) ? 0 : -1) 
+#define PYGLIB_PyUnicode_FromString PyUnicode_FromString
+#define PYGLIB_PyUnicode_FromStringAndSize PyUnicode_FromStringAndSize
+#define PYGLIB_PyUnicode_FromFormat PyUnicode_FromFormat
+#define PYGLIB_PyUnicode_GET_SIZE PyUnicode_GET_SIZE
+#define PYGLIB_PyUnicode_Resize PyUnicode_Resize
+#define PYGLIB_PyUnicode_Type PyUnicode_Type
+#define PYGLIB_PyLong_Check PyLong_Check
+#define PYGLIB_PyLong_FromLong PyLong_FromLong
+#define PYGLIB_PyLong_AsLong PyLong_AsLong
+#define PYGLIB_PyLong_AS_LONG(o) PyLong_AS_LONG((PyObject*)(o))
+#define PYGLIB_PyLongObject PyLongObject
+#define PYGLIB_PyLong_Type PyLong_Type
+
+#define PYGLIB_PyBytes_FromStringAndSize PyBytes_FromStringAndSize
+#define PYGLIB_PyBytes_Resize(o, len) _PyBytes_Resize(o, len)
+#define PYGLIB_PyBytes_AsString PyBytes_AsString
+#define PYGLIB_PyBytes_Size PyBytes_Size
+#define PYGLIB_PyBytes_Check PyBytes_Check
+
 #endif
 
 #endif /* __PYGLIB_PYTHON_COMPAT_H__ */

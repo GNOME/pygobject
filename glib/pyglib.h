@@ -67,20 +67,6 @@ PyObject* _pyglib_generic_long_richcompare(long a, long b, int op);
             PyEval_RestoreThread(_save);        \
     } G_STMT_END
 
-#define PYGLIB_MODULE_START(symbol, modname)	        \
-DL_EXPORT(void) init##symbol(void)			\
-{                                                       \
-    PyObject *module;                                   \
-    module = Py_InitModule(modname, symbol##_functions);
-#define PYGLIB_MODULE_END }
-#define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
-PyTypeObject symbol = {                                 \
-    PyObject_HEAD_INIT(NULL)                            \
-    0,                                                  \
-    typename,						\
-    sizeof(csymbol),                                    \
-    0,                                                  \
-};
 #define PYGLIB_REGISTER_TYPE(d, type, name)	        \
     if (!type.tp_alloc)                                 \
 	type.tp_alloc = PyType_GenericAlloc;            \

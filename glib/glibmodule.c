@@ -68,19 +68,19 @@ get_handler_priority(gint *priority, PyObject *kwargs)
     }
     pos = 0;
     PyDict_Next(kwargs, &pos, &key, &val);
-    if (!_PyUnicode_Check(key)) {
+    if (!PYGLIB_PyUnicode_Check(key)) {
 	PyErr_SetString(PyExc_TypeError,
 			"keyword argument name is not a string");
 	return -1;
     }
 
-    if (strcmp(_PyUnicode_AsString(key), "priority") != 0) {
+    if (strcmp(PYGLIB_PyUnicode_AsString(key), "priority") != 0) {
 	PyErr_SetString(PyExc_TypeError,
 			"only 'priority' keyword argument accepted");
 	return -1;
     }
 
-    *priority = _PyLong_AsLong(val);
+    *priority = PYGLIB_PyLong_AsLong(val);
     if (PyErr_Occurred()) {
 	PyErr_Clear();
 	PyErr_SetString(PyExc_ValueError, "could not get priority value");
@@ -135,7 +135,7 @@ pyglib_idle_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_idle_add_full(priority,
 				 _pyglib_handler_marshal, data,
 				 _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 
@@ -175,7 +175,7 @@ pyglib_timeout_add(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_full(priority, interval,
 				    _pyglib_handler_marshal, data,
 				    _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -214,7 +214,7 @@ pyglib_timeout_add_seconds(PyObject *self, PyObject *args, PyObject *kwargs)
     handler_id = g_timeout_add_seconds_full(priority, interval,
                                             _pyglib_handler_marshal, data,
                                             _pyglib_destroy_notify);
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static gboolean
@@ -305,7 +305,7 @@ pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
 				     (GDestroyNotify)_pyglib_destroy_notify);
     g_io_channel_unref(iochannel);
     
-    return _PyLong_FromLong(handler_id);
+    return PYGLIB_PyLong_FromLong(handler_id);
 }
 
 static PyObject *
@@ -385,7 +385,7 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
         Py_INCREF(child_data->data);
     id = g_child_watch_add_full(priority, pid, child_watch_func,
                                 child_data, child_watch_dnotify);
-    return _PyLong_FromLong(id);
+    return PYGLIB_PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -402,7 +402,7 @@ pyglib_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     text_out = g_markup_escape_text(text_in, text_size);
-    retval = _PyUnicode_FromString(text_out);
+    retval = PYGLIB_PyUnicode_FromString(text_out);
     g_free(text_out);
     return retval;
 }
@@ -422,7 +422,7 @@ pyglib_get_user_cache_dir(PyObject *self)
     const char *path = g_get_user_cache_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -435,7 +435,7 @@ pyglib_get_user_config_dir(PyObject *self)
     const char *path = g_get_user_config_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -448,7 +448,7 @@ pyglib_get_user_data_dir(PyObject *self)
     const char *path = g_get_user_data_dir();
 
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -469,7 +469,7 @@ pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
 
     path = g_get_user_special_dir(directory);
     if (path)
-        return _PyUnicode_FromString(path);
+        return PYGLIB_PyUnicode_FromString(path);
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -479,7 +479,7 @@ pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
 static PyObject *
 pyglib_main_depth(PyObject *unused)
 {
-    return _PyLong_FromLong(g_main_depth());
+    return PYGLIB_PyLong_FromLong(g_main_depth());
 }
 
 static PyObject *
@@ -535,7 +535,7 @@ pyglib_filename_from_utf8(PyObject *self, PyObject *args)
         g_free(filename);
         return NULL;
     }
-    py_filename = _PyUnicode_FromStringAndSize(filename, bytes_written);
+    py_filename = PYGLIB_PyUnicode_FromStringAndSize(filename, bytes_written);
     g_free(filename);
     return py_filename;
 }
@@ -551,19 +551,19 @@ pyglib_get_application_name(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return _PyUnicode_FromString(name);
+    return PYGLIB_PyUnicode_FromString(name);
 }
 
 static PyObject*
 pyglib_set_application_name(PyObject *self, PyObject *arg)
 {
-    if (!PyString_Check(arg)) {
+    if (!PYGLIB_PyUnicode_Check(arg)) {
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
-		     PyString_AS_STRING(PyObject_Repr(arg)));
+		     PYGLIB_PyUnicode_AsString(PyObject_Repr(arg)));
 	return NULL;
     }
-    g_set_application_name(PyString_AS_STRING(arg));
+    g_set_application_name(PYGLIB_PyUnicode_AsString(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -578,19 +578,19 @@ pyglib_get_prgname(PyObject *self)
         Py_INCREF(Py_None);
         return Py_None;
     }
-    return _PyUnicode_FromString(name);
+    return PYGLIB_PyUnicode_FromString(name);
 }
 
 static PyObject*
 pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
-    if (!PyString_Check(arg)) {
+    if (!PYGLIB_PyUnicode_Check(arg)) {
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
-		     PyString_AS_STRING(PyObject_Repr(arg)));
+		     PYGLIB_PyUnicode_AsString(PyObject_Repr(arg)));
 	return NULL;
     }
-    g_set_prgname(PyString_AS_STRING(arg));
+    g_set_prgname(PYGLIB_PyUnicode_AsString(arg));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -608,7 +608,7 @@ pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     ret = g_find_program_in_path(program);
-    retval = _PyUnicode_FromString(ret);
+    retval = PYGLIB_PyUnicode_FromString(ret);
     g_free(ret);
     return retval;
 }
