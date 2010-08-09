@@ -272,13 +272,17 @@ pyg_option_context_add_group(PyGOptionContext *self,
     return Py_None;
 }
 
-static int
-pyg_option_context_compare(PyGOptionContext *self, PyGOptionContext *context)
+static PyObject*
+pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->context == context->context) return 0;
-    if (self->context > context->context)
-        return 1;
-    return -1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGOptionContext_Type)
+        return _pyglib_generic_ptr_richcompare(((PyGOptionContext*)self)->context,
+                                               ((PyGOptionContext*)other)->context,
+                                               op);
+    else {
+       Py_INCREF(Py_NotImplemented);
+       return Py_NotImplemented;
+    }
 }
 
 static PyObject *
@@ -304,7 +308,7 @@ void
 pyglib_option_context_register_types(PyObject *d)
 {
     PyGOptionContext_Type.tp_dealloc = (destructor)pyg_option_context_dealloc;
-    PyGOptionContext_Type.tp_compare = (cmpfunc)pyg_option_context_compare;
+    PyGOptionContext_Type.tp_richcompare = pyg_option_context_richcompare;
     PyGOptionContext_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGOptionContext_Type.tp_methods = pyg_option_context_methods;
     PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;

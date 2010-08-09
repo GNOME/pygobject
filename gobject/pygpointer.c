@@ -41,12 +41,17 @@ pyg_pointer_dealloc(PyGPointer *self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int
-pyg_pointer_compare(PyGPointer *self, PyGPointer *v)
+static PyObject*
+pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->pointer == v->pointer) return 0;
-    if (self->pointer > v->pointer)  return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGPointer_Type)
+        return _pyglib_generic_ptr_richcompare(((PyGPointer*)self)->pointer,
+                                               ((PyGPointer*)other)->pointer,
+                                               op);
+    else {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
 }
 
 static long
@@ -183,7 +188,7 @@ pygobject_pointer_register_types(PyObject *d)
     pygpointer_class_key     = g_quark_from_static_string("PyGPointer::class");
 
     PyGPointer_Type.tp_dealloc = (destructor)pyg_pointer_dealloc;
-    PyGPointer_Type.tp_compare = (cmpfunc)pyg_pointer_compare;
+    PyGPointer_Type.tp_richcompare = pyg_pointer_richcompare;
     PyGPointer_Type.tp_repr = (reprfunc)pyg_pointer_repr;
     PyGPointer_Type.tp_hash = (hashfunc)pyg_pointer_hash;
     PyGPointer_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;

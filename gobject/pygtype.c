@@ -47,6 +47,20 @@ pyg_type_wrapper_compare(PyGTypeWrapper *self, PyGTypeWrapper *v)
     return 1;
 }
 
+
+static PyObject*
+pyg_type_wrapper_richcompare(PyObject *self, PyObject *other, int op)
+{
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGTypeWrapper_Type)
+        return _pyglib_generic_long_richcompare(((PyGTypeWrapper*)self)->type,
+                                                ((PyGTypeWrapper*)other)->type,
+                                                op);
+    else {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+}
+
 static long
 pyg_type_wrapper_hash(PyGTypeWrapper *self)
 {
@@ -1372,13 +1386,13 @@ gclosure_from_pyfunc(PyGObject *object, PyObject *func)
     GSList *l;
     PyGObjectData *inst_data;
     inst_data = pyg_object_peek_inst_data(object->obj);
-    if (inst_data)
-    {
+    if (inst_data) {
         for (l = inst_data->closures; l; l = l->next) {
             PyGClosure *pyclosure = l->data;
-            int res;
-            PyObject_Cmp(pyclosure->callback, func, &res);
-            if (!res) {
+            int res = PyObject_RichCompareBool(pyclosure->callback, func, Py_EQ);
+            if (res == -1) {
+                PyErr_Clear(); // Is there anything else to do?
+            } else if (res) {
                 return (GClosure*)pyclosure;
             }
         }
@@ -1759,7 +1773,7 @@ void
 pygobject_type_register_types(PyObject *d)
 {
     PyGTypeWrapper_Type.tp_dealloc = (destructor)pyg_type_wrapper_dealloc;
-    PyGTypeWrapper_Type.tp_compare = (cmpfunc)pyg_type_wrapper_compare;
+    PyGTypeWrapper_Type.tp_richcompare = pyg_type_wrapper_richcompare;
     PyGTypeWrapper_Type.tp_repr = (reprfunc)pyg_type_wrapper_repr;
     PyGTypeWrapper_Type.tp_hash = (hashfunc)pyg_type_wrapper_hash;
     PyGTypeWrapper_Type.tp_flags = Py_TPFLAGS_DEFAULT;
