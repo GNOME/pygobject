@@ -731,11 +731,20 @@ _pygi_argument_from_object (PyObject   *object,
                 arg.v_string = NULL;
                 break;
             }
+#if PY_VERSION_HEX < 0x03000000
+            string = g_strdup(PyString_AsString (object));
+#else
+            {
+                PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
+                if (!pybytes_obj)
+                    break;
 
-            string = PyString_AsString (object);
+                string = g_strdup(PyBytes_AsString (pybytes_obj));
+                Py_DECREF (pybytes_obj);
+            }
+#endif
+            arg.v_string = string;
 
-            /* Don't need to check for errors, since g_strdup is NULL-proof. */
-            arg.v_string = g_strdup (string);
             break;
         }
         case GI_TYPE_TAG_FILENAME:
@@ -743,12 +752,26 @@ _pygi_argument_from_object (PyObject   *object,
             GError *error = NULL;
             const gchar *string;
 
-            string = PyString_AsString (object);
+#if PY_VERSION_HEX < 0x03000000
+            string = g_strdup(PyString_AsString (object));
+#else
+            {
+                PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
+                if (!pybytes_obj)
+                    break;
+
+                string = g_strdup(PyBytes_AsString (pybytes_obj));
+                Py_DECREF (pybytes_obj);
+            }
+#endif
+
             if (string == NULL) {
                 break;
             }
 
             arg.v_string = g_filename_from_utf8 (string, -1, NULL, NULL, &error);
+            g_free(string);
+
             if (arg.v_string == NULL) {
                 PyErr_SetString (PyExc_Exception, error->message);
                 /* TODO: Convert the error to an exception. */
