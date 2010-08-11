@@ -206,16 +206,16 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         }
 	
 	if ( ret_obj == NULL ) {
-	    ret_obj = PYGLIB_PyUnicode_FromStringAndSize((char *)NULL, buf_size);
+	    ret_obj = PYGLIB_PyBytes_FromStringAndSize((char *)NULL, buf_size);
 	    if (ret_obj == NULL)
 		goto failure;
 	}
-	else if (buf_size + total_read > PYGLIB_PyUnicode_GET_SIZE(ret_obj)) {
-	    if (PYGLIB_PyUnicode_Resize(&ret_obj, buf_size + total_read) == -1)
+	else if (buf_size + total_read > PYGLIB_PyBytes_Size(ret_obj)) {
+	    if (PYGLIB_PyBytes_Resize(&ret_obj, buf_size + total_read) == -1)
 		goto failure;
 	}
        
-        buf = PYGLIB_PyUnicode_AsString(ret_obj) + total_read;
+        buf = PYGLIB_PyBytes_AsString(ret_obj) + total_read;
 
         pyglib_unblock_threads();
         status = g_io_channel_read_chars(self->channel, buf, buf_size, 
@@ -227,10 +227,28 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	total_read += single_read;
     }
 	
-    if ( total_read != PYGLIB_PyUnicode_GET_SIZE(ret_obj) ) {
-	if (PYGLIB_PyUnicode_Resize(&ret_obj, total_read) == -1)
+    if ( total_read != PYGLIB_PyBytes_Size(ret_obj) ) {
+	if (PYGLIB_PyBytes_Resize(&ret_obj, total_read) == -1)
 	    goto failure;
     }
+
+#if PY_VERSION_HEX >= 0x03000000
+    /* If this is not UTF8 encoded channel return the raw bytes */
+    if (g_io_channel_get_encoding(self->channel) != NULL)
+        return ret_obj;
+
+    /* convert to Unicode string */
+    {
+	PyObject *unicode_obj;
+
+	unicode_obj = PyUnicode_FromString(PyBytes_AS_STRING(ret_obj));
+	if (unicode_obj == NULL)
+	    goto failure;
+	Py_DECREF(ret_obj);
+	ret_obj = unicode_obj;
+    }
+#endif
+
     return ret_obj;
 
   failure:
