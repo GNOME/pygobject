@@ -938,12 +938,17 @@ _free_invocation_state (struct invocation_state *state)
     for (i = 0; i < state->n_args; i++) {
 
         /* check for caller-allocated values we need to free */
-        if (g_arg_info_is_caller_allocates (state->arg_infos[i])) {
+        if (state->args != NULL
+            && state->args[i] != NULL
+            && state->arg_infos[i] != NULL
+            && state->arg_type_infos[i] != NULL
+            && g_arg_info_is_caller_allocates (state->arg_infos[i])) {
             GIBaseInfo *info;
             GIInfoType info_type;
 
             info = g_type_info_get_interface (state->arg_type_infos[i]);
             g_assert (info != NULL);
+
             info_type = g_base_info_get_type (info);
 
             /* caller-allocates applies only to structs right now
@@ -959,6 +964,8 @@ _free_invocation_state (struct invocation_state *state)
                     g_free (state->args[i]);
                 }
             }
+
+            g_base_info_unref (info);
         }
 
         if (state->arg_type_infos[i] != NULL)
