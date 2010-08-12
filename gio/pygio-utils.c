@@ -22,6 +22,7 @@
  */
 
 #include "pygio-utils.h"
+#include <pyglib-python-compat.h>
 
 /**
  * pygio_check_cancellable:
@@ -115,14 +116,28 @@ pygio_pylist_to_uri_glist(PyObject *pyfile_list)
 
     len = PySequence_Size(pyfile_list);
     for (i = 0; i < len; i++) {
-    item = PySequence_GetItem(pyfile_list, i);
-        if (!PyString_Check(item)) {
+        item = PySequence_GetItem(pyfile_list, i);
+        if (!PYGLIB_PyUnicode_Check(item)) {
             PyErr_SetString(PyExc_TypeError,
                             "files must be strings");
             g_list_free(file_list);
             return NULL;
         }
-        file_list = g_list_prepend(file_list, PyString_AsString(item));
+
+#if PY_VERSION_HEX < 0x03000000
+        file_list = g_list_prepend(file_list, g_strdup(PyString_AsString(item)));
+#else
+	{
+            PyObject *utf8_bytes_obj = PyUnicode_AsUTF8String (item);
+            if (!utf8_bytes_obj) {
+                g_list_free(file_list);
+                return NULL;
+            }
+            file_list = g_list_prepend(file_list, g_strdup(PyBytes_AsString(utf8_bytes_obj)));
+            Py_DECREF (utf8_bytes_obj);
+        }
+#endif
+
     }
     file_list = g_list_reverse(file_list);
 
@@ -144,9 +159,9 @@ strv_to_pylist (char **strv)
     len = strv ? g_strv_length (strv) : 0;
     list = PyList_New (len);
 
-    for (i = 0; i < len; i++)
-        PyList_SetItem (list, i, PyString_FromString (strv[i]));
-
+    for (i = 0; i < len; i++) {
+        PyList_SetItem (list, i, PYGLIB_PyUnicode_FromString (strv[i]));
+    }
     return list;
 }
 
@@ -191,7 +206,7 @@ pylist_to_strv (PyObject *list,
             return FALSE;
         }
 
-        if (!PyString_Check (item))
+        if (!PYGLIB_PyUnicode_Check (item))
         {
             Py_DECREF (item);
             g_strfreev (ret);
@@ -199,7 +214,20 @@ pylist_to_strv (PyObject *list,
             return FALSE;
         }
 
+#if PY_VERSION_HEX < 0x03000000
         ret[i] = g_strdup (PyString_AsString (item));
+#else
+	{
+            PyObject *utf8_bytes_obj = PyUnicode_AsUTF8String (item);
+            if (!utf8_bytes_obj) {
+                Py_DECREF (item);
+                g_strfreev (ret);
+                return FALSE;
+            }
+            ret[i] = g_strdup (PyBytes_AsString(utf8_bytes_obj));
+            Py_DECREF (utf8_bytes_obj);
+        }
+#endif
         Py_DECREF (item);
     }
 
