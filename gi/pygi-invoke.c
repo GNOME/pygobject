@@ -967,20 +967,12 @@ _free_invocation_state (struct invocation_state *state)
             g_base_info_unref ( (GIBaseInfo *) state->arg_infos[i]);
     }
 
-    if (state->arg_infos != NULL) {
-        g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_infos);
-    }
-
-    if (state->arg_type_infos != NULL) {
-        g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_type_infos);
-    }
+    g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_infos);
+    g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_type_infos);
+    g_slice_free1 (sizeof (gboolean) * state->n_args, state->args_is_auxiliary);
 
     if (state->args != NULL) {
         g_slice_free1 (sizeof (gpointer) * state->n_args, state->args);
-    }
-
-    if (state->args_is_auxiliary != NULL) {
-        g_slice_free1 (sizeof (gboolean) * state->n_args, state->args_is_auxiliary);
     }
 
     if (state->in_args != NULL) {
