@@ -359,7 +359,7 @@ pyglib_gerror_exception_check(GError **error)
     }
 
     g_set_error(error, g_quark_from_string(_PyUnicode_AsString(py_domain)),
-                _PyLong_AsLong(py_code), _PyUnicode_AsString(py_message));
+                _PyLong_AsLong(py_code), "%s", _PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);
@@ -368,7 +368,7 @@ pyglib_gerror_exception_check(GError **error)
 
 bad_gerror:
     Py_DECREF(value);
-    g_set_error(error, g_quark_from_static_string("pyglib"), 0, bad_gerror_message);
+    g_set_error(error, g_quark_from_static_string("pyglib"), 0, "%s", bad_gerror_message);
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;

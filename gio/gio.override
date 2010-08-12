@@ -141,7 +141,7 @@ pygio_notify_allocate_buffer(PyGIONotify *notify, gsize buffer_size)
     if (buffer_size > 0) {
         notify->buffer = g_slice_alloc(buffer_size);
         if (!notify->buffer) {
-            PyErr_Format(PyExc_MemoryError, "failed to allocate %d bytes", buffer_size);
+            PyErr_Format(PyExc_MemoryError, "failed to allocate %" G_GSIZE_FORMAT " bytes", buffer_size);
             return FALSE;
         }
 
