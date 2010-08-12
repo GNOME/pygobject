@@ -204,6 +204,11 @@ if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
+AC_ARG_ENABLE(cairo,
+    AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
+    enable_cairo=$enableval,
+    enable_cairo=yes)
+
 AC_ARG_ENABLE(introspection,
   AC_HELP_STRING([--enable-introspection], [Use introspection information]),
   enable_introspection=$enableval,
@@ -214,11 +219,15 @@ if test "$enable_introspection" != no; then
         glib-2.0 >= glib_required_version
         gobject-introspection-1.0 >= introspection_required_version
     )
-    PKG_CHECK_MODULES(PYCAIRO,
-        pycairo >= pycairo_required_version
-    )
+
+    if test "$enable_cairo" != no; then
+        PKG_CHECK_MODULES(PYCAIRO,
+            pycairo >= pycairo_required_version
+        )
+    fi
 fi
 AM_CONDITIONAL(ENABLE_INTROSPECTION, test "$enable_introspection" = "yes")
+AM_CONDITIONAL(ENABLE_CAIRO, test "$enable_cairo" = "yes")
 
 INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
 INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0`

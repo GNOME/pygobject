@@ -68,18 +68,22 @@ _gi_cairo_la_LIBADD = \
 	$(PYCAIRO_LIBS)
 _gi_cairo_la_SOURCES = pygi-foreign-cairo.c
 
-pygi_LTLIBRARIES = _gi.la _gi_cairo.la
+
+pygi_LTLIBRARIES = _gi.la
+
+if ENABLE_CAIRO
+pygi_LTLIBRARIES += _gi_cairo.la
+endif
+
 
 # This is to ensure we have a symlink to the .so in the
 # build directory, which the Python interpreter can load
 # directly without having to know how to parse .la files.
-_gi.so: _gi.la
-	rm -f $@ && $(LN_S) .libs/$@ $@
-_gi_cairo.so: _gi_cairo.la
-	rm -f $@ && $(LN_S) .libs/$@ $@
+.la.so:
+	test -L $@ || $(LN_S) .libs/$@ $@
 
-all-local: _gi.so _gi_cairo.so
-check-local: _gi.so _gi_cairo.so
+all-local: $(LTLIBRARIES:.la=.so)
+check-local: $(LTLIBRARIES:.la=.so)
 clean-local:
-	rm -f _gi.so _gi_cairo.so
+	rm -f $(LTLIBRARIES:.la=.so)
 
