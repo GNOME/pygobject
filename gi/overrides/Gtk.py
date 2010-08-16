@@ -405,6 +405,19 @@ class TreeViewColumn(Gtk.TreeViewColumn):
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
+class Button(Gtk.Button):
+    def __init__(self, label=None, stock=None, use_underline=False):
+        if stock:
+            label = stock
+            use_stock = True
+            use_underline = True
+        else:
+            use_stock = False
+        Gtk.Button.__init__(self, label=label, use_stock=use_stock,
+                            use_underline=use_underline)
+Button = override(Button)
+__all__.append('Button')
+
 import sys
 
 initialized, argv = Gtk.init_check(sys.argv)
