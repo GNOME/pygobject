@@ -22,6 +22,7 @@
 #ifndef __PYGI_H__
 #define __PYGI_H__
 
+#define NO_IMPORT_PYGOBJECT
 #include <config.h>
 #include <pygobject.h>
 
