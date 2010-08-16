@@ -263,3 +263,13 @@ class TestGtk(unittest.TestCase):
         text = buffer.get_text(start, end, False)
 
         self.assertEquals(text, 'Hello Jane Hello Bob')
+
+    def test_buttons(self):
+        self.assertEquals(Gtk.Button, overrides.Gtk.Button)
+
+        # test Gtk.Button
+        button = Gtk.Button()
+        button = Gtk.Button(stock=Gtk.STOCK_CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertTrue(button.get_use_stock())
+        self.assertTrue(button.get_use_underline())
