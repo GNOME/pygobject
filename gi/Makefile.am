@@ -7,7 +7,7 @@ SUBDIRS = \
 	repository \
 	overrides
 
-INCLUDES = -I$(top_srcdir)/gobject
+INCLUDES = -I$(top_srcdir)/gobject -I$(top_srcdir)/glib
 
 pygidir = $(pkgpyexecdir)/gi
 pygi_PYTHON = \

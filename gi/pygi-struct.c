@@ -25,6 +25,7 @@
 
 #include <pygobject.h>
 #include <girepository.h>
+#include <pyglib-python-compat.h>
 
 static void
 _struct_dealloc (PyGIStruct *self)

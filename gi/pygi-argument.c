@@ -28,7 +28,7 @@
 
 #include <datetime.h>
 #include <pygobject.h>
-
+#include <pyglib-python-compat.h>
 
 static void
 _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
@@ -37,29 +37,29 @@ _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
 {
     switch (type_tag) {
         case GI_TYPE_TAG_INT8:
-            *lower = PyInt_FromLong (-128);
-            *upper = PyInt_FromLong (127);
+            *lower = PYGLIB_PyLong_FromLong (-128);
+            *upper = PYGLIB_PyLong_FromLong (127);
             break;
         case GI_TYPE_TAG_UINT8:
-            *upper = PyInt_FromLong (255);
-            *lower = PyInt_FromLong (0);
+            *upper = PYGLIB_PyLong_FromLong (255);
+            *lower = PYGLIB_PyLong_FromLong (0);
             break;
         case GI_TYPE_TAG_INT16:
-            *lower = PyInt_FromLong (-32768);
-            *upper = PyInt_FromLong (32767);
+            *lower = PYGLIB_PyLong_FromLong (-32768);
+            *upper = PYGLIB_PyLong_FromLong (32767);
             break;
         case GI_TYPE_TAG_UINT16:
-            *upper = PyInt_FromLong (65535);
-            *lower = PyInt_FromLong (0);
+            *upper = PYGLIB_PyLong_FromLong (65535);
+            *lower = PYGLIB_PyLong_FromLong (0);
             break;
         case GI_TYPE_TAG_INT32:
-            *lower = PyInt_FromLong (G_MININT32);
-            *upper = PyInt_FromLong (G_MAXINT32);
+            *lower = PYGLIB_PyLong_FromLong (G_MININT32);
+            *upper = PYGLIB_PyLong_FromLong (G_MAXINT32);
             break;
         case GI_TYPE_TAG_UINT32:
             /* Note: On 32-bit archs, this number doesn't fit in a long. */
             *upper = PyLong_FromLongLong (G_MAXUINT32);
-            *lower = PyInt_FromLong (0);
+            *lower = PYGLIB_PyLong_FromLong (0);
             break;
         case GI_TYPE_TAG_INT64:
             /* Note: On 32-bit archs, these numbers don't fit in a long. */
@@ -68,7 +68,7 @@ _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
             break;
         case GI_TYPE_TAG_UINT64:
             *upper = PyLong_FromUnsignedLongLong (G_MAXUINT64);
-            *lower = PyInt_FromLong (0);
+            *lower = PYGLIB_PyLong_FromLong (0);
             break;
         case GI_TYPE_TAG_FLOAT:
             *upper = PyFloat_FromDouble (G_MAXFLOAT);
@@ -204,7 +204,7 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
             if (type_tag == GI_TYPE_TAG_FLOAT || type_tag == GI_TYPE_TAG_DOUBLE) {
                 number = PyNumber_Float (object);
             } else {
-                number = PyNumber_Int (object);
+                number = PYGLIB_PyNumber_Long (object);
             }
 
             _pygi_g_type_tag_py_bounds (type_tag, &lower, &upper);
@@ -215,8 +215,8 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
             }
 
             /* Check bounds */
-            if (PyObject_Compare (lower, number) > 0
-                    || PyObject_Compare (upper, number) < 0) {
+            if (PyObject_RichCompareBool (lower, number, Py_GT)
+                    || PyObject_RichCompareBool (upper, number, Py_LT)) {
                 PyObject *lower_str;
                 PyObject *upper_str;
 
@@ -232,10 +232,30 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                     goto check_number_error_release;
                 }
 
+#if PY_VERSION_HEX < 0x03000000
                 PyErr_Format (PyExc_ValueError, "Must range from %s to %s",
                               PyString_AS_STRING (lower_str),
                               PyString_AS_STRING (upper_str));
+#else
+                {
+                    PyObject *lower_pybytes_obj = PyUnicode_AsUTF8String (lower_str);
+                    if (!lower_pybytes_obj)
+                        goto utf8_fail;
 
+                    PyObject *upper_pybytes_obj = PyUnicode_AsUTF8String (upper_str);                    
+                    if (!upper_pybytes_obj) {
+                        Py_DECREF(lower_pybytes_obj);
+                        goto utf8_fail;
+                    }
+
+                    PyErr_Format (PyExc_ValueError, "Must range from %s to %s",
+                                  PyBytes_AsString (lower_pybytes_obj),
+                                  PyBytes_AsString (upper_pybytes_obj));
+                    Py_DECREF (lower_pybytes_obj);
+                    Py_DECREF (upper_pybytes_obj);
+                }
+utf8_fail:
+#endif
                 retval = 0;
 
 check_number_error_release:
@@ -260,7 +280,7 @@ check_number_release:
         }
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            if (!PyString_Check (object)) {
+            if (!PYGLIB_PyUnicode_Check (object)) {
                 PyErr_Format (PyExc_TypeError, "Must be string, not %s",
                               object->ob_type->tp_name);
                 retval = 0;
@@ -344,11 +364,11 @@ check_number_release:
                 case GI_INFO_TYPE_ENUM:
                     retval = 0;
                     if (PyNumber_Check (object)) {
-                        PyObject *number = PyNumber_Int (object);
+                        PyObject *number = PYGLIB_PyNumber_Long (object);
                         if (number == NULL)
                             PyErr_Clear();
                         else {
-                            glong value = PyInt_AsLong (number);
+                            glong value = PYGLIB_PyLong_AsLong (number);
                             int i;
                             for (i = 0; i < g_enum_info_get_n_values (info); i++) {
                                 GIValueInfo *value_info = g_enum_info_get_value (info, i);
@@ -367,11 +387,11 @@ check_number_release:
                 case GI_INFO_TYPE_FLAGS:
                     if (PyNumber_Check (object)) {
                         /* Accept 0 as a valid flag value */
-                        PyObject *number = PyNumber_Int (object);
+                        PyObject *number = PYGLIB_PyNumber_Long (object);
                         if (number == NULL)
                             PyErr_Clear();
                         else {
-                            long value = PyInt_AsLong (number);
+                            long value = PYGLIB_PyLong_AsLong (number);
                             if (value == 0)
                                 break;
                             else if (value == -1)
@@ -633,12 +653,12 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *int_;
 
-            int_ = PyNumber_Int (object);
+            int_ = PYGLIB_PyNumber_Long (object);
             if (int_ == NULL) {
                 break;
             }
 
-            arg.v_long = PyInt_AsLong (int_);
+            arg.v_long = PYGLIB_PyLong_AsLong (int_);
 
             Py_DECREF (int_);
 
@@ -650,13 +670,13 @@ _pygi_argument_from_object (PyObject   *object,
             PyObject *number;
             guint64 value;
 
-            number = PyNumber_Int (object);
+            number = PYGLIB_PyNumber_Long (object);
             if (number == NULL) {
                 break;
             }
 
-            if (PyInt_Check (number)) {
-                value = PyInt_AS_LONG (number);
+            if (PYGLIB_PyLong_Check (number)) {
+                value = PYGLIB_PyLong_AS_LONG (number);
             } else {
                 value = PyLong_AsUnsignedLongLong (number);
             }
@@ -672,13 +692,13 @@ _pygi_argument_from_object (PyObject   *object,
             PyObject *number;
             gint64 value;
 
-            number = PyNumber_Int (object);
+            number = PYGLIB_PyNumber_Long (object);
             if (number == NULL) {
                 break;
             }
 
-            if (PyInt_Check (number)) {
-                value = PyInt_AS_LONG (number);
+            if (PYGLIB_PyLong_Check (number)) {
+                value = PYGLIB_PyLong_AS_LONG (number);
             } else {
                 value = PyLong_AsLongLong (number);
             }
@@ -934,12 +954,12 @@ array_item_error:
                 {
                     PyObject *int_;
 
-                    int_ = PyNumber_Int (object);
+                    int_ = PYGLIB_PyNumber_Long (object);
                     if (int_ == NULL) {
                         break;
                     }
 
-                    arg.v_long = PyInt_AsLong (int_);
+                    arg.v_long = PYGLIB_PyLong_AsLong (int_);
 
                     Py_DECREF (int_);
 
@@ -1169,27 +1189,27 @@ _pygi_argument_to_object (GArgument  *arg,
         }
         case GI_TYPE_TAG_INT8:
         {
-            object = PyInt_FromLong (arg->v_int8);
+            object = PYGLIB_PyLong_FromLong (arg->v_int8);
             break;
         }
         case GI_TYPE_TAG_UINT8:
         {
-            object = PyInt_FromLong (arg->v_uint8);
+            object = PYGLIB_PyLong_FromLong (arg->v_uint8);
             break;
         }
         case GI_TYPE_TAG_INT16:
         {
-            object = PyInt_FromLong (arg->v_int16);
+            object = PYGLIB_PyLong_FromLong (arg->v_int16);
             break;
         }
         case GI_TYPE_TAG_UINT16:
         {
-            object = PyInt_FromLong (arg->v_uint16);
+            object = PYGLIB_PyLong_FromLong (arg->v_uint16);
             break;
         }
         case GI_TYPE_TAG_INT32:
         {
-            object = PyInt_FromLong (arg->v_int32);
+            object = PYGLIB_PyLong_FromLong (arg->v_int32);
             break;
         }
         case GI_TYPE_TAG_UINT32:
@@ -1229,7 +1249,7 @@ _pygi_argument_to_object (GArgument  *arg,
                 break;
             }
 
-            object = PyString_FromString (arg->v_string);
+            object = PYGLIB_PyUnicode_FromString (arg->v_string);
             break;
         case GI_TYPE_TAG_FILENAME:
         {
@@ -1249,7 +1269,7 @@ _pygi_argument_to_object (GArgument  *arg,
                 break;
             }
 
-            object = PyString_FromString (string);
+            object = PYGLIB_PyUnicode_FromString (string);
 
             g_free (string);
 

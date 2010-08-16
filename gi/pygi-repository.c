@@ -23,6 +23,8 @@
 
 #include "pygi-private.h"
 
+#include <pyglib-python-compat.h>
+
 PyObject *PyGIRepositoryError;
 
 static PyMethodDef _PyGIRepository_methods[];
@@ -78,7 +80,7 @@ _wrap_g_irepository_enumerate_versions (PyGIRepository *self,
     ret = PyList_New(0);
     for (item = versions; item; item = item->next) {
         char *version = item->data;
-        PyObject *py_version = PyString_FromString (version);
+        PyObject *py_version = PYGLIB_PyUnicode_FromString (version);
         PyList_Append(ret, py_version);
         Py_DECREF(py_version);
         g_free (version);
@@ -236,7 +238,7 @@ _wrap_g_irepository_get_typelib_path (PyGIRepository *self,
         return NULL;
     }
 
-    return PyString_FromString (typelib_path);
+    return PYGLIB_PyBytes_FromString (typelib_path);
 }
 
 static PyObject *
@@ -259,7 +261,7 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
         return NULL;
     }
 
-    return PyString_FromString (version);
+    return PYGLIB_PyUnicode_FromString (version);
 }
 
 static PyMethodDef _PyGIRepository_methods[] = {

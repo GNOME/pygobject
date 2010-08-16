@@ -24,6 +24,7 @@
 #include "pygi-private.h"
 
 #include <pygobject.h>
+#include <pyglib-python-compat.h>
 
 #define _PyGI_DEFINE_INFO_TYPE(name, cname, base) \
 static PyMethodDef _Py##cname##_methods[]; \
@@ -88,8 +89,10 @@ _base_info_traverse (PyGIBaseInfo *self,
 static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
-    return PyString_FromFormat ("<%s object (%s) at 0x%p>",
-                                self->ob_type->tp_name, g_base_info_get_name (self->info), (void *) self);
+    return PYGLIB_PyUnicode_FromFormat ("<%s object (%s) at 0x%p>",
+                                        self->ob_type->tp_name, 
+                                        g_base_info_get_name (self->info), 
+                                        (void *) self);
 }
 
 static PyMethodDef _PyGIBaseInfo_methods[];
@@ -130,13 +133,13 @@ PyTypeObject PyGIBaseInfo_Type = {
 static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
-    return PyString_FromString (g_base_info_get_name (self->info));
+    return PYGLIB_PyUnicode_FromString (g_base_info_get_name (self->info));
 }
 
 static PyObject *
 _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return PyString_FromString (g_base_info_get_namespace (self->info));
+    return PYGLIB_PyUnicode_FromString (g_base_info_get_namespace (self->info));
 }
 
 static PyObject *
@@ -1066,7 +1069,7 @@ _wrap_g_value_info_get_value (PyGIBaseInfo *self)
 
     value = g_value_info_get_value ( (GIValueInfo *) self->info);
 
-    return PyInt_FromLong (value);
+    return PYGLIB_PyLong_FromLong (value);
 }
 
 
