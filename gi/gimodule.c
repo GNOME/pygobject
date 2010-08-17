@@ -195,12 +195,17 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
         field_info = g_struct_info_get_field (struct_info, i);
 
         if (strcmp (g_base_info_get_name ( (GIBaseInfo*) field_info),
-                    g_base_info_get_name ( (GIBaseInfo*) vfunc_info)) != 0)
+                    g_base_info_get_name ( (GIBaseInfo*) vfunc_info)) != 0) {
+            g_base_info_unref (field_info);
             continue;
+        }
 
         type_info = g_field_info_get_type (field_info);
-        if (g_type_info_get_tag (type_info) != GI_TYPE_TAG_INTERFACE)
+        if (g_type_info_get_tag (type_info) != GI_TYPE_TAG_INTERFACE) {
+            g_base_info_unref (type_info);
+            g_base_info_unref (field_info);
             continue;
+        }
 
         interface_info = g_type_info_get_interface (type_info);
         g_assert (g_base_info_get_type (interface_info) == GI_INFO_TYPE_CALLBACK);
