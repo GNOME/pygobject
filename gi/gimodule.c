@@ -25,6 +25,7 @@
 #include "pygi.h"
 
 #include <pygobject.h>
+#include <pyglib-python-compat.h>
 
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
@@ -234,7 +235,7 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-static PyMethodDef _pygi_functions[] = {
+static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
 
@@ -251,16 +252,9 @@ static struct PyGI_API CAPI = {
   pygi_register_foreign_struct_real,
 };
 
-PyMODINIT_FUNC
-init_gi (void)
+PYGLIB_MODULE_START(_gi, "_gi")
 {
-    PyObject *m;
     PyObject *api;
-
-    m = Py_InitModule ("_gi", _pygi_functions);
-    if (m == NULL) {
-        return;
-    }
 
     if (pygobject_init (-1, -1, -1) == NULL) {
         return;
@@ -270,16 +264,16 @@ init_gi (void)
         return;
     }
 
-    _pygi_repository_register_types (m);
-    _pygi_info_register_types (m);
-    _pygi_struct_register_types (m);
-    _pygi_boxed_register_types (m);
+    _pygi_repository_register_types (module);
+    _pygi_info_register_types (module);
+    _pygi_struct_register_types (module);
+    _pygi_boxed_register_types (module);
     _pygi_argument_init();
 
     api = PyCObject_FromVoidPtr ( (void *) &CAPI, NULL);
     if (api == NULL) {
         return;
     }
-    PyModule_AddObject (m, "_API", api);
+    PyModule_AddObject (module, "_API", api);
 }
-
+PYGLIB_MODULE_END
