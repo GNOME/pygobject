@@ -26,44 +26,6 @@
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
-#define _PyGI_DEFINE_INFO_TYPE(name, cname, base) \
-static PyMethodDef _Py##cname##_methods[]; \
-PyTypeObject Py##cname##_Type = { \
-    PyObject_HEAD_INIT(NULL) \
-    0, \
-    "gi." name,                               /* tp_name */ \
-    sizeof(PyGIBaseInfo),                     /* tp_basicsize */ \
-    0,                                        /* tp_itemsize */ \
-    (destructor)NULL,                         /* tp_dealloc */ \
-    (printfunc)NULL,                          /* tp_print */ \
-    (getattrfunc)NULL,                        /* tp_getattr */ \
-    (setattrfunc)NULL,                        /* tp_setattr */ \
-    (cmpfunc)NULL,                            /* tp_compare */ \
-    (reprfunc)NULL,                           /* tp_repr */ \
-    NULL,                                     /* tp_as_number */ \
-    NULL,                                     /* tp_as_sequence */ \
-    NULL,                                     /* tp_as_mapping */ \
-    (hashfunc)NULL,                           /* tp_hash */ \
-    (ternaryfunc)NULL,                        /* tp_call */ \
-    (reprfunc)NULL,                           /* tp_str */ \
-    (getattrofunc)NULL,                       /* tp_getattro */ \
-    (setattrofunc)NULL,                       /* tp_setattro */ \
-    NULL,                                     /* tp_as_buffer */ \
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */ \
-    NULL,                                     /* tp_doc */ \
-    (traverseproc)NULL,                       /* tp_traverse */ \
-    (inquiry)NULL,                            /* tp_clear */ \
-    (richcmpfunc)NULL,                        /* tp_richcompare */ \
-    offsetof(PyGIBaseInfo, inst_weakreflist), /* tp_weaklistoffset */ \
-    (getiterfunc)NULL,                        /* tp_iter */ \
-    (iternextfunc)NULL,                       /* tp_iternext */ \
-    _Py##cname##_methods,                     /* tp_methods */ \
-    NULL,                                     /* tp_members */ \
-    NULL,                                     /* tp_getset */ \
-    &base                                     /* tp_base */ \
-}
-
-
 /* BaseInfo */
 
 static void
@@ -75,7 +37,7 @@ _base_info_dealloc (PyGIBaseInfo *self)
 
     g_base_info_unref (self->info);
 
-    self->ob_type->tp_free ( (PyObject *) self);
+    Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
 }
 
 static int
@@ -90,45 +52,14 @@ static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
     return PYGLIB_PyUnicode_FromFormat ("<%s object (%s) at 0x%p>",
-                                        self->ob_type->tp_name, 
+                                        Py_TYPE( (PyObject *) self)->tp_name, 
                                         g_base_info_get_name (self->info), 
                                         (void *) self);
 }
 
 static PyMethodDef _PyGIBaseInfo_methods[];
 
-PyTypeObject PyGIBaseInfo_Type = {
-    PyObject_HEAD_INIT (NULL)
-    0,
-    "gi.BaseInfo",                             /* tp_name */
-    sizeof (PyGIBaseInfo),                     /* tp_basicsize */
-    0,                                         /* tp_itemsize */
-    (destructor) _base_info_dealloc,       /* tp_dealloc */
-    (printfunc) NULL,                          /* tp_print */
-    (getattrfunc) NULL,                        /* tp_getattr */
-    (setattrfunc) NULL,                        /* tp_setattr */
-    (cmpfunc) NULL,                            /* tp_compare */
-    (reprfunc) _base_info_repr,            /* tp_repr */
-    NULL,                                      /* tp_as_number */
-    NULL,                                      /* tp_as_sequence */
-    NULL,                                      /* tp_as_mapping */
-    (hashfunc) NULL,                           /* tp_hash */
-    (ternaryfunc) NULL,                        /* tp_call */
-    (reprfunc) NULL,                           /* tp_str */
-    (getattrofunc) NULL,                       /* tp_getattro */
-    (setattrofunc) NULL,                       /* tp_setattro */
-    NULL,                                      /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-    Py_TPFLAGS_HAVE_GC,                    /* tp_flags */
-    NULL,                                      /* tp_doc */
-    (traverseproc) _base_info_traverse,    /* tp_traverse */
-    (inquiry) NULL,                            /* tp_clear */
-    (richcmpfunc) NULL,                        /* tp_richcompare */
-    offsetof (PyGIBaseInfo, inst_weakreflist), /* tp_weaklistoffset */
-    (getiterfunc) NULL,                        /* tp_iter */
-    (iternextfunc) NULL,                       /* tp_iternext */
-    _PyGIBaseInfo_methods,                     /* tp_methods */
-};
+PYGLIB_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
@@ -258,7 +189,7 @@ _pygi_object_get_gi_info (PyObject     *object,
     }
     if (!PyObject_TypeCheck (py_info, type)) {
         PyErr_Format (PyExc_TypeError, "attribute '__info__' must be %s, not %s",
-                      type->tp_name, py_info->ob_type->tp_name);
+                      type->tp_name, Py_TYPE(&py_info)->tp_name);
         goto out;
     }
 
@@ -273,7 +204,7 @@ out:
 
 
 /* CallableInfo */
-_PyGI_DEFINE_INFO_TYPE ("CallableInfo", GICallableInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGICallableInfo_methods[] = {
     { NULL, NULL, 0 }
@@ -281,7 +212,7 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
 
 
 /* FunctionInfo */
-_PyGI_DEFINE_INFO_TYPE ("FunctionInfo", GIFunctionInfo, PyGICallableInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.FunctionInfo", PyGIFunctionInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_function_info_is_constructor (PyGIBaseInfo *self)
@@ -470,7 +401,7 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
 
 
 /* RegisteredTypeInfo */
-_PyGI_DEFINE_INFO_TYPE ("RegisteredTypeInfo", GIRegisteredTypeInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_registered_type_info_get_g_type (PyGIBaseInfo *self)
@@ -489,7 +420,7 @@ static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
 
 
 /* GIStructInfo */
-_PyGI_DEFINE_INFO_TYPE ("StructInfo", GIStructInfo, PyGIRegisteredTypeInfo_Type);
+PYGLIB_DEFINE_TYPE ("StructInfo", PyGIStructInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _get_fields (PyGIBaseInfo *self, GIInfoType info_type)
@@ -835,7 +766,7 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
 
 
 /* EnumInfo */
-_PyGI_DEFINE_INFO_TYPE ("EnumInfo", GIEnumInfo, PyGIRegisteredTypeInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.EnumInfo", PyGIEnumInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_enum_info_get_values (PyGIBaseInfo *self)
@@ -880,7 +811,7 @@ static PyMethodDef _PyGIEnumInfo_methods[] = {
 
 
 /* ObjectInfo */
-_PyGI_DEFINE_INFO_TYPE ("ObjectInfo", GIObjectInfo, PyGIRegisteredTypeInfo_Type);
+PYGLIB_DEFINE_TYPE ("ObjectInfo", PyGIObjectInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_object_info_get_parent (PyGIBaseInfo *self)
@@ -973,7 +904,7 @@ static PyMethodDef _PyGIObjectInfo_methods[] = {
 
 
 /* GIInterfaceInfo */
-_PyGI_DEFINE_INFO_TYPE ("InterfaceInfo", GIInterfaceInfo, PyGIRegisteredTypeInfo_Type);
+PYGLIB_DEFINE_TYPE ("InterfaceInfo", PyGIInterfaceInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_interface_info_get_methods (PyGIBaseInfo *self)
@@ -1031,7 +962,7 @@ static PyMethodDef _PyGIInterfaceInfo_methods[] = {
 };
 
 /* GIConstantInfo */
-_PyGI_DEFINE_INFO_TYPE ("ConstantInfo", GIConstantInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.ConstantInfo", PyGIConstantInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
@@ -1060,7 +991,7 @@ static PyMethodDef _PyGIConstantInfo_methods[] = {
 };
 
 /* GIValueInfo */
-_PyGI_DEFINE_INFO_TYPE ("ValueInfo", GIValueInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.ValueInfo", PyGIValueInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_value_info_get_value (PyGIBaseInfo *self)
@@ -1080,7 +1011,7 @@ static PyMethodDef _PyGIValueInfo_methods[] = {
 
 
 /* GIFieldInfo */
-_PyGI_DEFINE_INFO_TYPE ("FieldInfo", GIFieldInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.FieldInfo", PyGIFieldInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_field_info_get_value (PyGIBaseInfo *self,
@@ -1336,14 +1267,14 @@ static PyMethodDef _PyGIFieldInfo_methods[] = {
 
 
 /* GIUnresolvedInfo */
-_PyGI_DEFINE_INFO_TYPE ("UnresolvedInfo", GIUnresolvedInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.UnresolvedInfo", PyGIUnresolvedInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
 /* GIVFuncInfo */
-_PyGI_DEFINE_INFO_TYPE ("VFuncInfo", GIVFuncInfo, PyGIBaseInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGIVFuncInfo_methods[] = {
     { NULL, NULL, 0 }
@@ -1351,7 +1282,7 @@ static PyMethodDef _PyGIVFuncInfo_methods[] = {
 
 
 /* GIUnionInfo */
-_PyGI_DEFINE_INFO_TYPE ("UnionInfo", GIUnionInfo, PyGIRegisteredTypeInfo_Type);
+PYGLIB_DEFINE_TYPE ("gi.UnionInfo", PyGIUnionInfo_Type, PyGIBaseInfo);
 
 static PyObject *
 _wrap_g_union_info_get_fields (PyGIBaseInfo *self)
@@ -1461,27 +1392,61 @@ _pygi_g_base_info_get_fullname (GIBaseInfo *info)
 void
 _pygi_info_register_types (PyObject *m)
 {
-#define _PyGI_REGISTER_TYPE(m, type, name) \
-    type.ob_type = &PyType_Type; \
+#define _PyGI_REGISTER_TYPE(m, type, cname, base) \
+    Py_TYPE(&type) = &PyType_Type; \
+    type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE); \
+    type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist); \
+    type.tp_methods = _PyGI##cname##_methods; \
+    type.tp_base = &base; \
     if (PyType_Ready(&type)) \
         return; \
-    if (PyModule_AddObject(m, name, (PyObject *)&type)) \
+    if (PyModule_AddObject(m, #cname, (PyObject *)&type)) \
         return
 
-    _PyGI_REGISTER_TYPE (m, PyGIBaseInfo_Type, "BaseInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, "UnresolvedInfo");
-    _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, "CallableInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, "FunctionInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIRegisteredTypeInfo_Type, "RegisteredTypeInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIStructInfo_Type, "StructInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIEnumInfo_Type, "EnumInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIObjectInfo_Type, "ObjectInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIInterfaceInfo_Type, "InterfaceInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIConstantInfo_Type, "ConstantInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIValueInfo_Type, "ValueInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIFieldInfo_Type, "FieldInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, "VFuncInfo");
-    _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, "UnionInfo");
+    Py_TYPE(&PyGIBaseInfo_Type) = &PyType_Type;
+
+    PyGIBaseInfo_Type.tp_dealloc = (destructor) _base_info_dealloc;
+    PyGIBaseInfo_Type.tp_repr = (reprfunc) _base_info_repr;
+    PyGIBaseInfo_Type.tp_flags = (Py_TPFLAGS_DEFAULT | 
+                                   Py_TPFLAGS_BASETYPE  | 
+                                   Py_TPFLAGS_HAVE_GC);
+    PyGIBaseInfo_Type.tp_traverse = (traverseproc) _base_info_traverse;
+    PyGIBaseInfo_Type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist);
+    PyGIBaseInfo_Type.tp_methods = _PyGIBaseInfo_methods; 
+
+    if (PyType_Ready(&PyGIBaseInfo_Type))
+        return;   
+ 
+    if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type))
+        return
+
+    _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo, 
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo, 
+                         PyGICallableInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIRegisteredTypeInfo_Type, RegisteredTypeInfo, 
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIStructInfo_Type, StructInfo, 
+                         PyGIRegisteredTypeInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIEnumInfo_Type, EnumInfo, 
+                         PyGIRegisteredTypeInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIObjectInfo_Type, ObjectInfo, 
+                         PyGIRegisteredTypeInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIInterfaceInfo_Type, InterfaceInfo, 
+                         PyGIRegisteredTypeInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIConstantInfo_Type, ConstantInfo, 
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIValueInfo_Type, ValueInfo, 
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIFieldInfo_Type, FieldInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, UnionInfo,
+                         PyGIRegisteredTypeInfo_Type);
+
 
 #undef _PyGI_REGISTER_TYPE
 }

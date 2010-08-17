@@ -29,37 +29,7 @@ PyObject *PyGIRepositoryError;
 
 static PyMethodDef _PyGIRepository_methods[];
 
-PyTypeObject PyGIRepository_Type = {
-    PyObject_HEAD_INIT (NULL)
-    0,
-    "gi.Repository",         /* tp_name */
-    sizeof (PyGIRepository), /* tp_basicsize */
-    0,                       /* tp_itemsize */
-    (destructor) NULL,       /* tp_dealloc */
-    (printfunc) NULL,        /* tp_print */
-    (getattrfunc) NULL,      /* tp_getattr */
-    (setattrfunc) NULL,      /* tp_setattr */
-    (cmpfunc) NULL,          /* tp_compare */
-    (reprfunc) NULL,         /* tp_repr */
-    NULL,                    /* tp_as_number */
-    NULL,                    /* tp_as_sequence */
-    NULL,                    /* tp_as_mapping */
-    (hashfunc) NULL,         /* tp_hash */
-    (ternaryfunc) NULL,      /* tp_call */
-    (reprfunc) NULL,         /* tp_str */
-    (getattrofunc) NULL,     /* tp_getattro */
-    (setattrofunc) NULL,     /* tp_setattro */
-    NULL,                    /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,      /* tp_flags */
-    NULL,                    /* tp_doc */
-    (traverseproc) NULL,     /* tp_traverse */
-    (inquiry) NULL,          /* tp_clear */
-    (richcmpfunc) NULL,      /* tp_richcompare */
-    0,                       /* tp_weaklistoffset */
-    (getiterfunc) NULL,      /* tp_iter */
-    (iternextfunc) NULL,     /* tp_iternext */
-    _PyGIRepository_methods, /* tp_methods */
-};
+PYGLIB_DEFINE_TYPE("gi.Repository", PyGIRepository_Type, PyGIRepository);
 
 static PyObject *
 _wrap_g_irepository_enumerate_versions (PyGIRepository *self,
@@ -278,10 +248,15 @@ static PyMethodDef _PyGIRepository_methods[] = {
 void
 _pygi_repository_register_types (PyObject *m)
 {
-    PyGIRepository_Type.ob_type = &PyType_Type;
+    Py_TYPE(&PyGIRepository_Type) = &PyType_Type;
+
+    PyGIRepository_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGIRepository_Type.tp_methods = _PyGIRepository_methods;
+
     if (PyType_Ready (&PyGIRepository_Type)) {
         return;
     }
+
     if (PyModule_AddObject (m, "Repository", (PyObject *) &PyGIRepository_Type)) {
         return;
     }

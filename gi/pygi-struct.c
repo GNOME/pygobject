@@ -31,7 +31,7 @@ static void
 _struct_dealloc (PyGIStruct *self)
 {
     GIBaseInfo *info = _pygi_object_get_gi_info (
-                           (PyObject *) ( (PyObject *) self)->ob_type,
+                           Py_TYPE((PyObject *) self),
                            &PyGIStructInfo_Type);
 
     PyObject_GC_UnTrack ( (PyObject *) self);
@@ -46,7 +46,7 @@ _struct_dealloc (PyGIStruct *self)
 
     g_base_info_unref (info);
 
-    ( (PyGPointer *) self)->ob_type->tp_free ( (PyObject *) self);
+    Py_TYPE( (PyGPointer *) self )->tp_free ( (PyObject *) self);
 }
 
 static PyObject *
@@ -100,41 +100,7 @@ _struct_init (PyObject *self,
     return 0;
 }
 
-
-PyTypeObject PyGIStruct_Type = {
-    PyObject_HEAD_INIT (NULL)
-    0,
-    "gi.Struct",                               /* tp_name */
-    sizeof (PyGIStruct),                       /* tp_basicsize */
-    0,                                         /* tp_itemsize */
-    (destructor) _struct_dealloc,              /* tp_dealloc */
-    (printfunc) NULL,                          /* tp_print */
-    (getattrfunc) NULL,                        /* tp_getattr */
-    (setattrfunc) NULL,                        /* tp_setattr */
-    (cmpfunc) NULL,                            /* tp_compare */
-    (reprfunc) NULL,                           /* tp_repr */
-    NULL,                                      /* tp_as_number */
-    NULL,                                      /* tp_as_sequence */
-    NULL,                                      /* tp_as_mapping */
-    (hashfunc) NULL,                           /* tp_hash */
-    (ternaryfunc) NULL,                        /* tp_call */
-    (reprfunc) NULL,                           /* tp_str */
-    (getattrofunc) NULL,                       /* tp_getattro */
-    (setattrofunc) NULL,                       /* tp_setattro */
-    NULL,                                      /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
-    NULL,                                     /* tp_doc */
-    (traverseproc) NULL,                      /* tp_traverse */
-    (inquiry) NULL,                           /* tp_clear */
-    (richcmpfunc) NULL,                       /* tp_richcompare */
-    0,                                        /* tp_weaklistoffset */
-    (getiterfunc) NULL,                       /* tp_iter */
-    (iternextfunc) NULL,                      /* tp_iternext */
-    NULL,                                     /* tp_methods */
-    NULL,                                     /* tp_members */
-    NULL,                                     /* tp_getset */
-    (PyTypeObject *) NULL,                    /* tp_base */
-};
+PYGLIB_DEFINE_TYPE("gi.Struct", PyGIStruct_Type, PyGIStruct);
 
 PyObject *
 _pygi_struct_new (PyTypeObject *type,
@@ -166,10 +132,13 @@ _pygi_struct_new (PyTypeObject *type,
 void
 _pygi_struct_register_types (PyObject *m)
 {
-    PyGIStruct_Type.ob_type = &PyType_Type;
+    Py_TYPE(&PyGIStruct_Type) = &PyType_Type;
     PyGIStruct_Type.tp_base = &PyGPointer_Type;
     PyGIStruct_Type.tp_new = (newfunc) _struct_new;
     PyGIStruct_Type.tp_init = (initproc) _struct_init;
+    PyGIStruct_Type.tp_dealloc = (destructor) _struct_dealloc;
+    PyGIStruct_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+
     if (PyType_Ready (&PyGIStruct_Type))
         return;
     if (PyModule_AddObject (m, "Struct", (PyObject *) &PyGIStruct_Type))
