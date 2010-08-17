@@ -62,7 +62,7 @@ _gi_cairo_la_CFLAGS = \
 _gi_cairo_la_LDFLAGS = \
 	-module \
 	-avoid-version \
-	-export-symbols-regex init_gi_cairo
+	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
 _gi_cairo_la_LIBADD = \
 	$(GI_LIBS) \
 	$(PYCAIRO_LIBS)

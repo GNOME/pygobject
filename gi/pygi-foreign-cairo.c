@@ -27,6 +27,8 @@ Pycairo_CAPI_t *Pycairo_CAPI;
 
 #include "pygi-foreign.h"
 
+#include <pyglib-python-compat.h>
+
 PyObject *
 cairo_context_to_arg (PyObject       *value,
                       GITypeInfo     *type_info,
@@ -103,19 +105,13 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
-PyMODINIT_FUNC
-init_gi_cairo (void)
+
+static PyMethodDef _gi_cairo_functions[] = {};
+PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
-    PyObject *m;
-
-    m = Py_InitModule ("_gi_cairo", NULL);
-    if (m == NULL) {
-        return;
-    }
-
     Pycairo_IMPORT;
     if (Pycairo_CAPI == NULL)
-        return;
+        return 0;
 
     pygi_register_foreign_struct ("cairo",
                                   "Context",
@@ -129,3 +125,4 @@ init_gi_cairo (void)
                                   cairo_surface_from_arg,
                                   cairo_surface_release);
 }
+PYGLIB_MODULE_END;
