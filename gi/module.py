@@ -141,7 +141,7 @@ class IntrospectionModule(object):
                 elif g_type.is_a(gobject.TYPE_POINTER) or g_type == gobject.TYPE_NONE:
                     bases = (Struct,)
                 else:
-                    raise TypeError, "unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name())
+                    raise TypeError("unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name()))
                 metaclass = StructMeta
             else:
                 raise NotImplementedError(info)
