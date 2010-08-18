@@ -11,7 +11,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/GConf\.VALUE_/GConf.ValueType./g;" \
     -pe "s/gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/return;gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/g;" \
 \
-    -pe "s/import gtk\n/from gi.repository import Gtk; Gtk.require_version('2.0')\n/g;" \
+    -pe "s/import gtk\n/from gi.repository import Gtk\n/g;" \
     -pe "s/gtk\./Gtk\./g;" \
     -pe "s/Gtk.SIZE_GROUP_/Gtk.SizeGroupMode./g;" \
     -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
@@ -32,6 +32,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
     -pe "s/Gtk.RESPONSE_/Gtk.ResponseType./g;" \
     -pe "s/Gtk.CORNER_/Gtk.CornerType./g;" \
+    -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
     -pe "s/Gtk.settings_get_default/Gtk.Settings.get_default/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
     -pe "s/.window.set_type_hint/.set_type_hint/g;" \
@@ -42,7 +43,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/self._model.filter_new\(\)/Gtk.TreeModelFilter.new\(self._model, None\)/g;" \
     -pe "#s/Gtk.ScrolledWindow\(\)/Gtk.ScrolledWindow\(None, None\)/g;" \
     -pe "#s/Gtk.Window.__init__\(self\)/Gtk.Window.__init__\(Gtk.WindowType.TOPLEVEL\)/g;" \
-    -pe "#s/\.child/.get_child\(\)/g;" \
+    -pe "s/\.child([^_a-z])/.get_child\(\)\1/g;" \
 \
     -pe "s/column.pack_start\(([^,\)]*)\)/column.pack_start\(\1, True\)/g;" \
     -pe "s/pack_start\(([^,\)]*)\)/pack_start\(\1, True, True, 0\)/g;" \
@@ -70,6 +71,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.([A-Z_0-9]*)_MASK/Gdk.EventMask.\1_MASK/g;" \
     -pe "s/Gdk.VISIBILITY_FULLY_OBSCURED/Gdk.VisibilityState.FULLY_OBSCURED/g;" \
     -pe "s/Gdk.BUTTON_PRESS/Gdk.EventType.BUTTON_PRESS/g;" \
+    -pe "s/#Gdk.Rectangle\(([^,\)]*), ([^,\)]*), ([^,\)]*), ([^,\)]*)\)/\1, \2, \3, \4/g;" \
+    -pe "s/Gdk.Rectangle//g;" \
     -pe "s/intersection = child_rect.intersect/intersects_, intersection = child_rect.intersect/g;" \
     -pe "s/event.state/event.get_state\(\)/g;" \
 \
@@ -140,12 +143,12 @@ done
 
 NEED_GDK=`grep -R -l Gdk\. $FILES_TO_CONVERT | xargs grep -nL import\ Gdk`
 for f in $NEED_GDK; do
-    sed -i "/import Gtk/ i\from gi.repository import Gdk; Gdk.require_version('2.0')" $f
+    sed -i "/import Gtk/ i\from gi.repository import Gdk" $f
 done
 
 NEED_GDK_X11=`grep -R -l GdkX11\. $FILES_TO_CONVERT | xargs grep -nL import\ GdkX11`
 for f in $NEED_GDK_X11; do
-    sed -i "/Gdk.require_version('2.0')/ i\from gi.repository import GdkX11; GdkX11.require_version('2.0')" $f
+    sed -i "/import Gdk/ i\from gi.repository import GdkX11" $f
 done
 
 NEED_SUGAR_EXT=`grep -R -l SugarExt\. $FILES_TO_CONVERT | xargs grep -nL import\ SugarExt`
