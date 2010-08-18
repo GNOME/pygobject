@@ -2,7 +2,12 @@
 
 import unittest
 import sys
-from StringIO import StringIO
+
+# py3k has StringIO in a different module
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError

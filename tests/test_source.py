@@ -92,8 +92,8 @@ class TestSource(unittest.TestCase):
 
 class TestTimeout(unittest.TestCase):
      def test504337(self):
-	timeout_source = glib.Timeout(20)
-	idle_source = glib.Idle()
+        timeout_source = glib.Timeout(20)
+        idle_source = glib.Idle()
 
 
 if __name__ == '__main__':
