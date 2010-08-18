@@ -105,10 +105,14 @@ class MetaClassHelper(object):
                             'the method do_%s()' % (base.__info__.get_namespace(),
                                                     base.__info__.get_name(),
                                                     vfunc_info.get_name()))
-                elif vfunc is not None and not \
-                        is_function_in_classes(vfunc.im_func, cls.__bases__):
-                    hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
-                                                 vfunc)
+                elif vfunc is not None:
+                    function = vfunc
+                    if sys.version_info < (3, 0):
+                        function = vfunc.im_func
+ 
+                    if not is_function_in_classes(function, cls.__bases__):
+                        hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
+                                                     vfunc)
 
 def is_function_in_classes(function, classes):
     for klass in classes:
