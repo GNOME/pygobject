@@ -103,6 +103,8 @@ static int _pyglib_init_##modname(PyObject *module)
 
 #define PYGLIB_PyLong_Check PyInt_Check
 #define PYGLIB_PyLong_FromLong PyInt_FromLong
+#define PYGLIB_PyLong_FromSsize_t PyInt_FromSsize_t
+#define PYGLIB_PyLong_FromSize_t PyInt_FromSize_t
 #define PYGLIB_PyLong_AsLong  PyInt_AsLong
 #define PYGLIB_PyLongObject PyIntObject
 #define PYGLIB_PyLong_Type PyInt_Type
