@@ -590,6 +590,7 @@ _pyglib_generic_ptr_richcompare(void* a, void *b, int op)
         break;
 
       case Py_LT:
+        res = (a < b) ? Py_True : Py_False;
         break;
 
       case Py_LE:
