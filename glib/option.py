@@ -110,10 +110,10 @@ class Option(optparse.Option):
         flags = 0
 
         if self.hidden:
-            self.flags |= _glib.OPTION_FLAG_HIDDEN
+            flags |= _glib.OPTION_FLAG_HIDDEN
 
         if self.in_main:
-            self.flags |= _glib.OPTION_FLAG_IN_MAIN
+            flags |= _glib.OPTION_FLAG_IN_MAIN
 
         if self.takes_value():
             if self.optional_arg:
