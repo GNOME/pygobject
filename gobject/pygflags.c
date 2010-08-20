@@ -468,6 +468,7 @@ pygobject_flags_register_types(PyObject *d)
     PyGFlags_Type.tp_new = pyg_flags_new;
 #else
     PyGFlags_Type.tp_new = PyLong_Type.tp_new;
+    PyGFlags_Type.tp_hash = PyLong_Type.tp_hash;    
 #endif
     PyGFlags_Type.tp_repr = (reprfunc)pyg_flags_repr;
     PyGFlags_Type.tp_as_number = &pyg_flags_as_number;

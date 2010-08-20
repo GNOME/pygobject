@@ -354,6 +354,7 @@ pygobject_enum_register_types(PyObject *d)
     PyGEnum_Type.tp_new = pyg_enum_new;
 #else
     PyGEnum_Type.tp_new = PyLong_Type.tp_new;
+    PyGEnum_Type.tp_hash = PyLong_Type.tp_hash;    
 #endif
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
