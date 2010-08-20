@@ -115,30 +115,87 @@ pygi_get_property_value_real (PyGObject *instance,
     type_info = g_property_info_get_type (property_info);
     transfer = g_property_info_get_ownership_transfer (property_info);
 
-    // FIXME: Lots of types still unhandled
-    if (g_type_info_is_pointer (type_info)) {
-        arg.v_pointer = g_value_peek_pointer (&value);
-    } else {
-        GITypeTag type_tag = g_type_info_get_tag (type_info);
-        switch (type_tag) {
-            case GI_TYPE_TAG_INT32:
-                arg.v_int = g_value_get_int (&value);
-                break;
-            case GI_TYPE_TAG_UINT32:
-                arg.v_uint = g_value_get_uint (&value);
-                break;
-            case GI_TYPE_TAG_BOOLEAN:
-                arg.v_boolean = g_value_get_boolean (&value);
-                break;
-            case GI_TYPE_TAG_INTERFACE:
-                arg.v_pointer = g_value_get_object (&value);
-                break;
-            default:
-                PyErr_Format (PyExc_NotImplementedError,
-                              "Retrieving properties of type %s is not implemented",
-                              g_type_tag_to_string (g_type_info_get_tag (type_info)));
-                goto out;
+    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    switch (type_tag) {
+        case GI_TYPE_TAG_BOOLEAN:
+            arg.v_boolean = g_value_get_boolean (&value);
+            break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_INT64:
+            arg.v_int = g_value_get_int (&value);
+            break;
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_UINT64:
+            arg.v_uint = g_value_get_uint (&value);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            arg.v_float = g_value_get_float (&value);
+            break;
+        case GI_TYPE_TAG_DOUBLE:
+            arg.v_double = g_value_get_double (&value);
+            break;
+        case GI_TYPE_TAG_GTYPE:
+            arg.v_size = g_value_get_uint (&value);
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            arg.v_string = g_value_dup_string (&value);
+            break;
+        case GI_TYPE_TAG_INTERFACE:
+        {
+            GIBaseInfo *info;
+            GIInfoType info_type;
+            GType type;
+
+            info = g_type_info_get_interface (type_info);
+            type = g_registered_type_info_get_g_type (info);
+            info_type = g_base_info_get_type (info);
+
+            switch (info_type) {
+                case GI_INFO_TYPE_ENUM:
+                    arg.v_int32 = g_value_get_enum (&value);
+                    break;
+                case GI_INFO_TYPE_INTERFACE:
+                case GI_INFO_TYPE_OBJECT:
+                    arg.v_pointer = g_value_get_object (&value);
+                    break;
+                case GI_INFO_TYPE_BOXED:
+                case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_UNION:
+
+                    if (g_type_is_a (type, G_TYPE_BOXED)) {
+                        arg.v_pointer = g_value_get_boxed (&value);
+                    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
+                        arg.v_pointer = g_value_get_pointer (&value);
+                    } else {
+                        PyErr_Format (PyExc_NotImplementedError,
+                                      "Retrieving properties of type '%s' is not implemented",
+                                      g_type_name (type));
+                    }
+                    break;
+                default:
+                    PyErr_Format (PyExc_NotImplementedError,
+                                  "Retrieving properties of type '%s' is not implemented",
+                                  g_type_name (type));
+                    goto out;
+            }
+            break;
         }
+        case GI_TYPE_TAG_GHASH:
+            arg.v_pointer = g_value_get_boxed (&value);
+            break;
+        case GI_TYPE_TAG_GLIST:
+            arg.v_pointer = g_value_get_pointer (&value);
+            break;
+        default:
+            PyErr_Format (PyExc_NotImplementedError,
+                          "Retrieving properties of type %s is not implemented",
+                          g_type_tag_to_string (g_type_info_get_tag (type_info)));
+            goto out;
     }
 
     py_value = _pygi_argument_to_object (&arg, type_info, transfer);
@@ -198,10 +255,10 @@ pygi_set_property_value_real (PyGObject *instance,
         {
             GIBaseInfo *info;
             GIInfoType info_type;
+            GType type;
 
             info = g_type_info_get_interface (type_info);
-            g_assert (info != NULL);
-
+            type = g_registered_type_info_get_g_type (info);
             info_type = g_base_info_get_type (info);
 
             switch (info_type) {
@@ -212,31 +269,58 @@ pygi_set_property_value_real (PyGObject *instance,
                 case GI_INFO_TYPE_OBJECT:
                     g_value_set_object (&value, arg.v_pointer);
                     break;
+                case GI_INFO_TYPE_BOXED:
+                case GI_INFO_TYPE_STRUCT:
+                case GI_INFO_TYPE_UNION:
+                    if (g_type_is_a (type, G_TYPE_BOXED)) {
+                        g_value_set_boxed (&value, arg.v_pointer);
+                    } else {
+                        PyErr_Format (PyExc_NotImplementedError,
+                                      "Setting properties of type '%s' is not implemented",
+                                      g_type_name (type));
+                    }
+                    break;
                 default:
                     PyErr_Format (PyExc_NotImplementedError,
                                   "Setting properties of type '%s' is not implemented",
-                                  g_info_type_to_string (info_type));
+                                  g_type_name (type));
                     goto out;
             }
             break;
         }
+        case GI_TYPE_TAG_BOOLEAN:
+            g_value_set_boolean (&value, arg.v_boolean);
+            break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_INT64:
+            g_value_set_int (&value, arg.v_int);
+            break;
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_UINT64:
+            g_value_set_uint (&value, arg.v_uint);
+            break;
+        case GI_TYPE_TAG_FLOAT:
+            g_value_set_float (&value, arg.v_float);
+            break;
+        case GI_TYPE_TAG_DOUBLE:
+            g_value_set_double (&value, arg.v_double);
+            break;
+        case GI_TYPE_TAG_GTYPE:
+            g_value_set_uint (&value, arg.v_size);
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            g_value_set_string (&value, arg.v_string);
+            break;
         case GI_TYPE_TAG_GHASH:
             g_value_set_boxed (&value, arg.v_pointer);
             break;
         case GI_TYPE_TAG_GLIST:
             g_value_set_pointer (&value, arg.v_pointer);
-            break;
-        case GI_TYPE_TAG_INT32:
-            g_value_set_int (&value, arg.v_int32);
-            break;
-        case GI_TYPE_TAG_UINT32:
-            g_value_set_uint (&value, arg.v_uint32);
-            break;
-        case GI_TYPE_TAG_BOOLEAN:
-            g_value_set_boolean (&value, arg.v_boolean);
-            break;
-        case GI_TYPE_TAG_FLOAT:
-            g_value_set_float (&value, arg.v_float);
             break;
         default:
             PyErr_Format (PyExc_NotImplementedError,

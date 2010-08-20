@@ -311,6 +311,29 @@ class TestCallbacks(unittest.TestCase):
 
 class TestProperties(unittest.TestCase):
 
+    def test_basic(self):
+        object_ = Everything.TestObj()
+
+        self.assertEquals(object_.props.int, 0)
+        object_.props.int = 42
+        self.assertTrue(isinstance(object_.props.int, int))
+        self.assertEquals(object_.props.int, 42)
+
+        self.assertEquals(object_.props.float, 0.0)
+        object_.props.float = 42.42
+        self.assertTrue(isinstance(object_.props.float, float))
+        self.assertAlmostEquals(object_.props.float, 42.42, places=5)
+
+        self.assertEquals(object_.props.double, 0.0)
+        object_.props.double = 42.42
+        self.assertTrue(isinstance(object_.props.double, float))
+        self.assertAlmostEquals(object_.props.double, 42.42, places=5)
+
+        self.assertEquals(object_.props.string, None)
+        object_.props.string = 'mec'
+        self.assertTrue(isinstance(object_.props.string, str))
+        self.assertEquals(object_.props.string, 'mec')
+
     def test_hash_table(self):
         object_ = Everything.TestObj()
         self.assertEquals(object_.props.hash_table, None)
@@ -326,3 +349,14 @@ class TestProperties(unittest.TestCase):
         object_.props.list = ['1', '2', '3']
         self.assertTrue(isinstance(object_.props.list, list))
         self.assertEquals(object_.props.list, ['1', '2', '3'])
+
+    def test_boxed(self):
+        object_ = Everything.TestObj()
+        self.assertEquals(object_.props.boxed, None)
+
+        boxed = Everything.TestBoxed()
+        boxed.some_int8 = 42
+        object_.props.boxed = boxed
+
+        self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
+        self.assertEquals(object_.props.boxed.some_int8, 42)
