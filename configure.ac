@@ -8,7 +8,7 @@ m4_define(pygobject_micro_version, 6)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
-m4_define(introspection_required_version, 0.9.1)
+m4_define(introspection_required_version, 0.9.5)
 m4_define(pycairo_required_version, 1.0.2)
 m4_define(glib_required_version, 2.22.4)
 m4_define(gio_required_version, 2.22.4)
@@ -219,6 +219,9 @@ if test "$enable_introspection" != no; then
         glib-2.0 >= glib_required_version
         gobject-introspection-1.0 >= introspection_required_version
     )
+
+    GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
+    AC_SUBST(GI_DATADIR)
 
     if test "$enable_cairo" != no; then
         PKG_CHECK_MODULES(PYCAIRO,

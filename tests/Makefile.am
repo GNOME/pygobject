@@ -1,3 +1,41 @@
+CLEANFILES =
+
+# noinst_ always builds a static library
+testlib_LTLIBRARIES = libregress.la libgimarshallingtests.la
+testlibdir = $(prefix)/unused
+install-testlibLTLIBRARIES: # prevent it from being installed
+
+libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
+libregress_la_CFLAGS = $(GIO_CFLAGS) $(PYCAIRO_CFLAGS)
+libregress_la_LDFLAGS = -avoid-version $(GIO_LIBS) $(PYCAIRO_LIBS)
+libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
+libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
+libgimarshallingtests_la_LDFLAGS = -avoid-version $(GLIB_LIBS)
+
+# g-i doesn't ship these as shared libraries anymore; we build them here
+Regress-1.0.gir: libregress.la Makefile
+	$(AM_V_GEN) g-ir-scanner --include=cairo-1.0 --include=Gio-2.0 \
+	--namespace=Regress --nsversion=1.0 \
+	--warn-all --warn-error \
+	--library=libregress.la \
+	--libtool="$(top_builddir)/libtool" \
+	--output $@ \
+	$(libregress_la_SOURCES)
+Regress-1.0.typelib: Regress-1.0.gir Makefile
+	$(AM_V_GEN) g-ir-compiler $< -o $@
+
+GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
+	$(AM_V_GEN) g-ir-scanner --include=Gio-2.0 \
+	--namespace=GIMarshallingTests --nsversion=1.0 --symbol-prefix=gi_marshalling_tests \
+	--warn-all --warn-error \
+	--library=libgimarshallingtests.la \
+	--libtool="$(top_builddir)/libtool" \
+	--output $@ \
+	$(libgimarshallingtests_la_SOURCES)
+GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
+	$(AM_V_GEN) g-ir-compiler $< -o $@
+
+CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib
 
 noinst_LTLIBRARIES = testhelper.la
 
@@ -56,8 +94,8 @@ clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 
 
-check-local: $(LTLIBRARIES:.la=.so)
-	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib
+	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH GI_TYPELIB_PATH=$(builddir) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check

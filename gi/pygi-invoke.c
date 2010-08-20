@@ -154,16 +154,12 @@ _prepare_invocation_state (struct invocation_state *state,
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             state->n_in_args += 1;
-            if (transfer == GI_TRANSFER_CONTAINER) {
-                state->n_backup_args += 1;
-            }
         }
+	if (direction == GI_DIRECTION_INOUT) {
+	    state->n_backup_args += 1;
+	}
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             state->n_out_args += 1;
-        }
-
-        if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
-            state->n_backup_args += 1;
         }
 
         switch (arg_type_tag) {
@@ -173,12 +169,15 @@ _prepare_invocation_state (struct invocation_state *state,
 
                 length_arg_pos = g_type_info_get_array_length (state->arg_type_infos[i]);
 
-                if (state->is_method)
-                    length_arg_pos--; // length_arg_pos refers to C args
-
                 if (length_arg_pos < 0) {
                     break;
                 }
+
+		/* For array lengths, we're going to delete the length argument; so remove the
+		 * extra backup we just added above */
+		if (direction == GI_DIRECTION_INOUT) {
+		    state->n_backup_args -= 1;
+		}
 
                 g_assert (length_arg_pos < state->n_args);
                 state->args_is_auxiliary[length_arg_pos] = TRUE;
@@ -207,9 +206,6 @@ _prepare_invocation_state (struct invocation_state *state,
     if (state->return_type_tag == GI_TYPE_TAG_ARRAY) {
         gint length_arg_pos;
         length_arg_pos = g_type_info_get_array_length (state->return_type_info);
-
-        if (state->is_method)
-            length_arg_pos--; // length_arg_pos refers to C args
 
         if (length_arg_pos >= 0) {
             g_assert (length_arg_pos < state->n_args);
@@ -483,60 +479,10 @@ _prepare_invocation_state (struct invocation_state *state,
                     return FALSE;
                 }
 
-                if (direction == GI_DIRECTION_INOUT && transfer == GI_TRANSFER_NOTHING) {
+                if (direction == GI_DIRECTION_INOUT) {
                     /* We need to keep a copy of the argument to be able to release it later. */
                     g_assert (backup_args_pos < state->n_backup_args);
                     state->backup_args[backup_args_pos] = *state->args[i];
-                    backup_args_pos += 1;
-                } else if (transfer == GI_TRANSFER_CONTAINER) {
-                    /* We need to keep a copy of the items to be able to release them later. */
-                    switch (arg_type_tag) {
-                        case GI_TYPE_TAG_ARRAY:
-                        {
-                            GArray *array;
-                            gsize item_size;
-                            GArray *new_array;
-
-                            array = state->args[i]->v_pointer;
-
-                            item_size = g_array_get_element_size (array);
-
-                            new_array = g_array_sized_new (FALSE, FALSE, item_size, array->len);
-                            g_array_append_vals (new_array, array->data, array->len);
-
-                            g_assert (backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = new_array;
-
-                            break;
-                        }
-                        case GI_TYPE_TAG_GLIST:
-                            g_assert (backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_list_copy (state->args[i]->v_pointer);
-                            break;
-                        case GI_TYPE_TAG_GSLIST:
-                            g_assert (backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_slist_copy (state->args[i]->v_pointer);
-                            break;
-                        case GI_TYPE_TAG_GHASH:
-                        {
-                            GHashTable *hash_table;
-                            GList *keys;
-                            GList *values;
-
-                            hash_table = state->args[i]->v_pointer;
-
-                            keys = g_hash_table_get_keys (hash_table);
-                            values = g_hash_table_get_values (hash_table);
-
-                            g_assert (backup_args_pos < state->n_backup_args);
-                            state->backup_args[backup_args_pos].v_pointer = g_list_concat (keys, values);
-
-                            break;
-                        }
-                        default:
-                            g_warn_if_reached();
-                    }
-
                     backup_args_pos += 1;
                 }
 
@@ -547,8 +493,6 @@ _prepare_invocation_state (struct invocation_state *state,
                     array = state->args[i]->v_pointer;
 
                     length_arg_pos = g_type_info_get_array_length (state->arg_type_infos[i]);
-                    if (state->is_method)
-                        length_arg_pos--; // length_arg_pos refers to C args
                     if (length_arg_pos >= 0) {
                         int len = 0;
                         /* Set the auxiliary argument holding the length. */
@@ -841,71 +785,12 @@ _process_invocation_state (struct invocation_state *state,
 
             /* Release the argument. */
 
-            if ( (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
-                    && transfer == GI_TRANSFER_CONTAINER) {
-                /* Release the items we kept in another container. */
-                switch (type_tag) {
-                    case GI_TYPE_TAG_ARRAY:
-                    case GI_TYPE_TAG_GLIST:
-                    case GI_TYPE_TAG_GSLIST:
-                        g_assert (backup_args_pos < state->n_backup_args);
-                        _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                                                transfer, GI_DIRECTION_IN);
-                        break;
-                    case GI_TYPE_TAG_GHASH:
-                    {
-                        GITypeInfo *key_type_info;
-                        GITypeInfo *value_type_info;
-                        GList *item;
-                        gsize length;
-                        gsize j;
-
-                        key_type_info = g_type_info_get_param_type (state->arg_type_infos[i], 0);
-                        value_type_info = g_type_info_get_param_type (state->arg_type_infos[i], 1);
-
-                        g_assert (backup_args_pos < state->n_backup_args);
-                        item = state->backup_args[backup_args_pos].v_pointer;
-
-                        length = g_list_length (item) / 2;
-
-                        for (j = 0; j < length; j++, item = g_list_next (item)) {
-                            _pygi_argument_release ( (GArgument *) &item->data, key_type_info,
-                                                     GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
-                        }
-
-                        for (j = 0; j < length; j++, item = g_list_next (item)) {
-                            _pygi_argument_release ( (GArgument *) &item->data, value_type_info,
-                                                     GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
-                        }
-
-                        g_list_free (state->backup_args[backup_args_pos].v_pointer);
-
-                        break;
-                    }
-                    default:
-                        g_warn_if_reached();
-                }
-
-                if (direction == GI_DIRECTION_INOUT) {
-                    /* Release the output argument. */
-                    _pygi_argument_release (state->args[i], state->arg_type_infos[i], GI_TRANSFER_CONTAINER,
-                                            GI_DIRECTION_OUT);
-                }
-
-                backup_args_pos += 1;
-            } else if (direction == GI_DIRECTION_INOUT) {
-                if (transfer == GI_TRANSFER_NOTHING) {
-                    g_assert (backup_args_pos < state->n_backup_args);
-                    _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                                            GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
-                    backup_args_pos += 1;
-                }
-
-                _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer,
-                                        GI_DIRECTION_OUT);
-            } else {
-                _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
-            }
+            if (direction == GI_DIRECTION_INOUT) {
+		_pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
+					transfer, GI_DIRECTION_IN);
+		backup_args_pos += 1;
+	    }
+	    _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
 
             if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {

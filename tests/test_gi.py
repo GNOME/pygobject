@@ -614,9 +614,6 @@ class TestUtf8(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
 
-    def test_utf8_full_in(self):
-        GIMarshallingTests.utf8_full_in(CONSTANT_UTF8)
-
     def test_utf8_none_out(self):
         self.assertEquals(CONSTANT_UTF8, GIMarshallingTests.utf8_none_out())
 
@@ -751,12 +748,6 @@ class TestGArray(unittest.TestCase):
     def test_garray_utf8_none_in(self):
         GIMarshallingTests.garray_utf8_none_in(Sequence(['0', '1', '2']))
 
-    def test_garray_utf8_container_in(self):
-        GIMarshallingTests.garray_utf8_container_in(Sequence(['0', '1', '2']))
-
-    def test_garray_utf8_full_in(self):
-        GIMarshallingTests.garray_utf8_full_in(Sequence(['0', '1', '2']))
-
     def test_garray_utf8_none_out(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.garray_utf8_none_out())
 
@@ -800,12 +791,6 @@ class TestGList(unittest.TestCase):
 
     def test_glist_utf8_none_in(self):
         GIMarshallingTests.glist_utf8_none_in(Sequence(('0', '1', '2')))
-
-    def test_glist_utf8_container_in(self):
-        GIMarshallingTests.glist_utf8_container_in(Sequence(('0', '1', '2')))
-
-    def test_glist_utf8_full_in(self):
-        GIMarshallingTests.glist_utf8_full_in(Sequence(('0', '1', '2')))
 
     def test_glist_utf8_none_out(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.glist_utf8_none_out())
@@ -851,12 +836,6 @@ class TestGSList(unittest.TestCase):
     def test_gslist_utf8_none_in(self):
         GIMarshallingTests.gslist_utf8_none_in(Sequence(('0', '1', '2')))
 
-    def test_gslist_utf8_container_in(self):
-        GIMarshallingTests.gslist_utf8_container_in(Sequence(('0', '1', '2')))
-
-    def test_gslist_utf8_full_in(self):
-        GIMarshallingTests.gslist_utf8_full_in(Sequence(('0', '1', '2')))
-
     def test_gslist_utf8_none_out(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.gslist_utf8_none_out())
 
@@ -901,12 +880,6 @@ class TestGHashTable(unittest.TestCase):
 
     def test_ghashtable_utf8_none_in(self):
         GIMarshallingTests.ghashtable_utf8_none_in({'-1': '1', '0': '0', '1': '-1', '2': '-2'})
-
-    def test_ghashtable_utf8_container_in(self):
-        GIMarshallingTests.ghashtable_utf8_container_in({'-1': '1', '0': '0', '1': '-1', '2': '-2'})
-
-    def test_ghashtable_utf8_full_in(self):
-        GIMarshallingTests.ghashtable_utf8_full_in({'-1': '1', '0': '0', '1': '-1', '2': '-2'})
 
     def test_ghashtable_utf8_none_out(self):
         self.assertEquals({'-1': '1', '0': '0', '1': '-1', '2': '-2'}, GIMarshallingTests.ghashtable_utf8_none_out())
@@ -1075,7 +1048,7 @@ class TestStructure(unittest.TestCase):
         self.assertEquals(None, struct.pointer)
 
     def test_simple_struct_return(self):
-        struct = GIMarshallingTests.simple_struct_return()
+        struct = GIMarshallingTests.SimpleStruct.returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.SimpleStruct))
         self.assertEquals(6, struct.long_)
@@ -1088,40 +1061,17 @@ class TestStructure(unittest.TestCase):
         struct.long_ = 6
         struct.int8 = 7
 
-        GIMarshallingTests.simple_struct_in(struct)
+        GIMarshallingTests.SimpleStruct.inv(struct)
 
         del struct
 
         struct = GIMarshallingTests.NestedStruct()
 
-        self.assertRaises(TypeError, GIMarshallingTests.simple_struct_in, struct)
+        self.assertRaises(TypeError, GIMarshallingTests.SimpleStruct.inv, struct)
 
         del struct
 
-        self.assertRaises(TypeError, GIMarshallingTests.simple_struct_in, None)
-
-    def test_simple_struct_out(self):
-        struct = GIMarshallingTests.simple_struct_out()
-
-        self.assertTrue(isinstance(struct, GIMarshallingTests.SimpleStruct))
-        self.assertEquals(6, struct.long_)
-        self.assertEquals(7, struct.int8)
-
-        del struct
-
-    def test_simple_struct_inout(self):
-        in_struct = GIMarshallingTests.SimpleStruct()
-        in_struct.long_ = 6
-        in_struct.int8 = 7
-
-        out_struct = GIMarshallingTests.simple_struct_inout(in_struct)
-
-        self.assertTrue(isinstance(out_struct, GIMarshallingTests.SimpleStruct))
-        self.assertEquals(7, out_struct.long_)
-        self.assertEquals(6, out_struct.int8)
-
-        del in_struct
-        del out_struct
+        self.assertRaises(TypeError, GIMarshallingTests.SimpleStruct.inv, None)
 
     def test_simple_struct_method(self):
         struct = GIMarshallingTests.SimpleStruct()
@@ -1144,7 +1094,7 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_pointer_struct_return(self):
-        struct = GIMarshallingTests.pointer_struct_return()
+        struct = GIMarshallingTests.PointerStruct.returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.PointerStruct))
         self.assertEquals(42, struct.long_)
@@ -1155,29 +1105,9 @@ class TestStructure(unittest.TestCase):
         struct = GIMarshallingTests.PointerStruct()
         struct.long_ = 42
 
-        GIMarshallingTests.pointer_struct_in(struct)
+        struct.inv()
 
         del struct
-
-    def test_pointer_struct_out(self):
-        struct = GIMarshallingTests.pointer_struct_out()
-
-        self.assertTrue(isinstance(struct, GIMarshallingTests.PointerStruct))
-        self.assertEquals(42, struct.long_)
-
-        del struct
-
-    def test_pointer_struct_inout(self):
-        in_struct = GIMarshallingTests.PointerStruct()
-        in_struct.long_ = 42
-
-        out_struct = GIMarshallingTests.pointer_struct_inout(in_struct)
-
-        self.assertTrue(isinstance(out_struct, GIMarshallingTests.PointerStruct))
-        self.assertEquals(0, out_struct.long_)
-
-        del in_struct
-        del out_struct
 
     def test_boxed_struct(self):
         self.assertTrue(issubclass(GIMarshallingTests.BoxedStruct, GObject.GBoxed))
@@ -1206,7 +1136,7 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_boxed_struct_return(self):
-        struct = GIMarshallingTests.boxed_struct_return()
+        struct = GIMarshallingTests.BoxedStruct.returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
@@ -1218,12 +1148,12 @@ class TestStructure(unittest.TestCase):
         struct = GIMarshallingTests.BoxedStruct()
         struct.long_ = 42
 
-        GIMarshallingTests.boxed_struct_in(struct)
+        struct.inv()
 
         del struct
 
     def test_boxed_struct_out(self):
-        struct = GIMarshallingTests.boxed_struct_out()
+        struct = GIMarshallingTests.BoxedStruct.out()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
@@ -1234,7 +1164,7 @@ class TestStructure(unittest.TestCase):
         in_struct = GIMarshallingTests.BoxedStruct()
         in_struct.long_ = 42
 
-        out_struct = GIMarshallingTests.boxed_struct_inout(in_struct)
+        out_struct = GIMarshallingTests.BoxedStruct.inout(in_struct)
 
         self.assertTrue(isinstance(out_struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(0, out_struct.long_)
@@ -1254,7 +1184,7 @@ class TestStructure(unittest.TestCase):
         del new_union
 
     def test_union_return(self):
-        union = GIMarshallingTests.union_return()
+        union = GIMarshallingTests.Union.returnv()
 
         self.assertTrue(isinstance(union, GIMarshallingTests.Union))
         self.assertEquals(42, union.long_)
@@ -1265,29 +1195,9 @@ class TestStructure(unittest.TestCase):
         union = GIMarshallingTests.Union()
         union.long_ = 42
 
-        GIMarshallingTests.union_in(union)
+        union.inv()
 
         del union
-
-    def test_union_out(self):
-        union = GIMarshallingTests.union_out()
-
-        self.assertTrue(isinstance(union, GIMarshallingTests.Union))
-        self.assertEquals(42, union.long_)
-
-        del union
-
-    def test_union_inout(self):
-        in_union = GIMarshallingTests.Union()
-        in_union.long_ = 42
-
-        out_union = GIMarshallingTests.union_inout(in_union)
-
-        self.assertTrue(isinstance(out_union, GIMarshallingTests.Union))
-        self.assertEquals(0, out_union.long_)
-
-        del in_union
-        del out_union
 
     def test_union_method(self):
         union = GIMarshallingTests.Union()
@@ -1364,49 +1274,44 @@ class TestGObject(unittest.TestCase):
 #        self.assertEquals(object_.int_, 42)
 
     def test_object_none_return(self):
-        object_ = GIMarshallingTests.object_none_return()
+        object_ = GIMarshallingTests.Object.none_return()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEquals(object_.__grefcount__, 2)
 
     def test_object_full_return(self):
-        object_ = GIMarshallingTests.object_full_return()
+        object_ = GIMarshallingTests.Object.full_return()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEquals(object_.__grefcount__, 1)
 
     def test_object_none_in(self):
         object_ = GIMarshallingTests.Object(int = 42)
-        GIMarshallingTests.object_none_in(object_)
+        GIMarshallingTests.Object.none_in(object_)
         self.assertEquals(object_.__grefcount__, 1)
 
         object_ = GIMarshallingTests.SubObject(int = 42)
-        GIMarshallingTests.object_none_in(object_)
+        GIMarshallingTests.Object.none_in(object_)
 
         object_ = GObject.GObject()
-        self.assertRaises(TypeError, GIMarshallingTests.object_none_in, object_)
+        self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, object_)
 
-        self.assertRaises(TypeError, GIMarshallingTests.object_none_in, None)
-
-    def test_object_full_in(self):
-        object_ = GIMarshallingTests.Object(int = 42)
-        GIMarshallingTests.object_full_in(object_)
-        self.assertEquals(object_.__grefcount__, 1)
+        self.assertRaises(TypeError, GIMarshallingTests.Object.none_in, None)
 
     def test_object_none_out(self):
-        object_ = GIMarshallingTests.object_none_out()
+        object_ = GIMarshallingTests.Object.none_out()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEquals(object_.__grefcount__, 2)
 
-        new_object = GIMarshallingTests.object_none_out()
+        new_object = GIMarshallingTests.Object.none_out()
         self.assertTrue(new_object is object_)
 
     def test_object_full_out(self):
-        object_ = GIMarshallingTests.object_full_out()
+        object_ = GIMarshallingTests.Object.full_out()
         self.assertTrue(isinstance(object_, GIMarshallingTests.Object))
         self.assertEquals(object_.__grefcount__, 1)
 
     def test_object_none_inout(self):
         object_ = GIMarshallingTests.Object(int = 42)
-        new_object = GIMarshallingTests.object_none_inout(object_)
+        new_object = GIMarshallingTests.Object.none_inout(object_)
 
         self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
 
@@ -1415,20 +1320,20 @@ class TestGObject(unittest.TestCase):
         self.assertEquals(object_.__grefcount__, 1)
         self.assertEquals(new_object.__grefcount__, 2)
 
-        new_new_object = GIMarshallingTests.object_none_inout(object_)
+        new_new_object = GIMarshallingTests.Object.none_inout(object_)
         self.assertTrue(new_new_object is new_object)
 
-        GIMarshallingTests.object_none_inout(GIMarshallingTests.SubObject(int = 42))
+        GIMarshallingTests.Object.none_inout(GIMarshallingTests.SubObject(int = 42))
 
     def test_object_full_inout(self):
         object_ = GIMarshallingTests.Object(int = 42)
-        new_object = GIMarshallingTests.object_full_inout(object_)
+        new_object = GIMarshallingTests.Object.full_inout(object_)
 
         self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
 
         self.assertFalse(object_ is new_object)
 
-        self.assertEquals(object_.__grefcount__, 1)
+        self.assertEquals(object_.__grefcount__, 2)
         self.assertEquals(new_object.__grefcount__, 1)
 
 # FIXME: Doesn't actually return the same object.
@@ -1572,7 +1477,7 @@ class TestOverrides(unittest.TestCase):
         del struct
 
         # Test that the overrides wrapper has been registered.
-        struct = GIMarshallingTests.overrides_struct_return()
+        struct = GIMarshallingTests.OverridesStruct.returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.OverridesStruct))
 
@@ -1593,7 +1498,7 @@ class TestOverrides(unittest.TestCase):
         self.assertEquals(6, object_.method())
 
         # Test that the overrides wrapper has been registered.
-        object_ = GIMarshallingTests.overrides_object_return()
+        object_ = GIMarshallingTests.OverridesObject.returnv()
 
         self.assertTrue(isinstance(object_, GIMarshallingTests.OverridesObject))
 

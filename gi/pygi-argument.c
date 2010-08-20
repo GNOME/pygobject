@@ -603,12 +603,6 @@ _pygi_argument_to_array (GArgument  *arg,
             length_arg_pos = g_type_info_get_array_length (type_info);
             g_assert (length_arg_pos >= 0);
 
-            if (is_method) {
-                length_arg_pos--;
-            }
-
-            g_assert (length_arg_pos >= 0);
-
             /* FIXME: Take into account the type of the argument. */
             length = args[length_arg_pos]->v_int;
         }
@@ -1592,6 +1586,7 @@ _pygi_argument_release (GArgument   *arg,
                         GIDirection  direction)
 {
     GITypeTag type_tag;
+    gboolean is_out = (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT);
 
     type_tag = g_type_info_get_tag (type_info);
 
@@ -1719,7 +1714,7 @@ _pygi_argument_release (GArgument   *arg,
                     if (arg->v_pointer == NULL) {
                         return;
                     }
-                    if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
+                    if (is_out && transfer == GI_TRANSFER_EVERYTHING) {
                         g_object_unref (arg->v_pointer);
                     }
                     break;

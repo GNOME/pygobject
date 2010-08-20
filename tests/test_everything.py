@@ -11,7 +11,7 @@ import cairo
 
 from gi.repository import GObject
 from gi.repository import GLib
-from gi.repository import Everything
+from gi.repository import Regress as Everything
 
 class TestEverything(unittest.TestCase):
 
@@ -138,7 +138,7 @@ class TestNullableArgs(unittest.TestCase):
         Everything.test_utf8_null_in(None)
 
     def test_in_nullable_object(self):
-        Everything.test_object_null_in(None)
+        Everything.TestObj.null_in(None)
 
     def test_out_nullable_hash(self):
         self.assertEqual(None, Everything.test_ghash_null_out())
@@ -154,7 +154,7 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual(None, Everything.test_utf8_null_out())
 
     def test_out_nullable_object(self):
-        self.assertEqual(None, Everything.test_object_null_out())
+        self.assertEqual(None, Everything.TestObj.null_out())
 
 
 class TestCallbacks(unittest.TestCase):
