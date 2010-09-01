@@ -968,7 +968,7 @@ static PyObject *
 _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
 {
     GITypeInfo *type_info;
-    GArgument value;
+    GIArgument value;
     PyObject *py_value;
 
     if (g_constant_info_get_value ( (GIConstantInfo *) self->info, &value) < 0) {
@@ -1022,10 +1022,10 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     GIInfoType container_info_type;
     gpointer pointer;
     GITypeInfo *field_type_info;
-    GArgument value;
+    GIArgument value;
     PyObject *py_value = NULL;
 
-    memset(&value, 0, sizeof(GArgument));
+    memset(&value, 0, sizeof(GIArgument));
 
     if (!PyArg_ParseTuple (args, "O:FieldInfo.get_value", &instance)) {
         return NULL;
@@ -1131,7 +1131,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     GIInfoType container_info_type;
     gpointer pointer;
     GITypeInfo *field_type_info;
-    GArgument value;
+    GIArgument value;
     PyObject *retval = NULL;
 
     if (!PyArg_ParseTuple (args, "OO:FieldInfo.set_value", &instance, &py_value)) {

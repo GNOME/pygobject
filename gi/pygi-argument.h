@@ -40,21 +40,21 @@ gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
                                                 PyObject             *object);
 
 
-GArray* _pygi_argument_to_array (GArgument  *arg,
-                                 GArgument  *args[],
+GArray* _pygi_argument_to_array (GIArgument  *arg,
+                                 GIArgument  *args[],
                                  GITypeInfo *type_info,
                                  gboolean    is_method);
 
-GArgument _pygi_argument_from_object (PyObject   *object,
+GIArgument _pygi_argument_from_object (PyObject   *object,
                                       GITypeInfo *type_info,
                                       GITransfer  transfer);
 
-PyObject* _pygi_argument_to_object (GArgument  *arg,
+PyObject* _pygi_argument_to_object (GIArgument  *arg,
                                     GITypeInfo *type_info,
                                     GITransfer  transfer);
 
 
-void _pygi_argument_release (GArgument   *arg,
+void _pygi_argument_release (GIArgument   *arg,
                              GITypeInfo  *type_info,
                              GITransfer   transfer,
                              GIDirection  direction);

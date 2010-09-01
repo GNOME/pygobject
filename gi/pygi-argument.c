@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
  *
- *   pygi-argument.c: GArgument - PyObject conversion functions.
+ *   pygi-argument.c: GIArgument - PyObject conversion functions.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -571,8 +571,8 @@ check_number_release:
 }
 
 GArray *
-_pygi_argument_to_array (GArgument  *arg,
-                         GArgument  *args[],
+_pygi_argument_to_array (GIArgument  *arg,
+                         GIArgument  *args[],
                          GITypeInfo *type_info,
                          gboolean is_method)
 {
@@ -618,15 +618,15 @@ _pygi_argument_to_array (GArgument  *arg,
     return g_array;
 }
 
-GArgument
+GIArgument
 _pygi_argument_from_object (PyObject   *object,
                             GITypeInfo *type_info,
                             GITransfer  transfer)
 {
-    GArgument arg;
+    GIArgument arg;
     GITypeTag type_tag;
 
-    memset(&arg, 0, sizeof(GArgument));
+    memset(&arg, 0, sizeof(GIArgument));
     type_tag = g_type_info_get_tag (type_info);
 
     switch (type_tag) {
@@ -829,7 +829,7 @@ _pygi_argument_from_object (PyObject   *object,
 
             for (i = 0; i < length; i++) {
                 PyObject *py_item;
-                GArgument item;
+                GIArgument item;
 
                 py_item = PySequence_GetItem (object, i);
                 if (py_item == NULL) {
@@ -849,7 +849,7 @@ _pygi_argument_from_object (PyObject   *object,
 
 array_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release ( (GArgument *) &array, type_info,
+                _pygi_argument_release ( (GIArgument *) &array, type_info,
                                          GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 array = NULL;
 
@@ -1004,7 +1004,7 @@ array_item_error:
 
             for (i = length - 1; i >= 0; i--) {
                 PyObject *py_item;
-                GArgument item;
+                GIArgument item;
 
                 py_item = PySequence_GetItem (object, i);
                 if (py_item == NULL) {
@@ -1029,7 +1029,7 @@ array_item_error:
 
 list_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release ( (GArgument *) &list, type_info,
+                _pygi_argument_release ( (GIArgument *) &list, type_info,
                                          GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 list = NULL;
 
@@ -1109,8 +1109,8 @@ list_item_error:
             for (i = 0; i < length; i++) {
                 PyObject *py_key;
                 PyObject *py_value;
-                GArgument key;
-                GArgument value;
+                GIArgument key;
+                GIArgument value;
 
                 py_key = PyList_GET_ITEM (keys, i);
                 py_value = PyList_GET_ITEM (values, i);
@@ -1131,7 +1131,7 @@ list_item_error:
 
 hash_table_item_error:
                 /* Free everything we have converted so far. */
-                _pygi_argument_release ( (GArgument *) &hash_table, type_info,
+                _pygi_argument_release ( (GIArgument *) &hash_table, type_info,
                                          GI_TRANSFER_NOTHING, GI_DIRECTION_IN);
                 hash_table = NULL;
 
@@ -1158,7 +1158,7 @@ hash_table_release:
 }
 
 PyObject *
-_pygi_argument_to_object (GArgument  *arg,
+_pygi_argument_to_object (GIArgument  *arg,
                           GITypeInfo *type_info,
                           GITransfer transfer)
 {
@@ -1297,7 +1297,7 @@ _pygi_argument_to_object (GArgument  *arg,
             item_size = g_array_get_element_size (array);
 
             for (i = 0; i < array->len; i++) {
-                GArgument item;
+                GIArgument item;
                 PyObject *py_item;
                 gboolean is_struct = FALSE;
 
@@ -1314,9 +1314,9 @@ _pygi_argument_to_object (GArgument  *arg,
                 }
 
                 if (is_struct) {
-                    item.v_pointer = &_g_array_index (array, GArgument, i);
+                    item.v_pointer = &_g_array_index (array, GIArgument, i);
                 } else {
-                    memcpy (&item, &_g_array_index (array, GArgument, i), item_size);
+                    memcpy (&item, &_g_array_index (array, GIArgument, i), item_size);
                 }
 
                 py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
@@ -1491,7 +1491,7 @@ _pygi_argument_to_object (GArgument  *arg,
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
             for (i = 0; list != NULL; list = g_slist_next (list), i++) {
-                GArgument item;
+                GIArgument item;
                 PyObject *py_item;
 
                 item.v_pointer = list->data;
@@ -1515,8 +1515,8 @@ _pygi_argument_to_object (GArgument  *arg,
             GITypeInfo *value_type_info;
             GITransfer item_transfer;
             GHashTableIter hash_table_iter;
-            GArgument key;
-            GArgument value;
+            GIArgument key;
+            GIArgument value;
 
             if (arg->v_pointer == NULL) {
                 object = Py_None;
@@ -1580,7 +1580,7 @@ _pygi_argument_to_object (GArgument  *arg,
 }
 
 void
-_pygi_argument_release (GArgument   *arg,
+_pygi_argument_release (GIArgument   *arg,
                         GITypeInfo  *type_info,
                         GITransfer   transfer,
                         GIDirection  direction)
@@ -1638,8 +1638,8 @@ _pygi_argument_release (GArgument   *arg,
 
                 /* Free the items */
                 for (i = 0; i < array->len; i++) {
-                    GArgument *item;
-                    item = &_g_array_index (array, GArgument, i);
+                    GIArgument *item;
+                    item = &_g_array_index (array, GIArgument, i);
                     _pygi_argument_release (item, item_type_info, item_transfer, direction);
                 }
 
@@ -1749,7 +1749,7 @@ _pygi_argument_release (GArgument   *arg,
 
                 /* Free the items */
                 for (item = list; item != NULL; item = g_slist_next (item)) {
-                    _pygi_argument_release ( (GArgument *) &item->data, item_type_info,
+                    _pygi_argument_release ( (GIArgument *) &item->data, item_type_info,
                                              item_transfer, direction);
                 }
 
@@ -1802,9 +1802,9 @@ _pygi_argument_release (GArgument   *arg,
 
                 g_hash_table_iter_init (&hash_table_iter, hash_table);
                 while (g_hash_table_iter_next (&hash_table_iter, &key, &value)) {
-                    _pygi_argument_release ( (GArgument *) &key, key_type_info,
+                    _pygi_argument_release ( (GIArgument *) &key, key_type_info,
                                              item_transfer, direction);
-                    _pygi_argument_release ( (GArgument *) &value, value_type_info,
+                    _pygi_argument_release ( (GIArgument *) &value, value_type_info,
                                              item_transfer, direction);
                 }
 

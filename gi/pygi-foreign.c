@@ -31,8 +31,8 @@
 typedef struct {
     const char *namespace;
     const char *name;
-    PyGIArgOverrideToGArgumentFunc to_func;
-    PyGIArgOverrideFromGArgumentFunc from_func;
+    PyGIArgOverrideToGIArgumentFunc to_func;
+    PyGIArgOverrideFromGIArgumentFunc from_func;
     PyGIArgOverrideReleaseFunc release_func;
 } PyGIForeignStruct;
 
@@ -107,7 +107,7 @@ PyObject *
 pygi_struct_foreign_convert_to_g_argument (PyObject       *value,
                                            GITypeInfo     *type_info,
                                            GITransfer      transfer,
-                                           GArgument      *arg)
+                                           GIArgument      *arg)
 {
     GIBaseInfo *base_info = g_type_info_get_interface (type_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
@@ -124,7 +124,7 @@ pygi_struct_foreign_convert_to_g_argument (PyObject       *value,
 
 PyObject *
 pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
-                                             GArgument  *arg)
+                                             GIArgument  *arg)
 {
     GIBaseInfo *base_info = g_type_info_get_interface (type_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
@@ -158,8 +158,8 @@ pygi_struct_foreign_release (GIBaseInfo *base_info,
 void
 pygi_register_foreign_struct_real (const char* namespace_,
                                    const char* name,
-                                   PyGIArgOverrideToGArgumentFunc to_func,
-                                   PyGIArgOverrideFromGArgumentFunc from_func,
+                                   PyGIArgOverrideToGIArgumentFunc to_func,
+                                   PyGIArgOverrideFromGIArgumentFunc from_func,
                                    PyGIArgOverrideReleaseFunc release_func)
 {
     PyGIForeignStruct *new_struct = g_slice_new0 (PyGIForeignStruct);

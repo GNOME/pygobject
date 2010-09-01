@@ -29,10 +29,10 @@
 PyObject *g_variant_to_arg(PyObject       *value,
                            GITypeInfo     *type_info,
                            GITransfer      transfer,
-                           GArgument      *arg);
+                           GIArgument      *arg);
 
 PyObject *g_variant_from_arg(GITypeInfo *type_info,
-                             GArgument  *arg);
+                             GIArgument  *arg);
 
 PyObject *g_variant_release_foreign (GIBaseInfo *base_info,
                                      gpointer    struct_);

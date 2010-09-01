@@ -52,12 +52,12 @@ typedef struct {
     gsize size;
 } PyGIBoxed;
 
-typedef PyObject * (*PyGIArgOverrideToGArgumentFunc) (PyObject       *value,
+typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject       *value,
                                                       GITypeInfo     *type_info,
                                                       GITransfer      transfer,
-                                                      GArgument      *arg);
-typedef PyObject * (*PyGIArgOverrideFromGArgumentFunc) (GITypeInfo *type_info,
-                                                        GArgument  *arg);
+                                                      GIArgument      *arg);
+typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GITypeInfo *type_info,
+                                                        GIArgument  *arg);
 typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
                                                   gpointer  struct_);
 
@@ -70,8 +70,8 @@ struct PyGI_API {
                                 PyObject *value);
     void (*register_foreign_struct) (const char* namespace_,
                                      const char* name,
-                                     PyGIArgOverrideToGArgumentFunc to_func,
-                                     PyGIArgOverrideFromGArgumentFunc from_func,
+                                     PyGIArgOverrideToGIArgumentFunc to_func,
+                                     PyGIArgOverrideFromGIArgumentFunc from_func,
                                      PyGIArgOverrideReleaseFunc release_func);
 };
 
@@ -125,8 +125,8 @@ pygi_set_property_value (PyGObject *instance,
 static inline PyObject *
 pygi_register_foreign_struct (const char* namespace_,
                               const char* name,
-                              PyGIArgOverrideToGArgumentFunc to_func,
-                              PyGIArgOverrideFromGArgumentFunc from_func,
+                              PyGIArgOverrideToGIArgumentFunc to_func,
+                              PyGIArgOverrideFromGIArgumentFunc from_func,
                               PyGIArgOverrideReleaseFunc release_func)
 {
     if (_pygi_import() < 0) {

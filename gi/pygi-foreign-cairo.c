@@ -33,7 +33,7 @@ PyObject *
 cairo_context_to_arg (PyObject       *value,
                       GITypeInfo     *type_info,
                       GITransfer      transfer,
-                      GArgument      *arg)
+                      GIArgument      *arg)
 {
     cairo_t *cr;
 
@@ -49,7 +49,7 @@ cairo_context_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_context_from_arg (GITypeInfo *type_info, GArgument  *arg)
+cairo_context_from_arg (GITypeInfo *type_info, GIArgument  *arg)
 {
     cairo_t *context = (cairo_t*) arg;
 
@@ -71,7 +71,7 @@ PyObject *
 cairo_surface_to_arg (PyObject       *value,
                       GITypeInfo     *type_info,
                       GITransfer      transfer,
-                      GArgument      *arg)
+                      GIArgument      *arg)
 {
     cairo_surface_t *surface;
 
@@ -88,7 +88,7 @@ cairo_surface_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_surface_from_arg (GITypeInfo *type_info, GArgument  *arg)
+cairo_surface_from_arg (GITypeInfo *type_info, GIArgument  *arg)
 {
     cairo_surface_t *surface = (cairo_surface_t*) arg;
 

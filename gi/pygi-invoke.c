@@ -49,14 +49,14 @@ struct invocation_state
     GITypeInfo *return_type_info;
     GITypeTag return_type_tag;
 
-    GArgument **args;
+    GIArgument **args;
     gboolean *args_is_auxiliary;
 
-    GArgument *in_args;
-    GArgument *out_args;
-    GArgument *out_values;
-    GArgument *backup_args;
-    GArgument return_arg;
+    GIArgument *in_args;
+    GIArgument *out_args;
+    GIArgument *out_values;
+    GIArgument *backup_args;
+    GIArgument return_arg;
 
     PyObject *return_value;
 };
@@ -281,10 +281,10 @@ _prepare_invocation_state (struct invocation_state *state,
     }
 
     state->args = g_slice_alloc0 (sizeof (gpointer) * state->n_args);
-    state->in_args = g_slice_alloc0 (sizeof (GArgument) * state->n_in_args);
-    state->out_args = g_slice_alloc0 (sizeof (GArgument) * state->n_out_args);
-    state->out_values = g_slice_alloc0 (sizeof (GArgument) * state->n_out_args);
-    state->backup_args = g_slice_alloc0 (sizeof (GArgument) * state->n_backup_args);
+    state->in_args = g_slice_alloc0 (sizeof (GIArgument) * state->n_in_args);
+    state->out_args = g_slice_alloc0 (sizeof (GIArgument) * state->n_out_args);
+    state->out_values = g_slice_alloc0 (sizeof (GIArgument) * state->n_out_args);
+    state->backup_args = g_slice_alloc0 (sizeof (GIArgument) * state->n_backup_args);
 
     /* Bind args so we can use an unique index. */
     {
@@ -868,19 +868,19 @@ _free_invocation_state (struct invocation_state *state)
     }
 
     if (state->in_args != NULL) {
-        g_slice_free1 (sizeof (GArgument) * state->n_in_args, state->in_args);
+        g_slice_free1 (sizeof (GIArgument) * state->n_in_args, state->in_args);
     }
 
     if (state->out_args != NULL) {
-        g_slice_free1 (sizeof (GArgument) * state->n_out_args, state->out_args);
+        g_slice_free1 (sizeof (GIArgument) * state->n_out_args, state->out_args);
     }
 
     if (state->out_values != NULL) {
-        g_slice_free1 (sizeof (GArgument) * state->n_out_args, state->out_values);
+        g_slice_free1 (sizeof (GIArgument) * state->n_out_args, state->out_values);
     }
 
     if (state->backup_args != NULL) {
-        g_slice_free1 (sizeof (GArgument) * state->n_backup_args, state->backup_args);
+        g_slice_free1 (sizeof (GIArgument) * state->n_backup_args, state->backup_args);
     }
 
     if (PyErr_Occurred()) {

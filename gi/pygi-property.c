@@ -91,7 +91,7 @@ pygi_get_property_value_real (PyGObject *instance,
     char *property_name = g_strdup (attr_name);
     GParamSpec *pspec = NULL;
     GValue value = { 0, };
-    GArgument arg = { 0, };
+    GIArgument arg = { 0, };
     PyObject *py_value = NULL;
     GITypeInfo *type_info = NULL;
     GITransfer transfer;
@@ -165,7 +165,7 @@ pygi_set_property_value_real (PyGObject *instance,
     GITypeTag type_tag;
     GITransfer transfer;
     GValue value = { 0, };
-    GArgument arg = { 0, };
+    GIArgument arg = { 0, };
     GParamSpec *pspec = NULL;
     gint ret_value = -1;
 

@@ -30,7 +30,7 @@ PyObject *
 g_variant_to_arg (PyObject       *value,
                   GITypeInfo     *type_info,
                   GITransfer      transfer,
-                  GArgument      *arg)
+                  GIArgument      *arg)
 {
     g_assert (transfer == GI_TRANSFER_NOTHING);
 
@@ -42,7 +42,7 @@ g_variant_to_arg (PyObject       *value,
 
 PyObject *
 g_variant_from_arg (GITypeInfo *type_info,
-                    GArgument  *arg)
+                    GIArgument  *arg)
 {
     GVariant *variant = (GVariant *) arg;
     GITypeInfo *interface_info = g_type_info_get_interface (type_info);
