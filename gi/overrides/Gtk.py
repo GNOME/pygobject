@@ -256,8 +256,14 @@ class Dialog(Gtk.Dialog):
             self.set_modal(True)
         if flags & Gtk.DialogFlags.DESTROY_WITH_PARENT:
             self.set_destroy_with_parent(True)
-        if flags & Gtk.DialogFlags.NO_SEPARATOR:
-            self.set_has_separator(False)
+
+        # NO_SEPARATOR has been removed from Gtk 3
+        try:
+            if flags & Gtk.DialogFlags.NO_SEPARATOR:
+                self.set_has_separator(False)
+        except AttributeError:
+            pass
+
         if buttons:
             self.add_buttons(*buttons)
 
