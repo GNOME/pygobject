@@ -109,11 +109,8 @@ _pygi_scan_for_callbacks (GIFunctionInfo *function_info,
             g_base_info_unref (interface_info);
         }
         destroy = g_arg_info_get_destroy (arg_info);
-        if (is_method)
-            --destroy;
+        
         closure = g_arg_info_get_closure (arg_info);
-        if (is_method)
-            --closure;
         direction = g_arg_info_get_direction (arg_info);
 
         if (destroy > 0 && destroy < n_args) {
