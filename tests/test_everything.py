@@ -138,7 +138,7 @@ class TestNullableArgs(unittest.TestCase):
         Everything.test_utf8_null_in(None)
 
     def test_in_nullable_object(self):
-        Everything.TestObj.null_in(None)
+        Everything.func_obj_null_in(None)
 
     def test_out_nullable_hash(self):
         self.assertEqual(None, Everything.test_ghash_null_out())
