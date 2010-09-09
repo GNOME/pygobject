@@ -1418,7 +1418,7 @@ _pygi_info_register_types (PyObject *m)
         return;   
  
     if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type))
-        return
+        return;
 
     _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
                          PyGIBaseInfo_Type);
