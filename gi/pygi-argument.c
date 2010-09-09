@@ -749,7 +749,7 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_UTF8:
         {
-            const gchar *string;
+            gchar *string;
 
             if (object == Py_None) {
                 arg.v_string = NULL;
@@ -774,7 +774,7 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_FILENAME:
         {
             GError *error = NULL;
-            const gchar *string;
+            gchar *string;
 
 #if PY_VERSION_HEX < 0x03000000
             string = g_strdup(PyString_AsString (object));

@@ -1192,7 +1192,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
-    PyObject_SetAttrString(class, "__gtype__", gtype);
+    PyObject_SetAttrString((PyObject *)class, "__gtype__", gtype);
     Py_DECREF(gtype);
 
       /* propagate new constructor API compatility flag from parent to child type */

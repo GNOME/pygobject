@@ -31,7 +31,7 @@ static void
 _struct_dealloc (PyGIStruct *self)
 {
     GIBaseInfo *info = _pygi_object_get_gi_info (
-                           Py_TYPE((PyObject *) self),
+                           (PyObject *) self,
                            &PyGIStructInfo_Type);
 
     PyObject_GC_UnTrack ( (PyObject *) self);
