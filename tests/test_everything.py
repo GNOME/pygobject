@@ -99,7 +99,8 @@ class TestEverything(unittest.TestCase):
     def test_wrong_type_of_arguments(self):
         try:
             Everything.test_int8()
-        except TypeError, e:
+        except TypeError:
+            (e_type, e) = sys.exc_info()[:2]
             self.assertEquals(e.args, ("test_int8() takes exactly 1 argument(s) (0 given)",))
 
     def test_gtypes(self):
@@ -349,7 +350,7 @@ class TestProperties(unittest.TestCase):
 
         object_.props.hash_table = {'mec': 56}
         self.assertTrue(isinstance(object_.props.hash_table, dict))
-        self.assertEquals(object_.props.hash_table.items()[0], ('mec', 56))
+        self.assertEquals(list(object_.props.hash_table.items())[0], ('mec', 56))
 
     def test_list(self):
         object_ = Everything.TestObj()

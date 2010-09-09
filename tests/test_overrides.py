@@ -187,7 +187,7 @@ class TestGtk(unittest.TestCase):
 
         tree_store = Gtk.TreeStore(int, 'gchararray', TestGtk.TestClass)
         parent = None
-        for i in xrange(100):
+        for i in range(100):
             label = 'this is child #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
             parent = tree_store.append(parent, (i, label, testobj))
@@ -214,7 +214,7 @@ class TestGtk(unittest.TestCase):
 
     def test_list_store(self):
         list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest')
-        for i in xrange(100):
+        for i in range(100):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
             parent = list_store.append((i, label, testobj))

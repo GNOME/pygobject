@@ -206,9 +206,9 @@ class TestProperty(unittest.TestCase):
         o.float = 3.14
         self.assertEqual(o.float, 3.14)
 
-        self.assertEqual(o.long, long(0))
-        o.long = long(100)
-        self.assertEqual(o.long, long(100))
+        self.assertEqual(o.long, _long(0))
+        o.long = _long(100)
+        self.assertEqual(o.long, _long(100))
 
     def testCustomGetter(self):
         class C(gobject.GObject):
