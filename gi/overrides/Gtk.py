@@ -19,11 +19,19 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import sys
 import gobject
 from gi.repository import Gdk
 from gi.repository import GObject
 from ..types import override
 from ..importer import modules
+
+if sys.version_info >= (3, 0):
+    _basestring = str
+    _callable = lambda c: hasattr(c, '__call__')
+else:
+    _basestring = basestring
+    _callable = callable
 
 Gtk = modules['Gtk'].introspection_module
 __all__ = []
@@ -184,7 +192,7 @@ __all__.append('ActionGroup')
 
 class UIManager(Gtk.UIManager):
     def add_ui_from_string(self, buffer):
-        if not isinstance(buffer, basestring):
+        if not isinstance(buffer, _basestring):
             raise TypeError('buffer must be a string')
 
         length = len(buffer)
@@ -207,7 +215,7 @@ class Builder(Gtk.Builder):
             if handler is None:
                 raise AttributeError('Handler %s not found' % handler_name)
 
-            if not callable(handler):
+            if not _callable(handler):
                 raise TypeError('Handler %s is not a method or function' % handler_name)
 
             after = flags or GObject.ConnectFlags.AFTER
@@ -226,7 +234,7 @@ class Builder(Gtk.Builder):
                                   obj_or_map);
 
     def add_from_string(self, buffer):
-        if not isinstance(buffer, basestring):
+        if not isinstance(buffer, _basestring):
             raise TypeError('buffer must be a string')
 
         length = len(buffer)
@@ -234,7 +242,7 @@ class Builder(Gtk.Builder):
         return Gtk.Builder.add_from_string(self, buffer, length)
 
     def add_objects_from_string(self, buffer, object_ids):
-        if not isinstance(buffer, basestring):
+        if not isinstance(buffer, _basestring):
             raise TypeError('buffer must be a string')
 
         length = len(buffer)
@@ -330,14 +338,14 @@ class TextBuffer(Gtk.TextBuffer):
         return tag
 
     def insert(self, iter, text):
-        if not isinstance(text , basestring):
+        if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
         length = len(text)
         Gtk.TextBuffer.insert(self, iter, text, length)
 
     def insert_at_cursor(self, text):
-        if not isinstance(text , basestring):
+        if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
         length = len(text)
@@ -388,7 +396,7 @@ class TreeStore(Gtk.TreeStore, TreeModel):
         if len(row) != n_columns:
             raise ValueError('row sequence has the incorrect number of elements')
 
-        for i in xrange(n_columns):
+        for i in range(n_columns):
             if row[i] is not None:
                 self.set_value(treeiter, i, row[i])
 
@@ -405,7 +413,7 @@ class TreeViewColumn(Gtk.TreeViewColumn):
         if cell_renderer:
             self.pack_start(cell_renderer, True)
 
-        for (name, value) in attributes.iteritems():
+        for (name, value) in attributes.items():
             self.add_attribute(cell_renderer, name, value)
 
 TreeViewColumn = override(TreeViewColumn)
