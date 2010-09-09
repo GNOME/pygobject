@@ -794,20 +794,23 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_long(value, PYGLIB_PyLong_AsLong(obj));
 	break;
     case G_TYPE_ULONG:
-	{
-	    if (PYGLIB_PyLong_Check(obj)) {
-		glong val;
+#if PY_VERSION_HEX < 0x03000000
+	if (PyInt_Check(obj)) {
+            long val;
 
-		val = PYGLIB_PyLong_AsLong(obj);
-		if (val >= 0)
-		    g_value_set_ulong(value, (gulong)val);
-		else
-		    return -1;
-	    } else {
-		g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
-	    }
-	}
-	break;
+            val = PYGLIB_PyLong_AsLong(obj);
+            if (val < 0) {
+                PyErr_SetString(PyExc_OverflowError, "negative value not allowed for uint64 property");
+                return -1;
+            }
+            g_value_set_ulong(value, (gulong)val);
+        } else
+#endif
+        if (PyLong_Check(obj))
+	    g_value_set_ulong(value, PyLong_AsUnsignedLong(obj));
+        else
+            return -1;
+        break;
     case G_TYPE_INT64:
 	g_value_set_int64(value, PyLong_AsLongLong(obj));
 	break;
