@@ -669,11 +669,13 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
-            if (PYGLIB_PyLong_Check (number)) {
-                value = PYGLIB_PyLong_AS_LONG (number);
-            } else {
+#if PY_VERSION_HEX < 0x03000000
+            if (PyInt_Check (number)) {
+                value = PyInt_AS_LONG (number);
+            } else
+#endif
+            if (PyLong_Check (number))
                 value = PyLong_AsUnsignedLongLong (number);
-            }
 
             arg.v_uint64 = value;
 
@@ -691,11 +693,13 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
-            if (PYGLIB_PyLong_Check (number)) {
-                value = PYGLIB_PyLong_AS_LONG (number);
-            } else {
+#if PY_VERSION_HEX < 0x03000000
+            if (PyInt_Check (number)) {
+                value = PyInt_AS_LONG (number);
+            } else 
+#endif 
+            if (PyLong_Check (number))
                 value = PyLong_AsLongLong (number);
-            }
 
             arg.v_int64 = value;
 
