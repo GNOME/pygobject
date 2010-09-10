@@ -497,7 +497,8 @@ check_number_release:
             GITypeInfo *value_type_info;
             Py_ssize_t i;
 
-            if (!PyMapping_Check (object)) {
+            keys = PyMapping_Keys (object);
+            if (keys == NULL) {
                 PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
                               object->ob_type->tp_name);
                 retval = 0;
@@ -506,12 +507,7 @@ check_number_release:
 
             length = PyMapping_Length (object);
             if (length < 0) {
-                retval = -1;
-                break;
-            }
-
-            keys = PyMapping_Keys (object);
-            if (keys == NULL) {
+                Py_DECREF (keys);
                 retval = -1;
                 break;
             }
