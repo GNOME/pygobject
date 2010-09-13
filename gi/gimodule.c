@@ -272,6 +272,25 @@ _wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
     return py_variant;
 }
 
+static PyObject *
+_wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
+{
+    char *type_string;
+    PyObject *py_type;
+    PyObject *py_variant = NULL;
+
+    if (!PyArg_ParseTuple (args, "s:variant_type_from_string",
+                           &type_string)) {
+        return NULL;
+    }
+
+    py_type = _pygi_type_import_by_name ("GLib", "VariantType");
+
+    py_variant = _pygi_struct_new ( (PyTypeObject *) py_type, type_string, FALSE);
+
+    return py_variant;
+}
+
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
@@ -280,6 +299,7 @@ static PyMethodDef _gi_functions[] = {
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },
+    { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

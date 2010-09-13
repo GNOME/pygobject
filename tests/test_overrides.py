@@ -9,10 +9,35 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
+from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 import gi.overrides as overrides
+
+class TestGLib(unittest.TestCase):
+
+    def test_gvariant(self):
+        variant = GLib.Variant('i', 42)
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEquals(variant.get_int32(), 42)
+
+        variant = GLib.Variant('(ss)', 'mec', 'mac')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
+        self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
+
+        variant = GLib.Variant('a{si}', {'key1': 1, 'key2': 2})
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        # Looks like order is not preserved
+        self.assertEquals(variant.get_child_value(1).get_child_value(0).get_string(), 'key1')
+        self.assertEquals(variant.get_child_value(1).get_child_value(1).get_int32(), 1)
+        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'key2')
+        self.assertEquals(variant.get_child_value(0).get_child_value(1).get_int32(), 2)
 
 class TestGdk(unittest.TestCase):
 

@@ -48,7 +48,7 @@ g_variant_from_arg (GITypeInfo *type_info,
     GITypeInfo *interface_info = g_type_info_get_interface (type_info);
     PyObject *type = _pygi_type_import_by_gi_info (interface_info);
 
-    g_variant_ref (variant);
+    g_variant_ref_sink (variant);
 
     return _pygi_struct_new ( (PyTypeObject *) type, variant, FALSE);
 }
