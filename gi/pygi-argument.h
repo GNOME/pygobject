@@ -30,6 +30,8 @@ G_BEGIN_DECLS
 
 
 /* Private */
+gint _pygi_g_type_interface_check_object (GIBaseInfo *info,
+                                          PyObject   *object);
 
 gint _pygi_g_type_info_check_object (GITypeInfo *type_info,
                                      PyObject   *object,

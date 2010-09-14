@@ -161,6 +161,101 @@ _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 }
 
 gint
+_pygi_g_type_interface_check_object (GIBaseInfo *info,
+                                     PyObject   *object)
+{
+    gint retval = 1;
+    GIInfoType info_type;
+
+    info_type = g_base_info_get_type (info);
+    switch (info_type) {
+        case GI_INFO_TYPE_CALLBACK:
+            if (!PyCallable_Check (object)) {
+                PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
+                              object->ob_type->tp_name);
+                retval = 0;
+            }
+            break;
+        case GI_INFO_TYPE_ENUM:
+            retval = 0;
+            if (PyNumber_Check (object)) {
+                PyObject *number = PYGLIB_PyNumber_Long (object);
+                if (number == NULL)
+                    PyErr_Clear();
+                else {
+                    glong value = PYGLIB_PyLong_AsLong (number);
+                    int i;
+                    for (i = 0; i < g_enum_info_get_n_values (info); i++) {
+                        GIValueInfo *value_info = g_enum_info_get_value (info, i);
+                        glong enum_value = g_value_info_get_value (value_info);
+                        if (value == enum_value) {
+                            retval = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (retval < 1)
+                retval = _pygi_g_registered_type_info_check_object (
+                             (GIRegisteredTypeInfo *) info, TRUE, object);
+            break;
+        case GI_INFO_TYPE_FLAGS:
+            if (PyNumber_Check (object)) {
+                /* Accept 0 as a valid flag value */
+                PyObject *number = PYGLIB_PyNumber_Long (object);
+                if (number == NULL)
+                    PyErr_Clear();
+                else {
+                    long value = PYGLIB_PyLong_AsLong (number);
+                    if (value == 0)
+                        break;
+                    else if (value == -1)
+                        PyErr_Clear();
+                }
+            }
+            retval = _pygi_g_registered_type_info_check_object (
+                         (GIRegisteredTypeInfo *) info, TRUE, object);
+            break;
+        case GI_INFO_TYPE_STRUCT:
+        {
+            GType type;
+
+            /* Handle special cases. */
+            type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+            if (g_type_is_a (type, G_TYPE_VALUE)) {
+                GType object_type;
+                object_type = pyg_type_from_object ( (PyObject *) object->ob_type);
+                if (object_type == G_TYPE_INVALID) {
+                    PyErr_Format (PyExc_TypeError, "Must be of a known GType, not %s",
+                                  object->ob_type->tp_name);
+                    retval = 0;
+                }
+                break;
+            } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
+                if (!PyCallable_Check (object)) {
+                    PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
+                                  object->ob_type->tp_name);
+                    retval = 0;
+                }
+                break;
+            }
+
+            /* Fallback. */
+        }
+        case GI_INFO_TYPE_BOXED:
+        case GI_INFO_TYPE_INTERFACE:
+        case GI_INFO_TYPE_OBJECT:
+        case GI_INFO_TYPE_UNION:
+            retval = _pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) info, TRUE, object);
+            break;
+        default:
+            g_assert_not_reached();
+    }
+
+    return retval;
+}
+
+gint
 _pygi_g_type_info_check_object (GITypeInfo *type_info,
                                 PyObject   *object,
                                 gboolean   allow_none)
@@ -346,96 +441,11 @@ check_number_release:
         case GI_TYPE_TAG_INTERFACE:
         {
             GIBaseInfo *info;
-            GIInfoType info_type;
 
             info = g_type_info_get_interface (type_info);
             g_assert (info != NULL);
 
-            info_type = g_base_info_get_type (info);
-
-            switch (info_type) {
-                case GI_INFO_TYPE_CALLBACK:
-                    if (!PyCallable_Check (object)) {
-                        PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
-                                      object->ob_type->tp_name);
-                        retval = 0;
-                    }
-                    break;
-                case GI_INFO_TYPE_ENUM:
-                    retval = 0;
-                    if (PyNumber_Check (object)) {
-                        PyObject *number = PYGLIB_PyNumber_Long (object);
-                        if (number == NULL)
-                            PyErr_Clear();
-                        else {
-                            glong value = PYGLIB_PyLong_AsLong (number);
-                            int i;
-                            for (i = 0; i < g_enum_info_get_n_values (info); i++) {
-                                GIValueInfo *value_info = g_enum_info_get_value (info, i);
-                                glong enum_value = g_value_info_get_value (value_info);
-                                if (value == enum_value) {
-                                    retval = 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (retval < 1)
-                        retval = _pygi_g_registered_type_info_check_object (
-                                     (GIRegisteredTypeInfo *) info, TRUE, object);
-                    break;
-                case GI_INFO_TYPE_FLAGS:
-                    if (PyNumber_Check (object)) {
-                        /* Accept 0 as a valid flag value */
-                        PyObject *number = PYGLIB_PyNumber_Long (object);
-                        if (number == NULL)
-                            PyErr_Clear();
-                        else {
-                            long value = PYGLIB_PyLong_AsLong (number);
-                            if (value == 0)
-                                break;
-                            else if (value == -1)
-                                PyErr_Clear();
-                        }
-                    }
-                    retval = _pygi_g_registered_type_info_check_object (
-                                 (GIRegisteredTypeInfo *) info, TRUE, object);
-                    break;
-                case GI_INFO_TYPE_STRUCT:
-                {
-                    GType type;
-
-                    /* Handle special cases. */
-                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
-                    if (g_type_is_a (type, G_TYPE_VALUE)) {
-                        GType object_type;
-                        object_type = pyg_type_from_object ( (PyObject *) object->ob_type);
-                        if (object_type == G_TYPE_INVALID) {
-                            PyErr_Format (PyExc_TypeError, "Must be of a known GType, not %s",
-                                          object->ob_type->tp_name);
-                            retval = 0;
-                        }
-                        break;
-                    } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
-                        if (!PyCallable_Check (object)) {
-                            PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
-                                          object->ob_type->tp_name);
-                            retval = 0;
-                        }
-                        break;
-                    }
-
-                    /* Fallback. */
-                }
-                case GI_INFO_TYPE_BOXED:
-                case GI_INFO_TYPE_INTERFACE:
-                case GI_INFO_TYPE_OBJECT:
-                case GI_INFO_TYPE_UNION:
-                    retval = _pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) info, TRUE, object);
-                    break;
-                default:
-                    g_assert_not_reached();
-            }
+            retval = _pygi_g_type_interface_check_object(info, object);
 
             g_base_info_unref (info);
             break;

@@ -379,12 +379,26 @@ _prepare_invocation_state (struct invocation_state *state,
             GIBaseInfo *container_info;
             GIInfoType container_info_type;
             PyObject *py_arg;
+            gint check_val;
 
             container_info = g_base_info_get_container (function_info);
             container_info_type = g_base_info_get_type (container_info);
 
             g_assert (py_args_pos < state->n_py_args);
             py_arg = PyTuple_GET_ITEM (py_args, py_args_pos);
+
+            /* In python 2 python takes care of checking the type
+             * of the self instance.  In python 3 it does not
+             * so we have to check it here
+             */
+            check_val = _pygi_g_type_interface_check_object(container_info,
+                                                            py_arg);
+            if (check_val < 0) {
+                return FALSE;
+            } else if (!check_val) {
+                _PyGI_ERROR_PREFIX ("instance: ");
+                return FALSE;
+            }
 
             switch (container_info_type) {
                 case GI_INFO_TYPE_UNION:
