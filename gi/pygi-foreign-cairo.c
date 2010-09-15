@@ -22,7 +22,13 @@
  */
 
 #include <cairo.h>
+
+#if PY_VERSION_HEX < 0x03000000
 #include <pycairo.h>
+#else
+#include <pycairo/py3cairo.h>
+#endif
+
 Pycairo_CAPI_t *Pycairo_CAPI;
 
 #include "pygi-foreign.h"
