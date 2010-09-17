@@ -1,4 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import sys
@@ -12,7 +13,7 @@ import gobject
 from gi.repository import GIMarshallingTests
 
 if sys.version_info < (3, 0):
-    CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8" 
+    CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
 else:
     CONSTANT_UTF8 = "const ♥ utf8"
 
