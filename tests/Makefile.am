@@ -59,20 +59,8 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 
 all: $(LTLIBRARIES:.la=.so)
 
-
-EXTRA_DIST = \
-	runtests.py \
-	testmodule.py \
-	test-floating.h \
-	test-thread.h \
-	test-unknown.h \
-	\
-	test_gcancellable.py \
-	test_gicon.py \
-	test_gio.py \
+TEST_FILES = \
 	test_gobject.py \
-	test_gresolver.py \
-	test_gsocket.py \
 	test_interface.py \
 	test_mainloop.py \
 	test_option.py \
@@ -82,20 +70,37 @@ EXTRA_DIST = \
 	test_subprocess.py \
 	test_thread.py
 
+if BUILD_GIO
+TEST_FILES += \
+	test_gio.py \
+	test_gresolver.py \
+	test_gsocket.py \
+	test_gicon.py \
+	test_gcancellable.py
+endif 
+
 if ENABLE_INTROSPECTION
-EXTRA_DIST += \
+TEST_FILES += \
 	test_everything.py \
 	test_gi.py \
 	test_overrides.py
 endif
 
+EXTRA_DIST = \
+	runtests.py \
+	testmodule.py \
+	test-floating.h \
+	test-thread.h \
+	test-unknown.h 
+
+EXTRA_DIST += $(TEST_FILES)
 
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib
-	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH GI_TYPELIB_PATH=$(builddir) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+	TEST_FILES="$(TEST_FILES)" PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH GI_TYPELIB_PATH=$(builddir) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check

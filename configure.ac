@@ -1,6 +1,14 @@
 -*- mode: m4 -*-
 AC_PREREQ(2.52)
 
+# The version of python used is determined by the executable pointed to by
+# the PYTHON environment variable.  For instance if your system installs
+# Python 3 as python3 to configure to compile pygobject under Python 3
+# you would do this:
+# $> PYTHON=python3 ./configure
+m4_define(python_min_ver, 2.5.2)
+m4_define(python3_min_ver, 3.1)
+
 dnl the pygobject version number
 m4_define(pygobject_major_version, 2)
 m4_define(pygobject_minor_version, 21)
@@ -77,7 +85,21 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
-JD_PATH_PYTHON(2.5.2)
+# check that we have the minimum version of python necisary to build
+JD_PATH_PYTHON(python_min_ver)
+
+# check if we are building for python 3
+JD_PYTHON_CHECK_VERSION([$PYTHON], [3.0],
+			 build_py3k=true,
+			 build_py3k=false)
+
+# if building for python 3 make sure we have the minimum version supported
+if test $build_py3k = true ; then
+  AC_MSG_CHECKING([for $PYTHON >=] python3_min_ver)
+  JD_PYTHON_CHECK_VERSION([$PYTHON], python3_min_ver,
+			  [AC_MSG_RESULT(yes)],
+			  [AC_MSG_ERROR(too old)])
+fi
 
 JD_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
@@ -189,7 +211,11 @@ PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
 	have_gio=true, have_gio=false)
 AC_SUBST(GIO_CFLAGS)
 AC_SUBST(GIO_LIBS)
-AM_CONDITIONAL(BUILD_GIO, $have_gio)
+
+# Do not build GIO if the python version >= 3.0
+# We use GI to access GIO in python 3
+AM_CONDITIONAL(BUILD_GIO, test $have_gio = true -a $build_py3k = false)
+
 if test -n "$export_dynamic"; then
   GIO_LIBS=`echo $GIO_LIBS | sed -e "s/$export_dynamic//"`
 fi
@@ -199,7 +225,7 @@ PKG_CHECK_MODULES(GIOUNIX, gio-unix-2.0 >= giounix_required_version,
 	have_giounix=true, have_giounix=false)
 AC_SUBST(GIOUNIX_CFLAGS)
 AC_SUBST(GIOUNIX_LIBS)
-AM_CONDITIONAL(BUILD_GIOUNIX, $have_giounix)
+AM_CONDITIONAL(BUILD_GIOUNIX, test $have_giounix = true -a $build_py3k = false)
 if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
