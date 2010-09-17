@@ -1053,7 +1053,7 @@ class TestStructure(unittest.TestCase):
         self.assertEquals(None, struct.pointer)
 
     def test_simple_struct_return(self):
-        struct = GIMarshallingTests.SimpleStruct.returnv()
+        struct = GIMarshallingTests.simple_struct_returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.SimpleStruct))
         self.assertEquals(6, struct.long_)
@@ -1099,7 +1099,7 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_pointer_struct_return(self):
-        struct = GIMarshallingTests.PointerStruct.returnv()
+        struct = GIMarshallingTests.pointer_struct_returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.PointerStruct))
         self.assertEquals(42, struct.long_)
@@ -1141,7 +1141,7 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_boxed_struct_return(self):
-        struct = GIMarshallingTests.BoxedStruct.returnv()
+        struct = GIMarshallingTests.boxed_struct_returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
@@ -1158,7 +1158,7 @@ class TestStructure(unittest.TestCase):
         del struct
 
     def test_boxed_struct_out(self):
-        struct = GIMarshallingTests.BoxedStruct.out()
+        struct = GIMarshallingTests.boxed_struct_out()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(42, struct.long_)
@@ -1169,7 +1169,7 @@ class TestStructure(unittest.TestCase):
         in_struct = GIMarshallingTests.BoxedStruct()
         in_struct.long_ = 42
 
-        out_struct = GIMarshallingTests.BoxedStruct.inout(in_struct)
+        out_struct = GIMarshallingTests.boxed_struct_inout(in_struct)
 
         self.assertTrue(isinstance(out_struct, GIMarshallingTests.BoxedStruct))
         self.assertEquals(0, out_struct.long_)
@@ -1189,7 +1189,7 @@ class TestStructure(unittest.TestCase):
         del new_union
 
     def test_union_return(self):
-        union = GIMarshallingTests.Union.returnv()
+        union = GIMarshallingTests.union_returnv()
 
         self.assertTrue(isinstance(union, GIMarshallingTests.Union))
         self.assertEquals(42, union.long_)
@@ -1482,7 +1482,7 @@ class TestOverrides(unittest.TestCase):
         del struct
 
         # Test that the overrides wrapper has been registered.
-        struct = GIMarshallingTests.OverridesStruct.returnv()
+        struct = GIMarshallingTests.overrides_struct_returnv()
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.OverridesStruct))
 
