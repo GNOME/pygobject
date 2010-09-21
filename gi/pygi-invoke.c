@@ -155,9 +155,9 @@ _prepare_invocation_state (struct invocation_state *state,
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             state->n_in_args += 1;
         }
-	if (direction == GI_DIRECTION_INOUT) {
-	    state->n_backup_args += 1;
-	}
+        if (direction == GI_DIRECTION_INOUT) {
+            state->n_backup_args += 1;
+        }
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             state->n_out_args += 1;
         }
@@ -173,11 +173,11 @@ _prepare_invocation_state (struct invocation_state *state,
                     break;
                 }
 
-		/* For array lengths, we're going to delete the length argument; so remove the
-		 * extra backup we just added above */
-		if (direction == GI_DIRECTION_INOUT) {
-		    state->n_backup_args -= 1;
-		}
+                /* For array lengths, we're going to delete the length argument;
+                 * so remove the extra backup we just added above */
+                if (direction == GI_DIRECTION_INOUT) {
+                    state->n_backup_args -= 1;
+                }
 
                 g_assert (length_arg_pos < state->n_args);
                 state->args_is_auxiliary[length_arg_pos] = TRUE;
@@ -693,10 +693,8 @@ _process_invocation_state (struct invocation_state *state,
 
     /* Convert output arguments and release arguments. */
     {
-        gsize backup_args_pos;
         gsize return_values_pos;
 
-        backup_args_pos = 0;
         return_values_pos = 0;
 
         if (state->n_return_values > 1) {
@@ -797,24 +795,9 @@ _process_invocation_state (struct invocation_state *state,
                 return_values_pos += 1;
             }
 
-            /* Release the argument. */
-
-            if (direction == GI_DIRECTION_INOUT) {
-		_pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-					transfer, GI_DIRECTION_IN);
-		backup_args_pos += 1;
-	    }
-	    _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
-
-            if (type_tag == GI_TYPE_TAG_ARRAY
-                    && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
-                /* We created a #GArray and it has not been released above, so free it. */
-                state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
-            }
         }
 
         g_assert (state->n_return_values <= 1 || return_values_pos == state->n_return_values);
-        g_assert (backup_args_pos == state->n_backup_args);
     }
 
     return TRUE;
@@ -824,6 +807,7 @@ static void
 _free_invocation_state (struct invocation_state *state)
 {
     gsize i;
+    gsize backup_args_pos;
 
     if (state->return_type_info != NULL) {
         g_base_info_unref ( (GIBaseInfo *) state->return_type_info);
@@ -834,37 +818,42 @@ _free_invocation_state (struct invocation_state *state)
             _pygi_invoke_closure_free (state->closure);
     }
 
+    /* release all arguments. */
+    backup_args_pos = 0;
     for (i = 0; i < state->n_args; i++) {
 
-        /* check for caller-allocated values we need to free */
+        if (state->args_is_auxiliary[i]) {
+            /* Auxiliary arguments are not released. */
+            continue;
+        }
+
         if (state->args != NULL
             && state->args[i] != NULL
             && state->arg_infos[i] != NULL
-            && state->arg_type_infos[i] != NULL
-            && g_arg_info_is_caller_allocates (state->arg_infos[i])) {
-            GIBaseInfo *info;
-            GIInfoType info_type;
+            && state->arg_type_infos[i] != NULL) {
+            GIDirection direction;
+            GITypeTag type_tag;
+            GITransfer transfer;
 
-            info = g_type_info_get_interface (state->arg_type_infos[i]);
-            g_assert (info != NULL);
+            direction = g_arg_info_get_direction (state->arg_infos[i]);
+            transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
 
-            info_type = g_base_info_get_type (info);
+            type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
-            /* caller-allocates applies only to structs right now
-             * the GI scanner is overzealous when marking parameters
-             * as caller-allocates
-             */
-            if (info_type == GI_INFO_TYPE_STRUCT) {
-                /* special case GValues since all other structs are returned
-                 * as is and freed when they go out of scope
-                 */
-                if (g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info) == G_TYPE_VALUE) {
-                    g_value_unset ( (GValue *) state->args[i]);
-                    g_free (state->args[i]);
-                }
+            /* Release the argument. */
+            if (direction == GI_DIRECTION_INOUT) {
+                _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
+                                        transfer, GI_DIRECTION_IN);
+                backup_args_pos += 1;
+            }
+           _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
+
+            if (type_tag == GI_TYPE_TAG_ARRAY
+                    && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
+                /* We created a #GArray and it has not been released above, so free it. */
+                state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
             }
 
-            g_base_info_unref (info);
         }
 
         if (state->arg_type_infos[i] != NULL)
@@ -872,6 +861,7 @@ _free_invocation_state (struct invocation_state *state)
         if (state->arg_infos[i] != NULL)
             g_base_info_unref ( (GIBaseInfo *) state->arg_infos[i]);
     }
+    g_assert (backup_args_pos == state->n_backup_args);
 
     g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_infos);
     g_slice_free1 (sizeof (gpointer) * state->n_args, state->arg_type_infos);
@@ -925,6 +915,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
         return NULL;
     }
 
+    _free_invocation_state (&state);
     return state.return_value;
 }
 

@@ -247,7 +247,7 @@ class TestCallbacks(unittest.TestCase):
         start_ref_count = getrefcount(ud)
         for i in range(100):
             Everything.test_callback_destroy_notify(callback, ud)
-
+            
         Everything.test_callback_thaw_notifications()
         end_ref_count = getrefcount(ud)
 
@@ -282,6 +282,7 @@ class TestCallbacks(unittest.TestCase):
 
         def callback():
             TestCallbacks.called = True
+            return 42
 
         TestCallbacks.called = False
         object_.instance_method_callback(callback)
@@ -293,6 +294,7 @@ class TestCallbacks(unittest.TestCase):
 
         def callbackWithUserData(user_data):
             TestCallbacks.called = True
+            return 42
 
         TestCallbacks.called = False
         obj_ = Everything.TestObj.new_callback(callbackWithUserData, None)
