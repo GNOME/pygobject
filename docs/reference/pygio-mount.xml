@@ -536,11 +536,12 @@
                     </simpara></listitem>
                 </varlistentry>
             </variablelist>
-    
+
+            <!-- XXX This description must be incorrect! -->
             <para>
                 The <methodname>guess_content_type_finish</methodname>() method finishes guessing content
                 types of mount. If any errors occured during the operation, error will be set to
-                contain the errors and FALSE will be returned. In particular, you may get an
+                contain the errors and <literal>False</literal> will be returned. In particular, you may get an
                 gio.ERROR_NOT_SUPPORTED if the mount does not support content guessing.
             </para>
         </refsect2>

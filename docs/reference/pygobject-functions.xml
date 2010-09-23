@@ -233,16 +233,16 @@ instance</simpara></listitem>
 	</varlistentry>
 	<varlistentry>
 	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara><literal>TRUE</literal> if
+	  <listitem><simpara><literal>True</literal> if
 <parameter>parent_type</parameter> is an ancestor of
 <parameter>type</parameter></simpara></listitem>
 	</varlistentry>
       </variablelist>
 
       <para>The <function>gobject.type_is_a</function>() function returns
-<literal>TRUE</literal> if the specified <parameter>type</parameter> is a
+<literal>True</literal> if the specified <parameter>type</parameter> is a
 descendant of the type specified by <parameter>parent_type</parameter>. This
-function also returns <literal>TRUE</literal> if
+function also returns <literal>True</literal> if
 <parameter>parent_type</parameter> is an interface and
 <parameter>type</parameter> conforms to it.</para>
 

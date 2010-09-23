@@ -148,7 +148,7 @@ loop. The function is given the default idle priority,
 pass to <parameter>callback</parameter> can be specified after
 <parameter>callback</parameter>. The idle priority can be specified as a
 keyword-value pair with the keyword "priority". If
-<parameter>callback</parameter> returns <literal>FALSE</literal> it is
+<parameter>callback</parameter> returns <literal>False</literal> it is
 automatically removed from the list of event sources and will not be called
 again.</para>
 
@@ -194,7 +194,7 @@ arguments to pass to <parameter>callback</parameter> can be specified after
 keyword-value pair with the keyword "priority".</para>
 
       <para>The function is called repeatedly until it returns
-<literal>FALSE</literal>, at which point the timeout is automatically
+<literal>False</literal>, at which point the timeout is automatically
 destroyed and the function will not be called again. The first call to the
 function will be at the end of the first interval. Note that timeout
 functions may be delayed, due to the processing of other event sources. Thus
@@ -355,9 +355,9 @@ signal; and, <parameter>...</parameter> are the zero or more arguments that
 were passed to the <function>glib.io_add_watch</function>()
 function.</para>
 
-      <para>If the callback function returns <literal>FALSE</literal> it
+      <para>If the callback function returns <literal>False</literal> it
 will be automatically removed from the list of event sources and will not be
-called again. If it returns <literal>TRUE</literal> it will be called again
+called again. If it returns <literal>True</literal> it will be called again
 when the condition is matched.</para>
 
     </refsect2>
@@ -376,7 +376,7 @@ when the condition is matched.</para>
 	</varlistentry>
 	<varlistentry>
 	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara><literal>TRUE</literal> if the event source was
+	  <listitem><simpara><literal>True</literal> if the event source was
 removed</simpara></listitem>
 	</varlistentry>
       </variablelist>
@@ -553,17 +553,17 @@ calling <function>exec</function>()</simpara></listitem>
         </varlistentry>
         <varlistentry>
           <term><parameter role="keyword">standard_input</parameter>&nbsp;:</term>
-          <listitem><simpara>if <literal>TRUE</literal> return the file
+          <listitem><simpara>if <literal>True</literal> return the file
 descriptor for the child's stdin</simpara></listitem>
         </varlistentry>
         <varlistentry>
           <term><parameter role="keyword">standard_output</parameter>&nbsp;:</term>
-          <listitem><simpara>if <literal>TRUE</literal> return the file
+          <listitem><simpara>if <literal>True</literal> return the file
 descriptor for the child's stdout</simpara></listitem>
         </varlistentry>
         <varlistentry>
           <term><parameter role="keyword">standard_error</parameter>&nbsp;:</term>
-          <listitem><simpara>if <literal>TRUE</literal> return the file
+          <listitem><simpara>if <literal>True</literal> return the file
 descriptor for the child's stderr</simpara></listitem>
         </varlistentry>
         <varlistentry>
@@ -591,7 +591,7 @@ and stderr. The stdin, stdout and stderr file descriptors are returned only
 ofthe corresponding <parameter>standard_input</parameter>,
 <parameter>standard_output</parameter> or
 <parameter>standard_error</parameter> params are
-<literal>TRUE</literal>.</para>
+<literal>True</literal>.</para>
 
       <para>On Windows, the low-level child process creation API
 (<function>CreateProcess</function>()) doesn't use argument vectors, but a
