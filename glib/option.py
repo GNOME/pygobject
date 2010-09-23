@@ -49,7 +49,7 @@ __all__ = [
     "OptionError",
     "OptionValueError",
     "BadOptionError",
-    "OptionConflictError"
+    "OptionConflictError",
     "Option",
     "OptionGroup",
     "OptionParser",
