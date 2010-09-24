@@ -417,10 +417,8 @@ pyglib_get_current_time(PyObject *unused)
 }
 
 static PyObject*
-pyglib_get_user_cache_dir(PyObject *self)
+get_user_dir(const char *path)
 {
-    const char *path = g_get_user_cache_dir();
-
     if (path)
         return PYGLIB_PyUnicode_FromString(path);
     else {
@@ -432,27 +430,19 @@ pyglib_get_user_cache_dir(PyObject *self)
 static PyObject*
 pyglib_get_user_config_dir(PyObject *self)
 {
-    const char *path = g_get_user_config_dir();
+    return get_user_dir(g_get_user_config_dir());
+}
 
-    if (path)
-        return PYGLIB_PyUnicode_FromString(path);
-    else {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+static PyObject*
+pyglib_get_user_cache_dir(PyObject *self)
+{
+    return get_user_dir(g_get_user_cache_dir());
 }
 
 static PyObject*
 pyglib_get_user_data_dir(PyObject *self)
 {
-    const char *path = g_get_user_data_dir();
-
-    if (path)
-        return PYGLIB_PyUnicode_FromString(path);
-    else {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+    return get_user_dir(g_get_user_data_dir());
 }
 
 static PyObject *
@@ -644,6 +634,44 @@ pyglib_uri_list_extract_uris(PyObject *self, PyObject *args, PyObject *kwargs)
     return ret;
 }
 
+/* FIXME: we should use strv_to_pylist (in pygio-utils.h) here, but that
+ * function should be moved into pyglib first. See
+ * https://bugzilla.gnome.org/show_bug.cgi?id=630508
+ */
+static PyObject *
+tuple_of_strings_from_dirs(const gchar* const *dirs)
+{
+    char **tmp;
+    int i = 0, j;
+    PyObject *ret;
+
+    if (!dirs) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    tmp = (char **)dirs;
+    while (*tmp)
+        tmp++, i++;
+
+    ret = PyTuple_New(i);
+    for (j = 0; j < i; j++)
+        PyTuple_SetItem(ret, j, PYGLIB_PyUnicode_FromString(dirs[j]));
+
+    return ret;
+}
+
+static PyObject*
+pyglib_get_system_config_dirs(PyObject *self)
+{
+    return tuple_of_strings_from_dirs(g_get_system_config_dirs());
+}
+
+static PyObject*
+pyglib_get_system_data_dirs(PyObject *self)
+{
+    return tuple_of_strings_from_dirs(g_get_system_data_dirs());
+}
 
 static PyMethodDef _glib_functions[] = {
     { "threads_init",
@@ -746,6 +774,10 @@ static PyMethodDef _glib_functions[] = {
       "Splits an string containing an URI list conforming to the \n"
       "text/uri-list mime type defined in RFC 2483 into individual URIs, \n"
       "discarding any comments. The URIs are not validated." },
+    { "get_system_config_dirs",
+      (PyCFunction)pyglib_get_system_config_dirs, METH_NOARGS },
+    { "get_system_data_dirs",
+      (PyCFunction)pyglib_get_system_data_dirs, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
