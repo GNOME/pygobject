@@ -1,17 +1,21 @@
 CLEANFILES =
-
+noinst_LTLIBRARIES = 
 if ENABLE_INTROSPECTION
-# noinst_ always builds a static library
-testlib_LTLIBRARIES = libregress.la libgimarshallingtests.la
-testlibdir = $(prefix)/unused
-install-testlibLTLIBRARIES: # prevent it from being installed
+noinst_LTLIBRARIES += libregress.la libgimarshallingtests.la
 
-libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
+nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(PYCAIRO_CFLAGS)
-libregress_la_LDFLAGS = -avoid-version $(GIO_LIBS) $(PYCAIRO_LIBS)
-libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
+libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(PYCAIRO_LIBS)
+nodist_libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
 libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
-libgimarshallingtests_la_LDFLAGS = -avoid-version $(GLIB_LIBS)
+libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS)
+
+# This is a hack to make sure a shared library is built
+libregress.la: $(libregress_la_OBJECTS) $(libregress_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkgpyexecdir) $(libregress_la_LDFLAGS) $(libregress_la_OBJECTS) $(libregress_la_LIBADD) $(LIBS)
+
+libgimarshallingtests.la: $(libgimarshallingtests_la_OBJECTS) $(libgimarshallingtests_la_DEPENDENCIES)
+	$(LINK) -rpath $(pkgpyexecdir) $(libgimarshallingtests_la_LDFLAGS) $(libgimarshallingtests_la_OBJECTS) $(libgimarhallingtests_la_LIBADD) $(LIBS)
 
 # g-i doesn't ship these as shared libraries anymore; we build them here
 Regress-1.0.gir: libregress.la Makefile
@@ -21,7 +25,7 @@ Regress-1.0.gir: libregress.la Makefile
 	--library=libregress.la \
 	--libtool="$(top_builddir)/libtool" \
 	--output $@ \
-	$(libregress_la_SOURCES)
+	$(nodist_libregress_la_SOURCES)
 Regress-1.0.typelib: Regress-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 
@@ -32,14 +36,14 @@ GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 	--library=libgimarshallingtests.la \
 	--libtool="$(top_builddir)/libtool" \
 	--output $@ \
-	$(libgimarshallingtests_la_SOURCES)
+	$(nodist_libgimarshallingtests_la_SOURCES)
 GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 
 CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib
 endif
 
-noinst_LTLIBRARIES = testhelper.la
+noinst_LTLIBRARIES += testhelper.la
 
 testhelper_la_CFLAGS = -I$(top_srcdir)/gobject -I$(top_srcdir)/glib $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 testhelper_la_LDFLAGS = -module -avoid-version
@@ -90,6 +94,7 @@ TEST_FILES += \
 endif
 
 EXTRA_DIST = \
+	compathelper.py \
 	runtests.py \
 	testmodule.py \
 	test-floating.h \
@@ -99,7 +104,7 @@ EXTRA_DIST = \
 EXTRA_DIST += $(TEST_FILES)
 
 clean-local:
-	rm -f $(LTLIBRARIES:.la=.so)
+	rm -f $(LTLIBRARIES:.la=.so) file.txt~
 
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib
