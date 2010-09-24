@@ -1,5 +1,6 @@
 CLEANFILES =
 
+if ENABLE_INTROSPECTION
 # noinst_ always builds a static library
 testlib_LTLIBRARIES = libregress.la libgimarshallingtests.la
 testlibdir = $(prefix)/unused
@@ -36,6 +37,7 @@ GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 
 CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib
+endif
 
 noinst_LTLIBRARIES = testhelper.la
 
