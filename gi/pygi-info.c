@@ -57,6 +57,34 @@ _base_info_repr (PyGIBaseInfo *self)
                                         (void *) self);
 }
 
+static PyObject *
+_base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
+{
+    PyObject *res;
+    GIBaseInfo *other_info;
+
+    if (!PyObject_TypeCheck(other, &PyGIBaseInfo_Type)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    }
+
+    other_info = ((PyGIBaseInfo *)other)->info;
+
+    switch (op) {
+        case Py_EQ:
+            res = g_base_info_equal (self->info, other_info) ? Py_True : Py_False;
+            break;
+        case Py_NE:
+            res = g_base_info_equal (self->info, other_info) ? Py_False : Py_True;
+            break;
+        default:
+            res = Py_NotImplemented;
+            break;
+    }
+    Py_INCREF(res);
+    return res;
+}
+
 static PyMethodDef _PyGIBaseInfo_methods[];
 
 PYGLIB_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
@@ -1478,6 +1506,7 @@ _pygi_info_register_types (PyObject *m)
     PyGIBaseInfo_Type.tp_traverse = (traverseproc) _base_info_traverse;
     PyGIBaseInfo_Type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist);
     PyGIBaseInfo_Type.tp_methods = _PyGIBaseInfo_methods; 
+    PyGIBaseInfo_Type.tp_richcompare = (richcmpfunc)_base_info_richcompare;
 
     if (PyType_Ready(&PyGIBaseInfo_Type))
         return;   
