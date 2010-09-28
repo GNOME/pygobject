@@ -864,8 +864,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	else if (PyObject_TypeCheck(obj, &PyGPointer_Type) &&
 		   G_VALUE_HOLDS(value, ((PyGPointer *)obj)->gtype))
 	    g_value_set_pointer(value, pyg_pointer_get(obj, gpointer));
-	else if (PyCObject_Check(obj))
-	    g_value_set_pointer(value, PyCObject_AsVoidPtr(obj));
+	else if (PYGLIB_PyCapsule_Check(obj))
+	    g_value_set_pointer(value, PYGLIB_PyCapsule_GetPointer(obj, NULL));
 	else
 	    return -1;
 	break;
@@ -910,15 +910,15 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
         }
 	else if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
 	    return bm->tovalue(value, obj);
-	else if (PyCObject_Check(obj))
-	    g_value_set_boxed(value, PyCObject_AsVoidPtr(obj));
+	else if (PYGLIB_PyCapsule_Check(obj))
+	    g_value_set_boxed(value, PYGLIB_PyCapsule_GetPointer(obj, NULL));
 	else
 	    return -1;
 	break;
     }
     case G_TYPE_PARAM:
 	if (PyGParamSpec_Check(obj))
-	    g_value_set_param(value, PyCObject_AsVoidPtr(obj));
+	    g_value_set_param(value, PYGLIB_PyCapsule_GetPointer(obj, NULL));
 	else
 	    return -1;
 	break;
