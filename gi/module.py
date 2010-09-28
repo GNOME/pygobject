@@ -85,6 +85,7 @@ class IntrospectionModule(object):
         self.__name__ = 'gi.repository.' + namespace
 
         repository.require(self._namespace, self.version)
+        self.__path__ = repository.get_typelib_path(self._namespace)
 
         if self.version is None:
             self.version = repository.get_version(self._namespace)
@@ -222,6 +223,7 @@ class DynamicModule(object):
 
         overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
         self._overrides_module = getattr(overrides_modules, self._namespace, None)
+        self.__path__ = repository.get_typelib_path(self._namespace)
 
     def __getattr__(self, name):
         if self.introspection_module is None:
