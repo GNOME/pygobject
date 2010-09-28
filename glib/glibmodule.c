@@ -627,7 +627,7 @@ pyglib_uri_list_extract_uris(PyObject *self, PyObject *args, PyObject *kwargs)
 
     ret = PyTuple_New(i);
     for (j = 0; j < i; j++)
-        PyTuple_SetItem(ret, j, PyString_FromString(uris[j]));
+        PyTuple_SetItem(ret, j, PYGLIB_PyUnicode_FromString(uris[j]));
 
     g_strfreev(uris);
 
