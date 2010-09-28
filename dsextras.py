@@ -122,8 +122,8 @@ class BuildExt(build_ext):
             msnative_struct = { '2' : '-fnative-struct',
                                 '3' : '-mms-bitfields' }
             gcc_version = getoutput('gcc -dumpversion')
-            print 'using MinGW GCC version %s with %s option' % \
-                  (gcc_version, msnative_struct[gcc_version[0]])
+            print ('using MinGW GCC version %s with %s option' % \
+                  (gcc_version, msnative_struct[gcc_version[0]]))
             self.extra_compile_args.append(msnative_struct[gcc_version[0]])
 
     def modify_compiler(self):
@@ -312,9 +312,9 @@ class PkgConfigExtension(Extension):
                 self.can_build_ok = 1
                 return 1
             else:
-                print "Warning: Too old version of %s" % self.pkc_name
-                print "         Need %s, but %s is installed" % \
-                      (version, orig_version)
+                print ("Warning: Too old version of %s" % self.pkc_name)
+                print ("         Need %s, but %s is installed" % \
+                      (version, orig_version))
                 self.can_build_ok = 0
                 return 0
 
@@ -343,7 +343,8 @@ try:
     from codegen.codegen import register_types, SourceWriter, \
          FileOutput
     import codegen.createdefs
-except ImportError, e:
+except ImportError:
+    (etype, e) = sys.exc_info()[:2]    
     template_classes_enabled=False
 
 class Template(object):
