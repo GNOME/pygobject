@@ -328,7 +328,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_boxed_register_types (module);
     _pygi_argument_init();
 
-    api = PyCObject_FromVoidPtr ( (void *) &CAPI, NULL);
+    api = PYGLIB_CPointer_WrapPointer ( (void *) &CAPI, "gi._API");
     if (api == NULL) {
         return;
     }

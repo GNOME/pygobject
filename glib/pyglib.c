@@ -71,8 +71,8 @@ pyglib_init(void)
     }
     
     cobject = PyObject_GetAttrString(glib, "_PyGLib_API");
-    if (cobject && PyCObject_Check(cobject))
-	_PyGLib_API = (struct _PyGLib_Functions *) PyCObject_AsVoidPtr(cobject);
+    if (cobject && PYGLIB_CPointer_Check(cobject))
+	_PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(cobject, "glib._PyGLib_API");
     else {
 	PyErr_SetString(PyExc_ImportError,
 			"could not import glib (could not find _PyGLib_API object)");
@@ -88,7 +88,7 @@ pyglib_init(void)
 void
 pyglib_init_internal(PyObject *api)
 {
-    _PyGLib_API = (struct _PyGLib_Functions *) PyCObject_AsVoidPtr(api);
+    _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "glib._PyGLib_API");
 }
 
 gboolean

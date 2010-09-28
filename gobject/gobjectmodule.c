@@ -2511,7 +2511,7 @@ pygobject_register_api(PyObject *d)
 {
     PyObject *api;
 
-    api = PyCObject_FromVoidPtr(&pygobject_api_functions,NULL);
+    api = PYGLIB_CPointer_WrapPointer(&pygobject_api_functions, "gobject._PyGObject_API");
     PyDict_SetItemString(d, "_PyGObject_API", api);
     Py_DECREF(api);
 }
