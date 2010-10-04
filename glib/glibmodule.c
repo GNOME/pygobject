@@ -797,7 +797,7 @@ pyglib_register_api(PyObject *d)
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGLib_API",
-			 o=PYGLIB_PyCapsule_New(&pyglib_api,"glib._PyGLib_API"));
+			 o=PyCObject_FromVoidPtr(&pyglib_api,NULL));
     Py_DECREF(o);
     
     pyglib_init_internal(o);

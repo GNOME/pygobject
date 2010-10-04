@@ -41,25 +41,6 @@ typedef int Py_ssize_t;
 typedef inquiry lenfunc;
 #endif
 
-/* PyCObject superceded by PyCapsule on Python >= 2.7 */
-#if PY_VERSION_HEX >= 0x02070000
-# define PYGLIB_PyCapsule_Check PyCapsule_CheckExact
-# define PYGLIB_PyCapsule_New(ptr, typename) \
-    PyCapsule_New(ptr, typename, NULL)
-# define PYGLIB_PyCapsule_GetPointer(obj, typename) \
-    PyCapsule_GetPointer(obj, typename)
-# define PYGLIB_PyCapsule_Import(module, symbol) \
-    PyCapsule_Import(##module##.##symbol##, FALSE)
-#else
-# define PYGLIB_PyCapsule_Check PyCObject_Check
-# define PYGLIB_PyCapsule_New(ptr, typename) \
-    PyCObject_FromVoidPtr(ptr, NULL)
-# define PYGLIB_PyCapsule_GetPointer(obj, typename) \
-  PyCObject_AsVoidPtr(obj)
-# define PYGLIB_PyCapsule_Import(module, symbol) \
-    PyCObject_Import(module, symbol)
-#endif
-
 #if PY_VERSION_HEX < 0x03000000
 
 #define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \

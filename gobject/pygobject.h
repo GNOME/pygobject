@@ -352,14 +352,8 @@ pygobject_init(int req_major, int req_minor, int req_micro)
     }
 
     cobject = PyObject_GetAttrString(gobject, "_PyGObject_API");
-#if PY_VERSION_HEX >= 0x02070000
-    if (cobject && PyCapsule_CheckExact(cobject))
-        _PyGObject_API = (struct _PyGObject_Functions *) PyCapsule_GetPointer(cobject, "gobject._PyGObject_API");
-
-#else
     if (cobject && PyCObject_Check(cobject))
         _PyGObject_API = (struct _PyGObject_Functions *) PyCObject_AsVoidPtr(cobject);
-#endif
     else {
         PyErr_SetString(PyExc_ImportError,
                         "could not import gobject (could not find _PyGObject_API object)");

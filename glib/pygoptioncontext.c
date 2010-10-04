@@ -288,7 +288,7 @@ pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
 static PyObject *
 pyg_option_get_context(PyGOptionContext *self)
 {
-    return PYGLIB_PyCapsule_New(self->context, "goption.context");
+    return PyCObject_FromVoidPtr(self->context, NULL);
 }
 
 static PyMethodDef pyg_option_context_methods[] = {
