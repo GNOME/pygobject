@@ -155,7 +155,7 @@ static inline PyObject *
 pygi_get_property_value (PyGObject *instance,
                          const gchar *attr_name)
 {
-    return -1;
+    return NULL;
 }
 
 static inline gint
