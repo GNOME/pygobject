@@ -358,6 +358,89 @@ class TreeModel(Gtk.TreeModel):
     def __len__(self):
         return self.iter_n_children(None)
 
+    def __bool__(self):
+        return True
+
+    def __getitem__(self, key):
+        if isinstance(key, Gtk.TreeIter):
+            return TreeModelRow(self, key)
+        elif isinstance(key, int) and key < 0:
+            index = len(self) + key
+            if index < 0:
+                raise IndexError("row index is out of bounds: %d" % key)
+            try:
+                aiter = self.get_iter(index)
+            except ValueError:
+                raise IndexError("could not find tree path '%s'" % key)
+            return TreeModelRow(self, aiter)
+        else:
+            try:
+                aiter = self.get_iter(key)
+            except ValueError:
+                raise IndexError("could not find tree path '%s'" % key)
+            return TreeModelRow(self, aiter)
+
+    def __iter__(self):
+        return TreeModelRowIter(self, self.get_iter_first())
+
+    def get_iter(self, path):
+        if isinstance(path, Gtk.TreePath):
+            pass
+        elif isinstance(path, (int, str,)):
+            path = self._tree_path_from_string(str(path))
+        elif isinstance(path, tuple):
+            path_str = ":".join(str(val) for val in path)
+            path = self._tree_path_from_string(path_str)
+        else:
+            raise TypeError("tree path must be one of Gtk.TreeIter, Gtk.TreePath, \
+                int, str or tuple, not %s" % type(path).__name__)
+
+        success, aiter = super(TreeModel, self).get_iter(path)
+        if not success:
+            raise ValueError("invalid tree path '%s'" % path)
+        return aiter
+
+    def _tree_path_from_string(self, path):
+        if len(path) == 0:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
+        try:
+            return TreePath.new_from_string(path)
+        except TypeError:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
+
+    def get_iter_first(self):
+        success, aiter = super(TreeModel, self).get_iter_first()
+        if success:
+            return aiter
+
+    def get_iter_from_string(self, path_string):
+        success, aiter = super(TreeModel, self).get_iter_from_string(path_string)
+        if not success:
+            raise ValueError("invalid tree path '%s'" % path_string)
+        return aiter
+
+    def iter_next(self, aiter):
+        next_iter = aiter.copy()
+        success = super(TreeModel, self).iter_next(next_iter)
+        if success:
+            return next_iter
+
+    def iter_children(self, aiter):
+        success, child_iter = super(TreeModel, self).iter_children(aiter)
+        if success:
+            return child_iter
+
+    def iter_nth_child(self, parent, n):
+        success, child_iter = super(TreeModel, self).iter_nth_child(parent, n)
+        if success:
+            return child_iter
+
+    def iter_parent(self, aiter):
+        success, parent_iter = super(TreeModel, self).iter_parent(aiter)
+        if success:
+            return parent_iter
+
+TreeModel.__nonzero__ = TreeModel.__bool__
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
@@ -385,6 +468,118 @@ class ListStore(Gtk.ListStore, TreeModel):
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
+
+class TreeModelRow(object):
+
+    def __init__(self, model, iter_or_path):
+        if not isinstance(model, Gtk.TreeModel):
+            raise TypeError("expected Gtk.TreeModel, %s found" % type(model).__name__)
+        self.model = model
+        if isinstance(iter_or_path, Gtk.TreePath):
+            self.iter = model.get_iter(iter_or_path)
+        elif isinstance(iter_or_path, Gtk.TreeIter):
+            self.iter = iter_or_path
+        else:
+            raise TypeError("expected Gtk.TreeIter or Gtk.TreePath, \
+                %s found" % type(iter_or_path).__name__)
+
+    @property
+    def path(self):
+        return self.model.get_path(self.iter)
+
+    @property
+    def next(self):
+        return self.get_next()
+
+    @property
+    def parent(self):
+        return self.get_parent()
+
+    def get_next(self):
+        next_iter = self.model.iter_next(self.iter)
+        if next_iter:
+            return TreeModelRow(self.model, next_iter)
+
+    def get_parent(self):
+        parent_iter = self.model.iter_parent(self.iter)
+        if parent_iter:
+            return TreeModelRow(self.model, parent_iter)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            if key >= self.model.get_n_columns():
+                raise IndexError("column index is out of bounds: %d" % key)
+            elif key < 0:
+                key = self._convert_negative_index(key)
+            return self.model.get_value(self.iter, key)
+        else:
+            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+
+    def __setitem__(self, key, value):
+        if isinstance(key, int):
+            if key >= self.model.get_n_columns():
+                raise IndexError("column index is out of bounds: %d" % key)
+            elif key < 0:
+                key = self._convert_negative_index(key)
+            return self.model.set_value(self.iter, key, value)
+        else:
+            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+
+    def _convert_negative_index(self, index):
+        new_index = self.model.get_n_columns() + index
+        if new_index < 0:
+            raise IndexError("column index is out of bounds: %d" % index)
+        return new_index
+
+    def iterchildren(self):
+        child_iter = self.model.iter_children(self.iter)
+        return TreeModelRowIter(self.model, child_iter)
+
+__all__.append('TreeModelRow')
+
+class TreeModelRowIter(object):
+
+    def __init__(self, model, aiter):
+        self.model = model
+        self.iter = aiter
+
+    def next(self):
+        if not self.iter:
+            raise StopIteration
+        row = TreeModelRow(self.model, self.iter)
+        self.iter = self.model.iter_next(self.iter)
+        return row
+
+    def __iter__(self):
+        return self
+
+__all__.append('TreeModelRowIter')
+
+class TreePath(Gtk.TreePath):
+
+    def __str__(self):
+        return self.to_string()
+
+    def __lt__(self, other):
+        return self.compare(other) < 0
+
+    def __le__(self, other):
+        return self.compare(other) <= 0
+
+    def __eq__(self, other):
+        return self.compare(other) == 0
+
+    def __ne__(self, other):
+        return self.compare(other) != 0
+
+    def __gt__(self, other):
+        return self.compare(other) > 0
+
+    def __ge__(self, other):
+        return self.compare(other) >= 0
+
+TreePath = override(TreePath)
+__all__.append('TreePath')
 
 class TreeStore(Gtk.TreeStore, TreeModel):
 
