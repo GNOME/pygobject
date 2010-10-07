@@ -174,8 +174,16 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(signal_checker.sentinel, 4)
 
-    def test_dialog(self):
+    def test_dialogs(self):
         self.assertEquals(Gtk.Dialog, overrides.Gtk.Dialog)
+        self.assertEquals(Gtk.AboutDialog, overrides.Gtk.AboutDialog)
+        self.assertEquals(Gtk.MessageDialog, overrides.Gtk.MessageDialog)
+        self.assertEquals(Gtk.ColorSelectionDialog, overrides.Gtk.ColorSelectionDialog)
+        self.assertEquals(Gtk.FileChooserDialog, overrides.Gtk.FileChooserDialog)
+        self.assertEquals(Gtk.FontSelectionDialog, overrides.Gtk.FontSelectionDialog)
+        self.assertEquals(Gtk.RecentChooserDialog, overrides.Gtk.RecentChooserDialog)
+
+        # Gtk.Dialog
         dialog = Gtk.Dialog (title='Foo',
                              flags=Gtk.DialogFlags.MODAL,
                              buttons=('test-button1', 1))
@@ -184,6 +192,60 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
+        button = dialog.get_widget_for_response (1)
+        self.assertEquals('test-button1', button.get_label())
+        button = dialog.get_widget_for_response (2)
+        self.assertEquals('test-button2', button.get_label())
+        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+
+        # Gtk.AboutDialog
+        dialog = Gtk.AboutDialog()
+
+        # Gtk.MessageDialog
+        dialog = Gtk.MessageDialog (title='message dialog test',
+                                    flags=Gtk.DialogFlags.MODAL,
+                                    buttons=Gtk.ButtonsType.OK,
+                                    message_format='dude!')
+
+        self.assertEquals('message dialog test', dialog.get_title())
+        self.assertTrue(dialog.get_modal())
+        text = dialog.get_property('text')
+        self.assertEquals('dude!', text)
+
+        # Gtk.ColorSelectionDialog
+        dialog = Gtk.ColorSelectionDialog("color selection dialog test")
+        self.assertEquals('color selection dialog test', dialog.get_title())
+
+        # Gtk.FileChooserDialog
+        dialog = Gtk.FileChooserDialog (title='file chooser dialog test',
+                                        buttons=('test-button1', 1),
+                                        action=Gtk.FileChooserAction.SAVE)
+
+        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        self.assertEquals('file chooser dialog test', dialog.get_title())
+        button = dialog.get_widget_for_response (1)
+        self.assertEquals('test-button1', button.get_label())
+        button = dialog.get_widget_for_response (2)
+        self.assertEquals('test-button2', button.get_label())
+        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        action = dialog.get_property('action')
+        self.assertEquals(Gtk.FileChooserAction.SAVE, action)
+
+
+        # Gtk.FontSelectionDialog
+        dialog = Gtk.ColorSelectionDialog("font selection dialog test")
+        self.assertEquals('font selection dialog test', dialog.get_title())
+
+        # Gtk.RecentChooserDialog
+        test_manager = Gtk.RecentManager()
+        dialog = Gtk.RecentChooserDialog (title='recent chooser dialog test',
+                                          buttons=('test-button1', 1),
+                                          manager=test_manager)
+
+        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        self.assertEquals('recent chooser dialog test', dialog.get_title())
         button = dialog.get_widget_for_response (1)
         self.assertEquals('test-button1', button.get_label())
         button = dialog.get_widget_for_response (2)

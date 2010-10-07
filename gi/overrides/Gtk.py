@@ -252,10 +252,17 @@ class Builder(Gtk.Builder):
 Builder = override(Builder)
 __all__.append('Builder')
 
+
 class Dialog(Gtk.Dialog):
 
-    def __init__(self, title=None, parent=None, flags=0, buttons=None):
-        Gtk.Dialog.__init__(self)
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 flags=0,
+                 buttons=None,
+                 **kwds):
+
+        Gtk.Dialog.__init__(self, **kwds)
         if title:
             self.set_title(title)
         if parent:
@@ -272,7 +279,7 @@ class Dialog(Gtk.Dialog):
         except AttributeError:
             pass
 
-        if buttons:
+        if buttons is not None:
             self.add_buttons(*buttons)
 
     def add_buttons(self, *args):
@@ -287,21 +294,96 @@ class Dialog(Gtk.Dialog):
 
         will add "Open" and "Close" buttons to dialog.
         """
-
-        def buttons(b):
+        def _button(b):
             while b:
                 t, r = b[0:2]
                 b = b[2:]
                 yield t, r
 
         try:
-            for text, response in buttons(args):
+            for text, response in _button(args):
                 self.add_button(text, response)
         except (IndexError):
             raise TypeError('Must pass an even number of arguments')
 
 Dialog = override(Dialog)
 __all__.append('Dialog')
+
+class MessageDialog(Gtk.MessageDialog, Dialog):
+    def __init__(self,
+                 parent=None,
+                 flags=0,
+                 type=Gtk.MessageType.INFO,
+                 buttons=Gtk.ButtonsType.NONE,
+                 message_format=None,
+                 **kwds):
+
+        if message_format != None:
+            kwds['text'] = message_format
+        Gtk.MessageDialog.__init__(self,
+                                   buttons=buttons,
+                                   **kwds)
+        Dialog.__init__(self, parent=parent, flags=flags)
+
+MessageDialog = override(MessageDialog)
+__all__.append('MessageDialog')
+
+class AboutDialog(Gtk.AboutDialog, Dialog):
+    def __init__(self, **kwds):
+        Gtk.AboutDialog.__init__(self, **kwds)
+        Dialog.__init__(self)
+
+AboutDialog = override(AboutDialog)
+__all__.append('AboutDialog')
+
+class ColorSelectionDialog(Gtk.ColorSelectionDialog, Dialog):
+    def __init__(self, title=None, **kwds):
+        Gtk.ColorSelectionDialog.__init__(self, **kwds)
+        Dialog.__init__(self, title=title)
+
+ColorSelectionDialog = override(ColorSelectionDialog)
+__all__.append('ColorSelectionDialog')
+
+class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 action=Gtk.FileChooserAction.OPEN,
+                 buttons=None,
+                 **kwds):
+        Gtk.FileChooserDialog.__init__(self,
+                                       action=action,
+                                       **kwds)
+        Dialog.__init__(self, title=title, parent=parent, buttons=buttons)
+
+FileChooserDialog = override(FileChooserDialog)
+__all__.append('FileChooserDialog')
+
+class FontSelectionDialog(Gtk.FontSelectionDialog, Dialog):
+    def __init__(self, title=None, **kwds):
+        Gtk.FontSelectionDialog.__init__(self, **kwds)
+        Dialog.__init__(self, title=title)
+
+FontSelectionDialog = override(FontSelectionDialog)
+__all__.append('FontSelectionDialog')
+
+class RecentChooserDialog(Gtk.RecentChooserDialog, Dialog):
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 manager=None,
+                 buttons=None,
+                 **kwds):
+
+        Gtk.RecentChooserDialog.__init__(self, recent_manager=manager, **kwds)
+        Dialog.__init__(self,
+                        title=title,
+                        parent=parent,
+                        buttons=buttons)
+
+RecentChooserDialog = override(RecentChooserDialog)
+__all__.append('RecentChooserDialog')
+
 
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
