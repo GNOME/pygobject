@@ -366,16 +366,20 @@ class ListStore(Gtk.ListStore, TreeModel):
         Gtk.ListStore.__init__(self)
         self.set_column_types(column_types)
 
-    def append(self, row):
+    def append(self, row=None):
         treeiter = Gtk.ListStore.append(self)
 
-        n_columns = self.get_n_columns();
-        if len(row) != n_columns:
-            raise ValueError('row sequence has the incorrect number of elements')
+        # TODO: Accept a dictionary for row
+        # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
 
-        for i in range(n_columns):
-            if row[i] is not None:
-                self.set_value(treeiter, i, row[i])
+        if row is not None:
+            n_columns = self.get_n_columns();
+            if len(row) != n_columns:
+                raise ValueError('row sequence has the incorrect number of elements')
+
+            for i in range(n_columns):
+                if row[i] is not None:
+                    self.set_value(treeiter, i, row[i])
 
         return treeiter
 
@@ -388,17 +392,21 @@ class TreeStore(Gtk.TreeStore, TreeModel):
         Gtk.TreeStore.__init__(self)
         self.set_column_types(column_types)
 
-    def append(self, parent, row):
+    def append(self, parent, row=None):
 
         treeiter = Gtk.TreeStore.append(self, parent)
 
-        n_columns = self.get_n_columns();
-        if len(row) != n_columns:
-            raise ValueError('row sequence has the incorrect number of elements')
+        # TODO: Accept a dictionary for row
+        # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
 
-        for i in range(n_columns):
-            if row[i] is not None:
-                self.set_value(treeiter, i, row[i])
+        if row is not None:
+            n_columns = self.get_n_columns();
+            if len(row) != n_columns:
+                raise ValueError('row sequence has the incorrect number of elements')
+
+            for i in range(n_columns):
+                if row[i] is not None:
+                    self.set_value(treeiter, i, row[i])
 
         return treeiter
 
