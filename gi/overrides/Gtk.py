@@ -427,6 +427,18 @@ class TreeViewColumn(Gtk.TreeViewColumn):
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
+class TreeSelection(Gtk.TreeSelection):
+
+    def get_selected(self):
+        success, model, aiter = super(TreeSelection, self).get_selected()
+        if success:
+            return (model, aiter)
+        else:
+            return (model, None)
+
+TreeSelection = override(TreeSelection)
+__all__.append('TreeSelection')
+
 class Button(Gtk.Button):
     def __init__(self, label=None, stock=None, use_underline=False):
         if stock:
