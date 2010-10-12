@@ -198,6 +198,7 @@ struct _PyGObject_Functions {
 				      gpointer data);
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
+    GType (* type_from_object_strict) (PyObject *obj, gboolean strict);    
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -218,6 +219,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_watch_closure     (_PyGObject_API->object_watch_closure)
 #define pyg_closure_set_exception_handler (_PyGObject_API->closure_set_exception_handler)
 #define pyg_destroy_notify          (_PyGObject_API->destroy_notify)
+#define pyg_type_from_object_strict   (_PyGObject_API->type_from_object_strict)
 #define pyg_type_from_object        (_PyGObject_API->type_from_object)
 #define pyg_type_wrapper_new        (_PyGObject_API->type_wrapper_new)
 #define pyg_enum_get_value          (_PyGObject_API->enum_get_value)

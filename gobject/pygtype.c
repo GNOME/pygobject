@@ -349,16 +349,20 @@ pyg_type_wrapper_new(GType type)
 }
 
 /**
- * pyg_type_from_object:
+ * pyg_type_from_object_strict:
  * obj: a Python object
+ * strict: if set to TRUE, raises an exception if it can't perform the
+ *         conversion
  *
- * converts a python object to a GType.  Raises an exception if it
- * can't perform the conversion.
+ * converts a python object to a GType.  If strict is set, raises an 
+ * exception if it can't perform the conversion, otherwise returns
+ * PY_TYPE_OBJECT.
  *
  * Returns: the corresponding GType, or 0 on error.
  */
+
 GType
-pyg_type_from_object(PyObject *obj)
+pyg_type_from_object_strict(PyObject *obj, gboolean strict)
 {
     PyObject *gtype;
     GType type;
@@ -416,8 +420,33 @@ pyg_type_from_object(PyObject *obj)
     }
 
     PyErr_Clear();
+
+    /* Some API like those that take GValues can hold a python object as
+     * a pointer.  This is potentially dangerous becuase everything is 
+     * passed in as a PyObject so we can't actually type check it.  Only
+     * fallback to PY_TYPE_OBJECT if strict checking is disabled
+     */
+    if (!strict)
+        return PY_TYPE_OBJECT;
+
     PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
     return 0;
+}
+
+/**
+ * pyg_type_from_object:
+ * obj: a Python object
+ *
+ * converts a python object to a GType.  Raises an exception if it
+ * can't perform the conversion.
+ *
+ * Returns: the corresponding GType, or 0 on error.
+ */
+GType
+pyg_type_from_object(PyObject *obj)
+{
+    /* Legacy call always defaults to strict type checking */
+    return pyg_type_from_object_strict(obj, TRUE);
 }
 
 /* -------------- GValue marshalling ------------------ */

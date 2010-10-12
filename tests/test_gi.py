@@ -915,7 +915,6 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_in(self):
         GIMarshallingTests.gvalue_in(42)
-        self.assertRaises(TypeError, GIMarshallingTests.gvalue_in, None)
 
     def test_gvalue_out(self):
         self.assertEquals(42, GIMarshallingTests.gvalue_out())

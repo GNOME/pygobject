@@ -272,12 +272,24 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.TreeModel, overrides.Gtk.TreeModel)
         self.assertEquals(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
 
-        tree_store = Gtk.TreeStore(int, 'gchararray', TestGtk.TestClass)
+        class TestPyObject(object):
+            pass
+
+        test_pyobj = TestPyObject()
+        test_pydict = {1:1, "2":2, "3":"3"}
+        test_pylist = [1,"2", "3"]
+        tree_store = Gtk.TreeStore(int, 'gchararray', TestGtk.TestClass, object, object, object)
+
         parent = None
         for i in range(100):
             label = 'this is child #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
-            parent = tree_store.append(parent, (i, label, testobj))
+            parent = tree_store.append(parent, (i,
+                                                label,
+                                                testobj,
+                                                test_pyobj,
+                                                test_pydict,
+                                                test_pylist))
 
         # len gets the number of children in the root node
         # since we kept appending to the previous node
@@ -293,18 +305,41 @@ class TestGtk(unittest.TestCase):
            i = tree_store.get_value(treeiter, 0)
            s = tree_store.get_value(treeiter, 1)
            obj = tree_store.get_value(treeiter, 2)
+           i = tree_store.get_value(treeiter, 0)
+           s = tree_store.get_value(treeiter, 1)
+           obj = tree_store.get_value(treeiter, 2)
            obj.check(i, s)
+
+           pyobj = tree_store.get_value(treeiter, 3)
+           self.assertEquals(pyobj, test_pyobj)
+           pydict = tree_store.get_value(treeiter, 4)
+           self.assertEquals(pydict, test_pydict)
+           pylist = tree_store.get_value(treeiter, 5)
+           self.assertEquals(pylist, test_pylist)
+
            parent = treeiter
            treeiter = tree_store.iter_children(parent)
 
         self.assertEquals(i, 99)
 
     def test_list_store(self):
-        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest')
+        class TestPyObject(object):
+            pass
+
+        test_pyobj = TestPyObject()
+        test_pydict = {1:1, "2":2, "3":"3"}
+        test_pylist = [1,"2", "3"]
+
+        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object)
         for i in range(100):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
-            parent = list_store.append((i, label, testobj))
+            parent = list_store.append((i,
+                                        label,
+                                        testobj,
+                                        test_pyobj,
+                                        test_pydict,
+                                        test_pylist))
 
         self.assertEquals(len(list_store), 100)
 
@@ -317,6 +352,13 @@ class TestGtk(unittest.TestCase):
             s = list_store.get_value(treeiter, 1)
             obj = list_store.get_value(treeiter, 2)
             obj.check(i, s)
+
+            pyobj = list_store.get_value(treeiter, 3)
+            self.assertEquals(pyobj, test_pyobj)
+            pydict = list_store.get_value(treeiter, 4)
+            self.assertEquals(pydict, test_pydict)
+            pylist = list_store.get_value(treeiter, 5)
+            self.assertEquals(pylist, test_pylist)
             treeiter = list_store.iter_next(treeiter)
 
         self.assertEquals(i, 99)

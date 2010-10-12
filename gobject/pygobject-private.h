@@ -98,6 +98,7 @@ gboolean pyg_gerror_exception_check(GError **error);
 extern PyTypeObject PyGTypeWrapper_Type;
 
 PyObject *pyg_type_wrapper_new (GType type);
+GType     pyg_type_from_object_strict (PyObject *obj, gboolean strict);
 GType     pyg_type_from_object (PyObject *obj);
 
 gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);

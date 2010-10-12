@@ -222,21 +222,16 @@ _pygi_g_type_interface_check_object (GIBaseInfo *info,
 
             /* Handle special cases. */
             type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
-            if (g_type_is_a (type, G_TYPE_VALUE)) {
-                GType object_type;
-                object_type = pyg_type_from_object ( (PyObject *) object->ob_type);
-                if (object_type == G_TYPE_INVALID) {
-                    PyErr_Format (PyExc_TypeError, "Must be of a known GType, not %s",
-                                  object->ob_type->tp_name);
-                    retval = 0;
-                }
-                break;
-            } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
+            if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                 if (!PyCallable_Check (object)) {
                     PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
                                   object->ob_type->tp_name);
                     retval = 0;
                 }
+                break;
+            } else if (g_type_is_a (type, G_TYPE_VALUE)) {
+                /* we can't check g_values because we don't have 
+                 * enough context so just pass them through */
                 break;
             }
 
@@ -904,7 +899,7 @@ array_item_error:
                         GType object_type;
                         gint retval;
 
-                        object_type = pyg_type_from_object ( (PyObject *) object->ob_type);
+                        object_type = pyg_type_from_object_strict ( (PyObject *) object->ob_type, FALSE);
                         if (object_type == G_TYPE_INVALID) {
                             PyErr_SetString (PyExc_RuntimeError, "unable to retrieve object's GType");
                             break;
