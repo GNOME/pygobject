@@ -321,20 +321,13 @@ class PkgConfigExtension(Extension):
     def generate(self):
         pass
 
-# The Template and TemplateExtension classes require codegen which is
-# currently part of the pygtk distribution. While codegen might ultimately
-# be moved to pygobject, it was decided (bug #353849) to keep the Template
-# and TemplateExtension code in dsextras. In the meantime, we check for the
-# availability of codegen and redirect the user to the pygtk installer if
-# he/she wants to get access to Template and TemplateExtension.
+# The Template and TemplateExtension classes require codegen
 
 template_classes_enabled=True
 codegen_error_message="""
 ***************************************************************************
 Codegen could not be found on your system and is required by the
-dsextras.Template and dsextras.TemplateExtension classes. codegen is part
-of PyGTK. To use either Template or TemplateExtension, you should also
-install PyGTK.
+dsextras.Template and dsextras.TemplateExtension classes.
 ***************************************************************************
 """
 try:
