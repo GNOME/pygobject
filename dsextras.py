@@ -312,7 +312,7 @@ class PkgConfigExtension(Extension):
                 self.can_build_ok = 1
                 return 1
             else:
-                print ("Warning: Too old version of %s" % self.pkc_name)
+                print ("Warning: Too old version of %s" % package)
                 print ("         Need %s, but %s is installed" % \
                       (version, orig_version))
                 self.can_build_ok = 0
