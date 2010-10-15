@@ -113,14 +113,14 @@ _pygi_info_new (GIBaseInfo *info)
             type = &PyGIFunctionInfo_Type;
             break;
         case GI_INFO_TYPE_CALLBACK:
-            PyErr_SetString (PyExc_NotImplementedError, "GICallbackInfo bindings not implemented");
-            return NULL;
+            type = &PyGICallbackInfo_Type;
+            break;
         case GI_INFO_TYPE_STRUCT:
             type = &PyGIStructInfo_Type;
             break;
         case GI_INFO_TYPE_BOXED:
-            PyErr_SetString (PyExc_NotImplementedError, "GIBoxedInfo bindings not implemented");
-            return NULL;
+            type = &PyGIBoxedInfo_Type;
+            break;
         case GI_INFO_TYPE_ENUM:
         case GI_INFO_TYPE_FLAGS:
             type = &PyGIEnumInfo_Type;
@@ -135,8 +135,8 @@ _pygi_info_new (GIBaseInfo *info)
             type = &PyGIConstantInfo_Type;
             break;
         case GI_INFO_TYPE_ERROR_DOMAIN:
-            PyErr_SetString (PyExc_NotImplementedError, "GIErrorDomainInfo bindings not implemented");
-            return NULL;
+            type = &PyGIErrorDomainInfo_Type;
+            break;
         case GI_INFO_TYPE_UNION:
             type = &PyGIUnionInfo_Type;
             break;
@@ -144,23 +144,23 @@ _pygi_info_new (GIBaseInfo *info)
             type = &PyGIValueInfo_Type;
             break;
         case GI_INFO_TYPE_SIGNAL:
-            PyErr_SetString (PyExc_NotImplementedError, "GISignalInfo bindings not implemented");
-            return NULL;
+            type = &PyGISignalInfo_Type;
+            break;
         case GI_INFO_TYPE_VFUNC:
             type = &PyGIVFuncInfo_Type;
             break;
         case GI_INFO_TYPE_PROPERTY:
-            PyErr_SetString (PyExc_NotImplementedError, "GIPropertyInfo bindings not implemented");
-            return NULL;
+            type = &PyGIPropertyInfo_Type;
+            break;
         case GI_INFO_TYPE_FIELD:
             type = &PyGIFieldInfo_Type;
             break;
         case GI_INFO_TYPE_ARG:
-            PyErr_SetString (PyExc_NotImplementedError, "GIArgInfo bindings not implemented");
-            return NULL;
+            type = &PyGIArgInfo_Type;
+            break;
         case GI_INFO_TYPE_TYPE:
-            PyErr_SetString (PyExc_NotImplementedError, "GITypeInfo bindings not implemented");
-            return NULL;
+            type = &PyGITypeInfo_Type;
+            break;
         case GI_INFO_TYPE_UNRESOLVED:
             type = &PyGIUnresolvedInfo_Type;
             break;
@@ -207,6 +207,55 @@ out:
 PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGICallableInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* CallbackInfo */
+PYGLIB_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGICallbackInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* BoxedInfo */
+PYGLIB_DEFINE_TYPE ("gi.BoxedInfo", PyGIBoxedInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGIBoxedInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* ErrorDomainInfo */
+PYGLIB_DEFINE_TYPE ("gi.ErrorDomainInfo", PyGIErrorDomainInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGIErrorDomainInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* SignalInfo */
+PYGLIB_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGISignalInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* PropertyInfo */
+PYGLIB_DEFINE_TYPE ("gi.PropertyInfo", PyGIPropertyInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGIPropertyInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* ArgInfo */
+PYGLIB_DEFINE_TYPE ("gi.ArgInfo", PyGIArgInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGIArgInfo_methods[] = {
+    { NULL, NULL, 0 }
+};
+
+/* TypeInfo */
+PYGLIB_DEFINE_TYPE ("gi.TypeInfo", PyGITypeInfo_Type, PyGIBaseInfo);
+
+static PyMethodDef _PyGITypeInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
@@ -1424,6 +1473,8 @@ _pygi_info_register_types (PyObject *m)
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo, 
                          PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGICallbackInfo_Type, CallbackInfo,
+                         PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo, 
                          PyGICallableInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIRegisteredTypeInfo_Type, RegisteredTypeInfo, 
@@ -1446,6 +1497,18 @@ _pygi_info_register_types (PyObject *m)
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, UnionInfo,
                          PyGIRegisteredTypeInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIBoxedInfo_Type, BoxedInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIErrorDomainInfo_Type, ErrorDomainInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGISignalInfo_Type, SignalInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIPropertyInfo_Type, PropertyInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGIArgInfo_Type, ArgInfo,
+                         PyGIBaseInfo_Type);
+    _PyGI_REGISTER_TYPE (m, PyGITypeInfo_Type, TypeInfo,
+                         PyGIBaseInfo_Type);
 
 
 #undef _PyGI_REGISTER_TYPE
