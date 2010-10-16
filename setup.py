@@ -32,7 +32,7 @@ else:
     if not input.startswith('y'):
         raise SystemExit("Aborted")
 
-MIN_PYTHON_VERSION = (2, 3, 5)
+MIN_PYTHON_VERSION = (2, 6, 0)
 
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
