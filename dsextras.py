@@ -346,7 +346,7 @@ class Template(object):
         if not template_classes_enabled:
             raise NameError("'%s' is not defined\n" % cls.__name__
                             + codegen_error_message)    
-        return object.__new__(cls,*args, **kwds)
+        return object.__new__(cls)
 
     def __init__(self, override, output, defs, prefix,
                  register=[], load_types=None, py_ssize_t_clean=False):
