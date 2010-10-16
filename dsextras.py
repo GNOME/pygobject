@@ -120,7 +120,8 @@ class BuildExt(build_ext):
             # uses -mms-bitfields. Based on the version
             # the proper flag is used below.
             msnative_struct = { '2' : '-fnative-struct',
-                                '3' : '-mms-bitfields' }
+                                '3' : '-mms-bitfields',
+                                '4' : '-mms-bitfields'}
             gcc_version = getoutput('gcc -dumpversion')
             print ('using MinGW GCC version %s with %s option' % \
                   (gcc_version, msnative_struct[gcc_version[0]]))
