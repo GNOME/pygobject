@@ -157,13 +157,13 @@ gio = TemplateExtension(name='gio',
                         pkc_name='gio-2.0',
                         pkc_version=GLIB_REQUIRED,
                         output='gio._gio',
-                        defs=('gio/gio.defs', ['gio/gio-types.defs']),
+                        defs='gio/gio.defs',
                         include_dirs=['glib'],
                         libraries=['pyglib'],
                         sources=['gio/giomodule.c',
                                  'gio/gio.c',
                                  'gio/pygio-utils.c'],
-                        register=[('gio/gio.defs', ['gio/gio-types.defs'])],
+                        register=['gio/gio-types.defs'],
                         override='gio/gio.override')
 
 clibs = []
@@ -207,7 +207,7 @@ else:
 if gio.can_build():
     ext_modules.append(gio)
     py_modules += ['gio.__init__']
-    data_files.append((DEFS_DIR,('gio/gio-types.defs',)))
+    data_files.append((DEFS_DIR,('gio/gio.defs', 'gio/gio-types.defs',)))
 else:
     raise SystemExit("ERROR: Nothing to do, gio could not be found and is essential.")
 
