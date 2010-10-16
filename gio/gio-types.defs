@@ -419,28 +419,28 @@
   )
 )
 
-;;(define-flags ConverterFlags
-;;  (in-module "gio")
-;;  (c-name "GConverterFlags")
-;;  (gtype-id "G_TYPE_CONVERTER_FLAGS")
-;;  (values
-;;    '("no-flags" "G_CONVERTER_NO_FLAGS")
-;;    '("input-at-end" "G_CONVERTER_INPUT_AT_END")
-;;    '("flush" "G_CONVERTER_FLUSH")
-;;  )
-;;)
+(define-flags ConverterFlags
+  (in-module "gio")
+  (c-name "GConverterFlags")
+  (gtype-id "G_TYPE_CONVERTER_FLAGS")
+  (values
+    '("no-flags" "G_CONVERTER_NO_FLAGS")
+    '("input-at-end" "G_CONVERTER_INPUT_AT_END")
+    '("flush" "G_CONVERTER_FLUSH")
+  )
+)
 
-;;(define-enum ConverterResult
-;;  (in-module "gio")
-;;  (c-name "GConverterResult")
-;;  (gtype-id "G_TYPE_CONVERTER_RESULT")
-;;  (values
-;;    '("error" "G_CONVERTER_ERROR")
-;;    '("converted" "G_CONVERTER_CONVERTED")
-;;    '("finished" "G_CONVERTER_FINISHED")
-;;    '("flushed" "G_CONVERTER_FLUSHED")
-;;  )
-;;)
+(define-enum ConverterResult
+  (in-module "gio")
+  (c-name "GConverterResult")
+  (gtype-id "G_TYPE_CONVERTER_RESULT")
+  (values
+    '("error" "G_CONVERTER_ERROR")
+    '("converted" "G_CONVERTER_CONVERTED")
+    '("finished" "G_CONVERTER_FINISHED")
+    '("flushed" "G_CONVERTER_FLUSHED")
+  )
+)
 
 (define-enum DataStreamByteOrder
   (in-module "gio")
@@ -795,13 +795,13 @@
   )
 )
 
-;;(define-enum ZlibCompressorFormat
-;;  (in-module "gio")
-;;  (c-name "GZlibCompressorFormat")
-;;  (gtype-id "G_TYPE_ZLIB_COMPRESSOR_FORMAT")
-;;  (values
-;;    '("zlib" "G_ZLIB_COMPRESSOR_FORMAT_ZLIB")
-;;    '("gzip" "G_ZLIB_COMPRESSOR_FORMAT_GZIP")
-;;    '("raw" "G_ZLIB_COMPRESSOR_FORMAT_RAW")
-;;  )
-;;)
+(define-enum ZlibCompressorFormat
+  (in-module "gio")
+  (c-name "GZlibCompressorFormat")
+  (gtype-id "G_TYPE_ZLIB_COMPRESSOR_FORMAT")
+  (values
+    '("zlib" "G_ZLIB_COMPRESSOR_FORMAT_ZLIB")
+    '("gzip" "G_ZLIB_COMPRESSOR_FORMAT_GZIP")
+    '("raw" "G_ZLIB_COMPRESSOR_FORMAT_RAW")
+  )
+)
