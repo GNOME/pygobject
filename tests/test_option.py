@@ -2,11 +2,17 @@
 
 import unittest
 import sys
-from StringIO import StringIO
+
+# py3k has StringIO in a different module
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError
 
+from compathelper import _bytes
 
 class TestOption(unittest.TestCase):
     EXCEPTION_MESSAGE = "This callback fails"
@@ -23,7 +29,7 @@ class TestOption(unittest.TestCase):
 
     def _create_group(self):
         def option_callback(option, opt, value, parser):
-            raise StandardError(self.EXCEPTION_MESSAGE)
+            raise Exception(self.EXCEPTION_MESSAGE)
 
         group = OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
@@ -108,6 +114,7 @@ class TestOption(unittest.TestCase):
                 ["test_option.py", "--callback-failure-test"])
         finally:
             sys.stderr = old_stderr
+
         assert (sio.getvalue().split('\n')[-2] ==
-                "StandardError: " + self.EXCEPTION_MESSAGE)
+                "Exception: " + self.EXCEPTION_MESSAGE)
 

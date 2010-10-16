@@ -210,6 +210,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 
 #define pygobject_register_class    (_PyGObject_API->register_class)
 #define pygobject_register_wrapper  (_PyGObject_API->register_wrapper)
+/* This is deprecated, sinkfuncs are not needed anymore */
 #define pygobject_register_sinkfunc (_PyGObject_API->register_sinkfunc)
 #define pygobject_lookup_class      (_PyGObject_API->lookup_class)
 #define pygobject_new               (_PyGObject_API->newgobj)
@@ -316,9 +317,32 @@ pygobject_init(int req_major, int req_minor, int req_micro)
             Py_XDECREF(type);
             Py_XDECREF(value);
             Py_XDECREF(traceback);
+
+
+#if PY_VERSION_HEX < 0x03000000
             PyErr_Format(PyExc_ImportError,
                          "could not import gobject (error was: %s)",
                          PyString_AsString(py_orig_exc));
+#else
+            {
+                /* Can not use PyErr_Format because it doesn't have
+                 * a format string for dealing with PyUnicode objects
+                 * like PyUnicode_FromFormat has
+                 */
+                PyObject *errmsg = PyUnicode_FromFormat("could not import gobject (error was: %U)",
+                                                        py_orig_exc);
+
+                if (errmsg) {
+                   PyErr_SetObject(PyExc_ImportError,
+                                   errmsg);
+                   Py_DECREF(errmsg);
+                }
+                /* if errmsg is NULL then we might have OOM
+                 * PyErr should already be set and trying to
+                 * return our own error would be futile
+                 */
+            }
+#endif
             Py_DECREF(py_orig_exc);
         } else {
             PyErr_SetString(PyExc_ImportError,
@@ -328,8 +352,14 @@ pygobject_init(int req_major, int req_minor, int req_micro)
     }
 
     cobject = PyObject_GetAttrString(gobject, "_PyGObject_API");
+#if PY_VERSION_HEX >= 0x03000000
+    if (cobject && PyCapsule_CheckExact(cobject))
+        _PyGObject_API = (struct _PyGObject_Functions *) PyCapsule_GetPointer(cobject, "gobject._PyGObject_API");
+
+#else
     if (cobject && PyCObject_Check(cobject))
         _PyGObject_API = (struct _PyGObject_Functions *) PyCObject_AsVoidPtr(cobject);
+#endif
     else {
         PyErr_SetString(PyExc_ImportError,
                         "could not import gobject (could not find _PyGObject_API object)");

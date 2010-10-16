@@ -3,7 +3,9 @@
 import os
 import unittest
 
-from common import gio, glib, gobject
+import glib
+import gobject
+import gio
 
 
 class TestSocket(unittest.TestCase):

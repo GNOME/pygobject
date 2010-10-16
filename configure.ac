@@ -1,13 +1,23 @@
 -*- mode: m4 -*-
 AC_PREREQ(2.52)
 
+# The version of python used is determined by the executable pointed to by
+# the PYTHON environment variable.  For instance if your system installs
+# Python 3 as python3 to configure to compile pygobject under Python 3
+# you would do this:
+# $> PYTHON=python3 ./configure
+m4_define(python_min_ver, 2.5.2)
+m4_define(python3_min_ver, 3.1)
+
 dnl the pygobject version number
 m4_define(pygobject_major_version, 2)
-m4_define(pygobject_minor_version, 21)
-m4_define(pygobject_micro_version, 2)
+m4_define(pygobject_minor_version, 27)
+m4_define(pygobject_micro_version, 0)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
+m4_define(introspection_required_version, 0.9.5)
+m4_define(pycairo_required_version, 1.0.2)
 m4_define(glib_required_version, 2.22.4)
 m4_define(gio_required_version, 2.22.4)
 m4_define(giounix_required_version, 2.22.4)
@@ -16,6 +26,7 @@ AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
 
 AC_DEFINE(PYGOBJECT_MAJOR_VERSION, pygobject_major_version, [pygobject major version])
 AC_SUBST(PYGOBJECT_MAJOR_VERSION, pygobject_major_version)
@@ -24,10 +35,10 @@ AC_SUBST(PYGOBJECT_MINOR_VERSION, pygobject_minor_version)
 AC_DEFINE(PYGOBJECT_MICRO_VERSION, pygobject_micro_version, [pygobject micro version])
 AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
-AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
 AM_CONFIG_HEADER(config.h)
-
-AM_INIT_AUTOMAKE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
+AM_INIT_AUTOMAKE(foreign)
+AM_MAINTAINER_MODE
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
@@ -68,10 +79,27 @@ m4_define([_LT_AC_TAGCONFIG],[])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 dnl when using libtool 2.x create libtool early, because it's used in configure
-m4_ifdef([LT_OUTPUT], [LT_OUTPUT]) 
+m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
+AC_ISC_POSIX
+AC_PROG_CC
+AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
-JD_PATH_PYTHON(2.3.5)
+# check that we have the minimum version of python necisary to build
+JD_PATH_PYTHON(python_min_ver)
+
+# check if we are building for python 3
+JD_PYTHON_CHECK_VERSION([$PYTHON], [3.0],
+			 build_py3k=true,
+			 build_py3k=false)
+
+# if building for python 3 make sure we have the minimum version supported
+if test $build_py3k = true ; then
+  AC_MSG_CHECKING([for $PYTHON >=] python3_min_ver)
+  JD_PYTHON_CHECK_VERSION([$PYTHON], python3_min_ver,
+			  [AC_MSG_RESULT(yes)],
+			  [AC_MSG_ERROR(too old)])
+fi
 
 JD_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
@@ -173,7 +201,6 @@ if test x"$have_libffi" = xyes; then
   AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
   LIBFFI_PC=libffi
 fi
-AC_MSG_RESULT([$have_libffi])
 AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
@@ -184,7 +211,11 @@ PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
 	have_gio=true, have_gio=false)
 AC_SUBST(GIO_CFLAGS)
 AC_SUBST(GIO_LIBS)
-AM_CONDITIONAL(BUILD_GIO, $have_gio)
+
+# Do not build GIO if the python version >= 3.0
+# We use GI to access GIO in python 3
+AM_CONDITIONAL(BUILD_GIO, test $have_gio = true -a $build_py3k = false)
+
 if test -n "$export_dynamic"; then
   GIO_LIBS=`echo $GIO_LIBS | sed -e "s/$export_dynamic//"`
 fi
@@ -194,18 +225,44 @@ PKG_CHECK_MODULES(GIOUNIX, gio-unix-2.0 >= giounix_required_version,
 	have_giounix=true, have_giounix=false)
 AC_SUBST(GIOUNIX_CFLAGS)
 AC_SUBST(GIOUNIX_LIBS)
-AM_CONDITIONAL(BUILD_GIOUNIX, $have_giounix)
+AM_CONDITIONAL(BUILD_GIOUNIX, test $have_giounix = true -a $build_py3k = false)
 if test -n "$export_dynamic"; then
   GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
 fi
 
-AC_ARG_ENABLE(pygi,
-  AC_HELP_STRING([--enable-pygi], [Use PyGI to create wrappers for introspection-enabled types]),
-  enable_pygi=$enableval,
-  enable_pygi=no)
-if test "$enable_pygi" != no; then
-    AC_DEFINE(ENABLE_PYGI,1,Use PyGI to create wrappers for introspection-enabled types)
+AC_ARG_ENABLE(cairo,
+    AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
+    enable_cairo=$enableval,
+    enable_cairo=yes)
+
+AC_ARG_ENABLE(introspection,
+  AC_HELP_STRING([--enable-introspection], [Use introspection information]),
+  enable_introspection=$enableval,
+  enable_introspection=yes)
+if test "$enable_introspection" != no; then
+    AC_DEFINE(ENABLE_INTROSPECTION,1,Use introspection information)
+    PKG_CHECK_MODULES(GI,
+        glib-2.0 >= glib_required_version
+        gobject-introspection-1.0 >= introspection_required_version
+    )
+
+    GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
+    AC_SUBST(GI_DATADIR)
+
+    if test "$enable_cairo" != no; then
+        PKG_CHECK_MODULES(PYCAIRO,
+            pycairo >= pycairo_required_version
+        )
+    fi
 fi
+AM_CONDITIONAL(ENABLE_INTROSPECTION, test "$enable_introspection" = "yes")
+AM_CONDITIONAL(ENABLE_CAIRO, test "$enable_cairo" = "yes")
+
+INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
+INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0`
+
+AC_SUBST(INTROSPECTION_SCANNER)
+AC_SUBST(INTROSPECTION_COMPILER)
 
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
@@ -231,6 +288,9 @@ AC_CONFIG_FILES(
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
+  gi/Makefile
+  gi/repository/Makefile
+  gi/overrides/Makefile
   glib/Makefile
   gobject/Makefile
   gio/Makefile
@@ -241,4 +301,5 @@ AC_OUTPUT
 
 echo
 echo "libffi support: $have_libffi"
+echo "introspection support: $enable_introspection"
 echo

@@ -3,7 +3,8 @@
 import os
 import unittest
 
-from common import gio, glib
+import glib
+import gio
 
 
 class TestFile(unittest.TestCase):

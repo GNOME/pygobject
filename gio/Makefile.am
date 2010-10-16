@@ -109,6 +109,7 @@ endif
 
 if BUILD_GIO
 all: $(pkgpyexec_LTLIBRARIES:.la=.so)
+check-local: $(pkgpyexec_LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(pkgpyexec_LTLIBRARIES:.la=.so)
 .la.so:

@@ -98,7 +98,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     for (pos = 0; pos < argv_length; pos++)
     {
         arg = PyList_GetItem(argv, pos);
-        argv_content[pos] = g_strdup(_PyUnicode_AsString(arg));
+        argv_content[pos] = g_strdup(PYGLIB_PyUnicode_AsString(arg));
         if (argv_content[pos] == NULL)
         {
             g_strfreev(argv_content);
@@ -126,7 +126,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     new_argv = PyList_New(g_strv_length(argv_content));
     for (pos = 0; pos < argv_length; pos++)
     {
-        arg = _PyUnicode_FromString(argv_content[pos]);
+        arg = PYGLIB_PyUnicode_FromString(argv_content[pos]);
         PyList_SetItem(new_argv, pos, arg);
     }
 
@@ -272,19 +272,23 @@ pyg_option_context_add_group(PyGOptionContext *self,
     return Py_None;
 }
 
-static int
-pyg_option_context_compare(PyGOptionContext *self, PyGOptionContext *context)
+static PyObject*
+pyg_option_context_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->context == context->context) return 0;
-    if (self->context > context->context)
-        return 1;
-    return -1;
+    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGOptionContext_Type)
+        return _pyglib_generic_ptr_richcompare(((PyGOptionContext*)self)->context,
+                                               ((PyGOptionContext*)other)->context,
+                                               op);
+    else {
+       Py_INCREF(Py_NotImplemented);
+       return Py_NotImplemented;
+    }
 }
 
 static PyObject *
 pyg_option_get_context(PyGOptionContext *self)
 {
-    return PyCObject_FromVoidPtr(self->context, NULL);
+    return PYGLIB_CPointer_WrapPointer(self->context, "goption.context");
 }
 
 static PyMethodDef pyg_option_context_methods[] = {
@@ -304,7 +308,7 @@ void
 pyglib_option_context_register_types(PyObject *d)
 {
     PyGOptionContext_Type.tp_dealloc = (destructor)pyg_option_context_dealloc;
-    PyGOptionContext_Type.tp_compare = (cmpfunc)pyg_option_context_compare;
+    PyGOptionContext_Type.tp_richcompare = pyg_option_context_richcompare;
     PyGOptionContext_Type.tp_flags = Py_TPFLAGS_DEFAULT;
     PyGOptionContext_Type.tp_methods = pyg_option_context_methods;
     PyGOptionContext_Type.tp_init = (initproc)pyg_option_context_init;

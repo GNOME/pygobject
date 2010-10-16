@@ -39,17 +39,23 @@ py_io_channel_next(PyGIOChannel *self)
         return NULL;
     }
 
-    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
+    ret_obj = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
 }
 
-static int
-py_io_channel_compare(PyGIOChannel *self, PyGIOChannel *v)
+static PyObject*
+py_io_channel_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (self->channel == v->channel) return 0;
-    if (self->channel > v->channel) return -1;
-    return 1;
+    if (Py_TYPE(self) == Py_TYPE(other) && 
+          Py_TYPE(self) == &PyGIOChannel_Type) {
+        return _pyglib_generic_ptr_richcompare(((PyGIOChannel*)self)->channel,
+                                               ((PyGIOChannel*)other)->channel,
+                                               op);
+    } else {
+       Py_INCREF(Py_NotImplemented);
+       return Py_NotImplemented;
+    }
 }
 
 static PyObject*
@@ -88,7 +94,7 @@ py_io_channel_shutdown(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(ret);
+    return PYGLIB_PyLong_FromLong(ret);
 }
 
 /* character encoding conversion involved functions.
@@ -112,7 +118,7 @@ py_io_channel_set_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwar
 static PyObject*
 py_io_channel_get_buffer_size(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffer_size(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffer_size(self->channel));
 }
 
 static PyObject*
@@ -133,7 +139,7 @@ py_io_channel_set_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 static PyObject*
 py_io_channel_get_buffered(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffered(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffered(self->channel));
 }
 
 static PyObject*
@@ -164,7 +170,7 @@ py_io_channel_get_encoding(PyGIOChannel* self)
 	return Py_None;
     }
 
-    return _PyUnicode_FromString(encoding);
+    return PYGLIB_PyUnicode_FromString(encoding);
 }
 
 #define CHUNK_SIZE (8 * 1024)
@@ -183,7 +189,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     if (max_count == 0)
-	return _PyUnicode_FromString("");
+	return PYGLIB_PyUnicode_FromString("");
     
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
@@ -200,16 +206,16 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         }
 	
 	if ( ret_obj == NULL ) {
-	    ret_obj = _PyUnicode_FromStringAndSize((char *)NULL, buf_size);
+	    ret_obj = PYGLIB_PyBytes_FromStringAndSize((char *)NULL, buf_size);
 	    if (ret_obj == NULL)
 		goto failure;
 	}
-	else if (buf_size + total_read > _PyUnicode_GET_SIZE(ret_obj)) {
-	    if (_PyUnicode_Resize(&ret_obj, buf_size + total_read) == -1)
+	else if (buf_size + total_read > PYGLIB_PyBytes_Size(ret_obj)) {
+	    if (PYGLIB_PyBytes_Resize(&ret_obj, buf_size + total_read) == -1)
 		goto failure;
 	}
        
-        buf = _PyUnicode_AS_STRING(ret_obj) + total_read;
+        buf = PYGLIB_PyBytes_AsString(ret_obj) + total_read;
 
         pyglib_unblock_threads();
         status = g_io_channel_read_chars(self->channel, buf, buf_size, 
@@ -221,10 +227,28 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	total_read += single_read;
     }
 	
-    if ( total_read != _PyUnicode_GET_SIZE(ret_obj) ) {
-	if (_PyUnicode_Resize(&ret_obj, total_read) == -1)
+    if ( total_read != PYGLIB_PyBytes_Size(ret_obj) ) {
+	if (PYGLIB_PyBytes_Resize(&ret_obj, total_read) == -1)
 	    goto failure;
     }
+
+#if PY_VERSION_HEX >= 0x03000000
+    /* If this is not UTF8 encoded channel return the raw bytes */
+    if (g_io_channel_get_encoding(self->channel) != NULL)
+        return ret_obj;
+
+    /* convert to Unicode string */
+    {
+	PyObject *unicode_obj;
+
+	unicode_obj = PyUnicode_FromString(PyBytes_AS_STRING(ret_obj));
+	if (unicode_obj == NULL)
+	    goto failure;
+	Py_DECREF(ret_obj);
+	ret_obj = unicode_obj;
+    }
+#endif
+
     return ret_obj;
 
   failure:
@@ -252,7 +276,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(count);
+    return PYGLIB_PyLong_FromLong(count);
 }
 
 static PyObject*
@@ -278,13 +302,13 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             PyErr_Clear();
             goto normal_exit;
         }
-        if (!_PyUnicode_Check(value)) {
+        if (!PYGLIB_PyUnicode_Check(value)) {
             PyErr_SetString(PyExc_TypeError, "glib.IOChannel.writelines must"
                             " be sequence/iterator of strings");
             Py_DECREF(iter);
             return NULL;
         }
-        _PyUnicode_AsStringAndSize(value, &buf, &buf_len);
+        PYGLIB_PyUnicode_AsStringAndSize(value, &buf, &buf_len);
         pyglib_unblock_threads();
         status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
         pyglib_unblock_threads();
@@ -312,7 +336,7 @@ py_io_channel_flush(PyGIOChannel* self)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 static PyObject*
@@ -331,19 +355,19 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 static PyObject*
 py_io_channel_get_flags(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_flags(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_flags(self->channel));
 }
 
 static PyObject*
 py_io_channel_get_buffer_condition(PyGIOChannel* self)
 {
-    return _PyLong_FromLong(g_io_channel_get_buffer_condition(self->channel));
+    return PYGLIB_PyLong_FromLong(g_io_channel_get_buffer_condition(self->channel));
 }
 
 static PyObject*
@@ -494,7 +518,7 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
         pyfd = PyList_GET_ITEM(pyfds, i);
         ((PyGPollFD *) pyfd)->pollfd = pollfd[i];
     }
-    return _PyLong_FromLong(result);
+    return PYGLIB_PyLong_FromLong(result);
 }
 
 static PyObject *
@@ -538,7 +562,7 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
                                     &terminator_pos, &error);
     if (pyglib_error_check(&error))
         return NULL;
-    ret_obj = _PyUnicode_FromStringAndSize(str_return, length);
+    ret_obj = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
     g_free(str_return);
     return ret_obj;
 }
@@ -567,7 +591,7 @@ py_io_channel_read_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             Py_DECREF(line);
             return NULL;
         }
-        line = _PyUnicode_FromStringAndSize(str_return, length);
+        line = PYGLIB_PyUnicode_FromStringAndSize(str_return, length);
         g_free(str_return);
         if (PyList_Append(list, line)) {
             Py_DECREF(line);
@@ -608,7 +632,7 @@ py_io_channel_seek(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     if (pyglib_error_check(&error))
 	return NULL;
 	
-    return _PyLong_FromLong(status);
+    return PYGLIB_PyLong_FromLong(status);
 }
 
 #if 0 // Not wrapped
@@ -643,29 +667,29 @@ static PyMemberDef py_io_channel_members[] = {
 };
 
 static PyMethodDef py_io_channel_methods[] = {
-    { "close", (PyCFunction)py_io_channel_shutdown, METH_KEYWORDS },
+    { "close", (PyCFunction)py_io_channel_shutdown, METH_VARARGS|METH_KEYWORDS },
     { "flush", (PyCFunction)py_io_channel_flush, METH_NOARGS },
-    { "set_encoding", (PyCFunction)py_io_channel_set_encoding, METH_KEYWORDS },
+    { "set_encoding", (PyCFunction)py_io_channel_set_encoding, METH_VARARGS|METH_KEYWORDS },
     { "get_encoding", (PyCFunction)py_io_channel_get_encoding, METH_NOARGS },
-    { "set_buffered", (PyCFunction)py_io_channel_set_buffered, METH_KEYWORDS },
+    { "set_buffered", (PyCFunction)py_io_channel_set_buffered, METH_VARARGS|METH_KEYWORDS },
     { "get_buffered", (PyCFunction)py_io_channel_get_buffered, METH_NOARGS },
-    { "set_buffer_size", (PyCFunction)py_io_channel_set_buffer_size, METH_KEYWORDS },
+    { "set_buffer_size", (PyCFunction)py_io_channel_set_buffer_size, METH_VARARGS|METH_KEYWORDS },
     { "get_buffer_size", (PyCFunction)py_io_channel_get_buffer_size, METH_NOARGS },
-    { "read", (PyCFunction)py_io_channel_read_chars, METH_KEYWORDS },
-    { "readline", (PyCFunction)py_io_channel_read_line, METH_KEYWORDS },
-    { "readlines", (PyCFunction)py_io_channel_read_lines, METH_KEYWORDS },
-    { "write", (PyCFunction)py_io_channel_write_chars, METH_KEYWORDS },
-    { "writelines", (PyCFunction)py_io_channel_write_lines, METH_KEYWORDS },
-    { "set_flags", (PyCFunction)py_io_channel_set_flags, METH_KEYWORDS },
+    { "read", (PyCFunction)py_io_channel_read_chars, METH_VARARGS|METH_KEYWORDS },
+    { "readline", (PyCFunction)py_io_channel_read_line, METH_VARARGS|METH_KEYWORDS },
+    { "readlines", (PyCFunction)py_io_channel_read_lines, METH_VARARGS|METH_KEYWORDS },
+    { "write", (PyCFunction)py_io_channel_write_chars, METH_VARARGS|METH_KEYWORDS },
+    { "writelines", (PyCFunction)py_io_channel_write_lines, METH_VARARGS|METH_KEYWORDS },
+    { "set_flags", (PyCFunction)py_io_channel_set_flags, METH_VARARGS|METH_KEYWORDS },
     { "get_flags", (PyCFunction)py_io_channel_get_flags, METH_NOARGS },
     { "get_buffer_condition", (PyCFunction)py_io_channel_get_buffer_condition, METH_NOARGS },
-    { "set_close_on_unref", (PyCFunction)py_io_channel_set_close_on_unref, METH_KEYWORDS },
+    { "set_close_on_unref", (PyCFunction)py_io_channel_set_close_on_unref, METH_VARARGS | METH_KEYWORDS },
     { "get_close_on_unref", (PyCFunction)py_io_channel_get_close_on_unref, METH_NOARGS },
-    { "add_watch", (PyCFunction)py_io_channel_add_watch, METH_KEYWORDS },
-    { "seek", (PyCFunction)py_io_channel_seek, METH_KEYWORDS },
+    { "add_watch", (PyCFunction)py_io_channel_add_watch, METH_VARARGS|METH_KEYWORDS },
+    { "seek", (PyCFunction)py_io_channel_seek, METH_VARARGS|METH_KEYWORDS },
 #ifdef G_OS_WIN32
-    { "win32_make_pollfd", (PyCFunction)py_io_channel_win32_make_pollfd, METH_KEYWORDS },
-    { "win32_poll", (PyCFunction)py_io_channel_win32_poll, METH_KEYWORDS|METH_STATIC },
+    { "win32_make_pollfd", (PyCFunction)py_io_channel_win32_make_pollfd, METH_VARARGS | METH_KEYWORDS },
+    { "win32_poll", (PyCFunction)py_io_channel_win32_poll, METH_VARARGS|METH_KEYWORDS|METH_STATIC },
 #endif
     { NULL, NULL, 0 }
 };
@@ -732,7 +756,7 @@ pyglib_iochannel_register_types(PyObject *d)
     PyGIOChannel_Type.tp_members = py_io_channel_members;
     PyGIOChannel_Type.tp_methods = py_io_channel_methods;
     PyGIOChannel_Type.tp_hash = (hashfunc)py_io_channel_hash;
-    PyGIOChannel_Type.tp_compare = (cmpfunc)py_io_channel_compare;
+    PyGIOChannel_Type.tp_richcompare = (richcmpfunc)py_io_channel_richcompare;
     PyGIOChannel_Type.tp_iter = (getiterfunc)py_io_channel_get_iter;
     PyGIOChannel_Type.tp_iternext = (iternextfunc)py_io_channel_next;
 

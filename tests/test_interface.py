@@ -1,6 +1,10 @@
+# -*- Mode: Python -*-
+
 import unittest
 
-from common import gobject, testhelper
+import gobject
+import testhelper
+
 
 GUnknown = gobject.type_from_name("TestUnknown")
 Unknown = GUnknown.pytype

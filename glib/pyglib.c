@@ -61,7 +61,7 @@ pyglib_init(void)
 	    Py_XDECREF(traceback);
 	    PyErr_Format(PyExc_ImportError,
 			 "could not import glib (error was: %s)",
-			 _PyUnicode_AsString(py_orig_exc));
+			 PYGLIB_PyUnicode_AsString(py_orig_exc));
 	    Py_DECREF(py_orig_exc);
         } else {
 	    PyErr_SetString(PyExc_ImportError,
@@ -71,8 +71,8 @@ pyglib_init(void)
     }
     
     cobject = PyObject_GetAttrString(glib, "_PyGLib_API");
-    if (cobject && PyCObject_Check(cobject))
-	_PyGLib_API = (struct _PyGLib_Functions *) PyCObject_AsVoidPtr(cobject);
+    if (cobject && PYGLIB_CPointer_Check(cobject))
+	_PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(cobject, "glib._PyGLib_API");
     else {
 	PyErr_SetString(PyExc_ImportError,
 			"could not import glib (could not find _PyGLib_API object)");
@@ -88,7 +88,7 @@ pyglib_init(void)
 void
 pyglib_init_internal(PyObject *api)
 {
-    _PyGLib_API = (struct _PyGLib_Functions *) PyCObject_AsVoidPtr(api);
+    _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "glib._PyGLib_API");
 }
 
 gboolean
@@ -264,7 +264,7 @@ pyglib_error_check(GError **error)
     if (exception_table != NULL)
     {
 	PyObject *item;
-	item = PyDict_GetItem(exception_table, _PyLong_FromLong((*error)->domain));
+	item = PyDict_GetItem(exception_table, PYGLIB_PyLong_FromLong((*error)->domain));
 	if (item != NULL)
 	    exc_type = item;
     }
@@ -273,19 +273,19 @@ pyglib_error_check(GError **error)
 
     if ((*error)->domain) {
 	PyObject_SetAttrString(exc_instance, "domain",
-			       d=_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
+			       d=PYGLIB_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
 	Py_DECREF(d);
     }
     else
 	PyObject_SetAttrString(exc_instance, "domain", Py_None);
 
     PyObject_SetAttrString(exc_instance, "code",
-			   d=_PyLong_FromLong((*error)->code));
+			   d=PYGLIB_PyLong_FromLong((*error)->code));
     Py_DECREF(d);
 
     if ((*error)->message) {
 	PyObject_SetAttrString(exc_instance, "message",
-			       d=_PyUnicode_FromString((*error)->message));
+			       d=PYGLIB_PyUnicode_FromString((*error)->message));
 	Py_DECREF(d);
     } else {
 	PyObject_SetAttrString(exc_instance, "message", Py_None);
@@ -338,28 +338,28 @@ pyglib_gerror_exception_check(GError **error)
     Py_XDECREF(traceback);
 
     py_message = PyObject_GetAttrString(value, "message");
-    if (!py_message || !_PyUnicode_Check(py_message)) {
+    if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
         bad_gerror_message = "glib.GError instances must have a 'message' string attribute";
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
-    if (!py_domain || !_PyUnicode_Check(py_domain)) {
+    if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
         bad_gerror_message = "glib.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         goto bad_gerror;
     }
 
     py_code = PyObject_GetAttrString(value, "code");
-    if (!py_code || !_PyLong_Check(py_code)) {
+    if (!py_code || !PYGLIB_PyLong_Check(py_code)) {
         bad_gerror_message = "glib.GError instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
         goto bad_gerror;
     }
 
-    g_set_error(error, g_quark_from_string(_PyUnicode_AsString(py_domain)),
-                _PyLong_AsLong(py_code), _PyUnicode_AsString(py_message));
+    g_set_error(error, g_quark_from_string(PYGLIB_PyUnicode_AsString(py_domain)),
+                PYGLIB_PyLong_AsLong(py_code), PYGLIB_PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);
@@ -368,7 +368,7 @@ pyglib_gerror_exception_check(GError **error)
 
 bad_gerror:
     Py_DECREF(value);
-    g_set_error(error, g_quark_from_static_string("pyglib"), 0, bad_gerror_message);
+    g_set_error(error, g_quark_from_static_string("pyglib"), 0, "%s", bad_gerror_message);
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;
@@ -397,7 +397,7 @@ pyglib_register_exception_for_domain(gchar *name,
 	exception_table = PyDict_New();
 
     PyDict_SetItem(exception_table,
-		   _PyLong_FromLong(error_domain),
+		   PYGLIB_PyLong_FromLong(error_domain),
 		   exception);
     
     return exception;
@@ -574,4 +574,90 @@ _pyglib_handler_marshal(gpointer user_data)
     return res;
 }
 
+PyObject*
+_pyglib_generic_ptr_richcompare(void* a, void *b, int op)
+{
+    PyObject *res;
+
+    switch (op) {
+
+      case Py_EQ:
+        res = (a == b) ? Py_True : Py_False;
+        break;
+
+      case Py_NE:
+        res = (a != b) ? Py_True : Py_False;
+        break;
+
+      case Py_LT:
+        res = (a < b) ? Py_True : Py_False;
+        break;
+
+      case Py_LE:
+        res = (a <= b) ? Py_True : Py_False;
+        break;
+
+      case Py_GT:
+        res = (a > b) ? Py_True : Py_False;
+        break;
+
+      case Py_GE:
+        res = (a >= b) ? Py_True : Py_False;
+        break;
+
+      default:
+        res = Py_NotImplemented;
+        break;
+    }
+
+    Py_INCREF(res);
+    return res;
+}
+
+PyObject*
+_pyglib_generic_long_richcompare(long a, long b, int op)
+{
+    PyObject *res;
+
+    switch (op) {
+
+      case Py_EQ:
+        res = (a == b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_NE:
+        res = (a != b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+
+      case Py_LT:
+        res = (a < b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_LE:
+        res = (a <= b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_GT:
+        res = (a > b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      case Py_GE:
+        res = (a >= b) ? Py_True : Py_False;
+        Py_INCREF(res);
+        break;
+
+      default:
+        res = Py_NotImplemented;
+        Py_INCREF(res);
+        break;
+    }
+
+    return res;
+}
 

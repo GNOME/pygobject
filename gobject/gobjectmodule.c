@@ -50,7 +50,7 @@ static gboolean log_handlers_disabled = FALSE;
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
 
-    
+
 /* -------------- GDK threading hooks ---------------------------- */
 
 /**
@@ -109,14 +109,14 @@ pyg_type_name (PyObject *self, PyObject *args)
 		   "use GType.name instead"))
         return NULL;
 #endif
-    
+
     if (!PyArg_ParseTuple(args, "O:gobject.type_name", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
 	return NULL;
     name = g_type_name(type);
     if (name)
-	return _PyUnicode_FromString(name);
+	return PYGLIB_PyUnicode_FromString(name);
     PyErr_SetString(PyExc_RuntimeError, "unknown typecode");
     return NULL;
 }
@@ -131,14 +131,14 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 		   "gobject.type_from_name is deprecated; "
 		   "use GType.from_name instead"))
         return NULL;
-#endif    
+#endif
     if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
 	return NULL;
     type = _pyg_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
     PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
-		 _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+         PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		 name);
     return NULL;
 }
@@ -153,7 +153,7 @@ pyg_type_parent (PyObject *self, PyObject *args)
 		   "gobject.type_parent is deprecated; "
 		   "use GType.parent instead"))
         return NULL;
-#endif    
+#endif
     if (!PyArg_ParseTuple(args, "O:gobject.type_parent", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -175,7 +175,7 @@ pyg_type_is_a (PyObject *self, PyObject *args)
 		   "gobject.type_is_a is deprecated; "
 		   "use GType.is_a instead"))
         return NULL;
-#endif    
+#endif
     if (!PyArg_ParseTuple(args, "OO:gobject.type_is_a", &gtype, &gparent))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -196,7 +196,7 @@ pyg_type_children (PyObject *self, PyObject *args)
 		   "gobject.type_children is deprecated; "
 		   "use GType.children instead"))
         return NULL;
-#endif    
+#endif
     if (!PyArg_ParseTuple(args, "O:gobject.type_children", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -227,7 +227,7 @@ pyg_type_interfaces (PyObject *self, PyObject *args)
 		   "gobject.type_interfaces is deprecated; "
 		   "use GType.interfaces instead"))
         return NULL;
-#endif    
+#endif
     if (!PyArg_ParseTuple(args, "O:gobject.type_interfaces", &gtype))
 	return NULL;
     if ((type = pyg_type_from_object(gtype)) == 0)
@@ -308,7 +308,7 @@ pyg_object_get_property (GObject *object, guint property_id,
     Py_DECREF(object_wrapper);
     Py_DECREF(py_pspec);
     Py_XDECREF(retval);
-    
+
     pyglib_gil_state_release(state);
 }
 
@@ -338,7 +338,7 @@ _pyg_signal_accumulator(GSignalInvocationHint *ihint,
 
     state = pyglib_gil_state_ensure();
     if (ihint->detail)
-        py_detail = _PyUnicode_FromString(g_quark_to_string(ihint->detail));
+        py_detail = PYGLIB_PyUnicode_FromString(g_quark_to_string(ihint->detail));
     else {
         Py_INCREF(Py_None);
         py_detail = Py_None;
@@ -497,17 +497,17 @@ add_signals (GType instance_type, PyObject *signals)
 	const gchar *signal_name;
         gchar *signal_name_canon, *c;
 
-	if (!_PyUnicode_Check(key)) {
+	if (!PYGLIB_PyUnicode_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gsignals__ keys must be strings");
 	    ret = FALSE;
 	    break;
 	}
-	signal_name = _PyUnicode_AsString (key);
+	signal_name = PYGLIB_PyUnicode_AsString (key);
 
 	if (value == Py_None ||
-	    (_PyUnicode_Check(value) &&
-	     !strcmp(_PyUnicode_AsString(value), "override")))
+	    (PYGLIB_PyUnicode_Check(value) &&
+	     !strcmp(PYGLIB_PyUnicode_AsString(value), "override")))
         {
               /* canonicalize signal name, replacing '-' with '_' */
             signal_name_canon = g_strdup(signal_name);
@@ -652,14 +652,14 @@ create_property (const gchar  *prop_name,
 	{
 	    gint default_value;
 	    PyObject *pydefault;
-	    
+
 	    if (!PyArg_ParseTuple(args, "O", &pydefault))
 		return NULL;
-	    
+
 	    if (pyg_enum_get_value(prop_type, pydefault,
 				   (gint *)&default_value))
 		return NULL;
-	    
+
 	    pspec = g_param_spec_enum (prop_name, nick, blurb,
 				       prop_type, default_value, flags);
 	}
@@ -671,11 +671,11 @@ create_property (const gchar  *prop_name,
 
 	    if (!PyArg_ParseTuple(args, "O", &pydefault))
 		return NULL;
-	    
+
 	    if (pyg_flags_get_value(prop_type, pydefault,
 				    (gint *)&default_value))
 		return NULL;
-	    
+
 	    pspec = g_param_spec_flags (prop_name, nick, blurb,
 					prop_type, default_value, flags);
 	}
@@ -745,7 +745,7 @@ create_property (const gchar  *prop_name,
 	PyErr_SetString(PyExc_TypeError, buf);
 	return NULL;
     }
-    
+
     return pspec;
 }
 
@@ -764,27 +764,27 @@ pyg_param_spec_from_object (PyObject *tuple)
 	PyErr_SetString(PyExc_TypeError,
 			"paramspec tuples must be at least 4 elements long");
 	return NULL;
-    }	    
+    }
 
     slice = PySequence_GetSlice(tuple, 0, 4);
     if (!slice) {
 	return NULL;
     }
-    
+
     if (!PyArg_ParseTuple(slice, "sOzz", &prop_name, &py_prop_type, &nick, &blurb)) {
 	Py_DECREF(slice);
 	return NULL;
     }
-    
+
     Py_DECREF(slice);
-    
+
     prop_type = pyg_type_from_object(py_prop_type);
     if (!prop_type) {
 	return NULL;
     }
-    
+
     item = PyTuple_GetItem(tuple, val_length-1);
-    if (!_PyLong_Check(item)) {
+    if (!PYGLIB_PyLong_Check(item)) {
 	PyErr_SetString(PyExc_TypeError,
 			"last element in tuple must be an int");
 	return NULL;
@@ -794,7 +794,7 @@ pyg_param_spec_from_object (PyObject *tuple)
     slice = PySequence_GetSlice(tuple, 4, val_length-1);
     pspec = create_property(prop_name, prop_type,
 			    nick, blurb, slice,
-			    _PyLong_AsLong(item));
+			    PYGLIB_PyLong_AsLong(item));
 
     return pspec;
 }
@@ -816,16 +816,16 @@ add_properties (GType instance_type, PyObject *properties)
 	gint val_length;
 	PyObject *slice, *item, *py_prop_type;
 	GParamSpec *pspec;
-	
+
 	/* values are of format (type,nick,blurb, type_specific_args, flags) */
-	
-	if (!_PyUnicode_Check(key)) {
+
+	if (!PYGLIB_PyUnicode_Check(key)) {
 	    PyErr_SetString(PyExc_TypeError,
 			    "__gproperties__ keys must be strings");
 	    ret = FALSE;
 	    break;
 	}
-	prop_name = _PyUnicode_AsString (key);
+	prop_name = PYGLIB_PyUnicode_AsString (key);
 
 	if (!PyTuple_Check(value)) {
 	    PyErr_SetString(PyExc_TypeError,
@@ -839,7 +839,7 @@ add_properties (GType instance_type, PyObject *properties)
 			    "__gproperties__ values must be at least 4 elements long");
 	    ret = FALSE;
 	    break;
-	}	    
+	}
 
 	slice = PySequence_GetSlice(value, 0, 3);
 	if (!slice) {
@@ -858,40 +858,40 @@ add_properties (GType instance_type, PyObject *properties)
 	    break;
 	}
 	item = PyTuple_GetItem(value, val_length-1);
-	if (!_PyLong_Check(item)) {
+	if (!PYGLIB_PyLong_Check(item)) {
 	    PyErr_SetString(PyExc_TypeError,
 		"last element in __gproperties__ value tuple must be an int");
 	    ret = FALSE;
 	    break;
 	}
-	flags = _PyLong_AsLong(item);
+	flags = PYGLIB_PyLong_AsLong(item);
 
 	/* slice is the extra items in the tuple */
 	slice = PySequence_GetSlice(value, 3, val_length-1);
 	pspec = create_property(prop_name, prop_type, nick, blurb,
 				slice, flags);
 	Py_DECREF(slice);
-	
+
 	if (pspec) {
 	    g_object_class_install_property(oclass, 1, pspec);
 	} else {
             PyObject *type, *value, *traceback;
 	    ret = FALSE;
             PyErr_Fetch(&type, &value, &traceback);
-            if (_PyUnicode_Check(value)) {
+            if (PYGLIB_PyUnicode_Check(value)) {
                 char msg[256];
                 g_snprintf(msg, 256,
 			   "%s (while registering property '%s' for GType '%s')",
-                           _PyUnicode_AsString(value),
+               PYGLIB_PyUnicode_AsString(value),
 			   prop_name, g_type_name(instance_type));
                 Py_DECREF(value);
-                value = _PyUnicode_FromString(msg);
+                value = PYGLIB_PyUnicode_FromString(msg);
             }
             PyErr_Restore(type, value, traceback);
 	    break;
 	}
     }
-    
+
     g_type_class_unref(oclass);
     return ret;
 }
@@ -920,7 +920,7 @@ pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
         if (rv)
 	    return rv;
     }
-    
+
     list = g_type_get_qdata(gtype, pygobject_class_init_key);
     for (; list; list = list->next) {
 	class_init = list->data;
@@ -928,7 +928,7 @@ pyg_run_class_init(GType gtype, gpointer gclass, PyTypeObject *pyclass)
         if (rv)
 	    return rv;
     }
-    
+
     return 0;
 }
 
@@ -954,7 +954,7 @@ _wrap_pyg_type_register(PyObject *self, PyObject *args)
         if (pyg_type_register(class, type_name))
             return NULL;
     }
- 
+
     Py_INCREF(class);
     return (PyObject *) class;
 }
@@ -966,17 +966,17 @@ get_type_name_for_class(PyTypeObject *class)
     char name_serial_str[16];
     PyObject *module;
     char *type_name = NULL;
-    
+
     /* make name for new GType */
     name_serial = 1;
     /* give up after 1000 tries, just in case.. */
-    while (name_serial < 1000) 
+    while (name_serial < 1000)
     {
 	g_free(type_name);
 	snprintf(name_serial_str, 16, "-v%i", name_serial);
 	module = PyObject_GetAttrString((PyObject *)class, "__module__");
-	if (module && _PyUnicode_Check(module)) {
-	    type_name = g_strconcat(_PyUnicode_AsString(module), ".",
+	if (module && PYGLIB_PyUnicode_Check(module)) {
+	    type_name = g_strconcat(PYGLIB_PyUnicode_AsString(module), ".",
 				    class->tp_name,
 				    name_serial > 1 ? name_serial_str : NULL,
 				    NULL);
@@ -1028,7 +1028,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
 			  pygobject_has_updated_constructor_key))
         return;
 
-    wrapper = g_object_get_qdata(object, pygobject_wrapper_key); 
+    wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
         wrapper = pygobject_init_wrapper_get();
         if (wrapper && ((PyGObject *) wrapper)->obj == NULL) {
@@ -1160,10 +1160,10 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     if (type_name)
 	/* care is taken below not to free this */
-        new_type_name = (gchar *) type_name; 
+        new_type_name = (gchar *) type_name;
     else
 	new_type_name = get_type_name_for_class(class);
-    
+
     /* set class_data that will be passed to the class_init function. */
     type_info.class_data = class;
 
@@ -1192,7 +1192,7 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
 
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
-    PyDict_SetItemString(class->tp_dict, "__gtype__", gtype);
+    PyObject_SetAttrString((PyObject *)class, "__gtype__", gtype);
     Py_DECREF(gtype);
 
       /* propagate new constructor API compatility flag from parent to child type */
@@ -1334,7 +1334,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			"argument 2 must be an object type or interface type");
 	return NULL;
     }
-    
+
     return_type = pyg_type_from_object(py_return_type);
     if (!return_type)
 	return NULL;
@@ -1368,7 +1368,7 @@ pyg_signal_new(PyObject *self, PyObject *args)
 			      return_type, n_params, param_types);
     g_free(param_types);
     if (signal_id != 0)
-	return _PyLong_FromLong(signal_id);
+	return PYGLIB_PyLong_FromLong(signal_id);
     PyErr_SetString(PyExc_RuntimeError, "could not create signal");
     return NULL;
 }
@@ -1406,16 +1406,16 @@ pyg_signal_list_names (PyObject *self, PyObject *args, PyObject *kwargs)
     } else {
         iface = g_type_default_interface_ref(itype);
     }
-    
+
     ids = g_signal_list_ids(itype, &n);
 
     list = PyTuple_New((gint)n);
     if (list != NULL) {
 	for (i = 0; i < n; i++)
 	    PyTuple_SetItem(list, i,
-			    _PyUnicode_FromString(g_signal_name(ids[i])));
+	    		PYGLIB_PyUnicode_FromString(g_signal_name(ids[i])));
     }
-    
+
     g_free(ids);
     if (class)
         g_type_class_unref(class);
@@ -1458,7 +1458,7 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
     } else {
         iface = g_type_default_interface_ref(itype);
     }
-    
+
     ids = g_signal_list_ids(itype, &n);
 
     list = PyTuple_New((gint)n);
@@ -1469,7 +1469,7 @@ pyg_signal_list_ids (PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
     for (i = 0; i < n; i++)
-	PyTuple_SetItem(list, i, _PyLong_FromLong(ids[i]));
+	PyTuple_SetItem(list, i, PYGLIB_PyLong_FromLong(ids[i]));
     g_free(ids);
     if (class)
         g_type_class_unref(class);
@@ -1510,14 +1510,14 @@ pyg_signal_lookup (PyObject *self, PyObject *args, PyObject *kwargs)
     } else {
         iface = g_type_default_interface_ref(itype);
     }
-    
+
     id = g_signal_lookup(signal_name, itype);
 
     if (class)
         g_type_class_unref(class);
     else
        g_type_default_interface_unref(iface);
-    return _PyLong_FromLong(id);
+    return PYGLIB_PyLong_FromLong(id);
 }
 
 static PyObject *
@@ -1532,7 +1532,7 @@ pyg_signal_name (PyObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     signal_name = g_signal_name(id);
     if (signal_name)
-        return _PyUnicode_FromString(signal_name);
+        return PYGLIB_PyUnicode_FromString(signal_name);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -1582,7 +1582,7 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
                             "Usage: one of:\n"
                             "  gobject.signal_query(name, type)\n"
                             "  gobject.signal_query(signal_id)");
-             
+
 	return NULL;
         }
     }
@@ -1605,10 +1605,10 @@ pyg_signal_query (PyObject *self, PyObject *args, PyObject *kwargs)
         goto done;
     }
 
-    PyTuple_SET_ITEM(py_query, 0, _PyLong_FromLong(query.signal_id));
-    PyTuple_SET_ITEM(py_query, 1, _PyUnicode_FromString(query.signal_name));
+    PyTuple_SET_ITEM(py_query, 0, PYGLIB_PyLong_FromLong(query.signal_id));
+    PyTuple_SET_ITEM(py_query, 1, PYGLIB_PyUnicode_FromString(query.signal_name));
     PyTuple_SET_ITEM(py_query, 2, pyg_type_wrapper_new(query.itype));
-    PyTuple_SET_ITEM(py_query, 3, _PyLong_FromLong(query.signal_flags));
+    PyTuple_SET_ITEM(py_query, 3, PYGLIB_PyLong_FromLong(query.signal_flags));
     PyTuple_SET_ITEM(py_query, 4, pyg_type_wrapper_new(query.return_type));
     for (i = 0; i < query.n_params; i++) {
         PyTuple_SET_ITEM(params_list, i,
@@ -1663,7 +1663,7 @@ pyg_object_class_list_properties (PyObject *self, PyObject *args)
                         "type must be derived from GObject or an interface");
 	return NULL;
     }
-        
+
     list = PyTuple_New(nprops);
     if (list == NULL) {
 	g_free(specs);
@@ -1719,7 +1719,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	params = g_new0(GParameter, PyDict_Size(kwargs));
 	while (PyDict_Next (kwargs, &pos, &key, &value)) {
 	    GParamSpec *pspec;
-	    const gchar *key_str = _PyUnicode_AsString (key);
+	    const gchar *key_str = PYGLIB_PyUnicode_AsString (key);
 
 	    pspec = g_object_class_find_property (class, key_str);
 	    if (!pspec) {
@@ -1754,11 +1754,10 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     }
     g_free(params);
     g_type_class_unref(class);
-    
+
     if (obj) {
 	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
         g_object_unref(obj);
-        pygobject_sink(obj);
     } else
         self = NULL;
 
@@ -1786,7 +1785,7 @@ pyg_handler_marshal(gpointer user_data)
 	res = PyObject_IsTrue(ret);
 	Py_DECREF(ret);
     }
-    
+
     pyglib_gil_state_release(state);
 
     return res;
@@ -1809,7 +1808,7 @@ pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 {
     if (!pyglib_enable_threads())
         return NULL;
-    
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1858,7 +1857,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
 
     for (i = 0; i < n_param_values; i++) {
 	PyObject *item = pyg_value_as_pyobject(&param_values[i], FALSE);
-	
+
 	/* error condition */
 	if (!item) {
 	    goto out;
@@ -1878,7 +1877,7 @@ marshal_emission_hook(GSignalInvocationHint *ihint,
     if (retobj == NULL) {
         PyErr_Print();
     }
-    
+
     retval = (retobj == Py_True ? TRUE : FALSE);
     Py_XDECREF(retobj);
 out:
@@ -1911,7 +1910,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 	return NULL;
     }
     Py_DECREF(first);
-    
+
     if ((gtype = pyg_type_from_object(pygtype)) == 0) {
 	return NULL;
     }
@@ -1922,7 +1921,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 
     if (!g_signal_parse_name(name, gtype, &sigid, &detail, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+			PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
 		     name);
 	return NULL;
     }
@@ -1933,12 +1932,12 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     data = Py_BuildValue("(ON)", callback, extra_args);
     if (data == NULL)
       return NULL;
-    
+
     hook_id = g_signal_add_emission_hook(sigid, detail,
 					 marshal_emission_hook,
 					 data,
 					 (GDestroyNotify)pyg_destroy_notify);
-        
+
     return PyLong_FromUnsignedLong(hook_id);
 }
 
@@ -1950,24 +1949,24 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     guint signal_id;
     gulong hook_id;
     GType gtype;
-    
+
     if (!PyArg_ParseTuple(args, "Osk:gobject.remove_emission_hook",
 			  &pygtype, &name, &hook_id))
 	return NULL;
-    
+
     if ((gtype = pyg_type_from_object(pygtype)) == 0) {
 	return NULL;
     }
-    
+
     if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     _PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
-		     name);
+                 PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+                 name);
 	return NULL;
     }
 
     g_signal_remove_emission_hook(signal_id, hook_id);
-    
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2043,7 +2042,7 @@ pyg_constant_strip_prefix(const gchar *name, const gchar *strip_prefix)
 {
     gint prefix_len;
     guint i;
-    
+
     prefix_len = strlen(strip_prefix);
 
     /* Check so name starts with strip_prefix, if it doesn't:
@@ -2163,7 +2162,7 @@ pyg_error_check(GError **error)
 		   "pyg_error_check is deprecated, use "
 		   "pyglib_error_check instead"))
         return NULL;
-#endif    
+#endif
     return pyglib_error_check(error);
 }
 
@@ -2188,7 +2187,7 @@ pyg_gerror_exception_check(GError **error)
 		   "pyg_gerror_exception_check is deprecated, use "
 		   "pyglib_gerror_exception_check instead"))
         return NULL;
-#endif    
+#endif
     return pyglib_gerror_exception_check(error);
 }
 
@@ -2203,9 +2202,9 @@ pyg_gerror_exception_check(GError **error)
  * arguments/properties
  * @nparams: output parameter to contain actual number of arguments found
  * @py_args: array of PyObject* containing the actual constructor arguments
- * 
+ *
  * Parses an array of PyObject's and creates a GParameter array
- * 
+ *
  * Return value: %TRUE if all is successful, otherwise %FALSE and
  * python exception set.
  **/
@@ -2259,7 +2258,6 @@ pygobject_constructv(PyGObject  *self,
         pygobject_init_wrapper_set(NULL);
         if (self->obj == NULL) {
             self->obj = obj;
-            pygobject_sink(obj);
             pygobject_register_wrapper((PyObject *) self);
         }
     } else {
@@ -2300,9 +2298,9 @@ pygobject_construct(PyGObject *self, const char *first_property_name, ...)
 
         if (!pspec)
 	{
-            g_warning("%s: object class `%s' has no property named `%s'", 
-                      G_STRFUNC, 
-                      g_type_name(object_type), 
+            g_warning("%s: object class `%s' has no property named `%s'",
+                      G_STRFUNC,
+                      g_type_name(object_type),
                       name);
             break;
 	}
@@ -2349,12 +2347,12 @@ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
     gboolean t;
 
     switch (op) {
-    case Py_EQ: t = _PyLong_AS_LONG(v) == _PyLong_AS_LONG(w); break;
-    case Py_NE: t = _PyLong_AS_LONG(v) != _PyLong_AS_LONG(w); break;
-    case Py_LE: t = _PyLong_AS_LONG(v) <= _PyLong_AS_LONG(w); break;
-    case Py_GE: t = _PyLong_AS_LONG(v) >= _PyLong_AS_LONG(w); break;
-    case Py_LT: t = _PyLong_AS_LONG(v) <  _PyLong_AS_LONG(w); break;
-    case Py_GT: t = _PyLong_AS_LONG(v) >  _PyLong_AS_LONG(w); break;
+    case Py_EQ: t = PYGLIB_PyLong_AS_LONG(v) == PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_NE: t = PYGLIB_PyLong_AS_LONG(v) != PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_LE: t = PYGLIB_PyLong_AS_LONG(v) <= PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_GE: t = PYGLIB_PyLong_AS_LONG(v) >= PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_LT: t = PYGLIB_PyLong_AS_LONG(v) <  PYGLIB_PyLong_AS_LONG(w); break;
+    case Py_GT: t = PYGLIB_PyLong_AS_LONG(v) >  PYGLIB_PyLong_AS_LONG(w); break;
     default: g_assert_not_reached();
     }
 
@@ -2382,7 +2380,7 @@ _log_func(const gchar *log_domain,
 }
 
 static void
-add_warning_redirection(const char *domain, 
+add_warning_redirection(const char *domain,
                         PyObject   *warning)
 {
     g_return_if_fail(domain != NULL);
@@ -2392,7 +2390,7 @@ add_warning_redirection(const char *domain,
     {
 	guint handler;
 	gpointer old_handler;
-	
+
 	if (!log_handlers)
 	    log_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 
@@ -2417,7 +2415,7 @@ static void
 disable_warning_redirections(void)
 {
     log_handlers_disabled = TRUE;
-    
+
     if (log_handlers)
     {
 	g_hash_table_foreach(log_handlers, remove_handler, NULL);
@@ -2459,7 +2457,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   pyg_enum_add_constants,
   pyg_flags_add_constants,
-  
+
   pyg_constant_strip_prefix,
 
   pyg_error_check,
@@ -2480,7 +2478,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   &PyGEnum_Type,
   pyg_enum_add,
   pyg_enum_from_gtype,
-  
+
   &PyGFlags_Type,
   pyg_flags_add,
   pyg_flags_from_gtype,
@@ -2496,15 +2494,15 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_constructv,
   pygobject_construct,
   pyg_set_object_has_new_constructor,
-  
+
   add_warning_redirection,
   disable_warning_redirections,
-  
+
   pyg_type_register_custom_callback,
   pyg_gerror_exception_check,
 
   pyglib_option_group_new
-  
+
 };
 
 /* for addon libraries ... */
@@ -2512,8 +2510,8 @@ static void
 pygobject_register_api(PyObject *d)
 {
     PyObject *api;
-    
-    api = PyCObject_FromVoidPtr(&pygobject_api_functions,NULL);
+
+    api = PYGLIB_CPointer_WrapPointer(&pygobject_api_functions, "gobject._PyGObject_API");
     PyDict_SetItemString(d, "_PyGObject_API", api);
     Py_DECREF(api);
 }
@@ -2546,8 +2544,16 @@ pygobject_register_constants(PyObject *m)
     PyModule_AddObject(m,       "G_MININT64", PyLong_FromLongLong(G_MININT64));
     PyModule_AddObject(m,       "G_MAXINT64", PyLong_FromLongLong(G_MAXINT64));
     PyModule_AddObject(m,       "G_MAXUINT64", PyLong_FromUnsignedLongLong(G_MAXUINT64));
+#if PY_VERSION_HEX < 0x02050000 /* 2.3, 2.4 */
+    PyModule_AddObject(m,       "G_MAXSIZE", PyLong_FromUnsignedLongLong(G_MAXSIZE));
+    PyModule_AddObject(m,       "G_MAXSSIZE", PyLong_FromUnsignedLongLong(G_MAXSSIZE));
+#elif PY_VERSION_HEX < 0x02060000 /* 2.5 */
+    PyModule_AddObject(m,       "G_MAXSIZE", PYGLIB_PyLong_FromSize_t(G_MAXSIZE));
+    PyModule_AddObject(m,       "G_MAXSSIZE", PYGLIB_PyLong_FromSsize_t(G_MAXSSIZE));
+#else /* 2.6+ */
     PyModule_AddObject(m,       "G_MAXSIZE", PyLong_FromSize_t(G_MAXSIZE));
     PyModule_AddObject(m,       "G_MAXSSIZE", PyLong_FromSsize_t(G_MAXSSIZE));
+#endif
     PyModule_AddObject(m,       "G_MINOFFSET", PyLong_FromLongLong(G_MINOFFSET));
     PyModule_AddObject(m,       "G_MAXOFFSET", PyLong_FromLongLong(G_MAXOFFSET));
 
@@ -2582,7 +2588,7 @@ static void
 pygobject_register_features(PyObject *d)
 {
     PyObject *features;
-    
+
     features = PyDict_New();
 #ifdef HAVE_FFI_H
     PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
@@ -2642,7 +2648,7 @@ PYGLIB_MODULE_START(_gobject, "gobject._gobject")
     pygobject_pointer_register_types(d);
     pygobject_enum_register_types(d);
     pygobject_flags_register_types(d);
-    
+
       /* signal registration recognizes this special accumulator 'constant' */
     _pyg_signal_accumulator_true_handled_func = \
         PyDict_GetItemString(d, "signal_accumulator_true_handled");

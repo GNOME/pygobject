@@ -120,10 +120,11 @@ class BuildExt(build_ext):
             # uses -mms-bitfields. Based on the version
             # the proper flag is used below.
             msnative_struct = { '2' : '-fnative-struct',
-                                '3' : '-mms-bitfields' }
+                                '3' : '-mms-bitfields',
+                                '4' : '-mms-bitfields'}
             gcc_version = getoutput('gcc -dumpversion')
-            print 'using MinGW GCC version %s with %s option' % \
-                  (gcc_version, msnative_struct[gcc_version[0]])
+            print ('using MinGW GCC version %s with %s option' % \
+                  (gcc_version, msnative_struct[gcc_version[0]]))
             self.extra_compile_args.append(msnative_struct[gcc_version[0]])
 
     def modify_compiler(self):
@@ -312,29 +313,22 @@ class PkgConfigExtension(Extension):
                 self.can_build_ok = 1
                 return 1
             else:
-                print "Warning: Too old version of %s" % self.pkc_name
-                print "         Need %s, but %s is installed" % \
-                      (version, orig_version)
+                print ("Warning: Too old version of %s" % package)
+                print ("         Need %s, but %s is installed" % \
+                      (version, orig_version))
                 self.can_build_ok = 0
                 return 0
 
     def generate(self):
         pass
 
-# The Template and TemplateExtension classes require codegen which is
-# currently part of the pygtk distribution. While codegen might ultimately
-# be moved to pygobject, it was decided (bug #353849) to keep the Template
-# and TemplateExtension code in dsextras. In the meantime, we check for the
-# availability of codegen and redirect the user to the pygtk installer if
-# he/she wants to get access to Template and TemplateExtension.
+# The Template and TemplateExtension classes require codegen
 
 template_classes_enabled=True
 codegen_error_message="""
 ***************************************************************************
 Codegen could not be found on your system and is required by the
-dsextras.Template and dsextras.TemplateExtension classes. codegen is part
-of PyGTK. To use either Template or TemplateExtension, you should also
-install PyGTK.
+dsextras.Template and dsextras.TemplateExtension classes.
 ***************************************************************************
 """
 try:
@@ -343,7 +337,8 @@ try:
     from codegen.codegen import register_types, SourceWriter, \
          FileOutput
     import codegen.createdefs
-except ImportError, e:
+except ImportError:
+    (etype, e) = sys.exc_info()[:2]    
     template_classes_enabled=False
 
 class Template(object):
@@ -351,7 +346,7 @@ class Template(object):
         if not template_classes_enabled:
             raise NameError("'%s' is not defined\n" % cls.__name__
                             + codegen_error_message)    
-        return object.__new__(cls,*args, **kwds)
+        return object.__new__(cls)
 
     def __init__(self, override, output, defs, prefix,
                  register=[], load_types=None, py_ssize_t_clean=False):

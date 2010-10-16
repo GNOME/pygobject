@@ -760,13 +760,13 @@ identifier</simpara></listitem>
 	</varlistentry>
 	<varlistentry>
 	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara><literal>TRUE</literal> if the signal handler
+	  <listitem><simpara><literal>True</literal> if the signal handler
 is connected to the object.</simpara></listitem>
 	</varlistentry>
       </variablelist>
 
       <para>The <methodname>handler_is_connected</methodname>() method
-returns <literal>TRUE</literal> if the signal handler with the specified
+returns <literal>True</literal> if the signal handler with the specified
 <parameter>handler_id</parameter> is connected to the object.</para>
 
     </refsect2>

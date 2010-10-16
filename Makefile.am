@@ -1,7 +1,13 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs codegen glib gobject gio examples tests
+SUBDIRS = docs codegen glib gobject gio examples
+
+if ENABLE_INTROSPECTION
+SUBDIRS += gi
+endif
+
+SUBDIRS += tests
 
 PLATFORM_VERSION = 2.0
 
@@ -118,3 +124,10 @@ dist-hook: $(BUILT_EXTRA_DIST)
 	for f in $$files; do \
 	  if test -f $$f; then d=.; else d=$(srcdir); fi; \
 	  rm -f $(distdir)/$$f && cp $$d/$$f $(distdir) || exit 1; done
+
+check.gdb:
+	cd tests && $(MAKE) check.gdb
+
+check.valgrind:
+	cd tests && $(MAKE) check.valgrind
+

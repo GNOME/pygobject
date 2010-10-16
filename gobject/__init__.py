@@ -29,7 +29,7 @@ from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
      filename_from_utf8, get_application_name, set_application_name, \
      get_prgname, set_prgname, main_depth, Pid, GError, glib_version, \
      MainLoop, MainContext, main_context_default, IOChannel, Source, Idle, \
-     Timeout, PollFD, OptionGroup, OptionContext, option
+     Timeout, PollFD, OptionGroup, OptionContext, option, uri_list_extract_uris
 from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      SPAWN_SEARCH_PATH, SPAWN_STDOUT_TO_DEV_NULL, SPAWN_STDERR_TO_DEV_NULL, \
      SPAWN_CHILD_INHERITS_STDIN, SPAWN_FILE_AND_ARGV_ZERO, PRIORITY_HIGH, \

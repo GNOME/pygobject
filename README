@@ -6,6 +6,7 @@ Original authors:   James Henstridge <james@daa.com.au>
 Current maintainers:  Gustavo J A M Carneiro <gjc@gnome.org>
                       Paul Pogonyshev <pogonyshev@gmx.net>
                       Gian Mario Tagliaretti <gianmt@gnome.org>
+                      Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
 
 This archive contains bindings for the GLib, GObject and GIO,
 to be used in Python. It is a fairly complete set of bindings,

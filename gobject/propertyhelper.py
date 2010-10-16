@@ -36,6 +36,12 @@ from gobject.constants import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
 
+if sys.version_info >= (3, 0):
+    _basestring = str
+    _long = int
+else:
+    _basestring = basestring
+    _long = long
 
 class property(object):
     """
@@ -107,11 +113,11 @@ class property(object):
         self.default = self._get_default(default)
         self._check_default()
 
-        if not isinstance(nick, basestring):
+        if not isinstance(nick, _basestring):
             raise TypeError("nick must be a string")
         self.nick = nick
 
-        if not isinstance(blurb, basestring):
+        if not isinstance(blurb, _basestring):
             raise TypeError("blurb must be a string")
         self.blurb = blurb
 
@@ -171,12 +177,12 @@ class property(object):
             raise exc
 
     def _type_from_python(self, type):
-        if type == int:
+        if type == _long:
+            return TYPE_LONG
+        elif type == int:
             return TYPE_INT
         elif type == bool:
             return TYPE_BOOLEAN
-        elif type == long:
-            return TYPE_LONG
         elif type == float:
             return TYPE_DOUBLE
         elif type == str:

@@ -101,10 +101,10 @@ functions.</para>
       </varlistentry>
       <varlistentry>
 	<term><parameter>is_running</parameter>&nbsp;:</term>
-	<listitem><simpara>if <literal>TRUE</literal> indicates that the
+	<listitem><simpara>if <literal>True</literal> indicates that the
 	loop is running. This is not very important since calling the <link
 	linkend="method-glibmainloop--run"><methodname>run</methodname>()</link>
-	method will set this to <literal>TRUE</literal>
+	method will set this to <literal>True</literal>
 	anyway.</simpara></listitem>
       </varlistentry>
       <varlistentry>
@@ -155,7 +155,7 @@ that the mainloop was created with.</para>
       <variablelist>
 	<varlistentry>
 	<term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara><literal>TRUE</literal> if the mainloop is
+	  <listitem><simpara><literal>True</literal> if the mainloop is
 	  currently being run.</simpara></listitem>
 	</varlistentry>
       </variablelist>

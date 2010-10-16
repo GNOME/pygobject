@@ -34,6 +34,13 @@ import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
                      BadOptionError, OptionConflictError
 
+if sys.version_info >= (3, 0):
+    _basestring = str
+    _bytes = lambda s: s.encode()
+else:
+    _basestring = basestring
+    _bytes = str
+
 import glib
 _glib = sys.modules['glib._glib']
 
@@ -42,7 +49,7 @@ __all__ = [
     "OptionError",
     "OptionValueError",
     "BadOptionError",
-    "OptionConflictError"
+    "OptionConflictError",
     "Option",
     "OptionGroup",
     "OptionParser",
@@ -110,10 +117,10 @@ class Option(optparse.Option):
         flags = 0
 
         if self.hidden:
-            self.flags |= _glib.OPTION_FLAG_HIDDEN
+            flags |= _glib.OPTION_FLAG_HIDDEN
 
         if self.in_main:
-            self.flags |= _glib.OPTION_FLAG_IN_MAIN
+            flags |= _glib.OPTION_FLAG_IN_MAIN
 
         if self.takes_value():
             if self.optional_arg:
@@ -125,10 +132,10 @@ class Option(optparse.Option):
             flags |= _glib.OPTION_FLAG_FILENAME
 
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
-            yield (long_name[2:], short_name[1], flags, self.help, self.metavar)
+            yield (long_name[2:], _bytes(short_name[1]), flags, self.help, self.metavar)
 
         for long_name in self._long_opts[len(self._short_opts):]:
-            yield (long_name[2:], '\0', flags, self.help, self.metavar)
+            yield (long_name[2:], _bytes('\0'), flags, self.help, self.metavar)
 
 class OptionGroup(optparse.OptionGroup):
     """A group of command line options.
@@ -199,6 +206,7 @@ class OptionGroup(optparse.OptionGroup):
         entries = []
         for option in self.option_list:
             entries.extend(option._to_goptionentries())
+ 
         group.add_entries(entries)
 
         return group
@@ -214,7 +222,7 @@ class OptionGroup(optparse.OptionGroup):
     def set_values_to_defaults(self):
         for option in self.option_list:
             default = self.defaults.get(option.dest)
-            if isinstance(default, basestring):
+            if isinstance(default, _basestring):
                 opt_str = option.get_opt_string()
                 self.defaults[option.dest] = option.check_value(
                     opt_str, default)
@@ -292,7 +300,7 @@ class OptionParser(optparse.OptionParser):
         return context
 
     def add_option_group(self, *args, **kwargs):
-        if isinstance(args[0], basestring):
+        if isinstance(args[0], _basestring):
             optparse.OptionParser.add_option_group(self,
                 OptionGroup(self, *args, **kwargs))
             return

@@ -113,10 +113,10 @@ void      pyg_register_gtype_custom(GType gtype,
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
 PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
 int       pyg_param_gvalue_from_pyobject(GValue* value,
-                                         PyObject* py_obj, 
+                                         PyObject* py_obj,
                                          const GParamSpec* pspec);
 PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
-                                       gboolean copy_boxed, 
+                                       gboolean copy_boxed,
                                        const GParamSpec* pspec);
 
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
@@ -175,14 +175,14 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 /* pygflags */
 typedef struct {
-    _PyLongObject parent;
+	PYGLIB_PyLongObject parent;
     GType gtype;
 } PyGFlags;
 
 extern PyTypeObject PyGFlags_Type;
 
 #define PyGFlags_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_FLAGS))
-			   
+
 extern PyObject * pyg_flags_add        (PyObject *   module,
 					const char * type_name,
 					const char * strip_prefix,
@@ -194,7 +194,7 @@ extern PyObject * pyg_flags_from_gtype (GType        gtype,
 #define PyGEnum_Check(x) (g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
-    _PyLongObject parent;
+	PYGLIB_PyLongObject parent;
     GType gtype;
 } PyGEnum;
 
@@ -221,7 +221,7 @@ extern PyTypeObject PyGObjectWeakRef_Type;
 static inline PyGObjectData *
 pyg_object_peek_inst_data(GObject *obj)
 {
-    return ((PyGObjectData *) 
+    return ((PyGObjectData *)
             g_object_get_qdata(obj, pygobject_instance_data_key));
 }
 

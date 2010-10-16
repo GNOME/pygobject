@@ -6,7 +6,7 @@
 
   <name xml:lang="en">PyGObject</name>
   <shortdesc xml:lang="en">Python bindings GLib, GObject and GIO</shortdesc>
-  <homepage rdf:resource="http://www.pygtk.org" />
+  <homepage rdf:resource="http://live.gnome.org/PyGObject" />
   <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#bindings" />
 
@@ -29,6 +29,27 @@
       <foaf:name>Gian Mario Tagliaretti</foaf:name>
       <foaf:mbox rdf:resource="mailto:gianmt@gnome.org" />
       <gnome:userid>gianmt</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Tomeu Vizoso</foaf:name>
+      <foaf:mbox rdf:resource="mailto:tomeu.vizoso@collabora.co.uk" />
+      <gnome:userid>tomeuv</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Simon van der Linden</foaf:name>
+      <foaf:mbox rdf:resource="mailto:svdlinden@src.gnome.org" />
+      <gnome:userid>svdlinden</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Zach Goldberg</foaf:name>
+      <foaf:mbox rdf:resource="mailto:zach@zachgoldberg.com" />
+      <gnome:userid>zgoldberg</gnome:userid>
     </foaf:Person>
   </maintainer>
 </Project>
