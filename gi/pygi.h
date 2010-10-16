@@ -22,8 +22,11 @@
 #ifndef __PYGI_H__
 #define __PYGI_H__
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #define NO_IMPORT_PYGOBJECT
-#include <config.h>
 #include <pygobject.h>
 
 #if ENABLE_INTROSPECTION

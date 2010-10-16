@@ -22,10 +22,13 @@
  * IN THE SOFTWARE.
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include "pygi-foreign.h"
 #include "pygi-foreign-gvariant.h"
 
-#include <config.h>
 #include <girepository.h>
 
 typedef struct {

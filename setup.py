@@ -51,7 +51,7 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION)]
 
 if sys.platform == 'win32':
-    GLOBAL_MACROS.append(('VERSION', '"""%s"""' % VERSION))
+    GLOBAL_MACROS.append(('VERSION', '\\"%s\\"' % VERSION))
 else:
     raise SystemExit("Error: distutils build only supported on windows")
 
@@ -139,7 +139,7 @@ gobject = PkgConfigExtension(name='gobject._gobject',
                              pkc_name='gobject-2.0',
                              pkc_version=GLIB_REQUIRED,
                              pygobject_pkc=None,
-                             include_dirs=['glib'],
+                             include_dirs=['glib','gi'],
                              libraries=['pyglib'],
                              sources=['gobject/gobjectmodule.c',
                                       'gobject/pygboxed.c',
