@@ -66,7 +66,7 @@ if len(sys.argv) == 2:
         lines=open(pkgconfig_file).readlines()
         open(pkgconfig_file, 'w').writelines(map(replace_prefix,lines))
         # TODO: Add an installer option for shortcut creation 
-        create_shortcuts()
+        # create_shortcuts()
         print __doc__
     elif sys.argv[1] == "-remove":
         remove_shortcuts()
