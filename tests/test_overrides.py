@@ -174,8 +174,16 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(signal_checker.sentinel, 4)
 
-    def test_dialog(self):
+    def test_dialogs(self):
         self.assertEquals(Gtk.Dialog, overrides.Gtk.Dialog)
+        self.assertEquals(Gtk.AboutDialog, overrides.Gtk.AboutDialog)
+        self.assertEquals(Gtk.MessageDialog, overrides.Gtk.MessageDialog)
+        self.assertEquals(Gtk.ColorSelectionDialog, overrides.Gtk.ColorSelectionDialog)
+        self.assertEquals(Gtk.FileChooserDialog, overrides.Gtk.FileChooserDialog)
+        self.assertEquals(Gtk.FontSelectionDialog, overrides.Gtk.FontSelectionDialog)
+        self.assertEquals(Gtk.RecentChooserDialog, overrides.Gtk.RecentChooserDialog)
+
+        # Gtk.Dialog
         dialog = Gtk.Dialog (title='Foo',
                              flags=Gtk.DialogFlags.MODAL,
                              buttons=('test-button1', 1))
@@ -184,6 +192,60 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
+        button = dialog.get_widget_for_response (1)
+        self.assertEquals('test-button1', button.get_label())
+        button = dialog.get_widget_for_response (2)
+        self.assertEquals('test-button2', button.get_label())
+        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+
+        # Gtk.AboutDialog
+        dialog = Gtk.AboutDialog()
+
+        # Gtk.MessageDialog
+        dialog = Gtk.MessageDialog (title='message dialog test',
+                                    flags=Gtk.DialogFlags.MODAL,
+                                    buttons=Gtk.ButtonsType.OK,
+                                    message_format='dude!')
+
+        self.assertEquals('message dialog test', dialog.get_title())
+        self.assertTrue(dialog.get_modal())
+        text = dialog.get_property('text')
+        self.assertEquals('dude!', text)
+
+        # Gtk.ColorSelectionDialog
+        dialog = Gtk.ColorSelectionDialog("color selection dialog test")
+        self.assertEquals('color selection dialog test', dialog.get_title())
+
+        # Gtk.FileChooserDialog
+        dialog = Gtk.FileChooserDialog (title='file chooser dialog test',
+                                        buttons=('test-button1', 1),
+                                        action=Gtk.FileChooserAction.SAVE)
+
+        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        self.assertEquals('file chooser dialog test', dialog.get_title())
+        button = dialog.get_widget_for_response (1)
+        self.assertEquals('test-button1', button.get_label())
+        button = dialog.get_widget_for_response (2)
+        self.assertEquals('test-button2', button.get_label())
+        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        action = dialog.get_property('action')
+        self.assertEquals(Gtk.FileChooserAction.SAVE, action)
+
+
+        # Gtk.FontSelectionDialog
+        dialog = Gtk.ColorSelectionDialog("font selection dialog test")
+        self.assertEquals('font selection dialog test', dialog.get_title())
+
+        # Gtk.RecentChooserDialog
+        test_manager = Gtk.RecentManager()
+        dialog = Gtk.RecentChooserDialog (title='recent chooser dialog test',
+                                          buttons=('test-button1', 1),
+                                          manager=test_manager)
+
+        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        self.assertEquals('recent chooser dialog test', dialog.get_title())
         button = dialog.get_widget_for_response (1)
         self.assertEquals('test-button1', button.get_label())
         button = dialog.get_widget_for_response (2)
@@ -226,14 +288,14 @@ class TestGtk(unittest.TestCase):
         parent = None
         i = 0
 
-        (has_children, treeiter) = tree_store.iter_children(parent)
-        while (has_children):
+        treeiter = tree_store.iter_children(parent)
+        while treeiter:
            i = tree_store.get_value(treeiter, 0)
            s = tree_store.get_value(treeiter, 1)
            obj = tree_store.get_value(treeiter, 2)
            obj.check(i, s)
            parent = treeiter
-           (has_children, treeiter) = tree_store.iter_children(parent)
+           treeiter = tree_store.iter_children(parent)
 
         self.assertEquals(i, 99)
 
@@ -248,16 +310,164 @@ class TestGtk(unittest.TestCase):
 
         # walk the list to see if the values were stored correctly
         i = 0
-        (has_more, treeiter) = list_store.get_iter_first()
+        treeiter = list_store.get_iter_first()
 
-        while has_more:
+        while treeiter:
             i = list_store.get_value(treeiter, 0)
             s = list_store.get_value(treeiter, 1)
             obj = list_store.get_value(treeiter, 2)
             obj.check(i, s)
-            has_more = list_store.iter_next(treeiter)
+            treeiter = list_store.iter_next(treeiter)
 
         self.assertEquals(i, 99)
+
+    def test_tree_model(self):
+        tree_store = Gtk.TreeStore(int, str)
+
+        self.assertTrue(tree_store)
+        self.assertEqual(len(tree_store), 0)
+        self.assertEqual(tree_store.get_iter_first(), None)
+
+        def get_by_index(row, col=None):
+            if col:
+                return tree_store[row][col]
+            else:
+                return tree_store[row]
+
+        self.assertRaises(TypeError, get_by_index, None)
+        self.assertRaises(TypeError, get_by_index, "")
+        self.assertRaises(TypeError, get_by_index, ())
+
+        self.assertRaises(IndexError, get_by_index, "0")
+        self.assertRaises(IndexError, get_by_index, 0)
+        self.assertRaises(IndexError, get_by_index, (0,))
+
+        self.assertRaises(ValueError, tree_store.get_iter, "0")
+        self.assertRaises(ValueError, tree_store.get_iter, 0)
+        self.assertRaises(ValueError, tree_store.get_iter, (0,))
+
+        self.assertRaises(ValueError, tree_store.get_iter_from_string, "0")
+
+        for row in tree_store:
+            self.fail("Should not be reached")
+
+        for i in range(100):
+            label = 'this is row #%d' % i
+            parent = tree_store.append(None, (i, label,))
+            self.assertNotEquals(parent, None)
+            for j in range(20):
+                label = 'this is child #%d of node #%d' % (j, i)
+                child = tree_store.append(parent, (j, label,))
+                self.assertNotEqual(child, None)
+
+        self.assertTrue(tree_store)
+        self.assertEqual(len(tree_store), 100)
+
+        for i,row in enumerate(tree_store):
+            self.assertEqual(row.model, tree_store)
+            self.assertEqual(row.parent, None)
+
+            self.assertEqual(tree_store[i].path, row.path)
+            self.assertEqual(tree_store[str(i)].path, row.path)
+            self.assertEqual(tree_store[(i,)].path, row.path)
+
+            self.assertEqual(tree_store[i][0], i)
+            self.assertEqual(tree_store[i][1], "this is row #%d" % i)
+
+            aiter = tree_store.get_iter(i)
+            self.assertEqual(tree_store.get_path(aiter), row.path)
+
+            aiter = tree_store.get_iter(str(i))
+            self.assertEqual(tree_store.get_path(aiter), row.path)
+
+            aiter = tree_store.get_iter((i,))
+            self.assertEqual(tree_store.get_path(aiter), row.path)
+
+            self.assertEqual(tree_store.iter_parent(aiter), row.parent)
+
+            next = tree_store.iter_next(aiter)
+            if i < len(tree_store) - 1:
+                self.assertEqual(tree_store.get_path(next), row.next.path)
+            else:
+                self.assertEqual(next, None)
+
+            self.assertEqual(tree_store.iter_n_children(row.iter), 20)
+
+            child = tree_store.iter_children(row.iter)
+            for j,childrow in enumerate(row.iterchildren()):
+                child_path = tree_store.get_path(child)
+                self.assertEqual(childrow.path, child_path)
+                self.assertEqual(childrow.parent.path, row.path)
+                self.assertEqual(childrow.path, tree_store[child].path)
+                self.assertEqual(childrow.path, tree_store[child_path].path)
+
+                self.assertEqual(childrow[0], tree_store[child][0])
+                self.assertEqual(childrow[0], j)
+                self.assertEqual(childrow[1], tree_store[child][1])
+                self.assertEqual(childrow[1], 'this is child #%d of node #%d' % (j, i))
+
+                self.assertRaises(IndexError, get_by_index, child, 2)
+
+                tree_store[child][1] = 'this was child #%d of node #%d' % (j, i)
+                self.assertEqual(childrow[1], 'this was child #%d of node #%d' % (j, i))
+
+                nth_child = tree_store.iter_nth_child(row.iter, j)
+                self.assertEqual(childrow.path, tree_store.get_path(nth_child))
+
+                childrow2 = tree_store["%d:%d" % (i, j)]
+                self.assertEqual(childrow.path, childrow2.path)
+
+                childrow2 = tree_store[(i, j,)]
+                self.assertEqual(childrow.path, childrow2.path)
+
+                child = tree_store.iter_next(child)
+                if j < 19:
+                    self.assertEqual(childrow.next.path, tree_store.get_path(child))
+                else:
+                    self.assertEqual(child, childrow.next)
+                    self.assertEqual(child, None)
+
+            self.assertEqual(j, 19)
+
+        self.assertEqual(i, 99)
+
+        # negative indices
+        for i in range(-1,-100,-1):
+            i_real = i + 100
+            self.assertEqual(tree_store[i][0], i_real)
+
+            row = tree_store[i]
+            for j in range(-1, -20, -1):
+                j_real = j + 20
+                path = (i_real, j_real,)
+
+                self.assertEqual(tree_store[path][-2], j_real)
+
+                label = 'this was child #%d of node #%d' % (j_real, i_real)
+                self.assertEqual(tree_store[path][-1], label)
+
+                new_label = 'this still is child #%d of node #%d' % (j_real, i_real)
+                tree_store[path][-1] = new_label
+                self.assertEqual(tree_store[path][-1], new_label)
+
+                self.assertRaises(IndexError, get_by_index, path, -3)
+
+        self.assertRaises(IndexError, get_by_index, -101)
+
+        last_row = tree_store[99]
+        self.assertNotEqual(last_row, None)
+
+        for i,childrow in enumerate(last_row.iterchildren()):
+            if i < 19:
+                self.assertTrue(tree_store.remove(childrow.iter))
+            else:
+                self.assertFalse(tree_store.remove(childrow.iter))
+
+        self.assertEqual(i, 19)
+
+        self.assertEqual(tree_store.iter_n_children(last_row.iter), 0)
+        for childrow in last_row.iterchildren():
+            self.fail("Should not be reached")
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()

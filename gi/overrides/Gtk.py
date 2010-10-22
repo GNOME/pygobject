@@ -252,10 +252,17 @@ class Builder(Gtk.Builder):
 Builder = override(Builder)
 __all__.append('Builder')
 
+
 class Dialog(Gtk.Dialog):
 
-    def __init__(self, title=None, parent=None, flags=0, buttons=None):
-        Gtk.Dialog.__init__(self)
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 flags=0,
+                 buttons=None,
+                 **kwds):
+
+        Gtk.Dialog.__init__(self, **kwds)
         if title:
             self.set_title(title)
         if parent:
@@ -272,7 +279,7 @@ class Dialog(Gtk.Dialog):
         except AttributeError:
             pass
 
-        if buttons:
+        if buttons is not None:
             self.add_buttons(*buttons)
 
     def add_buttons(self, *args):
@@ -287,21 +294,96 @@ class Dialog(Gtk.Dialog):
 
         will add "Open" and "Close" buttons to dialog.
         """
-
-        def buttons(b):
+        def _button(b):
             while b:
                 t, r = b[0:2]
                 b = b[2:]
                 yield t, r
 
         try:
-            for text, response in buttons(args):
+            for text, response in _button(args):
                 self.add_button(text, response)
         except (IndexError):
             raise TypeError('Must pass an even number of arguments')
 
 Dialog = override(Dialog)
 __all__.append('Dialog')
+
+class MessageDialog(Gtk.MessageDialog, Dialog):
+    def __init__(self,
+                 parent=None,
+                 flags=0,
+                 type=Gtk.MessageType.INFO,
+                 buttons=Gtk.ButtonsType.NONE,
+                 message_format=None,
+                 **kwds):
+
+        if message_format != None:
+            kwds['text'] = message_format
+        Gtk.MessageDialog.__init__(self,
+                                   buttons=buttons,
+                                   **kwds)
+        Dialog.__init__(self, parent=parent, flags=flags)
+
+MessageDialog = override(MessageDialog)
+__all__.append('MessageDialog')
+
+class AboutDialog(Gtk.AboutDialog, Dialog):
+    def __init__(self, **kwds):
+        Gtk.AboutDialog.__init__(self, **kwds)
+        Dialog.__init__(self)
+
+AboutDialog = override(AboutDialog)
+__all__.append('AboutDialog')
+
+class ColorSelectionDialog(Gtk.ColorSelectionDialog, Dialog):
+    def __init__(self, title=None, **kwds):
+        Gtk.ColorSelectionDialog.__init__(self, **kwds)
+        Dialog.__init__(self, title=title)
+
+ColorSelectionDialog = override(ColorSelectionDialog)
+__all__.append('ColorSelectionDialog')
+
+class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 action=Gtk.FileChooserAction.OPEN,
+                 buttons=None,
+                 **kwds):
+        Gtk.FileChooserDialog.__init__(self,
+                                       action=action,
+                                       **kwds)
+        Dialog.__init__(self, title=title, parent=parent, buttons=buttons)
+
+FileChooserDialog = override(FileChooserDialog)
+__all__.append('FileChooserDialog')
+
+class FontSelectionDialog(Gtk.FontSelectionDialog, Dialog):
+    def __init__(self, title=None, **kwds):
+        Gtk.FontSelectionDialog.__init__(self, **kwds)
+        Dialog.__init__(self, title=title)
+
+FontSelectionDialog = override(FontSelectionDialog)
+__all__.append('FontSelectionDialog')
+
+class RecentChooserDialog(Gtk.RecentChooserDialog, Dialog):
+    def __init__(self,
+                 title=None,
+                 parent=None,
+                 manager=None,
+                 buttons=None,
+                 **kwds):
+
+        Gtk.RecentChooserDialog.__init__(self, recent_manager=manager, **kwds)
+        Dialog.__init__(self,
+                        title=title,
+                        parent=parent,
+                        buttons=buttons)
+
+RecentChooserDialog = override(RecentChooserDialog)
+__all__.append('RecentChooserDialog')
+
 
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
@@ -358,6 +440,89 @@ class TreeModel(Gtk.TreeModel):
     def __len__(self):
         return self.iter_n_children(None)
 
+    def __bool__(self):
+        return True
+
+    def __getitem__(self, key):
+        if isinstance(key, Gtk.TreeIter):
+            return TreeModelRow(self, key)
+        elif isinstance(key, int) and key < 0:
+            index = len(self) + key
+            if index < 0:
+                raise IndexError("row index is out of bounds: %d" % key)
+            try:
+                aiter = self.get_iter(index)
+            except ValueError:
+                raise IndexError("could not find tree path '%s'" % key)
+            return TreeModelRow(self, aiter)
+        else:
+            try:
+                aiter = self.get_iter(key)
+            except ValueError:
+                raise IndexError("could not find tree path '%s'" % key)
+            return TreeModelRow(self, aiter)
+
+    def __iter__(self):
+        return TreeModelRowIter(self, self.get_iter_first())
+
+    def get_iter(self, path):
+        if isinstance(path, Gtk.TreePath):
+            pass
+        elif isinstance(path, (int, str,)):
+            path = self._tree_path_from_string(str(path))
+        elif isinstance(path, tuple):
+            path_str = ":".join(str(val) for val in path)
+            path = self._tree_path_from_string(path_str)
+        else:
+            raise TypeError("tree path must be one of Gtk.TreeIter, Gtk.TreePath, \
+                int, str or tuple, not %s" % type(path).__name__)
+
+        success, aiter = super(TreeModel, self).get_iter(path)
+        if not success:
+            raise ValueError("invalid tree path '%s'" % path)
+        return aiter
+
+    def _tree_path_from_string(self, path):
+        if len(path) == 0:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
+        try:
+            return TreePath.new_from_string(path)
+        except TypeError:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
+
+    def get_iter_first(self):
+        success, aiter = super(TreeModel, self).get_iter_first()
+        if success:
+            return aiter
+
+    def get_iter_from_string(self, path_string):
+        success, aiter = super(TreeModel, self).get_iter_from_string(path_string)
+        if not success:
+            raise ValueError("invalid tree path '%s'" % path_string)
+        return aiter
+
+    def iter_next(self, aiter):
+        next_iter = aiter.copy()
+        success = super(TreeModel, self).iter_next(next_iter)
+        if success:
+            return next_iter
+
+    def iter_children(self, aiter):
+        success, child_iter = super(TreeModel, self).iter_children(aiter)
+        if success:
+            return child_iter
+
+    def iter_nth_child(self, parent, n):
+        success, child_iter = super(TreeModel, self).iter_nth_child(parent, n)
+        if success:
+            return child_iter
+
+    def iter_parent(self, aiter):
+        success, parent_iter = super(TreeModel, self).iter_parent(aiter)
+        if success:
+            return parent_iter
+
+TreeModel.__nonzero__ = TreeModel.__bool__
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
@@ -385,6 +550,118 @@ class ListStore(Gtk.ListStore, TreeModel):
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
+
+class TreeModelRow(object):
+
+    def __init__(self, model, iter_or_path):
+        if not isinstance(model, Gtk.TreeModel):
+            raise TypeError("expected Gtk.TreeModel, %s found" % type(model).__name__)
+        self.model = model
+        if isinstance(iter_or_path, Gtk.TreePath):
+            self.iter = model.get_iter(iter_or_path)
+        elif isinstance(iter_or_path, Gtk.TreeIter):
+            self.iter = iter_or_path
+        else:
+            raise TypeError("expected Gtk.TreeIter or Gtk.TreePath, \
+                %s found" % type(iter_or_path).__name__)
+
+    @property
+    def path(self):
+        return self.model.get_path(self.iter)
+
+    @property
+    def next(self):
+        return self.get_next()
+
+    @property
+    def parent(self):
+        return self.get_parent()
+
+    def get_next(self):
+        next_iter = self.model.iter_next(self.iter)
+        if next_iter:
+            return TreeModelRow(self.model, next_iter)
+
+    def get_parent(self):
+        parent_iter = self.model.iter_parent(self.iter)
+        if parent_iter:
+            return TreeModelRow(self.model, parent_iter)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            if key >= self.model.get_n_columns():
+                raise IndexError("column index is out of bounds: %d" % key)
+            elif key < 0:
+                key = self._convert_negative_index(key)
+            return self.model.get_value(self.iter, key)
+        else:
+            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+
+    def __setitem__(self, key, value):
+        if isinstance(key, int):
+            if key >= self.model.get_n_columns():
+                raise IndexError("column index is out of bounds: %d" % key)
+            elif key < 0:
+                key = self._convert_negative_index(key)
+            return self.model.set_value(self.iter, key, value)
+        else:
+            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+
+    def _convert_negative_index(self, index):
+        new_index = self.model.get_n_columns() + index
+        if new_index < 0:
+            raise IndexError("column index is out of bounds: %d" % index)
+        return new_index
+
+    def iterchildren(self):
+        child_iter = self.model.iter_children(self.iter)
+        return TreeModelRowIter(self.model, child_iter)
+
+__all__.append('TreeModelRow')
+
+class TreeModelRowIter(object):
+
+    def __init__(self, model, aiter):
+        self.model = model
+        self.iter = aiter
+
+    def next(self):
+        if not self.iter:
+            raise StopIteration
+        row = TreeModelRow(self.model, self.iter)
+        self.iter = self.model.iter_next(self.iter)
+        return row
+
+    def __iter__(self):
+        return self
+
+__all__.append('TreeModelRowIter')
+
+class TreePath(Gtk.TreePath):
+
+    def __str__(self):
+        return self.to_string()
+
+    def __lt__(self, other):
+        return self.compare(other) < 0
+
+    def __le__(self, other):
+        return self.compare(other) <= 0
+
+    def __eq__(self, other):
+        return self.compare(other) == 0
+
+    def __ne__(self, other):
+        return self.compare(other) != 0
+
+    def __gt__(self, other):
+        return self.compare(other) > 0
+
+    def __ge__(self, other):
+        return self.compare(other) >= 0
+
+TreePath = override(TreePath)
+__all__.append('TreePath')
 
 class TreeStore(Gtk.TreeStore, TreeModel):
 

@@ -49,16 +49,7 @@ def create_shortcuts():
     if os.path.isfile(pygobject_doc_link):   
         os.remove(pygobject_doc_link)
     create_shortcut(doc_url,'PyGObject Documentation',pygobject_doc_link)
-
-def remove_shortcuts():
-    pygtk_shortcuts = os.path.join(
-        get_special_folder_path('CSIDL_COMMON_PROGRAMS'), 'PyGTK')
-    os.remove(os.path.join(pygtk_shortcuts,'PyGObject Documentation.lnk'))
-    try:
-        os.rmdir(pygtk_shortcuts)
-    except OSError, e:
-        # Directory is not empty, so leave it like that !
-        pass
+    file_created(pygobject_doc_link)
 
 if len(sys.argv) == 2:
     if sys.argv[1] == "-install":
@@ -66,7 +57,6 @@ if len(sys.argv) == 2:
         lines=open(pkgconfig_file).readlines()
         open(pkgconfig_file, 'w').writelines(map(replace_prefix,lines))
         # TODO: Add an installer option for shortcut creation 
-        create_shortcuts()
+        # create_shortcuts()
         print __doc__
-    elif sys.argv[1] == "-remove":
-        remove_shortcuts()
+
