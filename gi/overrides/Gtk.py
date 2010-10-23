@@ -500,6 +500,21 @@ class TextBuffer(Gtk.TextBuffer):
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
+class TextIter(Gtk.TextIter):
+
+    def forward_search(self, string, flags, limit):
+        success, match_start, match_end = super(TextIter, self).forward_search(string,
+            flags, limit)
+        return (match_start, match_end,)
+
+    def backward_search(self, string, flags, limit):
+        success, match_start, match_end = super(TextIter, self).backward_search(string,
+            flags, limit)
+        return (match_start, match_end,)
+
+TextIter = override(TextIter)
+__all__.append('TextIter')
+
 class TreeModel(Gtk.TreeModel):
     def __len__(self):
         return self.iter_n_children(None)
