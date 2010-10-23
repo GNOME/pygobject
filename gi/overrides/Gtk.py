@@ -424,6 +424,16 @@ class IconView(Gtk.IconView):
 IconView = override(IconView)
 __all__.append('IconView')
 
+class IMContext(Gtk.IMContext):
+
+    def get_surrounding(self):
+        success, text, cursor_index = super(IMContext, self).get_surrounding()
+        if success:
+            return (text, cursor_index,)
+
+IMContext = override(IMContext)
+__all__.append('IMContext')
+
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
         table = self.get_tag_table()
