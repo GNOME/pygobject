@@ -212,6 +212,16 @@ class ComboBox(Gtk.ComboBox):
 ComboBox = override(ComboBox)
 __all__.append('ComboBox')
 
+class Container(Gtk.Container):
+
+    def get_focus_chain(self):
+        success, widgets = super(Container, self).get_focus_chain()
+        if success:
+            return widgets
+
+Container = override(Container)
+__all__.append('Container')
+
 class Builder(Gtk.Builder):
 
     def connect_signals(self, obj_or_map):
