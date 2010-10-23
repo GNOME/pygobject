@@ -807,6 +807,11 @@ class TreeViewColumn(Gtk.TreeViewColumn):
         for (name, value) in attributes.items():
             self.add_attribute(cell_renderer, name, value)
 
+    def cell_get_position(self, cell_renderer):
+        success, start_pos, width = super(TreeViewColumn, self).cell_get_position(cell_renderer)
+        if success:
+            return (start_pos, width,)
+
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
