@@ -492,6 +492,11 @@ class TextBuffer(Gtk.TextBuffer):
         length = len(text)
         Gtk.TextBuffer.insert_at_cursor(self, text, length)
 
+    def get_selection_bounds(self):
+        success, start, end = super(TextBuffer, self).get_selection_bounds(string,
+            flags, limit)
+        return (start, end)
+
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
