@@ -769,6 +769,18 @@ class TreeStore(Gtk.TreeStore, TreeModel):
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
+class TreeSortable(Gtk.TreeSortable):
+
+    def get_sort_column_id(self):
+        success, sort_column_id, order = super(TreeSortable, self).get_sort_column_id()
+        if success:
+            return (sort_column_id, order,)
+        else:
+            return (None, None,)
+
+TreeSortable = override(TreeSortable)
+__all__.append('TreeSortable')
+
 class TreeViewColumn(Gtk.TreeViewColumn):
     def __init__(self, title='',
                  cell_renderer=None,
