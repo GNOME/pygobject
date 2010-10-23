@@ -781,6 +781,21 @@ class TreeSortable(Gtk.TreeSortable):
 TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
+class TreeView(Gtk.TreeView):
+
+    def get_path_at_pos(self, x, y):
+        success, path, column, cell_x, cell_y = super(TreeView, self).get_path_at_pos(x, y)
+        if success:
+            return (path, column, cell_x, cell_y,)
+
+    def get_dest_row_at_pos(self, drag_x, drag_y):
+        success, path, pos = super(TreeView, self).get_dest_row_at_pos(drag_x, drag_y)
+        if success:
+            return (path, pos,)
+
+TreeView = override(TreeView)
+__all__.append('TreeView')
+
 class TreeViewColumn(Gtk.TreeViewColumn):
     def __init__(self, title='',
                  cell_renderer=None,
