@@ -202,6 +202,16 @@ class UIManager(Gtk.UIManager):
 UIManager = override(UIManager)
 __all__.append('UIManager')
 
+class ComboBox(Gtk.ComboBox):
+
+    def get_active_iter(self):
+        success, aiter = super(ComboBox, self).get_active_iter()
+        if success:
+            return aiter
+
+ComboBox = override(ComboBox)
+__all__.append('ComboBox')
+
 class Builder(Gtk.Builder):
 
     def connect_signals(self, obj_or_map):
