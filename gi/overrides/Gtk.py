@@ -827,6 +827,17 @@ class TreeSelection(Gtk.TreeSelection):
 TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
 
+class Widget(Gtk.Widget):
+
+    def translate_coordinates(self, dest_widget, src_x, src_y):
+        success, dest_x, dest_y = super(Widget, self).translate_coordinates(
+            dest_widget, src_x, src_y)
+        if success:
+            return (dest_x, dest_y,)
+
+Widget = override(Widget)
+__all__.append('Widget')
+
 class Button(Gtk.Button):
     def __init__(self, label=None, stock=None, use_underline=False):
         if stock:
