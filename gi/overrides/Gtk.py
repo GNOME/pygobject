@@ -434,6 +434,16 @@ class IMContext(Gtk.IMContext):
 IMContext = override(IMContext)
 __all__.append('IMContext')
 
+class RecentInfo(Gtk.RecentInfo):
+
+    def get_application_info(self, app_name):
+        success, app_exec, count, time = super(RecentInfo, self).get_application_info(app_name)
+        if success:
+            return (app_exec, count, time,)
+
+RecentInfo = override(RecentInfo)
+__all__.append('RecentInfo')
+
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
         table = self.get_tag_table()
