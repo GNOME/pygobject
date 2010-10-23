@@ -404,6 +404,25 @@ class RecentChooserDialog(Gtk.RecentChooserDialog, Dialog):
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
 
+class IconView(Gtk.IconView):
+
+    def get_item_at_pos(self, x, y):
+        success, path, cell = super(IconView, self).get_item_at_pos(x, y)
+        if success:
+            return (path, cell,)
+
+    def get_visible_range(self):
+        success, start_path, end_path = super(IconView, self).get_visible_range()
+        if success:
+            return (start_path, end_path,)
+
+    def get_dest_item_at_pos(self, drag_x, drag_y):
+        success, path, pos = super(IconView, self).get_dest_item_at_pos(drag_x, drag_y)
+        if success:
+            return path, pos
+
+IconView = override(IconView)
+__all__.append('IconView')
 
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
