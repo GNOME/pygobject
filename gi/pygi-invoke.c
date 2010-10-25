@@ -343,9 +343,20 @@ _prepare_invocation_state (struct invocation_state *state,
                         /* if caller allocates only use one level of indirection */
                         state->out_args[out_args_pos].v_pointer = NULL;
                         state->args[i] = &state->out_args[out_args_pos];
-                        if (g_type_is_a (g_registered_type_info_get_g_type (info), G_TYPE_BOXED))
+                        if (g_type_is_a (g_registered_type_info_get_g_type (info), G_TYPE_BOXED)) {
                             state->args[i]->v_pointer = _pygi_boxed_alloc (info, NULL);
-                        else {
+                        } else if (g_struct_info_is_foreign((GIStructInfo *) info) ) {
+                            PyObject *foreign_struct =
+                                pygi_struct_foreign_convert_from_g_argument(state->arg_type_infos[i], NULL);
+
+                            pygi_struct_foreign_convert_to_g_argument(
+                                foreign_struct,
+                                state->arg_type_infos[i],
+                                GI_TRANSFER_EVERYTHING,
+                                state->args[i]);
+
+                            Py_DECREF(foreign_struct);
+                        } else {
                             gssize size = g_struct_info_get_size ( (GIStructInfo *) info);
                             state->args[i]->v_pointer = g_malloc0 (size);
                         }

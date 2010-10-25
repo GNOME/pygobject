@@ -112,6 +112,56 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+PyObject *
+cairo_rectangle_int_to_arg (PyObject       *value,
+                            GITypeInfo     *type_info,
+                            GITransfer      transfer,
+                            GIArgument      *arg)
+{
+    cairo_rectangle_int_t *rect;
+
+    rect = ( (PycairoRectangleInt *) value)->rectangle_int;
+    if (!rect) {
+        PyErr_SetString (PyExc_ValueError, "RectangleInt instance wrapping a NULL pointer");
+        return NULL;
+    }
+
+    if (transfer == GI_TRANSFER_EVERYTHING) {
+        unsigned int size = sizeof(cairo_rectangle_int_t);
+        cairo_rectangle_int_t *transfer = malloc(size);
+        if (!transfer) {
+            PyErr_NoMemory();
+            return NULL;
+        }
+
+        memcpy(transfer, rect, size);
+        rect = transfer;
+    }
+
+    arg->v_pointer = rect;
+    Py_RETURN_NONE;
+}
+
+PyObject *
+cairo_rectangle_int_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+{
+    cairo_rectangle_int_t *rect = (cairo_rectangle_int_t*) arg;
+
+    if (rect)
+      return PycairoRectangleInt_FromRectangleInt (rect);
+    else {
+      cairo_rectangle_int_t temp = {};
+      return PycairoRectangleInt_FromRectangleInt (&temp);
+    }
+}
+
+PyObject *
+cairo_rectangle_int_release (GIBaseInfo *base_info,
+                             gpointer    struct_)
+{
+    g_free (struct_);
+    Py_RETURN_NONE;
+}
 
 static PyMethodDef _gi_cairo_functions[] = {};
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
@@ -131,5 +181,12 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_surface_to_arg,
                                   cairo_surface_from_arg,
                                   cairo_surface_release);
+
+     pygi_register_foreign_struct ("cairo",
+                                  "RectangleInt",
+                                  cairo_rectangle_int_to_arg,
+                                  cairo_rectangle_int_from_arg,
+                                  cairo_rectangle_int_release);
+
 }
 PYGLIB_MODULE_END;
