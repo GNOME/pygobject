@@ -173,6 +173,9 @@ class IntrospectionModule(object):
         path = repository.get_typelib_path(self._namespace)
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
+    def __dir__ (self):
+        attribs_list = repository.get_infos(self._namespace)
+        return list(map(lambda x: x.get_name(), attribs_list))
 
 class DynamicGObjectModule(IntrospectionModule):
     """Wrapper for the GObject module
@@ -235,3 +238,8 @@ class DynamicModule(object):
                 return getattr(self._overrides_module, name, None)
 
         return getattr(self.introspection_module, name)
+
+    def __dir__ (self):
+        repository.require(self._namespace, self._version)
+        attribs_list = repository.get_infos(self._namespace)
+        return list(map(lambda x: x.get_name(), attribs_list))
