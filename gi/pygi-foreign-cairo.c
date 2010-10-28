@@ -22,6 +22,7 @@
  */
 
 #include <cairo.h>
+#include <Python.h>
 
 #if PY_VERSION_HEX < 0x03000000
 #include <pycairo.h>
