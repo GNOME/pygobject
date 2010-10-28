@@ -548,8 +548,16 @@ _invoke_function (struct invocation_state *state,
 
     error = NULL;
 
+    pyg_begin_allow_threads;
     retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
-                                      state->in_args, state->n_in_args, state->out_args, state->n_out_args, &state->return_arg, &error);
+                                      state->in_args,
+                                      state->n_in_args,
+                                      state->out_args,
+                                      state->n_out_args,
+                                      &state->return_arg,
+                                      &error);
+    pyg_end_allow_threads;
+
     if (!retval) {
         g_assert (error != NULL);
         /* TODO: raise the right error, out of the error domain. */
