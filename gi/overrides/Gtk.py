@@ -522,6 +522,9 @@ class TreeModel(Gtk.TreeModel):
     def __bool__(self):
         return True
 
+    # alias for Python 2.x object protocol
+    __nonzero__ = __bool__
+
     def __getitem__(self, key):
         if isinstance(key, Gtk.TreeIter):
             return TreeModelRow(self, key)
@@ -601,7 +604,6 @@ class TreeModel(Gtk.TreeModel):
         if success:
             return parent_iter
 
-TreeModel.__nonzero__ = TreeModel.__bool__
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
@@ -704,12 +706,15 @@ class TreeModelRowIter(object):
         self.model = model
         self.iter = aiter
 
-    def next(self):
+    def __next__(self):
         if not self.iter:
             raise StopIteration
         row = TreeModelRow(self.model, self.iter)
         self.iter = self.model.iter_next(self.iter)
         return row
+
+    # alias for Python 2.x object protocol
+    next = __next__
 
     def __iter__(self):
         return self
