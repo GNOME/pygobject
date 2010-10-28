@@ -1509,3 +1509,27 @@ class TestOverrides(unittest.TestCase):
     def test_module_name(self):
         self.assertEquals(GIMarshallingTests.OverridesStruct.__module__, 'gi.overrides.GIMarshallingTests')
         self.assertEquals(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
+
+class TestDir(unittest.TestCase):
+    def test_members_list(self):
+        list = dir(GIMarshallingTests)
+        self.assertTrue('OverridesStruct' in list)
+        self.assertTrue('BoxedStruct' in list)
+        self.assertTrue('OVERRIDES_CONSTANT' in list)
+        self.assertTrue('GEnum' in list)
+        self.assertTrue('int32_return_max' in list)
+
+    def test_modules_list(self):
+        import gi.repository
+        list = dir(gi.repository)
+        self.assertTrue('GIMarshallingTests' in list)
+
+        # FIXME: test to see if a module which was not imported is in the list
+        #        we should be listing every typelib we find, not just the ones
+        #        which are imported
+        #
+        #        to test this I recommend we compile a fake module which
+        #        our tests would never import and check to see if it is
+        #        in the list:
+        #
+        # self.assertTrue('DoNotImportDummyTests' in list)
