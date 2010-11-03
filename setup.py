@@ -1,21 +1,34 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # setup.py - distutils configuration for pygobject
-#
-"""Python Bindings for GObject."""
+
+
+'''Python Bindings for GObject.
+
+PyGObject is a set of bindings for the glib, gobject and gio libraries.
+It provides an object oriented interface that is slightly higher level than
+the C one. It automatically does all the type casting and reference
+counting that you would have to do normally with the C API. You can
+find out more on the official homepage, http://www.pygtk.org/'''
+
+
+import os
+import sys
+import glob
 
 from distutils.command.build import build
 from distutils.command.build_clib import build_clib
+from distutils.command.build_scripts import build_scripts
 from distutils.sysconfig import get_python_inc
+from distutils.extension import Extension
 from distutils.core import setup
-import glob
-import os
-import sys
 
-from dsextras import get_m4_define, getoutput, have_pkgconfig, \
-     GLOBAL_INC, GLOBAL_MACROS, InstallLib, InstallData, BuildExt, \
-     PkgConfigExtension, TemplateExtension, \
-     pkgc_get_libraries, pkgc_get_library_dirs, pkgc_get_include_dirs
+from dsextras import GLOBAL_MACROS, GLOBAL_INC, get_m4_define, getoutput, \
+                     have_pkgconfig, pkgc_get_libraries, \
+                     pkgc_get_library_dirs, pkgc_get_include_dirs, \
+                     PkgConfigExtension, TemplateExtension, \
+                     BuildExt, InstallLib, InstallData
 
 if '--yes-i-know-its-not-supported' in sys.argv:
     sys.argv.remove('--yes-i-know-its-not-supported')
