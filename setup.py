@@ -119,6 +119,9 @@ class PyGObjectInstallData(InstallData):
                               os.path.join(self.install_dir,
                                            'lib', 'pkgconfig'))
 
+        self.install_template('docs/xsl/fixxref.py.in',
+                              os.path.join(self.install_dir, XSL_DIR))
+
 class PyGObjectBuild(build):
     enable_threading = 1
 PyGObjectBuild.user_options.append(('enable-threading', None,
