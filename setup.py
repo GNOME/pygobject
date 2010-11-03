@@ -84,6 +84,9 @@ class PyGObjectInstallLib(InstallLib):
         install_dir = os.path.join(self.install_dir, PYGTK_SUFFIX_LONG)
         self.set_install_dir(install_dir)
 
+        # Install tests
+        self.install_tests()
+
         InstallLib.run(self)
 
     def install_pth(self):
@@ -101,6 +104,46 @@ class PyGObjectInstallLib(InstallLib):
         self.byte_compile([pygtk])
         self.local_outputs.append(pygtk)
         self.local_inputs.append('pygtk.py')
+
+    def copy_test(self, srcfile, dstfile=None):
+        if dstfile is None:
+            dstfile = os.path.join(self.test_dir, srcfile)
+        else:
+            dstfile = os.path.join(self.test_dir, dstfile)
+
+        srcfile = os.path.join('tests', srcfile)
+
+        self.copy_file(srcfile, os.path.abspath(dstfile))
+        self.local_outputs.append(dstfile)
+        self.local_inputs.append('srcfile')
+
+    def install_tests(self):
+        self.test_dir = os.path.join(self.install_dir, 'tests', 'pygobject')
+        self.mkpath(self.test_dir)
+
+        self.copy_test('runtests-windows.py', 'runtests.py')
+        self.copy_test('compathelper.py')
+        self.copy_test('test_everything.py')
+        self.copy_test('test_gcancellable.py')
+        self.copy_test('test_gi.py')
+        self.copy_test('test_gicon.py')
+        self.copy_test('test_gio.py')
+        self.copy_test('test_gobject.py')
+        self.copy_test('test_gresolver.py')
+        self.copy_test('test_gsocket.py')
+        self.copy_test('test_interface.py')
+        self.copy_test('test_mainloop.py')
+        self.copy_test('test_option.py')
+        self.copy_test('test_overrides.py')
+        self.copy_test('test_properties.py')
+        self.copy_test('test_signal.py')
+        self.copy_test('test_source.py')
+        self.copy_test('test_subprocess.py')
+        self.copy_test('test_thread.py')
+        self.copy_test('test_unknown.py')
+        self.copy_test('test_uris.py')
+        self.copy_test('testmodule.py')
+
 
 class PyGObjectInstallData(InstallData):
     def run(self):
@@ -247,6 +290,24 @@ if gio.can_build():
     data_files.append((DEFS_DIR,('gio/gio.defs', 'gio/gio-types.defs',)))
 else:
     raise SystemExit("ERROR: Nothing to do, gio could not be found and is essential.")
+
+# Build testhelper library
+testhelper = Extension(name='testhelper',
+                       sources=['tests/testhelpermodule.c',
+                                'tests/test-floating.c',
+                                'tests/test-thread.c',
+                                'tests/test-unknown.c'],
+                       libraries=['pyglib'] +
+                                 pkgc_get_libraries('glib-%s' % PYGTK_SUFFIX) +
+                                 pkgc_get_libraries('gobject-%s' % PYGTK_SUFFIX),
+                       include_dirs=['tests', 'glib',
+                                     'gobject', get_python_inc()] +
+                                    pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX) +
+                                    pkgc_get_include_dirs('gobject-%s' % PYGTK_SUFFIX),
+                       library_dirs=pkgc_get_library_dirs('glib%s' % PYGTK_SUFFIX) +
+                                    pkgc_get_library_dirs('gobject-%s' % PYGTK_SUFFIX))
+
+ext_modules.append(testhelper)
 
 # Threading support
 if '--disable-threading' in sys.argv:
