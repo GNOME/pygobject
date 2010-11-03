@@ -36,6 +36,27 @@ else:
 Gtk = modules['Gtk'].introspection_module
 __all__ = []
 
+class Widget(Gtk.Widget):
+
+    def translate_coordinates(self, dest_widget, src_x, src_y):
+        success, dest_x, dest_y = super(Widget, self).translate_coordinates(
+            dest_widget, src_x, src_y)
+        if success:
+            return (dest_x, dest_y,)
+
+Widget = override(Widget)
+__all__.append('Widget')
+
+class Container(Gtk.Container, Widget):
+
+    def get_focus_chain(self):
+        success, widgets = super(Container, self).get_focus_chain()
+        if success:
+            return widgets
+
+Container = override(Container)
+__all__.append('Container')
+
 class ActionGroup(Gtk.ActionGroup):
     def add_actions(self, entries, user_data=None):
         """
@@ -202,7 +223,7 @@ class UIManager(Gtk.UIManager):
 UIManager = override(UIManager)
 __all__.append('UIManager')
 
-class ComboBox(Gtk.ComboBox):
+class ComboBox(Gtk.ComboBox, Container):
 
     def get_active_iter(self):
         success, aiter = super(ComboBox, self).get_active_iter()
@@ -211,16 +232,6 @@ class ComboBox(Gtk.ComboBox):
 
 ComboBox = override(ComboBox)
 __all__.append('ComboBox')
-
-class Container(Gtk.Container):
-
-    def get_focus_chain(self):
-        success, widgets = super(Container, self).get_focus_chain()
-        if success:
-            return widgets
-
-Container = override(Container)
-__all__.append('Container')
 
 class Builder(Gtk.Builder):
 
@@ -273,7 +284,7 @@ Builder = override(Builder)
 __all__.append('Builder')
 
 
-class Dialog(Gtk.Dialog):
+class Dialog(Gtk.Dialog, Container):
 
     def __init__(self,
                  title=None,
@@ -607,7 +618,20 @@ class TreeModel(Gtk.TreeModel):
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
-class ListStore(Gtk.ListStore, TreeModel):
+class TreeSortable(Gtk.TreeSortable, ):
+
+    def get_sort_column_id(self):
+        success, sort_column_id, order = super(TreeSortable, self).get_sort_column_id()
+        if success:
+            return (sort_column_id, order,)
+        else:
+            return (None, None,)
+
+TreeSortable = override(TreeSortable)
+__all__.append('TreeSortable')
+
+
+class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def __init__(self, *column_types):
         Gtk.ListStore.__init__(self)
         self.set_column_types(column_types)
@@ -747,7 +771,7 @@ class TreePath(Gtk.TreePath):
 TreePath = override(TreePath)
 __all__.append('TreePath')
 
-class TreeStore(Gtk.TreeStore, TreeModel):
+class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
     def __init__(self, *column_types):
         Gtk.TreeStore.__init__(self)
@@ -774,19 +798,7 @@ class TreeStore(Gtk.TreeStore, TreeModel):
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
-class TreeSortable(Gtk.TreeSortable):
-
-    def get_sort_column_id(self):
-        success, sort_column_id, order = super(TreeSortable, self).get_sort_column_id()
-        if success:
-            return (sort_column_id, order,)
-        else:
-            return (None, None,)
-
-TreeSortable = override(TreeSortable)
-__all__.append('TreeSortable')
-
-class TreeView(Gtk.TreeView):
+class TreeView(Gtk.TreeView, Container):
 
     def get_path_at_pos(self, x, y):
         success, path, column, cell_x, cell_y = super(TreeView, self).get_path_at_pos(x, y)
@@ -832,18 +844,7 @@ class TreeSelection(Gtk.TreeSelection):
 TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
 
-class Widget(Gtk.Widget):
-
-    def translate_coordinates(self, dest_widget, src_x, src_y):
-        success, dest_x, dest_y = super(Widget, self).translate_coordinates(
-            dest_widget, src_x, src_y)
-        if success:
-            return (dest_x, dest_y,)
-
-Widget = override(Widget)
-__all__.append('Widget')
-
-class Button(Gtk.Button):
+class Button(Gtk.Button, Container):
     def __init__(self, label=None, stock=None, use_underline=False):
         if stock:
             label = stock
