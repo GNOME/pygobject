@@ -76,10 +76,11 @@ def have_pkgconfig():
     """Checks for the existence of pkg-config"""
     if (sys.platform == 'win32' and
         os.system('pkg-config --version > NUL') == 0):
-        return 1
+        
+        return True
     else:
         if getstatusoutput('pkg-config')[0] == 256:
-            return 1
+            return True
 
 def list_files(dir):
     """List all files in a dir, with filename match support:
@@ -102,19 +103,19 @@ def list_files(dir):
 
 def pkgc_version_check(name, req_version):
     """Check the existence and version number of a package:
-    returns 0 if not installed or too old, 1 otherwise."""
+    returns False if not installed or too old, True otherwise."""
     is_installed = not os.system('pkg-config --exists %s' % name)
     if not is_installed:
-        return 0
+        return False
 
     orig_version = getoutput('pkg-config --modversion %s' % name)
     version = map(int, orig_version.split('.'))
     pkc_version = map(int, req_version.split('.'))
 
     if version >= pkc_version:
-        return 1
+        return True
         
-    return 0
+    return False
 
 def pkgc_get_libraries(name):
     """returns a list of libraries as returned by pkg-config --libs-only-l"""
@@ -324,21 +325,21 @@ class PkgConfigExtension(Extension):
             if retval:
                 print ("* %s.pc could not be found, bindings for %s"
                        " will not be built." % (package, self.name))
-                self.can_build_ok = 0
-                return 0
+                self.can_build_ok = False
+                return False
 
             orig_version = getoutput('pkg-config --modversion %s' %
                                      package)
             if (map(int, orig_version.split('.')) >=
                 map(int, version.split('.'))):
-                self.can_build_ok = 1
-                return 1
+                self.can_build_ok = True
+                return True
             else:
                 print ("Warning: Too old version of %s" % package)
                 print ("         Need %s, but %s is installed" % \
                       (version, orig_version))
-                self.can_build_ok = 0
-                return 0
+                self.can_build_ok = False
+                return False
 
     def generate(self):
         pass
