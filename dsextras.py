@@ -149,8 +149,8 @@ class BuildExt(build_ext):
            self.compiler.compiler_type == 'mingw32':
             # MSVC compatible struct packing is required.
             # Note gcc2 uses -fnative-struct while gcc3
-            # uses -mms-bitfields. Based on the version
-            # the proper flag is used below.
+            # and gcc4 use -mms-bitfields. Based on the
+            # version the proper flag is used below.
             msnative_struct = { '2' : '-fnative-struct',
                                 '3' : '-mms-bitfields',
                                 '4' : '-mms-bitfields'}
