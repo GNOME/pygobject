@@ -180,7 +180,7 @@ class BuildExt(build_ext):
             save_libs = ext.libraries
         # Invoke base build_extension()
         build_ext.build_extension(self, ext)
-        if save_libs != None and save_libs != ext.libraries:
+        if save_libs is not None and save_libs != ext.libraries:
             ext.libraries = save_libs
 
 class InstallLib(install_lib):
@@ -312,7 +312,7 @@ class PkgConfigExtension(Extension):
 
     def can_build(self):
         """If the pkg-config version found is good enough"""
-        if self.can_build_ok != None:
+        if self.can_build_ok is not None:
             return self.can_build_ok
 
         if type(self.pkc_name) != tuple:
