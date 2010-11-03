@@ -40,6 +40,16 @@ if sys.platform != 'win32':
 
 MIN_PYTHON_VERSION = (2, 6, 0)
 
+if sys.version_info[:3] < MIN_PYTHON_VERSION:
+    raise SystemExit('ERROR: Python %s or higher is required, %s found.' % (
+                         '.'.join(map(str, MIN_PYTHON_VERSION)),
+                         '.'.join(map(str, sys.version_info[:3]))))
+
+if not have_pkgconfig():
+    raise SystemExit('ERROR: Could not find pkg-config: '
+                     'Please check your PATH environment variable.')
+
+
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
 MICRO_VERSION = int(get_m4_define('pygobject_micro_version'))
@@ -56,14 +66,6 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MINOR_VERSION', MINOR_VERSION),
                   ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION),
                   ('VERSION', '\\"%s\\"' % VERSION)]
-
-if sys.version_info[:3] < MIN_PYTHON_VERSION:
-    raise SystemExit("Python %s or higher is required, %s found" % (
-        ".".join(map(str,MIN_PYTHON_VERSION)),
-                     ".".join(map(str,sys.version_info[:3]))))
-
-if not have_pkgconfig():
-    raise SystemExit("Error, could not find pkg-config")
 
 DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
 INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
