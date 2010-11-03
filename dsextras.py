@@ -117,6 +117,10 @@ def pkgc_version_check(name, req_version):
         
     return False
 
+def pkgc_get_version(name):
+    '''return the version as return by pkg-config --modversion'''
+    return getoutput('pkg-config --modversion %s' % name)
+
 def pkgc_get_libraries(name):
     """returns a list of libraries as returned by pkg-config --libs-only-l"""
     output = getoutput('pkg-config --libs-only-l %s' % name)
@@ -131,6 +135,12 @@ def pkgc_get_include_dirs(name):
     """returns a list of include dirs as returned by pkg-config --cflags-only-I"""
     output = getoutput('pkg-config --cflags-only-I %s' % name)
     return output.replace('-I', '').split()
+
+def pkgc_get_defs_dir(name):
+    '''returns the defs dir as returned by pkg-config --variable=defsdir'''
+    output = getoutput('pkg-config --variable=defsdir %s' % name)
+    return output
+
 
 class BuildExt(build_ext):
     def init_extra_compile_args(self):
