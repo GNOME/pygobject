@@ -50,16 +50,15 @@ if not have_pkgconfig():
                      'Please check your PATH environment variable.')
 
 
+PYGTK_SUFFIX = '2.0'
+PYGTK_SUFFIX_LONG = 'gtk-' + PYGTK_SUFFIX
+
+GLIB_REQUIRED = get_m4_define('glib_required_version')
+
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
 MICRO_VERSION = int(get_m4_define('pygobject_micro_version'))
-
-VERSION = "%d.%d.%d" % (MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
-
-GLIB_REQUIRED  = get_m4_define('glib_required_version')
-
-PYGOBJECT_SUFFIX = '2.0'
-PYGOBJECT_SUFFIX_LONG = 'gtk-' + PYGOBJECT_SUFFIX
+VERSION       = '%d.%d.%d' % (MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 GLOBAL_INC += ['gobject']
 GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
@@ -67,8 +66,12 @@ GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION),
                   ('VERSION', '\\"%s\\"' % VERSION)]
 
-DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
-INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
+BIN_DIR     = os.path.join('Scripts')
+INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGTK_SUFFIX)
+DEFS_DIR    = os.path.join('share', 'pygobject', PYGTK_SUFFIX, 'defs')
+XSL_DIR     = os.path.join('share', 'pygobject','xsl')
+HTML_DIR    = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
+
 
 class PyGObjectInstallLib(InstallLib):
     def run(self):
@@ -78,7 +81,7 @@ class PyGObjectInstallLib(InstallLib):
         self.install_pygtk()
 
         # Modify the base installation dir
-        install_dir = os.path.join(self.install_dir, PYGOBJECT_SUFFIX_LONG)
+        install_dir = os.path.join(self.install_dir, PYGTK_SUFFIX_LONG)
         self.set_install_dir(install_dir)
 
         InstallLib.run(self)
@@ -87,7 +90,7 @@ class PyGObjectInstallLib(InstallLib):
         """Write the pygtk.pth file"""
         file = os.path.join(self.install_dir, 'pygtk.pth')
         self.mkpath(self.install_dir)
-        open(file, 'w').write(PYGOBJECT_SUFFIX_LONG)
+        open(file, 'w').write(PYGTK_SUFFIX_LONG)
         self.local_outputs.append(file)
         self.local_inputs.append('pygtk.pth')
 
@@ -112,7 +115,7 @@ class PyGObjectInstallData(InstallData):
         InstallData.run(self)
 
     def install_templates(self):
-        self.install_template('pygobject-2.0.pc.in',
+        self.install_template('pygobject-%s.pc.in' % PYGTK_SUFFIX,
                               os.path.join(self.install_dir,
                                            'lib', 'pkgconfig'))
 
@@ -123,7 +126,7 @@ PyGObjectBuild.user_options.append(('enable-threading', None,
 
 # glib
 glib = PkgConfigExtension(name='glib._glib',
-                          pkc_name='glib-2.0',
+                          pkc_name='glib-%s' % PYGTK_SUFFIX,
                           pkc_version=GLIB_REQUIRED,
                           pygobject_pkc=None,
                           include_dirs=['glib'],
@@ -140,7 +143,7 @@ glib = PkgConfigExtension(name='glib._glib',
 
 # GObject
 gobject = PkgConfigExtension(name='gobject._gobject',
-                             pkc_name='gobject-2.0',
+                             pkc_name='gobject-%s' % PYGTK_SUFFIX,
                              pkc_version=GLIB_REQUIRED,
                              pygobject_pkc=None,
                              include_dirs=['glib','gi'],
@@ -158,7 +161,7 @@ gobject = PkgConfigExtension(name='gobject._gobject',
 
 # gio
 gio = TemplateExtension(name='gio',
-                        pkc_name='gio-2.0',
+                        pkc_name='gio-%s' % PYGTK_SUFFIX,
                         pkc_version=GLIB_REQUIRED,
                         output='gio._gio',
                         defs='gio/gio.defs',
@@ -192,7 +195,7 @@ if glib.can_build():
             'sources':['glib/pyglib.c'],
             'macros':GLOBAL_MACROS,
             'include_dirs':
-                ['glib', get_python_inc()]+pkgc_get_include_dirs('glib-2.0')}))
+                ['glib', get_python_inc()]+pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX)}))
     #this library is not installed, so probbably should not include its header
     #data_files.append((INCLUDE_DIR, ('glib/pyglib.h',)))
         
@@ -231,7 +234,7 @@ else:
         enable_threading = True
 
 if enable_threading:
-    name = 'gthread-2.0'
+    name = 'gthread-%s' % PYGTK_SUFFIX
     for module in ext_modules:
         raw = getoutput('pkg-config --libs-only-l %s' % name)
         for arg in raw.split():
