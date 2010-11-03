@@ -39,53 +39,57 @@ dsextras.Template and dsextras.TemplateExtension classes.
 
 
 def get_m4_define(varname):
-    """Return the value of a m4_define variable as set in configure.in."""
-    pattern = re.compile("m4_define\(" + varname + "\,\s*(.+)\)")
+    '''Return the value of a m4_define variable as set in configure.in.'''
+    pattern = re.compile('m4_define\(' + varname + '\,\s*(.+)\)')
+
     if os.path.exists('configure.ac'):
         fname = 'configure.ac'
     elif os.path.exists('configure.in'):
         fname = 'configure.in'
     else:
-        raise SystemExit('could not find configure file')
+        raise SystemExit('ERROR: Could not find configure file')
 
     for line in open(fname).readlines():
         match_obj = pattern.match(line)
+
         if match_obj:
             return match_obj.group(1)
 
     return None
 
 def getoutput(cmd):
-    """Return output (stdout or stderr) of executing cmd in a shell."""
+    '''Return output (stdout or stderr) of executing cmd in a shell.'''
     return getstatusoutput(cmd)[1]
 
 def getstatusoutput(cmd):
-    """Return (status, output) of executing cmd in a shell."""
+    '''Return (status, output) of executing cmd in a shell.'''
     if sys.platform == 'win32':
         pipe = os.popen(cmd, 'r')
         text = pipe.read()
         sts = pipe.close() or 0
+
         if text[-1:] == '\n':
             text = text[:-1]
+
         return sts, text
     else:
         from commands import getstatusoutput
         return getstatusoutput(cmd)
 
 def have_pkgconfig():
-    """Checks for the existence of pkg-config"""
+    '''Checks for the existence of pkg-config'''
     if (sys.platform == 'win32' and
         os.system('pkg-config --version > NUL') == 0):
-        
+
         return True
     else:
         if getstatusoutput('pkg-config')[0] == 256:
             return True
 
 def list_files(dir):
-    """List all files in a dir, with filename match support:
+    '''List all files in a dir, with filename match support:
     for example: glade/*.glade will return all files in the glade directory
-    that matches *.glade. It also looks up the full path"""
+    that matches *.glade. It also looks up the full path'''
     if dir.find(os.sep) != -1:
         parts = dir.split(os.sep)
         dir = string.join(parts[:-1], os.sep)
@@ -96,15 +100,18 @@ def list_files(dir):
 
     dir = os.path.abspath(dir)
     retval = []
+
     for file in os.listdir(dir):
         if fnmatch.fnmatch(file, pattern):
             retval.append(os.path.join(dir, file))
+
     return retval
 
 def pkgc_version_check(name, req_version):
-    """Check the existence and version number of a package:
-    returns False if not installed or too old, True otherwise."""
+    '''Check the existence and version number of a package:
+    returns False if not installed or too old, True otherwise.'''
     is_installed = not os.system('pkg-config --exists %s' % name)
+
     if not is_installed:
         return False
 
@@ -114,7 +121,7 @@ def pkgc_version_check(name, req_version):
 
     if version >= pkc_version:
         return True
-        
+
     return False
 
 def pkgc_get_version(name):
@@ -122,17 +129,17 @@ def pkgc_get_version(name):
     return getoutput('pkg-config --modversion %s' % name)
 
 def pkgc_get_libraries(name):
-    """returns a list of libraries as returned by pkg-config --libs-only-l"""
+    '''returns a list of libraries as returned by pkg-config --libs-only-l'''
     output = getoutput('pkg-config --libs-only-l %s' % name)
     return output.replace('-l', '').split()
 
 def pkgc_get_library_dirs(name):
-    """returns a list of library dirs as returned by pkg-config --libs-only-L"""
+    '''returns a list of library dirs as returned by pkg-config --libs-only-L'''
     output = getoutput('pkg-config --libs-only-L %s' % name)
     return output.replace('-L', '').split()
 
 def pkgc_get_include_dirs(name):
-    """returns a list of include dirs as returned by pkg-config --cflags-only-I"""
+    '''returns a list of include dirs as returned by pkg-config --cflags-only-I'''
     output = getoutput('pkg-config --cflags-only-I %s' % name)
     return output.replace('-I', '').split()
 
@@ -145,23 +152,24 @@ def pkgc_get_defs_dir(name):
 class BuildExt(build_ext):
     def init_extra_compile_args(self):
         self.extra_compile_args = []
-        if sys.platform == 'win32' and \
-           self.compiler.compiler_type == 'mingw32':
+
+        if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
             # MSVC compatible struct packing is required.
             # Note gcc2 uses -fnative-struct while gcc3
             # and gcc4 use -mms-bitfields. Based on the
             # version the proper flag is used below.
-            msnative_struct = { '2' : '-fnative-struct',
-                                '3' : '-mms-bitfields',
-                                '4' : '-mms-bitfields'}
+            msnative_struct = {'2': '-fnative-struct',
+                               '3': '-mms-bitfields',
+                               '4': '-mms-bitfields'}
             gcc_version = getoutput('gcc -dumpversion')
+
             print ('using MinGW GCC version %s with %s option' % \
                   (gcc_version, msnative_struct[gcc_version[0]]))
+
             self.extra_compile_args.append(msnative_struct[gcc_version[0]])
 
     def modify_compiler(self):
-        if sys.platform == 'win32' and \
-           self.compiler.compiler_type == 'mingw32':
+        if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
             # Remove '-static' linker option to prevent MinGW ld
             # from trying to link with MSVC import libraries.
             if self.compiler.linker_so.count('-static'):
@@ -178,23 +186,27 @@ class BuildExt(build_ext):
     def build_extension(self, ext):
         # Add self.extra_compile_args to ext.extra_compile_args
         ext.extra_compile_args += self.extra_compile_args
+
         # Generate eventual templates before building
         if hasattr(ext, 'generate'):
             ext.generate()
+
         # Filter out 'c' and 'm' libs when compilic w/ msvc
         if sys.platform == 'win32' and self.compiler.compiler_type == 'msvc':
             save_libs = ext.libraries
-            ext.libraries = [lib for lib in ext.libraries 
+            ext.libraries = [lib for lib in ext.libraries
                              if lib not in ['c', 'm']]
         else:
             save_libs = ext.libraries
+
         # Invoke base build_extension()
         build_ext.build_extension(self, ext)
+
         if save_libs is not None and save_libs != ext.libraries:
             ext.libraries = save_libs
 
-class InstallLib(install_lib):
 
+class InstallLib(install_lib):
     local_outputs = []
     local_inputs = []
 
@@ -207,17 +219,17 @@ class InstallLib(install_lib):
     def get_inputs(self):
         return install_lib.get_inputs(self) + self.local_inputs
 
-class InstallData(install_data):
 
+class InstallData(install_data):
     local_outputs = []
     local_inputs = []
     template_options = {}
 
     def prepare(self):
-        if os.name == "nt":
+        if os.name == 'nt':
             self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-3])
         else:
-            # default: os.name == "posix"
+            # default: os.name == 'posix'
             self.prefix = os.sep.join(self.install_dir.split(os.sep)[:-4])
 
         self.exec_prefix = '${prefix}/bin'
@@ -242,10 +254,11 @@ class InstallData(install_data):
         self.template_options['@%s@' % name] = value
 
     def install_template(self, filename, install_dir):
-        """Install template filename into target directory install_dir."""
+        '''Install template filename into target directory install_dir.'''
         output_file = os.path.split(filename)[-1][:-3]
 
         template = open(filename).read()
+
         for key, value in self.template_options.items():
             template = template.replace(key, value)
 
@@ -262,31 +275,40 @@ class InstallData(install_data):
     def get_inputs(self):
         return install_data.get_inputs(self) + self.local_inputs
 
+
 class PkgConfigExtension(Extension):
     # Name of pygobject package extension depends on, can be None
     pygobject_pkc = 'pygobject-2.0'
     can_build_ok = None
+
     def __init__(self, **kwargs):
         name = kwargs['pkc_name']
+
         if 'include_dirs' in kwargs:
             kwargs['include_dirs'] += self.get_include_dirs(name) + GLOBAL_INC
         else:
             kwargs['include_dirs'] = self.get_include_dirs(name) + GLOBAL_INC
+
         kwargs['define_macros'] = GLOBAL_MACROS
+
         if 'libraries' in kwargs:
             kwargs['libraries'] += self.get_libraries(name)
         else:
             kwargs['libraries'] = self.get_libraries(name)
+
         if 'library_dirs' in kwargs:
             kwargs['library_dirs'] += self.get_library_dirs(name)
         else:
             kwargs['library_dirs'] = self.get_library_dirs(name)
+
         if 'pygobject_pkc' in kwargs:
             self.pygobject_pkc = kwargs.pop('pygobject_pkc')
+
         if self.pygobject_pkc:
             kwargs['include_dirs'] += self.get_include_dirs(self.pygobject_pkc)
             kwargs['libraries'] += self.get_libraries(self.pygobject_pkc)
             kwargs['library_dirs'] += self.get_library_dirs(self.pygobject_pkc)
+
         self.name = kwargs['name']
         self.pkc_name = kwargs['pkc_name']
         self.pkc_version = kwargs['pkc_version']
@@ -296,29 +318,38 @@ class PkgConfigExtension(Extension):
     def get_include_dirs(self, names):
         if type(names) != tuple:
             names = (names,)
+
         retval = []
+
         for name in names:
             retval.extend(pkgc_get_include_dirs(name))
+
         return retval
 
     def get_libraries(self, names):
         if type(names) != tuple:
             names = (names,)
+
         retval = []
+
         for name in names:
             retval.extend(pkgc_get_libraries(name))
+
         return retval
 
     def get_library_dirs(self, names):
         if type(names) != tuple:
             names = (names,)
+
         retval = []
+
         for name in names:
             retval.extend(pkgc_get_library_dirs(name))
+
         return retval
 
     def can_build(self):
-        """If the pkg-config version found is good enough"""
+        '''If the pkg-config version found is good enough'''
         if self.can_build_ok is not None:
             return self.can_build_ok
 
@@ -329,9 +360,10 @@ class PkgConfigExtension(Extension):
 
         for package, version in reqs:
             retval = os.system('pkg-config --exists %s' % package)
+
             if retval:
-                print ("* %s.pc could not be found, bindings for %s"
-                       " will not be built." % (package, self.name))
+                print ('* %s.pc could not be found, bindings for %s'
+                       ' will not be built.' % (package, self.name))
                 self.can_build_ok = False
                 return False
 
@@ -339,12 +371,12 @@ class PkgConfigExtension(Extension):
 
             if (map(int, orig_version.split('.')) >=
                 map(int, version.split('.'))):
+
                 self.can_build_ok = True
                 return True
             else:
-                print ("Warning: Too old version of %s" % package)
-                print ("         Need %s, but %s is installed" % \
-                      (version, orig_version))
+                print ('Warning: Too old version of %s' % package)
+                print ('         Need %s, but %s is installed' % (version, orig_version))
                 self.can_build_ok = False
                 return False
 
@@ -356,13 +388,14 @@ class Template(object):
     def __new__(cls, *args, **kwds):
         # The Template and TemplateExtension classes require codegen
         if not template_classes_enabled:
-            raise NameError("'%s' is not defined\n" % cls.__name__
-                            + codegen_error_message)    
+            raise NameError('\'%s\' is not defined\n%s' % (cls.__name__,
+                                                           codegen_error_message))
+
         return object.__new__(cls)
 
     def __init__(self, override, output, defs, prefix,
                  register=[], load_types=None, py_ssize_t_clean=False):
-        
+
         self.override = override
         self.output = output
         self.prefix = prefix
@@ -370,15 +403,17 @@ class Template(object):
         self.py_ssize_t_clean = py_ssize_t_clean
 
         self.built_defs=[]
-        if isinstance(defs,tuple):
+
+        if isinstance(defs, tuple):
             self.defs=defs[0]
             self.built_defs.append(defs)
         else:
             self.defs=defs
 
         self.register=[]
+
         for r in register:
-            if isinstance(r,tuple):
+            if isinstance(r, tuple):
                 self.register.append(r[0])
                 self.built_defs.append(r)
             else:
@@ -390,25 +425,25 @@ class Template(object):
         files.append(self.override)
         files.append(self.defs)
 
-        return not distutils.dep_util.newer_group(files,self.output)
+        return not distutils.dep_util.newer_group(files, self.output)
 
     def generate_defs(self):
-        for (target,sources) in self.built_defs:
-            if distutils.dep_util.newer_group(sources,target):
+        for (target, sources) in self.built_defs:
+            if distutils.dep_util.newer_group(sources, target):
                 # createdefs is mostly called from the CLI !
-                args=['dummy',target]+sources
+                args=['dummy', target] + sources
                 codegen.createdefs.main(args)
-
 
     def generate(self):
         # Generate defs files if necessary
         self.generate_defs()
+
         # ... then check the file timestamps
         if self.check_dates():
             return
 
         for item in self.register:
-            dp = DefsParser(item,dict(GLOBAL_MACROS))
+            dp = DefsParser(item, dict(GLOBAL_MACROS))
             dp.startParsing()
             register_types(dp)
 
@@ -416,39 +451,44 @@ class Template(object):
             globals = {}
             execfile(self.load_types, globals)
 
-        dp = DefsParser(self.defs,dict(GLOBAL_MACROS))
+        dp = DefsParser(self.defs, dict(GLOBAL_MACROS))
         dp.startParsing()
         register_types(dp)
 
         fd = open(self.output, 'w')
-        sw = SourceWriter(dp,Overrides(self.override),
-                          self.prefix,FileOutput(fd,self.output))
+        sw = SourceWriter(dp, Overrides(self.override), self.prefix,
+                          FileOutput(fd, self.output))
         sw.write(self.py_ssize_t_clean)
         fd.close()
+
 
 class TemplateExtension(PkgConfigExtension):
     def __new__(cls,*args, **kwds):
         if not template_classes_enabled:
-            raise NameError("'%s' is not defined\n" % cls.__name__
-                            + codegen_error_message)    
+            raise NameError('\'%s\' is not defined\n%s' % (cls.__name__,
+                                                           codegen_error_message))
+
         return PkgConfigExtension.__new__(cls,*args, **kwds)
-    
+
     def __init__(self, **kwargs):
         name = kwargs['name']
         defs = kwargs['defs']
-        if isinstance(defs,tuple):
+
+        if isinstance(defs, tuple):
             output = defs[0][:-5] + '.c'
         else:
             output = defs[:-5] + '.c'
+
         override = kwargs['override']
         load_types = kwargs.get('load_types')
-        py_ssize_t_clean = kwargs.pop('py_ssize_t_clean',False)
+        py_ssize_t_clean = kwargs.pop('py_ssize_t_clean', False)
         self.templates = []
         self.templates.append(Template(override, output, defs, 'py' + name,
                                        kwargs['register'], load_types,
                                        py_ssize_t_clean))
 
         del kwargs['register'], kwargs['override'], kwargs['defs']
+
         if load_types:
             del kwargs['load_types']
 
@@ -460,5 +500,3 @@ class TemplateExtension(PkgConfigExtension):
 
     def generate(self):
         map(lambda x: x.generate(), self.templates)
-
-
