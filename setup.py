@@ -234,6 +234,9 @@ else:
 if gobject.can_build():
     ext_modules.append(gobject)
     data_files.append((INCLUDE_DIR, ('gobject/pygobject.h',)))
+    data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
+    data_files.append((HTML_DIR, ['docs/style.css']))
+    data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
     py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
     raise SystemExit("ERROR: Nothing to do, gobject could not be found and is essential.")
