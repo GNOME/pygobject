@@ -127,6 +127,30 @@ class PyGObjectBuild(build):
 PyGObjectBuild.user_options.append(('enable-threading', None,
                                 'enable threading support'))
 
+
+class PyGObjectBuildScripts(build_scripts):
+    '''
+    Overrides distutils' build_script command so we can generate
+    a valid pygobject-codegen script that works on windows.
+    '''
+
+    def run(self):
+        self.mkpath(self.build_dir)
+        self.install_codegen_script()
+        build_scripts.run(self)
+
+    def install_codegen_script(self):
+        '''Create pygobject-codegen'''
+        script = ('#!/bin/sh\n\n'
+                  'codegendir=`pkg-config pygobject-%s --variable=codegendir`\n\n'
+                  'PYTHONPATH=$codegendir\n'
+                  'export PYTHONPATH\n\n'
+                  'exec pythonw.exe "$codegendir/codegen.py" "$@"\n' % PYGTK_SUFFIX)
+
+        outfile = os.path.join(self.build_dir, 'pygobject-codegen-%s' % PYGTK_SUFFIX)
+        open(outfile, 'w').write(script)
+
+
 # glib
 glib = PkgConfigExtension(name='glib._glib',
                           pkc_name='glib-%s' % PYGTK_SUFFIX,
@@ -277,6 +301,7 @@ setup(name="pygobject",
       options=options,
       cmdclass={'install_lib': PyGObjectInstallLib,
                 'install_data': PyGObjectInstallData,
+                'build_scripts': PyGObjectBuildScripts,
                 'build_clib' : build_clib,
                 'build_ext': BuildExt,
                 'build': PyGObjectBuild})
