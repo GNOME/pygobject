@@ -108,7 +108,7 @@ def pkgc_version_check(name, req_version):
     if not is_installed:
         return False
 
-    orig_version = getoutput('pkg-config --modversion %s' % name)
+    orig_version = pkgc_get_version(name)
     version = map(int, orig_version.split('.'))
     pkc_version = map(int, req_version.split('.'))
 
@@ -298,8 +298,7 @@ class PkgConfigExtension(Extension):
             names = (names,)
         retval = []
         for name in names:
-            output = getoutput('pkg-config --cflags-only-I %s' % name)
-            retval.extend(output.replace('-I', '').split())
+            retval.extend(pkgc_get_include_dirs(name))
         return retval
 
     def get_libraries(self, names):
@@ -307,8 +306,7 @@ class PkgConfigExtension(Extension):
             names = (names,)
         retval = []
         for name in names:
-            output = getoutput('pkg-config --libs-only-l %s' % name)
-            retval.extend(output.replace('-l', '').split())
+            retval.extend(pkgc_get_libraries(name))
         return retval
 
     def get_library_dirs(self, names):
@@ -316,8 +314,7 @@ class PkgConfigExtension(Extension):
             names = (names,)
         retval = []
         for name in names:
-            output = getoutput('pkg-config --libs-only-L %s' % name)
-            retval.extend(output.replace('-L', '').split())
+            retval.extend(pkgc_get_library_dirs(name))
         return retval
 
     def can_build(self):
@@ -338,8 +335,8 @@ class PkgConfigExtension(Extension):
                 self.can_build_ok = False
                 return False
 
-            orig_version = getoutput('pkg-config --modversion %s' %
-                                     package)
+            orig_version = pkgc_get_version(package)
+
             if (map(int, orig_version.split('.')) >=
                 map(int, version.split('.'))):
                 self.can_build_ok = True
