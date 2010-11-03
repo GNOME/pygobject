@@ -1,21 +1,42 @@
+# -*- coding: utf-8 -*-
 #
-# dsextras.py - Extra classes and utilities for distutils, adding
-#               pkg-config support
+# dsextras.py - Extra classes and utilities for distutils,
+#               adding pkg-config support
 
 
+import os
+import sys
+import fnmatch
+import re
+import string
+
+import distutils.dep_util
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
-import distutils.dep_util
-import fnmatch
-import os
-import re
-import string
-import sys
+
+try:
+    import codegen.createdefs
+    from codegen.override import Overrides
+    from codegen.defsparser import DefsParser
+    from codegen.codegen import register_types, SourceWriter, FileOutput
+except ImportError:
+    template_classes_enabled = False
+else:
+    template_classes_enabled = True
+
 
 GLOBAL_INC = []
 GLOBAL_MACROS = []
+
+codegen_error_message='''
+***************************************************************************
+Codegen could not be found on your system and is required by the
+dsextras.Template and dsextras.TemplateExtension classes.
+***************************************************************************
+'''
+
 
 def get_m4_define(varname):
     """Return the value of a m4_define variable as set in configure.in."""
@@ -322,27 +343,10 @@ class PkgConfigExtension(Extension):
     def generate(self):
         pass
 
-# The Template and TemplateExtension classes require codegen
-
-template_classes_enabled=True
-codegen_error_message="""
-***************************************************************************
-Codegen could not be found on your system and is required by the
-dsextras.Template and dsextras.TemplateExtension classes.
-***************************************************************************
-"""
-try:
-    from codegen.override import Overrides
-    from codegen.defsparser import DefsParser
-    from codegen.codegen import register_types, SourceWriter, \
-         FileOutput
-    import codegen.createdefs
-except ImportError:
-    (etype, e) = sys.exc_info()[:2]    
-    template_classes_enabled=False
 
 class Template(object):
-    def __new__(cls,*args, **kwds):
+    def __new__(cls, *args, **kwds):
+        # The Template and TemplateExtension classes require codegen
         if not template_classes_enabled:
             raise NameError("'%s' is not defined\n" % cls.__name__
                             + codegen_error_message)    
