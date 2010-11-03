@@ -75,7 +75,6 @@ HTML_DIR    = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
 
 class PyGObjectInstallLib(InstallLib):
     def run(self):
-
         # Install pygtk.pth, pygtk.py[c] and templates
         self.install_pth()
         self.install_pygtk()
@@ -90,7 +89,7 @@ class PyGObjectInstallLib(InstallLib):
         InstallLib.run(self)
 
     def install_pth(self):
-        """Write the pygtk.pth file"""
+        '''Create the pygtk.pth file'''
         file = os.path.join(self.install_dir, 'pygtk.pth')
         self.mkpath(self.install_dir)
         open(file, 'w').write(PYGTK_SUFFIX_LONG)
@@ -98,7 +97,7 @@ class PyGObjectInstallLib(InstallLib):
         self.local_inputs.append('pygtk.pth')
 
     def install_pygtk(self):
-        """install pygtk.py in the right place."""
+        '''Install pygtk.py in the right place.'''
         self.copy_file('pygtk.py', self.install_dir)
         pygtk = os.path.join(self.install_dir, 'pygtk.py')
         self.byte_compile([pygtk])
@@ -159,16 +158,17 @@ class PyGObjectInstallData(InstallData):
 
     def install_templates(self):
         self.install_template('pygobject-%s.pc.in' % PYGTK_SUFFIX,
-                              os.path.join(self.install_dir,
-                                           'lib', 'pkgconfig'))
+                              os.path.join(self.install_dir, 'lib', 'pkgconfig'))
 
         self.install_template('docs/xsl/fixxref.py.in',
                               os.path.join(self.install_dir, XSL_DIR))
 
+
 class PyGObjectBuild(build):
     enable_threading = 1
+
 PyGObjectBuild.user_options.append(('enable-threading', None,
-                                'enable threading support'))
+                                    'enable threading support'))
 
 
 class PyGObjectBuildScripts(build_scripts):
@@ -247,8 +247,7 @@ clibs = []
 data_files = []
 ext_modules = []
 
-#Install dsextras and codegen so that the pygtk installer
-#can find them
+#Install dsextras and codegen so that the pygtk installer can find them
 py_modules = ['dsextras']
 packages = ['codegen']
 
@@ -260,19 +259,17 @@ if glib.can_build():
     #subclass
     #
     #So we are stuck with this ugly thing
-    clibs.append((
-        'pyglib',{
-            'sources':['glib/pyglib.c'],
-            'macros':GLOBAL_MACROS,
-            'include_dirs':
-                ['glib', get_python_inc()]+pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX)}))
-    #this library is not installed, so probbably should not include its header
+    clibs.append(('pyglib', {'sources': ['glib/pyglib.c'],
+                             'macros': GLOBAL_MACROS,
+                             'include_dirs': ['glib', get_python_inc()] +
+                                              pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX)}))
+    #this library is not installed, so probably should not include its header
     #data_files.append((INCLUDE_DIR, ('glib/pyglib.h',)))
-        
+
     ext_modules.append(glib)
     py_modules += ['glib.__init__', 'glib.option']
 else:
-    raise SystemExit("ERROR: Nothing to do, glib could not be found and is essential.")
+    raise SystemExit('ERROR: Nothing to do, glib could not be found and is essential.')
 
 if gobject.can_build():
     ext_modules.append(gobject)
@@ -282,14 +279,14 @@ if gobject.can_build():
     data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
     py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
-    raise SystemExit("ERROR: Nothing to do, gobject could not be found and is essential.")
+    raise SystemExit('ERROR: Nothing to do, gobject could not be found and is essential.')
 
 if gio.can_build():
     ext_modules.append(gio)
     py_modules += ['gio.__init__']
     data_files.append((DEFS_DIR,('gio/gio.defs', 'gio/gio-types.defs',)))
 else:
-    raise SystemExit("ERROR: Nothing to do, gio could not be found and is essential.")
+    raise SystemExit, 'ERROR: Nothing to do, gio could not be found and is essential.'
 
 # Build testhelper library
 testhelper = Extension(name='testhelper',
@@ -319,7 +316,7 @@ else:
     try:
         import thread
     except ImportError:
-        print "Warning: Could not import thread module, disabling threading"
+        print ('* Could not import thread module, disabling threading')
         enable_threading = False
     else:
         enable_threading = True
@@ -342,26 +339,25 @@ if enable_threading:
 else:
     GLOBAL_MACROS.append(('DISABLE_THREADING', 1))
 
+doclines = __doc__.split('\n')
+options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py'}}
 
-doclines = __doc__.split("\n")
-
-options = {"bdist_wininst": {"install_script": "pygobject_postinstall.py"}}
-
-setup(name="pygobject",
+setup(name='pygobject',
       url='http://www.pygtk.org/',
       version=VERSION,
       license='LGPL',
-      platforms=['yes'],
-      maintainer="Johan Dahlin",
-      maintainer_email="johan@gnome.org",
+      platforms=['MS Windows'],
+      maintainer='Johan Dahlin',
+      maintainer_email='johan@gnome.org',
       description = doclines[0],
-      long_description = "\n".join(doclines[2:]),
+      long_description = '\n'.join(doclines[2:]),
+      provides = 'pygobject',
       py_modules=py_modules,
       packages=packages,
       ext_modules=ext_modules,
       libraries=clibs,
       data_files=data_files,
-      scripts = ["pygobject_postinstall.py"],
+      scripts = ['pygobject_postinstall.py'],
       options=options,
       cmdclass={'install_lib': PyGObjectInstallLib,
                 'install_data': PyGObjectInstallData,
