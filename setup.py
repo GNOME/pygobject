@@ -122,26 +122,9 @@ class PyGObjectInstallLib(InstallLib):
 
         self.copy_test('runtests-windows.py', 'runtests.py')
         self.copy_test('compathelper.py')
-        self.copy_test('test_everything.py')
-        self.copy_test('test_gcancellable.py')
-        self.copy_test('test_gi.py')
-        self.copy_test('test_gicon.py')
-        self.copy_test('test_gio.py')
-        self.copy_test('test_gobject.py')
-        self.copy_test('test_gresolver.py')
-        self.copy_test('test_gsocket.py')
-        self.copy_test('test_interface.py')
-        self.copy_test('test_mainloop.py')
-        self.copy_test('test_option.py')
-        self.copy_test('test_overrides.py')
-        self.copy_test('test_properties.py')
-        self.copy_test('test_signal.py')
-        self.copy_test('test_source.py')
-        self.copy_test('test_subprocess.py')
-        self.copy_test('test_thread.py')
-        self.copy_test('test_unknown.py')
-        self.copy_test('test_uris.py')
-        self.copy_test('testmodule.py')
+
+        for testfile in glob.glob('tests/test*.py'):
+            self.copy_test(os.path.basename(testfile))
 
 
 class PyGObjectInstallData(InstallData):
