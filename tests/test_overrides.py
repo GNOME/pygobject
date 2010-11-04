@@ -14,6 +14,7 @@ from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 import gi.overrides as overrides
+import gi.types
 
 class TestGLib(unittest.TestCase):
 
@@ -550,3 +551,29 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
+
+    def test_inheritance(self):
+        for name in overrides.Gtk.__all__:
+            over = getattr(overrides.Gtk, name)
+            for element in dir(Gtk):
+                try:
+                    klass = getattr(Gtk, element)
+                    info = klass.__info__
+                except (NotImplementedError, AttributeError):
+                    continue
+
+                # Get all parent classes and interfaces klass inherits from
+                if isinstance(info, gi.types.ObjectInfo):
+                    classes = list(info.get_interfaces())
+                    parent = info.get_parent()
+                    while parent.get_name() != "Object":
+                        classes.append(parent)
+                        parent = parent.get_parent()
+                    classes = [kl for kl in classes if kl.get_namespace() == "Gtk"]
+                else:
+                    continue
+
+                for kl in classes:
+                    if kl.get_name() == name:
+                        self.assertTrue(issubclass(klass, over,),
+                            "%r does not inherit from override %r" % (klass, over,))

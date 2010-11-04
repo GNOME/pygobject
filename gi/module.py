@@ -25,6 +25,8 @@ from __future__ import absolute_import
 import os
 import gobject
 
+from .overrides import registry
+
 from ._gi import \
     Repository, \
     FunctionInfo, \
@@ -46,7 +48,6 @@ from .types import \
     Enum
 
 repository = Repository.get_default()
-
 
 def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
@@ -236,6 +237,15 @@ class DynamicModule(object):
             override_exports = getattr(self._overrides_module, '__all__', ())
             if name in override_exports:
                 return getattr(self._overrides_module, name, None)
+        else:
+            # check the registry just in case the module hasn't loaded yet
+            # TODO: Only gtypes are registered in the registry right now 
+            #       but it would be nice to register all overrides and 
+            #       get rid of the module imports. We might actually see a 
+            #       speedup.
+            key = '%s.%s' % (self._namespace, name)
+            if key in registry:
+                return registry[key]
 
         return getattr(self.introspection_module, name)
 

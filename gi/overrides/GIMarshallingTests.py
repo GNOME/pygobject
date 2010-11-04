@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from ..types import override
+from ..overrides import override
 from ..importer import modules
 
 GIMarshallingTests = modules['GIMarshallingTests'].introspection_module

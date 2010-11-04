@@ -162,14 +162,6 @@ class StructMeta(type, MetaClassHelper):
         cls._setup_methods()
         cls._setup_constructors()
 
-
-def override(type_):
-    g_type = type_.__info__.get_g_type()
-    assert g_type != gobject.TYPE_NONE
-    if g_type != gobject.TYPE_INVALID:
-        g_type.pytype = type_
-    return type_
-
 class Enum(int):
     __info__ = None
     def __init__(self, value):

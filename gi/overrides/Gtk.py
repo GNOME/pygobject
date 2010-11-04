@@ -23,7 +23,7 @@ import sys
 import gobject
 from gi.repository import Gdk
 from gi.repository import GObject
-from ..types import override
+from ..overrides import override
 from ..importer import modules
 
 if sys.version_info >= (3, 0):
