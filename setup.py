@@ -1,99 +1,131 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # setup.py - distutils configuration for pygobject
-#
-"""Python Bindings for GObject."""
+
+
+'''Python Bindings for GObject.
+
+PyGObject is a set of bindings for the glib, gobject and gio libraries.
+It provides an object oriented interface that is slightly higher level than
+the C one. It automatically does all the type casting and reference
+counting that you would have to do normally with the C API. You can
+find out more on the official homepage, http://www.pygtk.org/'''
+
+
+import os
+import sys
+import glob
 
 from distutils.command.build import build
 from distutils.command.build_clib import build_clib
+from distutils.command.build_scripts import build_scripts
 from distutils.sysconfig import get_python_inc
+from distutils.extension import Extension
 from distutils.core import setup
-import glob
-import os
-import sys
 
-from dsextras import get_m4_define, getoutput, have_pkgconfig, \
-     GLOBAL_INC, GLOBAL_MACROS, InstallLib, InstallData, BuildExt, \
-     PkgConfigExtension, TemplateExtension, \
-     pkgc_get_libraries, pkgc_get_library_dirs, pkgc_get_include_dirs
+from dsextras import GLOBAL_MACROS, GLOBAL_INC, get_m4_define, getoutput, \
+                     have_pkgconfig, pkgc_get_libraries, \
+                     pkgc_get_library_dirs, pkgc_get_include_dirs, \
+                     PkgConfigExtension, TemplateExtension, \
+                     BuildExt, InstallLib, InstallData
 
-if '--yes-i-know-its-not-supported' in sys.argv:
-    sys.argv.remove('--yes-i-know-its-not-supported')
-else:
-    print '*'*70
-    print 'Building PyGObject using distutils is NOT SUPPORTED.'
-    print "It's mainly included to be able to easily build win32 installers"
-    print "You may continue, but only if you agree to not ask any questions"
-    print "To build PyGObject in a supported way, read the INSTALL file"
-    print
-    print "Build fixes are of course welcome and should be filed in bugzilla"
-    print '*'*70
-    input = raw_input('Not supported, ok [y/N]? ')
-    if not input.startswith('y'):
-        raise SystemExit("Aborted")
+
+if sys.platform != 'win32':
+    msg =  '*' * 68 + '\n'
+    msg += '* Building PyGObject using distutils is only supported on windows. *\n'
+    msg += '* To build PyGObject in a supported way, read the INSTALL file.    *\n'
+    msg += '*' * 68
+    raise SystemExit(msg)
 
 MIN_PYTHON_VERSION = (2, 6, 0)
+
+if sys.version_info[:3] < MIN_PYTHON_VERSION:
+    raise SystemExit('ERROR: Python %s or higher is required, %s found.' % (
+                         '.'.join(map(str, MIN_PYTHON_VERSION)),
+                         '.'.join(map(str, sys.version_info[:3]))))
+
+if not have_pkgconfig():
+    raise SystemExit('ERROR: Could not find pkg-config: '
+                     'Please check your PATH environment variable.')
+
+
+PYGTK_SUFFIX = '2.0'
+PYGTK_SUFFIX_LONG = 'gtk-' + PYGTK_SUFFIX
+
+GLIB_REQUIRED = get_m4_define('glib_required_version')
 
 MAJOR_VERSION = int(get_m4_define('pygobject_major_version'))
 MINOR_VERSION = int(get_m4_define('pygobject_minor_version'))
 MICRO_VERSION = int(get_m4_define('pygobject_micro_version'))
-
-VERSION = "%d.%d.%d" % (MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
-
-GLIB_REQUIRED  = get_m4_define('glib_required_version')
-
-PYGOBJECT_SUFFIX = '2.0'
-PYGOBJECT_SUFFIX_LONG = 'gtk-' + PYGOBJECT_SUFFIX
+VERSION       = '%d.%d.%d' % (MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 GLOBAL_INC += ['gobject']
 GLOBAL_MACROS += [('PYGOBJECT_MAJOR_VERSION', MAJOR_VERSION),
                   ('PYGOBJECT_MINOR_VERSION', MINOR_VERSION),
-                  ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION)]
+                  ('PYGOBJECT_MICRO_VERSION', MICRO_VERSION),
+                  ('VERSION', '\\"%s\\"' % VERSION)]
 
-if sys.platform == 'win32':
-    GLOBAL_MACROS.append(('VERSION', '\\"%s\\"' % VERSION))
-else:
-    raise SystemExit("Error: distutils build only supported on windows")
+BIN_DIR     = os.path.join('Scripts')
+INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGTK_SUFFIX)
+DEFS_DIR    = os.path.join('share', 'pygobject', PYGTK_SUFFIX, 'defs')
+XSL_DIR     = os.path.join('share', 'pygobject','xsl')
+HTML_DIR    = os.path.join('share', 'gtk-doc', 'html', 'pygobject')
 
-if sys.version_info[:3] < MIN_PYTHON_VERSION:
-    raise SystemExit("Python %s or higher is required, %s found" % (
-        ".".join(map(str,MIN_PYTHON_VERSION)),
-                     ".".join(map(str,sys.version_info[:3]))))
-
-if not have_pkgconfig():
-    raise SystemExit("Error, could not find pkg-config")
-
-DEFS_DIR    = os.path.join('share', 'pygobject', PYGOBJECT_SUFFIX, 'defs')
-INCLUDE_DIR = os.path.join('include', 'pygtk-%s' % PYGOBJECT_SUFFIX)
 
 class PyGObjectInstallLib(InstallLib):
     def run(self):
-
         # Install pygtk.pth, pygtk.py[c] and templates
         self.install_pth()
         self.install_pygtk()
 
         # Modify the base installation dir
-        install_dir = os.path.join(self.install_dir, PYGOBJECT_SUFFIX_LONG)
+        install_dir = os.path.join(self.install_dir, PYGTK_SUFFIX_LONG)
         self.set_install_dir(install_dir)
+
+        # Install tests
+        self.install_tests()
 
         InstallLib.run(self)
 
     def install_pth(self):
-        """Write the pygtk.pth file"""
+        '''Create the pygtk.pth file'''
         file = os.path.join(self.install_dir, 'pygtk.pth')
         self.mkpath(self.install_dir)
-        open(file, 'w').write(PYGOBJECT_SUFFIX_LONG)
+        open(file, 'w').write(PYGTK_SUFFIX_LONG)
         self.local_outputs.append(file)
         self.local_inputs.append('pygtk.pth')
 
     def install_pygtk(self):
-        """install pygtk.py in the right place."""
+        '''Install pygtk.py in the right place.'''
         self.copy_file('pygtk.py', self.install_dir)
         pygtk = os.path.join(self.install_dir, 'pygtk.py')
         self.byte_compile([pygtk])
         self.local_outputs.append(pygtk)
         self.local_inputs.append('pygtk.py')
+
+    def copy_test(self, srcfile, dstfile=None):
+        if dstfile is None:
+            dstfile = os.path.join(self.test_dir, srcfile)
+        else:
+            dstfile = os.path.join(self.test_dir, dstfile)
+
+        srcfile = os.path.join('tests', srcfile)
+
+        self.copy_file(srcfile, os.path.abspath(dstfile))
+        self.local_outputs.append(dstfile)
+        self.local_inputs.append('srcfile')
+
+    def install_tests(self):
+        self.test_dir = os.path.join(self.install_dir, 'tests', 'pygobject')
+        self.mkpath(self.test_dir)
+
+        self.copy_test('runtests-windows.py', 'runtests.py')
+        self.copy_test('compathelper.py')
+
+        for testfile in glob.glob('tests/test*.py'):
+            self.copy_test(os.path.basename(testfile))
+
 
 class PyGObjectInstallData(InstallData):
     def run(self):
@@ -108,18 +140,46 @@ class PyGObjectInstallData(InstallData):
         InstallData.run(self)
 
     def install_templates(self):
-        self.install_template('pygobject-2.0.pc.in',
-                              os.path.join(self.install_dir,
-                                           'lib', 'pkgconfig'))
+        self.install_template('pygobject-%s.pc.in' % PYGTK_SUFFIX,
+                              os.path.join(self.install_dir, 'lib', 'pkgconfig'))
+
+        self.install_template('docs/xsl/fixxref.py.in',
+                              os.path.join(self.install_dir, XSL_DIR))
+
 
 class PyGObjectBuild(build):
     enable_threading = 1
+
 PyGObjectBuild.user_options.append(('enable-threading', None,
-                                'enable threading support'))
+                                    'enable threading support'))
+
+
+class PyGObjectBuildScripts(build_scripts):
+    '''
+    Overrides distutils' build_script command so we can generate
+    a valid pygobject-codegen script that works on windows.
+    '''
+
+    def run(self):
+        self.mkpath(self.build_dir)
+        self.install_codegen_script()
+        build_scripts.run(self)
+
+    def install_codegen_script(self):
+        '''Create pygobject-codegen'''
+        script = ('#!/bin/sh\n\n'
+                  'codegendir=`pkg-config pygobject-%s --variable=codegendir`\n\n'
+                  'PYTHONPATH=$codegendir\n'
+                  'export PYTHONPATH\n\n'
+                  'exec pythonw.exe "$codegendir/codegen.py" "$@"\n' % PYGTK_SUFFIX)
+
+        outfile = os.path.join(self.build_dir, 'pygobject-codegen-%s' % PYGTK_SUFFIX)
+        open(outfile, 'w').write(script)
+
 
 # glib
 glib = PkgConfigExtension(name='glib._glib',
-                          pkc_name='glib-2.0',
+                          pkc_name='glib-%s' % PYGTK_SUFFIX,
                           pkc_version=GLIB_REQUIRED,
                           pygobject_pkc=None,
                           include_dirs=['glib'],
@@ -136,7 +196,7 @@ glib = PkgConfigExtension(name='glib._glib',
 
 # GObject
 gobject = PkgConfigExtension(name='gobject._gobject',
-                             pkc_name='gobject-2.0',
+                             pkc_name='gobject-%s' % PYGTK_SUFFIX,
                              pkc_version=GLIB_REQUIRED,
                              pygobject_pkc=None,
                              include_dirs=['glib','gi'],
@@ -154,7 +214,7 @@ gobject = PkgConfigExtension(name='gobject._gobject',
 
 # gio
 gio = TemplateExtension(name='gio',
-                        pkc_name='gio-2.0',
+                        pkc_name='gio-%s' % PYGTK_SUFFIX,
                         pkc_version=GLIB_REQUIRED,
                         output='gio._gio',
                         defs='gio/gio.defs',
@@ -170,8 +230,7 @@ clibs = []
 data_files = []
 ext_modules = []
 
-#Install dsextras and codegen so that the pygtk installer
-#can find them
+#Install dsextras and codegen so that the pygtk installer can find them
 py_modules = ['dsextras']
 packages = ['codegen']
 
@@ -183,33 +242,52 @@ if glib.can_build():
     #subclass
     #
     #So we are stuck with this ugly thing
-    clibs.append((
-        'pyglib',{
-            'sources':['glib/pyglib.c'],
-            'macros':GLOBAL_MACROS,
-            'include_dirs':
-                ['glib', get_python_inc()]+pkgc_get_include_dirs('glib-2.0')}))
-    #this library is not installed, so probbably should not include its header
+    clibs.append(('pyglib', {'sources': ['glib/pyglib.c'],
+                             'macros': GLOBAL_MACROS,
+                             'include_dirs': ['glib', get_python_inc()] +
+                                              pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX)}))
+    #this library is not installed, so probably should not include its header
     #data_files.append((INCLUDE_DIR, ('glib/pyglib.h',)))
-        
+
     ext_modules.append(glib)
     py_modules += ['glib.__init__', 'glib.option']
 else:
-    raise SystemExit("ERROR: Nothing to do, glib could not be found and is essential.")
+    raise SystemExit('ERROR: Nothing to do, glib could not be found and is essential.')
 
 if gobject.can_build():
     ext_modules.append(gobject)
     data_files.append((INCLUDE_DIR, ('gobject/pygobject.h',)))
+    data_files.append((HTML_DIR, glob.glob('docs/html/*.html')))
+    data_files.append((HTML_DIR, ['docs/style.css']))
+    data_files.append((XSL_DIR,  glob.glob('docs/xsl/*.xsl')))
     py_modules += ['gobject.__init__', 'gobject.propertyhelper', 'gobject.constants']
 else:
-    raise SystemExit("ERROR: Nothing to do, gobject could not be found and is essential.")
+    raise SystemExit('ERROR: Nothing to do, gobject could not be found and is essential.')
 
 if gio.can_build():
     ext_modules.append(gio)
     py_modules += ['gio.__init__']
     data_files.append((DEFS_DIR,('gio/gio.defs', 'gio/gio-types.defs',)))
 else:
-    raise SystemExit("ERROR: Nothing to do, gio could not be found and is essential.")
+    raise SystemExit, 'ERROR: Nothing to do, gio could not be found and is essential.'
+
+# Build testhelper library
+testhelper = Extension(name='testhelper',
+                       sources=['tests/testhelpermodule.c',
+                                'tests/test-floating.c',
+                                'tests/test-thread.c',
+                                'tests/test-unknown.c'],
+                       libraries=['pyglib'] +
+                                 pkgc_get_libraries('glib-%s' % PYGTK_SUFFIX) +
+                                 pkgc_get_libraries('gobject-%s' % PYGTK_SUFFIX),
+                       include_dirs=['tests', 'glib',
+                                     'gobject', get_python_inc()] +
+                                    pkgc_get_include_dirs('glib-%s' % PYGTK_SUFFIX) +
+                                    pkgc_get_include_dirs('gobject-%s' % PYGTK_SUFFIX),
+                       library_dirs=pkgc_get_library_dirs('glib%s' % PYGTK_SUFFIX) +
+                                    pkgc_get_library_dirs('gobject-%s' % PYGTK_SUFFIX))
+
+ext_modules.append(testhelper)
 
 # Threading support
 if '--disable-threading' in sys.argv:
@@ -221,13 +299,13 @@ else:
     try:
         import thread
     except ImportError:
-        print "Warning: Could not import thread module, disabling threading"
+        print ('* Could not import thread module, disabling threading')
         enable_threading = False
     else:
         enable_threading = True
 
 if enable_threading:
-    name = 'gthread-2.0'
+    name = 'gthread-%s' % PYGTK_SUFFIX
     for module in ext_modules:
         raw = getoutput('pkg-config --libs-only-l %s' % name)
         for arg in raw.split():
@@ -244,29 +322,29 @@ if enable_threading:
 else:
     GLOBAL_MACROS.append(('DISABLE_THREADING', 1))
 
+doclines = __doc__.split('\n')
+options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py'}}
 
-doclines = __doc__.split("\n")
-
-options = {"bdist_wininst": {"install_script": "pygobject_postinstall.py"}}
-
-setup(name="pygobject",
+setup(name='pygobject',
       url='http://www.pygtk.org/',
       version=VERSION,
       license='LGPL',
-      platforms=['yes'],
-      maintainer="Johan Dahlin",
-      maintainer_email="johan@gnome.org",
+      platforms=['MS Windows'],
+      maintainer='Johan Dahlin',
+      maintainer_email='johan@gnome.org',
       description = doclines[0],
-      long_description = "\n".join(doclines[2:]),
+      long_description = '\n'.join(doclines[2:]),
+      provides = 'pygobject',
       py_modules=py_modules,
       packages=packages,
       ext_modules=ext_modules,
       libraries=clibs,
       data_files=data_files,
-      scripts = ["pygobject_postinstall.py"],
+      scripts = ['pygobject_postinstall.py'],
       options=options,
       cmdclass={'install_lib': PyGObjectInstallLib,
                 'install_data': PyGObjectInstallData,
+                'build_scripts': PyGObjectBuildScripts,
                 'build_clib' : build_clib,
                 'build_ext': BuildExt,
                 'build': PyGObjectBuild})

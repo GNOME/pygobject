@@ -33,7 +33,14 @@ stamp-h1
 *.so
 .deps
 .libs
+build
+dist
 
 # Other generated files.
 *~
 *.orig
+
+# Eclipse files.
+.settings
+.project
+.pydevproject
