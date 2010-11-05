@@ -291,8 +291,15 @@ class Dialog(Gtk.Dialog, Container):
                  parent=None,
                  flags=0,
                  buttons=None,
+                 _buttons_property=None,
                  **kwds):
 
+        # buttons is overloaded by PyGtk so we have to do the same here
+        # this breaks some subclasses of Dialog so add a _buttons_property
+        # keyword to work around this
+        if _buttons_property is not None:
+            kwds['buttons'] = _buttons_property
+ 
         Gtk.Dialog.__init__(self, **kwds)
         if title:
             self.set_title(title)
@@ -352,7 +359,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
         if message_format != None:
             kwds['text'] = message_format
         Gtk.MessageDialog.__init__(self,
-                                   buttons=buttons,
+                                   _buttons_property=buttons,
                                    **kwds)
         Dialog.__init__(self, parent=parent, flags=flags)
 
@@ -385,7 +392,10 @@ class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
         Gtk.FileChooserDialog.__init__(self,
                                        action=action,
                                        **kwds)
-        Dialog.__init__(self, title=title, parent=parent, buttons=buttons)
+        Dialog.__init__(self, 
+                        title=title, 
+                        parent=parent, 
+                        buttons=buttons)
 
 FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
