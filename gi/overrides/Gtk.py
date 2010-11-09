@@ -625,6 +625,18 @@ class TreeModel(Gtk.TreeModel):
         if success:
             return parent_iter
 
+    def set_row(self, treeiter, row):
+        # TODO: Accept a dictionary for row
+        # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
+
+        n_columns = self.get_n_columns();
+        if len(row) != n_columns:
+            raise ValueError('row sequence has the incorrect number of elements')
+
+        for i in range(n_columns):
+            if row[i] is not None:
+                self.set_value(treeiter, i, row[i])
+
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
@@ -640,7 +652,6 @@ class TreeSortable(Gtk.TreeSortable, ):
 TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
-
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def __init__(self, *column_types):
         Gtk.ListStore.__init__(self)
@@ -649,19 +660,36 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def append(self, row=None):
         treeiter = Gtk.ListStore.append(self)
 
-        # TODO: Accept a dictionary for row
-        # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
-
         if row is not None:
-            n_columns = self.get_n_columns();
-            if len(row) != n_columns:
-                raise ValueError('row sequence has the incorrect number of elements')
-
-            for i in range(n_columns):
-                if row[i] is not None:
-                    self.set_value(treeiter, i, row[i])
+            self.set_row(treeiter, row)
 
         return treeiter
+
+    def insert(self, position, row=None):
+        treeiter = Gtk.ListStore.insert(self, position)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
+    def insert_before(self, sibling, row=None):
+        treeiter = Gtk.ListStore.insert_before(self, sibling)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
+
+    def insert_after(self, sibling, row=None):
+        treeiter = Gtk.ListStore.insert_after(self, sibling)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
@@ -788,22 +816,38 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         self.set_column_types(column_types)
 
     def append(self, parent, row=None):
-
         treeiter = Gtk.TreeStore.append(self, parent)
 
-        # TODO: Accept a dictionary for row
-        # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
-
         if row is not None:
-            n_columns = self.get_n_columns();
-            if len(row) != n_columns:
-                raise ValueError('row sequence has the incorrect number of elements')
-
-            for i in range(n_columns):
-                if row[i] is not None:
-                    self.set_value(treeiter, i, row[i])
+            self.set_row(treeiter, row)
 
         return treeiter
+
+    def insert(self, parent, position, row=None):
+        treeiter = Gtk.TreeStore.insert(self, parent, position)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
+    def insert_before(self, parent, sibling, row=None):
+        treeiter = Gtk.TreeStore.insert_before(self, parent, sibling)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
+
+    def insert_after(self, parent, sibling, row=None):
+        treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
 
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
