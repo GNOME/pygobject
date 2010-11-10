@@ -112,6 +112,7 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+#ifdef PycairoRectangleInt_FromRectangleInt
 PyObject *
 cairo_rectangle_int_to_arg (PyObject       *value,
                             GITypeInfo     *type_info,
@@ -162,6 +163,7 @@ cairo_rectangle_int_release (GIBaseInfo *base_info,
     g_free (struct_);
     Py_RETURN_NONE;
 }
+#endif
 
 static PyMethodDef _gi_cairo_functions[] = {};
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
@@ -182,11 +184,13 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_surface_from_arg,
                                   cairo_surface_release);
 
+#ifdef PycairoRectangleInt_FromRectangleInt
      pygi_register_foreign_struct ("cairo",
                                   "RectangleInt",
                                   cairo_rectangle_int_to_arg,
                                   cairo_rectangle_int_from_arg,
                                   cairo_rectangle_int_release);
+#endif
 
 }
 PYGLIB_MODULE_END;
