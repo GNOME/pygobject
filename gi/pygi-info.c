@@ -1325,7 +1325,23 @@ static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
 /* GIVFuncInfo */
 PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGIBaseInfo);
 
+static PyObject *
+_wrap_g_vfunc_info_get_invoker (PyGIBaseInfo *self)
+{
+    PyObject *result = Py_None;
+    GIBaseInfo *info;
+
+    info = (GIBaseInfo *) g_vfunc_info_get_invoker ( (GIVFuncInfo *) self->info );
+    if (info)
+        result = _pygi_info_new(info);
+    else
+        Py_INCREF(Py_None);
+
+    return result;
+}
+
 static PyMethodDef _PyGIVFuncInfo_methods[] = {
+    { "get_invoker", (PyCFunction) _wrap_g_vfunc_info_get_invoker, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
