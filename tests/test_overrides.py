@@ -628,3 +628,15 @@ class TestGtk(unittest.TestCase):
                     if kl.get_name() == name:
                         self.assertTrue(issubclass(klass, over,),
                             "%r does not inherit from override %r" % (klass, over,))
+
+    def test_editable(self):
+        self.assertEquals(Gtk.Editable, overrides.Gtk.Editable)
+
+        # need to use Gtk.Entry because Editable is an interface
+        entry=Gtk.Entry()
+        pos = entry.insert_text('HeWorld', 0)
+        self.assertEquals(pos, 7)
+        pos = entry.insert_text('llo ', 2)
+        self.assertEquals(pos, 6)
+        text = entry.get_chars(0, 11)
+        self.assertEquals('Hello World', text)

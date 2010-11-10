@@ -57,6 +57,23 @@ class Container(Gtk.Container, Widget):
 Container = override(Container)
 __all__.append('Container')
 
+class Editable(Gtk.Editable):
+
+    def insert_text(self, text, position):
+        pos = super(Editable, self).insert_text(text, -1, position)
+
+        return pos
+
+    def get_selection_bounds(self):
+        success, start_pos, end_pos = super(Editable, self).get_selection_bounds()
+        if success:
+            return (start_pos, end_pos,)
+        else:
+            return tuple()
+
+Editable = override(Editable)
+__all__.append("Editable")
+
 class ActionGroup(Gtk.ActionGroup):
     def add_actions(self, entries, user_data=None):
         """
