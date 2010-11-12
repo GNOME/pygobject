@@ -846,9 +846,7 @@ _free_invocation_state (struct invocation_state *state)
             continue;
         }
 
-        if (state->args != NULL
-            && state->args[i] != NULL
-            && state->arg_infos[i] != NULL
+        if (state->arg_infos[i] != NULL
             && state->arg_type_infos[i] != NULL) {
             GIDirection direction;
             GITypeTag type_tag;
@@ -857,20 +855,25 @@ _free_invocation_state (struct invocation_state *state)
             direction = g_arg_info_get_direction (state->arg_infos[i]);
             transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
 
-            type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
-
             /* Release the argument. */
             if (direction == GI_DIRECTION_INOUT) {
-                _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                                        transfer, GI_DIRECTION_IN);
+                if (state->args != NULL) {
+                    _pygi_argument_release (&state->backup_args[backup_args_pos],
+                                            state->arg_type_infos[i],
+                                            transfer, GI_DIRECTION_IN);
+                }
                 backup_args_pos += 1;
             }
-           _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
+            if (state->args != NULL && state->args[i] != NULL) {
+                _pygi_argument_release (state->args[i], state->arg_type_infos[i],
+                                        transfer, direction);
 
-            if (type_tag == GI_TYPE_TAG_ARRAY
+                type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
+                if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
-                /* We created a #GArray and it has not been released above, so free it. */
-                state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
+                    /* We created a #GArray and it has not been released above, so free it. */
+                    state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
+                }
             }
 
         }
