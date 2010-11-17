@@ -14,6 +14,7 @@ from gi.repository import GIMarshallingTests
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
+    PY2_UNICODE_UTF8 = u"const ♥ utf8"
 else:
     CONSTANT_UTF8 = "const ♥ utf8"
 
@@ -615,6 +616,8 @@ class TestUtf8(unittest.TestCase):
 
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
+        if sys.version_info < (3, 0):
+            GIMarshallingTests.utf8_none_in(PY2_UNICODE_UTF8)
 
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)

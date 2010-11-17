@@ -370,7 +370,7 @@ check_number_release:
         }
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            if (!PYGLIB_PyUnicode_Check (object)) {
+            if (!PYGLIB_PyBaseString_Check (object) ) {
                 PyErr_Format (PyExc_TypeError, "Must be string, not %s",
                               object->ob_type->tp_name);
                 retval = 0;
@@ -751,7 +751,17 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 #if PY_VERSION_HEX < 0x03000000
-            string = g_strdup(PyString_AsString (object));
+            if (PyUnicode_Check(object)) {
+                 PyObject *pystr_obj = PyUnicode_AsUTF8String (object);
+                 
+                 if (!pystr_obj)
+                     break;
+
+                 string = g_strdup(PyString_AsString (pystr_obj));
+                 Py_DECREF(pystr_obj);
+            } else {
+                 string = g_strdup(PyString_AsString (object));
+            }
 #else
             {
                 PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
