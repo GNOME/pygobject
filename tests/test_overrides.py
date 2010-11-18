@@ -99,16 +99,17 @@ class TestGtk(unittest.TestCase):
             test_radio_action_callback_data,
             callback_data)
 
-        expected_results = (('test-action1', Gtk.Action),
+        expected_results = [('test-action1', Gtk.Action),
                             ('test-action2', Gtk.Action),
                             ('test-toggle-action1', Gtk.ToggleAction),
                             ('test-toggle-action2', Gtk.ToggleAction),
                             ('test-radio-action1', Gtk.RadioAction),
-                            ('test-radio-action2', Gtk.RadioAction))
+                            ('test-radio-action2', Gtk.RadioAction)]
 
-        for action, cmp in zip(action_group.list_actions(), expected_results):
+        for action in action_group.list_actions():
             a = (action.get_name(), type(action))
-            self.assertEquals(a,cmp)
+            self.assertTrue(a in expected_results)
+            expected_results.remove(a)
             action.activate()
 
     def test_builder(self):
