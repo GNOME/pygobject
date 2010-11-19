@@ -117,6 +117,13 @@ class Event(Gdk.Event):
 Event = override(Event)
 __all__.append('Event')
 
+class DragContext(Gdk.DragContext):
+    def finish(self, success, del_, time):
+        Gtk = modules['Gtk'].introspection_module
+        Gtk.drag_finish(self, success, del_, time)
+
+DragContext = override(DragContext)
+__all__.append('DragContext')
 
 import sys
 

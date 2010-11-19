@@ -881,6 +881,31 @@ class TreeView(Gtk.TreeView, Container):
         if success:
             return (path, pos,)
 
+    def _construct_target_list(self, targets):
+        # FIXME: this should most likely be part of Widget or a global helper
+        #        function
+        target_entries = []
+        for t in targets:
+            entry = Gtk.TargetEntry.new(*t)
+            target_entries.append(entry)
+            print(entry.target, entry.flags, entry.info)
+        return target_entries
+
+    def enable_model_drag_source(self, start_button_mask, targets, actions):
+        target_entries = self._construct_target_list(targets)
+        super(TreeView, self).enable_model_drag_source(start_button_mask,
+                                                       target_entries,
+                                                       len(target_entries),
+                                                       actions)
+
+    def enable_model_drag_dest(self, targets, actions):
+        target_entries = self._construct_target_list(targets)
+        super(TreeView, self).enable_model_drag_dest(target_entries,
+                                                     len(target_entries),
+                                                     actions)
+
+
+
 TreeView = override(TreeView)
 __all__.append('TreeView')
 
