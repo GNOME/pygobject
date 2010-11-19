@@ -33,6 +33,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.RESPONSE_/Gtk.ResponseType./g;" \
     -pe "s/Gtk.CORNER_/Gtk.CornerType./g;" \
     -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
+    -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
+    -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
     -pe "s/Gtk.settings_get_default/Gtk.Settings.get_default/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
     -pe "s/.window.set_type_hint/.set_type_hint/g;" \
