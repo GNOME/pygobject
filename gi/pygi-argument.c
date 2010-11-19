@@ -271,8 +271,18 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
         case GI_TYPE_TAG_BOOLEAN:
             /* No check; every Python object has a truth value. */
             break;
-        case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:
+            /* UINT8 types can be characters */
+            if (PYGLIB_PyBytes_Check(object)) {
+                if (PYGLIB_PyBytes_Size(object) != 1) {
+                    PyErr_Format (PyExc_TypeError, "Must be a single character");
+                    retval = 0;
+                    break;
+                }
+
+                break;
+            }
+        case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:
@@ -407,6 +417,10 @@ check_number_release:
             item_type_info = g_type_info_get_param_type (type_info, 0);
             g_assert (item_type_info != NULL);
 
+            /* FIXME: This is insain.  We really should only check the first
+             *        object and perhaps have a debugging mode.  Large arrays
+             *        will cause apps to slow to a crawl.
+             */
             for (i = 0; i < length; i++) {
                 PyObject *item;
 
@@ -640,8 +654,13 @@ _pygi_argument_from_object (PyObject   *object,
             arg.v_boolean = PyObject_IsTrue (object);
             break;
         }
-        case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:
+            if (PYGLIB_PyBytes_Check(object)) {
+                arg.v_long = (long)(PYGLIB_PyBytes_AsString(object)[0]);
+                break;
+            }
+
+        case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:
@@ -840,6 +859,14 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
+            if (g_type_info_get_tag (item_type_info) == GI_TYPE_TAG_UINT8 &&
+                PYGLIB_PyBytes_Check(object)) {
+
+                memcpy(array->data, PYGLIB_PyBytes_AsString(object), length);
+                goto array_success;
+            }
+
+
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
             for (i = 0; i < length; i++) {
@@ -872,6 +899,7 @@ array_item_error:
                 break;
             }
 
+array_success:
             arg.v_pointer = array;
 
             g_base_info_unref ( (GIBaseInfo *) item_type_info);
@@ -1292,23 +1320,36 @@ _pygi_argument_to_object (GIArgument  *arg,
             GITransfer item_transfer;
             gsize i, item_size;
 
-            if (arg->v_pointer == NULL) {
-                object = PyList_New (0);
-                break;
-            }
-
             array = arg->v_pointer;
-
-            object = PyList_New (array->len);
-            if (object == NULL) {
-                break;
-            }
 
             item_type_info = g_type_info_get_param_type (type_info, 0);
             g_assert (item_type_info != NULL);
 
             item_type_tag = g_type_info_get_tag (item_type_info);
             item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
+            if (item_type_tag == GI_TYPE_TAG_UINT8) {
+                /* Return as a byte array */
+                if (arg->v_pointer == NULL) {
+                    object = PYGLIB_PyBytes_FromString ("");
+                    break;
+                }
+
+                object = PYGLIB_PyBytes_FromStringAndSize(array->data, array->len);
+                break;
+
+            } else {
+                if (arg->v_pointer == NULL) {
+                    object = PyList_New (0);
+                    break;
+                }
+
+                object = PyList_New (array->len);
+                if (object == NULL) {
+                    break;
+                }
+
+            }
             item_size = g_array_get_element_size (array);
 
             for (i = 0; i < array->len; i++) {

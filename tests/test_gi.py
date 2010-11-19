@@ -14,9 +14,11 @@ from gi.repository import GIMarshallingTests
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
-    PY2_UNICODE_UTF8 = u"const ♥ utf8"
+    PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
+    CHAR_255='\xff'
 else:
     CONSTANT_UTF8 = "const ♥ utf8"
+    CHAR_255=bytes([255])
 
 CONSTANT_NUMBER = 42
 
@@ -121,9 +123,9 @@ class TestUInt8(unittest.TestCase):
         number = Number(self.MAX)
 
         GIMarshallingTests.uint8_in(number)
+        GIMarshallingTests.uint8_in(CHAR_255)
 
         number.value += 1
-
         self.assertRaises(ValueError, GIMarshallingTests.uint8_in, number)
         self.assertRaises(ValueError, GIMarshallingTests.uint8_in, Number(-1))
 
