@@ -1,6 +1,10 @@
 #!/bin/sh
 
-FILES_TO_CONVERT="$(find sugar-pygi -iname \*.py) $(find sugar-toolkit-pygi -iname \*.py) sugar-pygi/bin/sugar-session"
+if [ -n "$1" ]; then
+    FILES_TO_CONVERT="$@"
+else
+    FILES_TO_CONVERT="$(find -name '*.py')"
+fi
 
 for f in $FILES_TO_CONVERT; do
     perl -i -0 \
@@ -157,22 +161,3 @@ NEED_SUGAR_EXT=`grep -R -l SugarExt\. $FILES_TO_CONVERT | xargs grep -nL import\
 for f in $NEED_SUGAR_EXT; do
     sed -i "/import cairo/ i\from gi.repository import SugarExt" $f
 done
-
-for f in sugar-pygi/src/jarabe/util/emulator.py sugar-pygi/bin/sugar-session; do
-    sed -i "/import Gdk/ a\Gdk.init_check([])" $f
-    sed -i "/import Gtk/ a\Gtk.init_check([])" $f
-done
-
-sed -i "/Gdk.threads_init()/ i\gobject.threads_init()" sugar-pygi/bin/sugar-session
-
-# Disable treeview stuff
-sed -i 's/class CellRendererIcon(Gtk.GenericCellRenderer):/class CellRendererIcon(Gtk.CellRenderer):/g' sugar-toolkit-pygi/src/sugar/graphics/icon.py
-
-#sed -i '/def get_icon_state(base_name, perc, step=5):/ i\"""' sugar-toolkit-pygi/src/sugar/graphics/icon.py
-
-#sed -i 's/from sugar.graphics.icon import Icon, CellRendererIcon/from sugar.graphics.icon import Icon/g' sugar-pygi/src/jarabe/desktop/activitieslist.py
-
-#sed -i '/class CellRendererFavorite(CellRendererIcon):/ i\"""' sugar-pygi/src/jarabe/desktop/activitieslist.py
-#sed -i '/def get_icon_state(base_name, perc, step=5):/ i\"""' sugar-toolkit-pygi/src/sugar/graphics/icon.py
-
-
