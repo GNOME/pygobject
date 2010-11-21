@@ -378,6 +378,8 @@ check_number_release:
             }
             break;
         }
+        case GI_TYPE_TAG_UNICHAR:
+            /* TODO: check if it is a single valid utf8 character? */
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
             if (!PYGLIB_PyBaseString_Check (object) ) {
@@ -758,6 +760,42 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_GTYPE:
         {
             arg.v_long = pyg_type_from_object (object);
+
+            break;
+        }
+        case GI_TYPE_TAG_UNICHAR:
+        {
+            gchar *string;
+
+            if (object == Py_None) {
+                arg.v_uint32 = 0;
+                break;
+            }
+
+#if PY_VERSION_HEX < 0x03000000
+            if (PyUnicode_Check(object)) {
+                 PyObject *pystr_obj = PyUnicode_AsUTF8String (object);
+
+                 if (!pystr_obj)
+                     break;
+
+                 string = g_strdup(PyString_AsString (pystr_obj));
+                 Py_DECREF(pystr_obj);
+            } else {
+                 string = g_strdup(PyString_AsString (object));
+            }
+#else
+            {
+                PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
+                if (!pybytes_obj)
+                    break;
+
+                string = g_strdup(PyBytes_AsString (pybytes_obj));
+                Py_DECREF (pybytes_obj);
+            }
+#endif
+
+            arg.v_uint32 = g_utf8_get_char (string);
 
             break;
         }
@@ -1279,6 +1317,27 @@ _pygi_argument_to_object (GIArgument  *arg,
             object = pyg_type_wrapper_new ( (GType) arg->v_long);
             break;
         }
+        case GI_TYPE_TAG_UNICHAR:
+        {
+            /* Preserve the bidirectional mapping between 0 and "" */
+            if (arg->v_uint32 == 0) {
+                object = PYGLIB_PyUnicode_FromString ("");
+            } else if (g_unichar_validate (arg->v_uint32)) {
+                gchar utf8[7];
+                gint bytes;
+
+                bytes = g_unichar_to_utf8 (arg->v_uint32, &utf8);
+                object = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
+            } else {
+                /* TODO: Convert the error to an exception. */
+                PyErr_Format (PyExc_TypeError,
+                              "Invalid unicode codepoint %" G_GUINT32_FORMAT,
+                              arg->v_uint32);
+                object = Py_None;
+                Py_INCREF (object);
+            }
+            break;
+        }
         case GI_TYPE_TAG_UTF8:
             if (arg->v_string == NULL) {
                 object = Py_None;
@@ -1662,6 +1721,7 @@ _pygi_argument_release (GIArgument   *arg,
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
         case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_UNICHAR:
             break;
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_UTF8:

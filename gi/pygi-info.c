@@ -349,6 +349,9 @@ _pygi_g_type_tag_size (GITypeTag type_tag)
         case GI_TYPE_TAG_GTYPE:
             size = sizeof (GType);
             break;
+        case GI_TYPE_TAG_UNICHAR:
+            size = sizeof (gunichar);
+            break;
         case GI_TYPE_TAG_VOID:
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
@@ -388,6 +391,7 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
         case GI_TYPE_TAG_FLOAT:
         case GI_TYPE_TAG_DOUBLE:
         case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_UNICHAR:
             if (g_type_info_is_pointer (type_info)) {
                 size = sizeof (gpointer);
             } else {
@@ -767,6 +771,7 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
             case GI_TYPE_TAG_UINT64:
             case GI_TYPE_TAG_FLOAT:
             case GI_TYPE_TAG_DOUBLE:
+            case GI_TYPE_TAG_UNICHAR:
                 if (g_type_info_is_pointer (field_type_info)) {
                     is_simple = FALSE;
                 }

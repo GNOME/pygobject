@@ -48,6 +48,11 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(surface.get_width(), 10)
         self.assertEquals(surface.get_height(), 10)
 
+    def test_unichar(self):
+        self.assertEquals("c", Everything.test_unichar("c"))
+        self.assertEquals("", Everything.test_unichar(""))
+        self.assertEquals("\xe2\x99\xa5", Everything.test_unichar("\xe2\x99\xa5"))
+
     def test_floating(self):
         Everything.TestFloating()
 
