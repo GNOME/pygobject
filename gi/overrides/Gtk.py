@@ -237,6 +237,9 @@ class UIManager(Gtk.UIManager):
 
         return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 
+    def insert_action_group(self, buffer, length=-1):
+        return Gtk.UIManager.insert_action_group(self, buffer, length)
+
 UIManager = override(UIManager)
 __all__.append('UIManager')
 

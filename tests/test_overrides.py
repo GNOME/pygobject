@@ -59,19 +59,6 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(event.y_root, 5)
 
 class TestGtk(unittest.TestCase):
-    def test_uimanager(self):
-        self.assertEquals(Gtk.UIManager, overrides.Gtk.UIManager)
-        ui = Gtk.UIManager()
-        ui.add_ui_from_string(
-"""
-<ui>
-    <menubar name="menubar1"></menubar>
-</ui>
-"""
-)
-        menubar = ui.get_widget("/menubar1")
-        self.assertEquals(type(menubar), Gtk.MenuBar)
-
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         action_group = Gtk.ActionGroup (name = 'TestActionGroup')
@@ -111,6 +98,27 @@ class TestGtk(unittest.TestCase):
             self.assertTrue(a in expected_results)
             expected_results.remove(a)
             action.activate()
+
+    def test_uimanager(self):
+        self.assertEquals(Gtk.UIManager, overrides.Gtk.UIManager)
+        ui = Gtk.UIManager()
+        ui.add_ui_from_string(
+"""
+<ui>
+    <menubar name="menubar1"></menubar>
+</ui>
+"""
+)
+        menubar = ui.get_widget("/menubar1")
+        self.assertEquals(type(menubar), Gtk.MenuBar)
+
+        ag = Gtk.ActionGroup (name="ag1")
+        ui.insert_action_group(ag)
+        ag2 = Gtk.ActionGroup (name="ag2")
+        ui.insert_action_group(ag2)
+        groups = ui.get_action_groups()
+        self.assertEquals(ag, groups[-2])
+        self.assertEquals(ag2, groups[-1])
 
     def test_builder(self):
         self.assertEquals(Gtk.Builder, overrides.Gtk.Builder)
