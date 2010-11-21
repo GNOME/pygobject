@@ -564,6 +564,12 @@ class TestGtk(unittest.TestCase):
         for childrow in last_row.iterchildren():
             self.fail("Should not be reached")
 
+        aiter = tree_store.get_iter(10)
+        self.assertRaises(TypeError, tree_store.get, aiter, 1, 'a')
+        self.assertRaises(ValueError, tree_store.get, aiter, 1, -1)
+        self.assertRaises(ValueError, tree_store.get, aiter, 1, 100)
+        self.assertEqual(tree_store.get(aiter, 0, 1), (10, 'this is row #10'))
+
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title='This is just a test',

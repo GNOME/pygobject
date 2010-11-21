@@ -654,6 +654,21 @@ class TreeModel(Gtk.TreeModel):
             if row[i] is not None:
                 self.set_value(treeiter, i, row[i])
 
+    def get(self, treeiter, *columns):
+        n_columns = self.get_n_columns();
+
+        values = []
+        for col in columns:
+            if not isinstance(col, int):
+                raise TypeError("column numbers must be ints")
+
+            if col < 0 or col >= n_columns:
+                raise ValueError("column number is out of range")
+
+            values.append(self.get_value(treeiter, col))
+
+        return tuple(values)
+
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
