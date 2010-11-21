@@ -937,6 +937,12 @@ class TreeSelection(Gtk.TreeSelection):
         else:
             return (model, None)
 
+    # for compatibility with PyGtk
+    def get_selected_rows(self):
+        rows, model = super(TreeSelection, self).get_selected_rows()
+        return (model, rows)
+
+
 TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
 
