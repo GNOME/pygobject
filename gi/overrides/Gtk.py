@@ -75,6 +75,9 @@ Editable = override(Editable)
 __all__.append("Editable")
 
 class ActionGroup(Gtk.ActionGroup):
+    def __init__(self, name):
+        super(ActionGroup, self).__init__(name = name)
+
     def add_actions(self, entries, user_data=None):
         """
         The add_actions() method is a convenience method that creates a number

@@ -61,6 +61,8 @@ class TestGdk(unittest.TestCase):
 class TestGtk(unittest.TestCase):
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
+        self.assertRaises(TypeError, Gtk.ActionGroup)
+
         action_group = Gtk.ActionGroup (name = 'TestActionGroup')
         callback_data = "callback data"
 
