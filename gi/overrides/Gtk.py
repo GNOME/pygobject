@@ -75,8 +75,8 @@ Editable = override(Editable)
 __all__.append("Editable")
 
 class ActionGroup(Gtk.ActionGroup):
-    def __init__(self, name):
-        super(ActionGroup, self).__init__(name = name)
+    def __init__(self, name, **kwds):
+        super(ActionGroup, self).__init__(name = name, **kwds)
 
     def add_actions(self, entries, user_data=None):
         """
