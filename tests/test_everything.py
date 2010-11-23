@@ -1,4 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
@@ -12,6 +13,13 @@ import cairo
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Regress as Everything
+
+if sys.version_info < (3, 0):
+    UNICHAR = "\xe2\x99\xa5"
+    PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
+else:
+    UNICHAR = "♥"
+
 
 class TestEverything(unittest.TestCase):
 
@@ -50,8 +58,13 @@ class TestEverything(unittest.TestCase):
 
     def test_unichar(self):
         self.assertEquals("c", Everything.test_unichar("c"))
-        self.assertEquals("", Everything.test_unichar(""))
-        self.assertEquals("\xe2\x99\xa5", Everything.test_unichar("\xe2\x99\xa5"))
+
+        if sys.version_info < (3, 0):
+            self.assertEquals(UNICHAR, Everything.test_unichar(PY2_UNICODE_UNICHAR))
+        self.assertEquals(UNICHAR, Everything.test_unichar(UNICHAR))
+        self.assertRaises(TypeError, Everything.test_unichar, "")
+        self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
+        
 
     def test_floating(self):
         Everything.TestFloating()

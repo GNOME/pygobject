@@ -379,7 +379,32 @@ check_number_release:
             break;
         }
         case GI_TYPE_TAG_UNICHAR:
-            /* TODO: check if it is a single valid utf8 character? */
+        {
+            Py_ssize_t size;
+            if (PyUnicode_Check (object)) {
+                size = PyUnicode_GET_SIZE (object);
+#if PY_VERSION_HEX < 0x03000000
+            } else if (PyString_Check (object)) {
+                PyObject *pyuni = PyUnicode_FromEncodedObject (object, "UTF-8", "strict");
+                size = PyUnicode_GET_SIZE (pyuni);
+                Py_DECREF(pyuni);
+#endif
+            } else {
+                PyErr_Format (PyExc_TypeError, "Must be string, not %s",
+                              object->ob_type->tp_name);
+                retval = 0;
+                break;
+            }
+
+            if (size != 1) {
+                PyErr_Format (PyExc_TypeError, "Must be a one character string, not %i characters",
+                              size);
+                retval = 0;
+                break;
+            }
+
+            break;
+        }
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
             if (!PYGLIB_PyBaseString_Check (object) ) {
