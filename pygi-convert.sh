@@ -86,6 +86,9 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/pango\./Pango\./g;" \
     -pe "s/Pango\.FontDescription/Pango\.Font\.description_from_string/g;" \
     -pe "s/Pango.ELLIPSIZE_/Pango.EllipsizeMode./g;" \
+    -pe "s/Pango.STYLE_/Pango.Style./g;" \
+    -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \
+    -pe "s/Pango.WEIGHT_/Pango.Weight./g;" \
 \
     -pe "s/import hippo\n/from gi.repository import Hippo\n/g;" \
     -pe "s/hippo\./Hippo\./g;" \
