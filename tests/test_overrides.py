@@ -600,6 +600,16 @@ class TestGtk(unittest.TestCase):
         mark = buffer.create_mark(None, start)
         self.assertFalse(mark.get_left_gravity())
 
+        buffer.set_text('Hello Jane Hello Bob')
+        (start, end) = buffer.get_bounds()
+        text = buffer.get_text(start, end, False)
+        self.assertEquals(text, 'Hello Jane Hello Bob')
+
+        buffer.set_text('')
+        (start, end) = buffer.get_bounds()
+        text = buffer.get_text(start, end, False)
+        self.assertEquals(text, '')
+
         buffer.insert(end, 'HelloHello')
         buffer.insert(end, ' Bob')
 
@@ -610,7 +620,6 @@ class TestGtk(unittest.TestCase):
 
         (start, end) = buffer.get_bounds()
         text = buffer.get_text(start, end, False)
-
         self.assertEquals(text, 'Hello Jane Hello Bob')
 
         sel = buffer.get_selection_bounds()

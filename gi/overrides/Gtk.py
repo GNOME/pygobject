@@ -525,6 +525,9 @@ class TextBuffer(Gtk.TextBuffer):
     def create_mark(self, mark_name, where, left_gravity=False):
         return Gtk.TextBuffer.create_mark(self, mark_name, where, left_gravity)
 
+    def set_text(self, text, length=-1):
+        Gtk.TextBuffer.set_text(self, text, length)
+
     def insert(self, iter, text):
         if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
