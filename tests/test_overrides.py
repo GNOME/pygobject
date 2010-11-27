@@ -597,6 +597,9 @@ class TestGtk(unittest.TestCase):
 
         (start, end) = buffer.get_bounds()
 
+        mark = buffer.create_mark(None, start)
+        self.assertFalse(mark.get_left_gravity())
+
         buffer.insert(end, 'HelloHello')
         buffer.insert(end, ' Bob')
 
