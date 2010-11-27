@@ -65,8 +65,10 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/([^\.^ ]*)\.drag_dest_set\(/Gtk.drag_dest_set\(\1, /g;" \
     -pe "s/Gtk\..*\.__init__/gobject.GObject.__init__/g;" \
 \
+    -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/Gtk.gdk.x11_/GdkX11\./g;" \
     -pe "s/Gtk.gdk\./Gdk\./g;" \
+    -pe "s/gdk\./Gdk\./g;" \
     -pe "s/Gdk.screen_width/Gdk.Screen.width/g;" \
     -pe "s/Gdk.screen_height/Gdk.Screen.height/g;" \
     -pe "s/Gdk.screen_get_default/Gdk.Screen.get_default/g;" \
