@@ -629,6 +629,23 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(sel[0].equal(start))
         self.assertTrue(sel[1].equal(end))
 
+    def test_text_iter(self):
+        self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
+        buffer = Gtk.TextBuffer()
+        buffer.set_text('Hello Jane Hello Bob')
+        tag = buffer.create_tag ('title', font = 'Sans 18')
+        (start, end) = buffer.get_bounds()
+        start.forward_chars(10)
+        buffer.apply_tag(tag, start, end)
+        self.assertTrue(start.begins_tag())
+        self.assertTrue(end.ends_tag())
+        self.assertTrue(start.toggles_tag())
+        self.assertTrue(end.toggles_tag())
+        start.backward_chars(1)
+        self.assertFalse(start.begins_tag())
+        self.assertFalse(start.ends_tag())
+        self.assertFalse(start.toggles_tag())
+
     def test_buttons(self):
         self.assertEquals(Gtk.Button, overrides.Gtk.Button)
 

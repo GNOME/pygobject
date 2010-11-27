@@ -564,6 +564,15 @@ class TextIter(Gtk.TextIter):
             flags, limit)
         return (match_start, match_end,)
 
+    def begins_tag(self, tag=None):
+        return super(TextIter, self).begins_tag(tag)
+
+    def ends_tag(self, tag=None):
+        return super(TextIter, self).ends_tag(tag)
+
+    def toggles_tag(self, tag=None):
+        return super(TextIter, self).toggles_tag(tag)
+
 TextIter = override(TextIter)
 __all__.append('TextIter')
 
