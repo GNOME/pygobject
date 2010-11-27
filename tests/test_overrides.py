@@ -610,6 +610,13 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(text, 'Hello Jane Hello Bob')
 
+        sel = buffer.get_selection_bounds()
+        self.assertEquals(sel, ())
+        buffer.select_range(start, end)
+        sel = buffer.get_selection_bounds()
+        self.assertTrue(sel[0].equal(start))
+        self.assertTrue(sel[1].equal(end))
+
     def test_buttons(self):
         self.assertEquals(Gtk.Button, overrides.Gtk.Button)
 
