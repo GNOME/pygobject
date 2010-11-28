@@ -49,6 +49,12 @@ __all__.append('Widget')
 
 class Container(Gtk.Container, Widget):
 
+    def __len__(self):
+        return len(self.get_children())
+
+    def __contains__(self, child):
+        return child in self.get_children()
+
     def get_focus_chain(self):
         success, widgets = super(Container, self).get_focus_chain()
         if success:
