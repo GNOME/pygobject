@@ -405,6 +405,7 @@ class TestInt(unittest.TestCase):
     def test_int_inout(self):
         self.assertEquals(self.MIN, GIMarshallingTests.int_inout_max_min(Number(self.MAX)))
         self.assertEquals(self.MAX, GIMarshallingTests.int_inout_min_max(Number(self.MIN)))
+        self.assertRaises(TypeError, GIMarshallingTests.int_inout_min_max, Number(self.MIN), CONSTANT_NUMBER)
 
 
 class TestUInt(unittest.TestCase):
