@@ -6,7 +6,7 @@ pkginclude_HEADERS = pyglib.h
 
 lib_LTLIBRARIES = libpyglib-2.0-@PYTHON_BASENAME@.la
 
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexecdir = $(pyexecdir)
 
 pyglibdir = $(pkgpyexecdir)/glib
 pyglib_PYTHON = 	\

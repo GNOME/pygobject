@@ -3,8 +3,6 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import sys
-import pygtk
-pygtk.require("2.0")
 
 import unittest
 from gi.repository import GObject

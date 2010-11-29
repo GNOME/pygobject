@@ -4,7 +4,7 @@ PLATFORM_VERSION = 2.0
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
 
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexecdir = $(pyexecdir)
 
 # gobject python scripts
 pygobjectdir = $(pkgpyexecdir)/gobject

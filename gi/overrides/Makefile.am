@@ -1,6 +1,6 @@
 PLATFORM_VERSION = 2.0
 
-pkgpyexecdir = $(pyexecdir)/gtk-2.0/gi
+pkgpyexecdir = $(pyexecdir)/gi
 
 pygioverridesdir = $(pkgpyexecdir)/overrides
 pygioverrides_PYTHON = \

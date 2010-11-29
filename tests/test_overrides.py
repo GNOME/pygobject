@@ -1,9 +1,6 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
-import pygtk
-pygtk.require("2.0")
-
 import unittest
 
 import sys
