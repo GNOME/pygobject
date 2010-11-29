@@ -374,3 +374,70 @@ class TestProperties(unittest.TestCase):
 
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEquals(object_.props.boxed.some_int8, 42)
+
+class TestTortureProfile(unittest.TestCase):
+    def test_torture_profile(self):
+        import time
+        total_time = 0
+        print("")
+        object_ = Everything.TestObj()
+        sys.stdout.write("\ttorture test 1 (10000 iterations): ")
+
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = object_.torture_signature_0(5000,
+                                                  "Torture Test 1",
+                                                  12345)
+
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+        sys.stdout.write("\ttorture test 2 (10000 iterations): ")
+
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = Everything.TestObj().torture_signature_0(5000,
+                                                               "Torture Test 2",
+                                                               12345)
+
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+
+        sys.stdout.write("\ttorture test 3 (10000 iterations): ")
+        start_time = time.clock()
+        for i in range(10000):
+            try:
+                (y,z,q) = object_.torture_signature_1(5000,
+                                                      "Torture Test 3",
+                                                      12345)
+            except:
+                pass
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+        sys.stdout.write("\ttorture test 4 (10000 iterations): ")
+        def callback(userdata):
+            pass
+
+        userdata = [1,2,3,4]
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = Everything.test_torture_signature_2(5000,
+                                                          callback,
+                                                          userdata,
+                                                          "Torture Test 4",
+                                                          12345)
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+        print("\t====")
+        print("\tTotal: %f sec" % total_time)
+
