@@ -482,9 +482,15 @@ class TestGtk(unittest.TestCase):
         for row in tree_store:
             self.fail("Should not be reached")
 
+        class DerivedIntType(int):
+            pass
+
+        class DerivedStrType(str):
+            pass
+
         for i in range(100):
             label = 'this is row #%d' % i
-            parent = tree_store.append(None, (i, label,))
+            parent = tree_store.append(None, (DerivedIntType(i), DerivedStrType(label),))
             self.assertNotEquals(parent, None)
             for j in range(20):
                 label = 'this is child #%d of node #%d' % (j, i)

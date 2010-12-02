@@ -664,8 +664,42 @@ class TreeModel(Gtk.TreeModel):
             raise ValueError('row sequence has the incorrect number of elements')
 
         for i in range(n_columns):
-            if row[i] is not None:
-                self.set_value(treeiter, i, row[i])
+            value = row[i]
+
+            if value is None:
+                continue
+            
+            # we may need to convert to a basic type
+            type_ = self.get_column_type(i)
+            if type_ == gobject.TYPE_PYOBJECT:
+                pass # short-circut branching
+            elif type_ == gobject.TYPE_STRING:
+                if isinstance(value, str):
+                    value = str(value)
+                elif sys.version_info < (3, 0):
+                    if isinstance(value, unicode):
+                        value = unicode(value)
+                    else:
+                        raise ValueError('Expected string or unicode for row %i but got %s' % i, type(value))
+                else:
+                    raise ValueError('Expected a string for row %i but got %s' % i, type(value))
+            elif type_ == gobject.TYPE_FLOAT or type_ == gobject.TYPE_DOUBLE:
+                if isinstance(value, float):
+                    value = float(value)
+                else:
+                    raise ValueError('Expected a float for row %i but got %s' % i, type(value))
+            elif type_ == gobject.TYPE_LONG or type_ == gobject.TYPE_INT:
+                if isinstance(value, int):
+                    value = int(value)
+                elif sys.version_info < (3, 0):
+                    if isinstance(value, long):
+                        value = long(value)
+                    else:
+                        raise ValueError('Expected an long for row %i but got %s' % i, type(value))
+                else:
+                    raise ValueError('Expected an interger for row %i but got %s' % i, type(value))
+
+            self.set_value(treeiter, i, value)
 
     def get(self, treeiter, *columns):
         n_columns = self.get_n_columns();
