@@ -1044,7 +1044,10 @@ class Button(Gtk.Button, Container):
 Button = override(Button)
 __all__.append('Button')
 
-import sys
+_Gtk_main_quit = Gtk.main_quit
+@override(Gtk.main_quit)
+def main_quit(*args):
+    _Gtk_main_quit()
 
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
