@@ -434,6 +434,24 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(i, 99)
 
+    def test_tree_path(self):
+        p1 = Gtk.TreePath()
+        p2 = Gtk.TreePath.new_first()
+        self.assertEqual(p1, p2)
+        self.assertEqual(str(p1), '0')
+        p1 = Gtk.TreePath(2)
+        p2 = Gtk.TreePath.new_from_string('2')
+        self.assertEqual(p1, p2)
+        self.assertEqual(str(p1), '2')
+        p1 = Gtk.TreePath('1:2:3')
+        p2 = Gtk.TreePath.new_from_string('1:2:3')
+        self.assertEqual(p1, p2)
+        self.assertEqual(str(p1), '1:2:3')
+        p1 = Gtk.TreePath((1,2,3))
+        p2 = Gtk.TreePath.new_from_string('1:2:3')
+        self.assertEqual(p1, p2)
+        self.assertEqual(str(p1), '1:2:3')
+
     def test_tree_model(self):
         tree_store = Gtk.TreeStore(int, str)
 

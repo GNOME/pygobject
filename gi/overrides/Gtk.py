@@ -615,29 +615,13 @@ class TreeModel(Gtk.TreeModel):
         return TreeModelRowIter(self, self.get_iter_first())
 
     def get_iter(self, path):
-        if isinstance(path, Gtk.TreePath):
-            pass
-        elif isinstance(path, (int, str,)):
-            path = self._tree_path_from_string(str(path))
-        elif isinstance(path, tuple):
-            path_str = ":".join(str(val) for val in path)
-            path = self._tree_path_from_string(path_str)
-        else:
-            raise TypeError("tree path must be one of Gtk.TreeIter, Gtk.TreePath, \
-                int, str or tuple, not %s" % type(path).__name__)
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
 
         success, aiter = super(TreeModel, self).get_iter(path)
         if not success:
             raise ValueError("invalid tree path '%s'" % path)
         return aiter
-
-    def _tree_path_from_string(self, path):
-        if len(path) == 0:
-            raise TypeError("could not parse subscript '%s' as a tree path" % path)
-        try:
-            return TreePath.new_from_string(path)
-        except TypeError:
-            raise TypeError("could not parse subscript '%s' as a tree path" % path)
 
     def get_iter_first(self):
         success, aiter = super(TreeModel, self).get_iter_first()
@@ -845,6 +829,19 @@ class TreeModelRowIter(object):
 __all__.append('TreeModelRowIter')
 
 class TreePath(Gtk.TreePath):
+
+    def __new__(cls, path=0):
+        if isinstance(path, int):
+            path = str(path)
+        elif isinstance(path, tuple):
+            path = ":".join(str(val) for val in path)
+
+        if len(path) == 0:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
+        try:
+            return TreePath.new_from_string(path)
+        except TypeError:
+            raise TypeError("could not parse subscript '%s' as a tree path" % path)
 
     def __str__(self):
         return self.to_string()
