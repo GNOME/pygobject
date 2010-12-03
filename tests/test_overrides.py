@@ -613,6 +613,35 @@ class TestGtk(unittest.TestCase):
                                     text=0,
                                     style=2)
 
+    def test_tree_selection(self):
+        store = Gtk.ListStore(int, str)
+        for i in range(10):
+            store.append((i, "foo"))
+        view = Gtk.TreeView()
+        view.set_model(store)
+        firstpath = store.get_path(store.get_iter_first())
+        sel = view.get_selection()
+
+        sel.select_path(firstpath)
+        (m, s) = sel.get_selected()
+        self.assertEqual(m, store)
+        self.assertEqual(store.get_path(s), firstpath)
+
+        sel.select_path(0)
+        (m, s) = sel.get_selected()
+        self.assertEqual(m, store)
+        self.assertEqual(store.get_path(s), firstpath)
+
+        sel.select_path("0:0")
+        (m, s) = sel.get_selected()
+        self.assertEqual(m, store)
+        self.assertEqual(store.get_path(s), firstpath)
+
+        sel.select_path((0,0))
+        (m, s) = sel.get_selected()
+        self.assertEqual(m, store)
+        self.assertEqual(store.get_path(s), firstpath)
+
     def test_text_buffer(self):
         self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()

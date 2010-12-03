@@ -945,6 +945,10 @@ class TreeView(Gtk.TreeView, Container):
                                                      len(target_entries),
                                                      actions)
 
+    def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
 
 
 TreeView = override(TreeView)
@@ -966,10 +970,16 @@ class TreeViewColumn(Gtk.TreeViewColumn):
         if success:
             return (start_pos, width,)
 
+
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
 class TreeSelection(Gtk.TreeSelection):
+
+    def select_path(self, path):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        super(TreeSelection, self).select_path(path)
 
     def get_selected(self):
         success, model, aiter = super(TreeSelection, self).get_selected()
