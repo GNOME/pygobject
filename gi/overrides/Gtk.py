@@ -1044,6 +1044,13 @@ class Button(Gtk.Button, Container):
 Button = override(Button)
 __all__.append('Button')
 
+class Label(Gtk.Label):
+    def __init__(self, str=None, **kwds):
+        Gtk.Table.__init__(self, label=str, **kwds)
+
+Label = override(Label)
+__all__.append('Label')
+
 class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
