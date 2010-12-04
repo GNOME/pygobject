@@ -1044,6 +1044,13 @@ class Button(Gtk.Button, Container):
 Button = override(Button)
 __all__.append('Button')
 
+class Table(Gtk.Table, Container):
+    def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
+        Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
+
+Table = override(Table)
+__all__.append('Table')
+
 _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):

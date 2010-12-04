@@ -754,3 +754,15 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(pos, 6)
         text = entry.get_chars(0, 11)
         self.assertEquals('Hello World', text)
+
+    def test_table(self):
+        table = Gtk.Table()
+        self.assertEquals(table.get_size(), (1,1))
+        self.assertEquals(table.get_homogeneous(), False)
+        table = Gtk.Table(2, 3)
+        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_homogeneous(), False)
+        table = Gtk.Table(2, 3, True)
+        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_homogeneous(), True)
+
