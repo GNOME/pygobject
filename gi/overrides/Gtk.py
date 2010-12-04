@@ -1072,6 +1072,13 @@ class Label(Gtk.Label):
 Label = override(Label)
 __all__.append('Label')
 
+class Adjustment(Gtk.Adjustment):
+    def __init__(self, value=None, lower=None, upper=None, step_increment=None, page_increment=None, page_size=None, **kwds):
+        Gtk.Adjustment.__init__(self, value=value, lower=lower, upper=upper, step_increment=step_increment, page_increment=page_increment, page_size=page_size, **kwds)
+
+Adjustment = override(Adjustment)
+__all__.append('Adjustment')
+
 class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)

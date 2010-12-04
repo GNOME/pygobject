@@ -784,6 +784,15 @@ class TestGtk(unittest.TestCase):
         label = Gtk.Label('Hello')
         self.assertEquals(label.get_text(), 'Hello')
 
+    def test_adjustment(self):
+        adjustment = Gtk.Adjustment(1, 0, 3, 4, 5, 6)
+        self.assertEquals(adjustment.get_value(),1)
+        self.assertEquals(adjustment.get_lower(),0)
+        self.assertEquals(adjustment.get_upper(),3)
+        self.assertEquals(adjustment.get_step_increment(),4)
+        self.assertEquals(adjustment.get_page_increment(),5)
+        self.assertEquals(adjustment.get_page_size(),6)
+
     def test_table(self):
         table = Gtk.Table()
         self.assertEquals(table.get_size(), (1,1))
