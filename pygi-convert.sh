@@ -28,6 +28,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.CELL_RENDERER_MODE_/Gtk.CellRendererMode./g;" \
     -pe "s/Gtk.TREE_VIEW_COLUMN_/Gtk.TreeViewColumnSizing./g;" \
     -pe "s/Gtk.TEXT_DIR_/Gtk.TextDirection./g;" \
+    -pe "s/Gtk.TEXT_WINDOW_/Gtk.TextWindowType./g;" \
     -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
     -pe "s/Gtk.SHADOW_/Gtk.ShadowType./g;" \
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
