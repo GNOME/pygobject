@@ -62,12 +62,20 @@ if Gdk.version == '2.0':
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
 
-class Drawable(Gdk.Drawable):
-    def cairo_create(self):
-        return Gdk.cairo_create(self)
+if Gdk.version == '2.0':
+    class Drawable(Gdk.Drawable):
+        def cairo_create(self):
+            return Gdk.cairo_create(self)
 
-Drawable = override(Drawable)
-__all__.append('Drawable')
+    Drawable = override(Drawable)
+    __all__.append('Drawable')
+else:
+    class Window(Gdk.Window):
+        def cairo_create(self):
+            return Gdk.cairo_create(self)
+
+    Window = override(Window)
+    __all__.append('Window')
 
 class Event(Gdk.Event):
     _UNION_MEMBERS = {
@@ -101,8 +109,10 @@ class Event(Gdk.Event):
         Gdk.EventType.DROP_FINISHED: 'dnd',
         Gdk.EventType.CLIENT_EVENT: 'client',
         Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
-        Gdk.EventType.NO_EXPOSE: 'no_expose'
     }
+
+    if Gdk.version == '2.0':
+        _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
     def __new__(cls, *args, **kwargs):
         return Gdk.Event.__new__(cls)
