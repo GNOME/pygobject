@@ -59,13 +59,17 @@ class TestGtk(unittest.TestCase):
 
     def test_container(self):
         box = Gtk.Box()
+        self.assertTrue(box)
         label = Gtk.Label()
         label2 = Gtk.Label()
         box.add(label)
         box.add(label2)
         self.assertTrue(label in box)
         self.assertTrue(label2 in box)
-        self.assertEqual(len(box),2)
+        self.assertEqual(len(box), 2)
+        self.assertTrue(box)
+        l = [x for x in box]
+        self.assertEqual(l, [label, label2])
 
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)

@@ -54,6 +54,15 @@ class Container(Gtk.Container, Widget):
     def __contains__(self, child):
         return child in self.get_children()
 
+    def __iter__(self):
+        return iter(self.get_children())
+
+    def __bool__(self):
+        return True
+
+    # alias for Python 2.x object protocol
+    __nonzero__ = __bool__
+
     def get_focus_chain(self):
         success, widgets = super(Container, self).get_focus_chain()
         if success:
