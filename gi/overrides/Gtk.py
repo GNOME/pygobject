@@ -290,8 +290,7 @@ class Builder(Gtk.Builder):
                 else:
                     gobj.connect(signal_name, handler)
 
-        self.connect_signals_full(_full_callback,
-                                  obj_or_map);
+        self.connect_signals_full(_full_callback, obj_or_map)
 
     def add_from_string(self, buffer):
         if not isinstance(buffer, _basestring):
@@ -659,7 +658,7 @@ class TreeModel(Gtk.TreeModel):
         # TODO: Accept a dictionary for row
         # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
 
-        n_columns = self.get_n_columns();
+        n_columns = self.get_n_columns()
         if len(row) != n_columns:
             raise ValueError('row sequence has the incorrect number of elements')
 
@@ -702,7 +701,7 @@ class TreeModel(Gtk.TreeModel):
             self.set_value(treeiter, i, value)
 
     def get(self, treeiter, *columns):
-        n_columns = self.get_n_columns();
+        n_columns = self.get_n_columns()
 
         values = []
         for col in columns:
