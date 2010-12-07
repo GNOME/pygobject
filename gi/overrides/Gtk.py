@@ -1051,6 +1051,13 @@ class Button(Gtk.Button, Container):
 Button = override(Button)
 __all__.append('Button')
 
+class LinkButton(Gtk.LinkButton):
+    def __init__(self, uri, label=None, **kwds):
+        Gtk.LinkButton.__init__(self, uri=uri, label=label, **kwds)
+
+LinkButton = override(LinkButton)
+__all__.append('LinkButton')
+
 class Label(Gtk.Label):
     def __init__(self, str=None, **kwds):
         Gtk.Label.__init__(self, label=str, **kwds)

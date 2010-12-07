@@ -721,6 +721,12 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
 
+        # test Gtk.LinkButton
+        self.assertRaises(TypeError, Gtk.LinkButton)
+        button = Gtk.LinkButton('http://www.gtk.org', 'Gtk')
+        self.assertEquals('http://www.gtk.org', button.get_uri())
+        self.assertEquals('Gtk', button.get_label())
+
     def test_inheritance(self):
         for name in overrides.Gtk.__all__:
             over = getattr(overrides.Gtk, name)
