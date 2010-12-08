@@ -244,10 +244,10 @@ class GtkDemoApp(object):
                                     text = 0,
                                     style = 2)
 
+        first_iter = tree_store.get_iter_first()
+        if first_iter is not None:
+            selection.select_iter(first_iter)
 
-
-        (success, first_iter) = tree_store.get_iter_first()
-        selection.select_iter(first_iter)
         selection.connect('changed', self.selection_cb, tree_store)
         tree_view.connect('row_activated', self.row_activated_cb, tree_store)
 
