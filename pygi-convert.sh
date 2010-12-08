@@ -32,6 +32,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
     -pe "s/Gtk.SHADOW_/Gtk.ShadowType./g;" \
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
+    -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
     -pe "s/Gtk.SHRINK/Gtk.AttachOptions.SHRINK/g;" \
     -pe "s/Gtk.FILL/Gtk.AttachOptions.FILL/g;" \
     -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
@@ -41,9 +42,22 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
     -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
     -pe "s/Gtk.MOVEMENT_/Gtk.MovementStep./g;" \
+    -pe "s/Gtk.FILE_CHOOSER_ACTION_/Gtk.FileChooserAction./g;" \
+    -pe "s/Gtk.SORT_/Gtk.SortType./g;" \
+    -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
+    -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
+    -pe "s/Gtk.ASSISTANT_PAGE_/Gtk.AssistantPageType./g;" \
+    -pe "s/Gtk.ICON_LOOKUP_/Gtk.IconLookupFlags./g;" \
+    -pe "s/Gtk.WINDOW_/Gtk.WindowType./g;" \
     -pe "s/Gtk.accel_map_/Gtk.AccelMap./g;" \
     -pe "s/Gtk.settings_get_default/Gtk.Settings.get_default/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
+    -pe "s/Gtk.image_new_from_stock/Gtk.Image.new_from_stock/g;" \
+    -pe "s/Gtk.image_new_from_icon_name/Gtk.Image.new_from_icon_name/g;" \
+    -pe "s/Gtk.window_set_default_icon_name/Gtk.Window.set_default_icon_name/g; " \
+    -pe "s/set_flags\(Gtk.CAN_DEFAULT\)/set_can_default\(True\)/g;" \
+    -pe "s/.flags\(\) & Gtk.MAPPED/.get_mapped\(\)/g;" \
+    -pe "s/.flags\(\) & Gtk.REALIZED/.get_realized\(\)/g;" \
     -pe "s/.window.set_type_hint/.set_type_hint/g;" \
     -pe "s/self.drag_source_unset\(\)/Gtk.drag_source_unset\(self\)/g;" \
     -pe "s/self.drag_dest_unset\(\)/Gtk.drag_dest_unset\(self\)/g;" \
