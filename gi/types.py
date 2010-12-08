@@ -107,7 +107,7 @@ class MetaClassHelper(object):
                     raise TypeError('Class implementing %s.%s should implement '
                                     'the method %s()' % (base.__info__.get_namespace(),
                                                          base.__info__.get_name(),
-                                                         vfunc_name()))
+                                                         vfunc_name))
                 elif vfunc is not None:
                     # check to see if there are vfuncs with the same name in the bases
                     # we have no way of specifying which one we are supposed to override
