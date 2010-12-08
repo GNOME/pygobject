@@ -1443,16 +1443,6 @@ class TestInterfaces(unittest.TestCase):
         self.assertEquals(GIMarshallingTests.Interface.__gtype__.name, 'GIMarshallingTestsInterface')
         self.assertRaises(NotImplementedError, GIMarshallingTests.Interface)
 
-
-    def test_incomplete(self):
-        def create_incomplete():
-            class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-                __type_name__ = 'TestInterfaceImpl'
-                def __init__(self):
-                    GObject.GObject.__init__(self)
-
-        self.assertRaises(TypeError, create_incomplete)
-
     def test_implementation(self):
 
         class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):

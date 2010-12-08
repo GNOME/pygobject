@@ -253,6 +253,8 @@ _wrap_pyg_hook_up_vfunc_implementation (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+#if 0
+/* Not used, left around for future reference */
 static PyObject *
 _wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
 {
@@ -291,6 +293,7 @@ _wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
     Py_INCREF(py_ret);
     return py_ret;
 }
+#endif
 
 static PyObject *
 _wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
@@ -355,7 +358,6 @@ static PyMethodDef _gi_functions[] = {
     { "set_object_has_new_constructor", (PyCFunction) _wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
-    { "has_vfunc_implementation", (PyCFunction) _wrap_pyg_has_vfunc_implementation, METH_VARARGS },
     { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { NULL, NULL, 0 }

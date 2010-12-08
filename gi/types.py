@@ -31,8 +31,7 @@ from ._gi import \
     StructInfo, \
     set_object_has_new_constructor, \
     register_interface_info, \
-    hook_up_vfunc_implementation, \
-    has_vfunc_implementation
+    hook_up_vfunc_implementation
 
 
 def Function(info):
@@ -101,14 +100,7 @@ class MetaClassHelper(object):
             for vfunc_info in base.__info__.get_vfuncs():
                 vfunc_name = 'do_' + vfunc_info.get_name()
                 vfunc = getattr(impl, vfunc_name, None)
-                if vfunc is None and isinstance(base.__info__, InterfaceInfo) and \
-                    impl.__module__.startswith('gi.overrides') is False and \
-                        not has_vfunc_implementation(vfunc_info, impl.__gtype__):
-                    raise TypeError('Class implementing %s.%s should implement '
-                                    'the method %s()' % (base.__info__.get_namespace(),
-                                                         base.__info__.get_name(),
-                                                         vfunc_name))
-                elif vfunc is not None:
+                if vfunc is not None:
                     # check to see if there are vfuncs with the same name in the bases
                     # we have no way of specifying which one we are supposed to override
                     ambiguous_base = find_vfunc_conflict_in_bases(vfunc_info, cls.__bases__)
