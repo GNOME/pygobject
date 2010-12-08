@@ -10,6 +10,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
+from gi.repository import Pango
 import gi.overrides as overrides
 import gi.types
 
@@ -36,6 +37,12 @@ class TestGLib(unittest.TestCase):
         self.assertEquals(variant.get_child_value(1).get_child_value(1).get_int32(), 1)
         self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'key2')
         self.assertEquals(variant.get_child_value(0).get_child_value(1).get_int32(), 2)
+
+class TestPango(unittest.TestCase):
+
+    def test_font_description(self):
+        desc = Pango.FontDescription('monospace')
+        self.assertEquals(desc.get_family(), 'monospace')
 
 class TestGdk(unittest.TestCase):
 

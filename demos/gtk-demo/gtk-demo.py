@@ -288,7 +288,7 @@ class GtkDemoApp(object):
         scrolled_window.add(text_view)
 
         if is_source:
-            font_desc = Pango.Font.description_from_string('monospace')
+            font_desc = Pango.FontDescription('monospace')
             text_view.modify_font(font_desc)
             text_view.set_wrap_mode(Gtk.WrapMode.NONE)
         else:

@@ -8,6 +8,7 @@ pygioverrides_PYTHON = \
 	Gtk.py \
 	Gdk.py \
 	GIMarshallingTests.py \
+	Pango.py \
 	keysyms.py \
 	__init__.py
 
