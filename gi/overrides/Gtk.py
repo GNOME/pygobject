@@ -687,14 +687,14 @@ class TreeModel(Gtk.TreeModel):
                     if isinstance(value, unicode):
                         value = unicode(value)
                     else:
-                        raise ValueError('Expected string or unicode for row %i but got %s' % i, type(value))
+                        raise ValueError('Expected string or unicode for row %i but got %s%s' % (i, value, type(value)))
                 else:
-                    raise ValueError('Expected a string for row %i but got %s' % i, type(value))
+                    raise ValueError('Expected a string for row %i but got %s' % (i, type(value)))
             elif type_ == gobject.TYPE_FLOAT or type_ == gobject.TYPE_DOUBLE:
                 if isinstance(value, float):
                     value = float(value)
                 else:
-                    raise ValueError('Expected a float for row %i but got %s' % i, type(value))
+                    raise ValueError('Expected a float for row %i but got %s' % (i, type(value)))
             elif type_ == gobject.TYPE_LONG or type_ == gobject.TYPE_INT:
                 if isinstance(value, int):
                     value = int(value)
@@ -970,7 +970,6 @@ class TreeView(Gtk.TreeView, Container):
         for t in targets:
             entry = Gtk.TargetEntry.new(*t)
             target_entries.append(entry)
-            print(entry.target, entry.flags, entry.info)
         return target_entries
 
     def enable_model_drag_source(self, start_button_mask, targets, actions):
