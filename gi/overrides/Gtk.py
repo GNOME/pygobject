@@ -1059,8 +1059,8 @@ LinkButton = override(LinkButton)
 __all__.append('LinkButton')
 
 class Label(Gtk.Label):
-    def __init__(self, str=None, **kwds):
-        Gtk.Label.__init__(self, label=str, **kwds)
+    def __init__(self, label=None, **kwds):
+        Gtk.Label.__init__(self, label=label, **kwds)
 
 Label = override(Label)
 __all__.append('Label')
