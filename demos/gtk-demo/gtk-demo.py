@@ -175,10 +175,11 @@ class GtkDemoApp(object):
         Gtk.Window.set_default_icon_list(list)
 
     def selection_cb(self, selection, model):
-        (success, m, treeiter) = selection.get_selected()
-        if not success:
+        sel = selection.get_selected()
+        if sel == ():
             return
 
+        treeiter = sel[1]
         demo = model.get_value(treeiter, 1)
 
         title = demo.title
