@@ -399,6 +399,14 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
                                    **kwds)
         Dialog.__init__(self, parent=parent, flags=flags)
 
+    def format_secondary_text(self, message_format):
+        self.set_property('secondary-use-markup', False)
+        self.set_property('secondary-text', message_format)
+
+    def format_secondary_markup(self, message_format):
+        self.set_property('secondary-use-markup', True)
+        self.set_property('secondary-text', message_format)
+
 MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 

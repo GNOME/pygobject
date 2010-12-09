@@ -244,6 +244,14 @@ class TestGtk(unittest.TestCase):
         text = dialog.get_property('text')
         self.assertEquals('dude!', text)
 
+        dialog.format_secondary_text('2nd text')
+        self.assertEqual(dialog.get_property('secondary-text'), '2nd text')
+        self.assertFalse(dialog.get_property('secondary-use-markup'))
+
+        dialog.format_secondary_markup('2nd markup')
+        self.assertEqual(dialog.get_property('secondary-text'), '2nd markup')
+        self.assertTrue(dialog.get_property('secondary-use-markup'))
+
         # Gtk.ColorSelectionDialog
         dialog = Gtk.ColorSelectionDialog("color selection dialog test")
         self.assertEquals('color selection dialog test', dialog.get_title())
