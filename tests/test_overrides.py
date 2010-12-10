@@ -78,6 +78,24 @@ class TestGtk(unittest.TestCase):
         l = [x for x in box]
         self.assertEqual(l, [label, label2])
 
+    def test_actions(self):
+        self.assertEquals(Gtk.Action, overrides.Gtk.Action)
+        self.assertRaises(TypeError, Gtk.Action)
+        action = Gtk.Action("test", "Test", "Test Action", Gtk.STOCK_COPY)
+        self.assertEquals(action.get_name(), "test")
+        self.assertEquals(action.get_label(), "Test")
+        self.assertEquals(action.get_tooltip(), "Test Action")
+        self.assertEquals(action.get_stock_id(), Gtk.STOCK_COPY)
+
+        self.assertEquals(Gtk.RadioAction, overrides.Gtk.RadioAction)
+        self.assertRaises(TypeError, Gtk.RadioAction)
+        action = Gtk.RadioAction("test", "Test", "Test Action", Gtk.STOCK_COPY, 1)
+        self.assertEquals(action.get_name(), "test")
+        self.assertEquals(action.get_label(), "Test")
+        self.assertEquals(action.get_tooltip(), "Test Action")
+        self.assertEquals(action.get_stock_id(), Gtk.STOCK_COPY)
+        self.assertEquals(action.get_current_value(), 1)
+
     def test_actiongroup(self):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         self.assertRaises(TypeError, Gtk.ActionGroup)

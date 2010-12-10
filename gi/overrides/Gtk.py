@@ -88,6 +88,20 @@ class Editable(Gtk.Editable):
 Editable = override(Editable)
 __all__.append("Editable")
 
+class Action(Gtk.Action):
+    def __init__(self, name, label, tooltip, stock_id, **kwds):
+        Gtk.Action.__init__(self, name=name, label=label, tooltip=tooltip, stock_id=stock_id, **kwds)
+
+Action = override(Action)
+__all__.append("Action")
+
+class RadioAction(Gtk.RadioAction):
+    def __init__(self, name, label, tooltip, stock_id, value, **kwds):
+        Gtk.RadioAction.__init__(self, name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=value, **kwds)
+
+RadioAction = override(RadioAction)
+__all__.append("RadioAction")
+
 class ActionGroup(Gtk.ActionGroup):
     def __init__(self, name, **kwds):
         super(ActionGroup, self).__init__(name = name, **kwds)
@@ -124,7 +138,7 @@ class ActionGroup(Gtk.ActionGroup):
             raise TypeError('entries must be iterable')
 
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
-            action = Gtk.Action(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
+            action = Action(name, label, tooltip, stock_id)
             if callback is not None:
                 action.connect('activate', callback, user_data)
 
@@ -169,7 +183,7 @@ class ActionGroup(Gtk.ActionGroup):
             raise TypeError('entries must be iterable')
 
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None, is_active=False):
-            action = Gtk.ToggleAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id)
+            action = Gtk.ToggleAction(name, label, tooltip, stock_id)
             action.set_active(is_active)
             if callback is not None:
                 action.connect('activate', callback, user_data)
@@ -217,7 +231,7 @@ class ActionGroup(Gtk.ActionGroup):
         first_action = None
 
         def _process_action(group_source, name, stock_id=None, label=None, accelerator=None, tooltip=None, entry_value=0):
-            action = Gtk.RadioAction(name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=entry_value)
+            action = RadioAction(name, label, tooltip, stock_id, entry_value)
 
             # FIXME: join_group is a patch to Gtk+ 3.0
             #        otherwise we can't effectively add radio actions to a
