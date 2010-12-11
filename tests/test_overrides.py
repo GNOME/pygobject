@@ -44,6 +44,12 @@ class TestPango(unittest.TestCase):
         desc = Pango.FontDescription('monospace')
         self.assertEquals(desc.get_family(), 'monospace')
 
+    def test_layout(self):
+        self.assertRaises(TypeError, Pango.Layout)
+        context = Pango.Context()
+        layout = Pango.Layout(context)
+        self.assertEquals(layout.get_context(), context)
+
 class TestGdk(unittest.TestCase):
 
     def test_color(self):

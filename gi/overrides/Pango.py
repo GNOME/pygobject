@@ -38,3 +38,16 @@ class FontDescription(Pango.FontDescription):
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
 
+class Layout(Pango.Layout):
+
+    def __new__(cls, context):
+        return Pango.Layout.new(context)
+
+    def __init__(self, context, **kwds):
+        # simply discard 'context', since it was set by
+        # __new__ and it is not a PangoLayout property
+        super(Layout, self).__init__(**kwds)
+
+Layout = override(Layout)
+__all__.append('Layout')
+
