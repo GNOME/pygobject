@@ -17,38 +17,40 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import gtk\n/from gi.repository import Gtk\n/g;" \
     -pe "s/gtk\./Gtk\./g;" \
-    -pe "s/Gtk.SIZE_GROUP_/Gtk.SizeGroupMode./g;" \
-    -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
-    -pe "s/Gtk.STATE_/Gtk.StateType./g;" \
-    -pe "s/Gtk.TARGET_/Gtk.TargetFlags./g;" \
-    -pe "s/Gtk.SHADOW_NONE/Gtk.ShadowType.NONE/g;" \
-    -pe "s/Gtk.ICON_SIZE_/Gtk.IconSize./g;" \
-    -pe "s/Gtk.IMAGE_/Gtk.ImageType./g;" \
-    -pe "s/Gtk.SELECTION_/Gtk.SelectionMode./g;" \
-    -pe "s/Gtk.CELL_RENDERER_MODE_/Gtk.CellRendererMode./g;" \
-    -pe "s/Gtk.TREE_VIEW_COLUMN_/Gtk.TreeViewColumnSizing./g;" \
-    -pe "s/Gtk.TEXT_DIR_/Gtk.TextDirection./g;" \
-    -pe "s/Gtk.TEXT_WINDOW_/Gtk.TextWindowType./g;" \
-    -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
-    -pe "s/Gtk.SHADOW_/Gtk.ShadowType./g;" \
+    -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
+    -pe "s/Gtk.ASSISTANT_PAGE_/Gtk.AssistantPageType./g;" \
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
-    -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
-    -pe "s/Gtk.SHRINK/Gtk.AttachOptions.SHRINK/g;" \
-    -pe "s/Gtk.FILL/Gtk.AttachOptions.FILL/g;" \
-    -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
-    -pe "s/Gtk.RESPONSE_/Gtk.ResponseType./g;" \
+    -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
+    -pe "s/Gtk.CELL_RENDERER_MODE_/Gtk.CellRendererMode./g;" \
     -pe "s/Gtk.CORNER_/Gtk.CornerType./g;" \
     -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
-    -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
-    -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
-    -pe "s/Gtk.MOVEMENT_/Gtk.MovementStep./g;" \
+    -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
     -pe "s/Gtk.FILE_CHOOSER_ACTION_/Gtk.FileChooserAction./g;" \
-    -pe "s/Gtk.SORT_/Gtk.SortType./g;" \
-    -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
-    -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
-    -pe "s/Gtk.ASSISTANT_PAGE_/Gtk.AssistantPageType./g;" \
+    -pe "s/Gtk.FILL/Gtk.AttachOptions.FILL/g;" \
     -pe "s/Gtk.ICON_LOOKUP_/Gtk.IconLookupFlags./g;" \
+    -pe "s/Gtk.ICON_SIZE_/Gtk.IconSize./g;" \
+    -pe "s/Gtk.IMAGE_/Gtk.ImageType./g;" \
+    -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
+    -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
+    -pe "s/Gtk.MOVEMENT_/Gtk.MovementStep./g;" \
+    -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
+    -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
+    -pe "s/Gtk.RESPONSE_/Gtk.ResponseType./g;" \
+    -pe "s/Gtk.SELECTION_/Gtk.SelectionMode./g;" \
+    -pe "s/Gtk.SHADOW_/Gtk.ShadowType./g;" \
+    -pe "s/Gtk.SHADOW_NONE/Gtk.ShadowType.NONE/g;" \
+    -pe "s/Gtk.SHRINK/Gtk.AttachOptions.SHRINK/g;" \
+    -pe "s/Gtk.SIZE_GROUP_/Gtk.SizeGroupMode./g;" \
+    -pe "s/Gtk.SORT_/Gtk.SortType./g;" \
+    -pe "s/Gtk.STATE_/Gtk.StateType./g;" \
+    -pe "s/Gtk.TARGET_/Gtk.TargetFlags./g;" \
+    -pe "s/Gtk.TEXT_DIR_/Gtk.TextDirection./g;" \
+    -pe "s/Gtk.TEXT_SEARCH_/Gtk.TextSearchFlags./g;" \
+    -pe "s/Gtk.TEXT_WINDOW_/Gtk.TextWindowType./g;" \
+    -pe "s/Gtk.TREE_VIEW_COLUMN_/Gtk.TreeViewColumnSizing./g;" \
     -pe "s/Gtk.WINDOW_/Gtk.WindowType./g;" \
+    -pe "s/Gtk.WIN_POS_/Gtk.WindowPosition./g;" \
+    -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
     -pe "s/Gtk.accel_map_/Gtk.AccelMap./g;" \
     -pe "s/Gtk.settings_get_default/Gtk.Settings.get_default/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
