@@ -3,7 +3,7 @@
 if [ -n "$1" ]; then
     FILES_TO_CONVERT="$@"
 else
-    FILES_TO_CONVERT="$(find -name '*.py')"
+    FILES_TO_CONVERT="$(find . -name '*.py')"
 fi
 
 for f in $FILES_TO_CONVERT; do
