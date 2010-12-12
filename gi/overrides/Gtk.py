@@ -1100,6 +1100,13 @@ class Table(Gtk.Table, Container):
 Table = override(Table)
 __all__.append('Table')
 
+class ScrolledWindow(Gtk.ScrolledWindow):
+    def __init__(self, hadjustment=None, vadjustment=None, **kwds):
+        Gtk.ScrolledWindow.__init__(self, hadjustment=hadjustment, vadjustment=vadjustment, **kwds)
+
+ScrolledWindow = override(ScrolledWindow)
+__all__.append('ScrolledWindow')
+
 _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):

@@ -828,3 +828,10 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(table.get_size(), (2,3))
         self.assertEquals(table.get_homogeneous(), True)
 
+    def test_scrolledwindow(self):
+        sw = Gtk.ScrolledWindow()
+        sb = sw.get_hscrollbar()
+        self.assertEquals(sw.get_hadjustment(), sb.get_adjustment())
+        sb = sw.get_vscrollbar()
+        self.assertEquals(sw.get_vadjustment(), sb.get_adjustment())
+
