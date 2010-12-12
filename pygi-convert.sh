@@ -61,10 +61,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/.window.set_type_hint/.set_type_hint/g;" \
     -pe "s/self.drag_source_unset\(\)/Gtk.drag_source_unset\(self\)/g;" \
     -pe "s/self.drag_dest_unset\(\)/Gtk.drag_dest_unset\(self\)/g;" \
-    -pe "s/Gtk.ListStore\(([^\)]*)\)/Gtk.ListStore.newv\(\[\1\]\)/g;" \
     -pe "s/Gtk.Alignment\(/Gtk.Alignment.new\(/g;" \
     -pe "s/self._model.filter_new\(\)/Gtk.TreeModelFilter.new\(self._model, None\)/g;" \
-    -pe "#s/Gtk.ScrolledWindow\(\)/Gtk.ScrolledWindow\(None, None\)/g;" \
     -pe "#s/Gtk.Window.__init__\(self\)/Gtk.Window.__init__\(Gtk.WindowType.TOPLEVEL\)/g;" \
     -pe "s/\.child([^_a-z])/.get_child\(\)\1/g;" \
 \
