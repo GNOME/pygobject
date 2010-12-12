@@ -109,6 +109,14 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \
     -pe "s/Pango.WEIGHT_/Pango.Weight./g;" \
 \
+    -pe "s/import gio\n/from gi.repository import Gio\n/g;" \
+    -pe "s/gio\./Gio\./g;" \
+    -pe "s/Gio.FILE_TYPE_/Gio.FileType./g;" \
+    -pe "s/Gio.vfs_/Gio.Vfs./g;" \
+\
+    -pe "s/import glib\n/from gi.repository import GLib\n/g;" \
+    -pe "s/glib\./GLib\./g;" \
+\
     -pe "s/import hippo\n/from gi.repository import Hippo\n/g;" \
     -pe "s/hippo\./Hippo\./g;" \
     -pe "s/Hippo\..*\.__init__/gobject.GObject.__init__/g;" \
