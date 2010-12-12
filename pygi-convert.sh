@@ -107,6 +107,18 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \
     -pe "s/Pango.WEIGHT_/Pango.Weight./g;" \
 \
+    -pe "s/import atk\n/from gi.repository import Atk\n/g;" \
+    -pe "s/atk\./Atk\./g;" \
+    -pe "s/Atk.HYPERLINK_/Atk.HyperlinkStateFlags./g;" \
+    -pe "s/Atk.KEY_EVENT_/Atk.KeyEventType./g;" \
+    -pe "s/Atk.LAYER_/Atk.Layer./g;" \
+    -pe "s/Atk.RELATION_/Atk.RelationType./g;" \
+    -pe "s/Atk.ROLE_/Atk.Role./g;" \
+    -pe "s/Atk.STATE_/Atk.StateType./g;" \
+    -pe "s/Atk.TEXT_ATTR_/Atk.TextAttribute./g;" \
+    -pe "s/Atk.TEXT_BOUNDARY_/Atk.TextBoundary./g;" \
+    -pe "s/Atk.TEXT_CLIP_/Atk.TextClipType./g;" \
+\
     -pe "s/import gio\n/from gi.repository import Gio\n/g;" \
     -pe "s/gio\./Gio\./g;" \
     -pe "s/Gio.FILE_COPY_/Gio.FileCopyFlags./g;" \
