@@ -109,7 +109,16 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import gio\n/from gi.repository import Gio\n/g;" \
     -pe "s/gio\./Gio\./g;" \
+    -pe "s/Gio.FILE_COPY_/Gio.FileCopyFlags./g;" \
+    -pe "s/Gio.FILE_CREATE_/Gio.FileCreateFlags./g;" \
+    -pe "s/Gio.FILE_MONITOR_EVENT_/Gio.FileMonitorEvent./g;" \
+    -pe "s/Gio.FILE_MONITOR_/Gio.FileMonitorFlags./g;" \
     -pe "s/Gio.FILE_TYPE_/Gio.FileType./g;" \
+    -pe "s/Gio.FILE_QUERY_INFO_/Gio.FileQueryInfoFlags./g;" \
+    -pe "s/Gio.MOUNT_MOUNT_/Gio.MountMountFlags./g;" \
+    -pe "s/Gio.MOUNT_OPERATION_/Gio.MountOperationResult./g;" \
+    -pe "s/Gio.MOUNT_UNMOUNT_/Gio.MountUnmountFlags./g;" \
+    -pe "s/Gio.OUTPUT_STREAM_SPLICE_/Gio.OutputStreamSpliceFlags./g;" \
     -pe "s/Gio.vfs_/Gio.Vfs./g;" \
 \
     -pe "s/import glib\n/from gi.repository import GLib\n/g;" \
