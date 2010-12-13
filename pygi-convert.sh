@@ -23,6 +23,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
     -pe "s/Gtk.CELL_RENDERER_MODE_/Gtk.CellRendererMode./g;" \
     -pe "s/Gtk.CORNER_/Gtk.CornerType./g;" \
+    -pe "s/Gtk.DIALOG_/Gtk.DialogFlags./g;" \
     -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
     -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
     -pe "s/Gtk.FILE_CHOOSER_ACTION_/Gtk.FileChooserAction./g;" \
