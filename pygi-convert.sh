@@ -170,6 +170,13 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/_sugarext\./SugarExt\./g;" \
 \
     -pe "s/import gtksourceview2\n/from gi.repository import GtkSource\n/g;" \
+    -pe "s/import gtksourceview2 as gsv\n/from gi.repository import GtkSource\n/g;" \
+    -pe "s/gtksourceview2\./GtkSource\./g;" \
+    -pe "s/gsv\./GtkSource\./g;" \
+    -pe "s/GtkSource.DRAW_SPACES_/GtkSource.DrawSpacesFlags./g;" \
+    -pe "s/GtkSource.SMART_HOME_END_/GtkSource.SmartHomeEndType./g;" \
+    -pe "s/GtkSource.style_scheme_manager_get_default/GtkSource.StyleSchemeManager.get_default/g;" \
+    -pe "s/GtkSource.language_manager_get_default/GtkSource.LanguageManager.get_default/g;" \
 \
     -pe "#s/import cairo\n/from gi.repository import cairo\n/g;" \
 \
