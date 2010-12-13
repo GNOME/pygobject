@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
         print "<root>"
 
-        for name, value in docs.items():
+        for name, value in sorted(docs.items()):
             # Get the type of comment block ('function', 'signal' or
             # 'property') (the value is a GtkDoc).
             block_type = value.get_type()
