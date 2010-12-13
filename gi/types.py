@@ -45,6 +45,16 @@ def Function(info):
     return function
 
 
+def NativeVFunc(info, cls):
+
+    def native_vfunc(*args):
+        return info.invoke(*args, gtype=cls.__gtype__)
+    native_vfunc.__info__ = info
+    native_vfunc.__name__ = info.get_name()
+    native_vfunc.__module__ = info.get_namespace()
+
+    return native_vfunc
+
 def Constructor(info):
 
     def constructor(cls, *args):
@@ -125,6 +135,21 @@ class MetaClassHelper(object):
 
             base._setup_vfuncs(impl)
 
+    def _setup_native_vfuncs(cls, impl):
+        for base in cls.__bases__ + (cls,):
+            if not hasattr(base, '__info__') or \
+                    not hasattr(base.__info__, 'get_vfuncs') or \
+                    isinstance(base.__info__, InterfaceInfo):
+                continue
+            for vfunc_info in base.__info__.get_vfuncs():
+                name = 'do_%s' % vfunc_info.get_name()
+                value = NativeVFunc(vfunc_info, impl)
+                setattr(impl, name, value)
+
+            if base != cls:
+                base._setup_native_vfuncs(impl)
+
+
 def find_vfunc_conflict_in_bases(vfunc, bases):
     for klass in bases:
         if not hasattr(klass, '__info__') or \
@@ -153,7 +178,6 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
     def __init__(cls, name, bases, dict_):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
-
         is_gi_defined = False
         if cls.__module__ == 'gi.repository.' + cls.__info__.get_namespace():
             is_gi_defined = True
@@ -167,6 +191,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
         elif is_gi_defined:
             cls._setup_methods()
             cls._setup_constants()
+            cls._setup_native_vfuncs(cls)
 
             if isinstance(cls.__info__, ObjectInfo):
                 cls._setup_fields()
@@ -174,6 +199,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
                 set_object_has_new_constructor(cls.__info__.get_g_type())
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
+
 
 class StructMeta(type, MetaClassHelper):
 

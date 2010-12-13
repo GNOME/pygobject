@@ -58,19 +58,40 @@ struct invocation_state
     GIArgument *backup_args;
     GIArgument return_arg;
 
-    PyObject *return_value;
+    PyObject  *return_value;
+
+    GType      implementor_gtype;
 };
 
-static void
+static gboolean
 _initialize_invocation_state (struct invocation_state *state,
                               GIFunctionInfo *info,
-                              PyObject *py_args)
+                              PyObject *py_args,
+                              PyObject *kwargs)
 {
-    GIFunctionInfoFlags flags;
+    if (g_base_info_get_type (info) == GI_INFO_TYPE_FUNCTION) {
+        GIFunctionInfoFlags flags = g_function_info_get_flags (info);
 
-    flags = g_function_info_get_flags (info);
-    state->is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
-    state->is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+        state->is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
+        state->is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+        state->implementor_gtype = 0;
+    } else {
+        PyObject *obj;
+
+        state->is_method = TRUE;
+        state->is_constructor = FALSE;
+
+        obj = PyDict_GetItemString (kwargs, "gtype");
+        if (obj == NULL) {
+            PyErr_SetString (PyExc_TypeError,
+                             "need the GType of the implementor class");
+            return FALSE;
+        }
+
+        state->implementor_gtype = pyg_type_from_object (obj);
+        if (state->implementor_gtype == 0)
+            return FALSE;
+    }
 
     /* Count arguments. */
     state->n_args = g_callable_info_get_n_args ( (GICallableInfo *) info);
@@ -98,6 +119,8 @@ _initialize_invocation_state (struct invocation_state *state,
     state->out_args = NULL;
     state->out_values = NULL;
     state->backup_args = NULL;
+
+    return TRUE;
 }
 
 static gboolean
@@ -552,7 +575,7 @@ _prepare_invocation_state (struct invocation_state *state,
 
 static gboolean
 _invoke_function (struct invocation_state *state,
-                  GIFunctionInfo *function_info, PyObject *py_args)
+                  GICallableInfo *callable_info, PyObject *py_args)
 {
     GError *error;
     gint retval;
@@ -560,13 +583,24 @@ _invoke_function (struct invocation_state *state,
     error = NULL;
 
     pyg_begin_allow_threads;
-    retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
-                                      state->in_args,
-                                      state->n_in_args,
-                                      state->out_args,
-                                      state->n_out_args,
-                                      &state->return_arg,
-                                      &error);
+    if (g_base_info_get_type (callable_info) == GI_INFO_TYPE_FUNCTION) {
+        retval = g_function_info_invoke ( (GIFunctionInfo *) callable_info,
+                                          state->in_args,
+                                          state->n_in_args,
+                                          state->out_args,
+                                          state->n_out_args,
+                                          &state->return_arg,
+                                          &error);
+    } else {
+        retval = g_vfunc_info_invoke ( (GIVFuncInfo *) callable_info,
+                                       state->implementor_gtype,
+                                       state->in_args,
+                                       state->n_in_args,
+                                       state->out_args,
+                                       state->n_out_args,
+                                       &state->return_arg,
+                                       &error);
+    }
     pyg_end_allow_threads;
 
     if (!retval) {
@@ -916,11 +950,15 @@ _free_invocation_state (struct invocation_state *state)
 
 
 PyObject *
-_wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
+_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
+                              PyObject *kwargs)
 {
     struct invocation_state state = { 0, };
 
-    _initialize_invocation_state (&state, self->info, py_args);
+    if (!_initialize_invocation_state (&state, self->info, py_args, kwargs)) {
+        _free_invocation_state (&state);
+        return NULL;
+    }
 
     if (!_prepare_invocation_state (&state, self->info, py_args)) {
         _free_invocation_state (&state);

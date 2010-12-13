@@ -1372,7 +1372,8 @@ class TestPythonGObject(unittest.TestCase):
             return 42
 
         def do_method_with_default_implementation(self, int8):
-            self.props.int = int8 * 2
+            GIMarshallingTests.Object.do_method_with_default_implementation(self, int8)
+            self.props.int += int8
 
     class SubObject(GIMarshallingTests.SubObject):
         __gtype_name__ = "SubObject"
@@ -1400,7 +1401,7 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.method_int8_out(), 42)
 
         object_.method_with_default_implementation(42)
-        self.assertEqual(object_.val, 84)
+        self.assertEqual(object_.props.int, 84)
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
             __gtype_name__ = 'ObjectWithoutVFunc'
