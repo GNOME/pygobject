@@ -148,7 +148,7 @@ class PyGObjectInstallData(InstallData):
 
 
 class PyGObjectBuild(build):
-    enable_threading = 1
+    enable_threading = True
 
 PyGObjectBuild.user_options.append(('enable-threading', None,
                                     'enable threading support'))
