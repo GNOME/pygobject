@@ -15,6 +15,7 @@ from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
+from distutils.spawn import find_executable
 
 try:
     import codegen.createdefs
@@ -78,13 +79,8 @@ def getstatusoutput(cmd):
 
 def have_pkgconfig():
     '''Checks for the existence of pkg-config'''
-    if (sys.platform == 'win32' and
-        os.system('pkg-config --version > NUL') == 0):
-
+    if find_executable('pkg-config'):
         return True
-    else:
-        if getstatusoutput('pkg-config')[0] == 256:
-            return True
 
 def list_files(dir):
     '''List all files in a dir, with filename match support:
