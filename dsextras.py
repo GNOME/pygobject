@@ -77,6 +77,11 @@ def getstatusoutput(cmd):
         from commands import getstatusoutput
         return getstatusoutput(cmd)
 
+def have_gcc():
+    '''Checks for the existence of gcc'''
+    if find_executable('gcc'):
+        return True
+
 def have_pkgconfig():
     '''Checks for the existence of pkg-config'''
     if find_executable('pkg-config'):
