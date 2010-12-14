@@ -10,7 +10,7 @@ import fnmatch
 import re
 import string
 
-import distutils.dep_util
+from distutils import dep_util
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.command.install_data import install_data
@@ -426,11 +426,11 @@ class Template(object):
         files.append(self.override)
         files.append(self.defs)
 
-        return not distutils.dep_util.newer_group(files, self.output)
+        return not dep_util.newer_group(files, self.output)
 
     def generate_defs(self):
         for (target, sources) in self.built_defs:
-            if distutils.dep_util.newer_group(sources, target):
+            if dep_util.newer_group(sources, target):
                 # createdefs is mostly called from the CLI !
                 args=['dummy', target] + sources
                 codegen.createdefs.main(args)
