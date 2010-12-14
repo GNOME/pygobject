@@ -155,6 +155,9 @@ class BuildExt(build_ext):
         self.extra_compile_args = []
 
         if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
+            if not have_gcc():
+                raise SystemExit('ERROR: Could not find gcc.')
+
             # MSVC compatible struct packing is required.
             # Note gcc2 uses -fnative-struct while gcc3
             # and gcc4 use -mms-bitfields. Based on the
@@ -171,6 +174,9 @@ class BuildExt(build_ext):
 
     def modify_compiler(self):
         if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
+            if not have_gcc():
+                raise SystemExit('ERROR: Could not find gcc.')
+
             # Remove '-static' linker option to prevent MinGW ld
             # from trying to link with MSVC import libraries.
             if self.compiler.linker_so.count('-static'):
