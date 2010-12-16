@@ -7,6 +7,7 @@ pygioverrides_PYTHON = \
 	GLib.py \
 	Gtk.py \
 	Gdk.py \
+	Gio.py \
 	GIMarshallingTests.py \
 	Pango.py \
 	keysyms.py \

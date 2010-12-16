@@ -10,6 +10,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
+from gi.repository import Gio
 from gi.repository import Pango
 import gi.overrides as overrides
 import gi.types
@@ -967,4 +968,23 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(sw.get_hadjustment(), sb.get_adjustment())
         sb = sw.get_vscrollbar()
         self.assertEquals(sw.get_vadjustment(), sb.get_adjustment())
+
+class TestGio(unittest.TestCase):
+    def test_file_enumerator(self):
+        self.assertEquals(Gio.FileEnumerator, overrides.Gio.FileEnumerator)
+        f = Gio.file_new_for_path("./")
+
+        iter_info = []
+        for info in f.enumerate_children("standard::*", 0, None):
+            iter_info.append(info.get_name())
+
+        next_info = []
+        enumerator = f.enumerate_children("standard::*", 0, None)
+        while True:
+            info = enumerator.next_file(None)
+            if info is None:
+                break
+            next_info.append(info.get_name())
+
+        self.assertEquals(iter_info, next_info)
 
