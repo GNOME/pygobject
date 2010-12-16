@@ -1,3 +1,4 @@
+# coding=utf-8
 
 import sys
 import struct
@@ -12,6 +13,13 @@ from gobject.constants import \
 from gobject.constants import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
+
+if sys.version_info < (3, 0):
+    TEST_UTF8 = "\xe2\x99\xa5"
+    UNICODE_UTF8 = unicode(TEST_UTF8, 'UTF-8')
+else:
+    TEST_UTF8 = "♥"
+    UNICODE_UTF8 = TEST_UTF8
 
 from compathelper import _long
 
@@ -71,6 +79,14 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.construct, "456")
         obj.props.construct = '789'
         self.assertEqual(obj.props.construct, "789")
+   
+    def testUTF8(self):
+        obj = new(PropertyObject, construct_only=UNICODE_UTF8)
+        self.assertEqual(obj.props.construct_only, TEST_UTF8)
+        obj.set_property('construct', UNICODE_UTF8)
+        self.assertEqual(obj.props.construct, TEST_UTF8)
+        obj.props.normal = UNICODE_UTF8
+        self.assertEqual(obj.props.normal, TEST_UTF8)
 
     def testConstructOnly(self):
         obj = new(PropertyObject, construct_only="123")

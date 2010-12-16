@@ -765,13 +765,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_CHAR:
-	if ((tmp = PyObject_Str(obj)))
-	    g_value_set_char(value, PYGLIB_PyUnicode_AsString(tmp)[0]);
-	else {
+#if PY_VERSION_HEX < 0x03000000
+	if (PyString_Check(obj)) {
+	    g_value_set_char(value, PyString_AsString(obj)[0]);
+	} else
+#endif
+	if (PyUnicode_Check(obj)) {
+	    tmp = PyUnicode_AsUTF8String(obj);
+	    g_value_set_char(value, PYGLIB_PyBytes_AsString(tmp)[0]);
+	    Py_DECREF(tmp);
+	} else {
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
+
 	break;
     case G_TYPE_UCHAR:
 	if (PYGLIB_PyLong_Check(obj)) {
@@ -781,8 +788,13 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	      g_value_set_uchar(value, (guchar)PYGLIB_PyLong_AsLong (obj));
 	    else
 	      return -1;
-	} else if ((tmp = PyObject_Str(obj))) {
-	    g_value_set_uchar(value, PYGLIB_PyUnicode_AsString(tmp)[0]);
+#if PY_VERSION_HEX < 0x03000000
+	} else if (PyString_Check(obj)) {
+	    g_value_set_uchar(value, PyString_AsString(obj)[0]);
+#endif
+	} else if (PyUnicode_Check(obj)) {
+	    tmp = PyUnicode_AsUTF8String(obj);
+	    g_value_set_uchar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
 	    Py_DECREF(tmp);
 	} else {
 	    PyErr_Clear();
@@ -877,10 +889,15 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_double(value, PyFloat_AsDouble(obj));
 	break;
     case G_TYPE_STRING:
-	if (obj == Py_None)
+	if (obj == Py_None) {
 	    g_value_set_string(value, NULL);
-	else if ((tmp = PyObject_Str(obj))) {
-	    g_value_set_string(value, PYGLIB_PyUnicode_AsString(tmp));
+#if PY_VERSION_HEX < 0x03000000
+	} else if (PyString_Check(obj)) {
+	    g_value_set_string(value, PyString_AsString(obj));
+#endif
+	} else if (PyUnicode_Check(obj)) {
+	    tmp = PyUnicode_AsUTF8String(obj);
+	    g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
 	    Py_DECREF(tmp);
 	} else {
 	    PyErr_Clear();
