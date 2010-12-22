@@ -840,7 +840,7 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
     static char *kwlist[] = { "attribute", "type", "value_p",
                               "flags", "cancellable", NULL };
     GFileQueryInfoFlags flags = G_FILE_QUERY_INFO_NONE;
-    int ret;
+    int ret = 0;
     GCancellable *cancellable = NULL;
     GError *error = NULL;
     char *attribute;
@@ -883,7 +883,7 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
 				       &error);
 	}
 	break;
-				       
+
     case G_FILE_ATTRIBUTE_TYPE_BYTE_STRING:
 	{
 	    char* s;
@@ -902,7 +902,6 @@ _wrap_g_file_set_attribute(PyGObject *self, PyObject *args, PyObject *kwargs)
 				       &error);
 	}
 	break;
-				       
 
     case G_FILE_ATTRIBUTE_TYPE_STRINGV:
 	{

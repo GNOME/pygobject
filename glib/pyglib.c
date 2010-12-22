@@ -359,7 +359,7 @@ pyglib_gerror_exception_check(GError **error)
     }
 
     g_set_error(error, g_quark_from_string(PYGLIB_PyUnicode_AsString(py_domain)),
-                PYGLIB_PyLong_AsLong(py_code), PYGLIB_PyUnicode_AsString(py_message));
+                PYGLIB_PyLong_AsLong(py_code), "%s", PYGLIB_PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);

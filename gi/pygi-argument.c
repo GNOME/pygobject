@@ -397,7 +397,7 @@ check_number_release:
             }
 
             if (size != 1) {
-                PyErr_Format (PyExc_TypeError, "Must be a one character string, not %i characters",
+                PyErr_Format (PyExc_TypeError, "Must be a one character string, not %ld characters",
                               size);
                 retval = 0;
                 break;
@@ -721,8 +721,7 @@ _pygi_argument_from_object (PyObject   *object,
                 value = PyInt_AS_LONG (number);
             } else
 #endif
-            if (PyLong_Check (number))
-                value = PyLong_AsUnsignedLongLong (number);
+            value = PyLong_AsUnsignedLongLong (number);
 
             arg.v_uint64 = value;
 
@@ -743,10 +742,9 @@ _pygi_argument_from_object (PyObject   *object,
 #if PY_VERSION_HEX < 0x03000000
             if (PyInt_Check (number)) {
                 value = PyInt_AS_LONG (number);
-            } else 
-#endif 
-            if (PyLong_Check (number))
-                value = PyLong_AsLongLong (number);
+            } else
+#endif
+            value = PyLong_AsLongLong (number);
 
             arg.v_int64 = value;
 
@@ -1348,10 +1346,10 @@ _pygi_argument_to_object (GIArgument  *arg,
             if (arg->v_uint32 == 0) {
                 object = PYGLIB_PyUnicode_FromString ("");
             } else if (g_unichar_validate (arg->v_uint32)) {
-                gchar utf8[7];
+                gchar utf8[6];
                 gint bytes;
 
-                bytes = g_unichar_to_utf8 (arg->v_uint32, &utf8);
+                bytes = g_unichar_to_utf8 (arg->v_uint32, utf8);
                 object = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
             } else {
                 /* TODO: Convert the error to an exception. */

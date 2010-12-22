@@ -126,7 +126,7 @@ cairo_surface_release (GIBaseInfo *base_info,
     }                                   \
     if (l > INT_MAX || l < INT_MIN) {   \
         Py_DECREF(item);                \
-        PyErr_Format(PyExc_ValueError, "integer %l is out of range", l); \
+        PyErr_Format(PyExc_ValueError, "integer %ld is out of range", l); \
         goto err;                       \
     }                                   \
     i = (int)l;                         \
@@ -213,7 +213,7 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
     Pycairo_IMPORT;
     if (Pycairo_CAPI == NULL)
-        return 0;
+        return PYGLIB_MODULE_ERROR_RETURN;
 
     pygi_register_foreign_struct ("cairo",
                                   "Context",
@@ -226,14 +226,5 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_surface_to_arg,
                                   cairo_surface_from_arg,
                                   cairo_surface_release);
-
-#ifdef PycairoRectangleInt_FromRectangleInt
-     pygi_register_foreign_struct ("cairo",
-                                  "RectangleInt",
-                                  cairo_rectangle_int_to_arg,
-                                  cairo_rectangle_int_from_arg,
-                                  cairo_rectangle_int_release);
-#endif
-
 }
 PYGLIB_MODULE_END;
