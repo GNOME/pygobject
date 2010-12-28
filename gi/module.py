@@ -114,8 +114,11 @@ class IntrospectionModule(object):
                 wrapper.__module__ = 'gi.repository.' + info.get_namespace()
 
                 for value_info in info.get_values():
-                    name = value_info.get_name().upper()
-                    setattr(wrapper, name, wrapper(value_info.get_value()))
+                    value_name = value_info.get_name().upper()
+                    setattr(wrapper, value_name, wrapper(value_info.get_value()))
+
+            if g_type != gobject.TYPE_NONE:
+                g_type.pytype = wrapper
 
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
