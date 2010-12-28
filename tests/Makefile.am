@@ -114,4 +114,4 @@ check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
 
 check.valgrind:
-	EXEC_NAME="valgrind" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="valgrind --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
