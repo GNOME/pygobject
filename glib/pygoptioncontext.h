@@ -32,6 +32,8 @@ typedef struct {
     GOptionContext *context;
 } PyGOptionContext;
 
+PyObject* pyg_option_context_new(GOptionContext *context);
+
 void pyglib_option_context_register_types(PyObject *d);
 
 #endif /* __PYG_OPTIONCONTEXT_H__ */

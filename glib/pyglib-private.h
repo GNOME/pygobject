@@ -34,6 +34,9 @@ struct _PyGLib_Functions {
     PyObject *gerror_exception;
     PyGLibThreadBlockFunc block_threads;
     PyGLibThreadBlockFunc unblock_threads;
+    PyObject* (*main_context_new)(GMainContext *context);
+    PyObject* (*option_context_new)(GOptionContext *context);
+    PyObject* (*option_group_new)(GOptionGroup *group);
 };
 
 gboolean _pyglib_handler_marshal(gpointer user_data);

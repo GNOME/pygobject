@@ -32,7 +32,7 @@ typedef struct {
 
 extern PyTypeObject PyGMainContext_Type;
 
-PyObject * pyglib_main_context_new(GMainContext *context);
+PyObject* pyg_main_context_new(GMainContext *context);
 
 void pyglib_maincontext_register_types(PyObject *d);
 

@@ -30,6 +30,27 @@
 
 PYGLIB_DEFINE_TYPE("glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
+/**
+ * pyg_option_context_new:
+ * @context: a GOptionContext
+ *
+ * Returns: A new GOptionContext wrapper.
+ */
+PyObject *
+pyg_option_context_new (GOptionContext *context)
+{
+    PyGOptionContext *self;
+
+    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext, &PyGOptionContext_Type);
+    if (self == NULL)
+        return NULL;
+
+    self->context = context;
+    self->main_group = NULL;
+
+    return (PyObject *)self;
+}
+
 static int
 pyg_option_context_init(PyGOptionContext *self,
                         PyObject *args,

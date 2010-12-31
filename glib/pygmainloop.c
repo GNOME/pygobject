@@ -302,7 +302,7 @@ pyg_main_loop_richcompare(PyObject *self, PyObject *other, int op)
 static PyObject *
 _wrap_g_main_loop_get_context (PyGMainLoop *loop)
 {
-    return pyglib_main_context_new(g_main_loop_get_context(loop->loop));
+    return pyg_main_context_new(g_main_loop_get_context(loop->loop));
 }
 
 static PyObject *

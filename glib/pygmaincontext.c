@@ -33,6 +33,28 @@
 
 PYGLIB_DEFINE_TYPE("glib.MainContext", PyGMainContext_Type, PyGMainContext)
 
+/**
+ * pyg_main_context_new:
+ * @context: a GMainContext.
+ *
+ * Creates a wrapper for a GMainContext.
+ *
+ * Returns: the GMainContext wrapper.
+ */
+PyObject *
+pyg_main_context_new(GMainContext *context)
+{
+    PyGMainContext *self;
+
+    self = (PyGMainContext *)PyObject_NEW(PyGMainContext, &PyGMainContext_Type);
+    if (self == NULL)
+        return NULL;
+
+    self->context = g_main_context_ref(context);
+
+    return (PyObject *)self;
+}
+
 static int
 pyg_main_context_init(PyGMainContext *self)
 {

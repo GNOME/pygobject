@@ -35,15 +35,6 @@ static struct _PyGLib_Functions *_PyGLib_API;
 static int pyglib_thread_state_tls_key;
 static PyObject *exception_table = NULL;
 
-static PyTypeObject *_PyGMainContext_Type;
-#define PyGMainContext_Type (*_PyGMainContext_Type)
-
-static PyTypeObject *_PyGOptionGroup_Type;
-#define PyGOptionGroup_Type (*_PyGOptionGroup_Type)
-
-static PyTypeObject *_PyGOptionContext_Type;
-#define PyGOptionContext_Type (*_PyGOptionContext_Type)
-
 void
 pyglib_init(void)
 {
@@ -79,10 +70,6 @@ pyglib_init(void)
 	Py_DECREF(glib);
 	return;
     }
-
-    _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
-    _PyGOptionGroup_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionGroup");
-    _PyGOptionContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionContext");
 }
 
 void
@@ -414,15 +401,7 @@ pyglib_register_exception_for_domain(gchar *name,
 PyObject *
 pyglib_main_context_new(GMainContext *context)
 {
-    PyGMainContext *self;
-
-    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
-					  &PyGMainContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = g_main_context_ref(context);
-    return (PyObject *)self;
+    return _PyGLib_API->main_context_new(context);
 }
 
 /**
@@ -472,18 +451,7 @@ pyglib_option_group_transfer_group(PyObject *obj)
 PyObject * 
 pyglib_option_group_new (GOptionGroup *group)
 {
-    PyGOptionGroup *self;
-
-    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
-					  &PyGOptionGroup_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->group = group;
-    self->other_owner = TRUE;
-    self->is_in_context = FALSE;
-        
-    return (PyObject *)self;
+    return _PyGLib_API->option_group_new(group);
 }
 
 /**
@@ -495,17 +463,7 @@ pyglib_option_group_new (GOptionGroup *group)
 PyObject * 
 pyglib_option_context_new (GOptionContext *context)
 {
-    PyGOptionContext *self;
-
-    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext,
-					    &PyGOptionContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = context;
-    self->main_group = NULL;
-    
-    return (PyObject *)self;
+    return _PyGLib_API->option_context_new(context);
 }
 
 /**
