@@ -122,7 +122,7 @@ class Event(Gdk.Event):
         if real_event:
             return getattr(getattr(self, real_event), name)
         else:
-            return getattr(self, name)
+            raise AttributeError, "'%s' object has no attribute '%s'" % (self.__class__.__name__, name)
 
 Event = override(Event)
 __all__.append('Event')
