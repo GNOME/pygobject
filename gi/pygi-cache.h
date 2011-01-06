@@ -31,7 +31,7 @@ typedef struct _PyGIFunctionCache PyGIFunctionCache;
 typedef struct _PyGIArgCache PyGIArgCache;
 
 typedef gboolean (*PyGIMarshalInFunc) (PyGIState         *state,
-                                       PyGIFunctionCache *function_cache, 
+                                       PyGIFunctionCache *function_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,
                                        GIArgument        *arg);
@@ -42,20 +42,20 @@ typedef gboolean (*PyGIArgCleanupFunc) (gpointer data);
 
 typedef struct _PyGISequenceCache
 {
-    gssize fixed_size; 
+    gssize fixed_size;
     PyGIValidateFunc *item_validate_func;
     PyGIMarshalFunc *item_marshal_func;
     gint len_arg_index;
-    gboolean is_zero_terminated; 
+    gboolean is_zero_terminated;
     gsize item_size;
-    GITypeTag item_tag_type; 
+    GITypeTag item_tag_type;
 } PyGISequenceCache;
 
 typedef struct _PyGIInterfaceCache
 {
-    gboolean is_foreign; 
-    GType g_type; 
-    PyObject *py_type; 
+    gboolean is_foreign;
+    GType g_type;
+    PyObject *py_type;
 } PyGIInterfaceCache;
 
 typedef struct _PyGIHashCache
@@ -63,35 +63,35 @@ typedef struct _PyGIHashCache
     GITypeTag key_type_tag;
     PyGIValidateFunc *key_validate_func;
     PyGIMarshalFunc *key_marshal_func;
-    GITypeTag value_type_tag; 
+    GITypeTag value_type_tag;
     PyGIValidateFunc *value_validate_func;
     PyGIValidateFunc *value_marshal_func;
 } PyGIHashCache;
 
-typedef struct _PyGICallbackCache  
+typedef struct _PyGICallbackCache
 {
     gint py_user_data_index;
     gint user_data_index;
-    gint destroy_notify_index; 
+    gint destroy_notify_index;
     GScope scope;
-} PyGICallbackCache; 
+} PyGICallbackCache;
 
 struct _PyGIArgCache
 {
-    gboolean is_aux; 
-    gboolean is_pointer; 
+    gboolean is_aux;
+    gboolean is_pointer;
     GIDirection direction;
     GITransfer transfer;
     GIArgInfo *arg_info;
     GIArgument *default_value;
 
-    PyGIMashalInFunc in_marshaler; 
-    PyGIMarshalOutFunc out_marshaler; 
-    PyGIArgCleanupFunc cleanup; 
+    PyGIMashalInFunc in_marshaler;
+    PyGIMarshalOutFunc out_marshaler;
+    PyGIArgCleanupFunc cleanup;
 
-    PyGISequenceCache *sequence_cache; 
-    PyGIInterfaceCache *interface_cache; 
-    PyGIHashCache *hash_cache; 
+    PyGISequenceCache *sequence_cache;
+    PyGIInterfaceCache *interface_cache;
+    PyGIHashCache *hash_cache;
     PyCallbackCache *callback_cache;
 
     gint c_arg_index;
@@ -103,14 +103,14 @@ struct _PyGIFunctionCache
     gboolean is_method;
     gboolean is_constructor;
 
-    PyGIArgCache **args_cache; 
+    PyGIArgCache **args_cache;
     GSList *in_args;
     GSList *out_arg;
 
     /* counts */
     guint n_in_args;
     guint n_out_args;
-    guint n_args;   
+    guint n_args;
 };
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);

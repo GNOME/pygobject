@@ -58,18 +58,18 @@ _pygi_arg_cache_clear (PyGIArgCache *cache);
     cache->is_pointer = FALSE;
     cache->direction = 0;
     g_base_info_unref(cache->arg_info);
-    
-    cache->in_validator = NULL; 
-    cache->in_marshaler = NULL; 
-    cache->out_marshaler = NULL; 
-    cache->cleanup = NULL; 
+
+    cache->in_validator = NULL;
+    cache->in_marshaler = NULL;
+    cache->out_marshaler = NULL;
+    cache->cleanup = NULL;
 
     _pygi_sequence_cache_free(cache->sequence_cache);
     cache->sequence_cache = NULL;
     _pygi_interface_cache_free(cache->interface_cache);
     cache->interface_cache = NULL;
     _pygi_hash_cache_free(cache->hash_cache);
-    cache->hash_cache = NULL; 
+    cache->hash_cache = NULL;
     _pygi_callback_cache_free(cache->callback_cache);
     cache->callback_cache = NULL;
 
@@ -87,7 +87,7 @@ _pygi_function_cache_free (PyGIFunctionCache *cache)
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *tmp = cache->args_cache[i];
         _pygi_arg_cache_clear(tmp);
-        g_slice_free(PyGIArgCache, tmp); 
+        g_slice_free(PyGIArgCache, tmp);
     }
 
     g_slice_free(PyGIFunctionCache, cache);
@@ -127,7 +127,7 @@ _arg_cache_generate_metadata_in_boolean(PyGIArgCache *arg_cache,
                                         PyGIFunctionCache *function_cache,
                                         GIArgInfo *arg_info)
 {
-    arg_cache->in_marshaler = _pygi_marshal_in_boolean; 
+    arg_cache->in_marshaler = _pygi_marshal_in_boolean;
     return TRUE;
 }
 
@@ -456,14 +456,14 @@ _arg_cache_generate_metadata_in(PyGIArgCache *arg_cache,
            break;
     }
 
-    function_cache->in_args = 
+    function_cache->in_args =
         g_slist_append(function_cache->in_args, arg_cache);
 
     return success;
 }
 
 static inline boolean
-_args_cache_generate(GIFunctionInfo *function_info, 
+_args_cache_generate(GIFunctionInfo *function_info,
                      PyGIFunctionCache *function_cache)
 {
     for (i = 0; i < function_cache->n_args; i++) {
@@ -474,7 +474,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
         if (function_cache->args_cache[i] != NULL)
             continue;
 
-        arg_info = 
+        arg_info =
             g_callable_info_get_arg ( (GICallableInfo *) function_info, i);
 
         arg_cache = function_cache->args_cache[i] = g_slice_new0(PyGIArgCache);
@@ -514,5 +514,5 @@ _pygi_function_cache_new (GIFunctionInfo *function_info)
 
 err:
     _pygi_function_cache_free(fc);
-    return NULL; 
+    return NULL;
 }
