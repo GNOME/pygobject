@@ -19,11 +19,26 @@
  * USA
  */
 
-/* placeholders for now */
-typedef gboolean (*PyGIValidateInFunc) (void);
-typedef gboolean (*PyGIMarshalInFunc) (void);
+#ifndef __PYGI_CACHE_H__
+#define __PYGI_CACHE_H__
+
+#include <Python.h>
+#include <girepository.h>
+
+G_BEGIN_DECLS
+
+typedef struct _PyGIFunctionCache PyGIFunctionCache;
+typedef struct _PyGIArgCache PyGIArgCache;
+
+typedef gboolean (*PyGIMarshalInFunc) (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache, 
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+
 typedef gboolean (*PyGIMarshalOutFunc) (void);
 typedef gboolean (*PyGIArgCleanupFunc) (gpointer data);
+
 
 typedef struct _PyGISequenceCache
 {
@@ -34,7 +49,7 @@ typedef struct _PyGISequenceCache
     gboolean is_zero_terminated; 
     gsize item_size;
     GITypeTag item_tag_type; 
-}
+} PyGISequenceCache;
 
 typedef struct _PyGIInterfaceCache
 {
@@ -61,14 +76,15 @@ typedef struct _PyGICallbackCache
     GScope scope;
 } PyGICallbackCache; 
 
-typedef struct _PyGIArgCache
+struct _PyGIArgCache
 {
     gboolean is_aux; 
     gboolean is_pointer; 
-    GIDirection direction; 
+    GIDirection direction;
+    GITransfer transfer;
     GIArgInfo *arg_info;
+    GIArgument *default_value;
 
-    PyGIValidateInFunc in_validator; 
     PyGIMashalInFunc in_marshaler; 
     PyGIMarshalOutFunc out_marshaler; 
     PyGIArgCleanupFunc cleanup; 
@@ -80,9 +96,9 @@ typedef struct _PyGIArgCache
 
     gint c_arg_index;
     gint py_arg_index;
-} PyGIArgCache;
+};
 
-typedef struct _PyGIFunctionCache
+struct _PyGIFunctionCache
 {
     gboolean is_method;
     gboolean is_constructor;
@@ -95,10 +111,13 @@ typedef struct _PyGIFunctionCache
     guint n_in_args;
     guint n_out_args;
     guint n_args;   
-} PyGIFunctionCache;
+};
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);
 void _pygi_function_cache_free	(PyGIFunctionCache *cache);
 
-PyGIFunctionCache *_pygi_generate_function_cache (GIFunctionInfo *function_info);
+PyGIFunctionCache *_pygi_function_cache_new (GIFunctionInfo *function_info);
 
+G_END_DECLS
+
+#endif /* __PYGI_CACHE_H__ */

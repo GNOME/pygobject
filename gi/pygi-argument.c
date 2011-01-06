@@ -1989,3 +1989,711 @@ _pygi_argument_init (void)
     _pygobject_import();
 }
 
+/*** argument marshaling and validating routines ***/
+
+gboolean 
+_pygi_marshal_in_void (PyGIState         *state,
+                       PyGIFunctionCache *function_cache, 
+                       PyGIArgCache      *arg_cache,
+                       PyObject          *py_arg,
+                       GIArgument        *arg)
+{
+    g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
+
+    arg.v_pointer = py_arg;
+   
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_boolean (PyGIState         *state,
+                          PyGIFunctionCache *function_cache, 
+                          PyGIArgCache      *arg_cache,
+                          PyObject          *py_arg,
+                          GIArgument        *arg)
+{
+    arg.v_boolean = PyObject_IsTrue(py_arg);
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_int8 (PyGIState         *state,
+                       PyGIFunctionCache *function_cache, 
+                       PyGIArgCache      *arg_cache,
+                       PyObject          *py_arg,
+                       GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+    long_ = PYGLIB_PyLong_AsLong(py_long);
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < -128 || long_ > 127) {
+        PyErr_Format (PyExc_ValueError, "%i not in range %i to %i", long_, -128, 127);
+        return FALSE;
+    }
+
+    arg.v_long = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_uint8 (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    long long_;
+
+    if (PYGLIB_PyBytes_Check(py_arg)) { 
+
+        if (PYGLIB_PyBytes_Size(py_arg) != 1) {
+            PyErr_Format (PyExc_TypeError, "Must be a single character");
+            return FALSE;
+        }
+
+        long_ = (long)(PYGLIB_PyBytes_AsString(py_arg)[0]);
+
+    } else if (PyNumber_Check(py_arg)) {
+        PyObject *py_long;
+        py_long = PYGLIB_PyNumber_Long(py_arg);
+        if (!py_long)
+            return FALSE;
+
+        long_ = PYGLIB_PyLong_AsLong(py_long);
+        Py_DECREF(py_long);
+
+        if (PyErr_Occured())
+            return FALSE;
+    } else {
+        PyErr_Format (PyExc_TypeError, "Must be number or single byte string, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    if (long_ < 0 || long_ > 255) {
+        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, 0, 255);
+        return FALSE;
+    }
+
+    arg.v_long = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_int16 (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+    long_ = PYGLIB_PyLong_AsLong(py_long);
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < -32768 || long_ > 32767) {
+        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, -32768, 32767);
+        return FALSE;
+    }
+
+    arg.v_long = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_uint16 (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+    long_ = PYGLIB_PyLong_AsLong(py_long);
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < 0 || long_ > 65535) {
+        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, 0, 65535);
+        return FALSE;
+    }
+
+    arg.v_long = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_int32 (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+    long_ = PYGLIB_PyLong_AsLong(py_long);
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < G_MININT32 || long_ > G_MAXINT32) {
+        PyErr_Format (PyExc_ValueError, "%i not in range %i to %i", long_, G_MININT32, G_MAXINT32);
+        return FALSE;
+    }
+
+    arg.v_long = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_uint32 (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+#if PY_VERSION_HEX < 0x03000000
+    if (PyInt_Check (number))
+        long_ = PyInt_AS_LONG (number);
+    else
+#endif
+        long_ = PyLong_AsLongLong(py_long);
+
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < 0 || long_ > G_MAXUINT32) {
+        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lli", long_, 0, G_MAXUINT32);
+        return FALSE;
+    }
+
+    arg.v_uint64 = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_int64 (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+#if PY_VERSION_HEX < 0x03000000
+    if (PyInt_Check (number))
+        long_ = PyInt_AS_LONG (number);
+    else
+#endif
+        long_ = PyLong_AsLongLong(py_long);
+
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < G_MININT64 || long_ > G_MAXINT64) {
+        PyErr_Format (PyExc_ValueError, "%lli not in range %lli to %lli", long_, G_MININT64, G_MAXINT64);
+        return FALSE;
+    }
+
+    arg.v_uint64 = long_;
+
+    return TRUE;
+}
+
+gboolean 
+_pygi_marshal_in_uint64 (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyObject *py_long;
+    long long long_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_long = PYGLIB_PyNumber_Long(py_arg);
+    if (!py_long)
+        return FALSE;
+
+#if PY_VERSION_HEX < 0x03000000
+    if (PyInt_Check (number))
+        long_ = PyInt_AS_LONG (number);
+    else
+#endif
+        long_ = PyLong_AsLongLong(py_long);
+
+    Py_DECREF(py_long);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (long_ < 0 || long_ > G_MAXUINT64) {
+        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lli", long_, 0, G_MAXUINT64);
+        return FALSE;
+    }
+
+    arg.v_uint64 = long_;
+
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_in_float (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyObject *py_float;
+    double double_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_float = PyNumber_Float(py_arg);
+    if (!py_float)
+        return FALSE;
+
+    double_ = PyFLoat_AsDouble(py_float);
+    Py_DECREF(py_float);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) {
+        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", long_, -G_MAXFLOAT, G_MAXFLOAT);
+        return FALSE;
+    }
+
+    arg.v_double = double_;
+
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_in_double (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyObject *py_float;
+    double double_;
+
+    if (!PyNumber_Check(py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    py_float = PyNumber_Float(py_arg);
+    if (!py_float)
+        return FALSE;
+
+    double_ = PyFLoat_AsDouble(py_float);
+    Py_DECREF(py_float);
+
+    if (PyErr_Occurred())
+        return FALSE;
+
+    if (double_ < -G_MAXDOUBLE || double_ > G_MAXDOUBLE) {
+        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", long_, -G_MAXDOUBLE, G_MAXDOUBLE);
+        return FALSE;
+    }
+
+    arg.v_double = double_;
+
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_in_unichar (PyGIState         *state,
+                          PyGIFunctionCache *function_cache, 
+                          PyGIArgCache      *arg_cache,
+                          PyObject          *py_arg,
+                          GIArgument        *arg)
+{
+    Py_ssize_t size;
+    gchar *string_;
+    
+    if (PyUnicode_Check (py_arg)) {
+       PyObject *py_bytes;
+
+       size = PyUnicode_GET_SIZE (py_arg);
+       py_bytes = PyUnicode_AsUTF8String();
+       _string = strdup(PYGLIB_PyBytes_AsString(py_bytes));
+       Py_DECREF(py_bytes);
+ 
+#if PY_VERSION_HEX < 0x03000000
+    } else if (PyString_Check (py_arg)) {
+       PyObject *pyuni = PyUnicode_FromEncodedObject (py_arg, "UTF-8", "strict");
+       if (!pyuni)
+           return FALSE;
+
+       size = PyUnicode_GET_SIZE (pyuni);
+       string_ = g_strdup(PyString_AsString(py_arg));
+       Py_DECREF(pyuni);
+#endif
+    } else {
+       PyErr_Format (PyExc_TypeError, "Must be string, not %s",
+                     py_arg->ob_type->tp_name);
+       return FALSE;
+    }
+
+    if (size != 1) {
+       PyErr_Format (PyExc_TypeError, "Must be a one character string, not %ld characters",
+                     size);
+       g_free(string_);
+       return FALSE;
+    }
+
+    arg.v_uint32 = g_utf8_get_char(string_);
+    g_free(string_);
+
+    return TRUE;
+}
+gboolean
+_pygi_marshal_in_gtype (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    long type_ = pyg_type_from_object (py_arg);
+
+    if (type_ == 0) {
+        PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
+                      py_arg->ob_type->tp_name);
+    } 
+
+    arg.v_long = type_;
+    return TRUE;
+}
+gboolean
+_pygi_marshal_in_utf8 (PyGIState         *state,
+                       PyGIFunctionCache *function_cache, 
+                       PyGIArgCache      *arg_cache,
+                       PyObject          *py_arg,
+                       GIArgument        *arg)
+{
+    gchar *string_;
+
+    if (PyUnicode_Check(py_arg)) {
+        PyObject *pystr_obj = PyUnicode_AsUTF8String (py_arg);
+        if (!pystr_obj)
+            return FALSE;
+
+        string = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
+        Py_DECREF(pystr_obj);
+    } 
+#if PY_VERSION_HEX < 0x03000000
+    else if (PyString_Check(py_arg)) {
+        string = g_strdup(PyString_AsString (py_arg));
+    }
+#endif
+    else {
+        PyErr_Format (PyExc_TypeError, "Must be string, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    arg.v_string = string_;
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_in_filename (PyGIState         *state,
+                           PyGIFunctionCache *function_cache, 
+                           PyGIArgCache      *arg_cache,
+                           PyObject          *py_arg,
+                           GIArgument        *arg)
+{
+    gchar *string_;
+    GError *error = NULL;
+
+    if (PyUnicode_Check(py_arg)) {
+        PyObject *pystr_obj = PyUnicode_AsUTF8String (py_arg);
+        if (!pystr_obj)
+            return FALSE;
+
+        string = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
+        Py_DECREF(pystr_obj);
+    } 
+#if PY_VERSION_HEX < 0x03000000
+    else if (PyString_Check(py_arg)) {
+        string = g_strdup(PyString_AsString (py_arg));
+    }
+#endif
+    else {
+        PyErr_Format (PyExc_TypeError, "Must be string, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    arg.v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
+    g_free(string_);
+
+    if (arg.v_string == NULL) {
+        PyErr_SetString (PyExc_Exception, error->message);
+        g_error_free(error);
+        /* TODO: Convert the error to an exception. */
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_in_array (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_glist (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_gslist (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_ghash (PyGIState         *state,
+                        PyGIFunctionCache *function_cache, 
+                        PyGIArgCache      *arg_cache,
+                        PyObject          *py_arg,
+                        GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_gerror (PyGIState         *state,
+                         PyGIFunctionCache *function_cache, 
+                         PyGIArgCache      *arg_cache,
+                         PyObject          *py_arg,
+                         GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_callback (PyGIState         *state,
+                                     PyGIFunctionCache *function_cache, 
+                                     PyGIArgCache      *arg_cache,
+                                     PyObject          *py_arg,
+                                     GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_enum (PyGIState         *state,
+                                 PyGIFunctionCache *function_cache, 
+                                 PyGIArgCache      *arg_cache,
+                                 PyObject          *py_arg,
+                                 GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_flags (PyGIState         *state,
+                                  PyGIFunctionCache *function_cache, 
+                                  PyGIArgCache      *arg_cache,
+                                  PyObject          *py_arg,
+                                  GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_struct (PyGIState         *state,
+                                   PyGIFunctionCache *function_cache, 
+                                   PyGIArgCache      *arg_cache,
+                                   PyObject          *py_arg,
+                                   GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_interface (PyGIState         *state,
+                                      PyGIFunctionCache *function_cache, 
+                                      PyGIArgCache      *arg_cache,
+                                      PyObject          *py_arg,
+                                      GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_boxed (PyGIState         *state,
+                                  PyGIFunctionCache *function_cache, 
+                                  PyGIArgCache      *arg_cache,
+                                  PyObject          *py_arg,
+                                  GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_object (PyGIState         *state,
+                                   PyGIFunctionCache *function_cache, 
+                                   PyGIArgCache      *arg_cache,
+                                   PyObject          *py_arg,
+                                   GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+
+gboolean
+_pygi_marshal_in_interface_union (PyGIState         *state,
+                                  PyGIFunctionCache *function_cache, 
+                                  PyGIArgCache      *arg_cache,
+                                  PyObject          *py_arg,
+                                  GIArgument        *arg)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return FALSE;
+}
+

@@ -26,8 +26,9 @@
 
 #include <girepository.h>
 
-G_BEGIN_DECLS
+#include "pygi-cache.h"
 
+G_BEGIN_DECLS
 
 /* Private */
 gint _pygi_g_type_interface_check_object (GIBaseInfo *info,
@@ -62,6 +63,38 @@ void _pygi_argument_release (GIArgument   *arg,
                              GIDirection  direction);
 
 void _pygi_argument_init (void);
+
+
+/*** argument marshaling and validating routines ***/
+PyGIMarshalInFunc _pygi_marshal_in_void;
+PyGIMarshalInFunc _pygi_marshal_in_int8;
+PyGIMarshalInFunc _pygi_marshal_in_uint8;
+PyGIMarshalInFunc _pygi_marshal_in_int16;
+PyGIMarshalInFunc _pygi_marshal_in_uint16;
+PyGIMarshalInFunc _pygi_marshal_in_int32;
+PyGIMarshalInFunc _pygi_marshal_in_uint32;
+PyGIMarshalInFunc _pygi_marshal_in_int64;
+PyGIMarshalInFunc _pygi_marshal_in_float;
+PyGIMarshalInFunc _pygi_marshal_in_double;
+PyGIMarshalInFunc _pygi_marshal_in_unichar;
+PyGIMarshalInFunc _pygi_marshal_in_gtype;
+PyGIMarshalInFunc _pygi_marshal_in_utf8;
+PyGIMarshalInFunc _pygi_marshal_in_filename;
+PyGIMarshalInFunc _pygi_marshal_in_array;
+PyGIMarshalInFunc _pygi_marshal_in_glist;
+PyGIMarshalInFunc _pygi_marshal_in_gslist;
+PyGIMarshalInFunc _pygi_marshal_in_ghash;
+PyGIMarshalInFunc _pygi_marshal_in_gerror;
+PyGIMarshalInFunc _pygi_marshal_in_interface_callback;
+PyGIMarshalInFunc _pygi_marshal_in_interface_enum;
+PyGIMarshalInFunc _pygi_marshal_in_interface_flags;
+PyGIMarshalInFunc _pygi_marshal_in_interface_struct;
+PyGIMarshalInFunc _pygi_marshal_in_interface_interface;
+PyGIMarshalInFunc _pygi_marshal_in_interface_boxed;
+PyGIMarshalInFunc _pygi_marshal_in_interface_object;
+PyGIMarshalInFunc _pygi_marshal_in_interface_union;
+
+
 
 G_END_DECLS
 
