@@ -68,6 +68,10 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(event.x_root, 0)
         self.assertEquals(event.y_root, 5)
 
+        event = Gdk.Event()
+        event.type = Gdk.EventType.SCROLL
+        self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
+
 class TestGtk(unittest.TestCase):
 
     def test_container(self):
