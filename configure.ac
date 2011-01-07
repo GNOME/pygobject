@@ -206,30 +206,6 @@ AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 AC_SUBST(LIBFFI_PC)
 
-dnl gio
-PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
-	have_gio=true, have_gio=false)
-AC_SUBST(GIO_CFLAGS)
-AC_SUBST(GIO_LIBS)
-
-# Do not build GIO if the python version >= 3.0
-# We use GI to access GIO in python 3
-AM_CONDITIONAL(BUILD_GIO, test $have_gio = true -a $build_py3k = false)
-
-if test -n "$export_dynamic"; then
-  GIO_LIBS=`echo $GIO_LIBS | sed -e "s/$export_dynamic//"`
-fi
-
-dnl giounix
-PKG_CHECK_MODULES(GIOUNIX, gio-unix-2.0 >= giounix_required_version,
-	have_giounix=true, have_giounix=false)
-AC_SUBST(GIOUNIX_CFLAGS)
-AC_SUBST(GIOUNIX_LIBS)
-AM_CONDITIONAL(BUILD_GIOUNIX, test $have_giounix = true -a $build_py3k = false)
-if test -n "$export_dynamic"; then
-  GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
-fi
-
 AC_ARG_ENABLE(cairo,
     AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
     enable_cairo=$enableval,
@@ -293,7 +269,6 @@ AC_CONFIG_FILES(
   gi/overrides/Makefile
   glib/Makefile
   gobject/Makefile
-  gio/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)
