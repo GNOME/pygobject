@@ -188,6 +188,7 @@ _pygi_g_type_interface_check_object (GIBaseInfo *info,
                     for (i = 0; i < g_enum_info_get_n_values (info); i++) {
                         GIValueInfo *value_info = g_enum_info_get_value (info, i);
                         glong enum_value = g_value_info_get_value (value_info);
+                        g_base_info_unref (value_info);
                         if (value == enum_value) {
                             retval = 1;
                             break;
