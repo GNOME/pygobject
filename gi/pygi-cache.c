@@ -22,10 +22,13 @@
 #include "pygi-argument.h"
 #include <girepository.h>
 
-gboolean _arg_cache_generate_metadata_in(PyGIArgCache *arg_cache,
-                                         GITypeInfo *type_info,
-                                         GITypeTag type_tag);
-
+PyGIArgCache * _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
+                                  PyGIFunctionCache *function_cache,
+                                  GITypeTag type_tag,
+                                  GITransfer transfer,
+                                  GIDirection direction,
+                                  gint c_arg_index,
+                                  gint py_arg_index);
 /* cleanup */
 static inline void
 _pygi_interface_cache_free (PyGIInterfaceCache *cache)
@@ -58,28 +61,13 @@ _pygi_callback_cache_free (PyGICallbackCache *cache)
 }
 
 void
-_pygi_arg_cache_clear (PyGIArgCache *cache)
+_pygi_arg_cache_free (PyGIArgCache *cache)
 {
-    cache->is_aux = FALSE;
-    cache->is_pointer = FALSE;
-    cache->direction = 0;
     g_base_info_unref(cache->arg_info);
-
-    cache->in_marshaller = NULL;
-    cache->out_marshaller = NULL;
-    cache->cleanup = NULL;
-
-    _pygi_sequence_cache_free(cache->sequence_cache);
-    cache->sequence_cache = NULL;
-    _pygi_interface_cache_free(cache->interface_cache);
-    cache->interface_cache = NULL;
-    _pygi_hash_cache_free(cache->hash_cache);
-    cache->hash_cache = NULL;
-    _pygi_callback_cache_free(cache->callback_cache);
-    cache->callback_cache = NULL;
-
-    gint c_arg_index = -1;
-    gint py_arg_index = -1;
+    if (cache->destroy_notify)
+        cache->destroy_notify(cache);
+    else
+        g_slice_free(PyGIArgCache, cache);
 }
 
 void
@@ -127,326 +115,368 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
     sc->fixed_size = -1;
     sc->len_arg_index = -1;
     sc->is_zero_terminated = g_type_info_is_zero_terminated(type_info);
-    if (!sc->is_zero_terminated) 
+    if (!sc->is_zero_terminated)
         sc->fixed_size = g_type_info_get_array_fixed_size(type_info);
     if (sc->fixed_size < 0)
-        sc->len_arg_index = g_type_info_get_array_length (type_info);    
-    
+        sc->len_arg_index = g_type_info_get_array_length (type_info);
+
     item_type_info = g_type_info_get_param_type (type_info, 0);
     item_type_tag = g_type_info_get_tag (item_type_info);
 
-    sc->item_cache = g_slice_new0(PyGIArgCache);
     sc->item_cache->type_tag = item_type_tag;
 
-    _arg_cache_generate_metadata_in(sc->item_cache,
-                                    item_type_info,
-                                    item_type_tag);
+    /* FIXME: support out also */
+    sc->item_cache = _arg_cache_in_new_from_type_info(item_type_info,
+                                                      NULL,
+                                                      item_type_tag,
+                                                      GI_TRANSFER_EVERYTHING,
+                                                      GI_DIRECTION_IN,
+                                                      0, 0);
 
- 
-    g_base_info_unref ( (GIBaseInfo *) item_type_info);
+    g_base_info_unref( (GIBaseInfo *) item_type_info);
+
+    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_pygi_sequence_cache_free;
 
     return sc;
 }
 
+static inline PyGIArgCache *
+_arg_cache_new(void)
+{
+    return g_slice_new0(PyGIArgCache);
+}
 /* process in args */
 
-static inline gboolean
-_arg_cache_generate_metadata_in_void(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_void(void)
 {
+     PyGIArgCache *arg_cache = _arg_cache_new();
      arg_cache->in_marshaller = _pygi_marshal_in_void;
 
-     return TRUE;
+     return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_boolean(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_boolean(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_boolean;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_int8(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_int8(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_int8;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_uint8(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_uint8(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_uint8;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_int16(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_int16(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_int16;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_uint16(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_uint16(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_uint16;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_int32(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_int32(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_int32;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_uint32(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_uint32(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_uint32;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_int64(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_int64(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_int64;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_uint64(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_uint64(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_uint64;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_float(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_float(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_float;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_double(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_double(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_double;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_unichar(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_unichar(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_unichar;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_gtype(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_gtype(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_gtype;
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_utf8(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_utf8(GITransfer transfer)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_utf8;
     if (arg_cache->transfer == GI_TRANSFER_NOTHING)
         arg_cache->cleanup = g_free;
 
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_filename(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_filename(GITransfer transfer)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_filename;
     if (arg_cache->transfer == GI_TRANSFER_NOTHING)
         arg_cache->cleanup = g_free;
 
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_array(PyGIArgCache *arg_cache,
-                                      GITypeInfo *type_info)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_array(GITypeInfo *type_info,
+                                      GITransfer transfer)
 {
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info);
     arg_cache->in_marshaller = _pygi_marshal_in_array;
-    arg_cache->sequence_cache = _sequence_cache_new_from_type_info(type_info);
 
     /* arg_cache->cleanup = _pygi_cleanup_array; */
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_interface(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_interface(void)
 {
+    PyGIArgCache *arg_cache = NULL;
     /* TODO: Switch on GI_INFO_TYPE_ to determine caching */
     PyErr_Format(PyExc_NotImplementedError,
                  "Caching for this type is not fully implemented yet");
-    return FALSE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_glist(PyGIArgCache *arg_cache,
-                                      GITypeInfo *type_info)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_glist(GITypeInfo *type_info,
+                                      GITransfer transfer)
 {
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info);
     arg_cache->in_marshaller = _pygi_marshal_in_glist;
-    arg_cache->sequence_cache = _sequence_cache_new_from_type_info(type_info);
     /* arg_cache->cleanup = */
 
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_gslist(PyGIArgCache *arg_cache,
-                                       GITypeInfo *type_info)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_gslist(GITypeInfo *type_info,
+                                       GITransfer transfer)
 {
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info);
     arg_cache->in_marshaller = _pygi_marshal_in_gslist;
-    arg_cache->sequence_cache = _sequence_cache_new_from_type_info(type_info);
     /* arg_cache->cleanup = */
 
-    return TRUE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_ghash(PyGIArgCache *arg_cache,
-                                      GITypeInfo *type_info)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_ghash(GITypeInfo *type_info)
 {
-    arg_cache->in_marshaller = _pygi_marshal_in_ghash;
+    PyGIArgCache *arg_cache = NULL;
+    /*arg_cache->in_marshaller = _pygi_marshal_in_ghash;*/
     PyErr_Format(PyExc_NotImplementedError,
                  "Caching for this type is not fully implemented yet");
-    return FALSE;
+    return arg_cache;
 }
 
-static inline gboolean
-_arg_cache_generate_metadata_in_gerror(PyGIArgCache *arg_cache)
+static inline PyGIArgCache *
+_arg_cache_new_for_in_gerror(void)
 {
+    PyGIArgCache *arg_cache = _arg_cache_new();
     arg_cache->in_marshaller = _pygi_marshal_in_gerror;
     arg_cache->is_aux = TRUE;
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
-    return FALSE;
+    return arg_cache;
 }
 
-gboolean
-_arg_cache_generate_metadata_in(PyGIArgCache *arg_cache,
-                                GITypeInfo *type_info,
-                                GITypeTag type_tag)
+PyGIArgCache *
+_arg_cache_in_new_from_type_info (GITypeInfo *type_info,
+                                  PyGIFunctionCache *function_cache,
+                                  GITypeTag type_tag,
+                                  GITransfer transfer,
+                                  GIDirection direction,
+                                  gint c_arg_index,
+                                  gint py_arg_index)
 {
-    gboolean success = TRUE;
+    PyGIArgCache *arg_cache = NULL;
 
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
-           success = _arg_cache_generate_metadata_in_void(arg_cache);
+           arg_cache = _arg_cache_new_for_in_void();
            break;
        case GI_TYPE_TAG_BOOLEAN:
-           success = _arg_cache_generate_metadata_in_boolean(arg_cache);
+           arg_cache = _arg_cache_new_for_in_boolean();
            break;
        case GI_TYPE_TAG_INT8:
-           success = _arg_cache_generate_metadata_in_int8(arg_cache);
+           arg_cache = _arg_cache_new_for_in_int8();
            break;
        case GI_TYPE_TAG_UINT8:
-           success = _arg_cache_generate_metadata_in_uint8(arg_cache);
+           arg_cache = _arg_cache_new_for_in_uint8();
            break;
        case GI_TYPE_TAG_INT16:
-           success = _arg_cache_generate_metadata_in_uint16(arg_cache);
+           arg_cache = _arg_cache_new_for_in_uint16();
            break;
        case GI_TYPE_TAG_UINT16:
-           success = _arg_cache_generate_metadata_in_uint16(arg_cache);
+           arg_cache = _arg_cache_new_for_in_uint16();
            break;
        case GI_TYPE_TAG_INT32:
-           success = _arg_cache_generate_metadata_in_int32(arg_cache);
+           arg_cache = _arg_cache_new_for_in_int32();
            break;
        case GI_TYPE_TAG_UINT32:
-           success = _arg_cache_generate_metadata_in_uint32(arg_cache);
+           arg_cache = _arg_cache_new_for_in_uint32();
            break;
        case GI_TYPE_TAG_INT64:
-           success = _arg_cache_generate_metadata_in_int64(arg_cache);
+           arg_cache = _arg_cache_new_for_in_int64();
            break;
        case GI_TYPE_TAG_UINT64:
-           success = _arg_cache_generate_metadata_in_uint64(arg_cache);
+           arg_cache = _arg_cache_new_for_in_uint64();
            break;
        case GI_TYPE_TAG_FLOAT:
-           success = _arg_cache_generate_metadata_in_float(arg_cache);
+           arg_cache = _arg_cache_new_for_in_float();
            break;
        case GI_TYPE_TAG_DOUBLE:
-           success = _arg_cache_generate_metadata_in_double(arg_cache);
+           arg_cache = _arg_cache_new_for_in_double();
            break;
        case GI_TYPE_TAG_UNICHAR:
-           success = _arg_cache_generate_metadata_in_unichar(arg_cache);
+           arg_cache = _arg_cache_new_for_in_unichar();
            break;
        case GI_TYPE_TAG_GTYPE:
-           success = _arg_cache_generate_metadata_in_gtype(arg_cache);
+           arg_cache = _arg_cache_new_for_in_gtype();
            break;
        case GI_TYPE_TAG_UTF8:
-           success = _arg_cache_generate_metadata_in_utf8(arg_cache);
+           arg_cache = _arg_cache_new_for_in_utf8(transfer);
            break;
        case GI_TYPE_TAG_FILENAME:
-           success = _arg_cache_generate_metadata_in_filename(arg_cache);
+           arg_cache = _arg_cache_new_for_in_filename(transfer);
            break;
        case GI_TYPE_TAG_ARRAY:
-           success = _arg_cache_generate_metadata_in_array(arg_cache,
-                                                           type_info);
+           arg_cache = _arg_cache_new_for_in_array(type_info,
+                                                   transfer);
            break;
        case GI_TYPE_TAG_INTERFACE:
-           success = _arg_cache_generate_metadata_in_interface(arg_cache);
+           arg_cache = _arg_cache_new_for_in_interface();
            break;
        case GI_TYPE_TAG_GLIST:
-           success = _arg_cache_generate_metadata_in_glist(arg_cache,
-                                                           type_info);
+           arg_cache = _arg_cache_new_for_in_glist(type_info,
+                                                   transfer);
            break;
        case GI_TYPE_TAG_GSLIST:
-           success = _arg_cache_generate_metadata_in_gslist(arg_cache,
-                                                            type_info);
+           arg_cache = _arg_cache_new_for_in_gslist(type_info,
+                                                    transfer);
            break;
        case GI_TYPE_TAG_GHASH:
-           success = _arg_cache_generate_metadata_in_ghash(arg_cache,
-                                                           type_info);
+           arg_cache = _arg_cache_new_for_in_ghash(type_info);
            break;
        case GI_TYPE_TAG_ERROR:
-           success = _arg_cache_generate_metadata_in_gerror(arg_cache);
+           arg_cache = _arg_cache_new_for_in_gerror();
            break;
     }
 
-    return success;
+    if (arg_cache != NULL) {
+        arg_cache->direction = direction;
+        arg_cache->transfer = transfer;
+        arg_cache->type_tag = type_tag;
+        arg_cache->py_arg_index = py_arg_index;
+        arg_cache->c_arg_index = c_arg_index;
+    }
+
+    return arg_cache;
 }
 
 static inline gboolean
 _args_cache_generate(GIFunctionInfo *function_info,
                      PyGIFunctionCache *function_cache)
 {
-    int i;
-    for (i = 0; i < function_cache->n_args; i++) {
+    int arg_index;
+    for (arg_index = 0; arg_index < function_cache->n_args; arg_index++) {
         PyGIArgCache *arg_cache;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
+        GIDirection direction;
+        GITransfer transfer;
+        GITypeTag type_tag;
+        gint py_arg_index;
 
         /* must be an aux arg filled in by its owner so skip */
-        if (function_cache->args_cache[i] != NULL)
+        if (function_cache->args_cache[arg_index] != NULL)
             continue;
 
         arg_info =
-            g_callable_info_get_arg ( (GICallableInfo *) function_info, i);
+            g_callable_info_get_arg( (GICallableInfo *) function_info, arg_index);
 
-        arg_cache = function_cache->args_cache[i] = g_slice_new0(PyGIArgCache);
-        arg_cache->direction = g_arg_info_get_direction(arg_info);
-        arg_cache->transfer = g_arg_info_get_ownership_transfer (arg_info);
-        type_info = g_base_info_get_type_info ( (GIBaseInfo *) arg_info);
-        arg_cache->type_tag = g_type_info_get_tag (type_info);
+        direction = g_arg_info_get_direction(arg_info);
+        transfer = g_arg_info_get_ownership_transfer(arg_info);
+        type_info = g_arg_info_get_type_info(arg_info);
+        type_tag = g_type_info_get_tag(type_info);
 
         switch(arg_cache->direction) {
             case GI_DIRECTION_IN:
+                py_arg_index = function_cache->n_in_args;
                 function_cache->n_in_args++;
-                arg_cache->c_arg_index = i + function_cache->is_method;
-                arg_cache->py_arg_index =
-                    function_cache->n_in_args + function_cache->is_method;
 
-                _arg_cache_generate_metadata_in(arg_cache,
-                                                type_info,
-                                                arg_cache->type_tag);
+                arg_cache =
+                    _arg_cache_in_new_from_type_info(type_info,
+                                                     function_cache,
+                                                     type_tag,
+                                                     transfer,
+                                                     direction,
+                                                     arg_index,
+                                                     py_arg_index);
 
                 function_cache->in_args =
                     g_slist_append(function_cache->in_args, arg_cache);
@@ -455,6 +485,8 @@ _args_cache_generate(GIFunctionInfo *function_info,
             case GI_DIRECTION_OUT:
                 function_cache->n_out_args++;
         }
+
+        function_cache->args_cache[arg_index] = arg_cache;
         g_base_info_unref( (GIBaseInfo *) type_info);
     }
     return TRUE;

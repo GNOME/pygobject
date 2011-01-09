@@ -1991,9 +1991,9 @@ _pygi_argument_init (void)
 
 /*** argument marshaling and validating routines ***/
 
-gboolean 
+gboolean
 _pygi_marshal_in_void (PyGIState         *state,
-                       PyGIFunctionCache *function_cache, 
+                       PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
                        GIArgument        *arg)
@@ -2001,13 +2001,13 @@ _pygi_marshal_in_void (PyGIState         *state,
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
     (*arg).v_pointer = py_arg;
-   
+
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_boolean (PyGIState         *state,
-                          PyGIFunctionCache *function_cache, 
+                          PyGIFunctionCache *function_cache,
                           PyGIArgCache      *arg_cache,
                           PyObject          *py_arg,
                           GIArgument        *arg)
@@ -2017,9 +2017,9 @@ _pygi_marshal_in_boolean (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_int8 (PyGIState         *state,
-                       PyGIFunctionCache *function_cache, 
+                       PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
                        GIArgument        *arg)
@@ -2053,16 +2053,16 @@ _pygi_marshal_in_int8 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_uint8 (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
     long long_;
 
-    if (PYGLIB_PyBytes_Check(py_arg)) { 
+    if (PYGLIB_PyBytes_Check(py_arg)) {
 
         if (PYGLIB_PyBytes_Size(py_arg) != 1) {
             PyErr_Format (PyExc_TypeError, "Must be a single character");
@@ -2098,9 +2098,9 @@ _pygi_marshal_in_uint8 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_int16 (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2134,9 +2134,9 @@ _pygi_marshal_in_int16 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_uint16 (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2170,9 +2170,9 @@ _pygi_marshal_in_uint16 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_int32 (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2206,9 +2206,9 @@ _pygi_marshal_in_int32 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_uint32 (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2248,9 +2248,9 @@ _pygi_marshal_in_uint32 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_int64 (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2290,9 +2290,9 @@ _pygi_marshal_in_int64 (PyGIState         *state,
     return TRUE;
 }
 
-gboolean 
+gboolean
 _pygi_marshal_in_uint64 (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2334,7 +2334,7 @@ _pygi_marshal_in_uint64 (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_float (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2370,7 +2370,7 @@ _pygi_marshal_in_float (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_double (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2406,14 +2406,14 @@ _pygi_marshal_in_double (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_unichar (PyGIState         *state,
-                          PyGIFunctionCache *function_cache, 
+                          PyGIFunctionCache *function_cache,
                           PyGIArgCache      *arg_cache,
                           PyObject          *py_arg,
                           GIArgument        *arg)
 {
     Py_ssize_t size;
     gchar *string_;
-    
+
     if (PyUnicode_Check (py_arg)) {
        PyObject *py_bytes;
 
@@ -2421,7 +2421,7 @@ _pygi_marshal_in_unichar (PyGIState         *state,
        py_bytes = PyUnicode_AsUTF8String(py_arg);
        string_ = strdup(PYGLIB_PyBytes_AsString(py_bytes));
        Py_DECREF(py_bytes);
- 
+
 #if PY_VERSION_HEX < 0x03000000
     } else if (PyString_Check (py_arg)) {
        PyObject *pyuni = PyUnicode_FromEncodedObject (py_arg, "UTF-8", "strict");
@@ -2452,7 +2452,7 @@ _pygi_marshal_in_unichar (PyGIState         *state,
 }
 gboolean
 _pygi_marshal_in_gtype (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2462,14 +2462,14 @@ _pygi_marshal_in_gtype (PyGIState         *state,
     if (type_ == 0) {
         PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
                       py_arg->ob_type->tp_name);
-    } 
+    }
 
     (*arg).v_long = type_;
     return TRUE;
 }
 gboolean
 _pygi_marshal_in_utf8 (PyGIState         *state,
-                       PyGIFunctionCache *function_cache, 
+                       PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
                        GIArgument        *arg)
@@ -2483,7 +2483,7 @@ _pygi_marshal_in_utf8 (PyGIState         *state,
 
         string_ = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
         Py_DECREF(pystr_obj);
-    } 
+    }
 #if PY_VERSION_HEX < 0x03000000
     else if (PyString_Check(py_arg)) {
         string_ = g_strdup(PyString_AsString (py_arg));
@@ -2501,7 +2501,7 @@ _pygi_marshal_in_utf8 (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_filename (PyGIState         *state,
-                           PyGIFunctionCache *function_cache, 
+                           PyGIFunctionCache *function_cache,
                            PyGIArgCache      *arg_cache,
                            PyObject          *py_arg,
                            GIArgument        *arg)
@@ -2516,7 +2516,7 @@ _pygi_marshal_in_filename (PyGIState         *state,
 
         string_ = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
         Py_DECREF(pystr_obj);
-    } 
+    }
 #if PY_VERSION_HEX < 0x03000000
     else if (PyString_Check(py_arg)) {
         string_ = g_strdup(PyString_AsString (py_arg));
@@ -2543,7 +2543,7 @@ _pygi_marshal_in_filename (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_array (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2552,6 +2552,8 @@ _pygi_marshal_in_array (PyGIState         *state,
     int i;
     Py_ssize_t length;
     GArray *array_ = NULL;
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+
 
     if (py_arg == Py_None) {
         (*arg).v_pointer = NULL;
@@ -2568,17 +2570,17 @@ _pygi_marshal_in_array (PyGIState         *state,
     if (length < 0)
         return FALSE;
 
-    if (arg_cache->sequence_cache->fixed_size >= 0 &&
-        arg_cache->sequence_cache->fixed_size != length) {
+    if (sequence_cache->fixed_size >= 0 &&
+        sequence_cache->fixed_size != length) {
         PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
-                              arg_cache->sequence_cache->fixed_size, length);
+                      sequence_cache->fixed_size, length);
 
         return FALSE;
     }
 
-    array_ = g_array_sized_new (arg_cache->sequence_cache->is_zero_terminated, 
+    array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
                                 FALSE,
-                                arg_cache->sequence_cache->item_size,
+                                sequence_cache->item_size,
                                 length);
 
     if (array_ == NULL) {
@@ -2586,21 +2588,21 @@ _pygi_marshal_in_array (PyGIState         *state,
         return FALSE;
     }
 
-    if (arg_cache->sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
+    if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PYGLIB_PyBytes_Check(py_arg)) {
         memcpy(array_->data, PYGLIB_PyBytes_AsString(py_arg), length);
 
         goto array_success;
     }
 
-    in_marshaller = arg_cache->sequence_cache->item_cache->in_marshaller;
+    in_marshaller = sequence_cache->item_cache->in_marshaller;
     for (i = 0; i < length; i++) {
         GIArgument item;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) {
             int j;
-            if (arg_cache->sequence_cache->item_cache->cleanup != NULL) {
-                PyGIArgCleanupFunc cleanup = arg_cache->sequence_cache->item_cache->cleanup;
+            if (sequence_cache->item_cache->cleanup != NULL) {
+                PyGIArgCleanupFunc cleanup = sequence_cache->item_cache->cleanup;
                 /*for(j = 0; j < i; j++)
                     cleanup((gpointer)(array_->data[j]));*/
             }
@@ -2609,11 +2611,11 @@ _pygi_marshal_in_array (PyGIState         *state,
             _PyGI_ERROR_PREFIX ("Item %i: ", i);
             return FALSE;
         }
-        arg_cache->sequence_cache->item_cache->in_marshaller(state, 
-                                                             function_cache, 
-                                                             arg_cache->sequence_cache->item_cache, 
-                                                             py_item, 
-                                                             &item);
+        sequence_cache->item_cache->in_marshaller(state,
+                                                  function_cache,
+                                                  sequence_cache->item_cache,
+                                                  py_item,
+                                                  &item);
         g_array_insert_val(array_, i, item);
     }
 
@@ -2625,7 +2627,7 @@ array_success:
 
 gboolean
 _pygi_marshal_in_glist (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2637,7 +2639,7 @@ _pygi_marshal_in_glist (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_gslist (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2649,7 +2651,7 @@ _pygi_marshal_in_gslist (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_ghash (PyGIState         *state,
-                        PyGIFunctionCache *function_cache, 
+                        PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
                         GIArgument        *arg)
@@ -2661,7 +2663,7 @@ _pygi_marshal_in_ghash (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_gerror (PyGIState         *state,
-                         PyGIFunctionCache *function_cache, 
+                         PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
                          GIArgument        *arg)
@@ -2673,7 +2675,7 @@ _pygi_marshal_in_gerror (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_callback (PyGIState         *state,
-                                     PyGIFunctionCache *function_cache, 
+                                     PyGIFunctionCache *function_cache,
                                      PyGIArgCache      *arg_cache,
                                      PyObject          *py_arg,
                                      GIArgument        *arg)
@@ -2685,7 +2687,7 @@ _pygi_marshal_in_interface_callback (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_enum (PyGIState         *state,
-                                 PyGIFunctionCache *function_cache, 
+                                 PyGIFunctionCache *function_cache,
                                  PyGIArgCache      *arg_cache,
                                  PyObject          *py_arg,
                                  GIArgument        *arg)
@@ -2697,7 +2699,7 @@ _pygi_marshal_in_interface_enum (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_flags (PyGIState         *state,
-                                  PyGIFunctionCache *function_cache, 
+                                  PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,
                                   GIArgument        *arg)
@@ -2709,7 +2711,7 @@ _pygi_marshal_in_interface_flags (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_struct (PyGIState         *state,
-                                   PyGIFunctionCache *function_cache, 
+                                   PyGIFunctionCache *function_cache,
                                    PyGIArgCache      *arg_cache,
                                    PyObject          *py_arg,
                                    GIArgument        *arg)
@@ -2721,7 +2723,7 @@ _pygi_marshal_in_interface_struct (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_interface (PyGIState         *state,
-                                      PyGIFunctionCache *function_cache, 
+                                      PyGIFunctionCache *function_cache,
                                       PyGIArgCache      *arg_cache,
                                       PyObject          *py_arg,
                                       GIArgument        *arg)
@@ -2733,7 +2735,7 @@ _pygi_marshal_in_interface_interface (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_boxed (PyGIState         *state,
-                                  PyGIFunctionCache *function_cache, 
+                                  PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,
                                   GIArgument        *arg)
@@ -2745,7 +2747,7 @@ _pygi_marshal_in_interface_boxed (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_object (PyGIState         *state,
-                                   PyGIFunctionCache *function_cache, 
+                                   PyGIFunctionCache *function_cache,
                                    PyGIArgCache      *arg_cache,
                                    PyObject          *py_arg,
                                    GIArgument        *arg)
@@ -2757,7 +2759,7 @@ _pygi_marshal_in_interface_object (PyGIState         *state,
 
 gboolean
 _pygi_marshal_in_interface_union (PyGIState         *state,
-                                  PyGIFunctionCache *function_cache, 
+                                  PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,
                                   GIArgument        *arg)

@@ -41,37 +41,6 @@ typedef gboolean (*PyGIMarshalInFunc) (PyGIState         *state,
 typedef gboolean (*PyGIMarshalOutFunc) (void);
 typedef gboolean (*PyGIArgCleanupFunc) (gpointer data);
 
-
-typedef struct _PyGISequenceCache
-{
-    gssize fixed_size;
-    gint len_arg_index;
-    gboolean is_zero_terminated;
-    gsize item_size;
-    PyGIArgCache *item_cache;
-} PyGISequenceCache;
-
-typedef struct _PyGIInterfaceCache
-{
-    gboolean is_foreign;
-    GType g_type;
-    PyObject *py_type;
-} PyGIInterfaceCache;
-
-typedef struct _PyGIHashCache
-{
-    PyGIArgCache *key_cache;
-    PyGIArgCache *value_cache;
-} PyGIHashCache;
-
-typedef struct _PyGICallbackCache
-{
-    gint py_user_data_index;
-    gint user_data_index;
-    gint destroy_notify_index;
-    GIScopeType scope;
-} PyGICallbackCache;
-
 struct _PyGIArgCache
 {
     gboolean is_aux;
@@ -84,20 +53,47 @@ struct _PyGIArgCache
 
     PyGIMarshalInFunc in_marshaller;
     PyGIMarshalOutFunc out_marshaller;
-    PyGIArgCleanupFunc cleanup;
+    GDestroyNotify cleanup;
 
-    /* FIXME: we should actually subclass ArgCache for each of these 
-     *        types but that requires we know more about the type
-     *        before we create the cache.
-     */
-    PyGISequenceCache *sequence_cache;
-    PyGIInterfaceCache *interface_cache;
-    PyGIHashCache *hash_cache;
-    PyGICallbackCache *callback_cache;
+    GDestroyNotify destroy_notify;
 
     gint c_arg_index;
     gint py_arg_index;
 };
+
+typedef struct _PyGISequenceCache
+{
+    PyGIArgCache arg_cache;
+    gssize fixed_size;
+    gint len_arg_index;
+    gboolean is_zero_terminated;
+    gsize item_size;
+    PyGIArgCache *item_cache;
+} PyGISequenceCache;
+
+typedef struct _PyGIInterfaceCache
+{
+    PyGIArgCache arg_cache;
+    gboolean is_foreign;
+    GType g_type;
+    PyObject *py_type;
+} PyGIInterfaceCache;
+
+typedef struct _PyGIHashCache
+{
+    PyGIArgCache arg_cache;
+    PyGIArgCache *key_cache;
+    PyGIArgCache *value_cache;
+} PyGIHashCache;
+
+typedef struct _PyGICallbackCache
+{
+    PyGIArgCache arg_cache;
+    gint py_user_data_index;
+    gint user_data_index;
+    gint destroy_notify_index;
+    GIScopeType scope;
+} PyGICallbackCache;
 
 struct _PyGIFunctionCache
 {
