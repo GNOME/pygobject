@@ -79,8 +79,7 @@ _pygi_function_cache_free (PyGIFunctionCache *cache)
     g_slist_free(cache->out_args);
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *tmp = cache->args_cache[i];
-        _pygi_arg_cache_clear(tmp);
-        g_slice_free(PyGIArgCache, tmp);
+        _pygi_arg_cache_free(tmp);
     }
 
     g_slice_free(PyGIFunctionCache, cache);
@@ -461,7 +460,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
 
         direction = g_arg_info_get_direction(arg_info);
         transfer = g_arg_info_get_ownership_transfer(arg_info);
-        type_info = g_arg_info_get_type_info(arg_info);
+        type_info = g_arg_info_get_type(arg_info);
         type_tag = g_type_info_get_tag(type_info);
 
         switch(arg_cache->direction) {
