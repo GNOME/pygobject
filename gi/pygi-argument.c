@@ -2000,7 +2000,7 @@ _pygi_marshal_in_void (PyGIState         *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    arg.v_pointer = py_arg;
+    (*arg).v_pointer = py_arg;
    
     return TRUE;
 }
@@ -2012,7 +2012,7 @@ _pygi_marshal_in_boolean (PyGIState         *state,
                           PyObject          *py_arg,
                           GIArgument        *arg)
 {
-    arg.v_boolean = PyObject_IsTrue(py_arg);
+    (*arg).v_boolean = PyObject_IsTrue(py_arg);
 
     return TRUE;
 }
@@ -2044,11 +2044,11 @@ _pygi_marshal_in_int8 (PyGIState         *state,
         return FALSE;
 
     if (long_ < -128 || long_ > 127) {
-        PyErr_Format (PyExc_ValueError, "%i not in range %i to %i", long_, -128, 127);
+        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, -128, 127);
         return FALSE;
     }
 
-    arg.v_long = long_;
+    (*arg).v_long = long_;
 
     return TRUE;
 }
@@ -2080,7 +2080,7 @@ _pygi_marshal_in_uint8 (PyGIState         *state,
         long_ = PYGLIB_PyLong_AsLong(py_long);
         Py_DECREF(py_long);
 
-        if (PyErr_Occured())
+        if (PyErr_Occurred())
             return FALSE;
     } else {
         PyErr_Format (PyExc_TypeError, "Must be number or single byte string, not %s",
@@ -2093,7 +2093,7 @@ _pygi_marshal_in_uint8 (PyGIState         *state,
         return FALSE;
     }
 
-    arg.v_long = long_;
+    (*arg).v_long = long_;
 
     return TRUE;
 }
@@ -2129,7 +2129,7 @@ _pygi_marshal_in_int16 (PyGIState         *state,
         return FALSE;
     }
 
-    arg.v_long = long_;
+    (*arg).v_long = long_;
 
     return TRUE;
 }
@@ -2165,7 +2165,7 @@ _pygi_marshal_in_uint16 (PyGIState         *state,
         return FALSE;
     }
 
-    arg.v_long = long_;
+    (*arg).v_long = long_;
 
     return TRUE;
 }
@@ -2197,11 +2197,11 @@ _pygi_marshal_in_int32 (PyGIState         *state,
         return FALSE;
 
     if (long_ < G_MININT32 || long_ > G_MAXINT32) {
-        PyErr_Format (PyExc_ValueError, "%i not in range %i to %i", long_, G_MININT32, G_MAXINT32);
+        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, G_MININT32, G_MAXINT32);
         return FALSE;
     }
 
-    arg.v_long = long_;
+    (*arg).v_long = long_;
 
     return TRUE;
 }
@@ -2227,8 +2227,8 @@ _pygi_marshal_in_uint32 (PyGIState         *state,
         return FALSE;
 
 #if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (number))
-        long_ = PyInt_AS_LONG (number);
+    if (PyInt_Check (py_long))
+        long_ = PyInt_AS_LONG (py_long);
     else
 #endif
         long_ = PyLong_AsLongLong(py_long);
@@ -2239,11 +2239,11 @@ _pygi_marshal_in_uint32 (PyGIState         *state,
         return FALSE;
 
     if (long_ < 0 || long_ > G_MAXUINT32) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lli", long_, 0, G_MAXUINT32);
+        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %u", long_, 0, G_MAXUINT32);
         return FALSE;
     }
 
-    arg.v_uint64 = long_;
+    (*arg).v_uint64 = long_;
 
     return TRUE;
 }
@@ -2269,8 +2269,8 @@ _pygi_marshal_in_int64 (PyGIState         *state,
         return FALSE;
 
 #if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (number))
-        long_ = PyInt_AS_LONG (number);
+    if (PyInt_Check (py_long))
+        long_ = PyInt_AS_LONG (py_long);
     else
 #endif
         long_ = PyLong_AsLongLong(py_long);
@@ -2281,11 +2281,11 @@ _pygi_marshal_in_int64 (PyGIState         *state,
         return FALSE;
 
     if (long_ < G_MININT64 || long_ > G_MAXINT64) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %lli to %lli", long_, G_MININT64, G_MAXINT64);
+        PyErr_Format (PyExc_ValueError, "%lli not in range %li to %li", long_, G_MININT64, G_MAXINT64);
         return FALSE;
     }
 
-    arg.v_uint64 = long_;
+    (*arg).v_uint64 = long_;
 
     return TRUE;
 }
@@ -2311,8 +2311,8 @@ _pygi_marshal_in_uint64 (PyGIState         *state,
         return FALSE;
 
 #if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (number))
-        long_ = PyInt_AS_LONG (number);
+    if (PyInt_Check (py_long))
+        long_ = PyInt_AS_LONG (py_long);
     else
 #endif
         long_ = PyLong_AsLongLong(py_long);
@@ -2323,11 +2323,11 @@ _pygi_marshal_in_uint64 (PyGIState         *state,
         return FALSE;
 
     if (long_ < 0 || long_ > G_MAXUINT64) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lli", long_, 0, G_MAXUINT64);
+        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lu", long_, 0, G_MAXUINT64);
         return FALSE;
     }
 
-    arg.v_uint64 = long_;
+    (*arg).v_uint64 = long_;
 
     return TRUE;
 }
@@ -2352,18 +2352,18 @@ _pygi_marshal_in_float (PyGIState         *state,
     if (!py_float)
         return FALSE;
 
-    double_ = PyFLoat_AsDouble(py_float);
+    double_ = PyFloat_AsDouble(py_float);
     Py_DECREF(py_float);
 
     if (PyErr_Occurred())
         return FALSE;
 
     if (double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) {
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", long_, -G_MAXFLOAT, G_MAXFLOAT);
+        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXFLOAT, G_MAXFLOAT);
         return FALSE;
     }
 
-    arg.v_double = double_;
+    (*arg).v_double = double_;
 
     return TRUE;
 }
@@ -2388,18 +2388,18 @@ _pygi_marshal_in_double (PyGIState         *state,
     if (!py_float)
         return FALSE;
 
-    double_ = PyFLoat_AsDouble(py_float);
+    double_ = PyFloat_AsDouble(py_float);
     Py_DECREF(py_float);
 
     if (PyErr_Occurred())
         return FALSE;
 
     if (double_ < -G_MAXDOUBLE || double_ > G_MAXDOUBLE) {
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", long_, -G_MAXDOUBLE, G_MAXDOUBLE);
+        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXDOUBLE, G_MAXDOUBLE);
         return FALSE;
     }
 
-    arg.v_double = double_;
+    (*arg).v_double = double_;
 
     return TRUE;
 }
@@ -2418,8 +2418,8 @@ _pygi_marshal_in_unichar (PyGIState         *state,
        PyObject *py_bytes;
 
        size = PyUnicode_GET_SIZE (py_arg);
-       py_bytes = PyUnicode_AsUTF8String();
-       _string = strdup(PYGLIB_PyBytes_AsString(py_bytes));
+       py_bytes = PyUnicode_AsUTF8String(py_arg);
+       string_ = strdup(PYGLIB_PyBytes_AsString(py_bytes));
        Py_DECREF(py_bytes);
  
 #if PY_VERSION_HEX < 0x03000000
@@ -2445,7 +2445,7 @@ _pygi_marshal_in_unichar (PyGIState         *state,
        return FALSE;
     }
 
-    arg.v_uint32 = g_utf8_get_char(string_);
+    (*arg).v_uint32 = g_utf8_get_char(string_);
     g_free(string_);
 
     return TRUE;
@@ -2464,7 +2464,7 @@ _pygi_marshal_in_gtype (PyGIState         *state,
                       py_arg->ob_type->tp_name);
     } 
 
-    arg.v_long = type_;
+    (*arg).v_long = type_;
     return TRUE;
 }
 gboolean
@@ -2481,12 +2481,12 @@ _pygi_marshal_in_utf8 (PyGIState         *state,
         if (!pystr_obj)
             return FALSE;
 
-        string = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
+        string_ = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
         Py_DECREF(pystr_obj);
     } 
 #if PY_VERSION_HEX < 0x03000000
     else if (PyString_Check(py_arg)) {
-        string = g_strdup(PyString_AsString (py_arg));
+        string_ = g_strdup(PyString_AsString (py_arg));
     }
 #endif
     else {
@@ -2495,7 +2495,7 @@ _pygi_marshal_in_utf8 (PyGIState         *state,
         return FALSE;
     }
 
-    arg.v_string = string_;
+    (*arg).v_string = string_;
     return TRUE;
 }
 
@@ -2514,12 +2514,12 @@ _pygi_marshal_in_filename (PyGIState         *state,
         if (!pystr_obj)
             return FALSE;
 
-        string = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
+        string_ = g_strdup(PYGLIB_PyBytes_AsString (pystr_obj));
         Py_DECREF(pystr_obj);
     } 
 #if PY_VERSION_HEX < 0x03000000
     else if (PyString_Check(py_arg)) {
-        string = g_strdup(PyString_AsString (py_arg));
+        string_ = g_strdup(PyString_AsString (py_arg));
     }
 #endif
     else {
@@ -2528,10 +2528,10 @@ _pygi_marshal_in_filename (PyGIState         *state,
         return FALSE;
     }
 
-    arg.v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
+    (*arg).v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
     g_free(string_);
 
-    if (arg.v_string == NULL) {
+    if ((*arg).v_string == NULL) {
         PyErr_SetString (PyExc_Exception, error->message);
         g_error_free(error);
         /* TODO: Convert the error to an exception. */
@@ -2548,13 +2548,13 @@ _pygi_marshal_in_array (PyGIState         *state,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
-    PyGIMarshalInFunc *in_marshaller;
+    PyGIMarshalInFunc in_marshaller;
     int i;
     Py_ssize_t length;
-    garray array_ = NULL;
+    GArray *array_ = NULL;
 
     if (py_arg == Py_None) {
-        arg.v_pointer = NULL;
+        (*arg).v_pointer = NULL;
         return TRUE;
     }
 
@@ -2588,30 +2588,30 @@ _pygi_marshal_in_array (PyGIState         *state,
 
     if (arg_cache->sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PYGLIB_PyBytes_Check(py_arg)) {
-        memcpy(array->data, PYGLIB_PyBytes_AsString(py_arg), length);
+        memcpy(array_->data, PYGLIB_PyBytes_AsString(py_arg), length);
 
         goto array_success;
     }
 
-    in_marshaler = arg_cache->sequence_cache->item_cache->in_marshaller;
+    in_marshaller = arg_cache->sequence_cache->item_cache->in_marshaller;
     for (i = 0; i < length; i++) {
         GIArgument item;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL) {
             int j;
             if (arg_cache->sequence_cache->item_cache->cleanup != NULL) {
-                PyGICleanupFunc *cleanup = arg_cache->sequence_cache->item_cache->cleanup;
-                for(j = 0; j < i; j++)
-                    cleanup(array_->data[j]);
+                PyGIArgCleanupFunc cleanup = arg_cache->sequence_cache->item_cache->cleanup;
+                /*for(j = 0; j < i; j++)
+                    cleanup((gpointer)(array_->data[j]));*/
             }
 
             g_array_free(array_, TRUE);
-            _PyGI_ERROR_PREFIX ("Item %zd: ", i);
+            _PyGI_ERROR_PREFIX ("Item %i: ", i);
             return FALSE;
         }
         arg_cache->sequence_cache->item_cache->in_marshaller(state, 
                                                              function_cache, 
-                                                             item_cache, 
+                                                             arg_cache->sequence_cache->item_cache, 
                                                              py_item, 
                                                              &item);
         g_array_insert_val(array_, i, item);
@@ -2619,7 +2619,7 @@ _pygi_marshal_in_array (PyGIState         *state,
 
 array_success:
 
-    arg.v_pointer = array;
+    (*arg).v_pointer = array_;
     return TRUE;
 }
 

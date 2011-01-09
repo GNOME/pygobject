@@ -30,6 +30,8 @@ G_BEGIN_DECLS
 typedef struct _PyGIFunctionCache PyGIFunctionCache;
 typedef struct _PyGIArgCache PyGIArgCache;
 
+typedef struct _PyGIState PyGIState;
+
 typedef gboolean (*PyGIMarshalInFunc) (PyGIState         *state,
                                        PyGIFunctionCache *function_cache,
                                        PyGIArgCache      *arg_cache,
@@ -58,12 +60,8 @@ typedef struct _PyGIInterfaceCache
 
 typedef struct _PyGIHashCache
 {
-    GITypeTag key_type_tag;
-    PyGIValidateFunc *key_validate_func;
-    PyGIMarshalFunc *key_marshal_func;
-    GITypeTag value_type_tag;
-    PyGIValidateFunc *value_validate_func;
-    PyGIValidateFunc *value_marshal_func;
+    PyGIArgCache *key_cache;
+    PyGIArgCache *value_cache;
 } PyGIHashCache;
 
 typedef struct _PyGICallbackCache
@@ -71,7 +69,7 @@ typedef struct _PyGICallbackCache
     gint py_user_data_index;
     gint user_data_index;
     gint destroy_notify_index;
-    GScope scope;
+    GIScopeType scope;
 } PyGICallbackCache;
 
 struct _PyGIArgCache
@@ -80,17 +78,22 @@ struct _PyGIArgCache
     gboolean is_pointer;
     GIDirection direction;
     GITransfer transfer;
+    GITypeTag type_tag;
     GIArgInfo *arg_info;
     GIArgument *default_value;
 
-    PyGIMashalInFunc in_marshaler;
-    PyGIMarshalOutFunc out_marshaler;
+    PyGIMarshalInFunc in_marshaller;
+    PyGIMarshalOutFunc out_marshaller;
     PyGIArgCleanupFunc cleanup;
 
+    /* FIXME: we should actually subclass ArgCache for each of these 
+     *        types but that requires we know more about the type
+     *        before we create the cache.
+     */
     PyGISequenceCache *sequence_cache;
     PyGIInterfaceCache *interface_cache;
     PyGIHashCache *hash_cache;
-    PyCallbackCache *callback_cache;
+    PyGICallbackCache *callback_cache;
 
     gint c_arg_index;
     gint py_arg_index;
@@ -103,7 +106,7 @@ struct _PyGIFunctionCache
 
     PyGIArgCache **args_cache;
     GSList *in_args;
-    GSList *out_arg;
+    GSList *out_args;
 
     /* counts */
     guint n_in_args;

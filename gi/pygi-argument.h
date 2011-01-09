@@ -66,35 +66,151 @@ void _pygi_argument_init (void);
 
 
 /*** argument marshaling and validating routines ***/
-PyGIMarshalInFunc _pygi_marshal_in_void;
-PyGIMarshalInFunc _pygi_marshal_in_int8;
-PyGIMarshalInFunc _pygi_marshal_in_uint8;
-PyGIMarshalInFunc _pygi_marshal_in_int16;
-PyGIMarshalInFunc _pygi_marshal_in_uint16;
-PyGIMarshalInFunc _pygi_marshal_in_int32;
-PyGIMarshalInFunc _pygi_marshal_in_uint32;
-PyGIMarshalInFunc _pygi_marshal_in_int64;
-PyGIMarshalInFunc _pygi_marshal_in_float;
-PyGIMarshalInFunc _pygi_marshal_in_double;
-PyGIMarshalInFunc _pygi_marshal_in_unichar;
-PyGIMarshalInFunc _pygi_marshal_in_gtype;
-PyGIMarshalInFunc _pygi_marshal_in_utf8;
-PyGIMarshalInFunc _pygi_marshal_in_filename;
-PyGIMarshalInFunc _pygi_marshal_in_array;
-PyGIMarshalInFunc _pygi_marshal_in_glist;
-PyGIMarshalInFunc _pygi_marshal_in_gslist;
-PyGIMarshalInFunc _pygi_marshal_in_ghash;
-PyGIMarshalInFunc _pygi_marshal_in_gerror;
-PyGIMarshalInFunc _pygi_marshal_in_interface_callback;
-PyGIMarshalInFunc _pygi_marshal_in_interface_enum;
-PyGIMarshalInFunc _pygi_marshal_in_interface_flags;
-PyGIMarshalInFunc _pygi_marshal_in_interface_struct;
-PyGIMarshalInFunc _pygi_marshal_in_interface_interface;
-PyGIMarshalInFunc _pygi_marshal_in_interface_boxed;
-PyGIMarshalInFunc _pygi_marshal_in_interface_object;
-PyGIMarshalInFunc _pygi_marshal_in_interface_union;
-
-
+gboolean _pygi_marshal_in_void        (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_boolean     (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_int8        (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_uint8       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_int16       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_uint16      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_int32       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_uint32      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_int64       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_uint64      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_float       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_double      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_unichar     (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_gtype       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_utf8        (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_filename    (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_array       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_glist       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_gslist      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_ghash       (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_gerror      (PyGIState         *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       PyObject          *py_arg,
+                                       GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_callback (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_enum     (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_flags    (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_struct   (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_interface(PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_boxed    (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_object   (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
+gboolean _pygi_marshal_in_interface_union    (PyGIState         *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg);
 
 G_END_DECLS
 

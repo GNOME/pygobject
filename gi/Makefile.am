@@ -52,6 +52,8 @@ _gi_la_SOURCES = \
 	pygi-private.h \
 	pygi-property.c \
 	pygi-property.h \
+	pygi-cache.h \
+	pygi-cache.c \
 	pygobject-external.h \
 	gimodule.c
 
