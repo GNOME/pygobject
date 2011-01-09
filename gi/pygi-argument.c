@@ -2548,9 +2548,79 @@ _pygi_marshal_in_array (PyGIState         *state,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    PyGIMarshalInFunc *in_marshaller;
+    int i;
+    Py_ssize_t length;
+    garray array_ = NULL;
+
+    if (py_arg == Py_None) {
+        arg.v_pointer = NULL;
+        return TRUE;
+    }
+
+    if (!PySequence_Check (py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    length = PySequence_Length (py_arg);
+    if (length < 0)
+        return FALSE;
+
+    if (arg_cache->sequence_cache->fixed_size >= 0 &&
+        arg_cache->sequence_cache->fixed_size != length) {
+        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
+                              arg_cache->sequence_cache->fixed_size, length);
+
+        return FALSE;
+    }
+
+    array_ = g_array_sized_new (arg_cache->sequence_cache->is_zero_terminated, 
+                                FALSE,
+                                arg_cache->sequence_cache->item_size,
+                                length);
+
+    if (array_ == NULL) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
+    if (arg_cache->sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
+        PYGLIB_PyBytes_Check(py_arg)) {
+        memcpy(array->data, PYGLIB_PyBytes_AsString(py_arg), length);
+
+        goto array_success;
+    }
+
+    in_marshaler = arg_cache->sequence_cache->item_cache->in_marshaller;
+    for (i = 0; i < length; i++) {
+        GIArgument item;
+        PyObject *py_item = PySequence_GetItem (py_arg, i);
+        if (py_item == NULL) {
+            int j;
+            if (arg_cache->sequence_cache->item_cache->cleanup != NULL) {
+                PyGICleanupFunc *cleanup = arg_cache->sequence_cache->item_cache->cleanup;
+                for(j = 0; j < i; j++)
+                    cleanup(array_->data[j]);
+            }
+
+            g_array_free(array_, TRUE);
+            _PyGI_ERROR_PREFIX ("Item %zd: ", i);
+            return FALSE;
+        }
+        arg_cache->sequence_cache->item_cache->in_marshaller(state, 
+                                                             function_cache, 
+                                                             item_cache, 
+                                                             py_item, 
+                                                             &item);
+        g_array_insert_val(array_, i, item);
+    }
+
+array_success:
+
+    arg.v_pointer = array;
+    return TRUE;
 }
 
 gboolean

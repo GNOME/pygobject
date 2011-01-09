@@ -43,12 +43,10 @@ typedef gboolean (*PyGIArgCleanupFunc) (gpointer data);
 typedef struct _PyGISequenceCache
 {
     gssize fixed_size;
-    PyGIValidateFunc *item_validate_func;
-    PyGIMarshalFunc *item_marshal_func;
     gint len_arg_index;
     gboolean is_zero_terminated;
     gsize item_size;
-    GITypeTag item_tag_type;
+    PyGIArgCache *item_cache;
 } PyGISequenceCache;
 
 typedef struct _PyGIInterfaceCache
