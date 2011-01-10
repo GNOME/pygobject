@@ -25,14 +25,14 @@
 #include <Python.h>
 #include <girepository.h>
 
+#include "pygi-invoke-state-struct.h"
+
 G_BEGIN_DECLS
 
 typedef struct _PyGIFunctionCache PyGIFunctionCache;
 typedef struct _PyGIArgCache PyGIArgCache;
 
-typedef struct _PyGIState PyGIState;
-
-typedef gboolean (*PyGIMarshalInFunc) (PyGIState         *state,
+typedef gboolean (*PyGIMarshalInFunc) (PyGIInvokeState   *state,
                                        PyGIFunctionCache *function_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,

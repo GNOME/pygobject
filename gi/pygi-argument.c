@@ -30,6 +30,8 @@
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
+#include "pygi-cache.h"
+
 static void
 _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
                             PyObject  **lower,
@@ -1992,7 +1994,7 @@ _pygi_argument_init (void)
 /*** argument marshaling and validating routines ***/
 
 gboolean
-_pygi_marshal_in_void (PyGIState         *state,
+_pygi_marshal_in_void (PyGIInvokeState   *state,
                        PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
@@ -2006,7 +2008,7 @@ _pygi_marshal_in_void (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_boolean (PyGIState         *state,
+_pygi_marshal_in_boolean (PyGIInvokeState   *state,
                           PyGIFunctionCache *function_cache,
                           PyGIArgCache      *arg_cache,
                           PyObject          *py_arg,
@@ -2018,7 +2020,7 @@ _pygi_marshal_in_boolean (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_int8 (PyGIState         *state,
+_pygi_marshal_in_int8 (PyGIInvokeState   *state,
                        PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
@@ -2054,7 +2056,7 @@ _pygi_marshal_in_int8 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_uint8 (PyGIState         *state,
+_pygi_marshal_in_uint8 (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2099,7 +2101,7 @@ _pygi_marshal_in_uint8 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_int16 (PyGIState         *state,
+_pygi_marshal_in_int16 (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2135,7 +2137,7 @@ _pygi_marshal_in_int16 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_uint16 (PyGIState         *state,
+_pygi_marshal_in_uint16 (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2171,7 +2173,7 @@ _pygi_marshal_in_uint16 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_int32 (PyGIState         *state,
+_pygi_marshal_in_int32 (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2207,7 +2209,7 @@ _pygi_marshal_in_int32 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_uint32 (PyGIState         *state,
+_pygi_marshal_in_uint32 (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2249,7 +2251,7 @@ _pygi_marshal_in_uint32 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_int64 (PyGIState         *state,
+_pygi_marshal_in_int64 (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2291,7 +2293,7 @@ _pygi_marshal_in_int64 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_uint64 (PyGIState         *state,
+_pygi_marshal_in_uint64 (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2333,7 +2335,7 @@ _pygi_marshal_in_uint64 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_float (PyGIState         *state,
+_pygi_marshal_in_float (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2369,7 +2371,7 @@ _pygi_marshal_in_float (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_double (PyGIState         *state,
+_pygi_marshal_in_double (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2405,7 +2407,7 @@ _pygi_marshal_in_double (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_unichar (PyGIState         *state,
+_pygi_marshal_in_unichar (PyGIInvokeState   *state,
                           PyGIFunctionCache *function_cache,
                           PyGIArgCache      *arg_cache,
                           PyObject          *py_arg,
@@ -2451,7 +2453,7 @@ _pygi_marshal_in_unichar (PyGIState         *state,
     return TRUE;
 }
 gboolean
-_pygi_marshal_in_gtype (PyGIState         *state,
+_pygi_marshal_in_gtype (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2468,7 +2470,7 @@ _pygi_marshal_in_gtype (PyGIState         *state,
     return TRUE;
 }
 gboolean
-_pygi_marshal_in_utf8 (PyGIState         *state,
+_pygi_marshal_in_utf8 (PyGIInvokeState   *state,
                        PyGIFunctionCache *function_cache,
                        PyGIArgCache      *arg_cache,
                        PyObject          *py_arg,
@@ -2500,7 +2502,7 @@ _pygi_marshal_in_utf8 (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_filename (PyGIState         *state,
+_pygi_marshal_in_filename (PyGIInvokeState   *state,
                            PyGIFunctionCache *function_cache,
                            PyGIArgCache      *arg_cache,
                            PyObject          *py_arg,
@@ -2542,7 +2544,7 @@ _pygi_marshal_in_filename (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_array (PyGIState         *state,
+_pygi_marshal_in_array (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2626,7 +2628,7 @@ array_success:
 }
 
 gboolean
-_pygi_marshal_in_glist (PyGIState         *state,
+_pygi_marshal_in_glist (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2638,7 +2640,7 @@ _pygi_marshal_in_glist (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_gslist (PyGIState         *state,
+_pygi_marshal_in_gslist (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2650,7 +2652,7 @@ _pygi_marshal_in_gslist (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_ghash (PyGIState         *state,
+_pygi_marshal_in_ghash (PyGIInvokeState   *state,
                         PyGIFunctionCache *function_cache,
                         PyGIArgCache      *arg_cache,
                         PyObject          *py_arg,
@@ -2662,7 +2664,7 @@ _pygi_marshal_in_ghash (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_gerror (PyGIState         *state,
+_pygi_marshal_in_gerror (PyGIInvokeState   *state,
                          PyGIFunctionCache *function_cache,
                          PyGIArgCache      *arg_cache,
                          PyObject          *py_arg,
@@ -2674,7 +2676,7 @@ _pygi_marshal_in_gerror (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_callback (PyGIState         *state,
+_pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
                                      PyGIFunctionCache *function_cache,
                                      PyGIArgCache      *arg_cache,
                                      PyObject          *py_arg,
@@ -2686,7 +2688,7 @@ _pygi_marshal_in_interface_callback (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_enum (PyGIState         *state,
+_pygi_marshal_in_interface_enum (PyGIInvokeState   *state,
                                  PyGIFunctionCache *function_cache,
                                  PyGIArgCache      *arg_cache,
                                  PyObject          *py_arg,
@@ -2698,7 +2700,7 @@ _pygi_marshal_in_interface_enum (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_flags (PyGIState         *state,
+_pygi_marshal_in_interface_flags (PyGIInvokeState   *state,
                                   PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,
@@ -2710,7 +2712,7 @@ _pygi_marshal_in_interface_flags (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_struct (PyGIState         *state,
+_pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
                                    PyGIFunctionCache *function_cache,
                                    PyGIArgCache      *arg_cache,
                                    PyObject          *py_arg,
@@ -2722,7 +2724,7 @@ _pygi_marshal_in_interface_struct (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_interface (PyGIState         *state,
+_pygi_marshal_in_interface_interface (PyGIInvokeState   *state,
                                       PyGIFunctionCache *function_cache,
                                       PyGIArgCache      *arg_cache,
                                       PyObject          *py_arg,
@@ -2734,7 +2736,7 @@ _pygi_marshal_in_interface_interface (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_boxed (PyGIState         *state,
+_pygi_marshal_in_interface_boxed (PyGIInvokeState   *state,
                                   PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,
@@ -2746,7 +2748,7 @@ _pygi_marshal_in_interface_boxed (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_object (PyGIState         *state,
+_pygi_marshal_in_interface_object (PyGIInvokeState   *state,
                                    PyGIFunctionCache *function_cache,
                                    PyGIArgCache      *arg_cache,
                                    PyObject          *py_arg,
@@ -2758,7 +2760,7 @@ _pygi_marshal_in_interface_object (PyGIState         *state,
 }
 
 gboolean
-_pygi_marshal_in_interface_union (PyGIState         *state,
+_pygi_marshal_in_interface_union (PyGIInvokeState   *state,
                                   PyGIFunctionCache *function_cache,
                                   PyGIArgCache      *arg_cache,
                                   PyObject          *py_arg,

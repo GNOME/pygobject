@@ -29,6 +29,7 @@
 #include "pygi-callbacks.h"
 #include "pygi-invoke.h"
 #include "pygi-property.h"
+#include "pygi-cache.h"
 
 G_BEGIN_DECLS
 #if PY_VERSION_HEX >= 0x03000000

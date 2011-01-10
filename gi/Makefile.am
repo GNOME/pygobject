@@ -32,6 +32,7 @@ _gi_la_SOURCES = \
 	pygi-info.h \
 	pygi-invoke.c \
 	pygi-invoke.h \
+       pygi-invoke-state-struct.h \
 	pygi-foreign.c \
 	pygi-foreign.h \
 	pygi-foreign-gvariant.c \

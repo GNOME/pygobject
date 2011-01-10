@@ -550,9 +550,10 @@ _prepare_invocation_state (struct invocation_state *state,
     return TRUE;
 }
 
-static gboolean
-_invoke_function (struct invocation_state *state,
-                  GIFunctionInfo *function_info, PyObject *py_args)
+static inline gboolean
+_invoke_function (PyGIInvokeState *state,
+                  PyGIFunctionCache *cache,
+                  GIFunctionInfo *function_info)
 {
     GError *error;
     gint retval;
@@ -560,11 +561,13 @@ _invoke_function (struct invocation_state *state,
     error = NULL;
 
     pyg_begin_allow_threads;
+
+    /* FIXME: use this for now but we can streamline the call */
     retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
                                       state->in_args,
-                                      state->n_in_args,
+                                      cache->n_in_args,
                                       state->out_args,
-                                      state->n_out_args,
+                                      cache->n_out_args,
                                       &state->return_arg,
                                       &error);
     pyg_end_allow_threads;
@@ -580,20 +583,13 @@ _invoke_function (struct invocation_state *state,
         return FALSE;
     }
 
-    if (state->error_arg_pos >= 0) {
-        GError **error;
+    if (state->error != NULL) {
+        /* TODO: raise the right error, out of the error domain, if applicable. */
+        PyErr_SetString (PyExc_Exception, state->error->message);
 
-        error = state->args[state->error_arg_pos]->v_pointer;
+        /* TODO: release input arguments. */
 
-        if (*error != NULL) {
-            /* TODO: raise the right error, out of the error domain, if applicable. */
-            PyErr_SetString (PyExc_Exception, (*error)->message);
-            g_error_free (*error);
-
-            /* TODO: release input arguments. */
-
-            return FALSE;
-        }
+        return FALSE;
     }
 
     return TRUE;
@@ -914,35 +910,120 @@ _free_invocation_state (struct invocation_state *state)
     }
 }
 
+static inline gboolean
+_invoke_state_init_from_function_cache(PyGIInvokeState *state,
+                                       PyGIFunctionCache *cache,
+                                       PyObject *py_args)
+{
+    state->py_in_args = py_args;
+    state->n_py_in_args = PySequence_Length(py_args);
+    state->args = g_slice_alloc0(cache->n_args * sizeof(GIArgument *));
+    if (state->args == NULL && cache->n_args != 0) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
+    state->in_args = g_slice_alloc0(cache->n_in_args * sizeof(GIArgument));
+    if (state->in_args == NULL && cache->n_in_args != 0) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
+    state->out_args = g_slice_alloc0(cache->n_out_args * sizeof(GIArgument));
+    if (state->out_args == NULL && cache->n_out_args != 0) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
+    state->error = NULL;
+
+    return TRUE;
+}
+
+static inline void
+_invoke_state_clear(PyGIInvokeState *state, PyGIFunctionCache *cache)
+{
+    g_slice_free1(cache->n_args * sizeof(GIArgument *), state->args);
+    g_slice_free1(cache->n_in_args * sizeof(GIArgument), state->in_args);
+    g_slice_free1(cache->n_out_args * sizeof(GIArgument), state->out_args);
+}
+
+static inline gboolean
+_invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
+{
+    int i, in_count, out_count;
+    in_count = 0;
+    out_count = 0;
+    for (i = 0; i < cache->n_args; i++) {
+        GIArgument *c_arg;
+        PyGIArgCache *arg_cache = cache->args_cache[i];
+        PyObject *py_arg = NULL;
+
+        switch (arg_cache->direction) {
+            case GI_DIRECTION_IN:
+            case GI_DIRECTION_INOUT:
+                /* FIXME: get default or throw error if there aren't enough pyargs */
+                py_arg =
+                    PyTuple_GET_ITEM(state->py_in_args,
+                                     arg_cache->py_arg_index);
+
+                state->args[i] = &(state->in_args[in_count]);
+                in_count++;
+                break;
+            case GI_DIRECTION_OUT:
+                state->args[i] = &(state->out_args[out_count]);
+                out_count++;
+                break;
+        }
+
+        c_arg = state->args[i];
+        if (arg_cache->in_marshaller != NULL) {
+            gboolean success = arg_cache->in_marshaller(state,
+                                                        cache,
+                                                        arg_cache,
+                                                        py_arg,
+                                                        c_arg);
+            if (!success)
+                return FALSE;
+        }
+
+    }
+
+    return TRUE;
+}
+
+static inline PyObject *
+_invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
+{
+    /* FIXME: we are just sending back Py_None for now */
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 PyObject *
 _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
 {
-    struct invocation_state state = { 0, };
+    PyGIInvokeState state = { 0, };
+    PyObject *ret;
 
     if (self->cache == NULL) {
         self->cache = _pygi_function_cache_new(self->info);
         if (self->cache == NULL)
             return NULL;
     }
-    _initialize_invocation_state (&state, self->info, py_args);
+    _invoke_state_init_from_function_cache(&state, self->cache, py_args);
+    if (!_invoke_marshal_in_args (&state, self->cache))
+        goto err;
 
-    if (!_prepare_invocation_state (&state, self->info, py_args)) {
-        _free_invocation_state (&state);
-        return NULL;
-    }
+    if (!_invoke_function(&state, self->cache, self->info))
+        goto err;
 
-    if (!_invoke_function (&state, self->info, py_args)) {
-        _free_invocation_state (&state);
-        return NULL;
-    }
+    ret = _invoke_marshal_out_args (&state, self->cache);
+    _invoke_state_clear (&state, self->cache);
+    return ret;
 
-    if (!_process_invocation_state (&state, self->info, py_args)) {
-        _free_invocation_state (&state);
-        return NULL;
-    }
-
-    _free_invocation_state (&state);
-    return state.return_value;
+err:
+    _invoke_state_clear (&state, self->cache);
+    return NULL;
 }
 

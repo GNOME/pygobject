@@ -27,7 +27,7 @@
 #include <girepository.h>
 
 #include "pygi-private.h"
-
+#include "pygi-invoke-state-struct.h"
 G_BEGIN_DECLS
 
 PyObject *_wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args);
