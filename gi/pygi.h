@@ -32,6 +32,7 @@
 #if ENABLE_INTROSPECTION
 
 #include <girepository.h>
+#include "pygi-cache.h"
 
 typedef struct {
     PyObject_HEAD
@@ -41,6 +42,7 @@ typedef struct {
 typedef struct {
     PyObject_HEAD
     GIBaseInfo *info;
+    PyGIFunctionCache *cache;
     PyObject *inst_weakreflist;
 } PyGIBaseInfo;
 

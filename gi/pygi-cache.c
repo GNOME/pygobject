@@ -31,7 +31,7 @@ PyGIArgCache * _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
                                   gint py_arg_index);
 /* cleanup */
 static inline void
-_pygi_interface_cache_free (PyGIInterfaceCache *cache)
+_interface_cache_free_func (PyGIInterfaceCache *cache)
 {
     if (cache != NULL) {
         Py_XDECREF(cache->py_type);
@@ -46,15 +46,15 @@ _pygi_hash_cache_free (PyGIHashCache *cache)
         g_slice_free(PyGIHashCache, cache);
 }
 
-static inline void
-_pygi_sequence_cache_free (PyGISequenceCache *cache)
+static void
+_sequence_cache_free_func (PyGISequenceCache *cache)
 {
     if (cache != NULL)
         g_slice_free(PyGISequenceCache, cache);
 }
 
-static inline void
-_pygi_callback_cache_free (PyGICallbackCache *cache)
+static void
+_callback_cache_free_func (PyGICallbackCache *cache)
 {
     if (cache != NULL)
         g_slice_free(PyGICallbackCache, cache);
@@ -63,7 +63,11 @@ _pygi_callback_cache_free (PyGICallbackCache *cache)
 void
 _pygi_arg_cache_free (PyGIArgCache *cache)
 {
-    g_base_info_unref(cache->arg_info);
+    if (cache == NULL)
+        return;
+
+    if (cache->arg_info != NULL)
+        g_base_info_unref(cache->arg_info);
     if (cache->destroy_notify)
         cache->destroy_notify(cache);
     else
@@ -75,13 +79,16 @@ _pygi_function_cache_free (PyGIFunctionCache *cache)
 {
     int i;
 
+    if (cache == NULL)
+        return;
+
     g_slist_free(cache->in_args);
     g_slist_free(cache->out_args);
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *tmp = cache->args_cache[i];
         _pygi_arg_cache_free(tmp);
     }
-
+    g_slice_free1(cache->n_args * sizeof(PyGIArgCache *), cache->args_cache);
     g_slice_free(PyGIFunctionCache, cache);
 }
 
@@ -97,7 +104,8 @@ _function_cache_new_from_function_info(GIFunctionInfo *function_info)
     fc->is_method = flags & GI_FUNCTION_IS_METHOD;
     fc->is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;
     fc->n_args = g_callable_info_get_n_args ( (GICallableInfo *) function_info);
-    fc->args_cache = g_slice_alloc0(fc->n_args * sizeof(PyGIArgCache *));
+    if (fc->n_args > 0)
+        fc->args_cache = g_slice_alloc0(fc->n_args * sizeof(PyGIArgCache *));
 
     return fc;
 }
@@ -122,8 +130,6 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
     item_type_info = g_type_info_get_param_type (type_info, 0);
     item_type_tag = g_type_info_get_tag (item_type_info);
 
-    sc->item_cache->type_tag = item_type_tag;
-
     /* FIXME: support out also */
     sc->item_cache = _arg_cache_in_new_from_type_info(item_type_info,
                                                       NULL,
@@ -132,9 +138,15 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
                                                       GI_DIRECTION_IN,
                                                       0, 0);
 
+    if (sc->item_cache == NULL) {
+        _pygi_arg_cache_free((PyGIArgCache *)sc);
+        return NULL;
+    }
+   
+    sc->item_cache->type_tag = item_type_tag;    
     g_base_info_unref( (GIBaseInfo *) item_type_info);
 
-    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_pygi_sequence_cache_free;
+    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
 
     return sc;
 }
@@ -443,7 +455,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
 {
     int arg_index;
     for (arg_index = 0; arg_index < function_cache->n_args; arg_index++) {
-        PyGIArgCache *arg_cache;
+        PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
         GIDirection direction;
@@ -463,7 +475,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
         type_info = g_arg_info_get_type(arg_info);
         type_tag = g_type_info_get_tag(type_info);
 
-        switch(arg_cache->direction) {
+        switch(direction) {
             case GI_DIRECTION_IN:
                 py_arg_index = function_cache->n_in_args;
                 function_cache->n_in_args++;
@@ -477,16 +489,33 @@ _args_cache_generate(GIFunctionInfo *function_info,
                                                      arg_index,
                                                      py_arg_index);
 
+                if (arg_cache == NULL)
+                    goto arg_err;
+
                 function_cache->in_args =
                     g_slist_append(function_cache->in_args, arg_cache);
                 break;
 
             case GI_DIRECTION_OUT:
                 function_cache->n_out_args++;
+                PyErr_Format(PyExc_NotImplementedError,
+                             "Out caching is not fully implemented yet");
+
+                goto arg_err;
+
+            case GI_DIRECTION_INOUT:
+                PyErr_Format(PyExc_NotImplementedError,
+                             "In/Out caching is not fully implemented yet");
+                goto arg_err;
+
         }
 
         function_cache->args_cache[arg_index] = arg_cache;
         g_base_info_unref( (GIBaseInfo *) type_info);
+        continue;
+arg_err:
+        g_base_info_unref( (GIBaseInfo *) type_info);
+        return FALSE;
     }
     return TRUE;
 }
@@ -495,9 +524,13 @@ PyGIFunctionCache *
 _pygi_function_cache_new (GIFunctionInfo *function_info)
 {
     PyGIFunctionCache *fc = _function_cache_new_from_function_info(function_info);
+    if (fc == NULL)
+        return NULL;
+
     if (!_args_cache_generate(function_info, fc))
         goto err;
 
+    return fc;
 err:
     _pygi_function_cache_free(fc);
     return NULL;

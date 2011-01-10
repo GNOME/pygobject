@@ -920,6 +920,11 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
 {
     struct invocation_state state = { 0, };
 
+    if (self->cache == NULL) {
+        self->cache = _pygi_function_cache_new(self->info);
+        if (self->cache == NULL)
+            return NULL;
+    }
     _initialize_invocation_state (&state, self->info, py_args);
 
     if (!_prepare_invocation_state (&state, self->info, py_args)) {

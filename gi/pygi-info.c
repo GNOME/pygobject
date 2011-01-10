@@ -22,6 +22,7 @@
  */
 
 #include "pygi-private.h"
+#include "pygi-cache.h"
 
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
@@ -36,6 +37,8 @@ _base_info_dealloc (PyGIBaseInfo *self)
     PyObject_ClearWeakRefs ( (PyObject *) self);
 
     g_base_info_unref (self->info);
+    
+    _pygi_function_cache_free(self->cache);
 
     Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
 }
