@@ -1011,6 +1011,7 @@ _wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
         if (self->cache == NULL)
             return NULL;
     }
+
     _invoke_state_init_from_function_cache(&state, self->cache, py_args);
     if (!_invoke_marshal_in_args (&state, self->cache))
         goto err;

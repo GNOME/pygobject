@@ -39,7 +39,6 @@ typedef gboolean (*PyGIMarshalInFunc) (PyGIInvokeState   *state,
                                        GIArgument        *arg);
 
 typedef gboolean (*PyGIMarshalOutFunc) (void);
-typedef gboolean (*PyGIArgCleanupFunc) (gpointer data);
 
 struct _PyGIArgCache
 {

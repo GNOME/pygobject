@@ -2604,7 +2604,7 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
         if (py_item == NULL) {
             int j;
             if (sequence_cache->item_cache->cleanup != NULL) {
-                PyGIArgCleanupFunc cleanup = sequence_cache->item_cache->cleanup;
+                GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
                 /*for(j = 0; j < i; j++)
                     cleanup((gpointer)(array_->data[j]));*/
             }
@@ -2754,9 +2754,16 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
                                    PyObject          *py_arg,
                                    GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    if (py_arg == Py_None) {
+        (*arg).v_pointer = NULL;
+        return TRUE;
+    }
+
+    (*arg).v_pointer = pygobject_get (py_arg);
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+        g_object_ref ((*arg).v_pointer);
+
+    return TRUE;
 }
 
 gboolean
