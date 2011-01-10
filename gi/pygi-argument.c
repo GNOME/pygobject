@@ -2071,7 +2071,7 @@ _pygi_marshal_in_uint8 (PyGIInvokeState   *state,
             return FALSE;
         }
 
-        long_ = (long)(PYGLIB_PyBytes_AsString(py_arg)[0]);
+        long_ = (unsigned char)(PYGLIB_PyBytes_AsString(py_arg)[0]);
 
     } else if (PyNumber_Check(py_arg)) {
         PyObject *py_long;
