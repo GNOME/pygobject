@@ -178,8 +178,17 @@ class IntrospectionModule(object):
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
     def __dir__ (self):
-        attribs_list = repository.get_infos(self._namespace)
-        return list(map(lambda x: x.get_name(), attribs_list))
+        # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
+
+        # update *set* because some repository attributes have already been
+        # wrapped by __getattr__() and included in self.__dict__
+        namespace_infos = repository.get_infos(self._namespace)
+        result.update(info.get_name() for info in namespace_infos)
+
+        return list(result)
+
 
 class DynamicGObjectModule(IntrospectionModule):
     """Wrapper for the GObject module
@@ -254,12 +263,17 @@ class DynamicModule(object):
         return getattr(self.introspection_module, name)
 
     def __dir__ (self):
-        repository.require(self._namespace, self._version)
+        if self.introspection_module is None:
+            self._import()
+            
+        # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
         
-        namespace_infos = repository.get_infos(self._namespace)
-        result = [info.get_name() for info in namespace_infos]
-        result.extend(self.__dict__.keys())
-        return result
+        result.update(dir(self.introspection_module))
+        override_exports = getattr(self._overrides_module, '__all__', ())
+        result.update(override_exports)
+        return list(result)
 
     def __repr__(self):
         repository.require(self._namespace, self._version)
