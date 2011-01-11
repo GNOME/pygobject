@@ -212,6 +212,123 @@ gboolean _pygi_marshal_in_interface_union    (PyGIInvokeState   *state,
                                               PyObject          *py_arg,
                                               GIArgument        *arg);
 
+PyObject *_pygi_marshal_out_void      (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_boolean   (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_int8      (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_uint8     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_int16     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_uint16    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_int32     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_uint32    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_int64     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_uint64    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_float     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_double    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_unichar   (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_gtype     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_utf8      (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_filename  (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_array     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_glist     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_gslist    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_ghash     (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_gerror    (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_callback(PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_enum   (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_flags  (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_interface(PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_boxed  (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_object (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+PyObject *_pygi_marshal_out_interface_union  (PyGIInvokeState   *state,
+                                              PyGIFunctionCache *function_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              GIArgument        *arg);
+
 G_END_DECLS
 
 #endif /* __PYGI_ARGUMENT_H__ */

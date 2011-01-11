@@ -995,9 +995,15 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 static inline PyObject *
 _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 {
-    /* FIXME: we are just sending back Py_None for now */
-    Py_INCREF(Py_None);
-    return Py_None;
+    PyObject *py_out = NULL;
+    PyObject *py_return = NULL;
+
+    if (cache->return_cache)
+        py_return = cache->return_cache->out_marshaller(state,
+                                                        cache,
+                                                        cache->return_cache,
+                                                        &state->return_arg);
+    return py_return;
 }
 
 PyObject *

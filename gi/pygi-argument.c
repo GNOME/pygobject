@@ -2718,10 +2718,10 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
                                    PyObject          *py_arg,
                                    GIArgument        *arg)
 {
-    PyGIIntefaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
     if (py_arg == Py_None) {
-        arg.v_pointer = NULL;
+        arg->v_pointer = NULL;
         return TRUE;
     }
 
@@ -2739,8 +2739,8 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
             return FALSE;
         }
 
-        (*argv).v_pointer = closure;
-    } else if (iface_cache->g_type == G_VALUE) {
+        (*arg).v_pointer = closure;
+    } else if (iface_cache->g_type == G_TYPE_VALUE) {
         GValue *value;
         GType object_type;
 
@@ -2752,7 +2752,7 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
 
         value = g_slice_new0 (GValue);
         g_value_init (value, object_type);
-        if (pyg_value_from_pyobject (value, object) < 0) {
+        if (pyg_value_from_pyobject (value, py_arg) < 0) {
             g_slice_free (GValue, value);
             PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
             return FALSE;
@@ -2822,5 +2822,382 @@ _pygi_marshal_in_interface_union (PyGIInvokeState   *state,
     PyErr_Format(PyExc_NotImplementedError,
                  "Marshalling for this type is not implemented yet");
     return FALSE;
+}
+
+PyObject *
+_pygi_marshal_out_void (PyGIInvokeState   *state,
+                        PyGIFunctionCache *function_cache,
+                        PyGIArgCache      *arg_cache,
+                        GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+    if (arg_cache->is_pointer)
+        py_obj = arg->v_pointer;
+    else
+        py_obj = Py_None;
+ 
+    Py_XINCREF(py_obj);
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_boolean (PyGIInvokeState   *state,
+                           PyGIFunctionCache *function_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
+{
+    PyObject *py_obj = PyBool_FromLong(arg->v_boolean);
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_int8 (PyGIInvokeState   *state,
+                        PyGIFunctionCache *function_cache,
+                        PyGIArgCache      *arg_cache,
+                        GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_uint8 (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_int16 (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_uint16 (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_int32 (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_uint32 (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_int64 (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_uint64 (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_float (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_double (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_unichar (PyGIInvokeState   *state,
+                           PyGIFunctionCache *function_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_gtype (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_utf8 (PyGIInvokeState   *state,
+                        PyGIFunctionCache *function_cache,
+                        PyGIArgCache      *arg_cache,
+                        GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_filename (PyGIInvokeState   *state,
+                            PyGIFunctionCache *function_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_array (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_glist (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_gslist (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_ghash (PyGIInvokeState   *state,
+                         PyGIFunctionCache *function_cache,
+                         PyGIArgCache      *arg_cache,
+                         GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_gerror (PyGIInvokeState   *state,
+                          PyGIFunctionCache *function_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_callback(PyGIInvokeState   *state,
+                                     PyGIFunctionCache *function_cache,
+                                     PyGIArgCache      *arg_cache,
+                                     GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_enum (PyGIInvokeState   *state,
+                                  PyGIFunctionCache *function_cache,
+                                  PyGIArgCache      *arg_cache,
+                                  GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_flags (PyGIInvokeState   *state,
+                                   PyGIFunctionCache *function_cache,
+                                   PyGIArgCache      *arg_cache,
+                                   GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
+                                    PyGIFunctionCache *function_cache,
+                                    PyGIArgCache      *arg_cache,
+                                    GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_interface (PyGIInvokeState   *state,
+                                       PyGIFunctionCache *function_cache,
+                                       PyGIArgCache      *arg_cache,
+                                       GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_boxed (PyGIInvokeState   *state,
+                                   PyGIFunctionCache *function_cache,
+                                   PyGIArgCache      *arg_cache,
+                                   GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_object (PyGIInvokeState   *state,
+                                    PyGIFunctionCache *function_cache,
+                                    PyGIArgCache      *arg_cache,
+                                    GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
+}
+
+PyObject *
+_pygi_marshal_out_interface_union  (PyGIInvokeState   *state,
+                                    PyGIFunctionCache *function_cache,
+                                    PyGIArgCache      *arg_cache,
+                                    GIArgument        *arg)
+{
+    PyObject *py_obj = NULL;
+
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Marshalling for this type is not implemented yet");
+    return py_obj;
 }
 

@@ -38,12 +38,17 @@ typedef gboolean (*PyGIMarshalInFunc) (PyGIInvokeState   *state,
                                        PyObject          *py_arg,
                                        GIArgument        *arg);
 
-typedef gboolean (*PyGIMarshalOutFunc) (void);
+typedef PyObject *(*PyGIMarshalOutFunc) (PyGIInvokeState   *state,
+                                         PyGIFunctionCache *function_cache,
+                                         PyGIArgCache      *arg_cache,
+                                         GIArgument        *arg);
 
 struct _PyGIArgCache
 {
     gboolean is_aux;
     gboolean is_pointer;
+    gboolean is_caller_allocates;
+
     GIDirection direction;
     GITransfer transfer;
     GITypeTag type_tag;
@@ -100,6 +105,7 @@ struct _PyGIFunctionCache
     gboolean is_method;
     gboolean is_constructor;
 
+    PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;
     GSList *in_args;
     GSList *out_args;
