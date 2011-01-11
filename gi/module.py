@@ -251,7 +251,7 @@ class DynamicModule(object):
             if key in registry:
                 return registry[key]
 
-        return self.introspection_module.__getattr__(name)
+        return getattr(self.introspection_module, name)
 
     def __dir__ (self):
         repository.require(self._namespace, self._version)
