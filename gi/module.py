@@ -260,3 +260,12 @@ class DynamicModule(object):
         result = [info.get_name() for info in namespace_infos]
         result.extend(self.__dict__.keys())
         return result
+
+    def __repr__(self):
+        repository.require(self._namespace, self._version)
+
+        path = repository.get_typelib_path(self._namespace)
+        return "<%s.%s %r from %r>" % (self.__class__.__module__,
+                                      self.__class__.__name__,
+                                      self._namespace,
+                                      path)
