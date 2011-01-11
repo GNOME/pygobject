@@ -217,6 +217,7 @@ class DynamicModule(object):
         self.introspection_module = None
         self._version = None
         self._overrides_module = None
+        self.__path__ = None
 
     def require_version(self, version):
         if self.introspection_module is not None and \
@@ -250,9 +251,12 @@ class DynamicModule(object):
             if key in registry:
                 return registry[key]
 
-        return getattr(self.introspection_module, name)
+        return self.introspection_module.__getattr__(name)
 
     def __dir__ (self):
         repository.require(self._namespace, self._version)
-        attribs_list = repository.get_infos(self._namespace)
-        return list(map(lambda x: x.get_name(), attribs_list))
+        
+        namespace_infos = repository.get_infos(self._namespace)
+        result = [info.get_name() for info in namespace_infos]
+        result.extend(self.__dict__.keys())
+        return result
