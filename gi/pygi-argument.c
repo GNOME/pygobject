@@ -2718,21 +2718,60 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
                                    PyObject          *py_arg,
                                    GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
-}
+    PyGIIntefaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-gboolean
-_pygi_marshal_in_interface_interface (PyGIInvokeState   *state,
-                                      PyGIFunctionCache *function_cache,
-                                      PyGIArgCache      *arg_cache,
-                                      PyObject          *py_arg,
-                                      GIArgument        *arg)
-{
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    if (py_arg == Py_None) {
+        arg.v_pointer = NULL;
+        return TRUE;
+    }
+
+    if (iface_cache->g_type == G_TYPE_CLOSURE) {
+        GClosure *closure;
+        if (!PyCallable_Check (py_arg)) {
+            PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
+                          py_arg->ob_type->tp_name);
+            return FALSE;
+        }
+
+        closure = pyg_closure_new (py_arg, NULL, NULL);
+        if (closure == NULL) {
+            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
+            return FALSE;
+        }
+
+        (*argv).v_pointer = closure;
+    } else if (iface_cache->g_type == G_VALUE) {
+        GValue *value;
+        GType object_type;
+
+        object_type = pyg_type_from_object_strict ( (PyObject *) py_arg->ob_type, FALSE);
+        if (object_type == G_TYPE_INVALID) {
+            PyErr_SetString (PyExc_RuntimeError, "unable to retrieve object's GType");
+            return FALSE;
+        }
+
+        value = g_slice_new0 (GValue);
+        g_value_init (value, object_type);
+        if (pyg_value_from_pyobject (value, object) < 0) {
+            g_slice_free (GValue, value);
+            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
+            return FALSE;
+        }
+
+        (*arg).v_pointer = value;
+
+    } else if (iface_cache->is_foreign) {
+         PyErr_Format (PyExc_NotImplementedError, "foreign types not implemented yet");
+
+        return FALSE;
+    } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
+        PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
+                      iface_cache->type_name, 
+                      iface_cache->py_type->ob_type->tp_name);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 gboolean
@@ -2757,6 +2796,13 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
     if (py_arg == Py_None) {
         (*arg).v_pointer = NULL;
         return TRUE;
+    }
+
+    if (!PyObject_IsInstance (py_arg, ((PyGIInterfaceCache *)arg_cache)->py_type)) {
+        PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
+                      ((PyGIInterfaceCache *)arg_cache)->type_name, 
+                      ((PyGIInterfaceCache *)arg_cache)->py_type->ob_type->tp_name);
+        return FALSE;
     }
 
     (*arg).v_pointer = pygobject_get (py_arg);

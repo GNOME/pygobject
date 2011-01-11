@@ -18,8 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  * USA
  */
+
+#include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-argument.h"
+#include "pygi-type.h"
 #include <girepository.h>
 
 PyGIArgCache * _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
@@ -36,6 +39,8 @@ _interface_cache_free_func (PyGIInterfaceCache *cache)
     if (cache != NULL) {
         Py_XDECREF(cache->py_type);
         g_slice_free(PyGIInterfaceCache, cache);
+        if (cache->type_name != NULL)
+            g_free(cache->type_name);
     }
 }
 
@@ -103,11 +108,35 @@ _function_cache_new_from_function_info(GIFunctionInfo *function_info)
     flags = g_function_info_get_flags(function_info);
     fc->is_method = flags & GI_FUNCTION_IS_METHOD;
     fc->is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;
+
     fc->n_args = g_callable_info_get_n_args ( (GICallableInfo *) function_info) + (fc->is_method ? 1: 0);
     if (fc->n_args > 0)
         fc->args_cache = g_slice_alloc0(fc->n_args * sizeof(PyGIArgCache *));
 
     return fc;
+}
+
+
+static inline PyGIInterfaceCache *
+_interface_cache_new_from_interface_info(GIInterfaceInfo *iface_info)
+{
+    PyGIInterfaceCache *ic;
+    
+    ic = g_slice_new0(PyGIInterfaceCache);
+    ((PyGIArgCache *)ic)->destroy_notify = (GDestroyNotify)_interface_cache_free_func;    
+    ic->g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *)iface_info);
+    if (ic->g_type != G_TYPE_NONE) {
+        ic->py_type = _pygi_type_get_from_g_type (ic->g_type);
+    } else {
+        /* FIXME: avoid passing GI infos to noncache API */
+        ic->py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
+    }
+
+    if (ic->py_type == NULL)
+        return NULL;
+
+    ic->type_name == _pygi_g_base_info_get_fullname(iface_info);
+    return ic;
 }
 
 static inline PyGISequenceCache *
@@ -118,6 +147,7 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
     GITypeTag item_type_tag;
 
     sc = g_slice_new0(PyGISequenceCache);
+    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_sequence_cache_free_func;    
 
     sc->fixed_size = -1;
     sc->len_arg_index = -1;
@@ -145,8 +175,6 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
    
     sc->item_cache->type_tag = item_type_tag;    
     g_base_info_unref( (GIBaseInfo *) item_type_info);
-
-    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
 
     return sc;
 }
@@ -355,20 +383,33 @@ _arg_cache_new_for_in_interface_union(void)
     return arg_cache;
 }
 
+
+static void 
+_g_slice_free_gvalue_func(GValue *value) {
+    g_slice_free(GValue, value);
+}
+
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_struct(void)
+_arg_cache_new_for_in_interface_struct(GIInterfaceInfo *iface_info,
+                                       GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache);
+    iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
+    if (iface_cache->g_type == G_TYPE_VALUE)
+        arg_cache->cleanup = _g_slice_free_gvalue_func;
+    if (iface_cache->g_type == G_TYPE_CLOSURE)
+        arg_cache->cleanup = g_closure_unref;
+
     return arg_cache;
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_object(GITransfer transfer)
+_arg_cache_new_for_in_interface_object(GIInterfaceInfo *iface_info,
+                                       GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
     arg_cache->in_marshaller = _pygi_marshal_in_interface_object;
     if (transfer == GI_TRANSFER_EVERYTHING)
         arg_cache->cleanup = (GDestroyNotify)g_object_unref;
@@ -377,12 +418,11 @@ _arg_cache_new_for_in_interface_object(GITransfer transfer)
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_boxed(void)
+_arg_cache_new_for_in_interface_boxed(GIInterfaceInfo *iface_info,
+                                      GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_boxed;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
     return arg_cache;
 }
 
@@ -436,10 +476,12 @@ _arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
             break;
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
-            arg_cache = _arg_cache_new_for_in_interface_object(transfer);
+            arg_cache = _arg_cache_new_for_in_interface_object(iface_info,
+                                                               transfer);
             break;
         case GI_INFO_TYPE_BOXED:
-            arg_cache = _arg_cache_new_for_in_interface_boxed();
+            arg_cache = _arg_cache_new_for_in_interface_boxed(iface_info,
+                                                              transfer);
             break;
         case GI_INFO_TYPE_CALLBACK:
             arg_cache = _arg_cache_new_for_in_interface_callback();
@@ -461,6 +503,8 @@ _arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
         arg_cache->py_arg_index = py_arg_index;
         arg_cache->c_arg_index = c_arg_index;
     }
+
+    return arg_cache;
 }
 
 
@@ -604,7 +648,8 @@ _args_cache_generate(GIFunctionInfo *function_info,
         function_cache->n_in_args++;
     }
 
-    for (arg_index; arg_index < function_cache->n_args; arg_index++) {
+
+    for (; arg_index < function_cache->n_args; arg_index++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;

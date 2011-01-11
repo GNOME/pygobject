@@ -76,6 +76,7 @@ typedef struct _PyGIInterfaceCache
     gboolean is_foreign;
     GType g_type;
     PyObject *py_type;
+    gchar *type_name;
 } PyGIInterfaceCache;
 
 typedef struct _PyGIHashCache
