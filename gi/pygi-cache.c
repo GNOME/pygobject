@@ -914,6 +914,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
                      PyGIFunctionCache *function_cache)
 {
     int arg_index = 0;
+    int i;
     GITypeInfo *return_info;
     GITypeTag return_type_tag;
     PyGIArgCache *return_cache;
@@ -961,7 +962,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
     }
 
 
-    for (; arg_index < function_cache->n_args; arg_index++) {
+    for (i=0; arg_index < function_cache->n_args; arg_index++, i++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
@@ -975,7 +976,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
             continue;
 
         arg_info =
-            g_callable_info_get_arg( (GICallableInfo *) function_info, arg_index);
+            g_callable_info_get_arg( (GICallableInfo *) function_info, i);
 
         direction = g_arg_info_get_direction(arg_info);
         transfer = g_arg_info_get_ownership_transfer(arg_info);
@@ -1005,10 +1006,21 @@ _args_cache_generate(GIFunctionInfo *function_info,
 
             case GI_DIRECTION_OUT:
                 function_cache->n_out_args++;
-                PyErr_Format(PyExc_NotImplementedError,
-                             "Out caching is not fully implemented yet");
+                arg_cache = 
+                    _arg_cache_out_new_from_type_info(return_info,
+                                                      function_cache,
+                                                      type_tag,
+                                                      transfer,
+                                                      direction,
+                                                      arg_index);
 
-                goto arg_err;
+                if (arg_cache == NULL)
+                    goto arg_err;
+
+                function_cache->out_args =
+                    g_slist_append(function_cache->out_args, arg_cache);
+
+                break;
 
             case GI_DIRECTION_INOUT:
                 PyErr_Format(PyExc_NotImplementedError,
