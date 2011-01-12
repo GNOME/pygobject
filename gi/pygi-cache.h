@@ -48,6 +48,7 @@ struct _PyGIArgCache
     gboolean is_aux;
     gboolean is_pointer;
     gboolean is_caller_allocates;
+    gboolean allow_none;
 
     GIDirection direction;
     GITransfer transfer;

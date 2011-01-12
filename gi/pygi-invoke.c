@@ -986,6 +986,13 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 
         c_arg = state->args[i];
         if (arg_cache->in_marshaller != NULL) {
+            if (!arg_cache->allow_none && py_arg == Py_None) {
+                PyErr_Format(PyExc_TypeError,
+                             "Argument %i does not allow None as a value",
+                             i);
+
+                return FALSE;
+            }
             gboolean success = arg_cache->in_marshaller(state,
                                                         cache,
                                                         arg_cache,

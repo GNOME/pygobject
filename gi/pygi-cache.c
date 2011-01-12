@@ -1000,7 +1000,8 @@ _args_cache_generate(GIFunctionInfo *function_info,
 
                 if (arg_cache == NULL)
                     goto arg_err;
-
+                 
+                arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
                 function_cache->in_args =
                     g_slist_append(function_cache->in_args, arg_cache);
                 break;
