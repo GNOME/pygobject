@@ -2639,9 +2639,64 @@ _pygi_marshal_in_glist (PyGIInvokeState   *state,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    PyGIMarshalInFunc in_marshaller;
+    int i;
+    Py_ssize_t length;
+    GList *list_ = NULL;
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+
+
+    if (py_arg == Py_None) {
+        (*arg).v_pointer = NULL;
+        return TRUE;
+    }
+
+    if (!PySequence_Check (py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    length = PySequence_Length(py_arg);
+    if (length < 0)
+        return FALSE;
+
+    if (sequence_cache->fixed_size >= 0 &&
+        sequence_cache->fixed_size != length) {
+        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
+                      sequence_cache->fixed_size, length);
+
+        return FALSE;
+    }
+
+    in_marshaller = sequence_cache->item_cache->in_marshaller;
+    for (i = 0; i < length; i++) {
+        GIArgument item;
+        PyObject *py_item = PySequence_GetItem (py_arg, i);
+        if (py_item == NULL)
+            goto err;
+
+        if (!in_marshaller(state,
+                           function_cache,
+                           sequence_cache->item_cache,
+                           py_item,
+                           &item))
+            goto err;
+
+        list_ = g_list_append(list_, item.v_pointer);
+        continue;
+err:
+        if (sequence_cache->item_cache->cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+        }
+
+        g_list_free(list_);
+        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        return FALSE;
+    }
+
+    (*arg).v_pointer = list_;
+    return TRUE;
 }
 
 gboolean
@@ -2651,9 +2706,64 @@ _pygi_marshal_in_gslist (PyGIInvokeState   *state,
                          PyObject          *py_arg,
                          GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    PyGIMarshalInFunc in_marshaller;
+    int i;
+    Py_ssize_t length;
+    GSList *list_ = NULL;
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+
+
+    if (py_arg == Py_None) {
+        (*arg).v_pointer = NULL;
+        return TRUE;
+    }
+
+    if (!PySequence_Check (py_arg)) {
+        PyErr_Format (PyExc_TypeError, "Must be sequence, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    length = PySequence_Length(py_arg);
+    if (length < 0)
+        return FALSE;
+
+    if (sequence_cache->fixed_size >= 0 &&
+        sequence_cache->fixed_size != length) {
+        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
+                      sequence_cache->fixed_size, length);
+
+        return FALSE;
+    }
+
+    in_marshaller = sequence_cache->item_cache->in_marshaller;
+    for (i = 0; i < length; i++) {
+        GIArgument item;
+        PyObject *py_item = PySequence_GetItem (py_arg, i);
+        if (py_item == NULL)
+            goto err;
+
+        if (!in_marshaller(state,
+                           function_cache,
+                           sequence_cache->item_cache,
+                           py_item,
+                           &item))
+            goto err;
+
+        list_ = g_slist_append(list_, item.v_pointer);
+        continue;
+err:
+        if (sequence_cache->item_cache->cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+        }
+
+        g_slist_free(list_);
+        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        return FALSE;
+    }
+
+    (*arg).v_pointer = list_;
+    return TRUE;
 }
 
 gboolean
