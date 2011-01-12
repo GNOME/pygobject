@@ -176,7 +176,8 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info)
         return NULL;
     }
    
-    sc->item_cache->type_tag = item_type_tag;    
+    sc->item_cache->type_tag = item_type_tag;
+    sc->item_size = _pygi_g_type_tag_size(item_type_tag);
     g_base_info_unref( (GIBaseInfo *) item_type_info);
 
     return sc;

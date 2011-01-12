@@ -2601,29 +2601,34 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
     for (i = 0; i < length; i++) {
         GIArgument item;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
-        if (py_item == NULL) {
-            int j;
-            if (sequence_cache->item_cache->cleanup != NULL) {
-                GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
-                /*for(j = 0; j < i; j++)
-                    cleanup((gpointer)(array_->data[j]));*/
-            }
+        if (py_item == NULL)
+            goto err;
 
-            g_array_free(array_, TRUE);
-            _PyGI_ERROR_PREFIX ("Item %i: ", i);
-            return FALSE;
-        }
-        sequence_cache->item_cache->in_marshaller(state,
-                                                  function_cache,
-                                                  sequence_cache->item_cache,
-                                                  py_item,
-                                                  &item);
+        if (!in_marshaller(state,
+                           function_cache,
+                           sequence_cache->item_cache,
+                           py_item,
+                           &item))
+            goto err;
+
         g_array_insert_val(array_, i, item);
+        continue;
+err:
+        if (sequence_cache->item_cache->cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+            /*for(j = 0; j < i; j++)
+                cleanup((gpointer)(array_->data[j]));*/
+        }
+
+        g_array_free(array_, TRUE);
+        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        return FALSE;
     }
 
 array_success:
 
-    (*arg).v_pointer = array_;
+    (*arg).v_pointer = array_->data;
+    g_array_free(array_, FALSE);
     return TRUE;
 }
 
