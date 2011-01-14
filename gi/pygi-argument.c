@@ -2626,6 +2626,14 @@ err:
     }
 
 array_success:
+    if (sequence_cache->len_arg_index >= 0) {
+        /* we have an aux arg to handle */
+        PyGIArgCache *aux_cache = 
+            function_cache->args_cache[sequence_cache->len_arg_index];
+        
+
+        state->in_args[aux_cache->c_arg_index].v_long = length;
+    }
 
     (*arg).v_pointer = array_->data;
     g_array_free(array_, FALSE);

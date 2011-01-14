@@ -969,13 +969,17 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
         switch (arg_cache->direction) {
             case GI_DIRECTION_IN:
             case GI_DIRECTION_INOUT:
+                state->args[i] = &(state->in_args[in_count]);
+                in_count++;
+
+                if (arg_cache->is_aux)      
+                    continue;
+
                 /* FIXME: get default or throw error if there aren't enough pyargs */
                 py_arg =
                     PyTuple_GET_ITEM(state->py_in_args,
                                      arg_cache->py_arg_index);
 
-                state->args[i] = &(state->in_args[in_count]);
-                in_count++;
                 break;
             case GI_DIRECTION_OUT:
                 state->out_args[out_count].v_pointer = &state->out_values[out_count];

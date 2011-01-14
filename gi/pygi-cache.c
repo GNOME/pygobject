@@ -92,7 +92,6 @@ _pygi_function_cache_free(PyGIFunctionCache *cache)
     if (cache == NULL)
         return;
 
-    g_slist_free(cache->in_args);
     g_slist_free(cache->out_args);
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *tmp = cache->args_cache[i];
@@ -378,10 +377,26 @@ _arg_cache_new_for_in_filename(GITransfer transfer)
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_array(GITypeInfo *type_info,
+_arg_cache_new_for_in_array(PyGIFunctionCache *function_cache,
+                            GITypeInfo *type_info,
                             GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info);
+    PyGISequenceCache *seq_cache = _sequence_cache_new_from_type_info(type_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)seq_cache;
+
+    seq_cache->len_arg_index = g_type_info_get_array_length(type_info);
+    if (seq_cache->len_arg_index >= 0) {
+        PyGIArgCache *aux_cache = _arg_cache_new();
+        aux_cache->is_aux = TRUE;
+        if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
+            PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
+            arg_cache->c_arg_index = invalid_cache->c_arg_index;
+            _pygi_arg_cache_free(invalid_cache);
+        }
+
+        function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
+    }
+
     arg_cache->in_marshaller = _pygi_marshal_in_array;
 
     /* arg_cache->cleanup = _pygi_cleanup_array; */
@@ -915,7 +930,8 @@ _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
            arg_cache = _arg_cache_new_for_in_filename(transfer);
            break;
        case GI_TYPE_TAG_ARRAY:
-           arg_cache = _arg_cache_new_for_in_array(type_info,
+           arg_cache = _arg_cache_new_for_in_array(function_cache,
+                                                   type_info,
                                                    transfer);
            break;
        case GI_TYPE_TAG_INTERFACE:
@@ -1022,9 +1038,15 @@ _args_cache_generate(GIFunctionInfo *function_info,
         GITypeTag type_tag;
         gint py_arg_index;
 
-        /* must be an aux arg filled in by its owner so skip */
-        if (function_cache->args_cache[arg_index] != NULL)
+        /* must be an aux arg filled in by its owner
+         * fill in it's c_arg_index, add to the in count
+         * and continue
+         */
+        if (function_cache->args_cache[arg_index] != NULL) {
+            function_cache->args_cache[arg_index]->c_arg_index = function_cache->n_in_args;
+            function_cache->n_in_args++;
             continue;
+        }
 
         arg_info =
             g_callable_info_get_arg( (GICallableInfo *) function_info, i);
@@ -1052,8 +1074,6 @@ _args_cache_generate(GIFunctionInfo *function_info,
                     goto arg_err;
 
                 arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
-                function_cache->in_args =
-                    g_slist_append(function_cache->in_args, arg_cache);
                 break;
 
             case GI_DIRECTION_OUT:

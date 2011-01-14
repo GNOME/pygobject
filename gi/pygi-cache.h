@@ -108,7 +108,6 @@ struct _PyGIFunctionCache
 
     PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;
-    GSList *in_args;
     GSList *out_args;
 
     /* counts */
