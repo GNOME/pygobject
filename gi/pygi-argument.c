@@ -2773,9 +2773,96 @@ _pygi_marshal_in_ghash (PyGIInvokeState   *state,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    PyGIMarshalInFunc key_in_marshaller;
+    PyGIMarshalInFunc value_in_marshaller;
+    
+    int i;
+    Py_ssize_t length;
+    PyObject *py_keys, *py_values;
+
+    GHashFunc hash_func;
+    GEqualFunc equal_func;
+
+    GHashTable *hash_ = NULL;
+    PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
+
+    py_keys = PyMapping_Keys(py_arg);
+    if (py_keys == NULL) {
+        PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    length = PyMapping_Length(py_arg);
+    if (length < 0) {
+        Py_DECREF(py_keys);
+        return FALSE;
+    }
+
+    py_values = PyMapping_Values(py_arg);
+    if (py_values == NULL) {
+        Py_DECREF(py_keys);
+        return FALSE;
+    }
+
+    key_in_marshaller = hash_cache->key_cache->in_marshaller;
+    value_in_marshaller = hash_cache->value_cache->in_marshaller;
+
+    switch (hash_cache->key_cache->type_tag) {
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            hash_func = g_str_hash;
+            equal_func = g_str_equal;
+            break;
+        default:
+            hash_func = NULL;
+            equal_func = NULL;
+    }
+
+    hash_ = g_hash_table_new (hash_func, equal_func);
+    if (hash_ == NULL) {
+        PyErr_NoMemory();
+        Py_DECREF(py_keys);
+        Py_DECREF(py_values);
+        return FALSE;
+    }
+
+    for (i = 0; i < length; i++) {
+        GIArgument key, value;
+        PyObject *py_key = PyList_GET_ITEM (py_keys, i);
+        PyObject *py_value = PyList_GET_ITEM (py_values, i);
+        if (py_key == NULL || py_value == NULL)
+            goto err;
+
+        if (!key_in_marshaller(state,
+                               function_cache,
+                               hash_cache->key_cache,
+                               py_key,
+                               &key))
+            goto err;
+
+        if (!value_in_marshaller(state,
+                                 function_cache,
+                                 hash_cache->value_cache,
+                                 py_value,
+                                 &value))
+            goto err;
+
+        g_hash_table_insert(hash_, key.v_pointer, value.v_pointer);
+        continue;
+err:
+        /* FIXME: cleanup hash keys and values */
+        Py_XDECREF(py_key);
+        Py_XDECREF(py_value);
+        Py_DECREF(py_keys);
+        Py_DECREF(py_values);
+        g_hash_table_unref(hash_);
+        _PyGI_ERROR_PREFIX ("Item %i: ", i);
+        return FALSE;
+    }
+
+    (*arg).v_pointer = hash_;
+    return TRUE;
 }
 
 gboolean
