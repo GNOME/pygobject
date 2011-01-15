@@ -16,7 +16,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/return;gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/g;" \
 \
     -pe "s/import gtk\n/from gi.repository import Gtk\n/g;" \
-    -pe "s/gtk\./Gtk\./g;" \
+    -pe "s/(?<!\.)gtk\./Gtk\./g;" \
     -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
     -pe "s/Gtk.ASSISTANT_PAGE_/Gtk.AssistantPageType./g;" \
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
@@ -87,7 +87,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/Gtk.gdk.x11_/GdkX11\./g;" \
     -pe "s/Gtk.gdk\./Gdk\./g;" \
-    -pe "s/gdk\./Gdk\./g;" \
+    -pe "s/(?<!\.)gdk\./Gdk\./g;" \
     -pe "s/Gdk.screen_width/Gdk.Screen.width/g;" \
     -pe "s/Gdk.screen_height/Gdk.Screen.height/g;" \
     -pe "s/Gdk.screen_get_default/Gdk.Screen.get_default/g;" \
