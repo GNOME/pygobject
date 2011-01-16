@@ -155,6 +155,8 @@ pygi_get_property_value_real (PyGObject *instance,
             type = g_registered_type_info_get_g_type (info);
             info_type = g_base_info_get_type (info);
 
+            g_base_info_unref (info);
+
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
                     arg.v_int32 = g_value_get_enum (&value);
@@ -260,6 +262,8 @@ pygi_set_property_value_real (PyGObject *instance,
             info = g_type_info_get_interface (type_info);
             type = g_registered_type_info_get_g_type (info);
             info_type = g_base_info_get_type (info);
+
+            g_base_info_unref (info);
 
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
