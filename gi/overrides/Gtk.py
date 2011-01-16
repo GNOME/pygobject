@@ -1097,6 +1097,9 @@ class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
 
+    def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
+        Gtk.Table.attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions, yoptions, xpadding, ypadding)
+
 Table = override(Table)
 __all__.append('Table')
 
