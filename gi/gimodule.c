@@ -188,14 +188,14 @@ find_vfunc_info (GIBaseInfo *vfunc_info,
         }
 
         type_info = g_field_info_get_type (field_info);
-        if (g_type_info_get_tag (type_info) != GI_TYPE_TAG_INTERFACE) {
+        if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_INTERFACE) {
             g_base_info_unref (type_info);
-            g_base_info_unref (field_info);
-            continue;
+            *field_info_ret = field_info;
+            break;
         }
 
-        *field_info_ret = field_info;
-        break;
+        g_base_info_unref (type_info);
+        g_base_info_unref (field_info);
     }
 
     g_base_info_unref (struct_info);
