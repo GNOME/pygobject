@@ -24,7 +24,8 @@ _gi_la_LDFLAGS = \
 	-avoid-version \
 	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
-	$(GI_LIBS)
+	$(GI_LIBS) \
+	$(PYTHON_LIBS)
 _gi_la_SOURCES = \
 	pygi-repository.c \
 	pygi-repository.h \
@@ -65,7 +66,8 @@ _gi_cairo_la_LDFLAGS = \
 	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
 _gi_cairo_la_LIBADD = \
 	$(GI_LIBS) \
-	$(PYCAIRO_LIBS)
+	$(PYCAIRO_LIBS) \
+	$(PYTHON_LIBS)
 _gi_cairo_la_SOURCES = pygi-foreign-cairo.c
 
 
