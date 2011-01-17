@@ -2892,9 +2892,71 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
                                      PyObject          *py_arg,
                                      GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
-    return FALSE;
+    GICallableInfo *callable_info;
+    GITypeInfo *type_info; 
+    PyGICClosure *closure;
+    PyGIArgCache *user_data_cache = NULL;
+    PyGIArgCache *destroy_cache = NULL;
+    PyGICallbackCache *callback_cache;
+    PyObject *py_user_data = NULL;
+
+    callback_cache =(PyGICallbackCache *)arg_cache;
+
+    if (callback_cache->user_data_index > 0) {
+        user_data_cache = function_cache->args_cache[callback_cache->user_data_index];
+        if (user_data_cache->py_arg_index < state->n_py_in_args) {
+            py_user_data = PyTuple_GetItem(state->py_in_args, user_data_cache->py_arg_index);
+            if (!py_user_data)
+                return FALSE;
+        } else {
+            py_user_data = Py_None;
+            Py_INCREF(Py_None);
+        }
+    }
+ 
+    if (py_arg == Py_None && py_user_data != Py_None) {
+        Py_DECREF(py_user_data);
+        PyErr_Format(PyExc_TypeError,
+                     "When passing None for a callback userdata must also be None");
+
+        return FALSE;
+    }
+
+    if (py_arg == Py_None) {
+        Py_XDECREF(py_user_data);
+        return TRUE;
+    }
+
+    if (!PyCallable_Check(py_arg)) {
+        Py_XDECREF(py_user_data);
+        PyErr_Format(PyExc_TypeError,
+                    "Callback needs to be a function or method not %s",  
+                    py_arg->ob_type->tp_name);
+
+        return FALSE;
+    }
+
+    if (callback_cache->destroy_notify_index > 0)
+        destroy_cache = function_cache->args_cache[callback_cache->destroy_notify_index];
+
+    type_info = g_arg_info_get_type(arg_cache->arg_info);
+    callable_info = (GICallableInfo *)g_type_info_get_interface(type_info);
+
+    closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data); 
+    g_base_info_unref((GIBaseInfo *)callable_info);
+    g_base_info_unref((GIBaseInfo *)type_info);
+
+    arg->v_pointer = closure->closure;
+    if (user_data_cache != NULL) {
+        state->in_args[user_data_cache->c_arg_index].v_pointer = closure;
+    }
+
+    if (destroy_cache) {
+        PyGICClosure *destroy_notify = _pygi_destroy_notify_create();
+        state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure; 
+    }
+
+    return TRUE;
 }
 
 gboolean

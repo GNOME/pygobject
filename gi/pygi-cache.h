@@ -43,9 +43,18 @@ typedef PyObject *(*PyGIMarshalOutFunc) (PyGIInvokeState   *state,
                                          PyGIArgCache      *arg_cache,
                                          GIArgument        *arg);
 
+typedef enum {
+  /* Not an AUX type */
+  PYGI_AUX_TYPE_NONE   = 0,
+  /* AUX type handled by parent */
+  PYGI_AUX_TYPE_IGNORE = 1,
+  /* AUX type has an associated pyarg which is modified by parent */
+  PYGI_AUX_TYPE_HAS_PYARG = 2
+} PyGIAuxType;
+
 struct _PyGIArgCache
 {
-    gboolean is_aux;
+    PyGIAuxType aux_type;
     gboolean is_pointer;
     gboolean is_caller_allocates;
     gboolean allow_none;
@@ -95,7 +104,6 @@ typedef struct _PyGIHashCache
 typedef struct _PyGICallbackCache
 {
     PyGIArgCache arg_cache;
-    gint py_user_data_index;
     gint user_data_index;
     gint destroy_notify_index;
     GIScopeType scope;
@@ -114,6 +122,7 @@ struct _PyGIFunctionCache
     guint n_in_args;
     guint n_out_args;
     guint n_args;
+    guint n_py_args;
 };
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);

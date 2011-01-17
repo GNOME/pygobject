@@ -972,7 +972,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                 state->args[i] = &(state->in_args[in_count]);
                 in_count++;
 
-                if (arg_cache->is_aux)      
+                if (arg_cache->aux_type > 0)
                     continue;
 
                 /* FIXME: get default or throw error if there aren't enough pyargs */
