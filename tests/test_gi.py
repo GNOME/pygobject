@@ -1365,8 +1365,6 @@ class TestGObject(unittest.TestCase):
 class TestPythonGObject(unittest.TestCase):
 
     class Object(GIMarshallingTests.Object):
-        __gtype_name__ = "Object"
-
         def __init__(self, int):
             GIMarshallingTests.Object.__init__(self)
             self.val = None
@@ -1386,8 +1384,6 @@ class TestPythonGObject(unittest.TestCase):
             self.props.int += int8
 
     class SubObject(GIMarshallingTests.SubObject):
-        __gtype_name__ = "SubObject"
-
         def __init__(self, int):
             GIMarshallingTests.SubObject.__init__(self)
             self.val = None
@@ -1414,8 +1410,6 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.props.int, 84)
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
-            __gtype_name__ = 'ObjectWithoutVFunc'
-
             def __init__(self, int):
                 GIMarshallingTests.Object.__init__(self)
 
@@ -1457,7 +1451,6 @@ class TestInterfaces(unittest.TestCase):
     def test_implementation(self):
 
         class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-            __gtype_name__ = 'TestInterfaceImpl'
             def __init__(self):
                 GObject.GObject.__init__(self)
                 self.val = None
@@ -1474,24 +1467,15 @@ class TestInterfaces(unittest.TestCase):
         self.assertEquals(instance.val, 42)
 
         class TestInterfaceImplA(TestInterfaceImpl):
-            __gtype_name__ = 'TestInterfaceImplA'
+            pass
 
         class TestInterfaceImplB(TestInterfaceImplA):
-            __gtype_name__ = 'TestInterfaceImplB'
+            pass
 
         instance = TestInterfaceImplA()
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEquals(instance.val, 42)
 
-        def define_implementor_without_gtype():
-            class TestInterfaceImpl(gobject.GObject, GIMarshallingTests.Interface):
-                def __init__(self):
-                    gobject.GObject.__init__(self)
-                    self.val = None
-
-                def do_test_int8_in(self, int8):
-                    self.val = int8
-        self.assertRaises(RuntimeError, define_implementor_without_gtype)
 
 # -- this needs some additions to GIMarshallingTests in gobject-introspection
 #class TestInterfaceClash(unittest.TestCase):
@@ -1499,7 +1483,6 @@ class TestInterfaces(unittest.TestCase):
 #    def test_clash(self):
 #        def create_clash():
 #            class TestClash(GObject.GObject, GIMarshallingTests.Interface, GIMarshallingTests.Interface2):
-#                __gtype_name__ = 'TestClash'
 #                def do_test_int8_in(self, int8):
 #                    pass
 #            TestClash()
