@@ -54,7 +54,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.WIN_POS_/Gtk.WindowPosition./g;" \
     -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
     -pe "s/Gtk.accel_map_/Gtk.AccelMap./g;" \
-    -pe "s/Gtk.settings_get_default/Gtk.Settings.get_default/g;" \
+    -pe "s/Gtk.settings_get_/Gtk.Settings.get_/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
     -pe "s/Gtk.image_new_from_stock/Gtk.Image.new_from_stock/g;" \
     -pe "s/Gtk.image_new_from_icon_name/Gtk.Image.new_from_icon_name/g;" \
