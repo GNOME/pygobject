@@ -105,6 +105,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/intersection = child_rect.intersect/intersects_, intersection = child_rect.intersect/g;" \
     -pe "s/event.state/event.get_state\(\)/g;" \
 \
+    -pe "s/Gdk.INTERP_/GdkPixbuf.InterpType./g;" \
+\
     -pe "s/import pango\n/from gi.repository import Pango\n/g;" \
     -pe "s/pango\./Pango\./g;" \
     -pe "s/Pango.ELLIPSIZE_/Pango.EllipsizeMode./g;" \
