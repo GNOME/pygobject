@@ -1120,6 +1120,16 @@ class Box(Gtk.Box):
 Box = override(Box)
 __all__.append('Box')
 
+class Paned(Gtk.Paned):
+    def pack1(self, child, resize=False, shrink=True):
+        super(Paned, self).pack1(child, resize, shrink)
+
+    def pack2(self, child, resize=True, shrink=True):
+        super(Paned, self).pack2(child, resize, shrink)
+
+Paned = override(Paned)
+__all__.append('Paned')
+
 _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):
