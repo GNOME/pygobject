@@ -82,14 +82,14 @@ class IntrospectionModule(object):
     def __init__(self, namespace, version=None):
         repository.require(namespace, version)
         self._namespace = namespace
-        self.version = version
+        self._version = version
         self.__name__ = 'gi.repository.' + namespace
 
-        repository.require(self._namespace, self.version)
+        repository.require(self._namespace, self._version)
         self.__path__ = repository.get_typelib_path(self._namespace)
 
-        if self.version is None:
-            self.version = repository.get_version(self._namespace)
+        if self._version is None:
+            self._version = repository.get_version(self._namespace)
 
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
@@ -223,27 +223,27 @@ class DynamicGObjectModule(IntrospectionModule):
 class DynamicModule(object):
     def __init__(self, namespace):
         self._namespace = namespace
-        self.introspection_module = None
+        self._introspection_module = None
         self._version = None
         self._overrides_module = None
         self.__path__ = None
 
     def require_version(self, version):
-        if self.introspection_module is not None and \
-                self.introspection_module.version != version:
+        if self._introspection_module is not None and \
+                self._introspection_module._version != version:
             raise RuntimeError('Module has been already loaded ')
         self._version = version
 
     def _import(self):
-        self.introspection_module = IntrospectionModule(self._namespace,
-                                                        self._version)
+        self._introspection_module = IntrospectionModule(self._namespace,
+                                                         self._version)
 
         overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
         self._overrides_module = getattr(overrides_modules, self._namespace, None)
         self.__path__ = repository.get_typelib_path(self._namespace)
 
     def __getattr__(self, name):
-        if self.introspection_module is None:
+        if self._introspection_module is None:
             self._import()
 
         if self._overrides_module is not None:
@@ -260,17 +260,17 @@ class DynamicModule(object):
             if key in registry:
                 return registry[key]
 
-        return getattr(self.introspection_module, name)
+        return getattr(self._introspection_module, name)
 
     def __dir__ (self):
-        if self.introspection_module is None:
+        if self._introspection_module is None:
             self._import()
             
         # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
         result = set(dir(self.__class__))
         result.update(self.__dict__.keys())
         
-        result.update(dir(self.introspection_module))
+        result.update(dir(self._introspection_module))
         override_exports = getattr(self._overrides_module, '__all__', ())
         result.update(override_exports)
         return list(result)

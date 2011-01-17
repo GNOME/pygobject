@@ -22,7 +22,7 @@
 from ..overrides import override
 from ..importer import modules
 
-Gdk = modules['Gdk'].introspection_module
+Gdk = modules['Gdk']._introspection_module
 
 __all__ = []
 
@@ -43,7 +43,7 @@ class Color(Gdk.Color):
 Color = override(Color)
 __all__.append('Color')
 
-if Gdk.version == '2.0':
+if Gdk._version == '2.0':
     class Rectangle(Gdk.Rectangle):
 
         def __init__(self, x, y, width, height):
@@ -62,7 +62,7 @@ if Gdk.version == '2.0':
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
 
-if Gdk.version == '2.0':
+if Gdk._version == '2.0':
     class Drawable(Gdk.Drawable):
         def cairo_create(self):
             return Gdk.cairo_create(self)
@@ -111,7 +111,7 @@ class Event(Gdk.Event):
         Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
     }
 
-    if Gdk.version == '2.0':
+    if Gdk._version == '2.0':
         _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
 
     def __new__(cls, *args, **kwargs):
@@ -129,7 +129,7 @@ __all__.append('Event')
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
-        Gtk = modules['Gtk'].introspection_module
+        Gtk = modules['Gtk']._introspection_module
         Gtk.drag_finish(self, success, del_, time)
 
 DragContext = override(DragContext)

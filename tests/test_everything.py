@@ -145,7 +145,7 @@ class TestEverything(unittest.TestCase):
         
         # test that instance members are listed
         self.assertTrue('_namespace' in attr_list)
-        self.assertTrue('version' in attr_list)
+        self.assertTrue('_version' in attr_list)
         
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))

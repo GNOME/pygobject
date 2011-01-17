@@ -32,7 +32,7 @@ else:
     _basestring = basestring
     _callable = callable
 
-Gtk = modules['Gtk'].introspection_module
+Gtk = modules['Gtk']._introspection_module
 __all__ = []
 
 class Widget(Gtk.Widget):

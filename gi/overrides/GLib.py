@@ -21,7 +21,7 @@
 from ..importer import modules
 from .._gi import variant_new_tuple, variant_type_from_string
 
-GLib = modules['GLib'].introspection_module
+GLib = modules['GLib']._introspection_module
 
 __all__ = []
 

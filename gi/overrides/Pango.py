@@ -21,7 +21,7 @@
 from ..overrides import override
 from ..importer import modules
 
-Pango = modules['Pango'].introspection_module
+Pango = modules['Pango']._introspection_module
 
 __all__ = []
 
