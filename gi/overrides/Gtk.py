@@ -46,16 +46,6 @@ class Widget(Gtk.Widget):
 Widget = override(Widget)
 __all__.append('Widget')
 
-class CellLayout(Gtk.CellLayout):
-    def pack_start(self, cell, expand=True):
-        super(CellLayout, self).pack_start(cell, expand)
-
-    def pack_end(self, cell, expand=True):
-        super(CellLayout, self).pack_end(cell, expand)
-
-CellLayout = override(CellLayout)
-__all__.append('CellLayout')
-
 class Container(Gtk.Container, Widget):
 
     def __len__(self):
@@ -284,7 +274,7 @@ class UIManager(Gtk.UIManager):
 UIManager = override(UIManager)
 __all__.append('UIManager')
 
-class ComboBox(Gtk.ComboBox, Container, CellLayout):
+class ComboBox(Gtk.ComboBox, Container):
 
     def get_active_iter(self):
         success, aiter = super(ComboBox, self).get_active_iter()
@@ -1047,6 +1037,7 @@ class TreeViewColumn(Gtk.TreeViewColumn):
         success, start_pos, width = super(TreeViewColumn, self).cell_get_position(cell_renderer)
         if success:
             return (start_pos, width,)
+
 
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
