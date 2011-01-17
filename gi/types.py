@@ -216,6 +216,8 @@ class StructMeta(type, MetaClassHelper):
         cls._setup_constructors()
 
 class Enum(int):
+    # Subclasses should have their own __info__ attribute
+    # so that all Enums do not share the same gi type.
     __info__ = None
     def __init__(self, value):
         int.__init__(value)

@@ -106,7 +106,7 @@ class IntrospectionModule(object):
                     wrapper = enum_add(g_type)
                 elif g_type.is_a(gobject.TYPE_NONE):
                     # An enum with a GType of None is an enum without GType
-                    wrapper = Enum
+                    wrapper = type(info.get_name(), (Enum,), {'__info__': None})
                 else:
                     wrapper = flags_add(g_type)
 

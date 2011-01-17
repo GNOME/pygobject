@@ -967,6 +967,16 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
         self.assertEquals(enum, GIMarshallingTests.Enum.VALUE1)
 
+    def test_enum_second(self):
+        # check for the bug where different non-gtype enums share the same class
+        self.assertNotEqual(GIMarshallingTests.Enum, GIMarshallingTests.SecondEnum)
+
+        # check that values are not being shared between different enums
+        self.assertTrue(hasattr(GIMarshallingTests.SecondEnum, "SECONDVALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.Enum, "SECONDVALUE1")
+        self.assertTrue(hasattr(GIMarshallingTests.Enum, "VALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.SecondEnum, "VALUE1")
+
 
 class TestGEnum(unittest.TestCase):
 
