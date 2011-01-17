@@ -1116,16 +1116,6 @@ class ScrolledWindow(Gtk.ScrolledWindow):
 ScrolledWindow = override(ScrolledWindow)
 __all__.append('ScrolledWindow')
 
-class Box(Gtk.Box):
-    def pack_start(self, child, expand=True, fill=True, padding=0):
-        super(Box, self).pack_start(child, expand, fill, padding)
-
-    def pack_end(self, child, expand=True, fill=True, padding=0):
-        super(Box, self).pack_end(child, expand, fill, padding)
-
-Box = override(Box)
-__all__.append('Box')
-
 class Paned(Gtk.Paned):
     def pack1(self, child, resize=False, shrink=True):
         super(Paned, self).pack1(child, resize, shrink)
