@@ -707,7 +707,7 @@ class TreeModel(Gtk.TreeModel):
                     value = str(value)
                 elif sys.version_info < (3, 0):
                     if isinstance(value, unicode):
-                        value = unicode(value)
+                        value = value.encode('UTF-8')
                     else:
                         raise ValueError('Expected string or unicode for row %i but got %s%s' % (i, value, type(value)))
                 else:
