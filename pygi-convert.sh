@@ -139,7 +139,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gio.vfs_/Gio.Vfs./g;" \
 \
     -pe "s/import glib\n/from gi.repository import GLib\n/g;" \
-    -pe "s/glib\./GLib\./g;" \
+    -pe "s/(?<!\.)glib\./GLib\./g;" \
     -pe "s/GLib.IO_(ERR|HUP|IN|NVAL|OUT|PRI)/GLib.IOCondition./g;" \
     -pe "s/GLib.IO_FLAG_/GLib.IOFlags./g;" \
     -pe "s/GLib.IO_STATUS_/GLib.IOStatus./g;" \
