@@ -767,6 +767,12 @@ class TreeSortable(Gtk.TreeSortable, ):
         else:
             return (None, None,)
 
+    def set_sort_func(self, sort_column_id, sort_func, user_data=None):
+        super(TreeSortable, self).set_sort_func(sort_column_id, sort_func, user_data)
+
+    def set_default_sort_func(self, sort_func, user_data=None):
+        super(TreeSortable, self).set_default_sort_func(sort_func, user_data)
+
 TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
