@@ -574,7 +574,7 @@ class TextBuffer(Gtk.TextBuffer):
         start_offset = iter.get_offset()
         self.insert(iter, text)
 
-        if tags is None:
+        if not tags:
             return
 
         start = self.get_iter_at_offset(start_offset)
