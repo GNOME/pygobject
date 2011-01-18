@@ -570,6 +570,18 @@ class TextBuffer(Gtk.TextBuffer):
         length = len(text)
         Gtk.TextBuffer.insert(self, iter, text, length)
 
+    def insert_with_tags(self, iter, text, *tags):
+        start_offset = iter.get_offset()
+        self.insert(iter, text)
+
+        if tags is None:
+            return
+
+        start = self.get_iter_at_offset(start_offset)
+
+        for tag in tags:
+            self.apply_tag(tag, start, iter)
+
     def insert_at_cursor(self, text):
         if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))

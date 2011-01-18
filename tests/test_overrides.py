@@ -753,6 +753,12 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(sel[0].equal(start))
         self.assertTrue(sel[1].equal(end))
 
+        buffer.set_text('')
+        buffer.insert_with_tags(buffer.get_start_iter(), 'HelloHello', tag)
+        (start, end) = buffer.get_bounds()
+        self.assertTrue(start.begins_tag(tag))
+        self.assertTrue(start.has_tag(tag))
+
     def test_text_iter(self):
         self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
         buffer = Gtk.TextBuffer()
