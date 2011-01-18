@@ -2365,7 +2365,7 @@ _pygi_marshal_in_float (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_double = double_;
+    (*arg).v_float = double_;
 
     return TRUE;
 }
