@@ -28,12 +28,7 @@ __all__ = []
 class FontDescription(Pango.FontDescription):
 
     def __new__(cls, string=None):
-        if string is not None:
-            # FIXME: this should be Pango.FontDescription.from_string()
-            # GI bug?
-            return Pango.font_description_from_string (string)
-        else:
-            return Pango.FontDescription.__new__(cls)
+        return Pango.font_description_from_string (string)
 
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
