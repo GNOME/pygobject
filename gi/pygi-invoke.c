@@ -1019,15 +1019,16 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
     int total_out_args = cache->n_out_args;
     gboolean has_return = FALSE;
 
-    if (cache->return_cache)
+    if (cache->return_cache) {
         py_return = cache->return_cache->out_marshaller(state,
                                                         cache,
                                                         cache->return_cache,
                                                         &state->return_arg);
 
-    if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
-        total_out_args++;
-        has_return = TRUE;
+        if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
+            total_out_args++;
+            has_return = TRUE;
+        }
     }
 
     if (cache->n_out_args == 0) {

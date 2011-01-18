@@ -797,7 +797,134 @@ _arg_cache_new_for_out_gerror(void)
     arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
     return arg_cache;
 }
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_struct(GIInterfaceInfo *iface_info,
+                                        GITransfer transfer)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for this type is not fully implemented yet");
+    return FALSE;
+    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+    iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
+    if (iface_cache->g_type == G_TYPE_VALUE)
+        arg_cache->cleanup = _g_slice_free_gvalue_func;
+    if (iface_cache->g_type == G_TYPE_CLOSURE)
+        arg_cache->cleanup = g_closure_unref;
 
+    return arg_cache;
+}
+
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_object(GIInterfaceInfo *iface_info,
+                                        GITransfer transfer)
+{
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
+
+    return arg_cache;
+}
+
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_boxed(GIInterfaceInfo *iface_info,
+                                      GITransfer transfer)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for this type is not fully implemented yet");
+    return FALSE;
+
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
+    return arg_cache;
+}
+
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_callback(void)
+{
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Callback returns are not supported");
+    return FALSE;
+}
+
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_enum(void)
+{
+    PyGIArgCache *arg_cache = NULL;
+    /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for this type is not fully implemented yet");
+    return arg_cache;
+}
+
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_union(void)
+{
+    PyGIArgCache *arg_cache = NULL;
+    /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for this type is not fully implemented yet");
+    return arg_cache;
+}
+static inline PyGIArgCache *
+_arg_cache_new_for_out_interface_flags(void)
+{
+    PyGIArgCache *arg_cache = NULL;
+    /*arg_cache->in_marshaller = _pygi_marshal_in_flags;*/
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for this type is not fully implemented yet");
+    return arg_cache;
+}
+
+PyGIArgCache *
+_arg_cache_out_new_from_interface_info (GIInterfaceInfo *iface_info,
+                                        PyGIFunctionCache *function_cache,
+                                        GIInfoType info_type,
+                                        GITransfer transfer,
+                                        GIDirection direction,
+                                        gint c_arg_index)
+{
+    PyGIArgCache *arg_cache = NULL;
+
+    switch (info_type) {
+        case GI_INFO_TYPE_UNION:
+            arg_cache = _arg_cache_new_for_out_interface_union();
+            break;
+        case GI_INFO_TYPE_STRUCT:
+            arg_cache = _arg_cache_new_for_out_interface_struct(iface_info,
+                                                               transfer);
+            break;
+        case GI_INFO_TYPE_OBJECT:
+        case GI_INFO_TYPE_INTERFACE:
+            arg_cache = _arg_cache_new_for_out_interface_object(iface_info,
+                                                                transfer);
+            break;
+        case GI_INFO_TYPE_BOXED:
+            arg_cache = _arg_cache_new_for_out_interface_boxed(iface_info,
+                                                               transfer);
+            break;
+        case GI_INFO_TYPE_CALLBACK:
+            arg_cache = _arg_cache_new_for_out_interface_callback();
+            break;
+        case GI_INFO_TYPE_ENUM:
+            arg_cache = _arg_cache_new_for_out_interface_enum();
+            break;
+        case GI_INFO_TYPE_FLAGS:
+            arg_cache = _arg_cache_new_for_out_interface_flags();
+            break;
+        default:
+            g_assert_not_reached();
+    }
+
+    if (arg_cache != NULL) {
+        arg_cache->direction = direction;
+        arg_cache->transfer = transfer;
+        arg_cache->type_tag = GI_TYPE_TAG_INTERFACE;
+        arg_cache->c_arg_index = c_arg_index;
+    }
+
+    return arg_cache;
+}
 
 PyGIArgCache *
 _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
@@ -863,7 +990,6 @@ _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
                                                    transfer);
            break;
        case GI_TYPE_TAG_INTERFACE:
-           /*
            {
                GIInterfaceInfo *interface_info = g_type_info_get_interface(type_info);
                GIInfoType info_type = g_base_info_get_type( (GIBaseInfo *) interface_info);
@@ -872,13 +998,11 @@ _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
                                                                  info_type,
                                                                  transfer,
                                                                  direction,
-                                                                 c_arg_index,
-                                                                 py_arg_index);
+                                                                 c_arg_index);
 
                g_base_info_unref( (GIBaseInfo *) interface_info);
                return arg_cache;
            }
-           */
        case GI_TYPE_TAG_GLIST:
            arg_cache = _arg_cache_new_for_out_glist(type_info,
                                                    transfer);

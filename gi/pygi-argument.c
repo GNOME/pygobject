@@ -2914,7 +2914,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
         }
     }
  
-    if (py_arg == Py_None && py_user_data != Py_None) {
+    if (py_arg == Py_None && !(py_user_data == Py_None || py_user_data == NULL)) {
         Py_DECREF(py_user_data);
         PyErr_Format(PyExc_TypeError,
                      "When passing None for a callback userdata must also be None");
@@ -3432,10 +3432,8 @@ _pygi_marshal_out_interface_object (PyGIInvokeState   *state,
                                     PyGIArgCache      *arg_cache,
                                     GIArgument        *arg)
 {
-    PyObject *py_obj = NULL;
-
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    PyObject *py_obj = pygobject_new (arg->v_pointer);
+;
     return py_obj;
 }
 
