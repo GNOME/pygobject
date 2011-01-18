@@ -94,7 +94,11 @@ pyglib_gil_state_ensure(void)
     if (!_PyGLib_API->threads_enabled)
 	return PyGILState_LOCKED;
 
+#ifdef DISABLE_THREADING
+    return PyGILState_LOCKED;
+#else
     return PyGILState_Ensure();
+#endif
 }
 
 void
@@ -105,7 +109,9 @@ pyglib_gil_state_release(PyGILState_STATE state)
     if (!_PyGLib_API->threads_enabled)
 	return;
 
+#ifndef DISABLE_THREADING
     PyGILState_Release(state);
+#endif
 }
 
 /**
@@ -171,13 +177,19 @@ _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
 int
 pyglib_gil_state_ensure_py23 (void)
 {
+#ifdef DISABLE_THREADING
+    return 0;
+#else
     return PyGILState_Ensure();
+#endif
 }
 
 void
 pyglib_gil_state_release_py23 (int flag)
 {
+#ifndef DISABLE_THREADING
     PyGILState_Release(flag);
+#endif
 }
 
 /**
