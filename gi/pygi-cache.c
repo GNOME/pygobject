@@ -403,6 +403,8 @@ _arg_cache_new_for_in_array(PyGIFunctionCache *function_cache,
     PyGISequenceCache *seq_cache = _sequence_cache_new_from_type_info(type_info,                                                                      (function_cache->is_method ? 1: 0));
     PyGIArgCache *arg_cache = (PyGIArgCache *)seq_cache;
 
+    seq_cache->array_type = g_type_info_get_array_type(type_info);
+
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *aux_cache = _arg_cache_new();
         aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;

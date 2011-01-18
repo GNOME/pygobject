@@ -2635,8 +2635,13 @@ array_success:
         state->in_args[aux_cache->c_arg_index].v_long = length;
     }
 
-    (*arg).v_pointer = array_->data;
-    g_array_free(array_, FALSE);
+    if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+        arg->v_pointer = array_->data;
+        g_array_free(array_, FALSE);
+    } else {
+        arg->v_pointer = array_;
+    }
+
     return TRUE;
 }
 

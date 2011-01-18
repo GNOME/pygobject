@@ -82,6 +82,7 @@ typedef struct _PyGISequenceCache
     gint len_arg_index;
     gboolean is_zero_terminated;
     gsize item_size;
+    GIArrayType array_type;
     PyGIArgCache *item_cache;
 } PyGISequenceCache;
 
