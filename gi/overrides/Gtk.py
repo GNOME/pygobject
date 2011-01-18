@@ -349,7 +349,7 @@ class Dialog(Gtk.Dialog, Container):
         # keyword to work around this
         if _buttons_property is not None:
             kwds['buttons'] = _buttons_property
- 
+
         Gtk.Dialog.__init__(self, **kwds)
         if title:
             self.set_title(title)
@@ -450,9 +450,9 @@ class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
         Gtk.FileChooserDialog.__init__(self,
                                        action=action,
                                        **kwds)
-        Dialog.__init__(self, 
-                        title=title, 
-                        parent=parent, 
+        Dialog.__init__(self,
+                        title=title,
+                        parent=parent,
                         buttons=buttons)
 
 FileChooserDialog = override(FileChooserDialog)
@@ -711,7 +711,7 @@ class TreeModel(Gtk.TreeModel):
     def _convert_value(self, treeiter, column, value):
             if value is None:
                 return
-            
+
             # we may need to convert to a basic type
             type_ = self.get_column_type(column)
             if type_ == gobject.TYPE_PYOBJECT:
