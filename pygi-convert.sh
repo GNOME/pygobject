@@ -79,8 +79,9 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/pack_start\(([^,]*),(\s*)padding=([A-Za-z0-9._]*)\)/pack_start\(\1,\2True, True,\2\3\)/g;" \
     -pe "#s/Gtk.HBox\(\)/Gtk.HBox\(False, 0\)/g;" \
     -pe "#s/Gtk.VBox\(\)/Gtk.VBox\(False, 0\)/g;" \
-    -pe "s/Gtk.Label\(([^,\)]+)\)/Gtk.Label\(label=\1\)/g;" \
-    -pe "s/Gtk.AccelLabel\(([^,\)]+)\)/Gtk.AccelLabel\(label=\1\)/g;" \
+    -pe "s/Gtk.Label\s*\(([^,\)]+)\)/Gtk.Label\(label=\1\)/g;" \
+    -pe "s/Gtk.AccelLabel\s*\(([^,\)]+)\)/Gtk.AccelLabel\(label=\1\)/g;" \
+    -pe "s/Gtk.((?:Accel)?Label)\(label=label=/Gtk.\1\(label=/g;" \
     -pe "s/len\(self._content.get_children\(\)\) > 0/self._content.get_children\(\)/g;" \
     -pe "s/len\(self.menu.get_children\(\)\) > 0/self.menu.get_children\(\)/g;" \
     -pe "s/([^\.^ ]*)\.drag_dest_set\(/Gtk.drag_dest_set\(\1, /g;" \
