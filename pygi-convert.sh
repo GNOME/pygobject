@@ -60,6 +60,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.image_new_from_icon_name/Gtk.Image.new_from_icon_name/g;" \
     -pe "s/Gtk.window_set_default_icon_name/Gtk.Window.set_default_icon_name/g; " \
     -pe "s/Gtk.combo_box_new_text/Gtk.ComboBoxText/g;" \
+    -pe "s/Gtk.keysyms./Gdk.KEY_/g;" \
     -pe "s/set_flags\(Gtk.CAN_DEFAULT\)/set_can_default\(True\)/g;" \
     -pe "s/.flags\(\) & Gtk.MAPPED/.get_mapped\(\)/g;" \
     -pe "s/.flags\(\) & Gtk.REALIZED/.get_realized\(\)/g;" \
