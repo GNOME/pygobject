@@ -706,12 +706,14 @@ class TreeModel(Gtk.TreeModel):
 
         for i in range(n_columns):
             value = row[i]
+            self.set_value(treeiter, i, value)
 
+    def _convert_value(self, treeiter, column, value):
             if value is None:
-                continue
+                return
             
             # we may need to convert to a basic type
-            type_ = self.get_column_type(i)
+            type_ = self.get_column_type(column)
             if type_ == gobject.TYPE_PYOBJECT:
                 pass # short-circut branching
             elif type_ == gobject.TYPE_STRING:
@@ -721,14 +723,14 @@ class TreeModel(Gtk.TreeModel):
                     if isinstance(value, unicode):
                         value = value.encode('UTF-8')
                     else:
-                        raise ValueError('Expected string or unicode for row %i but got %s%s' % (i, value, type(value)))
+                        raise ValueError('Expected string or unicode for column %i but got %s%s' % (column, value, type(value)))
                 else:
-                    raise ValueError('Expected a string for row %i but got %s' % (i, type(value)))
+                    raise ValueError('Expected a string for column %i but got %s' % (column, type(value)))
             elif type_ == gobject.TYPE_FLOAT or type_ == gobject.TYPE_DOUBLE:
                 if isinstance(value, float):
                     value = float(value)
                 else:
-                    raise ValueError('Expected a float for row %i but got %s' % (i, type(value)))
+                    raise ValueError('Expected a float for column %i but got %s' % (column, type(value)))
             elif type_ == gobject.TYPE_LONG or type_ == gobject.TYPE_INT:
                 if isinstance(value, int):
                     value = int(value)
@@ -736,11 +738,11 @@ class TreeModel(Gtk.TreeModel):
                     if isinstance(value, long):
                         value = long(value)
                     else:
-                        raise ValueError('Expected an long for row %i but got %s' % i, type(value))
+                        raise ValueError('Expected an long for column %i but got %s' % (column, type(value)))
                 else:
-                    raise ValueError('Expected an interger for row %i but got %s' % i, type(value))
+                    raise ValueError('Expected an interger for column %i but got %s' % (column, type(value)))
 
-            self.set_value(treeiter, i, value)
+            return value
 
     def get(self, treeiter, *columns):
         n_columns = self.get_n_columns()
@@ -807,7 +809,6 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
         return treeiter
 
-
     def insert_after(self, sibling, row=None):
         treeiter = Gtk.ListStore.insert_after(self, sibling)
 
@@ -815,6 +816,10 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
             self.set_row(treeiter, row)
 
         return treeiter
+
+    def set_value(self, treeiter, column, value):
+        value = self._convert_value(treeiter, column, value)
+        Gtk.ListStore.set_value(self, treeiter, column, value)
 
 
 ListStore = override(ListStore)
@@ -978,7 +983,6 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         return treeiter
 
-
     def insert_after(self, parent, sibling, row=None):
         treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
 
@@ -986,6 +990,10 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
             self.set_row(treeiter, row)
 
         return treeiter
+
+    def set_value(self, treeiter, column, value):
+        value = self._convert_value(treeiter, column, value)
+        Gtk.TreeStore.set_value(self, treeiter, column, value)
 
 
 TreeStore = override(TreeStore)
