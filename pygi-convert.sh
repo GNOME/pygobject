@@ -211,12 +211,12 @@ done
 
 NEED_GOBJECT=`grep -R -l gobject\. $FILES_TO_CONVERT | xargs grep -nL import\ gobject`
 for f in $NEED_GOBJECT; do
-    sed -i "/import Gdk/ i\import gobject" $f
+    sed -i "/import Gdk\($\|,\)/ i\import gobject" $f
 done
 
 NEED_GOBJECT=`grep -R -l gobject\. $FILES_TO_CONVERT | xargs grep -nL import\ gobject`
 for f in $NEED_GOBJECT; do
-    sed -i "/import Gtk/ i\import gobject" $f
+    sed -i "/import Gtk\($\|,\)/ i\import gobject" $f
 done
 
 NEED_GOBJECT=`grep -R -l gobject\. $FILES_TO_CONVERT | xargs grep -nL import\ gobject`
@@ -226,12 +226,12 @@ done
 
 NEED_GDK=`grep -R -l Gdk\. $FILES_TO_CONVERT | xargs grep -nL import\ Gdk`
 for f in $NEED_GDK; do
-    sed -i "/import Gtk/ i\from gi.repository import Gdk" $f
+    sed -i "/import Gtk\($\|,\)/ i\from gi.repository import Gdk" $f
 done
 
 NEED_GDK_X11=`grep -R -l GdkX11\. $FILES_TO_CONVERT | xargs grep -nL import\ GdkX11`
 for f in $NEED_GDK_X11; do
-    sed -i "/import Gdk/ i\from gi.repository import GdkX11" $f
+    sed -i "/import Gdk\($\|,\)/ i\from gi.repository import GdkX11" $f
 done
 
 NEED_SUGAR_EXT=`grep -R -l SugarExt\. $FILES_TO_CONVERT | xargs grep -nL import\ SugarExt`
