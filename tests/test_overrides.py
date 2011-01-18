@@ -491,7 +491,7 @@ class TestGtk(unittest.TestCase):
         test_pylist = [1,"2", "3"]
 
         list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object)
-        for i in range(94):
+        for i in range(93):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
             parent = list_store.append((i,
@@ -500,6 +500,16 @@ class TestGtk(unittest.TestCase):
                                         test_pyobj,
                                         test_pydict,
                                         test_pylist))
+
+        i = 93
+        label = u'this is row #93'
+        treeiter = list_store.append()
+        list_store.set_value(treeiter, 0, i)
+        list_store.set_value(treeiter, 1, label)
+        list_store.set_value(treeiter, 2, TestGtk.TestClass(self, i, label))
+        list_store.set_value(treeiter, 3, test_pyobj)
+        list_store.set_value(treeiter, 4, test_pydict)
+        list_store.set_value(treeiter, 5, test_pylist)
 
         # test automatic unicode->str conversion
         i = 94
