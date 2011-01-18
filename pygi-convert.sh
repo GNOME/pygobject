@@ -201,7 +201,6 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/gobject.GObject.__init__\(self, self._model_filter\)/gobject.GObject.__init__\(self, model=self._model_filter\)/g;" \
     -pe "s/self._model_filter.set_visible_func/return;self._model_filter.set_visible_func/g;" \
     -pe "s/buddies_column.set_cell_data_func/return;buddies_column.set_cell_data_func/g;" \
-    -pe "s/ column.set_cell_data_func/# column.set_cell_data_func/g;" \
     -pe "s/Hippo\.cairo_surface_from_gdk_pixbuf/SugarExt\.cairo_surface_from_pixbuf/g;" \
 \
     -pe "s/import pynotify\n/from gi.repository import Notify\n/g;" \
