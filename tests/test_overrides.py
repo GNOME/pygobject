@@ -38,6 +38,13 @@ class TestGLib(unittest.TestCase):
         self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'key2')
         self.assertEquals(variant.get_child_value(0).get_child_value(1).get_int32(), 2)
 
+        variant = GLib.Variant('ai', [1, 2])
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_int32(), 1)
+        self.assertEquals(variant.get_child_value(1).get_int32(), 2)
+
     def test_gvariant_unpack(self):
         # simple values
         res = GLib.Variant.new_int32(-42).unpack()
