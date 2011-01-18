@@ -806,13 +806,16 @@ _process_invocation_state (struct invocation_state *state,
                 if (type_tag == GI_TYPE_TAG_INTERFACE) {
                     GIBaseInfo *info;
                     GIInfoType info_type;
+                    GType type;
 
                     info = g_type_info_get_interface (state->arg_type_infos[i]);
                     g_assert (info != NULL);
                     info_type = g_base_info_get_type (info);
+                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
 
                     if ( (info_type == GI_INFO_TYPE_STRUCT) &&
-                             !g_struct_info_is_foreign((GIStructInfo *) info) ) {
+                             !g_struct_info_is_foreign((GIStructInfo *) info) &&
+                             !g_type_is_a (type, G_TYPE_BOXED)) {
                         if (g_arg_info_is_caller_allocates (state->arg_infos[i])) {
                             transfer = GI_TRANSFER_EVERYTHING;
                         } else if (transfer == GI_TRANSFER_EVERYTHING) {
