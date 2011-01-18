@@ -69,6 +69,61 @@ class TestGLib(unittest.TestCase):
         res = GLib.Variant('a{si}', {'key1': 1, 'key2': 2}).unpack()
         self.assertEqual(res, {'key1': 1, 'key2': 2})
 
+    def test_gvariant_iteration(self):
+        # array index access
+        vb = GLib.VariantBuilder()
+        vb.init(gi._gi.variant_type_from_string('ai'))
+        vb.add_value(GLib.Variant.new_int32(-1))
+        vb.add_value(GLib.Variant.new_int32(3))
+        v = vb.end()
+
+        self.assertEqual(len(v), 2)
+        self.assertEqual(v[0], -1)
+        self.assertEqual(v[1], 3)
+        self.assertEqual(v[-1], 3)
+        self.assertEqual(v[-2], -1)
+        self.assertRaises(IndexError, v.__getitem__, 2)
+        self.assertRaises(IndexError, v.__getitem__, -3)
+        self.assertRaises(TypeError, v.__getitem__, 'a')
+
+        # array iteration
+        self.assertEqual([x for x in v], [-1, 3])
+        self.assertEqual(list(v), [-1, 3])
+
+        # tuple index access
+        v = GLib.Variant.new_tuple(GLib.Variant.new_int32(-1),
+                GLib.Variant.new_string('hello'))
+        self.assertEqual(len(v), 2)
+        self.assertEqual(v[0], -1)
+        self.assertEqual(v[1], 'hello')
+        self.assertEqual(v[-1], 'hello')
+        self.assertEqual(v[-2], -1)
+        self.assertRaises(IndexError, v.__getitem__, 2)
+        self.assertRaises(IndexError, v.__getitem__, -3)
+        self.assertRaises(TypeError, v.__getitem__, 'a')
+
+        # tuple iteration
+        self.assertEqual([x for x in v], [-1, 'hello'])
+        self.assertEqual(tuple(v), (-1, 'hello'))
+
+        # dictionary index access
+        vsi = GLib.Variant('a{si}', {'key1': 1, 'key2': 2})
+        vis = GLib.Variant('a{is}', {1: 'val1', 5: 'val2'})
+
+        self.assertEqual(len(vsi), 2)
+        self.assertEqual(vsi['key1'], 1)
+        self.assertEqual(vsi['key2'], 2)
+        self.assertRaises(KeyError, vsi.__getitem__, 'unknown')
+
+        self.assertEqual(len(vis), 2)
+        self.assertEqual(vis[1], 'val1')
+        self.assertEqual(vis[5], 'val2')
+        self.assertRaises(KeyError, vsi.__getitem__, 3)
+
+        # dictionary iteration
+        self.assertEqual(set(vsi.keys()), set(['key1', 'key2']))
+        self.assertEqual(set(vis.keys()), set([1, 5]))
+
 class TestPango(unittest.TestCase):
 
     def test_font_description(self):

@@ -195,6 +195,56 @@ class Variant(GLib.Variant):
 
         raise NotImplementedError, 'unsupported GVariant type ' + self.get_type_string()
 
+    #
+    # Pythonic iterators
+    #
+    def __len__(self):
+        if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
+            return self.n_children()
+        raise TypeError, 'GVariant type %s is not a container' % self.get_type_string()
+
+    def __getitem__(self, key):
+        # dict
+        if self.get_type_string().startswith('a{'):
+            try:
+                val = self.lookup_value(key, variant_type_from_string('*'))
+                if val is None:
+                    raise KeyError, key
+                return val.unpack()
+            except TypeError:
+                # lookup_value() only works for string keys, which is certainly
+                # the common case; we have to do painful iteration for other
+                # key types
+                for i in xrange(self.n_children()):
+                    v = self.get_child_value(i)
+                    if v.get_child_value(0).unpack() == key:
+                        return v.get_child_value(1).unpack()
+                raise KeyError, key
+
+        # array/tuple
+        if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
+            try:
+                key = int(key)
+            except ValueError, e:
+                raise TypeError, str(e)
+            if key < 0:
+                key = self.n_children() + key
+            if key < 0 or key >= self.n_children():
+                raise IndexError, 'list index out of range'
+            return self.get_child_value(key).unpack()
+
+        raise TypeError, 'GVariant type %s is not a container' % self.get_type_string()
+
+    def keys(self):
+        if not self.get_type_string().startswith('a{'):
+            return TypeError, 'GVariant type %s is not a dictionary' % self.get_type_string()
+
+        res = []
+        for i in xrange(self.n_children()):
+            v = self.get_child_value(i)
+            res.append(v.get_child_value(0).unpack())
+        return res
+
 @classmethod
 def new_tuple(cls, *elements):
     return variant_new_tuple(elements)
