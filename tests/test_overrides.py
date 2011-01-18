@@ -16,7 +16,7 @@ import gi.types
 
 class TestGLib(unittest.TestCase):
 
-    def test_gvariant(self):
+    def test_gvariant_create(self):
         variant = GLib.Variant('i', 42)
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEquals(variant.get_int32(), 42)
@@ -37,6 +37,37 @@ class TestGLib(unittest.TestCase):
         self.assertEquals(variant.get_child_value(1).get_child_value(1).get_int32(), 1)
         self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'key2')
         self.assertEquals(variant.get_child_value(0).get_child_value(1).get_int32(), 2)
+
+    def test_gvariant_unpack(self):
+        # simple values
+        res = GLib.Variant.new_int32(-42).unpack()
+        self.assertEqual(res, -42)
+
+        res = GLib.Variant.new_uint64(34359738368).unpack()
+        self.assertEqual(res, 34359738368)
+
+        res = GLib.Variant.new_boolean(True).unpack()
+        self.assertEqual(res, True)
+
+        res = GLib.Variant.new_object_path('/foo/Bar').unpack()
+        self.assertEqual(res, '/foo/Bar')
+
+        # tuple
+        res = GLib.Variant.new_tuple(GLib.Variant.new_int32(-1),
+                GLib.Variant.new_string('hello')).unpack()
+        self.assertEqual(res, (-1, 'hello'))
+
+        # array
+        vb = GLib.VariantBuilder()
+        vb.init(gi._gi.variant_type_from_string('ai'))
+        vb.add_value(GLib.Variant.new_int32(-1))
+        vb.add_value(GLib.Variant.new_int32(3))
+        res = vb.end().unpack()
+        self.assertEqual(res, [-1, 3])
+
+        # dictionary
+        res = GLib.Variant('a{si}', {'key1': 1, 'key2': 2}).unpack()
+        self.assertEqual(res, {'key1': 1, 'key2': 2})
 
 class TestPango(unittest.TestCase):
 
