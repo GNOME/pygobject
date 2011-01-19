@@ -925,6 +925,7 @@ _pygi_argument_from_object (PyObject   *object,
                 PYGLIB_PyBytes_Check(object)) {
 
                 memcpy(array->data, PYGLIB_PyBytes_AsString(object), length);
+                array->len = length;
                 goto array_success;
             }
 
