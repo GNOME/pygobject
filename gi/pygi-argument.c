@@ -2480,6 +2480,11 @@ _pygi_marshal_in_utf8 (PyGIInvokeState   *state,
 {
     gchar *string_;
 
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
     if (PyUnicode_Check(py_arg)) {
         PyObject *pystr_obj = PyUnicode_AsUTF8String (py_arg);
         if (!pystr_obj)
