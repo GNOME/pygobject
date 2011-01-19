@@ -1113,8 +1113,18 @@ Label = override(Label)
 __all__.append('Label')
 
 class Adjustment(Gtk.Adjustment):
-    def __init__(self, value=None, lower=None, upper=None, step_increment=None, page_increment=None, page_size=None, **kwds):
-        Gtk.Adjustment.__init__(self, value=value, lower=lower, upper=upper, step_increment=step_increment, page_increment=page_increment, page_size=page_size, **kwds)
+    def __init__(self, *args, **kwds):
+        arg_names = ('value', 'lower', 'upper',
+                        'step_increment', 'page_increment', 'page_size')
+        new_args = dict(zip(arg_names, args))
+        new_args.update(kwds)
+        Gtk.Adjustment.__init__(self, **new_args)
+
+        # The value property is set between lower and (upper - page_size).
+        # Just in case lower, upper or page_size was still 0 when value
+        # was set, we set it again here.
+        if 'value' in new_args:
+            self.set_value(new_args['value'])
 
 Adjustment = override(Adjustment)
 __all__.append('Adjustment')

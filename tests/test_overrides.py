@@ -956,14 +956,34 @@ class TestGtk(unittest.TestCase):
         label = Gtk.Label('Hello')
         self.assertEquals(label.get_text(), 'Hello')
 
+    def adjustment_check(self, adjustment, value=0.0, lower=0.0, upper=0.0,
+                         step_increment=0.0, page_increment=0.0, page_size=0.0):
+        self.assertEquals(adjustment.get_value(), value)
+        self.assertEquals(adjustment.get_lower(), lower)
+        self.assertEquals(adjustment.get_upper(), upper)
+        self.assertEquals(adjustment.get_step_increment(), step_increment)
+        self.assertEquals(adjustment.get_page_increment(), page_increment)
+        self.assertEquals(adjustment.get_page_size(), page_size)
+
     def test_adjustment(self):
-        adjustment = Gtk.Adjustment(1, 0, 3, 4, 5, 6)
-        self.assertEquals(adjustment.get_value(),1)
-        self.assertEquals(adjustment.get_lower(),0)
-        self.assertEquals(adjustment.get_upper(),3)
-        self.assertEquals(adjustment.get_step_increment(),4)
-        self.assertEquals(adjustment.get_page_increment(),5)
-        self.assertEquals(adjustment.get_page_size(),6)
+        adjustment =       Gtk.Adjustment(1, 0, 6, 4, 5, 3)
+        self.adjustment_check(adjustment, 1, 0, 6, 4, 5, 3)
+
+        adjustment =       Gtk.Adjustment(1, 0, 6, 4, 5)
+        self.adjustment_check(adjustment, 1, 0, 6, 4, 5)
+
+        adjustment =       Gtk.Adjustment(1, 0, 6, 4)
+        self.adjustment_check(adjustment, 1, 0, 6, 4)
+
+        adjustment =       Gtk.Adjustment(1, 0, 6)
+        self.adjustment_check(adjustment, 1, 0, 6)
+
+        adjustment = Gtk.Adjustment()
+        self.adjustment_check(adjustment)
+
+        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6,
+                                    step_increment=4, page_increment=5, page_size=3)
+        self.adjustment_check(adjustment, 1, 0, 6, 4, 5, 3)
 
     def test_table(self):
         table = Gtk.Table()
