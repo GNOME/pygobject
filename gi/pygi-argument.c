@@ -3004,26 +3004,31 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
         return TRUE;
     }
 
+    /* FIXME: handle this large if statement in the cache
+     *        and set the correct marshaller
+     */
+
     if (iface_cache->g_type == G_TYPE_CLOSURE) {
         GClosure *closure;
-        if (!PyCallable_Check (py_arg)) {
-            PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
-                          py_arg->ob_type->tp_name);
+        if (!PyCallable_Check(py_arg)) {
+            PyErr_Format(PyExc_TypeError, "Must be callable, not %s",
+                         py_arg->ob_type->tp_name);
             return FALSE;
         }
 
-        closure = pyg_closure_new (py_arg, NULL, NULL);
+        closure = pyg_closure_new(py_arg, NULL, NULL);
         if (closure == NULL) {
-            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
+            PyErr_SetString(PyExc_RuntimeError, "PyObject conversion to GClosure failed");
             return FALSE;
         }
 
         arg->v_pointer = closure;
+        return TRUE;
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         GValue *value;
         GType object_type;
 
-        object_type = pyg_type_from_object_strict ( (PyObject *) py_arg->ob_type, FALSE);
+        object_type = pyg_type_from_object_strict( (PyObject *) py_arg->ob_type, FALSE);
         if (object_type == G_TYPE_INVALID) {
             PyErr_SetString (PyExc_RuntimeError, "unable to retrieve object's GType");
             return FALSE;
@@ -3031,25 +3036,43 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
 
         value = g_slice_new0 (GValue);
         g_value_init (value, object_type);
-        if (pyg_value_from_pyobject (value, py_arg) < 0) {
+        if (pyg_value_from_pyobject(value, py_arg) < 0) {
             g_slice_free (GValue, value);
             PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
             return FALSE;
         }
 
         arg->v_pointer = value;
-
+        return TRUE;
     } else if (iface_cache->is_foreign) {
-         PyErr_Format (PyExc_NotImplementedError, "foreign types not implemented yet");
+        gboolean success;
+        GITypeInfo *type_info = g_arg_info_get_type(arg_cache->arg_info);
+        success = pygi_struct_foreign_convert_to_g_argument(py_arg, 
+                                                            type_info, 
+                                                            arg_cache->transfer, 
+                                                            arg);
+        g_base_info_unref((GIBaseInfo *)type_info);
 
-        return FALSE;
-    } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
+        return success;
+    } else if (!PyObject_IsInstance(py_arg, iface_cache->py_type)) {
         PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
                       iface_cache->type_name, 
                       iface_cache->py_type->ob_type->tp_name);
         return FALSE;
     }
 
+    if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
+        arg->v_pointer = pyg_boxed_get(py_arg, void);
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+            arg->v_pointer = g_boxed_copy(iface_cache->g_type, arg->v_pointer);
+        }
+    } else if (g_type_is_a (iface_cache->g_type, G_TYPE_POINTER) ||
+               iface_cache->g_type  == G_TYPE_NONE) {
+        arg->v_pointer = pyg_pointer_get(py_arg, void);
+    } else {
+        PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name(iface_cache->g_type));
+        return FALSE;
+    }
     return TRUE;
 }
 

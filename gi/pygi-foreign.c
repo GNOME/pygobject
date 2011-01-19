@@ -106,23 +106,29 @@ pygi_struct_foreign_lookup (GIBaseInfo *base_info)
     return result;
 }
 
-PyObject *
+gboolean
 pygi_struct_foreign_convert_to_g_argument (PyObject       *value,
                                            GITypeInfo     *type_info,
                                            GITransfer      transfer,
                                            GIArgument      *arg)
 {
+    PyObject *result;
     GIBaseInfo *base_info = g_type_info_get_interface (type_info);
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
     g_base_info_unref (base_info);
 
-    if (foreign_struct == NULL)
-        return NULL;
+    if (foreign_struct == NULL) {
+        PyErr_Format(PyExc_KeyError, "could not find foreign type %s",
+                     g_base_info_get_name (base_info));
+        return FALSE;
+    }
 
-    if (!foreign_struct->to_func (value, type_info, transfer, arg))
-        return NULL;
+    result = foreign_struct->to_func (value, type_info, transfer, arg);
+    if (result == NULL)
+        return FALSE;
 
-    Py_RETURN_NONE;
+    Py_DECREF(result);
+    return TRUE;
 }
 
 PyObject *
