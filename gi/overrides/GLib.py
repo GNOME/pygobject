@@ -44,108 +44,126 @@ class _VariantCreator(object):
         'v': GLib.Variant.new_variant,
     }
 
-    def __init__(self, format_string, args):
-        self._format_string = format_string
-        self._args = args
+    def _create(self, format, args):
+        '''Create a GVariant object from given format and argument list.
 
-    def create(self):
-        if self._format_string_is_leaf():
-            return self._new_variant_leaf()
+        This method recursively calls itself for complex structures (arrays,
+        dictionaries, boxed).
 
-        format_char = self._pop_format_char()
-        arg = self._pop_arg()
+        Return a tuple (variant, rest_format, rest_args) with the generated
+        GVariant, the remainder of the format string, and the remainder of the
+        arguments.
 
-        if format_char == 'm':
-            raise NotImplementedError()
-        else:
-            builder = GLib.VariantBuilder()
-            if format_char == '(':
-                builder.init(variant_type_from_string('r'))
-            elif format_char == '{':
-                builder.init(variant_type_from_string('{?*}'))
+        If args is None, then this won't actually consume any arguments, and
+        just parse the format string and generate empty GVariant structures.
+        This is required for creating empty dictionaries or arrays.
+        '''
+        # leaves (simple types)
+        constructor = self._LEAF_CONSTRUCTORS.get(format[0])
+        if constructor:
+            if args is not None:
+                if not args:
+                    raise TypeError('not enough arguments for GVariant format string')
+                v = constructor(args[0])
+                return (constructor(args[0]), format[1:], args[1:])
             else:
-                raise NotImplementedError()
-            format_char = self._pop_format_char()
-            while format_char not in [')', '}']:
-                builder.add_value(Variant(format_char, arg))
-                format_char = self._pop_format_char()
-                if self._args:
-                    arg = self._pop_arg()
-            return builder.end()
+                return (None, format[1:], None)
 
-    def _format_string_is_leaf(self):
-        format_char = self._format_string[0]
-        return not format_char in ['m', '(', '{']
+        if format[0] == '(':
+            return self._create_tuple(format, args)
 
-    def _format_string_is_nnp(self):
-        format_char = self._format_string[0]
-        return format_char in ['a', 's', 'o', 'g', '^', '@', '*', '?', 'r',
-                               'v', '&']
+        if format.startswith('a{'):
+            return self._create_dict(format, args)
 
-    def _new_variant_leaf(self):
-        if self._format_string_is_nnp():
-            return self._new_variant_nnp()
+        if format[0] == 'a':
+            return self._create_array(format, args)
 
-        format_char = self._pop_format_char()
-        arg = self._pop_arg()
+        raise NotImplementedError('cannot handle GVariant type ' + format)
 
-        return _VariantCreator._LEAF_CONSTRUCTORS[format_char](arg)
+    def _create_tuple(self, format, args):
+        '''Handle the case where the outermost type of format is a tuple.
 
-    def _new_variant_nnp(self):
-        format_char = self._pop_format_char()
-        arg = self._pop_arg()
+        Tuples might come in as actual tuples in args, or as a flat list, so
+        this needs to handle both cases.
+        '''
+        format = format[1:] # eat the '('
+        builder = GLib.VariantBuilder()
+        builder.init(variant_type_from_string('r'))
+        if args is not None and args and type(args[0]) == type(()):
+            # tuple in args
+            for i in xrange(len(args[0])):
+                (v, format, _) = self._create(format, args[0][i:])
+                builder.add_value(v)
+            args = args[1:]
+        else:
+            # flat list
+            while format[0] != ')':
+                (v, format, args) = self._create(format, args)
+                builder.add_value(v)
+        return (builder.end(), format[1:], args)
 
-        if format_char == '&':
-            format_char = self._pop_format_char()
+    def _create_dict(self, format, args):
+        '''Handle the case where the outermost type of format is a dict.'''
 
-        if format_char == 'a':
-            builder = GLib.VariantBuilder()
+        builder = GLib.VariantBuilder()
+        if args is None or not args[0]:
+            # empty value: we need to call _create() to parse the subtype,
+            # and specify the element type precisely
+            rest_format = self._create(format[2:], None)[1]
+            rest_format = self._create(rest_format, None)[1]
+            if not rest_format.startswith('}'):
+                raise ValueError('dictionary type string not closed with }')
+            rest_format = rest_format[1:] # eat the }
+            element_type = format[:len(format) - len(rest_format)]
+            builder.init(variant_type_from_string(element_type))
+        else:
+            builder.init(variant_type_from_string('a{?*}'))
+            for k, v in args[0].iteritems():
+                (key_v, rest_format, _) = self._create(format[2:], [k])
+                (val_v, rest_format, _) = self._create(rest_format, [v])
+
+                if not rest_format.startswith('}'):
+                    raise ValueError('dictionary type string not closed with }')
+                rest_format = rest_format[1:] # eat the }
+
+                entry = GLib.VariantBuilder()
+                entry.init(variant_type_from_string('{?*}'))
+                entry.add_value(key_v)
+                entry.add_value(val_v)
+                builder.add_value(entry.end())
+
+        if args is not None:
+            args = args[1:]
+        return (builder.end(), rest_format, args)
+
+    def _create_array(self, format, args):
+        '''Handle the case where the outermost type of format is an array.'''
+
+        builder = GLib.VariantBuilder()
+        if args is None or not args[0]:
+            # empty value: we need to call _create() to parse the subtype,
+            # and specify the element type precisely
+            rest_format = self._create(format[1:], None)[1]
+            element_type = format[:len(format) - len(rest_format)]
+            builder.init(variant_type_from_string(element_type))
+        else:
             builder.init(variant_type_from_string('a*'))
-
-            element_format_string = self._pop_leaf_format_string()
-
-            if isinstance(arg, dict):
-                for element in arg.items():
-                    value = Variant(element_format_string, *element)
-                    builder.add_value(value)
-            else:
-                for element in arg:
-                    value = Variant(element_format_string, element)
-                    builder.add_value(value)
-            return builder.end()
-        elif format_char == '^':
-            raise NotImplementedError()
-        elif format_char == '@':
-            raise NotImplementedError()
-        elif format_char == '*':
-            raise NotImplementedError()
-        elif format_char == 'r':
-            raise NotImplementedError()
-        elif format_char == '?':
-            raise NotImplementedError()
-        else:
-            return _VariantCreator._LEAF_CONSTRUCTORS[format_char](arg)
-
-    def _pop_format_char(self):
-        format_char = self._format_string[0]
-        self._format_string = self._format_string[1:]
-        return format_char
-
-    def _pop_leaf_format_string(self):
-        # FIXME: This will break when the leaf is inside a tuple or dict entry
-        format_string = self._format_string
-        self._format_string = ''
-        return format_string
-
-    def _pop_arg(self):
-        arg = self._args[0]
-        self._args = self._args[1:]
-        return arg
+            for i in xrange(len(args[0])):
+                (v, rest_format, _) = self._create(format[1:], args[0][i:])
+                builder.add_value(v)
+        if args is not None:
+            args = args[1:]
+        return (builder.end(), rest_format, args)
 
 class Variant(GLib.Variant):
     def __new__(cls, format_string, *args):
-        creator = _VariantCreator(format_string, args)
-        return creator.create()
+        creator = _VariantCreator()
+        (v, rest_format, restargs) = creator._create(format_string, list(args))
+        if rest_format:
+            raise TypeError('invalid remaining format string: "%s"' % rest_format)
+        if restargs:
+            raise TypeError('too many arguments for format string: "%s"' % str(restargs))
+        return v
 
     def __repr__(self):
         return '<GLib.Variant(%s)>' % getattr(self, 'print')(True)
@@ -193,7 +211,7 @@ class Variant(GLib.Variant):
             return [self.get_child_value(i).unpack() 
                     for i in xrange(self.n_children())]
 
-        raise NotImplementedError, 'unsupported GVariant type ' + self.get_type_string()
+        raise NotImplementedError('unsupported GVariant type ' + self.get_type_string())
 
     #
     # Pythonic iterators
@@ -203,7 +221,7 @@ class Variant(GLib.Variant):
             return len(self.get_string())
         if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
             return self.n_children()
-        raise TypeError, 'GVariant type %s does not have a length' % self.get_type_string()
+        raise TypeError('GVariant type %s does not have a length' % self.get_type_string())
 
     def __getitem__(self, key):
         # dict
@@ -211,7 +229,7 @@ class Variant(GLib.Variant):
             try:
                 val = self.lookup_value(key, variant_type_from_string('*'))
                 if val is None:
-                    raise KeyError, key
+                    raise KeyError(key)
                 return val.unpack()
             except TypeError:
                 # lookup_value() only works for string keys, which is certainly
@@ -221,25 +239,22 @@ class Variant(GLib.Variant):
                     v = self.get_child_value(i)
                     if v.get_child_value(0).unpack() == key:
                         return v.get_child_value(1).unpack()
-                raise KeyError, key
+                raise KeyError(key)
 
         # array/tuple
         if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
-            try:
-                key = int(key)
-            except ValueError, e:
-                raise TypeError, str(e)
+            key = int(key)
             if key < 0:
                 key = self.n_children() + key
             if key < 0 or key >= self.n_children():
-                raise IndexError, 'list index out of range'
+                raise IndexError('list index out of range')
             return self.get_child_value(key).unpack()
 
         # string
         if self.get_type_string() in ['s', 'o', 'g']:
             return self.get_string().__getitem__(key)
 
-        raise TypeError, 'GVariant type %s is not a container' % self.get_type_string()
+        raise TypeError('GVariant type %s is not a container' % self.get_type_string())
 
     def keys(self):
         if not self.get_type_string().startswith('a{'):

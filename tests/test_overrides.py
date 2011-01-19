@@ -18,33 +18,176 @@ import gi.types
 class TestGLib(unittest.TestCase):
 
     def test_gvariant_create(self):
+        # simple values
+
         variant = GLib.Variant('i', 42)
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEquals(variant.get_int32(), 42)
 
-        variant = GLib.Variant('(ss)', 'mec', 'mac')
+        variant = GLib.Variant('s', '')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEquals(variant.get_string(), '')
+
+        variant = GLib.Variant('s', 'hello')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEquals(variant.get_string(), 'hello')
+
+        # tuples
+
+        variant = GLib.Variant('()')
+        self.assertEqual(variant.get_type_string(), '()')
+        self.assertEquals(variant.n_children(), 0)
+
+        # canonical arguments
+        variant = GLib.Variant('(ss)', ('mec', 'mac'))
+        self.assertEqual(variant.get_type_string(), '(ss)')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
         self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
         self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
 
-        variant = GLib.Variant('a{si}', {'key1': 1, 'key2': 2})
+        # flat arguments
+        variant = GLib.Variant('(ss)', 'mec', 'mac')
+        self.assertEqual(variant.get_type_string(), '(ss)')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
-        # Looks like order is not preserved
-        self.assertEquals(variant.get_child_value(1).get_child_value(0).get_string(), 'key1')
-        self.assertEquals(variant.get_child_value(1).get_child_value(1).get_int32(), 1)
-        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'key2')
-        self.assertEquals(variant.get_child_value(0).get_child_value(1).get_int32(), 2)
+        self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
+        self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
+
+        # nested tuples (canonical)
+        variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
+        self.assertEqual(variant.get_type_string(), '((si)(ub))')
+        self.assertEqual(variant.unpack(), (('hello', -1), (42L, True)))
+
+        # nested tuples (flat)
+        variant = GLib.Variant('((si)(ub))', 'hello', -1, 42, True)
+        self.assertEqual(variant.get_type_string(), '((si)(ub))')
+        self.assertEqual(variant.unpack(), (('hello', -1), (42L, True)))
+
+        # dictionaries
+
+        variant = GLib.Variant('a{si}', {})
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEqual(variant.get_type_string(), 'a{si}')
+        self.assertEquals(variant.n_children(), 0)
+
+        variant = GLib.Variant('a{si}', {'': 1, 'key1': 2, 'key2': 3})
+        self.assertEqual(variant.get_type_string(), 'a{si}')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(2), GLib.Variant))
+        self.assertEqual(variant.unpack(), {'': 1, 'key1': 2, 'key2': 3})
+
+        # nested dictionaries
+        variant = GLib.Variant('a{sa{si}}', {})
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEqual(variant.get_type_string(), 'a{sa{si}}')
+        self.assertEquals(variant.n_children(), 0)
+
+        d = {'':     {'': 1, 'keyn1': 2},
+             'key1': {'key11': 11, 'key12': 12}}
+        variant = GLib.Variant('a{sa{si}}', d)
+        self.assertEqual(variant.get_type_string(), 'a{sa{si}}')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEqual(variant.unpack(), d)
+
+        # arrays
+
+        variant = GLib.Variant('ai', [])
+        self.assertEqual(variant.get_type_string(), 'ai')
+        self.assertEquals(variant.n_children(), 0)
 
         variant = GLib.Variant('ai', [1, 2])
+        self.assertEqual(variant.get_type_string(), 'ai')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
         self.assertEquals(variant.get_child_value(0).get_int32(), 1)
         self.assertEquals(variant.get_child_value(1).get_int32(), 2)
+
+        variant = GLib.Variant('as', [])
+        self.assertEqual(variant.get_type_string(), 'as')
+        self.assertEquals(variant.n_children(), 0)
+
+        variant = GLib.Variant('as', [''])
+        self.assertEqual(variant.get_type_string(), 'as')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_string(), '')
+
+        variant = GLib.Variant('as', ['hello', 'world'])
+        self.assertEqual(variant.get_type_string(), 'as')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_string(), 'hello')
+        self.assertEquals(variant.get_child_value(1).get_string(), 'world')
+
+        # nested arrays
+        variant = GLib.Variant('aai', [])
+        self.assertEqual(variant.get_type_string(), 'aai')
+        self.assertEquals(variant.n_children(), 0)
+
+        variant = GLib.Variant('aai', [[]])
+        self.assertEqual(variant.get_type_string(), 'aai')
+        self.assertEquals(variant.n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).n_children(), 0)
+
+        variant = GLib.Variant('aai', [[1, 2], [3, 4, 5]])
+        self.assertEqual(variant.get_type_string(), 'aai')
+        self.assertEquals(variant.unpack(), [[1, 2], [3, 4, 5]])
+
+        #
+        # complex types
+        #
+
+        variant = GLib.Variant('(as)', [])
+        self.assertEqual(variant.get_type_string(), '(as)')
+        self.assertEquals(variant.n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).n_children(), 0)
+
+        variant = GLib.Variant('(as)', [''])
+        self.assertEqual(variant.get_type_string(), '(as)')
+        self.assertEquals(variant.n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), '')
+
+        variant = GLib.Variant('(as)', ['hello'])
+        self.assertEqual(variant.get_type_string(), '(as)')
+        self.assertEquals(variant.n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).n_children(), 1)
+        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'hello')
+
+        obj = {'a1': (1, True), 'a2': (2, False)}
+        variant = GLib.Variant('a{s(ib)}', obj)
+        self.assertEqual(variant.get_type_string(), 'a{s(ib)}')
+        self.assertEqual(variant.unpack(), obj)
+
+        obj = (1, {'a': {'a1': True, 'a2': False},
+                   'b': {'b1': False},
+                   'c': {}
+                  },
+               'foo')
+        variant = GLib.Variant('(ia{sa{sb}}s)', obj)
+        self.assertEqual(variant.get_type_string(), '(ia{sa{sb}}s)')
+        self.assertEqual(variant.unpack(), obj)
+
+    def test_gvariant_create_errors(self):
+        # excess arguments
+        self.assertRaises(TypeError, GLib.Variant, 'i', 42, 3)
+
+        # not enough arguments
+        self.assertRaises(TypeError, GLib.Variant, '(ii)', 42)
+
+        # data type mismatch
+        self.assertRaises(TypeError, GLib.Variant, 'i', 'hello')
+        self.assertRaises(TypeError, GLib.Variant, 's', 42)
+
+        # unimplemented data type
+        self.assertRaises(NotImplementedError, GLib.Variant, 'Q', 1)
 
     def test_gvariant_unpack(self):
         # simple values
@@ -92,7 +235,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(v[-2], -1)
         self.assertRaises(IndexError, v.__getitem__, 2)
         self.assertRaises(IndexError, v.__getitem__, -3)
-        self.assertRaises(TypeError, v.__getitem__, 'a')
+        self.assertRaises(ValueError, v.__getitem__, 'a')
 
         # array iteration
         self.assertEqual([x for x in v], [-1, 3])
@@ -108,7 +251,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(v[-2], -1)
         self.assertRaises(IndexError, v.__getitem__, 2)
         self.assertRaises(IndexError, v.__getitem__, -3)
-        self.assertRaises(TypeError, v.__getitem__, 'a')
+        self.assertRaises(ValueError, v.__getitem__, 'a')
 
         # tuple iteration
         self.assertEqual([x for x in v], [-1, 'hello'])
