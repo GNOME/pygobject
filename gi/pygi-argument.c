@@ -3424,7 +3424,7 @@ _pygi_marshal_out_interface_callback(PyGIInvokeState   *state,
     PyObject *py_obj = NULL;
 
     PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+                 "Callback out values are not supported");
     return py_obj;
 }
 

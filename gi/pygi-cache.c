@@ -472,7 +472,7 @@ _arg_cache_new_for_in_interface_union(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_inteface_union;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for In Interface Union is not fully implemented yet");
     return arg_cache;
 }
 
@@ -546,7 +546,7 @@ _arg_cache_new_for_in_interface_enum(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for In Interface ENum is not fully implemented yet");
     return arg_cache;
 }
 
@@ -556,7 +556,7 @@ _arg_cache_new_for_in_interface_flags(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_flags;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for In Interface Flags is not fully implemented yet");
     return arg_cache;
 }
 
@@ -789,7 +789,7 @@ _arg_cache_new_for_out_ghash(GITypeInfo *type_info)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->out_marshaller = _pygi_marshal_out_ghash;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out GHash is not fully implemented yet");
     return arg_cache;
 }
 
@@ -806,7 +806,7 @@ _arg_cache_new_for_out_interface_struct(GIInterfaceInfo *iface_info,
                                         GITransfer transfer)
 {
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out Interface Struct is not fully implemented yet");
     return FALSE;
     PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
     PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
@@ -835,7 +835,7 @@ _arg_cache_new_for_out_interface_boxed(GIInterfaceInfo *iface_info,
                                       GITransfer transfer)
 {
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out Interface Boxed is not fully implemented yet");
     return FALSE;
 
     PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
@@ -857,7 +857,7 @@ _arg_cache_new_for_out_interface_enum(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out Interface ENum is not fully implemented yet");
     return arg_cache;
 }
 
@@ -867,7 +867,7 @@ _arg_cache_new_for_out_interface_union(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out Interface Unions is not fully implemented yet");
     return arg_cache;
 }
 static inline PyGIArgCache *
@@ -876,7 +876,7 @@ _arg_cache_new_for_out_interface_flags(void)
     PyGIArgCache *arg_cache = NULL;
     /*arg_cache->in_marshaller = _pygi_marshal_in_flags;*/
     PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for this type is not fully implemented yet");
+                 "Caching for Out Interface Flags is not fully implemented yet");
     return arg_cache;
 }
 
