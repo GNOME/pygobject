@@ -1042,6 +1042,8 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                                                         cache,
                                                         cache->return_cache,
                                                         &state->return_arg);
+        if (py_return == NULL)
+            return NULL;
 
         if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
             total_out_args++;
@@ -1075,6 +1077,9 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                                                          cache,
                                                          arg_cache,
                                                          &(state->out_values[out_cache_index]));
+
+            if (py_obj == NULL)
+                return NULL;
 
             PyTuple_SET_ITEM(py_out, py_arg_index, py_obj);
             cache_item = cache_item->next;
