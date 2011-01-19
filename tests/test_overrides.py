@@ -132,6 +132,19 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(set(vsi.keys()), set(['key1', 'key2']))
         self.assertEqual(set(vis.keys()), set([1, 5]))
 
+        # string index access
+        v = GLib.Variant('si', 'hello')
+        self.assertEqual(len(v), 5)
+        self.assertEqual(v[0], 'h')
+        self.assertEqual(v[4], 'o')
+        self.assertEqual(v[-1], 'o')
+        self.assertEqual(v[-5], 'h')
+        self.assertRaises(IndexError, v.__getitem__, 5)
+        self.assertRaises(IndexError, v.__getitem__, -6)
+
+        # string iteration
+        self.assertEqual([x for x in v], ['h', 'e', 'l', 'l', 'o'])
+
 class TestPango(unittest.TestCase):
 
     def test_default_font_description(self):

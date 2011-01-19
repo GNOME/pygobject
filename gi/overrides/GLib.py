@@ -199,9 +199,11 @@ class Variant(GLib.Variant):
     # Pythonic iterators
     #
     def __len__(self):
+        if self.get_type_string() in ['s', 'o', 'g']:
+            return len(self.get_string())
         if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
             return self.n_children()
-        raise TypeError, 'GVariant type %s is not a container' % self.get_type_string()
+        raise TypeError, 'GVariant type %s does not have a length' % self.get_type_string()
 
     def __getitem__(self, key):
         # dict
@@ -232,6 +234,10 @@ class Variant(GLib.Variant):
             if key < 0 or key >= self.n_children():
                 raise IndexError, 'list index out of range'
             return self.get_child_value(key).unpack()
+
+        # string
+        if self.get_type_string() in ['s', 'o', 'g']:
+            return self.get_string().__getitem__(key)
 
         raise TypeError, 'GVariant type %s is not a container' % self.get_type_string()
 
