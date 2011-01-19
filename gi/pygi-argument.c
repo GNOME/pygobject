@@ -2800,6 +2800,11 @@ _pygi_marshal_in_ghash (PyGIInvokeState   *state,
     GHashTable *hash_ = NULL;
     PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
 
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+ 
     py_keys = PyMapping_Keys(py_arg);
     if (py_keys == NULL) {
         PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
