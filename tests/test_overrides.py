@@ -134,9 +134,14 @@ class TestGLib(unittest.TestCase):
 
 class TestPango(unittest.TestCase):
 
+    def test_default_font_description(self):
+        desc = Pango.FontDescription()
+        self.assertEquals(desc.get_variant(), Pango.Variant.NORMAL)
+
     def test_font_description(self):
         desc = Pango.FontDescription('monospace')
         self.assertEquals(desc.get_family(), 'monospace')
+        self.assertEquals(desc.get_variant(), Pango.Variant.NORMAL)
 
     def test_layout(self):
         self.assertRaises(TypeError, Pango.Layout)
