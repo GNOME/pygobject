@@ -2063,7 +2063,7 @@ _pygi_marshal_in_uint8 (PyGIInvokeState   *state,
                         PyObject          *py_arg,
                         GIArgument        *arg)
 {
-    long long_;
+    unsigned long long_;
 
     if (PYGLIB_PyBytes_Check(py_arg)) {
 
@@ -2164,7 +2164,7 @@ _pygi_marshal_in_uint16 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < 0 || long_ > 65535) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
+        PyErr_Format (PyExc_ValueError, "%li not in range %d to %d", long_, 0, 65535);
         return FALSE;
     }
 
@@ -2231,7 +2231,7 @@ _pygi_marshal_in_uint32 (PyGIInvokeState   *state,
 
 #if PY_VERSION_HEX < 0x03000000
     if (PyInt_Check (py_long))
-        long_ = PyInt_AS_LONG (py_long);
+        long_ = PyInt_AsLong (py_long);
     else
 #endif
         long_ = PyLong_AsLongLong(py_long);
@@ -2280,15 +2280,42 @@ _pygi_marshal_in_int64 (PyGIInvokeState   *state,
 
     Py_DECREF(py_long);
 
-    if (PyErr_Occurred())
+    if (PyErr_Occurred()) {
+        /* OverflowError occured but range errors should be returned as ValueError */
+        char *long_str;
+        PyObject *py_str = PyObject_Str(py_long);
+
+        if (PyUnicode_Check(py_str)) {
+            PyObject *py_bytes = PyUnicode_AsUTF8String(py_str);
+            if (py_bytes == NULL)
+                return FALSE;
+
+            long_str = g_strdup(PYGLIB_PyBytes_AsString(py_bytes));
+            if (long_str == NULL) {
+                PyErr_NoMemory();
+                return FALSE;
+            }
+
+            Py_DECREF(py_bytes);
+        } else {
+            long_str = g_strdup(PYGLIB_PyBytes_AsString(py_str));
+        }
+
+        Py_DECREF(py_str);
+        PyErr_Clear();
+        PyErr_Format(PyExc_ValueError, "%s not in range %ld to %ld", 
+                     long_str, G_MININT64, G_MAXINT64);
+
+        g_free(long_str);
         return FALSE;
+    }
 
     if (long_ < G_MININT64 || long_ > G_MAXINT64) {
         PyErr_Format (PyExc_ValueError, "%lld not in range %ld to %ld", long_, G_MININT64, G_MAXINT64);
         return FALSE;
     }
 
-    arg->v_uint64 = long_;
+    arg->v_int64 = long_;
 
     return TRUE;
 }
@@ -2301,7 +2328,7 @@ _pygi_marshal_in_uint64 (PyGIInvokeState   *state,
                          GIArgument        *arg)
 {
     PyObject *py_long;
-    long long long_;
+    guint64 ulong_;
 
     if (!PyNumber_Check(py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
@@ -2314,23 +2341,56 @@ _pygi_marshal_in_uint64 (PyGIInvokeState   *state,
         return FALSE;
 
 #if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (py_long))
-        long_ = PyInt_AS_LONG (py_long);
-    else
+    if (PyInt_Check (py_long)) {
+        long long_ = PyInt_AsLong(py_long);
+        if (long_ < 0) {
+            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %llu",
+                          long_, 0, G_MAXUINT64);
+            return FALSE;
+        }
+        ulong_ = long_;
+    } else
 #endif
-        long_ = PyLong_AsLongLong(py_long);
+        ulong_ = PyLong_AsUnsignedLongLong(py_long);
 
     Py_DECREF(py_long);
 
-    if (PyErr_Occurred())
-        return FALSE;
+    if (PyErr_Occurred()) {
+        /* OverflowError occured but range errors should be returned as ValueError */
+        char *long_str;
+        PyObject *py_str = PyObject_Str(py_long);
 
-    if (long_ < 0 || long_ > G_MAXUINT64) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %lu", long_, 0, G_MAXUINT64);
+        if (PyUnicode_Check(py_str)) {
+            PyObject *py_bytes = PyUnicode_AsUTF8String(py_str);
+            if (py_bytes == NULL)
+                return FALSE;
+
+            long_str = g_strdup(PYGLIB_PyBytes_AsString(py_bytes));
+            if (long_str == NULL) {
+                PyErr_NoMemory();
+                return FALSE;
+            }
+
+            Py_DECREF(py_bytes);
+        } else {
+            long_str = g_strdup(PYGLIB_PyBytes_AsString(py_str));
+        }
+
+        Py_DECREF(py_str);
+        PyErr_Clear();
+        PyErr_Format(PyExc_ValueError, "%s not in range %d to %llu", 
+                     long_str, 0, G_MAXUINT64);
+
+        g_free(long_str);
         return FALSE;
     }
 
-    arg->v_uint64 = long_;
+    if (ulong_ > G_MAXUINT64) {
+        PyErr_Format (PyExc_ValueError, "%llu not in range %d to %llu", ulong_, 0, G_MAXUINT64);
+        return FALSE;
+    }
+
+    arg->v_uint64 = ulong_;
 
     return TRUE;
 }
@@ -3243,7 +3303,7 @@ _pygi_marshal_out_uint64 (PyGIInvokeState   *state,
                           PyGIArgCache      *arg_cache,
                           GIArgument        *arg)
 {
-    PyObject *py_obj = PyLong_FromUnsignedLongLong(arg->v_uint64);
+    PyObject *py_obj = PyLong_FromLongLong(arg->v_uint64);
 
     return py_obj;
 }

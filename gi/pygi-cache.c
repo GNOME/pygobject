@@ -1059,7 +1059,7 @@ _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
            arg_cache = _arg_cache_new_for_in_uint8();
            break;
        case GI_TYPE_TAG_INT16:
-           arg_cache = _arg_cache_new_for_in_uint16();
+           arg_cache = _arg_cache_new_for_in_int16();
            break;
        case GI_TYPE_TAG_UINT16:
            arg_cache = _arg_cache_new_for_in_uint16();
