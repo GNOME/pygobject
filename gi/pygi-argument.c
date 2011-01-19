@@ -2047,7 +2047,7 @@ _pygi_marshal_in_int8 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < -128 || long_ > 127) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, -128, 127);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -128, 127);
         return FALSE;
     }
 
@@ -2092,7 +2092,7 @@ _pygi_marshal_in_uint8 (PyGIInvokeState   *state,
     }
 
     if (long_ < 0 || long_ > 255) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, 0, 255);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 255);
         return FALSE;
     }
 
@@ -2128,7 +2128,7 @@ _pygi_marshal_in_int16 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < -32768 || long_ > 32767) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, -32768, 32767);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -32768, 32767);
         return FALSE;
     }
 
@@ -2164,7 +2164,7 @@ _pygi_marshal_in_uint16 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < 0 || long_ > 65535) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, 0, 65535);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
         return FALSE;
     }
 
@@ -2200,7 +2200,7 @@ _pygi_marshal_in_int32 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < G_MININT32 || long_ > G_MAXINT32) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %i to %i", long_, G_MININT32, G_MAXINT32);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, G_MININT32, G_MAXINT32);
         return FALSE;
     }
 
@@ -2284,7 +2284,7 @@ _pygi_marshal_in_int64 (PyGIInvokeState   *state,
         return FALSE;
 
     if (long_ < G_MININT64 || long_ > G_MAXINT64) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %li to %li", long_, G_MININT64, G_MAXINT64);
+        PyErr_Format (PyExc_ValueError, "%lld not in range %ld to %ld", long_, G_MININT64, G_MAXINT64);
         return FALSE;
     }
 
