@@ -77,6 +77,9 @@ else:
     Window = override(Window)
     __all__.append('Window')
 
+Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
+Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
+
 class Event(Gdk.Event):
     _UNION_MEMBERS = {
         Gdk.EventType.DELETE: 'any',
@@ -84,8 +87,8 @@ class Event(Gdk.Event):
         Gdk.EventType.EXPOSE: 'expose',
         Gdk.EventType.MOTION_NOTIFY: 'motion',
         Gdk.EventType.BUTTON_PRESS: 'button',
-        getattr(Gdk.EventType, "2BUTTON_PRESS"): 'button',
-        getattr(Gdk.EventType, "3BUTTON_PRESS"): 'button',
+        Gdk.EventType._2BUTTON_PRESS: 'button',
+        Gdk.EventType._3BUTTON_PRESS: 'button',
         Gdk.EventType.BUTTON_RELEASE: 'button',
         Gdk.EventType.KEY_PRESS: 'key',
         Gdk.EventType.KEY_RELEASE: 'key',
