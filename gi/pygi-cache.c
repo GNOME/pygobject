@@ -113,6 +113,8 @@ _function_cache_new_from_function_info(GIFunctionInfo *function_info)
     GIFunctionInfoFlags flags;
 
     fc = g_slice_new0(PyGIFunctionCache);
+
+    fc->name = g_base_info_get_name((GIBaseInfo *)function_info);
     flags = g_function_info_get_flags(function_info);
     fc->is_method = flags & GI_FUNCTION_IS_METHOD;
     fc->is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;

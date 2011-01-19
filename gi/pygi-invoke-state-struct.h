@@ -10,7 +10,7 @@ G_BEGIN_DECLS
 typedef struct _PyGIInvokeState
 {
     PyObject *py_in_args;
-    gint n_py_in_args;
+    gssize n_py_in_args;
 
     GIArgument **args;
     GIArgument *in_args;

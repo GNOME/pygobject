@@ -71,8 +71,8 @@ struct _PyGIArgCache
 
     GDestroyNotify destroy_notify;
 
-    gint c_arg_index;
-    gint py_arg_index;
+    gssize c_arg_index;
+    gssize py_arg_index;
 };
 
 typedef struct _PyGISequenceCache
@@ -112,6 +112,8 @@ typedef struct _PyGICallbackCache
 
 struct _PyGIFunctionCache
 {
+    const gchar *name;
+
     gboolean is_method;
     gboolean is_constructor;
 
@@ -120,10 +122,10 @@ struct _PyGIFunctionCache
     GSList *out_args;
 
     /* counts */
-    guint n_in_args;
-    guint n_out_args;
-    guint n_args;
-    guint n_py_args;
+    gssize n_in_args;
+    gssize n_out_args;
+    gssize n_args;
+    gssize n_py_args;
 };
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);

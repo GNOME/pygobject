@@ -961,6 +961,16 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
     int i, in_count, out_count;
     in_count = 0;
     out_count = 0;
+
+    if (state->n_py_in_args > cache->n_py_args) {
+        PyErr_Format(PyExc_TypeError,
+                     "%s() takes exactly %zd arguments (%zd given)",
+                     cache->name,
+                     cache->n_py_args,
+                     state->n_py_in_args);
+        return FALSE;
+    }
+
     for (i = 0; i < cache->n_args; i++) {
         GIArgument *c_arg;
         PyGIArgCache *arg_cache = cache->args_cache[i];
@@ -975,7 +985,15 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                 if (arg_cache->aux_type > 0)
                     continue;
 
-                /* FIXME: get default or throw error if there aren't enough pyargs */
+                if (arg_cache->py_arg_index >= state->n_py_in_args) {
+                    PyErr_Format(PyExc_TypeError,
+                                 "%s() takes exactly %zd arguments (%zd given)",
+                                  cache->name,
+                                  cache->n_py_args,
+                                  state->n_py_in_args);
+                    return FALSE;
+                }
+
                 py_arg =
                     PyTuple_GET_ITEM(state->py_in_args,
                                      arg_cache->py_arg_index);
