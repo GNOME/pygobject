@@ -1510,6 +1510,8 @@ _pygi_argument_to_object (GIArgument  *arg,
                     type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
                     if (g_type_is_a (type, G_TYPE_VALUE)) {
                         object = pyg_value_as_pyobject (arg->v_pointer, FALSE);
+                    } else if (g_struct_info_is_foreign (info)) {
+                        object = pygi_struct_foreign_convert_from_g_argument (type_info, arg->v_pointer);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                         PyObject *py_type;
 
@@ -1533,8 +1535,6 @@ _pygi_argument_to_object (GIArgument  *arg,
                         }
 
                         Py_XDECREF (py_type);
-                    } else if ( (type == G_TYPE_NONE) && (g_struct_info_is_foreign (info))) {
-                        object = pygi_struct_foreign_convert_from_g_argument (type_info, arg->v_pointer);
                     } else if (type == G_TYPE_NONE) {
                         PyObject *py_type;
 
