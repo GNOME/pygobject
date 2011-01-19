@@ -3303,7 +3303,7 @@ _pygi_marshal_out_uint64 (PyGIInvokeState   *state,
                           PyGIArgCache      *arg_cache,
                           GIArgument        *arg)
 {
-    PyObject *py_obj = PyLong_FromLongLong(arg->v_uint64);
+    PyObject *py_obj = PyLong_FromUnsignedLongLong(arg->v_uint64);
 
     return py_obj;
 }
