@@ -206,6 +206,11 @@ AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 AC_SUBST(LIBFFI_PC)
 
+dnl gio
+PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
+AC_SUBST(GIO_CFLAGS)
+AC_SUBST(GIO_LIBS)
+
 AC_ARG_ENABLE(cairo,
     AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
     enable_cairo=$enableval,
