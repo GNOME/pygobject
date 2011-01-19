@@ -964,7 +964,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 
     if (state->n_py_in_args > cache->n_py_args) {
         PyErr_Format(PyExc_TypeError,
-                     "%s() takes exactly %zd arguments (%zd given)",
+                     "%s() takes exactly %zd argument(s) (%zd given)",
                      cache->name,
                      cache->n_py_args,
                      state->n_py_in_args);
@@ -987,7 +987,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 
                 if (arg_cache->py_arg_index >= state->n_py_in_args) {
                     PyErr_Format(PyExc_TypeError,
-                                 "%s() takes exactly %zd arguments (%zd given)",
+                                 "%s() takes exactly %zd argument(s) (%zd given)",
                                   cache->name,
                                   cache->n_py_args,
                                   state->n_py_in_args);
@@ -1059,23 +1059,24 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                                            arg_cache,
                                            &(state->out_values[0]));
     } else {
-        int arg_index = 0;
+        int out_cache_index = 0;
+        int py_arg_index = 0;
         GSList *cache_item = cache->out_args;
         /* return a tuple */
         py_out = PyTuple_New(total_out_args);
         if (has_return) {
-            PyTuple_SET_ITEM(py_out, arg_index, py_return);
-            arg_index++;
+            PyTuple_SET_ITEM(py_out, py_arg_index, py_return);
+            py_arg_index++;
         }
 
-        for(; arg_index < total_out_args; arg_index++) {
+        for(; py_arg_index < total_out_args; py_arg_index++, out_cache_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
             PyObject *py_obj = arg_cache->out_marshaller(state,
                                                          cache,
                                                          arg_cache,
-                                                         &(state->out_values[arg_index]));
+                                                         &(state->out_values[out_cache_index]));
 
-            PyTuple_SET_ITEM(py_out, arg_index, py_obj);
+            PyTuple_SET_ITEM(py_out, py_arg_index, py_obj);
             cache_item = cache_item->next;
         }
     }

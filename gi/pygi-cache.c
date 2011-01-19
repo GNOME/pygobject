@@ -621,7 +621,6 @@ _arg_cache_new_for_out_void(void)
 {
      PyGIArgCache *arg_cache = _arg_cache_new();
      arg_cache->out_marshaller = _pygi_marshal_out_void;
-
      return arg_cache;
 }
 
@@ -1028,6 +1027,7 @@ _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
         arg_cache->transfer = transfer;
         arg_cache->type_tag = type_tag;
         arg_cache->c_arg_index = c_arg_index;
+        arg_cache->is_pointer = g_type_info_is_pointer(type_info);
     }
 
     return arg_cache;
@@ -1137,6 +1137,7 @@ _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
         arg_cache->type_tag = type_tag;
         arg_cache->py_arg_index = py_arg_index;
         arg_cache->c_arg_index = c_arg_index;
+        arg_cache->is_pointer = g_type_info_is_pointer(type_info);
     }
 
     return arg_cache;
@@ -1150,15 +1151,19 @@ _args_cache_generate(GIFunctionInfo *function_info,
     int i;
     GITypeInfo *return_info;
     GITypeTag return_type_tag;
+    GITransfer return_transfer;
     PyGIArgCache *return_cache;
     /* cache the return arg */
-    return_info = g_callable_info_get_return_type( (GICallableInfo *)function_info);
+    return_info = 
+        g_callable_info_get_return_type( (GICallableInfo *)function_info);
+    return_transfer = 
+        g_callable_info_get_caller_owns( (GICallableInfo *)function_info);
     return_type_tag = g_type_info_get_tag(return_info);
     return_cache =
         _arg_cache_out_new_from_type_info(return_info,
                                           function_cache,
                                           return_type_tag,
-                                          GI_TRANSFER_EVERYTHING,
+                                          return_transfer,
                                           GI_DIRECTION_OUT,
                                           -1);
 
