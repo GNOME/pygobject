@@ -71,6 +71,12 @@ if Gdk._version == '2.0':
     __all__.append('Drawable')
 else:
     class Window(Gdk.Window):
+        def __new__(cls, parent, attributes, attributes_mask):
+            # Gdk.Window had to be made abstract,
+            # this override allows using the standard constructor
+            return Gdk.Window.new(parent, attributes, attributes_mask)
+        def __init__(self, parent, attributes, attributes_mask):
+            pass
         def cairo_create(self):
             return Gdk.cairo_create(self)
 

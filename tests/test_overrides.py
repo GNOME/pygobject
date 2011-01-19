@@ -330,6 +330,14 @@ class TestPango(unittest.TestCase):
 
 class TestGdk(unittest.TestCase):
 
+    def test_constructor(self):
+        attribute = Gdk.WindowAttr()
+        attribute.window_type = Gdk.WindowType.CHILD
+        attributes_mask = Gdk.WindowAttributesType.X | \
+            Gdk.WindowAttributesType.Y
+        window = Gdk.Window(None, attribute, attributes_mask)
+        self.assertEquals(window.get_window_type(), Gdk.WindowType.CHILD)
+
     def test_color(self):
         color = Gdk.Color(100, 200, 300)
         self.assertEquals(color.red, 100)
