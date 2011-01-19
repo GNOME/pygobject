@@ -11,10 +11,16 @@ class TestGObjectAPI(unittest.TestCase):
         obj = gobject.GObject()
         self.assertEquals(obj.__module__,
                           'gobject._gobject')
+
+
+class TestReferenceCounting(unittest.TestCase):
+    def testRegularObject(self):
+        obj = gobject.GObject()
         self.assertEquals(obj.__grefcount__, 1)
 
+        obj = gobject.new(gobject.GObject)
+        self.assertEquals(obj.__grefcount__, 1)
 
-class TestFloating(unittest.TestCase):
     def testFloatingWithSinkFunc(self):
         obj = testhelper.FloatingWithSinkFunc()
         self.assertEquals(obj.__grefcount__, 1)
