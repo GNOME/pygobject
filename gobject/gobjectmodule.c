@@ -1003,18 +1003,18 @@ get_type_name_for_class(PyTypeObject *class)
 }
 
 
-static GStaticPrivate pygobject_contruction_wrapper = G_STATIC_PRIVATE_INIT;
+static GStaticPrivate pygobject_construction_wrapper = G_STATIC_PRIVATE_INIT;
 
 static inline void
 pygobject_init_wrapper_set(PyObject *wrapper)
 {
-    g_static_private_set(&pygobject_contruction_wrapper, wrapper, NULL);
+    g_static_private_set(&pygobject_construction_wrapper, wrapper, NULL);
 }
 
 static inline PyObject *
 pygobject_init_wrapper_get(void)
 {
-    return (PyObject *) g_static_private_get(&pygobject_contruction_wrapper);
+    return (PyObject *) g_static_private_get(&pygobject_construction_wrapper);
 }
 
 static void
