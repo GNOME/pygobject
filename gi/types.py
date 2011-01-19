@@ -215,6 +215,13 @@ class StructMeta(type, MetaClassHelper):
         cls._setup_methods()
         cls._setup_constructors()
 
+        for method_info in cls.__info__.get_methods():
+            if method_info.is_constructor() and \
+                    method_info.get_name() == 'new' and \
+                    not method_info.get_arguments():
+                cls.__new__ = staticmethod(Constructor(method_info))
+                break
+
 class Enum(int):
     # Only subclasses of this type should be instantiated.
     # Each subclass requires an __info__ attribute,

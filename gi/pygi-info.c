@@ -234,8 +234,45 @@ out:
 /* CallableInfo */
 PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGIBaseInfo);
 
+static PyObject *
+_wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_callable_info_get_n_args ( (GICallableInfo *) self->info);
+
+    infos = PyTuple_New (n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *) g_callable_info_get_arg ( (GICallableInfo *) self->info, i);
+        g_assert (info != NULL);
+
+        py_info = _pygi_info_new (info);
+
+        g_base_info_unref (info);
+
+        if (py_info == NULL) {
+            Py_CLEAR (infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM (infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGICallableInfo_methods[] = {
     { "invoke", (PyCFunction) _wrap_g_callable_info_invoke, METH_VARARGS | METH_KEYWORDS },
+    { "get_arguments", (PyCFunction) _wrap_g_callable_info_get_arguments, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
