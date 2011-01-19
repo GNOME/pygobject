@@ -2465,9 +2465,10 @@ _pygi_marshal_in_gtype (PyGIInvokeState   *state,
     if (type_ == 0) {
         PyErr_Format (PyExc_TypeError, "Must be gobject.GType, not %s",
                       py_arg->ob_type->tp_name);
+        return FALSE;
     }
 
-    (*arg).v_long = type_;
+    arg->v_long = type_;
     return TRUE;
 }
 gboolean
