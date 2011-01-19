@@ -58,3 +58,23 @@ typedef struct {
 
 GType test_floating_without_sink_func_get_type (void);
 
+/* TestOwnedByLibrary */
+
+typedef struct {
+  GObject parent;
+} TestOwnedByLibrary;
+
+typedef struct {
+  GObjectClass parent_class;
+} TestOwnedByLibraryClass;
+
+#define TEST_TYPE_OWNED_BY_LIBRARY            (test_owned_by_library_get_type())
+#define TEST_OWNED_BY_LIBRARY(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_OWNED_BY_LIBRARY, TestOwnedByLibrary))
+#define TEST_OWNED_BY_LIBRARY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_OWNED_BY_LIBRARY, TestOwnedByLibraryClass))
+#define TEST_IS_OWNED_BY_LIBRARY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_OWNED_BY_LIBRARY))
+#define TEST_IS_OWNED_BY_LIBRARY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_OWNED_BY_LIBRARY))
+#define TEST_OWNED_BY_LIBRARY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), TEST_TYPE_OWNED_BY_LIBRARY, TestOwnedByLibraryClass))
+
+GType test_owned_by_library_get_type (void);
+void test_owned_by_library_release (TestOwnedByLibrary *self);
+GSList *test_owned_by_library_get_instance_list (void);

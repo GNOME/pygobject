@@ -93,3 +93,33 @@ test_floating_without_sink_func_init (TestFloatingWithoutSinkFunc *self)
 {
 }
 
+/* TestOwnedByLibrary */
+
+G_DEFINE_TYPE(TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT)
+
+static GSList *obl_instance_list = NULL;
+
+static void
+test_owned_by_library_class_init (TestOwnedByLibraryClass *klass)
+{
+}
+
+static void
+test_owned_by_library_init (TestOwnedByLibrary *self)
+{
+    g_object_ref (self);
+    obl_instance_list = g_slist_prepend (obl_instance_list, self);
+}
+
+void
+test_owned_by_library_release (TestOwnedByLibrary *self)
+{
+    obl_instance_list = g_slist_remove (obl_instance_list, self);
+    g_object_unref (self);
+}
+
+GSList *
+test_owned_by_library_get_instance_list (void)
+{
+    return obl_instance_list;
+}
