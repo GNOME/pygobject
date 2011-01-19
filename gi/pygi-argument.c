@@ -2727,7 +2727,6 @@ _pygi_marshal_in_gslist (PyGIInvokeState   *state,
     GSList *list_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
-
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
@@ -3269,8 +3268,22 @@ _pygi_marshal_out_unichar (PyGIInvokeState   *state,
 {
     PyObject *py_obj = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    /* Preserve the bidirectional mapping between 0 and "" */
+    if (arg->v_uint32 == 0) {
+        py_obj = PYGLIB_PyUnicode_FromString ("");
+    } else if (g_unichar_validate (arg->v_uint32)) {
+        gchar utf8[6];
+        gint bytes;
+
+        bytes = g_unichar_to_utf8 (arg->v_uint32, utf8);
+        py_obj = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
+    } else {
+        /* TODO: Convert the error to an exception. */
+        PyErr_Format (PyExc_TypeError,
+                      "Invalid unicode codepoint %" G_GUINT32_FORMAT,
+                      arg->v_uint32);
+    }
+
     return py_obj;
 }
 
@@ -3282,8 +3295,7 @@ _pygi_marshal_out_gtype (PyGIInvokeState   *state,
 {
     PyObject *py_obj = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    py_obj = pyg_type_wrapper_new( (GType)arg->v_long);
     return py_obj;
 }
 
@@ -3294,9 +3306,13 @@ _pygi_marshal_out_utf8 (PyGIInvokeState   *state,
                         GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
+    if (arg->v_string == NULL) {
+        py_obj = Py_None;
+        Py_INCREF (py_obj);
+        return py_obj;
+     }
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    py_obj = PYGLIB_PyUnicode_FromString (arg->v_string);
     return py_obj;
 }
 
@@ -3306,10 +3322,26 @@ _pygi_marshal_out_filename (PyGIInvokeState   *state,
                             PyGIArgCache      *arg_cache,
                             GIArgument        *arg)
 {
+    gchar *string;
     PyObject *py_obj = NULL;
+    GError *error = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    if (arg->v_string == NULL) {
+        py_obj = Py_None;
+        Py_INCREF (py_obj);
+        return py_obj;
+    }
+
+    string = g_filename_to_utf8 (arg->v_string, -1, NULL, NULL, &error);
+    if (string == NULL) {
+        PyErr_SetString (PyExc_Exception, error->message);
+        /* TODO: Convert the error to an exception. */
+        return NULL;
+    }
+
+    py_obj = PYGLIB_PyUnicode_FromString (string);
+    g_free (string);
+
     return py_obj;
 }
 
