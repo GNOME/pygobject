@@ -2003,7 +2003,7 @@ _pygi_marshal_in_void (PyGIInvokeState   *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    (*arg).v_pointer = py_arg;
+    arg->v_pointer = py_arg;
 
     return TRUE;
 }
@@ -2015,7 +2015,7 @@ _pygi_marshal_in_boolean (PyGIInvokeState   *state,
                           PyObject          *py_arg,
                           GIArgument        *arg)
 {
-    (*arg).v_boolean = PyObject_IsTrue(py_arg);
+    arg->v_boolean = PyObject_IsTrue(py_arg);
 
     return TRUE;
 }
@@ -2051,7 +2051,7 @@ _pygi_marshal_in_int8 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_long = long_;
+    arg->v_long = long_;
 
     return TRUE;
 }
@@ -2096,7 +2096,7 @@ _pygi_marshal_in_uint8 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_long = long_;
+    arg->v_long = long_;
 
     return TRUE;
 }
@@ -2132,7 +2132,7 @@ _pygi_marshal_in_int16 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_long = long_;
+    arg->v_long = long_;
 
     return TRUE;
 }
@@ -2168,7 +2168,7 @@ _pygi_marshal_in_uint16 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_long = long_;
+    arg->v_long = long_;
 
     return TRUE;
 }
@@ -2204,7 +2204,7 @@ _pygi_marshal_in_int32 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_long = long_;
+    arg->v_long = long_;
 
     return TRUE;
 }
@@ -2246,7 +2246,7 @@ _pygi_marshal_in_uint32 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_uint64 = long_;
+    arg->v_uint64 = long_;
 
     return TRUE;
 }
@@ -2288,7 +2288,7 @@ _pygi_marshal_in_int64 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_uint64 = long_;
+    arg->v_uint64 = long_;
 
     return TRUE;
 }
@@ -2330,7 +2330,7 @@ _pygi_marshal_in_uint64 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_uint64 = long_;
+    arg->v_uint64 = long_;
 
     return TRUE;
 }
@@ -2366,7 +2366,7 @@ _pygi_marshal_in_float (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_float = double_;
+    arg->v_float = double_;
 
     return TRUE;
 }
@@ -2402,7 +2402,7 @@ _pygi_marshal_in_double (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_double = double_;
+    arg->v_double = double_;
 
     return TRUE;
 }
@@ -2448,7 +2448,7 @@ _pygi_marshal_in_unichar (PyGIInvokeState   *state,
        return FALSE;
     }
 
-    (*arg).v_uint32 = g_utf8_get_char(string_);
+    arg->v_uint32 = g_utf8_get_char(string_);
     g_free(string_);
 
     return TRUE;
@@ -2499,7 +2499,7 @@ _pygi_marshal_in_utf8 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_string = string_;
+    arg->v_string = string_;
     return TRUE;
 }
 
@@ -2532,10 +2532,10 @@ _pygi_marshal_in_filename (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
+    arg->v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
     g_free(string_);
 
-    if ((*arg).v_string == NULL) {
+    if (arg->v_string == NULL) {
         PyErr_SetString (PyExc_Exception, error->message);
         g_error_free(error);
         /* TODO: Convert the error to an exception. */
@@ -2560,7 +2560,7 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
 
 
     if (py_arg == Py_None) {
-        (*arg).v_pointer = NULL;
+        arg->v_pointer = NULL;
         return TRUE;
     }
 
@@ -2662,7 +2662,7 @@ _pygi_marshal_in_glist (PyGIInvokeState   *state,
 
 
     if (py_arg == Py_None) {
-        (*arg).v_pointer = NULL;
+        arg->v_pointer = NULL;
         return TRUE;
     }
 
@@ -2710,7 +2710,7 @@ err:
         return FALSE;
     }
 
-    (*arg).v_pointer = list_;
+    arg->v_pointer = list_;
     return TRUE;
 }
 
@@ -2729,7 +2729,7 @@ _pygi_marshal_in_gslist (PyGIInvokeState   *state,
 
 
     if (py_arg == Py_None) {
-        (*arg).v_pointer = NULL;
+        arg->v_pointer = NULL;
         return TRUE;
     }
 
@@ -2777,7 +2777,7 @@ err:
         return FALSE;
     }
 
-    (*arg).v_pointer = list_;
+    arg->v_pointer = list_;
     return TRUE;
 }
 
@@ -2876,7 +2876,7 @@ err:
         return FALSE;
     }
 
-    (*arg).v_pointer = hash_;
+    arg->v_pointer = hash_;
     return TRUE;
 }
 
@@ -3018,7 +3018,7 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
             return FALSE;
         }
 
-        (*arg).v_pointer = closure;
+        arg->v_pointer = closure;
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         GValue *value;
         GType object_type;
@@ -3037,7 +3037,7 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
             return FALSE;
         }
 
-        (*arg).v_pointer = value;
+        arg->v_pointer = value;
 
     } else if (iface_cache->is_foreign) {
          PyErr_Format (PyExc_NotImplementedError, "foreign types not implemented yet");
@@ -3073,7 +3073,7 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
                                    GIArgument        *arg)
 {
     if (py_arg == Py_None) {
-        (*arg).v_pointer = NULL;
+        arg->v_pointer = NULL;
         return TRUE;
     }
 
@@ -3084,9 +3084,9 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    (*arg).v_pointer = pygobject_get (py_arg);
+    arg->v_pointer = pygobject_get (py_arg);
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_ref ((*arg).v_pointer);
+        g_object_ref (arg->v_pointer);
 
     return TRUE;
 }
