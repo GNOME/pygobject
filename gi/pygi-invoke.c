@@ -21,6 +21,7 @@
  * USA
  */
 
+#include <pyglib.h>
 #include "pygi-invoke.h"
 
 struct invocation_state
@@ -604,10 +605,7 @@ _invoke_function (struct invocation_state *state,
     pyg_end_allow_threads;
 
     if (!retval) {
-        g_assert (error != NULL);
-        /* TODO: raise the right error, out of the error domain. */
-        PyErr_SetString (PyExc_RuntimeError, error->message);
-        g_error_free (error);
+        pyglib_error_check(&error);
 
         /* TODO: release input arguments. */
 
@@ -619,11 +617,7 @@ _invoke_function (struct invocation_state *state,
 
         error = state->args[state->error_arg_pos]->v_pointer;
 
-        if (*error != NULL) {
-            /* TODO: raise the right error, out of the error domain, if applicable. */
-            PyErr_SetString (PyExc_Exception, (*error)->message);
-            g_error_free (*error);
-
+        if (pyglib_error_check(error)) {
             /* TODO: release input arguments. */
 
             return FALSE;

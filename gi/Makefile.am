@@ -25,7 +25,8 @@ _gi_la_LDFLAGS = \
 	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
 	$(GI_LIBS) \
-	$(PYTHON_LIBS)
+	$(PYTHON_LIBS) \
+	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
 _gi_la_SOURCES = \
 	pygi-repository.c \
 	pygi-repository.h \
