@@ -740,7 +740,7 @@ class TreeModel(Gtk.TreeModel):
                     else:
                         raise ValueError('Expected an long for column %i but got %s' % (column, type(value)))
                 else:
-                    raise ValueError('Expected an interger for column %i but got %s' % (column, type(value)))
+                    raise ValueError('Expected an integer for column %i but got %s' % (column, type(value)))
 
             return value
 
