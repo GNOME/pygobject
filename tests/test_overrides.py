@@ -133,7 +133,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(set(vis.keys()), set([1, 5]))
 
         # string index access
-        v = GLib.Variant('si', 'hello')
+        v = GLib.Variant('s', 'hello')
         self.assertEqual(len(v), 5)
         self.assertEqual(v[0], 'h')
         self.assertEqual(v[4], 'o')
