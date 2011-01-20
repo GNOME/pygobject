@@ -151,7 +151,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gio.vfs_/Gio.Vfs./g;" \
 \
     -pe "# GLib is not introspectable very well, for now we keep using the static bindings" \
-    -pe "s/glib.GError\n/gobject.GError/g;" \
+    -pe "s/glib.GError\b/gobject.GError/g;" \
     -pe "s/glib.timeout_add\b/gobject.timeout_add/g;" \
     -pe "s/glib.MainLoop\b/gobject.MainLoop/g;" \
     -pe "#s/import glib\n/from gi.repository import GLib\n/g;" \
