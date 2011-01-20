@@ -144,7 +144,7 @@ _interface_cache_new_from_interface_info(GIInterfaceInfo *iface_info)
     if (ic->py_type == NULL)
         return NULL;
 
-    ic->type_name == _pygi_g_base_info_get_fullname(iface_info);
+    ic->type_name = _pygi_g_base_info_get_fullname(iface_info);
     return ic;
 }
 
@@ -402,7 +402,9 @@ _arg_cache_new_for_in_array(PyGIFunctionCache *function_cache,
                             GITypeInfo *type_info,
                             GITransfer transfer)
 {
-    PyGISequenceCache *seq_cache = _sequence_cache_new_from_type_info(type_info,                                                                      (function_cache->is_method ? 1: 0));
+    PyGISequenceCache *seq_cache = _sequence_cache_new_from_type_info(type_info, 
+                                                                      (function_cache->is_method ? 1: 0));
+
     PyGIArgCache *arg_cache = (PyGIArgCache *)seq_cache;
 
     seq_cache->array_type = g_type_info_get_array_type(type_info);
@@ -541,22 +543,22 @@ _arg_cache_new_for_in_interface_callback(PyGIFunctionCache *function_cache,
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_enum(void)
+_arg_cache_new_for_in_interface_enum(GIInterfaceInfo *iface_info)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for In Interface ENum is not fully implemented yet");
+    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_enum;
     return arg_cache;
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_flags(void)
+_arg_cache_new_for_in_interface_flags(GIInterfaceInfo *iface_info)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_flags;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for In Interface Flags is not fully implemented yet");
+    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache; 
+
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_flags;
     return arg_cache;
 }
 
@@ -594,10 +596,10 @@ _arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
                                                                  arg_info);
             break;
         case GI_INFO_TYPE_ENUM:
-            arg_cache = _arg_cache_new_for_in_interface_enum();
+            arg_cache = _arg_cache_new_for_in_interface_enum(iface_info);
             break;
         case GI_INFO_TYPE_FLAGS:
-            arg_cache = _arg_cache_new_for_in_interface_flags();
+            arg_cache = _arg_cache_new_for_in_interface_flags(iface_info);
             break;
         default:
             g_assert_not_reached();

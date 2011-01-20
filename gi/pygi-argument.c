@@ -232,7 +232,7 @@ _pygi_g_type_interface_check_object (GIBaseInfo *info,
                 }
                 break;
             } else if (g_type_is_a (type, G_TYPE_VALUE)) {
-                /* we can't check g_values because we don't have 
+                /* we can't check g_values because we don't have
                  * enough context so just pass them through */
                 break;
             }
@@ -2303,7 +2303,7 @@ _pygi_marshal_in_int64 (PyGIInvokeState   *state,
 
         Py_DECREF(py_str);
         PyErr_Clear();
-        PyErr_Format(PyExc_ValueError, "%s not in range %ld to %ld", 
+        PyErr_Format(PyExc_ValueError, "%s not in range %ld to %ld",
                      long_str, G_MININT64, G_MAXINT64);
 
         g_free(long_str);
@@ -2378,7 +2378,7 @@ _pygi_marshal_in_uint64 (PyGIInvokeState   *state,
 
         Py_DECREF(py_str);
         PyErr_Clear();
-        PyErr_Format(PyExc_ValueError, "%s not in range %d to %llu", 
+        PyErr_Format(PyExc_ValueError, "%s not in range %d to %llu",
                      long_str, 0, G_MAXUINT64);
 
         g_free(long_str);
@@ -2695,9 +2695,9 @@ err:
 array_success:
     if (sequence_cache->len_arg_index >= 0) {
         /* we have an aux arg to handle */
-        PyGIArgCache *aux_cache = 
+        PyGIArgCache *aux_cache =
             function_cache->args_cache[sequence_cache->len_arg_index];
-        
+
 
         state->in_args[aux_cache->c_arg_index].v_long = length;
     }
@@ -2854,7 +2854,7 @@ _pygi_marshal_in_ghash (PyGIInvokeState   *state,
 {
     PyGIMarshalInFunc key_in_marshaller;
     PyGIMarshalInFunc value_in_marshaller;
-    
+
     int i;
     Py_ssize_t length;
     PyObject *py_keys, *py_values;
@@ -2869,7 +2869,7 @@ _pygi_marshal_in_ghash (PyGIInvokeState   *state,
         arg->v_pointer = NULL;
         return TRUE;
     }
- 
+
     py_keys = PyMapping_Keys(py_arg);
     if (py_keys == NULL) {
         PyErr_Format (PyExc_TypeError, "Must be mapping, not %s",
@@ -2957,7 +2957,7 @@ _pygi_marshal_in_gerror (PyGIInvokeState   *state,
                          GIArgument        *arg)
 {
     PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+                 "Marshalling for GErrors is not implemented");
     return FALSE;
 }
 
@@ -2969,7 +2969,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
                                      GIArgument        *arg)
 {
     GICallableInfo *callable_info;
-    GITypeInfo *type_info; 
+    GITypeInfo *type_info;
     PyGICClosure *closure;
     PyGIArgCache *user_data_cache = NULL;
     PyGIArgCache *destroy_cache = NULL;
@@ -2989,7 +2989,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
             Py_INCREF(Py_None);
         }
     }
- 
+
     if (py_arg == Py_None && !(py_user_data == Py_None || py_user_data == NULL)) {
         Py_DECREF(py_user_data);
         PyErr_Format(PyExc_TypeError,
@@ -3006,7 +3006,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
     if (!PyCallable_Check(py_arg)) {
         Py_XDECREF(py_user_data);
         PyErr_Format(PyExc_TypeError,
-                    "Callback needs to be a function or method not %s",  
+                    "Callback needs to be a function or method not %s",
                     py_arg->ob_type->tp_name);
 
         return FALSE;
@@ -3018,7 +3018,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
     type_info = g_arg_info_get_type(arg_cache->arg_info);
     callable_info = (GICallableInfo *)g_type_info_get_interface(type_info);
 
-    closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data); 
+    closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data);
     g_base_info_unref((GIBaseInfo *)callable_info);
     g_base_info_unref((GIBaseInfo *)type_info);
 
@@ -3029,7 +3029,7 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
 
     if (destroy_cache) {
         PyGICClosure *destroy_notify = _pygi_destroy_notify_create();
-        state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure; 
+        state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
     }
 
     return TRUE;
@@ -3042,8 +3042,54 @@ _pygi_marshal_in_interface_enum (PyGIInvokeState   *state,
                                  PyObject          *py_arg,
                                  GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    PyObject *int_;
+    gint is_instance;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+    is_instance = PyObject_IsInstance(py_arg, iface_cache->py_type);
+
+    int_ = PYGLIB_PyNumber_Long(py_arg);
+    if (int_ == NULL) {
+        PyErr_Clear();
+        goto err;
+    }
+
+    arg->v_long = PYGLIB_PyLong_AsLong(int_);
+    Py_DECREF(int_);
+
+    /* If this is not an instance of the Enum type that we want
+     * we need to check if the value is equivilant to one of the
+     * Enum's memebers */
+    if (!is_instance) {
+        int i;
+        gboolean is_found = FALSE;
+        GITypeInfo *type_info = g_arg_info_get_type(arg_cache->arg_info);
+        GIInterfaceInfo *iface_info =
+            g_type_info_get_interface (type_info);
+
+        for (i = 0; i < g_enum_info_get_n_values(iface_info); i++) {
+            GIValueInfo *value_info =
+                g_enum_info_get_value(iface_info, i);
+            glong enum_value = g_value_info_get_value(value_info);
+            g_base_info_unref( (GIBaseInfo *)value_info);
+            if (arg->v_long == enum_value) {
+                is_found = TRUE;
+                break;
+            }
+        }
+
+        g_base_info_unref( (GIBaseInfo *)iface_info);
+        g_base_info_unref( (GIBaseInfo *)type_info);
+
+        if (!is_found)
+            goto err;
+    }
+
+    return TRUE;
+
+err:
+    PyErr_Format(PyExc_TypeError, "Expected a %s, but got %s",
+                 iface_cache->type_name, py_arg->ob_type->tp_name);
     return FALSE;
 }
 
@@ -3054,9 +3100,32 @@ _pygi_marshal_in_interface_flags (PyGIInvokeState   *state,
                                   PyObject          *py_arg,
                                   GIArgument        *arg)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    PyObject *int_;
+    gint is_instance;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+    is_instance = PyObject_IsInstance(py_arg, iface_cache->py_type);
+
+    int_ = PYGLIB_PyNumber_Long(py_arg);
+    if (int_ == NULL) {
+        PyErr_Clear();
+        goto err;
+    }
+
+    arg->v_long = PYGLIB_PyLong_AsLong(int_);
+    Py_DECREF(int_);
+
+    /* only 0 or argument of type Flag is allowed */
+    if (!is_instance && arg->v_long != 0)
+        goto err;
+
+    return TRUE;
+
+err:
+    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                  iface_cache->type_name, py_arg->ob_type->tp_name);
     return FALSE;
+
 }
 
 gboolean
@@ -3116,16 +3185,16 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
     } else if (iface_cache->is_foreign) {
         gboolean success;
         GITypeInfo *type_info = g_arg_info_get_type(arg_cache->arg_info);
-        success = pygi_struct_foreign_convert_to_g_argument(py_arg, 
-                                                            type_info, 
-                                                            arg_cache->transfer, 
+        success = pygi_struct_foreign_convert_to_g_argument(py_arg,
+                                                            type_info,
+                                                            arg_cache->transfer,
                                                             arg);
         g_base_info_unref((GIBaseInfo *)type_info);
 
         return success;
     } else if (!PyObject_IsInstance(py_arg, iface_cache->py_type)) {
         PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
-                      iface_cache->type_name, 
+                      iface_cache->type_name,
                       iface_cache->py_type->ob_type->tp_name);
         return FALSE;
     }
@@ -3171,7 +3240,7 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
 
     if (!PyObject_IsInstance (py_arg, ((PyGIInterfaceCache *)arg_cache)->py_type)) {
         PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
-                      ((PyGIInterfaceCache *)arg_cache)->type_name, 
+                      ((PyGIInterfaceCache *)arg_cache)->type_name,
                       ((PyGIInterfaceCache *)arg_cache)->py_type->ob_type->tp_name);
         return FALSE;
     }
@@ -3206,7 +3275,7 @@ _pygi_marshal_out_void (PyGIInvokeState   *state,
         py_obj = arg->v_pointer;
     else
         py_obj = Py_None;
- 
+
     Py_XINCREF(py_obj);
     return py_obj;
 }
@@ -3315,7 +3384,7 @@ _pygi_marshal_out_float (PyGIInvokeState   *state,
                          GIArgument        *arg)
 {
     PyObject *py_obj = PyFloat_FromDouble (arg->v_float);
- 
+
     return py_obj;
 }
 
@@ -3325,7 +3394,7 @@ _pygi_marshal_out_double (PyGIInvokeState   *state,
                           PyGIArgCache      *arg_cache,
                           GIArgument        *arg)
 {
-    PyObject *py_obj = PyFloat_FromDouble (arg->v_double); 
+    PyObject *py_obj = PyFloat_FromDouble (arg->v_double);
 
     return py_obj;
 }
@@ -3565,7 +3634,7 @@ _pygi_marshal_out_interface_object (PyGIInvokeState   *state,
                                     GIArgument        *arg)
 {
     PyObject *py_obj = pygobject_new (arg->v_pointer);
-;
+
     /* The new wrapper increased the reference count, so decrease it. */
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
         g_object_unref (arg->v_pointer);
