@@ -1024,13 +1024,11 @@ class TreeView(Gtk.TreeView, Container):
         target_entries = self._construct_target_list(targets)
         super(TreeView, self).enable_model_drag_source(start_button_mask,
                                                        target_entries,
-                                                       len(target_entries),
                                                        actions)
 
     def enable_model_drag_dest(self, targets, actions):
         target_entries = self._construct_target_list(targets)
         super(TreeView, self).enable_model_drag_dest(target_entries,
-                                                     len(target_entries),
                                                      actions)
 
     def scroll_to_cell(self, path, column=None, use_align=False, row_align=0.0, col_align=0.0):
