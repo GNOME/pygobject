@@ -1491,17 +1491,17 @@ class TestInterfaces(unittest.TestCase):
         self.assertEquals(instance.val, 42)
 
 
-# -- this needs some additions to GIMarshallingTests in gobject-introspection
-#class TestInterfaceClash(unittest.TestCase):
-#
-#    def test_clash(self):
-#        def create_clash():
-#            class TestClash(GObject.GObject, GIMarshallingTests.Interface, GIMarshallingTests.Interface2):
-#                def do_test_int8_in(self, int8):
-#                    pass
-#            TestClash()
-#
-#        self.assertRaises(TypeError, create_clash)
+class TestInterfaceClash(unittest.TestCase):
+
+    def test_clash(self):
+        def create_clash():
+            class TestClash(GObject.GObject, GIMarshallingTests.Interface, GIMarshallingTests.Interface2):
+                def do_test_int8_in(self, int8):
+                    pass
+            TestClash()
+
+        self.assertRaises(TypeError, create_clash)
+
 
 class TestOverrides(unittest.TestCase):
 
