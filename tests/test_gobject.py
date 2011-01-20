@@ -96,3 +96,66 @@ class TestReferenceCounting(unittest.TestCase):
 
         obj.release()
         self.assertEquals(obj.__grefcount__, 1)
+
+    def testFloatingAndSunk(self):
+        # Upon creation, the refcount of the object should be 2:
+        # - someone already has a reference on the new object.
+        # - the python wrapper should hold its own reference.
+        obj = testhelper.FloatingAndSunk()
+        self.assertEquals(obj.__grefcount__, 2)
+
+        # We ask the library to release its reference, so the only
+        # remaining ref should be our wrapper's. Once the wrapper
+        # will run out of scope, the object will get finalized.
+        obj.release()
+        self.assertEquals(obj.__grefcount__, 1)
+
+    def testFloatingAndSunkOutOfScope(self):
+        obj = testhelper.FloatingAndSunk()
+        self.assertEquals(obj.__grefcount__, 2)
+
+        # We are manually taking the object out of scope. This means
+        # that our wrapper has been freed, and its reference dropped. We
+        # cannot check it but the refcount should now be 1 (the ref held
+        # by the library is still there, we didn't call release()
+        obj = None
+
+        # When we get the object back from the lib, the wrapper is
+        # re-created, so our refcount will be 2 once again.
+        obj = testhelper.floating_and_sunk_get_instance_list()[0]
+        self.assertEquals(obj.__grefcount__, 2)
+
+        obj.release()
+        self.assertEquals(obj.__grefcount__, 1)
+
+ 
+    def testFloatingAndSunkUsingGObjectNew(self):
+        # Upon creation, the refcount of the object should be 2:
+        # - someone already has a reference on the new object.
+        # - the python wrapper should hold its own reference.
+        obj = gobject.new(testhelper.FloatingAndSunk)
+        self.assertEquals(obj.__grefcount__, 2)
+
+        # We ask the library to release its reference, so the only
+        # remaining ref should be our wrapper's. Once the wrapper
+        # will run out of scope, the object will get finalized.
+        obj.release()
+        self.assertEquals(obj.__grefcount__, 1)
+
+    def testFloatingAndSunkOutOfScopeUsingGObjectNew(self):
+        obj = gobject.new(testhelper.FloatingAndSunk)
+        self.assertEquals(obj.__grefcount__, 2)
+
+        # We are manually taking the object out of scope. This means
+        # that our wrapper has been freed, and its reference dropped. We
+        # cannot check it but the refcount should now be 1 (the ref held
+        # by the library is still there, we didn't call release()
+        obj = None
+
+        # When we get the object back from the lib, the wrapper is
+        # re-created, so our refcount will be 2 once again.
+        obj = testhelper.floating_and_sunk_get_instance_list()[0]
+        self.assertEquals(obj.__grefcount__, 2)
+
+        obj.release()
+        self.assertEquals(obj.__grefcount__, 1)

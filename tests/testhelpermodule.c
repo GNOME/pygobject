@@ -245,6 +245,21 @@ static const PyMethodDef _PyTestOwnedByLibrary_methods[] = {
     { NULL, NULL, 0, NULL }
 };
 
+/* TestFloatingAndSunk */
+PYGLIB_DEFINE_TYPE("testhelper.FloatingAndSunk", PyTestFloatingAndSunk_Type, PyGObject);
+
+static PyObject *
+_wrap_test_floating_and_sunk_release (PyGObject *self)
+{
+    test_floating_and_sunk_release (TEST_FLOATING_AND_SUNK (self->obj));
+    return Py_None;
+}
+
+static const PyMethodDef _PyTestFloatingAndSunk_methods[] = {
+    { "release", (PyCFunction)_wrap_test_floating_and_sunk_release, METH_NOARGS, NULL },
+    { NULL, NULL, 0, NULL }
+};
+
 
 #include <string.h>
 #include <glib-object.h>
@@ -470,6 +485,29 @@ _wrap_test_owned_by_library_get_instance_list (PyObject *self)
     return py_list;
 }
 
+static PyObject *
+_wrap_test_floating_and_sunk_get_instance_list (PyObject *self)
+{
+    PyObject *py_list, *py_obj;
+    GSList *list, *tmp;
+
+    list = test_floating_and_sunk_get_instance_list ();
+
+    if ((py_list = PyList_New (0)) == NULL) {
+       return NULL;
+    }
+    for (tmp = list; tmp != NULL; tmp = tmp->next) {
+       py_obj = pygobject_new (G_OBJECT (tmp->data));
+       if (py_obj == NULL) {
+           Py_DECREF (py_list);
+           return NULL;
+       }
+       PyList_Append (py_list, py_obj);
+       Py_DECREF (py_obj);
+    }
+    return py_list;
+}
+
 static PyMethodDef testhelper_functions[] = {
     { "get_test_thread", (PyCFunction)_wrap_get_test_thread, METH_NOARGS },
     { "get_unknown", (PyCFunction)_wrap_get_unknown, METH_NOARGS },
@@ -480,6 +518,7 @@ static PyMethodDef testhelper_functions[] = {
     { "test_value_array", (PyCFunction)_wrap_test_value_array, METH_VARARGS },
     { "test_gerror_exception", (PyCFunction)_wrap_test_gerror_exception, METH_VARARGS },
     { "owned_by_library_get_instance_list", (PyCFunction)_wrap_test_owned_by_library_get_instance_list, METH_NOARGS },
+    { "floating_and_sunk_get_instance_list", (PyCFunction)_wrap_test_floating_and_sunk_get_instance_list, METH_NOARGS },
     { NULL, NULL }
 };
 
@@ -558,6 +597,17 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 			   Py_BuildValue("(O)",
                            &PyGObject_Type));
   pyg_set_object_has_new_constructor(TEST_TYPE_OWNED_BY_LIBRARY);
+
+  /* TestFloatingAndSunk */
+  PyTestFloatingAndSunk_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+  PyTestFloatingAndSunk_Type.tp_methods = (struct PyMethodDef*)_PyTestFloatingAndSunk_methods;
+  PyTestFloatingAndSunk_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
+  PyTestFloatingAndSunk_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
+  pygobject_register_class(d, "FloatingAndSunk", TEST_TYPE_FLOATING_AND_SUNK,
+                           &PyTestFloatingAndSunk_Type,
+                           Py_BuildValue("(O)",
+                           &PyGObject_Type));
+  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING_AND_SUNK);
 }
 PYGLIB_MODULE_END
 

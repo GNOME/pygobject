@@ -146,12 +146,13 @@ pygobject_sink(GObject *obj)
 	    }
 	}
     }
-    if (G_IS_INITIALLY_UNOWNED(obj) && !g_object_is_floating(obj)) {
-        /* GtkWindow and GtkInvisible does not return a ref to caller of
-         * g_object_new.
-         */
-        g_object_ref(obj);
-    } else if (g_object_is_floating(obj)) {
+    /* The default behaviour for GInitiallyUnowned subclasses is to call ref_sink().
+     * - if the object is new and owned by someone else, its ref has been sunk and
+     *   we need to keep the one from that someone and add our own "fresh ref"
+     * - if the object is not and owned by nobody, its ref is floating and we need
+     *   to transform it into a regular ref.
+     */
+    if (G_IS_INITIALLY_UNOWNED(obj)) {
         g_object_ref_sink(obj);
     }
 }
@@ -631,7 +632,6 @@ pygobject_register_wrapper(PyObject *self)
 
     gself = (PyGObject *)self;
 
-    pygobject_sink(gself->obj);
     g_assert(gself->obj->ref_count >= 1);
       /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full(gself->obj, pygobject_wrapper_key, gself, NULL);
