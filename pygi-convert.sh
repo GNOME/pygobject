@@ -153,6 +153,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "# GLib is not introspectable very well, for now we keep using the static bindings" \
     -pe "s/glib.GError\b/gobject.GError/g;" \
     -pe "s/glib.timeout_add\b/gobject.timeout_add/g;" \
+    -pe "s/glib.source_remove\b/gobject.source_remove/g;" \
     -pe "s/glib.MainLoop\b/gobject.MainLoop/g;" \
     -pe "#s/import glib\n/from gi.repository import GLib\n/g;" \
     -pe "#s/(?<!\.)glib\./GLib\./g;" \
