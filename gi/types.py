@@ -29,6 +29,7 @@ from ._gi import \
     InterfaceInfo, \
     ObjectInfo, \
     StructInfo, \
+    VFuncInfo, \
     set_object_has_new_constructor, \
     register_interface_info, \
     hook_up_vfunc_implementation
@@ -102,38 +103,51 @@ class MetaClassHelper(object):
             value = constant_info.get_value()
             setattr(cls, name, value)
 
-    def _setup_vfuncs(cls, impl):
-        for base in cls.__bases__:
-            if not hasattr(base, '__info__') or \
-                    not hasattr(base.__info__, 'get_vfuncs'):
+    def _setup_vfuncs(cls):
+        for vfunc_name, py_vfunc in cls.__dict__.iteritems():
+            if not vfunc_name.startswith("do_") or not callable(py_vfunc):
                 continue
-            for vfunc_info in base.__info__.get_vfuncs():
-                vfunc_name = 'do_' + vfunc_info.get_name()
-                vfunc = getattr(impl, vfunc_name, None)
-                if vfunc is not None:
-                    # check to see if there are vfuncs with the same name in the bases
-                    # we have no way of specifying which one we are supposed to override
-                    ambiguous_base = find_vfunc_conflict_in_bases(vfunc_info, cls.__bases__)
-                    if ambiguous_base is not None:
-                        raise TypeError('Method %s() on class %s.%s is ambiguous '
-                                'with methods in base classes %s.%s and %s.%s' %
-                                (vfunc_name,
-                                 impl.__info__.get_namespace(),
-                                 impl.__info__.get_name(),
-                                 base.__info__.get_namespace(),
-                                 base.__info__.get_name(),
-                                 ambiguous_base.__info__.get_namespace(),
-                                 ambiguous_base.__info__.get_name()))
 
-                    function = vfunc
-                    if sys.version_info < (3, 0):
-                        function = vfunc.im_func
- 
-                    if not is_function_in_classes(function, impl.__bases__):
-                        hook_up_vfunc_implementation(vfunc_info, impl.__gtype__,
-                                                     vfunc)
+            # If a method name starts with "do_" assume it is a vfunc, and search
+            # in the base classes for a method with the same name to override.
+            # Recursion is not necessary here because getattr() searches all
+            # super class attributes as well.
+            vfunc_info = None
+            for base in cls.__bases__:
+                method = getattr(base, vfunc_name, None)
+                if method is not None and hasattr(method, '__info__') and \
+                        isinstance(method.__info__, VFuncInfo):
+                    vfunc_info = method.__info__
+                    break
 
-            base._setup_vfuncs(impl)
+            # If we did not find a matching method name in the bases, we might
+            # be overriding an interface virtual method. Since interfaces do not
+            # provide implementations, there will be no method attribute installed
+            # on the object. Instead we have to search through
+            # InterfaceInfo.get_vfuncs(). Note that the infos returned by
+            # get_vfuncs() use the C vfunc name (ie. there is no "do_" prefix).
+            if vfunc_info is None:
+                vfunc_info = find_vfunc_info_in_interface(cls.__bases__, vfunc_name[len("do_"):])
+
+            if vfunc_info is not None:
+                assert vfunc_name == ('do_' + vfunc_info.get_name())
+                # Check to see if there are vfuncs with the same name in the bases.
+                # We have no way of specifying which one we are supposed to override.
+                ambiguous_base = find_vfunc_conflict_in_bases(vfunc_info, cls.__bases__)
+                if ambiguous_base is not None:
+                    base_info = vfunc_info.get_container()
+                    raise TypeError('Method %s() on class %s.%s is ambiguous '
+                            'with methods in base classes %s.%s and %s.%s' %
+                            (vfunc_name,
+                             cls.__info__.get_namespace(),
+                             cls.__info__.get_name(),
+                             base_info.get_namespace(),
+                             base_info.get_name(),
+                             ambiguous_base.__info__.get_namespace(),
+                             ambiguous_base.__info__.get_name()))
+
+                hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
+                                             py_vfunc)
 
     def _setup_native_vfuncs(cls, impl):
         for base in cls.__bases__ + (cls,):
@@ -149,6 +163,24 @@ class MetaClassHelper(object):
             if base != cls:
                 base._setup_native_vfuncs(impl)
 
+def find_vfunc_info_in_interface(bases, vfunc_name):
+    for base in bases:
+        # All wrapped interfaces inherit from GInterface.
+        # This can be seen in IntrospectionModule.__getattr__() in module.py.
+        # We do not need to search regular classes here, only wrapped interfaces.
+        if not issubclass(base, gobject.GInterface) or\
+                not isinstance(base.__info__, InterfaceInfo):
+            continue
+
+        for vfunc in base.__info__.get_vfuncs():
+            if vfunc.get_name() == vfunc_name:
+                return vfunc
+
+        vfunc = find_vfunc_info_in_interface(base.__bases__, vfunc_name)
+        if vfunc is not None:
+            return vfunc
+
+    return None
 
 def find_vfunc_conflict_in_bases(vfunc, bases):
     for klass in bases:
@@ -166,14 +198,6 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
             return aklass
     return None
 
-def is_function_in_classes(function, classes):
-    for klass in classes:
-        if function in klass.__dict__.values():
-            return True
-        elif is_function_in_classes(function, klass.__bases__):
-            return True
-    return False
-
 class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
     def __init__(cls, name, bases, dict_):
@@ -187,7 +211,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             is_python_defined = True
 
         if is_python_defined:
-            cls._setup_vfuncs(cls)
+            cls._setup_vfuncs()
         elif is_gi_defined:
             cls._setup_methods()
             cls._setup_constants()

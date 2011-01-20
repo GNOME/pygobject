@@ -1434,6 +1434,19 @@ class TestPythonGObject(unittest.TestCase):
         # compare a static gobject attr with a dynamic GObject attr
         self.assertEquals(GObject.GObject, gobject.GObject)
 
+    def test_subobject_non_vfunc_do_method(self):
+        class PythonObjectWithNonVFuncDoMethod:
+            def do_not_a_vfunc(self):
+                return 5
+
+        class ObjectOverrideNonVFuncDoMethod(GIMarshallingTests.Object, PythonObjectWithNonVFuncDoMethod):
+            def do_not_a_vfunc(self):
+                value = super(ObjectOverrideNonVFuncDoMethod, self).do_not_a_vfunc()
+                return 13 + value
+
+        object_ = ObjectOverrideNonVFuncDoMethod()
+        self.assertEquals(18, object_.do_not_a_vfunc())
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):
