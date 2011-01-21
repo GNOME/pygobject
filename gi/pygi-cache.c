@@ -942,6 +942,7 @@ _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
                                    GITypeTag type_tag,
                                    GITransfer transfer,
                                    GIDirection direction,
+                                   gboolean is_caller_allocates,
                                    gint c_arg_index)
 {
     PyGIArgCache *arg_cache = NULL;
@@ -1036,6 +1037,7 @@ _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
         arg_cache->type_tag = type_tag;
         arg_cache->c_arg_index = c_arg_index;
         arg_cache->is_pointer = g_type_info_is_pointer(type_info);
+        arg_cache->is_caller_allocates = is_caller_allocates;
         g_base_info_ref( (GIBaseInfo *) type_info);
         arg_cache->type_info = type_info;
     }
@@ -1222,6 +1224,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
         GIDirection direction;
         GITransfer transfer;
         GITypeTag type_tag;
+        gboolean is_caller_allocates;
         gint py_arg_index;
 
         /* must be an aux arg filled in by its owner
@@ -1271,12 +1274,20 @@ _args_cache_generate(GIFunctionInfo *function_info,
 
             case GI_DIRECTION_OUT:
                 function_cache->n_out_args++;
+                is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+                if (is_caller_allocates) {
+                    PyErr_Format(PyExc_NotImplementedError,
+                                 "Caller allocates is not fully implemented yet");
+
+                    goto arg_err;
+                } 
                 arg_cache =
                     _arg_cache_out_new_from_type_info(type_info,
                                                       function_cache,
                                                       type_tag,
                                                       transfer,
                                                       direction,
+                                                      is_caller_allocates,
                                                       arg_index);
 
                 if (arg_cache == NULL)
