@@ -1689,7 +1689,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     GType type;
     GObject *obj = NULL;
     GObjectClass *class;
-    int n_params = 0, i;
+    guint n_params = 0, i;
     GParameter *params = NULL;
 
     if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
@@ -1711,37 +1711,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
 
-    if (kwargs) {
-	Py_ssize_t pos = 0;
-	PyObject *key;
-	PyObject *value;
-
-	params = g_new0(GParameter, PyDict_Size(kwargs));
-	while (PyDict_Next (kwargs, &pos, &key, &value)) {
-	    GParamSpec *pspec;
-	    const gchar *key_str = PYGLIB_PyUnicode_AsString (key);
-
-	    pspec = g_object_class_find_property (class, key_str);
-	    if (!pspec) {
-		PyErr_Format(PyExc_TypeError,
-			     "gobject `%s' doesn't support property `%s'",
-			     g_type_name(type), key_str);
-		goto cleanup;
-	    }
-	    g_value_init(&params[n_params].value,
-			 G_PARAM_SPEC_VALUE_TYPE(pspec));
-	    if (pyg_param_gvalue_from_pyobject(&params[n_params].value,
-					       value, pspec) < 0) {
-		PyErr_Format(PyExc_TypeError,
-			     "could not convert value for property `%s' from %s to %s",
-			     key_str, Py_TYPE(value)->tp_name,
-			     g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
-		goto cleanup;
-	    }
-	    params[n_params].name = g_strdup(key_str);
-	    n_params++;
-	}
-    }
+    if (!pygobject_prepare_construct_properties (class, kwargs, &n_params, &params))
+        goto cleanup;
 
     obj = g_object_newv(type, n_params, params);
     if (!obj)
