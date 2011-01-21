@@ -81,6 +81,7 @@ if ENABLE_INTROSPECTION
 TEST_FILES += \
 	test_everything.py \
 	test_gi.py \
+	test_gdbus.py \
 	test_overrides.py
 endif
 
