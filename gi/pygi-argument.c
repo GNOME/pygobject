@@ -2969,14 +2969,13 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
                                      GIArgument        *arg)
 {
     GICallableInfo *callable_info;
-    GITypeInfo *type_info;
     PyGICClosure *closure;
     PyGIArgCache *user_data_cache = NULL;
     PyGIArgCache *destroy_cache = NULL;
     PyGICallbackCache *callback_cache;
     PyObject *py_user_data = NULL;
 
-    callback_cache =(PyGICallbackCache *)arg_cache;
+    callback_cache = (PyGICallbackCache *)arg_cache;
 
     if (callback_cache->user_data_index > 0) {
         user_data_cache = function_cache->args_cache[callback_cache->user_data_index];
@@ -3583,9 +3582,32 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
                                     GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+    GType type = iface_cache->g_type;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    if (g_type_is_a (type, G_TYPE_VALUE)) {
+        py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
+    } else if (g_type_is_a (type, G_TYPE_BOXED)) {
+        py_obj = _pygi_boxed_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
+                                  arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
+        if (iface_cache->py_type == NULL ||
+                !PyType_IsSubtype( (PyTypeObject *)iface_cache->py_type, &PyGIStruct_Type)) {
+            g_warn_if_fail(arg_cache->transfer == GI_TRANSFER_NOTHING);
+            py_obj = pyg_pointer_new(type, arg->v_pointer);
+        } else {
+            py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
+                                      arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+        }
+    } else if (type == G_TYPE_NONE && iface_cache->is_foreign) {
+        py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info, arg->v_pointer);
+    } else if (type == G_TYPE_NONE) {
+        py_obj = _pygi_struct_new((PyTypeObject *) iface_cache->py_type, arg->v_pointer, 
+                                  arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+    } else {
+        PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name (type));
+    }
+
     return py_obj;
 }
 

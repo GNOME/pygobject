@@ -819,17 +819,10 @@ static inline PyGIArgCache *
 _arg_cache_new_for_out_interface_struct(GIInterfaceInfo *iface_info,
                                         GITransfer transfer)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out Interface Struct is not fully implemented yet");
-    return FALSE;
     PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
     PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
-    arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
-    if (iface_cache->g_type == G_TYPE_VALUE)
-        arg_cache->cleanup = _g_slice_free_gvalue_func;
-    if (iface_cache->g_type == G_TYPE_CLOSURE)
-        arg_cache->cleanup = g_closure_unref;
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
 
     return arg_cache;
 }
@@ -848,12 +841,8 @@ static inline PyGIArgCache *
 _arg_cache_new_for_out_interface_boxed(GIInterfaceInfo *iface_info,
                                       GITransfer transfer)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out Interface Boxed is not fully implemented yet");
-    return FALSE;
-
     PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
     return arg_cache;
 }
 
