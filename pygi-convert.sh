@@ -105,6 +105,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.VISIBILITY_FULLY_OBSCURED/Gdk.VisibilityState.FULLY_OBSCURED/g;" \
     -pe "s/Gdk.BUTTON_PRESS/Gdk.EventType.BUTTON_PRESS/g;" \
     -pe "s/Gdk.ACTION_/Gdk.DragAction./g;" \
+    -pe "s/Gdk.GRAB_/Gdk.GrabStatus./g;" \
     -pe "s/Gdk.SCROLL_(DOWN|LEFT|RIGHT|UP)/Gdk.ScrollDirection.\1/g;" \
     -pe "s/Gdk.([A-Z]+_(PTR|CURSOR))/Gdk.CursorType.\1/g;" \
     -pe "s/Gdk.Cursor\s*\(/Gdk.Cursor.new\(/g;" \
