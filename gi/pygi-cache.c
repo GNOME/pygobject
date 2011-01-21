@@ -477,13 +477,12 @@ _arg_cache_new_for_in_gerror(void)
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_union(void)
+_arg_cache_new_for_in_interface_union(GIInterfaceInfo *iface_info,
+                                      GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_inteface_union;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for In Interface Union is not fully implemented yet");
-    return arg_cache;
+    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
+    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
 }
 
 
@@ -585,7 +584,7 @@ _arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
 
     switch (info_type) {
         case GI_INFO_TYPE_UNION:
-            arg_cache = _arg_cache_new_for_in_interface_union();
+            arg_cache = _arg_cache_new_for_in_interface_union(iface_info, transfer);
             break;
         case GI_INFO_TYPE_STRUCT:
             arg_cache = _arg_cache_new_for_in_interface_struct(iface_info,
@@ -839,7 +838,7 @@ _arg_cache_new_for_out_interface_object(GIInterfaceInfo *iface_info,
 
 static inline PyGIArgCache *
 _arg_cache_new_for_out_interface_boxed(GIInterfaceInfo *iface_info,
-                                      GITransfer transfer)
+                                       GITransfer transfer)
 {
     PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
     arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
@@ -865,14 +864,14 @@ _arg_cache_new_for_out_interface_enum(void)
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_union(void)
+_arg_cache_new_for_out_interface_union(GIInterfaceInfo *iface_info,
+                                       GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out Interface Unions is not fully implemented yet");
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
     return arg_cache;
 }
+
 static inline PyGIArgCache *
 _arg_cache_new_for_out_interface_flags(void)
 {
@@ -895,7 +894,7 @@ _arg_cache_out_new_from_interface_info (GIInterfaceInfo *iface_info,
 
     switch (info_type) {
         case GI_INFO_TYPE_UNION:
-            arg_cache = _arg_cache_new_for_out_interface_union();
+            arg_cache = _arg_cache_new_for_out_interface_union(iface_info, transfer);
             break;
         case GI_INFO_TYPE_STRUCT:
             arg_cache = _arg_cache_new_for_out_interface_struct(iface_info,
