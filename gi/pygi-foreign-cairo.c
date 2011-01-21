@@ -37,9 +37,9 @@ Pycairo_CAPI_t *Pycairo_CAPI;
 #include <pyglib-python-compat.h>
 
 PyObject *
-cairo_context_to_arg (PyObject       *value,
-                      GITypeInfo     *type_info,
-                      GITransfer      transfer,
+cairo_context_to_arg (PyObject        *value,
+                      GIInterfaceInfo *interface_info,
+                      GITransfer       transfer,
                       GIArgument      *arg)
 {
     cairo_t *cr;
@@ -56,7 +56,7 @@ cairo_context_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_context_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+cairo_context_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
 {
     cairo_t *context = (cairo_t*) arg;
 
@@ -75,9 +75,9 @@ cairo_context_release (GIBaseInfo *base_info,
 
 
 PyObject *
-cairo_surface_to_arg (PyObject       *value,
-                      GITypeInfo     *type_info,
-                      GITransfer      transfer,
+cairo_surface_to_arg (PyObject        *value,
+                      GIInterfaceInfo *interface_info,
+                      GITransfer       transfer,
                       GIArgument      *arg)
 {
     cairo_surface_t *surface;
@@ -95,7 +95,7 @@ cairo_surface_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_surface_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+cairo_surface_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
 {
     cairo_surface_t *surface = (cairo_surface_t*) arg;
 
@@ -143,9 +143,9 @@ cairo_surface_release (GIBaseInfo *base_info,
 }
 
 PyObject *
-cairo_rectangle_int_to_arg (PyObject       *value,
-                            GITypeInfo     *type_info,
-                            GITransfer      transfer,
+cairo_rectangle_int_to_arg (PyObject        *value,
+                            GIInterfaceInfo *interface_info,
+                            GITransfer       transfer,
                             GIArgument      *arg)
 {
     cairo_rectangle_int_t *rect;
@@ -173,7 +173,7 @@ err:
 }
 
 PyObject *
-cairo_rectangle_int_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+cairo_rectangle_int_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
 {
     PyObject *result;
     cairo_rectangle_int_t *rect = (cairo_rectangle_int_t*) arg;

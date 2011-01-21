@@ -62,7 +62,7 @@ struct _PyGIArgCache
     GIDirection direction;
     GITransfer transfer;
     GITypeTag type_tag;
-    GIArgInfo *arg_info;
+    GITypeInfo *type_info;
     GIArgument *default_value;
 
     PyGIMarshalInFunc in_marshaller;
@@ -92,6 +92,7 @@ typedef struct _PyGIInterfaceCache
     gboolean is_foreign;
     GType g_type;
     PyObject *py_type;
+    GIInterfaceInfo *interface_info;
     gchar *type_name;
 } PyGIInterfaceCache;
 
@@ -108,6 +109,7 @@ typedef struct _PyGICallbackCache
     gint user_data_index;
     gint destroy_notify_index;
     GIScopeType scope;
+    GIInterfaceInfo *interface_info;
 } PyGICallbackCache;
 
 struct _PyGIFunctionCache

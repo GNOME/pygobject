@@ -3015,13 +3015,9 @@ _pygi_marshal_in_interface_callback (PyGIInvokeState   *state,
     if (callback_cache->destroy_notify_index > 0)
         destroy_cache = function_cache->args_cache[callback_cache->destroy_notify_index];
 
-    type_info = g_arg_info_get_type(arg_cache->arg_info);
-    callable_info = (GICallableInfo *)g_type_info_get_interface(type_info);
+    callable_info = (GICallableInfo *)callback_cache->interface_info;
 
     closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data);
-    g_base_info_unref((GIBaseInfo *)callable_info);
-    g_base_info_unref((GIBaseInfo *)type_info);
-
     arg->v_pointer = closure->closure;
     if (user_data_cache != NULL) {
         state->in_args[user_data_cache->c_arg_index].v_pointer = closure;
@@ -3063,13 +3059,10 @@ _pygi_marshal_in_interface_enum (PyGIInvokeState   *state,
     if (!is_instance) {
         int i;
         gboolean is_found = FALSE;
-        GITypeInfo *type_info = g_arg_info_get_type(arg_cache->arg_info);
-        GIInterfaceInfo *iface_info =
-            g_type_info_get_interface (type_info);
 
-        for (i = 0; i < g_enum_info_get_n_values(iface_info); i++) {
+        for (i = 0; i < g_enum_info_get_n_values(iface_cache->interface_info); i++) {
             GIValueInfo *value_info =
-                g_enum_info_get_value(iface_info, i);
+                g_enum_info_get_value(iface_cache->interface_info, i);
             glong enum_value = g_value_info_get_value(value_info);
             g_base_info_unref( (GIBaseInfo *)value_info);
             if (arg->v_long == enum_value) {
@@ -3077,9 +3070,6 @@ _pygi_marshal_in_interface_enum (PyGIInvokeState   *state,
                 break;
             }
         }
-
-        g_base_info_unref( (GIBaseInfo *)iface_info);
-        g_base_info_unref( (GIBaseInfo *)type_info);
 
         if (!is_found)
             goto err;
@@ -3184,12 +3174,10 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
         return TRUE;
     } else if (iface_cache->is_foreign) {
         gboolean success;
-        GITypeInfo *type_info = g_arg_info_get_type(arg_cache->arg_info);
         success = pygi_struct_foreign_convert_to_g_argument(py_arg,
-                                                            type_info,
+                                                            iface_cache->interface_info,
                                                             arg_cache->transfer,
                                                             arg);
-        g_base_info_unref((GIBaseInfo *)type_info);
 
         return success;
     } else if (!PyObject_IsInstance(py_arg, iface_cache->py_type)) {

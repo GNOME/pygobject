@@ -58,12 +58,12 @@ typedef struct {
 } PyGIBoxed;
 
 typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject       *value,
-                                                      GITypeInfo     *type_info,
+                                                      GIInterfaceInfo *interface_info,
                                                       GITransfer      transfer,
                                                       GIArgument      *arg);
-typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GITypeInfo *type_info,
-                                                        GIArgument  *arg);
-typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
+typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIInterfaceInfo *interface_info,
+                                                        GIArgument *arg);
+typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *interface_info,
                                                   gpointer  struct_);
 
 struct PyGI_API {
