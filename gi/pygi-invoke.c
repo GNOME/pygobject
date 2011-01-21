@@ -1038,6 +1038,13 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
     gboolean has_return = FALSE;
 
     if (cache->return_cache) {
+        if (cache->is_constructor) {
+            if (state->return_arg.v_pointer == NULL) {
+                PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
+                return NULL;
+            }
+        }
+
         py_return = cache->return_cache->out_marshaller(state,
                                                         cache,
                                                         cache->return_cache,
