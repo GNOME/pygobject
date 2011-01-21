@@ -854,12 +854,11 @@ _arg_cache_new_for_out_interface_callback(void)
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_enum(void)
+_arg_cache_new_for_out_interface_enum(GIInterfaceInfo *iface_info,
+                                      GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_enum;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out Interface ENum is not fully implemented yet");
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_enum;
     return arg_cache;
 }
 
@@ -873,12 +872,11 @@ _arg_cache_new_for_out_interface_union(GIInterfaceInfo *iface_info,
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_flags(void)
+_arg_cache_new_for_out_interface_flags(GIInterfaceInfo *iface_info,
+                                       GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->in_marshaller = _pygi_marshal_in_flags;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out Interface Flags is not fully implemented yet");
+    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_flags;
     return arg_cache;
 }
 
@@ -913,10 +911,12 @@ _arg_cache_out_new_from_interface_info (GIInterfaceInfo *iface_info,
             arg_cache = _arg_cache_new_for_out_interface_callback();
             break;
         case GI_INFO_TYPE_ENUM:
-            arg_cache = _arg_cache_new_for_out_interface_enum();
+            arg_cache = _arg_cache_new_for_out_interface_enum(iface_info,
+                                                              transfer);
             break;
         case GI_INFO_TYPE_FLAGS:
-            arg_cache = _arg_cache_new_for_out_interface_flags();
+            arg_cache = _arg_cache_new_for_out_interface_flags(iface_info,
+                                                               transfer);
             break;
         default:
             g_assert_not_reached();
