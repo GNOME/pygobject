@@ -139,7 +139,7 @@ pygi_get_property_value_real (PyGObject *instance,
             arg.v_double = g_value_get_double (&value);
             break;
         case GI_TYPE_TAG_GTYPE:
-            arg.v_size = g_value_get_uint (&value);
+            arg.v_size = g_value_get_gtype (&value);
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
@@ -314,7 +314,7 @@ pygi_set_property_value_real (PyGObject *instance,
             g_value_set_double (&value, arg.v_double);
             break;
         case GI_TYPE_TAG_GTYPE:
-            g_value_set_uint (&value, arg.v_size);
+            g_value_set_gtype (&value, arg.v_size);
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
