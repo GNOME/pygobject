@@ -3,6 +3,7 @@
 import unittest
 
 import gobject
+import sys
 import testhelper
 
 
@@ -159,3 +160,23 @@ class TestReferenceCounting(unittest.TestCase):
 
         obj.release()
         self.assertEquals(obj.__grefcount__, 1)
+
+class A(gobject.GObject):
+    def __init__(self):
+        super(A, self).__init__()
+
+class TestPythonReferenceCounting(unittest.TestCase):
+    # Newly created instances should alwayshave two references: one for
+    # the GC, and one for the bound variable in the local scope.
+
+    def testNewInstanceHasTwoRefs(self):
+        obj = gobject.GObject()
+        self.assertEquals(sys.getrefcount(obj), 2)
+
+    def testNewInstanceHasTwoRefsUsingGObjectNew(self):
+        obj = gobject.new(gobject.GObject)
+        self.assertEquals(sys.getrefcount(obj), 2)
+
+    def testNewSubclassInstanceHasTwoRefs(self):
+        obj = A()
+        self.assertEquals(sys.getrefcount(obj), 2)
