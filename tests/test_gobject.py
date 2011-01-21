@@ -180,3 +180,7 @@ class TestPythonReferenceCounting(unittest.TestCase):
     def testNewSubclassInstanceHasTwoRefs(self):
         obj = A()
         self.assertEquals(sys.getrefcount(obj), 2)
+
+    def testNewSubclassInstanceHasTwoRefsUsingGObjectNew(self):
+        obj = gobject.new(A)
+        self.assertEquals(sys.getrefcount(obj), 2)
