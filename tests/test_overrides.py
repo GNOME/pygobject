@@ -32,6 +32,20 @@ class TestGLib(unittest.TestCase):
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEquals(variant.get_string(), 'hello')
 
+        # boxed variant
+        variant = GLib.Variant('v', GLib.Variant('i', 42))
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertTrue(isinstance(variant.get_variant(), GLib.Variant))
+        self.assertEqual(variant.get_type_string(), 'v')
+        self.assertEqual(variant.get_variant().get_type_string(), 'i')
+        self.assertEquals(variant.get_variant().get_int32(), 42)
+
+        variant = GLib.Variant('v', GLib.Variant('v', GLib.Variant('i', 42)))
+        self.assertEqual(variant.get_type_string(), 'v')
+        self.assertEqual(variant.get_variant().get_type_string(), 'v')
+        self.assertEqual(variant.get_variant().get_variant().get_type_string(), 'i')
+        self.assertEquals(variant.get_variant().get_variant().get_int32(), 42)
+
         # tuples
 
         variant = GLib.Variant('()')
@@ -166,6 +180,11 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(variant.get_type_string(), 'a{s(ib)}')
         self.assertEqual(variant.unpack(), obj)
 
+        obj = {'a1': (1, GLib.Variant('b', True)), 'a2': (2, GLib.Variant('y', 255))}
+        variant = GLib.Variant('a{s(iv)}', obj)
+        self.assertEqual(variant.get_type_string(), 'a{s(iv)}')
+        self.assertEqual(variant.unpack(), {'a1': (1, True), 'a2': (2, 255)})
+
         obj = (1, {'a': {'a1': True, 'a2': False},
                    'b': {'b1': False},
                    'c': {}
@@ -202,6 +221,13 @@ class TestGLib(unittest.TestCase):
 
         res = GLib.Variant.new_object_path('/foo/Bar').unpack()
         self.assertEqual(res, '/foo/Bar')
+
+        # variant
+        res = GLib.Variant('v', GLib.Variant.new_int32(-42)).unpack()
+        self.assertEqual(res, -42)
+
+        variant = GLib.Variant('v', GLib.Variant('v', GLib.Variant('i', 42)))
+        self.assertEqual(res, -42)
 
         # tuple
         res = GLib.Variant.new_tuple(GLib.Variant.new_int32(-1),
