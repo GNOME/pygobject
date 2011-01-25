@@ -1447,6 +1447,19 @@ class TestPythonGObject(unittest.TestCase):
         object_ = ObjectOverrideNonVFuncDoMethod()
         self.assertEquals(18, object_.do_not_a_vfunc())
 
+    def test_native_function_not_set_in_subclass_dict(self):
+        # Previously, GI was setting virtual functions on the class as well
+        # as any *native* class that subclasses it. Here we check that it is only
+        # set on the class that the method is originally from.
+        self.assertTrue('do_method_with_default_implementation' in GIMarshallingTests.Object.__dict__)
+        self.assertTrue('do_method_with_default_implementation' not in GIMarshallingTests.SubObject.__dict__)
+
+        # Here we check that accessing a vfunc from the subclass returns the same wrapper object,
+        # meaning that multiple wrapper objects have not been created for the same vfunc.
+        self.assertTrue(GIMarshallingTests.Object.do_method_with_default_implementation.im_func is \
+                GIMarshallingTests.SubObject.do_method_with_default_implementation.im_func)
+
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):

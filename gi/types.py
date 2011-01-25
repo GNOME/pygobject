@@ -149,19 +149,19 @@ class MetaClassHelper(object):
                 hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
                                              py_vfunc)
 
-    def _setup_native_vfuncs(cls, impl):
-        for base in cls.__bases__ + (cls,):
-            if not hasattr(base, '__info__') or \
-                    not hasattr(base.__info__, 'get_vfuncs') or \
-                    isinstance(base.__info__, InterfaceInfo):
-                continue
-            for vfunc_info in base.__info__.get_vfuncs():
-                name = 'do_%s' % vfunc_info.get_name()
-                value = NativeVFunc(vfunc_info, impl)
-                setattr(impl, name, value)
+    def _setup_native_vfuncs(cls):
+        # Only InterfaceInfo and ObjectInfo have the get_vfuncs() method.
+        # We skip InterfaceInfo because interfaces have no implementations for vfuncs.
+        # Also check if __info__ in __dict__, not hasattr('__info__', ...)
+        # because we do not want to accidentally retrieve __info__ from a base class.
+        class_info = cls.__dict__.get('__info__')
+        if class_info is None or not isinstance(class_info, ObjectInfo):
+            return
 
-            if base != cls:
-                base._setup_native_vfuncs(impl)
+        for vfunc_info in class_info.get_vfuncs():
+            name = 'do_%s' % vfunc_info.get_name()
+            value = NativeVFunc(vfunc_info, cls)
+            setattr(cls, name, value)
 
 def find_vfunc_info_in_interface(bases, vfunc_name):
     for base in bases:
@@ -215,7 +215,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
         elif is_gi_defined:
             cls._setup_methods()
             cls._setup_constants()
-            cls._setup_native_vfuncs(cls)
+            cls._setup_native_vfuncs()
 
             if isinstance(cls.__info__, ObjectInfo):
                 cls._setup_fields()
