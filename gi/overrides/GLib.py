@@ -102,7 +102,7 @@ class _VariantCreator(object):
             if not args or type(args[0]) != type(()):
                 raise (TypeError, 'expected tuple argument')
 
-            for i in xrange(len(args[0])):
+            for i in range(len(args[0])):
                 if format.startswith(')'):
                     raise (TypeError, 'too many arguments for tuple signature')
 
@@ -127,7 +127,7 @@ class _VariantCreator(object):
             builder.init(variant_type_from_string(element_type))
         else:
             builder.init(variant_type_from_string('a{?*}'))
-            for k, v in args[0].iteritems():
+            for k, v in args[0].items():
                 (key_v, rest_format, _) = self._create(format[2:], [k])
                 (val_v, rest_format, _) = self._create(rest_format, [v])
 
@@ -157,7 +157,7 @@ class _VariantCreator(object):
             builder.init(variant_type_from_string(element_type))
         else:
             builder.init(variant_type_from_string('a*'))
-            for i in xrange(len(args[0])):
+            for i in range(len(args[0])):
                 (v, rest_format, _) = self._create(format[1:], args[0][i:])
                 builder.add_value(v)
         if args is not None:
@@ -213,13 +213,13 @@ class Variant(GLib.Variant):
         # tuple
         if self.get_type_string().startswith('('):
             res = [self.get_child_value(i).unpack() 
-                    for i in xrange(self.n_children())]
+                    for i in range(self.n_children())]
             return tuple(res)
 
         # dictionary
         if self.get_type_string().startswith('a{'):
             res = {}
-            for i in xrange(self.n_children()):
+            for i in range(self.n_children()):
                 v = self.get_child_value(i)
                 res[v.get_child_value(0).unpack()] = v.get_child_value(1).unpack()
             return res
@@ -227,7 +227,7 @@ class Variant(GLib.Variant):
         # array
         if self.get_type_string().startswith('a'):
             return [self.get_child_value(i).unpack() 
-                    for i in xrange(self.n_children())]
+                    for i in range(self.n_children())]
 
         # variant (just unbox transparently)
         if self.get_type_string().startswith('v'):
@@ -257,7 +257,7 @@ class Variant(GLib.Variant):
                 # lookup_value() only works for string keys, which is certainly
                 # the common case; we have to do painful iteration for other
                 # key types
-                for i in xrange(self.n_children()):
+                for i in range(self.n_children()):
                     v = self.get_child_value(i)
                     if v.get_child_value(0).unpack() == key:
                         return v.get_child_value(1).unpack()
@@ -283,7 +283,7 @@ class Variant(GLib.Variant):
             return TypeError, 'GVariant type %s is not a dictionary' % self.get_type_string()
 
         res = []
-        for i in xrange(self.n_children()):
+        for i in range(self.n_children()):
             v = self.get_child_value(i)
             res.append(v.get_child_value(0).unpack())
         return res

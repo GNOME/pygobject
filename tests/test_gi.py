@@ -1456,9 +1456,13 @@ class TestPythonGObject(unittest.TestCase):
 
         # Here we check that accessing a vfunc from the subclass returns the same wrapper object,
         # meaning that multiple wrapper objects have not been created for the same vfunc.
-        self.assertTrue(GIMarshallingTests.Object.do_method_with_default_implementation.im_func is \
-                GIMarshallingTests.SubObject.do_method_with_default_implementation.im_func)
-
+        func1 = GIMarshallingTests.Object.do_method_with_default_implementation
+        func2 = GIMarshallingTests.SubObject.do_method_with_default_implementation
+        if sys.version_info < (3,0):
+            func1 = func1.im_func
+            func2 = func2.im_func
+            
+        self.assertTrue(func1 is func2)
 
 class TestMultiOutputArgs(unittest.TestCase):
 
@@ -1473,10 +1477,11 @@ class TestGErrorException(unittest.TestCase):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror)
         try:
             GIMarshallingTests.gerror()
-        except Exception, error:
-            self.assertEquals(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
-            self.assertEquals(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
-            self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+            self.assertEquals(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+            self.assertEquals(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+            self.assertEquals(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
 # Interface

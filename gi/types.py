@@ -34,6 +34,9 @@ from ._gi import \
     register_interface_info, \
     hook_up_vfunc_implementation
 
+if sys.version_info > (3, 0):
+    def callable(obj):
+        return hasattr(obj, '__call__')
 
 def Function(info):
 
@@ -104,7 +107,7 @@ class MetaClassHelper(object):
             setattr(cls, name, value)
 
     def _setup_vfuncs(cls):
-        for vfunc_name, py_vfunc in cls.__dict__.iteritems():
+        for vfunc_name, py_vfunc in cls.__dict__.items():
             if not vfunc_name.startswith("do_") or not callable(py_vfunc):
                 continue
 

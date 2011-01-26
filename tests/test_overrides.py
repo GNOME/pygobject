@@ -6,6 +6,8 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
+from compathelper import _long, _unicode
+
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gdk
@@ -70,7 +72,7 @@ class TestGLib(unittest.TestCase):
         # nested tuples
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
         self.assertEqual(variant.get_type_string(), '((si)(ub))')
-        self.assertEqual(variant.unpack(), (('hello', -1), (42L, True)))
+        self.assertEqual(variant.unpack(), (('hello', -1), (_long(42), True)))
 
         # dictionaries
 
@@ -684,7 +686,7 @@ class TestGtk(unittest.TestCase):
                                         test_pylist))
 
         i = 93
-        label = u'this is row #93'
+        label = _unicode('this is row #93')
         treeiter = list_store.append()
         list_store.set_value(treeiter, 0, i)
         list_store.set_value(treeiter, 1, label)
@@ -695,7 +697,7 @@ class TestGtk(unittest.TestCase):
 
         # test automatic unicode->str conversion
         i = 94
-        label = u'this is row #94'
+        label = _unicode('this is row #94')
         treeiter = list_store.append((i,
                                       label,
                                       TestGtk.TestClass(self, i, label),
