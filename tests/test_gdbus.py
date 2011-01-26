@@ -29,7 +29,7 @@ class TestGDBusClient(unittest.TestCase):
         self.assert_('org.freedesktop.DBus' in result)
 
         result = self.dbus_proxy.call_sync('GetNameOwner', 
-                GLib.Variant('(s)', 'org.freedesktop.DBus'),
+                GLib.Variant('(s)', ('org.freedesktop.DBus',)),
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
         self.assert_(isinstance(result, GLib.Variant))
         self.assertEqual(type(result.unpack()[0]), type(''))
@@ -46,7 +46,7 @@ class TestGDBusClient(unittest.TestCase):
         # error case: invalid argument
         try:
             self.dbus_proxy.call_sync('GetConnectionUnixProcessID', 
-                    GLib.Variant('(s)', ' unknown'),
+                    GLib.Variant('(s)', (' unknown',)),
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
         except Exception, e:
