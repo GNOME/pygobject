@@ -93,25 +93,22 @@ class _VariantCreator(object):
         raise NotImplementedError('cannot handle GVariant type ' + format)
 
     def _create_tuple(self, format, args):
-        '''Handle the case where the outermost type of format is a tuple.
+        '''Handle the case where the outermost type of format is a tuple.'''
 
-        Tuples might come in as actual tuples in args, or as a flat list, so
-        this needs to handle both cases.
-        '''
         format = format[1:] # eat the '('
         builder = GLib.VariantBuilder()
         builder.init(variant_type_from_string('r'))
-        if args is not None and args and type(args[0]) == type(()):
-            # tuple in args
+        if args is not None:
+            if not args or type(args[0]) != type(()):
+                raise TypeError, 'expected tuple argument'
+
             for i in xrange(len(args[0])):
+                if format.startswith(')'):
+                    raise TypeError, 'too many arguments for tuple signature'
+
                 (v, format, _) = self._create(format, args[0][i:])
                 builder.add_value(v)
             args = args[1:]
-        else:
-            # flat list
-            while format[0] != ')':
-                (v, format, args) = self._create(format, args)
-                builder.add_value(v)
         return (builder.end(), format[1:], args)
 
     def _create_dict(self, format, args):
@@ -168,13 +165,11 @@ class _VariantCreator(object):
         return (builder.end(), rest_format, args)
 
 class Variant(GLib.Variant):
-    def __new__(cls, format_string, *args):
+    def __new__(cls, format_string, value):
         creator = _VariantCreator()
-        (v, rest_format, restargs) = creator._create(format_string, list(args))
+        (v, rest_format, _) = creator._create(format_string, [value])
         if rest_format:
             raise TypeError('invalid remaining format string: "%s"' % rest_format)
-        if restargs:
-            raise TypeError('too many arguments for format string: "%s"' % str(restargs))
         return v
 
     def __repr__(self):

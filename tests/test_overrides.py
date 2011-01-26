@@ -48,11 +48,17 @@ class TestGLib(unittest.TestCase):
 
         # tuples
 
-        variant = GLib.Variant('()')
+        variant = GLib.Variant('()', ())
         self.assertEqual(variant.get_type_string(), '()')
         self.assertEquals(variant.n_children(), 0)
 
-        # canonical arguments
+        variant = GLib.Variant('(i)', (3,))
+        self.assertEqual(variant.get_type_string(), '(i)')
+        self.assertTrue(isinstance(variant, GLib.Variant))
+        self.assertEquals(variant.n_children(), 1)
+        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
+        self.assertEquals(variant.get_child_value(0).get_int32(), 3)
+
         variant = GLib.Variant('(ss)', ('mec', 'mac'))
         self.assertEqual(variant.get_type_string(), '(ss)')
         self.assertTrue(isinstance(variant, GLib.Variant))
@@ -61,22 +67,8 @@ class TestGLib(unittest.TestCase):
         self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
         self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
 
-        # flat arguments
-        variant = GLib.Variant('(ss)', 'mec', 'mac')
-        self.assertEqual(variant.get_type_string(), '(ss)')
-        self.assertTrue(isinstance(variant, GLib.Variant))
-        self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
-        self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
-        self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
-
-        # nested tuples (canonical)
+        # nested tuples
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
-        self.assertEqual(variant.get_type_string(), '((si)(ub))')
-        self.assertEqual(variant.unpack(), (('hello', -1), (42L, True)))
-
-        # nested tuples (flat)
-        variant = GLib.Variant('((si)(ub))', 'hello', -1, 42, True)
         self.assertEqual(variant.get_type_string(), '((si)(ub))')
         self.assertEqual(variant.unpack(), (('hello', -1), (42L, True)))
 
@@ -158,18 +150,18 @@ class TestGLib(unittest.TestCase):
         # complex types
         #
 
-        variant = GLib.Variant('(as)', [])
+        variant = GLib.Variant('(as)', ([],))
         self.assertEqual(variant.get_type_string(), '(as)')
         self.assertEquals(variant.n_children(), 1)
         self.assertEquals(variant.get_child_value(0).n_children(), 0)
 
-        variant = GLib.Variant('(as)', [''])
+        variant = GLib.Variant('(as)', ([''],))
         self.assertEqual(variant.get_type_string(), '(as)')
         self.assertEquals(variant.n_children(), 1)
         self.assertEquals(variant.get_child_value(0).n_children(), 1)
         self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), '')
 
-        variant = GLib.Variant('(as)', ['hello'])
+        variant = GLib.Variant('(as)', (['hello'],))
         self.assertEqual(variant.get_type_string(), '(as)')
         self.assertEquals(variant.n_children(), 1)
         self.assertEquals(variant.get_child_value(0).n_children(), 1)
@@ -197,13 +189,15 @@ class TestGLib(unittest.TestCase):
     def test_gvariant_create_errors(self):
         # excess arguments
         self.assertRaises(TypeError, GLib.Variant, 'i', 42, 3)
+        self.assertRaises(TypeError, GLib.Variant, '(i)', (42, 3))
 
         # not enough arguments
-        self.assertRaises(TypeError, GLib.Variant, '(ii)', 42)
+        self.assertRaises(TypeError, GLib.Variant, '(ii)', (42,))
 
         # data type mismatch
         self.assertRaises(TypeError, GLib.Variant, 'i', 'hello')
         self.assertRaises(TypeError, GLib.Variant, 's', 42)
+        self.assertRaises(TypeError, GLib.Variant, '(ss)', 'mec', 'mac')
 
         # unimplemented data type
         self.assertRaises(NotImplementedError, GLib.Variant, 'Q', 1)
