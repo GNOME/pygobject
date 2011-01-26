@@ -10,6 +10,8 @@ from gi.repository import GObject
 import gobject
 from gi.repository import GIMarshallingTests
 
+from compathelper import _bytes
+
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
     PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
@@ -673,7 +675,7 @@ class TestArray(unittest.TestCase):
 
     def test_array_uint8_in(self):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
-        GIMarshallingTests.array_uint8_in("abcd")
+        GIMarshallingTests.array_uint8_in(_bytes("abcd"))
 
     def test_array_out(self):
         self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_out())
