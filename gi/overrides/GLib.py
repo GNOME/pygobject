@@ -166,6 +166,17 @@ class _VariantCreator(object):
 
 class Variant(GLib.Variant):
     def __new__(cls, format_string, value):
+        '''Create a GVariant from a native Python object.
+
+        format_string is a standard GVariant type signature, value is a Python
+        object whose structure has to match the signature.
+        
+        Examples:
+          GLib.Variant('i', 1)
+          GLib.Variant('(is)', (1, 'hello'))
+          GLib.Variant('(asa{sv})', ([], {'foo': GLib.Variant('b', True), 
+                                          'bar': GLib.Variant('i', 2)}))
+        '''
         creator = _VariantCreator()
         (v, rest_format, _) = creator._create(format_string, [value])
         if rest_format:
