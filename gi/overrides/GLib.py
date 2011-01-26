@@ -100,11 +100,11 @@ class _VariantCreator(object):
         builder.init(variant_type_from_string('r'))
         if args is not None:
             if not args or type(args[0]) != type(()):
-                raise TypeError, 'expected tuple argument'
+                raise (TypeError, 'expected tuple argument')
 
             for i in xrange(len(args[0])):
                 if format.startswith(')'):
-                    raise TypeError, 'too many arguments for tuple signature'
+                    raise (TypeError, 'too many arguments for tuple signature')
 
                 (v, format, _) = self._create(format, args[0][i:])
                 builder.add_value(v)
