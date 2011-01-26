@@ -29,13 +29,17 @@ class FileEnumerator(Gio.FileEnumerator):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         file_info = self.next_file(None)
 
         if file_info is not None:
             return file_info
         else:
             raise StopIteration
+
+    # python 2 compat for the iter protocol
+    next = __next__
+
 
 FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
