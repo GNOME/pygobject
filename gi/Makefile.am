@@ -90,3 +90,5 @@ check-local: $(LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 
+
+-include $(top_srcdir)/git.mk

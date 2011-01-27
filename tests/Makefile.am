@@ -112,3 +112,5 @@ check.gdb:
 
 check.valgrind:
 	EXEC_NAME="valgrind --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+
+-include $(top_srcdir)/git.mk

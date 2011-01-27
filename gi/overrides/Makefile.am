@@ -13,3 +13,5 @@ pygioverrides_PYTHON = \
 	keysyms.py \
 	__init__.py
 
+
+-include $(top_srcdir)/git.mk
