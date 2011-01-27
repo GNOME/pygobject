@@ -68,7 +68,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/\.window\.set_type_hint/.set_type_hint/g;" \
     -pe "s/\.window\.set_skip_taskbar_hint/.set_skip_taskbar_hint/g;" \
     -pe "s/\.window\.set_transient_for/.set_transient_for/g;" \
-    -pe "s/\.window\b/.get_window()/g;" \
+    -pe "s/\.window\b(?!\s*=)/.get_window()/g;" \
     -pe "s/self.drag_source_unset\(\)/Gtk.drag_source_unset\(self\)/g;" \
     -pe "s/self.drag_dest_unset\(\)/Gtk.drag_dest_unset\(self\)/g;" \
     -pe "s/Gtk.Alignment\(/Gtk.Alignment.new\(/g;" \
