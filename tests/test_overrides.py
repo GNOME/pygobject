@@ -1046,6 +1046,15 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(start.begins_tag(tag))
         self.assertTrue(start.has_tag(tag))
 
+        buffer.set_text('')
+        buffer.insert_with_tags(buffer.get_start_iter(), 'HelloHello', 'title')
+        (start, end) = buffer.get_bounds()
+        self.assertTrue(start.begins_tag(tag))
+        self.assertTrue(start.has_tag(tag))
+
+        self.assertRaises(ValueError, buffer.insert_with_tags,
+                buffer.get_start_iter(), 'HelloHello', 'unknowntag')
+
     def test_text_iter(self):
         self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
         buffer = Gtk.TextBuffer()
