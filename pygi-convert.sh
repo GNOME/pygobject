@@ -126,6 +126,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \
     -pe "s/Pango.WEIGHT_/Pango.Weight./g;" \
     -pe "s/Pango.WRAP_/Pango.WrapMode./g;" \
+    -pe "s/Pango.TAB_/Pango.TabAlign./g;" \
 \
     -pe "s/import atk\n/from gi.repository import Atk\n/g;" \
     -pe "s/atk\./Atk\./g;" \
