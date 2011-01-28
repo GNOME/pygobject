@@ -67,7 +67,14 @@ class TestEverything(unittest.TestCase):
         
 
     def test_floating(self):
-        Everything.TestFloating()
+        e = Everything.TestFloating()
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = GObject.new(Everything.TestFloating)
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = Everything.TestFloating.new()
+        self.assertEquals(e.__grefcount__, 1)
 
     def test_caller_allocates(self):
         struct_a = Everything.TestStructA()
