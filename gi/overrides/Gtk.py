@@ -580,12 +580,21 @@ class TextBuffer(Gtk.TextBuffer):
         start = self.get_iter_at_offset(start_offset)
 
         for tag in tags:
-            if isinstance(tag, _basestring):
-                tagname = tag
-                tag = self.get_tag_table().lookup(tagname)
-                if not tag:
-                    raise ValueError, 'unknown text tag: ' + tagname
             self.apply_tag(tag, start, iter)
+
+    def insert_with_tags_by_name(self, iter, text, *tags):
+        if not tags:
+            return
+
+        tag_objs = []
+
+        for tag in tags:
+            tag_obj = self.get_tag_table().lookup(tag)
+            if not tag_obj:
+                raise ValueError, 'unknown text tag: ' + tag
+            tag_objs.append(tag_obj)
+
+        self.insert_with_tags(iter, text, *tag_objs)
 
     def insert_at_cursor(self, text):
         if not isinstance(text , _basestring):
