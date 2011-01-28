@@ -4,6 +4,7 @@
 import unittest
 
 import sys
+import os
 sys.path.insert(0, "../")
 
 from compathelper import _long, _unicode
@@ -1182,6 +1183,10 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(sw.get_vadjustment(), sb.get_adjustment())
 
 class TestGio(unittest.TestCase):
+    def setUp(self):
+        os.environ['GSETTINGS_BACKEND'] = 'memory'
+        os.environ['GSETTINGS_SCHEMA_DIR'] = os.path.dirname(__file__)
+
     def test_file_enumerator(self):
         self.assertEquals(Gio.FileEnumerator, overrides.Gio.FileEnumerator)
         f = Gio.file_new_for_path("./")
@@ -1200,3 +1205,29 @@ class TestGio(unittest.TestCase):
 
         self.assertEquals(iter_info, next_info)
 
+    def test_gsettings(self):
+        settings = Gio.Settings.new('org.gnome.test')
+        
+        self.assert_('test-array' in settings.list_keys())
+
+        # get various types
+        v = settings.get_value('test-boolean')
+        self.assertEqual(v.get_boolean(), True)
+        self.assertEqual(settings.get_boolean('test-boolean'), True)
+
+        v = settings.get_value('test-string')
+        self.assertEqual(v.get_string(), 'Hello')
+        self.assertEqual(settings.get_string('test-string'), 'Hello')
+
+        v = settings.get_value('test-array')
+        self.assertEqual(v.unpack(), [1, 2])
+
+        v = settings.get_value('test-tuple')
+        self.assertEqual(v.unpack(), (1, 2))
+
+        # set a value
+        settings.set_string('test-string', 'World')
+        self.assertEqual(settings.get_string('test-string'), 'World')
+
+        settings.set_value('test-string', GLib.Variant('s', 'Goodbye'))
+        self.assertEqual(settings.get_string('test-string'), 'Goodbye')

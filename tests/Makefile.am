@@ -40,7 +40,10 @@ GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 
-CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib
+gschemas.compiled: org.gnome.test.gschema.xml
+	glib-compile-schemas --targetdir=. --schema-file=$<
+
+CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib gschemas.compiled
 endif
 
 noinst_LTLIBRARIES += testhelper.la
@@ -99,7 +102,7 @@ clean-local:
 	rm -f $(LTLIBRARIES:.la=.so) file.txt~
 
 
-check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib
+check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
 	TEST_FILES="$(TEST_FILES)" \
 	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
 	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
