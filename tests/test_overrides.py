@@ -1234,6 +1234,11 @@ class TestGio(unittest.TestCase):
     def setUp(self):
         os.environ['GSETTINGS_BACKEND'] = 'memory'
         os.environ['GSETTINGS_SCHEMA_DIR'] = os.path.dirname(__file__)
+        self.settings = Gio.Settings('org.gnome.test')
+        # we change the values in the tests, so set them to predictable start
+        # value
+        self.settings.reset('test-string')
+        self.settings.reset('test-array')
 
     def test_file_enumerator(self):
         self.assertEquals(Gio.FileEnumerator, overrides.Gio.FileEnumerator)
@@ -1253,29 +1258,69 @@ class TestGio(unittest.TestCase):
 
         self.assertEquals(iter_info, next_info)
 
-    def test_gsettings(self):
-        settings = Gio.Settings.new('org.gnome.test')
-        
-        self.assert_('test-array' in settings.list_keys())
+    def test_gsettings_native(self):
+        self.assertTrue('test-array' in self.settings.list_keys())
 
         # get various types
-        v = settings.get_value('test-boolean')
+        v = self.settings.get_value('test-boolean')
         self.assertEqual(v.get_boolean(), True)
-        self.assertEqual(settings.get_boolean('test-boolean'), True)
+        self.assertEqual(self.settings.get_boolean('test-boolean'), True)
 
-        v = settings.get_value('test-string')
+        v = self.settings.get_value('test-string')
         self.assertEqual(v.get_string(), 'Hello')
-        self.assertEqual(settings.get_string('test-string'), 'Hello')
+        self.assertEqual(self.settings.get_string('test-string'), 'Hello')
 
-        v = settings.get_value('test-array')
+        v = self.settings.get_value('test-array')
         self.assertEqual(v.unpack(), [1, 2])
 
-        v = settings.get_value('test-tuple')
+        v = self.settings.get_value('test-tuple')
         self.assertEqual(v.unpack(), (1, 2))
 
         # set a value
-        settings.set_string('test-string', 'World')
-        self.assertEqual(settings.get_string('test-string'), 'World')
+        self.settings.set_string('test-string', 'World')
+        self.assertEqual(self.settings.get_string('test-string'), 'World')
 
-        settings.set_value('test-string', GLib.Variant('s', 'Goodbye'))
-        self.assertEqual(settings.get_string('test-string'), 'Goodbye')
+        self.settings.set_value('test-string', GLib.Variant('s', 'Goodbye'))
+        self.assertEqual(self.settings.get_string('test-string'), 'Goodbye')
+
+    def test_gsettings_constructor(self):
+        # default constructor uses path from schema
+        self.assertEqual(self.settings.get_property('path'), '/tests/')
+
+        # optional constructor arguments
+        with_path = Gio.Settings('org.gnome.nopathtest', path='/mypath/')
+        self.assertEqual(with_path.get_property('path'), '/mypath/')
+        self.assertEqual(with_path['np-int'], 42)
+
+    def test_gsettings_override(self):
+        # dictionary interface
+        self.assertEqual(len(self.settings), 4)
+        self.assertTrue('test-array' in self.settings)
+        self.assertTrue('test-array' in self.settings.keys())
+        self.failIf('nonexisting' in self.settings)
+        self.failIf(4 in self.settings)
+        self.assertEqual(bool(self.settings), True)
+
+        # get various types
+        self.assertEqual(self.settings['test-boolean'], True)
+        self.assertEqual(self.settings['test-string'], 'Hello')
+        self.assertEqual(self.settings['test-array'], [1, 2])
+        self.assertEqual(self.settings['test-tuple'], (1, 2))
+
+        self.assertRaises(KeyError, self.settings.__getitem__, 'unknown')
+        self.assertRaises(KeyError, self.settings.__getitem__, 2)
+
+        # set a value
+        self.settings['test-string'] = 'Goodbye'
+        self.assertEqual(self.settings['test-string'], 'Goodbye')
+        self.settings['test-array'] = [3, 4, 5]
+        self.assertEqual(self.settings['test-array'], [3, 4, 5])
+
+        self.assertRaises(TypeError, self.settings.__setitem__, 'test-string', 1)
+        self.assertRaises(KeyError, self.settings.__setitem__, 'unknown', 'moo')
+
+    def test_gsettings_empty(self):
+        empty = Gio.Settings('org.gnome.empty', path='/tests/')
+        self.assertEqual(len(empty), 0)
+        self.assertEqual(bool(empty), True)
+        self.assertEqual(empty.keys(), [])

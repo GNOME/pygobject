@@ -21,6 +21,8 @@
 from ..overrides import override
 from ..importer import modules
 
+from gi.repository import GLib
+
 Gio = modules['Gio']._introspection_module
 
 __all__ = []
@@ -43,3 +45,55 @@ class FileEnumerator(Gio.FileEnumerator):
 
 FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
+
+class Settings(Gio.Settings):
+    '''Provide dictionary-like access to GLib.Settings.'''
+
+    def __init__(self, schema, path=None, backend=None):
+        Gio.Settings.__init__(self, schema=schema, backend=backend, path=path)
+
+    def __contains__(self, key):
+        return key in self.list_keys()
+
+    def __len__(self):
+        return len(self.list_keys())
+
+    def __bool__(self):
+        # for "if mysettings" we don't want a dictionary-like test here, just
+        # if the object isn't None
+        return True
+
+    # alias for Python 2.x object protocol
+    __nonzero__ = __bool__
+
+    def __getitem__(self, key):
+        # get_value() aborts the program on an unknown key
+        if not key in self:
+            raise KeyError('unknown key: %r' % (key,))
+
+        return self.get_value(key).unpack()
+
+    def __setitem__(self, key, value):
+        # set_value() aborts the program on an unknown key
+        if not key in self:
+            raise KeyError('unknown key: %r' % (key,))
+
+        # determine type string of this key
+        range = self.get_range(key)
+        type_ = range.get_child_value(0).get_string()
+        v = range.get_child_value(1)
+        if type_ == 'type':
+            # v is boxed empty array, type of its elements is the allowed value type
+            type_str = v.get_child_value(0).get_type_string()
+            assert type_str.startswith('a')
+            type_str = type_str[1:]
+        else:
+            raise NotImplementedError('Cannot handle allowed type range class' + str(type_))
+
+        self.set_value(key, GLib.Variant(type_str, value))
+
+    def keys(self):
+        return self.list_keys()
+
+Settings = override(Settings)
+__all__.append('Settings')
