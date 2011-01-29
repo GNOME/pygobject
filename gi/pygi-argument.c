@@ -3477,10 +3477,107 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                          PyGIArgCache      *arg_cache,
                          GIArgument        *arg)
 {
+    GArray *array_;
     PyObject *py_obj = NULL;
+    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    array_ = arg->v_pointer;
+
+     /* GArrays make it easier to iterate over arrays
+      * with different element sizes but requires that
+      * we allocate a GArray if the argument was a C array
+      */
+    if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
+        gsize len;
+        if (seq_cache->fixed_size >= 0) {
+            len = seq_cache->fixed_size;
+        } else if (seq_cache->is_zero_terminated) {
+            len = g_strv_length(arg->v_string);
+        } else {
+            GIArgument *len_arg = state->args[seq_cache->len_arg_index];
+            len = len_arg->v_long;
+        }
+
+        array_ = g_array_new(seq_cache->is_zero_terminated,
+                             FALSE,
+                             seq_cache->item_size);
+        if (array_ == NULL) {
+            PyErr_NoMemory();
+            return NULL;
+        }
+
+        array_->data = arg->v_pointer;
+        array_->len = len;
+    }
+
+    if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
+        if (arg->v_pointer == NULL) {
+            py_obj = PYGLIB_PyBytes_FromString ("");
+        } else {
+            py_obj = PYGLIB_PyBytes_FromStringAndSize(array_->data, array_->len);
+        }
+    } else {
+        if (arg->v_pointer == NULL) {
+            py_obj = PyList_New (0);
+        } else {
+            int i;
+            gboolean is_struct;
+            gsize item_size;
+            PyGIMarshalOutFunc item_out_marshaller;
+            PyGIArgCache *item_arg_cache;
+
+            py_obj = PyList_New(array_->len);
+            if (py_obj == NULL) {
+                if (seq_cache->array_type == GI_ARRAY_TYPE_C)
+                    g_array_unref(array_);
+
+                return NULL;
+            }
+
+            item_arg_cache = seq_cache->item_cache;
+            item_out_marshaller = item_arg_cache->out_marshaller;
+            is_struct = FALSE;
+            if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
+                PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)item_arg_cache;
+                switch (g_base_info_get_type(iface_cache->interface_info)) {
+                    case GI_INFO_TYPE_STRUCT:
+                        case GI_INFO_TYPE_BOXED:
+                            is_struct = TRUE;
+                        default:
+                            break;
+                }
+            }
+
+            item_size = g_array_get_element_size(array_);
+            for (i = 0; i < array_->len; i++) {
+                GIArgument item_arg;
+                if (is_struct) {
+                    item_arg.v_pointer = &_g_array_index(array_, GIArgument, i);
+                } else {
+                    memcpy (&item_arg, &_g_array_index (array_, GIArgument, i), item_size);
+                }
+
+                PyObject *py_item = item_out_marshaller(state,
+                                                        function_cache,
+                                                        item_arg_cache,
+                                                        &item_arg);
+
+                if (py_item == NULL) {
+                    Py_CLEAR(py_obj);
+
+                    if (seq_cache->array_type == GI_ARRAY_TYPE_C)
+                        g_array_unref(array_);
+
+                    return NULL;
+                }
+                PyList_SET_ITEM(py_obj, i, py_item);
+            }
+        }
+    }
+
+    if (seq_cache->array_type == GI_ARRAY_TYPE_C)
+        g_array_free(array_, FALSE);
+
     return py_obj;
 }
 
