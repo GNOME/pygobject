@@ -3559,16 +3559,18 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
             item_size = g_array_get_element_size(array_);
             for (i = 0; i < array_->len; i++) {
                 GIArgument item_arg;
+                PyObject *py_item;
+
                 if (is_struct) {
                     item_arg.v_pointer = &_g_array_index(array_, GIArgument, i);
                 } else {
                     memcpy (&item_arg, &_g_array_index (array_, GIArgument, i), item_size);
                 }
 
-                PyObject *py_item = item_out_marshaller(state,
-                                                        function_cache,
-                                                        item_arg_cache,
-                                                        &item_arg);
+                py_item = item_out_marshaller(state,
+                                              function_cache,
+                                              item_arg_cache,
+                                              &item_arg);
 
                 if (py_item == NULL) {
                     Py_CLEAR(py_obj);
@@ -3595,10 +3597,45 @@ _pygi_marshal_out_glist (PyGIInvokeState   *state,
                          PyGIArgCache      *arg_cache,
                          GIArgument        *arg)
 {
+    GList *list_;
+    gsize length;
+    gsize i;
+
+    PyGIMarshalOutFunc item_out_marshaller;
+    PyGIArgCache *item_arg_cache;
+    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+
     PyObject *py_obj = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    list_ = arg->v_pointer;
+    length = g_list_length(list_);
+
+    py_obj = PyList_New(length);
+    if (py_obj == NULL)
+        return NULL;
+
+    item_arg_cache = seq_cache->item_cache;
+    item_out_marshaller = item_arg_cache->out_marshaller;
+
+    for (i = 0; list_ != NULL; list_ = g_list_next (list_), i++) {
+        GIArgument item_arg;
+        PyObject *py_item;
+
+        item_arg.v_pointer = list_->data;
+        py_item = item_out_marshaller(state,
+                                      function_cache,
+                                      item_arg_cache,
+                                      &item_arg);
+
+        if (py_item == NULL) {
+            Py_CLEAR (py_obj);
+            _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+            return NULL;
+        }
+
+        PyList_SET_ITEM (py_obj, i, py_item);
+    }
+
     return py_obj;
 }
 
@@ -3608,10 +3645,45 @@ _pygi_marshal_out_gslist (PyGIInvokeState   *state,
                           PyGIArgCache      *arg_cache,
                           GIArgument        *arg)
 {
+    GSList *list_;
+    gsize length;
+    gsize i;
+
+    PyGIMarshalOutFunc item_out_marshaller;
+    PyGIArgCache *item_arg_cache;
+    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+
     PyObject *py_obj = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    list_ = arg->v_pointer;
+    length = g_slist_length(list_);
+
+    py_obj = PyList_New(length);
+    if (py_obj == NULL)
+        return NULL;
+
+    item_arg_cache = seq_cache->item_cache;
+    item_out_marshaller = item_arg_cache->out_marshaller;
+
+    for (i = 0; list_ != NULL; list_ = g_slist_next (list_), i++) {
+        GIArgument item_arg;
+        PyObject *py_item;
+
+        item_arg.v_pointer = list_->data;
+        py_item = item_out_marshaller(state,
+                                      function_cache,
+                                      item_arg_cache,
+                                      &item_arg);
+
+        if (py_item == NULL) {
+            Py_CLEAR (py_obj);
+            _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+            return NULL;
+        }
+
+        PyList_SET_ITEM (py_obj, i, py_item);
+    }
+
     return py_obj;
 }
 
@@ -3621,10 +3693,73 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
                          PyGIArgCache      *arg_cache,
                          GIArgument        *arg)
 {
+    GHashTable *hash_;
+    GHashTableIter hash_table_iter;
+
+    PyGIMarshalOutFunc key_out_marshaller;
+    PyGIMarshalOutFunc value_out_marshaller;
+
+    PyGIArgCache *key_arg_cache;
+    PyGIArgCache *value_arg_cache;
+    PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
+
+    GIArgument key_arg;
+    GIArgument value_arg;
+
     PyObject *py_obj = NULL;
 
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Marshalling for this type is not implemented yet");
+    hash_ = arg->v_pointer;
+
+    py_obj = PyDict_New();
+    if (py_obj == NULL)
+        return NULL;
+
+    key_arg_cache = hash_cache->key_cache;
+    key_out_marshaller = key_arg_cache->out_marshaller;
+
+    value_arg_cache = hash_cache->value_cache;
+    value_out_marshaller = value_arg_cache->out_marshaller;
+
+    g_hash_table_iter_init(&hash_table_iter, hash_);
+    while (g_hash_table_iter_next(&hash_table_iter,
+                                  &key_arg.v_pointer,
+                                  &value_arg.v_pointer)) {
+        PyObject *py_key;
+        PyObject *py_value;
+        int retval;
+
+        py_key = key_out_marshaller(state,
+                                    function_cache,
+                                    key_arg_cache,
+                                    &key_arg);
+
+        if (py_key == NULL) {
+            Py_CLEAR (py_obj);
+            return NULL;
+        }
+
+        py_value = value_out_marshaller(state,
+                                        function_cache,
+                                        value_arg_cache,
+                                        &value_arg);
+
+        if (py_value == NULL) {
+            Py_CLEAR (py_obj);
+            Py_DECREF(py_key);
+            return NULL;
+        }
+
+        retval = PyDict_SetItem (py_obj, py_key, py_value);
+
+        Py_DECREF(py_key);
+        Py_DECREF(py_value);
+
+        if (retval < 0) {
+            Py_CLEAR(py_obj);
+            return NULL;
+        }
+    }
+
     return py_obj;
 }
 

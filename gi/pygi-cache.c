@@ -207,13 +207,16 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info,
     return sc;
 }
 static inline PyGIHashCache *
-_hash_cache_new_from_type_info(GITypeInfo *type_info)
+_hash_cache_new_from_type_info(GITypeInfo *type_info,
+                               GIDirection direction,
+                               GITransfer transfer)
 {
     PyGIHashCache *hc;
     GITypeInfo *key_type_info;
     GITypeTag key_type_tag;
     GITypeInfo *value_type_info;
     GITypeTag value_type_tag;
+    GITransfer item_transfer;
 
     hc = g_slice_new0(PyGIHashCache);
     ((PyGIArgCache *)hc)->destroy_notify = (GDestroyNotify)_hash_cache_free_func;
@@ -222,12 +225,17 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info)
     value_type_info = g_type_info_get_param_type (type_info, 1);
     value_type_tag = g_type_info_get_tag (value_type_info);
 
+    item_transfer = GI_TRANSFER_NOTHING;
+    if (transfer == GI_TRANSFER_EVERYTHING ||
+        transfer == GI_TRANSFER_CONTAINER)
+        item_transfer = GI_TRANSFER_EVERYTHING;
+
     hc->key_cache = _arg_cache_new_from_type_info(key_type_info,
                                                   NULL,
                                                   NULL,
                                                   key_type_tag,
-                                                  GI_TRANSFER_EVERYTHING,
-                                                  GI_DIRECTION_IN,
+                                                  item_transfer,
+                                                  direction,
                                                   FALSE,
                                                   0, 0);
 
@@ -240,8 +248,8 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info)
                                                     NULL,
                                                     NULL,
                                                     value_type_tag,
-                                                    GI_TRANSFER_EVERYTHING,
-                                                    GI_DIRECTION_IN,
+                                                    item_transfer,
+                                                    direction,
                                                     FALSE,
                                                     0, 0);
 
@@ -586,8 +594,7 @@ _arg_cache_in_ghash_setup(PyGIArgCache *arg_cache)
 static inline void
 _arg_cache_out_ghash_setup(PyGIArgCache *arg_cache)
 {
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out GHash is not fully implemented yet");
+    arg_cache->out_marshaller = _pygi_marshal_out_ghash;
 }
 
 static inline void
@@ -1126,7 +1133,9 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
             }
        case GI_TYPE_TAG_GHASH:
            arg_cache =
-               (PyGIArgCache *)_hash_cache_new_from_type_info(type_info);
+               (PyGIArgCache *)_hash_cache_new_from_type_info(type_info,
+                                                              direction,
+                                                              transfer);
 
            if (arg_cache == NULL)
                    break;
@@ -1136,8 +1145,6 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
 
            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
                _arg_cache_out_ghash_setup(arg_cache);
-               _pygi_arg_cache_free(arg_cache);
-               arg_cache = NULL;
            }
 
            break;
