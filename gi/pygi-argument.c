@@ -2698,8 +2698,16 @@ array_success:
         PyGIArgCache *aux_cache =
             function_cache->args_cache[sequence_cache->len_arg_index];
 
-
-        state->in_args[aux_cache->c_arg_index].v_long = length;
+        if (aux_cache->direction == GI_DIRECTION_INOUT) {
+            gint *len_arg = (gint *)state->in_args[aux_cache->c_arg_index].v_pointer;
+            /* if we are not setup yet just set the in arg */
+            if (len_arg == NULL)
+                state->in_args[aux_cache->c_arg_index].v_long = length;
+            else
+                *len_arg = length;
+        } else {              
+            state->in_args[aux_cache->c_arg_index].v_long = length;
+        }
     }
 
     if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {

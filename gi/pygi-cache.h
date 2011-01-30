@@ -126,6 +126,8 @@ struct _PyGIFunctionCache
     /* counts */
     gssize n_in_args;
     gssize n_out_args;
+    gssize n_out_aux_args;
+
     gssize n_args;
     gssize n_py_args;
 };

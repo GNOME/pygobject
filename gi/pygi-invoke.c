@@ -999,6 +999,10 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 
                 break;
             case GI_DIRECTION_INOUT:
+                /* this will be filled in if it is an aux value */
+                if (state->in_args[in_count].v_pointer != NULL)
+                    state->out_values[out_count] = state->in_args[in_count];
+
                 state->in_args[in_count].v_pointer = &state->out_values[out_count];
                 in_count++;
 
@@ -1075,7 +1079,9 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
         }
     }
 
-    if (cache->n_out_args == 0) {
+    total_out_args -= cache->n_out_aux_args;
+
+    if (cache->n_out_args - cache->n_out_aux_args  == 0) {
         py_out = py_return;
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */
@@ -1095,12 +1101,12 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
             py_arg_index++;
         }
 
-        for(; py_arg_index < total_out_args; py_arg_index++, out_cache_index++) {
+        for(; py_arg_index < total_out_args; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
             PyObject *py_obj = arg_cache->out_marshaller(state,
                                                          cache,
                                                          arg_cache,
-                                                         &(state->out_values[out_cache_index]));
+                                                         state->args[arg_cache->c_arg_index]);
 
             if (py_obj == NULL)
                 return NULL;

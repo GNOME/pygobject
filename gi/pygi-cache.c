@@ -481,7 +481,8 @@ static inline gboolean
 _arg_cache_in_array_setup(PyGIArgCache *arg_cache,
                           PyGIFunctionCache *function_cache,
                           GITypeInfo *type_info,
-                          GITransfer transfer)
+                          GITransfer transfer,
+                          GIDirection direction)
 {
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache; 
     seq_cache->array_type = g_type_info_get_array_type(type_info);
@@ -489,6 +490,7 @@ _arg_cache_in_array_setup(PyGIArgCache *arg_cache,
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *aux_cache = _arg_cache_new();
         aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+        aux_cache->direction = direction;
         if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
             PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
             arg_cache->c_arg_index = invalid_cache->c_arg_index;
@@ -507,7 +509,8 @@ static inline gboolean
 _arg_cache_out_array_setup(PyGIArgCache *arg_cache,
                            PyGIFunctionCache *function_cache,
                            GITypeInfo *type_info,
-                           GITransfer transfer)
+                           GITransfer transfer,
+                           gssize arg_index)
 {
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache; 
     arg_cache->out_marshaller = _pygi_marshal_out_array;
@@ -516,10 +519,14 @@ _arg_cache_out_array_setup(PyGIArgCache *arg_cache,
 
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *aux_cache = function_cache->args_cache[seq_cache->len_arg_index];
-        if (aux_cache == NULL)
+        if (seq_cache->len_arg_index < arg_index)
+             function_cache->n_out_aux_args++;
+
+        if (aux_cache == NULL) {
             aux_cache = _arg_cache_new();
-        else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE)
+        } else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE) {
             return TRUE;
+        }
 
         aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
         if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
@@ -527,6 +534,9 @@ _arg_cache_out_array_setup(PyGIArgCache *arg_cache,
             arg_cache->c_arg_index = invalid_cache->c_arg_index;
             _pygi_arg_cache_free(invalid_cache);
         }
+
+        if (aux_cache->direction != GI_DIRECTION_INOUT)
+            aux_cache->direction = GI_DIRECTION_OUT;
 
         function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
     }
@@ -1060,14 +1070,16 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
                    _arg_cache_in_array_setup(arg_cache,
                                              function_cache,
-                                             type_info, 
-                                             transfer);
+                                             type_info,
+                                             transfer,
+                                             direction);
 
                if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
-                   _arg_cache_out_array_setup(arg_cache, 
+                   _arg_cache_out_array_setup(arg_cache,
                                               function_cache,
                                               type_info,
-                                              transfer);
+                                              transfer,
+                                              c_arg_index);
 
                break;
            }
@@ -1245,6 +1257,14 @@ _args_cache_generate(GIFunctionInfo *function_info,
         gboolean is_caller_allocates;
         gint py_arg_index = -1;
 
+        arg_info =
+            g_callable_info_get_arg( (GICallableInfo *) function_info, i);
+
+        direction = g_arg_info_get_direction(arg_info);
+        transfer = g_arg_info_get_ownership_transfer(arg_info);
+        type_info = g_arg_info_get_type(arg_info);
+        type_tag = g_type_info_get_tag(type_info);
+
         /* must be an aux arg filled in by its owner
          * fill in it's c_arg_index, add to the in count
          * and continue
@@ -1255,24 +1275,25 @@ _args_cache_generate(GIFunctionInfo *function_info,
                 arg_cache->py_arg_index = function_cache->n_py_args;
                 function_cache->n_py_args++;
             }
-            arg_cache->c_arg_index = function_cache->n_in_args;
-            function_cache->n_in_args++;
+
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
+                arg_cache->c_arg_index = function_cache->n_in_args;
+                function_cache->n_in_args++;
+            }
+ 
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+                function_cache->n_out_args++;
+                function_cache->n_out_aux_args++;
+            }
+
+            g_base_info_unref( (GIBaseInfo *)arg_info);
             continue;
         }
-
-        arg_info =
-            g_callable_info_get_arg( (GICallableInfo *) function_info, i);
-
-        direction = g_arg_info_get_direction(arg_info);
-        transfer = g_arg_info_get_ownership_transfer(arg_info);
-        type_info = g_arg_info_get_type(arg_info);
-        type_tag = g_type_info_get_tag(type_info);
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             py_arg_index = function_cache->n_py_args;
             function_cache->n_in_args++;
             function_cache->n_py_args++;
-
         }
 
         arg_cache =
@@ -1309,10 +1330,13 @@ _args_cache_generate(GIFunctionInfo *function_info,
         }
 
         function_cache->args_cache[arg_index] = arg_cache;
-        g_base_info_unref( (GIBaseInfo *) type_info);
+        g_base_info_unref( (GIBaseInfo *)type_info);
+        g_base_info_unref( (GIBaseInfo *)arg_info);
+   
         continue;
 arg_err:
-        g_base_info_unref( (GIBaseInfo *) type_info);
+        g_base_info_unref( (GIBaseInfo *)type_info);
+        g_base_info_unref( (GIBaseInfo *)arg_info);        
         return FALSE;
     }
     return TRUE;
