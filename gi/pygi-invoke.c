@@ -978,7 +978,6 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 
         switch (arg_cache->direction) {
             case GI_DIRECTION_IN:
-            case GI_DIRECTION_INOUT:
                 state->args[i] = &(state->in_args[in_count]);
                 in_count++;
 
@@ -999,6 +998,24 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                                      arg_cache->py_arg_index);
 
                 break;
+            case GI_DIRECTION_INOUT:
+                state->in_args[in_count].v_pointer = &state->out_values[out_count];
+                in_count++;
+
+                if (arg_cache->aux_type == PYGI_AUX_TYPE_NONE) {
+                    if (arg_cache->py_arg_index >= state->n_py_in_args) {
+                        PyErr_Format(PyExc_TypeError,
+                                     "%s() takes exactly %zd argument(s) (%zd given)",
+                                      cache->name,
+                                      cache->n_py_args,
+                                      state->n_py_in_args);
+                        return FALSE;
+                    }
+
+                    py_arg =
+                        PyTuple_GET_ITEM(state->py_in_args,
+                                         arg_cache->py_arg_index);
+                }
             case GI_DIRECTION_OUT:
                 state->out_args[out_count].v_pointer = &state->out_values[out_count];
                 state->args[i] = &state->out_values[out_count];

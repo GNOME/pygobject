@@ -25,22 +25,16 @@
 #include "pygi-type.h"
 #include <girepository.h>
 
-PyGIArgCache * _arg_cache_in_new_from_type_info (GITypeInfo *type_info,
-                                                 GIArgInfo *arg_info,
-                                                 PyGIFunctionCache *function_cache,
-                                                 GITypeTag type_tag,
-                                                 GITransfer transfer,
-                                                 GIDirection direction,
-                                                 gint c_arg_index,
-                                                 gint py_arg_index);
+PyGIArgCache * _arg_cache_new_from_type_info (GITypeInfo *type_info,
+                                              PyGIFunctionCache *function_cache,
+                                              GIArgInfo *arg_info,
+                                              GITypeTag type_tag,
+                                              GITransfer transfer,
+                                              GIDirection direction,
+                                              gboolean is_caller_allocates,
+                                              gint c_arg_index,
+                                              gint py_arg_index);
 
-PyGIArgCache * _arg_cache_out_new_from_type_info (GITypeInfo *type_info,
-                                                  PyGIFunctionCache *function_cache,
-                                                  GITypeTag type_tag,
-                                                  GITransfer transfer,
-                                                  GIDirection direction,
-                                                  gboolean is_caller_allocates,
-                                                  gint c_arg_index);
 /* cleanup */
 void
 _pygi_arg_cache_free(PyGIArgCache *cache)
@@ -192,25 +186,14 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info,
         transfer == GI_TRANSFER_CONTAINER)
         item_transfer = GI_TRANSFER_EVERYTHING;
 
-    /* FIXME: in/out */
-
-    if (direction == GI_DIRECTION_IN)
-        sc->item_cache = _arg_cache_in_new_from_type_info(item_type_info,
-                                                          NULL,
-                                                          NULL,
-                                                          item_type_tag,
-                                                          item_transfer,
-                                                          direction,
-                                                          0, 0);
-    else
-        sc->item_cache = _arg_cache_out_new_from_type_info(item_type_info,
-                                                          NULL,
-                                                          item_type_tag,
-                                                          item_transfer,
-                                                          direction,
-                                                          FALSE,
-                                                          0);
-
+    sc->item_cache = _arg_cache_new_from_type_info(item_type_info,
+                                                   NULL,
+                                                   NULL,
+                                                   item_type_tag,
+                                                   item_transfer,
+                                                   direction,
+                                                   FALSE,
+                                                   0, 0);
 
     if (sc->item_cache == NULL) {
         _pygi_arg_cache_free((PyGIArgCache *)sc);
@@ -239,26 +222,28 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info)
     value_type_info = g_type_info_get_param_type (type_info, 1);
     value_type_tag = g_type_info_get_tag (value_type_info);
 
-    hc->key_cache = _arg_cache_in_new_from_type_info(key_type_info,
-                                                     NULL,
-                                                     NULL,
-                                                     key_type_tag,
-                                                     GI_TRANSFER_EVERYTHING,
-                                                     GI_DIRECTION_IN,
-                                                     0, 0);
+    hc->key_cache = _arg_cache_new_from_type_info(key_type_info,
+                                                  NULL,
+                                                  NULL,
+                                                  key_type_tag,
+                                                  GI_TRANSFER_EVERYTHING,
+                                                  GI_DIRECTION_IN,
+                                                  FALSE,
+                                                  0, 0);
 
     if (hc->key_cache == NULL) {
         _pygi_arg_cache_free((PyGIArgCache *)hc);
         return NULL;
     }
 
-    hc->value_cache = _arg_cache_in_new_from_type_info(value_type_info,
-                                                       NULL,
-                                                       NULL,
-                                                       value_type_tag,
-                                                       GI_TRANSFER_EVERYTHING,
-                                                       GI_DIRECTION_IN,
-                                                       0, 0);
+    hc->value_cache = _arg_cache_new_from_type_info(value_type_info,
+                                                    NULL,
+                                                    NULL,
+                                                    value_type_tag,
+                                                    GI_TRANSFER_EVERYTHING,
+                                                    GI_DIRECTION_IN,
+                                                    FALSE,
+                                                    0, 0);
 
     if (hc->value_cache == NULL) {
         _pygi_arg_cache_free((PyGIArgCache *)hc);
@@ -295,155 +280,210 @@ _arg_cache_new(void)
 {
     return g_slice_new0(PyGIArgCache);
 }
-/* process in args */
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_void(void)
+static inline void 
+_arg_cache_in_void_setup(PyGIArgCache *arg_cache)
 {
-     PyGIArgCache *arg_cache = _arg_cache_new();
-     arg_cache->in_marshaller = _pygi_marshal_in_void;
-
-     return arg_cache;
+    arg_cache->in_marshaller = _pygi_marshal_in_void;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_boolean(void)
+static inline void 
+_arg_cache_out_void_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_void;
+}
+
+static inline void
+_arg_cache_in_boolean_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_boolean;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_int8(void)
+static inline void 
+_arg_cache_out_boolean_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_boolean;
+}
+
+static inline void
+_arg_cache_in_int8_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_int8;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_uint8(void)
+static inline void
+_arg_cache_out_int8_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_int8;
+}
+
+static inline void
+_arg_cache_in_uint8_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_uint8;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_int16(void)
+static inline void
+_arg_cache_out_uint8_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_uint8;
+}
+
+static inline void
+_arg_cache_in_int16_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_int16;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_uint16(void)
+static inline void
+_arg_cache_out_int16_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_int16;
+}
+
+static inline void
+_arg_cache_in_uint16_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_uint16;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_int32(void)
+static inline void
+_arg_cache_out_uint16_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_uint16;
+}
+
+static inline void
+_arg_cache_in_int32_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_int32;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_uint32(void)
+static inline void
+_arg_cache_out_int32_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_int32;
+}
+
+static inline void
+_arg_cache_in_uint32_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_uint32;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_int64(void)
+static inline void
+_arg_cache_out_uint32_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_uint32;
+}
+
+static inline void
+_arg_cache_in_int64_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_int64;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_uint64(void)
+static inline void
+_arg_cache_out_int64_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_int64;
+}
+
+static inline void
+_arg_cache_in_uint64_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_uint64;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_float(void)
+static inline void
+_arg_cache_out_uint64_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_uint64;
+}
+
+static inline void
+_arg_cache_in_float_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_float;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_double(void)
+static inline void
+_arg_cache_out_float_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_float;
+}
+
+static inline void
+_arg_cache_in_double_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_double;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_unichar(void)
+static inline void
+_arg_cache_out_double_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_double;
+}
+
+static inline void
+_arg_cache_in_unichar_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_unichar;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_gtype(void)
+static inline void
+_arg_cache_out_unichar_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_unichar;
+}
+
+static inline void
+_arg_cache_in_gtype_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_gtype;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_utf8(GITransfer transfer)
+static inline void
+_arg_cache_out_gtype_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_gtype;
+}
+
+static inline void
+_arg_cache_in_utf8_setup(PyGIArgCache *arg_cache,
+                         GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_utf8;
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        arg_cache->cleanup = g_free;
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_filename(GITransfer transfer)
+static inline void
+_arg_cache_out_utf8_setup(PyGIArgCache *arg_cache,
+                          GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    arg_cache->out_marshaller = _pygi_marshal_out_utf8;
+}
+
+static inline void
+_arg_cache_in_filename_setup(PyGIArgCache *arg_cache,
+                             GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_filename;
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-        arg_cache->cleanup = g_free;
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_array(PyGIFunctionCache *function_cache,
-                            GITypeInfo *type_info,
-                            GITransfer transfer)
+static inline void
+_arg_cache_out_filename_setup(PyGIArgCache *arg_cache,
+                              GITransfer transfer)
 {
-    PyGISequenceCache *seq_cache = _sequence_cache_new_from_type_info(type_info,
-                                                                      GI_DIRECTION_IN,
-                                                                      transfer, 
-                                                                      (function_cache->is_method ? 1: 0));
+    arg_cache->out_marshaller = _pygi_marshal_out_filename;
+}
 
-    PyGIArgCache *arg_cache = (PyGIArgCache *)seq_cache;
-
+static inline gboolean
+_arg_cache_in_array_setup(PyGIArgCache *arg_cache,
+                          PyGIFunctionCache *function_cache,
+                          GITypeInfo *type_info,
+                          GITransfer transfer)
+{
+    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache; 
     seq_cache->array_type = g_type_info_get_array_type(type_info);
 
     if (seq_cache->len_arg_index >= 0) {
@@ -461,64 +501,111 @@ _arg_cache_new_for_in_array(PyGIFunctionCache *function_cache,
     arg_cache->in_marshaller = _pygi_marshal_in_array;
 
     /* arg_cache->cleanup = _pygi_cleanup_array; */
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_glist(GITypeInfo *type_info,
-                            GITransfer transfer)
+static inline gboolean
+_arg_cache_out_array_setup(PyGIArgCache *arg_cache,
+                           PyGIFunctionCache *function_cache,
+                           GITypeInfo *type_info,
+                           GITransfer transfer)
 {
-    PyGIArgCache *arg_cache =
-        (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info,
-                                                           GI_DIRECTION_IN,
-                                                           transfer,
-                                                           0);
+    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache; 
+    arg_cache->out_marshaller = _pygi_marshal_out_array;
+
+    seq_cache->array_type = g_type_info_get_array_type(type_info);
+
+    if (seq_cache->len_arg_index >= 0) {
+        PyGIArgCache *aux_cache = function_cache->args_cache[seq_cache->len_arg_index];
+        if (aux_cache == NULL)
+            aux_cache = _arg_cache_new();
+        else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE)
+            return TRUE;
+
+        aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+        if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
+            PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
+            arg_cache->c_arg_index = invalid_cache->c_arg_index;
+            _pygi_arg_cache_free(invalid_cache);
+        }
+
+        function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
+    }
+
+    return TRUE;
+    /* arg_cache->cleanup = _pygi_cleanup_array; */
+}
+
+static inline void
+_arg_cache_in_glist_setup(PyGIArgCache *arg_cache,
+                          GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_glist;
     /* arg_cache->cleanup = */
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_gslist(GITypeInfo *type_info,
-                             GITransfer transfer)
+static inline void
+_arg_cache_out_glist_setup(PyGIArgCache *arg_cache,
+                           GITransfer transfer)
 {
-    PyGIArgCache *arg_cache =
-        (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info,
-                                                           GI_DIRECTION_IN,
-                                                           transfer,
-                                                           0);
+    arg_cache->out_marshaller = _pygi_marshal_out_glist;
+    /* arg_cache->cleanup = */
+}
+
+static inline void
+_arg_cache_in_gslist_setup(PyGIArgCache *arg_cache,
+                           GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_gslist;
     /* arg_cache->cleanup = */
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_ghash(GITypeInfo *type_info)
+static inline void
+_arg_cache_out_gslist_setup(PyGIArgCache *arg_cache,
+                            GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_hash_cache_new_from_type_info(type_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_gslist;
+    /* arg_cache->cleanup = */
+}
+
+static inline void
+_arg_cache_in_ghash_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_ghash;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_gerror(void)
+static inline void 
+_arg_cache_out_ghash_setup(PyGIArgCache *arg_cache)
 {
-    PyGIArgCache *arg_cache = _arg_cache_new();
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Caching for Out GHash is not fully implemented yet");
+}
+
+static inline void
+_arg_cache_in_gerror_setup(PyGIArgCache *arg_cache)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_gerror;
     arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_union(GIInterfaceInfo *iface_info,
-                                      GITransfer transfer)
+static inline void
+_arg_cache_out_gerror_setup(PyGIArgCache *arg_cache)
 {
-    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+    arg_cache->out_marshaller = _pygi_marshal_out_gerror;
+    arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+}
+
+static inline void
+_arg_cache_in_interface_union_setup(PyGIArgCache *arg_cache,
+                                    GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
-    return arg_cache;
+}
+
+static inline void
+_arg_cache_out_interface_union_setup(PyGIArgCache *arg_cache,
+                                     GITransfer transfer)
+{
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
 }
 
 static void
@@ -526,50 +613,65 @@ _g_slice_free_gvalue_func(GValue *value) {
     g_slice_free(GValue, value);
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_struct(GIInterfaceInfo *iface_info,
-                                       GITransfer transfer)
+static inline void
+_arg_cache_in_interface_struct_setup(PyGIArgCache *arg_cache,
+                                     GIInterfaceInfo *iface_info,
+                                     GITransfer transfer)
 {
-    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
     if (iface_cache->g_type == G_TYPE_VALUE)
         arg_cache->cleanup = _g_slice_free_gvalue_func;
     if (iface_cache->g_type == G_TYPE_CLOSURE)
         arg_cache->cleanup = g_closure_unref;
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_object(GIInterfaceInfo *iface_info,
-                                       GITransfer transfer)
+static inline void
+_arg_cache_out_interface_struct_setup(PyGIArgCache *arg_cache,
+                                      GIInterfaceInfo *iface_info,
+                                      GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+    iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
+}
+
+static inline void
+_arg_cache_in_interface_object_setup(PyGIArgCache *arg_cache,
+                                     GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_interface_object;
     if (transfer == GI_TRANSFER_EVERYTHING)
         arg_cache->cleanup = (GDestroyNotify)g_object_unref;
-
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_boxed(GIInterfaceInfo *iface_info,
+static inline void 
+_arg_cache_out_interface_object_setup(PyGIArgCache *arg_cache,
                                       GITransfer transfer)
 {
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
-    return arg_cache;
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_callback(PyGIFunctionCache *function_cache,
-                                         GIArgInfo *arg_info,
-                                         GIInterfaceInfo *iface_info)
+static inline void
+_arg_cache_in_interface_boxed_setup(PyGIArgCache *arg_cache,
+                                    GITransfer transfer)
 {
-    PyGICallbackCache *callback_cache = _callback_cache_new_from_arg_info(arg_info, iface_info, function_cache->is_method ? 1: 0);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)callback_cache;
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
+}
+
+static inline void
+_arg_cache_out_interface_boxed_setup(PyGIArgCache *arg_cache,
+                                     GITransfer transfer)
+{
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
+}
+
+static inline void
+_arg_cache_in_interface_callback_setup(PyGIArgCache *arg_cache,
+                                       PyGIFunctionCache *function_cache)
+{
+    PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     if (callback_cache->user_data_index >= 0) {
         PyGIArgCache *user_data_arg_cache = _arg_cache_new();
         user_data_arg_cache->aux_type = PYGI_AUX_TYPE_HAS_PYARG;
@@ -582,68 +684,141 @@ _arg_cache_new_for_in_interface_callback(PyGIFunctionCache *function_cache,
         function_cache->args_cache[callback_cache->destroy_notify_index] = destroy_arg_cache;
     }
     arg_cache->in_marshaller = _pygi_marshal_in_interface_callback;
-    return arg_cache;
 }
 
-static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_enum(GIInterfaceInfo *iface_info)
+static inline void 
+_arg_cache_out_interface_callback_setup(void)
 {
-    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
+    PyErr_Format(PyExc_NotImplementedError,
+                 "Callback returns are not supported");
+}
 
+static inline void 
+_arg_cache_in_interface_enum_setup(PyGIArgCache *arg_cache,
+                                   GITransfer transfer)
+{
     arg_cache->in_marshaller = _pygi_marshal_in_interface_enum;
-    return arg_cache;
+}
+
+static inline void
+_arg_cache_out_interface_enum_setup(PyGIArgCache *arg_cache,
+                                    GITransfer transfer)
+{
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_enum;
+}
+
+static inline void 
+_arg_cache_in_interface_flags_setup(PyGIArgCache *arg_cache,
+                                    GITransfer transfer)
+{
+    arg_cache->in_marshaller = _pygi_marshal_in_interface_flags;
+}
+
+static inline void
+_arg_cache_out_interface_flags_setup(PyGIArgCache *arg_cache,
+                                     GITransfer transfer)
+{
+    arg_cache->out_marshaller = _pygi_marshal_out_interface_flags;
 }
 
 static inline PyGIArgCache *
-_arg_cache_new_for_in_interface_flags(GIInterfaceInfo *iface_info)
+_arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
+                                    PyGIFunctionCache *function_cache,
+                                    GIArgInfo *arg_info,
+                                    GIInfoType info_type,
+                                    GITransfer transfer,
+                                    GIDirection direction,
+                                    gint c_arg_index,
+                                    gint py_arg_index)
 {
-    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache; 
-
-    arg_cache->in_marshaller = _pygi_marshal_in_interface_flags;
-    return arg_cache;
-}
-
-PyGIArgCache *
-_arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
-                                       GIArgInfo *arg_info,
-                                       PyGIFunctionCache *function_cache,
-                                       GIInfoType info_type,
-                                       GITransfer transfer,
-                                       GIDirection direction,
-                                       gint c_arg_index,
-                                       gint py_arg_index)
-{
+    PyGIInterfaceCache *iface_cache = NULL;
     PyGIArgCache *arg_cache = NULL;
+
+    /* Callbacks are special cased */
+    if (info_type != GI_INFO_TYPE_CALLBACK) {
+        iface_cache = _interface_cache_new_from_interface_info(iface_info);
+
+        arg_cache = (PyGIArgCache *)iface_cache;
+        if (arg_cache == NULL)
+            return NULL;
+    }
 
     switch (info_type) {
         case GI_INFO_TYPE_UNION:
-            arg_cache = _arg_cache_new_for_in_interface_union(iface_info, transfer);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_union_setup(arg_cache, transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_union_setup(arg_cache, transfer);
+
             break;
         case GI_INFO_TYPE_STRUCT:
-            arg_cache = _arg_cache_new_for_in_interface_struct(iface_info,
-                                                               transfer);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_struct_setup(arg_cache,
+                                                    iface_info, 
+                                                    transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_struct_setup(arg_cache,
+                                                     iface_info,
+                                                     transfer);
+
             break;
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
-            arg_cache = _arg_cache_new_for_in_interface_object(iface_info,
-                                                               transfer);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_object_setup(arg_cache, transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_object_setup(arg_cache, transfer);
+
             break;
         case GI_INFO_TYPE_BOXED:
-            arg_cache = _arg_cache_new_for_in_interface_boxed(iface_info,
-                                                              transfer);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_boxed_setup(arg_cache, transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_boxed_setup(arg_cache, transfer);
+
             break;
         case GI_INFO_TYPE_CALLBACK:
-            arg_cache = _arg_cache_new_for_in_interface_callback(function_cache,
-                                                                 arg_info,
-                                                                 iface_info);
-            break;
+            {
+                PyGICallbackCache *callback_cache;
+
+                if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+                    _arg_cache_out_interface_callback_setup();
+                    return NULL;
+                }
+
+                callback_cache = 
+                    _callback_cache_new_from_arg_info(arg_info,
+                                                      iface_info,
+                                                      function_cache->is_method ? 1: 0);
+
+                arg_cache = (PyGIArgCache *)callback_cache;
+                if (arg_cache == NULL)
+                    return NULL;
+
+                if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+                    _arg_cache_in_interface_callback_setup(arg_cache, function_cache);
+
+                break;
+            }
         case GI_INFO_TYPE_ENUM:
-            arg_cache = _arg_cache_new_for_in_interface_enum(iface_info);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_enum_setup(arg_cache, transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_enum_setup(arg_cache, transfer);
+
             break;
         case GI_INFO_TYPE_FLAGS:
-            arg_cache = _arg_cache_new_for_in_interface_flags(iface_info);
+            if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_interface_flags_setup(arg_cache, transfer);
+
+            if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_interface_flags_setup(arg_cache, transfer);
+
             break;
         default:
             g_assert_not_reached();
@@ -656,552 +831,331 @@ _arg_cache_in_new_from_interface_info (GIInterfaceInfo *iface_info,
         arg_cache->py_arg_index = py_arg_index;
         arg_cache->c_arg_index = c_arg_index;
 
-        g_base_info_ref( (GIBaseInfo *)iface_info);
-        ((PyGIInterfaceCache *)arg_cache)->interface_info = iface_info; 
-    }
-
-    return arg_cache;
-}
-
-/* process out args */
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_void(void)
-{
-     PyGIArgCache *arg_cache = _arg_cache_new();
-     arg_cache->out_marshaller = _pygi_marshal_out_void;
-     return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_boolean(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_boolean;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_int8(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_int8;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_uint8(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_uint8;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_int16(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_int16;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_uint16(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_uint16;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_int32(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_int32;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_uint32(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_uint32;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_int64(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_int64;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_uint64(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_uint64;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_float(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_float;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_double(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_double;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_unichar(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_unichar;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_gtype(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_gtype;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_utf8(GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_utf8;
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_filename(GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_filename;
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_array(PyGIFunctionCache *function_cache,
-                             GITypeInfo *type_info,
-                             GITransfer transfer)
-{
-    PyGISequenceCache *seq_cache =
-        _sequence_cache_new_from_type_info(type_info,
-                                           GI_DIRECTION_OUT,
-                                           transfer,
-                                           function_cache->is_method ? 1: 0);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)seq_cache;
-
-    arg_cache->out_marshaller = _pygi_marshal_out_array;
-
-    seq_cache->array_type = g_type_info_get_array_type(type_info);
-
-    if (seq_cache->len_arg_index >= 0) {
-        PyGIArgCache *aux_cache = _arg_cache_new();
-        aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-        if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
-            PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
-            arg_cache->c_arg_index = invalid_cache->c_arg_index;
-            _pygi_arg_cache_free(invalid_cache);
+        if (iface_cache != NULL) {
+            g_base_info_ref( (GIBaseInfo *)iface_info);
+            iface_cache->interface_info = iface_info;
         }
-
-        function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
-    }
-
-
-    /* arg_cache->cleanup = _pygi_cleanup_array; */
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_glist(GITypeInfo *type_info,
-                             GITransfer transfer)
-{
-    PyGIArgCache *arg_cache =
-       (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info,
-                                                          GI_DIRECTION_OUT,
-                                                          transfer,
-                                                          0);
-    arg_cache->out_marshaller = _pygi_marshal_out_glist;
-    /* arg_cache->cleanup = */
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_gslist(GITypeInfo *type_info,
-                              GITransfer transfer)
-{
-    PyGIArgCache *arg_cache =
-        (PyGIArgCache *)_sequence_cache_new_from_type_info(type_info,
-                                                           GI_DIRECTION_OUT,
-                                                           transfer,
-                                                           0);
-    arg_cache->out_marshaller = _pygi_marshal_out_gslist;
-    /* arg_cache->cleanup = */
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_ghash(GITypeInfo *type_info)
-{
-    PyGIArgCache *arg_cache = NULL;
-    /*arg_cache->out_marshaller = _pygi_marshal_out_ghash;*/
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Caching for Out GHash is not fully implemented yet");
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_gerror(void)
-{
-    PyGIArgCache *arg_cache = _arg_cache_new();
-    arg_cache->out_marshaller = _pygi_marshal_out_gerror;
-    arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-    return arg_cache;
-}
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_struct(GIInterfaceInfo *iface_info,
-                                        GITransfer transfer)
-{
-    PyGIInterfaceCache *iface_cache = _interface_cache_new_from_interface_info(iface_info);
-    PyGIArgCache *arg_cache = (PyGIArgCache *)iface_cache;
-    iface_cache->is_foreign = g_struct_info_is_foreign( (GIStructInfo*)iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_object(GIInterfaceInfo *iface_info,
-                                        GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
-
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_boxed(GIInterfaceInfo *iface_info,
-                                       GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_callback(void)
-{
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Callback returns are not supported");
-    return FALSE;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_enum(GIInterfaceInfo *iface_info,
-                                      GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_enum;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_union(GIInterfaceInfo *iface_info,
-                                       GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
-    return arg_cache;
-}
-
-static inline PyGIArgCache *
-_arg_cache_new_for_out_interface_flags(GIInterfaceInfo *iface_info,
-                                       GITransfer transfer)
-{
-    PyGIArgCache *arg_cache = (PyGIArgCache *)_interface_cache_new_from_interface_info(iface_info);
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_flags;
-    return arg_cache;
-}
-
-PyGIArgCache *
-_arg_cache_out_new_from_interface_info (GIInterfaceInfo *iface_info,
-                                        PyGIFunctionCache *function_cache,
-                                        GIInfoType info_type,
-                                        GITransfer transfer,
-                                        GIDirection direction,
-                                        gint c_arg_index)
-{
-    PyGIArgCache *arg_cache = NULL;
-
-    switch (info_type) {
-        case GI_INFO_TYPE_UNION:
-            arg_cache = _arg_cache_new_for_out_interface_union(iface_info, transfer);
-            break;
-        case GI_INFO_TYPE_STRUCT:
-            arg_cache = _arg_cache_new_for_out_interface_struct(iface_info,
-                                                               transfer);
-            break;
-        case GI_INFO_TYPE_OBJECT:
-        case GI_INFO_TYPE_INTERFACE:
-            arg_cache = _arg_cache_new_for_out_interface_object(iface_info,
-                                                                transfer);
-            break;
-        case GI_INFO_TYPE_BOXED:
-            arg_cache = _arg_cache_new_for_out_interface_boxed(iface_info,
-                                                               transfer);
-            break;
-        case GI_INFO_TYPE_CALLBACK:
-            arg_cache = _arg_cache_new_for_out_interface_callback();
-            break;
-        case GI_INFO_TYPE_ENUM:
-            arg_cache = _arg_cache_new_for_out_interface_enum(iface_info,
-                                                              transfer);
-            break;
-        case GI_INFO_TYPE_FLAGS:
-            arg_cache = _arg_cache_new_for_out_interface_flags(iface_info,
-                                                               transfer);
-            break;
-        default:
-            g_assert_not_reached();
-    }
-
-    if (arg_cache != NULL) {
-        arg_cache->direction = direction;
-        arg_cache->transfer = transfer;
-        arg_cache->type_tag = GI_TYPE_TAG_INTERFACE;
-        arg_cache->c_arg_index = c_arg_index;
-
-        g_base_info_ref( (GIBaseInfo *)iface_info);
-        ((PyGIInterfaceCache *)arg_cache)->interface_info = iface_info;
     }
 
     return arg_cache;
 }
 
 PyGIArgCache *
-_arg_cache_out_new_from_type_info (GITypeInfo *type_info,
-                                   PyGIFunctionCache *function_cache,
-                                   GITypeTag type_tag,
-                                   GITransfer transfer,
-                                   GIDirection direction,
-                                   gboolean is_caller_allocates,
-                                   gint c_arg_index)
+_arg_cache_new_from_type_info (GITypeInfo *type_info,
+                               PyGIFunctionCache *function_cache,
+                               GIArgInfo *arg_info,
+                               GITypeTag type_tag,
+                               GITransfer transfer,
+                               GIDirection direction,
+                               gboolean is_caller_allocates,
+                               gint c_arg_index,
+                               gint py_arg_index)
 {
     PyGIArgCache *arg_cache = NULL;
 
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
-           arg_cache = _arg_cache_new_for_out_void();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_void_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_void_setup(arg_cache);
            break;
        case GI_TYPE_TAG_BOOLEAN:
-           arg_cache = _arg_cache_new_for_out_boolean();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_boolean_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_boolean_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_INT8:
-           arg_cache = _arg_cache_new_for_out_int8();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_int8_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_int8_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_UINT8:
-           arg_cache = _arg_cache_new_for_out_uint8();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_uint8_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_uint8_setup(arg_cache);
+ 
            break;
        case GI_TYPE_TAG_INT16:
-           arg_cache = _arg_cache_new_for_out_int16();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+           
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_int16_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_int16_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_UINT16:
-           arg_cache = _arg_cache_new_for_out_uint16();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_uint16_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_uint16_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_INT32:
-           arg_cache = _arg_cache_new_for_out_int32();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_int32_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_int32_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_UINT32:
-           arg_cache = _arg_cache_new_for_out_uint32();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_uint32_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_uint32_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_INT64:
-           arg_cache = _arg_cache_new_for_out_int64();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_int64_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_int64_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_UINT64:
-           arg_cache = _arg_cache_new_for_out_uint64();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+           
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_uint64_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_uint64_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_FLOAT:
-           arg_cache = _arg_cache_new_for_out_float();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_float_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_float_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_DOUBLE:
-           arg_cache = _arg_cache_new_for_out_double();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_double_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_double_setup(arg_cache);
+           
            break;
        case GI_TYPE_TAG_UNICHAR:
-           arg_cache = _arg_cache_new_for_out_unichar();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_unichar_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_unichar_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_GTYPE:
-           arg_cache = _arg_cache_new_for_out_gtype();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_gtype_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_gtype_setup(arg_cache);
+
            break;
        case GI_TYPE_TAG_UTF8:
-           arg_cache = _arg_cache_new_for_out_utf8(transfer);
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_utf8_setup(arg_cache, transfer);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_utf8_setup(arg_cache, transfer);
+
            break;
        case GI_TYPE_TAG_FILENAME:
-           arg_cache = _arg_cache_new_for_out_filename(transfer);
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_filename_setup(arg_cache, transfer);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_filename_setup(arg_cache, transfer);
+
            break;
        case GI_TYPE_TAG_ARRAY:
-           arg_cache = _arg_cache_new_for_out_array(function_cache,
-                                                    type_info,
-                                                    transfer);
+           {
+               PyGISequenceCache *seq_cache = 
+                   _sequence_cache_new_from_type_info(type_info,
+                                                      direction,
+                                                      transfer, 
+                                                      (function_cache->is_method ? 1: 0));
+
+               arg_cache = (PyGIArgCache *)seq_cache;
+               if (arg_cache == NULL)
+                   break;
+
+               if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_in_array_setup(arg_cache,
+                                             function_cache,
+                                             type_info, 
+                                             transfer);
+
+               if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_out_array_setup(arg_cache, 
+                                              function_cache,
+                                              type_info,
+                                              transfer);
+
+               break;
+           }
+       case GI_TYPE_TAG_GLIST:
+           {
+               PyGISequenceCache *seq_cache = 
+                   _sequence_cache_new_from_type_info(type_info,
+                                                      direction,
+                                                      transfer, 
+                                                      (function_cache->is_method ? 1: 0));
+
+               arg_cache = (PyGIArgCache *)seq_cache;
+               if (arg_cache == NULL)
+                   break;
+
+               if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_in_glist_setup(arg_cache, transfer);
+
+               if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_out_glist_setup(arg_cache, transfer);
+
+
+               break;
+           }
+       case GI_TYPE_TAG_GSLIST:
+           {
+               PyGISequenceCache *seq_cache = 
+                   _sequence_cache_new_from_type_info(type_info,
+                                                      direction,
+                                                      transfer, 
+                                                      (function_cache->is_method ? 1: 0));
+
+               arg_cache = (PyGIArgCache *)seq_cache;
+               if (arg_cache == NULL)
+                   break;
+
+               if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_in_gslist_setup(arg_cache, transfer);
+
+               if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+                   _arg_cache_out_gslist_setup(arg_cache, transfer);
+
+               break;
+            }
+       case GI_TYPE_TAG_GHASH:
+           arg_cache = 
+               (PyGIArgCache *)_hash_cache_new_from_type_info(type_info);
+
+           if (arg_cache == NULL)
+                   break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_ghash_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+               _arg_cache_out_ghash_setup(arg_cache);
+               _pygi_arg_cache_free(arg_cache);
+               arg_cache = NULL;
+           }
+
            break;
        case GI_TYPE_TAG_INTERFACE:
            {
                GIInterfaceInfo *interface_info = g_type_info_get_interface(type_info);
                GIInfoType info_type = g_base_info_get_type( (GIBaseInfo *) interface_info);
-               arg_cache = _arg_cache_out_new_from_interface_info(interface_info,
-                                                                 function_cache,
-                                                                 info_type,
-                                                                 transfer,
-                                                                 direction,
-                                                                 c_arg_index);
-
-               g_base_info_unref( (GIBaseInfo *) interface_info);
-
-               break; 
-           }
-       case GI_TYPE_TAG_GLIST:
-           arg_cache = _arg_cache_new_for_out_glist(type_info,
-                                                   transfer);
-           break;
-       case GI_TYPE_TAG_GSLIST:
-           arg_cache = _arg_cache_new_for_out_gslist(type_info,
-                                                    transfer);
-           break;
-       case GI_TYPE_TAG_GHASH:
-           arg_cache = _arg_cache_new_for_out_ghash(type_info);
-           break;
-       case GI_TYPE_TAG_ERROR:
-           arg_cache = _arg_cache_new_for_out_gerror();
-           break;
-    }
-
-    if (arg_cache != NULL) {
-        arg_cache->direction = direction;
-        arg_cache->transfer = transfer;
-        arg_cache->type_tag = type_tag;
-        arg_cache->c_arg_index = c_arg_index;
-        arg_cache->is_pointer = g_type_info_is_pointer(type_info);
-        arg_cache->is_caller_allocates = is_caller_allocates;
-        g_base_info_ref( (GIBaseInfo *) type_info);
-        arg_cache->type_info = type_info;
-    }
-
-    return arg_cache;
-}
-
-PyGIArgCache *
-_arg_cache_in_new_from_type_info (GITypeInfo *type_info,
-                                  GIArgInfo *arg_info,
-                                  PyGIFunctionCache *function_cache,
-                                  GITypeTag type_tag,
-                                  GITransfer transfer,
-                                  GIDirection direction,
-                                  gint c_arg_index,
-                                  gint py_arg_index)
-{
-    PyGIArgCache *arg_cache = NULL;
-
-    switch (type_tag) {
-       case GI_TYPE_TAG_VOID:
-           arg_cache = _arg_cache_new_for_in_void();
-           break;
-       case GI_TYPE_TAG_BOOLEAN:
-           arg_cache = _arg_cache_new_for_in_boolean();
-           break;
-       case GI_TYPE_TAG_INT8:
-           arg_cache = _arg_cache_new_for_in_int8();
-           break;
-       case GI_TYPE_TAG_UINT8:
-           arg_cache = _arg_cache_new_for_in_uint8();
-           break;
-       case GI_TYPE_TAG_INT16:
-           arg_cache = _arg_cache_new_for_in_int16();
-           break;
-       case GI_TYPE_TAG_UINT16:
-           arg_cache = _arg_cache_new_for_in_uint16();
-           break;
-       case GI_TYPE_TAG_INT32:
-           arg_cache = _arg_cache_new_for_in_int32();
-           break;
-       case GI_TYPE_TAG_UINT32:
-           arg_cache = _arg_cache_new_for_in_uint32();
-           break;
-       case GI_TYPE_TAG_INT64:
-           arg_cache = _arg_cache_new_for_in_int64();
-           break;
-       case GI_TYPE_TAG_UINT64:
-           arg_cache = _arg_cache_new_for_in_uint64();
-           break;
-       case GI_TYPE_TAG_FLOAT:
-           arg_cache = _arg_cache_new_for_in_float();
-           break;
-       case GI_TYPE_TAG_DOUBLE:
-           arg_cache = _arg_cache_new_for_in_double();
-           break;
-       case GI_TYPE_TAG_UNICHAR:
-           arg_cache = _arg_cache_new_for_in_unichar();
-           break;
-       case GI_TYPE_TAG_GTYPE:
-           arg_cache = _arg_cache_new_for_in_gtype();
-           break;
-       case GI_TYPE_TAG_UTF8:
-           arg_cache = _arg_cache_new_for_in_utf8(transfer);
-           break;
-       case GI_TYPE_TAG_FILENAME:
-           arg_cache = _arg_cache_new_for_in_filename(transfer);
-           break;
-       case GI_TYPE_TAG_ARRAY:
-           arg_cache = _arg_cache_new_for_in_array(function_cache,
-                                                   type_info,
-                                                   transfer);
-           break;
-       case GI_TYPE_TAG_INTERFACE:
-           {
-               GIInterfaceInfo *interface_info = g_type_info_get_interface(type_info);
-               GIInfoType info_type = g_base_info_get_type( (GIBaseInfo *) interface_info);
-               arg_cache = _arg_cache_in_new_from_interface_info(interface_info,
-                                                                 arg_info,
-                                                                 function_cache,
-                                                                 info_type,
-                                                                 transfer,
-                                                                 direction,
-                                                                 c_arg_index,
-                                                                 py_arg_index);
+               arg_cache = _arg_cache_new_from_interface_info(interface_info,
+                                                              function_cache,
+                                                              arg_info,
+                                                              info_type,
+                                                              transfer,
+                                                              direction,
+                                                              c_arg_index,
+                                                              py_arg_index);
 
                g_base_info_unref( (GIBaseInfo *) interface_info);
                break; 
            }
-       case GI_TYPE_TAG_GLIST:
-           arg_cache = _arg_cache_new_for_in_glist(type_info,
-                                                   transfer);
-           break;
-       case GI_TYPE_TAG_GSLIST:
-           arg_cache = _arg_cache_new_for_in_gslist(type_info,
-                                                    transfer);
-           break;
-       case GI_TYPE_TAG_GHASH:
-           arg_cache = _arg_cache_new_for_in_ghash(type_info);
-           break;
        case GI_TYPE_TAG_ERROR:
-           arg_cache = _arg_cache_new_for_in_gerror();
+           arg_cache = _arg_cache_new();
+           if (arg_cache == NULL)
+               break;
+
+           if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
+               _arg_cache_in_gerror_setup(arg_cache);
+
+           if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
+               _arg_cache_out_gerror_setup(arg_cache);
+
            break;
     }
 
@@ -1236,13 +1190,15 @@ _args_cache_generate(GIFunctionInfo *function_info,
         g_callable_info_get_caller_owns( (GICallableInfo *)function_info);
     return_type_tag = g_type_info_get_tag(return_info);
     return_cache =
-        _arg_cache_out_new_from_type_info(return_info,
-                                          function_cache,
-                                          return_type_tag,
-                                          return_transfer,
-                                          GI_DIRECTION_OUT,
-                                          FALSE,
-                                          -1);
+        _arg_cache_new_from_type_info(return_info,
+                                      function_cache,
+                                      NULL,
+                                      return_type_tag,
+                                      return_transfer,
+                                      GI_DIRECTION_OUT,
+                                      FALSE,
+                                      -1,
+                                      -1);
 
     function_cache->return_cache = return_cache;
     g_base_info_unref(return_info);
@@ -1257,14 +1213,14 @@ _args_cache_generate(GIFunctionInfo *function_info,
         info_type = g_base_info_get_type(interface_info);
 
         instance_cache =
-            _arg_cache_in_new_from_interface_info(interface_info,
-                                                  NULL,
-                                                  function_cache,
-                                                  info_type,
-                                                  GI_TRANSFER_NOTHING,
-                                                  GI_DIRECTION_IN,
-                                                  arg_index,
-                                                  0);
+            _arg_cache_new_from_interface_info(interface_info,
+                                               function_cache,
+                                               NULL,
+                                               info_type,
+                                               GI_TRANSFER_NOTHING,
+                                               GI_DIRECTION_IN,
+                                               arg_index,
+                                               0);
 
         g_base_info_unref( (GIBaseInfo *) interface_info);
 
@@ -1287,7 +1243,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
         GITransfer transfer;
         GITypeTag type_tag;
         gboolean is_caller_allocates;
-        gint py_arg_index;
+        gint py_arg_index = -1;
 
         /* must be an aux arg filled in by its owner
          * fill in it's c_arg_index, add to the in count
@@ -1312,59 +1268,44 @@ _args_cache_generate(GIFunctionInfo *function_info,
         type_info = g_arg_info_get_type(arg_info);
         type_tag = g_type_info_get_tag(type_info);
 
-        switch(direction) {
-            case GI_DIRECTION_IN:
-                py_arg_index = function_cache->n_py_args;
-                function_cache->n_in_args++;
-                function_cache->n_py_args++;
+        if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
+            py_arg_index = function_cache->n_py_args;
+            function_cache->n_in_args++;
+            function_cache->n_py_args++;
 
-                arg_cache =
-                    _arg_cache_in_new_from_type_info(type_info,
-                                                     arg_info,
-                                                     function_cache,
-                                                     type_tag,
-                                                     transfer,
-                                                     direction,
-                                                     arg_index,
-                                                     py_arg_index);
+        }
 
-                if (arg_cache == NULL)
-                    goto arg_err;
+        arg_cache =
+            _arg_cache_new_from_type_info(type_info,
+                                          function_cache,
+                                          arg_info,
+                                          type_tag,
+                                          transfer,
+                                          direction,
+                                          FALSE,
+                                          arg_index,
+                                          py_arg_index);
 
-                arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
-                break;
+        if (arg_cache == NULL)
+            goto arg_err;
 
-            case GI_DIRECTION_OUT:
-                function_cache->n_out_args++;
-                is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
-                if (is_caller_allocates) {
-                    PyErr_Format(PyExc_NotImplementedError,
-                                 "Caller allocates is not fully implemented yet");
+        arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
 
-                    goto arg_err;
-                } 
-                arg_cache =
-                    _arg_cache_out_new_from_type_info(type_info,
-                                                      function_cache,
-                                                      type_tag,
-                                                      transfer,
-                                                      direction,
-                                                      is_caller_allocates,
-                                                      arg_index);
-
-                if (arg_cache == NULL)
-                    goto arg_err;
-
-                function_cache->out_args =
-                    g_slist_append(function_cache->out_args, arg_cache);
-
-                break;
-
-            case GI_DIRECTION_INOUT:
+        if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
+            function_cache->n_out_args++;
+            is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+            if (is_caller_allocates) {
                 PyErr_Format(PyExc_NotImplementedError,
-                             "In/Out caching is not fully implemented yet");
+                             "Caller allocates is not fully implemented yet");
+
+                goto arg_err;
+            } 
+
+            if (arg_cache == NULL)
                 goto arg_err;
 
+            function_cache->out_args =
+                g_slist_append(function_cache->out_args, arg_cache);
         }
 
         function_cache->args_cache[arg_index] = arg_cache;
