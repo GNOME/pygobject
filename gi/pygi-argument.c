@@ -3710,6 +3710,12 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
 
     hash_ = arg->v_pointer;
 
+    if (hash_ == NULL) {
+        py_obj = Py_None;
+        Py_INCREF (py_obj);
+        return py_obj;
+    }
+
     py_obj = PyDict_New();
     if (py_obj == NULL)
         return NULL;
