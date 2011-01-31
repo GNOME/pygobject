@@ -495,20 +495,26 @@ _arg_cache_in_array_setup(PyGIArgCache *arg_cache,
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
     seq_cache->array_type = g_type_info_get_array_type(type_info);
 
-    if (seq_cache->len_arg_index >= 0) {
-        PyGIArgCache *aux_cache = _arg_cache_new();
+    arg_cache->in_marshaller = _pygi_marshal_in_array;
+    
+    if (seq_cache->len_arg_index >= 0 &&
+        direction == GI_DIRECTION_IN) {
+        PyGIArgCache *aux_cache = 
+            function_cache->args_cache[seq_cache->len_arg_index];
+
+        if (aux_cache == NULL) {
+            aux_cache = _arg_cache_new();
+        } else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE) {
+            return TRUE;
+        }
+
         aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
         aux_cache->direction = direction;
-        if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
-            PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
-            arg_cache->c_arg_index = invalid_cache->c_arg_index;
-            _pygi_arg_cache_free(invalid_cache);
-        }
+        aux_cache->in_marshaller = NULL;
+        aux_cache->out_marshaller = NULL;
 
         function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
     }
-
-    arg_cache->in_marshaller = _pygi_marshal_in_array;
 
     /* arg_cache->cleanup = _pygi_cleanup_array; */
 }
@@ -518,6 +524,7 @@ _arg_cache_out_array_setup(PyGIArgCache *arg_cache,
                            PyGIFunctionCache *function_cache,
                            GITypeInfo *type_info,
                            GITransfer transfer,
+                           GIDirection direction,
                            gssize arg_index)
 {
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
@@ -530,21 +537,20 @@ _arg_cache_out_array_setup(PyGIArgCache *arg_cache,
         if (seq_cache->len_arg_index < arg_index)
              function_cache->n_out_aux_args++;
 
-        if (aux_cache == NULL) {
+        if (aux_cache != NULL) {
+            if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE)
+                return TRUE;
+
+            function_cache->out_args = 
+                g_slist_remove(function_cache->out_args, aux_cache);
+        } else {
             aux_cache = _arg_cache_new();
-        } else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE) {
-            return TRUE;
         }
 
         aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-        if (function_cache->args_cache[seq_cache->len_arg_index] != NULL) {
-            PyGIArgCache *invalid_cache = function_cache->args_cache[seq_cache->len_arg_index];
-            arg_cache->c_arg_index = invalid_cache->c_arg_index;
-            _pygi_arg_cache_free(invalid_cache);
-        }
-
-        if (aux_cache->direction != GI_DIRECTION_INOUT)
-            aux_cache->direction = GI_DIRECTION_OUT;
+        aux_cache->direction = direction;
+        aux_cache->in_marshaller = NULL;
+        aux_cache->out_marshaller = NULL;
 
         function_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
     }
@@ -1086,7 +1092,31 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                               function_cache,
                                               type_info,
                                               transfer,
+                                              direction,
                                               c_arg_index);
+
+               /* ugly edge case code:
+                *  
+                * length can come before the array parameter which means we
+                * need to update indexes if this happens
+                */ 
+               if (seq_cache->len_arg_index > -1 &&
+                   seq_cache->len_arg_index < c_arg_index) {
+                   gssize i;
+
+                   py_arg_index -= 1;
+                   function_cache->n_py_args -= 1;
+
+                   for (i = seq_cache->len_arg_index + 1; 
+                          i < function_cache->n_args; 
+                            i++) {
+                       PyGIArgCache *update_cache = function_cache->args_cache[i];
+                       if (update_cache == NULL)
+                           break;
+
+                       update_cache->py_arg_index -= 1;
+                   }
+               }
 
                break;
            }

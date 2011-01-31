@@ -1006,7 +1006,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                 state->in_args[in_count].v_pointer = &state->out_values[out_count];
                 in_count++;
 
-                if (arg_cache->aux_type == PYGI_AUX_TYPE_NONE) {
+                if (arg_cache->aux_type != PYGI_AUX_TYPE_IGNORE) {
                     if (arg_cache->py_arg_index >= state->n_py_in_args) {
                         PyErr_Format(PyExc_TypeError,
                                      "%s() takes exactly %zd argument(s) (%zd given)",
