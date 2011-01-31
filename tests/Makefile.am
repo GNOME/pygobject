@@ -94,7 +94,8 @@ EXTRA_DIST = \
 	testmodule.py \
 	test-floating.h \
 	test-thread.h \
-	test-unknown.h 
+	test-unknown.h \
+	org.gnome.test.gschema.xml
 
 EXTRA_DIST += $(TEST_FILES)
 
