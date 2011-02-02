@@ -375,11 +375,11 @@ PYGLIB_MODULE_START(_gi, "_gi")
     PyObject *api;
 
     if (pygobject_init (-1, -1, -1) == NULL) {
-        return;
+        return PYGLIB_MODULE_ERROR_RETURN;
     }
 
     if (_pygobject_import() < 0) {
-        return;
+        return PYGLIB_MODULE_ERROR_RETURN;
     }
 
     _pygi_repository_register_types (module);
@@ -390,7 +390,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
 
     api = PYGLIB_CPointer_WrapPointer ( (void *) &CAPI, "gi._API");
     if (api == NULL) {
-        return;
+        return PYGLIB_MODULE_ERROR_RETURN;
     }
     PyModule_AddObject (module, "_API", api);
 }
