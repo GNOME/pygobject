@@ -591,7 +591,7 @@ class TextBuffer(Gtk.TextBuffer):
         for tag in tags:
             tag_obj = self.get_tag_table().lookup(tag)
             if not tag_obj:
-                raise ValueError, 'unknown text tag: ' + tag
+                raise ValueError('unknown text tag: %s' % tag)
             tag_objs.append(tag_obj)
 
         self.insert_with_tags(iter, text, *tag_objs)

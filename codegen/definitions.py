@@ -71,15 +71,15 @@ class Definition(object):
     def __init__(self, *args):
         """Create a new defs object of this type.  The arguments are the
         components of the definition"""
-        raise RuntimeError, "this is an abstract class"
+        raise RuntimeError("this is an abstract class")
 
     def merge(self, old):
         """Merge in customisations from older version of definition"""
-        raise RuntimeError, "this is an abstract class"
+        raise RuntimeError("this is an abstract class")
 
     def write_defs(self, fp=sys.stdout):
         """write out this definition in defs file format"""
-        raise RuntimeError, "this is an abstract class"
+        raise RuntimeError("this is an abstract class")
 
     def guess_return_value_ownership(self):
         "return 1 if caller owns return value"
@@ -407,7 +407,7 @@ class MethodDef(MethodDefBase):
         for item in ('c_name', 'of_object'):
             if self.__dict__[item] == None:
                 self.write_defs(sys.stderr)
-                raise RuntimeError, "definition missing required %s" % (item,)
+                raise RuntimeError("definition missing required %s" % (item,))
 
     def write_defs(self, fp=sys.stdout):
         fp.write('(define-method ' + self.name + '\n')
@@ -491,7 +491,7 @@ class FunctionDef(Definition):
         for item in ('c_name',):
             if self.__dict__[item] == None:
                 self.write_defs(sys.stderr)
-                raise RuntimeError, "definition missing required %s" % (item,)
+                raise RuntimeError("definition missing required %s" % (item,))
 
     _method_write_defs = MethodDef.__dict__['write_defs']
 
@@ -513,8 +513,8 @@ class FunctionDef(Definition):
                     else:
                         param.merge(old_param)
                         return param
-            raise RuntimeError, "could not find %s in old_parameters %r" % (
-                param.pname, [p.pname for p in old.params])
+            raise RuntimeError("could not find %s in old_parameters %r" % (
+                param.pname, [p.pname for p in old.params]))
         try:
             self.params = map(merge_param, self.params)
         except RuntimeError:
