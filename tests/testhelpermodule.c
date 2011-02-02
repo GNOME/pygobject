@@ -527,7 +527,7 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
   PyObject *m, *d;
   
   g_thread_init(NULL);
-  init_pygobject();
+  pygobject_init(-1, -1, -1);
 
   d = PyModule_GetDict(module);
 
@@ -538,12 +538,12 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
     if (_PyGObject_Type == NULL) {
       PyErr_SetString(PyExc_ImportError,
 		      "cannot import name GObject from gobject");
-      return ;
+      return PYGLIB_MODULE_ERROR_RETURN;
     }
   } else {
     PyErr_SetString(PyExc_ImportError,
 		    "could not import gobject");
-    return ;
+    return PYGLIB_MODULE_ERROR_RETURN;
   }
 
   /* TestInterface */
