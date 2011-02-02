@@ -80,6 +80,15 @@ TEST_FILES = \
 	test_thread.py \
 	test_uris.py
 
+if BUILD_GIO
+TEST_FILES += \
+	test_gio.py \
+	test_gresolver.py \
+	test_gsocket.py \
+	test_gicon.py \
+	test_gcancellable.py
+endif 
+
 if ENABLE_INTROSPECTION
 TEST_FILES += \
 	test_everything.py \

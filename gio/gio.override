@@ -1,0 +1,409 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * pygtk- Python bindings for the GTK toolkit.
+ * Copyright (C) 2008  Johan Dahlin
+ *
+ *   gio.override: module wrapping the GIO library
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
+ */
+%%
+modulename gio
+%%
+import gobject.GObject as PyGObject_Type
+import glib.PollFD as PyGPollFD_Type
+%%
+headers
+#define NO_IMPORT_PYGOBJECT
+#include <pygobject.h>
+#include <gio/gio.h>
+#include "pygio-utils.h"
+#include "pyglib.h"
+#include "pygsource.h"
+
+#define BUFSIZE 8192
+
+typedef struct _PyGIONotify PyGIONotify;
+
+struct _PyGIONotify {
+    gboolean  referenced;
+    PyObject *callback;
+    PyObject *data;
+    gboolean  attach_self;
+    gpointer  buffer;
+    gsize     buffer_size;
+
+    /* If a structure has any 'slaves', those will reference their
+     * callbacks and be freed together with the 'master'. */
+    PyGIONotify *slaves;
+};
+
+static GQuark
+pygio_notify_get_internal_quark(void)
+{
+    static GQuark quark = 0;
+    if (!quark)
+        quark = g_quark_from_string("pygio::notify");
+    return quark;
+}
+
+static PyGIONotify *
+pygio_notify_new(void)
+{
+    return g_slice_new0(PyGIONotify);
+}
+
+static PyGIONotify *
+pygio_notify_new_slave(PyGIONotify* master)
+{
+    PyGIONotify *slave = pygio_notify_new();
+
+    while (master->slaves)
+        master = master->slaves;
+    master->slaves = slave;
+
+    return slave;
+}
+
+static gboolean
+pygio_notify_using_optional_callback(PyGIONotify *notify)
+{
+    if (notify->callback)
+        return TRUE;
+    else {
+        notify->data = NULL;
+        return FALSE;
+    }
+}
+
+static gboolean
+pygio_notify_callback_is_valid_full(PyGIONotify *notify, const gchar *name)
+{
+    if (!notify->callback) {
+        PyErr_SetString(PyExc_RuntimeError, "internal error: callback is not set");
+        return FALSE;
+    }
+
+    if (!PyCallable_Check(notify->callback)) {
+        gchar *error_message = g_strdup_printf("%s argument not callable", name);
+
+	PyErr_SetString(PyExc_TypeError, error_message);
+        g_free(error_message);
+	return FALSE;
+    }
+
+    return TRUE;
+}
+
+static gboolean
+pygio_notify_callback_is_valid(PyGIONotify *notify)
+{
+    return pygio_notify_callback_is_valid_full(notify, "callback");
+}
+
+static void
+pygio_notify_reference_callback(PyGIONotify *notify)
+{
+    if (!notify->referenced) {
+        notify->referenced = TRUE;
+        Py_XINCREF(notify->callback);
+        Py_XINCREF(notify->data);
+
+        if (notify->slaves)
+            pygio_notify_reference_callback(notify->slaves);
+    }
+}
+
+static void
+pygio_notify_copy_buffer(PyGIONotify *notify, gpointer buffer, gsize buffer_size)
+{
+    if (buffer_size > 0) {
+	notify->buffer = g_slice_copy(buffer_size, buffer);
+	notify->buffer_size = buffer_size;
+    }
+}
+
+static gboolean
+pygio_notify_allocate_buffer(PyGIONotify *notify, gsize buffer_size)
+{
+    if (buffer_size > 0) {
+        notify->buffer = g_slice_alloc(buffer_size);
+        if (!notify->buffer) {
+            PyErr_Format(PyExc_MemoryError, "failed to allocate %" G_GSIZE_FORMAT " bytes", buffer_size);
+            return FALSE;
+        }
+
+        notify->buffer_size = buffer_size;
+    }
+
+    return TRUE;
+}
+
+static void
+pygio_notify_attach_to_result(PyGIONotify *notify)
+{
+    notify->attach_self = TRUE;
+}
+
+static PyGIONotify *
+pygio_notify_get_attached(PyGObject *result)
+{
+    return g_object_get_qdata(G_OBJECT(result->obj), pygio_notify_get_internal_quark());
+}
+
+static void
+pygio_notify_free(PyGIONotify *notify)
+{
+    if (notify) {
+        if (notify->slaves)
+            pygio_notify_free(notify->slaves);
+
+        if (notify->referenced) {
+            PyGILState_STATE state;
+
+            state = pyg_gil_state_ensure();
+            Py_XDECREF(notify->callback);
+            Py_XDECREF(notify->data);
+            pyg_gil_state_release(state);
+        }
+
+        if (notify->buffer)
+            g_slice_free1(notify->buffer_size, notify->buffer);
+
+        g_slice_free(PyGIONotify, notify);
+    }
+}
+
+static void
+async_result_callback_marshal(GObject *source_object,
+			      GAsyncResult *result,
+			      PyGIONotify *notify)
+{
+    PyObject *ret;
+    PyGILState_STATE state;
+
+    state = pyg_gil_state_ensure();
+
+    if (!notify->referenced)
+        g_warning("pygio_notify_reference_callback() hasn't been called before using the structure");
+
+    if (notify->attach_self) {
+        g_object_set_qdata_full(G_OBJECT(result), pygio_notify_get_internal_quark(),
+                                notify, (GDestroyNotify) pygio_notify_free);
+    }
+
+    if (notify->data)
+	ret = PyEval_CallFunction(notify->callback, "NNO",
+				  pygobject_new(source_object),
+				  pygobject_new((GObject *)result),
+				  notify->data);
+    else
+	ret = PyObject_CallFunction(notify->callback, "NN",
+				    pygobject_new(source_object),
+				    pygobject_new((GObject *)result));
+
+    if (ret == NULL) {
+	PyErr_Print();
+	PyErr_Clear();
+    }
+
+    Py_XDECREF(ret);
+
+    /* Otherwise the structure is attached to 'result' and will be
+     * freed when that object dies. */
+    if (!notify->attach_self)
+        pygio_notify_free(notify);
+
+    pyg_gil_state_release(state);
+}
+%%
+include
+  gappinfo.override
+  gapplaunchcontext.override
+  gbufferedinputstream.override
+  gcancellable.override
+  gdatainputstream.override
+  gdrive.override
+  gfile.override
+  gfileattribute.override
+  gfileenumerator.override
+  gfileinfo.override
+  gfileinputstream.override
+  gfileiostream.override
+  gfileoutputstream.override
+  gicon.override
+  giostream.override
+  gmemoryinputstream.override
+  gmemoryoutputstream.override
+  gmount.override
+  ginputstream.override
+  goutputstream.override
+  gresolver.override
+  gsocket.override
+  gvolume.override
+  gvolumemonitor.override
+%%
+ignore-glob
+  *_get_type
+  *free
+  *_ref
+  *_unref
+  g_async_result_get_user_data
+  g_file_new_from_commandline_arg
+  g_file_new_from_path
+  g_file_new_from_uri
+  g_file_hash
+  g_io_error_quark
+  g_simple_async_result_new_error
+  g_simple_async_report_error_in_idle
+  g_simple_async_result_set_op_res_gpointer
+  g_simple_async_result_get_op_res_gpointer
+  g_simple_async_result_get_source_tag
+  g_simple_async_result_run_in_thread
+  g_simple_async_result_set_from_error
+  g_simple_async_result_set_error
+  g_simple_async_result_set_error_va
+  g_io_module*
+  g_io_scheduler_*
+%%
+override g_app_info_get_all noargs
+static PyObject *
+_wrap_g_app_info_get_all (PyGObject *self)
+{
+  GList *list, *l;
+  PyObject *ret;
+
+  list = g_app_info_get_all ();
+
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GObject *obj = l->data;
+    PyObject *item = pygobject_new(obj);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+  }
+  g_list_free(list);
+
+  return ret;
+}
+%%
+override g_app_info_get_all_for_type args
+static PyObject *
+_wrap_g_app_info_get_all_for_type (PyGObject *self, PyObject *args)
+{
+  GList *list, *l;
+  PyObject *ret;
+  gchar *type;
+
+  if (!PyArg_ParseTuple (args, "s:app_info_get_all_for_type", &type))
+    return NULL;
+
+  list = g_app_info_get_all_for_type (type);
+
+  ret = PyList_New(0);
+  for (l = list; l; l = l->next) {
+    GObject *obj = l->data;
+    PyObject *item = pygobject_new(obj);
+    PyList_Append(ret, item);
+    Py_DECREF(item);
+  }
+  g_list_free(list);
+
+  return ret;
+}
+%%
+override g_content_type_guess kwargs
+static PyObject *
+_wrap_g_content_type_guess(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    char *kwlist[] = {"filename", "data", "want_uncertain", NULL};
+    char *filename = NULL, *data = NULL, *type;
+#ifdef PY_SSIZE_T_CLEAN
+    Py_ssize_t data_size = 0;
+#else
+    int data_size = 0;
+#endif
+
+    gboolean result_uncertain, want_uncertain = FALSE;
+    PyObject *ret;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
+				      "|zz#i:g_content_type_guess",
+				      kwlist,
+				      &filename, &data, &data_size,
+				      &want_uncertain))
+      return NULL;
+
+    if (!filename && !data) {
+      PyErr_SetString(PyExc_TypeError, "need at least one argument");
+      return NULL;
+    }
+
+    type = g_content_type_guess(filename, (guchar *) data,
+				data_size, &result_uncertain);
+
+    if (want_uncertain) {
+	ret = Py_BuildValue("zN", type, PyBool_FromLong(result_uncertain));
+    
+    } else {
+        ret = PyString_FromString(type);
+    }
+
+    g_free(type);
+    return ret;
+}
+%%
+override g_vfs_get_supported_uri_schemes noargs
+static PyObject *
+_wrap_g_vfs_get_supported_uri_schemes(PyGObject *self)
+{
+    const char * const *names;
+    PyObject *ret;
+
+    names = g_vfs_get_supported_uri_schemes(G_VFS(self->obj));
+
+    ret = PyList_New(0);
+    while (names && *names) {
+        PyObject *item = PyString_FromString(names[0]);
+        PyList_Append(ret, item);
+        Py_DECREF(item);
+
+        names++;
+    }
+
+    return ret;
+}
+%%
+override g_content_types_get_registered noargs
+static PyObject *
+_wrap_g_content_types_get_registered(PyObject *self)
+{
+    GList *list, *l;
+    PyObject *ret;
+
+    list = g_content_types_get_registered();
+
+    ret = PyList_New(0);
+    for (l = list; l; l = l->next) {
+	char *content_type = l->data;
+	PyObject *string = PyString_FromString(content_type);
+	PyList_Append(ret, string);
+	Py_DECREF(string);
+	g_free(content_type);
+    }
+    g_list_free(list);
+
+    return ret;
+}

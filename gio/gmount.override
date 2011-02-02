@@ -1,0 +1,454 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * pygobject - Python bindings for GObject
+ * Copyright (C) 2009  Gian Mario Tagliaretti
+ *
+ *   gmount.override: module overrides for GMount
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
+ */
+%%
+override g_mount_guess_content_type kwargs
+static PyObject *
+_wrap_g_mount_guess_content_type(PyGObject *self,
+                                 PyObject *args,
+                                 PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "force_rescan",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+    gboolean force_rescan;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "Oi|OO:Mount.guess_content_type",
+                                     kwlist,
+                                     &notify->callback,
+                                     &force_rescan,
+                                     &py_cancellable,
+                                     &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_mount_guess_content_type(G_MOUNT(self->obj),
+                            force_rescan,
+                            cancellable,
+                            (GAsyncReadyCallback)async_result_callback_marshal,
+                            notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+    error:
+       pygio_notify_free(notify);
+       return NULL;
+}
+%%
+override g_mount_guess_content_type_finish kwargs
+static PyObject *
+_wrap_g_mount_guess_content_type_finish(PyGObject *self,
+                                        PyObject *args,
+                                        PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *result;
+    GError *error = NULL;
+    char **ret;
+    PyObject *py_ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:Mount.guess_content_type_finish",
+                                      kwlist,
+                                      &PyGAsyncResult_Type,
+                                      &result))
+        return NULL;
+
+    ret = g_mount_guess_content_type_finish(G_MOUNT(self->obj),
+                                         G_ASYNC_RESULT(result->obj), &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (ret && ret[0] != NULL) {
+        py_ret = strv_to_pylist(ret);
+        g_strfreev (ret);
+    } else {
+        py_ret = Py_None;
+        Py_INCREF(py_ret);
+    }
+    return py_ret;
+}
+%%
+override g_mount_guess_content_type_sync kwargs
+static PyObject *
+_wrap_g_mount_guess_content_type_sync(PyGObject *self,
+                                      PyObject *args,
+                                      PyObject *kwargs)
+{
+    static char *kwlist[] = { "force_rescan", "cancellable", NULL };
+    gboolean force_rescan;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+    GError *error = NULL;
+    char **ret;
+    PyObject *py_ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "i|O:Mount.guess_content_type_sync",
+                                      kwlist,
+                                      &force_rescan,
+                                      &py_cancellable))
+        return NULL;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        return NULL;
+
+    ret = g_mount_guess_content_type_sync(G_MOUNT(self->obj), force_rescan,
+                                          cancellable, &error);
+
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (ret && ret[0] != NULL) {
+        py_ret = strv_to_pylist(ret);
+        g_strfreev (ret);
+    } else {
+        py_ret = Py_None;
+        Py_INCREF(py_ret);
+    }
+    return py_ret;
+}
+%%
+override g_mount_remount kwargs
+static PyObject *
+_wrap_g_mount_remount(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "flags", "mount_operation",
+			      "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    PyObject *py_mount_operation = Py_None;
+    GMountOperation *mount_operation = NULL;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O|OOOO:gio.Mount.remount",
+				     kwlist,
+				     &notify->callback,
+				     &py_flags,
+				     &py_mount_operation,
+				     &py_cancellable,
+				     &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (py_mount_operation != Py_None) {
+	if (!pygobject_check(py_mount_operation, &PyGMountOperation_Type)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "mount_operation must be a gio.MountOperation or None");
+            goto error;
+	}
+
+	mount_operation = G_MOUNT_OPERATION(pygobject_get(py_mount_operation));
+    }
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
+					py_flags, (gpointer) &flags))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    pyg_begin_allow_threads;
+
+    g_mount_remount(G_MOUNT(self->obj),
+		    flags,
+		    mount_operation,
+		    cancellable,
+		    (GAsyncReadyCallback) async_result_callback_marshal,
+		    notify);
+
+    pyg_end_allow_threads;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_mount_unmount kwargs
+static PyObject *
+_wrap_g_mount_unmount(PyGObject *self,
+		      PyObject *args,
+		      PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "flags",
+			      "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    PyGObject *py_cancellable = NULL;
+    GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O|OOO:gio.Mount.unmount",
+				     kwlist,
+				     &notify->callback,
+				     &py_flags,
+				     &py_cancellable,
+				     &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
+					py_flags, (gpointer)&flags))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    pyg_begin_allow_threads;
+
+    g_mount_unmount(G_MOUNT(self->obj),
+		    flags,
+		    cancellable,
+		    (GAsyncReadyCallback)async_result_callback_marshal,
+		    notify);
+
+    pyg_end_allow_threads;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_mount_eject kwargs
+static PyObject *
+_wrap_g_mount_eject(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "flags", "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O|OOO:gio.Mount.eject",
+				     kwlist,
+				     &notify->callback,
+				     &py_flags,
+				     &py_cancellable,
+				     &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
+					py_flags, (gpointer) &flags))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    pyg_begin_allow_threads;
+
+    g_mount_eject(G_MOUNT(self->obj),
+		  flags,
+		  cancellable,
+		  (GAsyncReadyCallback) async_result_callback_marshal,
+		  notify);
+
+    pyg_end_allow_threads;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override-slot GMount.tp_repr
+static PyObject *
+_wrap_g_mount_tp_repr(PyGObject *self)
+{
+    char *name = g_mount_get_name(G_MOUNT(self->obj));
+    char *uuid = g_mount_get_uuid(G_MOUNT(self->obj));
+    gchar *representation;
+    PyObject *result;
+
+    if (name) {
+	if (uuid) {
+	    representation = g_strdup_printf("<%s at %p: %s (%s)>",
+					     self->ob_type->tp_name, self, name, uuid);
+	}
+	else {
+	    representation = g_strdup_printf("<%s at %p: %s>",
+					     self->ob_type->tp_name, self, name);
+	}
+    }
+    else
+	representation = g_strdup_printf("<%s at %p: UNKNOWN NAME>", self->ob_type->tp_name, self);
+
+    g_free(name);
+    g_free(uuid);
+
+    result = PyString_FromString(representation);
+    g_free(representation);
+    return result;
+}
+%%
+override g_mount_unmount_with_operation kwargs
+static PyObject *
+_wrap_g_mount_unmount_with_operation(PyGObject *self,
+                                     PyObject *args,
+                                     PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "flags", "mount_operation",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    PyGObject *mount_operation;
+    PyGObject *py_cancellable = NULL;
+    GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                "O|OOOO:gio.Mount.unmount_with_operation",
+                                kwlist,
+                                &notify->callback,
+                                &py_flags,
+				&mount_operation,
+                                &py_cancellable,
+                                &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
+                                        py_flags, (gpointer)&flags))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_mount_unmount_with_operation(G_MOUNT(self->obj),
+                             flags,
+			     G_MOUNT_OPERATION(mount_operation->obj),
+                             cancellable,
+                             (GAsyncReadyCallback)async_result_callback_marshal,
+                             notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_mount_eject_with_operation kwargs
+static PyObject *
+_wrap_g_mount_eject_with_operation(PyGObject *self,
+                                     PyObject *args,
+                                     PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "flags", "mount_operation",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyObject *py_flags = NULL;
+    PyGObject *mount_operation;
+    PyGObject *py_cancellable = NULL;
+    GMountUnmountFlags flags = G_MOUNT_UNMOUNT_NONE;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                "O|OOOO:gio.Mount.eject_with_operation",
+                                kwlist,
+                                &notify->callback,
+                                &py_flags,
+                                &mount_operation,
+                                &py_cancellable,
+                                &notify->data))
+        goto error;
+
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (py_flags && pyg_flags_get_value(G_TYPE_MOUNT_UNMOUNT_FLAGS,
+                                        py_flags, (gpointer)&flags))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_mount_eject_with_operation(G_MOUNT(self->obj),
+                            flags,
+                            G_MOUNT_OPERATION(mount_operation->obj),
+                            cancellable,
+                            (GAsyncReadyCallback)async_result_callback_marshal,
+                            notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}

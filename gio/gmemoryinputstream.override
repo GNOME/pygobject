@@ -1,0 +1,91 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * pygobject - Python bindings for GObject
+ * Copyright (C) 2008  Johan Dahlin
+ * Copyright (C) 2009  Gian Mario Tagliaretti
+ *
+ *   gmemoryinputstream.override: module overrides for GMemoryInputStream
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
+ */
+%%
+override g_memory_input_stream_add_data kwargs
+static PyObject *
+_wrap_g_memory_input_stream_add_data(PyGObject *self,
+                                     PyObject *args,
+                                     PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", NULL };
+    PyObject *data;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gio.MemoryInputStream.add_data",
+                                     kwlist, &data))
+        return NULL;
+
+    if (data != Py_None) {
+        char *copy;
+        int length;
+
+        if (!PyString_Check(data)) {
+            PyErr_SetString(PyExc_TypeError, "data must be a string or None");
+            return NULL;
+        }
+
+        length = PyString_Size(data);
+        copy = g_malloc(length);
+        memcpy(copy, PyString_AsString(data), length);
+
+        g_memory_input_stream_add_data(G_MEMORY_INPUT_STREAM(self->obj),
+                                       copy, length, (GDestroyNotify) g_free);
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override g_memory_input_stream_new_from_data kwargs
+static PyObject *
+_wrap_g_memory_input_stream_new_from_data(PyGObject *self,
+                                          PyObject *args,
+                                          PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", NULL };
+    PyObject *data;
+    GInputStream *stream = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O:gio.memory_input_stream_new_from_data",
+                                     kwlist, &data))
+        return NULL;
+
+    if (data != Py_None) {
+        char *copy;
+        int length;
+
+        if (!PyString_Check(data)) {
+            PyErr_SetString(PyExc_TypeError, "data must be a string or None");
+            return NULL;
+        }
+
+        length = PyString_Size(data);
+        copy = g_malloc(length);
+        memcpy(copy, PyString_AsString(data), length);
+
+        stream = g_memory_input_stream_new_from_data(copy, length,
+                                                      (GDestroyNotify) g_free);
+    }
+
+    return pygobject_new((GObject *)stream);
+}

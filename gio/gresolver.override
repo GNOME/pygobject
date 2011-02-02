@@ -1,0 +1,312 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ * pygobject - Python bindings for GObject
+ * Copyright (C) 2009  Gian Mario Tagliaretti
+ *
+ *   gresolver.override: module overrides for GResolver
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ * USA
+ */
+%%
+override g_resolver_lookup_by_name kwargs
+static PyObject *
+_wrap_g_resolver_lookup_by_name(PyGObject *self,
+                                PyObject *args,
+                                PyObject *kwargs)
+{
+    static char *kwlist[] = { "hostname", "cancellable", NULL };
+    gchar *hostname;
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable;
+    GList *addr;
+    GError *error = NULL;
+    PyObject *ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                    "s|O:gio.Resolver.lookup_by_name",
+                                    kwlist,
+                                    &hostname,
+                                    &pycancellable))
+        return NULL;
+    
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+	return NULL;
+    
+    addr = g_resolver_lookup_by_name(G_RESOLVER(self->obj),
+                                     hostname, cancellable, &error);
+    
+    if (addr) {
+        PYLIST_FROMGLIST(ret, addr, pygobject_new(list_item), g_resolver_free_addresses, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+%%
+override g_resolver_lookup_by_name_async kwargs
+static PyObject *
+_wrap_g_resolver_lookup_by_name_async(PyGObject *self,
+                                      PyObject *args,
+                                      PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "hostname",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    gchar *hostname;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "Os|OO:gio.Resolver.lookup_by_name_async",
+                                     kwlist,
+                                     &notify->callback,
+                                     &hostname,
+                                     &py_cancellable,
+                                     &notify->data))
+        goto error;
+      
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_resolver_lookup_by_name_async(G_RESOLVER(self->obj),
+                          hostname,
+                          cancellable,
+                          (GAsyncReadyCallback) async_result_callback_marshal,
+                          notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_resolver_lookup_by_name_finish kwargs
+static PyObject *
+_wrap_g_resolver_lookup_by_name_finish(PyGObject *self,
+                                       PyObject *args,
+                                       PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *result;
+    GList *addr;
+    PyObject *ret;
+    GError *error = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:gio.Resolver.lookup_by_name_finish",
+                                     kwlist,
+                                     &PyGAsyncResult_Type,
+                                     &result))
+        return NULL;
+    
+    addr = g_resolver_lookup_by_name_finish(G_RESOLVER(self->obj),
+                                            G_ASYNC_RESULT(result->obj),
+                                            &error);
+    
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (addr) {
+        PYLIST_FROMGLIST(ret, addr, pygobject_new(list_item),
+                         g_resolver_free_addresses, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+%%
+override g_resolver_lookup_by_address_async kwargs
+static PyObject *
+_wrap_g_resolver_lookup_by_address_async(PyGObject *self,
+                                         PyObject *args,
+                                         PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "address",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    PyGObject *address;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "OO|OO:gio.Resolver.lookup_by_address_async",
+                                     kwlist,
+                                     &notify->callback,
+                                     &address,
+                                     &py_cancellable,
+                                     &notify->data))
+        goto error;
+      
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_resolver_lookup_by_address_async(G_RESOLVER(self->obj),
+                          G_INET_ADDRESS(address->obj),
+                          cancellable,
+                          (GAsyncReadyCallback) async_result_callback_marshal,
+                          notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_resolver_lookup_service kwargs
+static PyObject *
+_wrap_g_resolver_lookup_service(PyGObject *self,
+                                PyObject *args,
+                                PyObject *kwargs)
+{
+    static char *kwlist[] = { "service", "protocol",
+                              "domain", "cancellable", NULL };
+    gchar *service, *protocol, *domain;
+    PyGObject *pycancellable = NULL;
+    GCancellable *cancellable;
+    GList *targets;
+    GError *error = NULL;
+    PyObject *ret;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                    "sss|O:gio.Resolver.lookup_service",
+                                    kwlist,
+                                    &service,
+                                    &protocol,
+                                    &domain,
+                                    &pycancellable))
+        return NULL;
+    
+    if (!pygio_check_cancellable(pycancellable, &cancellable))
+	return NULL;
+    
+    targets = g_resolver_lookup_service(G_RESOLVER(self->obj),
+                                        service, protocol, domain,
+                                        cancellable, &error);
+    
+    if (targets) {
+        PYLIST_FROMGLIST(ret, targets,
+                        pyg_boxed_new(G_TYPE_SRV_TARGET, list_item, TRUE, TRUE),
+                        g_resolver_free_targets, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+%%
+override g_resolver_lookup_service_async kwargs
+static PyObject *
+_wrap_g_resolver_lookup_service_async(PyGObject *self,
+                                      PyObject *args,
+                                      PyObject *kwargs)
+{
+    static char *kwlist[] = { "callback", "service", "protocol", "domain",
+                              "cancellable", "user_data", NULL };
+    PyGIONotify *notify;
+    gchar *service, *protocol, *domain;
+    PyGObject *py_cancellable = NULL;
+    GCancellable *cancellable;
+
+    notify = pygio_notify_new();
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                    "Osss|OO:gio.Resolver.lookup_service_async",
+                                    kwlist,
+                                    &notify->callback,
+                                    &service,
+                                    &protocol,
+                                    &domain,
+                                    &py_cancellable,
+                                    &notify->data))
+        goto error;
+      
+    if (!pygio_notify_callback_is_valid(notify))
+        goto error;
+
+    if (!pygio_check_cancellable(py_cancellable, &cancellable))
+        goto error;
+
+    pygio_notify_reference_callback(notify);
+
+    g_resolver_lookup_service_async(G_RESOLVER(self->obj),
+                          service, protocol, domain,
+                          cancellable,
+                          (GAsyncReadyCallback) async_result_callback_marshal,
+                          notify);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    pygio_notify_free(notify);
+    return NULL;
+}
+%%
+override g_resolver_lookup_service_finish kwargs
+static PyObject *
+_wrap_g_resolver_lookup_service_finish(PyGObject *self,
+                                       PyObject *args,
+                                       PyObject *kwargs)
+{
+    static char *kwlist[] = { "result", NULL };
+    PyGObject *result;
+    GList *targets;
+    PyObject *ret;
+    GError *error = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "O!:gio.Resolver.lookup_service_finish",
+                                     kwlist,
+                                     &PyGAsyncResult_Type,
+                                     &result))
+        return NULL;
+    
+    targets = g_resolver_lookup_service_finish(G_RESOLVER(self->obj),
+                                               G_ASYNC_RESULT(result->obj),
+                                               &error);
+    
+    if (pyg_error_check(&error))
+        return NULL;
+
+    if (targets) {
+        PYLIST_FROMGLIST(ret, targets,
+                        pyg_boxed_new(G_TYPE_SRV_TARGET, list_item, TRUE, TRUE),
+                        g_resolver_free_targets, NULL);
+        return ret;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
