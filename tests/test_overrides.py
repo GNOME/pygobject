@@ -15,6 +15,7 @@ from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import Pango
+from gi.repository import GdkPixbuf
 import gi.overrides as overrides
 import gi.types
 
@@ -1189,6 +1190,45 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(sw.get_hadjustment(), sb.get_adjustment())
         sb = sw.get_vscrollbar()
         self.assertEquals(sw.get_vadjustment(), sb.get_adjustment())
+
+    def test_widget_drag_methods(self):
+        widget = Gtk.Button()
+
+        # here we are not checking functionality, only that the methods exist
+        # and except the right number of arguments
+
+        widget.drag_check_threshold(0, 0, 0, 0)
+
+        # drag_dest_ methods
+        widget.drag_dest_set(Gtk.DestDefaults.DROP, None, Gdk.DragAction.COPY)
+        widget.drag_dest_add_image_targets()
+        widget.drag_dest_add_text_targets()
+        widget.drag_dest_add_uri_targets()
+        widget.drag_dest_get_track_motion()
+        widget.drag_dest_set_track_motion(True)
+        widget.drag_dest_get_target_list()
+        widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry()]))
+        widget.drag_dest_unset()
+
+        widget.drag_highlight()
+        widget.drag_unhighlight()
+
+        # drag_source_ methods
+        widget.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, None, Gdk.DragAction.MOVE)
+        widget.drag_source_add_image_targets()
+        widget.drag_source_add_text_targets()
+        widget.drag_source_add_uri_targets()
+        widget.drag_source_set_icon_name("")
+        widget.drag_source_set_icon_pixbuf(GdkPixbuf.Pixbuf())
+        widget.drag_source_set_icon_stock("")
+        widget.drag_source_get_target_list()
+        widget.drag_source_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry()]))
+        widget.drag_source_unset()
+
+        # these methods cannot be called because they require a valid drag on
+        # a real GdkWindow. So we only check that they exist and are callable.
+        self.assertTrue(hasattr(widget.drag_dest_set_proxy, '__call__'))
+        self.assertTrue(hasattr(widget.drag_get_data, '__call__'))
 
 class TestGio(unittest.TestCase):
     def setUp(self):
