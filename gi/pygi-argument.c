@@ -3240,9 +3240,9 @@ _pygi_marshal_in_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_pointer = pygobject_get (py_arg);
+    arg->v_pointer = pygobject_get(py_arg);
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_ref (arg->v_pointer);
+        g_object_ref(arg->v_pointer);
 
     return TRUE;
 }
@@ -3895,10 +3895,9 @@ _pygi_marshal_out_interface_object (PyGIInvokeState   *state,
 {
     PyObject *py_obj = pygobject_new (arg->v_pointer);
 
-    /* The new wrapper increased the reference count, so decrease it. */
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
         g_object_unref (arg->v_pointer);
-
+    
     return py_obj;
 }
 

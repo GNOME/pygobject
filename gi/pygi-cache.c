@@ -181,10 +181,8 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info,
     item_type_info = g_type_info_get_param_type (type_info, 0);
     item_type_tag = g_type_info_get_tag (item_type_info);
 
-    item_transfer = GI_TRANSFER_NOTHING;
-    if (transfer == GI_TRANSFER_EVERYTHING ||
-        transfer == GI_TRANSFER_CONTAINER)
-        item_transfer = GI_TRANSFER_EVERYTHING;
+    item_transfer =
+        transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
     sc->item_cache = _arg_cache_new_from_type_info(item_type_info,
                                                    NULL,
@@ -225,10 +223,8 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info,
     value_type_info = g_type_info_get_param_type (type_info, 1);
     value_type_tag = g_type_info_get_tag (value_type_info);
 
-    item_transfer = GI_TRANSFER_NOTHING;
-    if (transfer == GI_TRANSFER_EVERYTHING ||
-        transfer == GI_TRANSFER_CONTAINER)
-        item_transfer = GI_TRANSFER_EVERYTHING;
+    item_transfer =
+        transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
     hc->key_cache = _arg_cache_new_from_type_info(key_type_info,
                                                   NULL,
