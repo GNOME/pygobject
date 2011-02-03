@@ -1021,8 +1021,39 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
                                          arg_cache->py_arg_index);
                 }
             case GI_DIRECTION_OUT:
-                state->out_args[out_count].v_pointer = &state->out_values[out_count];
-                state->args[i] = &state->out_values[out_count];
+                if (arg_cache->is_caller_allocates) {
+                    PyGIInterfaceCache *iface_cache =
+                        (PyGIInterfaceCache *)arg_cache;
+
+                    g_assert(arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
+
+                    state->out_args[out_count].v_pointer = NULL;
+                    state->args[i] = &state->out_args[out_count];
+                    if (iface_cache->g_type == G_TYPE_BOXED) {
+                        state->args[i]->v_pointer =
+                            _pygi_boxed_alloc(iface_cache->interface_info, NULL);
+                    } else if (iface_cache->is_foreign) {
+                        PyObject *foreign_struct =
+                            pygi_struct_foreign_convert_from_g_argument(
+                                iface_cache->interface_info,
+                                NULL);
+
+                        pygi_struct_foreign_convert_to_g_argument(
+                            foreign_struct,
+                            iface_cache->interface_info,
+                            GI_TRANSFER_EVERYTHING,
+                            state->args[i]);
+                    } else {
+                        gssize size =
+                            g_struct_info_get_size(
+                                (GIStructInfo *)iface_cache->interface_info);
+                        state->args[i]->v_pointer = g_malloc0(size);
+                    }
+
+                } else {
+                    state->out_args[out_count].v_pointer = &state->out_values[out_count];
+                    state->args[i] = &state->out_values[out_count];
+                }
                 out_count++;
                 break;
         }
@@ -1089,7 +1120,7 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
         py_out = arg_cache->out_marshaller(state,
                                            cache,
                                            arg_cache,
-                                           &(state->out_values[0]));
+                                           state->args[arg_cache->c_arg_index]);
     } else {
         int out_cache_index = 0;
         int py_arg_index = 0;

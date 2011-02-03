@@ -31,7 +31,6 @@ PyGIArgCache * _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                               GITypeTag type_tag,
                                               GITransfer transfer,
                                               GIDirection direction,
-                                              gboolean is_caller_allocates,
                                               gint c_arg_index,
                                               gint py_arg_index);
 
@@ -190,7 +189,6 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info,
                                                    item_type_tag,
                                                    item_transfer,
                                                    direction,
-                                                   FALSE,
                                                    0, 0);
 
     if (sc->item_cache == NULL) {
@@ -232,7 +230,6 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info,
                                                   key_type_tag,
                                                   item_transfer,
                                                   direction,
-                                                  FALSE,
                                                   0, 0);
 
     if (hc->key_cache == NULL) {
@@ -246,7 +243,6 @@ _hash_cache_new_from_type_info(GITypeInfo *type_info,
                                                     value_type_tag,
                                                     item_transfer,
                                                     direction,
-                                                    FALSE,
                                                     0, 0);
 
     if (hc->value_cache == NULL) {
@@ -866,7 +862,6 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                GITypeTag type_tag,
                                GITransfer transfer,
                                GIDirection direction,
-                               gboolean is_caller_allocates,
                                gint c_arg_index,
                                gint py_arg_index)
 {
@@ -1241,7 +1236,6 @@ _args_cache_generate(GIFunctionInfo *function_info,
                                       return_type_tag,
                                       return_transfer,
                                       GI_DIRECTION_OUT,
-                                      FALSE,
                                       -1,
                                       -1);
 
@@ -1297,6 +1291,7 @@ _args_cache_generate(GIFunctionInfo *function_info,
         transfer = g_arg_info_get_ownership_transfer(arg_info);
         type_info = g_arg_info_get_type(arg_info);
         type_tag = g_type_info_get_tag(type_info);
+        is_caller_allocates = g_arg_info_is_caller_allocates(arg_info);
 
         /* must be an aux arg filled in by its owner
          * fill in it's c_arg_index, add to the in count
@@ -1336,24 +1331,17 @@ _args_cache_generate(GIFunctionInfo *function_info,
                                           type_tag,
                                           transfer,
                                           direction,
-                                          FALSE,
                                           arg_index,
                                           py_arg_index);
 
         if (arg_cache == NULL)
             goto arg_err;
 
-        arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
+        arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
+        arg_cache->is_caller_allocates = is_caller_allocates;
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             function_cache->n_out_args++;
-            is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
-            if (is_caller_allocates) {
-                PyErr_Format(PyExc_NotImplementedError,
-                             "Caller allocates is not fully implemented yet");
-
-                goto arg_err;
-            }
 
             if (arg_cache == NULL)
                 goto arg_err;
