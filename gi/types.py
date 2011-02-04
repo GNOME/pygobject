@@ -171,7 +171,9 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # All wrapped interfaces inherit from GInterface.
         # This can be seen in IntrospectionModule.__getattr__() in module.py.
         # We do not need to search regular classes here, only wrapped interfaces.
-        if not issubclass(base, gobject.GInterface) or\
+        # We also skip GInterface, because it is not wrapped and has no __info__ attr.
+        if base is gobject.GInterface or\
+                not issubclass(base, gobject.GInterface) or\
                 not isinstance(base.__info__, InterfaceInfo):
             continue
 

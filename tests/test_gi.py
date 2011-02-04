@@ -1466,6 +1466,14 @@ class TestPythonGObject(unittest.TestCase):
             
         self.assertTrue(func1 is func2)
 
+    def test_subobject_with_interface_and_non_vfunc_do_method(self):
+        # There was a bug for searching for vfuncs in interfaces. It was
+        # triggered by having a do_* method that wasn't overriding
+        # a native vfunc, as well as inheriting from an interface.
+        class GObjectSubclassWithInterface(GObject.GObject, GIMarshallingTests.Interface):
+            def do_method_not_a_vfunc(self):
+                pass
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):
