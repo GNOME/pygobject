@@ -23,15 +23,15 @@ class TestGDBusClient(unittest.TestCase):
     def test_native_calls_sync(self):
         result = self.dbus_proxy.call_sync('ListNames', None, 
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
-        self.assert_(isinstance(result, GLib.Variant))
+        self.assertTrue(isinstance(result, GLib.Variant))
         result = result.unpack()[0] # result is always a tuple
-        self.assert_(len(result) > 1)
-        self.assert_('org.freedesktop.DBus' in result)
+        self.assertTrue(len(result) > 1)
+        self.assertTrue('org.freedesktop.DBus' in result)
 
         result = self.dbus_proxy.call_sync('GetNameOwner', 
                 GLib.Variant('(s)', ('org.freedesktop.DBus',)),
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
-        self.assert_(isinstance(result, GLib.Variant))
+        self.assertTrue(isinstance(result, GLib.Variant))
         self.assertEqual(type(result.unpack()[0]), type(''))
 
     def test_native_calls_sync_errors(self):
@@ -40,9 +40,8 @@ class TestGDBusClient(unittest.TestCase):
             self.dbus_proxy.call_sync('GetConnectionUnixProcessID', None,
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
-        except Exception:
-            etype, e = sys.exc_info()[:2]
-            self.assert_('InvalidArgs' in e.message)
+        except Exception as e:
+            self.assertTrue('InvalidArgs' in str(e))
 
         # error case: invalid argument
         try:
@@ -50,18 +49,16 @@ class TestGDBusClient(unittest.TestCase):
                     GLib.Variant('(s)', (' unknown',)),
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
-        except Exception:
-            etype, e = sys.exc_info()[:2]
-            self.assert_('NameHasNoOwner' in e.message)
+        except Exception as e:
+            self.assertTrue('NameHasNoOwner' in str(e))
 
         # error case: unknown method
         try:
             self.dbus_proxy.call_sync('UnknownMethod', None,
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call for unknown method should raise an exception')
-        except Exception:
-            etype, e = sys.exc_info()[:2]
-            self.assert_('UnknownMethod' in e.message)
+        except Exception as e:
+            self.assertTrue('UnknownMethod' in str(e))
 
     def test_native_calls_async(self):
         def call_done(obj, result, user_data):
@@ -75,19 +72,18 @@ class TestGDBusClient(unittest.TestCase):
                 call_done, data)
         main_loop.run()
 
-        self.assert_(isinstance(data['result'], GLib.Variant))
+        self.assertTrue(isinstance(data['result'], GLib.Variant))
         result = data['result'].unpack()[0] # result is always a tuple
-        self.assert_(len(result) > 1)
-        self.assert_('org.freedesktop.DBus' in result)
+        self.assertTrue(len(result) > 1)
+        self.assertTrue('org.freedesktop.DBus' in result)
 
     def test_native_calls_async_errors(self):
         def call_done(obj, result, user_data):
             try:
                 self.dbus_proxy.call_finish(result)
                 self.fail('call_finish() for unknown method should raise an exception')
-            except Exception:
-                etype, e = sys.exc_info()[:2]
-                self.assert_('UnknownMethod' in e.message)
+            except Exception as e:
+                self.assertTrue('UnknownMethod' in str(e))
             finally:
                 user_data['main_loop'].quit()
 
