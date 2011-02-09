@@ -57,17 +57,6 @@ linkend="method-gobject--thaw-notify">thaw_notify</link></methodname>
 	  <methodparam></methodparam>  </methodsynopsis>
 	<methodsynopsis language="python">
 	  <methodname><link
-linkend="method-gobject--get-data">get_data</link></methodname>
-	  <methodparam><parameter>key</parameter></methodparam>
-	</methodsynopsis>
-	<methodsynopsis language="python">
-	  <methodname><link
-linkend="method-gobject--set-data">set_data</link></methodname>
-	  <methodparam><parameter>key</parameter></methodparam>
-	  <methodparam><parameter>data</parameter></methodparam>
-	</methodsynopsis>
-	<methodsynopsis language="python">
-	  <methodname><link
 linkend="method-gobject--connect">connect</link></methodname>
 	  <methodparam><parameter>detailed_signal</parameter></methodparam>
 	  <methodparam><parameter>handler</parameter></methodparam>
@@ -432,58 +421,6 @@ be emitted.</para>
       <para>The <methodname>thaw_notify</methodname>() method thaws the
 object's property-changed notification queue so that "notify" signals are
 emitted.</para>
-
-    </refsect2>
-
-    <refsect2 id="method-gobject--get-data">
-      <title>gobject.GObject.get_data</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>get_data</methodname>
-	  <methodparam><parameter>key</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><parameter>key</parameter>&nbsp;:</term>
-	  <listitem><simpara>a string used as the key</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara>a Python object containing the associated
-data</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>The <methodname>get_data</methodname>() method returns the
-Python object associated with the specified <parameter>key</parameter> or
-None if there is no data associated with the <parameter>key</parameter> or
-if there is no key associated with the object.</para>
-
-    </refsect2>
-
-    <refsect2 id="method-gobject--set-data">
-      <title>gobject.GObject.set_data</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>set_data</methodname>
-	  <methodparam><parameter>key</parameter></methodparam>
-	  <methodparam><parameter>data</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><parameter>key</parameter>&nbsp;:</term>
-	  <listitem><simpara>a string used as a key</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><parameter>data</parameter>&nbsp;:</term>
-	  <listitem><simpara>a Python object that is the value to be
-associated with the key</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>The <methodname>set_data</methodname>() method associates the
-specified Python object (<parameter>data</parameter>) with
-<parameter>key</parameter>.</para>
 
     </refsect2>
 

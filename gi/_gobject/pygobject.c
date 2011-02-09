@@ -1707,48 +1707,6 @@ pygobject_thaw_notify(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
-pygobject_get_data(PyGObject *self, PyObject *args)
-{
-    char *key;
-    GQuark quark;
-    PyObject *data;
-
-    g_warning("GObject.get_data() and set_data() are deprecated. Use normal Python attributes instead");
-
-    if (!PyArg_ParseTuple(args, "s:GObject.get_data", &key))
-	return NULL;
-    
-    CHECK_GOBJECT(self);
-    
-    quark = g_quark_from_string(key);
-    data = g_object_get_qdata(self->obj, quark);
-    if (!data) data = Py_None;
-    Py_INCREF(data);
-    return data;
-}
-
-static PyObject *
-pygobject_set_data(PyGObject *self, PyObject *args)
-{
-    char *key;
-    GQuark quark;
-    PyObject *data;
-
-    g_warning("GObject.get_data() and set_data() are deprecated. Use normal Python attributes instead");
-
-    if (!PyArg_ParseTuple(args, "sO:GObject.set_data", &key, &data))
-	return NULL;
-    
-    CHECK_GOBJECT(self);
-    
-    quark = g_quark_from_string(key);
-    Py_INCREF(data);
-    g_object_set_qdata_full(self->obj, quark, data, pyg_destroy_notify);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
 pygobject_connect(PyGObject *self, PyObject *args)
 {
     PyObject *first, *callback, *extra_args, *repr = NULL;
@@ -2370,8 +2328,6 @@ static PyMethodDef pygobject_methods[] = {
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
     { "notify", (PyCFunction)pygobject_notify, METH_VARARGS },
     { "thaw_notify", (PyCFunction)pygobject_thaw_notify, METH_VARARGS },
-    { "get_data", (PyCFunction)pygobject_get_data, METH_VARARGS },
-    { "set_data", (PyCFunction)pygobject_set_data, METH_VARARGS },
     { "connect", (PyCFunction)pygobject_connect, METH_VARARGS },
     { "connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
     { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
