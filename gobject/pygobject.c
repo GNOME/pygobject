@@ -967,9 +967,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self->weakreflist = NULL;
 	self->private_flags.flags = 0;
 	self->obj = obj;
-        /* if we are creating a wrapper around a newly created object, it can have
-           a floating ref (e.g. for methods like Gtk.Button.new()). Bug 640868 */
-	g_object_ref_sink(obj);
+	g_object_ref(obj);
 	pygobject_register_wrapper((PyObject *)self);
 	PyObject_GC_Track((PyObject *)self);
     }
