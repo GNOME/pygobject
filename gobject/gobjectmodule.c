@@ -1728,7 +1728,6 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
 
     if (obj) {
-        pygobject_sink (obj);
 	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
         g_object_unref(obj);
     } else
@@ -2228,7 +2227,6 @@ pygobject_constructv(PyGObject  *self,
         pygobject_init_wrapper_set((PyObject *) self);
         obj = g_object_newv(pyg_type_from_object((PyObject *) self),
                             n_parameters, parameters);
-        pygobject_sink (obj);
         pygobject_init_wrapper_set(NULL);
         if (self->obj == NULL) {
             self->obj = obj;
