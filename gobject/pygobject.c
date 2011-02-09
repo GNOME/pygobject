@@ -50,6 +50,7 @@ GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
 GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
+GQuark pygobject_ref_sunk_key;
 
 
 /* -------------- class <-> wrapper manipulation --------------- */
@@ -135,6 +136,12 @@ PyTypeObject *PyGObject_MetaType = NULL;
 void
 pygobject_sink(GObject *obj)
 {
+    gboolean sunk = FALSE;
+
+    /* We use a gobject data key to avoid running the sink funcs more than once. */
+    if (g_object_get_qdata (obj, pygobject_ref_sunk_key))
+        return;
+
     if (sink_funcs) {
 	gint i;
 
@@ -142,18 +149,17 @@ pygobject_sink(GObject *obj)
 	    if (g_type_is_a(G_OBJECT_TYPE(obj),
 			    g_array_index(sink_funcs, SinkFunc, i).type)) {
 		g_array_index(sink_funcs, SinkFunc, i).sinkfunc(obj);
-		return;
+
+		sunk = TRUE;
+                break;
 	    }
 	}
     }
-    if (G_IS_INITIALLY_UNOWNED(obj) && !g_object_is_floating(obj)) {
-        /* GtkWindow and GtkInvisible does not return a ref to caller of
-         * g_object_new.
-         */
-        g_object_ref(obj);
-    } else if (g_object_is_floating(obj)) {
+
+    if (!sunk && G_IS_INITIALLY_UNOWNED (obj))
         g_object_ref_sink(obj);
-    }
+
+    g_object_set_qdata (obj, pygobject_ref_sunk_key, GINT_TO_POINTER (1));
 }
 
 /**
@@ -2299,6 +2305,7 @@ pygobject_object_register_types(PyObject *d)
     pygobject_has_updated_constructor_key =
         g_quark_from_static_string("PyGObject::has-updated-constructor");
     pygobject_instance_data_key = g_quark_from_static_string("PyGObject::instance-data");
+    pygobject_ref_sunk_key = g_quark_from_static_string("PyGObject::ref-sunk");
 
     /* GObject */
     if (!PY_TYPE_OBJECT)
