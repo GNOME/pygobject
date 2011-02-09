@@ -102,6 +102,7 @@ EXTRA_DIST += $(TEST_FILES)
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so) file.txt~
 
+DBUS_LAUNCH=$(shell which dbus-launch)
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
 	TEST_FILES="$(TEST_FILES)" \
@@ -109,7 +110,7 @@ check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.t
 	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
-	$(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+	$(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
