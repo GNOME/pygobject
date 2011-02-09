@@ -81,7 +81,7 @@ TEST_FILES = \
 	test_uris.py
 
 if BUILD_GIO
-TEST_FILES += \
+GIO_TEST_FILES = \
 	test_gio.py \
 	test_gresolver.py \
 	test_gsocket.py \
@@ -113,6 +113,8 @@ clean-local:
 
 DBUS_LAUNCH=$(shell which dbus-launch)
 
+# need to run the gio tests separately to avoid loading gi.repository.Gio and
+# gio at the same time
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
 	TEST_FILES="$(TEST_FILES)" \
 	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
@@ -120,6 +122,15 @@ check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.t
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	$(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+
+if BUILD_GIO
+	TEST_FILES="$(GIO_TEST_FILES)" \
+	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
+	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
+	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
+	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
+	$(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+endif 
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
