@@ -700,6 +700,10 @@ _process_invocation_state (struct invocation_state *state,
                     /* The new wrapper increased the reference count, so decrease it. */
                     g_object_unref (state->return_arg.v_pointer);
                 }
+                if (state->is_constructor && G_IS_INITIALLY_UNOWNED (state->return_arg.v_pointer)) {
+                    /* GInitiallyUnowned constructors always end up with one extra reference, so decrease it. */
+                    g_object_unref (state->return_arg.v_pointer);
+                }
                 break;
             default:
                 /* Other types don't have neither methods nor constructors. */
