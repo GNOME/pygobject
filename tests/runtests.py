@@ -11,6 +11,7 @@ if '--help' in sys.argv:
     print "Usage: ./runtests.py <testfiles>"
     sys.exit(0)
 
+
 # Load tests.
 if 'TEST_NAMES' in os.environ:
 	names = os.environ['TEST_NAMES'].split()
