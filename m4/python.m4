@@ -45,12 +45,13 @@ AC_MSG_CHECKING(for headers required to compile python extensions)
 dnl deduce PYTHON_INCLUDES and PYTHON_LIBS
 py_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`
 py_exec_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.exec_prefix)"`
-if test -x "$PYTHON-config"; then
-PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
-PYTHON_LIBS=`$PYTHON-config --libs 2>/dev/null`
+PYTHON_CONFIG=`which $PYTHON`-config
+if test -x "$PYTHON_CONFIG"; then
+PYTHON_INCLUDES=`$PYTHON_CONFIG --includes 2>/dev/null`
+PYTHON_LIBS=`$PYTHON_CONFIG --libs 2>/dev/null`
 else
 PYTHON_INCLUDES="-I${py_prefix}/include/python${PYTHON_VERSION}"
-PYTHON_LIBS=`-lpython${PYTHON_VERSION}`
+PYTHON_LIBS="-lpython${PYTHON_VERSION}"
 if test "$py_prefix" != "$py_exec_prefix"; then
   PYTHON_INCLUDES="$PYTHON_INCLUDES -I${py_exec_prefix}/include/python${PYTHON_VERSION}"
 fi
