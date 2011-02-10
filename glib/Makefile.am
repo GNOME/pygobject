@@ -29,7 +29,7 @@ libpyglib_2_0_@PYTHON_BASENAME@_la_SOURCES = 	\
 
 _glib_la_CFLAGS = $(GLIB_CFLAGS)
 _glib_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_glib|PyInit__glib"
-_glib_la_LIBADD = $(GLIB_LIBS) libpyglib-2.0-@PYTHON_BASENAME@.la
+_glib_la_LIBADD = $(GLIB_LIBS) $(PYTHON_LIBS) libpyglib-2.0-@PYTHON_BASENAME@.la
 _glib_la_SOURCES = 	 	\
 	glibmodule.c	 	\
 	pygiochannel.c 	 	\
