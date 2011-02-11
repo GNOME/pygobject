@@ -323,7 +323,8 @@ else:
     GLOBAL_MACROS.append(('DISABLE_THREADING', 1))
 
 doclines = __doc__.split('\n')
-options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py'}}
+options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py',
+                             'user-access-control': 'auto'}}
 
 setup(name='pygobject',
       url='http://www.pygtk.org/',
