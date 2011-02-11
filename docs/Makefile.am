@@ -16,46 +16,6 @@ HTML_FILES =					\
 	html/glib-functions.html		\
 	html/gobject-class-reference.html	\
 	html/glib-class-reference.html		\
-	html/class-gioapplaunchcontext.html	\
-	html/class-gioappinfo.html		\
-	html/class-gioasyncresult.html		\
-	html/class-giobufferedinputstream.html	\
-	html/class-giobufferedoutputstream.html	\
-	html/class-giocancellable.html		\
-	html/class-giodatainputstream.html	\
-	html/class-giodataoutputstream.html	\
-	html/class-giodrive.html		\
-	html/class-gioemblem.html		\
-	html/class-gioemblemedicon.html		\
-	html/class-giofile.html			\
-	html/class-giofileattributeinfo.html	\
-	html/class-giofileenumerator.html	\
-	html/class-giofileicon.html		\
-	html/class-giofileinfo.html		\
-	html/class-giofileinputstream.html	\
-	html/class-giofilemonitor.html		\
-	html/class-giofileoutputstream.html	\
-	html/class-giofilterinputstream.html	\
-	html/class-giofilteroutputstream.html	\
-	html/class-gioicon.html			\
-	html/class-gioinputstream.html		\
-	html/class-gioloadableicon.html		\
-	html/class-giomemoryinputstream.html	\
-	html/class-giomemoryoutputstream.html	\
-	html/class-giomount.html		\
-	html/class-giomountoperation.html	\
-	html/class-giooutputstream.html		\
-	html/class-gioseekable.html		\
-	html/class-giosimpleasyncresult.html	\
-	html/class-giothemedicon.html		\
-	html/class-giounixinputstream.html	\
-	html/class-giounixoutputstream.html	\
-	html/class-giovolume.html		\
-	html/class-giovolumemonitor.html	\
-	html/gio-constants.html			\
-	html/gio-functions.html			\
-	html/gio-class-reference.html		\
-	html/giounix-class-reference.html	\
 	html/gobject-constants.html		\
 	html/gobject-functions.html		\
 	html/index.html				\
@@ -78,47 +38,7 @@ XML_FILES = 						\
 	reference/pyglib-constants.xml 			\
 	reference/pyglib-functions.xml			\
 	reference/pyglib-maincontext.xml 		\
-	reference/pyglib-mainloop.xml 			\
-	reference/pygio-classes.xml 			\
-	reference/pygiounix-classes.xml			\
-	reference/pygio-constants.xml			\
-	reference/pygio-functions.xml			\
-	reference/pygio-applaunchcontext.xml 		\
-	reference/pygio-appinfo.xml 			\
-	reference/pygio-asyncresult.xml 		\
-	reference/pygio-bufferedinputstream.xml 	\
-	reference/pygio-bufferedoutputstream.xml	\
-	reference/pygio-cancellable.xml 		\
-	reference/pygio-datainputstream.xml 		\
-	reference/pygio-dataoutputstream.xml 		\
-	reference/pygio-drive.xml 			\
-	reference/pygio-emblem.xml			\
-	reference/pygio-emblemedicon.xml		\
-	reference/pygio-file.xml			\
-	reference/pygio-fileattributeinfo.xml		\
-	reference/pygio-fileenumerator.xml		\
-	reference/pygio-fileicon.xml 			\
-	reference/pygio-fileinfo.xml 			\
-	reference/pygio-fileinputstream.xml 		\
-	reference/pygio-filemonitor.xml			\
-	reference/pygio-fileoutputstream.xml 		\
-	reference/pygio-filterinputstream.xml 		\
-	reference/pygio-filteroutputstream.xml 		\
-	reference/pygio-icon.xml			\
-	reference/pygio-inputstream.xml			\
-	reference/pygio-loadableicon.xml		\
-	reference/pygio-memoryinputstream.xml 		\
-	reference/pygio-memoryoutputstream.xml 		\
-	reference/pygio-mount.xml			\
-	reference/pygio-mountoperation.xml		\
-	reference/pygio-outputstream.xml		\
-	reference/pygio-seekable.xml			\
-	reference/pygio-simpleasyncresult.xml		\
-	reference/pygio-themedicon.xml			\
-	reference/pygio-unixinputstream.xml 		\
-	reference/pygio-unixoutputstream.xml 		\
-	reference/pygio-volume.xml 			\
-	reference/pygio-volumemonitor.xml
+	reference/pyglib-mainloop.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\
