@@ -38,10 +38,11 @@ to clear the area.
 is_fully_bound = False
 
 from gi.repository import Gtk, Gdk
+import cairo
 
 class DrawingAreaApp:
     def __init__(self):
-        self.pixmap = None
+        self.sureface = None
 
         window = Gtk.Window()
         window.set_title(title)
@@ -63,7 +64,7 @@ class DrawingAreaApp:
         da = Gtk.DrawingArea()
         da.set_size_request(100, 100)
         frame.add(da)
-        da.connect('expose-event', self.checkerboard_expose_event)
+        da.connect('draw', self.checkerboard_draw_event)
 
         # create scribble area
         label = Gtk.Label()
@@ -77,7 +78,7 @@ class DrawingAreaApp:
         da = Gtk.DrawingArea()
         da.set_size_request(100, 100)
         frame.add(da)
-        da.connect('expose-event', self.scribble_expose_event)
+        da.connect('draw', self.scribble_draw_event)
         da.connect('configure-event', self.scribble_configure_event)
 
         # event signals
@@ -94,49 +95,34 @@ class DrawingAreaApp:
 
         window.show_all()
 
-    def checkerboard_expose_event(self, da, event):
-        check_size = 10
-        spacing = 2
+    def checkerboard_draw_event(self, da, cairo_ctx):
 
-        # At the start of an expose handler, a clip region of event->area
-        # is set on the window, and event->area has been cleared to the
+        # At the start of a draw handler, a clip region has been set on
+        # the Cairo context, and the contents have been cleared to the
         # widget's background color. The docs for
         # gdk_window_begin_paint_region() give more details on how this
         # works.
-
-        # It would be a bit more efficient to keep these
-        # GC's around instead of recreating on each expose, but
-        # this is the lazy/slow way.
-
-        gc1 = Gdk.GC.new(da.get_window())
-        color = Gdk.Color(30000, 0, 30000)
-        gc1.set_rgb_fg_color(color)
-
-        gc2 = Gdk.GC.new(da.get_window())
-        color = Gdk.Color(65535, 65535, 65535)
-        gc2.set_rgb_fg_color(color)
+        check_size = 10
+        spacing = 2
 
         xcount = 0
         i = spacing
+        width = da.get_allocated_width()
+        height = da.get_allocated_height()
 
-        while i < da.allocation.width:
+        while i < width:
             j = spacing
             ycount = xcount % 2 # start with even/odd depending on row
-            while j < da.allocation.height:
+            while j < height:
                 if ycount % 2:
-                    gc = gc1
+                    cairo_ctx.set_source_rgb(0.45777, 0, 0.45777)
                 else:
-                    gc = gc2
-
-                # If we're outside event->area, this will do nothing.
-                # It might be mildly more efficient if we handled
-                # the clipping ourselves, but again we're feeling lazy.
-                Gdk.draw_rectangle(da.get_window(),
-                                   gc,
-                                   True,
-                                   i, j,
-                                   check_size,
-                                   check_size)
+                    cairo_ctx.set_source_rgb(1, 1, 1)
+                # If we're outside the clip this will do nothing.
+                cairo_ctx.rectangle(i, j,
+                                    check_size,
+                                    check_size)
+                cairo_ctx.fill()
 
                 j += check_size + spacing
                 ycount += 1
@@ -146,72 +132,43 @@ class DrawingAreaApp:
 
         return True
 
-    def scribble_expose_event(self, da, event):
+    def scribble_draw_event(self, da, cairo_ctx):
 
-        # We use the "foreground GC" for the widget since it already exists,
-        # but honestly any GC would work. The only thing to worry about
-        # is whether the GC has an inappropriate clip region set.
-
-        # FIXME: we should be using widget.style.forground_gc but
-        # there is a bug in GObject Introspection when getting
-        # certain struct offsets so we create a new GC here
-        black_gc = Gdk.GC.new(da.get_window())
-        color = Gdk.Color(0, 0, 0)
-        black_gc.set_rgb_fg_color(color)
-
-        Gdk.draw_drawable(da.get_window(),
-                          black_gc,
-                          self.pixmap,
-                          event.expose.area.x, event.expose.area.y,
-                          event.expose.area.x, event.expose.area.y,
-                          event.expose.area.width, event.expose.area.height)
+        cairo_ctx.set_source_surface(self.surface, 0, 0)
+        cairo_ctx.paint()
 
         return False
 
     def draw_brush(self, widget, x, y):
-        update_rect = Gdk.Rectangle(x - 3,
-                                    y - 3,
-                                    6,
-                                    6)
+        update_rect = Gdk.Rectangle()
+        update_rect.x = x - 3
+        update_rect.y = y - 3
+        update_rect.width = 6
+        update_rect.height = 6
 
-        # FIXME: we should be using widget.style.black_gc but
-        # there is a bug in GObject Introspection when getting
-        # certain struct offsets so we create a new GC here
-        black_gc = Gdk.GC.new(widget.get_window())
-        color = Gdk.Color(0, 0, 0)
-        black_gc.set_rgb_fg_color(color)
+        # paint to the surface where we store our state
+        cairo_ctx = cairo.Context(self.surface)
 
-        Gdk.draw_rectangle(self.pixmap,
-                           black_gc,
-                           True,
-                           update_rect.x, update_rect.y,
-                           update_rect.width, update_rect.height)
+        Gdk.cairo_rectangle(cairo_ctx, update_rect)
+        cairo_ctx.fill()
 
         widget.get_window().invalidate_rect(update_rect, False)
 
     def scribble_configure_event(self, da, event):
-        self.pixmap = Gdk.Pixmap.new(da.get_window(),
-                                     da.allocation.width,
-                                     da.allocation.height,
-                                     -1)
 
-        # FIXME: we should be using widget.style.white_gc but
-        # there is a bug in GObject Introspection when getting
-        # certain struct offsets so we create a new GC here
-        white_gc = Gdk.GC.new(da.get_window())
-        color = Gdk.Color(65535, 65535, 65535)
-        white_gc.set_rgb_fg_color(color)
-        Gdk.draw_rectangle(self.pixmap,
-                           white_gc,
-                           True,
-                           0, 0,
-                           da.allocation.width,
-                           da.allocation.height)
+        allocation = da.get_allocation()
+        self.surface = da.get_window().create_similar_surface(cairo.CONTENT_COLOR,
+                                                              allocation.width,
+                                                              allocation.height)
+
+        cairo_ctx = cairo.Context(self.surface)
+        cairo_ctx.set_source_rgb(1, 1, 1)
+        cairo_ctx.paint()
 
         return True
 
     def scribble_motion_notify_event(self, da, event):
-        if self.pixmap == None: # paranoia check, in case we haven't gotten a configure event
+        if self.surface == None: # paranoia check, in case we haven't gotten a configure event
             return False
 
         # This call is very important; it requests the next motion event.
@@ -224,20 +181,19 @@ class DrawingAreaApp:
         # we avoid getting a huge number of events faster than we
         # can cope.
 
-        (window, x, y, state) = event.motion.window.get_pointer()
+        (window, x, y, state) = event.window.get_pointer()
 
-        # FIXME: for some reason Gdk.ModifierType.BUTTON1_MASK doesn't exist
-        #if state & Gdk.ModifierType.BUTTON1_MASK:
-        #    self.draw_brush(da, x, y)
+        if state & Gdk.ModifierType.BUTTON1_MASK:
+            self.draw_brush(da, x, y)
 
         return True
 
     def scribble_button_press_event(self, da, event):
-        if self.pixmap == None: # paranoia check, in case we haven't gotten a configure event
+        if self.surface == None: # paranoia check, in case we haven't gotten a configure event
             return False
 
-        if event.button.button == 1:
-            self.draw_brush(da, event.button.x, event.button.y)
+        if event.button == 1:
+            self.draw_brush(da, event.x, event.y)
 
         return True
 
