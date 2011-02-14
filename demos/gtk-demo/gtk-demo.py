@@ -213,7 +213,7 @@ class GtkDemoApp(object):
         self.source_buffer.insert(end, code)
 
     def row_activated_cb(self, view, path, col, store):
-        (success, treeiter) = store.get_iter(path)
+        treeiter = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
         demo.module.main(self)
 
