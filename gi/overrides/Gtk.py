@@ -1143,6 +1143,14 @@ __all__.append('Adjustment')
 
 class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
+        if 'n_rows' in kwds:
+            rows = n_rows
+            del(kwds[n_rows])
+
+        if 'n_columns' in kwds:
+            columns = n_columns
+            del(kwds[n_columns])
+            
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
 
     def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
