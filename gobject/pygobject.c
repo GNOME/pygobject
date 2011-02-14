@@ -1528,7 +1528,11 @@ pygobject_connect(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, NULL);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, NULL);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
@@ -1577,7 +1581,11 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, NULL);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, NULL);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);
@@ -1626,7 +1634,11 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, object);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, object);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
@@ -1675,7 +1687,11 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, object);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, object);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);
