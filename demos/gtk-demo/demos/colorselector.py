@@ -34,7 +34,11 @@ class ColorSelectorApp:
     def __init__(self):
         # FIXME: we should allow Gdk.Color to be allocated without parameters
         #        Also color doesn't seem to work
-        self.color = Gdk.Color(0, 65535, 0)
+        self.color = Gdk.RGBA()
+        self.color.red = 0
+        self.color.blue = 1
+        self.color.green = 0
+        self.color.alpha = 1
 
         self.window = Gtk.Window()
         self.window.set_title('Color Selection')
@@ -52,12 +56,12 @@ class ColorSelectorApp:
         vbox.pack_start(frame, True, True, 0)
 
         self.da = Gtk.DrawingArea()
-        self.da.connect('expose_event', self.expose_event_cb)
+        self.da.connect('draw', self.draw_cb)
 
         # set a minimum size
         self.da.set_size_request(200, 200)
         # set the color
-        self.da.modify_bg(Gtk.StateType.NORMAL, self.color)
+        self.da.override_background_color(0, self.color)
         frame.add(self.da)
 
         alignment = Gtk.Alignment(xalign=1.0,
@@ -74,42 +78,28 @@ class ColorSelectorApp:
 
         self.window.show_all()
 
-    def expose_event_cb(self, widget, event):
-        window = widget.get_window()
+    def draw_cb(self, widget, cairo_ctx):
+        style = widget.get_style_context()
+        bg_color = style.get_background_color(0)
+        Gdk.cairo_set_source_rgba(cairo_ctx, bg_color)
+        cairo_ctx.paint()
 
-        if window:
-
-            style = widget.get_style()
-            x = event.expose.area.x
-            y = event.expose.area.y
-            width = event.expose.area.width
-            height = event.expose.area.height
-
-            """
-            Gdk.draw_rectangle(window,
-                                # FIXME: accessing style attribute segfaults
-                               style.bg_gc[Gtk.StateType.NORMAL],
-                               True,
-                               event.expose.area.x, event.expose.area.y,
-                               event.expose.area.width, event.expose.area.height)
-            """
         return True
-
 
     def change_color_cb(self, button):
         dialog = Gtk.ColorSelectionDialog(title='Changing color')
         dialog.set_transient_for(self.window)
 
         colorsel = dialog.get_color_selection()
-        colorsel.set_previous_color(self.color)
-        colorsel.set_current_color(self.color)
+        colorsel.set_previous_rgba(self.color)
+        colorsel.set_current_rgba(self.color)
         colorsel.set_has_palette(True)
 
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            self.color = colorsel.get_current_color()
-            self.da.modify_bg(Gtk.StateType.NORMAL, self.color)
+            self.color = colorsel.get_current_rgba()
+            self.da.override_background_color(0, self.color)
 
         dialog.destroy()
 
