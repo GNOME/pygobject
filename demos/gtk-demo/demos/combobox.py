@@ -116,10 +116,11 @@ class ComboboxApp:
         # FIXME: make new_from_indices work
         #        make constructor take list or string of indices
         path = Gtk.TreePath.new_from_string('0:8')
-        (success, treeiter) = model.get_iter(path)
+        treeiter = model.get_iter(path)
         combo.set_active_iter(treeiter)
 
-        # A GtkComboBoxEntry with validation.
+        # A GtkComboBoxText with validation.
+
         frame = Gtk.Frame(label='Editable')
         vbox.pack_start(frame, False, False, 0)
 
@@ -127,13 +128,13 @@ class ComboboxApp:
         box.set_border_width(5)
         frame.add(box)
 
-        combo = Gtk.ComboBoxEntry.new_text()
+        combo = Gtk.ComboBoxText()
         self.fill_combo_entry(combo)
         box.add(combo)
 
         entry = MaskEntry(mask='^([0-9]*|One|Two|2\302\275|Three)$')
 
-        combo.remove(combo.get_child())
+        combo.remove(0)
         combo.add(entry)
 
         self.window.show_all()
@@ -142,7 +143,6 @@ class ComboboxApp:
         return s.replace('_', '')
 
     def create_stock_icon_store(self):
-        item = Gtk.StockItem()
         stock_id = (Gtk.STOCK_DIALOG_WARNING,
                     Gtk.STOCK_STOP,
                     Gtk.STOCK_NEW,
@@ -156,8 +156,7 @@ class ComboboxApp:
         for id in stock_id:
             if id is not None:
                 pixbuf = cellview.render_icon(id, Gtk.IconSize.BUTTON, None)
-                # FIXME: item should be annotated (out)
-                Gtk.stock_lookup(id, item)
+                success, item = Gtk.stock_lookup(id)
                 label = self.strip_underscore(item.label)
                 store.append((pixbuf, label))
             else:
@@ -173,7 +172,7 @@ class ComboboxApp:
         """
 
         path = tree_model.get_path(treeiter)
-        indices = path.get_indices_with_depth()
+        indices = path.get_indices()
 
         sensitive = not(indices[0] == 1)
 
@@ -188,7 +187,7 @@ class ComboboxApp:
 
         path = model.get_path(treeiter)
 
-        indices = path.get_indices_with_depth()
+        indices = path.get_indices()
         result = (indices[0] == 4)
 
         return result
