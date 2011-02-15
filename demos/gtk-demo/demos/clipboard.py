@@ -62,9 +62,9 @@ class ClipboardApp:
         hbox.pack_start(button, False, False, 0)
         button.connect('clicked', self.copy_button_clicked, entry)
 
-
         label = Gtk.Label(label='"Paste" will paste the text from the clipboard to the entry')
         vbox.pack_start(label, False, False, 0)
+
 
         hbox = Gtk.HBox(homogeneous=False, spacing=4)
         hbox.set_border_width(8)
@@ -138,7 +138,7 @@ class ClipboardApp:
         #FIXME: Allow sending strings a Atoms and convert in PyGI
         atom = Gdk.atom_intern('CLIPBOARD', True)
         clipboard = Gtk.Clipboard.get(atom)
-        clipboard.set_can_store(None, 0)
+        clipboard.set_can_store(None)
 
         self.window.show_all()
 
@@ -183,7 +183,7 @@ class ClipboardApp:
         selection_data.set_pixbuf(pixbuf)
 
     def drag_data_received(self, widget, context, x, y, selection_data, info, time, data):
-        if selection_data.length > 0:
+        if selection_data.get_length() > 0:
             pixbuf = selection_data.get_pixbuf()
             data.set_from_pixbuf(pixbuf)
 
