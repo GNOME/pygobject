@@ -95,16 +95,16 @@ class ClipboardApp:
         hbox.add(ebox)
 
         # make ebox a drag source
-        Gtk.drag_source_set(ebox, Gdk.ModifierType.BUTTON1_MASK,
+        ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                             None, Gdk.DragAction.COPY)
-        Gtk.drag_source_add_image_targets(ebox)
+        ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
-        Gtk.drag_dest_set(ebox, Gtk.DestDefaults.ALL,
+        ebox.drag_dest_set(Gtk.DestDefaults.ALL,
                           None, Gdk.DragAction.COPY)
-        Gtk.drag_dest_add_image_targets(ebox)
+        ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 
         # context menu on ebox
@@ -119,16 +119,16 @@ class ClipboardApp:
         hbox.add(ebox)
 
         # make ebox a drag source
-        Gtk.drag_source_set(ebox, Gdk.ModifierType.BUTTON1_MASK,
+        ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                             None, Gdk.DragAction.COPY)
-        Gtk.drag_source_add_image_targets(ebox)
+        ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
-        Gtk.drag_dest_set(ebox, Gtk.DestDefaults.ALL,
+        ebox.drag_dest_set(Gtk.DestDefaults.ALL,
                           None, Gdk.DragAction.COPY)
-        Gtk.drag_dest_add_image_targets(ebox)
+        ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 
         # context menu on ebox
@@ -205,7 +205,7 @@ class ClipboardApp:
             data.set_from_pixbuf(pixbuf)
 
     def button_press(self, widget, event, data):
-        if event.button.button != 3:
+        if event.button != 3:
             return False
 
         menu = Gtk.Menu()
@@ -222,7 +222,7 @@ class ClipboardApp:
         item.show()
         menu.append(item)
 
-        menu.popup(None, None, None, None, 3, event.button.time)
+        menu.popup(None, None, None, None, 3, event.time)
 
 def main(demoapp=None):
     app = ClipboardApp()
