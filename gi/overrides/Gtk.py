@@ -1144,12 +1144,12 @@ __all__.append('Adjustment')
 class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
         if 'n_rows' in kwds:
-            rows = n_rows
-            del(kwds[n_rows])
+            rows = kwds['n_rows']
+            del(kwds['n_rows'])
 
         if 'n_columns' in kwds:
-            columns = n_columns
-            del(kwds[n_columns])
+            columns = kwds['n_columns']
+            del(kwds['n_columns'])
             
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
 
