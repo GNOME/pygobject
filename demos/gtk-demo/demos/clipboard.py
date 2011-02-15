@@ -208,21 +208,21 @@ class ClipboardApp:
         if event.button != 3:
             return False
 
-        menu = Gtk.Menu()
+        self.menu = Gtk.Menu()
 
         #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_COPY, None)
         item.connect('activate', self.copy_image, data)
         item.show()
-        menu.append(item)
+        self.menu.append(item)
 
         #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_PASTE, None)
         item.connect('activate', self.paste_image, data)
         item.show()
-        menu.append(item)
+        self.menu.append(item)
 
-        menu.popup(None, None, None, None, 3, event.time)
+        self.menu.popup(None, None, None, None, event.button, event.time)
 
 def main(demoapp=None):
     app = ClipboardApp()
