@@ -29,6 +29,7 @@ is_fully_bound = False
 
 from gi.repository import Gtk, GdkPixbuf, Gdk
 import sys, os
+import glib
 
 global infobar
 global window
@@ -87,15 +88,7 @@ def update_statusbar(buffer, statusbar):
 def mark_set_callback(buffer, new_location, mark, data):
     update_statusbar(buffer, data)
 
-def activate_email(about, link, data):
-    text = 'send mail to %s' % (link,)
-    print text
-
-def activate_url(about, link, data):
-    text = 'show url %s' % (link,)
-    print text
-
-def about_cb(widget):
+def about_cb(widget, data):
     global window
 
     authors = ['John (J5) Palmieri',
@@ -123,10 +116,13 @@ write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
     filename = os.path.join('data', 'gtk-logo-rgb.gif')
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    try:
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    except glib.GError:
+        filename = os.path.join('demos', filename)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-    Gtk.AboutDialog.set_email_hook(activate_email, None)
-    Gtk.AboutDialog.set_url_hook(activate_url, None)
     # FIXME: override Gtk.show_about_dialog
     #        make about dailog constructor take a parent argument
     about = Gtk.AboutDialog(program_name='GTK+ Code Demos',
@@ -138,7 +134,7 @@ Boston, MA 02111-1307, USA.
 			    authors=authors,
 			    documenters=documentors,
 			    logo=transparent,
-                            title='About GTK+ Code Demos')
+			    title='About GTK+ Code Demos')
 
     about.set_transient_for(window)
     about.connect('response', widget_destroy)
