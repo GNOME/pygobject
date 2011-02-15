@@ -25,5 +25,7 @@ suite = loader.loadTestsFromNames(names)
 
 # Run tests.
 runner = unittest.TextTestRunner(verbosity=2)
-runner.run(suite)
+result = runner.run(suite)
+if not result.wasSuccessful():
+	sys.exit(1) # exit code so "make check" reports error
 
