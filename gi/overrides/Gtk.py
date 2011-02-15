@@ -1176,6 +1176,13 @@ class Paned(Gtk.Paned):
 Paned = override(Paned)
 __all__.append('Paned')
 
+if Gtk._version != '2.0':
+    class Menu(Gtk.Menu):
+        def popup(self, parent_menu_shell, parent_menu_item, func, data, button, activate_time):
+            self.popup_for_device(None, parent_menu_shell, parent_menu_item, func, data, button, activate_time)
+    Menu = override(Menu)
+    __all__.append('Menu')
+
 _Gtk_main_quit = Gtk.main_quit
 @override(Gtk.main_quit)
 def main_quit(*args):
