@@ -88,14 +88,20 @@ static struct PyGI_API *PyGI_API = NULL;
 static int
 _pygi_import (void)
 {
+    PyObject *modules_dict;
+
     if (PyGI_API != NULL) {
         return 1;
     }
+
+    modules_dict = PyImport_GetModuleDict(); /* borrowed reference -- don't unref */
+    if (PyMapping_HasKeyString(modules_dict, "gi")) {
 #if PY_VERSION_HEX >= 0x03000000
-    PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
+        PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
 #else
-    PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
+        PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
 #endif
+    }
     if (PyGI_API == NULL) {
         return -1;
     }
