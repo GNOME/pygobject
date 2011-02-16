@@ -149,6 +149,47 @@ class DragContext(Gdk.DragContext):
 DragContext = override(DragContext)
 __all__.append('DragContext')
 
+class Cursor(Gdk.Cursor):
+    def __new__(cls, *args, **kwds):
+        arg_len = len(args)
+        kwd_len = len(kwds)
+        total_len = arg_len + kwd_len
+
+        def _new(cursor_type):
+            return cls.new(cursor_type)
+
+        def _new_for_display(display, cursor_type):
+            return cls.new_for_display(display, cursor_type)
+
+        def _new_from_pixbuf(display, pixbuf, x, y):
+            return cls.new_from_pixbuf(display, pixbuf, x, y)
+
+        def _new_from_pixmap(source, mask, fg, bg, x, y):
+            return cls.new_from_pixmap(source, mask, fg, bg, x, y)
+
+        _constructor = None
+        if total_len == 1:
+            _constructor = _new
+        elif total_len == 2:
+            _constructor = _new_for_display
+        elif total_len == 4:
+            _constructor = _new_from_pixbuf
+        elif total_len == 6:
+            if Gdk._version != '2.0':
+                # pixmaps don't exist in Gdk 3.0
+                raise ValueError("Wrong number of parameters")
+            _constructor = _new_from_pixmap
+        else:
+            raise ValueError("Wrong number of parameters")
+
+        return _constructor(*args, **kwds)
+
+    def __init__(self, *args, **kwargs):
+        Gdk.Cursor.__init__(self)
+
+Cursor = override(Cursor)
+__all__.append('Cursor')
+
 import sys
 
 initialized, argv = Gdk.init_check(sys.argv)

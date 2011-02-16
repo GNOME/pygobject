@@ -359,6 +359,29 @@ class TestGdk(unittest.TestCase):
         event.type = Gdk.EventType.SCROLL
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
+    def test_cursor(self):
+        self.assertEquals(Gdk.Cursor, overrides.Gdk.Cursor)
+        c = Gdk.Cursor(Gdk.CursorType.WATCH)
+        self.assertNotEqual(c, None)
+        c = Gdk.Cursor(cursor_type = Gdk.CursorType.WATCH)
+        self.assertNotEqual(c, None)
+
+        display_manager = Gdk.DisplayManager.get()
+        display = display_manager.get_default_display()
+
+        test_pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+                                           False,
+                                           8,
+                                           5,
+                                           10)
+
+        c = Gdk.Cursor(display,
+                       test_pixbuf,
+                       y=0, x=0)
+
+        self.assertNotEqual(c, None)
+        self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
+
 class TestGtk(unittest.TestCase):
 
     def test_container(self):
