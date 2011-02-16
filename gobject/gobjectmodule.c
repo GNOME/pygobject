@@ -1176,15 +1176,20 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     /* create new typecode */
     instance_type = g_type_register_static(parent_type, new_type_name,
 					   &type_info, 0);
-    if (type_name == NULL)
-        g_free(new_type_name);
     if (instance_type == 0) {
 	PyErr_Format(PyExc_RuntimeError,
 		     "could not create new GType: %s (subclass of %s)",
 		     new_type_name,
 		     g_type_name(parent_type));
+
+        if (type_name == NULL)
+            g_free(new_type_name);
+
 	return -1;
     }
+
+    if (type_name == NULL)
+        g_free(new_type_name);
 
     /* store pointer to the class with the GType */
     Py_INCREF(class);
