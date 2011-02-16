@@ -1180,6 +1180,14 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(table.get_size(), (2,3))
         self.assertEquals(table.get_homogeneous(), True)
 
+        # Test PyGTK interface
+        table = Gtk.Table(rows=3, columns=2)
+        self.assertEquals(table.get_size(), (3,2))
+        # Test using the actual property names
+        table = Gtk.Table(n_rows=2, n_columns=3, homogeneous=True)
+        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_homogeneous(), True)
+
         label = Gtk.Label('Hello')
         table.attach(label, 0, 1, 0, 1)
         self.assertEquals(label, table.get_children()[0])
