@@ -229,6 +229,46 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
 
+    def mro(cls):
+        return mro(cls)
+
+
+def mro(C):
+    """Compute the class precedence list (mro) according to C3
+
+    Based on http://www.python.org/download/releases/2.3/mro/
+    Modified to consider that interfaces don't create the diamond problem
+    """
+    # TODO: If this turns out being too slow, consider using generators
+    bases = []
+    bases_of_subclasses = [[C]]
+
+    if C.__bases__:
+        bases_of_subclasses += map(mro, C.__bases__) + [list(C.__bases__)]
+
+    while bases_of_subclasses:
+        for subclass_bases in bases_of_subclasses:
+            candidate = subclass_bases[0]
+            not_head = [s for s in bases_of_subclasses if candidate in s[1:]]
+            if not_head and gobject.GInterface not in candidate.__bases__:
+                candidate = None # conflict, reject candidate
+            else:
+                break
+
+        if candidate is None:
+            raise TypeError('Cannot create a consistent method resolution '
+                            'order (MRO)')
+
+        bases.append(candidate)
+
+        for subclass_bases in bases_of_subclasses[:]: # remove candidate
+            if subclass_bases and subclass_bases[0] == candidate:
+                del subclass_bases[0]
+                if not subclass_bases:
+                    bases_of_subclasses.remove(subclass_bases)
+
+    return bases
+
 
 class StructMeta(type, MetaClassHelper):
 

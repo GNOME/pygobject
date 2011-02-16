@@ -1609,6 +1609,22 @@ class TestInterfaces(unittest.TestCase):
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEquals(instance.val, 42)
 
+    def test_mro(self):
+        # there was a problem with Python bailing out because of
+        # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
+        # which shouldn't really be a problem.
+
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+            pass
+
+        class TestInterfaceImpl2(GIMarshallingTests.Interface,
+                                 TestInterfaceImpl):
+            pass
+
+        class TestInterfaceImpl3(TestInterfaceImpl,
+                                 GIMarshallingTests.Interface2):
+            pass
+
 
 class TestInterfaceClash(unittest.TestCase):
 
