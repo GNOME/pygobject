@@ -25,6 +25,7 @@ from __future__ import absolute_import
 import os
 import gobject
 
+import gi
 from .overrides import registry
 
 from ._gi import \
@@ -230,28 +231,19 @@ class DynamicModule(object):
     def __init__(self, namespace):
         self._namespace = namespace
         self._introspection_module = None
-        self._version = None
         self._overrides_module = None
         self.__path__ = None
 
-    def require_version(self, version):
-        if self._introspection_module is not None and \
-                self._introspection_module._version != version:
-            raise RuntimeError('Module has been already loaded ')
-        self._version = version
-
-    def _import(self):
+    def load(self):
+        version = gi.get_required_version(self._namespace)
         self._introspection_module = IntrospectionModule(self._namespace,
-                                                         self._version)
+                                                         version)
 
         overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
         self._overrides_module = getattr(overrides_modules, self._namespace, None)
         self.__path__ = repository.get_typelib_path(self._namespace)
 
     def __getattr__(self, name):
-        if self._introspection_module is None:
-            self._import()
-
         if self._overrides_module is not None:
             override_exports = getattr(self._overrides_module, '__all__', ())
             if name in override_exports:
@@ -269,9 +261,6 @@ class DynamicModule(object):
         return getattr(self._introspection_module, name)
 
     def __dir__ (self):
-        if self._introspection_module is None:
-            self._import()
-            
         # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
         result = set(dir(self.__class__))
         result.update(self.__dict__.keys())
@@ -282,8 +271,6 @@ class DynamicModule(object):
         return list(result)
 
     def __repr__(self):
-        repository.require(self._namespace, self._version)
-
         path = repository.get_typelib_path(self._namespace)
         return "<%s.%s %r from %r>" % (self.__class__.__module__,
                                       self.__class__.__name__,
