@@ -68,6 +68,7 @@ class DynamicImporter(object):
 
         dynamic_module = DynamicModule(namespace)
         modules[namespace] = dynamic_module
+        dynamic_module.load()
 
         dynamic_module.__file__ = '<%s>' % fullname
         dynamic_module.__loader__ = self
