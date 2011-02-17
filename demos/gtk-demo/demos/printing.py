@@ -120,16 +120,12 @@ class PrintingApp:
         layout.set_font_description(desc)
 
         layout.set_text(print_data['filename'], -1)
-        
-        # FIXME: Not annotated correctly
-        # (text_width, text_height) = layout.get_pixel_size()
-        text_width = 8
-        text_height = 8
+        (text_width, text_height) = layout.get_pixel_size()
         
         if text_width > width:
             layout.set_width(width)
             layout.set_ellipsize(Pango.EllipsizeType.START);
-            # FIXME: (text_width, text_height) = layout.get_pixel_size(layout)
+            (text_width, text_height) = layout.get_pixel_size(layout)
 
         cr.move_to ((width - text_width) / 2,
                     (self.HEADER_HEIGHT - text_height) / 2)
@@ -139,7 +135,7 @@ class PrintingApp:
         layout.set_text(page_str, -1)
 
         layout.set_width(-1)
-        # FIXME: (text_width, text_height) = layout.get_pixel_size()
+        (text_width, text_height) = layout.get_pixel_size()
         cr.move_to(width - text_width - 4, 
                    (self.HEADER_HEIGHT - text_height) / 2)
         PangoCairo.show_layout(cr, layout);
