@@ -8,7 +8,7 @@ import sys
 import unittest
 
 if '--help' in sys.argv:
-    print "Usage: ./runtests.py <testfiles>"
+    print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
 
 
