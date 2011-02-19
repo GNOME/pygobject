@@ -923,8 +923,23 @@ _wrap_g_enum_info_get_values (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_enum_info_is_flags (PyGIBaseInfo *self)
+{
+    GIInfoType info_type = g_base_info_get_type ((GIBaseInfo *) self->info);
+
+    if (info_type == GI_INFO_TYPE_ENUM) {
+        Py_RETURN_FALSE;
+    } else if (info_type == GI_INFO_TYPE_FLAGS) {
+        Py_RETURN_TRUE;
+    } else {
+        g_assert_not_reached();
+    }
+}
+
 static PyMethodDef _PyGIEnumInfo_methods[] = {
     { "get_values", (PyCFunction) _wrap_g_enum_info_get_values, METH_NOARGS },
+    { "is_flags", (PyCFunction) _wrap_g_enum_info_is_flags, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
