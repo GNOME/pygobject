@@ -40,12 +40,13 @@ from ._gi import \
     Struct, \
     Boxed, \
     enum_add, \
-    flags_add
+    enum_register_new_gtype_and_add, \
+    flags_add, \
+    flags_register_new_gtype_and_add
 from .types import \
     GObjectMeta, \
     StructMeta, \
-    Function, \
-    Enum
+    Function
 
 repository = Repository.get_default()
 
@@ -102,13 +103,18 @@ class IntrospectionModule(object):
             wrapper = g_type.pytype
 
             if wrapper is None:
-                if g_type.is_a(gobject.TYPE_ENUM):
-                    wrapper = enum_add(g_type)
-                elif g_type.is_a(gobject.TYPE_NONE):
-                    # An enum with a GType of None is an enum without GType
-                    wrapper = type(info.get_name(), (Enum,), {})
+                if info.is_flags():
+                    if g_type.is_a(gobject.TYPE_FLAGS):
+                        wrapper = flags_add(g_type)
+                    else:
+                        assert g_type == gobject.TYPE_NONE
+                        wrapper = flags_register_new_gtype_and_add(info)
                 else:
-                    wrapper = flags_add(g_type)
+                    if g_type.is_a(gobject.TYPE_ENUM):
+                        wrapper = enum_add(g_type)
+                    else:
+                        assert g_type == gobject.TYPE_NONE
+                        wrapper = enum_register_new_gtype_and_add(info)
 
                 wrapper.__info__ = info
                 wrapper.__module__ = 'gi.repository.' + info.get_namespace()

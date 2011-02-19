@@ -250,19 +250,3 @@ class StructMeta(type, MetaClassHelper):
                     not method_info.get_arguments():
                 cls.__new__ = staticmethod(Constructor(method_info))
                 break
-
-class Enum(int):
-    # Only subclasses of this type should be instantiated.
-    # Each subclass requires an __info__ attribute,
-    # which is not declared here because enums do not share the same gi type.
-    def __init__(self, value):
-        int.__init__(value)
-
-    def __repr__(self):
-        value_name = str(self)
-        for value_info in self.__info__.get_values():
-            if self == value_info.get_value():
-                value_name = value_info.get_name().upper()
-        return "<enum %s of type %s.%s>" % (value_name,
-                                            self.__info__.get_namespace(),
-                                            self.__info__.get_name())

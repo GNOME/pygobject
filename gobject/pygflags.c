@@ -172,13 +172,18 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     pyint = PYGLIB_PyLong_FromLong(value);
     ret = PyDict_GetItem(values, pyint);
+    if (!ret) {
+        PyErr_Clear();
+
+        ret = pyg_flags_val_new((PyObject *)type, gtype, pyint);
+        g_assert(ret != NULL);
+    } else {
+        Py_INCREF(ret);
+    }
+
     Py_DECREF(pyint);
     Py_DECREF(values);
 
-    if (ret)
-        Py_INCREF(ret);
-    else
-        PyErr_Format(PyExc_ValueError, "invalid flag value: %ld", value);
     return ret;
 }
 
