@@ -655,7 +655,20 @@ class TestGtk(unittest.TestCase):
         test_pyobj = TestPyObject()
         test_pydict = {1:1, "2":2, "3":"3"}
         test_pylist = [1,"2", "3"]
-        tree_store = Gtk.TreeStore(int, 'gchararray', TestGtk.TestClass, object, object, object)
+        tree_store = Gtk.TreeStore(int,
+                                   'gchararray',
+                                   TestGtk.TestClass,
+                                   object,
+                                   object,
+                                   object,
+                                   bool,
+                                   bool,
+                                   GObject.TYPE_UINT,
+                                   GObject.TYPE_ULONG,
+                                   GObject.TYPE_INT64,
+                                   GObject.TYPE_UINT64,
+                                   GObject.TYPE_UCHAR,
+                                   GObject.TYPE_CHAR)
 
         parent = None
         for i in range(100):
@@ -666,7 +679,16 @@ class TestGtk(unittest.TestCase):
                                                 testobj,
                                                 test_pyobj,
                                                 test_pydict,
-                                                test_pylist))
+                                                test_pylist,
+                                                i % 2,
+                                                bool(i % 2),
+                                                i,
+                                                sys.maxint + 1,
+                                                -9223372036854775808,
+                                                0xffffffffffffffff,
+                                                254,
+                                                'a'
+                                                ))
 
         # len gets the number of children in the root node
         # since we kept appending to the previous node
@@ -682,9 +704,6 @@ class TestGtk(unittest.TestCase):
            i = tree_store.get_value(treeiter, 0)
            s = tree_store.get_value(treeiter, 1)
            obj = tree_store.get_value(treeiter, 2)
-           i = tree_store.get_value(treeiter, 0)
-           s = tree_store.get_value(treeiter, 1)
-           obj = tree_store.get_value(treeiter, 2)
            obj.check(i, s)
 
            pyobj = tree_store.get_value(treeiter, 3)
@@ -693,6 +712,25 @@ class TestGtk(unittest.TestCase):
            self.assertEquals(pydict, test_pydict)
            pylist = tree_store.get_value(treeiter, 5)
            self.assertEquals(pylist, test_pylist)
+
+           bool_1 = tree_store.get_value(treeiter, 6)
+           bool_2 = tree_store.get_value(treeiter, 7)
+           self.assertEquals(bool_1, bool_2)
+           self.assertTrue(isinstance(bool_1, bool))
+           self.assertTrue(isinstance(bool_2, bool))
+
+           uint_ = tree_store.get_value(treeiter, 8)
+           self.assertEquals(uint_, i)
+           ulong_ = tree_store.get_value(treeiter, 9)
+           self.assertEquals(ulong_, sys.maxint + 1)
+           int64_ = tree_store.get_value(treeiter, 10)
+           self.assertEquals(int64_, -9223372036854775808)
+           uint64_ = tree_store.get_value(treeiter, 11)
+           self.assertEquals(uint64_, 0xffffffffffffffff)
+           uchar_ = tree_store.get_value(treeiter, 12)
+           self.assertEquals(ord(uchar_), 254)
+           char_ = tree_store.get_value(treeiter, 13)
+           self.assertEquals(char_, 'a')
 
            parent = treeiter
            treeiter = tree_store.iter_children(parent)
@@ -707,7 +745,7 @@ class TestGtk(unittest.TestCase):
         test_pydict = {1:1, "2":2, "3":"3"}
         test_pylist = [1,"2", "3"]
 
-        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object)
+        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object, bool, bool)
         for i in range(93):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
@@ -716,7 +754,9 @@ class TestGtk(unittest.TestCase):
                                         testobj,
                                         test_pyobj,
                                         test_pydict,
-                                        test_pylist))
+                                        test_pylist,
+                                        i % 2,
+                                        bool(i % 2)))
 
         i = 93
         label = _unicode('this is row #93')
@@ -727,6 +767,8 @@ class TestGtk(unittest.TestCase):
         list_store.set_value(treeiter, 3, test_pyobj)
         list_store.set_value(treeiter, 4, test_pydict)
         list_store.set_value(treeiter, 5, test_pylist)
+        list_store.set_value(treeiter, 6, 1)
+        list_store.set_value(treeiter, 7, True)
 
         # test automatic unicode->str conversion
         i = 94
@@ -736,7 +778,9 @@ class TestGtk(unittest.TestCase):
                                       TestGtk.TestClass(self, i, label),
                                       test_pyobj,
                                       test_pydict,
-                                      test_pylist))
+                                      test_pylist,
+                                      0,
+                                      False))
 
         # add sorted items out of order to test insert* apis
         i = 97
@@ -746,7 +790,9 @@ class TestGtk(unittest.TestCase):
                                       TestGtk.TestClass(self, i, label),
                                       test_pyobj,
                                       test_pydict,
-                                      test_pylist))
+                                      test_pylist,
+                                      1,
+                                      True))
         # this should append
         i = 99
         label = 'this is row #99'
@@ -755,7 +801,9 @@ class TestGtk(unittest.TestCase):
                                  TestGtk.TestClass(self, i, label),
                                  test_pyobj,
                                  test_pydict,
-                                 test_pylist))
+                                 test_pylist,
+                                 1,
+                                 True))
 
         i = 96
         label = 'this is row #96'
@@ -764,7 +812,9 @@ class TestGtk(unittest.TestCase):
                                             TestGtk.TestClass(self, i, label),
                                             test_pyobj,
                                             test_pydict,
-                                            test_pylist))
+                                            test_pylist,
+                                            0,
+                                            False))
 
         i = 98
         label = 'this is row #98'
@@ -773,7 +823,9 @@ class TestGtk(unittest.TestCase):
                                            TestGtk.TestClass(self, i, label),
                                            test_pyobj,
                                            test_pydict,
-                                           test_pylist))
+                                           test_pylist,
+                                           0,
+                                           False))
 
 
         i = 95
@@ -783,7 +835,9 @@ class TestGtk(unittest.TestCase):
                                TestGtk.TestClass(self, i, label),
                                test_pyobj,
                                test_pydict,
-                               test_pylist))
+                               test_pylist,
+                               1,
+                               True))
 
         self.assertEquals(len(list_store), 100)
 
@@ -805,6 +859,13 @@ class TestGtk(unittest.TestCase):
             self.assertEquals(pydict, test_pydict)
             pylist = list_store.get_value(treeiter, 5)
             self.assertEquals(pylist, test_pylist)
+
+            bool_1 = list_store.get_value(treeiter, 6)
+            bool_2 = list_store.get_value(treeiter, 7)
+            self.assertEquals(bool_1, bool_2)
+            self.assertTrue(isinstance(bool_1, bool))
+            self.assertTrue(isinstance(bool_2, bool))
+
             treeiter = list_store.iter_next(treeiter)
 
             counter += 1
