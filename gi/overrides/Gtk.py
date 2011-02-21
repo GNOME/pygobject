@@ -728,9 +728,9 @@ class TreeModel(Gtk.TreeModel):
 
             # we may need to convert to a basic type
             type_ = self.get_column_type(column)
-            if type_ == gobject.TYPE_PYOBJECT:
+            if type_ == GObject.TYPE_PYOBJECT:
                 pass # short-circut branching
-            elif type_ == gobject.TYPE_STRING:
+            elif type_ == GObject.TYPE_STRING:
                 if isinstance(value, str):
                     value = str(value)
                 elif sys.version_info < (3, 0):
@@ -740,12 +740,12 @@ class TreeModel(Gtk.TreeModel):
                         raise ValueError('Expected string or unicode for column %i but got %s%s' % (column, value, type(value)))
                 else:
                     raise ValueError('Expected a string for column %i but got %s' % (column, type(value)))
-            elif type_ == gobject.TYPE_FLOAT or type_ == gobject.TYPE_DOUBLE:
+            elif type_ == GObject.TYPE_FLOAT or type_ == GObject.TYPE_DOUBLE:
                 if isinstance(value, float):
                     value = float(value)
                 else:
                     raise ValueError('Expected a float for column %i but got %s' % (column, type(value)))
-            elif type_ == gobject.TYPE_LONG or type_ == gobject.TYPE_INT:
+            elif type_ == GObject.TYPE_LONG or type_ == GObject.TYPE_INT:
                 if isinstance(value, int):
                     value = int(value)
                 elif sys.version_info < (3, 0):
@@ -755,6 +755,35 @@ class TreeModel(Gtk.TreeModel):
                         raise ValueError('Expected an long for column %i but got %s' % (column, type(value)))
                 else:
                     raise ValueError('Expected an integer for column %i but got %s' % (column, type(value)))
+            elif type_ == GObject.TYPE_BOOLEAN:
+                if isinstance(value, (int, long)):
+                    value = bool(value)
+                else:
+                    raise ValueError('Expected a bool for column %i but got %s' % (column, type(value)))
+            else:
+                # use GValues directly to marshal to the correct type
+                # standard object checks should take care of validation
+                # so we don't have to do it here
+                value_container = GObject.Value()
+                value_container.init(type_)
+                if type_ == GObject.TYPE_CHAR:
+                    value_container.set_char(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_UCHAR:
+                    value_container.set_uchar(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_UINT:
+                    value_container.set_uint(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_ULONG:
+                    value_container.set_ulong(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_INT64:
+                    value_container.set_int64(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_UINT64:
+                    value_container.set_uint64(value)
+                    value = value_container
 
             return value
 
