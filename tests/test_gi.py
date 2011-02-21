@@ -925,13 +925,20 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_in(self):
         GIMarshallingTests.gvalue_in(42)
+        value = GObject.Value()
+        value.init(GObject.TYPE_INT)
+        value.set_int(42)
+        GIMarshallingTests.gvalue_in(value)
 
     def test_gvalue_out(self):
         self.assertEquals(42, GIMarshallingTests.gvalue_out())
 
     def test_gvalue_inout(self):
         self.assertEquals('42', GIMarshallingTests.gvalue_inout(42))
-
+        value = GObject.Value()
+        value.init(GObject.TYPE_INT)
+        value.set_int(42)
+        self.assertEquals('42', GIMarshallingTests.gvalue_inout(value))
 
 class TestGClosure(unittest.TestCase):
 

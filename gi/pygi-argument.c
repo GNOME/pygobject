@@ -1009,13 +1009,25 @@ array_success:
                         g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
 
                         value = g_slice_new0 (GValue);
-                        g_value_init (value, object_type);
 
-                        retval = pyg_value_from_pyobject (value, object);
-                        if (retval < 0) {
-                            g_slice_free (GValue, value);
-                            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
-                            break;
+                        /* if already a gvalue, copy, else marshal into gvalue */
+                        if (object_type == G_TYPE_VALUE) {
+                            /* src GValue's lifecycle is handled by Python
+                             * so we have to copy it into the destination's
+                             * GValue which is freed during the cleanup of
+                             * invoke.
+                             */
+                            GValue *src = (GValue *)((PyGObject *) object)->obj;
+                            g_value_init (value, G_VALUE_TYPE (src));
+                            g_value_copy(src, value);
+                        } else {
+                            g_value_init (value, object_type);
+                            retval = pyg_value_from_pyobject (value, object);
+                            if (retval < 0) {
+                                g_slice_free (GValue, value);
+                                PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
+                                break;
+                            }
                         }
 
                         arg.v_pointer = value;
