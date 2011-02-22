@@ -24,9 +24,6 @@ description = """
 The Button Box widgets are used to arrange buttons with padding.
 """
 
-# See FIXME's
-is_fully_bound = False
-
 from gi.repository import Gtk
 
 class ButtonBoxApp:
@@ -101,14 +98,13 @@ class ButtonBoxApp:
         bbox.set_layout(layout)
         bbox.set_spacing(spacing)
 
-        # FIXME: GtkButton consturctor should take a stock_id
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_OK)
+        button = Gtk.Button(Gtk.STOCK_OK)
         bbox.add(button)
 
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_CANCEL)
+        button = Gtk.Button(Gtk.STOCK_CANCEL)
         bbox.add(button)
 
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_HELP)
+        button = Gtk.Button(Gtk.STOCK_HELP)
         bbox.add(button)
 
         return frame

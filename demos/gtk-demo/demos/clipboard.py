@@ -56,9 +56,7 @@ class ClipboardApp:
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
 
-        #FIXME: have the button constuctor take a stock_id
-        # create button
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_COPY)
+        button = Gtk.Button(Gtk.STOCK_COPY)
         hbox.pack_start(button, False, False, 0)
         button.connect('clicked', self.copy_button_clicked, entry)
 
@@ -73,9 +71,7 @@ class ClipboardApp:
         # create secondary entry
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
-        #FIXME: have the button constuctor take a stock_id
-        # create button
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_PASTE)
+        button = Gtk.Button(Gtk.STOCK_PASTE)
         hbox.pack_start(button, False, False, 0)
         button.connect('clicked', self.paste_button_clicked, entry)
 

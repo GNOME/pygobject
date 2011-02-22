@@ -34,9 +34,6 @@ and drag in the scribble area to draw squiggles. Resize the window
 to clear the area.
 """
 
-# See FIXME's
-is_fully_bound = False
-
 from gi.repository import Gtk, Gdk
 import cairo
 

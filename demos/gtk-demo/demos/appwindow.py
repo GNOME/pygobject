@@ -24,9 +24,6 @@ description = """
 Demonstrates a typical application window with menubar, toolbar, statusbar.
 """
 
-# See FIXME's
-is_fully_bound = False
-
 from gi.repository import Gtk, GdkPixbuf, Gdk
 import sys, os
 import glib
@@ -51,12 +48,11 @@ def activate_action(action, user_data):
         return
 
 
-    dialog = Gtk.MessageDialog(message_type=Gtk.MessageType.INFO,
+    dialog = Gtk.MessageDialog(parent=window,
+                               message_type=Gtk.MessageType.INFO,
                                buttons=Gtk.ButtonsType.CLOSE,
                                text='You activated action: "%s" of type %s' % (name, _type))
 
-    # FIXME: this should be done in the constructor
-    dialog.set_transient_for(window)
     dialog.connect('response', widget_destroy)
     dialog.show()
 
@@ -123,9 +119,9 @@ Boston, MA 02111-1307, USA.
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
 
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-    # FIXME: override Gtk.show_about_dialog
-    #        make about dailog constructor take a parent argument
-    about = Gtk.AboutDialog(program_name='GTK+ Code Demos',
+    about = Gtk.AboutDialog(
+                parent=window, 
+                program_name='GTK+ Code Demos',
 			    version='0.1',
 			    copyright='(C) 2010 The PyGI Team',
 			    license=license,
@@ -136,10 +132,8 @@ Boston, MA 02111-1307, USA.
 			    logo=transparent,
 			    title='About GTK+ Code Demos')
 
-    about.set_transient_for(window)
     about.connect('response', widget_destroy)
-    about.show()
-
+    about.run()
 
 action_entries = (
     ("FileMenu", None, "_File"),                # name, stock id, label

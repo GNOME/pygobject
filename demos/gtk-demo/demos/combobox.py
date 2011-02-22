@@ -113,9 +113,7 @@ class ComboboxApp:
         combo.add_attribute(renderer, 'text', 0)
         combo.set_cell_data_func(renderer, self.is_capital_sensistive, None)
 
-        # FIXME: make new_from_indices work
-        #        make constructor take list or string of indices
-        path = Gtk.TreePath.new_from_string('0:8')
+        path = Gtk.TreePath('0:8')
         treeiter = model.get_iter(path)
         combo.set_active_iter(treeiter)
 
