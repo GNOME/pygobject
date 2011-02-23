@@ -241,8 +241,46 @@ _pygi_g_type_interface_check_object (GIBaseInfo *info,
         case GI_INFO_TYPE_BOXED:
         case GI_INFO_TYPE_INTERFACE:
         case GI_INFO_TYPE_OBJECT:
-        case GI_INFO_TYPE_UNION:
             retval = _pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) info, TRUE, object);
+            break;
+        case GI_INFO_TYPE_UNION:
+
+
+            retval = _pygi_g_registered_type_info_check_object ( (GIRegisteredTypeInfo *) info, TRUE, object);
+
+            /* If not the same type then check to see if the object's type
+             * is the same as one of the union's members
+             */
+            if (retval == 0) {
+                gint i;
+                gint n_fields;
+
+                n_fields = g_union_info_get_n_fields ( (GIUnionInfo *) info);
+
+                for (i = 0; i < n_fields; i++) {
+                    gint member_retval;
+                    GIFieldInfo *field_info;
+                    GITypeInfo *field_type_info;
+
+                    field_info =
+                        g_union_info_get_field ( (GIUnionInfo *) info, i);
+                    field_type_info = g_field_info_get_type (field_info);
+
+                    member_retval = _pygi_g_type_info_check_object(
+                        field_type_info,
+                        object,
+                        TRUE);
+
+                    g_base_info_unref ( ( GIBaseInfo *) field_type_info);
+                    g_base_info_unref ( ( GIBaseInfo *) field_info);
+
+                    if (member_retval == 1) {
+                        retval = member_retval;
+                        break;
+                    }
+                }
+            }
+
             break;
         default:
             g_assert_not_reached();
