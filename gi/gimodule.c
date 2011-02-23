@@ -83,15 +83,22 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         GIValueInfo *value_info;
         GEnumValue *enum_value;
         const gchar *name;
+        const gchar *c_identifier;
 
         value_info = g_enum_info_get_value (info, i);
         name = g_base_info_get_name ((GIBaseInfo *) value_info);
+        c_identifier = g_base_info_get_attribute ((GIBaseInfo *) value_info,
+                                                  "c:identifier");
 
         enum_value = &g_enum_values[i];
         enum_value->value_nick = g_strdup (name);
-        /* TODO: get "c:identifier" attribute for value_name once GI exposes it in the typelib */
-        enum_value->value_name = enum_value->value_nick;
         enum_value->value = g_value_info_get_value (value_info);
+
+        if (c_identifier == NULL) {
+            enum_value->value_name = enum_value->value_nick;
+        } else {
+            enum_value->value_name = g_strdup (c_identifier);
+        }
 
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
@@ -163,15 +170,22 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
         GIValueInfo *value_info;
         GFlagsValue *flags_value;
         const gchar *name;
+        const gchar *c_identifier;
 
         value_info = g_enum_info_get_value (info, i);
         name = g_base_info_get_name ((GIBaseInfo *) value_info);
+        c_identifier = g_base_info_get_attribute ((GIBaseInfo *) value_info,
+                                                  "c:identifier");
 
         flags_value = &g_flags_values[i];
         flags_value->value_nick = g_strdup (name);
-        /* TODO: get "c:identifier" attribute for value_name once GI exposes it in the typelib */
-        flags_value->value_name = flags_value->value_nick;
         flags_value->value = g_value_info_get_value (value_info);
+
+        if (c_identifier == NULL) {
+            flags_value->value_name = flags_value->value_nick;
+        } else {
+            flags_value->value_name = g_strdup (c_identifier);
+        }
 
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
