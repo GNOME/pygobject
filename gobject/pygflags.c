@@ -161,7 +161,7 @@ pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
 
-    if (!PyDict_Check(values) || PyDict_Size(values) != eclass->n_values) {
+    if (!PyDict_Check(values)) {
 	PyErr_SetString(PyExc_TypeError, "__flags_values__ badly formed");
 	Py_DECREF(values);
 	g_type_class_unref(eclass);
