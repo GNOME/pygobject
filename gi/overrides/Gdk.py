@@ -22,6 +22,8 @@
 from ..overrides import override
 from ..importer import modules
 
+import sys
+
 Gdk = modules['Gdk']._introspection_module
 
 __all__ = []
@@ -140,6 +142,74 @@ class Event(Gdk.Event):
 
 Event = override(Event)
 __all__.append('Event')
+
+# manually bind GdkEvent members to GdkEvent
+
+modname = globals()['__name__']
+module = sys.modules[modname]
+
+# right now we can't get the type_info from the
+# field info so manually list the class names
+event_member_classes = ['EventAny',
+                        'EventExpose',
+                        'EventVisibility',
+                        'EventMotion',
+                        'EventButton',
+                        'EventScroll',
+                        'EventKey',
+                        'EventCrossing',
+                        'EventFocus',
+                        'EventConfigure',
+                        'EventProperty',
+                        'EventSelection',
+                        'EventOwnerChange',
+                        'EventProximity',
+                        'EventDND',
+                        'EventWindowState',
+                        'EventSetting',
+                        'EventGrabBroken']
+
+if Gdk._version == '2.0':
+    event_member_classes.append('EventNoExpose')
+
+# whitelist all methods that have a success return we want to mask
+gsuccess_mask_funcs = ['get_state',
+                       'get_axis',
+                       'get_coords',
+                       'get_root_coords']
+
+def _gsuccess_mask(func):
+    def cull_success(*args):
+        result = func(*args)
+        success = result[0]
+        if success == False:
+            return None
+        else:
+            if len(result) == 2:
+                return result[1]
+            else:
+                return result[1:]
+    return cull_success
+
+for event_class in event_member_classes:
+    override_class = type(event_class, (getattr(Gdk, event_class),), {})
+    # add the event methods
+    for method_info in Gdk.Event.__info__.get_methods():
+        name = method_info.get_name()
+        event_method = getattr(Gdk.Event, name)
+        # python2 we need to use the __func__ attr to avoid internal
+        # instance checks
+        event_method = getattr(event_method, '__func__', event_method)
+
+        # use the _gsuccess_mask decorator if this method is whitelisted
+        if name in gsuccess_mask_funcs:
+            event_method = _gsuccess_mask(event_method)
+        setattr(override_class, name, event_method)
+
+    setattr(module, event_class, override_class)
+    __all__.append(event_class)
+
+# end GdkEvent overrides
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
