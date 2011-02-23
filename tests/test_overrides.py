@@ -783,16 +783,24 @@ class TestGtk(unittest.TestCase):
                                       False))
 
         # add sorted items out of order to test insert* apis
+        # also test sending in None to not set a column
         i = 97
         label = 'this is row #97'
-        treeiter = list_store.append((i,
-                                      label,
-                                      TestGtk.TestClass(self, i, label),
+        treeiter = list_store.append((None,
+                                      None,
+                                      None,
                                       test_pyobj,
-                                      test_pydict,
+                                      None,
                                       test_pylist,
                                       1,
-                                      True))
+                                      None))
+
+        list_store.set_value(treeiter, 0, i)
+        list_store.set_value(treeiter, 1, label)
+        list_store.set_value(treeiter, 2, TestGtk.TestClass(self, i, label))
+        list_store.set_value(treeiter, 4, test_pydict)
+        list_store.set_value(treeiter, 7, True)
+ 
         # this should append
         i = 99
         label = 'this is row #99'

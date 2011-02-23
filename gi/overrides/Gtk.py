@@ -720,6 +720,9 @@ class TreeModel(Gtk.TreeModel):
 
         for i in range(n_columns):
             value = row[i]
+            if value is None:
+               continue  # None means skip this row
+
             self.set_value(treeiter, i, value)
 
     def _convert_value(self, treeiter, column, value):
