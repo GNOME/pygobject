@@ -62,6 +62,12 @@ struct invocation_state
     PyObject  *return_value;
 
     GType      implementor_gtype;
+
+    /* hack to avoid treating C arrays as GArrays during free
+     * due to overly complicated array handling
+     * this will be removed when the new invoke branch is merged
+     */
+    gboolean c_arrays_are_wrapped;
 };
 
 static gboolean
@@ -120,6 +126,11 @@ _initialize_invocation_state (struct invocation_state *state,
     state->out_args = NULL;
     state->out_values = NULL;
     state->backup_args = NULL;
+
+    /* HACK: this gets marked FALSE whenever a C array in the args is
+     *       not wrapped by a GArray
+     */
+    state->c_arrays_are_wrapped = TRUE;
 
     return TRUE;
 }
@@ -556,6 +567,20 @@ _prepare_invocation_state (struct invocation_state *state,
                             (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C)) {
                         state->args[i]->v_pointer = array->data;
 
+                        /* HACK: We have unwrapped a C array so
+                         *       set the state to reflect this.
+                         *       If there is an error between now
+                         *       and when we rewrap the array
+                         *       we will leak C arrays due to
+                         *       being in an inconsitant state.
+                         *       e.g. for interfaces with more
+                         *       than one C array argument, an
+                         *       error may occure when not all
+                         *       C arrays have been rewrapped.
+                         *       This will be removed once the invoke
+                         *       rewrite branch is merged.
+                         */
+                        state->c_arrays_are_wrapped = FALSE;
                         if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
                             /* The array hasn't been referenced anywhere, so free it to avoid losing memory. */
                             g_array_free (array, FALSE);
@@ -847,6 +872,14 @@ _process_invocation_state (struct invocation_state *state,
 
         }
 
+        /* HACK: We rewrapped any C arrays above in a GArray so they are ok to
+         *       free as GArrays.  We will always leak C arrays if there is
+         *       an error before we reach this state as there is no easy way
+         *       to know which arrays were wrapped if there are more than one.
+         *       This will be removed with better array handling once merge
+         *       the invoke rewrite branch.
+         */
+        state->c_arrays_are_wrapped = TRUE;
         g_assert (state->n_return_values <= 1 || return_values_pos == state->n_return_values);
     }
 
@@ -896,13 +929,26 @@ _free_invocation_state (struct invocation_state *state)
                 backup_args_pos += 1;
             }
             if (state->args != NULL && state->args[i] != NULL) {
-                _pygi_argument_release (state->args[i], state->arg_type_infos[i],
-                                        transfer, direction);
-
                 type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
+
+                if (type_tag == GI_TYPE_TAG_ARRAY &&
+                        (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) &&
+                        (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C) &&
+                        !state->c_arrays_are_wrapped) {
+                    /* HACK: Noop - we are in an inconsitant state due to
+                     *       complex array handler so leak any C arrays
+                     *       as we don't know if we can free them safely.
+                     *       This will be removed when we merge the
+                     *       invoke rewrite branch.
+                     */
+                } else {
+                    _pygi_argument_release (state->args[i], state->arg_type_infos[i],
+                                            transfer, direction);
+                }
+
                 if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
-                    /* We created a #GArray and it has not been released above, so free it. */
+                    /* We created an *out* #GArray and it has not been released above, so free it. */
                     state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
                 }
             }
