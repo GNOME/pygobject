@@ -963,6 +963,15 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
         self.assertEquals(42, GIMarshallingTests.Enum.VALUE3)
 
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE3')
+
     def test_enum_in(self):
         GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.enum_in(42)
@@ -1000,6 +1009,15 @@ class TestGEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
         self.assertEquals(42, GIMarshallingTests.GEnum.VALUE3)
 
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE3')
+
     def test_genum_in(self):
         GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
         GIMarshallingTests.genum_in(42)
@@ -1029,6 +1047,15 @@ class TestGFlags(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1 | GIMarshallingTests.Flags.VALUE2,
                                    GIMarshallingTests.Flags))
         self.assertEquals(1 << 1, GIMarshallingTests.Flags.VALUE2)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE3')
 
     def test_flags_in(self):
         GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2)
@@ -1060,6 +1087,15 @@ class TestNoTypeFlags(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1 | GIMarshallingTests.NoTypeFlags.VALUE2,
                                    GIMarshallingTests.NoTypeFlags))
         self.assertEquals(1 << 1, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE3')
 
     def test_flags_in(self):
         GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2)
