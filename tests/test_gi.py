@@ -1691,3 +1691,12 @@ class TestDir(unittest.TestCase):
         #        in the list:
         #
         # self.assertTrue('DoNotImportDummyTests' in list)
+
+class TestGErrorArrayInCrash(unittest.TestCase):
+    # Previously there was a bug in invoke, in which C arrays were unwrapped
+    # from inside GArrays to be passed to the C function. But when a GError was
+    # set, invoke would attempt to free the C array as if it were a GArray.
+    # This crash is only for C arrays. It does not happen for C functions which
+    # take in GArrays. See https://bugzilla.gnome.org/show_bug.cgi?id=642708
+    def test_gerror_array_in_crash(self):
+        self.assertRaises(GObject.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])
