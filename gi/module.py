@@ -234,7 +234,7 @@ class DynamicModule(object):
         self._overrides_module = None
         self.__path__ = None
 
-    def load(self):
+    def _load(self):
         version = gi.get_required_version(self._namespace)
         self._introspection_module = IntrospectionModule(self._namespace,
                                                          version)

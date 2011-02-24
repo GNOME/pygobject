@@ -73,7 +73,7 @@ class DynamicImporter(object):
         dynamic_module.__loader__ = self
 
         sys.modules[fullname] = dynamic_module
-        dynamic_module.load()
+        dynamic_module._load()
 
         return dynamic_module
 
