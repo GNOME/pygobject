@@ -364,10 +364,7 @@ class TestGdk(unittest.TestCase):
             self.assertTrue(isinstance(event, Gdk.EventButton))
             self.assertTrue(event.type == Gdk.EventType.BUTTON_PRESS)
             self.assertEquals(event.send_event, 0)
-            event.state = Gdk.ModifierType.CONTROL_MASK
             self.assertEquals(event.get_state(), Gdk.ModifierType.CONTROL_MASK)
-
-            event.x_root, event.y_root = 2, 5
             self.assertEquals(event.get_root_coords(), (2, 5))
 
             event.time = 12345
@@ -378,7 +375,11 @@ class TestGdk(unittest.TestCase):
         b.connect('button-press-event', button_press_cb)
         w.add(b)
         w.show_all()
-        b.emit('button-press-event', Gdk.Event.new(Gdk.EventType.BUTTON_PRESS))
+        Gdk.test_simulate_button(b.get_window(),
+                                 2, 5,
+                                 0,
+                                 Gdk.ModifierType.CONTROL_MASK,
+                                 Gdk.EventType.BUTTON_PRESS)
 
     def test_cursor(self):
         self.assertEquals(Gdk.Cursor, overrides.Gdk.Cursor)
