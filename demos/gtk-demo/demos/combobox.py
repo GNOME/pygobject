@@ -154,7 +154,7 @@ class ComboboxApp:
         for id in stock_id:
             if id is not None:
                 pixbuf = cellview.render_icon(id, Gtk.IconSize.BUTTON, None)
-                success, item = Gtk.stock_lookup(id)
+                item = Gtk.stock_lookup(id)
                 label = self.strip_underscore(item.label)
                 store.append((pixbuf, label))
             else:
