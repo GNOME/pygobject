@@ -1218,6 +1218,15 @@ _Gtk_main_quit = Gtk.main_quit
 def main_quit(*args):
     _Gtk_main_quit()
 
+_Gtk_stock_lookup = Gtk.stock_lookup
+@override(Gtk.stock_lookup)
+def stock_lookup(*args):
+    success, item = _Gtk_stock_lookup(*args)
+    if not success:
+        return None
+
+    return item
+
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
 if not initialized:
