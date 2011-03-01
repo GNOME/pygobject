@@ -11,6 +11,8 @@ if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
 
+# force untranslated messages, as we check for them in some tests
+os.environ['LC_MESSAGES'] = 'C'
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:
