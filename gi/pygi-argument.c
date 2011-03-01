@@ -1072,8 +1072,6 @@ array_success:
                     } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                         GClosure *closure;
 
-                        g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-
                         closure = pyg_closure_new (object, NULL, NULL);
                         if (closure == NULL) {
                             PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
@@ -1972,10 +1970,6 @@ _pygi_argument_release (GIArgument   *arg,
                         if ( (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)
                                 || (direction == GI_DIRECTION_OUT && transfer != GI_TRANSFER_NOTHING)) {
                             g_slice_free (GValue, value);
-                        }
-                    } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
-                        if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING) {
-                            g_closure_unref (arg->v_pointer);
                         }
                     } else if (g_struct_info_is_foreign ( (GIStructInfo*) info)) {
                         if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {

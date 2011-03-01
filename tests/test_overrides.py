@@ -1446,3 +1446,11 @@ class TestGio(unittest.TestCase):
         self.assertEqual(len(empty), 0)
         self.assertEqual(bool(empty), True)
         self.assertEqual(empty.keys(), [])
+
+    def test_closures(self):
+        # make sure this doesn't crash
+        def fake_cb(*args):
+            pass
+
+        ag = Gtk.AccelGroup()
+        ag.connect(Gdk.KEY_l, Gdk.ModifierType.CONTROL_MASK, 0, fake_cb)
