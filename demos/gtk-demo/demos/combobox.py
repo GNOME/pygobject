@@ -45,15 +45,24 @@ class MaskEntry(Gtk.Entry):
 
         self.connect('changed', self.changed_cb)
 
+        self.error_color = Gdk.RGBA()
+        self.error_color.red = 1.0
+        self.error_color.green = 0.9
+        self.error_color_blue = 0.9
+        self.error_color.alpha = 1.0
+
+        # workaround since override_color doesn't accept None yet
+        style_ctx = self.get_style_context()
+        self.normal_color = style_ctx.get_color(0)
+
     def set_background(self):
-        error_color = Gdk.Color(65535, 60000, 60000)
         if self.mask:
             if not GLib.regex_match_simple(self.mask,
                                            self.get_text(), 0, 0):
-                self.modify_base(Gtk.StateType.NORMAL, error_color)
+                self.override_color(0, self.error_color)
                 return
 
-        self.modify_base(Gtk.StateType.NORMAL, None)
+        self.override_color(0, self.normal_color)
 
     def changed_cb(self, entry):
         self.set_background()
@@ -117,7 +126,7 @@ class ComboboxApp:
         treeiter = model.get_iter(path)
         combo.set_active_iter(treeiter)
 
-        # A GtkComboBoxText with validation.
+        # A GtkComboBoxEntry with validation.
 
         frame = Gtk.Frame(label='Editable')
         vbox.pack_start(frame, False, False, 0)
@@ -126,13 +135,13 @@ class ComboboxApp:
         box.set_border_width(5)
         frame.add(box)
 
-        combo = Gtk.ComboBoxText()
+        combo = Gtk.ComboBoxText.new_with_entry()
         self.fill_combo_entry(combo)
         box.add(combo)
 
         entry = MaskEntry(mask='^([0-9]*|One|Two|2\302\275|Three)$')
 
-        combo.remove(0)
+        Gtk.Container.remove(combo, combo.get_child())
         combo.add(entry)
 
         self.window.show_all()
