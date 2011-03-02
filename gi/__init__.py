@@ -32,7 +32,8 @@ def require_version(namespace, version):
     repository = Repository.get_default()
 
     if namespace in repository.get_loaded_namespaces():
-        if repository.get_version(namespace) != version:
+        loaded_version = repository.get_version(namespace)
+        if loaded_version != version:
             raise ValueError('Namespace %s is already loaded with version %s' % \
                              (namespace, loaded_version))
 
