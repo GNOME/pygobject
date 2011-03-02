@@ -244,7 +244,7 @@ def mro(C):
     bases_of_subclasses = [[C]]
 
     if C.__bases__:
-        bases_of_subclasses += map(mro, C.__bases__) + [list(C.__bases__)]
+        bases_of_subclasses += list(map(mro, C.__bases__)) + [list(C.__bases__)]
 
     while bases_of_subclasses:
         for subclass_bases in bases_of_subclasses:
