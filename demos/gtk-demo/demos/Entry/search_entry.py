@@ -89,22 +89,19 @@ class SearchboxApp:
         # Create the menu
         menu = self.create_search_menu(entry)
         entry.connect('icon-press', self.icon_press_cb, menu)
-        # FIXME:
-        # menu.attach_to_widget(entry, None) - missing annotation prevents
-        # using this method so do manually for now
-        entry.connect('button-press-event', self.popup_menu, menu)
 
-        # add accessible alternatives for icon functionality */
+        # FIXME: this should take None for the detach callback
+        #        but our callback implementation does not allow
+        #        it yet, so we pass in a noop callback
+        menu.attach_to_widget(entry, self.detach)
+
+        # add accessible alternatives for icon functionality
         entry.connect('populate-popup', self.entry_populate_popup)
 
         self.window.show_all()
 
-    def popup_menu(self, entry, event, menu):
-        if event.button != 3:
-            return False
-
-        menu.popup(None, None, None, None,
-                   event.button, event.time)
+    def detach(self, *args):
+        pass
 
     def show_find_button(self):
         self.notebook.set_current_page(0)
@@ -204,11 +201,9 @@ class SearchboxApp:
 
 
     def icon_press_cb(self, entry, position, event, menu):
-        # FIXME: sending in a GdkEvent when it should send in GdkEventButton
-        #        requires a Gtk annotation
         if position == Gtk.EntryIconPosition.PRIMARY:
             menu.popup(None, None, None, None,
-                       event.button.button, event.button.time)
+                       event.button, event.time)
         else:
             self.clear_entry(entry)
 
