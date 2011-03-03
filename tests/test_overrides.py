@@ -345,6 +345,16 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(color.green, 200)
         self.assertEquals(color.blue, 300)
 
+    def test_rgba(self):
+        self.assertEquals(Gdk.RGBA, overrides.Gdk.RGBA)
+        rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
+        self.assertEquals(rgba.red, 0.1)
+        self.assertEquals(rgba.green, 0.2)
+        self.assertEquals(rgba.blue, 0.3)
+        self.assertEquals(rgba.alpha, 0.4)
+        rgba.green = 0.9
+        self.assertEquals(rgba.green, 0.9)
+
     def test_event(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
         self.assertEquals(event.type, Gdk.EventType.CONFIGURE)
