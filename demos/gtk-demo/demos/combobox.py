@@ -31,7 +31,7 @@ How the options are displayed is controlled by cell renderers.
 # See FIXME's
 is_fully_bound = False
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 
 (PIXBUF_COL,
  TEXT_COL) = range(2)
@@ -146,7 +146,54 @@ class ComboboxApp:
         Gtk.Container.remove(combo, combo.get_child())
         combo.add(entry)
 
+         # A combobox with string IDs
+
+        frame = Gtk.Frame(label='String IDs')
+        vbox.pack_start(frame, False, False, 0)
+
+        box = Gtk.VBox(homogeneous=False, spacing=0)
+        box.set_border_width(5)
+        frame.add(box)
+
+        # FIXME: model is not setup when constructing Gtk.ComboBoxText()
+        #        so we call new() - Gtk should fix this to setup the model
+        #        in __init__, not in the constructor
+        combo = Gtk.ComboBoxText.new()
+        combo.append('never', 'Not visible')
+        combo.append('when-active', 'Visible when active')
+        combo.append('always', 'Always visible')
+        box.add(combo)
+
+        entry = Gtk.Entry()
+
+        # FIXME: a bug in PyGObject does not allow us to access dynamic
+        #        methods on GObject.Object, so bind properties the hard way
+        # GObject.Object.bind_property(combo, 'active-id',
+        #                             entry, 'text',
+        #                             GObject.BindingFlags.BIDIRECTIONAL)
+        self.combo_notify_id = \
+            combo.connect('notify::active-id',
+                          self.combo_active_id_changed, entry)
+        self.entry_notify_id = \
+            entry.connect('notify::text',
+                          self.entry_text_changed, combo)
+
+        box.add(entry)
         self.window.show_all()
+
+    def combo_active_id_changed(self, combo, pspec, entry):
+        entry.disconnect(self.entry_notify_id)
+        entry.set_text(combo.get_property('active-id'))
+        self.entry_notify_id = \
+            entry.connect('notify::text',
+                          self.entry_text_changed, combo)
+
+    def entry_text_changed(self, entry, pspec, combo):
+        combo.disconnect(self.combo_notify_id)
+        combo.set_property('active-id', entry.get_text())
+        self.combo_notify_id = \
+            combo.connect('notify::active-id',
+                          self.combo_active_id_changed, entry)
 
     def strip_underscore(self, s):
         return s.replace('_', '')
