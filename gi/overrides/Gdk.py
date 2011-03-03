@@ -45,6 +45,24 @@ class Color(Gdk.Color):
 Color = override(Color)
 __all__.append('Color')
 
+if Gdk._version == '3.0':
+    class RGBA(Gdk.RGBA):
+        def __init__(self, red=1.0, green=1.0, blue=1.0, alpha=1.0):
+            Gdk.RGBA.__init__(self)
+            self.red = red
+            self.green = green
+            self.blue = blue
+            self.alpha = alpha
+
+        def __new__(cls, *args, **kwargs):
+            return Gdk.RGBA.__new__(cls)
+
+        def __repr__(self):
+            return '<Gdk.Color(red=%f, green=%f, blue=%f, alpha=%f)>' % (self.red, self.green, self.blue, self.alpha)
+
+    RGBA = override(RGBA)
+    __all__.append('RGBA')
+
 if Gdk._version == '2.0':
     class Rectangle(Gdk.Rectangle):
 
