@@ -779,6 +779,16 @@ class TreeModel(Gtk.TreeModel):
                 elif type_ == GObject.TYPE_UCHAR:
                     value_container.set_uchar(value)
                     value = value_container
+                elif type_ == GObject.TYPE_UNICHAR:
+                    cmp_classes = [str]
+                    if sys.version_info < (3, 0):
+                        cmp_classes.append(unicode)
+
+                    if isinstance(value, tuple(cmp_classes)):
+                        value = ord(value[0])
+
+                    value_container.set_uint(value)
+                    value = value_container
                 elif type_ == GObject.TYPE_UINT:
                     value_container.set_uint(value)
                     value = value_container
