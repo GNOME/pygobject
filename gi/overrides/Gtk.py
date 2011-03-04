@@ -759,7 +759,11 @@ class TreeModel(Gtk.TreeModel):
                 else:
                     raise ValueError('Expected an integer for column %i but got %s' % (column, type(value)))
             elif type_ == GObject.TYPE_BOOLEAN:
-                if isinstance(value, (int, long)):
+                cmp_classes = [int]
+                if sys.version_info < (3, 0):
+                    cmp_classes.append(long)
+
+                if isinstance(value, tuple(cmp_classes)):
                     value = bool(value)
                 else:
                     raise ValueError('Expected a bool for column %i but got %s' % (column, type(value)))
