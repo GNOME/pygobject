@@ -1021,7 +1021,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     }
     case G_TYPE_UCHAR: {
 	guint8 val = g_value_get_uchar(value);
-	return PYGLIB_PyUnicode_FromStringAndSize((char *)&val, 1);
+	return PYGLIB_PyBytes_FromStringAndSize((char *)&val, 1);
     }
     case G_TYPE_BOOLEAN: {
 	return PyBool_FromLong(g_value_get_boolean(value));
