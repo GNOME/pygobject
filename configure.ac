@@ -146,7 +146,11 @@ fi
 
 AM_CONDITIONAL(ENABLE_DOCS, test x$enable_docs != xno)
 
-AM_CHECK_PYMOD(thread,,,enable_thread=no)
+AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
+if test "x$enable_thread" = xcheck_for_py3_module; then
+  dnl Python 3 uses the _thread module so check for that
+  AM_CHECK_PYMOD(_thread,,,enable_thread=no)
+fi
 
 AC_MSG_CHECKING(whether to enable threading in pygobject)
 if test "x$enable_thread" != xno; then
