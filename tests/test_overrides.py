@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.insert(0, "../")
 
-from compathelper import _long, _unicode
+from compathelper import _long, _unicode, _bytes
 
 from gi.repository import GLib
 from gi.repository import GObject
@@ -715,11 +715,11 @@ class TestGtk(unittest.TestCase):
                                                 i % 2,
                                                 bool(i % 2),
                                                 i,
-                                                sys.maxint + 1,
+                                                9223372036854775808,
                                                 -9223372036854775808,
                                                 0xffffffffffffffff,
                                                 254,
-                                                'a'
+                                                _bytes('a')
                                                 ))
 
         # len gets the number of children in the root node
@@ -754,7 +754,7 @@ class TestGtk(unittest.TestCase):
            uint_ = tree_store.get_value(treeiter, 8)
            self.assertEquals(uint_, i)
            ulong_ = tree_store.get_value(treeiter, 9)
-           self.assertEquals(ulong_, sys.maxint + 1)
+           self.assertEquals(ulong_, 9223372036854775808)
            int64_ = tree_store.get_value(treeiter, 10)
            self.assertEquals(int64_, -9223372036854775808)
            uint64_ = tree_store.get_value(treeiter, 11)
