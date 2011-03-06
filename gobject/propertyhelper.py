@@ -144,7 +144,6 @@ class property(object):
 
         self.name = None
 
-        self._values = {}
         self._exc = None
 
     def __repr__(self):
@@ -270,10 +269,10 @@ class property(object):
     #
 
     def _default_setter(self, instance, value):
-        self._values[instance] = value
+        setattr(instance, '_property_helper_'+self.name, value)
 
     def _default_getter(self, instance):
-        return self._values.get(instance, self.default)
+        return getattr(instance, '_property_helper_'+self.name, self.default)
 
     def _readonly_setter(self, instance, value):
         self._exc = TypeError("%s property of %s is read-only" % (
