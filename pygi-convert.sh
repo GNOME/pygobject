@@ -91,6 +91,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk\..*\.__init__/gobject.GObject.__init__/g;" \
 \
     -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
+    -pe "s/import gtk.gdk as gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/Gtk.gdk.x11_/GdkX11\./g;" \
     -pe "s/Gtk.gdk\./Gdk\./g;" \
     -pe "s/(?<!\.)gdk\./Gdk\./g;" \
@@ -169,6 +170,10 @@ for f in $FILES_TO_CONVERT; do
     -pe "#s/GLib.SPAWN_/GLib.SpawnFlags./g;" \
     -pe "#s/GLib.USER_DIRECTORY_/GLib.UserDirectory.DIRECTORY_/g;" \
 \
+    -pe "s/(?<!\.)gobject\./GObject\./g;" \
+    -pe "s/GObject.SIGNAL_/GObject.SignalFlags./g;" \
+    -pe "s/GObject.TYPE_NONE/None/g;" \
+\
     -pe "s/import hippo\n/from gi.repository import Hippo\n/g;" \
     -pe "s/hippo\./Hippo\./g;" \
     -pe "s/Hippo\..*\.__init__/gobject.GObject.__init__/g;" \
@@ -220,6 +225,8 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import pynotify\n/from gi.repository import Notify\n/g;" \
     -pe "s/pynotify\./Notify\./g;" \
+\
+    -pe "s/import webkit\n/from gi.repository import WebKit\n/g;" \
     $f
 done
 
