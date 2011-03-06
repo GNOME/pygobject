@@ -401,5 +401,28 @@ class TestProperty(unittest.TestCase):
         gobject.property(type=gobject.TYPE_FLOAT, minimum=-1)
         gobject.property(type=gobject.TYPE_DOUBLE, minimum=-1)
 
+    # Bug 644039
+    def testReferenceCount(self):
+        # We can check directly if an object gets finalized, so we will
+        # observe it indirectly through the refcount of a member object.
+
+        # We create our dummy object and store its current refcount
+        o = object()
+        rc = sys.getrefcount(o)
+
+        # We add our object as a member to our newly created object we
+        # want to observe. Its refcount is increased by one.
+        t = PropertyObject(normal="test")
+        t.o = o
+        self.assertEquals(sys.getrefcount(o), rc + 1)
+
+        # Now we want to ensure we do not leak any references to our
+        # object with properties. If no ref is leaked, then when deleting
+        # the local reference to this object, its reference count shoud
+        # drop to zero, and our dummy object should loose one reference.
+        del t
+        self.assertEquals(sys.getrefcount(o), rc)
+
+
 if __name__ == '__main__':
     unittest.main()
