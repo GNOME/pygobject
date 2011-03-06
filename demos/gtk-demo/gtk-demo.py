@@ -215,7 +215,8 @@ class GtkDemoApp(object):
     def row_activated_cb(self, view, path, col, store):
         treeiter = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
-        demo.module.main(self)
+        if not demo.isdir:
+            demo.module.main(self)
 
     def create_tree(self):
         tree_store = Gtk.TreeStore(str, Demo, Pango.Style)
