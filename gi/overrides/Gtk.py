@@ -1116,6 +1116,8 @@ class TreeViewColumn(Gtk.TreeViewColumn):
         if success:
             return (start_pos, width,)
 
+    def set_cell_data_func(self, cell_renderer, func, func_data=None):
+        super(TreeViewColumn, self).set_cell_data_func(cell_renderer, func, func_data)
 
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
