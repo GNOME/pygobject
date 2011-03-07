@@ -65,7 +65,7 @@ class ImagesApp:
         try:
             img_path = path.join(self.base_path, 'gtk-logo-rgb.gif')
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(img_path)
-        except GLib.Error as e:
+        except GObject.GError as e:
             dialog = Gtk.MessageDialog(self.window,
                                        Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                        Gtk.MessageType.ERROR,
@@ -186,7 +186,8 @@ class ImagesApp:
 
             try:
                 self.pixbuf_loader.write(buf)
-            except GLib.Error as e:
+
+            except GObject.GError as e:
                 dialog = Gtk.MessageDialog(self.window,
                                            Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                            Gtk.MessageType.ERROR,
@@ -211,7 +212,7 @@ class ImagesApp:
                 # it was incomplete.
                 try:
                    self.pixbuf_loader.close()
-                except GLib.Error as e:
+                except GObject.GError as e:
                     dialog = Gtk.MessageDialog(self.window,
                                                Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                                Gtk.MessageType.ERROR,
@@ -243,7 +244,7 @@ class ImagesApp:
             if self.pixbuf_loader:
                 try:
                     self.pixbuf_loader.close()
-                except GLib.Error:
+                except GObject.GError:
                     pass
                 self.pixbuf_loader = None
 
@@ -295,7 +296,7 @@ class ImagesApp:
         if self.pixbuf_loader:
             try:
                 self.pixbuf_loader.close()
-            except GLib.Error:
+            except GObject.GError:
                 pass
 
         if self.image_stream:
