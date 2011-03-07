@@ -38,9 +38,9 @@ if sys.version_info < (3, 0):
     HEART = unicode(BYTES_HEART, 'UTF-8')
 else:
     UTF8_TEXT = "I ♥ GTK+"
-    BYTES_TEXT = bytes(UTF8_TEXT)
+    BYTES_TEXT = bytes(UTF8_TEXT, 'utf-8')
     HEART = "♥"
-    BYTES_HEART = bytes(HEART)
+    BYTES_HEART = bytes(HEART, 'utf-8')
 
 class RotatedTextApp:
     RADIUS = 150

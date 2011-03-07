@@ -106,6 +106,12 @@ class IconViewApp:
                                        self.COL_DISPLAY_NAME, 
                                        self.COL_IS_DIRECTORY)
 
+        if a_name is None:
+            a_name = ''
+
+        if b_name is None:
+            b_name = ''
+
         if (not a_is_dir) and b_is_dir:
             return 1
         elif a_is_dir and (not b_is_dir):
