@@ -40,7 +40,8 @@ class TestGDBusClient(unittest.TestCase):
             self.dbus_proxy.call_sync('GetConnectionUnixProcessID', None,
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
             self.assertTrue('InvalidArgs' in str(e))
 
         # error case: invalid argument
@@ -49,7 +50,9 @@ class TestGDBusClient(unittest.TestCase):
                     GLib.Variant('(s)', (' unknown',)),
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+
             self.assertTrue('NameHasNoOwner' in str(e))
 
         # error case: unknown method
@@ -57,7 +60,9 @@ class TestGDBusClient(unittest.TestCase):
             self.dbus_proxy.call_sync('UnknownMethod', None,
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call for unknown method should raise an exception')
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+
             self.assertTrue('UnknownMethod' in str(e))
 
     def test_native_calls_async(self):
@@ -82,7 +87,9 @@ class TestGDBusClient(unittest.TestCase):
             try:
                 obj.call_finish(result)
                 self.fail('call_finish() for unknown method should raise an exception')
-            except Exception as e:
+            except Exception:
+                etype, e = sys.exc_info()[:2]
+
                 self.assertTrue('UnknownMethod' in str(e))
             finally:
                 user_data['main_loop'].quit()
@@ -120,7 +127,9 @@ class TestGDBusClient(unittest.TestCase):
             self.assertEqual(len(result), 4)
             for i in result:
                 self.assertEqual(type(i), type(''))
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+
             if 'Error.ServiceUnknown' not in str(e):
                 raise
 
@@ -128,7 +137,9 @@ class TestGDBusClient(unittest.TestCase):
         try:
             self.dbus_proxy.GetConnectionUnixProcessID('()', timeout=0)
             self.fail('call with timeout=0 should raise an exception')
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+
             self.assertTrue('Timeout' in str(e), str(e))
 
     def test_python_calls_sync_errors(self):
@@ -136,7 +147,9 @@ class TestGDBusClient(unittest.TestCase):
         try:
             self.dbus_proxy.GetConnectionUnixProcessID('()')
             self.fail('call with invalid arguments should raise an exception')
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+
             self.assertTrue('InvalidArgs' in str(e), str(e))
 
     def test_python_calls_async(self):
