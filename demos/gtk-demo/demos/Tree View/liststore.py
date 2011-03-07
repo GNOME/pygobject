@@ -102,7 +102,7 @@ class ListStoreApp:
             
         iter_ = self.model.get_iter_first()
         pulse = self.model.get(iter_, self.COLUMN_PULSE)[0]
-        if pulse == sys.maxint:
+        if pulse == 999999999:
             pulse = 0
         else:
             pulse += 1

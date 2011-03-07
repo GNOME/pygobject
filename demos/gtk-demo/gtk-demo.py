@@ -124,7 +124,7 @@ class GtkDemoApp(object):
 
                 try:
                     demo = Demo(module.title, module, f)
-                except AttributeError, e:
+                except AttributeError as e:
                     raise AttributeError('(%s): %s' % (f, e.message))
 
             demo_list.append(demo)
@@ -146,7 +146,7 @@ class GtkDemoApp(object):
             if filename.endswith('.py'):
                 demo_file_list.append(fullname)
 
-        demo_file_list.sort(lambda a, b: cmp(a.lower(), b.lower()))
+        demo_file_list = sorted(demo_file_list, key=str.lower)
 
         self.load_demos_from_list(demo_file_list, demo_list)
 
