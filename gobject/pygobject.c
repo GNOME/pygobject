@@ -988,6 +988,13 @@ pygobject_new(GObject *obj)
     return pygobject_new_full(obj, TRUE, NULL);
 }
 
+PyObject *
+pygobject_new_sunk(GObject *obj)
+{
+    g_object_set_qdata (obj, pygobject_ref_sunk_key, GINT_TO_POINTER (1));
+    return pygobject_new_full(obj, TRUE, NULL);
+}
+
 static void
 pygobject_unwatch_closure(gpointer data, GClosure *closure)
 {

@@ -156,6 +156,7 @@ void          pygobject_register_class   (PyObject *dict,
 void          pygobject_register_wrapper (PyObject *self);
 PyObject *    pygobject_new              (GObject *obj);
 PyObject *    pygobject_new_full         (GObject *obj, gboolean sink, gpointer g_class);
+PyObject *    pygobject_new_sunk         (GObject *obj);
 void          pygobject_sink             (GObject *obj);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);

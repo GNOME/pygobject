@@ -1012,7 +1012,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
     case G_TYPE_INTERFACE:
 	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
-	    return pygobject_new(g_value_get_object(value));
+	    return pygobject_new_sunk(g_value_get_object(value));
 	else
 	    break;
     case G_TYPE_CHAR: {
@@ -1130,7 +1130,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     case G_TYPE_PARAM:
 	return pyg_param_spec_new(g_value_get_param(value));
     case G_TYPE_OBJECT:
-	return pygobject_new(g_value_get_object(value));
+	return pygobject_new_sunk(g_value_get_object(value));
     default:
 	{
 	    PyGTypeMarshal *bm;
@@ -1326,7 +1326,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     g_return_if_fail(object != NULL && G_IS_OBJECT(object));
 
     /* get the wrapper for this object */
-    object_wrapper = pygobject_new(object);
+    object_wrapper = pygobject_new_sunk(object);
     g_return_if_fail(object_wrapper != NULL);
 
     /* construct method name for this class closure */
