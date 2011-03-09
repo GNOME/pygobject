@@ -23,6 +23,8 @@ from ..importer import modules
 
 from gi.repository import GLib
 
+import sys
+
 Gio = modules['Gio']._introspection_module
 
 __all__ = []
@@ -109,7 +111,8 @@ class _DBusProxyMethodCall:
         (result_callback, error_callback, real_user_data) = user_data
         try:
             ret = obj.call_finish(result)
-        except Exception as e:
+        except Exception:
+            etype, e = sys.exc_info()[:2]
             # return exception as value
             if error_callback:
                 error_callback(obj, e, real_user_data)
