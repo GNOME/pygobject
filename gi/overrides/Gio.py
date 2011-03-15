@@ -119,7 +119,17 @@ class _DBusProxyMethodCall:
 
         result_callback(obj, self._unpack_result(ret), real_user_data)
 
-    def __call__(self, signature, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
+        # the first positional argument is the signature, unless we are calling
+        # a method without arguments; then signature is implied to be '()'.
+        if args:
+            signature = args[0]
+            args = args[1:]
+            if not isinstance(signature, str):
+                raise TypeError('first argument must be the method signature string: %r' % signature)
+        else:
+            signature = '()'
+
         arg_variant = GLib.Variant(signature, tuple(args))
 
         if 'result_handler' in kwargs:
@@ -162,6 +172,10 @@ class DBusProxy(Gio.DBusProxy):
 
       proxy = Gio.DBusProxy.new_sync(...)
       result = proxy.MyMethod('(is)', 42, 'hello')
+
+    The exception are methods which take no arguments, like
+    proxy.MyMethod('()'). For these you can omit the signature and just write
+    proxy.MyMethod().
 
     Optional keyword arguments:
 

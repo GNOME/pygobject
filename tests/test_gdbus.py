@@ -131,6 +131,13 @@ class TestGDBusClient(unittest.TestCase):
         except Exception as e:
             self.assertTrue('Timeout' in str(e), str(e))
 
+    def test_python_calls_sync_noargs(self):
+        # methods without arguments don't need an explicit signature
+        result = self.dbus_proxy.ListNames()
+        self.assertTrue(isinstance(result, list))
+        self.assertTrue(len(result) > 1)
+        self.assertTrue('org.freedesktop.DBus' in result)
+
     def test_python_calls_sync_errors(self):
         # error case: invalid argument types
         try:
@@ -138,6 +145,12 @@ class TestGDBusClient(unittest.TestCase):
             self.fail('call with invalid arguments should raise an exception')
         except Exception as e:
             self.assertTrue('InvalidArgs' in str(e), str(e))
+
+        try:
+            self.dbus_proxy.GetConnectionUnixProcessID(None, 'foo')
+            self.fail('call with None signature should raise an exception')
+        except TypeError as e:
+            self.assertTrue('signature' in str(e), str(e))
 
     def test_python_calls_async(self):
         def call_done(obj, result, user_data):
