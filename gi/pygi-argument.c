@@ -224,7 +224,8 @@ _pygi_g_type_interface_check_object (GIBaseInfo *info,
             /* Handle special cases. */
             type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
             if (g_type_is_a (type, G_TYPE_CLOSURE)) {
-                if (!PyCallable_Check (object)) {
+                if (!(PyCallable_Check (object) ||
+                      pyg_type_from_object_strict (object, FALSE) == G_TYPE_CLOSURE)) {
                     PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
                                   object->ob_type->tp_name);
                     retval = 0;
@@ -1072,12 +1073,14 @@ array_success:
                     } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                         GClosure *closure;
 
-                        g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-
-                        closure = pyg_closure_new (object, NULL, NULL);
-                        if (closure == NULL) {
-                            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
-                            break;
+                        if (pyg_type_from_object_strict (object, FALSE) == G_TYPE_CLOSURE) {
+                            closure = (GClosure *)pyg_boxed_get (object, void);
+                        } else {
+                            closure = pyg_closure_new (object, NULL, NULL);
+                            if (closure == NULL) {
+                                PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
+                                break;
+                            }
                         }
 
                         arg.v_pointer = closure;

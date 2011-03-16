@@ -945,6 +945,10 @@ class TestGClosure(unittest.TestCase):
     def test_gclosure_in(self):
         GIMarshallingTests.gclosure_in(lambda: 42)
 
+        # test passing a closure between two C calls
+        closure = GIMarshallingTests.gclosure_return()
+        GIMarshallingTests.gclosure_in(closure)
+
         self.assertRaises(TypeError, GIMarshallingTests.gclosure_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.gclosure_in, None)
 
