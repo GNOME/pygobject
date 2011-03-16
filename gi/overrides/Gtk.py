@@ -410,6 +410,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
             kwds['text'] = message_format
         Gtk.MessageDialog.__init__(self,
                                    _buttons_property=buttons,
+                                   message_type=type,
                                    **kwds)
         Dialog.__init__(self, parent=parent, flags=flags)
 
