@@ -732,9 +732,7 @@ class TreeModel(Gtk.TreeModel):
 
             # we may need to convert to a basic type
             type_ = self.get_column_type(column)
-            if type_ == GObject.TYPE_PYOBJECT:
-                pass # short-circut branching
-            elif type_ == GObject.TYPE_STRING:
+            if type_ == GObject.TYPE_STRING:
                 if isinstance(value, str):
                     value = str(value)
                 elif sys.version_info < (3, 0):
@@ -774,7 +772,10 @@ class TreeModel(Gtk.TreeModel):
                 # so we don't have to do it here
                 value_container = GObject.Value()
                 value_container.init(type_)
-                if type_ == GObject.TYPE_CHAR:
+                if type_ == GObject.TYPE_PYOBJECT:
+                    value_container.set_boxed(value)
+                    value = value_container
+                elif type_ == GObject.TYPE_CHAR:
                     value_container.set_char(value)
                     value = value_container
                 elif type_ == GObject.TYPE_UCHAR:

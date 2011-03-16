@@ -773,14 +773,21 @@ class TestGtk(unittest.TestCase):
         class TestPyObject(object):
             pass
 
+        class TestPyGObject(GObject.Object):
+            __gtype_name__ = 'TestPyGObject'
+            def __init__(self, i):
+                GObject.Object.__init__(self)
+                self.sentinal = i + 5
+
         test_pyobj = TestPyObject()
         test_pydict = {1:1, "2":2, "3":"3"}
         test_pylist = [1,"2", "3"]
 
-        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object, bool, bool)
+        list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object, bool, bool, object)
         for i in range(93):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
+            testpygobj = TestPyGObject(i)
             parent = list_store.append((i,
                                         label,
                                         testobj,
@@ -788,7 +795,8 @@ class TestGtk(unittest.TestCase):
                                         test_pydict,
                                         test_pylist,
                                         i % 2,
-                                        bool(i % 2)))
+                                        bool(i % 2),
+                                        testpygobj))
 
         i = 93
         label = _unicode('this is row #93')
@@ -801,6 +809,7 @@ class TestGtk(unittest.TestCase):
         list_store.set_value(treeiter, 5, test_pylist)
         list_store.set_value(treeiter, 6, 1)
         list_store.set_value(treeiter, 7, True)
+        list_store.set_value(treeiter, 8, TestPyGObject(i))
 
         # test automatic unicode->str conversion
         i = 94
@@ -812,7 +821,8 @@ class TestGtk(unittest.TestCase):
                                       test_pydict,
                                       test_pylist,
                                       0,
-                                      False))
+                                      False,
+                                      TestPyGObject(i)))
 
         # add sorted items out of order to test insert* apis
         # also test sending in None to not set a column
@@ -825,7 +835,8 @@ class TestGtk(unittest.TestCase):
                                       None,
                                       test_pylist,
                                       1,
-                                      None))
+                                      None,
+                                      TestPyGObject(i)))
 
         list_store.set_value(treeiter, 0, i)
         list_store.set_value(treeiter, 1, label)
@@ -843,7 +854,8 @@ class TestGtk(unittest.TestCase):
                                  test_pydict,
                                  test_pylist,
                                  1,
-                                 True))
+                                 True,
+                                 TestPyGObject(i)))
 
         i = 96
         label = 'this is row #96'
@@ -854,7 +866,8 @@ class TestGtk(unittest.TestCase):
                                             test_pydict,
                                             test_pylist,
                                             0,
-                                            False))
+                                            False,
+                                            TestPyGObject(i)))
 
         i = 98
         label = 'this is row #98'
@@ -865,7 +878,8 @@ class TestGtk(unittest.TestCase):
                                            test_pydict,
                                            test_pylist,
                                            0,
-                                           False))
+                                           False,
+                                           TestPyGObject(i)))
 
 
         i = 95
@@ -877,7 +891,8 @@ class TestGtk(unittest.TestCase):
                                test_pydict,
                                test_pylist,
                                1,
-                               True))
+                               True,
+                               TestPyGObject(i)))
 
         self.assertEquals(len(list_store), 100)
 
@@ -905,6 +920,9 @@ class TestGtk(unittest.TestCase):
             self.assertEquals(bool_1, bool_2)
             self.assertTrue(isinstance(bool_1, bool))
             self.assertTrue(isinstance(bool_2, bool))
+
+            pygobj = list_store.get_value(treeiter, 8)
+            self.assertEquals(pygobj.sentinal, i + 5)
 
             treeiter = list_store.iter_next(treeiter)
 
