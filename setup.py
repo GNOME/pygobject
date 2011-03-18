@@ -324,7 +324,7 @@ else:
 
 doclines = __doc__.split('\n')
 options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py',
-                             'user-access-control': 'auto'}}
+                             'user_access_control': 'auto'}}
 
 setup(name='pygobject',
       url='http://www.pygtk.org/',
