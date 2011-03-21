@@ -1,3 +1,18 @@
+2.28.1 21-Mar-2011
+	- pygi-convert.sh remove gobject tests, GObject works now (John Stowers)
+	- pygi-convert.sh add GObject.xxx and webkit (John Stowers)
+	- [gi] marshal raw closures (John (J5) Palmieri)
+	- Revert "Deduce PYTHON_LIBS in addition to PYTHON_INCLUDES" (Martin Pit
+	- setup.py: fix user_access_control option (Dieter Verfaillie)
+	- [gi-overrides] fix marshalling pygobjects in treemodels (John (J5) Pal
+	- [gi] Respect the MessageType for Gtk.MessageDialog (Martin Pitt)
+	- [gi] Do not require signature for D-BUS methods without arguments (Mar
+	- [gi-demos] add pickers demo (John (J5) Palmieri)
+	- [gi-demos] add menu demo (John (J5) Palmieri)
+	- [gi-overrides] TreeViewColumn.set_cell_data_func func_data can be None
+	- [gi-demos] dont try and run demos that represent directories (John Sto
+	- [gi-overrides] fix exception block so it works in Python 2.5 (John (J5
+
 2.28.0 08-Mar-2011 (stable)
 	- [gi-demos] some python 3 compat fixes (John (J5) Palmieri)
 	- [gi-demos] catch the correct error class (John (J5) Palmieri)
