@@ -20,7 +20,7 @@ common_ldflags += -no-undefined
 endif
 
 libpyglib_2_0_@PYTHON_BASENAME@_la_CFLAGS = $(GLIB_CFLAGS)
-libpyglib_2_0_@PYTHON_BASENAME@_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS) $(PYTHON_LIBS)
+libpyglib_2_0_@PYTHON_BASENAME@_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
 libpyglib_2_0_@PYTHON_BASENAME@_la_SOURCES = 	\
 	pyglib.c		\
 	pyglib.h		\
