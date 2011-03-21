@@ -25,7 +25,6 @@ _gi_la_LDFLAGS = \
 	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
 	$(GI_LIBS) \
-	$(PYTHON_LIBS) \
 	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
 _gi_la_SOURCES = \
 	pygi-repository.c \
@@ -69,8 +68,7 @@ _gi_cairo_la_LDFLAGS = \
 	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
 _gi_cairo_la_LIBADD = \
 	$(GI_LIBS) \
-	$(PYCAIRO_LIBS) \
-	$(PYTHON_LIBS)
+	$(PYCAIRO_LIBS)
 _gi_cairo_la_SOURCES = pygi-foreign-cairo.c
 
 
