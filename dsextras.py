@@ -69,7 +69,7 @@ def getstatusoutput(cmd):
         text = pipe.read()
         sts = pipe.close() or 0
 
-        if text[-1:] == '\n':
+        while text[-1:] in ['\n', '\r']:
             text = text[:-1]
 
         return sts, text
