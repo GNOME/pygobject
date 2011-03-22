@@ -65,7 +65,7 @@ def Constructor(info):
         cls_name = info.get_container().get_name()
         if cls.__name__ != cls_name:
             raise TypeError('%s constructor cannot be used to create instances of a subclass' % cls_name)
-        return info.invoke(*args)
+        return info.invoke(cls, *args)
 
     constructor.__info__ = info
     constructor.__name__ = info.get_name()
@@ -76,16 +76,23 @@ def Constructor(info):
 
 class MetaClassHelper(object):
 
+    def _setup_constructors(cls):
+        for method_info in cls.__info__.get_methods():
+            if method_info.is_constructor():
+                name = method_info.get_name()
+                constructor = classmethod(Constructor(method_info))
+                setattr(cls, name, constructor)
+
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
             name = method_info.get_name()
-
-            if method_info.is_constructor():
-                method = classmethod(Constructor(method_info))
+            function = Function(method_info)
             if method_info.is_method():
-                method = Function(method_info)
+                method = function
+            elif method_info.is_constructor():
+                continue
             else:
-                method = staticmethod(Function(method_info))
+                method = staticmethod(function)
             setattr(cls, name, method)
 
     def _setup_fields(cls):
@@ -217,6 +224,7 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
 
             if isinstance(cls.__info__, ObjectInfo):
                 cls._setup_fields()
+                cls._setup_constructors()
                 set_object_has_new_constructor(cls.__info__.get_g_type())
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
@@ -274,6 +282,7 @@ class StructMeta(type, MetaClassHelper):
 
         cls._setup_fields()
         cls._setup_methods()
+        cls._setup_constructors()
 
         for method_info in cls.__info__.get_methods():
             if method_info.is_constructor() and \
