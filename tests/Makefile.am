@@ -108,7 +108,8 @@ RUN_TESTS_ENV_VARS= \
 	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
 	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
-	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share
+	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
+	TESTS_BUILDDIR=$(builddir)
 RUN_TESTS_LAUNCH=$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled

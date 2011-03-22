@@ -1365,7 +1365,9 @@ class TestGtk(unittest.TestCase):
 class TestGio(unittest.TestCase):
     def setUp(self):
         os.environ['GSETTINGS_BACKEND'] = 'memory'
-        os.environ['GSETTINGS_SCHEMA_DIR'] = os.path.dirname(__file__)
+        # support a separate build tree, so look in build dir first
+        os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
+                os.path.dirname(__file__))
         self.settings = Gio.Settings('org.gnome.test')
         # we change the values in the tests, so set them to predictable start
         # value
