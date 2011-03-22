@@ -88,6 +88,14 @@ class TestProperties(unittest.TestCase):
         obj.props.normal = UNICODE_UTF8
         self.assertEqual(obj.props.normal, TEST_UTF8)
 
+    def testIntToStr(self):
+        obj = new(PropertyObject, construct_only=1)
+        self.assertEqual(obj.props.construct_only, '1')
+        obj.set_property('construct', '2')
+        self.assertEqual(obj.props.construct, '2')
+        obj.props.normal = 3
+        self.assertEqual(obj.props.normal, '3')
+
     def testConstructOnly(self):
         obj = new(PropertyObject, construct_only="123")
         self.assertEqual(obj.props.construct_only, "123")
