@@ -31,9 +31,6 @@ _gi_la_SOURCES = \
 	pygi-repository.h \
 	pygi-info.c \
 	pygi-info.h \
-	pygi-invoke.c \
-	pygi-invoke.h \
-       pygi-invoke-state-struct.h \
 	pygi-foreign.c \
 	pygi-foreign.h \
 	pygi-foreign-gvariant.c \
@@ -54,12 +51,25 @@ _gi_la_SOURCES = \
 	pygi-private.h \
 	pygi-property.c \
 	pygi-property.h \
-	pygi-cache.h \
-	pygi-cache.c \
 	pygi-signal-closure.c \
 	pygi-signal-closure.h \
 	pygobject-external.h \
 	gimodule.c
+
+if ENABLE_INVOKE_NG
+_gi_la_SOURCES += \
+	pygi-invoke-ng.c \
+	pygi-invoke-ng.h \
+	pygi-invoke-state-struct.h \
+	pygi-cache.h \
+	pygi-cache.c \
+	pygi-marshal.c \
+	pygi-marshal.h
+else
+_gi_la_SOURCES += \
+	pygi-invoke.c \
+	pygi-invoke.h
+endif
 
 _gi_cairo_la_CFLAGS = \
 	$(PYTHON_INCLUDES) \

@@ -123,6 +123,12 @@ AC_ARG_ENABLE(thread,
   AC_HELP_STRING([--disable-thread], [Disable pygobject threading support]),,
   enable_thread=yes)
 
+dnl Build with the new caching invoker
+AC_ARG_ENABLE(invoke-ng,
+  AC_HELP_STRING([--enable-invoke-ng], [Enable the new caching invoke path]),,
+  enable_invoke_ng=no)
+AM_CONDITIONAL(ENABLE_INVOKE_NG, test x$enable_invoke_ng != xno)
+
 dnl Building documentation
 AC_ARG_ENABLE(docs,
   AC_HELP_STRING([--enable-docs], [Enable documentation building]),enable_docs=$enableval,
@@ -277,4 +283,5 @@ AC_OUTPUT
 echo
 echo "libffi support: $have_libffi"
 echo "introspection support: $enable_introspection"
+echo "invoke-ng support: $enable_invoke_ng"
 echo

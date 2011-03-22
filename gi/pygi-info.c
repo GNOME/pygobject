@@ -37,8 +37,10 @@ _base_info_dealloc (PyGIBaseInfo *self)
     PyObject_ClearWeakRefs ( (PyObject *) self);
 
     g_base_info_unref (self->info);
-    
+
+#ifdef ENABLE_INVOKE_NG
     _pygi_function_cache_free(self->cache);
+#endif
 
     Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
 }
