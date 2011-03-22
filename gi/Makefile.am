@@ -31,6 +31,7 @@ _gi_la_SOURCES = \
 	pygi-repository.h \
 	pygi-info.c \
 	pygi-info.h \
+	pygi-invoke.h \
 	pygi-foreign.c \
 	pygi-foreign.h \
 	pygi-foreign-gvariant.c \
@@ -59,7 +60,6 @@ _gi_la_SOURCES = \
 if ENABLE_INVOKE_NG
 _gi_la_SOURCES += \
 	pygi-invoke-ng.c \
-	pygi-invoke-ng.h \
 	pygi-invoke-state-struct.h \
 	pygi-cache.h \
 	pygi-cache.c \
@@ -67,8 +67,7 @@ _gi_la_SOURCES += \
 	pygi-marshal.h
 else
 _gi_la_SOURCES += \
-	pygi-invoke.c \
-	pygi-invoke.h
+	pygi-invoke.c
 endif
 
 _gi_cairo_la_CFLAGS = \

@@ -29,12 +29,10 @@
 #include "pygi-callbacks.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
+#include "pygi-invoke.h"
 
 #ifdef ENABLE_INVOKE_NG
-  #include "pygi-invoke-ng.h"
   #include "pygi-cache.h"
-#else
-  #include "pygi-invoke.h"
 #endif
 
 G_BEGIN_DECLS

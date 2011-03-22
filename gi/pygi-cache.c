@@ -21,7 +21,7 @@
 
 #include "pygi-info.h"
 #include "pygi-cache.h"
-#include "pygi-argument.h"
+#include "pygi-marshal.h"
 #include "pygi-type.h"
 #include <girepository.h>
 
