@@ -891,17 +891,27 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     case G_TYPE_STRING:
 	if (obj == Py_None) {
 	    g_value_set_string(value, NULL);
-#if PY_VERSION_HEX < 0x03000000
-	} else if (PyString_Check(obj)) {
-	    g_value_set_string(value, PyString_AsString(obj));
-#endif
-	} else if (PyUnicode_Check(obj)) {
-	    tmp = PyUnicode_AsUTF8String(obj);
-	    g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
-	    Py_DECREF(tmp);
 	} else {
-	    PyErr_Clear();
-	    return -1;
+	    PyObject* tmp_str = PyObject_Str(obj);
+	    if (tmp_str == NULL) {
+	        PyErr_Clear();
+	        if (PyUnicode_Check(obj)) {
+	            tmp = PyUnicode_AsUTF8String(obj);
+	            g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
+	            Py_DECREF(tmp);
+	        } else {
+	            return -1;
+	        }
+	    } else {
+#if PY_VERSION_HEX < 0x03000000
+	       g_value_set_string(value, PyString_AsString(obj));
+#else
+	       tmp = PyUnicode_AsUTF8String(obj);
+	       g_value_set_string(value, PyBytes_AsString(tmp));
+	       Py_DECREF(tmp);
+#endif
+	    }
+	    Py_XDECREF(tmp_str);
 	}
 	break;
     case G_TYPE_POINTER:
