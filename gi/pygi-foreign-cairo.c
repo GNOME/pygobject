@@ -37,9 +37,9 @@ Pycairo_CAPI_t *Pycairo_CAPI;
 #include <pyglib-python-compat.h>
 
 PyObject *
-cairo_context_to_arg (PyObject       *value,
-                      GITypeInfo     *type_info,
-                      GITransfer      transfer,
+cairo_context_to_arg (PyObject        *value,
+                      GIInterfaceInfo *interface_info,
+                      GITransfer       transfer,
                       GIArgument      *arg)
 {
     cairo_t *cr;
@@ -56,7 +56,7 @@ cairo_context_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_context_from_arg (GITypeInfo *type_info, gpointer data)
+cairo_context_from_arg (GIInterfaceInfo *interface_info, gpointer data)
 {
     cairo_t *context = (cairo_t*) data;
 
@@ -75,9 +75,9 @@ cairo_context_release (GIBaseInfo *base_info,
 
 
 PyObject *
-cairo_surface_to_arg (PyObject       *value,
-                      GITypeInfo     *type_info,
-                      GITransfer      transfer,
+cairo_surface_to_arg (PyObject        *value,
+                      GIInterfaceInfo *interface_info,
+                      GITransfer       transfer,
                       GIArgument      *arg)
 {
     cairo_surface_t *surface;
@@ -95,7 +95,7 @@ cairo_surface_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_surface_from_arg (GITypeInfo *type_info, gpointer data)
+cairo_surface_from_arg (GIInterfaceInfo *interface_info, gpointer data)
 {
     cairo_surface_t *surface = (cairo_surface_t*) data;
 

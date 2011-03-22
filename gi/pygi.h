@@ -55,12 +55,12 @@ typedef struct {
     gsize size;
 } PyGIBoxed;
 
-typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject       *value,
-                                                      GITypeInfo     *type_info,
-                                                      GITransfer      transfer,
-                                                      GIArgument      *arg);
-typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GITypeInfo *type_info,
-                                                         gpointer    data);
+typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject        *value,
+                                                       GIInterfaceInfo *interface_info,
+                                                       GITransfer       transfer,
+                                                       GIArgument      *arg);
+typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIInterfaceInfo *interface_info,
+                                                         gpointer         data);
 typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
                                                   gpointer  struct_);
 

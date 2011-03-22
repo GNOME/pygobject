@@ -31,11 +31,11 @@
 #include "pygi.h"
 
 PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
-                                                     GITypeInfo         *type_info,
+                                                     GIInterfaceInfo    *interface_info,
                                                      GITransfer          transfer,
-                                                     GIArgument          *arg);
-PyObject *pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
-                                                       GIArgument  *arg);
+                                                     GIArgument         *arg);
+PyObject *pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+                                                       GIArgument      *arg);
 PyObject *pygi_struct_foreign_release (GITypeInfo *type_info,
                                        gpointer struct_);
 

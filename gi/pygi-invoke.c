@@ -382,11 +382,11 @@ _prepare_invocation_state (struct invocation_state *state,
                             state->args[i]->v_pointer = _pygi_boxed_alloc (info, NULL);
                         } else if (g_struct_info_is_foreign((GIStructInfo *) info) ) {
                             PyObject *foreign_struct =
-                                pygi_struct_foreign_convert_from_g_argument(state->arg_type_infos[i], NULL);
+                                pygi_struct_foreign_convert_from_g_argument(info, NULL);
 
                             pygi_struct_foreign_convert_to_g_argument(
                                 foreign_struct,
-                                state->arg_type_infos[i],
+                                info,
                                 GI_TRANSFER_EVERYTHING,
                                 state->args[i]);
 
@@ -694,7 +694,7 @@ _process_invocation_state (struct invocation_state *state,
                 } else if (type == G_TYPE_NONE && g_struct_info_is_foreign (info)) {
                     state->return_value =
                         pygi_struct_foreign_convert_from_g_argument (
-                            state->return_type_info, state->return_arg.v_pointer);
+                            info, state->return_arg.v_pointer);
                 } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                     if (transfer != GI_TRANSFER_NOTHING)
                         g_warning ("Return argument in %s returns a struct "
