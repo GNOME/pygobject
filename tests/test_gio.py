@@ -516,7 +516,7 @@ class TestFile(unittest.TestCase):
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
-        self.file = gio.File(".")
+        self.file = gio.File(os.path.dirname(__file__))
 
     def testEnumerateChildren(self):
         enumerator = self.file.enumerate_children(
