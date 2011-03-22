@@ -42,9 +42,10 @@ g_variant_to_arg (PyObject        *value,
 
 PyObject *
 g_variant_from_arg (GIInterfaceInfo *interface_info,
-                    GIArgument      *arg)
+                    gpointer         data)
 {
-    GVariant *variant = (GVariant *) arg;
+    GVariant *variant = (GVariant *) data;
+
     PyObject *type = _pygi_type_import_by_gi_info (interface_info);
 
     g_variant_ref_sink (variant);

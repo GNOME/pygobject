@@ -20,3 +20,5 @@ check.valgrind:
 %.valgrind:
 	EXEC_NAME="valgrind" TEST_NAMES=$* $(MAKE) check
 
+
+-include $(top_srcdir)/git.mk

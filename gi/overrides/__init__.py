@@ -44,7 +44,7 @@ class overridefunc(object):
         if not hasattr(func, '__info__'):
             raise TypeError("func must be an gi function")
         from ..importer import modules
-        self.module = modules[func.__module__].introspection_module
+        self.module = modules[func.__module__]._introspection_module
 
     def __call__(self, func):
         def wrapper(*args, **kwargs):

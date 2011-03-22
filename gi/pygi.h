@@ -57,13 +57,13 @@ typedef struct {
     gsize size;
 } PyGIBoxed;
 
-typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject       *value,
-                                                      GIInterfaceInfo *interface_info,
-                                                      GITransfer      transfer,
-                                                      GIArgument      *arg);
+typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject        *value,
+                                                       GIInterfaceInfo *interface_info,
+                                                       GITransfer       transfer,
+                                                       GIArgument      *arg);
 typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GIInterfaceInfo *interface_info,
-                                                        GIArgument *arg);
-typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *interface_info,
+                                                         gpointer         data);
+typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
                                                   gpointer  struct_);
 
 struct PyGI_API {
@@ -73,6 +73,11 @@ struct PyGI_API {
     gint (*set_property_value) (PyGObject *instance,
                                 const gchar *attr_name,
                                 PyObject *value);
+    GClosure * (*signal_closure_new) (PyGObject *instance,
+                                      const gchar *sig_name,
+                                      PyObject *callback,
+                                      PyObject *extra_args,
+                                      PyObject *swap_data);
     void (*register_foreign_struct) (const char* namespace_,
                                      const char* name,
                                      PyGIArgOverrideToGIArgumentFunc to_func,
@@ -130,6 +135,19 @@ pygi_set_property_value (PyGObject *instance,
     return PyGI_API->set_property_value(instance, attr_name, value);
 }
 
+static inline GClosure *
+pygi_signal_closure_new (PyGObject *instance,
+                         const gchar *sig_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data)
+{
+    if (_pygi_import() < 0) {
+        return NULL;
+    }
+    return PyGI_API->signal_closure_new(instance, sig_name, callback, extra_args, swap_data);
+}
+
 static inline PyObject *
 pygi_register_foreign_struct (const char* namespace_,
                               const char* name,
@@ -169,6 +187,16 @@ pygi_set_property_value (PyGObject *instance,
                          PyObject *value)
 {
     return -1;
+}
+
+static inline GClosure *
+pygi_signal_closure_new (PyGObject *instance,
+                         const gchar *sig_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data)
+{
+    return NULL;
 }
 
 #endif /* ENABLE_INTROSPECTION */

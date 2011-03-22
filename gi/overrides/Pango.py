@@ -21,7 +21,7 @@
 from ..overrides import override
 from ..importer import modules
 
-Pango = modules['Pango'].introspection_module
+Pango = modules['Pango']._introspection_module
 
 __all__ = []
 
@@ -29,8 +29,6 @@ class FontDescription(Pango.FontDescription):
 
     def __new__(cls, string=None):
         if string is not None:
-            # FIXME: this should be Pango.FontDescription.from_string()
-            # GI bug?
             return Pango.font_description_from_string (string)
         else:
             return Pango.FontDescription.__new__(cls)

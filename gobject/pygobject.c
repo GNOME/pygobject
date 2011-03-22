@@ -146,12 +146,13 @@ pygobject_sink(GObject *obj)
 	    }
 	}
     }
-    if (G_IS_INITIALLY_UNOWNED(obj) && !g_object_is_floating(obj)) {
-        /* GtkWindow and GtkInvisible does not return a ref to caller of
-         * g_object_new.
-         */
-        g_object_ref(obj);
-    } else if (g_object_is_floating(obj)) {
+    /* The default behaviour for GInitiallyUnowned subclasses is to call ref_sink().
+     * - if the object is new and owned by someone else, its ref has been sunk and
+     *   we need to keep the one from that someone and add our own "fresh ref"
+     * - if the object is not and owned by nobody, its ref is floating and we need
+     *   to transform it into a regular ref.
+     */
+    if (G_IS_INITIALLY_UNOWNED(obj)) {
         g_object_ref_sink(obj);
     }
 }
@@ -631,7 +632,6 @@ pygobject_register_wrapper(PyObject *self)
 
     gself = (PyGObject *)self;
 
-    pygobject_sink(gself->obj);
     g_assert(gself->obj->ref_count >= 1);
       /* save wrapper pointer so we can access it later */
     g_object_set_qdata_full(gself->obj, pygobject_wrapper_key, gself, NULL);
@@ -967,7 +967,9 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self->weakreflist = NULL;
 	self->private_flags.flags = 0;
 	self->obj = obj;
-	g_object_ref(obj);
+        /* if we are creating a wrapper around a newly created object, it can have
+           a floating ref (e.g. for methods like Gtk.Button.new()). Bug 640868 */
+	g_object_ref_sink(obj);
 	pygobject_register_wrapper((PyObject *)self);
 	PyObject_GC_Track((PyObject *)self);
     }
@@ -1137,6 +1139,45 @@ pygobject_free(PyObject *op)
     PyObject_GC_Del(op);
 }
 
+gboolean
+pygobject_prepare_construct_properties(GObjectClass *class, PyObject *kwargs,
+                                       guint *n_params, GParameter **params)
+{
+    *n_params = 0;
+    *params = NULL;
+
+    if (kwargs) {
+        Py_ssize_t pos = 0;
+        PyObject *key;
+        PyObject *value;
+
+        *params = g_new0(GParameter, PyDict_Size(kwargs));
+        while (PyDict_Next(kwargs, &pos, &key, &value)) {
+            GParamSpec *pspec;
+            GParameter *param = &(*params)[*n_params];
+            const gchar *key_str = PYGLIB_PyUnicode_AsString(key);
+
+            pspec = g_object_class_find_property(class, key_str);
+            if (!pspec) {
+                PyErr_Format(PyExc_TypeError,
+                             "gobject `%s' doesn't support property `%s'",
+                             G_OBJECT_CLASS_NAME(class), key_str);
+                return FALSE;
+            }
+            g_value_init(&param->value, G_PARAM_SPEC_VALUE_TYPE(pspec));
+            if (pyg_param_gvalue_from_pyobject(&param->value, value, pspec) < 0) {
+                PyErr_Format(PyExc_TypeError,
+                             "could not convert value for property `%s' from %s to %s",
+                             key_str, Py_TYPE(value)->tp_name,
+                             g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
+                return FALSE;
+            }
+            param->name = g_strdup(key_str);
+            ++(*n_params);
+        }
+    }
+    return TRUE;
+}
 
 /* ---------------- PyGObject methods ----------------- */
 
@@ -1167,35 +1208,9 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 	return -1;
     }
 
-    if (kwargs) {
-	Py_ssize_t pos = 0;
-	PyObject *key;
-	PyObject *value;
+    if (!pygobject_prepare_construct_properties (class, kwargs, &n_params, &params))
+        goto cleanup;
 
-	params = g_new0(GParameter, PyDict_Size(kwargs));
-	while (PyDict_Next (kwargs, &pos, &key, &value)) {
-	    GParamSpec *pspec;
-	    gchar *key_str = PYGLIB_PyUnicode_AsString(key);
-
-	    pspec = g_object_class_find_property (class, key_str);
-	    if (!pspec) {
-		PyErr_Format(PyExc_TypeError,
-			     "object of type `%s' doesn't support property `%s'",
-			     g_type_name(object_type), key_str);
-		goto cleanup;
-	    }
-	    g_value_init(&params[n_params].value,
-			 G_PARAM_SPEC_VALUE_TYPE(pspec));
-	    if (pyg_value_from_pyobject(&params[n_params].value, value)) {
-		PyErr_Format(PyExc_TypeError,
-			     "could not convert value for property `%s'",
-			     key_str);
-		goto cleanup;
-	    }
-	    params[n_params].name = g_strdup(key_str);
-	    n_params++;
-	}
-    }
     if (pygobject_constructv(self, n_params, params))
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
 	   
@@ -1509,7 +1524,11 @@ pygobject_connect(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, NULL);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, NULL);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
@@ -1558,7 +1577,11 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, NULL);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, NULL);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);
@@ -1607,7 +1630,11 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, object);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, object);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, FALSE);
@@ -1656,7 +1683,11 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
-    closure = pyg_closure_new(callback, extra_args, object);
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, object);
+
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
 					       closure, TRUE);

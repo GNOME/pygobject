@@ -67,7 +67,14 @@ class TestEverything(unittest.TestCase):
         
 
     def test_floating(self):
-        Everything.TestFloating()
+        e = Everything.TestFloating()
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = GObject.new(Everything.TestFloating)
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = Everything.TestFloating.new()
+        self.assertEquals(e.__grefcount__, 1)
 
     def test_caller_allocates(self):
         struct_a = Everything.TestStructA()
@@ -131,6 +138,24 @@ class TestEverything(unittest.TestCase):
         gtype = Everything.test_gtype(ARegisteredClass)
         self.assertEquals(ARegisteredClass.__gtype__, gtype)
         self.assertRaises(TypeError, Everything.test_gtype, 'ARegisteredClass')
+        
+    def test_dir(self):
+        attr_list = dir(Everything)
+        
+        # test that typelib attributes are listed
+        self.assertTrue('TestStructA' in attr_list)
+        
+        # test that class attributes and methods are listed
+        self.assertTrue('__class__' in attr_list)
+        self.assertTrue('__dir__' in attr_list)
+        self.assertTrue('__repr__' in attr_list)
+        
+        # test that instance members are listed
+        self.assertTrue('_namespace' in attr_list)
+        self.assertTrue('_version' in attr_list)
+        
+        # test that there are no duplicates returned
+        self.assertEqual(len(attr_list), len(set(attr_list)))
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):

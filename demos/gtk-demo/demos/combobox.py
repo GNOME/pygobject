@@ -31,7 +31,7 @@ How the options are displayed is controlled by cell renderers.
 # See FIXME's
 is_fully_bound = False
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 
 (PIXBUF_COL,
  TEXT_COL) = range(2)
@@ -45,15 +45,24 @@ class MaskEntry(Gtk.Entry):
 
         self.connect('changed', self.changed_cb)
 
+        self.error_color = Gdk.RGBA()
+        self.error_color.red = 1.0
+        self.error_color.green = 0.9
+        self.error_color_blue = 0.9
+        self.error_color.alpha = 1.0
+
+        # workaround since override_color doesn't accept None yet
+        style_ctx = self.get_style_context()
+        self.normal_color = style_ctx.get_color(0)
+
     def set_background(self):
-        error_color = Gdk.Color(65535, 60000, 60000)
         if self.mask:
             if not GLib.regex_match_simple(self.mask,
                                            self.get_text(), 0, 0):
-                self.modify_base(Gtk.StateType.NORMAL, error_color)
+                self.override_color(0, self.error_color)
                 return
 
-        self.modify_base(Gtk.StateType.NORMAL, None)
+        self.override_color(0, self.normal_color)
 
     def changed_cb(self, entry):
         self.set_background()
@@ -116,10 +125,11 @@ class ComboboxApp:
         # FIXME: make new_from_indices work
         #        make constructor take list or string of indices
         path = Gtk.TreePath.new_from_string('0:8')
-        (success, treeiter) = model.get_iter(path)
+        treeiter = model.get_iter(path)
         combo.set_active_iter(treeiter)
 
         # A GtkComboBoxEntry with validation.
+
         frame = Gtk.Frame(label='Editable')
         vbox.pack_start(frame, False, False, 0)
 
@@ -127,22 +137,68 @@ class ComboboxApp:
         box.set_border_width(5)
         frame.add(box)
 
-        combo = Gtk.ComboBoxEntry.new_text()
+        combo = Gtk.ComboBoxText.new_with_entry()
         self.fill_combo_entry(combo)
         box.add(combo)
 
         entry = MaskEntry(mask='^([0-9]*|One|Two|2\302\275|Three)$')
 
-        combo.remove(combo.get_child())
+        Gtk.Container.remove(combo, combo.get_child())
         combo.add(entry)
 
+         # A combobox with string IDs
+
+        frame = Gtk.Frame(label='String IDs')
+        vbox.pack_start(frame, False, False, 0)
+
+        box = Gtk.VBox(homogeneous=False, spacing=0)
+        box.set_border_width(5)
+        frame.add(box)
+
+        # FIXME: model is not setup when constructing Gtk.ComboBoxText()
+        #        so we call new() - Gtk should fix this to setup the model
+        #        in __init__, not in the constructor
+        combo = Gtk.ComboBoxText.new()
+        combo.append('never', 'Not visible')
+        combo.append('when-active', 'Visible when active')
+        combo.append('always', 'Always visible')
+        box.add(combo)
+
+        entry = Gtk.Entry()
+
+        # FIXME: a bug in PyGObject does not allow us to access dynamic
+        #        methods on GObject.Object, so bind properties the hard way
+        # GObject.Object.bind_property(combo, 'active-id',
+        #                             entry, 'text',
+        #                             GObject.BindingFlags.BIDIRECTIONAL)
+        self.combo_notify_id = \
+            combo.connect('notify::active-id',
+                          self.combo_active_id_changed, entry)
+        self.entry_notify_id = \
+            entry.connect('notify::text',
+                          self.entry_text_changed, combo)
+
+        box.add(entry)
         self.window.show_all()
+
+    def combo_active_id_changed(self, combo, pspec, entry):
+        entry.disconnect(self.entry_notify_id)
+        entry.set_text(combo.get_property('active-id'))
+        self.entry_notify_id = \
+            entry.connect('notify::text',
+                          self.entry_text_changed, combo)
+
+    def entry_text_changed(self, entry, pspec, combo):
+        combo.disconnect(self.combo_notify_id)
+        combo.set_property('active-id', entry.get_text())
+        self.combo_notify_id = \
+            combo.connect('notify::active-id',
+                          self.combo_active_id_changed, entry)
 
     def strip_underscore(self, s):
         return s.replace('_', '')
 
     def create_stock_icon_store(self):
-        item = Gtk.StockItem()
         stock_id = (Gtk.STOCK_DIALOG_WARNING,
                     Gtk.STOCK_STOP,
                     Gtk.STOCK_NEW,
@@ -156,8 +212,7 @@ class ComboboxApp:
         for id in stock_id:
             if id is not None:
                 pixbuf = cellview.render_icon(id, Gtk.IconSize.BUTTON, None)
-                # FIXME: item should be annotated (out)
-                Gtk.stock_lookup(id, item)
+                item = Gtk.stock_lookup(id)
                 label = self.strip_underscore(item.label)
                 store.append((pixbuf, label))
             else:
@@ -173,7 +228,7 @@ class ComboboxApp:
         """
 
         path = tree_model.get_path(treeiter)
-        indices = path.get_indices_with_depth()
+        indices = path.get_indices()
 
         sensitive = not(indices[0] == 1)
 
@@ -188,7 +243,7 @@ class ComboboxApp:
 
         path = model.get_path(treeiter)
 
-        indices = path.get_indices_with_depth()
+        indices = path.get_indices()
         result = (indices[0] == 4)
 
         return result

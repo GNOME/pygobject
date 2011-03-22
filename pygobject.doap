@@ -5,7 +5,7 @@
          xmlns="http://usefulinc.com/ns/doap#">
 
   <name xml:lang="en">PyGObject</name>
-  <shortdesc xml:lang="en">Python bindings GLib, GObject and GIO</shortdesc>
+  <shortdesc xml:lang="en">Python bindings GLib and GObject</shortdesc>
   <homepage rdf:resource="http://live.gnome.org/PyGObject" />
   <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#bindings" />

@@ -93,3 +93,69 @@ test_floating_without_sink_func_init (TestFloatingWithoutSinkFunc *self)
 {
 }
 
+/* TestOwnedByLibrary */
+
+G_DEFINE_TYPE(TestOwnedByLibrary, test_owned_by_library, G_TYPE_OBJECT)
+
+static GSList *obl_instance_list = NULL;
+
+static void
+test_owned_by_library_class_init (TestOwnedByLibraryClass *klass)
+{
+}
+
+static void
+test_owned_by_library_init (TestOwnedByLibrary *self)
+{
+    g_object_ref (self);
+    obl_instance_list = g_slist_prepend (obl_instance_list, self);
+}
+
+void
+test_owned_by_library_release (TestOwnedByLibrary *self)
+{
+    obl_instance_list = g_slist_remove (obl_instance_list, self);
+    g_object_unref (self);
+}
+
+GSList *
+test_owned_by_library_get_instance_list (void)
+{
+    return obl_instance_list;
+}
+
+/* TestFloatingAndSunk
+ * This object is mimicking the GtkWindow behaviour, ie a GInitiallyUnowned subclass
+ * whose floating reference has already been sunk when g_object_new() returns it.
+ * The reference is already sunk because the instance is already owned by the instance
+ * list.
+ */
+
+G_DEFINE_TYPE(TestFloatingAndSunk, test_floating_and_sunk, G_TYPE_INITIALLY_UNOWNED)
+
+static GSList *fas_instance_list = NULL;
+
+static void
+test_floating_and_sunk_class_init (TestFloatingAndSunkClass *klass)
+{
+}
+
+static void
+test_floating_and_sunk_init (TestFloatingAndSunk *self)
+{
+    g_object_ref_sink (self);
+    fas_instance_list = g_slist_prepend (fas_instance_list, self);
+}
+
+void
+test_floating_and_sunk_release (TestFloatingAndSunk *self)
+{
+    fas_instance_list = g_slist_remove (fas_instance_list, self);
+    g_object_unref (self);
+}
+
+GSList *
+test_floating_and_sunk_get_instance_list (void)
+{
+    return fas_instance_list;
+}

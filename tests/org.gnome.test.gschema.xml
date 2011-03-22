@@ -1,0 +1,25 @@
+<schemalist>
+    <schema id="org.gnome.test" path="/tests/">
+	<key name="test-boolean" type="b">
+	    <default>true</default>
+	</key>
+	<key name="test-string" type="s">
+	    <default>"Hello"</default>
+	</key>
+       <key name="test-tuple" type="(ii)">
+	   <default>(1,2)</default>
+	</key>
+	<key name="test-array" type="ai">
+	    <default>[1,2]</default>
+	</key>
+    </schema>
+
+    <schema id="org.gnome.nopathtest">
+	<key name="np-int" type="i">
+	    <default>42</default>
+	</key>
+    </schema>
+
+    <schema id="org.gnome.empty" path="/tests/">
+    </schema>
+</schemalist>

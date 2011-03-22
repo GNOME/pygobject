@@ -106,14 +106,15 @@ pygi_struct_foreign_lookup (GIBaseInfo *base_info)
     return result;
 }
 
-gboolean
+PyObject *
 pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
                                            GIInterfaceInfo *interface_info,
                                            GITransfer       transfer,
-                                           GIArgument       *arg)
+                                           GIArgument      *arg)
 {
     PyObject *result;
-    PyGIBaseInfo *base_info = (PyGIBaseInfo *)interface_info;
+
+    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL) {
@@ -123,18 +124,14 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
     }
 
     result = foreign_struct->to_func (value, interface_info, transfer, arg);
-    if (result == NULL)
-        return FALSE;
-
-    Py_DECREF(result);
-    return TRUE;
+    return result;
 }
 
 PyObject *
 pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
-                                             GIArgument  *arg)
+                                             GIArgument      *arg)
 {
-    GIBaseInfo *base_info = (GIBaseInfo *)interface_info;
+    GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
     PyGIForeignStruct *foreign_struct = pygi_struct_foreign_lookup (base_info);
 
     if (foreign_struct == NULL)
@@ -155,10 +152,7 @@ pygi_struct_foreign_release (GIBaseInfo *base_info,
     if (!foreign_struct->release_func)
         Py_RETURN_NONE;
 
-    if (!foreign_struct->release_func (base_info, struct_))
-        return NULL;
-
-    Py_RETURN_NONE;
+    return foreign_struct->release_func (base_info, struct_);
 }
 
 void
@@ -168,7 +162,7 @@ pygi_register_foreign_struct_real (const char* namespace_,
                                    PyGIArgOverrideFromGIArgumentFunc from_func,
                                    PyGIArgOverrideReleaseFunc release_func)
 {
-    PyGIForeignStruct *new_struct = g_slice_new0 (PyGIForeignStruct);
+    PyGIForeignStruct *new_struct = g_slice_new (PyGIForeignStruct);
     new_struct->namespace = namespace_;
     new_struct->name = name;
     new_struct->to_func = to_func;

@@ -32,12 +32,18 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 
 #define pyg_threads_enabled (pygobject_api_functions.threads_enabled)
 
+#ifdef DISABLE_THREADING
+#define pyg_gil_state_ensure() 0
+#define pyg_gil_state_release(state) G_STMT_START {     \
+    } G_STMT_END
 
+#else
 #define pyg_gil_state_ensure() (pygobject_api_functions.threads_enabled? (PyGILState_Ensure()) : 0)
 #define pyg_gil_state_release(state) G_STMT_START {     \
     if (pygobject_api_functions.threads_enabled)        \
         PyGILState_Release(state);                      \
     } G_STMT_END
+#endif
 
 #define pyg_begin_allow_threads                         \
     G_STMT_START {                                      \
@@ -225,6 +231,11 @@ pyg_object_peek_inst_data(GObject *obj)
     return ((PyGObjectData *)
             g_object_get_qdata(obj, pygobject_instance_data_key));
 }
+
+gboolean        pygobject_prepare_construct_properties  (GObjectClass *class,
+                                                         PyObject *kwargs,
+                                                         guint *n_params,
+                                                         GParameter **params);
 
 
 #endif

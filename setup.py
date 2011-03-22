@@ -148,7 +148,7 @@ class PyGObjectInstallData(InstallData):
 
 
 class PyGObjectBuild(build):
-    enable_threading = 1
+    enable_threading = True
 
 PyGObjectBuild.user_options.append(('enable-threading', None,
                                     'enable threading support'))
@@ -323,7 +323,8 @@ else:
     GLOBAL_MACROS.append(('DISABLE_THREADING', 1))
 
 doclines = __doc__.split('\n')
-options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py'}}
+options = {'bdist_wininst': {'install_script': 'pygobject_postinstall.py',
+                             'user_access_control': 'auto'}}
 
 setup(name='pygobject',
       url='http://www.pygtk.org/',
@@ -332,15 +333,15 @@ setup(name='pygobject',
       platforms=['MS Windows'],
       maintainer='Johan Dahlin',
       maintainer_email='johan@gnome.org',
-      description = doclines[0],
-      long_description = '\n'.join(doclines[2:]),
-      provides = 'pygobject',
+      description=doclines[0],
+      long_description='\n'.join(doclines[2:]),
+      provides=['codegen', 'dsextras', 'gio', 'glib', 'gobject'],
       py_modules=py_modules,
       packages=packages,
       ext_modules=ext_modules,
       libraries=clibs,
       data_files=data_files,
-      scripts = ['pygobject_postinstall.py'],
+      scripts=['pygobject_postinstall.py'],
       options=options,
       cmdclass={'install_lib': PyGObjectInstallLib,
                 'install_data': PyGObjectInstallData,

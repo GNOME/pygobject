@@ -9,7 +9,7 @@ Maintainer: Johan Dahlin
 Maintainer-email: johan@gnome.org
 License: GNU LGPL
 Download-url: ftp://ftp.gnome.org/pub/GNOME/sources/pygobject/@PYGOBJECT_MAJOR_VERSION@.@PYGOBJECT_MINOR_VERSION@/pygobject-@VERSION@.tar.gz
-Description: Python bindings for GLib, GObject and GIO
+Description: Python bindings for GLib and GObject
 Platform: POSIX, Windows
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Environment :: Linux

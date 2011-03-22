@@ -31,8 +31,8 @@ PyObject *g_variant_to_arg(PyObject        *value,
                            GITransfer       transfer,
                            GIArgument      *arg);
 
-PyObject *g_variant_from_arg(GIInterfaceInfo *interface_info,
-                             GIArgument      *arg);
+PyObject *g_variant_from_arg(GITypeInfo *type_info,
+                             gpointer    data);
 
 PyObject *g_variant_release_foreign (GIBaseInfo *base_info,
                                      gpointer    struct_);

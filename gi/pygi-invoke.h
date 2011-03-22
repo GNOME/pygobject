@@ -30,7 +30,8 @@
 #include "pygi-invoke-state-struct.h"
 G_BEGIN_DECLS
 
-PyObject *_wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args);
+PyObject *_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
+                                        PyObject *kwargs);
 
 G_END_DECLS
 

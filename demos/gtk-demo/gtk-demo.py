@@ -124,7 +124,7 @@ class GtkDemoApp(object):
 
                 try:
                     demo = Demo(module.title, module, f)
-                except AttributeError, e:
+                except AttributeError as e:
                     raise AttributeError('(%s): %s' % (f, e.message))
 
             demo_list.append(demo)
@@ -146,7 +146,7 @@ class GtkDemoApp(object):
             if filename.endswith('.py'):
                 demo_file_list.append(fullname)
 
-        demo_file_list.sort(lambda a, b: cmp(a.lower(), b.lower()))
+        demo_file_list = sorted(demo_file_list, key=str.lower)
 
         self.load_demos_from_list(demo_file_list, demo_list)
 
@@ -213,9 +213,10 @@ class GtkDemoApp(object):
         self.source_buffer.insert(end, code)
 
     def row_activated_cb(self, view, path, col, store):
-        (success, treeiter) = store.get_iter(path)
+        treeiter = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
-        demo.module.main(self)
+        if not demo.isdir:
+            demo.module.main(self)
 
     def create_tree(self):
         tree_store = Gtk.TreeStore(str, Demo, Pango.Style)

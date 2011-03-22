@@ -29,6 +29,7 @@ is_fully_bound = False
 
 from gi.repository import Gtk, GdkPixbuf, Gdk
 import sys, os
+import glib
 
 global infobar
 global window
@@ -38,7 +39,7 @@ global _demoapp
 def widget_destroy(widget, button):
     widget.destroy()
 
-def activate_action(action):
+def activate_action(action, user_data):
     global window
 
     name = action.get_name()
@@ -59,7 +60,7 @@ def activate_action(action):
     dialog.connect('response', widget_destroy)
     dialog.show()
 
-def activate_radio_action(action, current):
+def activate_radio_action(action, current, user_data):
     global infobar
     global messagelabel
 
@@ -87,29 +88,7 @@ def update_statusbar(buffer, statusbar):
 def mark_set_callback(buffer, new_location, mark, data):
     update_statusbar(buffer, data)
 
-def update_resize_grip(widget, event, statusbar):
-    # FIXME: for some reason we get attribute errors in handlers
-    #        if we try to access flags without first evaluating
-    #        the parent struct
-    Gdk.WindowState
-
-    # FIXME: event should be a Gdk.EventWindowState but is only a Gdk.Event
-    if event.window_state.changed_mask and (Gdk.WindowState.MAXIMIZED or
-			       Gdk.WindowState.FULLSCREEN):
-
-        maximized = event.window_state.new_window_state and (Gdk.WindowState.MAXIMIZED or
-					        Gdk.WindowState.FULLSCREEN)
-        statusbar.set_has_resize_grip(not maximized)
-
-def activate_email(about, link, data):
-    text = 'send mail to %s' % (link,)
-    print text
-
-def activate_url(about, link, data):
-    text = 'show url %s' % (link,)
-    print text
-
-def about_cb(widget):
+def about_cb(widget, data):
     global window
 
     authors = ['John (J5) Palmieri',
@@ -137,10 +116,13 @@ write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
     filename = os.path.join('data', 'gtk-logo-rgb.gif')
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    try:
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    except glib.GError:
+        filename = os.path.join('demos', filename)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-    Gtk.AboutDialog.set_email_hook(activate_email, None)
-    Gtk.AboutDialog.set_url_hook(activate_url, None)
     # FIXME: override Gtk.show_about_dialog
     #        make about dailog constructor take a parent argument
     about = Gtk.AboutDialog(program_name='GTK+ Code Demos',
@@ -152,7 +134,7 @@ Boston, MA 02111-1307, USA.
 			    authors=authors,
 			    documenters=documentors,
 			    logo=transparent,
-                            title='About GTK+ Code Demos')
+			    title='About GTK+ Code Demos')
 
     about.set_transient_for(window)
     about.connect('response', widget_destroy)
@@ -337,8 +319,8 @@ def main(demoapp=None):
     window.set_title('Application Window')
     window.set_icon_name('gtk-open')
     window.connect_after('destroy', _quit)
-    table = Gtk.Table(n_rows=1,
-                      n_columns=5,
+    table = Gtk.Table(rows=1,
+                      columns=5,
                       homogeneous=False)
     window.add(table)
 
@@ -411,8 +393,6 @@ def main(demoapp=None):
     buffer = contents.get_buffer()
     buffer.connect('changed', update_statusbar, statusbar)
     buffer.connect('mark_set', mark_set_callback, statusbar)
-
-    window.connect('window_state_event', update_resize_grip, statusbar)
 
     update_statusbar(buffer, statusbar);
 

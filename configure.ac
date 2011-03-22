@@ -11,16 +11,15 @@ m4_define(python3_min_ver, 3.1)
 
 dnl the pygobject version number
 m4_define(pygobject_major_version, 2)
-m4_define(pygobject_minor_version, 27)
-m4_define(pygobject_micro_version, 0)
+m4_define(pygobject_minor_version, 90)
+m4_define(pygobject_micro_version, 1)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
-m4_define(introspection_required_version, 0.9.5)
-m4_define(pycairo_required_version, 1.0.2)
-m4_define(glib_required_version, 2.22.4)
-m4_define(gio_required_version, 2.22.4)
-m4_define(giounix_required_version, 2.22.4)
+m4_define(introspection_required_version, 0.10.2)
+m4_define(pycairo_required_version, 1.2.0)
+m4_define(glib_required_version, 2.24.0)
+m4_define(gio_required_version, 2.24.0)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -101,15 +100,9 @@ if test $build_py3k = true ; then
 			  [AC_MSG_ERROR(too old)])
 fi
 
-JD_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
-py_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`
-if test -x "$PYTHON-config"; then
-PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
-else
-PYTHON_INCLUDES="-I${py_prefix}/include/python${PYTHON_VERSION}"
-fi
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-Wall -Werror $PYTHON_INCLUDES"
 AC_TRY_COMPILE([#include <Python.h>],
@@ -152,7 +145,11 @@ fi
 
 AM_CONDITIONAL(ENABLE_DOCS, test x$enable_docs != xno)
 
-AM_CHECK_PYMOD(thread,,,enable_thread=no)
+AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
+if test "x$enable_thread" = xcheck_for_py3_module; then
+  dnl Python 3 uses the _thread module so check for that
+  AM_CHECK_PYMOD(_thread,,,enable_thread=no)
+fi
 
 AC_MSG_CHECKING(whether to enable threading in pygobject)
 if test "x$enable_thread" != xno; then
@@ -207,28 +204,7 @@ AC_SUBST(FFI_LIBS)
 AC_SUBST(LIBFFI_PC)
 
 dnl gio
-PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version,
-	have_gio=true, have_gio=false)
-AC_SUBST(GIO_CFLAGS)
-AC_SUBST(GIO_LIBS)
-
-# Do not build GIO if the python version >= 3.0
-# We use GI to access GIO in python 3
-AM_CONDITIONAL(BUILD_GIO, test $have_gio = true -a $build_py3k = false)
-
-if test -n "$export_dynamic"; then
-  GIO_LIBS=`echo $GIO_LIBS | sed -e "s/$export_dynamic//"`
-fi
-
-dnl giounix
-PKG_CHECK_MODULES(GIOUNIX, gio-unix-2.0 >= giounix_required_version,
-	have_giounix=true, have_giounix=false)
-AC_SUBST(GIOUNIX_CFLAGS)
-AC_SUBST(GIOUNIX_LIBS)
-AM_CONDITIONAL(BUILD_GIOUNIX, test $have_giounix = true -a $build_py3k = false)
-if test -n "$export_dynamic"; then
-  GIOUNIX_LIBS=`echo $GIOUNIX_LIBS | sed -e "s/$export_dynamic//"`
-fi
+PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
 
 AC_ARG_ENABLE(cairo,
     AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
@@ -293,7 +269,6 @@ AC_CONFIG_FILES(
   gi/overrides/Makefile
   glib/Makefile
   gobject/Makefile
-  gio/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)

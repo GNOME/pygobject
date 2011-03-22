@@ -234,6 +234,28 @@ _wrap_g_irepository_get_version (PyGIRepository *self,
     return PYGLIB_PyUnicode_FromString (version);
 }
 
+static PyObject *
+_wrap_g_irepository_get_loaded_namespaces (PyGIRepository *self)
+{
+    char **namespaces;
+    PyObject *py_namespaces;
+    gssize i;
+
+    namespaces = g_irepository_get_loaded_namespaces (self->repository);
+
+    py_namespaces = PyList_New (0);
+    for (i = 0; namespaces[i] != NULL; i++) {
+        PyObject *py_namespace = PYGLIB_PyUnicode_FromString (namespaces[i]);
+        PyList_Append (py_namespaces, py_namespace);
+        Py_DECREF(py_namespace);
+        g_free (namespaces[i]);
+    }
+
+    g_free (namespaces);
+
+    return py_namespaces;
+}
+
 static PyMethodDef _PyGIRepository_methods[] = {
     { "enumerate_versions", (PyCFunction) _wrap_g_irepository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
     { "get_default", (PyCFunction) _wrap_g_irepository_get_default, METH_STATIC | METH_NOARGS },
@@ -242,6 +264,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "find_by_name", (PyCFunction) _wrap_g_irepository_find_by_name, METH_VARARGS | METH_KEYWORDS },
     { "get_typelib_path", (PyCFunction) _wrap_g_irepository_get_typelib_path, METH_VARARGS | METH_KEYWORDS },
     { "get_version", (PyCFunction) _wrap_g_irepository_get_version, METH_VARARGS | METH_KEYWORDS },
+    { "get_loaded_namespaces", (PyCFunction) _wrap_g_irepository_get_loaded_namespaces, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

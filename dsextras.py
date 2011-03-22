@@ -10,11 +10,12 @@ import fnmatch
 import re
 import string
 
-import distutils.dep_util
+from distutils import dep_util
 from distutils.command.build_ext import build_ext
 from distutils.command.install_lib import install_lib
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
+from distutils.spawn import find_executable
 
 try:
     import codegen.createdefs
@@ -76,15 +77,15 @@ def getstatusoutput(cmd):
         from commands import getstatusoutput
         return getstatusoutput(cmd)
 
+def have_gcc():
+    '''Checks for the existence of gcc'''
+    if find_executable('gcc'):
+        return True
+
 def have_pkgconfig():
     '''Checks for the existence of pkg-config'''
-    if (sys.platform == 'win32' and
-        os.system('pkg-config --version > NUL') == 0):
-
+    if find_executable('pkg-config'):
         return True
-    else:
-        if getstatusoutput('pkg-config')[0] == 256:
-            return True
 
 def list_files(dir):
     '''List all files in a dir, with filename match support:
@@ -154,6 +155,9 @@ class BuildExt(build_ext):
         self.extra_compile_args = []
 
         if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
+            if not have_gcc():
+                raise SystemExit('ERROR: Could not find gcc.')
+
             # MSVC compatible struct packing is required.
             # Note gcc2 uses -fnative-struct while gcc3
             # and gcc4 use -mms-bitfields. Based on the
@@ -170,6 +174,9 @@ class BuildExt(build_ext):
 
     def modify_compiler(self):
         if sys.platform == 'win32' and self.compiler.compiler_type == 'mingw32':
+            if not have_gcc():
+                raise SystemExit('ERROR: Could not find gcc.')
+
             # Remove '-static' linker option to prevent MinGW ld
             # from trying to link with MSVC import libraries.
             if self.compiler.linker_so.count('-static'):
@@ -425,11 +432,11 @@ class Template(object):
         files.append(self.override)
         files.append(self.defs)
 
-        return not distutils.dep_util.newer_group(files, self.output)
+        return not dep_util.newer_group(files, self.output)
 
     def generate_defs(self):
         for (target, sources) in self.built_defs:
-            if distutils.dep_util.newer_group(sources, target):
+            if dep_util.newer_group(sources, target):
                 # createdefs is mostly called from the CLI !
                 args=['dummy', target] + sources
                 codegen.createdefs.main(args)

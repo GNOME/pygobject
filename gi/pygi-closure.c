@@ -245,6 +245,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
     if (_PyTuple_Resize (py_args, n_in_args) == -1)
         goto error;
 
+    g_free (g_args);
     return TRUE;
 
 error:
@@ -294,6 +295,14 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             GITransfer transfer = g_arg_info_get_ownership_transfer (arg_info);
+
+            if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ERROR) {
+                /* TODO: check if an exception has been set and convert it to a GError */
+                out_args[i_out_args].v_pointer = NULL;
+                i_out_args++;
+                continue;
+            }
+
             if (PyTuple_Check (py_retval)) {
                 PyObject *item = PyTuple_GET_ITEM (py_retval, i_py_retval);
                 _pygi_closure_assign_pyobj_to_out_argument (
@@ -355,6 +364,8 @@ _pygi_closure_handle (ffi_cif *cif,
     _pygi_closure_set_out_arguments (closure->info, retval, out_args, result);
 
 end:
+    if (out_args != NULL)
+        g_free (out_args);
     g_base_info_unref ( (GIBaseInfo*) return_type);
 
     PyGILState_Release (state);

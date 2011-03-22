@@ -35,6 +35,7 @@ _gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_gobject|PyInit__
 _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
+	$(PYTHON_LIBS) \
 	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
 _gobject_la_SOURCES =           \
         gobjectmodule.c         \
@@ -71,3 +72,5 @@ clean-local:
 	rm -f $(pygobject_LTLIBRARIES:.la=.so)
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
+
+-include $(top_srcdir)/git.mk

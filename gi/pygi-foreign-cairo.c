@@ -56,9 +56,9 @@ cairo_context_to_arg (PyObject        *value,
 }
 
 PyObject *
-cairo_context_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
+cairo_context_from_arg (GIInterfaceInfo *interface_info, gpointer data)
 {
-    cairo_t *context = (cairo_t*) arg;
+    cairo_t *context = (cairo_t*) data;
 
     cairo_reference (context);
 
@@ -95,9 +95,9 @@ cairo_surface_to_arg (PyObject        *value,
 }
 
 PyObject *
-cairo_surface_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
+cairo_surface_from_arg (GIInterfaceInfo *interface_info, gpointer data)
 {
-    cairo_surface_t *surface = (cairo_surface_t*) arg;
+    cairo_surface_t *surface = (cairo_surface_t*) data;
 
     cairo_surface_reference (surface);
 
@@ -109,102 +109,6 @@ cairo_surface_release (GIBaseInfo *base_info,
                        gpointer    struct_)
 {
     cairo_surface_destroy ( (cairo_surface_t*) struct_);
-    Py_RETURN_NONE;
-}
-
-#define _PY_TUPLE_GET_INT(t, pos, i)    \
-{                                       \
-    PyObject *item;                     \
-    long l;                             \
-    item = PyTuple_GET_ITEM(t, pos);    \
-    if (!item)                          \
-        goto err;                       \
-    l = PYGLIB_PyLong_AsLong(item);     \
-    if (PyErr_Occurred()) {             \
-        Py_DECREF(item);                \
-        goto err;                       \
-    }                                   \
-    if (l > INT_MAX || l < INT_MIN) {   \
-        Py_DECREF(item);                \
-        PyErr_Format(PyExc_ValueError, "integer %ld is out of range", l); \
-        goto err;                       \
-    }                                   \
-    i = (int)l;                         \
-    Py_DECREF(item);                    \
-}
-
-#define _PY_TUPLE_SET_INT(t, pos, i)    \
-{                                       \
-    PyObject *item;                     \
-    item = PYGLIB_PyLong_FromLong(i);   \
-    if (!item)                          \
-        goto err;                       \
-    PyTuple_SET_ITEM(t, pos, item);     \
-}
-
-PyObject *
-cairo_rectangle_int_to_arg (PyObject        *value,
-                            GIInterfaceInfo *interface_info,
-                            GITransfer       transfer,
-                            GIArgument      *arg)
-{
-    cairo_rectangle_int_t *rect;
-    Py_ssize_t seq_len;
-
-    seq_len = PySequence_Size(value);
-    if (!PySequence_Check(value) || (seq_len != 4)) {
-        PyErr_Format(PyExc_TypeError, "expected a sequence of length 4");
-        goto err;
-    }
-
-    rect = g_malloc(sizeof(cairo_rectangle_int_t));
-    if (!rect)
-        return PyErr_NoMemory();
-
-    _PY_TUPLE_GET_INT(value, 0, rect->x);
-    _PY_TUPLE_GET_INT(value, 1, rect->y);
-    _PY_TUPLE_GET_INT(value, 2, rect->width);
-    _PY_TUPLE_GET_INT(value, 3, rect->height);
-
-    arg->v_pointer = rect;
-    Py_RETURN_NONE;
-err:
-    return NULL;
-}
-
-PyObject *
-cairo_rectangle_int_from_arg (GIInterfaceInfo *interface_info, GIArgument  *arg)
-{
-    PyObject *result;
-    cairo_rectangle_int_t *rect = (cairo_rectangle_int_t*) arg;
-
-    result = PyTuple_New(4);
-    if (!result)
-        return NULL;
-
-    if (rect) {
-        _PY_TUPLE_SET_INT(result, 0, rect->x);
-        _PY_TUPLE_SET_INT(result, 1, rect->y);
-        _PY_TUPLE_SET_INT(result, 2, rect->width);
-        _PY_TUPLE_SET_INT(result, 3, rect->height);
-    } else {
-        _PY_TUPLE_SET_INT(result, 0, 0);
-        _PY_TUPLE_SET_INT(result, 1, 0);
-        _PY_TUPLE_SET_INT(result, 2, 0);
-        _PY_TUPLE_SET_INT(result, 3, 0);
-    }
-
-    return result;
-err:
-    Py_DECREF(result);
-    return NULL;
-}
-
-PyObject *
-cairo_rectangle_int_release (GIBaseInfo *base_info,
-                             gpointer    struct_)
-{
-    g_free (struct_);
     Py_RETURN_NONE;
 }
 

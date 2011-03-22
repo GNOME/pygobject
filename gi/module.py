@@ -25,6 +25,7 @@ from __future__ import absolute_import
 import os
 import gobject
 
+import gi
 from .overrides import registry
 
 from ._gi import \
@@ -40,12 +41,13 @@ from ._gi import \
     Struct, \
     Boxed, \
     enum_add, \
-    flags_add
+    enum_register_new_gtype_and_add, \
+    flags_add, \
+    flags_register_new_gtype_and_add
 from .types import \
     GObjectMeta, \
     StructMeta, \
-    Function, \
-    Enum
+    Function
 
 repository = Repository.get_default()
 
@@ -82,14 +84,14 @@ class IntrospectionModule(object):
     def __init__(self, namespace, version=None):
         repository.require(namespace, version)
         self._namespace = namespace
-        self.version = version
+        self._version = version
         self.__name__ = 'gi.repository.' + namespace
 
-        repository.require(self._namespace, self.version)
+        repository.require(self._namespace, self._version)
         self.__path__ = repository.get_typelib_path(self._namespace)
 
-        if self.version is None:
-            self.version = repository.get_version(self._namespace)
+        if self._version is None:
+            self._version = repository.get_version(self._namespace)
 
     def __getattr__(self, name):
         info = repository.find_by_name(self._namespace, name)
@@ -102,13 +104,18 @@ class IntrospectionModule(object):
             wrapper = g_type.pytype
 
             if wrapper is None:
-                if g_type.is_a(gobject.TYPE_ENUM):
-                    wrapper = enum_add(g_type)
-                elif g_type.is_a(gobject.TYPE_NONE):
-                    # An enum with a GType of None is an enum without GType
-                    wrapper = Enum
+                if info.is_flags():
+                    if g_type.is_a(gobject.TYPE_FLAGS):
+                        wrapper = flags_add(g_type)
+                    else:
+                        assert g_type == gobject.TYPE_NONE
+                        wrapper = flags_register_new_gtype_and_add(info)
                 else:
-                    wrapper = flags_add(g_type)
+                    if g_type.is_a(gobject.TYPE_ENUM):
+                        wrapper = enum_add(g_type)
+                    else:
+                        assert g_type == gobject.TYPE_NONE
+                        wrapper = enum_register_new_gtype_and_add(info)
 
                 wrapper.__info__ = info
                 wrapper.__module__ = 'gi.repository.' + info.get_namespace()
@@ -178,8 +185,17 @@ class IntrospectionModule(object):
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
     def __dir__ (self):
-        attribs_list = repository.get_infos(self._namespace)
-        return list(map(lambda x: x.get_name(), attribs_list))
+        # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
+
+        # update *set* because some repository attributes have already been
+        # wrapped by __getattr__() and included in self.__dict__
+        namespace_infos = repository.get_infos(self._namespace)
+        result.update(info.get_name() for info in namespace_infos)
+
+        return list(result)
+
 
 class DynamicGObjectModule(IntrospectionModule):
     """Wrapper for the GObject module
@@ -214,28 +230,20 @@ class DynamicGObjectModule(IntrospectionModule):
 class DynamicModule(object):
     def __init__(self, namespace):
         self._namespace = namespace
-        self.introspection_module = None
-        self._version = None
+        self._introspection_module = None
         self._overrides_module = None
+        self.__path__ = None
 
-    def require_version(self, version):
-        if self.introspection_module is not None and \
-                self.introspection_module.version != version:
-            raise RuntimeError('Module has been already loaded ')
-        self._version = version
-
-    def _import(self):
-        self.introspection_module = IntrospectionModule(self._namespace,
-                                                        self._version)
+    def _load(self):
+        version = gi.get_required_version(self._namespace)
+        self._introspection_module = IntrospectionModule(self._namespace,
+                                                         version)
 
         overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
         self._overrides_module = getattr(overrides_modules, self._namespace, None)
         self.__path__ = repository.get_typelib_path(self._namespace)
 
     def __getattr__(self, name):
-        if self.introspection_module is None:
-            self._import()
-
         if self._overrides_module is not None:
             override_exports = getattr(self._overrides_module, '__all__', ())
             if name in override_exports:
@@ -250,9 +258,21 @@ class DynamicModule(object):
             if key in registry:
                 return registry[key]
 
-        return getattr(self.introspection_module, name)
+        return getattr(self._introspection_module, name)
 
     def __dir__ (self):
-        repository.require(self._namespace, self._version)
-        attribs_list = repository.get_infos(self._namespace)
-        return list(map(lambda x: x.get_name(), attribs_list))
+        # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
+        
+        result.update(dir(self._introspection_module))
+        override_exports = getattr(self._overrides_module, '__all__', ())
+        result.update(override_exports)
+        return list(result)
+
+    def __repr__(self):
+        path = repository.get_typelib_path(self._namespace)
+        return "<%s.%s %r from %r>" % (self.__class__.__module__,
+                                      self.__class__.__name__,
+                                      self._namespace,
+                                      path)

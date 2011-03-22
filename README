@@ -8,7 +8,7 @@ Current maintainers:  Gustavo J A M Carneiro <gjc@gnome.org>
                       Gian Mario Tagliaretti <gianmt@gnome.org>
                       Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
 
-This archive contains bindings for the GLib, GObject and GIO,
+This archive contains bindings for the GLib, and GObject,
 to be used in Python. It is a fairly complete set of bindings,
 it's already rather useful, and is usable to write moderately
 complex programs.  (see the examples directory for some examples
@@ -45,7 +45,6 @@ Requirements
   * Python 2.3.5 or higher
   * Glib 2.22.4 or higher
   * GIO 2.22.4 or higher
-  * GIO-unix 2.22.4 or higher
   * libffi (optional)
 
 Copyright Information

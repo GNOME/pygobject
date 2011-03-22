@@ -16,9 +16,6 @@ gobject.threads_init()
 
 
 SKIP_FILES = ['runtests',
-              'test_gio',           # python crash
-              'test_gresolver',     # python crash
-              'test_gsocket',       # blocks on test_socket_condition_wait
               'test_mainloop',      # no os.fork on windows
               'test_subprocess']    # blocks on testChildWatch
 

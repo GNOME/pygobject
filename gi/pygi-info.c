@@ -237,7 +237,45 @@ out:
 /* CallableInfo */
 PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGIBaseInfo);
 
+static PyObject *
+_wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
+{
+    gssize n_infos;
+    PyObject *infos;
+    gssize i;
+
+    n_infos = g_callable_info_get_n_args ( (GICallableInfo *) self->info);
+
+    infos = PyTuple_New (n_infos);
+    if (infos == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < n_infos; i++) {
+        GIBaseInfo *info;
+        PyObject *py_info;
+
+        info = (GIBaseInfo *) g_callable_info_get_arg ( (GICallableInfo *) self->info, i);
+        g_assert (info != NULL);
+
+        py_info = _pygi_info_new (info);
+
+        g_base_info_unref (info);
+
+        if (py_info == NULL) {
+            Py_CLEAR (infos);
+            break;
+        }
+
+        PyTuple_SET_ITEM (infos, i, py_info);
+    }
+
+    return infos;
+}
+
 static PyMethodDef _PyGICallableInfo_methods[] = {
+    { "invoke", (PyCFunction) _wrap_g_callable_info_invoke, METH_VARARGS | METH_KEYWORDS },
+    { "get_arguments", (PyCFunction) _wrap_g_callable_info_get_arguments, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -479,7 +517,6 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
 static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "is_constructor", (PyCFunction) _wrap_g_function_info_is_constructor, METH_NOARGS },
     { "is_method", (PyCFunction) _wrap_g_function_info_is_method, METH_NOARGS },
-    { "invoke", (PyCFunction) _wrap_g_function_info_invoke, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -889,8 +926,23 @@ _wrap_g_enum_info_get_values (PyGIBaseInfo *self)
     return infos;
 }
 
+static PyObject *
+_wrap_g_enum_info_is_flags (PyGIBaseInfo *self)
+{
+    GIInfoType info_type = g_base_info_get_type ((GIBaseInfo *) self->info);
+
+    if (info_type == GI_INFO_TYPE_ENUM) {
+        Py_RETURN_FALSE;
+    } else if (info_type == GI_INFO_TYPE_FLAGS) {
+        Py_RETURN_TRUE;
+    } else {
+        g_assert_not_reached();
+    }
+}
+
 static PyMethodDef _PyGIEnumInfo_methods[] = {
     { "get_values", (PyCFunction) _wrap_g_enum_info_get_values, METH_NOARGS },
+    { "is_flags", (PyCFunction) _wrap_g_enum_info_is_flags, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1547,7 +1599,7 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGIFieldInfo_Type, FieldInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
-                         PyGIBaseInfo_Type);
+                         PyGICallableInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, UnionInfo,
                          PyGIRegisteredTypeInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIBoxedInfo_Type, BoxedInfo,

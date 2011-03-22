@@ -1003,18 +1003,18 @@ get_type_name_for_class(PyTypeObject *class)
 }
 
 
-static GStaticPrivate pygobject_contruction_wrapper = G_STATIC_PRIVATE_INIT;
+static GStaticPrivate pygobject_construction_wrapper = G_STATIC_PRIVATE_INIT;
 
 static inline void
 pygobject_init_wrapper_set(PyObject *wrapper)
 {
-    g_static_private_set(&pygobject_contruction_wrapper, wrapper, NULL);
+    g_static_private_set(&pygobject_construction_wrapper, wrapper, NULL);
 }
 
 static inline PyObject *
 pygobject_init_wrapper_get(void)
 {
-    return (PyObject *) g_static_private_get(&pygobject_contruction_wrapper);
+    return (PyObject *) g_static_private_get(&pygobject_construction_wrapper);
 }
 
 static void
@@ -1048,6 +1048,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         kwargs = PyDict_New();
         if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
             PyErr_Print();
+        Py_DECREF(wrapper);
         Py_DECREF(args);
         Py_DECREF(kwargs);
         pyglib_gil_state_release(state);
@@ -1175,15 +1176,20 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     /* create new typecode */
     instance_type = g_type_register_static(parent_type, new_type_name,
 					   &type_info, 0);
-    if (type_name == NULL)
-        g_free(new_type_name);
     if (instance_type == 0) {
 	PyErr_Format(PyExc_RuntimeError,
 		     "could not create new GType: %s (subclass of %s)",
 		     new_type_name,
 		     g_type_name(parent_type));
+
+        if (type_name == NULL)
+            g_free(new_type_name);
+
 	return -1;
     }
+
+    if (type_name == NULL)
+        g_free(new_type_name);
 
     /* store pointer to the class with the GType */
     Py_INCREF(class);
@@ -1689,7 +1695,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     GType type;
     GObject *obj = NULL;
     GObjectClass *class;
-    int n_params = 0, i;
+    guint n_params = 0, i;
     GParameter *params = NULL;
 
     if (!PyArg_ParseTuple (args, "O:gobject.new", &pytype)) {
@@ -1711,37 +1717,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 	return NULL;
     }
 
-    if (kwargs) {
-	Py_ssize_t pos = 0;
-	PyObject *key;
-	PyObject *value;
-
-	params = g_new0(GParameter, PyDict_Size(kwargs));
-	while (PyDict_Next (kwargs, &pos, &key, &value)) {
-	    GParamSpec *pspec;
-	    const gchar *key_str = PYGLIB_PyUnicode_AsString (key);
-
-	    pspec = g_object_class_find_property (class, key_str);
-	    if (!pspec) {
-		PyErr_Format(PyExc_TypeError,
-			     "gobject `%s' doesn't support property `%s'",
-			     g_type_name(type), key_str);
-		goto cleanup;
-	    }
-	    g_value_init(&params[n_params].value,
-			 G_PARAM_SPEC_VALUE_TYPE(pspec));
-	    if (pyg_param_gvalue_from_pyobject(&params[n_params].value,
-					       value, pspec) < 0) {
-		PyErr_Format(PyExc_TypeError,
-			     "could not convert value for property `%s' from %s to %s",
-			     key_str, Py_TYPE(value)->tp_name,
-			     g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)));
-		goto cleanup;
-	    }
-	    params[n_params].name = g_strdup(key_str);
-	    n_params++;
-	}
-    }
+    if (!pygobject_prepare_construct_properties (class, kwargs, &n_params, &params))
+        goto cleanup;
 
     obj = g_object_newv(type, n_params, params);
     if (!obj)
@@ -1756,6 +1733,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
 
     if (obj) {
+        pygobject_sink (obj);
 	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
         g_object_unref(obj);
     } else
@@ -2255,6 +2233,7 @@ pygobject_constructv(PyGObject  *self,
         pygobject_init_wrapper_set((PyObject *) self);
         obj = g_object_newv(pyg_type_from_object((PyObject *) self),
                             n_parameters, parameters);
+        pygobject_sink (obj);
         pygobject_init_wrapper_set(NULL);
         if (self->obj == NULL) {
             self->obj = obj;
