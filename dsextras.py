@@ -271,7 +271,7 @@ class InstallData(install_data):
 
         output = os.path.join(install_dir, output_file)
         self.mkpath(install_dir)
-        open(output, 'w').write(template)
+        open(output, 'wb').write(template)
         self.local_inputs.append(filename)
         self.local_outputs.append(output)
         return output
