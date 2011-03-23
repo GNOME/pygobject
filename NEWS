@@ -1,3 +1,9 @@
+2.28.2 22-Mar-2011
+	- fix static ABI for setting string gvalues from python objects (John (J
+	- Fix GSchema tests for separate build tree (Martin Pitt)
+	- GIO tests: Fix remaining test case for separate build tree (Martin Pit
+	- GIO tests: Fix for separate build tree (Martin Pitt)
+
 2.28.1 21-Mar-2011
 	- pygi-convert.sh remove gobject tests, GObject works now (John Stowers)
 	- pygi-convert.sh add GObject.xxx and webkit (John Stowers)
