@@ -904,9 +904,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	        }
 	    } else {
 #if PY_VERSION_HEX < 0x03000000
-	       g_value_set_string(value, PyString_AsString(obj));
+	       g_value_set_string(value, PyString_AsString(tmp_str));
 #else
-	       tmp = PyUnicode_AsUTF8String(obj);
+	       tmp = PyUnicode_AsUTF8String(tmp_str);
 	       g_value_set_string(value, PyBytes_AsString(tmp));
 	       Py_DECREF(tmp);
 #endif
