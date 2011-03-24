@@ -1,3 +1,6 @@
+2.28.3 23-Mar-2011
+	- fix a typo when converting objects to strings gvalues (John (J5) Palmieri)
+
 2.28.2 22-Mar-2011
 	- fix static ABI for setting string gvalues from python objects (John (J
 	- Fix GSchema tests for separate build tree (Martin Pitt)
