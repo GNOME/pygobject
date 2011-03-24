@@ -6,7 +6,7 @@ pkginclude_HEADERS = pyglib.h
 
 lib_LTLIBRARIES = libpyglib-2.0-@PYTHON_BASENAME@.la
 
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexecdir = $(pyexecdir)
 
 pyglibdir = $(pkgpyexecdir)/glib
 pyglib_PYTHON = 	\
@@ -57,3 +57,5 @@ clean-local:
 	rm -f $(pyglib_LTLIBRARIES:.la=.so)
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
+
+-include $(top_srcdir)/git.mk

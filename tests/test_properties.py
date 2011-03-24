@@ -1,3 +1,4 @@
+# coding=utf-8
 
 import sys
 import struct
@@ -12,6 +13,13 @@ from gobject.constants import \
 from gobject.constants import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
+
+if sys.version_info < (3, 0):
+    TEST_UTF8 = "\xe2\x99\xa5"
+    UNICODE_UTF8 = unicode(TEST_UTF8, 'UTF-8')
+else:
+    TEST_UTF8 = "♥"
+    UNICODE_UTF8 = TEST_UTF8
 
 from compathelper import _long
 
@@ -71,6 +79,22 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.construct, "456")
         obj.props.construct = '789'
         self.assertEqual(obj.props.construct, "789")
+   
+    def testUTF8(self):
+        obj = new(PropertyObject, construct_only=UNICODE_UTF8)
+        self.assertEqual(obj.props.construct_only, TEST_UTF8)
+        obj.set_property('construct', UNICODE_UTF8)
+        self.assertEqual(obj.props.construct, TEST_UTF8)
+        obj.props.normal = UNICODE_UTF8
+        self.assertEqual(obj.props.normal, TEST_UTF8)
+
+    def testIntToStr(self):
+        obj = new(PropertyObject, construct_only=1)
+        self.assertEqual(obj.props.construct_only, '1')
+        obj.set_property('construct', '2')
+        self.assertEqual(obj.props.construct, '2')
+        obj.props.normal = 3
+        self.assertEqual(obj.props.normal, '3')
 
     def testConstructOnly(self):
         obj = new(PropertyObject, construct_only="123")
@@ -320,6 +344,15 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
+    def testObjectSubclassProperty(self):
+        class ObjectSubclass(GObject):
+            __gtype_name__ = 'ObjectSubclass'
+
+        class PropertyObjectSubclass(GObject):
+            obj = gobject.property(type=ObjectSubclass)
+
+        obj1 = PropertyObjectSubclass(obj=ObjectSubclass())
+
     def testPropertySubclass(self):
         # test for #470718
         class A(GObject):
@@ -375,6 +408,29 @@ class TestProperty(unittest.TestCase):
         gobject.property(type=float, minimum=-1)
         gobject.property(type=gobject.TYPE_FLOAT, minimum=-1)
         gobject.property(type=gobject.TYPE_DOUBLE, minimum=-1)
+
+    # Bug 644039
+    def testReferenceCount(self):
+        # We can check directly if an object gets finalized, so we will
+        # observe it indirectly through the refcount of a member object.
+
+        # We create our dummy object and store its current refcount
+        o = object()
+        rc = sys.getrefcount(o)
+
+        # We add our object as a member to our newly created object we
+        # want to observe. Its refcount is increased by one.
+        t = PropertyObject(normal="test")
+        t.o = o
+        self.assertEquals(sys.getrefcount(o), rc + 1)
+
+        # Now we want to ensure we do not leak any references to our
+        # object with properties. If no ref is leaked, then when deleting
+        # the local reference to this object, its reference count shoud
+        # drop to zero, and our dummy object should loose one reference.
+        del t
+        self.assertEquals(sys.getrefcount(o), rc)
+
 
 if __name__ == '__main__':
     unittest.main()

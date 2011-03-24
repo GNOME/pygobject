@@ -124,7 +124,7 @@ class GtkDemoApp(object):
 
                 try:
                     demo = Demo(module.title, module, f)
-                except AttributeError, e:
+                except AttributeError as e:
                     raise AttributeError('(%s): %s' % (f, e.message))
 
             demo_list.append(demo)
@@ -146,7 +146,7 @@ class GtkDemoApp(object):
             if filename.endswith('.py'):
                 demo_file_list.append(fullname)
 
-        demo_file_list.sort(lambda a, b: cmp(a.lower(), b.lower()))
+        demo_file_list = sorted(demo_file_list, key=str.lower)
 
         self.load_demos_from_list(demo_file_list, demo_list)
 
@@ -175,10 +175,11 @@ class GtkDemoApp(object):
         Gtk.Window.set_default_icon_list(list)
 
     def selection_cb(self, selection, model):
-        (success, m, treeiter) = selection.get_selected()
-        if not success:
+        sel = selection.get_selected()
+        if sel == ():
             return
 
+        treeiter = sel[1]
         demo = model.get_value(treeiter, 1)
 
         title = demo.title
@@ -212,9 +213,10 @@ class GtkDemoApp(object):
         self.source_buffer.insert(end, code)
 
     def row_activated_cb(self, view, path, col, store):
-        (success, treeiter) = store.get_iter(path)
+        treeiter = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
-        demo.module.main(self)
+        if not demo.isdir:
+            demo.module.main(self)
 
     def create_tree(self):
         tree_store = Gtk.TreeStore(str, Demo, Pango.Style)
@@ -244,10 +246,10 @@ class GtkDemoApp(object):
                                     text = 0,
                                     style = 2)
 
+        first_iter = tree_store.get_iter_first()
+        if first_iter is not None:
+            selection.select_iter(first_iter)
 
-
-        (success, first_iter) = tree_store.get_iter_first()
-        selection.select_iter(first_iter)
         selection.connect('changed', self.selection_cb, tree_store)
         tree_view.connect('row_activated', self.row_activated_cb, tree_store)
 
@@ -288,7 +290,7 @@ class GtkDemoApp(object):
         scrolled_window.add(text_view)
 
         if is_source:
-            font_desc = Pango.Font.description_from_string('monospace')
+            font_desc = Pango.FontDescription('monospace')
             text_view.modify_font(font_desc)
             text_view.set_wrap_mode(Gtk.WrapMode.NONE)
         else:

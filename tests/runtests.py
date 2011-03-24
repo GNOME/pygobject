@@ -2,9 +2,13 @@
 
 import os
 import glob
+import sys
 
 import unittest
 
+
+# force untranslated messages, as we check for them in some tests
+os.environ['LC_MESSAGES'] = 'C'
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:
@@ -24,5 +28,7 @@ suite = loader.loadTestsFromNames(names)
 
 # Run tests.
 runner = unittest.TextTestRunner(verbosity=2)
-runner.run(suite)
+result = runner.run(suite)
+if not result.wasSuccessful():
+	sys.exit(1) # exit code so "make check" reports error
 

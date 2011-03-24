@@ -22,6 +22,9 @@ if libtoolize --version < /dev/null > /dev/null 2>&1 ; then
         2.2*)
         have_libtool=true
         ;;
+        2.4*)
+        have_libtool=true
+        ;;
     esac
 fi
 if $have_libtool ; then : ; else

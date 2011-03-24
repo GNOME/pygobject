@@ -182,7 +182,7 @@ pyg_source_get_context(PyGSource *self)
     context = g_source_get_context(self->source);
 
     if (context) {
-	return pyglib_main_context_new(context);
+	return pyg_main_context_new(context);
     } else {
 	Py_INCREF(Py_None);
 	return Py_None;

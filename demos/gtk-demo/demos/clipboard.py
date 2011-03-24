@@ -56,15 +56,13 @@ class ClipboardApp:
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
 
-        #FIXME: have the button constuctor take a stock_id
-        # create button
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_COPY)
+        button = Gtk.Button(Gtk.STOCK_COPY)
         hbox.pack_start(button, False, False, 0)
         button.connect('clicked', self.copy_button_clicked, entry)
 
-
         label = Gtk.Label(label='"Paste" will paste the text from the clipboard to the entry')
         vbox.pack_start(label, False, False, 0)
+
 
         hbox = Gtk.HBox(homogeneous=False, spacing=4)
         hbox.set_border_width(8)
@@ -73,9 +71,7 @@ class ClipboardApp:
         # create secondary entry
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
-        #FIXME: have the button constuctor take a stock_id
-        # create button
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_PASTE)
+        button = Gtk.Button(Gtk.STOCK_PASTE)
         hbox.pack_start(button, False, False, 0)
         button.connect('clicked', self.paste_button_clicked, entry)
 
@@ -95,16 +91,16 @@ class ClipboardApp:
         hbox.add(ebox)
 
         # make ebox a drag source
-        Gtk.drag_source_set(ebox, Gdk.ModifierType.BUTTON1_MASK,
+        ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                             None, Gdk.DragAction.COPY)
-        Gtk.drag_source_add_image_targets(ebox)
+        ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
-        Gtk.drag_dest_set(ebox, Gtk.DestDefaults.ALL,
+        ebox.drag_dest_set(Gtk.DestDefaults.ALL,
                           None, Gdk.DragAction.COPY)
-        Gtk.drag_dest_add_image_targets(ebox)
+        ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 
         # context menu on ebox
@@ -119,16 +115,16 @@ class ClipboardApp:
         hbox.add(ebox)
 
         # make ebox a drag source
-        Gtk.drag_source_set(ebox, Gdk.ModifierType.BUTTON1_MASK,
+        ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                             None, Gdk.DragAction.COPY)
-        Gtk.drag_source_add_image_targets(ebox)
+        ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
-        Gtk.drag_dest_set(ebox, Gtk.DestDefaults.ALL,
+        ebox.drag_dest_set(Gtk.DestDefaults.ALL,
                           None, Gdk.DragAction.COPY)
-        Gtk.drag_dest_add_image_targets(ebox)
+        ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 
         # context menu on ebox
@@ -138,7 +134,7 @@ class ClipboardApp:
         #FIXME: Allow sending strings a Atoms and convert in PyGI
         atom = Gdk.atom_intern('CLIPBOARD', True)
         clipboard = Gtk.Clipboard.get(atom)
-        clipboard.set_can_store(None, 0)
+        clipboard.set_can_store(None)
 
         self.window.show_all()
 
@@ -183,7 +179,7 @@ class ClipboardApp:
         selection_data.set_pixbuf(pixbuf)
 
     def drag_data_received(self, widget, context, x, y, selection_data, info, time, data):
-        if selection_data.length > 0:
+        if selection_data.get_length() > 0:
             pixbuf = selection_data.get_pixbuf()
             data.set_from_pixbuf(pixbuf)
 
@@ -205,24 +201,24 @@ class ClipboardApp:
             data.set_from_pixbuf(pixbuf)
 
     def button_press(self, widget, event, data):
-        if event.button.button != 3:
+        if event.button != 3:
             return False
 
-        menu = Gtk.Menu()
+        self.menu = Gtk.Menu()
 
         #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_COPY, None)
         item.connect('activate', self.copy_image, data)
         item.show()
-        menu.append(item)
+        self.menu.append(item)
 
         #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_PASTE, None)
         item.connect('activate', self.paste_image, data)
         item.show()
-        menu.append(item)
+        self.menu.append(item)
 
-        menu.popup(None, None, None, None, 3, event.button.time)
+        self.menu.popup(None, None, None, None, event.button, event.time)
 
 def main(demoapp=None):
     app = ClipboardApp()

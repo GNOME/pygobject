@@ -30,6 +30,32 @@
 
 PYGLIB_DEFINE_TYPE("glib.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 
+/**
+ * pyg_option_group_new:
+ * @group: a GOptionGroup
+ *
+ * The returned GOptionGroup can't be used to set any hooks, translation domains
+ * or add entries. It's only intend is, to use for GOptionContext.add_group().
+ *
+ * Returns: the GOptionGroup wrapper.
+ */
+PyObject *
+pyg_option_group_new (GOptionGroup *group)
+{
+    PyGOptionGroup *self;
+
+    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
+                      &PyGOptionGroup_Type);
+    if (self == NULL)
+        return NULL;
+
+    self->group = group;
+    self->other_owner = TRUE;
+    self->is_in_context = FALSE;
+
+    return (PyObject *)self;
+}
+
 static gboolean
 check_if_owned(PyGOptionGroup *self)
 {

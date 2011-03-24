@@ -193,3 +193,5 @@ $(HTML_FILES): $(XML_FILES) $(XSL_FILES)
 # 	pdfxmltex pygobject-ref.fo >output </dev/null
 
 endif
+
+-include $(top_srcdir)/git.mk

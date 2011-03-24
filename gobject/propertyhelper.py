@@ -144,7 +144,6 @@ class property(object):
 
         self.name = None
 
-        self._values = {}
         self._exc = None
 
     def __repr__(self):
@@ -176,30 +175,30 @@ class property(object):
             self._exc = None
             raise exc
 
-    def _type_from_python(self, type):
-        if type == _long:
+    def _type_from_python(self, type_):
+        if type_ == _long:
             return TYPE_LONG
-        elif type == int:
+        elif type_ == int:
             return TYPE_INT
-        elif type == bool:
+        elif type_ == bool:
             return TYPE_BOOLEAN
-        elif type == float:
+        elif type_ == float:
             return TYPE_DOUBLE
-        elif type == str:
+        elif type_ == str:
             return TYPE_STRING
-        elif type == object:
+        elif type_ == object:
             return TYPE_PYOBJECT
-        elif type == _gobject.GObject:
-            return TYPE_OBJECT
-        elif type in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
+        elif isinstance(type_, type) and issubclass(type_, _gobject.GObject):
+            return type_.__gtype__
+        elif type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                       TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
                       TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM,
                       TYPE_FLAGS, TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
                       TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
                       TYPE_PYOBJECT]:
-            return type
+            return type_
         else:
-            raise TypeError("Unsupported type: %r" % (type,))
+            raise TypeError("Unsupported type: %r" % (type_,))
 
     def _get_default(self, default):
         ptype = self.type
@@ -270,10 +269,10 @@ class property(object):
     #
 
     def _default_setter(self, instance, value):
-        self._values[instance] = value
+        setattr(instance, '_property_helper_'+self.name, value)
 
     def _default_getter(self, instance):
-        return self._values.get(instance, self.default)
+        return getattr(instance, '_property_helper_'+self.name, self.default)
 
     def _readonly_setter(self, instance, value):
         self._exc = TypeError("%s property of %s is read-only" % (
@@ -296,7 +295,7 @@ class property(object):
             args = (self.default,)
         elif ptype == TYPE_PYOBJECT:
             args = ()
-        elif ptype == TYPE_OBJECT:
+        elif ptype.is_a(TYPE_OBJECT):
             args = ()
         else:
             raise NotImplementedError(ptype)

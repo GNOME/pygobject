@@ -40,7 +40,10 @@ GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 
-CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib
+gschemas.compiled: org.gnome.test.gschema.xml
+	glib-compile-schemas --targetdir=. --schema-file=$<
+
+CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib gschemas.compiled
 endif
 
 noinst_LTLIBRARIES += testhelper.la
@@ -65,7 +68,7 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 
 all: $(LTLIBRARIES:.la=.so)
 
-TEST_FILES = \
+TEST_FILES_STATIC = \
 	test_gobject.py \
 	test_interface.py \
 	test_mainloop.py \
@@ -78,7 +81,7 @@ TEST_FILES = \
 	test_uris.py
 
 if BUILD_GIO
-TEST_FILES += \
+TEST_FILES_GIO = \
 	test_gio.py \
 	test_gresolver.py \
 	test_gsocket.py \
@@ -87,9 +90,10 @@ TEST_FILES += \
 endif 
 
 if ENABLE_INTROSPECTION
-TEST_FILES += \
+TEST_FILES_GI = \
 	test_everything.py \
 	test_gi.py \
+	test_gdbus.py \
 	test_overrides.py
 endif
 
@@ -99,19 +103,35 @@ EXTRA_DIST = \
 	testmodule.py \
 	test-floating.h \
 	test-thread.h \
-	test-unknown.h 
+	test-unknown.h \
+	org.gnome.test.gschema.xml
 
-EXTRA_DIST += $(TEST_FILES)
+EXTRA_DIST += $(TEST_FILES_STATIC) $(TEST_FILES_GI) $(TEST_FILES_GIO)
 
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so) file.txt~
 
+DBUS_LAUNCH=$(shell which dbus-launch)
+RUN_TESTS_ENV_VARS= \
+	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
+	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
+	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
+	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
+	TESTS_BUILDDIR=$(builddir)
+RUN_TESTS_LAUNCH=$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
-check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib
-	TEST_FILES="$(TEST_FILES)" PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH GI_TYPELIB_PATH=$(builddir) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+# run tests in separately to avoid loading static and introspection bindings in the same process
+check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
+	TEST_FILES="$(TEST_FILES_STATIC)" $(RUN_TESTS_LAUNCH)
+	TEST_FILES="$(TEST_FILES_GI)" $(RUN_TESTS_LAUNCH)
+if BUILD_GIO
+	TEST_FILES="$(TEST_FILES_GIO)" $(RUN_TESTS_LAUNCH)
+endif 
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
 
 check.valgrind:
-	EXEC_NAME="valgrind" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="valgrind --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+
+-include $(top_srcdir)/git.mk

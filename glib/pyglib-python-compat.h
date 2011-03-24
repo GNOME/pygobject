@@ -112,7 +112,12 @@ static int _pyglib_init_##modname(PyObject *module)
 
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
+#define PYGLIB_MODULE_ERROR_RETURN
+
 #define RO READONLY
+
+#define PYGLIB_PyBaseString_Check(ob) (PyString_Check(ob) || PyUnicode_Check(ob))
+
 #define PYGLIB_PyUnicode_Check PyString_Check
 #define PYGLIB_PyUnicode_AsString PyString_AsString
 #define PYGLIB_PyUnicode_AsStringAndSize PyString_AsStringAndSize
@@ -173,6 +178,7 @@ PyTypeObject symbol = {                                 \
 
 #else
 
+#define PYGLIB_MODULE_ERROR_RETURN 0
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
@@ -205,6 +211,8 @@ PyTypeObject symbol = {                                 \
     if (PyType_Ready(&type))                            \
 	    return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
+
+#define PYGLIB_PyBaseString_Check PyUnicode_Check
 
 #define PYGLIB_PyUnicode_Check PyUnicode_Check
 #define PYGLIB_PyUnicode_AsString _PyUnicode_AsString

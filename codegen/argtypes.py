@@ -79,14 +79,14 @@ class ArgType:
     def write_param(self, ptype, pname, pdflt, pnull, info):
         """Add code to the WrapperInfo instance to handle
         parameter."""
-        raise RuntimeError, "write_param not implemented for %s" % \
-              self.__class__.__name__
+        raise RuntimeError("write_param not implemented for %s"
+                           % self.__class__.__name__)
     def write_return(self, ptype, ownsreturn, info):
         """Adds a variable named ret of the return type to
         info.varlist, and add any required code to info.codeafter to
         convert the return value to a python object."""
-        raise RuntimeError, "write_return not implemented for %s" % \
-              self.__class__.__name__
+        raise RuntimeError("write_return not implemented for %s"
+                           % self.__class__.__name__)
 
 class NoneArg(ArgType):
     def write_return(self, ptype, ownsreturn, info):

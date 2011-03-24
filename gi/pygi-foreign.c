@@ -165,7 +165,7 @@ pygi_register_foreign_struct_real (const char* namespace_,
                                    PyGIArgOverrideFromGIArgumentFunc from_func,
                                    PyGIArgOverrideReleaseFunc release_func)
 {
-    PyGIForeignStruct *new_struct = g_slice_new0 (PyGIForeignStruct);
+    PyGIForeignStruct *new_struct = g_slice_new (PyGIForeignStruct);
     new_struct->namespace = namespace_;
     new_struct->name = name;
     new_struct->to_func = to_func;

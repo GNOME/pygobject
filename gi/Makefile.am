@@ -1,7 +1,7 @@
 PLATFORM_VERSION = 2.0
 
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
+pkgpyexecdir = $(pyexecdir)
 
 SUBDIRS = \
 	repository \
@@ -24,7 +24,8 @@ _gi_la_LDFLAGS = \
 	-avoid-version \
 	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
-	$(GI_LIBS)
+	$(GI_LIBS) \
+	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
 _gi_la_SOURCES = \
 	pygi-repository.c \
 	pygi-repository.h \
@@ -52,6 +53,8 @@ _gi_la_SOURCES = \
 	pygi-private.h \
 	pygi-property.c \
 	pygi-property.h \
+	pygi-signal-closure.c \
+	pygi-signal-closure.h \
 	pygobject-external.h \
 	gimodule.c
 
@@ -87,3 +90,5 @@ check-local: $(LTLIBRARIES:.la=.so)
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 
+
+-include $(top_srcdir)/git.mk

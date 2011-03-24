@@ -35,15 +35,6 @@ static struct _PyGLib_Functions *_PyGLib_API;
 static int pyglib_thread_state_tls_key;
 static PyObject *exception_table = NULL;
 
-static PyTypeObject *_PyGMainContext_Type;
-#define PyGMainContext_Type (*_PyGMainContext_Type)
-
-static PyTypeObject *_PyGOptionGroup_Type;
-#define PyGOptionGroup_Type (*_PyGOptionGroup_Type)
-
-static PyTypeObject *_PyGOptionContext_Type;
-#define PyGOptionContext_Type (*_PyGOptionContext_Type)
-
 void
 pyglib_init(void)
 {
@@ -79,10 +70,6 @@ pyglib_init(void)
 	Py_DECREF(glib);
 	return;
     }
-
-    _PyGMainContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "MainContext");
-    _PyGOptionGroup_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionGroup");
-    _PyGOptionContext_Type = (PyTypeObject*)PyObject_GetAttrString(glib, "OptionContext");
 }
 
 void
@@ -107,7 +94,11 @@ pyglib_gil_state_ensure(void)
     if (!_PyGLib_API->threads_enabled)
 	return PyGILState_LOCKED;
 
+#ifdef DISABLE_THREADING
+    return PyGILState_LOCKED;
+#else
     return PyGILState_Ensure();
+#endif
 }
 
 void
@@ -118,7 +109,9 @@ pyglib_gil_state_release(PyGILState_STATE state)
     if (!_PyGLib_API->threads_enabled)
 	return;
 
+#ifndef DISABLE_THREADING
     PyGILState_Release(state);
+#endif
 }
 
 /**
@@ -184,13 +177,19 @@ _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
 int
 pyglib_gil_state_ensure_py23 (void)
 {
+#ifdef DISABLE_THREADING
+    return 0;
+#else
     return PyGILState_Ensure();
+#endif
 }
 
 void
 pyglib_gil_state_release_py23 (int flag)
 {
+#ifndef DISABLE_THREADING
     PyGILState_Release(flag);
+#endif
 }
 
 /**
@@ -359,7 +358,7 @@ pyglib_gerror_exception_check(GError **error)
     }
 
     g_set_error(error, g_quark_from_string(PYGLIB_PyUnicode_AsString(py_domain)),
-                PYGLIB_PyLong_AsLong(py_code), PYGLIB_PyUnicode_AsString(py_message));
+                PYGLIB_PyLong_AsLong(py_code), "%s", PYGLIB_PyUnicode_AsString(py_message));
 
     Py_DECREF(py_message);
     Py_DECREF(py_code);
@@ -414,15 +413,7 @@ pyglib_register_exception_for_domain(gchar *name,
 PyObject *
 pyglib_main_context_new(GMainContext *context)
 {
-    PyGMainContext *self;
-
-    self = (PyGMainContext *)PyObject_NEW(PyGMainContext,
-					  &PyGMainContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = g_main_context_ref(context);
-    return (PyObject *)self;
+    return _PyGLib_API->main_context_new(context);
 }
 
 /**
@@ -472,18 +463,7 @@ pyglib_option_group_transfer_group(PyObject *obj)
 PyObject * 
 pyglib_option_group_new (GOptionGroup *group)
 {
-    PyGOptionGroup *self;
-
-    self = (PyGOptionGroup *)PyObject_NEW(PyGOptionGroup,
-					  &PyGOptionGroup_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->group = group;
-    self->other_owner = TRUE;
-    self->is_in_context = FALSE;
-        
-    return (PyObject *)self;
+    return _PyGLib_API->option_group_new(group);
 }
 
 /**
@@ -495,17 +475,7 @@ pyglib_option_group_new (GOptionGroup *group)
 PyObject * 
 pyglib_option_context_new (GOptionContext *context)
 {
-    PyGOptionContext *self;
-
-    self = (PyGOptionContext *)PyObject_NEW(PyGOptionContext,
-					    &PyGOptionContext_Type);
-    if (self == NULL)
-	return NULL;
-
-    self->context = context;
-    self->main_group = NULL;
-    
-    return (PyObject *)self;
+    return _PyGLib_API->option_context_new(context);
 }
 
 /**

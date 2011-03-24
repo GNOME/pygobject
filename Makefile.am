@@ -27,6 +27,33 @@ EXTRA_DIST = 				\
 	m4/jhflags.m4			\
 	m4/python.m4
 
+MAINTAINERCLEANFILES = \
+	$(srcdir)/INSTALL \
+	$(srcdir)/aclocal.m4 \
+	$(srcdir)/autoscan.log \
+	$(srcdir)/compile \
+	$(srcdir)/config.guess \
+	$(srcdir)/config.h.in \
+	$(srcdir)/config.sub \
+	$(srcdir)/configure.scan \
+	$(srcdir)/depcomp \
+	$(srcdir)/install-sh \
+	$(srcdir)/ltmain.sh \
+	$(srcdir)/missing \
+	$(srcdir)/mkinstalldirs \
+	$(srcdir)/omf.make \
+	$(srcdir)/xmldocs.make \
+	$(srcdir)/gtk-doc.make \
+	$(srcdir)/ChangeLog \
+	$(srcdir)/py-compile \
+	$(srcdir)/m4/libtool.m4 \
+	$(srcdir)/m4/ltoptions.m4 \
+	$(srcdir)/m4/ltsugar.m4 \
+	$(srcdir)/m4/ltversion.m4 \
+	$(srcdir)/m4/lt~obsolete.m4 \
+	`find "$(srcdir)" -type f -name Makefile.in -print` \
+	`find "$(srcdir)" -type f -name "*.pyc" -print`
+
 BUILT_EXTRA_DIST = 		\
 	ChangeLog
 
@@ -131,3 +158,5 @@ check.gdb:
 check.valgrind:
 	cd tests && $(MAKE) check.valgrind
 
+
+-include $(top_srcdir)/git.mk

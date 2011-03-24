@@ -349,16 +349,20 @@ pyg_type_wrapper_new(GType type)
 }
 
 /**
- * pyg_type_from_object:
+ * pyg_type_from_object_strict:
  * obj: a Python object
+ * strict: if set to TRUE, raises an exception if it can't perform the
+ *         conversion
  *
- * converts a python object to a GType.  Raises an exception if it
- * can't perform the conversion.
+ * converts a python object to a GType.  If strict is set, raises an 
+ * exception if it can't perform the conversion, otherwise returns
+ * PY_TYPE_OBJECT.
  *
  * Returns: the corresponding GType, or 0 on error.
  */
+
 GType
-pyg_type_from_object(PyObject *obj)
+pyg_type_from_object_strict(PyObject *obj, gboolean strict)
 {
     PyObject *gtype;
     GType type;
@@ -416,8 +420,33 @@ pyg_type_from_object(PyObject *obj)
     }
 
     PyErr_Clear();
+
+    /* Some API like those that take GValues can hold a python object as
+     * a pointer.  This is potentially dangerous becuase everything is 
+     * passed in as a PyObject so we can't actually type check it.  Only
+     * fallback to PY_TYPE_OBJECT if strict checking is disabled
+     */
+    if (!strict)
+        return PY_TYPE_OBJECT;
+
     PyErr_SetString(PyExc_TypeError, "could not get typecode from object");
     return 0;
+}
+
+/**
+ * pyg_type_from_object:
+ * obj: a Python object
+ *
+ * converts a python object to a GType.  Raises an exception if it
+ * can't perform the conversion.
+ *
+ * Returns: the corresponding GType, or 0 on error.
+ */
+GType
+pyg_type_from_object(PyObject *obj)
+{
+    /* Legacy call always defaults to strict type checking */
+    return pyg_type_from_object_strict(obj, TRUE);
 }
 
 /* -------------- GValue marshalling ------------------ */
@@ -736,13 +765,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_CHAR:
-	if ((tmp = PyObject_Str(obj)))
-	    g_value_set_char(value, PYGLIB_PyUnicode_AsString(tmp)[0]);
-	else {
+#if PY_VERSION_HEX < 0x03000000
+	if (PyString_Check(obj)) {
+	    g_value_set_char(value, PyString_AsString(obj)[0]);
+	} else
+#endif
+	if (PyUnicode_Check(obj)) {
+	    tmp = PyUnicode_AsUTF8String(obj);
+	    g_value_set_char(value, PYGLIB_PyBytes_AsString(tmp)[0]);
+	    Py_DECREF(tmp);
+	} else {
 	    PyErr_Clear();
 	    return -1;
 	}
-	Py_DECREF(tmp);
+
 	break;
     case G_TYPE_UCHAR:
 	if (PYGLIB_PyLong_Check(obj)) {
@@ -752,8 +788,13 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	      g_value_set_uchar(value, (guchar)PYGLIB_PyLong_AsLong (obj));
 	    else
 	      return -1;
-	} else if ((tmp = PyObject_Str(obj))) {
-	    g_value_set_uchar(value, PYGLIB_PyUnicode_AsString(tmp)[0]);
+#if PY_VERSION_HEX < 0x03000000
+	} else if (PyString_Check(obj)) {
+	    g_value_set_uchar(value, PyString_AsString(obj)[0]);
+#endif
+	} else if (PyUnicode_Check(obj)) {
+	    tmp = PyUnicode_AsUTF8String(obj);
+	    g_value_set_uchar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
 	    Py_DECREF(tmp);
 	} else {
 	    PyErr_Clear();
@@ -848,14 +889,29 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	g_value_set_double(value, PyFloat_AsDouble(obj));
 	break;
     case G_TYPE_STRING:
-	if (obj == Py_None)
+	if (obj == Py_None) {
 	    g_value_set_string(value, NULL);
-	else if ((tmp = PyObject_Str(obj))) {
-	    g_value_set_string(value, PYGLIB_PyUnicode_AsString(tmp));
-	    Py_DECREF(tmp);
 	} else {
-	    PyErr_Clear();
-	    return -1;
+	    PyObject* tmp_str = PyObject_Str(obj);
+	    if (tmp_str == NULL) {
+	        PyErr_Clear();
+	        if (PyUnicode_Check(obj)) {
+	            tmp = PyUnicode_AsUTF8String(obj);
+	            g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
+	            Py_DECREF(tmp);
+	        } else {
+	            return -1;
+	        }
+	    } else {
+#if PY_VERSION_HEX < 0x03000000
+	       g_value_set_string(value, PyString_AsString(tmp_str));
+#else
+	       tmp = PyUnicode_AsUTF8String(tmp_str);
+	       g_value_set_string(value, PyBytes_AsString(tmp));
+	       Py_DECREF(tmp);
+#endif
+	    }
+	    Py_XDECREF(tmp_str);
 	}
 	break;
     case G_TYPE_POINTER:
@@ -966,7 +1022,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
     case G_TYPE_INTERFACE:
 	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
-	    return pygobject_new(g_value_get_object(value));
+	    return pygobject_new_sunk(g_value_get_object(value));
 	else
 	    break;
     case G_TYPE_CHAR: {
@@ -975,7 +1031,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     }
     case G_TYPE_UCHAR: {
 	guint8 val = g_value_get_uchar(value);
-	return PYGLIB_PyUnicode_FromStringAndSize((char *)&val, 1);
+	return PYGLIB_PyBytes_FromStringAndSize((char *)&val, 1);
     }
     case G_TYPE_BOOLEAN: {
 	return PyBool_FromLong(g_value_get_boolean(value));
@@ -1084,7 +1140,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
     case G_TYPE_PARAM:
 	return pyg_param_spec_new(g_value_get_param(value));
     case G_TYPE_OBJECT:
-	return pygobject_new(g_value_get_object(value));
+	return pygobject_new_sunk(g_value_get_object(value));
     default:
 	{
 	    PyGTypeMarshal *bm;
@@ -1280,7 +1336,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     g_return_if_fail(object != NULL && G_IS_OBJECT(object));
 
     /* get the wrapper for this object */
-    object_wrapper = pygobject_new(object);
+    object_wrapper = pygobject_new_sunk(object);
     g_return_if_fail(object_wrapper != NULL);
 
     /* construct method name for this class closure */

@@ -35,6 +35,7 @@ gboolean pygi_g_struct_info_is_simple (GIStructInfo *struct_info);
 
 extern PyTypeObject PyGIBaseInfo_Type;
 extern PyTypeObject PyGICallableInfo_Type;
+extern PyTypeObject PyGICallbackInfo_Type;
 extern PyTypeObject PyGIFunctionInfo_Type;
 extern PyTypeObject PyGIRegisteredTypeInfo_Type;
 extern PyTypeObject PyGIStructInfo_Type;
@@ -47,6 +48,12 @@ extern PyTypeObject PyGIFieldInfo_Type;
 extern PyTypeObject PyGIUnresolvedInfo_Type;
 extern PyTypeObject PyGIVFuncInfo_Type;
 extern PyTypeObject PyGIUnionInfo_Type;
+extern PyTypeObject PyGIBoxedInfo_Type;
+extern PyTypeObject PyGIErrorDomainInfo_Type;
+extern PyTypeObject PyGISignalInfo_Type;
+extern PyTypeObject PyGIPropertyInfo_Type;
+extern PyTypeObject PyGIArgInfo_Type;
+extern PyTypeObject PyGITypeInfo_Type;
 
 #define PyGIBaseInfo_GET_GI_INFO(object) g_base_info_ref(((PyGIBaseInfo *)object)->info)
 

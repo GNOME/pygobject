@@ -516,13 +516,13 @@ class TestFile(unittest.TestCase):
 
 class TestGFileEnumerator(unittest.TestCase):
     def setUp(self):
-        self.file = gio.File(".")
+        self.file = gio.File(os.path.dirname(__file__))
 
     def testEnumerateChildren(self):
         enumerator = self.file.enumerate_children(
             "standard::*", gio.FILE_QUERY_INFO_NOFOLLOW_SYMLINKS)
         for file_info in enumerator:
-            if file_info.get_name() == 'test_gio.py':
+            if file_info.get_name() == os.path.basename(__file__):
                 break
         else:
             raise AssertionError
@@ -531,7 +531,7 @@ class TestGFileEnumerator(unittest.TestCase):
         def callback(gfile, result):
             try:
                 for file_info in gfile.enumerate_children_finish(result):
-                    if file_info.get_name() == 'test_gio.py':
+                    if file_info.get_name() == __file__:
                         break
                 else:
                     raise AssertionError
@@ -547,7 +547,7 @@ class TestGFileEnumerator(unittest.TestCase):
         def callback(enumerator, result):
             try:
                 for file_info in enumerator.next_files_finish(result):
-                    if file_info.get_name() == 'test_gio.py':
+                    if file_info.get_name() == __file__:
                         break
                 else:
                     raise AssertionError
@@ -594,7 +594,7 @@ class TestInputStream(unittest.TestCase):
         self.assertEquals(self.stream.read(), '')
 
         self.stream = gio.MemoryInputStream()
-        some_data = open("test_gio.py", "rb").read()
+        some_data = open(__file__, "rb").read()
         self.stream.add_data(some_data)
         self.assertEquals(self.stream.read(), some_data)
 
@@ -631,7 +631,7 @@ class TestInputStream(unittest.TestCase):
                           'testing')
 
         stream = gio.MemoryInputStream()
-        some_data = open('test_gio.py', 'rb').read()
+        some_data = open(__file__, 'rb').read()
         stream.add_data(some_data)
         self.assertEquals(self._read_in_loop(stream,
                                              lambda: stream.read_part(50),
@@ -807,7 +807,7 @@ class TestOutputStream(unittest.TestCase):
 
     def test_write_part(self):
         stream = gio.MemoryOutputStream()
-        some_data = open('test_gio.py', 'rb').read()
+        some_data = open(__file__, 'rb').read()
         buffer = some_data
 
         # In fact this makes only one looping (memory stream is fast,
@@ -963,7 +963,7 @@ class TestContentTypeGuess(unittest.TestCase):
 
 class TestFileInfo(unittest.TestCase):
     def setUp(self):
-        self.fileinfo = gio.File("test_gio.py").query_info("*")
+        self.fileinfo = gio.File(__file__).query_info("*")
 
     def testListAttributes(self):
         attributes = self.fileinfo.list_attributes("standard")

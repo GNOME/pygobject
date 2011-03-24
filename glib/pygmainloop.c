@@ -158,8 +158,9 @@ pyg_signal_watch_check(GSource *source)
     PySignalWatchSource *real_source = (PySignalWatchSource *)source;
     GPollFD *poll_fd = &real_source->fd;
     unsigned char dummy;
+    gssize ret;
     if (poll_fd->revents & G_IO_IN)
-	read(poll_fd->fd, &dummy, 1);
+	ret = read(poll_fd->fd, &dummy, 1);
 #endif
 
     state = pyglib_gil_state_ensure();
@@ -301,7 +302,7 @@ pyg_main_loop_richcompare(PyObject *self, PyObject *other, int op)
 static PyObject *
 _wrap_g_main_loop_get_context (PyGMainLoop *loop)
 {
-    return pyglib_main_context_new(g_main_loop_get_context(loop->loop));
+    return pyg_main_context_new(g_main_loop_get_context(loop->loop));
 }
 
 static PyObject *

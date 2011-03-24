@@ -21,6 +21,7 @@
  * USA
  */
 
+#include <pyglib.h>
 #include "pygi-invoke.h"
 
 struct invocation_state
@@ -58,19 +59,46 @@ struct invocation_state
     GIArgument *backup_args;
     GIArgument return_arg;
 
-    PyObject *return_value;
+    PyObject  *return_value;
+
+    GType      implementor_gtype;
+
+    /* hack to avoid treating C arrays as GArrays during free
+     * due to overly complicated array handling
+     * this will be removed when the new invoke branch is merged
+     */
+    gboolean c_arrays_are_wrapped;
 };
 
-static void
+static gboolean
 _initialize_invocation_state (struct invocation_state *state,
                               GIFunctionInfo *info,
-                              PyObject *py_args)
+                              PyObject *py_args,
+                              PyObject *kwargs)
 {
-    GIFunctionInfoFlags flags;
+    if (g_base_info_get_type (info) == GI_INFO_TYPE_FUNCTION) {
+        GIFunctionInfoFlags flags = g_function_info_get_flags (info);
 
-    flags = g_function_info_get_flags (info);
-    state->is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
-    state->is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+        state->is_method = (flags & GI_FUNCTION_IS_METHOD) != 0;
+        state->is_constructor = (flags & GI_FUNCTION_IS_CONSTRUCTOR) != 0;
+        state->implementor_gtype = 0;
+    } else {
+        PyObject *obj;
+
+        state->is_method = TRUE;
+        state->is_constructor = FALSE;
+
+        obj = PyDict_GetItemString (kwargs, "gtype");
+        if (obj == NULL) {
+            PyErr_SetString (PyExc_TypeError,
+                             "need the GType of the implementor class");
+            return FALSE;
+        }
+
+        state->implementor_gtype = pyg_type_from_object (obj);
+        if (state->implementor_gtype == 0)
+            return FALSE;
+    }
 
     /* Count arguments. */
     state->n_args = g_callable_info_get_n_args ( (GICallableInfo *) info);
@@ -98,6 +126,13 @@ _initialize_invocation_state (struct invocation_state *state,
     state->out_args = NULL;
     state->out_values = NULL;
     state->backup_args = NULL;
+
+    /* HACK: this gets marked FALSE whenever a C array in the args is
+     *       not wrapped by a GArray
+     */
+    state->c_arrays_are_wrapped = TRUE;
+
+    return TRUE;
 }
 
 static gboolean
@@ -343,9 +378,20 @@ _prepare_invocation_state (struct invocation_state *state,
                         /* if caller allocates only use one level of indirection */
                         state->out_args[out_args_pos].v_pointer = NULL;
                         state->args[i] = &state->out_args[out_args_pos];
-                        if (g_type_is_a (g_registered_type_info_get_g_type (info), G_TYPE_BOXED))
+                        if (g_type_is_a (g_registered_type_info_get_g_type (info), G_TYPE_BOXED)) {
                             state->args[i]->v_pointer = _pygi_boxed_alloc (info, NULL);
-                        else {
+                        } else if (g_struct_info_is_foreign((GIStructInfo *) info) ) {
+                            PyObject *foreign_struct =
+                                pygi_struct_foreign_convert_from_g_argument(state->arg_type_infos[i], NULL);
+
+                            pygi_struct_foreign_convert_to_g_argument(
+                                foreign_struct,
+                                state->arg_type_infos[i],
+                                GI_TRANSFER_EVERYTHING,
+                                state->args[i]);
+
+                            Py_DECREF(foreign_struct);
+                        } else {
                             gssize size = g_struct_info_get_size ( (GIStructInfo *) info);
                             state->args[i]->v_pointer = g_malloc0 (size);
                         }
@@ -521,6 +567,20 @@ _prepare_invocation_state (struct invocation_state *state,
                             (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C)) {
                         state->args[i]->v_pointer = array->data;
 
+                        /* HACK: We have unwrapped a C array so
+                         *       set the state to reflect this.
+                         *       If there is an error between now
+                         *       and when we rewrap the array
+                         *       we will leak C arrays due to
+                         *       being in an inconsitant state.
+                         *       e.g. for interfaces with more
+                         *       than one C array argument, an
+                         *       error may occure when not all
+                         *       C arrays have been rewrapped.
+                         *       This will be removed once the invoke
+                         *       rewrite branch is merged.
+                         */
+                        state->c_arrays_are_wrapped = FALSE;
                         if (direction != GI_DIRECTION_INOUT || transfer != GI_TRANSFER_NOTHING) {
                             /* The array hasn't been referenced anywhere, so free it to avoid losing memory. */
                             g_array_free (array, FALSE);
@@ -541,20 +601,36 @@ _prepare_invocation_state (struct invocation_state *state,
 
 static gboolean
 _invoke_function (struct invocation_state *state,
-                  GIFunctionInfo *function_info, PyObject *py_args)
+                  GICallableInfo *callable_info, PyObject *py_args)
 {
     GError *error;
     gint retval;
 
     error = NULL;
 
-    retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
-                                      state->in_args, state->n_in_args, state->out_args, state->n_out_args, &state->return_arg, &error);
+    pyg_begin_allow_threads;
+    if (g_base_info_get_type (callable_info) == GI_INFO_TYPE_FUNCTION) {
+        retval = g_function_info_invoke ( (GIFunctionInfo *) callable_info,
+                                          state->in_args,
+                                          state->n_in_args,
+                                          state->out_args,
+                                          state->n_out_args,
+                                          &state->return_arg,
+                                          &error);
+    } else {
+        retval = g_vfunc_info_invoke ( (GIVFuncInfo *) callable_info,
+                                       state->implementor_gtype,
+                                       state->in_args,
+                                       state->n_in_args,
+                                       state->out_args,
+                                       state->n_out_args,
+                                       &state->return_arg,
+                                       &error);
+    }
+    pyg_end_allow_threads;
+
     if (!retval) {
-        g_assert (error != NULL);
-        /* TODO: raise the right error, out of the error domain. */
-        PyErr_SetString (PyExc_RuntimeError, error->message);
-        g_error_free (error);
+        pyglib_error_check(&error);
 
         /* TODO: release input arguments. */
 
@@ -566,11 +642,7 @@ _invoke_function (struct invocation_state *state,
 
         error = state->args[state->error_arg_pos]->v_pointer;
 
-        if (*error != NULL) {
-            /* TODO: raise the right error, out of the error domain, if applicable. */
-            PyErr_SetString (PyExc_Exception, (*error)->message);
-            g_error_free (*error);
-
+        if (pyglib_error_check(error)) {
             /* TODO: release input arguments. */
 
             return FALSE;
@@ -651,6 +723,10 @@ _process_invocation_state (struct invocation_state *state,
                 state->return_value = pygobject_new (state->return_arg.v_pointer);
                 if (transfer == GI_TRANSFER_EVERYTHING) {
                     /* The new wrapper increased the reference count, so decrease it. */
+                    g_object_unref (state->return_arg.v_pointer);
+                }
+                if (state->is_constructor && G_IS_INITIALLY_UNOWNED (state->return_arg.v_pointer)) {
+                    /* GInitiallyUnowned constructors always end up with one extra reference, so decrease it. */
                     g_object_unref (state->return_arg.v_pointer);
                 }
                 break;
@@ -753,13 +829,16 @@ _process_invocation_state (struct invocation_state *state,
                 if (type_tag == GI_TYPE_TAG_INTERFACE) {
                     GIBaseInfo *info;
                     GIInfoType info_type;
+                    GType type;
 
                     info = g_type_info_get_interface (state->arg_type_infos[i]);
                     g_assert (info != NULL);
                     info_type = g_base_info_get_type (info);
+                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
 
                     if ( (info_type == GI_INFO_TYPE_STRUCT) &&
-                             !g_struct_info_is_foreign((GIStructInfo *) info) ) {
+                             !g_struct_info_is_foreign((GIStructInfo *) info) &&
+                             !g_type_is_a (type, G_TYPE_BOXED)) {
                         if (g_arg_info_is_caller_allocates (state->arg_infos[i])) {
                             transfer = GI_TRANSFER_EVERYTHING;
                         } else if (transfer == GI_TRANSFER_EVERYTHING) {
@@ -797,6 +876,14 @@ _process_invocation_state (struct invocation_state *state,
 
         }
 
+        /* HACK: We rewrapped any C arrays above in a GArray so they are ok to
+         *       free as GArrays.  We will always leak C arrays if there is
+         *       an error before we reach this state as there is no easy way
+         *       to know which arrays were wrapped if there are more than one.
+         *       This will be removed with better array handling once merge
+         *       the invoke rewrite branch.
+         */
+        state->c_arrays_are_wrapped = TRUE;
         g_assert (state->n_return_values <= 1 || return_values_pos == state->n_return_values);
     }
 
@@ -827,9 +914,7 @@ _free_invocation_state (struct invocation_state *state)
             continue;
         }
 
-        if (state->args != NULL
-            && state->args[i] != NULL
-            && state->arg_infos[i] != NULL
+        if (state->arg_infos[i] != NULL
             && state->arg_type_infos[i] != NULL) {
             GIDirection direction;
             GITypeTag type_tag;
@@ -838,20 +923,38 @@ _free_invocation_state (struct invocation_state *state)
             direction = g_arg_info_get_direction (state->arg_infos[i]);
             transfer = g_arg_info_get_ownership_transfer (state->arg_infos[i]);
 
-            type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
-
             /* Release the argument. */
             if (direction == GI_DIRECTION_INOUT) {
-                _pygi_argument_release (&state->backup_args[backup_args_pos], state->arg_type_infos[i],
-                                        transfer, GI_DIRECTION_IN);
+                if (state->args != NULL) {
+                    _pygi_argument_release (&state->backup_args[backup_args_pos],
+                                            state->arg_type_infos[i],
+                                            transfer, GI_DIRECTION_IN);
+                }
                 backup_args_pos += 1;
             }
-           _pygi_argument_release (state->args[i], state->arg_type_infos[i], transfer, direction);
+            if (state->args != NULL && state->args[i] != NULL) {
+                type_tag = g_type_info_get_tag (state->arg_type_infos[i]);
 
-            if (type_tag == GI_TYPE_TAG_ARRAY
+                if (type_tag == GI_TYPE_TAG_ARRAY &&
+                        (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) &&
+                        (g_type_info_get_array_type (state->arg_type_infos[i]) == GI_ARRAY_TYPE_C) &&
+                        !state->c_arrays_are_wrapped) {
+                    /* HACK: Noop - we are in an inconsitant state due to
+                     *       complex array handler so leak any C arrays
+                     *       as we don't know if we can free them safely.
+                     *       This will be removed when we merge the
+                     *       invoke rewrite branch.
+                     */
+                } else {
+                    _pygi_argument_release (state->args[i], state->arg_type_infos[i],
+                                            transfer, direction);
+                }
+
+                if (type_tag == GI_TYPE_TAG_ARRAY
                     && (direction != GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING)) {
-                /* We created a #GArray and it has not been released above, so free it. */
-                state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
+                    /* We created an *out* #GArray and it has not been released above, so free it. */
+                    state->args[i]->v_pointer = g_array_free (state->args[i]->v_pointer, FALSE);
+                }
             }
 
         }
@@ -894,11 +997,15 @@ _free_invocation_state (struct invocation_state *state)
 
 
 PyObject *
-_wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
+_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
+                              PyObject *kwargs)
 {
     struct invocation_state state = { 0, };
 
-    _initialize_invocation_state (&state, self->info, py_args);
+    if (!_initialize_invocation_state (&state, self->info, py_args, kwargs)) {
+        _free_invocation_state (&state);
+        return NULL;
+    }
 
     if (!_prepare_invocation_state (&state, self->info, py_args)) {
         _free_invocation_state (&state);

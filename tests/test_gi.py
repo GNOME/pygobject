@@ -3,8 +3,6 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import sys
-import pygtk
-pygtk.require("2.0")
 
 import unittest
 from gi.repository import GObject
@@ -12,10 +10,15 @@ from gi.repository import GObject
 import gobject
 from gi.repository import GIMarshallingTests
 
+from compathelper import _bytes
+
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
+    PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
+    CHAR_255='\xff'
 else:
     CONSTANT_UTF8 = "const ♥ utf8"
+    CHAR_255=bytes([255])
 
 CONSTANT_NUMBER = 42
 
@@ -120,9 +123,9 @@ class TestUInt8(unittest.TestCase):
         number = Number(self.MAX)
 
         GIMarshallingTests.uint8_in(number)
+        GIMarshallingTests.uint8_in(CHAR_255)
 
         number.value += 1
-
         self.assertRaises(ValueError, GIMarshallingTests.uint8_in, number)
         self.assertRaises(ValueError, GIMarshallingTests.uint8_in, Number(-1))
 
@@ -402,6 +405,7 @@ class TestInt(unittest.TestCase):
     def test_int_inout(self):
         self.assertEquals(self.MIN, GIMarshallingTests.int_inout_max_min(Number(self.MAX)))
         self.assertEquals(self.MAX, GIMarshallingTests.int_inout_min_max(Number(self.MIN)))
+        self.assertRaises(TypeError, GIMarshallingTests.int_inout_min_max, Number(self.MIN), CONSTANT_NUMBER)
 
 
 class TestUInt(unittest.TestCase):
@@ -615,6 +619,8 @@ class TestUtf8(unittest.TestCase):
 
     def test_utf8_none_in(self):
         GIMarshallingTests.utf8_none_in(CONSTANT_UTF8)
+        if sys.version_info < (3, 0):
+            GIMarshallingTests.utf8_none_in(PY2_UNICODE_UTF8)
 
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, CONSTANT_NUMBER)
         self.assertRaises(TypeError, GIMarshallingTests.utf8_none_in, None)
@@ -666,6 +672,10 @@ class TestArray(unittest.TestCase):
 
     def test_array_in(self):
         GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
+
+    def test_array_uint8_in(self):
+        GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
+        GIMarshallingTests.array_uint8_in(_bytes("abcd"))
 
     def test_array_out(self):
         self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_out())
@@ -915,19 +925,29 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_in(self):
         GIMarshallingTests.gvalue_in(42)
-        self.assertRaises(TypeError, GIMarshallingTests.gvalue_in, None)
+        value = GObject.Value()
+        value.init(GObject.TYPE_INT)
+        value.set_int(42)
+        GIMarshallingTests.gvalue_in(value)
 
     def test_gvalue_out(self):
         self.assertEquals(42, GIMarshallingTests.gvalue_out())
 
     def test_gvalue_inout(self):
         self.assertEquals('42', GIMarshallingTests.gvalue_inout(42))
-
+        value = GObject.Value()
+        value.init(GObject.TYPE_INT)
+        value.set_int(42)
+        self.assertEquals('42', GIMarshallingTests.gvalue_inout(value))
 
 class TestGClosure(unittest.TestCase):
 
     def test_gclosure_in(self):
         GIMarshallingTests.gclosure_in(lambda: 42)
+
+        # test passing a closure between two C calls
+        closure = GIMarshallingTests.gclosure_return()
+        GIMarshallingTests.gclosure_in(closure)
 
         self.assertRaises(TypeError, GIMarshallingTests.gclosure_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.gclosure_in, None)
@@ -947,6 +967,15 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Enum.VALUE3, GIMarshallingTests.Enum))
         self.assertEquals(42, GIMarshallingTests.Enum.VALUE3)
 
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Enum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.Enum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_ENUM_VALUE3')
+
     def test_enum_in(self):
         GIMarshallingTests.enum_in(GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.enum_in(42)
@@ -964,6 +993,16 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
         self.assertEquals(enum, GIMarshallingTests.Enum.VALUE1)
 
+    def test_enum_second(self):
+        # check for the bug where different non-gtype enums share the same class
+        self.assertNotEqual(GIMarshallingTests.Enum, GIMarshallingTests.SecondEnum)
+
+        # check that values are not being shared between different enums
+        self.assertTrue(hasattr(GIMarshallingTests.SecondEnum, "SECONDVALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.Enum, "SECONDVALUE1")
+        self.assertTrue(hasattr(GIMarshallingTests.Enum, "VALUE1"))
+        self.assertRaises(AttributeError, getattr, GIMarshallingTests.SecondEnum, "VALUE1")
+
 
 class TestGEnum(unittest.TestCase):
 
@@ -973,6 +1012,15 @@ class TestGEnum(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE2, GIMarshallingTests.GEnum))
         self.assertTrue(isinstance(GIMarshallingTests.GEnum.VALUE3, GIMarshallingTests.GEnum))
         self.assertEquals(42, GIMarshallingTests.GEnum.VALUE3)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE1.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE1')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE2.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE2')
+        self.assertEqual(GIMarshallingTests.GEnum.VALUE3.value_name, 'GI_MARSHALLING_TESTS_GENUM_VALUE3')
 
     def test_genum_in(self):
         GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
@@ -999,10 +1047,24 @@ class TestGFlags(unittest.TestCase):
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1, GIMarshallingTests.Flags))
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE2, GIMarshallingTests.Flags))
         self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE3, GIMarshallingTests.Flags))
+        # __or__() operation should still return an instance, not an int.
+        self.assertTrue(isinstance(GIMarshallingTests.Flags.VALUE1 | GIMarshallingTests.Flags.VALUE2,
+                                   GIMarshallingTests.Flags))
         self.assertEquals(1 << 1, GIMarshallingTests.Flags.VALUE2)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.Flags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.Flags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_FLAGS_VALUE3')
 
     def test_flags_in(self):
         GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2)
+        # result of __or__() operation should still be valid instance, not an int.
+        GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE2)
         GIMarshallingTests.flags_in_zero(Number(0))
 
         self.assertRaises(TypeError, GIMarshallingTests.flags_in, 1 << 1)
@@ -1017,6 +1079,45 @@ class TestGFlags(unittest.TestCase):
         flags = GIMarshallingTests.flags_inout(GIMarshallingTests.Flags.VALUE2)
         self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
         self.assertEquals(flags, GIMarshallingTests.Flags.VALUE1)
+
+class TestNoTypeFlags(unittest.TestCase):
+
+    def test_flags(self):
+        self.assertTrue(issubclass(GIMarshallingTests.NoTypeFlags, GObject.GFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1, GIMarshallingTests.NoTypeFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE2, GIMarshallingTests.NoTypeFlags))
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE3, GIMarshallingTests.NoTypeFlags))
+        # __or__() operation should still return an instance, not an int.
+        self.assertTrue(isinstance(GIMarshallingTests.NoTypeFlags.VALUE1 | GIMarshallingTests.NoTypeFlags.VALUE2,
+                                   GIMarshallingTests.NoTypeFlags))
+        self.assertEquals(1 << 1, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    def test_value_nick_and_name(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_nick, 'value1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_nick, 'value2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_nick, 'value3')
+
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE1.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE1')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE2.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2')
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.VALUE3.first_value_name, 'GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE3')
+
+    def test_flags_in(self):
+        GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2)
+        GIMarshallingTests.no_type_flags_in(GIMarshallingTests.NoTypeFlags.VALUE2 | GIMarshallingTests.NoTypeFlags.VALUE2)
+        GIMarshallingTests.no_type_flags_in_zero(Number(0))
+
+        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 1 << 1)
+        self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 'GIMarshallingTests.NoTypeFlags.VALUE2')
+
+    def test_flags_out(self):
+        flags = GIMarshallingTests.no_type_flags_out()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEquals(flags, GIMarshallingTests.NoTypeFlags.VALUE2)
+
+    def test_flags_inout(self):
+        flags = GIMarshallingTests.no_type_flags_inout(GIMarshallingTests.NoTypeFlags.VALUE2)
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEquals(flags, GIMarshallingTests.NoTypeFlags.VALUE1)
 
 
 class TestStructure(unittest.TestCase):
@@ -1352,8 +1453,6 @@ class TestGObject(unittest.TestCase):
 class TestPythonGObject(unittest.TestCase):
 
     class Object(GIMarshallingTests.Object):
-        __gtype_name__ = "Object"
-
         def __init__(self, int):
             GIMarshallingTests.Object.__init__(self)
             self.val = None
@@ -1369,7 +1468,16 @@ class TestPythonGObject(unittest.TestCase):
             return 42
 
         def do_method_with_default_implementation(self, int8):
-            self.props.int = int8 * 2
+            GIMarshallingTests.Object.do_method_with_default_implementation(self, int8)
+            self.props.int += int8
+
+    class SubObject(GIMarshallingTests.SubObject):
+        def __init__(self, int):
+            GIMarshallingTests.SubObject.__init__(self)
+            self.val = None
+
+        def do_method_with_default_implementation(self, int8):
+            self.val = int8
 
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
@@ -1387,17 +1495,20 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.method_int8_out(), 42)
 
         object_.method_with_default_implementation(42)
-        self.assertEqual(object_.val, 84)
+        self.assertEqual(object_.props.int, 84)
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
-            __gtype_name__ = 'ObjectWithoutVFunc'
-
             def __init__(self, int):
                 GIMarshallingTests.Object.__init__(self)
 
         object_ = ObjectWithoutVFunc(int = 42)
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
+
+    def test_subobject_parent_vfunc(self):
+        object_ = self.SubObject(int = 81)
+        object_.method_with_default_implementation(87)
+        self.assertEquals(object_.val, 87)
 
     def test_dynamic_module(self):
         from gi.module import DynamicGObjectModule
@@ -1407,6 +1518,44 @@ class TestPythonGObject(unittest.TestCase):
         # compare a static gobject attr with a dynamic GObject attr
         self.assertEquals(GObject.GObject, gobject.GObject)
 
+    def test_subobject_non_vfunc_do_method(self):
+        class PythonObjectWithNonVFuncDoMethod:
+            def do_not_a_vfunc(self):
+                return 5
+
+        class ObjectOverrideNonVFuncDoMethod(GIMarshallingTests.Object, PythonObjectWithNonVFuncDoMethod):
+            def do_not_a_vfunc(self):
+                value = super(ObjectOverrideNonVFuncDoMethod, self).do_not_a_vfunc()
+                return 13 + value
+
+        object_ = ObjectOverrideNonVFuncDoMethod()
+        self.assertEquals(18, object_.do_not_a_vfunc())
+
+    def test_native_function_not_set_in_subclass_dict(self):
+        # Previously, GI was setting virtual functions on the class as well
+        # as any *native* class that subclasses it. Here we check that it is only
+        # set on the class that the method is originally from.
+        self.assertTrue('do_method_with_default_implementation' in GIMarshallingTests.Object.__dict__)
+        self.assertTrue('do_method_with_default_implementation' not in GIMarshallingTests.SubObject.__dict__)
+
+        # Here we check that accessing a vfunc from the subclass returns the same wrapper object,
+        # meaning that multiple wrapper objects have not been created for the same vfunc.
+        func1 = GIMarshallingTests.Object.do_method_with_default_implementation
+        func2 = GIMarshallingTests.SubObject.do_method_with_default_implementation
+        if sys.version_info < (3,0):
+            func1 = func1.im_func
+            func2 = func2.im_func
+            
+        self.assertTrue(func1 is func2)
+
+    def test_subobject_with_interface_and_non_vfunc_do_method(self):
+        # There was a bug for searching for vfuncs in interfaces. It was
+        # triggered by having a do_* method that wasn't overriding
+        # a native vfunc, as well as inheriting from an interface.
+        class GObjectSubclassWithInterface(GObject.GObject, GIMarshallingTests.Interface):
+            def do_method_not_a_vfunc(self):
+                pass
+
 class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_out_out(self):
@@ -1414,6 +1563,17 @@ class TestMultiOutputArgs(unittest.TestCase):
 
     def test_int_return_out(self):
         self.assertEquals((6, 7), GIMarshallingTests.int_return_out())
+
+class TestGErrorException(unittest.TestCase):
+    def test_gerror_exception(self):
+        self.assertRaises(GObject.GError, GIMarshallingTests.gerror)
+        try:
+            GIMarshallingTests.gerror()
+        except Exception:
+            etype, e = sys.exc_info()[:2]
+            self.assertEquals(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+            self.assertEquals(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+            self.assertEquals(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
 # Interface
@@ -1428,7 +1588,6 @@ class TestInterfaces(unittest.TestCase):
     def test_implementation(self):
 
         class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-            __gtype_name__ = 'TestInterfaceImpl'
             def __init__(self):
                 GObject.GObject.__init__(self)
                 self.val = None
@@ -1445,24 +1604,42 @@ class TestInterfaces(unittest.TestCase):
         self.assertEquals(instance.val, 42)
 
         class TestInterfaceImplA(TestInterfaceImpl):
-            __gtype_name__ = 'TestInterfaceImplA'
+            pass
 
         class TestInterfaceImplB(TestInterfaceImplA):
-            __gtype_name__ = 'TestInterfaceImplB'
+            pass
 
         instance = TestInterfaceImplA()
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEquals(instance.val, 42)
 
-        def define_implementor_without_gtype():
-            class TestInterfaceImpl(gobject.GObject, GIMarshallingTests.Interface):
-                def __init__(self):
-                    gobject.GObject.__init__(self)
-                    self.val = None
+    def test_mro(self):
+        # there was a problem with Python bailing out because of
+        # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
+        # which shouldn't really be a problem.
 
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+            pass
+
+        class TestInterfaceImpl2(GIMarshallingTests.Interface,
+                                 TestInterfaceImpl):
+            pass
+
+        class TestInterfaceImpl3(TestInterfaceImpl,
+                                 GIMarshallingTests.Interface2):
+            pass
+
+
+class TestInterfaceClash(unittest.TestCase):
+
+    def test_clash(self):
+        def create_clash():
+            class TestClash(GObject.GObject, GIMarshallingTests.Interface, GIMarshallingTests.Interface2):
                 def do_test_int8_in(self, int8):
-                    self.val = int8
-        self.assertRaises(RuntimeError, define_implementor_without_gtype)
+                    pass
+            TestClash()
+
+        self.assertRaises(TypeError, create_clash)
 
 
 class TestOverrides(unittest.TestCase):
@@ -1510,3 +1687,36 @@ class TestOverrides(unittest.TestCase):
     def test_module_name(self):
         self.assertEquals(GIMarshallingTests.OverridesStruct.__module__, 'gi.overrides.GIMarshallingTests')
         self.assertEquals(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
+
+class TestDir(unittest.TestCase):
+    def test_members_list(self):
+        list = dir(GIMarshallingTests)
+        self.assertTrue('OverridesStruct' in list)
+        self.assertTrue('BoxedStruct' in list)
+        self.assertTrue('OVERRIDES_CONSTANT' in list)
+        self.assertTrue('GEnum' in list)
+        self.assertTrue('int32_return_max' in list)
+
+    def test_modules_list(self):
+        import gi.repository
+        list = dir(gi.repository)
+        self.assertTrue('GIMarshallingTests' in list)
+
+        # FIXME: test to see if a module which was not imported is in the list
+        #        we should be listing every typelib we find, not just the ones
+        #        which are imported
+        #
+        #        to test this I recommend we compile a fake module which
+        #        our tests would never import and check to see if it is
+        #        in the list:
+        #
+        # self.assertTrue('DoNotImportDummyTests' in list)
+
+class TestGErrorArrayInCrash(unittest.TestCase):
+    # Previously there was a bug in invoke, in which C arrays were unwrapped
+    # from inside GArrays to be passed to the C function. But when a GError was
+    # set, invoke would attempt to free the C array as if it were a GArray.
+    # This crash is only for C arrays. It does not happen for C functions which
+    # take in GArrays. See https://bugzilla.gnome.org/show_bug.cgi?id=642708
+    def test_gerror_array_in_crash(self):
+        self.assertRaises(GObject.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])

@@ -32,12 +32,18 @@ extern struct _PyGObject_Functions pygobject_api_functions;
 
 #define pyg_threads_enabled (pygobject_api_functions.threads_enabled)
 
+#ifdef DISABLE_THREADING
+#define pyg_gil_state_ensure() 0
+#define pyg_gil_state_release(state) G_STMT_START {     \
+    } G_STMT_END
 
+#else
 #define pyg_gil_state_ensure() (pygobject_api_functions.threads_enabled? (PyGILState_Ensure()) : 0)
 #define pyg_gil_state_release(state) G_STMT_START {     \
     if (pygobject_api_functions.threads_enabled)        \
         PyGILState_Release(state);                      \
     } G_STMT_END
+#endif
 
 #define pyg_begin_allow_threads                         \
     G_STMT_START {                                      \
@@ -98,6 +104,7 @@ gboolean pyg_gerror_exception_check(GError **error);
 extern PyTypeObject PyGTypeWrapper_Type;
 
 PyObject *pyg_type_wrapper_new (GType type);
+GType     pyg_type_from_object_strict (PyObject *obj, gboolean strict);
 GType     pyg_type_from_object (PyObject *obj);
 
 gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
@@ -149,6 +156,7 @@ void          pygobject_register_class   (PyObject *dict,
 void          pygobject_register_wrapper (PyObject *self);
 PyObject *    pygobject_new              (GObject *obj);
 PyObject *    pygobject_new_full         (GObject *obj, gboolean sink, gpointer g_class);
+PyObject *    pygobject_new_sunk         (GObject *obj);
 void          pygobject_sink             (GObject *obj);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
@@ -224,6 +232,11 @@ pyg_object_peek_inst_data(GObject *obj)
     return ((PyGObjectData *)
             g_object_get_qdata(obj, pygobject_instance_data_key));
 }
+
+gboolean        pygobject_prepare_construct_properties  (GObjectClass *class,
+                                                         PyObject *kwargs,
+                                                         guint *n_params,
+                                                         GParameter **params);
 
 
 #endif

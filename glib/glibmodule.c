@@ -787,7 +787,10 @@ static struct _PyGLib_Functions pyglib_api = {
     FALSE, /* threads_enabled */
     NULL,  /* gerror_exception */
     NULL,  /* block_threads */
-    NULL  /* unblock_threads */
+    NULL,  /* unblock_threads */
+    pyg_main_context_new,
+    pyg_option_context_new,
+    pyg_option_group_new,
 };
 
 static void

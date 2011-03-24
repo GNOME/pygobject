@@ -29,3 +29,5 @@ codegen_PYTHON = \
 	reversewrapper.py
 
 EXTRA_DIST = $(codegen_SCRIPTS) README.defs pygobject-codegen-$(PLATFORM_VERSION).in
+
+-include $(top_srcdir)/git.mk

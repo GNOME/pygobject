@@ -1,4 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# coding=utf-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
@@ -12,6 +13,13 @@ import cairo
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Regress as Everything
+
+if sys.version_info < (3, 0):
+    UNICHAR = "\xe2\x99\xa5"
+    PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
+else:
+    UNICHAR = "♥"
+
 
 class TestEverything(unittest.TestCase):
 
@@ -48,8 +56,25 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(surface.get_width(), 10)
         self.assertEquals(surface.get_height(), 10)
 
+    def test_unichar(self):
+        self.assertEquals("c", Everything.test_unichar("c"))
+
+        if sys.version_info < (3, 0):
+            self.assertEquals(UNICHAR, Everything.test_unichar(PY2_UNICODE_UNICHAR))
+        self.assertEquals(UNICHAR, Everything.test_unichar(UNICHAR))
+        self.assertRaises(TypeError, Everything.test_unichar, "")
+        self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
+        
+
     def test_floating(self):
-        Everything.TestFloating()
+        e = Everything.TestFloating()
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = GObject.new(Everything.TestFloating)
+        self.assertEquals(e.__grefcount__, 1)
+
+        e = Everything.TestFloating.new()
+        self.assertEquals(e.__grefcount__, 1)
 
     def test_caller_allocates(self):
         struct_a = Everything.TestStructA()
@@ -113,6 +138,24 @@ class TestEverything(unittest.TestCase):
         gtype = Everything.test_gtype(ARegisteredClass)
         self.assertEquals(ARegisteredClass.__gtype__, gtype)
         self.assertRaises(TypeError, Everything.test_gtype, 'ARegisteredClass')
+        
+    def test_dir(self):
+        attr_list = dir(Everything)
+        
+        # test that typelib attributes are listed
+        self.assertTrue('TestStructA' in attr_list)
+        
+        # test that class attributes and methods are listed
+        self.assertTrue('__class__' in attr_list)
+        self.assertTrue('__dir__' in attr_list)
+        self.assertTrue('__repr__' in attr_list)
+        
+        # test that instance members are listed
+        self.assertTrue('_namespace' in attr_list)
+        self.assertTrue('_version' in attr_list)
+        
+        # test that there are no duplicates returned
+        self.assertEqual(len(attr_list), len(set(attr_list)))
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
@@ -356,3 +399,70 @@ class TestProperties(unittest.TestCase):
 
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEquals(object_.props.boxed.some_int8, 42)
+
+class TestTortureProfile(unittest.TestCase):
+    def test_torture_profile(self):
+        import time
+        total_time = 0
+        print("")
+        object_ = Everything.TestObj()
+        sys.stdout.write("\ttorture test 1 (10000 iterations): ")
+
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = object_.torture_signature_0(5000,
+                                                  "Torture Test 1",
+                                                  12345)
+
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+        sys.stdout.write("\ttorture test 2 (10000 iterations): ")
+
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = Everything.TestObj().torture_signature_0(5000,
+                                                               "Torture Test 2",
+                                                               12345)
+
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+
+        sys.stdout.write("\ttorture test 3 (10000 iterations): ")
+        start_time = time.clock()
+        for i in range(10000):
+            try:
+                (y,z,q) = object_.torture_signature_1(5000,
+                                                      "Torture Test 3",
+                                                      12345)
+            except:
+                pass
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+
+        sys.stdout.write("\ttorture test 4 (10000 iterations): ")
+        def callback(userdata):
+            pass
+
+        userdata = [1,2,3,4]
+        start_time = time.clock()
+        for i in range(10000):
+            (y,z,q) = Everything.test_torture_signature_2(5000,
+                                                          callback,
+                                                          userdata,
+                                                          "Torture Test 4",
+                                                          12345)
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        total_time += delta_time
+        print("%f secs" % delta_time)
+        print("\t====")
+        print("\tTotal: %f sec" % total_time)
+

@@ -44,7 +44,7 @@ pyg_pointer_dealloc(PyGPointer *self)
 static PyObject*
 pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGPointer_Type)
+    if (Py_TYPE(self) == Py_TYPE(other))
         return _pyglib_generic_ptr_richcompare(((PyGPointer*)self)->pointer,
                                                ((PyGPointer*)other)->pointer,
                                                op);

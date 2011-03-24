@@ -55,6 +55,8 @@ PyObject* _pygi_argument_to_object (GIArgument  *arg,
                                     GITypeInfo *type_info,
                                     GITransfer  transfer);
 
+GIArgument _pygi_argument_from_g_value(const GValue *value,
+                                       GITypeInfo *type_info);
 
 void _pygi_argument_release (GIArgument   *arg,
                              GITypeInfo  *type_info,

@@ -60,7 +60,7 @@ typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject       *value,
                                                       GITransfer      transfer,
                                                       GIArgument      *arg);
 typedef PyObject * (*PyGIArgOverrideFromGIArgumentFunc) (GITypeInfo *type_info,
-                                                        GIArgument  *arg);
+                                                         gpointer    data);
 typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
                                                   gpointer  struct_);
 
@@ -71,6 +71,11 @@ struct PyGI_API {
     gint (*set_property_value) (PyGObject *instance,
                                 const gchar *attr_name,
                                 PyObject *value);
+    GClosure * (*signal_closure_new) (PyGObject *instance,
+                                      const gchar *sig_name,
+                                      PyObject *callback,
+                                      PyObject *extra_args,
+                                      PyObject *swap_data);
     void (*register_foreign_struct) (const char* namespace_,
                                      const char* name,
                                      PyGIArgOverrideToGIArgumentFunc to_func,
@@ -83,14 +88,20 @@ static struct PyGI_API *PyGI_API = NULL;
 static int
 _pygi_import (void)
 {
+    PyObject *modules_dict;
+
     if (PyGI_API != NULL) {
         return 1;
     }
+
+    modules_dict = PyImport_GetModuleDict(); /* borrowed reference -- don't unref */
+    if (PyMapping_HasKeyString(modules_dict, "gi")) {
 #if PY_VERSION_HEX >= 0x03000000
-    PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
+        PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
 #else
-    PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
+        PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
 #endif
+    }
     if (PyGI_API == NULL) {
         return -1;
     }
@@ -126,6 +137,19 @@ pygi_set_property_value (PyGObject *instance,
         return -1;
     }
     return PyGI_API->set_property_value(instance, attr_name, value);
+}
+
+static inline GClosure *
+pygi_signal_closure_new (PyGObject *instance,
+                         const gchar *sig_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data)
+{
+    if (_pygi_import() < 0) {
+        return NULL;
+    }
+    return PyGI_API->signal_closure_new(instance, sig_name, callback, extra_args, swap_data);
 }
 
 static inline PyObject *
@@ -167,6 +191,16 @@ pygi_set_property_value (PyGObject *instance,
                          PyObject *value)
 {
     return -1;
+}
+
+static inline GClosure *
+pygi_signal_closure_new (PyGObject *instance,
+                         const gchar *sig_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data)
+{
+    return NULL;
 }
 
 #endif /* ENABLE_INTROSPECTION */

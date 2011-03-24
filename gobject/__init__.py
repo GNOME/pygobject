@@ -106,9 +106,9 @@ class GObjectMeta(type):
         if '__gtype__' in namespace:
             return
 
-        if not ('__gproperties__' in namespace or
-                '__gsignals__' in namespace or
-                '__gtype_name__' in namespace):
+        # Do not register a new GType for the overrides, as this would sort of
+        # defeat the purpose of overrides...
+        if cls.__module__.startswith('gi.overrides.'):
             return
 
         type_register(cls, namespace.get('__gtype_name__'))

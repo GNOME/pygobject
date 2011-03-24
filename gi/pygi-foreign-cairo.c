@@ -22,6 +22,7 @@
  */
 
 #include <cairo.h>
+#include <Python.h>
 
 #if PY_VERSION_HEX < 0x03000000
 #include <pycairo.h>
@@ -55,9 +56,9 @@ cairo_context_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_context_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+cairo_context_from_arg (GITypeInfo *type_info, gpointer data)
 {
-    cairo_t *context = (cairo_t*) arg;
+    cairo_t *context = (cairo_t*) data;
 
     cairo_reference (context);
 
@@ -94,9 +95,9 @@ cairo_surface_to_arg (PyObject       *value,
 }
 
 PyObject *
-cairo_surface_from_arg (GITypeInfo *type_info, GIArgument  *arg)
+cairo_surface_from_arg (GITypeInfo *type_info, gpointer data)
 {
-    cairo_surface_t *surface = (cairo_surface_t*) arg;
+    cairo_surface_t *surface = (cairo_surface_t*) data;
 
     cairo_surface_reference (surface);
 
@@ -111,13 +112,12 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
-
 static PyMethodDef _gi_cairo_functions[] = {};
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
     Pycairo_IMPORT;
     if (Pycairo_CAPI == NULL)
-        return 0;
+        return PYGLIB_MODULE_ERROR_RETURN;
 
     pygi_register_foreign_struct ("cairo",
                                   "Context",

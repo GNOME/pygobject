@@ -32,7 +32,7 @@ PyObject *g_variant_to_arg(PyObject       *value,
                            GIArgument      *arg);
 
 PyObject *g_variant_from_arg(GITypeInfo *type_info,
-                             GIArgument  *arg);
+                             gpointer    data);
 
 PyObject *g_variant_release_foreign (GIBaseInfo *base_info,
                                      gpointer    struct_);
