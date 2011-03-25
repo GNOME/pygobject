@@ -2,6 +2,7 @@
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
  * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ * Copyright (C) 2011 John (J5) Palimier <johnp@redhat.com>
  *
  *   pygi-invoke.c: main invocation function
  *
@@ -70,13 +71,44 @@ _invoke_function (PyGIInvokeState *state,
 }
 
 static inline gboolean
-_invoke_state_init_from_function_cache(PyGIInvokeState *state,
-                                       PyGIFunctionCache *cache,
-                                       PyObject *py_args)
+_invoke_state_init_from_function_cache (PyGIInvokeState *state,
+                                                                    PyGIFunctionCache *cache,
+                                                                    PyObject *py_args)
 {
     state->py_in_args = py_args;
-    state->n_py_in_args = PySequence_Length(py_args);
-    state->args = g_slice_alloc0(cache->n_args * sizeof(GIArgument *));
+    state->n_py_in_args = PySequence_Length (py_args);
+
+    /* We don't use the class parameter sent in by  the structure
+     * so we remove it from the py_args tuple but we keep it 
+     * around just in case we want to call actual gobject constructors
+     * in the future instead of calling g_object_new
+     */
+    if  (cache->is_constructor) {
+        state->constructor_class = PyTuple_GetItem (py_args, 0);
+
+        if (state->constructor_class == NULL) {
+            PyErr_Clear ();
+            PyErr_Format(PyExc_TypeError,
+                     "Constructors require the class to be passed in as an argument, "
+                     "No arguments passed to the %s constructor.",
+                     cache->name);
+            return FALSE;
+        }
+
+        Py_INCREF(state->constructor_class);
+
+        state->n_py_in_args--;
+
+        /* we could optimize this by using offsets instead of modifying the tuple but it makes the
+         * code more error prone and confusing so don't do that unless profiling shows
+         * significant gain
+         */
+        state->py_in_args = PyTuple_GetSlice (py_args, 1, state->py_in_args);
+
+        Py_DECREF(py_args);
+    }
+
+    state->args = g_slice_alloc0 (cache->n_args * sizeof (GIArgument *));
     if (state->args == NULL && cache->n_args != 0) {
         PyErr_NoMemory();
         return FALSE;
@@ -309,7 +341,9 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 }
 
 PyObject *
-_wrap_g_function_info_invoke (PyGIBaseInfo *self, PyObject *py_args)
+_wrap_g_callable_info_invoke (PyGIBaseInfo *self,
+                              PyObject *py_args,
+                              PyObject *kwargs)
 {
     PyGIInvokeState state = { 0, };
     PyObject *ret;
