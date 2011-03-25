@@ -1185,15 +1185,22 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
 
     if (iface_cache->g_type == G_TYPE_CLOSURE) {
         GClosure *closure;
-        if (!PyCallable_Check(py_arg)) {
+        GType object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
+
+        if ( !(PyCallable_Check(py_arg) || 
+               g_type_is_a (object_gtype, G_TYPE_CLOSURE))) {
             PyErr_Format(PyExc_TypeError, "Must be callable, not %s",
                          py_arg->ob_type->tp_name);
             return FALSE;
         }
 
-        closure = pyg_closure_new(py_arg, NULL, NULL);
+        if (g_type_is_a (object_gtype, G_TYPE_CLOSURE))
+            closure = (GClosure *)pyg_boxed_get (py_arg, void);
+        else
+            closure = pyg_closure_new (py_arg, NULL, NULL);
+
         if (closure == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "PyObject conversion to GClosure failed");
+            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
             return FALSE;
         }
 
