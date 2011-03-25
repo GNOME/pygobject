@@ -13,6 +13,8 @@ typedef struct _PyGIInvokeState
     PyObject *constructor_class;
     gssize n_py_in_args;
 
+    GType implementor_gtype;
+
     GIArgument **args;
     GIArgument *in_args;
 

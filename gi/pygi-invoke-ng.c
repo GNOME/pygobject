@@ -37,14 +37,24 @@ _invoke_function (PyGIInvokeState *state,
 
     pyg_begin_allow_threads;
 
-    /* FIXME: use this for now but we can streamline the call */
-    retval = g_function_info_invoke ( (GIFunctionInfo *) function_info,
-                                      state->in_args,
-                                      cache->n_in_args,
-                                      state->out_args,
-                                      cache->n_out_args,
-                                      &state->return_arg,
-                                      &error);
+    /* FIXME: use this for now but we can streamline the calls */
+    if (cache->is_vfunc)
+        retval = g_vfunc_info_invoke ( function_info,
+                                           state->implementor_gtype,
+                                           state->in_args,
+                                           cache->n_in_args,
+                                           state->out_args,
+                                           cache->n_out_args,
+                                          &state->return_arg,
+                                          &error);
+    else
+        retval = g_function_info_invoke ( function_info,
+                                          state->in_args,
+                                          cache->n_in_args,
+                                          state->out_args,
+                                          cache->n_out_args,
+                                         &state->return_arg,
+                                         &error);
     pyg_end_allow_threads;
 
     if (!retval) {
@@ -73,7 +83,8 @@ _invoke_function (PyGIInvokeState *state,
 static inline gboolean
 _invoke_state_init_from_function_cache (PyGIInvokeState *state,
                                                                     PyGIFunctionCache *cache,
-                                                                    PyObject *py_args)
+                                        PyObject *py_args,
+                                        PyObject *kwargs)
 {
     state->py_in_args = py_args;
     state->n_py_in_args = PySequence_Length (py_args);
@@ -97,15 +108,30 @@ _invoke_state_init_from_function_cache (PyGIInvokeState *state,
 
         Py_INCREF(state->constructor_class);
 
-        state->n_py_in_args--;
-
         /* we could optimize this by using offsets instead of modifying the tuple but it makes the
          * code more error prone and confusing so don't do that unless profiling shows
          * significant gain
          */
-        state->py_in_args = PyTuple_GetSlice (py_args, 1, state->py_in_args);
+        state->py_in_args = PyTuple_GetSlice (py_args, 1, state->n_py_in_args);
+        state->n_py_in_args--;
+    } else {
+        Py_INCREF(state->py_in_args);
+    }
+    state->implementor_gtype = 0;
+    if (cache->is_vfunc) {
+        PyObject *py_gtype;
+        py_gtype = PyDict_GetItemString (kwargs, "gtype");
+        if (py_gtype == NULL) {
+            PyErr_SetString (PyExc_TypeError,
+                             "need the GType of the implementor class");
+            return FALSE;
+        }
 
-        Py_DECREF(py_args);
+        state->implementor_gtype = pyg_type_from_object (py_gtype);
+        Py_DECREF(py_gtype);
+
+        if (state->implementor_gtype == 0)
+            return FALSE;
     }
 
     state->args = g_slice_alloc0 (cache->n_args * sizeof (GIArgument *));
@@ -144,6 +170,8 @@ _invoke_state_clear(PyGIInvokeState *state, PyGIFunctionCache *cache)
     g_slice_free1(cache->n_in_args * sizeof(GIArgument), state->in_args);
     g_slice_free1(cache->n_out_args * sizeof(GIArgument), state->out_args);
     g_slice_free1(cache->n_out_args * sizeof(GIArgument), state->out_values);
+
+    Py_XDECREF(state->py_in_args);
 }
 
 static inline gboolean
@@ -354,7 +382,7 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
             return NULL;
     }
 
-    _invoke_state_init_from_function_cache(&state, self->cache, py_args);
+    _invoke_state_init_from_function_cache(&state, self->cache, py_args, kwargs);
     if (!_invoke_marshal_in_args (&state, self->cache))
         goto err;
 

@@ -119,6 +119,8 @@ struct _PyGIFunctionCache
 
     gboolean is_method;
     gboolean is_constructor;
+    gboolean is_vfunc;
+    gboolean is_callback;
 
     PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;

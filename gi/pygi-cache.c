@@ -735,6 +735,8 @@ _arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
     PyGIInterfaceCache *iface_cache = NULL;
     PyGIArgCache *arg_cache = NULL;
 
+    GI_IS_INTERFACE_INFO (iface_info);
+
     /* Callbacks are special cased */
     if (info_type != GI_INFO_TYPE_CALLBACK) {
         iface_cache = _interface_cache_new_from_interface_info(iface_info);
@@ -1357,6 +1359,13 @@ PyGIFunctionCache *
 _pygi_function_cache_new (GIFunctionInfo *function_info)
 {
     PyGIFunctionCache *fc = _function_cache_new_from_function_info(function_info);
+    GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)function_info);
+
+    if  (type == GI_INFO_TYPE_VFUNC)
+        fc->is_vfunc = TRUE;
+    else if (type == GI_INFO_TYPE_CALLBACK)
+        fc->is_callback = TRUE;
+
     if (fc == NULL)
         return NULL;
 
