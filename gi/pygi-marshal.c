@@ -1877,6 +1877,9 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
 
     if (g_type_is_a (type, G_TYPE_VALUE)) {
         py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
+    } else if (iface_cache->is_foreign) {
+        py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info,
+                                                              arg->v_pointer);
     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
         py_obj = _pygi_boxed_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
                                   arg_cache->transfer == GI_TRANSFER_EVERYTHING);

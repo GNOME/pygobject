@@ -669,20 +669,6 @@ _arg_cache_out_interface_object_setup(PyGIArgCache *arg_cache,
 }
 
 static inline void
-_arg_cache_in_interface_boxed_setup(PyGIArgCache *arg_cache,
-                                    GITransfer transfer)
-{
-    arg_cache->in_marshaller = _pygi_marshal_in_interface_boxed;
-}
-
-static inline void
-_arg_cache_out_interface_boxed_setup(PyGIArgCache *arg_cache,
-                                     GITransfer transfer)
-{
-    arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
-}
-
-static inline void
 _arg_cache_in_interface_callback_setup(PyGIArgCache *arg_cache,
                                        PyGIFunctionCache *function_cache)
 {
@@ -790,10 +776,14 @@ _arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
             break;
         case GI_INFO_TYPE_BOXED:
             if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT)
-               _arg_cache_in_interface_boxed_setup(arg_cache, transfer);
+                _arg_cache_in_interface_struct_setup (arg_cache,
+                                                                                  iface_info,
+                                                                                  transfer);
 
             if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT)
-               _arg_cache_out_interface_boxed_setup(arg_cache, transfer);
+                _arg_cache_out_interface_struct_setup (arg_cache,
+                                                                                     iface_info,
+                                                                                     transfer);
 
             break;
         case GI_INFO_TYPE_CALLBACK:
