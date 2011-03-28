@@ -1262,7 +1262,7 @@ _args_cache_generate (GICallableInfo *callable_info,
                                                 arg_index,
                                                 0);
 
-
+        instance_cache->in_marshaller = _pygi_marshal_in_interface_instance;
         g_base_info_unref ( (GIBaseInfo *)interface_info);
 
         if (instance_cache == NULL)

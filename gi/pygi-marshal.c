@@ -1306,6 +1306,44 @@ _pygi_marshal_in_interface_union (PyGIInvokeState   *state,
     return FALSE;
 }
 
+gboolean _pygi_marshal_in_interface_instance (PyGIInvokeState   *state,
+                                              PyGICallableCache *callable_cache,
+                                              PyGIArgCache      *arg_cache,
+                                              PyObject          *py_arg,
+                                              GIArgument        *arg)
+{
+    GIInfoType info_type;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+    /* FIXME: add instance checks */
+
+    info_type = g_base_info_get_type (iface_cache->interface_info);
+    switch (info_type) {
+        case GI_INFO_TYPE_UNION:
+        case GI_INFO_TYPE_STRUCT:
+        {
+            GType type = iface_cache->g_type;
+            if (g_type_is_a (type, G_TYPE_BOXED)) {
+                arg->v_pointer = pyg_boxed_get (py_arg, void);
+            } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+                arg->v_pointer = pyg_pointer_get (py_arg, void);
+            } else {
+                 PyErr_Format (PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name (type));
+                 return FALSE;
+            }
+
+            break;
+        }
+        case GI_INFO_TYPE_OBJECT:
+        case GI_INFO_TYPE_INTERFACE:
+            arg->v_pointer = pygobject_get (py_arg);
+            break;
+        default:
+            /* Other types don't have methods. */
+            g_assert_not_reached();
+   }
+}
+
 PyObject *
 _pygi_marshal_out_void (PyGIInvokeState   *state,
                         PyGICallableCache *callable_cache,
