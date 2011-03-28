@@ -27,9 +27,9 @@
 
 
 static inline gboolean
-_invoke_function (PyGIInvokeState *state,
-                  PyGIFunctionCache *cache,
-                  GIFunctionInfo *function_info)
+_invoke_callable (PyGIInvokeState *state,
+                  PyGICallableCache *cache,
+                  GICallableInfo *callable_info)
 {
     GError *error;
     gint retval;
@@ -40,16 +40,16 @@ _invoke_function (PyGIInvokeState *state,
 
     /* FIXME: use this for now but we can streamline the calls */
     if (cache->is_vfunc)
-        retval = g_vfunc_info_invoke ( function_info,
-                                           state->implementor_gtype,
-                                           state->in_args,
-                                           cache->n_in_args,
-                                           state->out_args,
-                                           cache->n_out_args,
-                                          &state->return_arg,
-                                          &error);
+        retval = g_vfunc_info_invoke ( callable_info,
+                                       state->implementor_gtype,
+                                       state->in_args,
+                                       cache->n_in_args,
+                                       state->out_args,
+                                       cache->n_out_args,
+                                      &state->return_arg,
+                                      &error);
     else
-        retval = g_function_info_invoke ( function_info,
+        retval = g_function_info_invoke ( callable_info,
                                           state->in_args,
                                           cache->n_in_args,
                                           state->out_args,
@@ -79,8 +79,8 @@ _invoke_function (PyGIInvokeState *state,
 }
 
 static inline gboolean
-_invoke_state_init_from_function_cache (PyGIInvokeState *state,
-                                                                    PyGIFunctionCache *cache,
+_invoke_state_init_from_callable_cache (PyGIInvokeState *state,
+                                        PyGICallableCache *cache,
                                         PyObject *py_args,
                                         PyObject *kwargs)
 {
@@ -162,7 +162,7 @@ _invoke_state_init_from_function_cache (PyGIInvokeState *state,
 }
 
 static inline void
-_invoke_state_clear(PyGIInvokeState *state, PyGIFunctionCache *cache)
+_invoke_state_clear(PyGIInvokeState *state, PyGICallableCache *cache)
 {
     g_slice_free1(cache->n_args * sizeof(GIArgument *), state->args);
     g_slice_free1(cache->n_in_args * sizeof(GIArgument), state->in_args);
@@ -173,7 +173,7 @@ _invoke_state_clear(PyGIInvokeState *state, PyGIFunctionCache *cache)
 }
 
 static inline gboolean
-_invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
+_invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
 {
     int i, in_count, out_count;
     in_count = 0;
@@ -299,7 +299,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
 }
 
 static inline PyObject *
-_invoke_marshal_out_args(PyGIInvokeState *state, PyGIFunctionCache *cache)
+_invoke_marshal_out_args(PyGIInvokeState *state, PyGICallableCache *cache)
 {
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
@@ -375,16 +375,16 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
     PyObject *ret;
 
     if (self->cache == NULL) {
-        self->cache = _pygi_function_cache_new(self->info);
+        self->cache = _pygi_callable_cache_new(self->info);
         if (self->cache == NULL)
             return NULL;
     }
 
-    _invoke_state_init_from_function_cache(&state, self->cache, py_args, kwargs);
+    _invoke_state_init_from_callable_cache(&state, self->cache, py_args, kwargs);
     if (!_invoke_marshal_in_args (&state, self->cache))
         goto err;
 
-    if (!_invoke_function(&state, self->cache, self->info))
+    if (!_invoke_callable(&state, self->cache, self->info))
         goto err;
 
     ret = _invoke_marshal_out_args (&state, self->cache);

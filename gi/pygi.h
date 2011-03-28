@@ -44,7 +44,7 @@ typedef struct {
     GIBaseInfo *info;
     PyObject *inst_weakreflist;
 #ifdef ENABLE_INVOKE_NG
-    PyGIFunctionCache *cache;
+    PyGICallableCache *cache;
 #endif
 } PyGIBaseInfo;
 

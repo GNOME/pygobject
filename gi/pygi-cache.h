@@ -30,17 +30,17 @@
 
 G_BEGIN_DECLS
 
-typedef struct _PyGIFunctionCache PyGIFunctionCache;
+typedef struct _PyGICallableCache PyGICallableCache;
 typedef struct _PyGIArgCache PyGIArgCache;
 
 typedef gboolean (*PyGIMarshalInFunc) (PyGIInvokeState   *state,
-                                       PyGIFunctionCache *function_cache,
+                                       PyGICallableCache *callable_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,
                                        GIArgument        *arg);
 
 typedef PyObject *(*PyGIMarshalOutFunc) (PyGIInvokeState   *state,
-                                         PyGIFunctionCache *function_cache,
+                                         PyGICallableCache *callable_cache,
                                          PyGIArgCache      *arg_cache,
                                          GIArgument        *arg);
 
@@ -113,7 +113,7 @@ typedef struct _PyGICallbackCache
     GIInterfaceInfo *interface_info;
 } PyGICallbackCache;
 
-struct _PyGIFunctionCache
+struct _PyGICallableCache
 {
     const gchar *name;
 
@@ -136,9 +136,9 @@ struct _PyGIFunctionCache
 };
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);
-void _pygi_function_cache_free	(PyGIFunctionCache *cache);
+void _pygi_callable_cache_free	(PyGICallableCache *cache);
 
-PyGIFunctionCache *_pygi_function_cache_new (GIFunctionInfo *function_info);
+PyGICallableCache *_pygi_function_cache_new (GICallableInfo *callable_info);
 
 G_END_DECLS
 
