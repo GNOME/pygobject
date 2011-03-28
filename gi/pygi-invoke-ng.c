@@ -22,6 +22,7 @@
  * USA
  */
 
+#include <pyglib.h>
 #include "pygi-invoke.h"
 
 
@@ -59,9 +60,7 @@ _invoke_function (PyGIInvokeState *state,
 
     if (!retval) {
         g_assert (error != NULL);
-        /* TODO: raise the right error, out of the error domain. */
-        PyErr_SetString (PyExc_RuntimeError, error->message);
-        g_error_free (error);
+        pyglib_error_check(&error);
 
         /* TODO: release input arguments. */
 
@@ -69,12 +68,11 @@ _invoke_function (PyGIInvokeState *state,
     }
 
     if (state->error != NULL) {
-        /* TODO: raise the right error, out of the error domain, if applicable. */
-        PyErr_SetString (PyExc_Exception, state->error->message);
+        if (pyglib_error_check(&(state->error))) {
+            /* TODO: release input arguments. */
 
-        /* TODO: release input arguments. */
-
-        return FALSE;
+            return FALSE;
+        }
     }
 
     return TRUE;
