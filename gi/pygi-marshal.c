@@ -1217,11 +1217,24 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
         }
 
         value = g_slice_new0 (GValue);
-        g_value_init (value, object_type);
-        if (pyg_value_from_pyobject(value, py_arg) < 0) {
-            g_slice_free (GValue, value);
-            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
-            return FALSE;
+
+        /* if already a gvalue, copy, else marshal into gvalue */
+        if (object_type == G_TYPE_VALUE) {
+            /* src GValue's lifecycle is handled by Python
+             * so we have to copy it into the destination's
+             * GValue which is freed during the cleanup of
+             * invoke.
+             */
+            GValue *src = (GValue *)((PyGObject *) py_arg)->obj;
+            g_value_init (value, G_VALUE_TYPE (src));
+            g_value_copy (src, value);
+        } else {
+            g_value_init (value, object_type);
+            if (pyg_value_from_pyobject(value, py_arg) < 0) {
+                g_slice_free (GValue, value);
+                PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
+                return FALSE;
+            }
         }
 
         arg->v_pointer = value;
