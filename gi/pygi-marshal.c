@@ -1355,6 +1355,8 @@ gboolean _pygi_marshal_in_interface_instance (PyGIInvokeState   *state,
             /* Other types don't have methods. */
             g_assert_not_reached();
    }
+
+   return TRUE;
 }
 
 PyObject *
@@ -1956,6 +1958,12 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     GType type = iface_cache->g_type;
 
+    if (arg->v_pointer == NULL) {
+        py_obj = Py_None;
+        Py_INCREF (py_obj);
+        return py_obj;
+    }
+
     if (g_type_is_a (type, G_TYPE_VALUE)) {
         py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
     } else if (iface_cache->is_foreign) {
@@ -2017,7 +2025,15 @@ _pygi_marshal_out_interface_object (PyGIInvokeState   *state,
                                     PyGIArgCache      *arg_cache,
                                     GIArgument        *arg)
 {
-    PyObject *py_obj = pygobject_new (arg->v_pointer);
+    PyObject *py_obj;
+
+    if (arg->v_pointer == NULL) {
+        py_obj = Py_None;
+        Py_INCREF (py_obj);
+        return py_obj;
+    }
+
+    py_obj = pygobject_new (arg->v_pointer);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
         g_object_unref (arg->v_pointer);
