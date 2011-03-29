@@ -126,7 +126,6 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         }
 
         state->implementor_gtype = pyg_type_from_object (py_gtype);
-        Py_DECREF(py_gtype);
 
         if (state->implementor_gtype == 0)
             return FALSE;
