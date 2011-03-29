@@ -179,10 +179,11 @@ _sequence_cache_new_from_type_info(GITypeInfo *type_info,
     sc->fixed_size = -1;
     sc->len_arg_index = -1;
     sc->is_zero_terminated = g_type_info_is_zero_terminated(type_info);
-    if (!sc->is_zero_terminated)
+    if (!sc->is_zero_terminated) {
         sc->fixed_size = g_type_info_get_array_fixed_size(type_info);
-    if (sc->fixed_size < 0)
-        sc->len_arg_index = g_type_info_get_array_length (type_info) + aux_offset;
+        if (sc->fixed_size < 0)
+            sc->len_arg_index = g_type_info_get_array_length (type_info) + aux_offset;
+    }
 
     item_type_info = g_type_info_get_param_type (type_info, 0);
     item_type_tag = g_type_info_get_tag (item_type_info);
@@ -274,8 +275,12 @@ _callback_cache_new_from_arg_info(GIArgInfo *arg_info,
    PyGICallbackCache *cc;
 
    cc = g_slice_new0(PyGICallbackCache);
-   cc->user_data_index = g_arg_info_get_closure(arg_info) + aux_offset;
-   cc->destroy_notify_index = g_arg_info_get_destroy(arg_info) + aux_offset;
+   cc->user_data_index = g_arg_info_get_closure(arg_info);
+   if (cc->user_data_index != -1)
+       cc->user_data_index += aux_offset;
+   cc->destroy_notify_index = g_arg_info_get_destroy(arg_info);
+   if (cc->destroy_notify_index != -1)
+       cc->destroy_notify_index += aux_offset;
    cc->scope = g_arg_info_get_scope(arg_info);
    g_base_info_ref( (GIBaseInfo *)iface_info);
    cc->interface_info = iface_info;
