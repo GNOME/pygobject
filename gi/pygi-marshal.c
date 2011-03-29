@@ -1918,7 +1918,30 @@ _pygi_marshal_out_interface_flags (PyGIInvokeState   *state,
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    py_obj = pyg_flags_from_gtype(iface_cache->g_type, arg->v_long);
+
+    if (iface_cache->g_type == G_TYPE_NONE) {
+        /* An enum with a GType of None is an enum without GType */
+
+        PyObject *py_type = _pygi_type_import_by_gi_info (iface_cache->interface_info);
+        PyObject *py_args = NULL;
+
+        if (!py_type)
+            return NULL;
+
+        py_args = PyTuple_New (1);
+        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (arg->v_long)) != 0) {
+            Py_DECREF (py_args);
+            Py_DECREF (py_type);
+            return NULL;
+        }
+
+        py_obj = PyObject_CallFunction (py_type, "l", arg->v_long);
+
+        Py_DECREF (py_args);
+        Py_DECREF (py_type);
+    } else {
+        py_obj = pyg_flags_from_gtype(iface_cache->g_type, arg->v_long);
+    }
 
     return py_obj;
 }
