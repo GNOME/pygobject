@@ -1,7 +1,7 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
- * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>, Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,8 @@
  * USA
  */
 
-#ifndef __PYGI_ARGUMENT_H__
-#define __PYGI_ARGUMENT_H__
+#ifndef __PYGI_MARSHAL_H__
+#define __PYGI_MARSHAL_H__
 
 #include <Python.h>
 
@@ -300,4 +300,4 @@ PyObject *_pygi_marshal_out_interface_union  (PyGIInvokeState   *state,
 
 G_END_DECLS
 
-#endif /* __PYGI_ARGUMENT_H__ */
+#endif /* __PYGI_MARSHAL_H__ */
