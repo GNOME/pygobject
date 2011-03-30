@@ -60,7 +60,7 @@ _invoke_callable (PyGIInvokeState *state,
 
     if (!retval) {
         g_assert (error != NULL);
-        pyglib_error_check(&error);
+        pyglib_error_check (&error);
 
         /* TODO: release input arguments. */
 
@@ -68,7 +68,7 @@ _invoke_callable (PyGIInvokeState *state,
     }
 
     if (state->error != NULL) {
-        if (pyglib_error_check(&(state->error))) {
+        if (pyglib_error_check (&(state->error))) {
             /* TODO: release input arguments. */
 
             return FALSE;
@@ -97,14 +97,14 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 
         if (state->constructor_class == NULL) {
             PyErr_Clear ();
-            PyErr_Format(PyExc_TypeError,
-                     "Constructors require the class to be passed in as an argument, "
-                     "No arguments passed to the %s constructor.",
-                     cache->name);
+            PyErr_Format (PyExc_TypeError,
+                          "Constructors require the class to be passed in as an argument, "
+                          "No arguments passed to the %s constructor.",
+                          cache->name);
             return FALSE;
         }
 
-        Py_INCREF(state->constructor_class);
+        Py_INCREF (state->constructor_class);
 
         /* we could optimize this by using offsets instead of modifying the tuple but it makes the
          * code more error prone and confusing so don't do that unless profiling shows
@@ -113,7 +113,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         state->py_in_args = PyTuple_GetSlice (py_args, 1, state->n_py_in_args);
         state->n_py_in_args--;
     } else {
-        Py_INCREF(state->py_in_args);
+        Py_INCREF (state->py_in_args);
     }
     state->implementor_gtype = 0;
     if (cache->is_vfunc) {
@@ -137,21 +137,21 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         return FALSE;
     }
 
-    state->in_args = g_slice_alloc0(cache->n_in_args * sizeof(GIArgument));
+    state->in_args = g_slice_alloc0 (cache->n_in_args * sizeof(GIArgument));
     if (state->in_args == NULL && cache->n_in_args != 0) {
-        PyErr_NoMemory();
+        PyErr_NoMemory ();
         return FALSE;
     }
 
-    state->out_values = g_slice_alloc0(cache->n_out_args * sizeof(GIArgument));
+    state->out_values = g_slice_alloc0 (cache->n_out_args * sizeof(GIArgument));
     if (state->out_values == NULL && cache->n_out_args != 0) {
-        PyErr_NoMemory();
+        PyErr_NoMemory ();
         return FALSE;
     }
 
-    state->out_args = g_slice_alloc0(cache->n_out_args * sizeof(GIArgument));
+    state->out_args = g_slice_alloc0 (cache->n_out_args * sizeof(GIArgument));
     if (state->out_args == NULL && cache->n_out_args != 0) {
-        PyErr_NoMemory();
+        PyErr_NoMemory ();
         return FALSE;
     }
 
@@ -161,29 +161,29 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 }
 
 static inline void
-_invoke_state_clear(PyGIInvokeState *state, PyGICallableCache *cache)
+_invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
 {
-    g_slice_free1(cache->n_args * sizeof(GIArgument *), state->args);
-    g_slice_free1(cache->n_in_args * sizeof(GIArgument), state->in_args);
-    g_slice_free1(cache->n_out_args * sizeof(GIArgument), state->out_args);
-    g_slice_free1(cache->n_out_args * sizeof(GIArgument), state->out_values);
+    g_slice_free1 (cache->n_args * sizeof(GIArgument *), state->args);
+    g_slice_free1 (cache->n_in_args * sizeof(GIArgument), state->in_args);
+    g_slice_free1 (cache->n_out_args * sizeof(GIArgument), state->out_args);
+    g_slice_free1 (cache->n_out_args * sizeof(GIArgument), state->out_values);
 
-    Py_XDECREF(state->py_in_args);
+    Py_XDECREF (state->py_in_args);
 }
 
 static inline gboolean
-_invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
+_invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
     int i, in_count, out_count;
     in_count = 0;
     out_count = 0;
 
     if (state->n_py_in_args > cache->n_py_args) {
-        PyErr_Format(PyExc_TypeError,
-                     "%s() takes exactly %zd argument(s) (%zd given)",
-                     cache->name,
-                     cache->n_py_args,
-                     state->n_py_in_args);
+        PyErr_Format (PyExc_TypeError,
+                      "%s() takes exactly %zd argument(s) (%zd given)",
+                      cache->name,
+                      cache->n_py_args,
+                      state->n_py_in_args);
         return FALSE;
     }
 
@@ -201,17 +201,17 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
                     continue;
 
                 if (arg_cache->py_arg_index >= state->n_py_in_args) {
-                    PyErr_Format(PyExc_TypeError,
-                                 "%s() takes exactly %zd argument(s) (%zd given)",
-                                  cache->name,
-                                  cache->n_py_args,
-                                  state->n_py_in_args);
+                    PyErr_Format (PyExc_TypeError,
+                                  "%s() takes exactly %zd argument(s) (%zd given)",
+                                   cache->name,
+                                   cache->n_py_args,
+                                   state->n_py_in_args);
                     return FALSE;
                 }
 
                 py_arg =
-                    PyTuple_GET_ITEM(state->py_in_args,
-                                     arg_cache->py_arg_index);
+                    PyTuple_GET_ITEM (state->py_in_args,
+                                      arg_cache->py_arg_index);
 
                 break;
             case GI_DIRECTION_INOUT:
@@ -224,37 +224,37 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
 
                 if (arg_cache->aux_type != PYGI_AUX_TYPE_IGNORE) {
                     if (arg_cache->py_arg_index >= state->n_py_in_args) {
-                        PyErr_Format(PyExc_TypeError,
-                                     "%s() takes exactly %zd argument(s) (%zd given)",
-                                      cache->name,
-                                      cache->n_py_args,
-                                      state->n_py_in_args);
+                        PyErr_Format (PyExc_TypeError,
+                                      "%s() takes exactly %zd argument(s) (%zd given)",
+                                       cache->name,
+                                       cache->n_py_args,
+                                       state->n_py_in_args);
                         return FALSE;
                     }
 
                     py_arg =
-                        PyTuple_GET_ITEM(state->py_in_args,
-                                         arg_cache->py_arg_index);
+                        PyTuple_GET_ITEM (state->py_in_args,
+                                          arg_cache->py_arg_index);
                 }
             case GI_DIRECTION_OUT:
                 if (arg_cache->is_caller_allocates) {
                     PyGIInterfaceCache *iface_cache =
                         (PyGIInterfaceCache *)arg_cache;
 
-                    g_assert(arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
+                    g_assert (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
 
                     state->out_args[out_count].v_pointer = NULL;
                     state->args[i] = &state->out_args[out_count];
                     if (iface_cache->g_type == G_TYPE_BOXED) {
                         state->args[i]->v_pointer =
-                            _pygi_boxed_alloc(iface_cache->interface_info, NULL);
+                            _pygi_boxed_alloc (iface_cache->interface_info, NULL);
                     } else if (iface_cache->is_foreign) {
                         PyObject *foreign_struct =
-                            pygi_struct_foreign_convert_from_g_argument(
+                            pygi_struct_foreign_convert_from_g_argument (
                                 iface_cache->interface_info,
                                 NULL);
 
-                        pygi_struct_foreign_convert_to_g_argument(
+                        pygi_struct_foreign_convert_to_g_argument (
                             foreign_struct,
                             iface_cache->interface_info,
                             GI_TRANSFER_EVERYTHING,
@@ -263,7 +263,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
                         gssize size =
                             g_struct_info_get_size(
                                 (GIStructInfo *)iface_cache->interface_info);
-                        state->args[i]->v_pointer = g_malloc0(size);
+                        state->args[i]->v_pointer = g_malloc0 (size);
                     }
 
                 } else {
@@ -277,17 +277,17 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
         c_arg = state->args[i];
         if (arg_cache->in_marshaller != NULL) {
             if (!arg_cache->allow_none && py_arg == Py_None) {
-                PyErr_Format(PyExc_TypeError,
-                             "Argument %i does not allow None as a value",
-                             i);
+                PyErr_Format (PyExc_TypeError,
+                              "Argument %i does not allow None as a value",
+                              i);
 
                 return FALSE;
             }
-            gboolean success = arg_cache->in_marshaller(state,
-                                                        cache,
-                                                        arg_cache,
-                                                        py_arg,
-                                                        c_arg);
+            gboolean success = arg_cache->in_marshaller (state,
+                                                         cache,
+                                                         arg_cache,
+                                                         py_arg,
+                                                         c_arg);
             if (!success)
                 return FALSE;
         }
@@ -298,7 +298,7 @@ _invoke_marshal_in_args(PyGIInvokeState *state, PyGICallableCache *cache)
 }
 
 static inline PyObject *
-_invoke_marshal_out_args(PyGIInvokeState *state, PyGICallableCache *cache)
+_invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
@@ -313,10 +313,10 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGICallableCache *cache)
             }
         }
 
-        py_return = cache->return_cache->out_marshaller(state,
-                                                        cache,
-                                                        cache->return_cache,
-                                                        &state->return_arg);
+        py_return = cache->return_cache->out_marshaller ( state,
+                                                          cache,
+                                                          cache->return_cache,
+                                                         &state->return_arg);
         if (py_return == NULL)
             return NULL;
 
@@ -333,32 +333,32 @@ _invoke_marshal_out_args(PyGIInvokeState *state, PyGICallableCache *cache)
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->out_args->data;
-        py_out = arg_cache->out_marshaller(state,
-                                           cache,
-                                           arg_cache,
-                                           state->args[arg_cache->c_arg_index]);
+        py_out = arg_cache->out_marshaller (state,
+                                            cache,
+                                            arg_cache,
+                                            state->args[arg_cache->c_arg_index]);
     } else {
         int out_cache_index = 0;
         int py_arg_index = 0;
         GSList *cache_item = cache->out_args;
         /* return a tuple */
-        py_out = PyTuple_New(total_out_args);
+        py_out = PyTuple_New (total_out_args);
         if (has_return) {
-            PyTuple_SET_ITEM(py_out, py_arg_index, py_return);
+            PyTuple_SET_ITEM (py_out, py_arg_index, py_return);
             py_arg_index++;
         }
 
         for(; py_arg_index < total_out_args; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
-            PyObject *py_obj = arg_cache->out_marshaller(state,
-                                                         cache,
-                                                         arg_cache,
-                                                         state->args[arg_cache->c_arg_index]);
+            PyObject *py_obj = arg_cache->out_marshaller (state,
+                                                          cache,
+                                                          arg_cache,
+                                                          state->args[arg_cache->c_arg_index]);
 
             if (py_obj == NULL)
                 return NULL;
 
-            PyTuple_SET_ITEM(py_out, py_arg_index, py_obj);
+            PyTuple_SET_ITEM (py_out, py_arg_index, py_obj);
             cache_item = cache_item->next;
         }
     }
@@ -374,16 +374,16 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
     PyObject *ret;
 
     if (self->cache == NULL) {
-        self->cache = _pygi_callable_cache_new(self->info);
+        self->cache = _pygi_callable_cache_new (self->info);
         if (self->cache == NULL)
             return NULL;
     }
 
-    _invoke_state_init_from_callable_cache(&state, self->cache, py_args, kwargs);
+    _invoke_state_init_from_callable_cache (&state, self->cache, py_args, kwargs);
     if (!_invoke_marshal_in_args (&state, self->cache))
         goto err;
 
-    if (!_invoke_callable(&state, self->cache, self->info))
+    if (!_invoke_callable (&state, self->cache, self->info))
         goto err;
 
     ret = _invoke_marshal_out_args (&state, self->cache);
@@ -394,4 +394,3 @@ err:
     _invoke_state_clear (&state, self->cache);
     return NULL;
 }
-
