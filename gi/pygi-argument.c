@@ -1316,6 +1316,23 @@ hash_table_release:
     return arg;
 }
 
+static glong
+_pygi_glong_from_argument (GIArgument  *arg,
+                    GITypeInfo *type_info)
+{
+    gsize item_size = _pygi_g_type_info_size (type_info);
+
+    if (item_size == sizeof (glong))
+        return arg->v_long;
+    else if (item_size == sizeof (gint))
+        return arg->v_int;
+    else
+        {
+            g_warning ("pygi: unsupported item size %ld", item_size);
+            return arg->v_long;
+        }
+}
+
 PyObject *
 _pygi_argument_to_object (GIArgument  *arg,
                           GITypeInfo *type_info,
@@ -1621,24 +1638,26 @@ _pygi_argument_to_object (GIArgument  *arg,
                         /* An enum with a GType of None is an enum without GType */
                         PyObject *py_type = _pygi_type_import_by_gi_info (info);
                         PyObject *py_args = NULL;
+                        glong val = _pygi_glong_from_argument (arg, type_info);
 
                         if (!py_type)
                             return NULL;
 
                         py_args = PyTuple_New (1);
-                        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (arg->v_long)) != 0) {
+                        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (val)) != 0) {
                             Py_DECREF (py_args);
                             Py_DECREF (py_type);
                             return NULL;
                         }
 
-                        object = PyObject_CallFunction (py_type, "l", arg->v_long);
+                        object = PyObject_CallFunction (py_type, "l", val);
 
                         Py_DECREF (py_args);
                         Py_DECREF (py_type);
 
                     } else if (info_type == GI_INFO_TYPE_ENUM) {
-                        object = pyg_enum_from_gtype (type, arg->v_long);
+                        glong val = _pygi_glong_from_argument (arg, type_info);
+                        object = pyg_enum_from_gtype (type, val);
                     } else {
                         object = pyg_flags_from_gtype (type, arg->v_long);
                     }
