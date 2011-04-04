@@ -232,6 +232,15 @@ class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
     def mro(cls):
         return mro(cls)
 
+    def _must_register_type(cls, namespace):
+        ## don't register the class if already registered
+        if '__gtype__' in namespace:
+            return False
+
+        # Do not register a new GType for the overrides, as this would sort of
+        # defeat the purpose of overrides...
+        return not cls.__module__.startswith('gi.overrides.')
+
 
 def mro(C):
     """Compute the class precedence list (mro) according to C3

@@ -101,17 +101,19 @@ class GObjectMeta(type):
                 prop.setter(self, value)
         cls.do_set_property = obj_set_property
 
-    def _type_register(cls, namespace):
+    def _must_register_type(cls, namespace):
         ## don't register the class if already registered
         if '__gtype__' in namespace:
-            return
+            return False
 
-        # Do not register a new GType for the overrides, as this would sort of
-        # defeat the purpose of overrides...
-        if cls.__module__.startswith('gi.overrides.'):
-            return
+        return ('__gproperties__' in namespace or
+                '__gsignals__' in namespace or
+                '__gtype_name__' in namespace)
 
-        type_register(cls, namespace.get('__gtype_name__'))
+    def _type_register(cls, namespace):
+        if cls._must_register_type(namespace):
+            type_register(cls, namespace.get('__gtype_name__'))
+
 _gobject._install_metaclass(GObjectMeta)
 
 del _gobject
