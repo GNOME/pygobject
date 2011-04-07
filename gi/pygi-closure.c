@@ -392,8 +392,10 @@ end:
 
 void _pygi_invoke_closure_free (gpointer data)
 {
+    PyGILState_STATE state;
     PyGICClosure* invoke_closure = (PyGICClosure *) data;
 
+    state = PyGILState_Ensure();
     Py_DECREF (invoke_closure->function);
 
     g_callable_info_free_closure (invoke_closure->info,
@@ -403,6 +405,7 @@ void _pygi_invoke_closure_free (gpointer data)
         g_base_info_unref ( (GIBaseInfo*) invoke_closure->info);
 
     Py_XDECREF (invoke_closure->user_data);
+    PyGILState_Release (state);
 
     g_slice_free (PyGICClosure, invoke_closure);
 }
