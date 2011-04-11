@@ -1863,6 +1863,8 @@ _pygi_argument_from_g_value(const GValue *value,
                 case GI_INFO_TYPE_UNION:
                     if (G_VALUE_HOLDS(value, G_TYPE_BOXED)) {
                         arg.v_pointer = g_value_get_boxed (value);
+                    } else if (G_VALUE_HOLDS(value, G_TYPE_VARIANT)) {
+                        arg.v_pointer = g_value_get_variant (value);
                     } else {
                         arg.v_pointer = g_value_get_pointer (value);
                     }
