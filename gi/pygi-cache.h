@@ -141,7 +141,7 @@ struct _PyGICallableCache
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);
 void _pygi_callable_cache_free	(PyGICallableCache *cache);
 
-PyGICallableCache *_pygi_function_cache_new (GICallableInfo *callable_info);
+PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info);
 
 G_END_DECLS
 
