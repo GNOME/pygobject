@@ -84,6 +84,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
                                         PyObject *py_args,
                                         PyObject *kwargs)
 {
+    state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_START;
     state->py_in_args = py_args;
     state->n_py_in_args = PySequence_Length (py_args);
 
@@ -192,6 +193,8 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyObject *py_arg = NULL;
 
+        state->current_arg = in_count;
+        state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_START;
         switch (arg_cache->direction) {
             case GI_DIRECTION_IN:
                 state->args[i] = &(state->in_args[in_count]);
@@ -290,6 +293,8 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                                                          c_arg);
             if (!success)
                 return FALSE;
+
+            state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_IDLE;
         }
 
     }
@@ -305,7 +310,10 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
     int total_out_args = cache->n_out_args;
     gboolean has_return = FALSE;
 
+    state->current_arg = 0;
+
     if (cache->return_cache) {
+        state->stage = PYGI_INVOKE_STAGE_MARSHAL_RETURN_START;
         if (cache->is_constructor) {
             if (state->return_arg.v_pointer == NULL) {
                 PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
@@ -320,6 +328,8 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         if (py_return == NULL)
             return NULL;
 
+        state->stage = PYGI_INVOKE_STAGE_MARSHAL_RETURN_DONE;
+
         if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
             total_out_args++;
             has_return = TRUE;
@@ -332,13 +342,17 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         py_out = py_return;
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */
+        state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_START;
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->out_args->data;
         py_out = arg_cache->out_marshaller (state,
                                             cache,
                                             arg_cache,
                                             state->args[arg_cache->c_arg_index]);
+        if (py_out == NULL)
+            return NULL;
+
+        state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE;
     } else {
-        int out_cache_index = 0;
         int py_arg_index = 0;
         GSList *cache_item = cache->out_args;
         /* return a tuple */
@@ -350,13 +364,19 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
         for(; py_arg_index < total_out_args; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
+            state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_START;
             PyObject *py_obj = arg_cache->out_marshaller (state,
                                                           cache,
                                                           arg_cache,
                                                           state->args[arg_cache->c_arg_index]);
 
-            if (py_obj == NULL)
+            if (py_obj == NULL) {
+                Py_DECREF (py_out);
                 return NULL;
+            }
+
+            state->current_arg++;
+            state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE;
 
             PyTuple_SET_ITEM (py_out, py_arg_index, py_obj);
             cache_item = cache_item->next;
@@ -371,7 +391,7 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
                               PyObject *kwargs)
 {
     PyGIInvokeState state = { 0, };
-    PyObject *ret;
+    PyObject *ret = NULL;
 
     if (self->cache == NULL) {
         self->cache = _pygi_callable_cache_new (self->info);
@@ -386,11 +406,13 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
     if (!_invoke_callable (&state, self->cache, self->info))
         goto err;
 
+    pygi_marshal_cleanup_args (&state, self->cache);
+
     ret = _invoke_marshal_out_args (&state, self->cache);
-    _invoke_state_clear (&state, self->cache);
-    return ret;
+    state.stage = PYGI_INVOKE_STAGE_DONE;
 
 err:
+    pygi_marshal_cleanup_args (&state, self->cache);
     _invoke_state_clear (&state, self->cache);
-    return NULL;
+    return ret;
 }

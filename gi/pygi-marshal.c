@@ -31,6 +31,7 @@
 #include <pyglib-python-compat.h>
 
 #include "pygi-cache.h"
+#include "pygi-marshal-cleanup.h"
 
 /*** argument marshaling and validating routines ***/
 

@@ -22,6 +22,7 @@
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-marshal.h"
+#include "pygi-marshal-cleanup.h"
 #include "pygi-type.h"
 #include <girepository.h>
 
@@ -540,7 +541,7 @@ _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
 
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *aux_cache = callable_cache->args_cache[seq_cache->len_arg_index];
-        if (seq_cache->len_argindex < arg_index)
+        if (seq_cache->len_arg_index < arg_index)
              callable_cache->n_out_aux_args++;
 
         if (aux_cache != NULL) {
@@ -637,11 +638,6 @@ _arg_cache_out_interface_union_setup (PyGIArgCache *arg_cache,
     arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
 }
 
-static void
-_g_slice_free_gvalue_func (GValue *value) {
-    g_slice_free (GValue, value);
-}
-
 static inline void
 _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
                                       GIInterfaceInfo *iface_info,
@@ -650,10 +646,12 @@ _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
-    if (iface_cache->g_type == G_TYPE_VALUE)
-        arg_cache->cleanup = _g_slice_free_gvalue_func;
+    if (iface_cache->g_type == G_TYPE_VALUE && 
+            arg_cache->transfer == GI_TRANSFER_NOTHING &&
+                arg_cache->direction == GI_DIRECTION_IN)
+        arg_cache->cleanup = _pygi_marshal_cleanup_gvalue;
     if (iface_cache->g_type == G_TYPE_CLOSURE)
-        arg_cache->cleanup = g_closure_unref;
+        arg_cache->cleanup = _pygi_marshal_cleanup_closure_unref;
 }
 
 static inline void
@@ -664,6 +662,11 @@ _arg_cache_out_interface_struct_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
     arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
+
+    if (iface_cache->g_type == G_TYPE_VALUE && 
+            arg_cache->transfer != GI_TRANSFER_NOTHING &&
+                arg_cache->direction == GI_DIRECTION_OUT)
+        arg_cache->cleanup = _pygi_marshal_cleanup_gvalue;
 }
 
 static inline void
@@ -671,8 +674,6 @@ _arg_cache_in_interface_object_setup (PyGIArgCache *arg_cache,
                                       GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_interface_object;
-    if (transfer == GI_TRANSFER_EVERYTHING)
-        arg_cache->cleanup = (GDestroyNotify)g_object_unref;
 }
 
 static inline void
@@ -680,6 +681,8 @@ _arg_cache_out_interface_object_setup (PyGIArgCache *arg_cache,
                                        GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+        arg_cache->cleanup = _pygi_marshal_cleanup_object_unref;
 }
 
 static inline void

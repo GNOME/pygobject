@@ -64,7 +64,9 @@ _gi_la_SOURCES += \
 	pygi-cache.h \
 	pygi-cache.c \
 	pygi-marshal.c \
-	pygi-marshal.h
+	pygi-marshal.h \
+	pygi-marshal-cleanup.c \
+	pygi-marshal-cleanup.h
 else
 _gi_la_SOURCES += \
 	pygi-invoke.c
