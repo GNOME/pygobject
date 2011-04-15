@@ -88,6 +88,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/len\(self._content.get_children\(\)\) > 0/self._content.get_children\(\)/g;" \
     -pe "s/len\(self.menu.get_children\(\)\) > 0/self.menu.get_children\(\)/g;" \
     -pe "s/([^\.^ ]*)\.drag_dest_set\(/Gtk.drag_dest_set\(\1, /g;" \
+    -pe "s/import gobject\n/from gi.repository import GObject\n/g;" \
     -pe "s/Gtk\..*\.__init__/gobject.GObject.__init__/g;" \
 \
     -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
