@@ -190,6 +190,21 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(variant.get_type_string(), '(ia{sa{sb}}s)')
         self.assertEqual(variant.unpack(), obj)
 
+        obj = {"frequency": GLib.Variant('t', 738000000),
+            "hierarchy": GLib.Variant('i', 0),
+            "bandwidth": GLib.Variant('x', 8),
+            "code-rate-hp": GLib.Variant('d', 2.0/3.0),
+            "constellation": GLib.Variant('s', "QAM16"),
+            "guard-interval": GLib.Variant('u', 4),}
+        variant = GLib.Variant('a{sv}', obj)
+        self.assertEqual(variant.get_type_string(), 'a{sv}')
+        self.assertEqual(variant.unpack(), {"frequency": 738000000,
+            "hierarchy": 0,
+            "bandwidth": 8,
+            "code-rate-hp": 2.0/3.0,
+            "constellation": "QAM16",
+            "guard-interval": 4})
+
     def test_gvariant_create_errors(self):
         # excess arguments
         self.assertRaises(TypeError, GLib.Variant, 'i', 42, 3)
