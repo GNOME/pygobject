@@ -65,7 +65,7 @@ class _VariantCreator(object):
                 if not args:
                     raise TypeError('not enough arguments for GVariant format string')
                 v = constructor(args[0])
-                return (constructor(args[0]), format[1:], args[1:])
+                return (v, format[1:], args[1:])
             else:
                 return (None, format[1:], None)
 
