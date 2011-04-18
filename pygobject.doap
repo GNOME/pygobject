@@ -6,9 +6,24 @@
 
   <name xml:lang="en">PyGObject</name>
   <shortdesc xml:lang="en">Python bindings GLib, GObject and GIO</shortdesc>
+  <description>
+GObject is a object system library used by GTK+ and GStreamer.
+
+PyGObject provides a convenient wrapper for the GObject library for use
+in Python programs, and takes care of many of the boring details such as
+managing memory and type casting. When combined with PyGTK, PyORBit and
+gnome-python, it can be used to write full featured GNOME applications.
+
+Like the GObject library itself PyGObject is licensed under the GNU
+LGPL, so is suitable for use in both free software and proprietary
+applications. It is already in use in many applications ranging from
+small single purpose scripts up to large full featured applications.
+  </description>
   <homepage rdf:resource="http://live.gnome.org/PyGObject" />
   <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#bindings" />
+  <download-page rdf:resource="http://download.gnome.org/sources/pygobject/" />
+  <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=pygobject" />
 
   <maintainer>
     <foaf:Person>
