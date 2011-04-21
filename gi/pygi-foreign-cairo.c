@@ -30,7 +30,7 @@
 #include <pycairo/py3cairo.h>
 #endif
 
-Pycairo_CAPI_t *Pycairo_CAPI;
+static Pycairo_CAPI_t *Pycairo_CAPI;
 
 #include "pygi-foreign.h"
 
@@ -115,7 +115,12 @@ cairo_surface_release (GIBaseInfo *base_info,
 static PyMethodDef _gi_cairo_functions[] = {};
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
+#if PY_VERSION_HEX < 0x03000000
     Pycairo_IMPORT;
+#else
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import("cairo", "CAPI");
+#endif
+
     if (Pycairo_CAPI == NULL)
         return PYGLIB_MODULE_ERROR_RETURN;
 
