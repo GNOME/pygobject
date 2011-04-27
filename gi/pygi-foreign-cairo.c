@@ -118,7 +118,7 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 #if PY_VERSION_HEX < 0x03000000
     Pycairo_IMPORT;
 #else
-    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import("cairo", "CAPI");
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCapsule_Import("cairo.CAPI", 0);
 #endif
 
     if (Pycairo_CAPI == NULL)
