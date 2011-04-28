@@ -62,15 +62,12 @@ _invoke_callable (PyGIInvokeState *state,
         g_assert (error != NULL);
         pyglib_error_check (&error);
 
-        /* TODO: release input arguments. */
-
         return FALSE;
     }
 
     if (state->error != NULL) {
         if (pyglib_error_check (&(state->error))) {
-            /* TODO: release input arguments. */
-
+            state->stage = PYGI_INVOKE_STAGE_NATIVE_INVOKE_FAILED;
             return FALSE;
         }
     }
@@ -193,7 +190,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyObject *py_arg = NULL;
 
-        state->current_arg = in_count;
+        state->current_arg = i;
         state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_START;
         switch (arg_cache->direction) {
             case GI_DIRECTION_IN:
@@ -406,6 +403,7 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
     if (!_invoke_callable (&state, self->cache, self->info))
         goto err;
 
+    state.stage = PYGI_INVOKE_STAGE_NATIVE_INVOKE_DONE;
     pygi_marshal_cleanup_args (&state, self->cache);
 
     ret = _invoke_marshal_out_args (&state, self->cache);

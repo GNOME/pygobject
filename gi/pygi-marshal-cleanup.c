@@ -32,10 +32,24 @@ pygi_marshal_cleanup_args (PyGIInvokeState   *state,
                next arg */
             state->current_arg++;
         case PYGI_INVOKE_STAGE_MARSHAL_IN_START:
+        case PYGI_INVOKE_STAGE_NATIVE_INVOKE_FAILED:
+        case PYGI_INVOKE_STAGE_NATIVE_INVOKE_DONE:
+        {
+            gsize i;
             /* we have not yet invoked so we only need to clean up 
-               the in args */
+               the in args and out caller allocates */
 
+            /* FIXME: handle caller allocates */
+            for (i = 0; i < state->current_arg; i++) {
+                PyGIArgCache *arg_cache = cache->args_cache[i];
+                PyGIMarshalCleanupFunc cleanup_func = arg_cache->cleanup;
+                if (cleanup_func != NULL  &&
+                    arg_cache->direction != GI_DIRECTION_OUT) {
+                    cleanup_func (state, arg_cache, state->args[i]->v_pointer);
+                }
+            }
             break;
+        }
         case PYGI_INVOKE_STAGE_MARSHAL_OUT_START:
             /* we have not yet marshalled so decrement to end with previous
                arg */
@@ -79,3 +93,38 @@ _pygi_marshal_cleanup_object_unref (PyGIInvokeState *state,
     g_object_unref ( (GObject *)data);
 }
 
+
+void
+_pygi_marshal_cleanup_utf8 (PyGIInvokeState *state,
+                            PyGIArgCache    *arg_cache,
+                            gpointer         data)
+{
+    /* For in or inout values before invoke we need to free this,
+     * but after invoke we we free only if transfer == GI_TRANSFER_NOTHING
+     * and this is not an inout value
+     *
+     * For out and inout values before invoke we do nothing but after invoke
+     * we free if transfer == GI_TRANSFER_EVERYTHING
+     */
+    switch (state->stage) {
+        PYGI_INVOKE_STAGE_MARSHAL_IN_START:
+        PYGI_INVOKE_STAGE_MARSHAL_IN_IDLE:
+            g_free (data);
+            break;
+        PYGI_INVOKE_STAGE_NATIVE_INVOKE_FAILED:
+        PYGI_INVOKE_STAGE_NATIVE_INVOKE_DONE:
+            if (arg_cache->transfer == GI_TRANSFER_NOTHING &&
+                  arg_cache->direction == GI_DIRECTION_IN)
+                g_free (data);
+            break;
+        PYGI_INVOKE_STAGE_MARSHAL_RETURN_START:
+        PYGI_INVOKE_STAGE_MARSHAL_RETURN_DONE:
+        PYGI_INVOKE_STAGE_MARSHAL_OUT_START:
+        PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE:
+            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+                g_free (data);
+            break;
+        default:
+            break;
+     }
+}

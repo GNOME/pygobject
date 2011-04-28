@@ -467,6 +467,7 @@ _arg_cache_in_utf8_setup (PyGIArgCache *arg_cache,
                           GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_utf8;
+    arg_cache->cleanup = _pygi_marshal_cleanup_utf8;
 }
 
 static inline void
@@ -474,6 +475,7 @@ _arg_cache_out_utf8_setup (PyGIArgCache *arg_cache,
                            GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_utf8;
+    arg_cache->cleanup = _pygi_marshal_cleanup_utf8;
 }
 
 static inline void
@@ -646,12 +648,6 @@ _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
-    if (iface_cache->g_type == G_TYPE_VALUE && 
-            arg_cache->transfer == GI_TRANSFER_NOTHING &&
-                arg_cache->direction == GI_DIRECTION_IN)
-        arg_cache->cleanup = _pygi_marshal_cleanup_gvalue;
-    if (iface_cache->g_type == G_TYPE_CLOSURE)
-        arg_cache->cleanup = _pygi_marshal_cleanup_closure_unref;
 }
 
 static inline void
@@ -662,11 +658,6 @@ _arg_cache_out_interface_struct_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
     arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
-
-    if (iface_cache->g_type == G_TYPE_VALUE && 
-            arg_cache->transfer != GI_TRANSFER_NOTHING &&
-                arg_cache->direction == GI_DIRECTION_OUT)
-        arg_cache->cleanup = _pygi_marshal_cleanup_gvalue;
 }
 
 static inline void
@@ -681,8 +672,6 @@ _arg_cache_out_interface_object_setup (PyGIArgCache *arg_cache,
                                        GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        arg_cache->cleanup = _pygi_marshal_cleanup_object_unref;
 }
 
 static inline void
