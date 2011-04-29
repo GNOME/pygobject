@@ -26,12 +26,13 @@
 
 G_BEGIN_DECLS
 
+void pygi_marshal_cleanup_args            (PyGIInvokeState   *state,
+                                           PyGICallableCache *cache,
+                                           gboolean           invoke_failure);
+
 void _pygi_marshal_cleanup_utf8           (PyGIInvokeState *state,
                                            PyGIArgCache    *arg_cache,
                                            gpointer         data);
-void pygi_marshal_cleanup_args            (PyGIInvokeState   *state,
-                                           PyGICallableCache *cache);
-
 void _pygi_marshal_cleanup_gvalue         (PyGIInvokeState *state,
                                            PyGIArgCache    *arg_cache,
                                            gpointer         data);

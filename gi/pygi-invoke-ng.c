@@ -404,13 +404,14 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
         goto err;
 
     state.stage = PYGI_INVOKE_STAGE_NATIVE_INVOKE_DONE;
-    pygi_marshal_cleanup_args (&state, self->cache);
+    pygi_marshal_cleanup_args (&state, self->cache, FALSE);
 
     ret = _invoke_marshal_out_args (&state, self->cache);
     state.stage = PYGI_INVOKE_STAGE_DONE;
 
 err:
-    pygi_marshal_cleanup_args (&state, self->cache);
+    pygi_marshal_cleanup_args (&state, self->cache,
+                                state.stage != PYGI_INVOKE_STAGE_DONE);
     _invoke_state_clear (&state, self->cache);
     return ret;
 }
