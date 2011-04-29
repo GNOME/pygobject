@@ -483,6 +483,7 @@ _arg_cache_in_filename_setup (PyGIArgCache *arg_cache,
                               GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_filename;
+    arg_cache->cleanup = _pygi_marshal_cleanup_utf8;
 }
 
 static inline void
@@ -490,6 +491,7 @@ _arg_cache_out_filename_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_filename;
+    arg_cache->cleanup = _pygi_marshal_cleanup_utf8;
 }
 
 static inline gboolean
