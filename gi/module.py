@@ -24,6 +24,7 @@ from __future__ import absolute_import
 
 import os
 import gobject
+import string
 
 import gi
 from .overrides import registry
@@ -120,8 +121,14 @@ class IntrospectionModule(object):
                 wrapper.__info__ = info
                 wrapper.__module__ = 'gi.repository.' + info.get_namespace()
 
+                # Don't use upper() here to avoid locale specific
+                # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
+                # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
+                ascii_upper_trans = string.maketrans(
+                        'abcdefgjhijklmnopqrstuvwxyz', 
+                        'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():
-                    value_name = value_info.get_name().upper()
+                    value_name = value_info.get_name().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))
 
             if g_type != gobject.TYPE_NONE:
