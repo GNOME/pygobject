@@ -5,6 +5,11 @@
 import sys
 
 import unittest
+import tempfile
+import shutil
+import os
+import locale
+import subprocess
 from gi.repository import GObject
 
 import gobject
@@ -959,6 +964,31 @@ class TestPointer(unittest.TestCase):
 
 
 class TestEnum(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        '''Run tests under a test locale.
+
+        Upper case conversion of member names should not be locale specific;
+        e.  g. in Turkish, "i".upper() == "i", which gives results like "iNVALiD"
+
+        Run test under a locale which defines toupper('a') == 'a'
+        '''
+        cls.locale_dir = tempfile.mkdtemp()
+        subprocess.check_call(['localedef', '-i',
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera'),
+            '-c', '-f', 'UTF-8', os.path.join(cls.locale_dir, 'te_ST.UTF-8@nouppera')])
+        os.environ['LOCPATH'] = cls.locale_dir
+        locale.setlocale(locale.LC_ALL, 'te_ST.UTF-8@nouppera')
+
+    @classmethod
+    def tearDownClass(cls):
+        locale.setlocale(locale.LC_ALL, 'C')
+        shutil.rmtree(cls.locale_dir)
+        try:
+            del os.environ['LOCPATH']
+        except KeyError:
+            pass
 
     def test_enum(self):
         self.assertTrue(issubclass(GIMarshallingTests.Enum, int))
