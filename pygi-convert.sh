@@ -110,6 +110,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.GRAB_/Gdk.GrabStatus./g;" \
     -pe "s/Gdk.SCROLL_(DOWN|LEFT|RIGHT|UP)/Gdk.ScrollDirection.\1/g;" \
     -pe "s/Gdk.([A-Z]+_(PTR|CURSOR))/Gdk.CursorType.\1/g;" \
+    -pe "s/Gdk.(CROSSHAIR)/Gdk.CursorType.\1/g;" \
     -pe "s/Gdk.Cursor\s*\(/Gdk.Cursor.new\(/g;" \
     -pe "s/#Gdk.Rectangle\(([^,\)]*), ([^,\)]*), ([^,\)]*), ([^,\)]*)\)/\1, \2, \3, \4/g;" \
     -pe "s/Gdk.Rectangle//g;" \
