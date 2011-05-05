@@ -650,6 +650,9 @@ _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
+
+    if (iface_cache->g_type == G_TYPE_VALUE)
+        arg_cache->cleanup = _pygi_marshal_cleanup_gvalue;
 }
 
 static inline void
@@ -667,6 +670,7 @@ _arg_cache_in_interface_object_setup (PyGIArgCache *arg_cache,
                                       GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_interface_object;
+    arg_cache->cleanup = _pygi_marshal_cleanup_object;
 }
 
 static inline void
@@ -674,6 +678,7 @@ _arg_cache_out_interface_object_setup (PyGIArgCache *arg_cache,
                                        GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_interface_object;
+    arg_cache->cleanup = _pygi_marshal_cleanup_object;
 }
 
 static inline void

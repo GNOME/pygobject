@@ -39,9 +39,9 @@ void _pygi_marshal_cleanup_gvalue         (PyGIInvokeState *state,
 void _pygi_marshal_cleanup_closure_unref  (PyGIInvokeState *state,
                                            PyGIArgCache    *arg_cache,
                                            gpointer         data);
-void _pygi_marshal_cleanup_object_unref   (PyGIInvokeState *state,
-                                           PyGIArgCache    *arg_cache,
-                                           gpointer         data);
+void _pygi_marshal_cleanup_object   (PyGIInvokeState *state,
+                                     PyGIArgCache    *arg_cache,
+                                     gpointer         data);
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_CLEANUP_H__ */

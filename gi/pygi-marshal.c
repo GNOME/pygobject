@@ -1219,16 +1219,9 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
 
         value = g_slice_new0 (GValue);
 
-        /* if already a gvalue, copy, else marshal into gvalue */
+        /* if already a gvalue, use that, else marshal into gvalue */
         if (object_type == G_TYPE_VALUE) {
-            /* src GValue's lifecycle is handled by Python
-             * so we have to copy it into the destination's
-             * GValue which is freed during the cleanup of
-             * invoke.
-             */
-            GValue *src = (GValue *)( (PyGObject *)py_arg)->obj;
-            g_value_init (value, G_VALUE_TYPE (src));
-            g_value_copy (src, value);
+            value = (GValue *)( (PyGObject *)py_arg)->obj;
         } else {
             g_value_init (value, object_type);
             if (pyg_value_from_pyobject (value, py_arg) < 0) {
