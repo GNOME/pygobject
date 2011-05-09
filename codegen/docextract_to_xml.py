@@ -17,7 +17,7 @@ def usage():
     sys.stderr.write('usage: docextract_to_xml.py ' +
         '[-s /src/dir | --source-dir=/src/dir] ' +
         '[-a | --with-annotations] [-p | --with-properties] ' +
-        '[-i | --with-signals ]\n')
+        '[-i | --with-signals ] [-n | --no-since]\n')
     sys.exit(1)
 
 # Translates special texts to &... HTML acceptable format.  Also replace
@@ -58,9 +58,10 @@ def print_annotations(annotations):
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:s:o:api",
+        opts, args = getopt.getopt(sys.argv[1:], "d:s:o:apin",
                                    ["source-dir=", "with-annotations",
-                                     "with-properties", "with-signals"])
+                                     "with-properties", "with-signals",
+                                     "no-since"])
     except getopt.error, e:
         sys.stderr.write('docextract_to_xml.py: %s\n' % e)
         usage()
@@ -77,6 +78,8 @@ if __name__ == '__main__':
             with_properties = True
         if opt in ('-i', '--with-signals'):
             with_signals = True
+        if opt in ('-n', '--no-since'):
+            docextract.no_since = True
     if len(args) != 0:
         usage()
 
