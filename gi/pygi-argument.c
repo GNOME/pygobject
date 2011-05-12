@@ -1844,6 +1844,8 @@ _pygi_argument_from_g_value(const GValue *value,
 
             switch (info_type) {
                 case GI_INFO_TYPE_FLAGS:
+                    arg.v_long = g_value_get_flags (value);
+                    break;
                 case GI_INFO_TYPE_ENUM:
                     arg.v_long = g_value_get_enum (value);
                     break;
