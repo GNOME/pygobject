@@ -351,9 +351,9 @@ def process_final_sections(fp, line, cur_doc):
                 else:
                     # For all others ('Since:' and 'Deprecated:') just append
                     # the line to the description for now.
-                    # But if the --no-since option is specified, skip the line.
+                    # But if --no-since is specified, don't append it.
                     if no_since and pattern == since_pattern:
-                        line = fp.readline()
+                        pass
                     else:
                         cur_doc.append_to_description(line)
 
