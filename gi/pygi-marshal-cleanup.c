@@ -38,6 +38,78 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
     }
 }
 
+/**
+ * Cleanup during invoke can happen in multiple
+ * stages, each of which can be the result of a
+ * successful compleation of that stage or an error
+ * occured which requires partial cleanup.
+ *
+ * For the most part, either the C interface being
+ * invoked or the python object which wraps the
+ * parameters, handle their lifecycles but in some
+ * cases, where we have intermediate objects,
+ * or when we fail processing a parameter, we need
+ * to handle the clean up manually.
+ *
+ * There are two argument processing stages.
+ * They are the in stage, where we process python
+ * parameters into their C counterparts, and the out
+ * stage, where we process out C parameters back
+ * into python objects. The in stage also sets up
+ * temporary out structures for caller allocated
+ * parameters which need to be cleaned up either on
+ * in stage failure or at the completion of the out
+ * stage (either success or failure)
+ *
+ * The in stage must call one of these cleanup functions:
+ *    - pygi_marshal_cleanup_args_in_marshal_success
+ *       (continue to out stage)
+ *    - pygi_marshal_cleanup_args_in_parameter_fail
+ *       (final, exit from invoke)
+ *
+ * The out stage must call one of these cleanup functions which are all final:
+ *    - pygi_marshal_cleanup_args_out_marshal_success
+ *    - pygi_marshal_cleanup_args_return_fail
+ *    - pygi_marshal_cleanup_args_out_parameter_fail
+ *
+ **/
+void
+pygi_marshal_cleanup_args_in_marshal_success (PyGIInvokeState   *state,
+                                              PyGICallableCache *cache)
+{
+
+}
+
+void
+pygi_marshal_cleanup_args_invoke_success (PyGIInvokeState   *state,
+                                          PyGICallableCache *cache)
+{
+
+}
+
+void
+pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
+                                             PyGICallableCache *cache,
+                                             gssize failed_arg_index)
+{
+
+}
+
+void
+pygi_marshal_cleanup_args_return_fail (PyGIInvokeState   *state,
+                                       PyGICallableCache *cache)
+{
+
+}
+
+void
+pygi_marshal_cleanup_args_out_parameter_fail (PyGIInvokeState   *state,
+                                              PyGICallableCache *cache,
+                                              gssize failed_out_arg_index)
+{
+
+}
+
 void
 pygi_marshal_cleanup_args (PyGIInvokeState   *state,
                            PyGICallableCache *cache,

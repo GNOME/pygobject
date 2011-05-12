@@ -26,6 +26,20 @@
 
 G_BEGIN_DECLS
 
+void pygi_marshal_cleanup_args_in_marshal_success  (PyGIInvokeState   *state,
+                                                    PyGICallableCache *cache);
+void pygi_marshal_cleanup_args_in_parameter_fail   (PyGIInvokeState   *state,
+                                                    PyGICallableCache *cache,
+                                                    gssize failed_arg_index);
+
+void pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
+                                                    PyGICallableCache *cache);
+void pygi_marshal_cleanup_args_return_fail         (PyGIInvokeState   *state,
+                                                    PyGICallableCache *cache);
+void pygi_marshal_cleanup_args_out_parameter_fail  (PyGIInvokeState   *state,
+                                                    PyGICallableCache *cache,
+                                                    gssize failed_out_arg_index);
+
 void pygi_marshal_cleanup_args            (PyGIInvokeState   *state,
                                            PyGICallableCache *cache,
                                            gboolean           invoke_failure);
