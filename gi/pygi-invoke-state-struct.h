@@ -7,26 +7,12 @@
 
 G_BEGIN_DECLS
 
-typedef enum {
-    PYGI_INVOKE_STAGE_MARSHAL_IN_START,
-    PYGI_INVOKE_STAGE_MARSHAL_IN_IDLE,
-    PYGI_INVOKE_STAGE_NATIVE_INVOKE_FAILED,
-    PYGI_INVOKE_STAGE_NATIVE_INVOKE_DONE,
-    PYGI_INVOKE_STAGE_MARSHAL_RETURN_START,
-    PYGI_INVOKE_STAGE_MARSHAL_RETURN_DONE,
-    PYGI_INVOKE_STAGE_MARSHAL_OUT_START,
-    PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE,
-    PYGI_INVOKE_STAGE_DONE
-} PyGIInvokeStage;
-
 typedef struct _PyGIInvokeState
 {
     PyObject *py_in_args;
     PyObject *constructor_class;
     gssize n_py_in_args;
     gssize current_arg;
-
-    PyGIInvokeStage stage;
 
     GType implementor_gtype;
 

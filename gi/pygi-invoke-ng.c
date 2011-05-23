@@ -315,7 +315,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 return FALSE;
             }
 
-            state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_IDLE;
         }
 
     }
@@ -332,7 +331,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
     gboolean has_return = FALSE;
 
     if (cache->return_cache) {
-        state->stage = PYGI_INVOKE_STAGE_MARSHAL_RETURN_START;
+
         if (cache->is_constructor) {
             if (state->return_arg.v_pointer == NULL) {
                 PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
@@ -352,7 +351,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
             return NULL;
         }
 
-        state->stage = PYGI_INVOKE_STAGE_MARSHAL_RETURN_DONE;
 
         if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
             total_out_args++;
@@ -366,7 +364,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         py_out = py_return;
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */
-        state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_START;
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->out_args->data;
         py_out = arg_cache->out_marshaller (state,
                                             cache,
@@ -379,7 +376,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
             return NULL;
         }
 
-        state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE;
     } else {
         int py_arg_index = 0;
         GSList *cache_item = cache->out_args;
@@ -392,7 +388,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
         for(; py_arg_index < total_out_args; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
-            state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_START;
             PyObject *py_obj = arg_cache->out_marshaller (state,
                                                           cache,
                                                           arg_cache,
