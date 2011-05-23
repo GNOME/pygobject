@@ -50,6 +50,8 @@ typedef struct _PyGIInvokeState
     GIArgument return_arg;
 
     GError *error;
+
+    gboolean failed;
 } PyGIInvokeState;
 
 G_END_DECLS

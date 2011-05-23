@@ -46,7 +46,8 @@ typedef PyObject *(*PyGIMarshalOutFunc) (PyGIInvokeState   *state,
 
 typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
                                         PyGIArgCache    *arg_cache,
-                                        gpointer         *data);
+                                        gpointer         data,
+                                        gboolean         was_processed);
 typedef enum {
   /* Not an AUX type */
   PYGI_AUX_TYPE_NONE   = 0,
@@ -72,7 +73,9 @@ struct _PyGIArgCache
     PyGIMarshalInFunc in_marshaller;
     PyGIMarshalOutFunc out_marshaller;
 
-    PyGIMarshalCleanupFunc cleanup;
+    PyGIMarshalCleanupFunc in_cleanup;
+    PyGIMarshalCleanupFunc out_cleanup;
+
     GDestroyNotify destroy_notify;
 
     gssize c_arg_index;

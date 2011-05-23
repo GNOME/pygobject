@@ -722,8 +722,8 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
         g_array_insert_val (array_, i, item);
         continue;
 err:
-        if (sequence_cache->item_cache->cleanup != NULL) {
-            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+        if (sequence_cache->item_cache->in_cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->in_cleanup;
             /*for(j = 0; j < i; j++)
                 cleanup((gpointer)(array_->data[j]));*/
         }
@@ -815,8 +815,8 @@ _pygi_marshal_in_glist (PyGIInvokeState   *state,
         list_ = g_list_append (list_, item.v_pointer);
         continue;
 err:
-        if (sequence_cache->item_cache->cleanup != NULL) {
-            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+        if (sequence_cache->item_cache->in_cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->in_cleanup;
         }
 
         g_list_free (list_);
@@ -881,8 +881,8 @@ _pygi_marshal_in_gslist (PyGIInvokeState   *state,
         list_ = g_slist_append (list_, item.v_pointer);
         continue;
 err:
-        if (sequence_cache->item_cache->cleanup != NULL) {
-            GDestroyNotify cleanup = sequence_cache->item_cache->cleanup;
+        if (sequence_cache->item_cache->in_cleanup != NULL) {
+            GDestroyNotify cleanup = sequence_cache->item_cache->in_cleanup;
         }
 
         g_slist_free (list_);
@@ -1217,12 +1217,11 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
             return FALSE;
         }
 
-        value = g_slice_new0 (GValue);
-
         /* if already a gvalue, use that, else marshal into gvalue */
         if (object_type == G_TYPE_VALUE) {
             value = (GValue *)( (PyGObject *)py_arg)->obj;
         } else {
+            value = g_slice_new0 (GValue);
             g_value_init (value, object_type);
             if (pyg_value_from_pyobject (value, py_arg) < 0) {
                 g_slice_free (GValue, value);

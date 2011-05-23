@@ -74,7 +74,6 @@ _invoke_callable (PyGIInvokeState *state,
 
     if (state->error != NULL) {
         if (pyglib_error_check (&(state->error))) {
-            state->stage = PYGI_INVOKE_STAGE_NATIVE_INVOKE_FAILED;
             /* even though we errored out, the call itself was successful,
                so we assume the call processed all of the parameters */
             pygi_marshal_cleanup_args_in_marshal_success (state, cache);
@@ -91,7 +90,6 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
                                         PyObject *py_args,
                                         PyObject *kwargs)
 {
-    state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_START;
     state->py_in_args = py_args;
     state->n_py_in_args = PySequence_Length (py_args);
 
@@ -109,6 +107,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
                           "Constructors require the class to be passed in as an argument, "
                           "No arguments passed to the %s constructor.",
                           cache->name);
+
             return FALSE;
         }
 
@@ -200,8 +199,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyObject *py_arg = NULL;
 
-        state->current_arg = i;
-        state->stage = PYGI_INVOKE_STAGE_MARSHAL_IN_START;
         switch (arg_cache->direction) {
             case GI_DIRECTION_IN:
                 state->args[i] = &(state->in_args[in_count]);
@@ -334,8 +331,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
     int total_out_args = cache->n_out_args;
     gboolean has_return = FALSE;
 
-    state->current_arg = 0;
-
     if (cache->return_cache) {
         state->stage = PYGI_INVOKE_STAGE_MARSHAL_RETURN_START;
         if (cache->is_constructor) {
@@ -413,9 +408,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 Py_DECREF (py_out);
                 return NULL;
             }
-
-            state->current_arg++;
-            state->stage = PYGI_INVOKE_STAGE_MARSHAL_OUT_IDLE;
 
             PyTuple_SET_ITEM (py_out, py_arg_index, py_obj);
             cache_item = cache_item->next;
