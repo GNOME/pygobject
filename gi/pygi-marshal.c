@@ -1653,10 +1653,10 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                 PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)item_arg_cache;
                 switch (g_base_info_get_type (iface_cache->interface_info)) {
                     case GI_INFO_TYPE_STRUCT:
-                        case GI_INFO_TYPE_BOXED:
-                            is_struct = TRUE;
-                        default:
-                            break;
+                    case GI_INFO_TYPE_BOXED:
+                        is_struct = TRUE;
+                    default:
+                        break;
                 }
             }
 
