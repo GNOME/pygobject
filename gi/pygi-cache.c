@@ -525,7 +525,7 @@ _arg_cache_in_array_setup (PyGIArgCache *arg_cache,
         callable_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
     }
 
-    /* arg_cache->cleanup = _pygi_cleanup_array; */
+    arg_cache->in_cleanup = _pygi_marshal_cleanup_in_array;
 
     return TRUE;
 }

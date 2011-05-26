@@ -77,7 +77,7 @@ void
 pygi_marshal_cleanup_args_in_marshal_success (PyGIInvokeState   *state,
                                               PyGICallableCache *cache)
 {
-    int i;
+    gsize i;
 
     /* For in success, call cleanup for all GI_DIRECTION_IN values only. */
     for (i = 0; i < cache->n_args; i++) {
@@ -241,4 +241,74 @@ _pygi_marshal_cleanup_out_interface_struct_foreign (PyGIInvokeState *state,
         pygi_struct_foreign_release ( 
             ( (PyGIInterfaceCache *)arg_cache)->interface_info,
             data);
+}
+
+void
+_pygi_marshal_cleanup_in_array (PyGIInvokeState *state,
+                                PyGIArgCache    *arg_cache,
+                                gpointer         data,
+                                gboolean         was_processed)
+{
+    if (was_processed) {
+        GArray *array_;
+        PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+
+        /* If this isn't a garray create one to help process variable sized
+           array elements */
+        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+            gsize len;
+            if (sequence_cache->fixed_size >= 0) {
+                len = sequence_cache->fixed_size;
+            } else if (sequence_cache->is_zero_terminated) {
+                len = g_strv_length ((gchar **)data);
+            } else {
+                GIArgument *len_arg = state->args[sequence_cache->len_arg_index];
+                len = len_arg->v_long;
+            }
+
+            array_ = g_array_new (FALSE,
+                                  FALSE,
+                                  sequence_cache->item_size);
+
+            if (array_ == NULL)
+                return;
+
+            array_->data = data;
+            array_->len = len;
+
+        } else {
+            array_ = (GArray *) data;
+        }
+
+        /* clean up items first */
+        if (sequence_cache->item_cache->in_cleanup != NULL) {
+            gsize i;
+            PyGIMarshalCleanupFunc cleanup_func =
+                sequence_cache->item_cache->in_cleanup;
+
+            for(i = 0; i < array_->len; i++) {
+                cleanup_func (state,
+                              sequence_cache->item_cache,
+                              g_array_index (array_, gpointer, i),
+                              TRUE);
+            }
+        }
+
+        if (state->failed ||
+            arg_cache->transfer == GI_TRANSFER_NOTHING ||
+            arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+            g_array_free (array_, TRUE);
+        } else if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+            g_array_free (array_, FALSE);
+        }
+    }
+}
+
+void
+_pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
+                                 PyGIArgCache    *arg_cache,
+                                 gpointer         data,
+                                 gboolean         was_processed)
+{
+
 }

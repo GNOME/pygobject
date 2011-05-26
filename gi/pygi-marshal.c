@@ -723,9 +723,16 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
         continue;
 err:
         if (sequence_cache->item_cache->in_cleanup != NULL) {
-            GDestroyNotify cleanup = sequence_cache->item_cache->in_cleanup;
-            /*for(j = 0; j < i; j++)
-                cleanup((gpointer)(array_->data[j]));*/
+            gsize j;
+            PyGIMarshalCleanupFunc cleanup_func =
+                sequence_cache->item_cache->in_cleanup;
+
+            for(j = 0; j < i; j++) {
+                cleanup_func (state,
+                              sequence_cache->item_cache,
+                              g_array_index (array_, gpointer, j),
+                              TRUE);
+            }
         }
 
         g_array_free (array_, TRUE);
