@@ -1590,6 +1590,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
     GArray *array_;
     PyObject *py_obj = NULL;
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+    gsize processed_items = 0;
 
     array_ = arg->v_pointer;
 
@@ -1613,6 +1614,10 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                               seq_cache->item_size);
         if (array_ == NULL) {
             PyErr_NoMemory ();
+
+            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+                g_free (arg->v_pointer);
+
             return NULL;
         }
 
@@ -1637,12 +1642,9 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
             PyGIArgCache *item_arg_cache;
 
             py_obj = PyList_New (array_->len);
-            if (py_obj == NULL) {
-                if (seq_cache->array_type == GI_ARRAY_TYPE_C)
-                    g_array_unref (array_);
+            if (py_obj == NULL)
+                goto err;
 
-                return NULL;
-            }
 
             item_arg_cache = seq_cache->item_cache;
             item_out_marshaller = item_arg_cache->out_marshaller;
@@ -1680,9 +1682,10 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                     if (seq_cache->array_type == GI_ARRAY_TYPE_C)
                         g_array_unref (array_);
 
-                    return NULL;
+                    goto err;
                 }
                 PyList_SET_ITEM (py_obj, i, py_item);
+                processed_items++;
             }
         }
     }
@@ -1691,6 +1694,28 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
         g_array_free (array_, FALSE);
 
     return py_obj;
+
+err:
+    if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
+        g_array_free (array_, arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+    } else {
+        /* clean up unprocessed items */
+        if (seq_cache->item_cache->out_cleanup != NULL) {
+            int j;
+            PyGIMarshalCleanupFunc cleanup_func = seq_cache->item_cache->out_cleanup;
+            for (j = processed_items; j < array_->len; j++) {
+                cleanup_func (state,
+                              seq_cache->item_cache,
+                              g_array_index (array_, gpointer, j),
+                              FALSE);
+            }
+        }
+
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+            g_array_free (array_, TRUE);
+    }
+
+    return NULL;
 }
 
 PyObject *

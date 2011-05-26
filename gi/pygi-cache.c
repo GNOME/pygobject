@@ -540,6 +540,7 @@ _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
 {
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
     arg_cache->out_marshaller = _pygi_marshal_out_array;
+    arg_cache->out_cleanup = _pygi_marshal_cleanup_out_array;
 
     seq_cache->array_type = g_type_info_get_array_type (type_info);
 
@@ -567,7 +568,6 @@ _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
     }
 
     return TRUE;
-    /* arg_cache->cleanup = _pygi_cleanup_array; */
 }
 
 static inline void

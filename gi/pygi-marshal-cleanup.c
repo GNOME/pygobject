@@ -310,5 +310,29 @@ _pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
                                  gpointer         data,
                                  gboolean         was_processed)
 {
+    PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        GArray *array_ = (GArray *) data;
+
+        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+            g_free (data);
+            return;
+        }
+
+        if (sequence_cache->item_cache->out_cleanup != NULL) {
+            int i;
+
+            PyGIMarshalCleanupFunc cleanup_func = sequence_cache->item_cache->out_cleanup;
+            for (i = 0; i < array_->len; i++) {
+                cleanup_func (state,
+                              sequence_cache->item_cache,
+                              g_array_index (array_, gpointer, i),
+                              was_processed);
+            }
+        }
+
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+            g_array_free (array_, TRUE);
+    }
 }
