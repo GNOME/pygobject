@@ -1608,7 +1608,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
             len = len_arg->v_long;
         }
 
-        array_ = g_array_new (seq_cache->is_zero_terminated,
+        array_ = g_array_new (FALSE,
                               FALSE,
                               seq_cache->item_size);
         if (array_ == NULL) {
