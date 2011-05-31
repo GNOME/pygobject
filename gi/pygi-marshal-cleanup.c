@@ -312,7 +312,8 @@ _pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
 {
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
+            arg_cache->transfer == GI_TRANSFER_CONTAINER) {
         GArray *array_ = (GArray *) data;
 
         if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
