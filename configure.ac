@@ -126,13 +126,13 @@ AC_ARG_ENABLE(thread,
 
 dnl Build with the new caching invoker
 AC_ARG_ENABLE(invoke-ng,
-  AC_HELP_STRING([--enable-invoke-ng], [Enable the new caching invoke path]),,
-  enable_invoke_ng=no)
-if test "${enable_invoke_ng}" != no; then
+  AC_HELP_STRING([--disable-invoke-ng], [Disable the new caching invoke path]),,
+  enable_invoke_ng=yes)
+if test "${enable_invoke_ng}" == yes; then
   AC_DEFINE(ENABLE_INVOKE_NG, 1, Enable the new invoke caching code path)
 fi
 
-AM_CONDITIONAL(ENABLE_INVOKE_NG, test x$enable_invoke_ng != xno)
+AM_CONDITIONAL(ENABLE_INVOKE_NG, test x$enable_invoke_ng == xyes)
 
 dnl Building documentation
 AC_ARG_ENABLE(docs,
