@@ -23,15 +23,17 @@
  #include <glib.h>
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState    *state,
-                           PyGIInterfaceCache *cache,
+                           PyGIArgCache       *cache,
                            gpointer            data)
 {
-    if (cache->g_type == G_TYPE_BOXED) {
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)cache;
+
+    if (iface_cache->g_type == G_TYPE_BOXED) {
         gsize size;
-        size = g_struct_info_get_size (cache->interface_info);
+        size = g_struct_info_get_size (iface_cache->interface_info);
         g_slice_free1 (size, data);
-    } else if (cache->is_foreign) {
-        pygi_struct_foreign_release ((GIBaseInfo *)cache->interface_info,
+    } else if (iface_cache->is_foreign) {
+        pygi_struct_foreign_release ((GIBaseInfo *)iface_cache->interface_info,
                                      data);
     } else {
         g_free (data);
@@ -123,7 +125,25 @@ pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
                                              PyGICallableCache *cache,
                                              gssize failed_arg_index)
 {
+    gsize i;
+
     state->failed = TRUE;
+
+    for (i = 0; i < cache->n_args; i++) {
+        PyGIArgCache *arg_cache = cache->args_cache[i];
+        PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
+
+        if (cleanup_func && arg_cache->direction == GI_DIRECTION_IN) {
+            cleanup_func (state,
+                          arg_cache,
+                          state->args[i]->v_pointer,
+                          i < failed_arg_index);
+        } else if (arg_cache->is_caller_allocates) {
+            _cleanup_caller_allocates (state,
+                                       arg_cache,
+                                       state->args[i]->v_pointer);
+        }
+    }
 }
 
 void
