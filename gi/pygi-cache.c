@@ -575,7 +575,7 @@ _arg_cache_in_glist_setup (PyGIArgCache *arg_cache,
                            GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_glist;
-    /* arg_cache->cleanup = */
+    arg_cache->in_cleanup = _pygi_marshal_cleanup_in_glist;
 }
 
 static inline void
@@ -583,7 +583,7 @@ _arg_cache_out_glist_setup (PyGIArgCache *arg_cache,
                             GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_glist;
-    /* arg_cache->cleanup = */
+    arg_cache->in_cleanup = _pygi_marshal_cleanup_out_glist;
 }
 
 static inline void
@@ -591,7 +591,7 @@ _arg_cache_in_gslist_setup (PyGIArgCache *arg_cache,
                             GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_gslist;
-    /* arg_cache->cleanup = */
+    arg_cache->in_cleanup = _pygi_marshal_cleanup_in_glist;
 }
 
 static inline void
@@ -599,7 +599,7 @@ _arg_cache_out_gslist_setup (PyGIArgCache *arg_cache,
                              GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_gslist;
-    /* arg_cache->cleanup = */
+    arg_cache->out_cleanup = _pygi_marshal_cleanup_out_glist;
 }
 
 static inline void
