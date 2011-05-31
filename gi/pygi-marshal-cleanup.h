@@ -84,8 +84,14 @@ void _pygi_marshal_cleanup_out_glist                    (PyGIInvokeState *state,
                                                          PyGIArgCache    *arg_cache,
                                                          gpointer         data,
                                                          gboolean         was_processed);
-
-
+void _pygi_marshal_cleanup_in_ghash                     (PyGIInvokeState *state,
+                                                         PyGIArgCache    *arg_cache,
+                                                         gpointer         data,
+                                                         gboolean         was_processed);
+void _pygi_marshal_cleanup_out_ghash                    (PyGIInvokeState *state,
+                                                         PyGIArgCache    *arg_cache,
+                                                         gpointer         data,
+                                                         gboolean         was_processed);
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_CLEANUP_H__ */

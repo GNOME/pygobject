@@ -606,12 +606,14 @@ static inline void
 _arg_cache_in_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_ghash;
+    arg_cache->in_cleanup = _pygi_marshal_cleanup_in_ghash;
 }
 
 static inline void
 _arg_cache_out_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_ghash;
+    arg_cache->out_cleanup = _pygi_marshal_cleanup_out_ghash;
 }
 
 static inline void

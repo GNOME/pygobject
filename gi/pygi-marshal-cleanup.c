@@ -421,3 +421,67 @@ _pygi_marshal_cleanup_out_glist (PyGIInvokeState *state,
         }
     }
 }
+
+void
+_pygi_marshal_cleanup_in_ghash  (PyGIInvokeState *state,
+                                 PyGIArgCache    *arg_cache,
+                                 gpointer         data,
+                                 gboolean         was_processed)
+{
+    if (data == NULL)
+        return;
+
+    if (was_processed) {
+        GHashTable *hash_;
+        PyGIHashCache *hash_cache = (PyGIHashCache *)arg_cache;
+
+        hash_ = (GHashTable *)data;
+
+        /* clean up keys and values first */
+        if (hash_cache->key_cache->in_cleanup != NULL ||
+                hash_cache->value_cache->in_cleanup != NULL) {
+            GHashTableIter hiter;
+            gpointer key;
+            gpointer value;
+
+            PyGIMarshalCleanupFunc key_cleanup_func =
+                hash_cache->key_cache->in_cleanup;
+            PyGIMarshalCleanupFunc value_cleanup_func =
+                hash_cache->value_cache->in_cleanup;
+
+            g_hash_table_iter_init (&hiter, hash_);
+            while (g_hash_table_iter_next (&hiter, &key, &value)) {
+                if (key != NULL && key_cleanup_func != NULL)
+                    key_cleanup_func (state,
+                                      hash_cache->key_cache,
+                                      key,
+                                      TRUE);
+                if (value != NULL && value_cleanup_func != NULL)
+                    value_cleanup_func (state,
+                                        hash_cache->value_cache,
+                                        value,
+                                        TRUE);
+            }
+        }
+
+        if (state->failed ||
+               arg_cache->transfer == GI_TRANSFER_NOTHING ||
+                  arg_cache->transfer == GI_TRANSFER_CONTAINER)
+            g_hash_table_destroy (hash_);
+
+    }
+}
+
+void
+_pygi_marshal_cleanup_out_ghash (PyGIInvokeState *state,
+                                 PyGIArgCache    *arg_cache,
+                                 gpointer         data,
+                                 gboolean         was_processed)
+{
+    if (data == NULL)
+        return;
+
+    /* assume hashtable has boxed key and value */
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+        g_hash_table_destroy ( (GHashTable *)data);
+}
