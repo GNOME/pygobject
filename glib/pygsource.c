@@ -387,9 +387,11 @@ pyg_source_clear(PyGSource *self)
 static void
 pyg_source_dealloc(PyGSource *self)
 {
-    PyObject_ClearWeakRefs((PyObject *)self);
-
+    /* Must be done first, so that there is no chance of Python's GC being
+     * called while tracking this half-deallocated object */
     PyObject_GC_UnTrack((PyObject *)self);
+
+    PyObject_ClearWeakRefs((PyObject *)self);
 
     pyg_source_clear(self);
 
