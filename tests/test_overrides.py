@@ -359,10 +359,14 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(color.red, 100)
         self.assertEquals(color.green, 200)
         self.assertEquals(color.blue, 300)
+        self.assertEquals(color, Gdk.Color(100, 200, 300))
+        self.assertNotEquals(color, Gdk.Color(1, 2, 3))
 
     def test_rgba(self):
         self.assertEquals(Gdk.RGBA, overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
+        self.assertEquals(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
+        self.assertNotEquals(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
         self.assertEquals(rgba.red, 0.1)
         self.assertEquals(rgba.green, 0.2)
         self.assertEquals(rgba.blue, 0.3)
