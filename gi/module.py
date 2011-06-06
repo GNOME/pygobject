@@ -157,7 +157,9 @@ class IntrospectionModule(object):
             elif isinstance(info, (StructInfo, UnionInfo)):
                 if g_type.is_a(gobject.TYPE_BOXED):
                     bases = (Boxed,)
-                elif g_type.is_a(gobject.TYPE_POINTER) or g_type == gobject.TYPE_NONE:
+                elif g_type.is_a(gobject.TYPE_POINTER) or \
+                     g_type == gobject.TYPE_NONE or \
+                     g_type.fundamental == g_type:
                     bases = (Struct,)
                 else:
                     raise TypeError("unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name()))
