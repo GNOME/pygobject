@@ -475,7 +475,7 @@ _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
 
     py_type = _pygi_type_import_by_name ("GLib", "VariantType");
 
-    py_variant = _pygi_struct_new ( (PyTypeObject *) py_type, type_string, FALSE);
+    py_variant = _pygi_boxed_new ( (PyTypeObject *) py_type, type_string, FALSE);
 
     return py_variant;
 }
