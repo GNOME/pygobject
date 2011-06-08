@@ -11,7 +11,6 @@ from sys import getrefcount
 import cairo
 
 from gi.repository import GObject
-from gi.repository import GLib
 from gi.repository import Regress as Everything
 
 if sys.version_info < (3, 0):
