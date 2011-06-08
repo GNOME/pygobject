@@ -35,6 +35,9 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
     GIArgument arg = _pygi_argument_from_object (object, type_info, transfer);
     GITypeTag type_tag = g_type_info_get_tag (type_info);
 
+    if (out_arg == NULL)
+        return;
+
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
            *((gboolean *) out_arg) = arg.v_boolean;
