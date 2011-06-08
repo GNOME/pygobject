@@ -25,6 +25,17 @@ GLib = modules['GLib']._introspection_module
 
 __all__ = []
 
+def _create_variant(value):
+    '''Create a variant containing the variant "value".
+    
+    This is usually done with the GLib.Variant.new_variant() leaf
+    constructor, but this is currently broken, see GNOME#639952.
+    '''
+    builder = GLib.VariantBuilder()
+    builder.init(variant_type_from_string('v'))
+    builder.add_value(value)
+    return builder.end()
+
 class _VariantCreator(object):
 
     _LEAF_CONSTRUCTORS = {
@@ -41,7 +52,8 @@ class _VariantCreator(object):
         's': GLib.Variant.new_string,
         'o': GLib.Variant.new_object_path,
         'g': GLib.Variant.new_signature,
-        'v': GLib.Variant.new_variant,
+        #'v': GLib.Variant.new_variant,
+        'v': _create_variant,
     }
 
     def _create(self, format, args):
