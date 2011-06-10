@@ -253,12 +253,9 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
 
 error:
     Py_CLEAR (*py_args);
-
-    if (*out_args != NULL)
-        g_free (*out_args);
-
-    if (g_args != NULL)
-        g_free (g_args);
+    g_free (*out_args);
+    *out_args = NULL;
+    g_free (g_args);
 
     return FALSE;
 }
@@ -367,8 +364,7 @@ _pygi_closure_handle (ffi_cif *cif,
     _pygi_closure_set_out_arguments (closure->info, retval, out_args, result);
 
 end:
-    if (out_args != NULL)
-        g_free (out_args);
+    g_free (out_args);
     g_base_info_unref ( (GIBaseInfo*) return_type);
 
     PyGILState_Release (state);
