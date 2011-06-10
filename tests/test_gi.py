@@ -742,7 +742,6 @@ class TestArray(unittest.TestCase):
     def test_gstrv_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
 
-
 class TestGArray(unittest.TestCase):
 
     def test_garray_int_none_return(self):
@@ -786,6 +785,48 @@ class TestGArray(unittest.TestCase):
     def test_garray_utf8_full_inout(self):
         self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_full_inout(['0', '1', '2']))
 
+class TestGPtrArray(unittest.TestCase):
+
+    def test_gptrarray_int_none_return(self):
+        self.assertEquals([0, 1, 2, 3], GIMarshallingTests.gptrarray_int_none_return())
+
+    def test_gptrarray_utf8_none_return(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_none_return())
+
+    def test_gptrarray_utf8_container_return(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_container_return())
+
+    def test_gptrarray_utf8_full_return(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_full_return())
+
+    def test_gptrarray_int_none_in(self):
+        GIMarshallingTests.gptrarray_int_none_in(Sequence([0, 1, 2, 3]))
+
+        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, Sequence([-1, '0', 1, 2]))
+
+        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, None)
+
+    def test_gptrarray_utf8_none_in(self):
+        GIMarshallingTests.gptrarray_utf8_none_in(Sequence(['0', '1', '2']))
+
+    def test_gptrarray_utf8_none_out(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_none_out())
+
+    def test_gptrarray_utf8_container_out(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_container_out())
+
+    def test_gptrarray_utf8_full_out(self):
+        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_full_out())
+
+    def test_gptrarray_utf8_none_inout(self):
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gptrarray_utf8_none_inout(Sequence(('0', '1', '2'))))
+
+    def test_gptrarray_utf8_container_inout(self):
+        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gptrarray_utf8_container_inout(['0', '1', '2']))
+
+    def test_gptrarray_utf8_full_inout(self):
+        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gptrarray_utf8_full_inout(['0', '1', '2']))
 
 class TestGList(unittest.TestCase):
 
