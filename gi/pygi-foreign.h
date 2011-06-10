@@ -30,14 +30,14 @@
 
 #include "pygi.h"
 
-PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
-                                                     GITypeInfo         *type_info,
-                                                     GITransfer          transfer,
-                                                     GIArgument          *arg);
-PyObject *pygi_struct_foreign_convert_from_g_argument (GITypeInfo *type_info,
-                                                       GIArgument  *arg);
-PyObject *pygi_struct_foreign_release (GITypeInfo *type_info,
-                                       gpointer struct_);
+PyObject *pygi_struct_foreign_convert_to_g_argument   (PyObject        *value,
+                                                       GIInterfaceInfo *iface_info,
+                                                       GITransfer       transfer,
+                                                       GIArgument      *arg);
+PyObject *pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *iface_info,
+                                                       GIArgument      *arg);
+PyObject *pygi_struct_foreign_release                 (GIBaseInfo      *base_info,
+                                                       gpointer         struct_);
 
 void pygi_register_foreign_struct_real (const char* namespace_,
                                         const char* name,

@@ -1084,15 +1084,15 @@ array_success:
                         }
 
                         arg.v_pointer = closure;
+                    } else if (g_struct_info_is_foreign (info)) {
+                        PyObject *result;
+                        result = pygi_struct_foreign_convert_to_g_argument (
+                                     object, info, transfer, &arg);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                         arg.v_pointer = pyg_boxed_get (object, void);
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
                         }
-                    } else if ( (type == G_TYPE_NONE) && (g_struct_info_is_foreign (info))) {
-                        PyObject *result;
-                        result = pygi_struct_foreign_convert_to_g_argument (
-                                     object, type_info, transfer, &arg);
                     } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
                         g_warn_if_fail (!g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
                         arg.v_pointer = pyg_pointer_get (object, void);
@@ -1581,7 +1581,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                     if (g_type_is_a (type, G_TYPE_VALUE)) {
                         object = pyg_value_as_pyobject (arg->v_pointer, FALSE);
                     } else if (g_struct_info_is_foreign (info)) {
-                        object = pygi_struct_foreign_convert_from_g_argument (type_info, arg->v_pointer);
+                        object = pygi_struct_foreign_convert_from_g_argument (info, arg->v_pointer);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                         PyObject *py_type;
 

@@ -27,9 +27,9 @@
 #include "pygi-foreign-gvariant.h"
 
 PyObject *
-g_variant_to_arg (PyObject       *value,
-                  GITypeInfo     *type_info,
-                  GITransfer      transfer,
+g_variant_to_arg (PyObject        *value,
+                  GIInterfaceInfo *type_info,
+                  GITransfer       transfer,
                   GIArgument      *arg)
 {
     g_assert (transfer == GI_TRANSFER_NOTHING);
@@ -41,12 +41,11 @@ g_variant_to_arg (PyObject       *value,
 }
 
 PyObject *
-g_variant_from_arg (GITypeInfo *type_info,
-                    gpointer    data)
+g_variant_from_arg (GIInterfaceInfo *iface_info,
+                    gpointer         data)
 {
     GVariant *variant = (GVariant *) data;
-    GITypeInfo *interface_info = g_type_info_get_interface (type_info);
-    PyObject *type = _pygi_type_import_by_gi_info (interface_info);
+    PyObject *type = _pygi_type_import_by_gi_info (iface_info);
 
     g_variant_ref_sink (variant);
 
@@ -55,7 +54,7 @@ g_variant_from_arg (GITypeInfo *type_info,
 
 PyObject *
 g_variant_release_foreign (GIBaseInfo *base_info,
-                           gpointer struct_)
+                           gpointer    struct_)
 {
     g_variant_unref ( (GVariant *) struct_);
     Py_RETURN_NONE;
