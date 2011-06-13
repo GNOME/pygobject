@@ -1,3 +1,17 @@
+2.28.6 11-Jun-1011
+        - closure: avoid double free crash (Ignacio Casal Quinteiro)
+        - [gi] backport of "GVariant has a GType" fe386a (John (J5) Palmieri)
+        - [gi] fixes to backport commit 6b5a65 - in older glib GVariants are still structs (John (J5) Palmieri)
+        - GVariantType is a boxed struct (Tomeu Vizoso)
+        - Use _gi.Struct to wrap fundamentals (Tomeu Vizoso)
+        - Added __eq__ method for Gdk.Color and Gdk.RGBA (Jason Siefken)
+        - Remove useless import (Ignacio Casal Quinteiro)
+        - Revert "[gi] Removed hack to avoid using GLib.Variant.new_variant." (Ignacio Casal Quinteiro)
+        - closure: Check the out arg is not null. Fixes bug #651812 (Ignacio Casal Quinteiro)
+        - Fix GC-related crash during PyGObject deallocation (Daniel Drake)
+        - Fix symbol names to be locale independent (Martin Pitt)
+        - Updated DOAP file (Sebastian Pölsterl)
+
 2.28.4 18-Apr-2011
         - Version bump to 2.24.4 (Sebastian Pölsterl)
         - [gi] Don't create variant twice (Sebastian Pölsterl)
