@@ -35,6 +35,9 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
     GIArgument arg = _pygi_argument_from_object (object, type_info, transfer);
     GITypeTag type_tag = g_type_info_get_tag (type_info);
 
+    if (out_arg == NULL)
+        return;
+
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
            *((gboolean *) out_arg) = arg.v_boolean;
@@ -250,12 +253,9 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
 
 error:
     Py_CLEAR (*py_args);
-
-    if (*out_args != NULL)
-        g_free (*out_args);
-
-    if (g_args != NULL)
-        g_free (g_args);
+    g_free (*out_args);
+    *out_args = NULL;
+    g_free (g_args);
 
     return FALSE;
 }
@@ -364,8 +364,7 @@ _pygi_closure_handle (ffi_cif *cif,
     _pygi_closure_set_out_arguments (closure->info, retval, out_args, result);
 
 end:
-    if (out_args != NULL)
-        g_free (out_args);
+    g_free (out_args);
     g_base_info_unref ( (GIBaseInfo*) return_type);
 
     PyGILState_Release (state);

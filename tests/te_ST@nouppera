@@ -1,0 +1,50 @@
+LC_IDENTIFICATION
+title      "pygobject test locale"
+END LC_IDENTIFICATION
+
+LC_COLLATE
+copy "POSIX"
+END LC_COLLATE
+
+LC_CTYPE
+# a → a, other characters normally
+toupper (<U0061>,<U0061>); (<U0062>,<U0042>); (<U0063>,<U0043>); \
+        (<U0076>,<U0056>); (<U006C>,<U004C>); (<U0075>,<U0055>); \
+        (<U0065>,<U0045>);
+END LC_CTYPE
+
+LC_MESSAGES
+copy "en_US"
+END LC_MESSAGES
+
+LC_MONETARY
+copy "en_US"
+END LC_MONETARY
+
+LC_NUMERIC
+copy "POSIX"
+END LC_NUMERIC
+
+LC_TIME
+copy "POSIX"
+END LC_TIME
+
+LC_PAPER
+copy "en_US"
+END LC_PAPER
+
+LC_TELEPHONE
+copy "en_US"
+END LC_TELEPHONE
+
+LC_MEASUREMENT
+copy "en_US"
+END LC_MEASUREMENT
+
+LC_NAME
+copy "en_US"
+END LC_NAME
+
+LC_ADDRESS
+copy "en_US"
+END LC_ADDRESS

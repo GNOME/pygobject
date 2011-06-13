@@ -4,6 +4,14 @@ sources, so I can use them for other purposes.'''
 
 import sys, os, string, re
 
+# Used to tell if the "Since: ..." portion of the gtkdoc function description
+# should be omitted.  This is useful for some C++ modules such as gstreamermm
+# that wrap C API which is still unstable and including this information would
+# not be useful.
+# This variable is modified from docextract_to_xml based on the --no-since
+# option being specified.
+no_since = False
+
 __all__ = ['extract']
 
 class GtkDoc:
@@ -343,7 +351,12 @@ def process_final_sections(fp, line, cur_doc):
                 else:
                     # For all others ('Since:' and 'Deprecated:') just append
                     # the line to the description for now.
-                    cur_doc.append_to_description(line)
+                    # But if --no-since is specified, don't append it.
+                    if no_since and pattern == since_pattern:
+                        pass
+                    else:
+                        cur_doc.append_to_description(line)
+
                     # In case more lines need to be appended.
                     append_func = cur_doc.append_to_description
 

@@ -39,6 +39,9 @@ class Color(Gdk.Color):
     def __new__(cls, *args, **kwargs):
         return Gdk.Color.__new__(cls)
 
+    def __eq__(self, other):
+        return self.equal(other)
+
     def __repr__(self):
         return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
 
@@ -56,6 +59,9 @@ if Gdk._version == '3.0':
 
         def __new__(cls, *args, **kwargs):
             return Gdk.RGBA.__new__(cls)
+
+        def __eq__(self, other):
+            return self.equal(other)
 
         def __repr__(self):
             return '<Gdk.Color(red=%f, green=%f, blue=%f, alpha=%f)>' % (self.red, self.green, self.blue, self.alpha)

@@ -1028,8 +1028,14 @@ PYGLIB_DEFINE_TYPE("gobject.GObject", PyGObject_Type, PyGObject);
 static void
 pygobject_dealloc(PyGObject *self)
 {
-    PyObject_ClearWeakRefs((PyObject *)self);
+    /* Untrack must be done first. This is because followup calls such as
+     * ClearWeakRefs could call into Python and cause new allocations to
+     * happen, which could in turn could trigger the garbage collector,
+     * which would then get confused as it is tracking this half-deallocated
+     * object. */
     PyObject_GC_UnTrack((PyObject *)self);
+
+    PyObject_ClearWeakRefs((PyObject *)self);
       /* this forces inst_data->type to be updated, which could prove
        * important if a new wrapper has to be created and it is of a
        * unregistered type */

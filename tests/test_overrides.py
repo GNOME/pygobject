@@ -359,10 +359,14 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(color.red, 100)
         self.assertEquals(color.green, 200)
         self.assertEquals(color.blue, 300)
+        self.assertEquals(color, Gdk.Color(100, 200, 300))
+        self.assertNotEquals(color, Gdk.Color(1, 2, 3))
 
     def test_rgba(self):
         self.assertEquals(Gdk.RGBA, overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
+        self.assertEquals(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
+        self.assertNotEquals(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
         self.assertEquals(rgba.red, 0.1)
         self.assertEquals(rgba.green, 0.2)
         self.assertEquals(rgba.blue, 0.3)
@@ -730,8 +734,8 @@ class TestGtk(unittest.TestCase):
                                                 i % 2,
                                                 bool(i % 2),
                                                 i,
-                                                9223372036854775808,
-                                                -9223372036854775808,
+                                                GObject.G_MAXULONG,
+                                                GObject.G_MININT64,
                                                 0xffffffffffffffff,
                                                 254,
                                                 _bytes('a')
@@ -769,9 +773,9 @@ class TestGtk(unittest.TestCase):
            uint_ = tree_store.get_value(treeiter, 8)
            self.assertEquals(uint_, i)
            ulong_ = tree_store.get_value(treeiter, 9)
-           self.assertEquals(ulong_, 9223372036854775808)
+           self.assertEquals(ulong_, GObject.G_MAXULONG)
            int64_ = tree_store.get_value(treeiter, 10)
-           self.assertEquals(int64_, -9223372036854775808)
+           self.assertEquals(int64_, GObject.G_MININT64)
            uint64_ = tree_store.get_value(treeiter, 11)
            self.assertEquals(uint64_, 0xffffffffffffffff)
            uchar_ = tree_store.get_value(treeiter, 12)
