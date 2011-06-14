@@ -1260,7 +1260,8 @@ _pygi_marshal_in_interface_struct (PyGIInvokeState   *state,
             arg->v_pointer = g_boxed_copy (iface_cache->g_type, arg->v_pointer);
         }
     } else if (g_type_is_a (iface_cache->g_type, G_TYPE_POINTER) ||
-               iface_cache->g_type  == G_TYPE_NONE) {
+                   g_type_is_a (iface_cache->g_type, G_TYPE_VARIANT) ||
+                       iface_cache->g_type  == G_TYPE_NONE) {
         arg->v_pointer = pyg_pointer_get (py_arg, void);
     } else {
         PyErr_Format (PyExc_NotImplementedError,
@@ -2008,6 +2009,10 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
             py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
                                       arg_cache->transfer == GI_TRANSFER_EVERYTHING);
         }
+    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
+         g_variant_ref_sink (arg->v_pointer);
+         py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
+                                      FALSE);
     } else if (type == G_TYPE_NONE && iface_cache->is_foreign) {
         py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info, arg->v_pointer);
     } else if (type == G_TYPE_NONE) {
