@@ -86,7 +86,9 @@ pygi_marshal_cleanup_args_in_marshal_success (PyGIInvokeState   *state,
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
 
-        if (cleanup_func && arg_cache->direction == GI_DIRECTION_IN)
+        if (cleanup_func &&
+                arg_cache->direction == GI_DIRECTION_IN &&
+                    state->args[i]->v_pointer != NULL)
             cleanup_func (state, arg_cache, state->args[i]->v_pointer, TRUE);
     }
 }
@@ -98,7 +100,7 @@ pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
     /* clean up the return if available */
     if (cache->return_cache != NULL) {
         PyGIMarshalCleanupFunc cleanup_func = cache->return_cache->out_cleanup;
-        if (cleanup_func)
+        if (cleanup_func && state->return_arg.v_pointer != NULL)
             cleanup_func (state,
                           cache->return_cache,
                           state->return_arg.v_pointer,
@@ -110,10 +112,12 @@ pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
     while (cache_item) {
         PyGIArgCache *arg_cache = (PyGIArgCache *) cache_item->data;
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->out_cleanup;
-        if (cleanup_func != NULL)
+        gpointer data = state->args[arg_cache->c_arg_index]->v_pointer;
+
+        if (cleanup_func != NULL && data != NULL)
             cleanup_func (state,
                           arg_cache,
-                          state->args[arg_cache->c_arg_index]->v_pointer,
+                          data,
                           TRUE);
 
         cache_item = cache_item->next;
@@ -132,16 +136,20 @@ pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
+        gpointer data = state->args[i]->v_pointer;
 
-        if (cleanup_func && arg_cache->direction == GI_DIRECTION_IN) {
+        if (cleanup_func &&
+                arg_cache->direction == GI_DIRECTION_IN &&
+                    data != NULL) {
             cleanup_func (state,
                           arg_cache,
-                          state->args[i]->v_pointer,
+                          data,
                           i < failed_arg_index);
-        } else if (arg_cache->is_caller_allocates) {
+
+        } else if (arg_cache->is_caller_allocates && data != NULL) {
             _cleanup_caller_allocates (state,
                                        arg_cache,
-                                       state->args[i]->v_pointer);
+                                       data);
         }
     }
 }
