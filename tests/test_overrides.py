@@ -248,8 +248,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(res, (-1, 'hello'))
 
         # array
-        vb = GLib.VariantBuilder()
-        vb.init(gi._gi.variant_type_from_string('ai'))
+        vb = GLib.VariantBuilder.new(gi._gi.variant_type_from_string('ai'))
         vb.add_value(GLib.Variant.new_int32(-1))
         vb.add_value(GLib.Variant.new_int32(3))
         res = vb.end().unpack()
@@ -261,8 +260,7 @@ class TestGLib(unittest.TestCase):
 
     def test_gvariant_iteration(self):
         # array index access
-        vb = GLib.VariantBuilder()
-        vb.init(gi._gi.variant_type_from_string('ai'))
+        vb = GLib.VariantBuilder.new(gi._gi.variant_type_from_string('ai'))
         vb.add_value(GLib.Variant.new_int32(-1))
         vb.add_value(GLib.Variant.new_int32(3))
         v = vb.end()

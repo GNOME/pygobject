@@ -84,8 +84,7 @@ class _VariantCreator(object):
         '''Handle the case where the outermost type of format is a tuple.'''
 
         format = format[1:] # eat the '('
-        builder = GLib.VariantBuilder()
-        builder.init(variant_type_from_string('r'))
+        builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
         if args is not None:
             if not args or type(args[0]) != type(()):
                 raise (TypeError, 'expected tuple argument')
@@ -102,7 +101,7 @@ class _VariantCreator(object):
     def _create_dict(self, format, args):
         '''Handle the case where the outermost type of format is a dict.'''
 
-        builder = GLib.VariantBuilder()
+        builder = None
         if args is None or not args[0]:
             # empty value: we need to call _create() to parse the subtype,
             # and specify the element type precisely
@@ -112,9 +111,9 @@ class _VariantCreator(object):
                 raise ValueError('dictionary type string not closed with }')
             rest_format = rest_format[1:] # eat the }
             element_type = format[:len(format) - len(rest_format)]
-            builder.init(variant_type_from_string(element_type))
+            builder = GLib.VariantBuilder.new(variant_type_from_string(element_type))
         else:
-            builder.init(variant_type_from_string('a{?*}'))
+            builder = GLib.VariantBuilder.new(variant_type_from_string('a{?*}'))
             for k, v in args[0].items():
                 (key_v, rest_format, _) = self._create(format[2:], [k])
                 (val_v, rest_format, _) = self._create(rest_format, [v])
@@ -123,8 +122,7 @@ class _VariantCreator(object):
                     raise ValueError('dictionary type string not closed with }')
                 rest_format = rest_format[1:] # eat the }
 
-                entry = GLib.VariantBuilder()
-                entry.init(variant_type_from_string('{?*}'))
+                entry = GLib.VariantBuilder.new(variant_type_from_string('{?*}'))
                 entry.add_value(key_v)
                 entry.add_value(val_v)
                 builder.add_value(entry.end())
@@ -136,15 +134,15 @@ class _VariantCreator(object):
     def _create_array(self, format, args):
         '''Handle the case where the outermost type of format is an array.'''
 
-        builder = GLib.VariantBuilder()
+        builder = None
         if args is None or not args[0]:
             # empty value: we need to call _create() to parse the subtype,
             # and specify the element type precisely
             rest_format = self._create(format[1:], None)[1]
             element_type = format[:len(format) - len(rest_format)]
-            builder.init(variant_type_from_string(element_type))
+            builder = GLib.VariantBuilder.new(variant_type_from_string(element_type))
         else:
-            builder.init(variant_type_from_string('a*'))
+            builder = GLib.VariantBuilder.new(variant_type_from_string('a*'))
             for i in range(len(args[0])):
                 (v, rest_format, _) = self._create(format[1:], args[0][i:])
                 builder.add_value(v)
