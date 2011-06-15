@@ -133,7 +133,7 @@ pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
 
     state->failed = TRUE;
 
-    for (i = 0; i < cache->n_args; i++) {
+    for (i = 0; i < cache->n_args  && i <= failed_arg_index; i++) {
         PyGIArgCache *arg_cache = cache->args_cache[i];
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
         gpointer data = state->args[i]->v_pointer;
