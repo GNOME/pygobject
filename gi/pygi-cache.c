@@ -149,12 +149,7 @@ _interface_cache_new_from_interface_info (GIInterfaceInfo *iface_info)
     ic = g_slice_new0 (PyGIInterfaceCache);
     ( (PyGIArgCache *)ic)->destroy_notify = (GDestroyNotify)_interface_cache_free_func;
     ic->g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *)iface_info);
-    if (ic->g_type != G_TYPE_NONE) {
-        ic->py_type = _pygi_type_get_from_g_type (ic->g_type);
-    } else {
-        /* FIXME: avoid passing GI infos to noncache API */
-        ic->py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
-    }
+    ic->py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) iface_info);
 
     if (ic->py_type == NULL)
         return NULL;
