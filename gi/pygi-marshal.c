@@ -1341,7 +1341,9 @@ gboolean _pygi_marshal_in_interface_instance (PyGIInvokeState   *state,
             GType type = iface_cache->g_type;
             if (g_type_is_a (type, G_TYPE_BOXED)) {
                 arg->v_pointer = pyg_boxed_get (py_arg, void);
-            } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
+            } else if (g_type_is_a (type, G_TYPE_POINTER) ||
+                           g_type_is_a (type, G_TYPE_VARIANT) ||
+                               type == G_TYPE_NONE) {
                 arg->v_pointer = pyg_pointer_get (py_arg, void);
             } else {
                  PyErr_Format (PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name (type));
