@@ -1639,7 +1639,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
             py_obj = PyList_New (0);
         } else {
             int i;
-            gboolean is_struct;
+
             gsize item_size;
             PyGIMarshalOutFunc item_out_marshaller;
             PyGIArgCache *item_arg_cache;
@@ -1651,33 +1651,24 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
 
             item_arg_cache = seq_cache->item_cache;
             item_out_marshaller = item_arg_cache->out_marshaller;
-            is_struct = FALSE;
-            if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
-                PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)item_arg_cache;
-                switch (g_base_info_get_type (iface_cache->interface_info)) {
-                    case GI_INFO_TYPE_STRUCT:
-                    case GI_INFO_TYPE_BOXED:
-                        is_struct = TRUE;
-                    default:
-                        break;
-                }
-            }
 
             item_size = g_array_get_element_size (array_);
+
             for (i = 0; i < array_->len; i++) {
                 GIArgument item_arg;
                 PyObject *py_item;
 
-                if (is_struct) {
-                    item_arg.v_pointer = &_g_array_index (array_, GIArgument, i);
-                } else {
-                    memcpy (&item_arg, &_g_array_index (array_, GIArgument, i), item_size);
-                }
+                if (seq_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY)
+                    item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
+                else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE)
+                    item_arg.v_pointer = array_->data + i * item_size;
+                else
+                    memcpy (&item_arg, array_->data + i * item_size, item_size);
 
                 py_item = item_out_marshaller ( state,
                                                 callable_cache,
                                                 item_arg_cache,
-                                               &item_arg);
+                                                &item_arg);
 
                 if (py_item == NULL) {
                     Py_CLEAR (py_obj);
