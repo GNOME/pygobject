@@ -661,6 +661,7 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
     PyGIMarshalInFunc in_marshaller;
     int i;
     Py_ssize_t length;
+    gboolean is_ptr_array;
     GArray *array_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
@@ -688,10 +689,15 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
-                                FALSE,
-                                sequence_cache->item_size,
-                                length);
+    is_ptr_array = (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
+    if (is_ptr_array) {
+        array_ = (GArray *)g_ptr_array_new ();
+    } else {
+        array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
+                                    FALSE,
+                                    sequence_cache->item_size,
+                                    length);
+    }
 
     if (array_ == NULL) {
         PyErr_NoMemory ();
@@ -719,7 +725,14 @@ _pygi_marshal_in_array (PyGIInvokeState   *state,
                             &item))
             goto err;
 
-        g_array_insert_val (array_, i, item);
+        /* FIXME: it is much more efficent to have seperate marshaller
+         *        for ptr arrays than doing the evaluation
+         *        and casting each loop iteration
+         */
+        if (is_ptr_array)
+            g_ptr_array_add((GPtrArray *)array_, item.v_pointer);
+        else
+            g_array_insert_val (array_, i, item);
         continue;
 err:
         if (sequence_cache->item_cache->in_cleanup != NULL) {
@@ -735,7 +748,10 @@ err:
             }
         }
 
-        g_array_free (array_, TRUE);
+        if (is_ptr_array)
+            g_ptr_array_free (array_, TRUE);
+        else
+            g_array_free (array_, TRUE);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
     }
