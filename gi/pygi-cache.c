@@ -1289,7 +1289,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         GIDirection direction;
         GITransfer transfer;
         GITypeTag type_tag;
-        gboolean is_caller_allocates;
+        gboolean is_caller_allocates = FALSE;
         gint py_arg_index = -1;
 
         arg_info =
@@ -1299,7 +1299,9 @@ _args_cache_generate (GICallableInfo *callable_info,
         transfer = g_arg_info_get_ownership_transfer (arg_info);
         type_info = g_arg_info_get_type (arg_info);
         type_tag = g_type_info_get_tag (type_info);
-        is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+
+        if (type_tag == GI_TYPE_TAG_INTERFACE)
+            is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
 
         /* must be an aux arg filled in by its owner
          * fill in it's c_arg_index, add to the in count
