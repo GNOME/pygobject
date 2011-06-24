@@ -265,6 +265,8 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                     if (iface_cache->g_type == G_TYPE_BOXED) {
                         state->args[i]->v_pointer =
                             _pygi_boxed_alloc (iface_cache->interface_info, NULL);
+                    } else if (iface_cache->g_type == G_TYPE_VALUE) {
+                        state->args[i]->v_pointer = g_slice_new0 (GValue);
                     } else if (iface_cache->is_foreign) {
                         PyObject *foreign_struct =
                             pygi_struct_foreign_convert_from_g_argument (

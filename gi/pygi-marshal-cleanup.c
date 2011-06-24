@@ -32,6 +32,8 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
         gsize size;
         size = g_struct_info_get_size (iface_cache->interface_info);
         g_slice_free1 (size, data);
+    } else if (iface_cache->g_type == G_TYPE_VALUE) {
+        g_slice_free (GValue, data);
     } else if (iface_cache->is_foreign) {
         pygi_struct_foreign_release ((GIBaseInfo *)iface_cache->interface_info,
                                      data);
