@@ -55,6 +55,9 @@ class Widget(Gtk.Widget):
         if success:
             return (dest_x, dest_y,)
 
+    def render_icon(self, stock_id, size, detail=None):
+        return super(Widget, self).render_icon(stock_id, size, detail)
+
 Widget = override(Widget)
 __all__.append('Widget')
 
