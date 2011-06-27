@@ -155,7 +155,10 @@ class ActionGroup(Gtk.ActionGroup):
         def _process_action(name, stock_id=None, label=None, accelerator=None, tooltip=None, callback=None):
             action = Action(name, label, tooltip, stock_id)
             if callback is not None:
-                action.connect('activate', callback, user_data)
+                if user_data is None:
+                    action.connect('activate', callback)
+                else:
+                    action.connect('activate', callback, user_data)
 
             self.add_action_with_accel(action, accelerator)
 
@@ -201,7 +204,10 @@ class ActionGroup(Gtk.ActionGroup):
             action = Gtk.ToggleAction(name, label, tooltip, stock_id)
             action.set_active(is_active)
             if callback is not None:
-                action.connect('activate', callback, user_data)
+                if user_data is None:
+                    action.connect('activate', callback)
+                else:
+                    action.connect('activate', callback, user_data)
 
             self.add_action_with_accel(action, accelerator)
 
@@ -269,7 +275,10 @@ class ActionGroup(Gtk.ActionGroup):
                 first_action = action
 
         if first_action is not None and on_change is not None:
-            first_action.connect('changed', on_change, user_data)
+            if user_data is None:
+                action.connect('changed', on_change)
+            else:
+                action.connect('changed', on_change, user_data)
 
 ActionGroup = override(ActionGroup)
 __all__.append('ActionGroup')
