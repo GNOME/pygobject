@@ -188,14 +188,16 @@ class property(object):
             return TYPE_STRING
         elif type_ == object:
             return TYPE_PYOBJECT
-        elif isinstance(type_, type) and issubclass(type_, _gobject.GObject):
+        elif (isinstance(type_, type) and
+              issubclass(type_, (_gobject.GObject,
+                                 _gobject.GEnum))):
             return type_.__gtype__
         elif type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
-                      TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
-                      TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM,
-                      TYPE_FLAGS, TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
-                      TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
-                      TYPE_PYOBJECT]:
+                       TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
+                       TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
+                       TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
+                       TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
+                       TYPE_PYOBJECT]:
             return type_
         else:
             raise TypeError("Unsupported type: %r" % (type_,))
@@ -224,6 +226,12 @@ class property(object):
         elif ptype == TYPE_PYOBJECT:
             if default is not None:
                 raise TypeError("object types does not have default values")
+        elif gobject.type_is_a(ptype, TYPE_ENUM):
+            if default is None:
+                raise TypeError("enum properties needs a default value")
+            elif not gobject.type_is_a(default, ptype):
+                raise TypeError("enum value %s must be an instance of %r" %
+                                (default, ptype))
 
     def _get_minimum(self):
         ptype = self.type
@@ -291,7 +299,8 @@ class property(object):
         if ptype in [TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG,
                      TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE]:
             args = self._get_minimum(), self._get_maximum(), self.default
-        elif ptype == TYPE_STRING or ptype == TYPE_BOOLEAN:
+        elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
+              ptype.is_a(TYPE_ENUM)):
             args = (self.default,)
         elif ptype == TYPE_PYOBJECT:
             args = ()
