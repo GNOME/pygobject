@@ -308,6 +308,41 @@ class ComboBox(Gtk.ComboBox, Container):
 ComboBox = override(ComboBox)
 __all__.append('ComboBox')
 
+
+class Box(Gtk.Box):
+    def __init__(self, homogeneous=False, spacing=0):
+        super(Box, self).__init__()
+        self.set_homogeneous(homogeneous)
+        self.set_spacing(spacing)
+
+Box = override(Box)
+__all__.append('Box')
+
+
+class Window(Gtk.Window):
+    def __init__(self, type=Gtk.WindowType.TOPLEVEL):
+        super(Window, self).__init__(type=type)
+
+Window = override(Window)
+__all__.append('Window')
+
+
+class SizeGroup(Gtk.SizeGroup):
+    def __init__(self, mode=Gtk.SizeGroupMode.VERTICAL):
+        super(SizeGroup, self).__init__(mode=mode)
+
+SizeGroup = override(SizeGroup)
+__all__.append('SizeGroup')
+
+
+class MenuItem(Gtk.MenuItem):
+    def __init__(self, label=None):
+        super(MenuItem, self).__init__(label=label)
+
+MenuItem = override(MenuItem)
+__all__.append('MenuItem')
+
+
 class Builder(Gtk.Builder):
 
     def connect_signals(self, obj_or_map):
@@ -1108,6 +1143,11 @@ TreeStore = override(TreeStore)
 __all__.append('TreeStore')
 
 class TreeView(Gtk.TreeView, Container):
+
+    def __init__(self, model=None):
+        Gtk.TreeView.__init__(self)
+        if model:
+            self.set_model(model)
 
     def get_path_at_pos(self, x, y):
         success, path, column, cell_x, cell_y = super(TreeView, self).get_path_at_pos(x, y)
