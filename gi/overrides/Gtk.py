@@ -430,6 +430,9 @@ class Dialog(Gtk.Dialog, Container):
         if buttons is not None:
             self.add_buttons(*buttons)
 
+    action_area = property(lambda dialog: dialog.get_action_area())
+    vbox = property(lambda dialog: dialog.get_content_area())
+
     def add_buttons(self, *args):
         """
         The add_buttons() method adds several buttons to the Gtk.Dialog using
