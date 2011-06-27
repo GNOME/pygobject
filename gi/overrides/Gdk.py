@@ -284,6 +284,14 @@ class Cursor(Gdk.Cursor):
 Cursor = override(Cursor)
 __all__.append('Cursor')
 
+_Gdk_color_parse = Gdk.color_parse
+@override(Gdk.color_parse)
+def color_parse(color):
+    success, color = _Gdk_color_parse(color)
+    if not success:
+        return None
+    return color
+
 import sys
 
 initialized, argv = Gdk.init_check(sys.argv)
