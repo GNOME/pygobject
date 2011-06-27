@@ -897,6 +897,9 @@ class TreeModel(Gtk.TreeModel):
 
         return tuple(values)
 
+    def filter_new(self, root=None):
+        return super(TreeModel, self).filter_new(root)
+
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
