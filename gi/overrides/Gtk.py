@@ -408,6 +408,11 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
 
         if message_format != None:
             kwds['text'] = message_format
+
+        # type keyword is used for backwards compat with PyGTK
+        if 'message_type' in kwds:
+            type = kwds.pop('message_type')
+
         Gtk.MessageDialog.__init__(self,
                                    _buttons_property=buttons,
                                    message_type=type,
