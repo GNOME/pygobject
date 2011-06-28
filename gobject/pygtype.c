@@ -743,11 +743,12 @@ int
 pyg_value_from_pyobject(GValue *value, PyObject *obj)
 {
     PyObject *tmp;
+    GType value_type = G_VALUE_TYPE(value);
 
-    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
+    switch (G_TYPE_FUNDAMENTAL(value_type)) {
     case G_TYPE_INTERFACE:
 	/* we only handle interface types that have a GObject prereq */
-	if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT)) {
+	if (g_type_is_a(value_type, G_TYPE_OBJECT)) {
 	    if (obj == Py_None)
 		g_value_set_object(value, NULL);
 	    else {
@@ -755,7 +756,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 		    return -1;
 		}
 		if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
-						G_VALUE_TYPE(value))) {
+						value_type)) {
 		    return -1;
 		}
 		g_value_set_object(value, pygobject_get(obj));
