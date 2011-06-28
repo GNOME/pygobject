@@ -707,6 +707,7 @@ class TestGtk(unittest.TestCase):
         tree_store = Gtk.TreeStore(int,
                                    'gchararray',
                                    TestGtk.TestClass,
+                                   GObject.TYPE_PYOBJECT,
                                    object,
                                    object,
                                    object,
@@ -725,6 +726,7 @@ class TestGtk(unittest.TestCase):
             testobj = TestGtk.TestClass(self, i, label)
             parent = tree_store.append(parent, (i,
                                                 label,
+                                                testobj,
                                                 testobj,
                                                 test_pyobj,
                                                 test_pydict,
@@ -754,31 +756,33 @@ class TestGtk(unittest.TestCase):
            s = tree_store.get_value(treeiter, 1)
            obj = tree_store.get_value(treeiter, 2)
            obj.check(i, s)
+           obj2 = tree_store.get_value(treeiter, 3)
+           self.assertEquals(obj, obj2);
 
-           pyobj = tree_store.get_value(treeiter, 3)
+           pyobj = tree_store.get_value(treeiter, 4)
            self.assertEquals(pyobj, test_pyobj)
-           pydict = tree_store.get_value(treeiter, 4)
+           pydict = tree_store.get_value(treeiter, 5)
            self.assertEquals(pydict, test_pydict)
-           pylist = tree_store.get_value(treeiter, 5)
+           pylist = tree_store.get_value(treeiter, 6)
            self.assertEquals(pylist, test_pylist)
 
-           bool_1 = tree_store.get_value(treeiter, 6)
-           bool_2 = tree_store.get_value(treeiter, 7)
+           bool_1 = tree_store.get_value(treeiter, 7)
+           bool_2 = tree_store.get_value(treeiter, 8)
            self.assertEquals(bool_1, bool_2)
            self.assertTrue(isinstance(bool_1, bool))
            self.assertTrue(isinstance(bool_2, bool))
 
-           uint_ = tree_store.get_value(treeiter, 8)
+           uint_ = tree_store.get_value(treeiter, 9)
            self.assertEquals(uint_, i)
-           ulong_ = tree_store.get_value(treeiter, 9)
+           ulong_ = tree_store.get_value(treeiter, 10)
            self.assertEquals(ulong_, GObject.G_MAXULONG)
-           int64_ = tree_store.get_value(treeiter, 10)
+           int64_ = tree_store.get_value(treeiter, 11)
            self.assertEquals(int64_, GObject.G_MININT64)
-           uint64_ = tree_store.get_value(treeiter, 11)
+           uint64_ = tree_store.get_value(treeiter, 12)
            self.assertEquals(uint64_, 0xffffffffffffffff)
-           uchar_ = tree_store.get_value(treeiter, 12)
+           uchar_ = tree_store.get_value(treeiter, 13)
            self.assertEquals(ord(uchar_), 254)
-           char_ = tree_store.get_value(treeiter, 13)
+           char_ = tree_store.get_value(treeiter, 14)
            self.assertEquals(char_, 'a')
 
            parent = treeiter
