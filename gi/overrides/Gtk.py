@@ -35,6 +35,18 @@ else:
 Gtk = modules['Gtk']._introspection_module
 __all__ = []
 
+if Gtk._version == '2.0':
+    import warnings
+    warn_msg = "You have imported the Gtk 2.0 module.  Because Gtk 2.0 \
+was not designed for use with introspection some of the \
+interfaces and API will fail.  As such this is not supported \
+by the pygobject development team and we encourage you to \
+port your app to Gtk 3 or greater. PyGTK is the recomended \
+python module to use with Gtk 2.0"
+
+    warnings.warn(warn_msg, RuntimeWarning)
+
+
 class Widget(Gtk.Widget):
 
     def translate_coordinates(self, dest_widget, src_x, src_y):
