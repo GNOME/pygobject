@@ -29,6 +29,7 @@
 #include <datetime.h>
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
+#include <pyglib.h>
 
 static void
 _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
@@ -1765,8 +1766,19 @@ _pygi_argument_to_object (GIArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            /* Errors should be handled in the invoke wrapper. */
-            g_assert_not_reached();
+             if (arg->v_pointer != NULL && pyglib_error_check (arg->v_pointer)) {
+                 PyObject *err_type;
+                 PyObject *err_value;
+                 PyObject *err_trace;
+                 PyErr_Fetch (&err_type, &err_value, &err_trace);
+                 Py_XDECREF (err_type);
+                 Py_XDECREF (err_trace);
+                 object = err_value;
+             } else {
+                 object = Py_None;
+                 Py_INCREF (object);
+                 break;
+             }
     }
 
     return object;
@@ -1857,6 +1869,8 @@ _pygi_argument_from_g_value(const GValue *value,
             break;
         }
         case GI_TYPE_TAG_ERROR:
+            arg.v_pointer = g_value_get_boxed (value);
+            break;
         case GI_TYPE_TAG_VOID:
             g_critical("Converting of type '%s' is not implemented", g_type_tag_to_string(type_tag));
             g_assert_not_reached();
