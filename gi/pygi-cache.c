@@ -1379,13 +1379,13 @@ _pygi_callable_cache_new (GICallableInfo *callable_info)
     PyGICallableCache *cache = _callable_cache_new_from_callable_info (callable_info);
     GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)callable_info);
 
+    if (cache == NULL)
+        return NULL;
+
     if (type == GI_INFO_TYPE_VFUNC)
         cache->is_vfunc = TRUE;
     else if (type == GI_INFO_TYPE_CALLBACK)
         cache->is_callback = TRUE;
-
-    if (cache == NULL)
-        return NULL;
 
     if (!_args_cache_generate (callable_info, cache))
         goto err;
