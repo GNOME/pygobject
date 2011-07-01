@@ -114,7 +114,7 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
-static PyMethodDef _gi_cairo_functions[] = {};
+static PyMethodDef _gi_cairo_functions[] = {0,};
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
     Pycairo_IMPORT;
