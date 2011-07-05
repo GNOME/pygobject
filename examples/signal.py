@@ -1,10 +1,9 @@
-import pygtk; pygtk.require("2.0")
-import gobject
+from gi.repository import GObject
 
-class C(gobject.GObject):
+class C(GObject.GObject):
     __gsignals__ = {
-        'my_signal': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
-                      (gobject.TYPE_INT,))
+        'my_signal': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE,
+                      (GObject.TYPE_INT,))
     }
     def __init__(self):
         self.__gobject_init__() # default constructor using our new GType
