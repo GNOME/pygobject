@@ -68,7 +68,6 @@ struct _PyGIArgCache
     GITransfer transfer;
     GITypeTag type_tag;
     GITypeInfo *type_info;
-    GIArgument *default_value;
 
     PyGIMarshalInFunc in_marshaller;
     PyGIMarshalOutFunc out_marshaller;
