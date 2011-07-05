@@ -896,6 +896,14 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
         return treeiter
 
+    def prepend(self, row=None):
+        treeiter = Gtk.ListStore.prepend(self)
+
+        if row is not None:
+            self.set_row(treeiter, row)
+
+        return treeiter
+
     def set_value(self, treeiter, column, value):
         value = self._convert_value(treeiter, column, value)
         Gtk.ListStore.set_value(self, treeiter, column, value)
