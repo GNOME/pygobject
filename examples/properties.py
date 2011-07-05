@@ -1,18 +1,18 @@
-import gobject
+from gi.repository import GObject
 
-class MyObject(gobject.GObject):
+class MyObject(GObject.GObject):
 
-    foo = gobject.property(type=str, default='bar')
-    boolprop = gobject.property(type=bool, default=False)
+    foo = GObject.property(type=str, default='bar')
+    boolprop = GObject.property(type=bool, default=False)
 
     def __init__(self):
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
 
-    @gobject.property
+    @GObject.property
     def readonly(self):
         return 'readonly'
 
-gobject.type_register(MyObject)
+GObject.type_register(MyObject)
 
 print "MyObject properties: ", list(MyObject.props)
 
