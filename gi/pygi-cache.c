@@ -32,8 +32,8 @@ PyGIArgCache * _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                               GITypeTag type_tag,
                                               GITransfer transfer,
                                               GIDirection direction,
-                                              gint c_arg_index,
-                                              gint py_arg_index);
+                                              gssize c_arg_index,
+                                              gssize py_arg_index);
 
 /* cleanup */
 void
@@ -96,7 +96,7 @@ _callback_cache_free_func (PyGICallbackCache *cache)
 void
 _pygi_callable_cache_free (PyGICallableCache *cache)
 {
-    int i;
+    gssize i;
 
     if (cache == NULL)
         return;
@@ -162,7 +162,7 @@ static inline PyGISequenceCache *
 _sequence_cache_new_from_type_info (GITypeInfo *type_info,
                                     GIDirection direction,
                                     GITransfer transfer,
-                                    gint aux_offset)
+                                    gssize aux_offset)
 {
     PyGISequenceCache *sc;
     GITypeInfo *item_type_info;
@@ -266,7 +266,7 @@ _hash_cache_new_from_type_info (GITypeInfo *type_info,
 static inline PyGICallbackCache *
 _callback_cache_new_from_arg_info (GIArgInfo *arg_info,
                                    GIInterfaceInfo *iface_info,
-                                   gint aux_offset)
+                                   gssize aux_offset)
 {
    PyGICallbackCache *cc;
 
@@ -744,8 +744,8 @@ _arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
                                     GIInfoType info_type,
                                     GITransfer transfer,
                                     GIDirection direction,
-                                    gint c_arg_index,
-                                    gint py_arg_index)
+                                    gssize c_arg_index,
+                                    gssize py_arg_index)
 {
     PyGIInterfaceCache *iface_cache = NULL;
     PyGIArgCache *arg_cache = NULL;
@@ -869,8 +869,8 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                GITypeTag type_tag,
                                GITransfer transfer,
                                GIDirection direction,
-                               gint c_arg_index,
-                               gint py_arg_index)
+                               gssize c_arg_index,
+                               gssize py_arg_index)
 {
     PyGIArgCache *arg_cache = NULL;
 
@@ -1224,8 +1224,8 @@ static inline gboolean
 _args_cache_generate (GICallableInfo *callable_info,
                       PyGICallableCache *callable_cache)
 {
-    int arg_index = 0;
-    int i;
+    gssize arg_index = 0;
+    gssize i;
     GITypeInfo *return_info;
     GITypeTag return_type_tag;
     GITransfer return_transfer;
@@ -1290,7 +1290,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         GITransfer transfer;
         GITypeTag type_tag;
         gboolean is_caller_allocates = FALSE;
-        gint py_arg_index = -1;
+        gssize py_arg_index = -1;
 
         arg_info =
             g_callable_info_get_arg (callable_info, i);

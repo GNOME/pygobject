@@ -85,7 +85,7 @@ typedef struct _PyGISequenceCache
 {
     PyGIArgCache arg_cache;
     gssize fixed_size;
-    gint len_arg_index;
+    gssize len_arg_index;
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;
@@ -112,8 +112,8 @@ typedef struct _PyGIHashCache
 typedef struct _PyGICallbackCache
 {
     PyGIArgCache arg_cache;
-    gint user_data_index;
-    gint destroy_notify_index;
+    gssize user_data_index;
+    gssize destroy_notify_index;
     GIScopeType scope;
     GIInterfaceInfo *interface_info;
 } PyGICallbackCache;

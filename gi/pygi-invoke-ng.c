@@ -181,7 +181,7 @@ _invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
 static inline gboolean
 _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
-    int i, in_count, out_count;
+    gssize i, in_count, out_count;
     in_count = 0;
     out_count = 0;
 
@@ -329,7 +329,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
-    int total_out_args = cache->n_out_args;
+    gssize total_out_args = cache->n_out_args;
     gboolean has_return = FALSE;
 
     if (cache->return_cache) {
@@ -379,7 +379,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         }
 
     } else {
-        int py_arg_index = 0;
+        gssize py_arg_index = 0;
         GSList *cache_item = cache->out_args;
         /* return a tuple */
         py_out = PyTuple_New (total_out_args);
