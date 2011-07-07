@@ -79,9 +79,7 @@ def fill_shapes(ctx, x, y):
 def stroke_shapes(ctx, x, y):
     draw_shapes(ctx, x, y, False)
 
-def expose (da, event):
-    ctx = Gdk.cairo_create(da.window)
-
+def draw(da, ctx):
     ctx.set_source_rgb(0, 0, 0)
 
     ctx.set_line_width(SIZE / 4)
@@ -114,7 +112,7 @@ def main():
 
     drawingarea = Gtk.DrawingArea()
     win.add(drawingarea)
-    drawingarea.connect('expose_event', expose)
+    drawingarea.connect('draw', draw)
 
     win.show_all()
     Gtk.main()
