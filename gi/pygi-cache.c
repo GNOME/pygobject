@@ -114,32 +114,6 @@ _pygi_callable_cache_free (PyGICallableCache *cache)
 }
 
 /* cache generation */
-static inline PyGICallableCache *
-_callable_cache_new_from_callable_info (GICallableInfo *callable_info)
-{
-    PyGICallableCache *cache;
-
-    cache = g_slice_new0 (PyGICallableCache);
-
-    cache->name = g_base_info_get_name ((GIBaseInfo *)callable_info);
-
-    if (g_base_info_get_type ( (GIBaseInfo *)callable_info) == GI_INFO_TYPE_FUNCTION) {
-        GIFunctionInfoFlags flags;
-
-        flags = g_function_info_get_flags ( (GIFunctionInfo *)callable_info);
-        cache->is_method = flags & GI_FUNCTION_IS_METHOD;
-        cache->is_constructor = flags & GI_FUNCTION_IS_CONSTRUCTOR;
-    } else {
-        cache->is_method = TRUE;
-        cache->is_constructor = FALSE;
-    }
-
-    cache->n_args = g_callable_info_get_n_args (callable_info) + (cache->is_method ? 1: 0);
-    if (cache->n_args > 0)
-        cache->args_cache = g_slice_alloc0 (cache->n_args * sizeof (PyGIArgCache *));
-
-    return cache;
-}
 
 static inline PyGIInterfaceCache *
 _interface_cache_new_from_interface_info (GIInterfaceInfo *iface_info)
@@ -749,6 +723,12 @@ _arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
 {
     PyGIInterfaceCache *iface_cache = NULL;
     PyGIArgCache *arg_cache = NULL;
+    gssize child_offset = 0;
+
+    if (callable_cache != NULL)
+        child_offset =
+            (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
+                 callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
 
     GI_IS_INTERFACE_INFO (iface_info);
 
@@ -815,7 +795,7 @@ _arg_cache_new_from_interface_info (GIInterfaceInfo *iface_info,
                 callback_cache =
                     _callback_cache_new_from_arg_info (arg_info,
                                                        iface_info,
-                                                       callable_cache->is_method ? 1: 0);
+                                                       child_offset);
 
                 arg_cache = (PyGIArgCache *)callback_cache;
                 if (arg_cache == NULL)
@@ -873,6 +853,12 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                                gssize py_arg_index)
 {
     PyGIArgCache *arg_cache = NULL;
+    gssize child_offset = 0;
+    
+    if (callable_cache != NULL)
+        child_offset =
+            (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
+                callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
 
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
@@ -1072,7 +1058,7 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                    _sequence_cache_new_from_type_info (type_info,
                                                        direction,
                                                        transfer,
-                                                       (callable_cache->is_method ? 1: 0));
+                                                       child_offset);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -1124,7 +1110,7 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                    _sequence_cache_new_from_type_info (type_info,
                                                        direction,
                                                        transfer,
-                                                       callable_cache->is_method ? 1: 0);
+                                                       child_offset);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -1145,7 +1131,7 @@ _arg_cache_new_from_type_info (GITypeInfo *type_info,
                    _sequence_cache_new_from_type_info (type_info,
                                                        direction,
                                                        transfer,
-                                                       callable_cache->is_method ? 1: 0);
+                                                       child_offset);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -1250,7 +1236,8 @@ _args_cache_generate (GICallableInfo *callable_info,
     g_base_info_unref (return_info);
 
     /* first arg is the instance */
-    if (callable_cache->is_method) {
+    if (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
+            callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
         GIInterfaceInfo *interface_info;
         PyGIArgCache *instance_cache;
         GIInfoType info_type;
@@ -1376,16 +1363,42 @@ arg_err:
 PyGICallableCache *
 _pygi_callable_cache_new (GICallableInfo *callable_info)
 {
-    PyGICallableCache *cache = _callable_cache_new_from_callable_info (callable_info);
+    PyGICallableCache *cache;
     GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)callable_info);
+
+    cache = g_slice_new0 (PyGICallableCache);
 
     if (cache == NULL)
         return NULL;
 
-    if (type == GI_INFO_TYPE_VFUNC)
-        cache->is_vfunc = TRUE;
-    else if (type == GI_INFO_TYPE_CALLBACK)
-        cache->is_callback = TRUE;
+    cache->name = g_base_info_get_name ((GIBaseInfo *)callable_info);
+
+    if (type == GI_INFO_TYPE_FUNCTION) {
+        GIFunctionInfoFlags flags;
+
+        flags = g_function_info_get_flags ( (GIFunctionInfo *)callable_info);
+
+        if (flags & GI_FUNCTION_IS_CONSTRUCTOR)
+            cache->function_type = PYGI_FUNCTION_TYPE_CONSTRUCTOR;
+        else if (flags & GI_FUNCTION_IS_METHOD)
+            cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
+    } else if (type == GI_INFO_TYPE_VFUNC) {
+        cache->function_type = PYGI_FUNCTION_TYPE_VFUNC;
+    } else if (type == GI_INFO_TYPE_CALLBACK) {
+        cache->function_type = PYGI_FUNCTION_TYPE_CALLBACK;
+    } else {
+        cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
+    }
+
+    cache->n_args = g_callable_info_get_n_args (callable_info);
+
+    /* if we are a method or vfunc make sure the instance parameter is counted */
+    if (cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
+            cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
+        cache->n_args++;
+
+    if (cache->n_args > 0)
+        cache->args_cache = g_slice_alloc0 (cache->n_args * sizeof (PyGIArgCache *));
 
     if (!_args_cache_generate (callable_info, cache))
         goto err;

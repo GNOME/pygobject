@@ -67,6 +67,19 @@ typedef enum {
     PYGI_META_ARG_TYPE_CHILD_WITH_PYARG
 } PyGIMetaArgType;
 
+/*
+ * GI determines function types via a combination of flags and info classes.
+ * Since for branching purposes they are mutually exclusive, the 
+ * PyGIFunctionType enum consolidates them into one enumeration for ease of 
+ * branching and debugging.
+ */
+ typedef enum {
+   PYGI_FUNCTION_TYPE_FUNCTION,
+   PYGI_FUNCTION_TYPE_METHOD,
+   PYGI_FUNCTION_TYPE_CONSTRUCTOR,
+   PYGI_FUNCTION_TYPE_VFUNC,
+   PYGI_FUNCTION_TYPE_CALLBACK
+ } PyGIFunctionType;
 
 struct _PyGIArgCache
 {
@@ -133,10 +146,7 @@ struct _PyGICallableCache
 {
     const gchar *name;
 
-    gboolean is_method;
-    gboolean is_constructor;
-    gboolean is_vfunc;
-    gboolean is_callback;
+    PyGIFunctionType function_type;
 
     PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;

@@ -39,7 +39,7 @@ _invoke_callable (PyGIInvokeState *state,
     pyg_begin_allow_threads;
 
     /* FIXME: use this for now but we can streamline the calls */
-    if (cache->is_vfunc)
+    if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
         retval = g_vfunc_info_invoke ( callable_info,
                                        state->implementor_gtype,
                                        state->in_args,
@@ -98,7 +98,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
      * around just in case we want to call actual gobject constructors
      * in the future instead of calling g_object_new
      */
-    if  (cache->is_constructor) {
+    if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
         state->constructor_class = PyTuple_GetItem (py_args, 0);
 
         if (state->constructor_class == NULL) {
@@ -123,7 +123,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         Py_INCREF (state->py_in_args);
     }
     state->implementor_gtype = 0;
-    if (cache->is_vfunc) {
+    if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
         PyObject *py_gtype;
         py_gtype = PyDict_GetItemString (kwargs, "gtype");
         if (py_gtype == NULL) {
@@ -334,7 +334,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
     if (cache->return_cache) {
 
-        if (cache->is_constructor) {
+        if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
             if (state->return_arg.v_pointer == NULL) {
                 PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
                 pygi_marshal_cleanup_args_return_fail (state,
