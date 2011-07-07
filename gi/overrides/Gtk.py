@@ -619,12 +619,18 @@ class TextIter(Gtk.TextIter):
     def forward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).forward_search(string,
             flags, limit)
-        return (match_start, match_end,)
+        if success:
+            return (match_start, match_end)
+        else:
+            return None
 
     def backward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).backward_search(string,
             flags, limit)
-        return (match_start, match_end,)
+        if success:
+            return (match_start, match_end)
+        else:
+            return None
 
     def begins_tag(self, tag=None):
         return super(TextIter, self).begins_tag(tag)
