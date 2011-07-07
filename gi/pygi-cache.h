@@ -48,18 +48,29 @@ typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
                                         PyGIArgCache    *arg_cache,
                                         gpointer         data,
                                         gboolean         was_processed);
+
+/* Argument meta types denote how we process the argument:
+ *  - Parents (PYGI_META_ARG_TYPE_PARENT) may or may not have children
+ *    but are always processed via the normal marshaller for their
+ *    actual GI type.  If they have children the marshaller will
+ *    also handle marshalling the children.
+ *  - Children without python argument (PYGI_META_ARG_TYPE_CHILD) are
+ *    ignored by the marshallers and handled directly by their parents
+ *    marshaller.
+ *  - Children with pyargs (PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) are processed
+ *    the same as other child args but also have an index into the 
+ *    python parameters passed to the invoker
+ */
 typedef enum {
-  /* Not an AUX type */
-  PYGI_AUX_TYPE_NONE   = 0,
-  /* AUX type handled by parent */
-  PYGI_AUX_TYPE_IGNORE = 1,
-  /* AUX type has an associated pyarg which is modified by parent */
-  PYGI_AUX_TYPE_HAS_PYARG = 2
-} PyGIAuxType;
+    PYGI_META_ARG_TYPE_PARENT,
+    PYGI_META_ARG_TYPE_CHILD,
+    PYGI_META_ARG_TYPE_CHILD_WITH_PYARG
+} PyGIMetaArgType;
+
 
 struct _PyGIArgCache
 {
-    PyGIAuxType aux_type;
+    PyGIMetaArgType meta_type;
     gboolean is_pointer;
     gboolean is_caller_allocates;
     gboolean allow_none;
@@ -134,7 +145,7 @@ struct _PyGICallableCache
     /* counts */
     gssize n_in_args;
     gssize n_out_args;
-    gssize n_out_aux_args;
+    gssize n_out_child_args;
 
     gssize n_args;
     gssize n_py_args;

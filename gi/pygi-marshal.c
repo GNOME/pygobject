@@ -790,19 +790,19 @@ err:
 
 array_success:
     if (sequence_cache->len_arg_index >= 0) {
-        /* we have an aux arg to handle */
-        PyGIArgCache *aux_cache =
+        /* we have an child arg to handle */
+        PyGIArgCache *child_cache =
             callable_cache->args_cache[sequence_cache->len_arg_index];
 
-        if (aux_cache->direction == GI_DIRECTION_INOUT) {
-            gint *len_arg = (gint *)state->in_args[aux_cache->c_arg_index].v_pointer;
+        if (child_cache->direction == GI_DIRECTION_INOUT) {
+            gint *len_arg = (gint *)state->in_args[child_cache->c_arg_index].v_pointer;
             /* if we are not setup yet just set the in arg */
             if (len_arg == NULL)
-                state->in_args[aux_cache->c_arg_index].v_long = length;
+                state->in_args[child_cache->c_arg_index].v_long = length;
             else
                 *len_arg = length;
         } else {
-            state->in_args[aux_cache->c_arg_index].v_long = length;
+            state->in_args[child_cache->c_arg_index].v_long = length;
         }
     }
 

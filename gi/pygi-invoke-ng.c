@@ -204,7 +204,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 state->args[i] = &(state->in_args[in_count]);
                 in_count++;
 
-                if (arg_cache->aux_type > 0)
+                if (arg_cache->meta_type > 0)
                     continue;
 
                 if (arg_cache->py_arg_index >= state->n_py_in_args) {
@@ -229,14 +229,14 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
                 break;
             case GI_DIRECTION_INOUT:
-                /* this will be filled in if it is an aux value */
+                /* this will be filled in if it is an child value */
                 if (state->in_args[in_count].v_pointer != NULL)
                     state->out_values[out_count] = state->in_args[in_count];
 
                 state->in_args[in_count].v_pointer = &state->out_values[out_count];
                 in_count++;
 
-                if (arg_cache->aux_type != PYGI_AUX_TYPE_IGNORE) {
+                if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
                     if (arg_cache->py_arg_index >= state->n_py_in_args) {
                         PyErr_Format (PyExc_TypeError,
                                       "%s() takes exactly %zd argument(s) (%zd given)",
@@ -360,9 +360,9 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         }
     }
 
-    total_out_args -= cache->n_out_aux_args;
+    total_out_args -= cache->n_out_child_args;
 
-    if (cache->n_out_args - cache->n_out_aux_args  == 0) {
+    if (cache->n_out_args - cache->n_out_child_args  == 0) {
         py_out = py_return;
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */

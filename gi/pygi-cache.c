@@ -162,7 +162,7 @@ static inline PyGISequenceCache *
 _sequence_cache_new_from_type_info (GITypeInfo *type_info,
                                     GIDirection direction,
                                     GITransfer transfer,
-                                    gssize aux_offset)
+                                    gssize child_offset)
 {
     PyGISequenceCache *sc;
     GITypeInfo *item_type_info;
@@ -178,7 +178,7 @@ _sequence_cache_new_from_type_info (GITypeInfo *type_info,
     if (!sc->is_zero_terminated) {
         sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
         if (sc->fixed_size < 0)
-            sc->len_arg_index = g_type_info_get_array_length (type_info) + aux_offset;
+            sc->len_arg_index = g_type_info_get_array_length (type_info) + child_offset;
     }
 
     item_type_info = g_type_info_get_param_type (type_info, 0);
@@ -266,17 +266,17 @@ _hash_cache_new_from_type_info (GITypeInfo *type_info,
 static inline PyGICallbackCache *
 _callback_cache_new_from_arg_info (GIArgInfo *arg_info,
                                    GIInterfaceInfo *iface_info,
-                                   gssize aux_offset)
+                                   gssize child_offset)
 {
    PyGICallbackCache *cc;
 
    cc = g_slice_new0 (PyGICallbackCache);
    cc->user_data_index = g_arg_info_get_closure (arg_info);
    if (cc->user_data_index != -1)
-       cc->user_data_index += aux_offset;
+       cc->user_data_index += child_offset;
    cc->destroy_notify_index = g_arg_info_get_destroy (arg_info);
    if (cc->destroy_notify_index != -1)
-       cc->destroy_notify_index += aux_offset;
+       cc->destroy_notify_index += child_offset;
    cc->scope = g_arg_info_get_scope (arg_info);
    g_base_info_ref( (GIBaseInfo *)iface_info);
    cc->interface_info = iface_info;
@@ -503,21 +503,21 @@ _arg_cache_in_array_setup (PyGIArgCache *arg_cache,
 
     if (seq_cache->len_arg_index >= 0 &&
         direction == GI_DIRECTION_IN) {
-        PyGIArgCache *aux_cache = 
+        PyGIArgCache *child_cache = 
             callable_cache->args_cache[seq_cache->len_arg_index];
 
-        if (aux_cache == NULL) {
-            aux_cache = _arg_cache_new();
-        } else if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE) {
+        if (child_cache == NULL) {
+            child_cache = _arg_cache_new();
+        } else if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD) {
             return TRUE;
         }
 
-        aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-        aux_cache->direction = direction;
-        aux_cache->in_marshaller = NULL;
-        aux_cache->out_marshaller = NULL;
+        child_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
+        child_cache->direction = direction;
+        child_cache->in_marshaller = NULL;
+        child_cache->out_marshaller = NULL;
 
-        callable_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
+        callable_cache->args_cache[seq_cache->len_arg_index] = child_cache;
     }
 
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_array;
@@ -540,26 +540,26 @@ _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
     seq_cache->array_type = g_type_info_get_array_type (type_info);
 
     if (seq_cache->len_arg_index >= 0) {
-        PyGIArgCache *aux_cache = callable_cache->args_cache[seq_cache->len_arg_index];
+        PyGIArgCache *child_cache = callable_cache->args_cache[seq_cache->len_arg_index];
         if (seq_cache->len_arg_index < arg_index)
-             callable_cache->n_out_aux_args++;
+             callable_cache->n_out_child_args++;
 
-        if (aux_cache != NULL) {
-            if (aux_cache->aux_type == PYGI_AUX_TYPE_IGNORE)
+        if (child_cache != NULL) {
+            if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD)
                 return TRUE;
 
             callable_cache->out_args = 
-                g_slist_remove (callable_cache->out_args, aux_cache);
+                g_slist_remove (callable_cache->out_args, child_cache);
         } else {
-            aux_cache = _arg_cache_new ();
+            child_cache = _arg_cache_new ();
         }
 
-        aux_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
-        aux_cache->direction = direction;
-        aux_cache->in_marshaller = NULL;
-        aux_cache->out_marshaller = NULL;
+        child_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
+        child_cache->direction = direction;
+        child_cache->in_marshaller = NULL;
+        child_cache->out_marshaller = NULL;
 
-        callable_cache->args_cache[seq_cache->len_arg_index] = aux_cache;
+        callable_cache->args_cache[seq_cache->len_arg_index] = child_cache;
     }
 
     return TRUE;
@@ -615,14 +615,14 @@ static inline void
 _arg_cache_in_gerror_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_gerror;
-    arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+    arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
 }
 
 static inline void
 _arg_cache_out_gerror_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_gerror;
-    arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+    arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
 }
 
 static inline void
@@ -690,13 +690,13 @@ _arg_cache_in_interface_callback_setup (PyGIArgCache *arg_cache,
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     if (callback_cache->user_data_index >= 0) {
         PyGIArgCache *user_data_arg_cache = _arg_cache_new ();
-        user_data_arg_cache->aux_type = PYGI_AUX_TYPE_HAS_PYARG;
+        user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         callable_cache->args_cache[callback_cache->user_data_index] = user_data_arg_cache;
     }
 
     if (callback_cache->destroy_notify_index >= 0) {
         PyGIArgCache *destroy_arg_cache = _arg_cache_new ();
-        destroy_arg_cache->aux_type = PYGI_AUX_TYPE_IGNORE;
+        destroy_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
         callable_cache->args_cache[callback_cache->destroy_notify_index] = destroy_arg_cache;
     }
     arg_cache->in_marshaller = _pygi_marshal_in_interface_callback;
@@ -1303,13 +1303,13 @@ _args_cache_generate (GICallableInfo *callable_info,
         if (type_tag == GI_TYPE_TAG_INTERFACE)
             is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
 
-        /* must be an aux arg filled in by its owner
+        /* must be an child arg filled in by its owner
          * fill in it's c_arg_index, add to the in count
          * and continue
          */
         if (callable_cache->args_cache[arg_index] != NULL) {
             arg_cache = callable_cache->args_cache[arg_index];
-            if (arg_cache->aux_type == PYGI_AUX_TYPE_HAS_PYARG) {
+            if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
                 arg_cache->py_arg_index = callable_cache->n_py_args;
                 callable_cache->n_py_args++;
             }
@@ -1321,7 +1321,7 @@ _args_cache_generate (GICallableInfo *callable_info,
 
             if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
                 callable_cache->n_out_args++;
-                callable_cache->n_out_aux_args++;
+                callable_cache->n_out_child_args++;
             }
 
             g_base_info_unref ( (GIBaseInfo *)arg_info);
