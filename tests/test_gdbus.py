@@ -62,8 +62,10 @@ class TestGDBusClient(unittest.TestCase):
 
     def test_native_calls_async(self):
         def call_done(obj, result, user_data):
-            user_data['result'] = obj.call_finish(result)
-            user_data['main_loop'].quit()
+            try:
+                user_data['result'] = obj.call_finish(result)
+            finally:
+                user_data['main_loop'].quit()
 
         main_loop = gobject.MainLoop()
         data = {'main_loop': main_loop}
