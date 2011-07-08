@@ -377,7 +377,8 @@ class Dialog(Gtk.Dialog, Container):
             if flags & Gtk.DialogFlags.NO_SEPARATOR:
                 self.set_has_separator(False)
         except AttributeError:
-            pass
+            import warnings
+            warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", DeprecationWarning)
 
         if buttons is not None:
             self.add_buttons(*buttons)
@@ -413,7 +414,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
     def __init__(self,
                  parent=None,
                  flags=0,
-                 type=Gtk.MessageType.INFO,
+                 message_type=Gtk.MessageType.INFO,
                  buttons=Gtk.ButtonsType.NONE,
                  message_format=None,
                  **kwds):
@@ -422,12 +423,14 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
             kwds['text'] = message_format
 
         # type keyword is used for backwards compat with PyGTK
-        if 'message_type' in kwds:
-            type = kwds.pop('message_type')
+        if 'type' in kwds:
+            import warnings
+            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", DeprecationWarning)
+            message_type = kwds.pop('type')
 
         Gtk.MessageDialog.__init__(self,
                                    _buttons_property=buttons,
-                                   message_type=type,
+                                   message_type=message_type,
                                    **kwds)
         Dialog.__init__(self, parent=parent, flags=flags)
 
