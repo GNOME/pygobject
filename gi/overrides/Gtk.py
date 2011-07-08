@@ -413,16 +413,22 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
     def __init__(self,
                  parent=None,
                  flags=0,
-                 type=Gtk.MessageType.INFO,
+                 message_type=Gtk.MessageType.INFO,
                  buttons=Gtk.ButtonsType.NONE,
                  message_format=None,
                  **kwds):
 
         if message_format != None:
             kwds['text'] = message_format
+
+        if 'type' in kwds:
+            import warnings
+            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", DeprecationWarning)
+            message_type = kwds['type']
+
         Gtk.MessageDialog.__init__(self,
                                    _buttons_property=buttons,
-                                   message_type=type,
+                                   message_type=message_type,
                                    **kwds)
         Dialog.__init__(self, parent=parent, flags=flags)
 
