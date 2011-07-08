@@ -257,175 +257,175 @@ _arg_cache_alloc (void)
     return g_slice_new0 (PyGIArgCache);
 }
 
-static inline void
+static void
 _arg_cache_in_void_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_void;
 }
 
-static inline void
+static void
 _arg_cache_out_void_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_void;
 }
 
-static inline void
+static void
 _arg_cache_in_boolean_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_boolean;
 }
 
-static inline void
+static void
 _arg_cache_out_boolean_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_boolean;
 }
 
-static inline void
+static void
 _arg_cache_in_int8_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_int8;
 }
 
-static inline void
+static void
 _arg_cache_out_int8_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_int8;
 }
 
-static inline void
+static void
 _arg_cache_in_uint8_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_uint8;
 }
 
-static inline void
+static void
 _arg_cache_out_uint8_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_uint8;
 }
 
-static inline void
+static void
 _arg_cache_in_int16_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_int16;
 }
 
-static inline void
+static void
 _arg_cache_out_int16_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_int16;
 }
 
-static inline void
+static void
 _arg_cache_in_uint16_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_uint16;
 }
 
-static inline void
+static void
 _arg_cache_out_uint16_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_uint16;
 }
 
-static inline void
+static void
 _arg_cache_in_int32_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_int32;
 }
 
-static inline void
+static void
 _arg_cache_out_int32_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_int32;
 }
 
-static inline void
+static void
 _arg_cache_in_uint32_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_uint32;
 }
 
-static inline void
+static void
 _arg_cache_out_uint32_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_uint32;
 }
 
-static inline void
+static void
 _arg_cache_in_int64_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_int64;
 }
 
-static inline void
+static void
 _arg_cache_out_int64_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_int64;
 }
 
-static inline void
+static void
 _arg_cache_in_uint64_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_uint64;
 }
 
-static inline void
+static void
 _arg_cache_out_uint64_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_uint64;
 }
 
-static inline void
+static void
 _arg_cache_in_float_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_float;
 }
 
-static inline void
+static void
 _arg_cache_out_float_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_float;
 }
 
-static inline void
+static void
 _arg_cache_in_double_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_double;
 }
 
-static inline void
+static void
 _arg_cache_out_double_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_double;
 }
 
-static inline void
+static void
 _arg_cache_in_unichar_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_unichar;
 }
 
-static inline void
+static void
 _arg_cache_out_unichar_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_unichar;
 }
 
-static inline void
+static void
 _arg_cache_in_gtype_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_gtype;
 }
 
-static inline void
+static void
 _arg_cache_out_gtype_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_gtype;
 }
 
-static inline void
+static void
 _arg_cache_in_utf8_setup (PyGIArgCache *arg_cache,
                           GITransfer transfer)
 {
@@ -433,7 +433,7 @@ _arg_cache_in_utf8_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_utf8;
 }
 
-static inline void
+static void
 _arg_cache_out_utf8_setup (PyGIArgCache *arg_cache,
                            GITransfer transfer)
 {
@@ -441,7 +441,7 @@ _arg_cache_out_utf8_setup (PyGIArgCache *arg_cache,
     arg_cache->out_cleanup = _pygi_marshal_cleanup_out_utf8;
 }
 
-static inline void
+static void
 _arg_cache_in_filename_setup (PyGIArgCache *arg_cache,
                               GITransfer transfer)
 {
@@ -449,7 +449,7 @@ _arg_cache_in_filename_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_utf8;
 }
 
-static inline void
+static void
 _arg_cache_out_filename_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
 {
@@ -457,7 +457,7 @@ _arg_cache_out_filename_setup (PyGIArgCache *arg_cache,
     arg_cache->out_cleanup = _pygi_marshal_cleanup_out_utf8;
 }
 
-static inline gboolean
+static gboolean
 _arg_cache_in_array_setup (PyGIArgCache *arg_cache,
                            PyGICallableCache *callable_cache,
                            GITypeInfo *type_info,
@@ -493,7 +493,7 @@ _arg_cache_in_array_setup (PyGIArgCache *arg_cache,
     return TRUE;
 }
 
-static inline gboolean
+static gboolean
 _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
                             PyGICallableCache *callable_cache,
                             GITypeInfo *type_info,
@@ -533,7 +533,7 @@ _arg_cache_out_array_setup (PyGIArgCache *arg_cache,
     return TRUE;
 }
 
-static inline void
+static void
 _arg_cache_in_glist_setup (PyGIArgCache *arg_cache,
                            GITransfer transfer)
 {
@@ -541,7 +541,7 @@ _arg_cache_in_glist_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_glist;
 }
 
-static inline void
+static void
 _arg_cache_out_glist_setup (PyGIArgCache *arg_cache,
                             GITransfer transfer)
 {
@@ -549,7 +549,7 @@ _arg_cache_out_glist_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_out_glist;
 }
 
-static inline void
+static void
 _arg_cache_in_gslist_setup (PyGIArgCache *arg_cache,
                             GITransfer transfer)
 {
@@ -557,7 +557,7 @@ _arg_cache_in_gslist_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_glist;
 }
 
-static inline void
+static void
 _arg_cache_out_gslist_setup (PyGIArgCache *arg_cache,
                              GITransfer transfer)
 {
@@ -565,49 +565,49 @@ _arg_cache_out_gslist_setup (PyGIArgCache *arg_cache,
     arg_cache->out_cleanup = _pygi_marshal_cleanup_out_glist;
 }
 
-static inline void
+static void
 _arg_cache_in_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_ghash;
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_ghash;
 }
 
-static inline void
+static void
 _arg_cache_out_ghash_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_ghash;
     arg_cache->out_cleanup = _pygi_marshal_cleanup_out_ghash;
 }
 
-static inline void
+static void
 _arg_cache_in_gerror_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_gerror;
     arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
 }
 
-static inline void
+static void
 _arg_cache_out_gerror_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_gerror;
     arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
 }
 
-static inline void
+static void
 _arg_cache_in_interface_union_setup (PyGIArgCache *arg_cache,
                                      GITransfer transfer)
 {
     arg_cache->in_marshaller = _pygi_marshal_in_interface_struct;
 }
 
-static inline void
+static void
 _arg_cache_out_interface_union_setup (PyGIArgCache *arg_cache,
                                       GITransfer transfer)
 {
     arg_cache->out_marshaller = _pygi_marshal_out_interface_struct;
 }
 
-static inline void
+static void
 _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
                                       GIInterfaceInfo *iface_info,
                                       GITransfer transfer)
@@ -622,7 +622,7 @@ _arg_cache_in_interface_struct_setup (PyGIArgCache *arg_cache,
         arg_cache->in_cleanup = _pygi_marshal_cleanup_in_interface_struct_foreign;
 }
 
-static inline void
+static void
 _arg_cache_out_interface_struct_setup (PyGIArgCache *arg_cache,
                                        GIInterfaceInfo *iface_info,
                                        GITransfer transfer)
@@ -635,7 +635,7 @@ _arg_cache_out_interface_struct_setup (PyGIArgCache *arg_cache,
         arg_cache->in_cleanup = _pygi_marshal_cleanup_out_interface_struct_foreign;
 }
 
-static inline void
+static void
 _arg_cache_in_interface_object_setup (PyGIArgCache *arg_cache,
                                       GITransfer transfer)
 {
@@ -643,7 +643,7 @@ _arg_cache_in_interface_object_setup (PyGIArgCache *arg_cache,
     arg_cache->in_cleanup = _pygi_marshal_cleanup_in_interface_object;
 }
 
-static inline void
+static void
 _arg_cache_out_interface_object_setup (PyGIArgCache *arg_cache,
                                        GITransfer transfer)
 {
