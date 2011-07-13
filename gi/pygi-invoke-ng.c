@@ -93,13 +93,14 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
     state->py_in_args = py_args;
     state->n_py_in_args = PySequence_Length (py_args);
 
-    /* We don't use the class parameter sent in by  the structure
-     * so we remove it from the py_args tuple but we keep it 
-     * around just in case we want to call actual gobject constructors
+    /* TODO: We don't use the class parameter sent in by  the structure
+     * so we remove it from the py_args tuple but we can keep it 
+     * around if we want to call actual gobject constructors
      * in the future instead of calling g_object_new
      */
     if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
-        state->constructor_class = PyTuple_GetItem (py_args, 0);
+        PyObject *constructor_class;
+        constructor_class = PyTuple_GetItem (py_args, 0);
 
         if (state->constructor_class == NULL) {
             PyErr_Clear ();
@@ -110,8 +111,6 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 
             return FALSE;
         }
-
-        Py_INCREF (state->constructor_class);
 
         /* we could optimize this by using offsets instead of modifying the tuple but it makes the
          * code more error prone and confusing so don't do that unless profiling shows
