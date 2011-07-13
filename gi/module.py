@@ -24,7 +24,11 @@ from __future__ import absolute_import
 
 import os
 import gobject
-import string
+try:
+    maketrans = ''.maketrans
+except AttributeError:
+    # fallback for Python 2
+    from string import maketrans
 
 import gi
 from .overrides import registry
@@ -124,7 +128,7 @@ class IntrospectionModule(object):
                 # Don't use upper() here to avoid locale specific
                 # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
                 # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
-                ascii_upper_trans = string.maketrans(
+                ascii_upper_trans = maketrans(
                         'abcdefgjhijklmnopqrstuvwxyz', 
                         'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():
