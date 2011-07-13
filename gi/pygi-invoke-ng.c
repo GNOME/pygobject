@@ -177,6 +177,47 @@ _invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
     Py_XDECREF (state->py_in_args);
 }
 
+static gboolean _caller_alloc (PyGIInvokeState *state,
+                               PyGIArgCache *arg_cache,
+                               gssize arg_count,
+                               gssize out_count)
+{
+    PyGIInterfaceCache *iface_cache;
+
+    g_assert (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
+
+    iface_cache = (PyGIInterfaceCache *)arg_cache;
+
+    state->out_args[out_count].v_pointer = NULL;
+    state->args[arg_count] = &state->out_args[out_count];
+    if (iface_cache->g_type == G_TYPE_BOXED) {
+        state->args[arg_count]->v_pointer =
+            _pygi_boxed_alloc (iface_cache->interface_info, NULL);
+    } else if (iface_cache->g_type == G_TYPE_VALUE) {
+        state->args[arg_count]->v_pointer = g_slice_new0 (GValue);
+    } else if (iface_cache->is_foreign) {
+        PyObject *foreign_struct =
+            pygi_struct_foreign_convert_from_g_argument (
+                iface_cache->interface_info,
+                NULL);
+
+            pygi_struct_foreign_convert_to_g_argument (foreign_struct,
+                                                       iface_cache->interface_info,
+                                                       GI_TRANSFER_EVERYTHING,
+                                                       state->args[arg_count]);
+    } else {
+            gssize size = g_struct_info_get_size(
+                (GIStructInfo *)iface_cache->interface_info);
+            state->args[arg_count]->v_pointer = g_malloc0 (size);
+    }
+
+    if (state->args[arg_count]->v_pointer == NULL)
+        return FALSE;
+
+
+    return TRUE;
+}
+
 static inline gboolean
 _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
@@ -254,36 +295,15 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 }
             case GI_DIRECTION_OUT:
                 if (arg_cache->is_caller_allocates) {
-                    PyGIInterfaceCache *iface_cache =
-                        (PyGIInterfaceCache *)arg_cache;
-
-                    g_assert (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
-
-                    state->out_args[out_count].v_pointer = NULL;
-                    state->args[i] = &state->out_args[out_count];
-                    if (iface_cache->g_type == G_TYPE_BOXED) {
-                        state->args[i]->v_pointer =
-                            _pygi_boxed_alloc (iface_cache->interface_info, NULL);
-                    } else if (iface_cache->g_type == G_TYPE_VALUE) {
-                        state->args[i]->v_pointer = g_slice_new0 (GValue);
-                    } else if (iface_cache->is_foreign) {
-                        PyObject *foreign_struct =
-                            pygi_struct_foreign_convert_from_g_argument (
-                                iface_cache->interface_info,
-                                NULL);
-
-                        pygi_struct_foreign_convert_to_g_argument (
-                            foreign_struct,
-                            iface_cache->interface_info,
-                            GI_TRANSFER_EVERYTHING,
-                            state->args[i]);
-                    } else {
-                        gssize size =
-                            g_struct_info_get_size(
-                                (GIStructInfo *)iface_cache->interface_info);
-                        state->args[i]->v_pointer = g_malloc0 (size);
+                    if (!_caller_alloc (state, arg_cache, i, out_count)) {
+                        PyErr_Format (PyExc_TypeError,
+                                      "Could not caller allocate argument %zd of callable %s",
+                                      i, cache->name);
+                        pygi_marshal_cleanup_args_in_parameter_fail (state,
+                                                                     cache,
+                                                                     i - 1);
+                        return FALSE;
                     }
-
                 } else {
                     state->out_args[out_count].v_pointer = &state->out_values[out_count];
                     state->args[i] = &state->out_values[out_count];
