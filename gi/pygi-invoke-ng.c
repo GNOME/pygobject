@@ -102,7 +102,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         PyObject *constructor_class;
         constructor_class = PyTuple_GetItem (py_args, 0);
 
-        if (state->constructor_class == NULL) {
+        if (constructor_class == NULL) {
             PyErr_Clear ();
             PyErr_Format (PyExc_TypeError,
                           "Constructors require the class to be passed in as an argument, "
