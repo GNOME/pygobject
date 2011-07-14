@@ -104,6 +104,7 @@ EXTRA_DIST = \
 	test-floating.h \
 	test-thread.h \
 	test-unknown.h \
+	te_ST@nouppera \
 	org.gnome.test.gschema.xml
 
 EXTRA_DIST += $(TEST_FILES_STATIC) $(TEST_FILES_GI) $(TEST_FILES_GIO)
