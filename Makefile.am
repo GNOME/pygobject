@@ -14,7 +14,6 @@ EXTRA_DIST = 				\
 	PKG-INFO.in 			\
 	setup.py			\
 	pygobject_postinstall.py	\
-	pygtk.py			\
 	dsextras.py			\
 	ChangeLog.pre-2.18		\
 	m4/as-ac-expand.m4		\
@@ -63,7 +62,6 @@ pkgpyexec_PYTHON = dsextras.py
 pkgpyexec_LTLIBRARIES =
 
 # python
-pyexec_PYTHON = pygtk.py
 pyexec_LTLIBRARIES =
 
 # linker flags
@@ -75,12 +73,9 @@ endif
 # install pth file.
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pythondir)
-	echo "gtk-$(PLATFORM_VERSION)" > $(DESTDIR)$(pyexecdir)/pygtk.pth
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
-	echo "gtk-$(PLATFORM_VERSION)" > $(DESTDIR)$(pyexecdir)/pygtk.pth
 uninstall-local:
-	rm -f $(DESTDIR)$(pythondir)/pygtk.pth $(DESTDIR)$(pyexecdir)/pygtk.pth
 
 EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM).egg
 
