@@ -176,9 +176,6 @@ fi
 PYTHON_BASENAME=`basename $PYTHON`
 AC_SUBST([PYTHON_BASENAME])
 
-pygobject_CODEGEN_DEFINES=""
-AC_SUBST([pygobject_CODEGEN_DEFINES])
-
 AS_AC_EXPAND(DATADIR, $datadir)
 
 dnl libffi
@@ -266,8 +263,6 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
   pygobject-2.0-uninstalled.pc
-  codegen/Makefile
-  codegen/pygobject-codegen-2.0
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
