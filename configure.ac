@@ -209,33 +209,25 @@ AC_ARG_ENABLE(cairo,
     enable_cairo=$enableval,
     enable_cairo=yes)
 
-AC_ARG_ENABLE(introspection,
-  AC_HELP_STRING([--enable-introspection], [Use introspection information]),
-  enable_introspection=$enableval,
-  enable_introspection=yes)
-if test "$enable_introspection" != no; then
-    AC_DEFINE(ENABLE_INTROSPECTION,1,Use introspection information)
-    PKG_CHECK_MODULES(GI,
-        glib-2.0 >= glib_required_version
-        gobject-introspection-1.0 >= introspection_required_version
-    )
+PKG_CHECK_MODULES(GI,
+    glib-2.0 >= glib_required_version
+    gobject-introspection-1.0 >= introspection_required_version
+)
 
-    GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
-    AC_SUBST(GI_DATADIR)
+GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
+AC_SUBST(GI_DATADIR)
 
-    if test "$enable_cairo" != no; then
-        if test $build_py3k = true; then  
-            PKG_CHECK_MODULES(PYCAIRO,
-                py3cairo >= py3cairo_required_version
-            )
-        else
-            PKG_CHECK_MODULES(PYCAIRO,
-                pycairo >= py2cairo_required_version
-            )
-        fi
+if test "$enable_cairo" != no; then
+    if test $build_py3k = true; then  
+        PKG_CHECK_MODULES(PYCAIRO,
+            py3cairo >= py3cairo_required_version
+        )
+    else
+        PKG_CHECK_MODULES(PYCAIRO,
+            pycairo >= py2cairo_required_version
+        )
     fi
 fi
-AM_CONDITIONAL(ENABLE_INTROSPECTION, test "$enable_introspection" = "yes")
 AM_CONDITIONAL(ENABLE_CAIRO, test "$enable_cairo" = "yes")
 
 INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
@@ -278,5 +270,4 @@ AC_OUTPUT
 
 echo
 echo "libffi support: $have_libffi"
-echo "introspection support: $enable_introspection"
 echo

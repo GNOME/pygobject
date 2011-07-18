@@ -29,8 +29,6 @@
 #define NO_IMPORT_PYGOBJECT
 #include <pygobject.h>
 
-#if ENABLE_INTROSPECTION
-
 #include <girepository.h>
 #include "pygi-cache.h"
 
@@ -165,40 +163,5 @@ pygi_register_foreign_struct (const char* namespace_,
                                       release_func);
     Py_RETURN_NONE;
 }
-
-#else /* ENABLE_INTROSPECTION */
-
-static inline PyObject *
-pygi_type_import_by_g_type (GType g_type)
-{
-    return NULL;
-}
-
-static inline PyObject *
-pygi_get_property_value (PyGObject *instance,
-                         const gchar *attr_name)
-{
-    return NULL;
-}
-
-static inline gint
-pygi_set_property_value (PyGObject *instance,
-                         const gchar *attr_name,
-                         PyObject *value)
-{
-    return -1;
-}
-
-static inline GClosure *
-pygi_signal_closure_new (PyGObject *instance,
-                         const gchar *sig_name,
-                         PyObject *callback,
-                         PyObject *extra_args,
-                         PyObject *swap_data)
-{
-    return NULL;
-}
-
-#endif /* ENABLE_INTROSPECTION */
 
 #endif /* __PYGI_H__ */

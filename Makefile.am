@@ -1,13 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs glib gobject examples
-
-if ENABLE_INTROSPECTION
-SUBDIRS += gi
-endif
-
-SUBDIRS += tests
+SUBDIRS = docs glib gobject examples gi tests
 
 PLATFORM_VERSION = 3.0
 

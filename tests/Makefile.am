@@ -1,7 +1,5 @@
 CLEANFILES =
-noinst_LTLIBRARIES = 
-if ENABLE_INTROSPECTION
-noinst_LTLIBRARIES += libregress.la libgimarshallingtests.la
+noinst_LTLIBRARIES = libregress.la libgimarshallingtests.la
 
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(PYCAIRO_CFLAGS)
@@ -44,7 +42,6 @@ gschemas.compiled: org.gnome.test.gschema.xml
 	glib-compile-schemas --targetdir=. --schema-file=$<
 
 CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib gschemas.compiled
-endif
 
 noinst_LTLIBRARIES += testhelper.la
 
@@ -81,13 +78,11 @@ TEST_FILES_STATIC = \
 	test_uris.py
 
 
-if ENABLE_INTROSPECTION
 TEST_FILES_GI = \
 	test_everything.py \
 	test_gi.py \
 	test_gdbus.py \
 	test_overrides.py
-endif
 
 EXTRA_DIST = \
 	compathelper.py \
