@@ -30,10 +30,7 @@
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-invoke.h"
-
-#ifdef ENABLE_INVOKE_NG
-  #include "pygi-cache.h"
-#endif
+#include "pygi-cache.h"
 
 G_BEGIN_DECLS
 #if PY_VERSION_HEX >= 0x03000000

@@ -19,7 +19,6 @@
  * USA
  */
 
-#ifdef ENABLE_INVOKE_NG
 #ifndef __PYGI_CACHE_H__
 #define __PYGI_CACHE_H__
 
@@ -169,4 +168,3 @@ PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info);
 G_END_DECLS
 
 #endif /* __PYGI_CACHE_H__ */
-#endif /* def ENABLE_INVOKE_NG */
