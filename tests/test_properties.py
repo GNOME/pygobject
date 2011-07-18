@@ -14,7 +14,7 @@ from gobject.constants import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
 
-import gio
+from gi.repository import Gio
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -37,7 +37,7 @@ class PropertyObject(GObject):
         type=TYPE_UINT64, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
 
     enum = gobject.property(
-        type=gio.SocketType, default=gio.SOCKET_TYPE_STREAM)
+        type=Gio.SocketType, default=Gio.SocketType.STREAM)
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -135,30 +135,30 @@ class TestProperties(unittest.TestCase):
 
     def testEnum(self):
         obj = new(PropertyObject)
-        self.assertEqual(obj.props.enum, gio.SOCKET_TYPE_STREAM)
-        self.assertEqual(obj.enum, gio.SOCKET_TYPE_STREAM)
-        obj.enum = gio.SOCKET_TYPE_DATAGRAM
-        self.assertEqual(obj.props.enum, gio.SOCKET_TYPE_DATAGRAM)
-        self.assertEqual(obj.enum, gio.SOCKET_TYPE_DATAGRAM)
-        obj.props.enum = gio.SOCKET_TYPE_STREAM
-        self.assertEqual(obj.props.enum, gio.SOCKET_TYPE_STREAM)
-        self.assertEqual(obj.enum, gio.SOCKET_TYPE_STREAM)
+        self.assertEqual(obj.props.enum, Gio.SocketType.STREAM)
+        self.assertEqual(obj.enum, Gio.SocketType.STREAM)
+        obj.enum = Gio.SocketType.DATAGRAM
+        self.assertEqual(obj.props.enum, Gio.SocketType.DATAGRAM)
+        self.assertEqual(obj.enum, Gio.SocketType.DATAGRAM)
+        obj.props.enum = Gio.SocketType.STREAM
+        self.assertEqual(obj.props.enum, Gio.SocketType.STREAM)
+        self.assertEqual(obj.enum, Gio.SocketType.STREAM)
         obj.props.enum = 2
-        self.assertEqual(obj.props.enum, gio.SOCKET_TYPE_DATAGRAM)
-        self.assertEqual(obj.enum, gio.SOCKET_TYPE_DATAGRAM)
+        self.assertEqual(obj.props.enum, Gio.SocketType.DATAGRAM)
+        self.assertEqual(obj.enum, Gio.SocketType.DATAGRAM)
         obj.enum = 1
-        self.assertEqual(obj.props.enum, gio.SOCKET_TYPE_STREAM)
-        self.assertEqual(obj.enum, gio.SOCKET_TYPE_STREAM)
+        self.assertEqual(obj.props.enum, Gio.SocketType.STREAM)
+        self.assertEqual(obj.enum, Gio.SocketType.STREAM)
 
         self.assertRaises(TypeError, setattr, obj, 'enum', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'enum', object())
 
-        self.assertRaises(TypeError, gobject.property, type=gio.SocketType)
-        self.assertRaises(TypeError, gobject.property, type=gio.SocketType,
-                          default=gio.SOCKET_PROTOCOL_TCP)
-        self.assertRaises(TypeError, gobject.property, type=gio.SocketType,
+        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType)
+        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
+                          default=Gio.SocketProtocol.TCP)
+        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
                           default=object())
-        self.assertRaises(TypeError, gobject.property, type=gio.SocketType,
+        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
                           default=1)
 
     def testRange(self):
