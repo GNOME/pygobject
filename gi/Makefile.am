@@ -55,7 +55,8 @@ _gi_la_SOURCES = \
 	pygi-signal-closure.h \
 	pygobject-external.h \
 	gimodule.c \
-	pygi-invoke-ng.c \
+	pygi-invoke.c \
+	pygi-invoke.h \
 	pygi-invoke-state-struct.h \
 	pygi-cache.h \
 	pygi-cache.c \
