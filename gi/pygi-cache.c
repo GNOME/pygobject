@@ -21,7 +21,8 @@
 
 #include "pygi-info.h"
 #include "pygi-cache.h"
-#include "pygi-marshal.h"
+#include "pygi-marshal-in.h"
+#include "pygi-marshal-out.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-type.h"
 #include <girepository.h>

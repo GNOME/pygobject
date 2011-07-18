@@ -63,8 +63,10 @@ _gi_la_SOURCES += \
 	pygi-invoke-state-struct.h \
 	pygi-cache.h \
 	pygi-cache.c \
-	pygi-marshal.c \
-	pygi-marshal.h \
+	pygi-marshal-in.c \
+	pygi-marshal-in.h \
+	pygi-marshal-out.c \
+	pygi-marshal-out.h \
 	pygi-marshal-cleanup.c \
 	pygi-marshal-cleanup.h
 else
