@@ -9,7 +9,7 @@ endif
 
 SUBDIRS += tests
 
-PLATFORM_VERSION = 2.0
+PLATFORM_VERSION = 3.0
 
 CLEANFILES =
 EXTRA_DIST = 				\

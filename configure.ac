@@ -261,8 +261,8 @@ fi
 
 AC_CONFIG_FILES(
   Makefile
-  pygobject-2.0.pc
-  pygobject-2.0-uninstalled.pc
+  pygobject-3.0.pc
+  pygobject-3.0-uninstalled.pc
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
