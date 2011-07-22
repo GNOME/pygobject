@@ -24,7 +24,7 @@ from ._gi import _API, Repository
 
 # Force loading the GObject typelib so we have available the wrappers for
 # base classes such as GInitiallyUnowned
-from gi.repository import GObject
+import gi._gobject
 
 _versions = {}
 
