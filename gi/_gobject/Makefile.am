@@ -1,13 +1,10 @@
 AUTOMAKE_OPTIONS = 1.7
 PLATFORM_VERSION = 2.0
 
-pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
-pkginclude_HEADERS = pygobject.h
-
 pkgpyexecdir = $(pyexecdir)
 
 # gobject python scripts
-pygobjectdir = $(pkgpyexecdir)/gobject
+pygobjectdir = $(pkgpyexecdir)/gi/_gobject
 pygobject_PYTHON = 	\
 	__init__.py 	\
 	constants.py	\
@@ -20,7 +17,7 @@ common_ldflags += -no-undefined
 endif
 
 _gobject_la_CFLAGS = \
-	-I$(top_srcdir)/glib \
+	-I$(top_srcdir)/gi/_glib \
 	-I$(top_srcdir)/gi \
 	$(PYTHON_INCLUDES) \
 	$(FFI_CFLAGS) \
@@ -33,7 +30,8 @@ _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(PYTHON_LIBS) \
-	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
+	$(top_builddir)/gi/_glib/libpyglib-2.0-@PYTHON_BASENAME@.la
+
 _gobject_la_SOURCES =           \
         gobjectmodule.c         \
         pygboxed.c              \

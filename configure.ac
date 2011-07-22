@@ -26,7 +26,7 @@ AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR([gobject/gobjectmodule.c])
+AC_CONFIG_SRCDIR([gi/gimodule.c])
 
 AC_DEFINE(PYGOBJECT_MAJOR_VERSION, pygobject_major_version, [pygobject major version])
 AC_SUBST(PYGOBJECT_MAJOR_VERSION, pygobject_major_version)
@@ -261,8 +261,8 @@ AC_CONFIG_FILES(
   gi/Makefile
   gi/repository/Makefile
   gi/overrides/Makefile
-  glib/Makefile
-  gobject/Makefile
+  gi/_glib/Makefile
+  gi/_gobject/Makefile
   examples/Makefile
   tests/Makefile
   PKG-INFO)

@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs glib gobject examples gi tests
+SUBDIRS = docs examples gi tests
 
 PLATFORM_VERSION = 3.0
 

@@ -1,14 +1,11 @@
 AUTOMAKE_OPTIONS = 1.7
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 
-pkgincludedir = $(includedir)/pygtk-2.0
-pkginclude_HEADERS = pyglib.h
-
 lib_LTLIBRARIES = libpyglib-2.0-@PYTHON_BASENAME@.la
 
 pkgpyexecdir = $(pyexecdir)
 
-pyglibdir = $(pkgpyexecdir)/glib
+pyglibdir = $(pkgpyexecdir)/gi/_glib
 pyglib_PYTHON = 	\
 	__init__.py	\
 	option.py

@@ -5,9 +5,11 @@ pkgpyexecdir = $(pyexecdir)
 
 SUBDIRS = \
 	repository \
-	overrides
+	overrides \
+        _glib \
+	_gobject
 
-INCLUDES = -I$(top_srcdir)/gobject -I$(top_srcdir)/glib
+INCLUDES = -I$(top_srcdir)/gi/_gobject -I$(top_srcdir)/gi/_glib
 
 pygidir = $(pkgpyexecdir)/gi
 pygi_PYTHON = \
@@ -25,7 +27,7 @@ _gi_la_LDFLAGS = \
 	-export-symbols-regex "init_gi|PyInit__gi"
 _gi_la_LIBADD = \
 	$(GI_LIBS) \
-	$(top_builddir)/glib/libpyglib-2.0-@PYTHON_BASENAME@.la
+	$(top_builddir)/gi/_glib/libpyglib-2.0-@PYTHON_BASENAME@.la
 _gi_la_SOURCES = \
 	pygi-repository.c \
 	pygi-repository.h \
