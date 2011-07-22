@@ -21,17 +21,16 @@
 
 import sys
 
-import gobject._gobject
-_gobject = sys.modules['gobject._gobject']
+from . import _gobject
 
-from gobject.constants import \
+from .constants import \
      TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
      TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
      TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, \
      TYPE_FLAGS, TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
      TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
      TYPE_PYOBJECT
-from gobject.constants import \
+from .constants import \
      G_MINFLOAT, G_MAXFLOAT, G_MINDOUBLE, G_MAXDOUBLE, \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
@@ -226,10 +225,10 @@ class property(object):
         elif ptype == TYPE_PYOBJECT:
             if default is not None:
                 raise TypeError("object types does not have default values")
-        elif gobject.type_is_a(ptype, TYPE_ENUM):
+        elif _gobject.type_is_a(ptype, TYPE_ENUM):
             if default is None:
                 raise TypeError("enum properties needs a default value")
-            elif not gobject.type_is_a(default, ptype):
+            elif not _gobject.type_is_a(default, ptype):
                 raise TypeError("enum value %s must be an instance of %r" %
                                 (default, ptype))
 

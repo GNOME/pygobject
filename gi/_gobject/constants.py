@@ -21,8 +21,7 @@
 
 import sys
 
-import gobject._gobject
-_gobject = sys.modules['gobject._gobject']
+from . import _gobject
 
 # TYPE_INVALID defined in gobjectmodule.c
 TYPE_NONE = _gobject.type_from_name('void')

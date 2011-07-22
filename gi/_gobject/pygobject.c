@@ -200,7 +200,7 @@ typedef struct {
     guint index;
 } PyGPropsIter;
 
-PYGLIB_DEFINE_TYPE("gobject.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
+PYGLIB_DEFINE_TYPE("gi._gobject.GPropsIter", PyGPropsIter_Type, PyGPropsIter);
 
 static void
 pyg_props_iter_dealloc(PyGPropsIter *self)
@@ -360,7 +360,7 @@ set_property_from_pspec(GObject *obj,
     return TRUE;
 }
 
-PYGLIB_DEFINE_TYPE("gobject.GProps", PyGProps_Type, PyGProps);
+PYGLIB_DEFINE_TYPE("gi._gobject.GProps", PyGProps_Type, PyGProps);
 
 static int
 PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
@@ -454,7 +454,7 @@ static PySequenceMethods _PyGProps_as_sequence = {
     0
 };
 
-PYGLIB_DEFINE_TYPE("gobject.GPropsDescr", PyGPropsDescr_Type, PyObject);
+PYGLIB_DEFINE_TYPE("gi._gobject.GPropsDescr", PyGPropsDescr_Type, PyObject);
 
 static PyObject *
 pyg_props_descr_descr_get(PyObject *self, PyObject *obj, PyObject *type)
@@ -1023,7 +1023,7 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
 
 /* -------------- PyGObject behaviour ----------------- */
 
-PYGLIB_DEFINE_TYPE("gobject.GObject", PyGObject_Type, PyGObject);
+PYGLIB_DEFINE_TYPE("gi._gobject.GObject", PyGObject_Type, PyGObject);
 
 static void
 pygobject_dealloc(PyGObject *self)
@@ -1976,7 +1976,7 @@ static PyObject *
 pygobject_copy(PyGObject *self)
 {
     PyErr_SetString(PyExc_TypeError,
-		    "gobject.GObject descendants' instances are non-copyable");
+		    "GObject descendants' instances are non-copyable");
     return NULL;
 }
 
@@ -1984,7 +1984,7 @@ static PyObject *
 pygobject_deepcopy(PyGObject *self, PyObject *args)
 {
     PyErr_SetString(PyExc_TypeError,
-		    "gobject.GObject descendants' instances are non-copyable");
+		    "GObject descendants' instances are non-copyable");
     return NULL;
 }
 
@@ -2173,7 +2173,7 @@ typedef struct {
     gboolean have_floating_ref;
 } PyGObjectWeakRef;
 
-PYGLIB_DEFINE_TYPE("gobject.GObjectWeakRef", PyGObjectWeakRef_Type, PyGObjectWeakRef);
+PYGLIB_DEFINE_TYPE("gi._gobject.GObjectWeakRef", PyGObjectWeakRef_Type, PyGObjectWeakRef);
 
 static int
 pygobject_weak_ref_traverse(PyGObjectWeakRef *self, visitproc visit, void *arg)
@@ -2373,7 +2373,7 @@ pygobject_object_register_types(PyObject *d)
     descr = PyObject_New(PyObject, &PyGPropsDescr_Type);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "props", descr);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__module__",
-                        o=PYGLIB_PyUnicode_FromString("gobject._gobject"));
+                        o=PYGLIB_PyUnicode_FromString("gi._gobject._gobject"));
     Py_DECREF(o);
 
     /* GPropsIter */

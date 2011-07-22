@@ -2606,7 +2606,7 @@ pygobject_register_warnings(PyObject *d)
 }
 
 
-PYGLIB_MODULE_START(_gobject, "gobject._gobject")
+PYGLIB_MODULE_START(_gobject, "_gobject")
 {
     PyObject *d;
 

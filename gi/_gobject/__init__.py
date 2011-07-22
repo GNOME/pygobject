@@ -23,14 +23,14 @@
 
 import sys
 
-from glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
+from .._glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
      io_add_watch, source_remove, child_watch_add, markup_escape_text, \
      get_current_time, filename_display_name, filename_display_basename, \
      filename_from_utf8, get_application_name, set_application_name, \
      get_prgname, set_prgname, main_depth, Pid, GError, glib_version, \
      MainLoop, MainContext, main_context_default, IOChannel, Source, Idle, \
      Timeout, PollFD, OptionGroup, OptionContext, option, uri_list_extract_uris
-from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
+from .._glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      SPAWN_SEARCH_PATH, SPAWN_STDOUT_TO_DEV_NULL, SPAWN_STDERR_TO_DEV_NULL, \
      SPAWN_CHILD_INHERITS_STDIN, SPAWN_FILE_AND_ARGV_ZERO, PRIORITY_HIGH, \
      PRIORITY_DEFAULT, PRIORITY_HIGH_IDLE, PRIORITY_DEFAULT_IDLE, \
@@ -44,13 +44,18 @@ from glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
      OPTION_ERROR_UNKNOWN_OPTION, OPTION_ERROR_BAD_VALUE, \
      OPTION_ERROR_FAILED, OPTION_REMAINING, OPTION_ERROR
 
-from gobject.constants import *
-from gobject._gobject import *
+from .constants import *
+from ._gobject import *
+
+# we can't have pygobject 2 loaded at the same time we load the internal _gobject
+if 'gobject' is sys.modules:
+    raise ImportError("The gobject module is already imported.  PyGObject 3 can not be run in the same namespace as PyGObject 2")
+
 _PyGObject_API = _gobject._PyGObject_API
 
-from gobject.propertyhelper import property
+from .propertyhelper import property
 
-sys.modules['gobject.option'] = option
+sys.modules['gi._gobject.option'] = option
 
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"
@@ -112,6 +117,7 @@ class GObjectMeta(type):
             return
 
         type_register(cls, namespace.get('__gtype_name__'))
+
 _gobject._install_metaclass(GObjectMeta)
 
-del _gobject
+#del _gobject

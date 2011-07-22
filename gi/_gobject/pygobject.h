@@ -308,7 +308,7 @@ pygobject_init(int req_major, int req_minor, int req_micro)
 {
     PyObject *gobject, *cobject;
     
-    gobject = PyImport_ImportModule("gobject");
+    gobject = PyImport_ImportModule("gi._gobject");
     if (!gobject) {
         if (PyErr_Occurred())
         {
