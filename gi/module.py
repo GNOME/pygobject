@@ -24,6 +24,7 @@ from __future__ import absolute_import
 
 import os
 from . import _gobject
+from . import _glib
 
 try:
     maketrans = ''.maketrans
@@ -210,11 +211,37 @@ class IntrospectionModule(object):
 
         return list(result)
 
+class DynamicGLibModule(IntrospectionModule):
+    """Wrapper for the internal GLib module
+
+    This class allows us to access both the static internal PyGLib module and the GI GLib module
+    through the same interface.  It is returned when by importing GLib from the gi repository:
+
+    from gi.repository import GLib
+
+    We use this because some PyGI interfaces generated from the GIR require GLib types not wrapped
+    by the static bindings.  This also allows access to module attributes in a way that is more
+    familiar to GI application developers.
+    """
+
+    def __init__(self):
+        IntrospectionModule.__init__(self, namespace='GLib')
+
+    def __getattr__(self, name):
+        # first see if this attr is in the internal _gobject module
+        attr = getattr(_glib, name, None)
+
+        # if not in module assume request for an attr exported through GI
+        if attr is None:
+            attr = super(DynamicGLibModule, self).__getattr__(name)
+
+        return attr
+
 
 class DynamicGObjectModule(IntrospectionModule):
-    """Wrapper for the GObject module
+    """Wrapper for the internal GObject module
 
-    This class allows us to access both the static PyGObject module and the GI GObject module
+    This class allows us to access both the static internal PyGObject module and the GI GObject module
     through the same interface.  It is returned when by importing GObject from the gi repository:
 
     from gi.repository import GObject
@@ -239,7 +266,6 @@ class DynamicGObjectModule(IntrospectionModule):
             attr = super(DynamicGObjectModule, self).__getattr__(name)
 
         return attr
-
 
 class DynamicModule(object):
     def __init__(self, namespace):

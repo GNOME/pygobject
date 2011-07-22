@@ -25,7 +25,7 @@ import logging
 import sys
 
 from ._gi import Repository, RepositoryError
-from .module import DynamicModule, DynamicGObjectModule
+from .module import DynamicModule, DynamicGObjectModule, DynamicGLibModule
 
 
 repository = Repository.get_default()
@@ -59,9 +59,12 @@ class DynamicImporter(object):
 
         path, namespace = fullname.rsplit('.', 1)
 
-        # Workaround for GObject
+        # Workaround for GObject and GLib
         if namespace == 'GObject':
             sys.modules[fullname] = DynamicGObjectModule()
+            return sys.modules[fullname]
+        elif namespace == "GLib":
+            sys.modules[fullname] = DynamicGLibModule()
             return sys.modules[fullname]
 
         dynamic_module = DynamicModule(namespace)
