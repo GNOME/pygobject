@@ -11,8 +11,8 @@ os.environ['PYGTK_USE_GIL_STATE_API'] = ''
 sys.path.insert(0, os.path.dirname(__file__))
 sys.argv.append('--g-fatal-warnings')
 
-import gobject
-gobject.threads_init()
+from gi.repository import GObject
+GObject.threads_init()
 
 
 SKIP_FILES = ['runtests',

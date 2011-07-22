@@ -5,6 +5,7 @@ import unittest
 
 import glib
 
+from gi.repository import GObject
 
 class TestProcess(unittest.TestCase):
 
@@ -14,7 +15,7 @@ class TestProcess(unittest.TestCase):
 
     def testChildWatch(self):
         self.data = None
-        self.loop = glib.MainLoop()
+        self.loop = GObject.MainLoop()
         argv = [sys.executable, '-c', 'import sys']
         pid, stdin, stdout, stderr = glib.spawn_async(
             argv, flags=glib.SPAWN_DO_NOT_REAP_CHILD)

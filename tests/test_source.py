@@ -4,6 +4,7 @@ import unittest
 
 import glib
 
+from gi.repository import GObject
 
 class Idle(glib.Idle):
     def __init__(self, loop):
@@ -44,7 +45,7 @@ class TestSource(unittest.TestCase):
         timeout.attach()
 
     def testSources(self):
-        loop = glib.MainLoop()
+        loop = GObject.MainLoop()
 
         self.setup_timeout(loop)
 
@@ -64,7 +65,7 @@ class TestSource(unittest.TestCase):
     def testSourcePrepare(self):
         # this test may not terminate if prepare() is wrapped incorrectly
         dispatched = [False]
-        loop = glib.MainLoop()
+        loop = GObject.MainLoop()
 
         class CustomTimeout(glib.Source):
             def prepare(self):

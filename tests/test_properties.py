@@ -4,13 +4,13 @@ import sys
 import struct
 import unittest
 
-import gobject
-from gobject import GObject, GType, GEnum, new, PARAM_READWRITE, \
+from gi.repository import GObject
+from  gi.repository.GObject import GType, GEnum, new, PARAM_READWRITE, \
      PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
-from gobject.constants import \
+from gi.repository.GObject import \
      TYPE_INT, TYPE_UINT, TYPE_LONG, \
      TYPE_ULONG, TYPE_INT64, TYPE_UINT64
-from gobject.constants import \
+from gi.repository.GObject import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
 
@@ -25,18 +25,18 @@ else:
 
 from compathelper import _long
 
-class PropertyObject(GObject):
-    normal = gobject.property(type=str)
-    construct = gobject.property(
+class PropertyObject(GObject.GObject):
+    normal = GObject.property(type=str)
+    construct = GObject.property(
         type=str,
         flags=PARAM_READWRITE|PARAM_CONSTRUCT, default='default')
-    construct_only = gobject.property(
+    construct_only = GObject.property(
         type=str,
         flags=PARAM_READWRITE|PARAM_CONSTRUCT_ONLY)
-    uint64 = gobject.property(
+    uint64 = GObject.property(
         type=TYPE_UINT64, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
 
-    enum = gobject.property(
+    enum = GObject.property(
         type=Gio.SocketType, default=Gio.SocketType.STREAM)
 
 class TestProperties(unittest.TestCase):
@@ -123,7 +123,7 @@ class TestProperties(unittest.TestCase):
 
     def testUInt64DefaultValue(self):
         try:
-            class TimeControl(GObject):
+            class TimeControl(GObject.GObject):
                 __gproperties__ = {
                     'time': (TYPE_UINT64, 'Time', 'Time',
                              _long(0), (1<<64) - 1, _long(0),
@@ -153,12 +153,12 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, setattr, obj, 'enum', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'enum', object())
 
-        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType)
-        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
+        self.assertRaises(TypeError, GObject.property, type=Gio.SocketType)
+        self.assertRaises(TypeError, GObject.property, type=Gio.SocketType,
                           default=Gio.SocketProtocol.TCP)
-        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
+        self.assertRaises(TypeError, GObject.property, type=Gio.SocketType,
                           default=object())
-        self.assertRaises(TypeError, gobject.property, type=Gio.SocketType,
+        self.assertRaises(TypeError, GObject.property, type=Gio.SocketType,
                           default=1)
 
     def testRange(self):
@@ -192,12 +192,12 @@ class TestProperties(unittest.TestCase):
                           PARAM_READABLE | PARAM_WRITABLE)
             return d
 
-        class RangeCheck(GObject):
+        class RangeCheck(GObject.GObject):
             __gproperties__ = build_gproperties(types)
 
             def __init__(self):
                 self.values = {}
-                GObject.__init__(self)
+                GObject.GObject.__init__(self)
 
             def do_set_property(self, pspec, value):
                 self.values[pspec.name] = value
@@ -240,11 +240,11 @@ class TestProperties(unittest.TestCase):
 
 class TestProperty(unittest.TestCase):
     def testSimple(self):
-        class C(gobject.GObject):
-            str = gobject.property(type=str)
-            int = gobject.property(type=int)
-            float = gobject.property(type=float)
-            long = gobject.property(type=_long)
+        class C(GObject.GObject):
+            str = GObject.property(type=str)
+            int = GObject.property(type=int)
+            float = GObject.property(type=float)
+            long = GObject.property(type=_long)
 
         self.failUnless(hasattr(C.props, 'str'))
         self.failUnless(hasattr(C.props, 'int'))
@@ -269,24 +269,24 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.long, _long(100))
 
     def testCustomGetter(self):
-        class C(gobject.GObject):
+        class C(GObject.GObject):
             def get_prop(self):
                 return 'value'
-            prop = gobject.property(getter=get_prop)
+            prop = GObject.property(getter=get_prop)
 
         o = C()
         self.assertEqual(o.prop, 'value')
         self.assertRaises(TypeError, setattr, o, 'prop', 'xxx')
 
     def testCustomSetter(self):
-        class C(gobject.GObject):
+        class C(GObject.GObject):
             def set_prop(self, value):
                 self._value = value
-            prop = gobject.property(setter=set_prop)
+            prop = GObject.property(setter=set_prop)
 
             def __init__(self):
                 self._value = None
-                gobject.GObject.__init__(self)
+                GObject.GObject.__init__(self)
 
         o = C()
         self.assertEquals(o._value, None)
@@ -295,26 +295,26 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, getattr, o, 'prop')
 
     def testErrors(self):
-        self.assertRaises(TypeError, gobject.property, type='str')
-        self.assertRaises(TypeError, gobject.property, nick=False)
-        self.assertRaises(TypeError, gobject.property, blurb=False)
+        self.assertRaises(TypeError, GObject.property, type='str')
+        self.assertRaises(TypeError, GObject.property, nick=False)
+        self.assertRaises(TypeError, GObject.property, blurb=False)
         # this never fail while bool is a subclass of int
         # >>> bool.__bases__
         # (<type 'int'>,)
-        # self.assertRaises(TypeError, gobject.property, type=bool, default=0)
-        self.assertRaises(TypeError, gobject.property, type=bool, default='ciao mamma')
-        self.assertRaises(TypeError, gobject.property, type=bool)
-        self.assertRaises(TypeError, gobject.property, type=object, default=0)
-        self.assertRaises(TypeError, gobject.property, type=complex)
-        self.assertRaises(TypeError, gobject.property, flags=-10)
+        # self.assertRaises(TypeError, GObject.property, type=bool, default=0)
+        self.assertRaises(TypeError, GObject.property, type=bool, default='ciao mamma')
+        self.assertRaises(TypeError, GObject.property, type=bool)
+        self.assertRaises(TypeError, GObject.property, type=object, default=0)
+        self.assertRaises(TypeError, GObject.property, type=complex)
+        self.assertRaises(TypeError, GObject.property, flags=-10)
 
     def testDefaults(self):
-        p1 = gobject.property(type=bool, default=True)
-        p2 = gobject.property(type=bool, default=False)
+        p1 = GObject.property(type=bool, default=True)
+        p2 = GObject.property(type=bool, default=False)
 
     def testNameWithUnderscore(self):
-        class C(gobject.GObject):
-            prop_name = gobject.property(type=int)
+        class C(GObject.GObject):
+            prop_name = GObject.property(type=int)
         o = C()
         o.prop_name = 10
         self.assertEqual(o.prop_name, 10)
@@ -335,25 +335,25 @@ class TestProperty(unittest.TestCase):
 
         for gtype, min, max in types:
             # Normal, everything is alright
-            prop = gobject.property(type=gtype, minimum=min, maximum=max)
-            subtype = type('', (gobject.GObject,),
+            prop = GObject.property(type=gtype, minimum=min, maximum=max)
+            subtype = type('', (GObject.GObject,),
                          dict(prop=prop))
             self.assertEqual(subtype.props.prop.minimum, min)
             self.assertEqual(subtype.props.prop.maximum, max)
 
             # Lower than minimum
             self.assertRaises(TypeError,
-                              gobject.property, type=gtype, minimum=min-1,
+                              GObject.property, type=gtype, minimum=min-1,
                               maximum=max)
 
             # Higher than maximum
             self.assertRaises(TypeError,
-                              gobject.property, type=gtype, minimum=min,
+                              GObject.property, type=gtype, minimum=min,
                               maximum=max+1)
 
     def testMultipleInstances(self):
-        class C(gobject.GObject):
-            prop = gobject.property(type=str, default='default')
+        class C(GObject.GObject):
+            prop = GObject.property(type=str, default='default')
 
         o1 = C()
         o2 = C()
@@ -364,8 +364,8 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o2.prop, 'default')
 
     def testObjectProperty(self):
-        class PropertyObject(GObject):
-            obj = gobject.property(type=GObject)
+        class PropertyObject(GObject.GObject):
+            obj = GObject.property(type=GObject.GObject)
 
         pobj1 = PropertyObject()
         obj1_hash = hash(pobj1)
@@ -377,21 +377,21 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(hash(pobj1), obj1_hash)
 
     def testObjectSubclassProperty(self):
-        class ObjectSubclass(GObject):
+        class ObjectSubclass(GObject.GObject):
             __gtype_name__ = 'ObjectSubclass'
 
-        class PropertyObjectSubclass(GObject):
-            obj = gobject.property(type=ObjectSubclass)
+        class PropertyObjectSubclass(GObject.GObject):
+            obj = GObject.property(type=ObjectSubclass)
 
         obj1 = PropertyObjectSubclass(obj=ObjectSubclass())
 
     def testPropertySubclass(self):
         # test for #470718
-        class A(GObject):
-            prop1 = gobject.property(type=int)
+        class A(GObject.GObject):
+            prop1 = GObject.property(type=int)
 
         class B(A):
-            prop2 = gobject.property(type=int)
+            prop2 = GObject.property(type=int)
 
         b = B()
         b.prop2 = 10
@@ -401,15 +401,15 @@ class TestProperty(unittest.TestCase):
 
     def testPropertySubclassCustomSetter(self):
         # test for #523352
-        class A(GObject):
+        class A(GObject.GObject):
             def get_first(self):
                 return 'first'
-            first = gobject.property(type=str, getter=get_first)
+            first = GObject.property(type=str, getter=get_first)
 
         class B(A):
             def get_second(self):
                 return 'second'
-            second = gobject.property(type=str, getter=get_second)
+            second = GObject.property(type=str, getter=get_second)
 
         a = A()
         self.assertEquals(a.first, 'first')
@@ -423,10 +423,10 @@ class TestProperty(unittest.TestCase):
 
     def testPropertySubclassCustomSetterError(self):
         try:
-            class A(GObject):
+            class A(GObject.GObject):
                 def get_first(self):
                     return 'first'
-                first = gobject.property(type=str, getter=get_first)
+                first = GObject.property(type=str, getter=get_first)
 
                 def do_get_property(self, pspec):
                     pass
@@ -437,9 +437,9 @@ class TestProperty(unittest.TestCase):
 
     # Bug 587637.
     def test_float_min(self):
-        gobject.property(type=float, minimum=-1)
-        gobject.property(type=gobject.TYPE_FLOAT, minimum=-1)
-        gobject.property(type=gobject.TYPE_DOUBLE, minimum=-1)
+        GObject.property(type=float, minimum=-1)
+        GObject.property(type=GObject.TYPE_FLOAT, minimum=-1)
+        GObject.property(type=GObject.TYPE_DOUBLE, minimum=-1)
 
     # Bug 644039
     def testReferenceCount(self):

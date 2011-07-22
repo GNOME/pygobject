@@ -1,17 +1,17 @@
-import gobject
+from gi.repository import GObject
 
-class PyGObject(gobject.GObject):
+class PyGObject(GObject.GObject):
     __gtype_name__ = 'PyGObject'
     __gproperties__ = {
-        'label': (gobject.TYPE_STRING,
+        'label': (GObject.TYPE_STRING,
                   'label property',
                   'the label of the object',
-                  'default', gobject.PARAM_READWRITE),
+                  'default', GObject.PARAM_READWRITE),
         }
 
     def __init__(self):
         self._props = {}
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
         self.set_property('label', 'hello')
 
     def do_set_property(self, name, value):

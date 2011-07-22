@@ -12,7 +12,6 @@ import locale
 import subprocess
 from gi.repository import GObject
 
-import gobject
 from gi.repository import GIMarshallingTests
 
 from compathelper import _bytes
@@ -1587,7 +1586,8 @@ class TestPythonGObject(unittest.TestCase):
         # compare the same enum from both the pygobject attrs and gi GObject attrs
         self.assertEquals(GObject.SIGNAL_ACTION, GObject.SignalFlags.ACTION)
         # compare a static gobject attr with a dynamic GObject attr
-        self.assertEquals(GObject.GObject, gobject.GObject)
+        import gi._gobject
+        self.assertEquals(GObject.GObject, gi._gobject.GObject)
 
     def test_subobject_non_vfunc_do_method(self):
         class PythonObjectWithNonVFuncDoMethod:

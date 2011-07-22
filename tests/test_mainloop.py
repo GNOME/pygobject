@@ -6,6 +6,7 @@ import select
 import unittest
 
 import glib
+from gi.repository import GObject
 
 from compathelper import _bytes
 
@@ -24,7 +25,7 @@ class TestMainLoop(unittest.TestCase):
             loop.quit()
             raise Exception("deadbabe")
 
-        loop = glib.MainLoop()
+        loop = GObject.MainLoop()
         glib.child_watch_add(pid, child_died, loop)
 
         os.close(pipe_r)

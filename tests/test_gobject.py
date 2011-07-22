@@ -2,38 +2,39 @@
 
 import unittest
 
-import gobject
+from gi.repository import GObject
 import sys
 import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
     def testGObjectModule(self):
-        obj = gobject.GObject()
+        obj = GObject.GObject()
+
         self.assertEquals(obj.__module__,
-                          'gobject._gobject')
+                          'gi._gobject._gobject')
 
 
 class TestReferenceCounting(unittest.TestCase):
     def testRegularObject(self):
-        obj = gobject.GObject()
+        obj = GObject.GObject()
         self.assertEquals(obj.__grefcount__, 1)
 
-        obj = gobject.new(gobject.GObject)
+        obj = GObject.new(GObject.GObject)
         self.assertEquals(obj.__grefcount__, 1)
 
     def testFloatingWithSinkFunc(self):
         obj = testhelper.FloatingWithSinkFunc()
         self.assertEquals(obj.__grefcount__, 1)
 
-        obj = gobject.new(testhelper.FloatingWithSinkFunc)
+        obj = GObject.new(testhelper.FloatingWithSinkFunc)
         self.assertEquals(obj.__grefcount__, 1)
 
     def testFloatingWithoutSinkFunc(self):
         obj = testhelper.FloatingWithoutSinkFunc()
         self.assertEquals(obj.__grefcount__, 1)
 
-        obj = gobject.new(testhelper.FloatingWithoutSinkFunc)
+        obj = GObject.new(testhelper.FloatingWithoutSinkFunc)
         self.assertEquals(obj.__grefcount__, 1)
 
     def testOwnedByLibrary(self):
@@ -71,7 +72,7 @@ class TestReferenceCounting(unittest.TestCase):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
-        obj = gobject.new(testhelper.OwnedByLibrary)
+        obj = GObject.new(testhelper.OwnedByLibrary)
         self.assertEquals(obj.__grefcount__, 2)
 
         # We ask the library to release its reference, so the only
@@ -81,7 +82,7 @@ class TestReferenceCounting(unittest.TestCase):
         self.assertEquals(obj.__grefcount__, 1)
 
     def testOwnedByLibraryOutOfScopeUsingGobjectNew(self):
-        obj = gobject.new(testhelper.OwnedByLibrary)
+        obj = GObject.new(testhelper.OwnedByLibrary)
         self.assertEquals(obj.__grefcount__, 2)
 
         # We are manually taking the object out of scope. This means
@@ -134,7 +135,7 @@ class TestReferenceCounting(unittest.TestCase):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
-        obj = gobject.new(testhelper.FloatingAndSunk)
+        obj = GObject.new(testhelper.FloatingAndSunk)
         self.assertEquals(obj.__grefcount__, 2)
 
         # We ask the library to release its reference, so the only
@@ -144,7 +145,7 @@ class TestReferenceCounting(unittest.TestCase):
         self.assertEquals(obj.__grefcount__, 1)
 
     def testFloatingAndSunkOutOfScopeUsingGObjectNew(self):
-        obj = gobject.new(testhelper.FloatingAndSunk)
+        obj = GObject.new(testhelper.FloatingAndSunk)
         self.assertEquals(obj.__grefcount__, 2)
 
         # We are manually taking the object out of scope. This means
@@ -161,7 +162,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEquals(obj.__grefcount__, 1)
 
-class A(gobject.GObject):
+class A(GObject.GObject):
     def __init__(self):
         super(A, self).__init__()
 
@@ -170,11 +171,11 @@ class TestPythonReferenceCounting(unittest.TestCase):
     # the GC, and one for the bound variable in the local scope.
 
     def testNewInstanceHasTwoRefs(self):
-        obj = gobject.GObject()
+        obj = GObject.GObject()
         self.assertEquals(sys.getrefcount(obj), 2)
 
     def testNewInstanceHasTwoRefsUsingGObjectNew(self):
-        obj = gobject.new(gobject.GObject)
+        obj = GObject.new(GObject.GObject)
         self.assertEquals(sys.getrefcount(obj), 2)
 
     def testNewSubclassInstanceHasTwoRefs(self):
@@ -182,5 +183,5 @@ class TestPythonReferenceCounting(unittest.TestCase):
         self.assertEquals(sys.getrefcount(obj), 2)
 
     def testNewSubclassInstanceHasTwoRefsUsingGObjectNew(self):
-        obj = gobject.new(A)
+        obj = GObject.new(A)
         self.assertEquals(sys.getrefcount(obj), 2)

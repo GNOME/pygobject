@@ -534,8 +534,8 @@ class TestGtk(unittest.TestCase):
         class SignalTest(GObject.GObject):
             __gtype_name__ = "GIOverrideSignalTest"
             __gsignals__ = {
-                "test-signal": (GObject.SIGNAL_RUN_FIRST,
-                                GObject.TYPE_NONE,
+                "test-signal": (GObject.SignalFlags.RUN_FIRST,
+                                None,
                                 []),
             }
 
@@ -1293,7 +1293,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals('Hello World', text)
 
     def test_label(self):
-        label = Gtk.Label('Hello')
+        label = Gtk.Label(label='Hello')
         self.assertEquals(label.get_text(), 'Hello')
 
     def adjustment_check(self, adjustment, value=0.0, lower=0.0, upper=0.0,
@@ -1344,7 +1344,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(table.get_size(), (2,3))
         self.assertEquals(table.get_homogeneous(), True)
 
-        label = Gtk.Label('Hello')
+        label = Gtk.Label(label='Hello')
         table.attach(label, 0, 1, 0, 1)
         self.assertEquals(label, table.get_children()[0])
 

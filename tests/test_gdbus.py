@@ -6,7 +6,7 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
-import gobject
+from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
 
@@ -67,7 +67,7 @@ class TestGDBusClient(unittest.TestCase):
             finally:
                 user_data['main_loop'].quit()
 
-        main_loop = gobject.MainLoop()
+        main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
         self.dbus_proxy.call('ListNames', None, 
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None,
@@ -89,7 +89,7 @@ class TestGDBusClient(unittest.TestCase):
             finally:
                 user_data['main_loop'].quit()
 
-        main_loop = gobject.MainLoop()
+        main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
         self.dbus_proxy.call('UnknownMethod', None,
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None, call_done, data)
@@ -159,7 +159,7 @@ class TestGDBusClient(unittest.TestCase):
             user_data['result'] = result
             user_data['main_loop'].quit()
 
-        main_loop = gobject.MainLoop()
+        main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
         self.dbus_proxy.ListNames('()', result_handler=call_done,
                 user_data=data)
@@ -176,7 +176,7 @@ class TestGDBusClient(unittest.TestCase):
             user_data['result'] = result
             user_data['main_loop'].quit()
 
-        main_loop = gobject.MainLoop()
+        main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
         self.dbus_proxy.ListNames('(s)', 'invalid_argument',
                 result_handler=call_done, user_data=data)
@@ -195,7 +195,7 @@ class TestGDBusClient(unittest.TestCase):
             user_data['error'] = error
             user_data['main_loop'].quit()
 
-        main_loop = gobject.MainLoop()
+        main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
         self.dbus_proxy.ListNames('(s)', 'invalid_argument',
                 result_handler=call_done, error_handler=call_error,
