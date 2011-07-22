@@ -59,15 +59,14 @@ class DynamicImporter(object):
 
         path, namespace = fullname.rsplit('.', 1)
 
-        # Workaround for GObject and GLib
+        # Special case GObject and GLib
         if namespace == 'GObject':
-            sys.modules[fullname] = DynamicGObjectModule()
-            return sys.modules[fullname]
+            dynamic_module = DynamicGObjectModule()
         elif namespace == "GLib":
-            sys.modules[fullname] = DynamicGLibModule()
-            return sys.modules[fullname]
+            dynamic_module = DynamicGLibModule()
+        else:
+            dynamic_module = DynamicModule(namespace)
 
-        dynamic_module = DynamicModule(namespace)
         modules[namespace] = dynamic_module
 
         dynamic_module.__file__ = '<%s>' % fullname
