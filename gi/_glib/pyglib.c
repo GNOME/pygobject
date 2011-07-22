@@ -40,7 +40,7 @@ pyglib_init(void)
 {
     PyObject *glib, *cobject;
     
-    glib = PyImport_ImportModule("glib");
+    glib = PyImport_ImportModule("gi._glib");
     if (!glib) {
 	if (PyErr_Occurred()) {
 	    PyObject *type, *value, *traceback;
@@ -51,22 +51,22 @@ pyglib_init(void)
 	    Py_XDECREF(value);
 	    Py_XDECREF(traceback);
 	    PyErr_Format(PyExc_ImportError,
-			 "could not import glib (error was: %s)",
+			 "could not import gi._glib (error was: %s)",
 			 PYGLIB_PyUnicode_AsString(py_orig_exc));
 	    Py_DECREF(py_orig_exc);
         } else {
 	    PyErr_SetString(PyExc_ImportError,
-			    "could not import glib (no error given)");
+			    "could not import gi._glib (no error given)");
 	}
 	return;
     }
     
     cobject = PyObject_GetAttrString(glib, "_PyGLib_API");
     if (cobject && PYGLIB_CPointer_Check(cobject))
-	_PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(cobject, "glib._PyGLib_API");
+	_PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(cobject, "gi._glib._PyGLib_API");
     else {
 	PyErr_SetString(PyExc_ImportError,
-			"could not import glib (could not find _PyGLib_API object)");
+			"could not import gi._glib (could not find _PyGLib_API object)");
 	Py_DECREF(glib);
 	return;
     }
@@ -75,7 +75,7 @@ pyglib_init(void)
 void
 pyglib_init_internal(PyObject *api)
 {
-    _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "glib._PyGLib_API");
+    _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "gi._glib._PyGLib_API");
 }
 
 gboolean
@@ -338,20 +338,20 @@ pyglib_gerror_exception_check(GError **error)
 
     py_message = PyObject_GetAttrString(value, "message");
     if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
-        bad_gerror_message = "glib.GError instances must have a 'message' string attribute";
+        bad_gerror_message = "gi._glib.GError instances must have a 'message' string attribute";
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
     if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
-        bad_gerror_message = "glib.GError instances must have a 'domain' string attribute";
+        bad_gerror_message = "gi._glib.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         goto bad_gerror;
     }
 
     py_code = PyObject_GetAttrString(value, "code");
     if (!py_code || !PYGLIB_PyLong_Check(py_code)) {
-        bad_gerror_message = "glib.GError instances must have a 'code' int attribute";
+        bad_gerror_message = "gi._glib.GError instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
         goto bad_gerror;

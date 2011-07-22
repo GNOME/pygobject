@@ -19,7 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 # USA
 
-from glib._glib import *
+from ._glib import *
+
 _PyGLib_API = _glib._PyGLib_API
 
 del _glib

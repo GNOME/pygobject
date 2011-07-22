@@ -246,7 +246,7 @@ iowatch_marshal(GIOChannel *source,
     } else {
         if (ret == Py_None) {
             if (PyErr_Warn(PyExc_Warning,
-			   "glib.io_add_watch callback returned None; "
+			   "_glib.io_add_watch callback returned None; "
                            "should return True/False")) {
                 PyErr_Print();
             }
@@ -373,7 +373,7 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
     if (!PyCallable_Check(func)) {
         PyErr_SetString(PyExc_TypeError,
-                        "glib.child_watch_add: second argument must be callable");
+                        "_glib.child_watch_add: second argument must be callable");
         return NULL;
     }
 
@@ -800,7 +800,7 @@ pyglib_register_api(PyObject *d)
 
     /* for addon libraries ... */
     PyDict_SetItemString(d, "_PyGLib_API",
-			 o=PYGLIB_CPointer_WrapPointer(&pyglib_api,"glib._PyGLib_API"));
+			 o=PYGLIB_CPointer_WrapPointer(&pyglib_api,"gi._glib._PyGLib_API"));
     Py_DECREF(o);
     
     pyglib_init_internal(o);
@@ -817,7 +817,7 @@ pyglib_register_error(PyObject *d)
      * GError has also an "message" attribute.
      */
     PyDict_SetItemString(dict, "message", Py_None);
-    gerror_class = PyErr_NewException("glib.GError", PyExc_RuntimeError, dict);
+    gerror_class = PyErr_NewException("gi._glib.GError", PyExc_RuntimeError, dict);
     Py_DECREF(dict);
 
     PyDict_SetItemString(d, "GError", gerror_class);
@@ -950,7 +950,7 @@ pyglib_register_constants(PyObject *m)
 			       (char*) g_quark_to_string(G_OPTION_ERROR));
 }
 
-PYGLIB_MODULE_START(_glib, "glib._glib")
+PYGLIB_MODULE_START(_glib, "_glib")
 {
     PyObject *d = PyModule_GetDict(module);
 

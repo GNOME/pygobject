@@ -41,8 +41,8 @@ else:
     _basestring = basestring
     _bytes = str
 
-import glib
-_glib = sys.modules['glib._glib']
+import gi._glib
+_glib = sys.modules['gi._glib._glib']
 
 __all__ = [
     "OptParseError",
