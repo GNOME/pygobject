@@ -3,9 +3,7 @@
 import sys
 import unittest
 
-import glib
-
-from gi.repository import GObject
+from gi.repository import GLib
 
 class TestProcess(unittest.TestCase):
 
@@ -15,11 +13,11 @@ class TestProcess(unittest.TestCase):
 
     def testChildWatch(self):
         self.data = None
-        self.loop = GObject.MainLoop()
+        self.loop = GLib.MainLoop()
         argv = [sys.executable, '-c', 'import sys']
-        pid, stdin, stdout, stderr = glib.spawn_async(
-            argv, flags=glib.SPAWN_DO_NOT_REAP_CHILD)
+        pid, stdin, stdout, stderr = GLib.spawn_async(
+            argv, flags=GLib.SPAWN_DO_NOT_REAP_CHILD)
         pid.close()
-        glib.child_watch_add(pid, self._child_watch_cb, 12345)
+        GLib.child_watch_add(pid, self._child_watch_cb, 12345)
         self.loop.run()
         self.assertEqual(self.data, 12345)

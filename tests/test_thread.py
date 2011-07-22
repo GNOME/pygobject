@@ -1,15 +1,13 @@
 # -*- Mode: Python -*-
 
 import unittest
-
-import glib
 import testhelper
 
-from gi.repository import GObject
+from gi.repository import GLib
 
 class TestThread(unittest.TestCase):
     def setUp(self):
-        self.main = GObject.MainLoop()
+        self.main = GLib.MainLoop()
 
     def from_thread_cb(self, test, enum):
         assert test == self.obj
@@ -22,8 +20,8 @@ class TestThread(unittest.TestCase):
         self.obj.emit('emit-signal')
 
     def testExtensionModule(self):
-        glib.idle_add(self.idle_cb)
-        GObject.timeout_add(50, self.timeout_cb)
+        GLib.idle_add(self.idle_cb)
+        GLib.timeout_add(50, self.timeout_cb)
         self.main.run()
 
     def timeout_cb(self):

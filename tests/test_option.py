@@ -9,7 +9,8 @@ try:
 except ImportError:
     from io import StringIO
 
-from glib.option import OptionParser, OptionGroup, OptionValueError, \
+# FIXME: we need a way to import the options module from a public module
+from gi._glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError
 
 from compathelper import _bytes

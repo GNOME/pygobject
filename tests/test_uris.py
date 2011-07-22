@@ -1,6 +1,6 @@
 import unittest
 
-import glib
+from gi.repository import GLib
 
 class TestUris(unittest.TestCase):
     def testExtractUris(self):
@@ -8,7 +8,7 @@ class TestUris(unittest.TestCase):
                         "http://www.huh.org/books/foo.html\n" + \
                         "http://www.huh.org/books/foo.pdf\n" + \
                         "ftp://ftp.foo.org/books/foo.txt\n"
-        uri_list = glib.uri_list_extract_uris(uri_list_text)
+        uri_list = GLib.uri_list_extract_uris(uri_list_text)
         assert uri_list[0] == "http://www.huh.org/books/foo.html"
         assert uri_list[1] == "http://www.huh.org/books/foo.pdf"
         assert uri_list[2] == "ftp://ftp.foo.org/books/foo.txt"
