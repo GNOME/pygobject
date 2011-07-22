@@ -30,7 +30,7 @@ _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(PYTHON_LIBS) \
-	$(top_builddir)/gi/_glib/libpyglib-2.0-@PYTHON_BASENAME@.la
+	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 
 _gobject_la_SOURCES =           \
         gobjectmodule.c         \

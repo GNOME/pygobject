@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = 1.7
 INCLUDES = $(PYTHON_INCLUDES) $(GLIB_CFLAGS) -DPY_SSIZE_T_CLEAN
 
-lib_LTLIBRARIES = libpyglib-2.0-@PYTHON_BASENAME@.la
+lib_LTLIBRARIES = libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 
 pkgpyexecdir = $(pyexecdir)
 
@@ -16,9 +16,9 @@ if PLATFORM_WIN32
 common_ldflags += -no-undefined
 endif
 
-libpyglib_2_0_@PYTHON_BASENAME@_la_CFLAGS = $(GLIB_CFLAGS)
-libpyglib_2_0_@PYTHON_BASENAME@_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
-libpyglib_2_0_@PYTHON_BASENAME@_la_SOURCES = 	\
+libpyglib_gi_2_0_@PYTHON_BASENAME@_la_CFLAGS = $(GLIB_CFLAGS)
+libpyglib_gi_2_0_@PYTHON_BASENAME@_la_LIBADD = $(GLIB_LIBS) $(FFI_LIBS)
+libpyglib_gi_2_0_@PYTHON_BASENAME@_la_SOURCES = 	\
 	pyglib.c		\
 	pyglib.h		\
 	pyglib-private.h 	\
@@ -26,7 +26,7 @@ libpyglib_2_0_@PYTHON_BASENAME@_la_SOURCES = 	\
 
 _glib_la_CFLAGS = $(GLIB_CFLAGS)
 _glib_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_glib|PyInit__glib"
-_glib_la_LIBADD = $(GLIB_LIBS) $(PYTHON_LIBS) libpyglib-2.0-@PYTHON_BASENAME@.la
+_glib_la_LIBADD = $(GLIB_LIBS) $(PYTHON_LIBS) libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 _glib_la_SOURCES = 	 	\
 	glibmodule.c	 	\
 	pygiochannel.c 	 	\
