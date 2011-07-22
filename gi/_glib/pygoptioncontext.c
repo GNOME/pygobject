@@ -28,7 +28,7 @@
 #include "pyglib-private.h"
 #include "pygoptioncontext.h"
 
-PYGLIB_DEFINE_TYPE("glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
+PYGLIB_DEFINE_TYPE("gi._glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
 /**
  * pyg_option_context_new:
@@ -58,7 +58,7 @@ pyg_option_context_init(PyGOptionContext *self,
 {
     char *parameter_string;
 
-    if (!PyArg_ParseTuple(args, "s:glib.GOptionContext.__init__",
+    if (!PyArg_ParseTuple(args, "s:gi._glib.GOptionContext.__init__",
                           &parameter_string))
         return -1;
 

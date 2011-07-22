@@ -233,7 +233,7 @@ pyg_signal_watch_new(void)
     return source;
 }
 
-PYGLIB_DEFINE_TYPE("glib.MainLoop", PyGMainLoop_Type, PyGMainLoop)
+PYGLIB_DEFINE_TYPE("gi._glib.MainLoop", PyGMainLoop_Type, PyGMainLoop)
 
 static int
 pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
@@ -251,7 +251,7 @@ pyg_main_loop_init(PyGMainLoop *self, PyObject *args, PyObject *kwargs)
     if (!PyObject_TypeCheck(py_context, &PyGMainContext_Type) &&
 	py_context != Py_None) {
 	PyErr_SetString(PyExc_TypeError,
-			"context must be a glib.MainContext or None");
+			"context must be a gi._glib.MainContext or None");
 	return -1;
     }
 

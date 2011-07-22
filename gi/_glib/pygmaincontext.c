@@ -31,7 +31,7 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 
-PYGLIB_DEFINE_TYPE("glib.MainContext", PyGMainContext_Type, PyGMainContext)
+PYGLIB_DEFINE_TYPE("gi._glib.MainContext", PyGMainContext_Type, PyGMainContext)
 
 /**
  * pyg_main_context_new:

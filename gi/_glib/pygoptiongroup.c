@@ -28,7 +28,7 @@
 #include "pyglib-private.h"
 #include "pygoptiongroup.h"
 
-PYGLIB_DEFINE_TYPE("glib.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
+PYGLIB_DEFINE_TYPE("gi._glib.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 
 /**
  * pyg_option_group_new:
@@ -62,7 +62,7 @@ check_if_owned(PyGOptionGroup *self)
     if (self->other_owner)
     {
         PyErr_SetString(PyExc_ValueError, "The GOptionGroup was not created by "
-                        "glib.OptionGroup(), so operation is not possible.");
+                        "gi._glib.OptionGroup(), so operation is not possible.");
         return TRUE;
     }
     return FALSE;

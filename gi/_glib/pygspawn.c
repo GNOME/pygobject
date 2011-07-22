@@ -32,7 +32,7 @@ struct _PyGChildSetupData {
     PyObject *data;
 };
 
-PYGLIB_DEFINE_TYPE("glib.Pid", PyGPid_Type, PYGLIB_PyLongObject)
+PYGLIB_DEFINE_TYPE("gi._glib.Pid", PyGPid_Type, PYGLIB_PyLongObject)
 
 static PyObject *
 pyg_pid_close(PyObject *self, PyObject *args, PyObject *kwargs)
@@ -57,7 +57,7 @@ pyg_pid_free(PyObject *gpid)
 static int
 pyg_pid_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyErr_SetString(PyExc_TypeError, "glib.Pid cannot be manually instantiated");
+    PyErr_SetString(PyExc_TypeError, "gi._glib.Pid cannot be manually instantiated");
     return -1;
 }
 
@@ -117,7 +117,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     GPid child_pid = -1;
     Py_ssize_t len, i;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:glib.spawn_async",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OsiOOOOO:gi._glib.spawn_async",
                                      kwlist,
                                      &pyargv, &pyenvp, &working_directory, &flags,
                                      &func, &user_data,
@@ -142,7 +142,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
       /* parse argv */
     if (!PySequence_Check(pyargv)) {
         PyErr_SetString(PyExc_TypeError,
-                        "glib.spawn_async: "
+                        "gi._glib.spawn_async: "
 			"first argument must be a sequence of strings");
         return NULL;
     }
@@ -152,7 +152,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
         PyObject *tmp = PySequence_ITEM(pyargv, i);
         if (!PYGLIB_PyUnicode_Check(tmp)) {
             PyErr_SetString(PyExc_TypeError,
-                            "glib.spawn_async: "
+                            "gi._glib.spawn_async: "
 			    "first argument must be a sequence of strings");
             g_free(argv);
             Py_XDECREF(tmp);
@@ -166,7 +166,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
     if (pyenvp) {
         if (!PySequence_Check(pyenvp)) {
             PyErr_SetString(PyExc_TypeError,
-                            "glib.spawn_async: "
+                            "gi._glib.spawn_async: "
 			    "second argument must be a sequence of strings");
             g_free(argv);
             return NULL;
@@ -177,7 +177,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
             PyObject *tmp = PySequence_ITEM(pyenvp, i);
             if (!PYGLIB_PyUnicode_Check(tmp)) {
                 PyErr_SetString(PyExc_TypeError,
-                                "glib.spawn_async: "
+                                "gi._glib.spawn_async: "
 				"second argument must be a sequence of strings");
                 g_free(envp);
                 Py_XDECREF(tmp);

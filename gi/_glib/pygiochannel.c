@@ -18,7 +18,7 @@ typedef struct {
     int softspace;         /* to make print >> chan, "foo" ... work */
 } PyGIOChannel;
 
-PYGLIB_DEFINE_TYPE("glib.IOChannel", PyGIOChannel_Type, PyGIOChannel)
+PYGLIB_DEFINE_TYPE("gi._glib.IOChannel", PyGIOChannel_Type, PyGIOChannel)
 
 static PyObject*
 py_io_channel_next(PyGIOChannel *self)
@@ -87,7 +87,7 @@ py_io_channel_shutdown(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     PyObject* flush = Py_True;
     GError* error = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|O:glib.IOChannel.shutdown", kwlist, &flush))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|O:gi._glib.IOChannel.shutdown", kwlist, &flush))
         return NULL;
 	
     ret = g_io_channel_shutdown(self->channel, PyObject_IsTrue(flush), &error);
@@ -106,7 +106,7 @@ py_io_channel_set_buffer_size(PyGIOChannel* self, PyObject *args, PyObject *kwar
     static char *kwlist[] = { "size", NULL };
     int size;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:glib.IOChannel.set_buffer_size", kwlist, &size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:gi._glib.IOChannel.set_buffer_size", kwlist, &size))
         return NULL;
 	
     g_io_channel_set_buffer_size(self->channel, size);
@@ -127,7 +127,7 @@ py_io_channel_set_buffered(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     static char *kwlist[] = { "buffered", NULL };
     int buffered;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:glib.IOChannel.set_buffered", kwlist, &buffered))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:gi._glib.IOChannel.set_buffered", kwlist, &buffered))
         return NULL;
 	
     g_io_channel_set_buffered(self->channel, buffered);
@@ -149,7 +149,7 @@ py_io_channel_set_encoding(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     const char* encoding;
     GError* error = NULL;
     
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "z:glib.IOChannel.set_encoding", kwlist, &encoding))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "z:gi._glib.IOChannel.set_encoding", kwlist, &encoding))
         return NULL;
     
     g_io_channel_set_encoding(self->channel, encoding, &error);
@@ -185,7 +185,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GError* error = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:glib.IOChannel.read", kwlist, &max_count))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:gi._glib.IOChannel.read", kwlist, &max_count))
         return NULL;
 	
     if (max_count == 0)
@@ -266,7 +266,7 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GError* error = NULL;
     GIOStatus status;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#:glib.IOChannel.write",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#:gi._glib.IOChannel.write",
                                      kwlist, &buf, &buf_len))
         return NULL;
 	
@@ -290,7 +290,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GIOStatus status;
     PyObject *iter, *value, *pylines;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:glib.IOChannel.writelines",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gi._glib.IOChannel.writelines",
                                      kwlist, &pylines))
         return NULL;
 
@@ -303,7 +303,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             goto normal_exit;
         }
         if (!PYGLIB_PyUnicode_Check(value)) {
-            PyErr_SetString(PyExc_TypeError, "glib.IOChannel.writelines must"
+            PyErr_SetString(PyExc_TypeError, "gi._glib.IOChannel.writelines must"
                             " be sequence/iterator of strings");
             Py_DECREF(iter);
             return NULL;
@@ -347,7 +347,7 @@ py_io_channel_set_flags(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GIOStatus status;
     GError* error = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:glib.IOChannel.set_flags",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:gi._glib.IOChannel.set_flags",
                                      kwlist, &flags))
         return NULL;
 	
@@ -376,7 +376,7 @@ py_io_channel_set_close_on_unref(PyGIOChannel* self, PyObject *args, PyObject *k
     static char *kwlist[] = { "do_close", NULL };
     PyObject *do_close;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:glib.IOChannel.set_close_on_unref",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gi._glib.IOChannel.set_close_on_unref",
                                      kwlist, &do_close))
         return NULL;
 	
@@ -460,7 +460,7 @@ py_io_channel_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     PyGIOWatchData *data;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "iO|Oi:glib.IOChannel.add_watch",
+                                     "iO|Oi:gi._glib.IOChannel.add_watch",
                                      kwlist, &condition, &callback,
                                      &user_data, &priority))
         return NULL;
@@ -498,7 +498,7 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
     gint result;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "O!|i:glib.IOChannel.win32_poll",
+                                     "O!|i:gi._glib.IOChannel.win32_poll",
                                      kwlist, &PyList_Type, &pyfds, &timeout))
         return NULL;
 
@@ -507,7 +507,7 @@ py_io_channel_win32_poll(PyObject *self, PyObject *args, PyObject *kwargs)
     for (i = 0; i < len; ++i) {
         pyfd = PyList_GET_ITEM(pyfds, i);
         if (!PyObject_TypeCheck(pyfd, &PyGPollFD_Type)) {
-            PyErr_SetString(PyExc_TypeError, "'fds' must be a list of glib.PollFD objects");
+            PyErr_SetString(PyExc_TypeError, "'fds' must be a list of gi._glib.PollFD objects");
             return NULL;
         }
         pollfd[i] = ((PyGPollFD *) pyfd)->pollfd;
@@ -530,7 +530,7 @@ py_io_channel_win32_make_pollfd(PyObject *self, PyObject *args, PyObject *kwargs
     PyGPollFD *pypollfd;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "i:glib.IOChannel.win32_make_pollfd",
+                                     "i:gi._glib.IOChannel.win32_make_pollfd",
                                      kwlist, &condition))
         return NULL;
 
@@ -554,7 +554,7 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     gint size_hint = -1;
     GIOStatus status;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:glib.IOChannel.readline", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:gi._glib.IOChannel.readline", kwlist,
                                      &size_hint))
         return NULL;
 
@@ -579,7 +579,7 @@ py_io_channel_read_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GIOStatus status = G_IO_STATUS_NORMAL;
     PyObject *list;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:glib.IOChannel.readlines", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:gi._glib.IOChannel.readlines", kwlist,
                                      &size_hint))
         return NULL;
 
@@ -613,7 +613,7 @@ py_io_channel_seek(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     GSeekType seek_type;
     GError* error = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "L|i:glib.IOChannel.seek",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "L|i:gi._glib.IOChannel.seek",
                                      kwlist, &offset, &whence))
         return NULL;
 
@@ -714,7 +714,7 @@ py_io_channel_init(PyGIOChannel *self, PyObject *args, PyObject *kwargs)
 #ifdef G_OS_WIN32
                                      "I"
 #endif
-                                     ":glib.IOChannel.__init__",
+                                     ":gi._glib.IOChannel.__init__",
                                      kwlist, &fd, &filename, &mode
 #ifdef G_OS_WIN32
                                      , &hwnd
