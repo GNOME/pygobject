@@ -1,7 +1,7 @@
 import sys
 import types
 
-import gobject
+from gi import _gobject
 
 registry = None
 class _Registry(dict):
@@ -25,8 +25,8 @@ class _Registry(dict):
             raise KeyError('You have tried to modify the registry outside of the overrides module.  This is not allowed')
 
         g_type = info.get_g_type()
-        assert g_type != gobject.TYPE_NONE
-        if g_type != gobject.TYPE_INVALID:
+        assert g_type != _gobject.TYPE_NONE
+        if g_type != _gobject.TYPE_INVALID:
             g_type.pytype = value 
 
             # strip gi.overrides from module name

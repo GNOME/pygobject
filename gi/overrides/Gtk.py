@@ -20,7 +20,7 @@
 # USA
 
 import sys
-import gobject
+from gi import _gobject
 from gi.repository import GObject
 from ..overrides import override
 from ..importer import modules

@@ -23,7 +23,7 @@
 from __future__ import absolute_import
 
 import sys
-import gobject
+from . import _gobject
 
 from ._gi import \
     InterfaceInfo, \
@@ -172,8 +172,8 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # This can be seen in IntrospectionModule.__getattr__() in module.py.
         # We do not need to search regular classes here, only wrapped interfaces.
         # We also skip GInterface, because it is not wrapped and has no __info__ attr.
-        if base is gobject.GInterface or\
-                not issubclass(base, gobject.GInterface) or\
+        if base is _gobject.GInterface or\
+                not issubclass(base, _gobject.GInterface) or\
                 not isinstance(base.__info__, InterfaceInfo):
             continue
 
@@ -203,7 +203,7 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
             return aklass
     return None
 
-class GObjectMeta(gobject.GObjectMeta, MetaClassHelper):
+class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
 
     def __init__(cls, name, bases, dict_):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
@@ -250,7 +250,7 @@ def mro(C):
         for subclass_bases in bases_of_subclasses:
             candidate = subclass_bases[0]
             not_head = [s for s in bases_of_subclasses if candidate in s[1:]]
-            if not_head and gobject.GInterface not in candidate.__bases__:
+            if not_head and _gobject.GInterface not in candidate.__bases__:
                 candidate = None # conflict, reject candidate
             else:
                 break
@@ -277,7 +277,7 @@ class StructMeta(type, MetaClassHelper):
 
         # Avoid touching anything else than the base class.
         g_type = cls.__info__.get_g_type()
-        if g_type != gobject.TYPE_INVALID and g_type.pytype is not None:
+        if g_type != _gobject.TYPE_INVALID and g_type.pytype is not None:
             return
 
         cls._setup_fields()

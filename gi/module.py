@@ -23,7 +23,8 @@
 from __future__ import absolute_import
 
 import os
-import gobject
+from . import _gobject
+
 try:
     maketrans = ''.maketrans
 except AttributeError:
@@ -67,7 +68,7 @@ def get_parent_for_object(object_info):
 
     # Workaround for GObject.Object and GObject.InitiallyUnowned.
     if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
-        return gobject.GObject
+        return _gobject.GObject
 
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
@@ -110,16 +111,16 @@ class IntrospectionModule(object):
 
             if wrapper is None:
                 if info.is_flags():
-                    if g_type.is_a(gobject.TYPE_FLAGS):
+                    if g_type.is_a(_gobject.TYPE_FLAGS):
                         wrapper = flags_add(g_type)
                     else:
-                        assert g_type == gobject.TYPE_NONE
+                        assert g_type == _gobject.TYPE_NONE
                         wrapper = flags_register_new_gtype_and_add(info)
                 else:
-                    if g_type.is_a(gobject.TYPE_ENUM):
+                    if g_type.is_a(_gobject.TYPE_ENUM):
                         wrapper = enum_add(g_type)
                     else:
-                        assert g_type == gobject.TYPE_NONE
+                        assert g_type == _gobject.TYPE_NONE
                         wrapper = enum_register_new_gtype_and_add(info)
 
                 wrapper.__info__ = info
@@ -135,14 +136,14 @@ class IntrospectionModule(object):
                     value_name = value_info.get_name().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))
 
-            if g_type != gobject.TYPE_NONE:
+            if g_type != _gobject.TYPE_NONE:
                 g_type.pytype = wrapper
 
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
 
             # Check if there is already a Python wrapper.
-            if g_type != gobject.TYPE_NONE:
+            if g_type != _gobject.TYPE_NONE:
                 type_ = g_type.pytype
                 if type_ is not None:
                     self.__dict__[name] = type_
@@ -156,13 +157,13 @@ class IntrospectionModule(object):
                 bases = (parent,) + interfaces
                 metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
-                bases = (gobject.GInterface,)
+                bases = (_gobject.GInterface,)
                 metaclass = GObjectMeta
             elif isinstance(info, (StructInfo, UnionInfo)):
-                if g_type.is_a(gobject.TYPE_BOXED):
+                if g_type.is_a(_gobject.TYPE_BOXED):
                     bases = (Boxed,)
-                elif g_type.is_a(gobject.TYPE_POINTER) or \
-                     g_type == gobject.TYPE_NONE or \
+                elif g_type.is_a(_gobject.TYPE_POINTER) or \
+                     g_type == _gobject.TYPE_NONE or \
                      g_type.fundamental == g_type:
                     bases = (Struct,)
                 else:
@@ -180,7 +181,7 @@ class IntrospectionModule(object):
             wrapper = metaclass(name, bases, dict_)
 
             # Register the new Python wrapper.
-            if g_type != gobject.TYPE_NONE:
+            if g_type != _gobject.TYPE_NONE:
                 g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):
@@ -230,8 +231,8 @@ class DynamicGObjectModule(IntrospectionModule):
         IntrospectionModule.__init__(self, namespace='GObject')
 
     def __getattr__(self, name):
-        # first see if this attr is in the gobject module
-        attr = getattr(gobject, name, None)
+        # first see if this attr is in the internal _gobject module
+        attr = getattr(_gobject, name, None)
 
         # if not in module assume request for an attr exported through GI
         if attr is None:

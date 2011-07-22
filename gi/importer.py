@@ -24,8 +24,6 @@ from __future__ import absolute_import
 import logging
 import sys
 
-import gobject
-
 from ._gi import Repository, RepositoryError
 from .module import DynamicModule, DynamicGObjectModule
 
