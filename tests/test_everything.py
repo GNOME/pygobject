@@ -157,6 +157,9 @@ class TestEverything(unittest.TestCase):
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))
 
+    def test_ptrarray(self):
+        self.assertEquals (Everything.test_garray_container_return(), ['regress'])
+
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)
