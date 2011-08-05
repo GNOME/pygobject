@@ -93,12 +93,14 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
     state->py_in_args = py_args;
     state->n_py_in_args = PySequence_Length (py_args);
 
+    state->implementor_gtype = 0;
+
     /* TODO: We don't use the class parameter sent in by  the structure
      * so we remove it from the py_args tuple but we can keep it 
      * around if we want to call actual gobject constructors
      * in the future instead of calling g_object_new
      */
-    if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
+    if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
         PyObject *constructor_class;
         constructor_class = PyTuple_GetItem (py_args, 0);
 
@@ -111,20 +113,9 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 
             return FALSE;
         }
-
-        /* we could optimize this by using offsets instead of modifying the tuple but it makes the
-         * code more error prone and confusing so don't do that unless profiling shows
-         * significant gain
-         */
-        state->py_in_args = PyTuple_GetSlice (py_args, 1, state->n_py_in_args);
-        state->n_py_in_args--;
-    } else {
-        Py_INCREF (state->py_in_args);
-    }
-    state->implementor_gtype = 0;
-    if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
+    } else if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
         PyObject *py_gtype;
-        py_gtype = PyDict_GetItemString (kwargs, "gtype");
+        py_gtype = PyTuple_GetItem (py_args, 0);
         if (py_gtype == NULL) {
             PyErr_SetString (PyExc_TypeError,
                              "need the GType of the implementor class");
@@ -135,6 +126,19 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 
         if (state->implementor_gtype == 0)
             return FALSE;
+    }
+
+    if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR ||
+            cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
+
+        /* we could optimize this by using offsets instead of modifying the tuple but it makes the
+         * code more error prone and confusing so don't do that unless profiling shows
+         * significant gain
+         */
+        state->py_in_args = PyTuple_GetSlice (py_args, 1, state->n_py_in_args);
+        state->n_py_in_args--;
+    } else {
+        Py_INCREF (state->py_in_args);
     }
 
     state->args = g_slice_alloc0 (cache->n_args * sizeof (GIArgument *));

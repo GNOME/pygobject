@@ -52,7 +52,7 @@ def Function(info):
 def NativeVFunc(info, cls):
 
     def native_vfunc(*args):
-        return info.invoke(*args, **dict(gtype=cls.__gtype__))
+        return info.invoke(cls.__gtype__, *args)
     native_vfunc.__info__ = info
     native_vfunc.__name__ = info.get_name()
     native_vfunc.__module__ = info.get_namespace()
