@@ -450,7 +450,9 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self,
             return NULL;
     }
 
-    _invoke_state_init_from_callable_cache (&state, self->cache, py_args, kwargs);
+    if (!_invoke_state_init_from_callable_cache (&state, self->cache, py_args, kwargs))
+        goto err;
+
     if (!_invoke_marshal_in_args (&state, self->cache))
         goto err;
 
