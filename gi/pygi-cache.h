@@ -82,6 +82,8 @@ typedef enum {
 
 struct _PyGIArgCache
 {
+    const gchar *arg_name;
+
     PyGIMetaArgType meta_type;
     gboolean is_pointer;
     gboolean is_caller_allocates;
@@ -150,6 +152,8 @@ struct _PyGICallableCache
     PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;
     GSList *out_args;
+    GSList *arg_name_list; /* for keyword arg matching */
+    GHashTable *arg_name_hash;
 
     /* counts */
     gssize n_in_args;

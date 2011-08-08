@@ -109,6 +109,9 @@ _pygi_callable_cache_free (PyGICallableCache *cache)
         return;
 
     g_slist_free (cache->out_args);
+    g_slist_free (cache->arg_name_list);
+    g_hash_table_destroy (cache->arg_name_hash);
+
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *tmp = cache->args_cache[i];
         _pygi_arg_cache_free (tmp);
@@ -1205,6 +1208,38 @@ _arg_cache_new (GITypeInfo *type_info,
     return arg_cache;
 }
 
+static void
+_arg_name_list_generate (PyGICallableCache *callable_cache)
+{
+    GSList * arg_name_list = NULL;
+
+    if (callable_cache->arg_name_hash == NULL) {
+        callable_cache->arg_name_hash = g_hash_table_new (g_str_hash, g_str_equal);
+    } else {
+        g_hash_table_remove_all (callable_cache->arg_name_hash);
+    }
+
+    for (int i=0; i < callable_cache->n_args; i++) {
+        PyGIArgCache *arg_cache = NULL;
+
+        arg_cache = callable_cache->args_cache[i];
+
+        if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
+                (arg_cache->direction == GI_DIRECTION_IN ||
+                 arg_cache->direction == GI_DIRECTION_INOUT)) {
+
+            gpointer arg_name = (gpointer)arg_cache->arg_name;
+
+            arg_name_list = g_slist_prepend (arg_name_list, arg_name);
+            if (arg_name != NULL) {
+                g_hash_table_insert (callable_cache->arg_name_hash, arg_name, arg_name);
+            }
+        }
+    }
+
+    callable_cache->arg_name_list = g_slist_reverse (arg_name_list);
+}
+
 /* Generate the cache for the callable's arguments */
 static gboolean
 _args_cache_generate (GICallableInfo *callable_info,
@@ -1328,6 +1363,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         if (arg_cache == NULL)
             goto arg_err;
 
+        arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
         arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
         arg_cache->is_caller_allocates = is_caller_allocates;
 
@@ -1351,6 +1387,9 @@ arg_err:
         g_base_info_unref( (GIBaseInfo *)arg_info);
         return FALSE;
     }
+
+    _arg_name_list_generate (callable_cache);
+
     return TRUE;
 }
 

@@ -40,8 +40,8 @@ if sys.version_info > (3, 0):
 
 def Function(info):
 
-    def function(*args):
-        return info.invoke(*args)
+    def function(*args, **kwargs):
+        return info.invoke(*args, **kwargs)
     function.__info__ = info
     function.__name__ = info.get_name()
     function.__module__ = info.get_namespace()
@@ -51,8 +51,8 @@ def Function(info):
 
 def NativeVFunc(info, cls):
 
-    def native_vfunc(*args):
-        return info.invoke(cls.__gtype__, *args)
+    def native_vfunc(*args, **kwargs):
+        return info.invoke(cls.__gtype__, *args, **kwargs)
     native_vfunc.__info__ = info
     native_vfunc.__name__ = info.get_name()
     native_vfunc.__module__ = info.get_namespace()
@@ -61,11 +61,11 @@ def NativeVFunc(info, cls):
 
 def Constructor(info):
 
-    def constructor(cls, *args):
+    def constructor(cls, *args, **kwargs):
         cls_name = info.get_container().get_name()
         if cls.__name__ != cls_name:
             raise TypeError('%s constructor cannot be used to create instances of a subclass' % cls_name)
-        return info.invoke(cls, *args)
+        return info.invoke(cls, *args, **kwargs)
 
     constructor.__info__ = info
     constructor.__name__ = info.get_name()

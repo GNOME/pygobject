@@ -1791,3 +1791,61 @@ class TestGErrorArrayInCrash(unittest.TestCase):
     # take in GArrays. See https://bugzilla.gnome.org/show_bug.cgi?id=642708
     def test_gerror_array_in_crash(self):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])
+
+class TestKeywordArgs(unittest.TestCase):
+    def test_calling(self):
+        kw_func = GIMarshallingTests.int_three_in_three_out
+
+        self.assertEquals(kw_func(1, 2, 3),                 (1, 2, 3))
+        self.assertEquals(kw_func(**{'a':4, 'b':5, 'c':6}), (4, 5, 6))
+        self.assertEquals(kw_func(1, **{'b':7, 'c':8}),     (1, 7, 8))
+        self.assertEquals(kw_func(1, 7, **{'c':8}),         (1, 7, 8))
+        self.assertEquals(kw_func(1, c=8, **{'b':7}),       (1, 7, 8))
+        self.assertEquals(kw_func(2, c=4, b=3),             (2, 3, 4))
+        self.assertEquals(kw_func(a=2, c=4, b=3),           (2, 3, 4))
+
+    def assertRaisesMessage(self, exception, message, func, *args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except exception:
+            (e_type, e) = sys.exc_info()[:2]
+            if message is not None:
+                self.assertEqual(str(e), message)
+        except:
+            raise
+        else:
+            msg = "%s() did not raise %s" % (func.__name__, exception.__name__)
+            raise AssertionError(msg)
+
+    def test_type_errors(self):
+        # test too few args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (1 given)",
+                                 GIMarshallingTests.int_three_in_three_out, 1)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *())
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(), **{})
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (0 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(), **{'c':4})
+
+        # test too many args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (4 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4))
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (4 given)",
+                                 GIMarshallingTests.int_three_in_three_out, *(1, 2, 3, 4), c=6)
+
+        # test too many keyword args
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got multiple values for keyword argument 'a'",
+                                 GIMarshallingTests.int_three_in_three_out, 1, 2, 3, **{'a': 4, 'b': 5})
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got an unexpected keyword argument 'd'",
+                                 GIMarshallingTests.int_three_in_three_out, d=4)
+        self.assertRaisesMessage(TypeError, "int_three_in_three_out() got an unexpected keyword argument 'e'",
+                                 GIMarshallingTests.int_three_in_three_out, **{'e': 2})
+
+    def test_kwargs_are_not_modified(self):
+        d = {'b': 2}
+        d2 = d.copy()
+        GIMarshallingTests.int_three_in_three_out(1, c=4, **d)
+        self.assertEqual(d, d2)
