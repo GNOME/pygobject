@@ -1589,6 +1589,13 @@ _pygi_argument_to_object (GIArgument  *arg,
                         }
 
                         Py_XDECREF (py_type);
+		    } else if (type == G_TYPE_VARIANT) {
+                        PyObject *py_type;
+
+                        g_variant_ref_sink (arg->v_pointer);
+                        py_type = _pygi_type_import_by_gi_info (info);
+                        object = _pygi_struct_new ( (PyTypeObject *) py_type, arg->v_pointer,
+                                                    transfer == GI_TRANSFER_EVERYTHING);
                     } else if (type == G_TYPE_NONE) {
                         PyObject *py_type;
 
