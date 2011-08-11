@@ -1094,8 +1094,10 @@ array_success:
                         if (transfer == GI_TRANSFER_EVERYTHING) {
                             arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
                         }
-                    } else if (g_type_is_a (type, G_TYPE_POINTER) || type == G_TYPE_NONE) {
-                        g_warn_if_fail (!g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
+                    } else if (g_type_is_a (type, G_TYPE_POINTER) || 
+                               g_type_is_a (type, G_TYPE_VARIANT) || 
+                               type == G_TYPE_NONE) {
+			g_warn_if_fail (g_type_is_a (type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
                         arg.v_pointer = pyg_pointer_get (object, void);
                     } else {
                         PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name (type));
