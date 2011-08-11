@@ -23,6 +23,10 @@
 
 import sys
 
+# we can't have pygobject 2 loaded at the same time we load the internal _gobject
+if 'gobject' in sys.modules:
+    raise ImportError('When using gi.repository you must not import static modules like "gobject". Please change all occurrences of "import gobject" to "from gi.repository import GObject".')
+
 from .._glib import spawn_async, idle_add, timeout_add, timeout_add_seconds, \
      io_add_watch, source_remove, child_watch_add, markup_escape_text, \
      get_current_time, filename_display_name, filename_display_basename, \
@@ -46,10 +50,6 @@ from .._glib import SPAWN_LEAVE_DESCRIPTORS_OPEN, SPAWN_DO_NOT_REAP_CHILD, \
 
 from .constants import *
 from ._gobject import *
-
-# we can't have pygobject 2 loaded at the same time we load the internal _gobject
-if 'gobject' is sys.modules:
-    raise ImportError("The gobject module is already imported.  PyGObject 3 can not be run in the same namespace as PyGObject 2")
 
 _PyGObject_API = _gobject._PyGObject_API
 
