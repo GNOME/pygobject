@@ -325,6 +325,28 @@ class TestGLib(unittest.TestCase):
         # string iteration
         self.assertEqual([x for x in v], ['h', 'e', 'l', 'l', 'o'])
 
+    def test_variant_split_signature(self):
+        self.assertEqual(GLib.Variant.split_signature('()'), [])
+
+        self.assertEqual(GLib.Variant.split_signature('s'), ['s'])
+
+        self.assertEqual(GLib.Variant.split_signature('as'), ['as'])
+
+        self.assertEqual(GLib.Variant.split_signature('(s)'), ['s'])
+
+        self.assertEqual(GLib.Variant.split_signature('(iso)'), ['i', 's', 'o'])
+
+        self.assertEqual(GLib.Variant.split_signature('(s(ss)i(ii))'), 
+                ['s', '(ss)', 'i', '(ii)'])
+
+        self.assertEqual(GLib.Variant.split_signature('(as)'), ['as'])
+
+        self.assertEqual(GLib.Variant.split_signature('(s(ss)iaiaasa(ii))'), 
+                ['s', '(ss)', 'i', 'ai', 'aas', 'a(ii)'])
+
+        self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'), 
+                ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
+
 class TestPango(unittest.TestCase):
 
     def test_default_font_description(self):
