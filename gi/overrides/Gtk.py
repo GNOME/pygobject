@@ -318,15 +318,6 @@ class Box(Gtk.Box):
 Box = override(Box)
 __all__.append('Box')
 
-
-class Window(Gtk.Window):
-    def __init__(self, type=Gtk.WindowType.TOPLEVEL):
-        super(Window, self).__init__(type=type)
-
-Window = override(Window)
-__all__.append('Window')
-
-
 class SizeGroup(Gtk.SizeGroup):
     def __init__(self, mode=Gtk.SizeGroupMode.VERTICAL):
         super(SizeGroup, self).__init__(mode=mode)
