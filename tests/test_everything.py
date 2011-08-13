@@ -466,3 +466,9 @@ class TestTortureProfile(unittest.TestCase):
         print("\t====")
         print("\tTotal: %f sec" % total_time)
 
+class TestAdvancedInterfaces(unittest.TestCase):
+    def test_array_objs(self):
+        obj1, obj2 = Everything.test_array_fixed_out_objects()
+        self.assertTrue(isinstance(obj1, Everything.TestObj))
+        self.assertTrue(isinstance(obj2, Everything.TestObj))
+        self.assertNotEqual(obj1, obj2)
