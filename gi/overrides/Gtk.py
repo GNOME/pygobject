@@ -961,6 +961,31 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         value = self._convert_value(treeiter, column, value)
         Gtk.ListStore.set_value(self, treeiter, column, value)
 
+    def set(self, treeiter, *args):
+
+        def _set_lists(columns, values):
+            if len(columns) != len(values):
+                raise TypeError('The number of columns do not match the number of values')
+            for col_num, val in zip(columns, values):
+                if not isinstance(col_num, int):
+                    raise TypeError('TypeError: Expected integer argument for column.')
+                self.set_value(treeiter, col_num, val)
+
+        if args:
+            if isinstance(args[0], int):
+                columns = args[::2]
+                values = args[1::2]
+                _set_lists(columns, values)
+            elif isinstance(args[0], (tuple, list)):
+                if len(args) != 2:
+                    raise TypeError('Too many arguments');
+                _set_lists(args[0], args[1])
+            elif isinstance(args[0], dict):
+                columns = args[0].keys()
+                values = args[0].values()
+                _set_lists(columns, values)
+            else:
+                raise TypeError('Argument list must be in the form of (column, value, ...), ((columns,...), (values, ...)) or {column: value}.  No -1 termination is needed.')
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
@@ -1135,6 +1160,31 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         value = self._convert_value(treeiter, column, value)
         Gtk.TreeStore.set_value(self, treeiter, column, value)
 
+    def set(self, treeiter, *args):
+
+        def _set_lists(columns, values):
+            if len(columns) != len(values):
+                raise TypeError('The number of columns do not match the number of values')
+            for col_num, val in zip(columns, values):
+                if not isinstance(col_num, int):
+                    raise TypeError('TypeError: Expected integer argument for column.')
+                self.set_value(treeiter, col_num, val)
+
+        if args:
+            if isinstance(args[0], int):
+                columns = args[::2]
+                values = args[1::2]
+                _set_lists(columns, values)
+            elif isinstance(args[0], (tuple, list)):
+                if len(args) != 2:
+                    raise TypeError('Too many arguments');
+                _set_lists(args[0], args[1])
+            elif isinstance(args[0], dict):
+                columns = args[0].keys()
+                values = args[0].values()
+                _set_lists(columns, values)
+            else:
+                raise TypeError('Argument list must be in the form of (column, value, ...), ((columns,...), (values, ...)) or {column: value}.  No -1 termination is needed.')
 
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')

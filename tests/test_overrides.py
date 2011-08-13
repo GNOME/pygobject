@@ -721,7 +721,7 @@ class TestGtk(unittest.TestCase):
                                    GObject.TYPE_CHAR)
 
         parent = None
-        for i in range(100):
+        for i in range(97):
             label = 'this is child #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
             parent = tree_store.append(parent, (i,
@@ -740,6 +740,67 @@ class TestGtk(unittest.TestCase):
                                                 254,
                                                 _bytes('a')
                                                 ))
+        # test set
+        parent = tree_store.append(parent)
+        i = 97
+        label = 'this is child #%d' % i
+        testobj = TestGtk.TestClass(self, i, label)
+        tree_store.set(parent, 0, i,
+                               2, testobj,
+                               1, label,
+                               3, testobj,
+                               4, test_pyobj,
+                               5, test_pydict,
+                               6, test_pylist,
+                               7, i % 2,
+                               8, bool(i % 2),
+                               9, i,
+                               10, GObject.G_MAXULONG,
+                               11, GObject.G_MININT64,
+                               12, 0xffffffffffffffff,
+                               13, 254,
+                               14, _bytes('a'))
+
+        parent = tree_store.append(parent)
+        i = 98
+        label = 'this is child #%d' % i
+        testobj = TestGtk.TestClass(self, i, label)
+        tree_store.set(parent, {0: i,
+                                2: testobj,
+                                1: label,
+                                3: testobj,
+                                4: test_pyobj,
+                                5: test_pydict,
+                                6: test_pylist,
+                                7: i % 2,
+                                8: bool(i % 2),
+                                9: i,
+                                10: GObject.G_MAXULONG,
+                                11: GObject.G_MININT64,
+                                12: 0xffffffffffffffff,
+                                13: 254,
+                                14: _bytes('a')})
+
+        parent = tree_store.append(parent)
+        i = 99
+        label = 'this is child #%d' % i
+        testobj = TestGtk.TestClass(self, i, label)
+        tree_store.set(parent, (0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14),
+                               (i,
+                                testobj,
+                                label,
+                                testobj,
+                                test_pyobj,
+                                test_pydict,
+                                test_pylist,
+                                i % 2,
+                                bool(i % 2),
+                                i,
+                                GObject.G_MAXULONG,
+                                GObject.G_MININT64,
+                                0xffffffffffffffff,
+                                254,
+                                _bytes('a')))
 
         # len gets the number of children in the root node
         # since we kept appending to the previous node
@@ -911,7 +972,42 @@ class TestGtk(unittest.TestCase):
                                1,
                                True))
 
-        self.assertEquals(len(list_store), 100)
+        i = 100
+        label = 'this is row #100'
+        treeiter = list_store.append()
+        list_store.set(treeiter, 1, label,
+                                 0, i,
+                                 2, TestGtk.TestClass(self, i, label),
+                                 3, test_pyobj,
+                                 4, test_pydict,
+                                 5, test_pylist,
+                                 6, 0,
+                                 7, False)
+        i = 101
+        label = 'this is row #101'
+        treeiter = list_store.append()
+        list_store.set(treeiter, {1: label,
+                                  0: i,
+                                  2: TestGtk.TestClass(self, i, label),
+                                  3: test_pyobj,
+                                  4: test_pydict,
+                                  5: test_pylist,
+                                  6: 1,
+                                  7: True})
+        i = 102
+        label = 'this is row #102'
+        treeiter = list_store.append()
+        list_store.set(treeiter, (1, 0, 2, 3, 4, 5, 6, 7),
+                                  (label,
+                                   i,
+                                   TestGtk.TestClass(self, i, label),
+                                   test_pyobj,
+                                   test_pydict,
+                                   test_pylist,
+                                   0,
+                                   False))
+
+        self.assertEquals(len(list_store), 103)
 
         # walk the list to see if the values were stored correctly
         i = 0
@@ -942,7 +1038,7 @@ class TestGtk(unittest.TestCase):
 
             counter += 1
 
-        self.assertEquals(i, 99)
+        self.assertEquals(i, 102)
 
     def test_tree_path(self):
         p1 = Gtk.TreePath()
