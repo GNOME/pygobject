@@ -5,26 +5,28 @@
          xmlns="http://usefulinc.com/ns/doap#">
 
   <name xml:lang="en">PyGObject</name>
-  <shortdesc xml:lang="en">Python bindings GLib and GObject</shortdesc>
+  <shortdesc xml:lang="en">Python bindings for GObject Introspection</shortdesc>
   <description>
-GObject is a object system library used by GTK+ and GStreamer.
+GObject is a object system used by GTK+,  GStreamer and other libraries.
 
-PyGObject provides a convenient wrapper for the GObject library for use
-in Python programs, and takes care of many of the boring details such as
-managing memory and type casting. When combined with PyGTK, PyORBit and
-gnome-python, it can be used to write full featured GNOME applications.
+PyGObject provides a convenient wrapper for use in Python programs when accessing GObject libraries.
 
-Like the GObject library itself PyGObject is licensed under the GNU
-LGPL, so is suitable for use in both free software and proprietary
-applications. It is already in use in many applications ranging from
-small single purpose scripts up to large full featured applications.
+Like the GObject library itself PyGObject is licensed under the GNU LGPL, so is suitable for use in both free software and proprietary applications. It is already in use in many applications ranging from small single purpose scripts up to large full featured applications.
+
+PyGObject now dynamically accesses any GObject libraries that uses GObject Introspection. It replaces the need for separate modules such as PyGTK, GIO and python-gnome to build a full GNOME 3.0 application. Once new functionality is added to gobject library it is instantly available as a Python API without the need for intermediate Python glue.
   </description>
   <homepage rdf:resource="http://live.gnome.org/PyGObject" />
-  <mailing-list rdf:resource="http://www.daa.com.au/mailman/listinfo/pygtk" />
+  <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/python-hackers-list" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#bindings" />
   <download-page rdf:resource="http://download.gnome.org/sources/pygobject/" />
   <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=pygobject" />
-
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>John (J5) Palmieri</foaf:name>
+      <foaf:mbox rdf:resource="mailto:johnp@redhat.com" />
+      <gnome:userid>johnp</gnome:userid>
+    </foaf:Person>
+  </maintainer>
   <maintainer>
     <foaf:Person>
       <foaf:name>Gustavo J Carneiro</foaf:name>
