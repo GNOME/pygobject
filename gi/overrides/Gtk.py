@@ -310,8 +310,8 @@ __all__.append('ComboBox')
 
 
 class Box(Gtk.Box):
-    def __init__(self, homogeneous=False, spacing=0):
-        super(Box, self).__init__()
+    def __init__(self, homogeneous=False, spacing=0, **kwds):
+        super(Box, self).__init__(**kwds)
         self.set_homogeneous(homogeneous)
         self.set_spacing(spacing)
 
