@@ -1,7 +1,11 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = docs codegen glib gobject gio examples
+SUBDIRS = docs glib gobject gio examples
+
+if ENABLE_CODEGEN
+SUBDIRS += codegen
+endif
 
 if ENABLE_INTROSPECTION
 SUBDIRS += gi

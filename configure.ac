@@ -85,7 +85,7 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
-# check that we have the minimum version of python necisary to build
+# check that we have the minimum version of python necessary to build
 JD_PATH_PYTHON(python_min_ver)
 
 # check if we are building for python 3
@@ -262,6 +262,9 @@ INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspecti
 AC_SUBST(INTROSPECTION_SCANNER)
 AC_SUBST(INTROSPECTION_COMPILER)
 
+dnl Do not install codegen for Python 3.
+AM_CONDITIONAL(ENABLE_CODEGEN, test $build_py3k = false)
+
 dnl add required cflags ...
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])
@@ -281,8 +284,6 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-2.0.pc
   pygobject-2.0-uninstalled.pc
-  codegen/Makefile
-  codegen/pygobject-codegen-2.0
   docs/Makefile
   docs/reference/entities.docbook
   docs/xsl/fixxref.py
@@ -295,6 +296,13 @@ AC_CONFIG_FILES(
   examples/Makefile
   tests/Makefile
   PKG-INFO)
+
+if test $build_py3k = false; then
+  AC_CONFIG_FILES(
+    codegen/Makefile
+    codegen/pygobject-codegen-2.0)
+fi
+
 AC_OUTPUT
 
 echo
