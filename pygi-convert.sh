@@ -15,6 +15,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/GConf\.VALUE_/GConf.ValueType./g;" \
     -pe "s/gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/return;gconf_client.notify_add\('\/desktop\/sugar\/collaboration\/publish_gadget',/g;" \
 \
+    -pe "s/import pygtk/import gi/g;" \
+    -pe "s/pygtk.require\('2.0'\)/gi.require_version\('Gtk', '3.0'\)/g;" \
     -pe "s/import gtk\n/from gi.repository import Gtk\n/g;" \
     -pe "s/(?<!\.)gtk\./Gtk\./g;" \
     -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
