@@ -1,5 +1,8 @@
 AUTOMAKE_OPTIONS = 1.7
-PLATFORM_VERSION = 2.0
+PLATFORM_VERSION = 3.0
+
+pkgincludedir = $(includedir)/pygobject-$(PLATFORM_VERSION)
+pkginclude_HEADERS = pygobject.h
 
 pkgpyexecdir = $(pyexecdir)
 

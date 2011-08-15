@@ -5,10 +5,10 @@ Requires.private: @LIBFFI_PC@
 Version: @VERSION@
 Cflags: -I${pc_top_builddir}/${pcfiledir}/gobject
 
-# you can use the --variable=pygtkincludedir argument to
+# you can use the --variable=pygobjectincludedir argument to
 # pkg-config to get this value.  You might want to use this to
 # install additional headers.
-pygtkincludedir=${pc_top_builddir}/${pcfiledir}/gobject
+pygobjectincludedir=${pc_top_builddir}/${pcfiledir}/gobject
 xslfiles=${pc_top_builddir}/${pcfiledir}/docs/xsl
 
 # same here.  Useful when calling the code generator in addon packages.
