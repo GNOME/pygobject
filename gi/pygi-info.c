@@ -430,12 +430,8 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
         case GI_TYPE_TAG_DOUBLE:
         case GI_TYPE_TAG_GTYPE:
         case GI_TYPE_TAG_UNICHAR:
-            if (g_type_info_is_pointer (type_info)) {
-                size = sizeof (gpointer);
-            } else {
-                size = _pygi_g_type_tag_size (type_tag);
-                g_assert (size > 0);
-            }
+            size = _pygi_g_type_tag_size (type_tag);
+            g_assert (size > 0);
             break;
         case GI_TYPE_TAG_INTERFACE:
         {
