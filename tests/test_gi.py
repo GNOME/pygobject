@@ -778,9 +778,6 @@ class TestGArray(unittest.TestCase):
 
 class TestGPtrArray(unittest.TestCase):
 
-    def test_gptrarray_int_none_return(self):
-        self.assertEquals([0, 1, 2, 3], GIMarshallingTests.gptrarray_int_none_return())
-
     def test_gptrarray_utf8_none_return(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_none_return())
 
@@ -789,14 +786,6 @@ class TestGPtrArray(unittest.TestCase):
 
     def test_gptrarray_utf8_full_return(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.gptrarray_utf8_full_return())
-
-    def test_gptrarray_int_none_in(self):
-        GIMarshallingTests.gptrarray_int_none_in(Sequence([0, 1, 2, 3]))
-
-        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, Sequence([-1, '0', 1, 2]))
-
-        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, 42)
-        self.assertRaises(TypeError, GIMarshallingTests.gptrarray_int_none_in, None)
 
     def test_gptrarray_utf8_none_in(self):
         GIMarshallingTests.gptrarray_utf8_none_in(Sequence(['0', '1', '2']))
