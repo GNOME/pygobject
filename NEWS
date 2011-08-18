@@ -1,3 +1,13 @@
+2.90.2  18-Aug-2011 (3.0 pre-release)
+        - remove tests that were removed from gi (John (J5) Palmieri)
+        - don't calculate item_size using is_pointer (John (J5) Palmieri)
+        - Updated signal example to use GObject introspection (Timo Vanwynsberghe)
+        - Updated properties example to use GObject introspection (Timo Vanwynsberghe)
+        - Add override for GLib.Variant.split_signature() (Martin Pitt)
+        - [pygi-convert.sh] Handle the import of pygtk and require Gtk 3.0 (Timo Vanwynsberghe)
+        - Install pygobject.h again. (Ignacio Casal Quinteiro)
+        - update the doap file (John (J5) Palmieri)
+
 2.90.1  14-Aug-2011 (3.0 pre-release)
 	- pass exta keywords to the Box constructor (John (J5) Palmieri)
         - add (Tree|List)Store set method override (John (J5) Palmieri)
