@@ -23,6 +23,8 @@
 import os
 import sys
 import glob
+import tokenize
+import keyword
 
 from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
 
@@ -31,6 +33,28 @@ from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
 DEMOROOTDIR = os.path.abspath(os.path.dirname(__file__))
 DEMOCODEDIR = os.path.join(DEMOROOTDIR, 'demos')
 sys.path.insert(0, DEMOROOTDIR)
+
+
+class InputStream(object):
+    '''
+    Simple Wrapper for File-like objects. [c]StringIO doesn't provide
+    a readline function for use with generate_tokens.
+    Using a iterator-like interface doesn't succeed, because the readline
+    function isn't used in such a context. (see <python-lib>/tokenize.py)
+    '''
+    def __init__(self, data):
+        self.__data = [ '%s\n' % x for x in data.splitlines() ]
+        self.__lcount = 0
+
+    def readline(self):
+        try:
+            line = self.__data[self.__lcount]
+            self.__lcount += 1
+        except IndexError:
+            line = ''
+            self.__lcount = 0
+
+        return line
 
 
 class Demo(GObject.GObject):
@@ -127,28 +151,31 @@ class GtkDemoWindow(Gtk.Window):
 
         (text_widget, info_buffer) = self.create_text(False)
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Info'))
-        self.info_buffer = info_buffer
 
-        tag = info_buffer.create_tag('title', font = 'Sans 18')
+        self.info_buffer = info_buffer
+        self.info_buffer.create_tag('title', font = 'Sans 18')
 
         (text_widget, source_buffer) = self.create_text(True)
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Source'))
 
         self.source_buffer = source_buffer
-        tag = source_buffer.create_tag('comment', foreground = 'DodgerBlue')
-        tag = source_buffer.create_tag('type', foreground = 'ForestGreen')
-        tag = source_buffer.create_tag('string',
-                                       foreground = 'RosyBrown',
-                                       weight = Pango.Weight.BOLD)
-        tag = source_buffer.create_tag('control', foreground = 'purple')
-        tag = source_buffer.create_tag('preprocessor',
-                                       style = Pango.Style.OBLIQUE,
-                                       foreground = 'burlywood4')
-        tag = source_buffer.create_tag('function' ,
-                                       weight = Pango.Weight.BOLD,
-                                       foreground = 'DarkGoldenrod4')
+        self.source_buffer.create_tag('bold',
+                                      weight=Pango.Weight.BOLD)
+        self.source_buffer.create_tag('italic',
+                                      style=Pango.Style.ITALIC)
+        self.source_buffer.create_tag('comment',
+                                      foreground='#c0c0c0')
+        self.source_buffer.create_tag('decorator',
+                                      foreground='#7d7d7d',
+                                      style=Pango.Style.ITALIC)
+        self.source_buffer.create_tag('keyword',
+                                      foreground='#0000ff')
+        self.source_buffer.create_tag('number',
+                                      foreground='#800000')
+        self.source_buffer.create_tag('string',
+                                      foreground='#00aa00',
+                                      style=Pango.Style.ITALIC)
 
-        self.source_buffer = source_buffer
         self.show_all()
 
         self.selection_cb(self.tree_view.get_selection(),
@@ -215,6 +242,7 @@ class GtkDemoWindow(Gtk.Window):
         start = self.source_buffer.get_iter_at_offset(0)
         end = start.copy()
         self.source_buffer.insert(end, code)
+        self.fontify()
 
     def row_activated_cb(self, view, path, col, store):
         treeiter = store.get_iter(path)
@@ -291,6 +319,64 @@ class GtkDemoWindow(Gtk.Window):
 
         return(scrolled_window, buffer)
 
+    def fontify(self):
+        start_iter = self.source_buffer.get_iter_at_offset(0)
+        end_iter = self.source_buffer.get_iter_at_offset(0)
+        data = self.source_buffer.get_text(self.source_buffer.get_start_iter(),
+                                           self.source_buffer.get_end_iter(),
+                                           False)
+
+        builtin_constants = ['None', 'True', 'False']
+        is_decorator = False
+        is_func = False
+
+        for x in tokenize.generate_tokens(InputStream(data).readline):
+            # x has 5-tuples
+            tok_type, tok_str = x[0], x[1]
+            srow, scol = x[2]
+            erow, ecol = x[3]
+
+            start_iter.set_line(srow-1)
+            start_iter.set_line_offset(scol)
+            end_iter.set_line(erow-1)
+            end_iter.set_line_offset(ecol)
+
+            if tok_type == tokenize.BACKQUOTE:
+                self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
+            elif tok_type == tokenize.COMMENT:
+                self.source_buffer.apply_tag_by_name('comment', start_iter, end_iter)
+            elif tok_type == tokenize.NAME:
+                if tok_str in keyword.kwlist or tok_str in builtin_constants:
+                    self.source_buffer.apply_tag_by_name('keyword', start_iter, end_iter)
+
+                    if tok_str == 'def' or tok_str == 'class':
+                        # Next token is going to be a function/method/class name
+                        is_func = True
+                        continue
+                elif tok_str == 'self':
+                    self.source_buffer.apply_tag_by_name('italic', start_iter, end_iter)
+                else:
+                    if is_func is True:
+                        self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
+                    elif is_decorator is True:
+                        self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
+            elif tok_type == tokenize.STRING:
+                self.source_buffer.apply_tag_by_name('string', start_iter, end_iter)
+            elif tok_type == tokenize.NUMBER:
+                self.source_buffer.apply_tag_by_name('number', start_iter, end_iter)
+            elif tok_type == tokenize.OP:
+                if tok_str == '@':
+                    self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
+
+                    # next token is going to be the decorator name
+                    is_decorator = True
+                    continue
+
+            if is_func is True:
+                is_func = False
+
+            if is_decorator is True:
+                is_decorator = False
 
 def main():
     mainloop = GLib.MainLoop()
