@@ -28,6 +28,7 @@ description = """
 
 from gi.repository import Gtk, Gdk
 
+
 class ColorSelectorApp:
     def __init__(self):
         # FIXME: we should allow Gdk.Color to be allocated without parameters

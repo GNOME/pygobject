@@ -27,6 +27,7 @@ Gtk.EntryBuffer provides the text content in a Gtk.Entry.
 
 from gi.repository import Gtk
 
+
 class EntryBufferApp:
     def __init__(self):
         self.window = Gtk.Dialog('Gtk.EntryBuffer',

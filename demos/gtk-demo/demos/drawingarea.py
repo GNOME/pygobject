@@ -35,8 +35,10 @@ to clear the area.
 """
 
 
-from gi.repository import Gtk, Gdk
 import cairo
+
+from gi.repository import Gtk, Gdk
+
 
 class DrawingAreaApp:
     def __init__(self):

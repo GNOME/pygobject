@@ -100,12 +100,12 @@ class IconViewApp:
         self.window.show_all()
 
     def sort_func(self, store, a_iter, b_iter, user_data):
-        (a_name, a_is_dir) = store.get(a_iter, 
-                                       self.COL_DISPLAY_NAME, 
+        (a_name, a_is_dir) = store.get(a_iter,
+                                       self.COL_DISPLAY_NAME,
                                        self.COL_IS_DIRECTORY)
 
-        (b_name, b_is_dir) = store.get(b_iter, 
-                                       self.COL_DISPLAY_NAME, 
+        (b_name, b_is_dir) = store.get(b_iter,
+                                       self.COL_DISPLAY_NAME,
                                        self.COL_IS_DIRECTORY)
 
         if a_name is None:

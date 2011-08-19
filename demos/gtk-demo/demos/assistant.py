@@ -29,6 +29,7 @@ through these steps.
 
 from gi.repository import Gtk, GdkPixbuf
 
+
 class AssistantApp:
     def __init__(self):
         self.assistant = Gtk.Assistant()

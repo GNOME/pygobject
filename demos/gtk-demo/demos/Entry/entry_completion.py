@@ -28,6 +28,7 @@ completion in Gtk.Entry.
 
 from gi.repository import Gtk
 
+
 class EntryBufferApp:
     def __init__(self):
         self.window = Gtk.Dialog('Gtk.EntryCompletion',

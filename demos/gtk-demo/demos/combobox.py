@@ -31,6 +31,7 @@ How the options are displayed is controlled by cell renderers.
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 
+
 (PIXBUF_COL,
  TEXT_COL) = range(2)
 

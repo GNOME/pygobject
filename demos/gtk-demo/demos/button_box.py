@@ -27,6 +27,7 @@ The Button Box widgets are used to arrange buttons with padding.
 
 from gi.repository import Gtk
 
+
 class ButtonBoxApp:
     def __init__(self):
         window = Gtk.Window()

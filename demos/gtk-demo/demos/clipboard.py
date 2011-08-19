@@ -33,6 +33,7 @@ manager to run.
 
 from gi.repository import Gtk, Gdk
 
+
 class ClipboardApp:
     def __init__(self):
         self.window = Gtk.Window()

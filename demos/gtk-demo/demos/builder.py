@@ -25,8 +25,10 @@ Demonstrates an interface loaded from a XML description.
 """
 
 
-from gi.repository import Gtk, GdkPixbuf, Gdk
 import os
+
+from gi.repository import Gtk, GdkPixbuf, Gdk
+
 
 class BuilderApp:
     def __init__(self, demoapp):
