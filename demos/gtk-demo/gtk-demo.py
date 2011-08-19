@@ -129,24 +129,24 @@ class GtkDemoWindow(Gtk.Window):
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Info'))
         self.info_buffer = info_buffer
 
-        tag = info_buffer.create_tag ('title', font = 'Sans 18')
+        tag = info_buffer.create_tag('title', font = 'Sans 18')
 
         (text_widget, source_buffer) = self.create_text(True)
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Source'))
 
-        self.source_buffer = source_buffer;
-        tag = source_buffer.create_tag ('comment', foreground = 'DodgerBlue')
-        tag = source_buffer.create_tag ('type', foreground = 'ForestGreen')
-        tag = source_buffer.create_tag ('string',
-                                        foreground = 'RosyBrown',
-                                        weight = Pango.Weight.BOLD)
-        tag = source_buffer.create_tag ('control', foreground = 'purple')
-        tag = source_buffer.create_tag ('preprocessor',
-                                        style = Pango.Style.OBLIQUE,
-                                        foreground = 'burlywood4')
-        tag = source_buffer.create_tag ('function' ,
-                                        weight = Pango.Weight.BOLD,
-                                        foreground = 'DarkGoldenrod4')
+        self.source_buffer = source_buffer
+        tag = source_buffer.create_tag('comment', foreground = 'DodgerBlue')
+        tag = source_buffer.create_tag('type', foreground = 'ForestGreen')
+        tag = source_buffer.create_tag('string',
+                                       foreground = 'RosyBrown',
+                                       weight = Pango.Weight.BOLD)
+        tag = source_buffer.create_tag('control', foreground = 'purple')
+        tag = source_buffer.create_tag('preprocessor',
+                                       style = Pango.Style.OBLIQUE,
+                                       foreground = 'burlywood4')
+        tag = source_buffer.create_tag('function' ,
+                                       weight = Pango.Weight.BOLD,
+                                       foreground = 'DarkGoldenrod4')
 
         self.source_buffer = source_buffer
         self.show_all()
