@@ -54,7 +54,7 @@ class DrawingAreaApp:
 
         # create checkerboard area
         label = Gtk.Label()
-        label.set_markup('<u>Scribble area</u>')
+        label.set_markup('<u>Checkerboard pattern</u>')
         vbox.pack_start(label, False, False, 0)
 
         frame = Gtk.Frame()
@@ -68,7 +68,7 @@ class DrawingAreaApp:
 
         # create scribble area
         label = Gtk.Label()
-        label.set_markup('<u>Checkerboard pattern</u>')
+        label.set_markup('<u>Scribble area</u>')
         vbox.pack_start(label, False, False, 0)
 
         frame = Gtk.Frame()
