@@ -21,30 +21,32 @@
 
 
 import os
+import sys
 import glob
 
 from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
 
 
-_DEMOCODEDIR = os.getcwd()
+
+DEMOCODEDIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, DEMOCODEDIR)
 
 
 class Demo(GObject.GObject):
     __gtype_name__ = 'GtkDemo'
 
-    def __init__(self, title = None, module = None, filename = None, children = None):
+    def __init__(self, title=None, module=None, filename=None, children=[]):
         super(Demo, self).__init__()
+
         self.title = title
         self.module = module
         self.filename = filename
-        if children is None:
-            children = []
-
         self.children = children
 
-        self.isdir = False
         if module is None:
             self.isdir = True
+        else:
+            self.isdir = False
 
 class GtkDemoApp(object):
     def _quit(self, *args):
@@ -104,18 +106,19 @@ class GtkDemoApp(object):
         Gtk.main()
 
     def load_demos_from_list(self, file_list, demo_list):
-        for f in file_list:
-            base_name = os.path.basename(f)
+        for fullpath in file_list:
+            base_name = os.path.basename(fullpath)
             if base_name == '__init__.py':
                 continue
 
             demo = None
-            if os.path.isdir(f):
+            if os.path.isdir(fullpath):
                 children = []
-                self.load_demos(f, children)
-                demo = Demo(base_name, None, f, children)
+                self.load_demos(fullpath, children)
+                demo = Demo(base_name, None, fullpath, children)
             else:
-                scrub_ext = f[0:-3]
+                relpath = os.path.relpath(fullpath, DEMOCODEDIR)
+                scrub_ext = relpath[0:-3]
                 split_path = scrub_ext.split(os.sep)
                 module_name = split_path[-1]
                 base_module_name = '.'.join(split_path[:-1])
@@ -123,17 +126,20 @@ class GtkDemoApp(object):
                 module = getattr(_temp, module_name)
 
                 try:
-                    demo = Demo(module.title, module, f)
+                    demo = Demo(module.title, module, fullpath)
                 except AttributeError as e:
-                    raise AttributeError('(%s): %s' % (f, e.message))
+                    raise AttributeError('(%s): %s' % (fullpath, e.message))
 
             demo_list.append(demo)
 
     def load_demos(self, top_dir='demos', demo_list=None):
+        top_dir = os.path.join(DEMOCODEDIR, top_dir)
+
         if demo_list is None:
             demo_list = self._demos
 
         demo_file_list = []
+
         for filename in os.listdir(top_dir):
             fullname = os.path.join(top_dir, filename)
             if os.path.isdir(fullname):
@@ -151,7 +157,7 @@ class GtkDemoApp(object):
         self.load_demos_from_list(demo_file_list, demo_list)
 
     def find_file(self, base=''):
-        dir = os.path.join('demos', 'data')
+        dir = os.path.join(DEMOCODEDIR, 'demos', 'data')
         logo_file = os.path.join(dir, 'gtk-logo-rgb.gif')
         base_file = os.path.join(dir, base)
 
@@ -159,7 +165,8 @@ class GtkDemoApp(object):
              GLib.file_test(base_file, GLib.FileTest.EXISTS)):
             return base_file
         else:
-            filename = os.path.join(_DEMOCODEDIR, base)
+            filename = os.path.join(DEMOCODEDIR, base)
+
             if GLib.file_test(filename, GLib.FileTest.EXISTS):
                 return filename
 
