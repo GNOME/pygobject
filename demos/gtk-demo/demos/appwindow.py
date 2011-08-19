@@ -27,9 +27,12 @@ Demonstrates a typical application window with menubar, toolbar, statusbar.
 # See FIXME's
 is_fully_bound = False
 
-from gi.repository import Gtk, GdkPixbuf, Gdk
-import sys, os
-import glib
+
+import os
+import sys
+
+from gi.repository import GLib, GdkPixbuf, Gdk, Gtk
+
 
 global infobar
 global window

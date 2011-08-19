@@ -20,14 +20,14 @@
 # USA
 
 
-
-import pygtk
-pygtk.require('2.0')
-from gi.repository import Gtk, GLib, GObject, GdkPixbuf, Gio, Pango
 import os
 import glob
 
+from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
+
+
 _DEMOCODEDIR = os.getcwd()
+
 
 class Demo(GObject.GObject):
     __gtype_name__ = 'GtkDemo'

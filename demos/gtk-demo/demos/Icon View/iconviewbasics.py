@@ -25,9 +25,11 @@ The GtkIconView widget is used to display and manipulate icons. It uses a GtkTre
 We also use the Gio.File API to get the icons for each file type.
  """
 
+
 import os
-from gi.repository import GLib, Gtk, Gio, GdkPixbuf
-import glib
+
+from gi.repository import GLib, Gio, GdkPixbuf, Gtk
+
 
 class IconViewApp:
     (COL_PATH,
