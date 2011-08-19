@@ -125,7 +125,7 @@ class GtkDemoWindow(Gtk.Window):
         notebook = Gtk.Notebook()
         hbox.pack_start(notebook, True, True, 0)
 
-        (text_widget, info_buffer) = self.create_text(True)
+        (text_widget, info_buffer) = self.create_text(False)
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Info'))
         self.info_buffer = info_buffer
 
@@ -206,7 +206,7 @@ class GtkDemoWindow(Gtk.Window):
         start = end.copy()
         start.backward_chars(len(title))
         self.info_buffer.apply_tag_by_name('title', start, end)
-        self.info_buffer.insert(end, '\n\n')
+        self.info_buffer.insert(end, '\n')
 
         # output the description
         self.info_buffer.insert(end, description)
