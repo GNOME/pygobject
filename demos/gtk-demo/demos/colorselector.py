@@ -25,8 +25,6 @@ description = """
  a prebuilt dialog containing a GtkColorSelection.
  """
 
-# See FIXME's
-is_fully_bound = False
 
 from gi.repository import Gtk, Gdk
 

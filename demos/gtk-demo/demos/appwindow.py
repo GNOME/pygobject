@@ -24,9 +24,6 @@ description = """
 Demonstrates a typical application window with menubar, toolbar, statusbar.
 """
 
-# See FIXME's
-is_fully_bound = False
-
 
 import os
 import sys

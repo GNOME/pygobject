@@ -28,8 +28,6 @@ that is not in the list of options.
 How the options are displayed is controlled by cell renderers.
  """
 
-# See FIXME's
-is_fully_bound = False
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 

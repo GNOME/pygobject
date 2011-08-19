@@ -25,8 +25,6 @@ Gtk.EntryCompletion provides a mechanism for adding support for
 completion in Gtk.Entry.
 """
 
-# See FIXME's
-is_fully_bound = True
 
 from gi.repository import Gtk
 

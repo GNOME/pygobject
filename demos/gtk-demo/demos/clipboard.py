@@ -30,8 +30,6 @@ the application exits. Clipboard persistence requires a clipboard
 manager to run.
 """
 
-# See FIXME's
-is_fully_bound = False
 
 from gi.repository import Gtk, Gdk
 

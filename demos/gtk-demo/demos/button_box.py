@@ -24,8 +24,6 @@ description = """
 The Button Box widgets are used to arrange buttons with padding.
 """
 
-# See FIXME's
-is_fully_bound = False
 
 from gi.repository import Gtk
 

@@ -24,8 +24,6 @@ description = """
 Gtk.EntryBuffer provides the text content in a Gtk.Entry.
 """
 
-# See FIXME's
-is_fully_bound = True
 
 from gi.repository import Gtk
 

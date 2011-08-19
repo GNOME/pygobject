@@ -26,8 +26,6 @@ an operation into several simpler sequential steps, and to guide the user
 through these steps.
 """
 
-# See FIXME's
-is_fully_bound = True
 
 from gi.repository import Gtk, GdkPixbuf
 

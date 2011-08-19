@@ -1,6 +1,5 @@
 title = "Test Demo"
 description = "Dude this is a test"
-is_fully_bound = True
 
 from gi.repository import Gtk
 
