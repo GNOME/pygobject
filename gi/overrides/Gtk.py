@@ -734,6 +734,10 @@ class TreeModel(Gtk.TreeModel):
                 raise IndexError("could not find tree path '%s'" % key)
             return TreeModelRow(self, aiter)
 
+    def __setitem__(self, key, value):
+        row = self[key]
+        self.set_row(row.iter, value)
+
     def __iter__(self):
         return TreeModelRowIter(self, self.get_iter_first())
 
@@ -781,6 +785,8 @@ class TreeModel(Gtk.TreeModel):
     def set_row(self, treeiter, row):
         # TODO: Accept a dictionary for row
         # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
+        if isinstance(row, str):
+            raise TypeError('Expected a list or tuple, but got str')
 
         n_columns = self.get_n_columns()
         if len(row) != n_columns:
@@ -1033,6 +1039,12 @@ class TreeModelRow(object):
             elif key < 0:
                 key = self._convert_negative_index(key)
             return self.model.get_value(self.iter, key)
+        elif isinstance(key, slice):
+            start, stop, step = key.indices(self.model.get_n_columns())
+            alist = []
+            for i in range(start, stop, step):
+                alist.append(self.model.get_value(self.iter, i))
+            return alist
         else:
             raise TypeError("indices must be integers, not %s" % type(key).__name__)
 
@@ -1042,9 +1054,19 @@ class TreeModelRow(object):
                 raise IndexError("column index is out of bounds: %d" % key)
             elif key < 0:
                 key = self._convert_negative_index(key)
-            return self.model.set_value(self.iter, key, value)
+            self.model.set_value(self.iter, key, value)
+        elif isinstance(key, slice):
+            start, stop, step = key.indices(self.model.get_n_columns())
+            indexList = range(start, stop, step)
+            if len(indexList) != len(value):
+                raise ValueError(
+                    "attempt to assign sequence of size %d to slice of size %d"
+                        % (len(value), len(indexList)))
+
+            for i,v in enumerate(indexList):
+                self.model.set_value(self.iter, v, value[i])
         else:
-            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+            raise TypeError("index must be an integer or slice, not %s" % type(key).__name__)
 
     def _convert_negative_index(self, index):
         new_index = self.model.get_n_columns() + index

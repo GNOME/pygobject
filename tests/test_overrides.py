@@ -1246,6 +1246,63 @@ class TestGtk(unittest.TestCase):
         self.assertRaises(ValueError, tree_store.get, aiter, 1, 100)
         self.assertEqual(tree_store.get(aiter, 0, 1), (10, 'this is row #10'))
 
+    def test_tree_model_edit(self):
+        model = Gtk.ListStore(int, str, float)
+        model.append([1, "one", -0.1])
+        model.append([2, "two", -0.2])
+
+        def set_row(value):
+            model[1] = value
+
+        self.assertRaises(TypeError, set_row, 3)
+        self.assertRaises(TypeError, set_row, "three")
+        self.assertRaises(ValueError, set_row, [])
+        self.assertRaises(ValueError, set_row, [3, "three"])
+
+        model[0] = (3, "three", -0.3)
+
+    def test_tree_row_slice(self):
+        model = Gtk.ListStore(int, str, float)
+        model.append([1, "one", -0.1])
+
+        self.assertEqual([1, "one", -0.1], model[0][:])
+        self.assertEqual([1, "one"], model[0][:2])
+        self.assertEqual(["one", -0.1], model[0][1:])
+        self.assertEqual(["one"], model[0][1:-1])
+        self.assertEqual([1], model[0][:-2])
+        self.assertEqual([], model[0][5:])
+        self.assertEqual([1, -0.1], model[0][0:3:2])
+
+        model[0][:] = (2, "two", -0.2)
+        self.assertEqual([2, "two", -0.2], model[0][:])
+
+        model[0][:2] = (3, "three")
+        self.assertEqual([3, "three", -0.2], model[0][:])
+
+        model[0][1:] = ("four", -0.4)
+        self.assertEqual([3, "four", -0.4], model[0][:])
+
+        model[0][1:-1] = ("five",)
+        self.assertEqual([3, "five", -0.4], model[0][:])
+
+        model[0][0:3:2] = (6, -0.6)
+        self.assertEqual([6, "five", -0.6], model[0][:])
+
+        def set_row1():
+            model[0][5:] = ("doesn't", "matter",)
+
+        self.assertRaises(ValueError, set_row1)
+
+        def set_row2():
+            model[0][:1] = (0, "zero", 0)
+
+        self.assertRaises(ValueError, set_row2)
+
+        def set_row3():
+            model[0][:2] = ("0", 0)
+
+        self.assertRaises(ValueError, set_row3)
+
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title='This is just a test',
