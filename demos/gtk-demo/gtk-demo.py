@@ -28,25 +28,82 @@ from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
 
 
 
-DEMOCODEDIR = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, DEMOCODEDIR)
+DEMOROOTDIR = os.path.abspath(os.path.dirname(__file__))
+DEMOCODEDIR = os.path.join(DEMOROOTDIR, 'demos')
+sys.path.insert(0, DEMOROOTDIR)
 
 
 class Demo(GObject.GObject):
     __gtype_name__ = 'GtkDemo'
 
-    def __init__(self, title=None, module=None, filename=None, children=[]):
+    def __init__(self, title, module, filename):
         super(Demo, self).__init__()
 
         self.title = title
         self.module = module
         self.filename = filename
-        self.children = children
 
-        if module is None:
-            self.isdir = True
-        else:
-            self.isdir = False
+    @classmethod
+    def new_from_file(cls, path):
+        relpath = os.path.relpath(path, DEMOROOTDIR)
+        packagename = os.path.dirname(relpath).replace(os.sep, '.')
+        modulename = os.path.basename(relpath)[0:-3]
+
+        package = __import__(packagename, globals(), locals(), [modulename], -1)
+        module = getattr(package, modulename)
+
+        try:
+            return cls(module.title, module, path)
+        except AttributeError as e:
+            raise AttributeError('(%s): %s' % (path, e.message))
+
+
+class DemoTreeStore(Gtk.TreeStore):
+    __gtype_name__ = 'GtkDemoTreeStore'
+
+    def __init__(self, *args):
+        #TODO: super does not seem to work here?
+        #super(Gtk.TreeStore, self).__init__(str, Demo, Pango.Style)
+        Gtk.TreeStore.__init__(self, str, Demo, Pango.Style)
+
+        self._parent_nodes = {}
+
+        for filename in self._list_dir(DEMOCODEDIR):
+            fullpath = os.path.join(DEMOCODEDIR, filename)
+            initfile = os.path.join(os.path.dirname(fullpath), '__init__.py')
+
+            if fullpath != initfile \
+            and os.path.isfile(initfile) \
+            and fullpath.endswith('.py'):
+                parentname = os.path.dirname(os.path.relpath(fullpath, DEMOCODEDIR))
+
+                if parentname:
+                    parent = self._get_parent_node(parentname)
+                else:
+                    parent = None
+
+                demo = Demo.new_from_file(fullpath)
+                self.append(parent, (demo.title, demo, Pango.Style.NORMAL))
+
+    def _list_dir(self, path):
+        demo_file_list = []
+
+        for filename in os.listdir(path):
+            fullpath = os.path.join(path, filename)
+
+            if os.path.isdir(fullpath):
+                demo_file_list.extend(self._list_dir(fullpath))
+            elif os.path.isfile(fullpath):
+                demo_file_list.append(fullpath)
+
+        return sorted(demo_file_list, key=str.lower)
+
+    def _get_parent_node(self, name):
+        if not name in self._parent_nodes.keys():
+            node = self.append(None, (name, None, Pango.Style.NORMAL))
+            self._parent_nodes[name] = node
+
+        return self._parent_nodes[name]
 
 
 class GtkDemoWindow(Gtk.Window):
@@ -58,9 +115,6 @@ class GtkDemoWindow(Gtk.Window):
         self.set_title('PyGI GTK+ Code Demos')
         self.set_default_size (600, 400)
         self.setup_default_icon()
-
-        self._demos = []
-        self.load_demos()
 
         hbox = Gtk.HBox(homogeneous=False, spacing=0)
         self.add(hbox)
@@ -100,59 +154,8 @@ class GtkDemoWindow(Gtk.Window):
         self.selection_cb(self.tree_view.get_selection(),
                           self.tree_view.get_model())
 
-    def load_demos_from_list(self, file_list, demo_list):
-        for fullpath in file_list:
-            base_name = os.path.basename(fullpath)
-            if base_name == '__init__.py':
-                continue
-
-            demo = None
-            if os.path.isdir(fullpath):
-                children = []
-                self.load_demos(fullpath, children)
-                demo = Demo(base_name, None, fullpath, children)
-            else:
-                relpath = os.path.relpath(fullpath, DEMOCODEDIR)
-                scrub_ext = relpath[0:-3]
-                split_path = scrub_ext.split(os.sep)
-                module_name = split_path[-1]
-                base_module_name = '.'.join(split_path[:-1])
-                _temp = __import__(base_module_name, globals(), locals(), [module_name], -1)
-                module = getattr(_temp, module_name)
-
-                try:
-                    demo = Demo(module.title, module, fullpath)
-                except AttributeError as e:
-                    raise AttributeError('(%s): %s' % (fullpath, e.message))
-
-            demo_list.append(demo)
-
-    def load_demos(self, top_dir='demos', demo_list=None):
-        top_dir = os.path.join(DEMOCODEDIR, top_dir)
-
-        if demo_list is None:
-            demo_list = self._demos
-
-        demo_file_list = []
-
-        for filename in os.listdir(top_dir):
-            fullname = os.path.join(top_dir, filename)
-            if os.path.isdir(fullname):
-                # make sure this is a module directory
-                init_file = os.path.join(fullname, '__init__.py')
-                if os.path.isfile(init_file):
-                    demo_file_list.append(fullname)
-                    continue
-
-            if filename.endswith('.py'):
-                demo_file_list.append(fullname)
-
-        demo_file_list = sorted(demo_file_list, key=str.lower)
-
-        self.load_demos_from_list(demo_file_list, demo_list)
-
     def find_file(self, base=''):
-        dir = os.path.join(DEMOCODEDIR, 'demos', 'data')
+        dir = os.path.join(DEMOCODEDIR, 'data')
         logo_file = os.path.join(dir, 'gtk-logo-rgb.gif')
         base_file = os.path.join(dir, base)
 
@@ -182,11 +185,10 @@ class GtkDemoWindow(Gtk.Window):
             return
 
         treeiter = sel[1]
+        title = model.get_value(treeiter, 0)
         demo = model.get_value(treeiter, 1)
 
-        title = demo.title
-
-        if demo.isdir:
+        if demo is None:
             return
 
         description = demo.module.description
@@ -217,30 +219,17 @@ class GtkDemoWindow(Gtk.Window):
     def row_activated_cb(self, view, path, col, store):
         treeiter = store.get_iter(path)
         demo = store.get_value(treeiter, 1)
-        if not demo.isdir:
+        if demo is not None:
             demo.module.main(self)
 
     def create_tree(self):
-        tree_store = Gtk.TreeStore(str, Demo, Pango.Style)
+        tree_store = DemoTreeStore()
         tree_view = Gtk.TreeView()
         self.tree_view = tree_view
         tree_view.set_model(tree_store)
         selection = tree_view.get_selection()
         selection.set_mode(Gtk.SelectionMode.BROWSE)
         tree_view.set_size_request(200, -1)
-
-        for demo in self._demos:
-            children = demo.children
-            parent = tree_store.append(None,
-                                       (demo.title,
-                                        demo,
-                                        Pango.Style.NORMAL))
-            if children:
-                for child_demo in children:
-                    tree_store.append(parent,
-                                      (child_demo.title,
-                                       child_demo,
-                                       Pango.Style.NORMAL))
 
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title = 'Widget (double click for demo)',
