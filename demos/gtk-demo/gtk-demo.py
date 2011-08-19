@@ -48,25 +48,22 @@ class Demo(GObject.GObject):
         else:
             self.isdir = False
 
-class GtkDemoApp(object):
-    def _quit(self, *args):
-        Gtk.main_quit()
+
+class GtkDemoWindow(Gtk.Window):
+    __gtype_name__ = 'GtkDemoWindow'
 
     def __init__(self):
-        super(GtkDemoApp, self).__init__()
+        super(GtkDemoWindow, self).__init__(type=Gtk.WindowType.TOPLEVEL)
+
+        self.set_title('PyGI GTK+ Code Demos')
+        self.set_default_size (600, 400)
+        self.setup_default_icon()
 
         self._demos = []
         self.load_demos()
 
-        self.setup_default_icon()
-
-        window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
-        window.set_title('PyGI GTK+ Code Demos')
-
-        window.connect_after('destroy', self._quit)
-
-        hbox = Gtk.HBox(homogeneous = False, spacing = 0)
-        window.add(hbox)
+        hbox = Gtk.HBox(homogeneous=False, spacing=0)
+        self.add(hbox)
 
         tree = self.create_tree()
         hbox.pack_start(tree, False, False, 0)
@@ -98,12 +95,10 @@ class GtkDemoApp(object):
                                         foreground = 'DarkGoldenrod4')
 
         self.source_buffer = source_buffer
-        window.set_default_size (600, 400)
-        window.show_all()
+        self.show_all()
 
         self.selection_cb(self.tree_view.get_selection(),
                           self.tree_view.get_model())
-        Gtk.main()
 
     def load_demos_from_list(self, file_list, demo_list):
         for fullpath in file_list:
@@ -307,5 +302,19 @@ class GtkDemoApp(object):
 
         return(scrolled_window, buffer)
 
+
+def main():
+    mainloop = GLib.MainLoop()
+
+    demowindow = GtkDemoWindow()
+    demowindow.connect('delete-event', quit, mainloop)
+    demowindow.show()
+
+    mainloop.run()
+
+def quit(widget, event, mainloop):
+    mainloop.quit()
+
+
 if __name__ == '__main__':
-    demo = GtkDemoApp()
+    main()
