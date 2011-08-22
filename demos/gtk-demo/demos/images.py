@@ -134,7 +134,7 @@ class ImagesApp:
         self.start_progressive_loading(image)
 
         # Sensistivity control
-        button = Gtk.ToggleButton(label='_Insensitive')
+        button = Gtk.ToggleButton.new_with_mnemonic('_Insensitive')
         button.connect('toggled', self.toggle_sensitivity_cb, vbox)
         vbox.pack_start(button, False, False, 0)
 
