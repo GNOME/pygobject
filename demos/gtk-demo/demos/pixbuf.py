@@ -28,13 +28,12 @@ Look at the Image demo for additional pixbuf usage examples.
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 import os
 import math
-from os import path
 
 class PixbufApp:
     FRAME_DELAY = 50
     BACKGROUND_NAME = "background.jpg"
     CYCLE_LEN = 60
-    
+
     def __init__(self):
         self.background_width = 0
         self.background_height = 0
@@ -65,15 +64,15 @@ class PixbufApp:
                                        Gtk.MessageType.ERROR,
                                        Gtk.ButtonsType.CLOSE,
                                        e.message)
- 
+
             dialog.run()
             dialog.destroy()
             Gtk.main_quit()
-        
+
         self.window.set_size_request(self.background_width,
                                      self.background_height)
-        self.frame = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, 
-                                          False, 
+        self.frame = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
+                                          False,
                                           8,
                                           self.background_width,
                                           self.background_height)
@@ -82,19 +81,17 @@ class PixbufApp:
         self.window.add(self.da)
         self.timeout_id = GObject.timeout_add(self.FRAME_DELAY, self.timeout_cb)
         self.window.show_all()
-        
-    def load_pixbufs(self):
-        base_path = 'data'
-        if not path.isdir(base_path):
-            base_path = path.join('demos', base_path)
 
-        img_path = path.join(base_path, self.BACKGROUND_NAME)
+    def load_pixbufs(self):
+        base_path = os.path.abspath(os.path.dirname(__file__))
+        base_path = os.path.join(base_path, 'data')
+        img_path = os.path.join(base_path, self.BACKGROUND_NAME)
         self.background_pixbuf = GdkPixbuf.Pixbuf.new_from_file(img_path)
         self.background_height = self.background_pixbuf.get_height()
         self.background_width = self.background_pixbuf.get_width()
 
         for img_name in self.image_names:
-            img_path = path.join(base_path, img_name)
+            img_path = os.path.join(base_path, img_name)
             self.pixbufs.append(GdkPixbuf.Pixbuf.new_from_file(img_path))
 
     def draw_cb(self, da, cairo_ctx):
@@ -174,7 +171,7 @@ class PixbufApp:
     def cleanup_cb(self, widget):
         GObject.source_remove(self.timeout_id)
         Gtk.main_quit()
-            
+
 def main(demoapp=None):
     app = PixbufApp()
     Gtk.main()
