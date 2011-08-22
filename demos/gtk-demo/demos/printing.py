@@ -28,22 +28,22 @@ from gi.repository import Gtk, GLib, Pango, PangoCairo
 import cairo
 import math
 import os
-from os import path
+
 
 class PrintingApp:
     HEADER_HEIGHT = 10*72/25.4
     HEADER_GAP = 3*72/25.4
-    
+
     def __init__(self):
         self.operation = Gtk.PrintOperation()
-        print_data = {'filename': 'printing.py',
+        print_data = {'filename': os.path.abspath(__file__),
                       'font_size': 12.0,
                       'lines_per_page': 0,
                       'lines': None,
                       'num_lines': 0,
                       'num_pages': 0
                      }
-                     
+
         self.operation.connect('begin-print', self.begin_print, print_data)
         self.operation.connect('draw-page', self.draw_page, print_data)
         self.operation.connect('end-print', self.end_print, print_data)
@@ -76,7 +76,7 @@ class PrintingApp:
                                        Gtk.MessageType.ERROR,
                                        Gtk.ButtonsType.CLOSE,
                                        e.message)
- 
+
             dialog.run()
             dialog.destroy()
 
@@ -84,29 +84,29 @@ class PrintingApp:
         height = print_ctx.get_height() - self.HEADER_HEIGHT - self.HEADER_GAP
         print_data['lines_per_page'] = \
             math.floor(height / print_data['font_size'])
-        
+
         file_path = print_data['filename']
-        if not path.isfile(file_path):
-            file_path = path.join('demos', file_path)
-            if not path.isfile:
+        if not os.path.isfile(file_path):
+            file_path = os.path.join('demos', file_path)
+            if not os.path.isfile:
                 raise FileNotFoundError()
 
-        # in reality you should most likely not read the entire 
+        # in reality you should most likely not read the entire
         # file into a buffer
         source_file = open(file_path, 'r')
         s = source_file.read()
         print_data['lines'] = s.split('\n')
-        
+
         print_data['num_lines'] = len(print_data['lines'])
         print_data['num_pages'] = \
             (print_data['num_lines'] - 1) / print_data['lines_per_page'] + 1
-            
+
         operation.set_n_pages(print_data['num_pages'])
 
     def draw_page(self, operation, print_ctx, page_num, print_data):
         cr = print_ctx.get_cairo_context()
         width = print_ctx.get_width()
-        
+
         cr.rectangle(0, 0, width, self.HEADER_HEIGHT)
         cr.set_source_rgb(0.8, 0.8, 0.8)
         cr.fill_preserve()
@@ -121,7 +121,7 @@ class PrintingApp:
 
         layout.set_text(print_data['filename'], -1)
         (text_width, text_height) = layout.get_pixel_size()
-        
+
         if text_width > width:
             layout.set_width(width)
             layout.set_ellipsize(Pango.EllipsizeType.START);
@@ -136,7 +136,7 @@ class PrintingApp:
 
         layout.set_width(-1)
         (text_width, text_height) = layout.get_pixel_size()
-        cr.move_to(width - text_width - 4, 
+        cr.move_to(width - text_width - 4,
                    (self.HEADER_HEIGHT - text_height) / 2)
         PangoCairo.show_layout(cr, layout);
 
@@ -156,7 +156,7 @@ class PrintingApp:
         for i in range(lines_pp):
             if line >= num_lines:
                 break;
-                
+
             layout.set_text(data_lines[line], -1)
             PangoCairo.show_layout(cr, layout)
             cr.rel_move_to (0, font_size)
