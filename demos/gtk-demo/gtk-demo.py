@@ -330,23 +330,27 @@ class GtkDemoWindow(Gtk.Window):
         is_decorator = False
         is_func = False
 
+        def prepare_iters():
+            start_iter.set_line(srow-1)
+            start_iter.set_line_offset(scol)
+            end_iter.set_line(erow-1)
+            end_iter.set_line_offset(ecol)
+
         for x in tokenize.generate_tokens(InputStream(data).readline):
             # x has 5-tuples
             tok_type, tok_str = x[0], x[1]
             srow, scol = x[2]
             erow, ecol = x[3]
 
-            start_iter.set_line(srow-1)
-            start_iter.set_line_offset(scol)
-            end_iter.set_line(erow-1)
-            end_iter.set_line_offset(ecol)
-
             if tok_type == tokenize.BACKQUOTE:
+                prepare_iters()
                 self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
             elif tok_type == tokenize.COMMENT:
+                prepare_iters()
                 self.source_buffer.apply_tag_by_name('comment', start_iter, end_iter)
             elif tok_type == tokenize.NAME:
                 if tok_str in keyword.kwlist or tok_str in builtin_constants:
+                    prepare_iters()
                     self.source_buffer.apply_tag_by_name('keyword', start_iter, end_iter)
 
                     if tok_str == 'def' or tok_str == 'class':
@@ -354,18 +358,24 @@ class GtkDemoWindow(Gtk.Window):
                         is_func = True
                         continue
                 elif tok_str == 'self':
+                    prepare_iters()
                     self.source_buffer.apply_tag_by_name('italic', start_iter, end_iter)
                 else:
                     if is_func is True:
+                        prepare_iters()
                         self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
                     elif is_decorator is True:
+                        prepare_iters()
                         self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
             elif tok_type == tokenize.STRING:
+                prepare_iters()
                 self.source_buffer.apply_tag_by_name('string', start_iter, end_iter)
             elif tok_type == tokenize.NUMBER:
+                prepare_iters()
                 self.source_buffer.apply_tag_by_name('number', start_iter, end_iter)
             elif tok_type == tokenize.OP:
                 if tok_str == '@':
+                    prepare_iters()
                     self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
 
                     # next token is going to be the decorator name
