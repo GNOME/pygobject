@@ -124,8 +124,8 @@ class PrintingApp:
 
         if text_width > width:
             layout.set_width(width)
-            layout.set_ellipsize(Pango.EllipsizeType.START);
-            (text_width, text_height) = layout.get_pixel_size(layout)
+            layout.set_ellipsize(Pango.EllipsizeMode.START);
+            (text_width, text_height) = layout.get_pixel_size()
 
         cr.move_to ((width - text_width) / 2,
                     (self.HEADER_HEIGHT - text_height) / 2)
