@@ -40,7 +40,7 @@ class ImagesApp:
 
         vbox = Gtk.VBox(spacing=8)
         vbox.set_border_width(8)
-        self.window.add(vbox)        
+        self.window.add(vbox)
 
         label = Gtk.Label()
         label.set_markup('<u>Image loaded from file</u>')
@@ -48,33 +48,21 @@ class ImagesApp:
 
         frame = Gtk.Frame()
         frame.set_shadow_type(Gtk.ShadowType.IN)
-        
+
         # The alignment keeps the frame from growing when users resize
         # the window
-        align = Gtk.Alignment(xalign=0.5, 
-                              yalign=0.5, 
-                              xscale=0, 
+        align = Gtk.Alignment(xalign=0.5,
+                              yalign=0.5,
+                              xscale=0,
                               yscale=0)
         align.add(frame)
         vbox.pack_start(align, False, False, 0)
 
-        self.base_path = 'data'
-        if not path.isdir(self.base_path):
-            self.base_path = path.join('demos', self.base_path)
-   
-        try:
-            img_path = path.join(self.base_path, 'gtk-logo-rgb.gif')
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(img_path)
-        except GObject.GError as e:
-            dialog = Gtk.MessageDialog(self.window,
-                                       Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                                       Gtk.MessageType.ERROR,
-                                       Gtk.ButtonsType.CLOSE,
-                                       e.message)
- 
-            dialog.show()
-            dialog.connect('response', lambda x,y: dialog.destroy())
-
+        self.base_path = os.path.abspath(os.path.dirname(__file__))
+        self.base_path = os.path.join(self.base_path, 'data')
+        filename = os.path.join(self.base_path, 'gtk-logo-rgb.gif')
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+        transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
         image = Gtk.Image.new_from_pixbuf(pixbuf)
         frame.add(image)
 
@@ -86,12 +74,12 @@ class ImagesApp:
 
         frame = Gtk.Frame()
         frame.set_shadow_type(Gtk.ShadowType.IN)
-        
+
         # The alignment keeps the frame from growing when users resize
         # the window
-        align = Gtk.Alignment(xalign=0.5, 
-                              yalign=0.5, 
-                              xscale=0, 
+        align = Gtk.Alignment(xalign=0.5,
+                              yalign=0.5,
+                              xscale=0,
                               yscale=0)
         align.add(frame)
         vbox.pack_start(align, False, False, 0)
@@ -108,12 +96,12 @@ class ImagesApp:
 
         frame = Gtk.Frame()
         frame.set_shadow_type(Gtk.ShadowType.IN)
-        
+
         # The alignment keeps the frame from growing when users resize
         # the window
-        align = Gtk.Alignment(xalign=0.5, 
-                              yalign=0.5, 
-                              xscale=0, 
+        align = Gtk.Alignment(xalign=0.5,
+                              yalign=0.5,
+                              xscale=0,
                               yscale=0)
         align.add(frame)
         vbox.pack_start(align, False, False, 0)
@@ -130,12 +118,12 @@ class ImagesApp:
 
         frame = Gtk.Frame()
         frame.set_shadow_type(Gtk.ShadowType.IN)
-        
+
         # The alignment keeps the frame from growing when users resize
         # the window
-        align = Gtk.Alignment(xalign=0.5, 
-                              yalign=0.5, 
-                              xscale=0, 
+        align = Gtk.Alignment(xalign=0.5,
+                              yalign=0.5,
+                              xscale=0,
                               yscale=0)
         align.add(frame)
         vbox.pack_start(align, False, False, 0)
@@ -197,7 +185,7 @@ class ImagesApp:
                 self.image_stream.close()
                 self.image_stream = None
                 self.load_timeout = 0
-    
+
                 dialog.show()
                 dialog.connect('response', lambda x,y: dialog.destroy())
 
@@ -220,7 +208,7 @@ class ImagesApp:
                                                'Failed to load image: %s' % e.message)
 
                     self.load_timeout = 0
-    
+
                     dialog.show()
                     dialog.connect('response', lambda x,y: dialog.destroy())
 
@@ -251,11 +239,11 @@ class ImagesApp:
             self.pixbuf_loader = GdkPixbuf.PixbufLoader()
 
             self.pixbuf_loader.connect('area-prepared',
-                                       self.progressive_prepared_callback, 
+                                       self.progressive_prepared_callback,
                                        image)
-      
+
             self.pixbuf_loader.connect('area-updated',
-                                       self.progressive_updated_callback, 
+                                       self.progressive_updated_callback,
                                        image)
         # leave timeout installed
         return True
@@ -267,7 +255,7 @@ class ImagesApp:
         pixbuf.fill(0xaaaaaaff)
         image.set_from_pixbuf(pixbuf)
 
-    def progressive_updated_callback(self, loader, x, y, width, height, image):       
+    def progressive_updated_callback(self, loader, x, y, width, height, image):
         # We know the pixbuf inside the GtkImage has changed, but the image
         # itself doesn't know this; so queue a redraw.  If we wanted to be
         # really efficient, we could use a drawing area or something
@@ -303,7 +291,7 @@ class ImagesApp:
             self.image_stream.close()
 
         Gtk.main_quit()
-            
+
 def main(demoapp=None):
     app = ImagesApp()
     Gtk.main()
