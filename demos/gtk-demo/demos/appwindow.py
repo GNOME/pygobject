@@ -115,13 +115,9 @@ License along with the Gnome Library; see the file COPYING.LIB.  If not,
 write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
-    filename = os.path.join('data', 'gtk-logo-rgb.gif')
-    try:
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-    except GLib.GError:
-        filename = os.path.join('demos', filename)
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-
+    dirname = os.path.abspath(os.path.dirname(__file__))
+    filename = os.path.join(dirname, 'data', 'gtk-logo-rgb.gif')
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
     # FIXME: override Gtk.show_about_dialog
     #        make about dailog constructor take a parent argument
