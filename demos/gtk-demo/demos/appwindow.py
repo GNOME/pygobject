@@ -118,7 +118,7 @@ Boston, MA 02111-1307, USA.
     filename = os.path.join('data', 'gtk-logo-rgb.gif')
     try:
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-    except glib.GError:
+    except GLib.GError:
         filename = os.path.join('demos', filename)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
 

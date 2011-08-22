@@ -191,7 +191,7 @@ class IconViewApp:
                 try:
                     pixbuf = icon_theme.load_icon(name, 64, 0)
                     break
-                except glib.GError:
+                except GLib.GError:
                     pass
 
             self.pixbuf_lookup[gicon] = pixbuf
