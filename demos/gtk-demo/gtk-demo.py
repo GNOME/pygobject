@@ -346,10 +346,7 @@ class GtkDemoWindow(Gtk.Window):
             srow, scol = x[2]
             erow, ecol = x[3]
 
-            if tok_type == tokenize.BACKQUOTE:
-                prepare_iters()
-                self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
-            elif tok_type == tokenize.COMMENT:
+            if tok_type == tokenize.COMMENT:
                 prepare_iters()
                 self.source_buffer.apply_tag_by_name('comment', start_iter, end_iter)
             elif tok_type == tokenize.NAME:
