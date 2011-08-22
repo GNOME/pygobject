@@ -22,6 +22,7 @@
 
 import os
 import sys
+import codecs
 import glob
 import tokenize
 import keyword
@@ -219,7 +220,10 @@ class GtkDemoWindow(Gtk.Window):
             return
 
         description = demo.module.description
-        code = GLib.file_get_contents(demo.filename)[1]
+
+        f = codecs.open(demo.filename, 'rU', 'utf-8')
+        code = f.read()
+        f.close()
 
         # output and style the title
         (start, end) = self.info_buffer.get_bounds()
