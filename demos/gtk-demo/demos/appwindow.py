@@ -39,7 +39,7 @@ global _demoapp
 def widget_destroy(widget, button):
     widget.destroy()
 
-def activate_action(action, user_data):
+def activate_action(action, user_data=None):
     global window
 
     name = action.get_name()
@@ -60,7 +60,7 @@ def activate_action(action, user_data):
     dialog.connect('response', widget_destroy)
     dialog.show()
 
-def activate_radio_action(action, current, user_data):
+def activate_radio_action(action, current, user_data=None):
     global infobar
     global messagelabel
 
@@ -88,7 +88,7 @@ def update_statusbar(buffer, statusbar):
 def mark_set_callback(buffer, new_location, mark, data):
     update_statusbar(buffer, data)
 
-def about_cb(widget, data):
+def about_cb(widget, user_data=None):
     global window
 
     authors = ['John (J5) Palmieri',
