@@ -249,10 +249,13 @@ class GtkDemoWindow(Gtk.Window):
         self.fontify()
 
     def row_activated_cb(self, view, path, col, store):
-        treeiter = store.get_iter(path)
-        demo = store.get_value(treeiter, 1)
+        iter = store.get_iter(path)
+        demo = store.get_value(iter, 1)
+
         if demo is not None:
+            store.set_value(iter, 2, Pango.Style.ITALIC)
             demo.module.main(self)
+            store.set_value(iter, 2, Pango.Style.NORMAL)
 
     def create_tree(self):
         tree_store = DemoTreeStore()
