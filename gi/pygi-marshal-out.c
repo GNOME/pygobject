@@ -331,20 +331,15 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                 if (seq_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
                 } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
-                    item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-                       PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
-                       switch (g_base_info_get_type (iface_cache->interface_info)) {
-                           case GI_INFO_TYPE_STRUCT:
-                           {
-                               gpointer *_struct = g_malloc (item_size);
-                               memcpy (_struct, item_arg.v_pointer, item_size);
-                               item_arg.v_pointer = _struct;
-                               break;
-                           }
-                           default:
-                               break;
-                       }
+                    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
+
+                    switch (g_base_info_get_type (iface_cache->interface_info)) {
+                        case GI_INFO_TYPE_STRUCT:
+                            item_arg.v_pointer = array_->data + i * item_size;
+                            break;
+                        default:
+                            item_arg.v_pointer = g_array_index (array_, gpointer, i);
+                            break;
                     }
                 } else {
                     memcpy (&item_arg, array_->data + i * item_size, item_size);

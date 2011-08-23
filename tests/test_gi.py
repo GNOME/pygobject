@@ -703,6 +703,14 @@ class TestArray(unittest.TestCase):
         object_ = GIMarshallingTests.Object()
         self.assertEquals([-1, 0, 1, 2], object_.method_array_return())
 
+    def test_array_fixed_out_struct(self):
+        struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
+
+        self.assertEquals(7, struct1.long_)
+        self.assertEquals(6, struct1.int8)
+        self.assertEquals(6, struct2.long_)
+        self.assertEquals(7, struct2.int8)
+
     def test_array_zero_terminated_return(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_return())
 
