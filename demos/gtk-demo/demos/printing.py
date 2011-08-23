@@ -68,13 +68,13 @@ class PrintingApp:
         settings.set(Gtk.PRINT_SETTINGS_OUTPUT_URI, uri)
         self.operation.set_print_settings(settings)
 
-    def run(self):
-        result = self.operation.run(Gtk.PrintOperationAction.PRINT_DIALOG, None)
+    def run(self, parent=None):
+        result = self.operation.run(Gtk.PrintOperationAction.PRINT_DIALOG, parent)
 
         if result == Gtk.PrintOperationResult.ERROR:
             message = self.operation.get_error()
 
-            dialog = Gtk.MessageDialog(None,
+            dialog = Gtk.MessageDialog(parent,
                                        0,
                                        Gtk.MessageType.ERROR,
                                        Gtk.ButtonsType.CLOSE,
@@ -172,7 +172,7 @@ class PrintingApp:
 
 def main(demoapp=None):
     app = PrintingApp()
-    GLib.idle_add(app.run)
+    GLib.idle_add(app.run, demoapp)
     Gtk.main()
 
 if __name__ == '__main__':
