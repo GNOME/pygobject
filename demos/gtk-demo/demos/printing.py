@@ -68,17 +68,22 @@ class PrintingApp:
         settings.set(Gtk.PRINT_SETTINGS_OUTPUT_URI, uri)
         self.operation.set_print_settings(settings)
 
-        try:
-            self.operation.run(Gtk.PrintOperationAction.PRINT_DIALOG, None)
-        except GLib.Error as e:
+    def run(self):
+        result = self.operation.run(Gtk.PrintOperationAction.PRINT_DIALOG, None)
+
+        if result == Gtk.PrintOperationResult.ERROR:
+            message = self.operation.get_error()
+
             dialog = Gtk.MessageDialog(None,
                                        0,
                                        Gtk.MessageType.ERROR,
                                        Gtk.ButtonsType.CLOSE,
-                                       e.message)
+                                       message)
 
             dialog.run()
             dialog.destroy()
+
+        Gtk.main_quit()
 
     def begin_print(self, operation, print_ctx, print_data):
         height = print_ctx.get_height() - self.HEADER_HEIGHT - self.HEADER_GAP
@@ -167,6 +172,7 @@ class PrintingApp:
 
 def main(demoapp=None):
     app = PrintingApp()
+    GLib.idle_add(app.run)
     Gtk.main()
 
 if __name__ == '__main__':
