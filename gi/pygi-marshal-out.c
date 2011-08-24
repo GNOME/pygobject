@@ -335,7 +335,13 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
 
                     switch (g_base_info_get_type (iface_cache->interface_info)) {
                         case GI_INFO_TYPE_STRUCT:
-                            item_arg.v_pointer = array_->data + i * item_size;
+                            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+                                gpointer *_struct = g_malloc (item_size);
+                                memcpy (_struct, array_->data + i * item_size,
+                                        item_size);
+                                item_arg.v_pointer = _struct;
+                            } else
+                                item_arg.v_pointer = array_->data + i * item_size;
                             break;
                         default:
                             item_arg.v_pointer = g_array_index (array_, gpointer, i);
