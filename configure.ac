@@ -124,28 +124,6 @@ AC_ARG_ENABLE(thread,
   AC_HELP_STRING([--disable-thread], [Disable pygobject threading support]),,
   enable_thread=yes)
 
-dnl Building documentation
-AC_ARG_ENABLE(docs,
-  AC_HELP_STRING([--enable-docs], [Enable documentation building]),enable_docs=$enableval,
-  enable_docs=no)
-if test "${enable_docs}" != no; then
-  dnl
-  dnl Check for xsltproc
-  dnl
-  AC_PATH_PROG([XSLTPROC], [xsltproc])
-  if test -z "$XSLTPROC"; then
-    enable_docs=no
-  fi
-
-  dnl check for DocBook DTD and stylesheets in the local catalog.
-  dnl JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.1.2//EN],
-  dnl   [DocBook XML DTD V4.1.2],,enable_docs=no)
-  dnl JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl],
-  dnl   [DocBook XSL Stylesheets],,enable_docs=no)
-fi
-
-AM_CONDITIONAL(ENABLE_DOCS, test x$enable_docs != xno)
-
 AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
 if test "x$enable_thread" = xcheck_for_py3_module; then
   dnl Python 3 uses the _thread module so check for that
@@ -255,9 +233,6 @@ AC_CONFIG_FILES(
   Makefile
   pygobject-3.0.pc
   pygobject-3.0-uninstalled.pc
-  docs/Makefile
-  docs/reference/entities.docbook
-  docs/xsl/fixxref.py
   gi/Makefile
   gi/repository/Makefile
   gi/overrides/Makefile
