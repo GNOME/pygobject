@@ -59,12 +59,12 @@ class IconviewEditApp:
         renderer.props.editable = True
         renderer.connect('edited', self.edited, icon_view)
         icon_view.add_attribute(renderer, 'text', self.COL_TEXT)
-        
+
         self.window.add(icon_view)
 
         self.window.show_all()
 
-    def set_cell_color (self, 
+    def set_cell_color (self,
                         cell_layout,
 	                    cell,
 		                tree_model,
@@ -73,7 +73,7 @@ class IconviewEditApp:
 
          # FIXME return single element instead of tuple
          text = tree_model.get(iter_, self.COL_TEXT)[0]
-         color = Gdk.color_parse(text)[1]
+         color = Gdk.color_parse(text)
          pixel = 0
          if color is not None:
              pixel = \
