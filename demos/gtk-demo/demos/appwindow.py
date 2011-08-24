@@ -119,9 +119,9 @@ Boston, MA 02111-1307, USA.
     filename = os.path.join(dirname, 'data', 'gtk-logo-rgb.gif')
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
     transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-    # FIXME: override Gtk.show_about_dialog
-    #        make about dailog constructor take a parent argument
-    about = Gtk.AboutDialog(program_name='GTK+ Code Demos',
+
+    about = Gtk.AboutDialog(parent=window,
+                program_name='GTK+ Code Demos',
 			    version='0.1',
 			    copyright='(C) 2010 The PyGI Team',
 			    license=license,
@@ -132,7 +132,6 @@ Boston, MA 02111-1307, USA.
 			    logo=transparent,
 			    title='About GTK+ Code Demos')
 
-    about.set_transient_for(window)
     about.connect('response', widget_destroy)
     about.show()
 
