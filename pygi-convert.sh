@@ -52,6 +52,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.TEXT_SEARCH_/Gtk.TextSearchFlags./g;" \
     -pe "s/Gtk.TEXT_WINDOW_/Gtk.TextWindowType./g;" \
     -pe "s/Gtk.TREE_VIEW_COLUMN_/Gtk.TreeViewColumnSizing./g;" \
+    -pe "s/Gtk.TREE_VIEW_DROP_/Gtk.TreeViewDropPosition./g;" \
     -pe "s/Gtk.WINDOW_/Gtk.WindowType./g;" \
     -pe "s/Gtk.WIN_POS_/Gtk.WindowPosition./g;" \
     -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
