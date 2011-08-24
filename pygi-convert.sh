@@ -19,6 +19,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/pygtk.require\('2.0'\)/gi.require_version\('Gtk', '3.0'\)/g;" \
     -pe "s/import gtk\n/from gi.repository import Gtk\n/g;" \
     -pe "s/(?<!\.)gtk\./Gtk\./g;" \
+    -pe "s/Gtk.ACCEL_/Gtk.AccelFlags./g;" \
     -pe "s/Gtk.ARROW_/Gtk.ArrowType./g;" \
     -pe "s/Gtk.ASSISTANT_PAGE_/Gtk.AssistantPageType./g;" \
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
