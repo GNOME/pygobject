@@ -475,3 +475,11 @@ class TestAdvancedInterfaces(unittest.TestCase):
         self.assertTrue(isinstance(obj1, Everything.TestObj))
         self.assertTrue(isinstance(obj2, Everything.TestObj))
         self.assertNotEqual(obj1, obj2)
+
+    def test_obj_skip_return_val(self):
+        obj = Everything.TestObj();
+        ret = obj.skip_return_val(50, 42.0, 60, 2, 3);
+        self.assertEquals(len(ret), 3);
+        self.assertEquals(ret[0], 51);
+        self.assertEquals(ret[1], 61);
+        self.assertEquals(ret[2], 32);

@@ -24,7 +24,7 @@
 
 #include <pyglib.h>
 #include "pygi-invoke.h"
-
+#include "pygi-marshal-cleanup.h"
 
 static inline gboolean
 _invoke_callable (PyGIInvokeState *state,
@@ -508,30 +508,42 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
     gboolean has_return = FALSE;
 
     if (cache->return_cache) {
+        if (!cache->return_cache->is_skipped) {
+            if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
+                if (state->return_arg.v_pointer == NULL) {
+                    PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
+                    pygi_marshal_cleanup_args_return_fail (state,
+                                                       cache);
+                    return NULL;
+                }
+            }
 
-        if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
-            if (state->return_arg.v_pointer == NULL) {
-                PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
+            py_return = cache->return_cache->out_marshaller ( state,
+                                                              cache,
+                                                              cache->return_cache,
+                                                             &state->return_arg);
+            if (py_return == NULL) {
                 pygi_marshal_cleanup_args_return_fail (state,
                                                        cache);
                 return NULL;
             }
-        }
-
-        py_return = cache->return_cache->out_marshaller ( state,
-                                                          cache,
-                                                          cache->return_cache,
-                                                         &state->return_arg);
-        if (py_return == NULL) {
-            pygi_marshal_cleanup_args_return_fail (state,
-                                                   cache);
-            return NULL;
-        }
 
 
-        if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
-            total_out_args++;
-            has_return = TRUE;
+            if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
+                total_out_args++;
+                has_return = TRUE;
+            }
+        } else {
+            if (cache->return_cache->transfer == GI_TRANSFER_EVERYTHING) {
+                PyGIMarshalCleanupFunc out_cleanup =
+                    cache->return_cache->out_cleanup;
+
+                if (out_cleanup != NULL)
+                    out_cleanup ( state,
+                                  cache->return_cache,
+                                 &state->return_arg,
+                                  FALSE);
+            }
         }
     }
 

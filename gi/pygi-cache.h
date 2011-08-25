@@ -87,6 +87,7 @@ struct _PyGIArgCache
     PyGIMetaArgType meta_type;
     gboolean is_pointer;
     gboolean is_caller_allocates;
+    gboolean is_skipped;
     gboolean allow_none;
 
     GIDirection direction;
