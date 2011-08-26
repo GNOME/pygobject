@@ -1024,10 +1024,6 @@ pygobject__g_instance_init(GTypeInstance   *instance,
     GObject *object = (GObject *) instance;
     PyObject *wrapper, *args, *kwargs;
 
-    if (!g_type_get_qdata(G_OBJECT_TYPE(object),
-			  pygobject_has_updated_constructor_key))
-        return;
-
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
         wrapper = pygobject_init_wrapper_get();
@@ -1135,7 +1131,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     guint n_parent_interfaces;
     GTypeQuery query;
     gpointer gclass;
-    gpointer has_new_constructor_api;
     GTypeInfo type_info = {
 	0,    /* class_size */
 
@@ -1200,14 +1195,6 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     gtype = pyg_type_wrapper_new(instance_type);
     PyObject_SetAttrString((PyObject *)class, "__gtype__", gtype);
     Py_DECREF(gtype);
-
-      /* propagate new constructor API compatility flag from parent to child type */
-    has_new_constructor_api =
-	g_type_get_qdata(parent_type,
-			 pygobject_has_updated_constructor_key);
-    if (has_new_constructor_api != NULL)
-        g_type_set_qdata(instance_type, pygobject_has_updated_constructor_key,
-                         has_new_constructor_api);
 
     /* if no __doc__, set it to the auto doc descriptor */
     if (PyDict_GetItemString(class->tp_dict, "__doc__") == NULL) {
@@ -2313,12 +2300,6 @@ pygobject_construct(PyGObject *self, const char *first_property_name, ...)
     return retval;
 }
 
-void
-pyg_set_object_has_new_constructor(GType type)
-{
-    g_type_set_qdata(type, pygobject_has_updated_constructor_key, GINT_TO_POINTER(1));
-}
-
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -2471,7 +2452,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_closure_set_exception_handler,
   pygobject_constructv,
   pygobject_construct,
-  pyg_set_object_has_new_constructor,
 
   add_warning_redirection,
   disable_warning_redirections,

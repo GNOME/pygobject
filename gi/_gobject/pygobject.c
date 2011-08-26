@@ -2297,7 +2297,6 @@ pygobject_object_register_types(PyObject *d)
 			     &PyGObject_Type, NULL);
     PyDict_SetItemString(PyGObject_Type.tp_dict, "__gdoc__",
 			 pyg_object_descr_doc_get());
-    pyg_set_object_has_new_constructor(G_TYPE_OBJECT);
 
     /* GProps */
     PyGProps_Type.tp_dealloc = (destructor)PyGProps_dealloc;

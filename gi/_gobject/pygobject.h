@@ -186,7 +186,6 @@ struct _PyGObject_Functions {
     int       (*pygobject_construct) (PyGObject  *self,
                                       const char *first_property_name,
                                       ...);
-    void      (*set_object_has_new_constructor) (GType type);
 
     void      (*add_warning_redirection) (const char *domain,
                                           PyObject   *warning);
@@ -257,7 +256,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_register_interface_info (_PyGObject_API->register_interface_info)
 #define pygobject_construct         (_PyGObject_API->pygobject_construct)
 #define pygobject_constructv        (_PyGObject_API->pygobject_constructv)
-#define pyg_set_object_has_new_constructor (_PyGObject_API->set_object_has_new_constructor)
 #define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
 #define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
 #define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)

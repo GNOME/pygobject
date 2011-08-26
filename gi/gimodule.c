@@ -201,33 +201,6 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
     return pyg_flags_add (NULL, g_type_name (g_type), NULL, g_type);
 }
 
-
-static PyObject *
-_wrap_pyg_set_object_has_new_constructor (PyObject *self,
-                                          PyObject *args,
-                                          PyObject *kwargs)
-{
-    static char *kwlist[] = { "g_type", NULL };
-    PyObject *py_g_type;
-    GType g_type;
-
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
-                                      "O!:set_object_has_new_constructor",
-                                      kwlist, &PyGTypeWrapper_Type, &py_g_type)) {
-        return NULL;
-    }
-
-    g_type = pyg_type_from_object (py_g_type);
-    if (!g_type_is_a (g_type, G_TYPE_OBJECT)) {
-        PyErr_SetString (PyExc_TypeError, "must be a subtype of GObject");
-        return NULL;
-    }
-
-    pyg_set_object_has_new_constructor (g_type);
-
-    Py_RETURN_NONE;
-}
-
 static void
 initialize_interface (GTypeInterface *iface, PyTypeObject *pytype)
 {
@@ -486,7 +459,6 @@ static PyMethodDef _gi_functions[] = {
     { "flags_add", (PyCFunction) _wrap_pyg_flags_add, METH_VARARGS | METH_KEYWORDS },
     { "flags_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_flags_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
 
-    { "set_object_has_new_constructor", (PyCFunction) _wrap_pyg_set_object_has_new_constructor, METH_VARARGS | METH_KEYWORDS },
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },

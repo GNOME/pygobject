@@ -560,8 +560,6 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 			   Py_BuildValue("(O)",
                            &PyGObject_Type,
                            &PyTestInterface_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_UNKNOWN);
-  //pyg_register_class_init(TEST_TYPE_UNKNOWN, __GtkUIManager_class_init);
 
   /* TestFloating */
   PyTestFloating_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
@@ -571,7 +569,6 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 			   &PyTestFloating_Type,
 			   Py_BuildValue("(O)",
                            &PyGObject_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING);
 
   /* TestOwnedByLibrary */
   PyTestOwnedByLibrary_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
@@ -582,7 +579,6 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 			   &PyTestOwnedByLibrary_Type,
 			   Py_BuildValue("(O)",
                            &PyGObject_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_OWNED_BY_LIBRARY);
 
   /* TestFloatingAndSunk */
   PyTestFloatingAndSunk_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
@@ -593,7 +589,6 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
                            &PyTestFloatingAndSunk_Type,
                            Py_BuildValue("(O)",
                            &PyGObject_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING_AND_SUNK);
 }
 PYGLIB_MODULE_END
 

@@ -92,7 +92,6 @@ int      pygobject_constructv (PyGObject   *self,
 int      pygobject_construct  (PyGObject   *self,
                                const char  *first_property_name,
                                ...);
-void     pyg_set_object_has_new_constructor (GType gtype);
 
 PyObject *pyg_integer_richcompare(PyObject *v,
                                   PyObject *w,

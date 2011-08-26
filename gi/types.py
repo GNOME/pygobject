@@ -30,7 +30,6 @@ from ._gi import \
     ObjectInfo, \
     StructInfo, \
     VFuncInfo, \
-    set_object_has_new_constructor, \
     register_interface_info, \
     hook_up_vfunc_implementation
 
@@ -225,7 +224,6 @@ class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
             if isinstance(cls.__info__, ObjectInfo):
                 cls._setup_fields()
                 cls._setup_constructors()
-                set_object_has_new_constructor(cls.__info__.get_g_type())
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
 
