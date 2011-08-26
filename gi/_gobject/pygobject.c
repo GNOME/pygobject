@@ -113,12 +113,6 @@ pygobject_get_inst_data(PyGObject *self)
 }
 
 
-typedef struct {
-    GType type;
-    void (* sinkfunc)(GObject *object);
-} SinkFunc;
-static GArray *sink_funcs = NULL;
-
 GHashTable *custom_type_registration = NULL;
 
 PyTypeObject *PyGObject_MetaType = NULL;
@@ -135,17 +129,6 @@ PyTypeObject *PyGObject_MetaType = NULL;
 void
 pygobject_sink(GObject *obj)
 {
-    if (sink_funcs) {
-	gint i;
-
-	for (i = 0; i < sink_funcs->len; i++) {
-	    if (g_type_is_a(G_OBJECT_TYPE(obj),
-			    g_array_index(sink_funcs, SinkFunc, i).type)) {
-		g_array_index(sink_funcs, SinkFunc, i).sinkfunc(obj);
-		return;
-	    }
-	}
-    }
     /* The default behaviour for GInitiallyUnowned subclasses is to call ref_sink().
      * - if the object is new and owned by someone else, its ref has been sunk and
      *   we need to keep the one from that someone and add our own "fresh ref"
@@ -155,42 +138,6 @@ pygobject_sink(GObject *obj)
     if (G_IS_INITIALLY_UNOWNED(obj)) {
         g_object_ref_sink(obj);
     }
-}
-
-/**
- * pygobject_register_sinkfunc:
- * type: the GType the sink function applies to.
- * sinkfunc: a function to remove the floating reference on an object.
- *
- * As Python handles reference counting for us, the "floating
- * reference" code in GTK is not all that useful.  In fact, it can
- * cause leaks.  For this reason, PyGTK removes the floating
- * references on objects on construction.
- *
- * The sinkfunc should be able to remove the floating reference on
- * instances of the given type, or any subclasses.
- *
- * Deprecated: Since 2.22, sinkfuncs are not needed.
- */
-void
-pygobject_register_sinkfunc(GType type, void (* sinkfunc)(GObject *object))
-{
-    SinkFunc sf;
-
-    g_message ("pygobject_register_sinkfunc is deprecated (%s)",
-               g_type_name(type));
-
-#if 0
-    g_return_if_fail(G_TYPE_IS_OBJECT(type));
-#endif
-    g_return_if_fail(sinkfunc != NULL);
-    
-    if (!sink_funcs)
-	sink_funcs = g_array_new(FALSE, FALSE, sizeof(SinkFunc));
-
-    sf.type = type;
-    sf.sinkfunc = sinkfunc;
-    g_array_append_val(sink_funcs, sf);
 }
 
 typedef struct {

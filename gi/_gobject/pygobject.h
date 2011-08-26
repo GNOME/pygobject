@@ -92,8 +92,6 @@ struct _PyGObject_Functions {
     void (* register_class)(PyObject *dict, const gchar *class_name,
 			    GType gtype, PyTypeObject *type, PyObject *bases);
     void (* register_wrapper)(PyObject *self);
-    void (* register_sinkfunc)(GType type,
-			       void (* sinkfunc)(GObject *object));
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
 
@@ -211,8 +209,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 
 #define pygobject_register_class    (_PyGObject_API->register_class)
 #define pygobject_register_wrapper  (_PyGObject_API->register_wrapper)
-/* This is deprecated, sinkfuncs are not needed anymore */
-#define pygobject_register_sinkfunc (_PyGObject_API->register_sinkfunc)
 #define pygobject_lookup_class      (_PyGObject_API->lookup_class)
 #define pygobject_new               (_PyGObject_API->newgobj)
 #define pyg_closure_new             (_PyGObject_API->closure_new)

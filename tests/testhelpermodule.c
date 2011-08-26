@@ -224,11 +224,8 @@ static const GInterfaceInfo __TestInterface__iinfo = {
     NULL
 };
 
-/* TestFloatingWithSinkFunc */
-PYGLIB_DEFINE_TYPE("testhelper.FloatingWithSinkFunc", PyTestFloatingWithSinkFunc_Type, PyGObject);
-
-/* TestFloatingWithoutSinkFunc */
-PYGLIB_DEFINE_TYPE("testhelper.FloatingWithoutSinkFunc", PyTestFloatingWithoutSinkFunc_Type, PyGObject);
+/* TestFloating */
+PYGLIB_DEFINE_TYPE("testhelper.Floating", PyTestFloating_Type, PyGObject);
 
 /* TestOwnedByLibrary */
 PYGLIB_DEFINE_TYPE("testhelper.OwnedByLibrary", PyTestOwnedByLibrary_Type, PyGObject);
@@ -566,26 +563,15 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
   pyg_set_object_has_new_constructor(TEST_TYPE_UNKNOWN);
   //pyg_register_class_init(TEST_TYPE_UNKNOWN, __GtkUIManager_class_init);
 
-  /* TestFloatingWithSinkFunc */
-  PyTestFloatingWithSinkFunc_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
-  PyTestFloatingWithSinkFunc_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
-  PyTestFloatingWithSinkFunc_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
-  pygobject_register_class(d, "FloatingWithSinkFunc", TEST_TYPE_FLOATING_WITH_SINK_FUNC,
-			   &PyTestFloatingWithSinkFunc_Type,
+  /* TestFloating */
+  PyTestFloating_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+  PyTestFloating_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
+  PyTestFloating_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
+  pygobject_register_class(d, "Floating", TEST_TYPE_FLOATING,
+			   &PyTestFloating_Type,
 			   Py_BuildValue("(O)",
                            &PyGObject_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING_WITH_SINK_FUNC);
-  pygobject_register_sinkfunc(TEST_TYPE_FLOATING_WITH_SINK_FUNC, sink_test_floating_with_sink_func);
-
-  /* TestFloatingWithoutSinkFunc */
-  PyTestFloatingWithoutSinkFunc_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
-  PyTestFloatingWithoutSinkFunc_Type.tp_weaklistoffset = offsetof(PyGObject, weakreflist);
-  PyTestFloatingWithoutSinkFunc_Type.tp_dictoffset = offsetof(PyGObject, inst_dict);
-  pygobject_register_class(d, "FloatingWithoutSinkFunc", TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC,
-			   &PyTestFloatingWithoutSinkFunc_Type,
-			   Py_BuildValue("(O)",
-                           &PyGObject_Type));
-  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC);
+  pyg_set_object_has_new_constructor(TEST_TYPE_FLOATING);
 
   /* TestOwnedByLibrary */
   PyTestOwnedByLibrary_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);

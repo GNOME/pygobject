@@ -1,5 +1,5 @@
 /*
- * test-floating.h - Header for TestFloatingWithSinkFunc and TestFloatingWithoutSinkFunc
+ * test-floating.h - Header for TestFloating
  * Copyright (C) 2010 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -19,44 +19,24 @@
 
 #include <glib-object.h>
 
-/* TestFloatingWithSinkFunc */
+/* TestFloating */
 
 typedef struct {
   GInitiallyUnowned parent;
-} TestFloatingWithSinkFunc;
+} TestFloating;
 
 typedef struct {
   GInitiallyUnownedClass parent_class;
-} TestFloatingWithSinkFuncClass;
+} TestFloatingClass;
 
-#define TEST_TYPE_FLOATING_WITH_SINK_FUNC (test_floating_with_sink_func_get_type())
-#define TEST_FLOATING_WITH_SINK_FUNC(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_FLOATING_WITH_SINK_FUNC, TestFloatingWithSinkFunc))
-#define TEST_FLOATING_WITH_SINK_FUNC_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_FLOATING_WITH_SINK_FUNC, TestFloatingWithSinkFuncClass))
-#define TEST_IS_FLOATING_WITH_SINK_FUNC(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_FLOATING_WITH_SINK_FUNC))
-#define TEST_IS_FLOATING_WITH_SINK_FUNC_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_FLOATING_WITH_SINK_FUNC))
-#define TEST_FLOATING_WITH_SINK_FUNC_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), TEST_TYPE_FLOATING_WITH_SINK_FUNC, TestFloatingWithSinkFuncClass))
+#define TEST_TYPE_FLOATING            (test_floating_get_type())
+#define TEST_FLOATING(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_FLOATING, TestFloating))
+#define TEST_FLOATING_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_FLOATING, TestFloatingClass))
+#define TEST_IS_FLOATING(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_FLOATING))
+#define TEST_IS_FLOATING_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_FLOATING))
+#define TEST_FLOATING_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), TEST_TYPE_FLOATING, TestFloatingClass))
 
-GType test_floating_with_sink_func_get_type (void);
-void sink_test_floating_with_sink_func (GObject *object);
-
-/* TestFloatingWithoutSinkFunc */
-
-typedef struct {
-  GInitiallyUnowned parent;
-} TestFloatingWithoutSinkFunc;
-
-typedef struct {
-  GInitiallyUnownedClass parent_class;
-} TestFloatingWithoutSinkFuncClass;
-
-#define TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC (test_floating_without_sink_func_get_type())
-#define TEST_FLOATING_WITHOUT_SINK_FUNC(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC, TestFloatingWithoutSinkFunc))
-#define TEST_FLOATING_WITHOUT_SINK_FUNC_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC, TestFloatingWithoutSinkFuncClass))
-#define TEST_IS_FLOATING_WITHOUT_SINK_FUNC(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC))
-#define TEST_IS_FLOATING_WITHOUT_SINK_FUNC_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC))
-#define TEST_FLOATING_WITHOUT_SINK_FUNC_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), TEST_TYPE_FLOATING_WITHOUT_SINK_FUNC, TestFloatingWithoutSinkFuncClass))
-
-GType test_floating_without_sink_func_get_type (void);
+GType test_floating_get_type (void);
 
 /* TestOwnedByLibrary */
 

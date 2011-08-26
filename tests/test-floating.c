@@ -1,5 +1,5 @@
 /*
- * test-floating.c - Source for TestFloatingWithSinkFunc and TestFloatingWithoutSinkFunc
+ * test-floating.c - Source for TestFloating
  * Copyright (C) 2010 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -19,55 +19,14 @@
 
 #include "test-floating.h"
 
-/* TestFloatingWithSinkFunc */
+/* TestFloating */
 
-G_DEFINE_TYPE(TestFloatingWithSinkFunc, test_floating_with_sink_func, G_TYPE_INITIALLY_UNOWNED)
-
-static void
-test_floating_with_sink_func_finalize (GObject *gobject)
-{
-  TestFloatingWithSinkFunc *object = TEST_FLOATING_WITH_SINK_FUNC (gobject);
-
-  if (g_object_is_floating (object))
-    {
-      g_warning ("A floating object was finalized. This means that someone\n"
-		 "called g_object_unref() on an object that had only a floating\n"
-		 "reference; the initial floating reference is not owned by anyone\n"
-		 "and must be removed with g_object_ref_sink().");
-    }
-  
-  G_OBJECT_CLASS (test_floating_with_sink_func_parent_class)->finalize (gobject);
-}
+G_DEFINE_TYPE(TestFloating, test_floating, G_TYPE_INITIALLY_UNOWNED)
 
 static void
-test_floating_with_sink_func_class_init (TestFloatingWithSinkFuncClass *klass)
+test_floating_finalize (GObject *gobject)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-
-  gobject_class->finalize = test_floating_with_sink_func_finalize;
-}
-
-static void
-test_floating_with_sink_func_init (TestFloatingWithSinkFunc *self)
-{
-}
-
-void
-sink_test_floating_with_sink_func (GObject *object)
-{
-    if (g_object_is_floating(object)) {
-	    g_object_ref_sink(object);
-    }
-}
-
-/* TestFloatingWithoutSinkFunc */
-
-G_DEFINE_TYPE(TestFloatingWithoutSinkFunc, test_floating_without_sink_func, G_TYPE_INITIALLY_UNOWNED)
-
-static void
-test_floating_without_sink_func_finalize (GObject *gobject)
-{
-  TestFloatingWithoutSinkFunc *object = TEST_FLOATING_WITHOUT_SINK_FUNC (gobject);
+  TestFloating *object = TEST_FLOATING (gobject);
 
   if (g_object_is_floating (object))
     {
@@ -77,19 +36,19 @@ test_floating_without_sink_func_finalize (GObject *gobject)
 		 "and must be removed without g_object_ref_sink().");
     }
 
-  G_OBJECT_CLASS (test_floating_without_sink_func_parent_class)->finalize (gobject);
+  G_OBJECT_CLASS (test_floating_parent_class)->finalize (gobject);
 }
 
 static void
-test_floating_without_sink_func_class_init (TestFloatingWithoutSinkFuncClass *klass)
+test_floating_class_init (TestFloatingClass *klass)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-  gobject_class->finalize = test_floating_without_sink_func_finalize;
+  gobject_class->finalize = test_floating_finalize;
 }
 
 static void
-test_floating_without_sink_func_init (TestFloatingWithoutSinkFunc *self)
+test_floating_init (TestFloating *self)
 {
 }
 

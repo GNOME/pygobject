@@ -23,18 +23,11 @@ class TestReferenceCounting(unittest.TestCase):
         obj = GObject.new(GObject.GObject)
         self.assertEquals(obj.__grefcount__, 1)
 
-    def testFloatingWithSinkFunc(self):
-        obj = testhelper.FloatingWithSinkFunc()
+    def testFloating(self):
+        obj = testhelper.Floating()
         self.assertEquals(obj.__grefcount__, 1)
 
-        obj = GObject.new(testhelper.FloatingWithSinkFunc)
-        self.assertEquals(obj.__grefcount__, 1)
-
-    def testFloatingWithoutSinkFunc(self):
-        obj = testhelper.FloatingWithoutSinkFunc()
-        self.assertEquals(obj.__grefcount__, 1)
-
-        obj = GObject.new(testhelper.FloatingWithoutSinkFunc)
+        obj = GObject.new(testhelper.Floating)
         self.assertEquals(obj.__grefcount__, 1)
 
     def testOwnedByLibrary(self):

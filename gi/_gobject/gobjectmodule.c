@@ -2408,7 +2408,6 @@ disable_warning_redirections(void)
 struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_register_class,
   pygobject_register_wrapper,
-  pygobject_register_sinkfunc,
   pygobject_lookup_class,
   pygobject_new,
 
