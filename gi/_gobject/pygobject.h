@@ -9,10 +9,7 @@
 
 G_BEGIN_DECLS
 
-/* This is deprecated, don't use */
-#define PYGIL_API_IS_BUGGY FALSE
-
-  /* PyGClosure is a _private_ structure */
+/* PyGClosure is a _private_ structure */
 typedef void (* PyClosureExceptionHandler) (GValue *ret, guint n_param_values, const GValue *params);
 typedef struct _PyGClosure PyGClosure;
 typedef struct _PyGObjectData PyGObjectData;
@@ -213,8 +210,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_type_wrapper_new        (_PyGObject_API->type_wrapper_new)
 #define pyg_enum_get_value          (_PyGObject_API->enum_get_value)
 #define pyg_flags_get_value         (_PyGObject_API->flags_get_value)
-/* This is deprecated, call pyg_register_gtype_custom directly instead */
-#define pyg_register_boxed_custom   pyg_register_gtype_custom
 #define pyg_register_gtype_custom   (_PyGObject_API->register_gtype_custom)
 #define pyg_value_from_pyobject     (_PyGObject_API->value_from_pyobject)
 #define pyg_value_as_pyobject       (_PyGObject_API->value_as_pyobject)
@@ -391,18 +386,6 @@ pygobject_init(int req_major, int req_minor, int req_micro)
     }
     return gobject;
 }
-
-/* deprecated macro, use pygobject_init() instead. */
-#define init_pygobject() G_STMT_START {         \
-    if (!pygobject_init(-1, -1, -1))            \
-        return;                                 \
-} G_STMT_END
-
-/* deprecated macro, use pygobject_init() instead. */
-#define init_pygobject_check(req_major, req_minor, req_micro) G_STMT_START {    \
-    if (!pygobject_init(req_major, req_minor, req_micro))                       \
-        return;                                                                 \
-} G_STMT_END
 
 /**
  * PYLIST_FROMGLIBLIST:
