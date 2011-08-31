@@ -29,6 +29,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.DIALOG_/Gtk.DialogFlags./g;" \
     -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
     -pe "s/Gtk.EXPAND/Gtk.AttachOptions.EXPAND/g;" \
+    -pe "s/Gtk.FALSE/False/g;" \
     -pe "s/Gtk.FILE_CHOOSER_ACTION_/Gtk.FileChooserAction./g;" \
     -pe "s/Gtk.FILL/Gtk.AttachOptions.FILL/g;" \
     -pe "s/Gtk.ICON_LOOKUP_/Gtk.IconLookupFlags./g;" \
@@ -54,6 +55,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.TEXT_WINDOW_/Gtk.TextWindowType./g;" \
     -pe "s/Gtk.TREE_VIEW_COLUMN_/Gtk.TreeViewColumnSizing./g;" \
     -pe "s/Gtk.TREE_VIEW_DROP_/Gtk.TreeViewDropPosition./g;" \
+    -pe "s/Gtk.TRUE/True/g;" \
     -pe "s/Gtk.WINDOW_/Gtk.WindowType./g;" \
     -pe "s/Gtk.WIN_POS_/Gtk.WindowPosition./g;" \
     -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
