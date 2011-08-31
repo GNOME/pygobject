@@ -1017,6 +1017,32 @@ pygobject_init_wrapper_get(void)
     return (PyObject *) g_static_private_get(&pygobject_construction_wrapper);
 }
 
+int
+pygobject_constructv(PyGObject  *self,
+                     guint       n_parameters,
+                     GParameter *parameters)
+{
+    if (self->obj == NULL) {
+        GObject *obj;
+        pygobject_init_wrapper_set((PyObject *) self);
+        obj = g_object_newv(pyg_type_from_object((PyObject *) self),
+                            n_parameters, parameters);
+        pygobject_sink (obj);
+        pygobject_init_wrapper_set(NULL);
+        if (self->obj == NULL) {
+            self->obj = obj;
+            pygobject_register_wrapper((PyObject *) self);
+        }
+    } else {
+        int i;
+        for (i = 0; i < n_parameters; ++i)
+            g_object_set_property(self->obj,
+				  parameters[i].name,
+				  &parameters[i].value);
+    }
+    return 0;
+}
+
 static void
 pygobject__g_instance_init(GTypeInstance   *instance,
                            gpointer         g_class)
@@ -2210,96 +2236,6 @@ pyg_parse_constructor_args(GType        obj_type,
     return TRUE;
 }
 
-int
-pygobject_constructv(PyGObject  *self,
-                     guint       n_parameters,
-                     GParameter *parameters)
-{
-    if (self->obj == NULL) {
-        GObject *obj;
-        pygobject_init_wrapper_set((PyObject *) self);
-        obj = g_object_newv(pyg_type_from_object((PyObject *) self),
-                            n_parameters, parameters);
-        pygobject_sink (obj);
-        pygobject_init_wrapper_set(NULL);
-        if (self->obj == NULL) {
-            self->obj = obj;
-            pygobject_register_wrapper((PyObject *) self);
-        }
-    } else {
-        int i;
-        for (i = 0; i < n_parameters; ++i)
-            g_object_set_property(self->obj,
-				  parameters[i].name,
-				  &parameters[i].value);
-    }
-    return 0;
-}
-
-/* This function is mostly juste copy-paste from g_object_new, but
- * calls pygobject_constructv instead of g_object_newv */
-int
-pygobject_construct(PyGObject *self, const char *first_property_name, ...)
-{
-    va_list var_args;
-    GObjectClass *class;
-    GParameter *params;
-    const gchar *name;
-    guint n_params = 0, n_alloced_params = 16;
-    GType object_type = pyg_type_from_object((PyObject *) self);
-    int retval;
-
-    if (!first_property_name)
-        return pygobject_constructv(self, 0, NULL);
-
-    va_start(var_args, first_property_name);
-    class = g_type_class_ref(object_type);
-
-    params = g_new(GParameter, n_alloced_params);
-    name = first_property_name;
-    while (name)
-    {
-        gchar *error = NULL;
-        GParamSpec *pspec = g_object_class_find_property(class, name);
-
-        if (!pspec)
-	{
-            g_warning("%s: object class `%s' has no property named `%s'",
-                      G_STRFUNC,
-                      g_type_name(object_type),
-                      name);
-            break;
-	}
-        if (n_params >= n_alloced_params)
-	{
-            n_alloced_params += 16;
-            params = g_renew(GParameter, params, n_alloced_params);
-	}
-        params[n_params].name = name;
-        params[n_params].value.g_type = 0;
-        g_value_init(&params[n_params].value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-        G_VALUE_COLLECT(&params[n_params].value, var_args, 0, &error);
-        if (error)
-	{
-            g_warning("%s: %s", G_STRFUNC, error);
-            g_free(error);
-            g_value_unset(&params[n_params].value);
-            break;
-	}
-        n_params++;
-        name = va_arg(var_args, gchar*);
-    }
-
-    retval = pygobject_constructv(self, n_params, params);
-
-    while (n_params--)
-        g_value_unset(&params[n_params].value);
-    g_free(params);
-    va_end(var_args);
-    g_type_class_unref(class);
-    return retval;
-}
-
 PyObject *
 pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
 {
@@ -2450,8 +2386,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_register_interface_info,
 
   pyg_closure_set_exception_handler,
-  pygobject_constructv,
-  pygobject_construct,
 
   add_warning_redirection,
   disable_warning_redirections,

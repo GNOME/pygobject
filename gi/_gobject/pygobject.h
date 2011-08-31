@@ -180,12 +180,6 @@ struct _PyGObject_Functions {
     void      (*register_class_init) (GType gtype, PyGClassInitFunc class_init);
     void      (*register_interface_info) (GType gtype, const GInterfaceInfo *info);
     void      (*closure_set_exception_handler) (GClosure *closure, PyClosureExceptionHandler handler);
-    int       (*pygobject_constructv) (PyGObject  *self,
-                                       guint       n_parameters,
-                                       GParameter *parameters);
-    int       (*pygobject_construct) (PyGObject  *self,
-                                      const char *first_property_name,
-                                      ...);
 
     void      (*add_warning_redirection) (const char *domain,
                                           PyObject   *warning);
@@ -254,8 +248,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_gil_state_release       (_PyGObject_API->gil_state_release)
 #define pyg_register_class_init     (_PyGObject_API->register_class_init)
 #define pyg_register_interface_info (_PyGObject_API->register_interface_info)
-#define pygobject_construct         (_PyGObject_API->pygobject_construct)
-#define pygobject_constructv        (_PyGObject_API->pygobject_constructv)
 #define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
 #define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
 #define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)

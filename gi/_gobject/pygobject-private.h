@@ -89,9 +89,6 @@ gboolean pyg_error_check      (GError     **error);
 int      pygobject_constructv (PyGObject   *self,
                                guint        n_parameters,
                                GParameter  *parameters);
-int      pygobject_construct  (PyGObject   *self,
-                               const char  *first_property_name,
-                               ...);
 
 PyObject *pyg_integer_richcompare(PyObject *v,
                                   PyObject *w,
