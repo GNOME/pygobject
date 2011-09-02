@@ -65,10 +65,10 @@ _gi_la_SOURCES = \
 	pygi-invoke-state-struct.h \
 	pygi-cache.h \
 	pygi-cache.c \
-	pygi-marshal-in.c \
-	pygi-marshal-in.h \
-	pygi-marshal-out.c \
-	pygi-marshal-out.h \
+	pygi-marshal-from-py.c \
+	pygi-marshal-from-py.h \
+	pygi-marshal-to-py.c \
+	pygi-marshal-to-py.h \
 	pygi-marshal-cleanup.c \
 	pygi-marshal-cleanup.h
 _gi_la_CFLAGS = \

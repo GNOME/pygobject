@@ -66,42 +66,42 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
  * stage (either success or failure)
  *
  * The in stage must call one of these cleanup functions:
- *    - pygi_marshal_cleanup_args_in_marshal_success
+ *    - pygi_marshal_cleanup_args_from_py_marshal_success
  *       (continue to out stage)
- *    - pygi_marshal_cleanup_args_in_parameter_fail
+ *    - pygi_marshal_cleanup_args_from_py_parameter_fail
  *       (final, exit from invoke)
  *
  * The out stage must call one of these cleanup functions which are all final:
- *    - pygi_marshal_cleanup_args_out_marshal_success
+ *    - pygi_marshal_cleanup_args_to_py_marshal_success
  *    - pygi_marshal_cleanup_args_return_fail
- *    - pygi_marshal_cleanup_args_out_parameter_fail
+ *    - pygi_marshal_cleanup_args_to_py_parameter_fail
  *
  **/
 void
-pygi_marshal_cleanup_args_in_marshal_success (PyGIInvokeState   *state,
-                                              PyGICallableCache *cache)
+pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
+                                                   PyGICallableCache *cache)
 {
     gssize i;
 
     /* For in success, call cleanup for all GI_DIRECTION_IN values only. */
     for (i = 0; i < cache->n_args; i++) {
         PyGIArgCache *arg_cache = cache->args_cache[i];
-        PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
+        PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
 
         if (cleanup_func &&
-                arg_cache->direction == GI_DIRECTION_IN &&
+                arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON &&
                     state->args[i]->v_pointer != NULL)
             cleanup_func (state, arg_cache, state->args[i]->v_pointer, TRUE);
     }
 }
 
 void
-pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
-                                               PyGICallableCache *cache)
+pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
+                                                 PyGICallableCache *cache)
 {
     /* clean up the return if available */
     if (cache->return_cache != NULL) {
-        PyGIMarshalCleanupFunc cleanup_func = cache->return_cache->out_cleanup;
+        PyGIMarshalCleanupFunc cleanup_func = cache->return_cache->to_py_cleanup;
         if (cleanup_func && state->return_arg.v_pointer != NULL)
             cleanup_func (state,
                           cache->return_cache,
@@ -110,10 +110,10 @@ pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
     }
 
     /* Now clean up args */
-    GSList *cache_item = cache->out_args;
+    GSList *cache_item = cache->to_py_args;
     while (cache_item) {
         PyGIArgCache *arg_cache = (PyGIArgCache *) cache_item->data;
-        PyGIMarshalCleanupFunc cleanup_func = arg_cache->out_cleanup;
+        PyGIMarshalCleanupFunc cleanup_func = arg_cache->to_py_cleanup;
         gpointer data = state->args[arg_cache->c_arg_index]->v_pointer;
 
         if (cleanup_func != NULL && data != NULL)
@@ -127,9 +127,9 @@ pygi_marshal_cleanup_args_out_marshal_success (PyGIInvokeState   *state,
 }
 
 void
-pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
-                                             PyGICallableCache *cache,
-                                             gssize failed_arg_index)
+pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
+                                                  PyGICallableCache *cache,
+                                                  gssize failed_arg_index)
 {
     gssize i;
 
@@ -137,11 +137,11 @@ pygi_marshal_cleanup_args_in_parameter_fail (PyGIInvokeState   *state,
 
     for (i = 0; i < cache->n_args  && i <= failed_arg_index; i++) {
         PyGIArgCache *arg_cache = cache->args_cache[i];
-        PyGIMarshalCleanupFunc cleanup_func = arg_cache->in_cleanup;
+        PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
         gpointer data = state->args[i]->v_pointer;
 
         if (cleanup_func &&
-                arg_cache->direction == GI_DIRECTION_IN &&
+                arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON &&
                     data != NULL) {
             cleanup_func (state,
                           arg_cache,
@@ -164,9 +164,9 @@ pygi_marshal_cleanup_args_return_fail (PyGIInvokeState   *state,
 }
 
 void
-pygi_marshal_cleanup_args_out_parameter_fail (PyGIInvokeState   *state,
+pygi_marshal_cleanup_args_to_py_parameter_fail (PyGIInvokeState   *state,
                                               PyGICallableCache *cache,
-                                              gssize failed_out_arg_index)
+                                              gssize failed_to_py_arg_index)
 {
     state->failed = TRUE;
 }
@@ -181,10 +181,10 @@ _pygi_marshal_cleanup_closure_unref (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_utf8 (PyGIInvokeState *state,
-                               PyGIArgCache    *arg_cache,
-                               gpointer         data,
-                               gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
+                                    PyGIArgCache    *arg_cache,
+                                    gpointer         data,
+                                    gboolean         was_processed)
 {
     /* We strdup strings so always free if we have processed this
        parameter for input */
@@ -193,10 +193,10 @@ _pygi_marshal_cleanup_in_utf8 (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_utf8 (PyGIInvokeState *state,
-                                PyGIArgCache    *arg_cache,
-                                gpointer         data,
-                                gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
+                                  PyGIArgCache    *arg_cache,
+                                  gpointer         data,
+                                  gboolean         was_processed)
 {
     /* Python copies the string so we need to free it
        if the interface is transfering ownership, 
@@ -206,10 +206,10 @@ _pygi_marshal_cleanup_out_utf8 (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_interface_object (PyGIInvokeState *state,
-                                           PyGIArgCache    *arg_cache,
-                                           gpointer         data,
-                                           gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
+                                                PyGIArgCache    *arg_cache,
+                                                gpointer         data,
+                                                gboolean         was_processed)
 {
     /* If we processed the parameter but fail before invoking the method,
        we need to remove the ref we added */
@@ -219,10 +219,10 @@ _pygi_marshal_cleanup_in_interface_object (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_interface_object (PyGIInvokeState *state,
-                                            PyGIArgCache    *arg_cache,
-                                            gpointer         data,
-                                            gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
+                                              PyGIArgCache    *arg_cache,
+                                              gpointer         data,
+                                              gboolean         was_processed)
 {
     /* If we error out and the object is not marshalled into a PyGObject
        we must take care of removing the ref */
@@ -231,10 +231,10 @@ _pygi_marshal_cleanup_out_interface_object (PyGIInvokeState *state,
 }
 
 void 
-_pygi_marshal_cleanup_in_interface_struct_gvalue (PyGIInvokeState *state,
-                                                  PyGIArgCache    *arg_cache,
-                                                  gpointer         data,
-                                                  gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_interface_struct_gvalue (PyGIInvokeState *state,
+                                                       PyGIArgCache    *arg_cache,
+                                                       gpointer         data,
+                                                       gboolean         was_processed)
 {
     if (was_processed) {
         PyObject *py_arg = PyTuple_GET_ITEM (state->py_in_args,
@@ -250,10 +250,10 @@ _pygi_marshal_cleanup_in_interface_struct_gvalue (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_interface_struct_foreign (PyGIInvokeState *state,
-                                                   PyGIArgCache    *arg_cache,
-                                                   gpointer         data,
-                                                   gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_interface_struct_foreign (PyGIInvokeState *state,
+                                                        PyGIArgCache    *arg_cache,
+                                                        gpointer         data,
+                                                        gboolean         was_processed)
 {
     if (state->failed && was_processed)
         pygi_struct_foreign_release (
@@ -262,10 +262,10 @@ _pygi_marshal_cleanup_in_interface_struct_foreign (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_interface_struct_foreign (PyGIInvokeState *state,
-                                                    PyGIArgCache    *arg_cache,
-                                                    gpointer         data,
-                                                    gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_interface_struct_foreign (PyGIInvokeState *state,
+                                                      PyGIArgCache    *arg_cache,
+                                                      gpointer         data,
+                                                      gboolean         was_processed)
 {
     if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
         pygi_struct_foreign_release ( 
@@ -274,10 +274,10 @@ _pygi_marshal_cleanup_out_interface_struct_foreign (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_array (PyGIInvokeState *state,
-                                PyGIArgCache    *arg_cache,
-                                gpointer         data,
-                                gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
+                                     PyGIArgCache    *arg_cache,
+                                     gpointer         data,
+                                     gboolean         was_processed)
 {
     if (was_processed) {
         GArray *array_;
@@ -311,10 +311,10 @@ _pygi_marshal_cleanup_in_array (PyGIInvokeState *state,
         }
 
         /* clean up items first */
-        if (sequence_cache->item_cache->in_cleanup != NULL) {
+        if (sequence_cache->item_cache->from_py_cleanup != NULL) {
             gsize i;
             PyGIMarshalCleanupFunc cleanup_func =
-                sequence_cache->item_cache->in_cleanup;
+                sequence_cache->item_cache->from_py_cleanup;
 
             for(i = 0; i < array_->len; i++) {
                 cleanup_func (state,
@@ -335,10 +335,10 @@ _pygi_marshal_cleanup_in_array (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
-                                 PyGIArgCache    *arg_cache,
-                                 gpointer         data,
-                                 gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
+                                   PyGIArgCache    *arg_cache,
+                                   gpointer         data,
+                                   gboolean         was_processed)
 {
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
@@ -351,10 +351,10 @@ _pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
             return;
         }
 
-        if (sequence_cache->item_cache->out_cleanup != NULL) {
+        if (sequence_cache->item_cache->to_py_cleanup != NULL) {
             gsize i;
 
-            PyGIMarshalCleanupFunc cleanup_func = sequence_cache->item_cache->out_cleanup;
+            PyGIMarshalCleanupFunc cleanup_func = sequence_cache->item_cache->to_py_cleanup;
             for (i = 0; i < array_->len; i++) {
                 cleanup_func (state,
                               sequence_cache->item_cache,
@@ -369,10 +369,10 @@ _pygi_marshal_cleanup_out_array (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_glist  (PyGIInvokeState *state,
-                                 PyGIArgCache    *arg_cache,
-                                 gpointer         data,
-                                 gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_glist  (PyGIInvokeState *state,
+                                      PyGIArgCache    *arg_cache,
+                                      gpointer         data,
+                                      gboolean         was_processed)
 {
     if (was_processed) {
         GSList *list_;
@@ -381,9 +381,9 @@ _pygi_marshal_cleanup_in_glist  (PyGIInvokeState *state,
         list_ = (GSList *)data;
 
         /* clean up items first */
-        if (sequence_cache->item_cache->in_cleanup != NULL) {
+        if (sequence_cache->item_cache->from_py_cleanup != NULL) {
             PyGIMarshalCleanupFunc cleanup_func =
-                sequence_cache->item_cache->in_cleanup;
+                sequence_cache->item_cache->from_py_cleanup;
             GSList *node = list_;
             while (node != NULL) {
                 cleanup_func (state,
@@ -412,10 +412,10 @@ _pygi_marshal_cleanup_in_glist  (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_glist (PyGIInvokeState *state,
-                                 PyGIArgCache    *arg_cache,
-                                 gpointer         data,
-                                 gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
+                                   PyGIArgCache    *arg_cache,
+                                   gpointer         data,
+                                   gboolean         was_processed)
 {
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
@@ -423,9 +423,9 @@ _pygi_marshal_cleanup_out_glist (PyGIInvokeState *state,
             arg_cache->transfer == GI_TRANSFER_CONTAINER) {
         GSList *list_ = (GSList *)data;
 
-        if (sequence_cache->item_cache->out_cleanup != NULL) {
+        if (sequence_cache->item_cache->to_py_cleanup != NULL) {
             PyGIMarshalCleanupFunc cleanup_func =
-                sequence_cache->item_cache->out_cleanup;
+                sequence_cache->item_cache->to_py_cleanup;
             GSList *node = list_;
 
             while (node != NULL) {
@@ -453,10 +453,10 @@ _pygi_marshal_cleanup_out_glist (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_in_ghash  (PyGIInvokeState *state,
-                                 PyGIArgCache    *arg_cache,
-                                 gpointer         data,
-                                 gboolean         was_processed)
+_pygi_marshal_cleanup_from_py_ghash  (PyGIInvokeState *state,
+                                      PyGIArgCache    *arg_cache,
+                                      gpointer         data,
+                                      gboolean         was_processed)
 {
     if (data == NULL)
         return;
@@ -468,16 +468,16 @@ _pygi_marshal_cleanup_in_ghash  (PyGIInvokeState *state,
         hash_ = (GHashTable *)data;
 
         /* clean up keys and values first */
-        if (hash_cache->key_cache->in_cleanup != NULL ||
-                hash_cache->value_cache->in_cleanup != NULL) {
+        if (hash_cache->key_cache->from_py_cleanup != NULL ||
+                hash_cache->value_cache->from_py_cleanup != NULL) {
             GHashTableIter hiter;
             gpointer key;
             gpointer value;
 
             PyGIMarshalCleanupFunc key_cleanup_func =
-                hash_cache->key_cache->in_cleanup;
+                hash_cache->key_cache->from_py_cleanup;
             PyGIMarshalCleanupFunc value_cleanup_func =
-                hash_cache->value_cache->in_cleanup;
+                hash_cache->value_cache->from_py_cleanup;
 
             g_hash_table_iter_init (&hiter, hash_);
             while (g_hash_table_iter_next (&hiter, &key, &value)) {
@@ -503,10 +503,10 @@ _pygi_marshal_cleanup_in_ghash  (PyGIInvokeState *state,
 }
 
 void
-_pygi_marshal_cleanup_out_ghash (PyGIInvokeState *state,
-                                 PyGIArgCache    *arg_cache,
-                                 gpointer         data,
-                                 gboolean         was_processed)
+_pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
+                                   PyGIArgCache    *arg_cache,
+                                   gpointer         data,
+                                   gboolean         was_processed)
 {
     if (data == NULL)
         return;

@@ -32,16 +32,16 @@ G_BEGIN_DECLS
 typedef struct _PyGICallableCache PyGICallableCache;
 typedef struct _PyGIArgCache PyGIArgCache;
 
-typedef gboolean (*PyGIMarshalInFunc) (PyGIInvokeState   *state,
-                                       PyGICallableCache *callable_cache,
-                                       PyGIArgCache      *arg_cache,
-                                       PyObject          *py_arg,
-                                       GIArgument        *arg);
+typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState   *state,
+                                           PyGICallableCache *callable_cache,
+                                           PyGIArgCache      *arg_cache,
+                                           PyObject          *py_arg,
+                                           GIArgument        *arg);
 
-typedef PyObject *(*PyGIMarshalOutFunc) (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
+typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState   *state,
+                                          PyGICallableCache *callable_cache,
+                                          PyGIArgCache      *arg_cache,
+                                          GIArgument        *arg);
 
 typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
                                         PyGIArgCache    *arg_cache,
@@ -72,13 +72,27 @@ typedef enum {
  * PyGIFunctionType enum consolidates them into one enumeration for ease of 
  * branching and debugging.
  */
- typedef enum {
-   PYGI_FUNCTION_TYPE_FUNCTION,
-   PYGI_FUNCTION_TYPE_METHOD,
-   PYGI_FUNCTION_TYPE_CONSTRUCTOR,
-   PYGI_FUNCTION_TYPE_VFUNC,
-   PYGI_FUNCTION_TYPE_CALLBACK
+typedef enum {
+    PYGI_FUNCTION_TYPE_FUNCTION,
+    PYGI_FUNCTION_TYPE_METHOD,
+    PYGI_FUNCTION_TYPE_CONSTRUCTOR,
+    PYGI_FUNCTION_TYPE_VFUNC,
+    PYGI_FUNCTION_TYPE_CALLBACK
  } PyGIFunctionType;
+
+/*
+ * In PyGI IN and OUT arguments mean different things depending on the context
+ * of the callable (e.g. is it a callback that is being called from C or a
+ * function that is being called from python).  We don't as much care if the
+ * parameter is an IN or OUT C parameter, than we do if the parameter is being
+ * marshalled into Python or from Python.
+ */
+typedef enum {
+    PYGI_DIRECTION_TO_PYTHON,
+    PYGI_DIRECTION_FROM_PYTHON,
+    PYGI_DIRECTION_BIDIRECTIONAL
+ } PyGIDirection;
+
 
 struct _PyGIArgCache
 {
@@ -90,16 +104,16 @@ struct _PyGIArgCache
     gboolean is_skipped;
     gboolean allow_none;
 
-    GIDirection direction;
+    PyGIDirection direction;
     GITransfer transfer;
     GITypeTag type_tag;
     GITypeInfo *type_info;
 
-    PyGIMarshalInFunc in_marshaller;
-    PyGIMarshalOutFunc out_marshaller;
+    PyGIMarshalFromPyFunc from_py_marshaller;
+    PyGIMarshalToPyFunc to_py_marshaller;
 
-    PyGIMarshalCleanupFunc in_cleanup;
-    PyGIMarshalCleanupFunc out_cleanup;
+    PyGIMarshalCleanupFunc from_py_cleanup;
+    PyGIMarshalCleanupFunc to_py_cleanup;
 
     GDestroyNotify destroy_notify;
 
@@ -152,14 +166,14 @@ struct _PyGICallableCache
 
     PyGIArgCache *return_cache;
     PyGIArgCache **args_cache;
-    GSList *out_args;
+    GSList *to_py_args;
     GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
 
     /* counts */
-    gssize n_in_args;
-    gssize n_out_args;
-    gssize n_out_child_args;
+    gssize n_from_py_args;
+    gssize n_to_py_args;
+    gssize n_to_py_child_args;
 
     gssize n_args;
     gssize n_py_args;

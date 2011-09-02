@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>,  Red Hat, Inc.
  *
- *   pygi-marshal-out.c: PyObject conversion functions for out parameters.
+ *   pygi-marshal-from-py.c: functions for converting C types to PyObject
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,13 +32,13 @@
 
 #include "pygi-cache.h"
 #include "pygi-marshal-cleanup.h"
-#include "pygi-marshal-out.h"
+#include "pygi-marshal-to-py.h"
 
 PyObject *
-_pygi_marshal_out_void (PyGIInvokeState   *state,
-                        PyGICallableCache *callable_cache,
-                        PyGIArgCache      *arg_cache,
-                        GIArgument        *arg)
+_pygi_marshal_to_py_void (PyGIInvokeState   *state,
+                          PyGICallableCache *callable_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     if (arg_cache->is_pointer)
@@ -51,30 +51,30 @@ _pygi_marshal_out_void (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_boolean (PyGIInvokeState   *state,
-                           PyGICallableCache *callable_cache,
-                           PyGIArgCache      *arg_cache,
-                           GIArgument        *arg)
+_pygi_marshal_to_py_boolean (PyGIInvokeState   *state,
+                             PyGICallableCache *callable_cache,
+                             PyGIArgCache      *arg_cache,
+                             GIArgument        *arg)
 {
     PyObject *py_obj = PyBool_FromLong (arg->v_boolean);
     return py_obj;
 }
 
 PyObject *
-_pygi_marshal_out_int8 (PyGIInvokeState   *state,
-                        PyGICallableCache *callable_cache,
-                        PyGIArgCache      *arg_cache,
-                        GIArgument        *arg)
+_pygi_marshal_to_py_int8 (PyGIInvokeState   *state,
+                          PyGICallableCache *callable_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
 {
     PyObject *py_obj = PYGLIB_PyLong_FromLong (arg->v_int8);
     return py_obj;
 }
 
 PyObject *
-_pygi_marshal_out_uint8 (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_uint8 (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj =  PYGLIB_PyLong_FromLong (arg->v_uint8);
 
@@ -82,10 +82,10 @@ _pygi_marshal_out_uint8 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_int16 (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_int16 (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj =  PYGLIB_PyLong_FromLong (arg->v_int16);
 
@@ -93,10 +93,10 @@ _pygi_marshal_out_int16 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_uint16 (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_uint16 (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     PyObject *py_obj =  PYGLIB_PyLong_FromLong (arg->v_uint16);
 
@@ -104,10 +104,10 @@ _pygi_marshal_out_uint16 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_int32 (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_int32 (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj = PYGLIB_PyLong_FromLong (arg->v_int32);
 
@@ -115,10 +115,10 @@ _pygi_marshal_out_int32 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_uint32 (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_uint32 (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     PyObject *py_obj = PyLong_FromLongLong (arg->v_uint32);
 
@@ -126,10 +126,10 @@ _pygi_marshal_out_uint32 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_int64 (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_int64 (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj = PyLong_FromLongLong (arg->v_int64);
 
@@ -137,10 +137,10 @@ _pygi_marshal_out_int64 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_uint64 (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_uint64 (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     PyObject *py_obj = PyLong_FromUnsignedLongLong (arg->v_uint64);
 
@@ -148,10 +148,10 @@ _pygi_marshal_out_uint64 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_float (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_float (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj = PyFloat_FromDouble (arg->v_float);
 
@@ -159,10 +159,10 @@ _pygi_marshal_out_float (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_double (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_double (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     PyObject *py_obj = PyFloat_FromDouble (arg->v_double);
 
@@ -170,10 +170,10 @@ _pygi_marshal_out_double (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_unichar (PyGIInvokeState   *state,
-                           PyGICallableCache *callable_cache,
-                           PyGIArgCache      *arg_cache,
-                           GIArgument        *arg)
+_pygi_marshal_to_py_unichar (PyGIInvokeState   *state,
+                             PyGICallableCache *callable_cache,
+                             PyGIArgCache      *arg_cache,
+                             GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
@@ -197,10 +197,10 @@ _pygi_marshal_out_unichar (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_gtype (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_gtype (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
@@ -209,10 +209,10 @@ _pygi_marshal_out_gtype (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_utf8 (PyGIInvokeState   *state,
-                        PyGICallableCache *callable_cache,
-                        PyGIArgCache      *arg_cache,
-                        GIArgument        *arg)
+_pygi_marshal_to_py_utf8 (PyGIInvokeState   *state,
+                          PyGICallableCache *callable_cache,
+                          PyGIArgCache      *arg_cache,
+                          GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     if (arg->v_string == NULL) {
@@ -226,10 +226,10 @@ _pygi_marshal_out_utf8 (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_filename (PyGIInvokeState   *state,
-                            PyGICallableCache *callable_cache,
-                            PyGIArgCache      *arg_cache,
-                            GIArgument        *arg)
+_pygi_marshal_to_py_filename (PyGIInvokeState   *state,
+                              PyGICallableCache *callable_cache,
+                              PyGIArgCache      *arg_cache,
+                              GIArgument        *arg)
 {
     gchar *string;
     PyObject *py_obj = NULL;
@@ -255,10 +255,10 @@ _pygi_marshal_out_filename (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_array (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_array (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     GArray *array_;
     PyObject *py_obj = NULL;
@@ -311,7 +311,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
             int i;
 
             gsize item_size;
-            PyGIMarshalOutFunc item_out_marshaller;
+            PyGIMarshalToPyFunc item_to_py_marshaller;
             PyGIArgCache *item_arg_cache;
 
             py_obj = PyList_New (array_->len);
@@ -320,7 +320,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
 
 
             item_arg_cache = seq_cache->item_cache;
-            item_out_marshaller = item_arg_cache->out_marshaller;
+            item_to_py_marshaller = item_arg_cache->to_py_marshaller;
 
             item_size = g_array_get_element_size (array_);
 
@@ -351,7 +351,7 @@ _pygi_marshal_out_array (PyGIInvokeState   *state,
                     memcpy (&item_arg, array_->data + i * item_size, item_size);
                 }
 
-                py_item = item_out_marshaller ( state,
+                py_item = item_to_py_marshaller ( state,
                                                 callable_cache,
                                                 item_arg_cache,
                                                 &item_arg);
@@ -380,9 +380,9 @@ err:
         g_array_free (array_, arg_cache->transfer == GI_TRANSFER_EVERYTHING);
     } else {
         /* clean up unprocessed items */
-        if (seq_cache->item_cache->out_cleanup != NULL) {
+        if (seq_cache->item_cache->to_py_cleanup != NULL) {
             int j;
-            PyGIMarshalCleanupFunc cleanup_func = seq_cache->item_cache->out_cleanup;
+            PyGIMarshalCleanupFunc cleanup_func = seq_cache->item_cache->to_py_cleanup;
             for (j = processed_items; j < array_->len; j++) {
                 cleanup_func (state,
                               seq_cache->item_cache,
@@ -399,16 +399,16 @@ err:
 }
 
 PyObject *
-_pygi_marshal_out_glist (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_glist (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     GList *list_;
     gsize length;
     gsize i;
 
-    PyGIMarshalOutFunc item_out_marshaller;
+    PyGIMarshalToPyFunc item_to_py_marshaller;
     PyGIArgCache *item_arg_cache;
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
 
@@ -422,14 +422,14 @@ _pygi_marshal_out_glist (PyGIInvokeState   *state,
         return NULL;
 
     item_arg_cache = seq_cache->item_cache;
-    item_out_marshaller = item_arg_cache->out_marshaller;
+    item_to_py_marshaller = item_arg_cache->to_py_marshaller;
 
     for (i = 0; list_ != NULL; list_ = g_list_next (list_), i++) {
         GIArgument item_arg;
         PyObject *py_item;
 
         item_arg.v_pointer = list_->data;
-        py_item = item_out_marshaller ( state,
+        py_item = item_to_py_marshaller ( state,
                                         callable_cache,
                                         item_arg_cache,
                                        &item_arg);
@@ -447,16 +447,16 @@ _pygi_marshal_out_glist (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_gslist (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     GSList *list_;
     gsize length;
     gsize i;
 
-    PyGIMarshalOutFunc item_out_marshaller;
+    PyGIMarshalToPyFunc item_to_py_marshaller;
     PyGIArgCache *item_arg_cache;
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
 
@@ -470,14 +470,14 @@ _pygi_marshal_out_gslist (PyGIInvokeState   *state,
         return NULL;
 
     item_arg_cache = seq_cache->item_cache;
-    item_out_marshaller = item_arg_cache->out_marshaller;
+    item_to_py_marshaller = item_arg_cache->to_py_marshaller;
 
     for (i = 0; list_ != NULL; list_ = g_slist_next (list_), i++) {
         GIArgument item_arg;
         PyObject *py_item;
 
         item_arg.v_pointer = list_->data;
-        py_item = item_out_marshaller ( state,
+        py_item = item_to_py_marshaller ( state,
                                         callable_cache,
                                         item_arg_cache,
                                        &item_arg);
@@ -495,16 +495,16 @@ _pygi_marshal_out_gslist (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_ghash (PyGIInvokeState   *state,
-                         PyGICallableCache *callable_cache,
-                         PyGIArgCache      *arg_cache,
-                         GIArgument        *arg)
+_pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
+                           PyGICallableCache *callable_cache,
+                           PyGIArgCache      *arg_cache,
+                           GIArgument        *arg)
 {
     GHashTable *hash_;
     GHashTableIter hash_table_iter;
 
-    PyGIMarshalOutFunc key_out_marshaller;
-    PyGIMarshalOutFunc value_out_marshaller;
+    PyGIMarshalToPyFunc key_to_py_marshaller;
+    PyGIMarshalToPyFunc value_to_py_marshaller;
 
     PyGIArgCache *key_arg_cache;
     PyGIArgCache *value_arg_cache;
@@ -528,10 +528,10 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
         return NULL;
 
     key_arg_cache = hash_cache->key_cache;
-    key_out_marshaller = key_arg_cache->out_marshaller;
+    key_to_py_marshaller = key_arg_cache->to_py_marshaller;
 
     value_arg_cache = hash_cache->value_cache;
-    value_out_marshaller = value_arg_cache->out_marshaller;
+    value_to_py_marshaller = value_arg_cache->to_py_marshaller;
 
     g_hash_table_iter_init (&hash_table_iter, hash_);
     while (g_hash_table_iter_next (&hash_table_iter,
@@ -541,7 +541,7 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
         PyObject *py_value;
         int retval;
 
-        py_key = key_out_marshaller ( state,
+        py_key = key_to_py_marshaller ( state,
                                       callable_cache,
                                       key_arg_cache,
                                      &key_arg);
@@ -551,7 +551,7 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
             return NULL;
         }
 
-        py_value = value_out_marshaller ( state,
+        py_value = value_to_py_marshaller ( state,
                                           callable_cache,
                                           value_arg_cache,
                                          &value_arg);
@@ -577,36 +577,36 @@ _pygi_marshal_out_ghash (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_gerror (PyGIInvokeState   *state,
-                          PyGICallableCache *callable_cache,
-                          PyGIArgCache      *arg_cache,
-                          GIArgument        *arg)
+_pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
+                            PyGICallableCache *callable_cache,
+                            PyGIArgCache      *arg_cache,
+                            GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
     PyErr_Format (PyExc_NotImplementedError,
-                  "Marshalling for gerror out is not implemented");
+                  "Marshalling for gerror to PyObject is not implemented");
     return py_obj;
 }
 
 PyObject *
-_pygi_marshal_out_interface_callback (PyGIInvokeState   *state,
-                                      PyGICallableCache *callable_cache,
-                                      PyGIArgCache      *arg_cache,
-                                      GIArgument        *arg)
+_pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
+                                        PyGICallableCache *callable_cache,
+                                        PyGIArgCache      *arg_cache,
+                                        GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
     PyErr_Format (PyExc_NotImplementedError,
-                  "Callback out values are not supported");
+                  "Marshalling a callback to PyObject is not supported");
     return py_obj;
 }
 
 PyObject *
-_pygi_marshal_out_interface_enum (PyGIInvokeState   *state,
-                                  PyGICallableCache *callable_cache,
-                                  PyGIArgCache      *arg_cache,
-                                  GIArgument        *arg)
+_pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
+                                    PyGICallableCache *callable_cache,
+                                    PyGIArgCache      *arg_cache,
+                                    GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -620,10 +620,10 @@ _pygi_marshal_out_interface_enum (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_flags (PyGIInvokeState   *state,
-                                   PyGICallableCache *callable_cache,
-                                   PyGIArgCache      *arg_cache,
-                                   GIArgument        *arg)
+_pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
+                                     PyGICallableCache *callable_cache,
+                                     PyGIArgCache      *arg_cache,
+                                     GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -656,10 +656,10 @@ _pygi_marshal_out_interface_flags (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
-                                    PyGICallableCache *callable_cache,
-                                    PyGIArgCache      *arg_cache,
-                                    GIArgument        *arg)
+_pygi_marshal_to_py_interface_struct (PyGIInvokeState   *state,
+                                      PyGICallableCache *callable_cache,
+                                      PyGIArgCache      *arg_cache,
+                                      GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
@@ -686,12 +686,12 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
             py_obj = pyg_pointer_new (type, arg->v_pointer);
         } else {
             py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
-                                      arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+                                       arg_cache->transfer == GI_TRANSFER_EVERYTHING);
         }
     } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
          g_variant_ref_sink (arg->v_pointer);
          py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
-                                      FALSE);
+                                    FALSE);
     } else if (type == G_TYPE_NONE && iface_cache->is_foreign) {
         py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info, arg->v_pointer);
     } else if (type == G_TYPE_NONE) {
@@ -707,10 +707,10 @@ _pygi_marshal_out_interface_struct (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_interface (PyGIInvokeState   *state,
-                                       PyGICallableCache *callable_cache,
-                                       PyGIArgCache      *arg_cache,
-                                       GIArgument        *arg)
+_pygi_marshal_to_py_interface_interface (PyGIInvokeState   *state,
+                                         PyGICallableCache *callable_cache,
+                                         PyGIArgCache      *arg_cache,
+                                         GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
@@ -720,10 +720,10 @@ _pygi_marshal_out_interface_interface (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_boxed (PyGIInvokeState   *state,
-                                   PyGICallableCache *callable_cache,
-                                   PyGIArgCache      *arg_cache,
-                                   GIArgument        *arg)
+_pygi_marshal_to_py_interface_boxed (PyGIInvokeState   *state,
+                                     PyGICallableCache *callable_cache,
+                                     PyGIArgCache      *arg_cache,
+                                     GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
@@ -733,10 +733,10 @@ _pygi_marshal_out_interface_boxed (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_object (PyGIInvokeState   *state,
-                                    PyGICallableCache *callable_cache,
-                                    PyGIArgCache      *arg_cache,
-                                    GIArgument        *arg)
+_pygi_marshal_to_py_interface_object (PyGIInvokeState   *state,
+                                      PyGICallableCache *callable_cache,
+                                      PyGIArgCache      *arg_cache,
+                                      GIArgument        *arg)
 {
     PyObject *py_obj;
 
@@ -755,10 +755,10 @@ _pygi_marshal_out_interface_object (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_out_interface_union  (PyGIInvokeState   *state,
-                                    PyGICallableCache *callable_cache,
-                                    PyGIArgCache      *arg_cache,
-                                    GIArgument        *arg)
+_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
+                                      PyGICallableCache *callable_cache,
+                                      PyGIArgCache      *arg_cache,
+                                      GIArgument        *arg)
 {
     PyObject *py_obj = NULL;
 
