@@ -5,8 +5,6 @@ class C(GObject.GObject):
         'my_signal': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE,
                       (GObject.TYPE_INT,))
     }
-    def __init__(self):
-        self.__gobject_init__() # default constructor using our new GType
     def do_my_signal(self, arg):
         print "C: class closure for `my_signal' called with argument", arg
 

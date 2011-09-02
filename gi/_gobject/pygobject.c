@@ -1178,15 +1178,6 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     return (self->obj) ? 0 : -1;
 }
 
-static PyObject *
-pygobject__gobject_init__(PyGObject *self, PyObject *args, PyObject *kwargs)
-{
-    if (pygobject_init(self, args, kwargs) < 0)
-	return NULL;
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 #define CHECK_GOBJECT(self) \
     if (!G_IS_OBJECT(self->obj)) {                                           \
 	PyErr_Format(PyExc_TypeError,                                        \
@@ -2033,8 +2024,6 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 }
 
 static PyMethodDef pygobject_methods[] = {
-    { "__gobject_init__", (PyCFunction)pygobject__gobject_init__,
-      METH_VARARGS|METH_KEYWORDS },
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "get_properties", (PyCFunction)pygobject_get_properties, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
