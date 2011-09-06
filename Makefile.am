@@ -6,18 +6,13 @@ SUBDIRS = docs examples gi tests
 PLATFORM_VERSION = 3.0
 
 CLEANFILES =
-EXTRA_DIST = 				\
-	MANIFEST.in 			\
-	README.win32 			\
+EXTRA_DIST = \
+	ChangeLog.pre-2.18 \
 	pygobject-$(PLATFORM_VERSION).pc.in \
-	PKG-INFO 			\
-	PKG-INFO.in 			\
-	setup.py			\
-	pygobject_postinstall.py	\
-	dsextras.py			\
-	ChangeLog.pre-2.18		\
-	m4/as-ac-expand.m4		\
-	m4/jhflags.m4			\
+	PKG-INFO \
+	PKG-INFO.in \
+	m4/as-ac-expand.m4 \
+	m4/jhflags.m4 \
 	m4/python.m4
 
 MAINTAINERCLEANFILES = \
@@ -56,11 +51,6 @@ INCLUDES = -I$(top_srcdir)/gobject $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
 
-# python modules
-pkgpyexecdir = $(pyexecdir)/gtk-2.0
-pkgpyexec_PYTHON = dsextras.py
-pkgpyexec_LTLIBRARIES =
-
 # python
 pyexec_LTLIBRARIES =
 
@@ -86,11 +76,10 @@ egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
 	$(MKDIR_P) $(EGG_TMPDIR)
 	$(MKDIR_P) $(EGG_TMPDIR)/EGG-INFO
 	$(MAKE) -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(EGG_TMPDIR)
-	$(INSTALL) dsextras.py $(EGG_TMPDIR)
 	rm -fr $(EGG_TMPDIR)/gobject.la
 	$(INSTALL) PKG-INFO $(EGG_TMPDIR)/EGG-INFO
 	echo "gobject.so" >> $(EGG_TMPDIR)/EGG-INFO/native_libs.txt
-	( echo "gobject" ; echo "dsextras.py" ) >> $(EGG_TMPDIR)/EGG-INFO/top_level.txt
+	( echo "gobject" ) >> $(EGG_TMPDIR)/EGG-INFO/top_level.txt
 	cd $(EGG_TMPDIR) && zip -rq $(EGG_NAME) .
 	mv $(EGG_TMPDIR)/$(EGG_NAME) .
 	rm -fr $(EGG_TMPDIR)
