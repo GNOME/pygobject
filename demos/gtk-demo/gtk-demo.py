@@ -333,6 +333,9 @@ class GtkDemoWindow(Gtk.Window):
                                            self.source_buffer.get_end_iter(),
                                            False)
 
+        if sys.version_info < (3, 0):
+            data = data.decode('utf-8')
+
         builtin_constants = ['None', 'True', 'False']
         is_decorator = False
         is_func = False
