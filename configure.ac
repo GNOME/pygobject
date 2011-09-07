@@ -236,7 +236,7 @@ AC_ARG_ENABLE(cairo,
 AC_ARG_ENABLE(introspection,
   AC_HELP_STRING([--enable-introspection], [Use introspection information]),
   enable_introspection=$enableval,
-  enable_introspection=yes)
+  enable_introspection=no)
 if test "$enable_introspection" != no; then
     AC_DEFINE(ENABLE_INTROSPECTION,1,Use introspection information)
     PKG_CHECK_MODULES(GI,
