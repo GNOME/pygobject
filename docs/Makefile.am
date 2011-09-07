@@ -1,3 +1,4 @@
+PLATFORM_VERSION = 3.0
 REF_VERSION = $(PYGOBJECT_MAJOR_VERSION).$(PYGOBJECT_MINOR_VERSION)
 FULL_VERSION = $(REF_VERSION).$(PYGOBJECT_MICRO_VERSION)
 
@@ -52,7 +53,7 @@ XSL_FILES =			\
 # so the date is newer then the files in HTML_FILES
 FIXXREF = xsl/fixxref.py
 
-TARGET_DIR = $(datadir)/gtk-doc/html/pygobject
+TARGET_DIR = $(datadir)/gtk-doc/html/pygobject-$(PLATFORM_VERSION)
 CSSdir = $(TARGET_DIR)
 CSS_DATA = $(CSS_FILES)
 
@@ -75,7 +76,7 @@ uninstall-local:
 	rm -f $(DESTDIR)$(TARGET_DIR)/*
 
 
-XSLdir = $(datadir)/pygobject/xsl
+XSLdir = $(datadir)/pygobject-$(PLATFORM_VERSION)/xsl
 XSL_DATA = $(XSL_FILES) $(FIXXREF)
 
 EXTRA_DIST = 		\
