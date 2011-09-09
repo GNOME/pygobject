@@ -87,7 +87,7 @@ EXTRA_DIST = 		\
 	$(CSS_FILES)
 
 reference/builddate.xml:
-	@$(PYTHON) -c 'import datetime; print datetime.date.today()' > $@
+	@$(PYTHON) -c 'import datetime; print(datetime.date.today())' > $@
 
 
 if ENABLE_DOCS

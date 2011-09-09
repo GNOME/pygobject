@@ -75,7 +75,7 @@ AC_DEFUN([AM_CHECK_PYTHON_LIBS],
 [AC_REQUIRE([AM_CHECK_PYTHON_HEADERS])
 AC_MSG_CHECKING(for libraries required to embed python)
 dnl deduce PYTHON_LIBS
-py_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
+py_exec_prefix=`$PYTHON -c "import sys; print(sys.exec_prefix)"`
 if test "x$PYTHON_LIBS" == x; then
 	PYTHON_LIBS="-L${py_prefix}/lib -lpython${PYTHON_VERSION}"
 fi
