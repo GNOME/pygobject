@@ -38,7 +38,7 @@ AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 AM_CONFIG_HEADER(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 AM_INIT_AUTOMAKE(foreign)
-AM_MAINTAINER_MODE
+AM_MAINTAINER_MODE([enable])
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
