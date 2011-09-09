@@ -4,63 +4,68 @@ PLATFORM_VERSION = 3.0
 pkgincludedir = $(includedir)/pygobject-$(PLATFORM_VERSION)
 pkginclude_HEADERS = pygobject.h
 
-pkgpyexecdir = $(pyexecdir)
+extension_cppflags = \
+	$(PYTHON_INCLUDES) \
+	-DPY_SSIZE_T_CLEAN
 
-# gobject python scripts
-pygobjectdir = $(pkgpyexecdir)/gi/_gobject
-pygobject_PYTHON = 	\
-	__init__.py 	\
-	constants.py	\
-	propertyhelper.py
-pygobject_LTLIBRARIES = _gobject.la 
+extension_ldflags = \
+	-module \
+	-avoid-version
 
-common_ldflags = -module -avoid-version
-if PLATFORM_WIN32
-common_ldflags += -no-undefined
+if OS_WIN32
+extension_ldflags += \
+	-no-undefined \
+	-shrext ".pyd"
 endif
 
+pygobjectdir = $(pyexecdir)/gi/_gobject
+
+pygobject_PYTHON = \
+	__init__.py \
+	constants.py \
+	propertyhelper.py
+
+pygobject_LTLIBRARIES = _gobject.la
+
+_gobject_la_SOURCES = \
+        gobjectmodule.c \
+        pygboxed.c \
+        pygboxed.h \
+        pygenum.c \
+        pygenum.h \
+        pygflags.c \
+        pygflags.h \
+        pyginterface.c \
+        pyginterface.h \
+        pygobject.c \
+        pygobject.h \
+        pygobject-private.h \
+        pygparamspec.c \
+        pygparamspec.h \
+        pygpointer.c \
+        pygpointer.h \
+        pygtype.c \
+        pygtype.h
 _gobject_la_CFLAGS = \
+	$(extension_cppflags) \
 	-I$(top_srcdir)/gi/_glib \
 	-I$(top_srcdir)/gi \
-	$(PYTHON_INCLUDES) \
 	$(FFI_CFLAGS) \
 	$(GLIB_CFLAGS) \
-	$(GI_CFLAGS) \
-	 -DPY_SSIZE_T_CLEAN
-
-_gobject_la_LDFLAGS = $(common_ldflags) -export-symbols-regex "_gobject|PyInit__gobject"
+	$(GI_CFLAGS)
+_gi_la_CPPFLAGS = \
+	$(extension_cppflags)
 _gobject_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(FFI_LIBS) \
 	$(PYTHON_LIBS) \
 	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
-
-_gobject_la_SOURCES =           \
-        gobjectmodule.c         \
-        pygboxed.c              \
-        pygboxed.h              \
-        pygenum.c               \
-        pygenum.h               \
-        pygflags.c              \
-        pygflags.h              \
-        pyginterface.c          \
-        pyginterface.h          \
-        pygobject.c             \
-        pygobject.h             \
-        pygobject-private.h     \
-        pygparamspec.c          \
-        pygparamspec.h          \
-        pygpointer.c            \
-        pygpointer.h            \
-        pygtype.c               \
-        pygtype.h
+_gobject_la_LDFLAGS = \
+	$(extension_ldflags) \
+	-export-symbols-regex "_gobject|PyInit__gobject"
 
 if HAVE_LIBFFI
 _gobject_la_SOURCES += ffi-marshaller.c ffi-marshaller.h
-endif
-
-if PLATFORM_WIN32
-_gobject_la_CFLAGS += -DPLATFORM_WIN32
 endif
 
 

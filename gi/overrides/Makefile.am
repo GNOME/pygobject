@@ -1,7 +1,5 @@
+pygioverridesdir = $(pyexecdir)/gi/overrides
 
-pkgpyexecdir = $(pyexecdir)/gi
-
-pygioverridesdir = $(pkgpyexecdir)/overrides
 pygioverrides_PYTHON = \
 	GLib.py \
 	Gtk.py \

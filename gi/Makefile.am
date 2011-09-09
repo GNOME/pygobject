@@ -1,31 +1,36 @@
-pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
-pkgpyexecdir = $(pyexecdir)
-
 SUBDIRS = \
 	repository \
 	overrides \
         _glib \
 	_gobject
 
-INCLUDES = -I$(top_srcdir)/gi/_gobject -I$(top_srcdir)/gi/_glib
+extension_cppflags = \
+	$(PYTHON_INCLUDES) \
+	-DPY_SSIZE_T_CLEAN
 
-pygidir = $(pkgpyexecdir)/gi
+extension_libadd = \
+	$(PYTHON_LIBS)
+
+extension_ldflags = \
+	-module \
+	-avoid-version
+
+if OS_WIN32
+extension_ldflags += \
+	-no-undefined \
+	-shrext ".pyd"
+endif
+
+pygidir = $(pyexecdir)/gi
+
 pygi_PYTHON = \
+	__init__.py \
 	types.py \
 	module.py \
-	importer.py \
-	__init__.py
+	importer.py
 
-_gi_la_CFLAGS = \
-	$(PYTHON_INCLUDES) \
-	$(GI_CFLAGS)
-_gi_la_LDFLAGS = \
-	-module \
-	-avoid-version \
-	-export-symbols-regex "init_gi|PyInit__gi"
-_gi_la_LIBADD = \
-	$(GI_LIBS) \
-	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
+pygi_LTLIBRARIES = _gi.la
+
 _gi_la_SOURCES = \
 	pygi-repository.c \
 	pygi-repository.h \
@@ -66,33 +71,47 @@ _gi_la_SOURCES = \
 	pygi-marshal-out.h \
 	pygi-marshal-cleanup.c \
 	pygi-marshal-cleanup.h
-
-_gi_cairo_la_CFLAGS = \
-	$(PYTHON_INCLUDES) \
-	$(GI_CFLAGS) \
-	$(PYCAIRO_CFLAGS)
-_gi_cairo_la_LDFLAGS = \
-	-module \
-	-avoid-version \
-	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
-_gi_cairo_la_LIBADD = \
+_gi_la_CFLAGS = \
+	$(GI_CFLAGS)
+_gi_la_CPPFLAGS = \
+	$(extension_cppflags) \
+	-I$(top_srcdir)/gi/_glib \
+	-I$(top_srcdir)/gi/_gobject
+_gi_la_LIBADD = \
+	$(extension_libadd) \
 	$(GI_LIBS) \
-	$(PYCAIRO_LIBS)
-_gi_cairo_la_SOURCES = pygi-foreign-cairo.c
-
-
-pygi_LTLIBRARIES = _gi.la
+	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
+_gi_la_LDFLAGS = \
+	$(extension_ldflags) \
+	-export-symbols-regex "init_gi|PyInit__gi"
 
 if ENABLE_CAIRO
 pygi_LTLIBRARIES += _gi_cairo.la
 endif
+
+_gi_cairo_la_SOURCES = \
+	pygi-foreign-cairo.c
+_gi_cairo_la_CFLAGS = \
+	$(GI_CFLAGS) \
+	$(PYCAIRO_CFLAGS)
+_gi_cairo_la_CPPFLAGS = \
+	$(extension_cppflags) \
+	-I$(top_srcdir)/gi/_glib \
+	-I$(top_srcdir)/gi/_gobject
+_gi_cairo_la_LIBADD = \
+	$(extension_libadd) \
+	$(GI_LIBS) \
+	$(PYCAIRO_LIBS)
+_gi_cairo_la_LDFLAGS = \
+	$(extension_ldflags) \
+	-export-symbols-regex "init_gi_cairo|PyInit__gi_cairo"
 
 
 # This is to ensure we have a symlink to the .so in the
 # build directory, which the Python interpreter can load
 # directly without having to know how to parse .la files.
 .la.so:
-	test -L $@ || $(LN_S) .libs/$@ $@
+	$(LN_S) .libs/$@ $@ || true
 
 all-local: $(LTLIBRARIES:.la=.so)
 check-local: $(LTLIBRARIES:.la=.so)

@@ -1,7 +1,5 @@
+pygirepositorydir = $(pyexecdir)/gi/repository
 
-pkgpyexecdir = $(pyexecdir)/gi
-
-pygirepositorydir = $(pkgpyexecdir)/repository
 pygirepository_PYTHON = \
 	__init__.py
 
