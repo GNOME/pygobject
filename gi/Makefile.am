@@ -1,5 +1,3 @@
-PLATFORM_VERSION = 2.0
-
 pkgincludedir = $(includedir)/pygtk-$(PLATFORM_VERSION)
 pkgpyexecdir = $(pyexecdir)
 
