@@ -101,7 +101,8 @@ if test $build_py3k = true ; then
 			  [AC_MSG_ERROR(too old)])
 fi
 
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
+AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found]))
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
 old_CPPFLAGS=$CPPFLAGS
