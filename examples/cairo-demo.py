@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""Based on cairo-demo/X11/cairo-demo.c
 """
-import pygtk
-pygtk.require('2.0')
+Based on cairo-demo/X11/cairo-demo.c
+"""
+
 import cairo
 from gi.repository import Gdk, Gtk
 
