@@ -52,12 +52,6 @@ pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
 # python
 pyexec_LTLIBRARIES =
 
-# linker flags
-common_ldflags = -module -avoid-version
-if PLATFORM_WIN32
-common_ldflags += -no-undefined
-endif
-
 # install pth file.
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pythondir)
