@@ -1070,7 +1070,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         kwargs = PyDict_New();
         if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
             PyErr_Print();
-        Py_DECREF(wrapper);
+
         Py_DECREF(args);
         Py_DECREF(kwargs);
         pyglib_gil_state_release(state);
