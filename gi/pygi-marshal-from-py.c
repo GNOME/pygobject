@@ -1378,14 +1378,20 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
     GIInfoType info_type;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    /* FIXME: add instance checks */
-
     info_type = g_base_info_get_type (iface_cache->interface_info);
     switch (info_type) {
         case GI_INFO_TYPE_UNION:
         case GI_INFO_TYPE_STRUCT:
         {
             GType type = iface_cache->g_type;
+
+            if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
+                PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                              iface_cache->type_name,
+                              py_arg->ob_type->tp_name);
+                return FALSE;
+            }
+
             if (g_type_is_a (type, G_TYPE_BOXED)) {
                 arg->v_pointer = pyg_boxed_get (py_arg, void);
             } else if (g_type_is_a (type, G_TYPE_POINTER) ||
@@ -1402,6 +1408,17 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
             arg->v_pointer = pygobject_get (py_arg);
+            if (arg->v_pointer != NULL) {
+                GType obj_type = G_OBJECT_TYPE (( GObject *)arg->v_pointer);
+                GType expected_type = iface_cache->g_type;
+
+                if (!g_type_is_a (obj_type, expected_type)) {
+                    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                                  iface_cache->type_name,
+                                  py_arg->ob_type->tp_name);
+                    return FALSE;
+                }
+            }
             break;
         default:
             /* Other types don't have methods. */
