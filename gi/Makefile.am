@@ -8,14 +8,17 @@ extension_cppflags = \
 	$(PYTHON_INCLUDES) \
 	-DPY_SSIZE_T_CLEAN
 
-extension_libadd = \
-	$(PYTHON_LIBS)
-
 extension_ldflags = \
 	-module \
 	-avoid-version
 
 if OS_WIN32
+# Windows requires Python modules to be explicitly linked to libpython.
+# Extension modules are shared libaries (.dll), but need to be
+# called .pyd for Python to load it as an extension module.
+extension_libadd = \
+	$(PYTHON_LIBS)
+
 extension_ldflags += \
 	-no-undefined \
 	-shrext ".pyd"

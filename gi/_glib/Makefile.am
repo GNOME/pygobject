@@ -9,6 +9,12 @@ extension_ldflags = \
 	-avoid-version
 
 if OS_WIN32
+# Windows requires Python modules to be explicitly linked to libpython.
+# Extension modules are shared libaries (.dll), but need to be
+# called .pyd for Python to load it as an extension module.
+extension_libadd = \
+	$(PYTHON_LIBS)
+
 extension_ldflags += \
 	-no-undefined \
 	-shrext ".pyd"
@@ -33,7 +39,7 @@ libpyglib_gi_2_0_@PYTHON_BASENAME@_la_CPPFLAGS = \
 libpyglib_gi_2_0_@PYTHON_BASENAME@_la_CFLAGS = \
 	$(GLIB_CFLAGS)
 libpyglib_gi_2_0_@PYTHON_BASENAME@_la_LIBADD = \
-	$(PYTHON_LIBS) \
+	$(extension_libadd) \
 	$(FFI_LIBS) \
 	$(GLIB_LIBS)
 
@@ -65,7 +71,7 @@ _glib_la_CFLAGS = \
 _glib_la_CPPFLAGS = \
 	$(extension_cppflags)
 _glib_la_LIBADD = \
-	$(PYTHON_LIBS) \
+	$(extension_libadd) \
 	$(GLIB_LIBS) \
 	libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 _glib_la_LDFLAGS = \

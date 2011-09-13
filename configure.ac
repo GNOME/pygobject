@@ -102,7 +102,9 @@ if test $build_py3k = true ; then
 fi
 
 AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
-AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found]))
+if test "x$os_win32" = "xyes"; then
+  AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
+fi
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
 old_CPPFLAGS=$CPPFLAGS
