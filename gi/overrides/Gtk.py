@@ -625,7 +625,7 @@ class TextBuffer(Gtk.TextBuffer):
     def set_text(self, text, length=-1):
         Gtk.TextBuffer.set_text(self, text, length)
 
-    def insert(self, iter, text, lenth=-1):
+    def insert(self, iter, text, length=-1):
         if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
