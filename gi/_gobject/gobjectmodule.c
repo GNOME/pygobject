@@ -2498,10 +2498,6 @@ pygobject_register_version_tuples(PyObject *d)
 			   PYGOBJECT_MINOR_VERSION,
 			   PYGOBJECT_MICRO_VERSION);
     PyDict_SetItemString(d, "pygobject_version", tuple);
-
-    /* backwards compatibility */
-    PyDict_SetItemString(d, "pygtk_version", tuple);
-    Py_DECREF(tuple);
 }
 
 static void

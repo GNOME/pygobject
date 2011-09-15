@@ -356,8 +356,6 @@ pygobject_init(int req_major, int req_minor, int req_micro)
         PyObject *version;
 
         version = PyObject_GetAttrString(gobject, "pygobject_version");
-        if (!version)
-            version = PyObject_GetAttrString(gobject, "pygtk_version");
         if (!version) {
             PyErr_SetString(PyExc_ImportError,
                             "could not import gobject (version too old)");
