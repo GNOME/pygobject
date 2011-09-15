@@ -82,7 +82,7 @@ class property(object):
         @type     type: type
         @param default: default value
         @param    nick: short description
-        @type     bick: string
+        @type     nick: string
         @param   blurb: long description
         @type    blurb: string
         @param flags:    parameter flags, one of:
