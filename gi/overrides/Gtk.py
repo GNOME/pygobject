@@ -625,11 +625,10 @@ class TextBuffer(Gtk.TextBuffer):
     def set_text(self, text, length=-1):
         Gtk.TextBuffer.set_text(self, text, length)
 
-    def insert(self, iter, text):
+    def insert(self, iter, text, lenth=-1):
         if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
-        length = len(text)
         Gtk.TextBuffer.insert(self, iter, text, length)
 
     def insert_with_tags(self, iter, text, *tags):
@@ -658,11 +657,10 @@ class TextBuffer(Gtk.TextBuffer):
 
         self.insert_with_tags(iter, text, *tag_objs)
 
-    def insert_at_cursor(self, text):
+    def insert_at_cursor(self, text, length=-1):
         if not isinstance(text , _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
-        length = len(text)
         Gtk.TextBuffer.insert_at_cursor(self, text, length)
 
     def get_selection_bounds(self):
