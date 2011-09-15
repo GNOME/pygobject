@@ -25,8 +25,10 @@ from ._gi import _API, Repository
 # Force loading the GObject typelib so we have available the wrappers for
 # base classes such as GInitiallyUnowned
 import gi._gobject
+import os
 
 _versions = {}
+_overridesdir = os.path.join(os.path.dirname(__file__), 'overrides')
 
 def require_version(namespace, version):
     repository = Repository.get_default()
