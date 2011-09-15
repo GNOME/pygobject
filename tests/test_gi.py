@@ -703,6 +703,35 @@ class TestArray(unittest.TestCase):
         object_ = GIMarshallingTests.Object()
         self.assertEquals([-1, 0, 1, 2], object_.method_array_return())
 
+    def test_array_enum_in(self):
+         GIMarshallingTests.array_enum_in([GIMarshallingTests.Enum.VALUE1,
+                                           GIMarshallingTests.Enum.VALUE2,
+                                           GIMarshallingTests.Enum.VALUE3])
+
+    def test_array_boxed_struct_in(self):
+         struct1 = GIMarshallingTests.BoxedStruct()
+         struct1.long_ = 1
+         struct2 = GIMarshallingTests.BoxedStruct()
+         struct2.long_ = 2
+         struct3 = GIMarshallingTests.BoxedStruct()
+         struct3.long_ = 3
+
+         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
+
+    def test_array_simple_struct_in(self):
+         struct1 = GIMarshallingTests.SimpleStruct()
+         struct1.long_ = 1
+         struct2 = GIMarshallingTests.SimpleStruct()
+         struct2.long_ = 2
+         struct3 = GIMarshallingTests.SimpleStruct()
+         struct3.long_ = 3
+
+         GIMarshallingTests.array_simple_struct_in([struct1, struct2, struct3])
+
+    def test_array_multi_array_key_value_in(self):
+         GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
+                                                     [1, 2, 3])
+
     def test_array_fixed_out_struct(self):
         struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
 

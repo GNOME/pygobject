@@ -692,6 +692,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     PyGIMarshalFromPyFunc from_py_marshaller;
     int i;
     Py_ssize_t length;
+    gssize item_size;
     gboolean is_ptr_array;
     GArray *array_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
@@ -720,13 +721,14 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         return FALSE;
     }
 
+    item_size = sequence_cache->item_size;
     is_ptr_array = (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
     if (is_ptr_array) {
         array_ = (GArray *)g_ptr_array_new ();
     } else {
         array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
                                     FALSE,
-                                    sequence_cache->item_size,
+                                    item_size,
                                     length);
     }
 
@@ -760,10 +762,37 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
          *        for ptr arrays than doing the evaluation
          *        and casting each loop iteration
          */
-        if (is_ptr_array)
+        if (is_ptr_array) {
             g_ptr_array_add((GPtrArray *)array_, item.v_pointer);
-        else
+        } else if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
+            PyGIInterfaceCache *item_iface_cache = (PyGIInterfaceCache *) sequence_cache->item_cache;
+            GIBaseInfo *base_info = (GIBaseInfo *) item_iface_cache->interface_info;
+            GIInfoType info_type = g_base_info_get_type (base_info);
+
+            switch (info_type) {
+                case GI_INFO_TYPE_UNION:
+                case GI_INFO_TYPE_STRUCT:
+                {
+                    PyGIArgCache *item_arg_cache = (PyGIArgCache *)item_iface_cache;
+                    PyGIMarshalCleanupFunc from_py_cleanup = item_arg_cache->from_py_cleanup;
+                    gboolean is_boxed = g_type_is_a (item_iface_cache->g_type, G_TYPE_BOXED);
+                    gboolean is_gvalue = item_iface_cache->g_type == G_TYPE_VALUE;
+
+                    if (!is_boxed || is_gvalue) {
+                        memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
+                        if (from_py_cleanup)
+                            from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                    } else {
+                        g_array_insert_val (array_, i, item);
+                    }
+                    break;
+                }
+                default:
+                    g_array_insert_val (array_, i, item);
+            }
+        } else {
             g_array_insert_val (array_, i, item);
+        }
         continue;
 err:
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
