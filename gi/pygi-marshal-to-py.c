@@ -26,7 +26,6 @@
 #include <string.h>
 #include <time.h>
 
-#include <datetime.h>
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
@@ -276,7 +275,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (seq_cache->fixed_size >= 0) {
             len = seq_cache->fixed_size;
         } else if (seq_cache->is_zero_terminated) {
-            len = g_strv_length (arg->v_string);
+            len = g_strv_length ((gchar **)arg->v_pointer);
         } else {
             GIArgument *len_arg = state->args[seq_cache->len_arg_index];
             len = len_arg->v_long;

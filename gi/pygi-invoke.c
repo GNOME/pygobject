@@ -472,7 +472,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         if (arg_cache->from_py_marshaller != NULL) {
             if (!arg_cache->allow_none && py_arg == Py_None) {
                 PyErr_Format (PyExc_TypeError,
-                              "Argument %i does not allow None as a value",
+                              "Argument %zd does not allow None as a value",
                               i);
 
                  pygi_marshal_cleanup_args_from_py_parameter_fail (state,

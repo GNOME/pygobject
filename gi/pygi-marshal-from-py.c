@@ -25,8 +25,6 @@
 
 #include <string.h>
 #include <time.h>
-
-#include <datetime.h>
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
@@ -406,7 +404,7 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
     if (PyInt_Check (py_long)) {
         long long_ = PyInt_AsLong (py_long);
         if (long_ < 0) {
-            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %llu",
+            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %lu",
                           long_, 0, G_MAXUINT64);
             return FALSE;
         }
@@ -444,7 +442,7 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
 
         Py_DECREF (py_str);
 
-        PyErr_Format (PyExc_ValueError, "%s not in range %d to %llu",
+        PyErr_Format (PyExc_ValueError, "%s not in range %d to %lu",
                       long_str, 0, G_MAXUINT64);
 
         g_free (long_str);
@@ -452,7 +450,7 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
     }
 
     if (ulong_ > G_MAXUINT64) {
-        PyErr_Format (PyExc_ValueError, "%llu not in range %d to %llu", ulong_, 0, G_MAXUINT64);
+        PyErr_Format (PyExc_ValueError, "%lu not in range %d to %lu", ulong_, 0, G_MAXUINT64);
         return FALSE;
     }
 
@@ -898,10 +896,11 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
         list_ = g_list_append (list_, item.v_pointer);
         continue;
 err:
+        /* FIXME: clean up list
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
             PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
-
+        */
         g_list_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
@@ -964,9 +963,11 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
         list_ = g_slist_append (list_, item.v_pointer);
         continue;
 err:
+        /* FIXME: Clean up list
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
             PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
+        */
 
         g_slist_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
@@ -1316,13 +1317,13 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
         arg->v_pointer = value;
         return TRUE;
     } else if (iface_cache->is_foreign) {
-        gboolean success;
+        PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (py_arg,
                                                              iface_cache->interface_info,
                                                              arg_cache->transfer,
                                                              arg);
 
-        return success;
+        return (success == Py_None);
     } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
         PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
                       iface_cache->type_name,

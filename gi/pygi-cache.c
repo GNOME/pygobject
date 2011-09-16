@@ -150,7 +150,6 @@ _sequence_cache_new (GITypeInfo *type_info,
 {
     PyGISequenceCache *sc;
     GITypeInfo *item_type_info;
-    GITypeTag item_type_tag;
     GITransfer item_transfer;
 
     sc = g_slice_new0 (PyGISequenceCache);
@@ -243,6 +242,8 @@ _callback_cache_new (GIArgInfo *arg_info,
    PyGICallbackCache *cc;
 
    cc = g_slice_new0 (PyGICallbackCache);
+   ( (PyGIArgCache *)cc)->destroy_notify = (GDestroyNotify)_callback_cache_free_func;
+
    cc->user_data_index = g_arg_info_get_closure (arg_info);
    if (cc->user_data_index != -1)
        cc->user_data_index += child_offset;
@@ -736,8 +737,6 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
             (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
                  callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
 
-    GI_IS_INTERFACE_INFO (iface_info);
-
     info_type = g_base_info_get_type ( (GIBaseInfo *)iface_info);
 
     /* Callbacks are special cased */
@@ -860,8 +859,6 @@ _arg_cache_new (GITypeInfo *type_info,
     PyGIArgCache *arg_cache = NULL;
     gssize child_offset = 0;
     GITypeTag type_tag;
-
-    GI_IS_TYPE_INFO (type_info);
 
     type_tag = g_type_info_get_tag (type_info);
 

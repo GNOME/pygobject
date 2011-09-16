@@ -192,6 +192,9 @@ _pygi_info_new (GIBaseInfo *info)
         case GI_INFO_TYPE_UNRESOLVED:
             type = &PyGIUnresolvedInfo_Type;
             break;
+        default:
+            g_assert_not_reached();
+            break;
     }
 
     self = (PyGIBaseInfo *) type->tp_alloc (type, 0);
@@ -484,6 +487,7 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
                 case GI_INFO_TYPE_ARG:
                 case GI_INFO_TYPE_TYPE:
                 case GI_INFO_TYPE_UNRESOLVED:
+                default:
                     g_assert_not_reached();
                     break;
             }
@@ -862,7 +866,9 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
                     case GI_INFO_TYPE_ARG:
                     case GI_INFO_TYPE_TYPE:
                     case GI_INFO_TYPE_UNRESOLVED:
+                    default:
                         g_assert_not_reached();
+                        break;
                 }
 
                 g_base_info_unref (info);

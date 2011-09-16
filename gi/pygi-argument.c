@@ -1775,7 +1775,7 @@ _pygi_argument_to_object (GIArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-             if (pyglib_error_check (&arg->v_pointer)) {
+             if (pyglib_error_check ( (GError **) &arg->v_pointer)) {
                  PyObject *err_type;
                  PyObject *err_value;
                  PyObject *err_trace;
