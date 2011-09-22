@@ -96,6 +96,9 @@ PyObject *pyg_integer_richcompare(PyObject *v,
 
 gboolean pyg_gerror_exception_check(GError **error);
 
+void pygobject_ref_float(PyGObject *self);
+void pygobject_ref_sink(PyGObject *self);
+
 /* from pygtype.h */
 extern PyTypeObject PyGTypeWrapper_Type;
 

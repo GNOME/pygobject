@@ -1066,6 +1066,11 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         PyGILState_STATE state;
         state = pyglib_gil_state_ensure();
         wrapper = pygobject_new_full(object, FALSE, g_class);
+
+        /* float the wrapper ref here because we are going to orphan it
+         * so we don't destroy the wrapper. The next call to pygobject_new_full
+         * will take the ref */
+        pygobject_ref_float (wrapper);
         args = PyTuple_New(0);
         kwargs = PyDict_New();
         if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))

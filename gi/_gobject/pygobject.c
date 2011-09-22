@@ -560,6 +560,31 @@ pygobject_switch_to_toggle_ref(PyGObject *self)
     g_object_unref(self->obj);
 }
 
+/* Called when an custom gobject is initalized via g_object_new instead of
+   its constructor.  The next time the wrapper is access via 
+   pygobject_new_full it will sink the floating reference instead of
+   adding a new reference and causing a leak */
+ 
+void
+pygobject_ref_float(PyGObject *self)
+{
+    /* should only be floated once */
+    g_assert(!(self->private_flags.flags & PYGOBJECT_IS_FLOATING_REF));
+    
+    self->private_flags.flags |= PYGOBJECT_IS_FLOATING_REF;
+}
+
+/* Called by gobject_new_full, if the floating flag is set remove it, otherwise
+   ref the pyobject */
+void
+pygobject_ref_sink(PyGObject *self)
+{
+    if (self->private_flags.flags & PYGOBJECT_IS_FLOATING_REF)
+        self->private_flags.flags &= ~PYGOBJECT_IS_FLOATING_REF;
+    else
+        Py_INCREF ( (PyObject *) self);
+}
+
 /**
  * pygobject_register_wrapper:
  * @self: the wrapper instance
@@ -888,7 +913,7 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
     /* we already have a wrapper for this object -- return it. */
     self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key);
     if (self != NULL) {
-	Py_INCREF(self);
+	pygobject_ref_sink(self);
     } else {
 	/* create wrapper */
         PyGObjectData *inst_data = pyg_object_peek_inst_data(obj);

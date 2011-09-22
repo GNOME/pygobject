@@ -23,7 +23,8 @@ struct _PyGClosure {
 };
 
 typedef enum {
-    PYGOBJECT_USING_TOGGLE_REF = 1 << 0
+    PYGOBJECT_USING_TOGGLE_REF = 1 << 0,
+    PYGOBJECT_IS_FLOATING_REF = 1 << 1
 } PyGObjectFlags;
 
   /* closures is just an alias for what is found in the
