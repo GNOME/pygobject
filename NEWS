@@ -1,3 +1,7 @@
+3.0.0   19-Sep-2011
+        - up version required of gobject-introspection to 1.29.0 (John (J5) Palmieri)
+        - fix most warnings (John (J5) Palmieri)
+
 2.90.4  15-Sep-2011 (3.0 pre-release)
         - do not pass in len(str) to the length argument of gtk_test_buffer_insert* apis (John (J5) Palmieri)
         - Switch tarball compression format to tar.xz only. (Dieter Verfaillie)
