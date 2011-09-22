@@ -1048,7 +1048,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
                            gpointer         g_class)
 {
     GObject *object = (GObject *) instance;
-    PyObject *wrapper;
+    PyObject *wrapper, *args, *kwargs;
 
     wrapper = g_object_get_qdata(object, pygobject_wrapper_key);
     if (wrapper == NULL) {
@@ -1059,6 +1059,22 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         }
     }
     pygobject_init_wrapper_set(NULL);
+    if (wrapper == NULL) {
+          /* this looks like a python object created through
+           * g_object_new -> we have no python wrapper, so create it
+           * now */
+        PyGILState_STATE state;
+        state = pyglib_gil_state_ensure();
+        wrapper = pygobject_new_full(object, FALSE, g_class);
+        args = PyTuple_New(0);
+        kwargs = PyDict_New();
+        if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
+            PyErr_Print();
+
+        Py_DECREF(args);
+        Py_DECREF(kwargs);
+        pyglib_gil_state_release(state);
+    }
 }
 
 
@@ -1730,22 +1746,8 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
     g_type_class_unref(class);
 
     if (obj) {
-        PyObject *empty_args;
-        PyObject *empty_kwargs;
-        PyGILState_STATE state;
-
         pygobject_sink (obj);
 	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
-        empty_args = PyTuple_New(0);
-        empty_kwargs = PyDict_New();
-
-        state = pyglib_gil_state_ensure();
-        if (Py_TYPE(self)->tp_init((PyObject *)self, empty_args, empty_kwargs))
-            PyErr_Print();
-        pyglib_gil_state_release(state);
-
-        Py_DECREF(empty_args);
-        Py_DECREF(empty_kwargs);
         g_object_unref(obj);
     } else
         self = NULL;
