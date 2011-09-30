@@ -1,3 +1,8 @@
+3.0.1   30-Sep-2011
+	- when checking instances union members are same type as parent
+	- add a floating flag to pygobjects
+	- Revert "Fix refcount bug by not creating python wrapper during gobject init stage"
+
 3.0.0   19-Sep-2011
         - up version required of gobject-introspection to 1.29.0 (John (J5) Palmieri)
         - fix most warnings (John (J5) Palmieri)
