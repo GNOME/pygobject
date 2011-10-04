@@ -10,7 +10,7 @@ import shutil
 import os
 import locale
 import subprocess
-from gi.repository import GObject
+from gi.repository import GObject, GLib
 
 from gi.repository import GIMarshallingTests
 
@@ -769,6 +769,18 @@ class TestArray(unittest.TestCase):
 
     def test_gstrv_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
+    
+    def test_array_gvariant_none_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+    
+    def test_array_gvariant_container_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+    
+    def test_array_gvariant_full_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
 
 class TestGArray(unittest.TestCase):
 

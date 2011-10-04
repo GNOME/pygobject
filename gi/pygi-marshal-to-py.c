@@ -292,7 +292,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
             return NULL;
         }
-
+        
+        g_free (array_->data);
         array_->data = arg->v_pointer;
         array_->len = len;
     }
@@ -331,10 +332,18 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
                 } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
                     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
+                    gboolean is_gvariant = iface_cache->g_type == G_TYPE_VARIANT;
 
+                    // FIXME: This probably doesn't work with boxed types or gvalues. See fx. _pygi_marshal_from_py_array()
                     switch (g_base_info_get_type (iface_cache->interface_info)) {
                         case GI_INFO_TYPE_STRUCT:
-                            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+                            if (is_gvariant) {
+                              g_assert (item_size == sizeof (gpointer));
+                              if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+                                item_arg.v_pointer = g_variant_ref_sink (g_array_index (array_, gpointer, i));
+                              else
+                                item_arg.v_pointer = g_array_index (array_, gpointer, i);
+                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
                                 gpointer *_struct = g_malloc (item_size);
                                 memcpy (_struct, array_->data + i * item_size,
                                         item_size);

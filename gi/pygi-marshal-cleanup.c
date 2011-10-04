@@ -273,6 +273,37 @@ _pygi_marshal_cleanup_to_py_interface_struct_foreign (PyGIInvokeState *state,
             data);
 }
 
+static GArray*
+_wrap_c_array (PyGIInvokeState   *state,
+               PyGISequenceCache *sequence_cache,
+               gpointer           data)
+{
+    GArray *array_;
+    gsize   len;
+  
+    if (sequence_cache->fixed_size >= 0) {
+        len = sequence_cache->fixed_size;
+    } else if (sequence_cache->is_zero_terminated) {
+        len = g_strv_length ((gchar **)data);
+    } else {
+        GIArgument *len_arg = state->args[sequence_cache->len_arg_index];
+        len = len_arg->v_long;
+    }
+
+    array_ = g_array_new (FALSE,
+                          FALSE,
+                          sequence_cache->item_size);
+
+    if (array_ == NULL)
+        return NULL;
+
+    g_free (array_->data);
+    array_->data = data;
+    array_->len = len;
+
+    return array_;
+}
+
 void
 _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
                                      PyGIArgCache    *arg_cache,
@@ -286,26 +317,11 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         /* If this isn't a garray create one to help process variable sized
            array elements */
         if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
-            gsize len;
-            if (sequence_cache->fixed_size >= 0) {
-                len = sequence_cache->fixed_size;
-            } else if (sequence_cache->is_zero_terminated) {
-                len = g_strv_length ((gchar **)data);
-            } else {
-                GIArgument *len_arg = state->args[sequence_cache->len_arg_index];
-                len = len_arg->v_long;
-            }
-
-            array_ = g_array_new (FALSE,
-                                  FALSE,
-                                  sequence_cache->item_size);
-
+            array_ = _wrap_c_array (state, sequence_cache, data);
+            
             if (array_ == NULL)
                 return;
-
-            array_->data = data;
-            array_->len = len;
-
+            
         } else {
             array_ = (GArray *) data;
         }
@@ -324,12 +340,12 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
             }
         }
 
-        if (state->failed ||
-            arg_cache->transfer == GI_TRANSFER_NOTHING ||
-            arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        /* Only free the array when we didn't transfer ownership */
+        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+            g_array_free (array_, arg_cache->transfer == GI_TRANSFER_NOTHING);
+        } else if (state->failed ||
+                   arg_cache->transfer == GI_TRANSFER_NOTHING) {
             g_array_free (array_, TRUE);
-        } else if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
-            g_array_free (array_, FALSE);
         }
     }
 }
@@ -343,12 +359,20 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
-            arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-        GArray *array_ = (GArray *) data;
+        arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        GArray *array_;
+        PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
+        /* If this isn't a garray create one to help process variable sized
+           array elements */
         if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
-            g_free (data);
-            return;
+            array_ = _wrap_c_array (state, sequence_cache, data);
+            
+            if (array_ == NULL)
+                return;
+            
+        } else {
+            array_ = (GArray *) data;
         }
 
         if (sequence_cache->item_cache->to_py_cleanup != NULL) {
@@ -363,8 +387,7 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
             }
         }
 
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-            g_array_free (array_, TRUE);
+        g_array_free (array_, TRUE);
     }
 }
 
