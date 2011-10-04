@@ -189,7 +189,8 @@ class property(object):
             return TYPE_PYOBJECT
         elif (isinstance(type_, type) and
               issubclass(type_, (_gobject.GObject,
-                                 _gobject.GEnum))):
+                                 _gobject.GEnum,
+                                 _gobject.GBoxed))):
             return type_.__gtype__
         elif type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                        TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
@@ -303,7 +304,7 @@ class property(object):
             args = (self.default,)
         elif ptype == TYPE_PYOBJECT:
             args = ()
-        elif ptype.is_a(TYPE_OBJECT):
+        elif ptype.is_a(TYPE_OBJECT) or ptype.is_a(TYPE_BOXED):
             args = ()
         else:
             raise NotImplementedError(ptype)
