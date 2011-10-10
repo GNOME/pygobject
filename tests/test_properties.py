@@ -15,6 +15,7 @@ from gi.repository.GObject import \
      G_MAXULONG
 
 from gi.repository import Gio
+from gi.repository import GLib
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -38,6 +39,9 @@ class PropertyObject(GObject.GObject):
 
     enum = GObject.property(
         type=Gio.SocketType, default=Gio.SocketType.STREAM)
+
+    boxed = GObject.property(
+        type=GLib.Regex, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -67,8 +71,9 @@ class TestProperties(unittest.TestCase):
                                                'construct',
                                                'construct-only',
                                                'uint64',
-                                               'enum'])
-            self.assertEqual(len(obj), 5)
+                                               'enum',
+                                               'boxed'])
+            self.assertEqual(len(obj), 6)
 
     def testNormal(self):
         obj = new(PropertyObject, normal="123")
@@ -160,6 +165,17 @@ class TestProperties(unittest.TestCase):
                           default=object())
         self.assertRaises(TypeError, GObject.property, type=Gio.SocketType,
                           default=1)
+
+    def textBoxed(self):
+        obj = new(PropertyObject)
+
+        regex = GLib.Regex.new('[a-z]*', 0, 0)
+        obj.props.boxed = regex
+        self.assertEqual(obj.props.boxed.get_pattern(), '[a-z]*')
+        self.assertEqual(obj.boxed.get_patttern(), '[a-z]*')
+
+        self.assertRaises(TypeError, setattr, obj, 'boxed', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'boxed', object())
 
     def testRange(self):
         # kiwi code
