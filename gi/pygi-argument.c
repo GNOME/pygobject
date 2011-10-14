@@ -1662,6 +1662,16 @@ _pygi_argument_to_object (GIArgument  *arg,
                         Py_INCREF (object);
                         break;
                     }
+
+                    /* since we will unref the object when the
+                     * wrapper is destroyed and we don't want
+                     * GTK removing the object while the
+                     * wrapper is live, we take a gobject reference
+                     * when one is not transfered to us
+                     */
+                    if (transfer == GI_TRANSFER_NOTHING)
+                        g_object_ref (G_OBJECT(arg->v_pointer));
+
                     object = pygobject_new (arg->v_pointer);
                     break;
                 default:
