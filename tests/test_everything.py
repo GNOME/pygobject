@@ -483,3 +483,14 @@ class TestAdvancedInterfaces(unittest.TestCase):
         self.assertEquals(ret[0], 51);
         self.assertEquals(ret[1], 61);
         self.assertEquals(ret[2], 32);
+
+class TestSignals(unittest.TestCase):
+    def test_object_param_signal(self):
+        obj = Everything.TestObj();
+
+        def callback (obj_param):
+            self.assertEquals(obj_param.props.int, 3)
+            self.assertEquals(obj_param.__grefcount__, 2)
+
+        obj.connect('sig-with-obj', callback)
+        obj.emit_sig_with_obj()
