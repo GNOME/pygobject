@@ -32,6 +32,62 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-marshal-from-py.h"
 
+/*
+ * _is_union_member - check to see if the py_arg is actually a member of the
+ * expected C union
+ */
+static gboolean
+_is_union_member (PyGIInterfaceCache *iface_cache, PyObject *py_arg) {
+    gint i;
+    gint n_fields;
+    GIUnionInfo *union_info;
+    GIInfoType info_type;
+    gboolean is_member = FALSE;
+
+    info_type = g_base_info_get_type (iface_cache->interface_info);
+
+    if (info_type != GI_INFO_TYPE_UNION)
+        return FALSE;
+
+    union_info = (GIUnionInfo *) iface_cache->interface_info;
+    n_fields = g_union_info_get_n_fields (union_info);
+
+    for (i = 0; i < n_fields; i++) {
+        GIFieldInfo *field_info;
+        GITypeInfo *field_type_info;
+
+        field_info = g_union_info_get_field (union_info, i);
+        field_type_info = g_field_info_get_type (field_info);
+
+        /* we can only check if the members are interfaces */
+        if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
+            PyObject *py_type;
+            GIInterfaceInfo *field_iface_info =
+                g_type_info_get_interface (field_type_info);
+
+            py_type = _pygi_type_import_by_gi_info (
+                (GIBaseInfo *) field_iface_info);
+
+            if (py_type != NULL && PyObject_IsInstance (py_arg, py_type)) {
+                is_member = TRUE;
+                break;
+            }
+
+            Py_XDECREF (py_type);
+            g_base_info_unref ( ( GIBaseInfo *) field_iface_info);
+
+        }
+
+        g_base_info_unref ( ( GIBaseInfo *) field_type_info);
+        g_base_info_unref ( ( GIBaseInfo *) field_info);
+
+        if (is_member)
+            break;
+    }
+
+    return is_member;
+}
+
 gboolean
 _pygi_marshal_from_py_void (PyGIInvokeState   *state,
                             PyGICallableCache *callable_cache,
@@ -1325,10 +1381,15 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
 
         return (success == Py_None);
     } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
-        PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
-                      iface_cache->type_name,
-                      iface_cache->py_type->ob_type->tp_name);
-        return FALSE;
+        /* first check to see if this is a member of the expected union */
+        if (!_is_union_member (iface_cache, py_arg)) {
+            if (!PyErr_Occurred())
+                PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
+                              iface_cache->type_name,
+                              iface_cache->py_type->ob_type->tp_name);
+
+            return FALSE;
+        }
     }
 
     if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
@@ -1417,59 +1478,13 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
 
             if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
                 /* wait, we might be a member of a union so manually check */
-                if (info_type == GI_INFO_TYPE_UNION) {
-                    gint i;
-                    gint n_fields;
-                    gboolean is_member = FALSE;
-                    GIUnionInfo *union_info = (GIUnionInfo *) iface_cache->interface_info;
-
-                    n_fields = g_union_info_get_n_fields (union_info);
-
-                    for (i = 0; i < n_fields; i++) {
-                        GIFieldInfo *field_info;
-                        GITypeInfo *field_type_info;
-
-                        field_info = g_union_info_get_field (union_info, i);
-                        field_type_info = g_field_info_get_type (field_info);
-
-                        /* we can only check if the members are interfaces */
-                        if (g_type_info_get_tag (field_type_info) ==
-                            GI_TYPE_TAG_INTERFACE) {
-                            PyObject *py_type;
-                            GIInterfaceInfo *field_iface_info =
-                                g_type_info_get_interface(field_type_info);
-
-                            py_type = _pygi_type_import_by_gi_info (
-                                (GIBaseInfo *) field_iface_info);
-
-                            if (PyObject_IsInstance (py_arg, py_type)) {
-                                is_member = TRUE;
-                                break;
-                            }
-
-                            Py_XDECREF (py_type);
-                            g_base_info_unref ( ( GIBaseInfo *) field_iface_info);
-
-                        }
-
-                        g_base_info_unref ( ( GIBaseInfo *) field_type_info);
-                        g_base_info_unref ( ( GIBaseInfo *) field_info);
-
-                        if (is_member)
-                            break;
-                    }
-
-                    if (!is_member) {
+                if (!_is_union_member (iface_cache, py_arg)) {
+                    if (!PyErr_Occurred())
                         PyErr_Format (PyExc_TypeError,
                                       "Expected a %s, but got %s",
                                       iface_cache->type_name,
                                       py_arg->ob_type->tp_name);
-                        return FALSE;
-                    }
-                } else {
-                    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
-                                  iface_cache->type_name,
-                                  py_arg->ob_type->tp_name);
+
                     return FALSE;
                 }
             }
