@@ -1,3 +1,11 @@
+3.0.2   21-Oct-2011
+        - Add tests for boxed properties. (Ignacio Casal Quinteiro)
+        - Allow GBoxed types as property (Timo Vanwynsberghe)
+        - when converting an object with transfer none, make sure the wrapper owns a ref (John (J5) Palmieri)
+        - unit test for checking ref count of object param in signals (John (J5) Palmieri)
+        - Gdk overrides: Unbreak for Gdk-2.0 (Martin Pitt)
+        - Do union member checks for unions that are parameters (John (J5) Palmieri)
+
 3.0.1   30-Sep-2011
 	- when checking instances union members are same type as parent
 	- add a floating flag to pygobjects
