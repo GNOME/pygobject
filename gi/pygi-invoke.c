@@ -550,6 +550,16 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
     total_out_args -= cache->n_to_py_child_args;
 
     if (cache->n_to_py_args - cache->n_to_py_child_args  == 0) {
+        if (cache->return_cache->is_skipped && state->error == NULL) {
+            /* we skip the return value and have no (out) arguments to return,
+             * so py_return should be NULL. But we must not return NULL,
+             * otherwise Python will expect an exception.
+             */
+            g_assert (py_return == NULL);
+            Py_INCREF(Py_None);
+            py_return = Py_None;
+        }
+
         py_out = py_return;
     } else if (total_out_args == 1) {
         /* if we get here there is one out arg an no return */

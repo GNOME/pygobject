@@ -484,6 +484,14 @@ class TestAdvancedInterfaces(unittest.TestCase):
         self.assertEquals(ret[1], 61);
         self.assertEquals(ret[2], 32);
 
+    def test_obj_skip_return_val_no_out(self):
+        obj = Everything.TestObj();
+        # raises an error for 0, succeeds for any other value
+        self.assertRaises(GLib.GError, obj.skip_return_val_no_out, 0)
+
+        ret = obj.skip_return_val_no_out(1)
+        self.assertEquals(ret, None)
+
 class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):
         obj = Everything.TestObj();
