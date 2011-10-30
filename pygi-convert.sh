@@ -38,6 +38,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
     -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
     -pe "s/Gtk.MOVEMENT_/Gtk.MovementStep./g;" \
+    -pe "s/Gtk.ORIENTATION_/Gtk.Orientation./g;" \
     -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
     -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
     -pe "s/Gtk.RELIEF_/Gtk.ReliefStyle./g;" \
