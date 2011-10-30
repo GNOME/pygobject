@@ -131,6 +131,7 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import pango\n/from gi.repository import Pango\n/g;" \
     -pe "s/pango\./Pango\./g;" \
+    -pe "s/Pango.ALIGN_/Pango.Alignment./g;" \
     -pe "s/Pango.ELLIPSIZE_/Pango.EllipsizeMode./g;" \
     -pe "s/Pango.STYLE_/Pango.Style./g;" \
     -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \
