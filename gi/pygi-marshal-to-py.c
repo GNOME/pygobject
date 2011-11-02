@@ -266,8 +266,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
     array_ = arg->v_pointer;
 
-    g_assert(array_ != NULL);
-
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
       * we allocate a GArray if the argument was a C array
@@ -277,11 +275,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (seq_cache->fixed_size >= 0) {
             len = seq_cache->fixed_size;
         } else if (seq_cache->is_zero_terminated) {
-            if(seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
-                len = strlen (arg->v_pointer);
-            } else {
-                len = g_strv_length ((gchar **)arg->v_pointer);
-            }
+            len = g_strv_length ((gchar **)arg->v_pointer);
         } else {
             GIArgument *len_arg = state->args[seq_cache->len_arg_index];
             len = len_arg->v_long;
