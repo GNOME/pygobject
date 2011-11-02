@@ -266,8 +266,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
     array_ = arg->v_pointer;
 
-    g_assert(array_ != NULL);
-
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
       * we allocate a GArray if the argument was a C array
@@ -275,8 +273,10 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
         gsize len;
         if (seq_cache->fixed_size >= 0) {
+            g_assert(arg->v_pointer != NULL);
             len = seq_cache->fixed_size;
         } else if (seq_cache->is_zero_terminated) {
+            g_assert(arg->v_pointer != NULL);
             if(seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
                 len = strlen (arg->v_pointer);
             } else {
@@ -293,13 +293,14 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (array_ == NULL) {
             PyErr_NoMemory ();
 
-            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && arg->v_pointer != NULL)
                 g_free (arg->v_pointer);
 
             return NULL;
         }
-        
-        g_free (array_->data);
+
+        if (array_->data != NULL) 
+            g_free (array_->data);
         array_->data = arg->v_pointer;
         array_->len = len;
     }
