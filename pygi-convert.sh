@@ -251,6 +251,82 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/pynotify\./Notify\./g;" \
 \
     -pe "s/import webkit\n/from gi.repository import WebKit\n/g;" \
+    -pe "s/import clutter\n/from gi.repository import Clutter\n/g;" \
+    -pe "s/from clutter import cogl\n/from gi.repository import Cogl\n/g;" \
+    -pe "s/(?<!\.)clutter\./Clutter\./g;" \
+    -pe "s/(?<!\.)cogl\./Cogl\./g;" \
+    -pe "s/Clutter.ACTOR_/Clutter.ActorFlags./g;" \
+    -pe "s/Clutter.ALLOCATION_/Clutter.AllocationFlags./g;" \
+    -pe "s/Clutter.BIND_/Clutter.BindCoordinate./g;" \
+    -pe "s/Clutter.BIN_ALIGNMENT_/Clutter.BinAlignment./g;" \
+    -pe "s/Clutter.BOX_ALIGNMENT_/Clutter.BoxAlignment./g;" \
+    -pe "s/Clutter.DRAG_/Clutter.DragAxis./g;" \
+    -pe "s/Clutter.EASE_/Clutter.AnimationMode./g;" \
+    -pe "s/Clutter.FEATURE_/Clutter.FeatureFlags./g;" \
+    -pe "s/Clutter.FLOW_/Clutter.FLOW_ORIENTATION./g;" \
+    -pe "s/Clutter.FONT_/Clutter.FontFlags./g;" \
+    -pe "s/Clutter.GRAVITY_/Clutter.Gravity./g;" \
+    -pe "s/Clutter.INTERPOLATION/Clutter.Interpolation./g;" \
+    -pe "s/Clutter.LINEAR/Clutter.AnimationMode.LINEAR/g;" \
+    -pe "s/Clutter.PATH_/Clutter.PathNodeType./g;" \
+    -pe "s/Clutter.PICK_/Clutter.PickMode./g;" \
+    -pe "s/Clutter.REQUEST_/Clutter.RequestMode./g;" \
+    -pe "s/Clutter.ROTATE_/Clutter.RotateDirection./g;" \
+    -pe "s/Clutter.SCRIPT_/Clutter.ScriptError./g;" \
+    -pe "s/Clutter.STAGE_STATE_/Clutter.StageState./g;" \
+    -pe "s/Clutter.TABLE_ALIGNMENT_/Clutter.TableAlignment./g;" \
+    -pe "s/Clutter.TEXTURE_ERROR_/Clutter.TextureError./g;" \
+    -pe "s/Clutter.TEXTURE_/Clutter.TextureFlags./g;" \
+    -pe "s/Clutter.TEXT_/Clutter.TextDirection./g;" \
+    -pe "s/Clutter.TIMELINE_/Clutter.TimelineDirection./g;" \
+    -pe "s/Clutter.UNIT_/Clutter.UnitType./g;" \
+    -pe "s/Clutter.X_AXIS/Clutter.RotateAxis.X_AXIS/g;" \
+    -pe "s/Clutter.Y_AXIS/Clutter.RotateAxis.Y_AXIS/g;" \
+    -pe "s/Clutter.Z_AXIS/Clutter.RotateAxis.Z_AXIS/g;" \
+    -pe "s/Clutter.ENTER/Clutter.EventType.ENTER/g;" \
+    -pe "s/Clutter.LEAVE/Clutter.EventType.LEAVE/g;" \
+    -pe "s/Clutter.BUTTON_PRESS/Clutter.EventType.BUTTON_PRESS/g;" \
+    -pe "s/Clutter.BUTTON_RELEASE/Clutter.EventType.BUTTON_RELEASE/g;" \
+    -pe "s/Clutter.KEY_PRESS/Clutter.EventType.KEY_PRESS/g;" \
+    -pe "s/Clutter.KEY_RELEASE/Clutter.EventType.KEY_RELEASE/g;" \
+    -pe "s/Clutter.SCROLL/Clutter.EventType.SCROLL/g;" \
+    -pe "s/Clutter.DELETE/Clutter.EventType.DELETE/g;" \
+    -pe "s/Clutter.CLIENT_MESSAGE/Clutter.EventType.CLIENT_MESSAGE/g;" \
+    -pe "s/Clutter.DESTROY_NOTIFY/Clutter.EventType.DESTROY_NOTIFY/g;" \
+    -pe "s/Clutter.STAGE_STATE/Clutter.EventType.STAGE_STATE/g;" \
+    -pe "s/Clutter.MOTION/Clutter.EventType.MOTION/g;" \
+    -pe "s/Clutter.BUTTON1_MASK/Clutter.ModifierType.BUTTON1_MASK/g;" \
+    -pe "s/Clutter.BUTTON2_MASK/Clutter.ModifierType.BUTTON2_MASK/g;" \
+    -pe "s/Clutter.BUTTON3_MASK/Clutter.ModifierType.BUTTON3_MASK/g;" \
+    -pe "s/Clutter.BUTTON4_MASK/Clutter.ModifierType.BUTTON4_MASK/g;" \
+    -pe "s/Clutter.BUTTON5_MASK/Clutter.ModifierType.BUTTON5_MASK/g;" \
+    -pe "s/Clutter.CONTROL_MASK/Clutter.ModifierType.CONTROL_MASK/g;" \
+    -pe "s/Clutter.HYPER_MASK/Clutter.ModifierType.HYPER_MASK/g;" \
+    -pe "s/Clutter.LOCK_MASK/Clutter.ModifierType.LOCK_MASK/g;" \
+    -pe "s/Clutter.META_MASK/Clutter.ModifierType.META_MASK/g;" \
+    -pe "s/Clutter.MOD1_MASK/Clutter.ModifierType.MOD1_MASK/g;" \
+    -pe "s/Clutter.MOD2_MASK/Clutter.ModifierType.MOD2_MASK/g;" \
+    -pe "s/Clutter.MOD3_MASK/Clutter.ModifierType.MOD3_MASK/g;" \
+    -pe "s/Clutter.MOD4_MASK/Clutter.ModifierType.MOD4_MASK/g;" \
+    -pe "s/Clutter.MOD5_MASK/Clutter.ModifierType.MOD5_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_MASK/Clutter.ModifierType.MODIFIER_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_13_MASK/Clutter.ModifierType.MODIFIER_RESERVED_13_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_14_MASK/Clutter.ModifierType.MODIFIER_RESERVED_14_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_15_MASK/Clutter.ModifierType.MODIFIER_RESERVED_15_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_16_MASK/Clutter.ModifierType.MODIFIER_RESERVED_16_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_17_MASK/Clutter.ModifierType.MODIFIER_RESERVED_17_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_18_MASK/Clutter.ModifierType.MODIFIER_RESERVED_18_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_19_MASK/Clutter.ModifierType.MODIFIER_RESERVED_19_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_20_MASK/Clutter.ModifierType.MODIFIER_RESERVED_20_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_21_MASK/Clutter.ModifierType.MODIFIER_RESERVED_21_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_22_MASK/Clutter.ModifierType.MODIFIER_RESERVED_22_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_23_MASK/Clutter.ModifierType.MODIFIER_RESERVED_23_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_24_MASK/Clutter.ModifierType.MODIFIER_RESERVED_24_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_25_MASK/Clutter.ModifierType.MODIFIER_RESERVED_25_MASK/g;" \
+    -pe "s/Clutter.MODIFIER_RESERVED_29_MASK/Clutter.ModifierType.MODIFIER_RESERVED_29_MASK/g;" \
+    -pe "s/Clutter.RELEASE_MASK/Clutter.ModifierType.RELEASE_MASK/g;" \
+    -pe "s/Clutter.SHIFT_MASK/Clutter.ModifierType.SHIFT_MASK/g;" \
+    -pe "s/Clutter.SUPER_MASK/Clutter.ModifierType.SUPER_MASK/g;" \
     $f
 done
 
