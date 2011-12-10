@@ -367,6 +367,37 @@ class TestProperty(unittest.TestCase):
                               GObject.property, type=gtype, minimum=min,
                               maximum=max+1)
 
+    def testMinMax(self):
+        class C(GObject.GObject):
+            prop_int = GObject.property(type=int, minimum=1, maximum=100, default=1)
+            prop_float = GObject.property(type=float, minimum=0.1, maximum=10.5, default=1.1)
+
+            def __init__(self):
+                GObject.GObject.__init__(self)
+
+        o = C()
+        self.assertEqual(o.prop_int, 1)
+
+        o.prop_int = 5
+        self.assertEqual(o.prop_int, 5)
+
+        o.prop_int = 0
+        self.assertEqual(o.prop_int, 5)
+
+        o.prop_int = 101
+        self.assertEqual(o.prop_int, 5)
+
+        self.assertEqual(o.prop_float, 1.1)
+
+        o.prop_float = 7.75
+        self.assertEqual(o.prop_float, 7.75)
+
+        o.prop_float = 0.09
+        self.assertEqual(o.prop_float, 7.75)
+
+        o.prop_float = 10.51
+        self.assertEqual(o.prop_float, 7.75)
+
     def testMultipleInstances(self):
         class C(GObject.GObject):
             prop = GObject.property(type=str, default='default')
