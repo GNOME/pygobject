@@ -15,6 +15,16 @@ Making a release
 
 Based on http://live.gnome.org/MaintainersCorner/Releasing
 
+Branching
+================
+
+Each cycle after the feature freeze, we create a stable branch so development can continue in the master branch unaffected by the freezes.
+
+1. Create the branch locally with: git checkout pygobject-3-2
+2. Push new branch: git push origin pygobject-3-2
+3. In master, update configure.ac to what will be the next version number (3.3.0)
+4. Announce the branching, send email telling people to continue development in master and cherry-picking the changes that are appropriate for the stable branch
+
 Tests
 =====
 
