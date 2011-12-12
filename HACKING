@@ -6,7 +6,7 @@ Making a release
    commit if not.
 3. Update NEWS, use the command: git log --format="        - %s (%an)"
 4. Tag with: git tag -s 2.90.4
-5. Build tarball with: make distclean; ./autogen.sh --enable-docs; make; make dist
+5. Build tarball with: make distclean; ./autogen.sh; make; make dist
 6. Upload tarball: scp pygobject-2.21.5.tar.gz tomeuv@master.gnome.org:
 7. Install tarball: ssh tomeuv@master.gnome.org 'install-module pygobject-2.21.5.tar.gz'
 8. Send release announcements to gnome-announce-list@gnome.org; pygtk@daa.com.au; python-hackers-list@gnome.org; python-announce-list@python.org
