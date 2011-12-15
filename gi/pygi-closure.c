@@ -163,6 +163,8 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
 
                     g_base_info_unref (interface);
                 }
+                case GI_TYPE_TAG_ERROR:
+                case GI_TYPE_TAG_GHASH:
                 case GI_TYPE_TAG_GLIST:
                 case GI_TYPE_TAG_GSLIST:
                     g_args[i].v_pointer = * (gpointer *) args[i];

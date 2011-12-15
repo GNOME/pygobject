@@ -12,6 +12,7 @@ import cairo
 
 from gi.repository import GObject
 from gi.repository import GLib
+from gi.repository import Gio
 from gi.repository import Regress as Everything
 
 if sys.version_info < (3, 0):
@@ -349,6 +350,40 @@ class TestCallbacks(unittest.TestCase):
     def testCallbackNone(self):
         # make sure this doesn't assert or crash
         Everything.test_simple_callback(None)
+
+    def testCallbackGError(self):
+        def callback(error):
+            self.assertEqual(error.message, 'regression test error')
+            self.assertTrue('g-io' in error.domain)
+            self.assertEqual(error.code, Gio.IOErrorEnum.NOT_SUPPORTED)
+            TestCallbacks.called = True
+
+        TestCallbacks.called = False
+        Everything.test_gerror_callback(callback)
+        self.assertTrue(TestCallbacks.called)
+
+    def testCallbackOwnedGError(self):
+        def callback(error):
+            self.assertEqual(error.message, 'regression test owned error')
+            self.assertTrue('g-io' in error.domain)
+            self.assertEqual(error.code, Gio.IOErrorEnum.PERMISSION_DENIED)
+            TestCallbacks.called = True
+
+        TestCallbacks.called = False
+        Everything.test_owned_gerror_callback(callback)
+        self.assertTrue(TestCallbacks.called)
+
+    def testCallbackHashTable(self):
+        def callback(data):
+            self.assertEqual(data, mydict)
+            mydict['new'] = 42
+            TestCallbacks.called = True
+
+        mydict = { 'foo': 1, 'bar': 2 }
+        TestCallbacks.called = False
+        Everything.test_hash_table_callback(mydict, callback)
+        self.assertTrue(TestCallbacks.called)
+        self.assertEqual(mydict, { 'foo': 1, 'bar': 2, 'new': 42 })
 
 class TestClosures(unittest.TestCase):
     def test_int_arg(self):
