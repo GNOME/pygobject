@@ -10,7 +10,7 @@ import shutil
 import os
 import locale
 import subprocess
-from gi.repository import GObject
+from gi.repository import GObject, GLib
 
 from gi.repository import GIMarshallingTests
 
@@ -769,6 +769,22 @@ class TestArray(unittest.TestCase):
 
     def test_gstrv_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
+    
+    def test_array_gvariant_none_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+    
+    def test_array_gvariant_container_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+    
+    def test_array_gvariant_full_in(self):
+        v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
+        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+
+    def test_bytearray_gvariant(self):
+        v = GLib.Variant.new_bytestring("foo")
+        self.assertEquals(v.get_bytestring(), "foo")
 
 class TestGArray(unittest.TestCase):
 
@@ -1627,16 +1643,6 @@ class TestPythonGObject(unittest.TestCase):
         self.assertTrue('do_method_with_default_implementation' in GIMarshallingTests.Object.__dict__)
         self.assertTrue('do_method_with_default_implementation' not in GIMarshallingTests.SubObject.__dict__)
 
-        # Here we check that accessing a vfunc from the subclass returns the same wrapper object,
-        # meaning that multiple wrapper objects have not been created for the same vfunc.
-        func1 = GIMarshallingTests.Object.do_method_with_default_implementation
-        func2 = GIMarshallingTests.SubObject.do_method_with_default_implementation
-        if sys.version_info < (3,0):
-            func1 = func1.im_func
-            func2 = func2.im_func
-            
-        self.assertTrue(func1 is func2)
-
     def test_subobject_with_interface_and_non_vfunc_do_method(self):
         # There was a bug for searching for vfuncs in interfaces. It was
         # triggered by having a do_* method that wasn't overriding
@@ -1644,6 +1650,16 @@ class TestPythonGObject(unittest.TestCase):
         class GObjectSubclassWithInterface(GObject.GObject, GIMarshallingTests.Interface):
             def do_method_not_a_vfunc(self):
                 pass
+
+    def test_subsubobject(self):
+        class SubSubSubObject(GIMarshallingTests.SubSubObject):
+            def do_method_deep_hierarchy(self, num):
+                self.props.int = num * 2
+
+        sub_sub_sub_object = SubSubSubObject()
+        GIMarshallingTests.SubSubObject.do_method_deep_hierarchy(sub_sub_sub_object, 5)
+        self.assertEqual(sub_sub_sub_object.props.int, 5)
+
 
 class TestMultiOutputArgs(unittest.TestCase):
 

@@ -794,7 +794,11 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PYGLIB_PyBytes_Check (py_arg)) {
         memcpy(array_->data, PYGLIB_PyBytes_AsString (py_arg), length);
-
+        if (sequence_cache->is_zero_terminated) {
+            /* If array_ has been created with zero_termination, space for the
+             * terminator is properly allocated, so we're not off-by-one here. */
+            array_->data[length] = '\0';
+        }
         goto array_success;
     }
 
@@ -831,8 +835,14 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                     PyGIMarshalCleanupFunc from_py_cleanup = item_arg_cache->from_py_cleanup;
                     gboolean is_boxed = g_type_is_a (item_iface_cache->g_type, G_TYPE_BOXED);
                     gboolean is_gvalue = item_iface_cache->g_type == G_TYPE_VALUE;
-
-                    if (!is_boxed || is_gvalue) {
+                    gboolean is_gvariant = item_iface_cache->g_type == G_TYPE_VARIANT;
+                    
+                    if (is_gvariant) {
+                        /* Item size will always be that of a pointer,
+                         * since GVariants are opaque hence always passed by ref */
+                        g_assert (item_size == sizeof (item.v_pointer));
+                        g_array_insert_val (array_, i, item.v_pointer);
+                    } else if (!is_boxed || is_gvalue) {
                         memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
                         if (from_py_cleanup)
                             from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);

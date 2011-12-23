@@ -217,7 +217,10 @@ pyg_signal_watch_new(void)
 	    g_error("Cannot create main loop pipe: %s\n",
 	            g_strerror(errno));
 
-        /* Make the write end of the fd non blocking */
+        /* Make both ends of the fd non blocking */
+        flag = fcntl(pipe_fds[0], F_GETFL, 0);
+        flag |= O_NONBLOCK;
+        fcntl(pipe_fds[0], F_SETFL, flag);
         flag = fcntl(pipe_fds[1], F_GETFL, 0);
         flag |= O_NONBLOCK;
         fcntl(pipe_fds[1], F_SETFL, flag);

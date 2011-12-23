@@ -1,3 +1,18 @@
+3.0.3   12-Dec-2011
+        - Convert all modifier constants to Gdk.ModifierType (Manuel Quiñones)
+        - Convert all strings to utf-8 encoding when retrieving from TreeModel (Sebastian Pölsterl)
+        - add test for bytearray variants (John (J5) Palmieri)
+        - handle NULL arrays correctly for each array type (John (J5) Palmieri)
+        - Revert "Revert "Fix array termination and size calculation"" (John (J5) Palmieri)
+        - pygmainloop: avoid lockups if multiple glib.MainLoop exist (Owen W. Taylor)
+        - Properly chain up to the class that implements a given vfunc. (Tomeu Vizoso)
+        - Revert "Fix array termination and size calculation" (Tomeu Vizoso)
+        - Fix array termination and size calculation (Holger Berndt)
+        - pygi-convert: fix for Pango.Alignment (Daniel Drake)
+        - pygi-convert: fix for Gtk.Orientation (Daniel Drake)
+        - Add tests for calling closures (Martin Pitt)
+        - fix marshaling of arrays of GVariants (Mikkel Kamstrup Erlandsen)
+
 3.0.2   21-Oct-2011
         - Add tests for boxed properties. (Ignacio Casal Quinteiro)
         - Allow GBoxed types as property (Timo Vanwynsberghe)

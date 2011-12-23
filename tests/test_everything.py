@@ -350,6 +350,30 @@ class TestCallbacks(unittest.TestCase):
         # make sure this doesn't assert or crash
         Everything.test_simple_callback(None)
 
+class TestClosures(unittest.TestCase):
+    def test_int_arg(self):
+        def callback(num):
+            self.called = True
+            return num+1
+
+        self.called = False
+        result = Everything.test_closure_one_arg(callback, 42)
+        self.assertTrue(self.called)
+        self.assertEqual(result, 43)
+
+    # https://bugzilla.gnome.org/show_bug.cgi?id=656554
+    @unittest.expectedFailure
+    def test_variant(self):
+        def callback(variant):
+            self.assertEqual(variant.get_type_string(), 'i')
+            self.called = True
+            return GLib.Variant('i', variant.get_int32() + 1)
+
+        self.called = False
+        result = Everything.test_closure_variant(callback, GLib.Variant('i', 42))
+        self.assertTrue(self.called)
+        self.assertEqual(result.get_type_string(), 'i')
+        self.assertEqual(result.get_int32(), 43)
 
 class TestProperties(unittest.TestCase):
 

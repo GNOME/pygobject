@@ -273,9 +273,15 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
         gsize len;
         if (seq_cache->fixed_size >= 0) {
+            g_assert(arg->v_pointer != NULL);
             len = seq_cache->fixed_size;
         } else if (seq_cache->is_zero_terminated) {
-            len = g_strv_length ((gchar **)arg->v_pointer);
+            g_assert(arg->v_pointer != NULL);
+            if(seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
+                len = strlen (arg->v_pointer);
+            } else {
+                len = g_strv_length ((gchar **)arg->v_pointer);
+            }
         } else {
             GIArgument *len_arg = state->args[seq_cache->len_arg_index];
             len = len_arg->v_long;
@@ -287,12 +293,14 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         if (array_ == NULL) {
             PyErr_NoMemory ();
 
-            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && arg->v_pointer != NULL)
                 g_free (arg->v_pointer);
 
             return NULL;
         }
 
+        if (array_->data != NULL) 
+            g_free (array_->data);
         array_->data = arg->v_pointer;
         array_->len = len;
     }
@@ -331,10 +339,18 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
                 } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
                     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
+                    gboolean is_gvariant = iface_cache->g_type == G_TYPE_VARIANT;
 
+                    // FIXME: This probably doesn't work with boxed types or gvalues. See fx. _pygi_marshal_from_py_array()
                     switch (g_base_info_get_type (iface_cache->interface_info)) {
                         case GI_INFO_TYPE_STRUCT:
-                            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+                            if (is_gvariant) {
+                              g_assert (item_size == sizeof (gpointer));
+                              if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+                                item_arg.v_pointer = g_variant_ref_sink (g_array_index (array_, gpointer, i));
+                              else
+                                item_arg.v_pointer = g_array_index (array_, gpointer, i);
+                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
                                 gpointer *_struct = g_malloc (item_size);
                                 memcpy (_struct, array_->data + i * item_size,
                                         item_size);

@@ -48,15 +48,20 @@ def Function(info):
     return function
 
 
-def NativeVFunc(info, cls):
+class NativeVFunc(object):
 
-    def native_vfunc(*args, **kwargs):
-        return info.invoke(cls.__gtype__, *args, **kwargs)
-    native_vfunc.__info__ = info
-    native_vfunc.__name__ = info.get_name()
-    native_vfunc.__module__ = info.get_namespace()
+    def __init__(self, info):
+        self._info = info
 
-    return native_vfunc
+    def __get__(self, instance, klass):
+        def native_vfunc(*args, **kwargs):
+            return self._info.invoke(klass.__gtype__, *args, **kwargs)
+        native_vfunc.__info__ = self._info
+        native_vfunc.__name__ = self._info.get_name()
+        native_vfunc.__module__ = self._info.get_namespace()
+
+        return native_vfunc
+
 
 def Constructor(info):
 
@@ -147,7 +152,6 @@ class MetaClassHelper(object):
                              base_info.get_name(),
                              ambiguous_base.__info__.get_namespace(),
                              ambiguous_base.__info__.get_name()))
-
                 hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
                                              py_vfunc)
 
@@ -162,7 +166,7 @@ class MetaClassHelper(object):
 
         for vfunc_info in class_info.get_vfuncs():
             name = 'do_%s' % vfunc_info.get_name()
-            value = NativeVFunc(vfunc_info, cls)
+            value = NativeVFunc(vfunc_info)
             setattr(cls, name, value)
 
 def find_vfunc_info_in_interface(bases, vfunc_name):

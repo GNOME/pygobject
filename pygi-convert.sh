@@ -38,6 +38,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.JUSTIFY_/Gtk.Justification./g;" \
     -pe "s/Gtk.MESSAGE_/Gtk.MessageType./g;" \
     -pe "s/Gtk.MOVEMENT_/Gtk.MovementStep./g;" \
+    -pe "s/Gtk.ORIENTATION_/Gtk.Orientation./g;" \
     -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
     -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
     -pe "s/Gtk.RELIEF_/Gtk.ReliefStyle./g;" \
@@ -108,7 +109,21 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.display_get_default/Gdk.Display.get_default/g;" \
     -pe "s/screen_, x_, y_, modmask = display.get_pointer\(\)/x_, y_, modmask = display.get_pointer\(None\)/g;" \
     -pe "s/Gdk.WINDOW_TYPE_HINT_/Gdk.WindowTypeHint./g;" \
+    -pe "s/Gdk.SHIFT_MASK/Gdk.ModifierType.SHIFT_MASK/g;" \
+    -pe "s/Gdk.LOCK_MASK/Gdk.ModifierType.LOCK_MASK/g;" \
+    -pe "s/Gdk.CONTROL_MASK/Gdk.ModifierType.CONTROL_MASK/g;" \
     -pe "s/Gdk.MOD1_MASK/Gdk.ModifierType.MOD1_MASK/g;" \
+    -pe "s/Gdk.MOD2_MASK/Gdk.ModifierType.MOD2_MASK/g;" \
+    -pe "s/Gdk.MOD3_MASK/Gdk.ModifierType.MOD3_MASK/g;" \
+    -pe "s/Gdk.MOD4_MASK/Gdk.ModifierType.MOD4_MASK/g;" \
+    -pe "s/Gdk.MOD5_MASK/Gdk.ModifierType.MOD5_MASK/g;" \
+    -pe "s/Gdk.BUTTON1_MASK/Gdk.ModifierType.BUTTON1_MASK/g;" \
+    -pe "s/Gdk.BUTTON2_MASK/Gdk.ModifierType.BUTTON2_MASK/g;" \
+    -pe "s/Gdk.BUTTON3_MASK/Gdk.ModifierType.BUTTON3_MASK/g;" \
+    -pe "s/Gdk.BUTTON4_MASK/Gdk.ModifierType.BUTTON4_MASK/g;" \
+    -pe "s/Gdk.BUTTON5_MASK/Gdk.ModifierType.BUTTON5_MASK/g;" \
+    -pe "s/Gdk.RELEASE_MASK/Gdk.ModifierType.RELEASE_MASK/g;" \
+    -pe "s/Gdk.MODIFIER_MASK/Gdk.ModifierType.MODIFIER_MASK/g;" \
     -pe "s/Gdk.([A-Z_0-9]*)_MASK/Gdk.EventMask.\1_MASK/g;" \
     -pe "s/Gdk.VISIBILITY_FULLY_OBSCURED/Gdk.VisibilityState.FULLY_OBSCURED/g;" \
     -pe "s/Gdk.BUTTON_PRESS/Gdk.EventType.BUTTON_PRESS/g;" \
@@ -130,6 +145,7 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import pango\n/from gi.repository import Pango\n/g;" \
     -pe "s/pango\./Pango\./g;" \
+    -pe "s/Pango.ALIGN_/Pango.Alignment./g;" \
     -pe "s/Pango.ELLIPSIZE_/Pango.EllipsizeMode./g;" \
     -pe "s/Pango.STYLE_/Pango.Style./g;" \
     -pe "s/Pango.UNDERLINE_/Pango.Underline./g;" \

@@ -298,7 +298,7 @@ class property(object):
         ptype = self.type
         if ptype in [TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG,
                      TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE]:
-            args = self._get_minimum(), self._get_maximum(), self.default
+            args = self.minimum, self.maximum, self.default
         elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
               ptype.is_a(TYPE_ENUM)):
             args = (self.default,)

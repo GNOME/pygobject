@@ -498,7 +498,7 @@ _arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
         callable_cache->args_cache[seq_cache->len_arg_index] = child_cache;
     }
 
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_to_py_array;
+    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
 
     return TRUE;
 }
