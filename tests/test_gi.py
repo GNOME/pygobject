@@ -786,8 +786,8 @@ class TestArray(unittest.TestCase):
         self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
 
     def test_bytearray_gvariant(self):
-        v = GLib.Variant.new_bytestring("foo")
-        self.assertEquals(v.get_bytestring(), "foo")
+        v = GLib.Variant.new_bytestring(b"foo")
+        self.assertEquals(v.get_bytestring(), b"foo")
 
 class TestGArray(unittest.TestCase):
 
