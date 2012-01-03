@@ -264,8 +264,6 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
     gsize processed_items = 0;
 
-    array_ = arg->v_pointer;
-
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
       * we allocate a GArray if the argument was a C array
@@ -276,8 +274,9 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             g_assert(arg->v_pointer != NULL);
             len = seq_cache->fixed_size;
         } else if (seq_cache->is_zero_terminated) {
-            g_assert(arg->v_pointer != NULL);
-            if(seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
+            if (arg->v_pointer == NULL) {
+                len = 0;
+            } else if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
                 len = strlen (arg->v_pointer);
             } else {
                 len = g_strv_length ((gchar **)arg->v_pointer);
@@ -303,6 +302,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             g_free (array_->data);
         array_->data = arg->v_pointer;
         array_->len = len;
+    } else {
+        array_ = arg->v_pointer;
     }
 
     if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {

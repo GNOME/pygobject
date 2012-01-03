@@ -743,6 +743,9 @@ class TestArray(unittest.TestCase):
     def test_array_zero_terminated_return(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_return())
 
+    def test_array_zero_terminated_return_null(self):
+        self.assertEquals([], GIMarshallingTests.array_zero_terminated_return_null())
+
     def test_array_zero_terminated_in(self):
         GIMarshallingTests.array_zero_terminated_in(Sequence(['0', '1', '2']))
 
