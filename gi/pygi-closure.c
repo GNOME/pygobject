@@ -421,8 +421,7 @@ _pygi_make_native_closure (GICallableInfo* info,
     ffi_closure *fficlosure;
 
     /* Begin by cleaning up old async functions */
-    g_slist_foreach (async_free_list, (GFunc) _pygi_invoke_closure_free, NULL);
-    g_slist_free (async_free_list);
+    g_slist_free_full (async_free_list, (GDestroyNotify) _pygi_invoke_closure_free);
     async_free_list = NULL;
 
     /* Build the closure itself */
