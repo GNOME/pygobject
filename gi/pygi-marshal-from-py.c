@@ -959,7 +959,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
                                  &item))
             goto err;
 
-        list_ = g_list_append (list_, item.v_pointer);
+        list_ = g_list_prepend (list_, item.v_pointer);
         continue;
 err:
         /* FIXME: clean up list
@@ -972,7 +972,7 @@ err:
         return FALSE;
     }
 
-    arg->v_pointer = list_;
+    arg->v_pointer = g_list_reverse (list_);
     return TRUE;
 }
 
@@ -1026,7 +1026,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
                             &item))
             goto err;
 
-        list_ = g_slist_append (list_, item.v_pointer);
+        list_ = g_slist_prepend (list_, item.v_pointer);
         continue;
 err:
         /* FIXME: Clean up list
@@ -1040,7 +1040,7 @@ err:
         return FALSE;
     }
 
-    arg->v_pointer = list_;
+    arg->v_pointer = g_slist_reverse (list_);
     return TRUE;
 }
 
