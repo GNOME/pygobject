@@ -276,9 +276,9 @@ class ActionGroup(Gtk.ActionGroup):
 
         if first_action is not None and on_change is not None:
             if user_data is None:
-                action.connect('changed', on_change)
+                first_action.connect('changed', on_change)
             else:
-                action.connect('changed', on_change, user_data)
+                first_action.connect('changed', on_change, user_data)
 
 ActionGroup = override(ActionGroup)
 __all__.append('ActionGroup')
