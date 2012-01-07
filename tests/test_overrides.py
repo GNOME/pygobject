@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
@@ -8,7 +7,7 @@ import sys
 import os
 sys.path.insert(0, "../")
 
-from compathelper import _long, _unicode, _bytes, _unichr
+from compathelper import _long, _unicode, _bytes
 
 from gi.repository import GLib
 from gi.repository import GObject
@@ -1261,34 +1260,6 @@ class TestGtk(unittest.TestCase):
         self.assertRaises(ValueError, set_row, [3, "three"])
 
         model[0] = (3, "three", -0.3)
-
-    def test_tree_model_unicode(self):
-        model = Gtk.ListStore(str)
-
-        text = (_unicode("just\na\tstring"),
-                _unicode("Tr") + _unichr(0xf6) + _unicode("del"),
-                _unicode("N") + _unichr(0xe1) + _unicode("m") + _unichr(0xe8),
-                _unichr(0xff) + _unichr(0xdf) + _unicode("er"),
-                _unichr(0x152) + _unichr(0x180) + _unichr(0x1d25))
-
-        for item in text:
-            model.append([item])
-
-        def byte_compare(have, expected):
-            if sys.version_info < (3, 0):
-                self.assertTrue(isinstance(have, unicode))
-            else:
-                self.assertTrue(isinstance(have, str))
-
-            self.assertEqual(len(have), len(expected))
-            for i in range(len(expected)):
-                a = have[i]
-                b = expected[i]
-                self.assertEqual(a, b)
-                self.assertEqual(ord(a), ord(b))
-
-        for i in range(len(model)):
-            byte_compare(model[i][0], text[i])
 
     def test_tree_row_slice(self):
         model = Gtk.ListStore(int, str, float)

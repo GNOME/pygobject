@@ -62,10 +62,8 @@ if sys.version_info >= (3, 0):
     '''
 
     _unicode = lambda s: str(s)
-    _unichr = chr
 else:
     _long = long
     _basestring = basestring
     _bytes = str
     _unicode = lambda s: unicode(s, 'UTF-8')
-    _unichr = unichr
