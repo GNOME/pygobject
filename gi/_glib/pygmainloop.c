@@ -315,7 +315,7 @@ _wrap_g_main_loop_is_running (PyGMainLoop *self)
 }
 
 static PyObject *
-_wrap_g_main_loop_quit (PyGMainLoop *self)
+_wrap_g_main_loop_quit (PyGMainLoop *self, PyObject *args, PyObject *kwargs)
 {
     g_main_loop_quit(self->loop);
     
@@ -346,7 +346,7 @@ _wrap_g_main_loop_run (PyGMainLoop *self)
 static PyMethodDef _PyGMainLoop_methods[] = {
     { "get_context", (PyCFunction)_wrap_g_main_loop_get_context, METH_NOARGS },
     { "is_running", (PyCFunction)_wrap_g_main_loop_is_running, METH_NOARGS },
-    { "quit", (PyCFunction)_wrap_g_main_loop_quit, METH_NOARGS },
+    { "quit", (PyCFunction)_wrap_g_main_loop_quit, METH_VARARGS|METH_KEYWORDS },
     { "run", (PyCFunction)_wrap_g_main_loop_run, METH_NOARGS },
     { NULL, NULL, 0 }
 };
