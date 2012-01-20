@@ -233,30 +233,28 @@ pyglib_set_thread_block_funcs (PyGLibThreadBlockFunc block_threads_func,
     _PyGLib_API->unblock_threads = unblock_threads_func;
 }
 
-
 /**
- * pyglib_error_check:
+ * pyglib_error_marshal:
  * @error: a pointer to the GError.
  *
- * Checks to see if the GError has been set.  If the error has been
- * set, then the glib.GError Python exception will be raised, and
- * the GError cleared.
+ * Checks to see if @error has been set.  If @error has been set, then a
+ * GLib.GError Python exception object is returned (but not raised).
  *
- * Returns: True if an error was set.
+ * Returns: a GLib.GError Python exception object, or NULL.
  */
-gboolean
-pyglib_error_check(GError **error)
+PyObject *
+pyglib_error_marshal (GError **error)
 {
     PyGILState_STATE state;
     PyObject *exc_type;
     PyObject *exc_instance;
     PyObject *d;
 
-    g_return_val_if_fail(error != NULL, FALSE);
+    g_return_val_if_fail(error != NULL, NULL);
 
     if (*error == NULL)
-	return FALSE;
-    
+	return NULL;
+
     state = pyglib_gil_state_ensure();
 
     exc_type = _PyGLib_API->gerror_exception;
@@ -289,7 +287,33 @@ pyglib_error_check(GError **error)
     } else {
 	PyObject_SetAttrString(exc_instance, "message", Py_None);
     }
+
+    pyglib_gil_state_release(state);
     
+    return exc_instance;
+}
+
+/**
+ * pyglib_error_check:
+ * @error: a pointer to the GError.
+ *
+ * Checks to see if the GError has been set.  If the error has been
+ * set, then the glib.GError Python exception will be raised, and
+ * the GError cleared.
+ *
+ * Returns: True if an error was set.
+ */
+gboolean
+pyglib_error_check(GError **error)
+{
+    PyGILState_STATE state;
+    PyObject *exc_instance;
+
+    g_return_val_if_fail(error != NULL, FALSE);
+
+    state = pyglib_gil_state_ensure();
+
+    exc_instance = pyglib_error_marshal (error);
     PyErr_SetObject(_PyGLib_API->gerror_exception, exc_instance);
     Py_DECREF(exc_instance);
     g_clear_error(error);

@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 
+#include <pyglib.h>
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
@@ -598,11 +599,20 @@ _pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
                             PyGIArgCache      *arg_cache,
                             GIArgument        *arg)
 {
+    GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;
 
-    PyErr_Format (PyExc_NotImplementedError,
-                  "Marshalling for gerror to PyObject is not implemented");
-    return py_obj;
+    py_obj = pyglib_error_marshal(&error);
+
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
+        g_error_free (error);
+    }
+
+    if (py_obj != NULL) {
+        return py_obj;
+    } else {
+        Py_RETURN_NONE;
+    }
 }
 
 PyObject *

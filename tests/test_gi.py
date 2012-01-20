@@ -1829,6 +1829,38 @@ class TestGErrorArrayInCrash(unittest.TestCase):
     def test_gerror_array_in_crash(self):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])
 
+class TestGErrorOut(unittest.TestCase):
+    # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
+    def test_gerror_out(self):
+        error, debug = GIMarshallingTests.gerror_out()
+
+        self.assertIsInstance(error, GObject.GError)
+        self.assertEquals(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEquals(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+        self.assertEquals(debug, GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE)
+
+class TestGErrorOutTransferNone(unittest.TestCase):
+    # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
+    def test_gerror_out_transfer_none(self):
+        error, debug = GIMarshallingTests.gerror_out_transfer_none()
+
+        self.assertIsInstance(error, GObject.GError)
+        self.assertEquals(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEquals(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+        self.assertEquals(GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE, debug)
+
+class TestGErrorReturn(unittest.TestCase):
+    # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
+    def test_return_gerror(self):
+        error = GIMarshallingTests.gerror_return()
+
+        self.assertIsInstance(error, GObject.GError)
+        self.assertEquals(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEquals(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+
 class TestKeywordArgs(unittest.TestCase):
     def test_calling(self):
         kw_func = GIMarshallingTests.int_three_in_three_out
