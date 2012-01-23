@@ -112,7 +112,7 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
-static PyMethodDef _gi_cairo_functions[] = {0,};
+static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
 #if PY_VERSION_HEX < 0x03000000
