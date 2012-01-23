@@ -1070,7 +1070,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
         /* float the wrapper ref here because we are going to orphan it
          * so we don't destroy the wrapper. The next call to pygobject_new_full
          * will take the ref */
-        pygobject_ref_float (wrapper);
+        pygobject_ref_float ((PyGObject *) wrapper);
         args = PyTuple_New(0);
         kwargs = PyDict_New();
         if (Py_TYPE(wrapper)->tp_init(wrapper, args, kwargs))
