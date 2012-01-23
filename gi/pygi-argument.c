@@ -1785,19 +1785,19 @@ _pygi_argument_to_object (GIArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-             if (pyglib_error_check ( (GError **) &arg->v_pointer)) {
-                 PyObject *err_type;
-                 PyObject *err_value;
-                 PyObject *err_trace;
-                 PyErr_Fetch (&err_type, &err_value, &err_trace);
-                 Py_XDECREF (err_type);
-                 Py_XDECREF (err_trace);
-                 object = err_value;
-             } else {
-                 object = Py_None;
-                 Py_INCREF (object);
-                 break;
-             }
+            if (pyglib_error_check ( (GError **) &arg->v_pointer)) {
+                PyObject *err_type;
+                PyObject *err_value;
+                PyObject *err_trace;
+                PyErr_Fetch (&err_type, &err_value, &err_trace);
+                Py_XDECREF (err_type);
+                Py_XDECREF (err_trace);
+                object = err_value;
+            } else {
+                object = Py_None;
+                Py_INCREF (object);
+                break;
+            }
     }
 
     return object;
