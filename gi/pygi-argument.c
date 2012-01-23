@@ -1785,7 +1785,16 @@ _pygi_argument_to_object (GIArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_ERROR:
-            if (pyglib_error_check ( (GError **) &arg->v_pointer)) {
+        {
+            GError *error = (GError *) arg->v_pointer;
+            if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
+                /* If we have not been transferred the ownership we must copy
+                 * the error, because pyglib_error_check() is going to free it.
+                 */
+                error = g_error_copy (error);
+            }
+
+            if (pyglib_error_check (&error)) {
                 PyObject *err_type;
                 PyObject *err_value;
                 PyObject *err_trace;
@@ -1798,6 +1807,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 Py_INCREF (object);
                 break;
             }
+        }
     }
 
     return object;
