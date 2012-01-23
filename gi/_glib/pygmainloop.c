@@ -158,9 +158,8 @@ pyg_signal_watch_check(GSource *source)
     PySignalWatchSource *real_source = (PySignalWatchSource *)source;
     GPollFD *poll_fd = &real_source->fd;
     unsigned char dummy;
-    gssize ret;
     if (poll_fd->revents & G_IO_IN)
-	ret = read(poll_fd->fd, &dummy, 1);
+        (void) read(poll_fd->fd, &dummy, 1);
 #endif
 
     state = pyglib_gil_state_ensure();

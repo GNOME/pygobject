@@ -1275,7 +1275,7 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
 
         property_name = PYGLIB_PyUnicode_AsString(py_property);
 
-        pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
+        pspec = g_object_class_find_property(class,
 					 property_name);
         if (!pspec) {
 	    PyErr_Format(PyExc_TypeError,

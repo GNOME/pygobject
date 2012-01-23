@@ -477,7 +477,7 @@ py_io_channel_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     data->user_data = user_data; Py_XINCREF(user_data);
     data->iochannel = self; Py_INCREF(self);
 
-    handler_id = g_io_add_watch_full(((PyGIOChannel *) self)->channel,
+    handler_id = g_io_add_watch_full(iochannel,
                                      priority, condition,
 				     pyg_iowatch_marshal, data,
 				     (GDestroyNotify) pyg_iowatch_data_free);
