@@ -363,6 +363,7 @@ pyglib_gerror_exception_check(GError **error)
     py_message = PyObject_GetAttrString(value, "message");
     if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
         bad_gerror_message = "gi._glib.GError instances must have a 'message' string attribute";
+        Py_XDECREF(py_message);
         goto bad_gerror;
     }
 
@@ -370,6 +371,7 @@ pyglib_gerror_exception_check(GError **error)
     if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
         bad_gerror_message = "gi._glib.GError instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
+        Py_XDECREF(py_domain);
         goto bad_gerror;
     }
 
@@ -378,6 +380,7 @@ pyglib_gerror_exception_check(GError **error)
         bad_gerror_message = "gi._glib.GError instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
+        Py_XDECREF(py_code);
         goto bad_gerror;
     }
 
