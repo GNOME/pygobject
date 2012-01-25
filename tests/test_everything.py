@@ -202,7 +202,7 @@ class TestCallbacks(unittest.TestCase):
     called = False
     main_loop = GObject.MainLoop()
 
-    def testCallback(self):
+    def test_callback(self):
         TestCallbacks.called = False
         def callback():
             TestCallbacks.called = True
@@ -210,7 +210,7 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_simple_callback(callback)
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackException(self):
+    def test_callback_exception(self):
         """
         This test ensures that we get errors from callbacks correctly
         and in particular that we do not segv when callbacks fail
@@ -223,7 +223,7 @@ class TestCallbacks(unittest.TestCase):
         except ZeroDivisionError:
             pass
 
-    def testDoubleCallbackException(self):
+    def test_double_callback_exception(self):
         """
         This test ensures that we get errors from callbacks correctly
         and in particular that we do not segv when callbacks fail
@@ -241,7 +241,7 @@ class TestCallbacks(unittest.TestCase):
         except ZeroDivisionError:
             pass
 
-    def testReturnValueCallback(self):
+    def test_return_value_callback(self):
         TestCallbacks.called = False
         def callback():
             TestCallbacks.called = True
@@ -250,7 +250,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEquals(Everything.test_callback(callback), 44)
         self.assertTrue(TestCallbacks.called)
     
-    def testCallbackAsync(self):
+    def test_callback_async(self):
         TestCallbacks.called = False
         def callback(foo):
             TestCallbacks.called = True
@@ -261,7 +261,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEquals(44, i);
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackScopeCall(self):
+    def test_callback_scope_call(self):
         TestCallbacks.called = 0
         def callback():
             TestCallbacks.called += 1
@@ -270,7 +270,7 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_multi_callback(callback)
         self.assertEquals(TestCallbacks.called, 2)
 
-    def testCallbackUserdata(self):
+    def test_callback_userdata(self):
         TestCallbacks.called = 0
         def callback(userdata):
             self.assertEquals(userdata, "Test%d" % TestCallbacks.called)
@@ -283,7 +283,7 @@ class TestCallbacks(unittest.TestCase):
             
         self.assertEquals(TestCallbacks.called, 100)
 
-    def testCallbackUserdataRefCount(self):
+    def test_callback_userdata_refcount(self):
         TestCallbacks.called = False
         def callback(userdata):
             TestCallbacks.called = True
@@ -300,7 +300,7 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertEquals(start_ref_count, end_ref_count)
 
-    def testAsyncReadyCallback(self):
+    def test_async_ready_callback(self):
         TestCallbacks.called = False
         TestCallbacks.main_loop = GObject.MainLoop()
 
@@ -314,7 +314,7 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackDestroyNotify(self):
+    def test_callback_destroy_notify(self):
         def callback(user_data):
             TestCallbacks.called = True
             return 42
@@ -324,7 +324,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertTrue(TestCallbacks.called)
         self.assertEquals(Everything.test_callback_thaw_notifications(), 42)
 
-    def testCallbackInMethods(self):
+    def test_callback_in_methods(self):
         object_ = Everything.TestObj()
 
         def callback():
@@ -347,11 +347,11 @@ class TestCallbacks(unittest.TestCase):
         obj_ = Everything.TestObj.new_callback(callbackWithUserData, None)
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackNone(self):
+    def test_callback_none(self):
         # make sure this doesn't assert or crash
         Everything.test_simple_callback(None)
 
-    def testCallbackGError(self):
+    def test_callback_gerror(self):
         def callback(error):
             self.assertEqual(error.message, 'regression test error')
             self.assertTrue('g-io' in error.domain)
@@ -362,7 +362,7 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_gerror_callback(callback)
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackOwnedGError(self):
+    def test_callback_owned_gerror(self):
         def callback(error):
             self.assertEqual(error.message, 'regression test owned error')
             self.assertTrue('g-io' in error.domain)
@@ -373,7 +373,7 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_owned_gerror_callback(callback)
         self.assertTrue(TestCallbacks.called)
 
-    def testCallbackHashTable(self):
+    def test_callback_hashtable(self):
         def callback(data):
             self.assertEqual(data, mydict)
             mydict['new'] = 42
