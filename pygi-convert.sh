@@ -100,7 +100,7 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/import gtk.gdk as gdk\n/from gi.repository import Gdk\n/g;" \
-    -pe "s/Gtk.gdk.x11_/GdkX11\./g;" \
+    -pe "s/Gtk.gdk.x11_/GdkX11.x11_/g;" \
     -pe "s/Gtk.gdk\./Gdk\./g;" \
     -pe "s/(?<!\.)gdk\./Gdk\./g;" \
     -pe "s/Gdk.screen_width/Gdk.Screen.width/g;" \
