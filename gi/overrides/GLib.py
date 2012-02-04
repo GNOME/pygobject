@@ -172,6 +172,24 @@ class Variant(GLib.Variant):
     def __repr__(self):
         return '<GLib.Variant(%s)>' % getattr(self, 'print')(True)
 
+    def __eq__(self, other):
+        try:
+            return self.equal(other)
+        except TypeError:
+            return False
+
+    def __ne__(self, other):
+        try:
+            return not self.equal(other)
+        except TypeError:
+            return True
+
+    def __hash__(self):
+        # We're not using just hash(self.unpack()) because otherwise we'll have
+        # hash collisions between the same content in different variant types,
+        # which will cause a performance issue in set/dict/etc.
+        return hash((self.get_type_string(), self.unpack()))
+
     def unpack(self):
         '''Decompose a GVariant into a native Python object.'''
 

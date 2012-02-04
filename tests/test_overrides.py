@@ -348,6 +348,51 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'), 
                 ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
 
+    def test_variant_hash(self):
+        v1 = GLib.Variant('s', 'somestring')
+        v2 = GLib.Variant('s', 'somestring')
+        v3 = GLib.Variant('s', 'somestring2')
+
+        self.assertTrue(v2 in set([v1, v3]))
+        self.assertTrue(v2 in frozenset([v1, v3]))
+        self.assertTrue(v2 in {v1: '1', v3:'2' })
+
+    def test_variant_compare(self):
+        # Check if identical GVariant are equal
+
+        def assert_equal(vtype, value):
+            self.assertEqual(GLib.Variant(vtype, value), GLib.Variant(vtype, value))
+
+        def assert_not_equal(vtype1, value1, vtype2, value2):
+            self.assertNotEqual(GLib.Variant(vtype1, value1), GLib.Variant(vtype2, value2))
+
+        numbers = ['y', 'n', 'q', 'i', 'u', 'x', 't', 'h', 'd']
+        for num in numbers:
+            assert_equal(num, 42)
+            assert_not_equal(num, 42, num, 41)
+            assert_not_equal(num, 42, 's', '42')
+
+        assert_equal('s', 'something')
+        assert_not_equal('s', 'something', 's', 'somethingelse')
+        assert_not_equal('s', 'something', 'i', 1234)
+
+        assert_equal('g', 'dustybinqhogx')
+        assert_not_equal('g', 'dustybinqhogx', 'g', 'dustybin')
+        assert_not_equal('g', 'dustybinqhogx', 'i', 1234)
+
+        assert_equal('o', '/dev/null')
+        assert_not_equal('o', '/dev/null', 'o', '/dev/zero')
+        assert_not_equal('o', '/dev/null', 'i', 1234)
+
+        assert_equal('(s)', ('strtuple',))
+        assert_not_equal('(s)', ('strtuple',), '(s)', ('strtuple2',))
+
+        assert_equal('a{si}', {'str': 42})
+        assert_not_equal('a{si}', {'str': 42}, 'a{si}', {'str': 43})
+
+        assert_equal('v', GLib.Variant('i', 42))
+        assert_not_equal('v', GLib.Variant('i', 42), 'v', GLib.Variant('i', 43))
+
     def test_variant_bool(self):
         # Check if the GVariant bool matches the unpacked Pythonic bool
 
