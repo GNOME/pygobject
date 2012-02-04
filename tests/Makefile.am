@@ -87,6 +87,7 @@ TEST_FILES_GI = \
 EXTRA_DIST = \
 	compathelper.py \
 	runtests.py \
+	runtests-windows.py \
 	testmodule.py \
 	test-floating.h \
 	test-thread.h \
