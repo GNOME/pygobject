@@ -348,6 +348,62 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'), 
                 ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
 
+    def test_variant_bool(self):
+        # Check if the GVariant bool matches the unpacked Pythonic bool
+
+        def assert_equals_bool(vtype, value):
+            self.assertEqual(bool(GLib.Variant(vtype, value)), bool(value))
+
+        # simple values
+        assert_equals_bool('b', True)
+        assert_equals_bool('b', False)
+
+        numbers = ['y', 'n', 'q', 'i', 'u', 'x', 't', 'h', 'd']
+        for number in numbers:
+            assert_equals_bool(number, 0)
+            assert_equals_bool(number, 1)
+
+        assert_equals_bool('s', '')
+        assert_equals_bool('g', '')
+        assert_equals_bool('s', 'something')
+        assert_equals_bool('o', '/dev/null')
+        assert_equals_bool('g', 'dustybinqhogx')
+
+        # arrays
+        assert_equals_bool('ab', [True])
+        assert_equals_bool('ab', [False])
+        for number in numbers:
+            assert_equals_bool('a'+number, [])
+            assert_equals_bool('a'+number, [0])
+        assert_equals_bool('as', [])
+        assert_equals_bool('as', [''])
+        assert_equals_bool('ao', [])
+        assert_equals_bool('ao', ['/'])
+        assert_equals_bool('ag', [])
+        assert_equals_bool('ag', [''])
+        assert_equals_bool('aai', [[]])
+
+        # tuples
+        assert_equals_bool('()', ())
+        for number in numbers:
+            assert_equals_bool('('+number+')', (0,))
+        assert_equals_bool('(s)', ('',))
+        assert_equals_bool('(o)', ('/',))
+        assert_equals_bool('(g)', ('',))
+        assert_equals_bool('(())', ((),))
+
+        # dictionaries
+        assert_equals_bool('a{si}', {})
+        assert_equals_bool('a{si}', {'': 0})
+
+        # complex types, always True
+        assert_equals_bool('(as)', ([],))
+        assert_equals_bool('a{s(i)}', {'': (0,)})
+
+        # variant types, recursive unpacking
+        assert_equals_bool('v', GLib.Variant('i', 0))
+        assert_equals_bool('v', GLib.Variant('i', 1))
+
 class TestPango(unittest.TestCase):
 
     def test_default_font_description(self):

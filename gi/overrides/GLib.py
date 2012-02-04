@@ -277,6 +277,7 @@ class Variant(GLib.Variant):
     def __len__(self):
         if self.get_type_string() in ['s', 'o', 'g']:
             return len(self.get_string())
+        # Array, dict, tuple
         if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
             return self.n_children()
         raise TypeError('GVariant type %s does not have a length' % self.get_type_string())
@@ -313,6 +314,28 @@ class Variant(GLib.Variant):
             return self.get_string().__getitem__(key)
 
         raise TypeError('GVariant type %s is not a container' % self.get_type_string())
+
+    #
+    # Pythonic bool operations
+    #
+    def __nonzero__(self):
+        return self.__bool__()
+
+    def __bool__(self):
+        if self.get_type_string() in ['y', 'n', 'q', 'i', 'u', 'x', 't', 'h', 'd']:
+            return self.unpack() != 0
+        if self.get_type_string() in ['b']:
+            return self.get_boolean()
+        if self.get_type_string() in ['s', 'o', 'g']:
+            return len(self.get_string()) != 0
+        # Array, dict, tuple
+        if self.get_type_string().startswith('a') or self.get_type_string().startswith('('):
+            return self.n_children() != 0
+        if self.get_type_string() in ['v']:
+            # unpack works recursively, hence bool also works recursively
+            return bool(self.unpack())
+        # Everything else is True
+        return True
 
     def keys(self):
         if not self.get_type_string().startswith('a{'):
