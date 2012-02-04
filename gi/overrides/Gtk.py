@@ -411,10 +411,8 @@ class Dialog(Gtk.Dialog, Container):
             self.set_destroy_with_parent(True)
 
         # NO_SEPARATOR has been removed from Gtk 3
-        try:
-            if flags & Gtk.DialogFlags.NO_SEPARATOR:
-                self.set_has_separator(False)
-        except AttributeError:
+        if hasattr(Gtk.DialogFlags, "NO_SEPARATOR") and (flags & Gtk.DialogFlags.NO_SEPARATOR):
+            self.set_has_separator(False)
             import warnings
             warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", DeprecationWarning)
 
