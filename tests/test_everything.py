@@ -362,6 +362,15 @@ class TestCallbacks(unittest.TestCase):
         Everything.test_gerror_callback(callback)
         self.assertTrue(TestCallbacks.called)
 
+    def test_callback_null_gerror(self):
+        def callback(error):
+            self.assertEqual(error, None)
+            TestCallbacks.called = True
+
+        TestCallbacks.called = False
+        Everything.test_null_gerror_callback(callback)
+        self.assertTrue(TestCallbacks.called)
+
     def test_callback_owned_gerror(self):
         def callback(error):
             self.assertEqual(error.message, 'regression test owned error')
