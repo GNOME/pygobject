@@ -775,15 +775,18 @@ class TestArray(unittest.TestCase):
     
     def test_array_gvariant_none_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
-        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
+        self.assertEquals([27, "Hello"], returned)
     
     def test_array_gvariant_container_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
-        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
+        self.assertEquals([27, "Hello"], returned)
     
     def test_array_gvariant_full_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
-        self.assertEquals([27, "Hello"], map(GLib.Variant.unpack, GIMarshallingTests.array_gvariant_none_in(v)))
+        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
+        self.assertEquals([27, "Hello"], returned)
 
     def test_bytearray_gvariant(self):
         v = GLib.Variant.new_bytestring(b"foo")
