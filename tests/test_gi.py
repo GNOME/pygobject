@@ -1918,3 +1918,65 @@ class TestKeywordArgs(unittest.TestCase):
         d2 = d.copy()
         GIMarshallingTests.int_three_in_three_out(1, c=4, **d)
         self.assertEqual(d, d2)
+
+class TestPropertiesObject(unittest.TestCase):
+
+    def setUp(self):
+        self.obj = GIMarshallingTests.PropertiesObject()
+
+    def test_boolean(self):
+        self.assertEqual(self.obj.props.some_boolean, False)
+        self.obj.props.some_boolean = True
+        self.assertEqual(self.obj.props.some_boolean, True)
+
+    @unittest.expectedFailure
+    def test_char(self):
+        # gobject-introspection thinks it has a guint8 type tag, which is wrong
+        self.assertEqual(self.obj.props.some_char, 0)
+        self.obj.props.some_char = GObject.G_MAXINT8
+        self.assertEqual(self.obj.props.some_char, GObject.G_MAXINT8)
+
+    def test_uchar(self):
+        self.assertEqual(self.obj.props.some_uchar, 0)
+        self.obj.props.some_uchar = GObject.G_MAXUINT8
+        self.assertEqual(self.obj.props.some_uchar, GObject.G_MAXUINT8)
+
+    def test_int(self):
+        self.assertEqual(self.obj.props.some_int, 0)
+        self.obj.props.some_int = GObject.G_MAXINT
+        self.assertEqual(self.obj.props.some_int, GObject.G_MAXINT)
+
+    def test_uint(self):
+        self.assertEqual(self.obj.props.some_uint, 0)
+        self.obj.props.some_uint = GObject.G_MAXUINT
+        self.assertEqual(self.obj.props.some_uint, GObject.G_MAXUINT)
+
+    def test_long(self):
+        self.assertEqual(self.obj.props.some_long, 0)
+        self.obj.props.some_long = GObject.G_MAXLONG
+        self.assertEqual(self.obj.props.some_long, GObject.G_MAXLONG)
+
+    def test_ulong(self):
+        self.assertEqual(self.obj.props.some_ulong, 0)
+        self.obj.props.some_ulong = GObject.G_MAXULONG
+        self.assertEqual(self.obj.props.some_ulong, GObject.G_MAXULONG)
+
+    def test_int64(self):
+        self.assertEqual(self.obj.props.some_int64, 0)
+        self.obj.props.some_int64 = GObject.G_MAXINT64
+        self.assertEqual(self.obj.props.some_int64, GObject.G_MAXINT64)
+
+    def test_uint64(self):
+        self.assertEqual(self.obj.props.some_uint64, 0)
+        self.obj.props.some_uint64 = GObject.G_MAXUINT64
+        self.assertEqual(self.obj.props.some_uint64, GObject.G_MAXUINT64)
+
+    def test_float(self):
+        self.assertEqual(self.obj.props.some_float, 0)
+        self.obj.props.some_float = GObject.G_MAXFLOAT
+        self.assertEqual(self.obj.props.some_float, GObject.G_MAXFLOAT)
+
+    def test_double(self):
+        self.assertEqual(self.obj.props.some_double, 0)
+        self.obj.props.some_double = GObject.G_MAXDOUBLE
+        self.assertEqual(self.obj.props.some_double, GObject.G_MAXDOUBLE)

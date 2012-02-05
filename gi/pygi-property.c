@@ -121,16 +121,36 @@ pygi_get_property_value_real (PyGObject *instance,
             arg.v_boolean = g_value_get_boolean (&value);
             break;
         case GI_TYPE_TAG_INT8:
+            arg.v_int8 = g_value_get_schar (&value);
+            break;
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
+            if (G_VALUE_HOLDS_LONG (&value))
+                arg.v_long = g_value_get_long (&value);
+            else
+                arg.v_int = g_value_get_int (&value);
+            break;
         case GI_TYPE_TAG_INT64:
-            arg.v_int = g_value_get_int (&value);
+            if (G_VALUE_HOLDS_LONG (&value))
+                arg.v_long = g_value_get_long (&value);
+            else
+                arg.v_int64 = g_value_get_int64 (&value);
             break;
         case GI_TYPE_TAG_UINT8:
+            arg.v_uint8 = g_value_get_uchar (&value);
+            break;
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
+            if (G_VALUE_HOLDS_ULONG (&value))
+                arg.v_ulong = g_value_get_ulong (&value);
+            else
+                arg.v_uint = g_value_get_uint (&value);
+            break;
         case GI_TYPE_TAG_UINT64:
-            arg.v_uint = g_value_get_uint (&value);
+            if (G_VALUE_HOLDS_ULONG (&value))
+                arg.v_ulong = g_value_get_ulong (&value);
+            else
+                arg.v_uint64 = g_value_get_uint64 (&value);
             break;
         case GI_TYPE_TAG_FLOAT:
             arg.v_float = g_value_get_float (&value);
@@ -296,16 +316,36 @@ pygi_set_property_value_real (PyGObject *instance,
             g_value_set_boolean (&value, arg.v_boolean);
             break;
         case GI_TYPE_TAG_INT8:
+            g_value_set_schar (&value, arg.v_int8);
+            break;
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
+            if (G_VALUE_HOLDS_LONG (&value))
+                g_value_set_long (&value, arg.v_long);
+            else
+                g_value_set_int (&value, arg.v_int);
+            break;
         case GI_TYPE_TAG_INT64:
-            g_value_set_int (&value, arg.v_int);
+            if (G_VALUE_HOLDS_LONG (&value))
+                g_value_set_long (&value, arg.v_long);
+            else
+                g_value_set_int64 (&value, arg.v_int64);
             break;
         case GI_TYPE_TAG_UINT8:
+            g_value_set_uchar (&value, arg.v_uint8);
+            break;
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
+            if (G_VALUE_HOLDS_ULONG (&value))
+                g_value_set_ulong (&value, arg.v_ulong);
+            else
+                g_value_set_uint (&value, arg.v_uint);
+            break;
         case GI_TYPE_TAG_UINT64:
-            g_value_set_uint (&value, arg.v_uint);
+            if (G_VALUE_HOLDS_ULONG (&value))
+                g_value_set_ulong (&value, arg.v_ulong);
+            else
+                g_value_set_uint64 (&value, arg.v_uint64);
             break;
         case GI_TYPE_TAG_FLOAT:
             g_value_set_float (&value, arg.v_float);
