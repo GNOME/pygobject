@@ -310,6 +310,8 @@ pyglib_error_check(GError **error)
     PyObject *exc_instance;
 
     g_return_val_if_fail(error != NULL, FALSE);
+    if (*error == NULL)
+	return FALSE;
 
     state = pyglib_gil_state_ensure();
 
