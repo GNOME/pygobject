@@ -22,34 +22,6 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
   <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=pygobject" />
   <maintainer>
     <foaf:Person>
-      <foaf:name>John (J5) Palmieri</foaf:name>
-      <foaf:mbox rdf:resource="mailto:johnp@redhat.com" />
-      <gnome:userid>johnp</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
-      <foaf:name>Gustavo J Carneiro</foaf:name>
-      <foaf:mbox rdf:resource="mailto:gjc@gnome.org" />
-      <gnome:userid>gjc</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
-      <foaf:name>Paul Pogonyshev</foaf:name>
-      <foaf:mbox rdf:resource="mailto:pogonyshev@gmx.net" />
-      <gnome:userid>paulp</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
-      <foaf:name>Gian Mario Tagliaretti</foaf:name>
-      <foaf:mbox rdf:resource="mailto:gianmt@gnome.org" />
-      <gnome:userid>gianmt</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
       <foaf:name>Tomeu Vizoso</foaf:name>
       <foaf:mbox rdf:resource="mailto:tomeu.vizoso@collabora.co.uk" />
       <gnome:userid>tomeuv</gnome:userid>
@@ -57,16 +29,30 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
   </maintainer>
   <maintainer>
     <foaf:Person>
-      <foaf:name>Simon van der Linden</foaf:name>
-      <foaf:mbox rdf:resource="mailto:svdlinden@src.gnome.org" />
-      <gnome:userid>svdlinden</gnome:userid>
+      <foaf:name>Martin Pitt</foaf:name>
+      <foaf:mbox rdf:resource="mailto:martin.pitt@ubuntu.com" />
+      <gnome:userid>martinpitt</gnome:userid>
     </foaf:Person>
   </maintainer>
   <maintainer>
     <foaf:Person>
-      <foaf:name>Zach Goldberg</foaf:name>
-      <foaf:mbox rdf:resource="mailto:zach@zachgoldberg.com" />
-      <gnome:userid>zgoldberg</gnome:userid>
+      <foaf:name>Paolo Borelli</foaf:name>
+      <foaf:mbox rdf:resource="mailto:pborelli@gnome.org" />
+      <gnome:userid>pborelli</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Ignacio Casal Quinteiro</foaf:name>
+      <foaf:mbox rdf:resource="mailto:icq@gnome.org" />
+      <gnome:userid>icq</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Sebastian Pölsterl</foaf:name>
+      <foaf:mbox rdf:resource="mailto:sebp@k-d-w.org" />
+      <gnome:userid>sebp</gnome:userid>
     </foaf:Person>
   </maintainer>
 </Project>
