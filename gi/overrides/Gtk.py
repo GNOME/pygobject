@@ -795,13 +795,6 @@ class TreeModel(Gtk.TreeModel):
 
             self.set_value(treeiter, i, value)
 
-    def _decode_value(self, treeiter, column, value):
-        type_ = self.get_column_type(column)
-        if type_ == GObject.TYPE_STRING and sys.version_info < (3, 0):
-            value = value.decode('UTF-8')
-
-        return value
-
     def _convert_value(self, treeiter, column, value):
             if value is None:
                 return
@@ -969,10 +962,6 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def set_value(self, treeiter, column, value):
         value = self._convert_value(treeiter, column, value)
         Gtk.ListStore.set_value(self, treeiter, column, value)
-
-    def get_value(self, treeiter, column):
-        value = Gtk.ListStore.get_value(self, treeiter, column)
-        return self._decode_value(treeiter, column, value)
 
     def set(self, treeiter, *args):
 
@@ -1188,10 +1177,6 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
     def set_value(self, treeiter, column, value):
         value = self._convert_value(treeiter, column, value)
         Gtk.TreeStore.set_value(self, treeiter, column, value)
-
-    def get_value(self, treeiter, column):
-        value = Gtk.TreeStore.get_value(self, treeiter, column)
-        return self._decode_value(treeiter, column, value)
 
     def set(self, treeiter, *args):
 
