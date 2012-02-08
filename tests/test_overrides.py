@@ -666,12 +666,18 @@ class TestGtk(unittest.TestCase):
         class SignalCheck:
             def __init__(self):
                 self.sentinel = 0
+                self.after_sentinel = 0;
 
             def on_signal_1(self, *args):
                 self.sentinel += 1
+                self.after_sentinel += 1
 
             def on_signal_3(self, *args):
                 self.sentinel += 3
+
+            def on_signal_after(self, *args):
+                if self.after_sentinel == 1:
+                    self.after_sentinel += 1
 
         signal_checker = SignalCheck()
         builder = Gtk.Builder()
@@ -681,6 +687,7 @@ class TestGtk(unittest.TestCase):
 """
 <interface>
   <object class="GIOverrideSignalTest" id="object1">
+      <signal name="test-signal" after="yes" handler="on_signal_after" />
       <signal name="test-signal" handler="on_signal_1" />
   </object>
 </interface>
@@ -714,6 +721,7 @@ class TestGtk(unittest.TestCase):
             obj.emit('test-signal')
 
         self.assertEquals(signal_checker.sentinel, 4)
+        self.assertEquals(signal_checker.after_sentinel, 2)
 
     def test_dialogs(self):
         self.assertEquals(Gtk.Dialog, overrides.Gtk.Dialog)
