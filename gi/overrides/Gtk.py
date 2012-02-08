@@ -350,7 +350,7 @@ class Builder(Gtk.Builder):
             if not _callable(handler):
                 raise TypeError('Handler %s is not a method or function' % handler_name)
 
-            after = flags or GObject.ConnectFlags.AFTER
+            after = flags & GObject.ConnectFlags.AFTER
             if connect_obj is not None:
                 if after:
                     gobj.connect_object_after(signal_name, handler, connect_obj)
