@@ -598,16 +598,29 @@ class TestDouble(unittest.TestCase):
 
 class TestGType(unittest.TestCase):
 
+    def test_gtype_name(self):
+        self.assertEquals("void", GObject.TYPE_NONE.name)
+        self.assertEquals("gchararray", GObject.TYPE_STRING.name)
+
+        def check_readonly(gtype):
+            gtype.name = "foo"
+
+        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_NONE)
+        self.assertRaises(AttributeError, check_readonly, GObject.TYPE_STRING)
+
     def test_gtype_return(self):
         self.assertEquals(GObject.TYPE_NONE, GIMarshallingTests.gtype_return())
+        self.assertEquals(GObject.TYPE_STRING, GIMarshallingTests.gtype_string_return())
 
     def test_gtype_in(self):
         GIMarshallingTests.gtype_in(GObject.TYPE_NONE)
-
-        self.assertRaises(TypeError, GIMarshallingTests.gtype_in, "GObject.TYPE_NONE")
+        GIMarshallingTests.gtype_string_in(GObject.TYPE_STRING)
+        self.assertRaises(TypeError, GIMarshallingTests.gtype_in, "foo")
+        self.assertRaises(TypeError, GIMarshallingTests.gtype_string_in, "foo")
 
     def test_gtype_out(self):
         self.assertEquals(GObject.TYPE_NONE, GIMarshallingTests.gtype_out())
+        self.assertEquals(GObject.TYPE_STRING, GIMarshallingTests.gtype_string_out())
 
     def test_gtype_inout(self):
         self.assertEquals(GObject.TYPE_INT, GIMarshallingTests.gtype_inout(GObject.TYPE_NONE))
