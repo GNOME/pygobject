@@ -670,7 +670,6 @@ class TestArray(unittest.TestCase):
     def test_array_fixed_inout(self):
         self.assertEquals([2, 1, 0, -1], GIMarshallingTests.array_fixed_inout([-1, 0, 1, 2]))
 
-
     def test_array_return(self):
         self.assertEquals([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
@@ -758,6 +757,9 @@ class TestArray(unittest.TestCase):
     def test_array_zero_terminated_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
 
+
+class TestGStrv(unittest.TestCase):
+
     def test_gstrv_return(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_return())
 
@@ -772,17 +774,20 @@ class TestArray(unittest.TestCase):
 
     def test_gstrv_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.gstrv_inout(['0', '1', '2']))
-    
+
+
+class TestArrayGVariant(unittest.TestCase):
+
     def test_array_gvariant_none_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
         returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
         self.assertEquals([27, "Hello"], returned)
-    
+
     def test_array_gvariant_container_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
         returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
         self.assertEquals([27, "Hello"], returned)
-    
+
     def test_array_gvariant_full_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
         returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
@@ -791,6 +796,7 @@ class TestArray(unittest.TestCase):
     def test_bytearray_gvariant(self):
         v = GLib.Variant.new_bytestring(b"foo")
         self.assertEquals(v.get_bytestring(), b"foo")
+
 
 class TestGArray(unittest.TestCase):
 
@@ -835,6 +841,7 @@ class TestGArray(unittest.TestCase):
     def test_garray_utf8_full_inout(self):
         self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_full_inout(['0', '1', '2']))
 
+
 class TestGPtrArray(unittest.TestCase):
 
     def test_gptrarray_utf8_none_return(self):
@@ -866,6 +873,7 @@ class TestGPtrArray(unittest.TestCase):
 
     def test_gptrarray_utf8_full_inout(self):
         self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gptrarray_utf8_full_inout(['0', '1', '2']))
+
 
 class TestGList(unittest.TestCase):
 
@@ -1024,6 +1032,7 @@ class TestGValue(unittest.TestCase):
         value.init(GObject.TYPE_INT)
         value.set_int(42)
         self.assertEquals('42', GIMarshallingTests.gvalue_inout(value))
+
 
 class TestGClosure(unittest.TestCase):
 
@@ -1190,6 +1199,7 @@ class TestGFlags(unittest.TestCase):
         self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
         self.assertEquals(flags, GIMarshallingTests.Flags.VALUE1)
 
+
 class TestNoTypeFlags(unittest.TestCase):
 
     def test_flags(self):
@@ -1299,7 +1309,6 @@ class TestStructure(unittest.TestCase):
         del struct
 
         self.assertRaises(TypeError, GIMarshallingTests.SimpleStruct.method)
-
 
     def test_pointer_struct(self):
         self.assertTrue(issubclass(GIMarshallingTests.PointerStruct, GObject.GPointer))
@@ -1425,6 +1434,7 @@ class TestStructure(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.Union.method)
 
+
 class TestGObject(unittest.TestCase):
 
     def test_object(self):
@@ -1453,7 +1463,6 @@ class TestGObject(unittest.TestCase):
         GIMarshallingTests.Object(int = 42).method()
         self.assertRaises(TypeError, GIMarshallingTests.Object.method, GObject.GObject())
         self.assertRaises(TypeError, GIMarshallingTests.Object.method)
-
 
     def test_sub_object(self):
         self.assertTrue(issubclass(GIMarshallingTests.SubObject, GIMarshallingTests.Object))
@@ -1799,6 +1808,7 @@ class TestOverrides(unittest.TestCase):
         self.assertEquals(GIMarshallingTests.OverridesStruct.__module__, 'gi.overrides.GIMarshallingTests')
         self.assertEquals(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
 
+
 class TestDir(unittest.TestCase):
     def test_members_list(self):
         list = dir(GIMarshallingTests)
@@ -1823,6 +1833,7 @@ class TestDir(unittest.TestCase):
         #
         # self.assertTrue('DoNotImportDummyTests' in list)
 
+
 class TestGErrorArrayInCrash(unittest.TestCase):
     # Previously there was a bug in invoke, in which C arrays were unwrapped
     # from inside GArrays to be passed to the C function. But when a GError was
@@ -1831,6 +1842,7 @@ class TestGErrorArrayInCrash(unittest.TestCase):
     # take in GArrays. See https://bugzilla.gnome.org/show_bug.cgi?id=642708
     def test_gerror_array_in_crash(self):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])
+
 
 class TestGErrorOut(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
@@ -1843,6 +1855,7 @@ class TestGErrorOut(unittest.TestCase):
         self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
         self.assertEquals(debug, GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE)
 
+
 class TestGErrorOutTransferNone(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
     def test_gerror_out_transfer_none(self):
@@ -1854,6 +1867,7 @@ class TestGErrorOutTransferNone(unittest.TestCase):
         self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
         self.assertEquals(GIMarshallingTests.CONSTANT_GERROR_DEBUG_MESSAGE, debug)
 
+
 class TestGErrorReturn(unittest.TestCase):
     # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
     def test_return_gerror(self):
@@ -1864,7 +1878,9 @@ class TestGErrorReturn(unittest.TestCase):
         self.assertEquals(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEquals(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
+
 class TestKeywordArgs(unittest.TestCase):
+
     def test_calling(self):
         kw_func = GIMarshallingTests.int_three_in_three_out
 
@@ -1921,6 +1937,7 @@ class TestKeywordArgs(unittest.TestCase):
         d2 = d.copy()
         GIMarshallingTests.int_three_in_three_out(1, c=4, **d)
         self.assertEqual(d, d2)
+
 
 class TestPropertiesObject(unittest.TestCase):
 
