@@ -1,3 +1,8 @@
+3.0.4   09-Feb-2012
+        - Revert "Convert all strings to utf-8 encoding when retrieving from TreeModel" (Martin Pitt)
+        - Fixed bug where GObject.property did not respect minimum and maximum values (Sebastian Pölsterl)
+        - Remove mention of removed option --enable-docs (Tomeu Vizoso)
+
 3.0.3   12-Dec-2011
         - Convert all modifier constants to Gdk.ModifierType (Manuel Quiñones)
         - Convert all strings to utf-8 encoding when retrieving from TreeModel (Sebastian Pölsterl)
