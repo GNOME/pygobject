@@ -1330,7 +1330,8 @@ _pygi_argument_to_object (GIArgument  *arg,
     type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
-            if (g_type_info_is_pointer (type_info)) {
+            if (g_type_info_is_pointer (type_info) &&
+                    (arg->v_pointer != NULL)) {
                 /* Raw Python objects are passed to void* args */
                 g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
                 object = arg->v_pointer;

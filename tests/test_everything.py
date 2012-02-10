@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0, "../")
 from sys import getrefcount
 
+import copy
 import cairo
 
 from gi.repository import GObject
@@ -160,6 +161,26 @@ class TestEverything(unittest.TestCase):
 
     def test_ptrarray(self):
         self.assertEquals (Everything.test_garray_container_return(), ['regress'])
+
+    def test_struct_gpointer(self):
+        l1 = GLib.List()
+        self.assertEqual(l1.data, None)
+        init_refcount = getrefcount(l1)
+
+        l1.data = 'foo'
+        self.assertEqual(l1.data, 'foo')
+
+        l2 = l1
+        self.assertEqual(l1.data, l2.data)
+        self.assertEquals(getrefcount(l1), init_refcount+1)
+
+        l3 = copy.copy(l1)
+        l3.data = 'bar'
+        self.assertEqual(l1.data, 'foo')
+        self.assertEqual(l2.data, 'foo')
+        self.assertEqual(l3.data, 'bar')
+        self.assertEquals(getrefcount(l1), init_refcount+1)
+        self.assertEquals(getrefcount(l3), init_refcount)
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
