@@ -320,7 +320,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
     } else if (G_IS_PARAM_SPEC_STRING(pspec)) {
 	if (!strcmp(attr, "__members__")) {
 	    return Py_BuildValue("[ssssssssssssss]", "__doc__", "__gtype__",
-				 "blurb", "cset_firth", "cset_nth", "default_value",
+				 "blurb", "cset_first", "cset_nth", "default_value",
 				 "ensure_non_null", "flags", "name", "nick",
 				 "null_fold_if_empty", "owner_type", "substitutor",
 				 "value_type");
