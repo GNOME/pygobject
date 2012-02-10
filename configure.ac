@@ -19,8 +19,8 @@ dnl versions of packages we require ...
 m4_define(introspection_required_version, 1.29.0)
 m4_define(py2cairo_required_version, 1.2.0)
 m4_define(py3cairo_required_version, 1.10.0)
-m4_define(glib_required_version, 2.24.0)
-m4_define(gio_required_version, 2.24.0)
+m4_define(glib_required_version, 2.31.0)
+m4_define(gio_required_version, 2.31.0)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
@@ -199,7 +199,7 @@ GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
 AC_SUBST(GI_DATADIR)
 
 if test "$enable_cairo" != no; then
-    if test $build_py3k = true; then  
+    if test $build_py3k = true; then
         PKG_CHECK_MODULES(PYCAIRO,
             py3cairo >= py3cairo_required_version
         )
