@@ -1839,7 +1839,7 @@ _pygi_argument_from_g_value(const GValue *value,
             arg.v_uint = g_value_get_uint (value);
             break;
         case GI_TYPE_TAG_UNICHAR:
-            arg.v_uint32 = g_value_get_char (value);
+            arg.v_uint32 = g_value_get_schar (value);
             break;
         case GI_TYPE_TAG_FLOAT:
             arg.v_float = g_value_get_float (value);
