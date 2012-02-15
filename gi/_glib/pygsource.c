@@ -244,13 +244,11 @@ pyg_source_remove_poll(PyGSource *self, PyObject *args, PyObject *kwargs)
 static PyObject *
 pyg_source_get_current_time(PyGSource *self)
 {
-    GTimeVal timeval;
     double   ret;
 
     CHECK_DESTROYED(self, NULL);
 
-    g_source_get_current_time(self->source, &timeval);
-    ret = (double)timeval.tv_sec + (double)timeval.tv_usec * 0.000001;
+    ret = g_get_real_time() * 0.000001;
     return PyFloat_FromDouble(ret);
 }
 
