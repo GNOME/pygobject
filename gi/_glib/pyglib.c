@@ -153,9 +153,6 @@ pyglib_enable_threads(void)
 	return TRUE;
   
     PyEval_InitThreads();
-    if (!g_threads_got_initialized)
-	g_thread_init(NULL);
-    
     _PyGLib_API->threads_enabled = TRUE;
     pyglib_thread_state_tls_key = PyThread_create_key();
 
