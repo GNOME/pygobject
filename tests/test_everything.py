@@ -160,7 +160,15 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(len(attr_list), len(set(attr_list)))
 
     def test_ptrarray(self):
-        self.assertEquals (Everything.test_garray_container_return(), ['regress'])
+        # transfer container
+        result = Everything.test_garray_container_return()
+        self.assertEquals (result, ['regress'])
+        result = None
+
+        # transfer full
+        result = Everything.test_garray_full_return()
+        self.assertEquals (result, ['regress'])
+        result = None
 
     def test_struct_gpointer(self):
         l1 = GLib.List()
