@@ -1219,6 +1219,7 @@ static void
 _arg_name_list_generate (PyGICallableCache *callable_cache)
 {
     GSList * arg_name_list = NULL;
+    int i;
 
     if (callable_cache->arg_name_hash == NULL) {
         callable_cache->arg_name_hash = g_hash_table_new (g_str_hash, g_str_equal);
@@ -1226,7 +1227,7 @@ _arg_name_list_generate (PyGICallableCache *callable_cache)
         g_hash_table_remove_all (callable_cache->arg_name_hash);
     }
 
-    for (int i=0; i < callable_cache->n_args; i++) {
+    for (i=0; i < callable_cache->n_args; i++) {
         PyGIArgCache *arg_cache = NULL;
 
         arg_cache = callable_cache->args_cache[i];
