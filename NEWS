@@ -1,3 +1,21 @@
+3.1.1   20-Feb-2012
+        - Don't use C99 style (Sebastian Pölsterl)
+        - Add test for GPtrArray with transfer full (Martin Pitt)
+        - Drop obsolete g_thread_init() (Martin Pitt)
+        - Fix deprecated g_source_get_current_time() (Martin Pitt)
+        - Fix deprecated g_value_[gs]et_char() (Martin Pitt)
+        - Make pygiconvert.sh correctly convert gtk.gdk.x11_* (Simon Schampijer)
+        - Raise required glib version to 2.31 because of g_value_(get|set)_schar (Sebastian Pölsterl)
+        - Fix cset_first typo (Dieter Verfaillie)
+        - pygi-convert: Handle Clutter and Cogl (Bastian Winkler)
+        - Provide access to gpointer struct values (Cédric Krier)
+        - Add some GType tests (Paolo Borelli)
+        - Split GStrv and array variant tests in their own classes (Paolo Borelli)
+        - Add unit test for builder's connect_after (Paolo Borelli)
+        - fix GtkBuilder signal connection 'after' logic (Ryan Lortie)
+        - test(1) uses '=' to test if strings are identical (Patrick Welche)
+        - pygspawn: improve error checking (Ryan Lortie)
+
 3.1.0   06-Feb-2012
         - Updated DOAP file to only include people currently actively working on the project (Sebastian Pölsterl)
         - Revert "Convert all strings to utf-8 encoding when retrieving from TreeModel" (Sebastian Pölsterl)
