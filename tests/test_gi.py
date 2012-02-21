@@ -1713,30 +1713,32 @@ class TestGErrorException(unittest.TestCase):
 
 class TestInterfaces(unittest.TestCase):
 
+    class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+        def __init__(self):
+            GObject.GObject.__init__(self)
+            self.val = None
+
+        def do_test_int8_in(self, int8):
+            self.val = int8
+
+    def setUp(self):
+        self.instance = self.TestInterfaceImpl()
+
     def test_wrapper(self):
         self.assertTrue(issubclass(GIMarshallingTests.Interface, GObject.GInterface))
         self.assertEquals(GIMarshallingTests.Interface.__gtype__.name, 'GIMarshallingTestsInterface')
         self.assertRaises(NotImplementedError, GIMarshallingTests.Interface)
 
     def test_implementation(self):
+        self.assertTrue(issubclass(self.TestInterfaceImpl, GIMarshallingTests.Interface))
+        self.assertTrue(isinstance(self.instance, GIMarshallingTests.Interface))
 
-        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-            def __init__(self):
-                GObject.GObject.__init__(self)
-                self.val = None
+    def test_int8_int(self):
+        GIMarshallingTests.test_interface_test_int8_in(self.instance, 42)
+        self.assertEquals(self.instance.val, 42)
 
-            def do_test_int8_in(self, int8):
-                self.val = int8
-
-        self.assertTrue(issubclass(TestInterfaceImpl, GIMarshallingTests.Interface))
-
-        instance = TestInterfaceImpl()
-        self.assertTrue(isinstance(instance, GIMarshallingTests.Interface))
-
-        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
-        self.assertEquals(instance.val, 42)
-
-        class TestInterfaceImplA(TestInterfaceImpl):
+    def test_subclass(self):
+        class TestInterfaceImplA(self.TestInterfaceImpl):
             pass
 
         class TestInterfaceImplB(TestInterfaceImplA):
@@ -1758,7 +1760,7 @@ class TestInterfaces(unittest.TestCase):
                                  TestInterfaceImpl):
             pass
 
-        class TestInterfaceImpl3(TestInterfaceImpl,
+        class TestInterfaceImpl3(self.TestInterfaceImpl,
                                  GIMarshallingTests.Interface2):
             pass
 
