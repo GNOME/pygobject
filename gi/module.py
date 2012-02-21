@@ -42,8 +42,10 @@ from ._gi import \
     ConstantInfo, \
     StructInfo, \
     UnionInfo, \
+    CallbackInfo, \
     Struct, \
     Boxed, \
+    CCallback, \
     enum_add, \
     enum_register_new_gtype_and_add, \
     flags_add, \
@@ -154,6 +156,9 @@ class IntrospectionModule(object):
                 interfaces = tuple(interface for interface in get_interfaces_for_object(info)
                         if not issubclass(parent, interface))
                 bases = (parent,) + interfaces
+                metaclass = GObjectMeta
+            elif isinstance(info, CallbackInfo):
+                bases = (CCallback,)
                 metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
                 bases = (_gobject.GInterface,)

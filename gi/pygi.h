@@ -55,6 +55,16 @@ typedef struct {
     gsize size;
 } PyGIBoxed;
 
+typedef struct {
+    PyObject_HEAD
+    GCallback callback;
+    GIFunctionInfo *info;
+    gpointer user_data;
+    GIScopeType scope;
+    GDestroyNotify destroy_notify_func;
+    PyGICallableCache *cache;
+} PyGICCallback;
+
 typedef PyObject * (*PyGIArgOverrideToGIArgumentFunc) (PyObject        *value,
                                                        GIInterfaceInfo *interface_info,
                                                        GITransfer       transfer,

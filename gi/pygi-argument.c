@@ -1547,17 +1547,7 @@ _pygi_argument_to_object (GIArgument  *arg,
             switch (info_type) {
                 case GI_INFO_TYPE_CALLBACK:
                 {
-                    /* There is no way we can support a callback return
-                     * as we are never sure if the callback was set from C
-                     * or Python.  API that return callbacks are broken
-                     * so we print a warning and send back a None
-                     */
-
-                    g_warning ("You are trying to use an API which returns a callback."
-                               "Callback returns can not be supported. Returning None instead.");
-                    object = Py_None;
-                    Py_INCREF (object);
-                    break;
+                    g_assert_not_reached();
                 }
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:

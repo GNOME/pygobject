@@ -1233,6 +1233,7 @@ _arg_name_list_generate (PyGICallableCache *callable_cache)
         arg_cache = callable_cache->args_cache[i];
 
         if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
+            arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
                 (arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON ||
                  arg_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL)) {
 
@@ -1331,8 +1332,24 @@ _args_cache_generate (GICallableInfo *callable_info,
         gboolean is_caller_allocates = FALSE;
         gssize py_arg_index = -1;
 
-        arg_info =
-            g_callable_info_get_arg (callable_info, i);
+        arg_info = g_callable_info_get_arg (callable_info, i);
+
+        if (g_arg_info_get_closure (arg_info) == i) {
+
+            arg_cache = _arg_cache_alloc ();
+            callable_cache->args_cache[arg_index] = arg_cache;
+
+            arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
+            arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
+            arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
+            arg_cache->c_arg_index = i;
+
+            callable_cache->n_from_py_args++;
+
+            g_base_info_unref ( (GIBaseInfo *)arg_info);
+
+            continue;
+        }
 
         /* For vfuncs and callbacks our marshalling directions
            are reversed */
@@ -1430,7 +1447,7 @@ arg_err:
 }
 
 PyGICallableCache *
-_pygi_callable_cache_new (GICallableInfo *callable_info)
+_pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
 {
     PyGICallableCache *cache;
     GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)callable_info);
@@ -1454,7 +1471,10 @@ _pygi_callable_cache_new (GICallableInfo *callable_info)
     } else if (type == GI_INFO_TYPE_VFUNC) {
         cache->function_type = PYGI_FUNCTION_TYPE_VFUNC;
     } else if (type == GI_INFO_TYPE_CALLBACK) {
-        cache->function_type = PYGI_FUNCTION_TYPE_CALLBACK;
+        if (is_ccallback)
+            cache->function_type = PYGI_FUNCTION_TYPE_CCALLBACK;
+        else
+            cache->function_type = PYGI_FUNCTION_TYPE_CALLBACK;
     } else {
         cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
     }

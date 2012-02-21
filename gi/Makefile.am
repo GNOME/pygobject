@@ -54,6 +54,8 @@ _gi_la_SOURCES = \
 	pygi-boxed.h \
 	pygi-closure.c \
 	pygi-closure.h \
+	pygi-ccallback.c \
+	pygi-ccallback.h \
 	pygi-callbacks.c \
 	pygi-callbacks.h \
 	pygi.h \

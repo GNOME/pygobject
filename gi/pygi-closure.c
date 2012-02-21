@@ -155,7 +155,8 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                         g_args[i].v_double = * (double *) args[i];
                         g_base_info_unref (interface);
                         break;
-                    } else if (interface_type == GI_INFO_TYPE_STRUCT) {
+                    } else if (interface_type == GI_INFO_TYPE_STRUCT ||
+                               interface_type == GI_INFO_TYPE_CALLBACK) {
                         g_args[i].v_pointer = * (gpointer *) args[i];
                         g_base_info_unref (interface);
                         break;
@@ -167,6 +168,7 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                 case GI_TYPE_TAG_GHASH:
                 case GI_TYPE_TAG_GLIST:
                 case GI_TYPE_TAG_GSLIST:
+                case GI_TYPE_TAG_VOID:
                     g_args[i].v_pointer = * (gpointer *) args[i];
                     break;
                 default:
@@ -188,6 +190,9 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
     int n_in_args = 0;
     int n_out_args = 0;
     int i;
+    int user_data_arg = -1;
+    int destroy_notify_arg = -1;
+
     GIArgument *g_args = NULL;
 
     *py_args = NULL;
@@ -200,6 +205,10 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
     g_args = _pygi_closure_convert_ffi_arguments (callable_info, args);
 
     for (i = 0; i < n_args; i++) {
+        /* Special case callbacks and skip over userdata and Destroy Notify */
+        if (i == user_data_arg || i == destroy_notify_arg)
+            continue;
+
         GIArgInfo *arg_info = g_callable_info_get_arg (callable_info, i);
         GIDirection direction = g_arg_info_get_direction (arg_info);
 
@@ -219,6 +228,45 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                 } else {
                     value = user_data;
                     Py_INCREF (value);
+                }
+            } else if (direction == GI_DIRECTION_IN &&
+                       arg_tag == GI_TYPE_TAG_INTERFACE) {
+                /* Handle callbacks as a special case */
+                GIBaseInfo *info;
+                GIInfoType info_type;
+
+                info = g_type_info_get_interface (arg_type);
+                info_type = g_base_info_get_type (info);
+
+                arg = (GIArgument*) &g_args[i];
+
+                if (info_type == GI_INFO_TYPE_CALLBACK) {
+                    gpointer user_data = NULL;
+                    GDestroyNotify destroy_notify = NULL;
+                    GIScopeType scope = g_arg_info_get_scope(arg_info);
+
+                    user_data_arg = g_arg_info_get_closure(arg_info);
+                    destroy_notify_arg = g_arg_info_get_destroy(arg_info);
+
+                    if (user_data_arg != -1)
+                        user_data = g_args[user_data_arg].v_pointer;
+
+                    if (destroy_notify_arg != -1)
+                        user_data = (GDestroyNotify) g_args[destroy_notify_arg].v_pointer;
+
+                    value = _pygi_ccallback_new(arg->v_pointer,
+                                                user_data,
+                                                scope,
+                                                (GIFunctionInfo *) info,
+                                                destroy_notify);
+                } else
+                    value = _pygi_argument_to_object (arg, arg_type, transfer);
+
+                g_base_info_unref (info);
+                if (value == NULL) {
+                    g_base_info_unref (arg_type);
+                    g_base_info_unref (arg_info);
+                    goto error;
                 }
             } else {
                 if (direction == GI_DIRECTION_IN)

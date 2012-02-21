@@ -68,7 +68,8 @@ typedef enum {
     PYGI_META_ARG_TYPE_PARENT,
     PYGI_META_ARG_TYPE_CHILD,
     PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE,
-    PYGI_META_ARG_TYPE_CHILD_WITH_PYARG
+    PYGI_META_ARG_TYPE_CHILD_WITH_PYARG,
+    PYGI_META_ARG_TYPE_CLOSURE,
 } PyGIMetaArgType;
 
 /*
@@ -82,7 +83,8 @@ typedef enum {
     PYGI_FUNCTION_TYPE_METHOD,
     PYGI_FUNCTION_TYPE_CONSTRUCTOR,
     PYGI_FUNCTION_TYPE_VFUNC,
-    PYGI_FUNCTION_TYPE_CALLBACK
+    PYGI_FUNCTION_TYPE_CALLBACK,
+    PYGI_FUNCTION_TYPE_CCALLBACK,
  } PyGIFunctionType;
 
 /*
@@ -187,7 +189,8 @@ struct _PyGICallableCache
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);
 void _pygi_callable_cache_free	(PyGICallableCache *cache);
 
-PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info);
+PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info,
+                                             gboolean is_ccallback);
 
 G_END_DECLS
 

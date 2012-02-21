@@ -1,7 +1,7 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
- * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>, Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,23 +19,23 @@
  * USA
  */
 
-#ifndef __PYGI_INVOKE_H__
-#define __PYGI_INVOKE_H__
+#ifndef __PYGI_CCLOSURE_H__
+#define __PYGI_CCLOSURE_H__
 
 #include <Python.h>
 
-#include <girepository.h>
-
-#include "pygi-private.h"
-#include "pygi-invoke-state-struct.h"
 G_BEGIN_DECLS
 
-PyObject *pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
-                                     PyObject *kwargs, PyGICallableCache *cache,
-                                     GCallback function_ptr, gpointer user_data);
-PyObject *_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
-                                        PyObject *kwargs);
+extern PyTypeObject PyGICCallback_Type;
+
+PyObject * _pygi_ccallback_new (GCallback       callback,
+                                gpointer        user_data,
+                                GIScopeType     scope,
+                                GIFunctionInfo *info,
+                                GDestroyNotify  destroy_notify);
+
+void _pygi_ccallback_register_types (PyObject *m);
 
 G_END_DECLS
 
-#endif /* __PYGI_INVOKE_H__ */
+#endif /* __PYGI_CCLOSURE_H__ */

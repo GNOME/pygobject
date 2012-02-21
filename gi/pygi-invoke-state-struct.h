@@ -37,6 +37,8 @@ typedef struct _PyGIInvokeState
     GError *error;
 
     gboolean failed;
+
+    gpointer user_data;
 } PyGIInvokeState;
 
 G_END_DECLS

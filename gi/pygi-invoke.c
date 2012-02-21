@@ -29,7 +29,8 @@
 static inline gboolean
 _invoke_callable (PyGIInvokeState *state,
                   PyGICallableCache *cache,
-                  GICallableInfo *callable_info)
+                  GICallableInfo *callable_info,
+                  GCallback function_ptr)
 {
     GError *error;
     gint retval;
@@ -48,6 +49,17 @@ _invoke_callable (PyGIInvokeState *state,
                                        cache->n_to_py_args,
                                       &state->return_arg,
                                       &error);
+    else if (g_base_info_get_type (callable_info) == GI_INFO_TYPE_CALLBACK)
+        retval = g_callable_info_invoke (callable_info,
+                                         function_ptr,
+                                         state->in_args,
+                                         cache->n_from_py_args,
+                                         state->out_args,
+                                         cache->n_to_py_args,
+                                         &state->return_arg,
+                                         FALSE,
+                                         FALSE,
+                                         &error);
     else
         retval = g_function_info_invoke ( callable_info,
                                           state->in_args,
@@ -149,10 +161,12 @@ _py_args_combine_and_check_length (const gchar *function_name,
     GSList *l;
 
     n_py_args = PyTuple_GET_SIZE (py_args);
-    n_py_kwargs = PyDict_Size (py_kwargs);
+    if (py_kwargs == NULL)
+        n_py_kwargs = 0;
+    else
+        n_py_kwargs = PyDict_Size (py_kwargs);
 
     n_expected_args = g_slist_length (arg_name_list);
-
     if (n_py_kwargs == 0 && n_py_args == n_expected_args) {
         return py_args;
     }
@@ -170,7 +184,9 @@ _py_args_combine_and_check_length (const gchar *function_name,
         return NULL;
     }
 
-    if (!_check_for_unexpected_kwargs (function_name, arg_name_hash, py_kwargs)) {
+    if (n_py_kwargs > 0 && !_check_for_unexpected_kwargs (function_name,
+                                                          arg_name_hash,
+                                                          py_kwargs)) {
         Py_DECREF (py_args);
         return NULL;
     }
@@ -191,7 +207,7 @@ _py_args_combine_and_check_length (const gchar *function_name,
         PyObject *py_arg_item, *kw_arg_item = NULL;
         const gchar *arg_name = l->data;
 
-        if (arg_name != NULL) {
+        if (n_py_kwargs > 0 && arg_name != NULL) {
             /* NULL means this argument has no keyword name */
             /* ex. the first argument to a method or constructor */
             kw_arg_item = PyDict_GetItemString (py_kwargs, arg_name);
@@ -400,7 +416,10 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 state->args[i] = &(state->in_args[in_count]);
                 in_count++;
 
-                if (arg_cache->meta_type > 0)
+                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CLOSURE) {
+                    state->args[i]->v_pointer = state->user_data;
+                    continue;
+                } else if (arg_cache->meta_type != PYGI_META_ARG_TYPE_PARENT)
                     continue;
 
                 if (arg_cache->py_arg_index >= state->n_py_in_args) {
@@ -611,34 +630,44 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 }
 
 PyObject *
-_wrap_g_callable_info_invoke (PyGIBaseInfo *self,
-                              PyObject *py_args,
-                              PyObject *kwargs)
+pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
+                           PyObject *kwargs, PyGICallableCache *cache,
+                           GCallback function_ptr, gpointer user_data)
 {
     PyGIInvokeState state = { 0, };
     PyObject *ret = NULL;
 
+    if (!_invoke_state_init_from_callable_cache (&state, cache, py_args, kwargs))
+        goto err;
+
+    if (cache->function_type == PYGI_FUNCTION_TYPE_CCALLBACK)
+        state.user_data = user_data;
+
+    if (!_invoke_marshal_in_args (&state, cache))
+        goto err;
+
+    if (!_invoke_callable (&state, cache, info, function_ptr))
+        goto err;
+
+    pygi_marshal_cleanup_args_from_py_marshal_success (&state, cache);
+
+    ret = _invoke_marshal_out_args (&state, cache);
+    if (ret)
+        pygi_marshal_cleanup_args_to_py_marshal_success (&state, cache);
+err:
+    _invoke_state_clear (&state, cache);
+    return ret;
+}
+
+PyObject *
+_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
+                              PyObject *kwargs)
+{
     if (self->cache == NULL) {
-        self->cache = _pygi_callable_cache_new (self->info);
+        self->cache = _pygi_callable_cache_new (self->info, FALSE);
         if (self->cache == NULL)
             return NULL;
     }
 
-    if (!_invoke_state_init_from_callable_cache (&state, self->cache, py_args, kwargs))
-        goto err;
-
-    if (!_invoke_marshal_in_args (&state, self->cache))
-        goto err;
-
-    if (!_invoke_callable (&state, self->cache, self->info))
-        goto err;
-
-    pygi_marshal_cleanup_args_from_py_marshal_success (&state, self->cache);
-
-    ret = _invoke_marshal_out_args (&state, self->cache);
-    if (ret)
-        pygi_marshal_cleanup_args_to_py_marshal_success (&state, self->cache);
-err:
-    _invoke_state_clear (&state, self->cache);
-    return ret;
+    return pygi_callable_info_invoke (self->info, py_args, kwargs, self->cache, NULL, NULL);
 }

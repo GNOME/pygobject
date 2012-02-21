@@ -1690,6 +1690,22 @@ class TestPythonGObject(unittest.TestCase):
         GIMarshallingTests.SubSubObject.do_method_deep_hierarchy(sub_sub_sub_object, 5)
         self.assertEqual(sub_sub_sub_object.props.int, 5)
 
+    def test_callback_in_vfunc(self):
+        class SubObject(GIMarshallingTests.Object):
+            def __init__(self):
+                GObject.GObject.__init__(self)
+                self.worked = False
+
+            def do_vfunc_with_callback(self, callback):
+                self.worked = callback(42) == 42
+
+        _object = SubObject()
+        _object.call_vfunc_with_callback()
+        self.assertTrue(_object.worked == True)
+        _object.worked = False
+        _object.call_vfunc_with_callback()
+        self.assertTrue(_object.worked == True)
+
 
 class TestMultiOutputArgs(unittest.TestCase):
 
