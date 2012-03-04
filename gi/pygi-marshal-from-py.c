@@ -61,21 +61,18 @@ _is_union_member (PyGIInterfaceCache *iface_cache, PyObject *py_arg) {
 
         /* we can only check if the members are interfaces */
         if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE) {
+            GIInterfaceInfo *field_iface_info;
             PyObject *py_type;
-            GIInterfaceInfo *field_iface_info =
-                g_type_info_get_interface (field_type_info);
 
-            py_type = _pygi_type_import_by_gi_info (
-                (GIBaseInfo *) field_iface_info);
+            field_iface_info = g_type_info_get_interface (field_type_info);
+            py_type = _pygi_type_import_by_gi_info ((GIBaseInfo *) field_iface_info);
 
             if (py_type != NULL && PyObject_IsInstance (py_arg, py_type)) {
                 is_member = TRUE;
-                break;
             }
 
             Py_XDECREF (py_type);
             g_base_info_unref ( ( GIBaseInfo *) field_iface_info);
-
         }
 
         g_base_info_unref ( ( GIBaseInfo *) field_type_info);
