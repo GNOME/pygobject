@@ -1219,6 +1219,11 @@ class TreeView(Gtk.TreeView, Container):
         if success:
             return (path, column, cell_x, cell_y,)
 
+    def get_visible_range(self):
+        success, start_path, end_path = super(TreeView, self).get_visible_range()
+        if success:
+            return (start_path, end_path,)
+
     def get_dest_row_at_pos(self, drag_x, drag_y):
         success, path, pos = super(TreeView, self).get_dest_row_at_pos(drag_x, drag_y)
         if success:
