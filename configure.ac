@@ -16,7 +16,7 @@ m4_define(pygobject_micro_version, 2)
 m4_define(pygobject_version, pygobject_major_version.pygobject_minor_version.pygobject_micro_version)
 
 dnl versions of packages we require ...
-m4_define(introspection_required_version, 1.29.0)
+m4_define(introspection_required_version, 1.31.20)
 m4_define(py2cairo_required_version, 1.2.0)
 m4_define(py3cairo_required_version, 1.10.0)
 m4_define(glib_required_version, 2.31.0)
@@ -174,7 +174,6 @@ if test x"$with_libffi" = xyes && test x"$have_libffi" = xno ; then
   AC_MSG_ERROR([ffi requested, but not found])
 fi
 if test x"$have_libffi" = xyes; then
-  AC_DEFINE(HAVE_FFI_H,1,[Have libffi include files])
   LIBFFI_PC=libffi
 fi
 AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")

@@ -25,6 +25,7 @@
 #endif
 
 #include <gobject/gvaluecollector.h>
+#include <girepository.h>
 #include <pyglib.h>
 #include <pythread.h>
 #include "pygobject-private.h"
@@ -35,13 +36,6 @@
 #include "pygparamspec.h"
 #include "pygpointer.h"
 #include "pygtype.h"
-
-#ifdef HAVE_FFI_H
-#include "ffi-marshaller.h"
-static GSignalCMarshaller marshal_generic = g_cclosure_marshal_generic_ffi;
-#else
-static GSignalCMarshaller marshal_generic = 0;
-#endif
 
 static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
@@ -450,7 +444,7 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
     signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
 			      pyg_signal_class_closure_get(),
 			      accumulator, accum_data,
-			      marshal_generic,
+			      gi_cclosure_marshal_generic,
 			      return_type, n_params, param_types);
     g_free(param_types);
 
@@ -2487,9 +2481,7 @@ pygobject_register_features(PyObject *d)
     PyObject *features;
 
     features = PyDict_New();
-#ifdef HAVE_FFI_H
     PyDict_SetItemString(features, "generic-c-marshaller", Py_True);
-#endif
     PyDict_SetItemString(d, "features", features);
     Py_DECREF(features);
 }

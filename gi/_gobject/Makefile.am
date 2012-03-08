@@ -56,7 +56,6 @@ _gobject_la_CFLAGS = \
 	$(extension_cppflags) \
 	-I$(top_srcdir)/gi/_glib \
 	-I$(top_srcdir)/gi \
-	$(FFI_CFLAGS) \
 	$(GLIB_CFLAGS) \
 	$(GI_CFLAGS)
 _gi_la_CPPFLAGS = \
@@ -64,15 +63,11 @@ _gi_la_CPPFLAGS = \
 _gobject_la_LIBADD = \
 	$(extension_libadd) \
 	$(GLIB_LIBS) \
-	$(FFI_LIBS) \
+	$(GI_LIBS) \
 	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 _gobject_la_LDFLAGS = \
 	$(extension_ldflags) \
 	-export-symbols-regex "_gobject|PyInit__gobject"
-
-if HAVE_LIBFFI
-_gobject_la_SOURCES += ffi-marshaller.c ffi-marshaller.h
-endif
 
 
 all: $(pygobject_LTLIBRARIES:.la=.so)
