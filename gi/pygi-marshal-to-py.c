@@ -511,6 +511,22 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
     return py_obj;
 }
 
+static void
+_pygi_hash_pointer_to_arg (GIArgument *arg,
+                           GITypeTag  type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT32:
+            arg->v_int32 = GPOINTER_TO_INT(arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            break;
+        default:
+            g_assert_not_reached();
+    }
+}
+
 PyObject *
 _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
                            PyGICallableCache *callable_cache,
@@ -558,6 +574,8 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
         PyObject *py_value;
         int retval;
 
+
+        _pygi_hash_pointer_to_arg (&key_arg, hash_cache->key_cache->type_tag);
         py_key = key_to_py_marshaller ( state,
                                       callable_cache,
                                       key_arg_cache,
@@ -568,6 +586,7 @@ _pygi_marshal_to_py_ghash (PyGIInvokeState   *state,
             return NULL;
         }
 
+        _pygi_hash_pointer_to_arg (&value_arg, hash_cache->value_cache->type_tag);
         py_value = value_to_py_marshaller ( state,
                                           callable_cache,
                                           value_arg_cache,

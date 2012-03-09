@@ -145,7 +145,7 @@ _pygi_marshal_from_py_int8 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_long = long_;
+    arg->v_int8 = long_;
 
     return TRUE;
 }
@@ -194,7 +194,7 @@ _pygi_marshal_from_py_uint8 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_long = long_;
+    arg->v_uint8 = long_;
 
     return TRUE;
 }
@@ -233,7 +233,7 @@ _pygi_marshal_from_py_int16 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_long = long_;
+    arg->v_int16 = long_;
 
     return TRUE;
 }
@@ -272,7 +272,7 @@ _pygi_marshal_from_py_uint16 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_long = long_;
+    arg->v_uint16 = long_;
 
     return TRUE;
 }
@@ -311,7 +311,7 @@ _pygi_marshal_from_py_int32 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_long = long_;
+    arg->v_int32 = long_;
 
     return TRUE;
 }
@@ -356,7 +356,7 @@ _pygi_marshal_from_py_uint32 (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_uint64 = long_;
+    arg->v_uint32 = long_;
 
     return TRUE;
 }
@@ -1041,6 +1041,22 @@ err:
     return TRUE;
 }
 
+static gpointer
+_pygi_arg_to_hash_pointer (const GIArgument *arg,
+                           GITypeTag        type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT32:
+            return GINT_TO_POINTER(arg->v_int32);
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            return arg->v_pointer;
+        default:
+            g_assert_not_reached();
+            return arg->v_pointer;
+    }
+}
+
 gboolean
 _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
@@ -1128,7 +1144,9 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
                                        &value))
             goto err;
 
-        g_hash_table_insert (hash_, key.v_pointer, value.v_pointer);
+        g_hash_table_insert (hash_,
+                             _pygi_arg_to_hash_pointer (&key, hash_cache->key_cache->type_tag),
+                             _pygi_arg_to_hash_pointer (&value, hash_cache->value_cache->type_tag));
         continue;
 err:
         /* FIXME: cleanup hash keys and values */

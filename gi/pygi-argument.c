@@ -722,15 +722,8 @@ _pygi_argument_from_object (PyObject   *object,
             arg.v_boolean = PyObject_IsTrue (object);
             break;
         }
-        case GI_TYPE_TAG_UINT8:
-            if (PYGLIB_PyBytes_Check(object)) {
-                arg.v_long = (long)(PYGLIB_PyBytes_AsString(object)[0]);
-                break;
-            }
-
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_INT16:
-        case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:
         {
             PyObject *int_;
@@ -740,12 +733,19 @@ _pygi_argument_from_object (PyObject   *object,
                 break;
             }
 
-            arg.v_long = PYGLIB_PyLong_AsLong (int_);
+            if (type_tag == GI_TYPE_TAG_INT32)
+                arg.v_int32 = PYGLIB_PyLong_AsLong (int_);
+            else if (type_tag == GI_TYPE_TAG_INT8)
+                arg.v_int8 = PYGLIB_PyLong_AsLong (int_);
+            else if (type_tag == GI_TYPE_TAG_INT16)
+                arg.v_int16 = PYGLIB_PyLong_AsLong (int_);
 
             Py_DECREF (int_);
 
             break;
         }
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
         case GI_TYPE_TAG_UINT64:
         {
@@ -764,7 +764,14 @@ _pygi_argument_from_object (PyObject   *object,
 #endif
             value = PyLong_AsUnsignedLongLong (number);
 
-            arg.v_uint64 = value;
+            if (type_tag == GI_TYPE_TAG_UINT32)
+                arg.v_uint32 = value;
+            else if (type_tag == GI_TYPE_TAG_UINT64)
+                arg.v_uint64 = value;
+            else if (type_tag == GI_TYPE_TAG_UINT8)
+                arg.v_uint8 = value;
+            else if (type_tag == GI_TYPE_TAG_UINT16)
+                arg.v_uint16 = value;
 
             Py_DECREF (number);
 
