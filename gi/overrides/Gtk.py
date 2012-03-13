@@ -1380,6 +1380,23 @@ class Paned(Gtk.Paned):
 Paned = override(Paned)
 __all__.append('Paned')
 
+
+class Arrow(Gtk.Arrow):
+    def __init__(self, arrow_type, shadow_type):
+        Gtk.Arrow.__init__(self, arrow_type=arrow_type,
+                           shadow_type=shadow_type)
+
+Arrow = override(Arrow)
+__all__.append('Arrow')
+
+
+class Window(Gtk.Window):
+    def __init__(self, type=Gtk.WindowType.TOPLEVEL):
+        Gtk.Window.__init__(self, type=type)
+
+Window = override(Window)
+__all__.append('Window')
+
 if Gtk._version != '2.0':
     class Menu(Gtk.Menu):
         def popup(self, parent_menu_shell, parent_menu_item, func, data, button, activate_time):
