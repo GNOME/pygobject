@@ -47,8 +47,8 @@ class property(object):
     Creates a new property which in conjunction with GObject subclass will
     create a property proxy:
 
-    >>> class MyObject(gobject.GObject):
-    >>> ... prop = gobject.property(type=str)
+    >>> class MyObject(GObject.GObject):
+    >>> ... prop = GObject.property(type=str)
 
     >>> obj = MyObject()
     >>> obj.prop = 'value'
@@ -58,17 +58,25 @@ class property(object):
 
     The API is similar to the builtin property:
 
-    class AnotherObject(gobject.GObject):
-        @gobject.property
+    class AnotherObject(GObject.GObject):
+        @GObject.property
         def prop(self):
+            '''Read only property.'''
             return ...
 
-    Which will create a read-only property called prop.
+        @GObject.property(type=int)
+        def propInt(self):
+            '''Read-write integer property.'''
+            return ...
+
+        @propInt.setter
+        def propInt(self, value):
+            ...
     """
 
     class __metaclass__(type):
         def __repr__(self):
-            return "<class 'gobject.property'>"
+            return "<class 'GObject.property'>"
 
     def __init__(self, getter=None, setter=None, type=None, default=None,
                  nick='', blurb='', flags=_gobject.PARAM_READWRITE,
@@ -96,16 +104,6 @@ class property(object):
         @keyword maximum:  maximum allowed value (int, float, long only)
         """
 
-        if getter and not setter:
-            setter = self._readonly_setter
-        elif setter and not getter:
-            getter = self._writeonly_getter
-        elif not setter and not getter:
-            getter = self._default_getter
-            setter = self._default_setter
-        self.getter = getter
-        self.setter = setter
-
         if type is None:
             type = object
         self.type = self._type_from_python(type)
@@ -123,6 +121,17 @@ class property(object):
         if flags < 0 or flags > 32:
             raise TypeError("invalid flag value: %r" % (flags,))
         self.flags = flags
+
+        # Call after setting blurb for potential __doc__ usage.
+        if getter and not setter:
+            setter = self._readonly_setter
+        elif setter and not getter:
+            getter = self._writeonly_getter
+        elif not setter and not getter:
+            getter = self._default_getter
+            setter = self._default_setter
+        self.getter(getter)
+        self.setter(setter)
 
         if minimum is not None:
             if minimum < self._get_minimum():
@@ -173,6 +182,24 @@ class property(object):
             exc = self._exc
             self._exc = None
             raise exc
+
+    def __call__(self, fget):
+        """Allows application of the getter along with init arguments."""
+        return self.getter(fget)
+
+    def getter(self, fget):
+        """Set the getter function to fget. For use as a decorator."""
+        if self.__doc__ is None:
+            self.__doc__ = fget.__doc__
+        if not self.blurb and fget.__doc__:
+            self.blurb = fget.__doc__
+        self.fget = fget
+        return self
+
+    def setter(self, fset):
+        """Set the setter function to fset. For use as a decorator."""
+        self.fset = fset
+        return self
 
     def _type_from_python(self, type_):
         if type_ == _long:

@@ -310,6 +310,38 @@ class TestProperty(unittest.TestCase):
         self.assertEquals(o._value, 'bar')
         self.assertRaises(TypeError, getattr, o, 'prop')
 
+    def testDecoratorDefault(self):
+        class C(GObject.GObject):
+            _value = 'value'
+            @GObject.property
+            def value(self):
+                return self._value
+            @value.setter
+            def value(self, value):
+                self._value = value
+
+        o = C()
+        self.assertEqual(o.value, 'value')
+        o.value = 'blah'
+        self.assertEqual(o.value, 'blah')
+        self.assertEqual(o.props.value, 'blah')
+
+    def testDecoratorWithCall(self):
+        class C(GObject.GObject):
+            _value = 1
+            @GObject.property(type=int, default=1, minimum=1, maximum=10)
+            def typedValue(self):
+                return self._value
+            @typedValue.setter
+            def typedValue(self, value):
+                self._value = value
+
+        o = C()
+        self.assertEqual(o.typedValue, 1)
+        o.typedValue = 5
+        self.assertEqual(o.typedValue, 5)
+        self.assertEqual(o.props.typedValue, 5)
+
     def testErrors(self):
         self.assertRaises(TypeError, GObject.property, type='str')
         self.assertRaises(TypeError, GObject.property, nick=False)
@@ -509,6 +541,15 @@ class TestProperty(unittest.TestCase):
         # drop to zero, and our dummy object should loose one reference.
         del t
         self.assertEquals(sys.getrefcount(o), rc)
+
+    def testDocStringAsBlurb(self):
+        class C(GObject.GObject):
+            @GObject.property
+            def blurbed(self):
+                """blurbed doc string"""
+                return 0
+
+        self.assertEqual(C.blurbed.blurb, 'blurbed doc string')
 
 
 if __name__ == '__main__':
