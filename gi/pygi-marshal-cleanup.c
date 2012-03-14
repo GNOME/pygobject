@@ -336,11 +336,20 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
             PyGIMarshalCleanupFunc cleanup_func =
                 sequence_cache->item_cache->from_py_cleanup;
 
-            for(i = 0; i < len; i++) {
-                cleanup_func (state,
-                              sequence_cache->item_cache,
-                              (array_ != NULL) ? g_array_index (array_, gpointer, i) : g_ptr_array_index (ptr_array_, i),
-                              TRUE);
+            for (i = 0; i < len; i++) {
+                gpointer item;
+
+                /* case 1: GPtrArray */
+                if (ptr_array_ != NULL)
+                    item = g_ptr_array_index (ptr_array_, i);
+                /* case 2: C array or GArray with object pointers */
+                else if (sequence_cache->item_cache->is_pointer)
+                    item = g_array_index (array_, gpointer, i);
+                /* case 3: C array or GArray with simple types or structs */
+                else
+                    item = array_->data + i * sequence_cache->item_size;
+
+                cleanup_func (state, sequence_cache->item_cache, item, TRUE);
             }
         }
 

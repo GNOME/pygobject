@@ -1046,6 +1046,14 @@ class TestGValue(unittest.TestCase):
         value.set_int(42)
         self.assertEquals('42', GIMarshallingTests.gvalue_inout(value))
 
+    def test_gvalue_flat_array_in(self):
+        # the function already asserts the correct values
+        GIMarshallingTests.gvalue_flat_array([42, "42", True])
+
+    def test_gvalue_flat_array_out(self):
+        values = GIMarshallingTests.return_gvalue_flat_array()
+        self.assertEqual(values, [42, '42', True])
+
 
 class TestGClosure(unittest.TestCase):
 

@@ -839,8 +839,19 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                          * since GVariants are opaque hence always passed by ref */
                         g_assert (item_size == sizeof (item.v_pointer));
                         g_array_insert_val (array_, i, item.v_pointer);
-                    } else if (!is_boxed || is_gvalue) {
+                    } else if (is_gvalue) {
+                        GValue* dest = (GValue*) (array_->data + (i * item_size));
+                        memset (dest, 0, item_size);
+                        if (item.v_pointer != NULL) {
+                            g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
+                            g_value_copy ((GValue*) item.v_pointer, dest);
+                        }
+
+                        if (from_py_cleanup)
+                            from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                    } else if (!is_boxed) {
                         memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
+
                         if (from_py_cleanup)
                             from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
                     } else {
