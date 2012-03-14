@@ -1140,6 +1140,9 @@ class TreePath(Gtk.TreePath):
     def __ge__(self, other):
         return other is None or self.compare(other) >= 0
 
+    def __iter__(self):
+        return iter(map(int, str(self).split(':')))
+
 TreePath = override(TreePath)
 __all__.append('TreePath')
 
