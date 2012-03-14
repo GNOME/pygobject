@@ -1429,6 +1429,16 @@ class TestGtk(unittest.TestCase):
 
         self.assertRaises(ValueError, set_row3)
 
+    def test_tree_view(self):
+        store = Gtk.ListStore(int, str)
+        store.append((0, "foo"))
+        store.append((1, "bar"))
+        view = Gtk.TreeView()
+        # We can't easily call get_cursor() to make sure this works as
+        # expected as we need to realize and focus the column
+        view.set_cursor(store[1].path)
+        view.set_cursor(str(store[1].path))
+
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title='This is just a test',

@@ -1261,6 +1261,10 @@ class TreeView(Gtk.TreeView, Container):
             path = TreePath(path)
         super(TreeView, self).scroll_to_cell(path, column, use_align, row_align, col_align)
 
+    def set_cursor(self, path, column=None, start_editing=False):
+        if not isinstance(path, Gtk.TreePath):
+            path = TreePath(path)
+        super(TreeView, self).set_cursor(path, column, start_editing)
 
 TreeView = override(TreeView)
 __all__.append('TreeView')
