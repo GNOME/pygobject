@@ -1347,9 +1347,15 @@ __all__.append('Label')
 class Adjustment(Gtk.Adjustment):
     def __init__(self, *args, **kwds):
         arg_names = ('value', 'lower', 'upper',
-                        'step_increment', 'page_increment', 'page_size')
+                     'step_increment', 'page_increment', 'page_size')
         new_args = dict(zip(arg_names, args))
         new_args.update(kwds)
+
+        # PyGTK compatiblity
+        if 'page_incr' in new_args:
+            new_args['page_increment'] = new_args.pop('page_incr')
+        if 'step_incr' in new_args:
+            new_args['step_increment'] = new_args.pop('step_incr')
         Gtk.Adjustment.__init__(self, **new_args)
 
         # The value property is set between lower and (upper - page_size).
