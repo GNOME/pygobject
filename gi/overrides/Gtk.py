@@ -785,7 +785,7 @@ class TreeModel(Gtk.TreeModel):
         if success:
             return parent_iter
 
-    def set_row(self, treeiter, row):
+    def _convert_row(self, row):
         # TODO: Accept a dictionary for row
         # model.append(None,{COLUMN_ICON: icon, COLUMN_NAME: name})
         if isinstance(row, str):
@@ -795,16 +795,24 @@ class TreeModel(Gtk.TreeModel):
         if len(row) != n_columns:
             raise ValueError('row sequence has the incorrect number of elements')
 
+        result = []
         for i in range(n_columns):
+            value = row[i]
+            result.append(self._convert_value(i, value))
+        return result
+
+    def set_row(self, treeiter, row):
+        converted_row = self._convert_row(row)
+        for i in range(self.get_n_columns()):
             value = row[i]
             if value is None:
                continue  # None means skip this row
 
             self.set_value(treeiter, i, value)
 
-    def _convert_value(self, treeiter, column, value):
+    def _convert_value(self, column, value):
             if value is None:
-                return
+                return None
 
             # we may need to convert to a basic type
             type_ = self.get_column_type(column)
@@ -926,22 +934,32 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
         Gtk.ListStore.__init__(self)
         self.set_column_types(column_types)
 
-    def append(self, row=None):
-        treeiter = Gtk.ListStore.append(self)
-
+    def _do_insert(self, position, row):
         if row is not None:
-            self.set_row(treeiter, row)
+            row = self._convert_row(row)
+            columns = range(len(row))
+            treeiter = self.insert_with_valuesv(position, columns, row)
+        else:
+            treeiter = Gtk.ListStore.insert(self, position)
 
         return treeiter
+
+    def append(self, row=None):
+        if row:
+            return self._do_insert(-1, row)
+        # gtk_list_store_insert() does not know about the "position == -1"
+        # case, so use append() here
+        else:
+            return Gtk.ListStore.append(self)
+
+    def prepend(self, row=None):
+        return self._do_insert(0, row)
 
     def insert(self, position, row=None):
-        treeiter = Gtk.ListStore.insert(self, position)
+        return self._do_insert(position, row)
 
-        if row is not None:
-            self.set_row(treeiter, row)
-
-        return treeiter
-
+    # FIXME: sends two signals; check if this can use an atomic
+    # insert_with_valuesv()
     def insert_before(self, sibling, row=None):
         treeiter = Gtk.ListStore.insert_before(self, sibling)
 
@@ -950,6 +968,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
         return treeiter
 
+    # FIXME: sends two signals; check if this can use an atomic
+    # insert_with_valuesv()
     def insert_after(self, sibling, row=None):
         treeiter = Gtk.ListStore.insert_after(self, sibling)
 
@@ -958,16 +978,8 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
         return treeiter
 
-    def prepend(self, row=None):
-        treeiter = Gtk.ListStore.prepend(self)
-
-        if row is not None:
-            self.set_row(treeiter, row)
-
-        return treeiter
-
     def set_value(self, treeiter, column, value):
-        value = self._convert_value(treeiter, column, value)
+        value = self._convert_value(column, value)
         Gtk.ListStore.set_value(self, treeiter, column, value)
 
     def set(self, treeiter, *args):
@@ -1152,22 +1164,27 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         Gtk.TreeStore.__init__(self)
         self.set_column_types(column_types)
 
-    def append(self, parent, row=None):
-        treeiter = Gtk.TreeStore.append(self, parent)
-
+    def _do_insert(self, parent, position, row):
         if row is not None:
-            self.set_row(treeiter, row)
+            row = self._convert_row(row)
+            columns = range(len(row))
+            treeiter = self.insert_with_values(parent, position, columns, row)
+        else:
+            treeiter = Gtk.TreeStore.insert(self, parent, position)
 
         return treeiter
+
+    def append(self, parent, row=None):
+        return self._do_insert(parent, -1, row)
+
+    def prepend(self, parent, row=None):
+        return self._do_insert(parent, 0, row)
 
     def insert(self, parent, position, row=None):
-        treeiter = Gtk.TreeStore.insert(self, parent, position)
+        return self._do_insert(parent, position, row)
 
-        if row is not None:
-            self.set_row(treeiter, row)
-
-        return treeiter
-
+    # FIXME: sends two signals; check if this can use an atomic
+    # insert_with_valuesv()
     def insert_before(self, parent, sibling, row=None):
         treeiter = Gtk.TreeStore.insert_before(self, parent, sibling)
 
@@ -1176,6 +1193,8 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
         return treeiter
 
+    # FIXME: sends two signals; check if this can use an atomic
+    # insert_with_valuesv()
     def insert_after(self, parent, sibling, row=None):
         treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
 
@@ -1185,7 +1204,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
         return treeiter
 
     def set_value(self, treeiter, column, value):
-        value = self._convert_value(treeiter, column, value)
+        value = self._convert_value(column, value)
         Gtk.TreeStore.set_value(self, treeiter, column, value)
 
     def set(self, treeiter, *args):

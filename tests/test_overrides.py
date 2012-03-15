@@ -999,6 +999,43 @@ class TestGtk(unittest.TestCase):
 
         self.assertEquals(i, 99)
 
+    def test_tree_store_signals(self):
+        tree_store = Gtk.TreeStore(int, bool)
+
+        def on_row_inserted(tree_store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(tree_store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        signals = []
+        tree_store.connect('row-inserted', on_row_inserted, signals)
+        tree_store.connect('row-changed', on_row_changed, signals)
+
+        # adding rows with and without data should only call one signal
+        tree_store.append(None, (0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        tree_store.append(None)
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        tree_store.prepend(None, (0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        tree_store.prepend(None)
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        tree_store.insert(None, 1, (0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        tree_store.insert(None, 1)
+        self.assertEqual(signals, ['row-inserted'])
+
     def test_list_store(self):
         class TestPyObject(object):
             pass
@@ -1187,6 +1224,43 @@ class TestGtk(unittest.TestCase):
             counter += 1
 
         self.assertEquals(i, 102)
+
+    def test_list_store_signals(self):
+        list_store = Gtk.ListStore(int, bool)
+
+        def on_row_inserted(list_store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-inserted')
+
+        def on_row_changed(list_store, tree_path, tree_iter, signal_list):
+            signal_list.append('row-changed')
+
+        signals = []
+        list_store.connect('row-inserted', on_row_inserted, signals)
+        list_store.connect('row-changed', on_row_changed, signals)
+
+        # adding rows with and without data should only call one signal
+        list_store.append((0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        list_store.append()
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        list_store.prepend((0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        list_store.prepend()
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        list_store.insert(1, (0, False))
+        self.assertEqual(signals, ['row-inserted'])
+
+        signals.pop()
+        list_store.insert(1)
+        self.assertEqual(signals, ['row-inserted'])
 
     def test_tree_path(self):
         p1 = Gtk.TreePath()
