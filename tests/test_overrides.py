@@ -1515,6 +1515,9 @@ class TestGtk(unittest.TestCase):
         view.set_cursor(store[1].path)
         view.set_cursor(str(store[1].path))
 
+        view.get_cell_area(store[1].path)
+        view.get_cell_area(str(store[1].path))
+
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(title='This is just a test',
