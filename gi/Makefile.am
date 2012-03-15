@@ -30,7 +30,8 @@ pygi_PYTHON = \
 	__init__.py \
 	types.py \
 	module.py \
-	importer.py
+	importer.py \
+	pygtkcompat.py
 
 pygi_LTLIBRARIES = _gi.la
 

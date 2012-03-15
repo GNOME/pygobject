@@ -82,7 +82,8 @@ TEST_FILES_GI = \
 	test_everything.py \
 	test_gi.py \
 	test_gdbus.py \
-	test_overrides.py
+	test_overrides.py \
+	test_pygtkcompat.py
 
 EXTRA_DIST = \
 	compathelper.py \
