@@ -111,6 +111,9 @@ else:
         def cairo_create(self):
             return Gdk.cairo_create(self)
 
+        def get_origin(self):
+            return super(Window, self).get_origin()[1:]
+
     Window = override(Window)
     __all__.append('Window')
 
