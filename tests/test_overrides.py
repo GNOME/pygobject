@@ -1811,8 +1811,15 @@ class TestGtk(unittest.TestCase):
 
         model = Gtk.ListStore(str)
         iconview = Gtk.IconView(model)
-
         self.assertEquals(iconview.props.model, model)
+
+    def test_toolbutton(self):
+        # PyGTK compat
+        button = Gtk.ToolButton()
+        self.assertEquals(button.props.stock_id, None)
+
+        button = Gtk.ToolButton('gtk-new')
+        self.assertEquals(button.props.stock_id, 'gtk-new')
 
 
 class TestGio(unittest.TestCase):
