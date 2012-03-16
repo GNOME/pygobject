@@ -1450,6 +1450,17 @@ class Window(Gtk.Window):
 Window = override(Window)
 __all__.append('Window')
 
+class IconSet(Gtk.IconSet):
+    def __new__(cls, pixbuf=None):
+        if pixbuf is not None:
+            iconset = Gtk.IconSet.new_from_pixbuf(pixbuf)
+        else:
+            iconset = Gtk.IconSet.__new__(cls)
+        return iconset
+
+IconSet = override(IconSet)
+__all__.append('IconSet')
+
 class TreeModelFilter(Gtk.TreeModelFilter):
     def set_visible_func(self, func, data=None):
         super(TreeModelFilter, self).set_visible_func(func, data)
