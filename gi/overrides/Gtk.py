@@ -552,6 +552,9 @@ __all__.append('RecentChooserDialog')
 
 class IconView(Gtk.IconView):
 
+    def __init__(self, model=None):
+        Gtk.IconView.__init__(self, model=model)
+
     def get_item_at_pos(self, x, y):
         success, path, cell = super(IconView, self).get_item_at_pos(x, y)
         if success:

@@ -1804,6 +1804,17 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(hasattr(widget.drag_dest_set_proxy, '__call__'))
         self.assertTrue(hasattr(widget.drag_get_data, '__call__'))
 
+    def test_iconview(self):
+        # PyGTK compat
+        iconview = Gtk.IconView()
+        self.assertEquals(iconview.props.model, None)
+
+        model = Gtk.ListStore(str)
+        iconview = Gtk.IconView(model)
+
+        self.assertEquals(iconview.props.model, model)
+
+
 class TestGio(unittest.TestCase):
     def setUp(self):
         os.environ['GSETTINGS_BACKEND'] = 'memory'
