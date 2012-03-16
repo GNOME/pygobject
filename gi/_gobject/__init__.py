@@ -53,7 +53,7 @@ from ._gobject import *
 
 _PyGObject_API = _gobject._PyGObject_API
 
-from .propertyhelper import property
+from .propertyhelper import Property
 
 sys.modules['gi._gobject.option'] = option
 
@@ -69,7 +69,7 @@ class GObjectMeta(type):
 
         props = []
         for name, prop in cls.__dict__.items():
-            if isinstance(prop, property): # not same as the built-in
+            if isinstance(prop, Property): # not same as the built-in
                 if name in gproperties:
                     raise ValueError
                 prop.name = name
@@ -120,4 +120,5 @@ class GObjectMeta(type):
 
 _gobject._install_metaclass(GObjectMeta)
 
-#del _gobject
+# Deprecated naming still available for backwards compatibility.
+property = Property

@@ -42,13 +42,13 @@ else:
     _basestring = basestring
     _long = long
 
-class property(object):
+class Property(object):
     """
     Creates a new property which in conjunction with GObject subclass will
     create a property proxy:
 
     >>> class MyObject(GObject.GObject):
-    >>> ... prop = GObject.property(type=str)
+    >>> ... prop = GObject.Property(type=str)
 
     >>> obj = MyObject()
     >>> obj.prop = 'value'
@@ -59,12 +59,12 @@ class property(object):
     The API is similar to the builtin property:
 
     class AnotherObject(GObject.GObject):
-        @GObject.property
+        @GObject.Property
         def prop(self):
             '''Read only property.'''
             return ...
 
-        @GObject.property(type=int)
+        @GObject.Property(type=int)
         def propInt(self):
             '''Read-write integer property.'''
             return ...
@@ -76,7 +76,7 @@ class property(object):
 
     class __metaclass__(type):
         def __repr__(self):
-            return "<class 'GObject.property'>"
+            return "<class 'GObject.Property'>"
 
     def __init__(self, getter=None, setter=None, type=None, default=None,
                  nick='', blurb='', flags=_gobject.PARAM_READWRITE,
@@ -155,7 +155,7 @@ class property(object):
         self._exc = None
 
     def __repr__(self):
-        return '<gobject property %s (%s)>' % (
+        return '<GObject Property %s (%s)>' % (
             self.name or '(uninitialized)',
             _gobject.type_name(self.type))
 

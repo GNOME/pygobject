@@ -2,13 +2,13 @@ from gi.repository import GObject
 
 class MyObject(GObject.GObject):
 
-    foo = GObject.property(type=str, default='bar')
-    boolprop = GObject.property(type=bool, default=False)
+    foo = GObject.Property(type=str, default='bar')
+    boolprop = GObject.Property(type=bool, default=False)
 
     def __init__(self):
         GObject.GObject.__init__(self)
 
-    @GObject.property
+    @GObject.Property
     def readonly(self):
         return 'readonly'
 

@@ -11,7 +11,7 @@ Unknown = GUnknown.pytype
 
 
 class MyUnknown(Unknown, testhelper.Interface):
-    some_property = GObject.property(type=str)
+    some_property = GObject.Property(type=str)
 
     def __init__(self):
         Unknown.__init__(self)
@@ -24,7 +24,7 @@ GObject.type_register(MyUnknown)
 
 
 class MyObject(GObject.GObject, testhelper.Interface):
-    some_property = GObject.property(type=str)
+    some_property = GObject.Property(type=str)
 
     def __init__(self):
         GObject.GObject.__init__(self)
