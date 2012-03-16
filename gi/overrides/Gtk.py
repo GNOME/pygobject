@@ -573,6 +573,16 @@ class IconView(Gtk.IconView):
 IconView = override(IconView)
 __all__.append('IconView')
 
+
+class ToolButton(Gtk.ToolButton):
+
+    def __init__(self, stock_id=None):
+        Gtk.ToolButton.__init__(self, stock_id=stock_id)
+
+ToolButton = override(ToolButton)
+__all__.append('ToolButton')
+
+
 class IMContext(Gtk.IMContext):
 
     def get_surrounding(self):
