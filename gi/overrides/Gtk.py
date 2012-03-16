@@ -1410,13 +1410,6 @@ Arrow = override(Arrow)
 __all__.append('Arrow')
 
 
-class Window(Gtk.Window):
-    def __init__(self, type=Gtk.WindowType.TOPLEVEL):
-        Gtk.Window.__init__(self, type=type)
-
-Window = override(Window)
-__all__.append('Window')
-
 class TreeModelFilter(Gtk.TreeModelFilter):
     def set_visible_func(self, func, data=None):
         super(TreeModelFilter, self).set_visible_func(func, data)
