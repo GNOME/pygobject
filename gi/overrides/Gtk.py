@@ -1461,6 +1461,16 @@ class IconSet(Gtk.IconSet):
 IconSet = override(IconSet)
 __all__.append('IconSet')
 
+
+class Viewport(Gtk.Viewport):
+    def __init__(self, hadjustment=None, vadjustment=None):
+        Gtk.Viewport.__init__(self, hadjustment=hadjustment,
+                              vadjustment=vadjustment)
+
+Viewport = override(Viewport)
+__all__.append('Viewport')
+
+
 class TreeModelFilter(Gtk.TreeModelFilter):
     def set_visible_func(self, func, data=None):
         super(TreeModelFilter, self).set_visible_func(func, data)
