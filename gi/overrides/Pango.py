@@ -55,6 +55,9 @@ class Layout(Pango.Layout):
         # __new__ and it is not a PangoLayout property
         super(Layout, self).__init__(**kwds)
 
+    def set_markup(self, text, length=-1):
+        super(Layout, self).set_markup(text, length)
+
 Layout = override(Layout)
 __all__.append('Layout')
 

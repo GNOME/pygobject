@@ -465,6 +465,10 @@ class TestPango(unittest.TestCase):
         layout = Pango.Layout(context)
         self.assertEquals(layout.get_context(), context)
 
+        layout.set_markup("Foobar")
+        self.assertEquals(layout.get_text(), "Foobar")
+
+
 class TestGdk(unittest.TestCase):
 
     def test_constructor(self):
