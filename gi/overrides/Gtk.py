@@ -1408,6 +1408,21 @@ class ScrolledWindow(Gtk.ScrolledWindow):
 ScrolledWindow = override(ScrolledWindow)
 __all__.append('ScrolledWindow')
 
+
+class HScrollbar(Gtk.HScrollbar):
+    def __init__(self, adjustment=None):
+        Gtk.HScrollbar.__init__(self, adjustment=adjustment)
+
+HScrollbar = override(HScrollbar)
+__all__.append('HScrollbar')
+
+class VScrollbar(Gtk.VScrollbar):
+    def __init__(self, adjustment=None):
+        Gtk.VScrollbar.__init__(self, adjustment=adjustment)
+
+VScrollbar = override(VScrollbar)
+__all__.append('VScrollbar')
+
 class Paned(Gtk.Paned):
     def pack1(self, child, resize=False, shrink=True):
         super(Paned, self).pack1(child, resize, shrink)
