@@ -847,8 +847,13 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             g_value_copy ((GValue*) item.v_pointer, dest);
                         }
 
-                        if (from_py_cleanup)
+                        if (from_py_cleanup) {
                             from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                            /* we freed the original copy already, the new one is a 
+                             * struct in an array. _pygi_marshal_cleanup_from_py_array()
+                             * must not free it again */
+                            item_arg_cache->from_py_cleanup = NULL;
+                        }
                     } else if (!is_boxed) {
                         memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
 
