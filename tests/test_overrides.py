@@ -1845,6 +1845,17 @@ class TestGtk(unittest.TestCase):
         pixbuf = GdkPixbuf.Pixbuf()
         iconset = Gtk.IconSet(pixbuf)
 
+    def test_viewport(self):
+        # PyGTK compat
+        vadjustment = Gtk.Adjustment()
+        hadjustment = Gtk.Adjustment()
+
+        viewport = Gtk.Viewport(hadjustment=hadjustment,
+                                vadjustment=vadjustment)
+
+        self.assertEquals(viewport.props.vadjustment, vadjustment)
+        self.assertEquals(viewport.props.hadjustment, hadjustment)
+
 
 class TestGio(unittest.TestCase):
     def setUp(self):
