@@ -1804,6 +1804,20 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(hasattr(widget.drag_dest_set_proxy, '__call__'))
         self.assertTrue(hasattr(widget.drag_get_data, '__call__'))
 
+    def test_scrollbar(self):
+        # PyGTK compat
+        adjustment = Gtk.Adjustment()
+
+        hscrollbar = Gtk.HScrollbar()
+        vscrollbar = Gtk.VScrollbar()
+        self.assertNotEquals(hscrollbar.props.adjustment, adjustment)
+        self.assertNotEquals(vscrollbar.props.adjustment, adjustment)
+
+        hscrollbar = Gtk.HScrollbar(adjustment)
+        vscrollbar = Gtk.VScrollbar(adjustment)
+        self.assertEquals(hscrollbar.props.adjustment, adjustment)
+        self.assertEquals(vscrollbar.props.adjustment, adjustment)
+
     def test_iconview(self):
         # PyGTK compat
         iconview = Gtk.IconView()
