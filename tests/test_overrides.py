@@ -558,6 +558,9 @@ class TestGtk(unittest.TestCase):
 
     def test_container(self):
         box = Gtk.Box()
+        self.failUnless(isinstance(box, Gtk.Box))
+        self.failUnless(isinstance(box, Gtk.Container))
+        self.failUnless(isinstance(box, Gtk.Widget))
         self.assertTrue(box)
         label = Gtk.Label()
         label2 = Gtk.Label()
@@ -736,6 +739,8 @@ class TestGtk(unittest.TestCase):
         dialog = Gtk.Dialog (title='Foo',
                              flags=Gtk.DialogFlags.MODAL,
                              buttons=('test-button1', 1))
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
 
         dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
 
@@ -750,12 +755,16 @@ class TestGtk(unittest.TestCase):
 
         # Gtk.AboutDialog
         dialog = Gtk.AboutDialog()
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
 
         # Gtk.MessageDialog
         dialog = Gtk.MessageDialog (title='message dialog test',
                                     flags=Gtk.DialogFlags.MODAL,
                                     buttons=Gtk.ButtonsType.OK,
                                     message_format='dude!')
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
 
         self.assertEquals('message dialog test', dialog.get_title())
         self.assertTrue(dialog.get_modal())
@@ -772,12 +781,16 @@ class TestGtk(unittest.TestCase):
 
         # Gtk.ColorSelectionDialog
         dialog = Gtk.ColorSelectionDialog("color selection dialog test")
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
         self.assertEquals('color selection dialog test', dialog.get_title())
 
         # Gtk.FileChooserDialog
         dialog = Gtk.FileChooserDialog (title='file chooser dialog test',
                                         buttons=('test-button1', 1),
                                         action=Gtk.FileChooserAction.SAVE)
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
 
         dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEquals('file chooser dialog test', dialog.get_title())
@@ -793,6 +806,8 @@ class TestGtk(unittest.TestCase):
 
         # Gtk.FontSelectionDialog
         dialog = Gtk.ColorSelectionDialog("font selection dialog test")
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
         self.assertEquals('font selection dialog test', dialog.get_title())
 
         # Gtk.RecentChooserDialog
@@ -800,6 +815,8 @@ class TestGtk(unittest.TestCase):
         dialog = Gtk.RecentChooserDialog (title='recent chooser dialog test',
                                           buttons=('test-button1', 1),
                                           manager=test_manager)
+        self.failUnless(isinstance(dialog, Gtk.Dialog))
+        self.failUnless(isinstance(dialog, Gtk.Window))
 
         dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEquals('recent chooser dialog test', dialog.get_title())
@@ -1527,6 +1544,9 @@ class TestGtk(unittest.TestCase):
 
         # test Gtk.Button
         button = Gtk.Button()
+        self.failUnless(isinstance(button, Gtk.Button))
+        self.failUnless(isinstance(button, Gtk.Container))
+        self.failUnless(isinstance(button, Gtk.Widget))
         button = Gtk.Button(stock=Gtk.STOCK_CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
@@ -1534,8 +1554,11 @@ class TestGtk(unittest.TestCase):
 
         # test Gtk.LinkButton
         self.assertRaises(TypeError, Gtk.LinkButton)
-        button = Gtk.LinkButton('http://www.gtk.org', 'Gtk')
-        self.assertEquals('http://www.gtk.org', button.get_uri())
+        button = Gtk.LinkButton('http://www.Gtk.org', 'Gtk')
+        self.failUnless(isinstance(button, Gtk.Button))
+        self.failUnless(isinstance(button, Gtk.Container))
+        self.failUnless(isinstance(button, Gtk.Widget))
+        self.assertEquals('http://www.Gtk.org', button.get_uri())
         self.assertEquals('Gtk', button.get_label())
 
     def test_inheritance(self):
@@ -1578,6 +1601,7 @@ class TestGtk(unittest.TestCase):
 
     def test_label(self):
         label = Gtk.Label(label='Hello')
+        self.failUnless(isinstance(label, Gtk.Widget))
         self.assertEquals(label.get_text(), 'Hello')
 
     def adjustment_check(self, adjustment, value=0.0, lower=0.0, upper=0.0,
@@ -1611,6 +1635,9 @@ class TestGtk(unittest.TestCase):
 
     def test_table(self):
         table = Gtk.Table()
+        self.failUnless(isinstance(table, Gtk.Table))
+        self.failUnless(isinstance(table, Gtk.Container))
+        self.failUnless(isinstance(table, Gtk.Widget))
         self.assertEquals(table.get_size(), (1,1))
         self.assertEquals(table.get_homogeneous(), False)
         table = Gtk.Table(2, 3)
@@ -1629,11 +1656,15 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(table.get_homogeneous(), True)
 
         label = Gtk.Label(label='Hello')
+        self.failUnless(isinstance(label, Gtk.Widget))
         table.attach(label, 0, 1, 0, 1)
         self.assertEquals(label, table.get_children()[0])
 
     def test_scrolledwindow(self):
         sw = Gtk.ScrolledWindow()
+        self.failUnless(isinstance(sw, Gtk.ScrolledWindow))
+        self.failUnless(isinstance(sw, Gtk.Container))
+        self.failUnless(isinstance(sw, Gtk.Widget))
         sb = sw.get_hscrollbar()
         self.assertEquals(sw.get_hadjustment(), sb.get_adjustment())
         sb = sw.get_vscrollbar()

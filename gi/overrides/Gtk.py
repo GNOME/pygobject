@@ -384,6 +384,16 @@ Builder = override(Builder)
 __all__.append('Builder')
 
 
+# NOTE: This must come before any other Window/Dialog subclassing, to ensure
+# that we have a correct inheritance hierarchy.
+class Window(Gtk.Window):
+    def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwargs):
+        Gtk.Window.__init__(self, type=type, **kwargs)
+
+Window = override(Window)
+__all__.append('Window')
+
+
 class Dialog(Gtk.Dialog, Container):
 
     def __init__(self,
@@ -470,8 +480,9 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
         Gtk.MessageDialog.__init__(self,
                                    _buttons_property=buttons,
                                    message_type=message_type,
+                                   parent=parent,
+                                   flags=flags,
                                    **kwds)
-        Dialog.__init__(self, parent=parent, flags=flags)
 
     def format_secondary_text(self, message_format):
         self.set_property('secondary-use-markup', False)
@@ -484,23 +495,21 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
 MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 
-class AboutDialog(Gtk.AboutDialog, Dialog):
+class AboutDialog(Gtk.AboutDialog):
     def __init__(self, **kwds):
         Gtk.AboutDialog.__init__(self, **kwds)
-        Dialog.__init__(self)
 
 AboutDialog = override(AboutDialog)
 __all__.append('AboutDialog')
 
-class ColorSelectionDialog(Gtk.ColorSelectionDialog, Dialog):
+class ColorSelectionDialog(Gtk.ColorSelectionDialog):
     def __init__(self, title=None, **kwds):
-        Gtk.ColorSelectionDialog.__init__(self, **kwds)
-        Dialog.__init__(self, title=title)
+        Gtk.ColorSelectionDialog.__init__(self, title=title, **kwds)
 
 ColorSelectionDialog = override(ColorSelectionDialog)
 __all__.append('ColorSelectionDialog')
 
-class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
+class FileChooserDialog(Gtk.FileChooserDialog):
     def __init__(self,
                  title=None,
                  parent=None,
@@ -509,24 +518,21 @@ class FileChooserDialog(Gtk.FileChooserDialog, Dialog):
                  **kwds):
         Gtk.FileChooserDialog.__init__(self,
                                        action=action,
+                                       title=title,
+                                       parent=parent,
+                                       buttons=buttons,
                                        **kwds)
-        Dialog.__init__(self,
-                        title=title,
-                        parent=parent,
-                        buttons=buttons)
-
 FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
 
-class FontSelectionDialog(Gtk.FontSelectionDialog, Dialog):
+class FontSelectionDialog(Gtk.FontSelectionDialog):
     def __init__(self, title=None, **kwds):
-        Gtk.FontSelectionDialog.__init__(self, **kwds)
-        Dialog.__init__(self, title=title)
+        Gtk.FontSelectionDialog.__init__(self, title=title, **kwds)
 
 FontSelectionDialog = override(FontSelectionDialog)
 __all__.append('FontSelectionDialog')
 
-class RecentChooserDialog(Gtk.RecentChooserDialog, Dialog):
+class RecentChooserDialog(Gtk.RecentChooserDialog):
     def __init__(self,
                  title=None,
                  parent=None,
@@ -534,11 +540,12 @@ class RecentChooserDialog(Gtk.RecentChooserDialog, Dialog):
                  buttons=None,
                  **kwds):
 
-        Gtk.RecentChooserDialog.__init__(self, recent_manager=manager, **kwds)
-        Dialog.__init__(self,
-                        title=title,
-                        parent=parent,
-                        buttons=buttons)
+        Gtk.RecentChooserDialog.__init__(self,
+                recent_manager=manager,
+                title=title,
+                parent=parent,
+                buttons=buttons,
+                **kwds)
 
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
@@ -1389,13 +1396,6 @@ class Arrow(Gtk.Arrow):
 Arrow = override(Arrow)
 __all__.append('Arrow')
 
-
-class Window(Gtk.Window):
-    def __init__(self, type=Gtk.WindowType.TOPLEVEL):
-        Gtk.Window.__init__(self, type=type)
-
-Window = override(Window)
-__all__.append('Window')
 
 if Gtk._version != '2.0':
     class Menu(Gtk.Menu):
