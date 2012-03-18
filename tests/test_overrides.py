@@ -1564,6 +1564,12 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
 
+        # test Gtk.Button use_stock
+        button = Gtk.Button(label=Gtk.STOCK_CLOSE, use_stock=True, use_underline=True)
+        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertTrue(button.get_use_stock())
+        self.assertTrue(button.get_use_underline())
+
         # test Gtk.LinkButton
         self.assertRaises(TypeError, Gtk.LinkButton)
         button = Gtk.LinkButton('http://www.Gtk.org', 'Gtk')

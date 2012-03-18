@@ -1318,13 +1318,11 @@ TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
 
 class Button(Gtk.Button, Container):
-    def __init__(self, label=None, stock=None, use_underline=False, **kwds):
+    def __init__(self, label=None, stock=None, use_stock=False, use_underline=False, **kwds):
         if stock:
             label = stock
             use_stock = True
             use_underline = True
-        else:
-            use_stock = False
         Gtk.Button.__init__(self, label=label, use_stock=use_stock,
                             use_underline=use_underline, **kwds)
 Button = override(Button)
