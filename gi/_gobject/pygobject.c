@@ -993,6 +993,116 @@ pygobject_watch_closure(PyObject *self, GClosure *closure)
     g_closure_add_invalidate_notifier(closure, data, pygobject_unwatch_closure);
 }
 
+
+/* -------------- Freeze Notify Context Manager ----------------- */
+
+/**
+ * pygcontext_manager_enter
+ * @self: Freeze or Block context instance
+ *
+ * Method used for __enter__ on both GContextFeezeNotify and
+ * GContextHandlerBlock. Does nothing since this is an object returned
+ * by the freeze_notify() and handler_block() methods which do the actual
+ * work of freezing and blocking.
+ */
+static PyObject *
+pygcontext_manager_enter(PyObject *self)
+{
+	Py_INCREF(self);
+	return self;
+}
+
+typedef struct {
+    PyObject_HEAD
+    GObject *obj;
+} PyGContextFreezeNotify;
+
+PYGLIB_DEFINE_TYPE("gi._gobject.GContextFreezeNotify",
+		PyGContextFreezeNotify_Type, PyGContextFreezeNotify);
+
+static PyObject *
+pygcontext_freeze_notify_new(GObject *gobj)
+{
+	PyGContextFreezeNotify *context;
+
+	context = PyObject_New(PyGContextFreezeNotify, &PyGContextFreezeNotify_Type);
+	if (context == NULL)
+		return NULL;
+
+	g_object_ref(gobj);
+	context->obj = gobj;
+	return (PyObject*)context;
+}
+
+static void
+pygcontext_freeze_notify_dealloc(PyGContextFreezeNotify* self)
+{
+    g_object_unref(self->obj);
+    self->obj = NULL;
+    PyObject_Del((PyObject*)self);
+}
+
+static PyObject *
+pygcontext_freeze_notify_exit(PyGContextFreezeNotify *self, PyObject *args)
+{
+	g_object_thaw_notify(self->obj);
+	Py_RETURN_NONE;
+}
+
+static PyMethodDef pygcontext_freeze_notify_methods[] = {
+	{"__enter__", (PyCFunction)pygcontext_manager_enter, METH_NOARGS, ""},
+	{"__exit__", (PyCFunction)pygcontext_freeze_notify_exit, METH_VARARGS, ""},
+    {NULL}
+};
+
+/* -------------- Handler Block Context Manager ----------------- */
+typedef struct {
+    PyObject_HEAD
+    GObject *obj;
+    gulong handler_id;
+} PyGContextHandlerBlock;
+
+PYGLIB_DEFINE_TYPE("gi._gobject.GContextHandlerBlock",
+		PyGContextHandlerBlock_Type, PyGContextHandlerBlock);
+
+static PyObject *
+pygcontext_handler_block_new(GObject *gobj, gulong handler_id)
+{
+	PyGContextHandlerBlock *context;
+
+	context = PyObject_New(PyGContextHandlerBlock, &PyGContextHandlerBlock_Type);
+	if (context == NULL)
+		return NULL;
+
+	g_object_ref(gobj);
+	context->obj = gobj;
+	context->handler_id = handler_id;
+	return (PyObject*)context;
+}
+
+static void
+pygcontext_handler_block_dealloc(PyGContextHandlerBlock* self)
+{
+    g_object_unref(self->obj);
+    self->obj = NULL;
+    PyObject_Del((PyObject*)self);
+}
+
+static PyObject *
+pygcontext_handler_block_exit(PyGContextHandlerBlock *self, PyObject *args)
+{
+	g_signal_handler_unblock(self->obj, self->handler_id);
+	Py_RETURN_NONE;
+}
+
+
+static PyMethodDef pygcontext_handler_block_methods[] = {
+	{"__enter__", (PyCFunction)pygcontext_manager_enter, METH_NOARGS, ""},
+	{"__exit__", (PyCFunction)pygcontext_handler_block_exit, METH_VARARGS, ""},
+    {NULL}
+};
+
+
 /* -------------- PyGObject behaviour ----------------- */
 
 PYGLIB_DEFINE_TYPE("gi._gobject.GObject", PyGObject_Type, PyGObject);
@@ -1380,12 +1490,11 @@ pygobject_freeze_notify(PyGObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ":GObject.freeze_notify"))
 	return NULL;
-    
+
     CHECK_GOBJECT(self);
-    
+
     g_object_freeze_notify(self->obj);
-    Py_INCREF(Py_None);
-    return Py_None;
+    return pygcontext_freeze_notify_new(self->obj);
 }
 
 static PyObject *
@@ -1395,9 +1504,9 @@ pygobject_notify(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:GObject.notify", &property_name))
 	return NULL;
-    
+
     CHECK_GOBJECT(self);
-    
+
     g_object_notify(self->obj, property_name);
     Py_INCREF(Py_None);
     return Py_None;
@@ -1666,8 +1775,7 @@ pygobject_handler_block(PyGObject *self, PyObject *args)
     CHECK_GOBJECT(self);
     
     g_signal_handler_block(self->obj, handler_id);
-    Py_INCREF(Py_None);
-    return Py_None;
+    return pygcontext_handler_block_new(self->obj, handler_id);
 }
 
 static PyObject *
@@ -2318,4 +2426,18 @@ pygobject_object_register_types(PyObject *d)
     if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
         return;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
+
+    PyGContextFreezeNotify_Type.tp_dealloc = (destructor)pygcontext_freeze_notify_dealloc;
+    PyGContextFreezeNotify_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGContextFreezeNotify_Type.tp_doc = "Context manager for freeze/thaw of GObjects";
+    PyGContextFreezeNotify_Type.tp_methods = pygcontext_freeze_notify_methods;
+    if (PyType_Ready(&PyGContextFreezeNotify_Type) < 0)
+        return;
+
+    PyGContextHandlerBlock_Type.tp_dealloc = (destructor)pygcontext_handler_block_dealloc;
+    PyGContextHandlerBlock_Type.tp_flags = Py_TPFLAGS_DEFAULT;
+    PyGContextHandlerBlock_Type.tp_doc = "Context manager for handler blocking of GObjects";
+    PyGContextHandlerBlock_Type.tp_methods = pygcontext_handler_block_methods;
+    if (PyType_Ready(&PyGContextHandlerBlock_Type) < 0)
+        return;
 }

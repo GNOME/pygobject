@@ -190,3 +190,161 @@ class TestPythonReferenceCounting(unittest.TestCase):
     def testNewSubclassInstanceHasTwoRefsUsingGObjectNew(self):
         obj = GObject.new(A)
         self.assertEquals(sys.getrefcount(obj), 2)
+
+
+class TestContextManagers(unittest.TestCase):
+    class ContextTestObject(GObject.GObject):
+        prop = GObject.Property(default=0, type=int)
+
+    def on_prop_set(self, obj, prop):
+        # Handler which tracks property changed notifications.
+        self.tracking.append(obj.get_property(prop.name))
+
+    def setUp(self):
+        self.tracking = []
+        self.obj = self.ContextTestObject()
+        self.handler = self.obj.connect('notify::prop', self.on_prop_set)
+
+    def testFreezeNotifyContext(self):
+        # Verify prop tracking list
+        self.assertEqual(self.tracking, [])
+        self.obj.props.prop = 1
+        self.assertEqual(self.tracking, [1])
+        self.obj.props.prop = 2
+        self.assertEqual(self.tracking, [1, 2])
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+        # Using the context manager the tracking list should not be affected
+        # and the GObject reference count should go up.
+        with self.obj.freeze_notify():
+            self.assertEqual(self.obj.__grefcount__, 2)
+            self.obj.props.prop = 3
+            self.assertEqual(self.obj.props.prop, 3)
+            self.assertEqual(self.tracking, [1, 2])
+
+        # After the context manager, the prop should have been modified,
+        # the tracking list will be modified, and the GObject ref
+        # count goes back down.
+        self.assertEqual(self.obj.props.prop, 3)
+        self.assertEqual(self.tracking, [1, 2, 3])
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+    def testHandlerBlockContext(self):
+        # Verify prop tracking list
+        self.assertEqual(self.tracking, [])
+        self.obj.props.prop = 1
+        self.assertEqual(self.tracking, [1])
+        self.obj.props.prop = 2
+        self.assertEqual(self.tracking, [1, 2])
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+        # Using the context manager the tracking list should not be affected
+        # and the GObject reference count should go up.
+        with self.obj.handler_block(self.handler):
+            self.assertEqual(self.obj.__grefcount__, 2)
+            self.obj.props.prop = 3
+            self.assertEqual(self.obj.props.prop, 3)
+            self.assertEqual(self.tracking, [1, 2])
+
+        # After the context manager, the prop should have been modified
+        # the tracking list should have stayed the same and the GObject ref
+        # count goes back down.
+        self.assertEqual(self.obj.props.prop, 3)
+        self.assertEqual(self.tracking, [1, 2])
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+    def testFreezeNotifyContextNested(self):
+        self.assertEqual(self.tracking, [])
+        with self.obj.freeze_notify():
+            self.obj.props.prop = 1
+            self.assertEqual(self.tracking, [])
+
+            with self.obj.freeze_notify():
+                self.obj.props.prop = 2
+                self.assertEqual(self.tracking, [])
+
+                with self.obj.freeze_notify():
+                    self.obj.props.prop = 3
+                    self.assertEqual(self.tracking, [])
+                self.assertEqual(self.tracking, [])
+            self.assertEqual(self.tracking, [])
+
+        # Finally after last context, the notifications should have collapsed
+        # and the last one sent.
+        self.assertEqual(self.tracking, [3])
+
+    def testHandlerBlockContextNested(self):
+        self.assertEqual(self.tracking, [])
+        with self.obj.handler_block(self.handler):
+            self.obj.props.prop = 1
+            self.assertEqual(self.tracking, [])
+
+            with self.obj.handler_block(self.handler):
+                self.obj.props.prop = 2
+                self.assertEqual(self.tracking, [])
+
+                with self.obj.handler_block(self.handler):
+                    self.obj.props.prop = 3
+                    self.assertEqual(self.tracking, [])
+                self.assertEqual(self.tracking, [])
+            self.assertEqual(self.tracking, [])
+
+        # Finally after last context, the notifications should have collapsed
+        # and the last one sent.
+        self.assertEqual(self.obj.props.prop, 3)
+        self.assertEqual(self.tracking, [])
+
+    def testFreezeNotifyNormalUsageRefCounts(self):
+        # Ensure ref counts without using methods as context managers
+        # maintain the same count.
+        self.assertEqual(self.obj.__grefcount__, 1)
+        self.obj.freeze_notify()
+        self.assertEqual(self.obj.__grefcount__, 1)
+        self.obj.thaw_notify()
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+    def testHandlerBlockNormalUsageRefCounts(self):
+        self.assertEqual(self.obj.__grefcount__, 1)
+        self.obj.handler_block(self.handler)
+        self.assertEqual(self.obj.__grefcount__, 1)
+        self.obj.handler_unblock(self.handler)
+        self.assertEqual(self.obj.__grefcount__, 1)
+
+    def testFreezeNotifyContextError(self):
+        # Test an exception occurring within a freeze context exits the context
+        try:
+            with self.obj.freeze_notify():
+                self.obj.props.prop = 1
+                self.assertEqual(self.tracking, [])
+                raise ValueError('Simulation')
+        except ValueError:
+            pass
+
+        # Verify the property set within the context called notify.
+        self.assertEqual(self.obj.props.prop, 1)
+        self.assertEqual(self.tracking, [1])
+
+        # Verify we are still not in a frozen context.
+        self.obj.props.prop = 2
+        self.assertEqual(self.tracking, [1, 2])
+
+    def testHandlerBlockContextError(self):
+        # Test an exception occurring within a handler block exits the context
+        try:
+            with self.obj.handler_block(self.handler):
+                self.obj.props.prop = 1
+                self.assertEqual(self.tracking, [])
+                raise ValueError('Simulation')
+        except ValueError:
+            pass
+
+        # Verify the property set within the context didn't call notify.
+        self.assertEqual(self.obj.props.prop, 1)
+        self.assertEqual(self.tracking, [])
+
+        # Verify we are still not in a handler block context.
+        self.obj.props.prop = 2
+        self.assertEqual(self.tracking, [2])
+
+if __name__ == '__main__':
+    unittest.main()
