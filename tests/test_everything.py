@@ -593,9 +593,9 @@ class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):
         obj = Everything.TestObj();
 
-        def callback (obj_param):
+        def callback(obj, obj_param):
             self.assertEquals(obj_param.props.int, 3)
-            self.assertEquals(obj_param.__grefcount__, 2)
+            self.assertGreater(obj_param.__grefcount__, 1)
 
         obj.connect('sig-with-obj', callback)
         obj.emit_sig_with_obj()
