@@ -34,7 +34,14 @@ a well behaved PyGTK application mostly unmodified on top of PyGI.
 
 import sys
 import warnings
-import UserList
+
+try:
+    # Python 3 
+    from collections import UserList
+    from imp import reload
+except ImportError:
+    # Python 2 ships that in a different module
+    from UserList import UserList
 
 import gi
 from gi.repository import GObject
@@ -90,7 +97,8 @@ _unset = object()
 def enable_gtk(version='2.0'):
     # set the default encoding like PyGTK
     reload(sys)
-    sys.setdefaultencoding('utf-8')
+    if sys.version_info < (3,0):
+        sys.setdefaultencoding('utf-8')
 
     # atk
     gi.require_version('Atk', '1.0')
@@ -160,7 +168,8 @@ def enable_gtk(version='2.0'):
     # Action
 
     def set_tool_item_type(menuaction, gtype):
-        print 'set_tool_item_type is not supported'
+        warnings.warn('set_tool_item_type() is not supported',
+                DeprecationWarning, stacklevel=2)
     Gtk.Action.set_tool_item_type = classmethod(set_tool_item_type)
 
     # Alignment
@@ -254,7 +263,8 @@ def enable_gtk(version='2.0'):
     # Container
 
     def install_child_property(container, flag, pspec):
-        print 'install_child_property is not supported'
+        warnings.warn('install_child_property() is not supported',
+                DeprecationWarning, stacklevel=2)
     Gtk.Container.install_child_property = classmethod(install_child_property)
 
     def new_text():
@@ -297,7 +307,7 @@ def enable_gtk(version='2.0'):
     Gtk.widget_get_default_direction = Gtk.Widget.get_default_direction
     orig_size_request = Gtk.Widget.size_request
     def size_request(widget):
-        class SizeRequest(UserList.UserList):
+        class SizeRequest(UserList):
             def __init__(self, req):
                 self.height = req.height
                 self.width = req.width
