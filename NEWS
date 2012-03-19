@@ -1,3 +1,49 @@
+3.1.92  19-Mar-2012
+        - Correct Gtk.TreePath.__iter__ to work with Python 3 (Johan Dahlin)
+        - Fix test_everything.TestSignals.test_object_param_signal test case
+          (Martin Pitt)
+        - Add a PyGTK compatibility layer (Johan Dahlin)
+        - pygtkcompat: Remove first argument for get_origin() (Johan Dahlin)
+        - Fix pygtkcompat.py to work with Python 3 (Martin Pitt)
+        - GtkViewport: Add a default values for the adjustment constructor
+          parameters (Johan Dahlin)
+        - GtkIconSet: Add a default value for the pixbuf constructor parameter
+          (Johan Dahlin)
+        - PangoLayout: Add a default value for set_markup() (Johan Dahlin)
+        - Gtk[HV]Scrollbar: Add a default value for the adjustment constructor
+          parameter (Johan Dahlin)
+        - GtkToolButton: Add a default value for the stock_id constructor
+          parameter (Johan Dahlin)
+        - GtkIconView: Add a default value for the model constructor parameter
+          (Johan Dahlin)
+        - Add a default value for column in Gtk.TreeView.get_cell_area()
+          (Johan Dahlin)
+        - Atomic inserts in Gtk.{List,Tree}Store overrides (Martin Pitt)
+        - Fix Gtk.Button constructor to accept use_stock parameter
+          (Martin Pitt)
+        - Correct bad rebase, remove duplicate Window (Johan Dahlin)
+        - Add bw-compatible arguments to Gtk.Adjustment (Johan Dahlin)
+        - GtkTreePath: make it iterable (Johan Dahlin)
+        - Add a default argument to TreeModelFilter.set_visible_func()
+          (Johan Dahlin)
+        - Add a default argument to Gtk.TreeView.set_cursor (Johan Dahlin)
+        - Add a default argument to Pango.Context.get_metrics() (Johan Dahlin)
+        - Fix double-freeing GValues in arrays (Martin Pitt)
+        - Renamed "property" class to "Property" (Simon Feltman)
+        - Fix Python to C marshalling of GValue arrays (Martin Pitt)
+        - Correct the Gtk.Window hierarchy (Johan Dahlin)
+        - Renamed getter/setter instance attributes to fget/fset respectively.
+          (Simon Feltman)
+        - Add Gtk.Arrow/Gtk.Window constructor override (Johan Dahlin)
+        - Fix marshalling to/from Python to work on big endian machines.
+          (Michel Dänzer)
+        - Use gi_cclosure_marshal_generic instead of duplicating it.
+          (Michel Dänzer)
+        - Override Gtk.TreeView.get_visible_range to fix return (René Stadler)
+        - Plug memory leak in _is_union_member (Paolo Borelli)
+        - tests: Split TestInterfaces into separate tests (Sebastian Pölsterl)
+        - README: Update current maintainers (Martin Pitt)
+
 3.1.1   20-Feb-2012
         - Don't use C99 style (Sebastian Pölsterl)
         - Add test for GPtrArray with transfer full (Martin Pitt)
