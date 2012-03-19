@@ -139,6 +139,11 @@ def enable_gtk(version='2.0'):
         return rect
     Gdk.Window.get_frame_extents = get_frame_extents
 
+    orig_get_origin = Gdk.Window.get_origin
+    def get_origin(self):
+        return orig_get_origin(self)[1:]
+    Gdk.Window.get_origin = get_origin
+
     # gtk
     gi.require_version('Gtk', version)
     from gi.repository import Gtk

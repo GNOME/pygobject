@@ -75,3 +75,8 @@ class TestGTKCompat(unittest.TestCase):
 
     def testPixbufLoader(self):
         gtk.gdk.PixbufLoader('png')
+
+    def testGdkWindow(self):
+        w = gtk.Window()
+        w.realize()
+        self.assertEquals(w.get_window().get_origin(), (0, 0))
