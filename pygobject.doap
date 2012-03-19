@@ -30,7 +30,7 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
   <maintainer>
     <foaf:Person>
       <foaf:name>Martin Pitt</foaf:name>
-      <foaf:mbox rdf:resource="mailto:martin.pitt@ubuntu.com" />
+      <foaf:mbox rdf:resource="mailto:martinpitt@gnome.org" />
       <gnome:userid>martinpitt</gnome:userid>
     </foaf:Person>
   </maintainer>
