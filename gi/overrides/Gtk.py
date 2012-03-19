@@ -1166,7 +1166,7 @@ class TreePath(Gtk.TreePath):
         return other is None or self.compare(other) >= 0
 
     def __iter__(self):
-        return iter(map(int, str(self).split(':')))
+        return (int(part) for part in str(self).split(':'))
 
 TreePath = override(TreePath)
 __all__.append('TreePath')
