@@ -29,7 +29,8 @@ pygobjectdir = $(pyexecdir)/gi/_gobject
 pygobject_PYTHON = \
 	__init__.py \
 	constants.py \
-	propertyhelper.py
+	propertyhelper.py \
+	signalhelper.py
 
 pygobject_LTLIBRARIES = _gobject.la
 

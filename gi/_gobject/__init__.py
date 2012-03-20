@@ -31,6 +31,7 @@ from .. import _glib
 from . import _gobject
 from . import constants
 from .propertyhelper import Property
+from . import signalhelper
 
 GBoxed = _gobject.GBoxed
 GEnum = _gobject.GEnum
@@ -210,6 +211,9 @@ G_MAXSSIZE = constants.G_MAXSSIZE
 G_MINOFFSET = constants.G_MINOFFSET
 G_MAXOFFSET = constants.G_MAXOFFSET
 
+Signal = signalhelper.Signal
+SignalOverride = signalhelper.SignalOverride
+
 from .._glib import option
 sys.modules['gi._gobject.option'] = option
 
@@ -219,6 +223,7 @@ class GObjectMeta(type):
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
         cls._install_properties()
+        signalhelper.install_signals(cls)
         cls._type_register(cls.__dict__)
 
     def _install_properties(cls):

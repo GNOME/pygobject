@@ -5,6 +5,7 @@ import unittest
 import sys
 
 from gi.repository import GObject
+from gi._gobject import signalhelper
 import testhelper
 from compathelper import _long
 
@@ -342,20 +343,20 @@ class TestSigProp(unittest.TestCase):
 
 f = GObject.SignalFlags.RUN_FIRST
 l = GObject.SignalFlags.RUN_LAST
-float = GObject.TYPE_FLOAT
-double = GObject.TYPE_DOUBLE
-uint = GObject.TYPE_UINT
-ulong = GObject.TYPE_ULONG
+gfloat = GObject.TYPE_FLOAT
+gdouble = GObject.TYPE_DOUBLE
+guint = GObject.TYPE_UINT
+gulong = GObject.TYPE_ULONG
 
 
 class CM(GObject.GObject):
     __gsignals__ = dict(
         test1=(f, None, ()),
         test2=(l, None, (str,)),
-        test3=(l, int, (double,)),
-        test4=(f, None, (bool, _long, float, double, int, uint, ulong)),
-        test_float=(l, float, (float,)),
-        test_double=(l, double, (double, )),
+        test3=(l, int, (gdouble,)),
+        test4=(f, None, (bool, _long, gfloat, gdouble, int, guint, gulong)),
+        test_float=(l, gfloat, (gfloat,)),
+        test_double=(l, gdouble, (gdouble, )),
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
     )
@@ -418,6 +419,197 @@ class TestPyGValue(unittest.TestCase):
         sys.last_type = None
         obj.emit('my-boxed-signal')
         assert not sys.last_type
+
+
+class TestSignalDecorator(unittest.TestCase):
+    class Decorated(GObject.GObject):
+        value = 0
+
+        @GObject.Signal
+        def pushed(self):
+            """this will push"""
+            self.value += 1
+
+        @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
+        def pulled(self):
+            self.value -= 1
+
+        stomped = GObject.Signal('stomped', arg_types=(int,), doc='this will stomp')
+        unnamed = GObject.Signal()
+
+    class DecoratedOverride(GObject.GObject):
+        overridden_closure_called = False
+        notify_called = False
+        value = GObject.Property(type=int, default=0)
+
+        @GObject.SignalOverride
+        def notify(self, *args, **kargs):
+            self.overridden_closure_called = True
+            #GObject.GObject.notify(self, *args, **kargs)
+
+        def on_notify(self, obj, prop):
+            self.notify_called = True
+
+    def setUp(self):
+        self.unnamedCalled = False
+
+    def onUnnamed(self, obj):
+        self.unnamedCalled = True
+
+    def testGetSignalArgs(self):
+        self.assertEqual(self.Decorated.pushed.get_signal_args(),
+                         (GObject.SignalFlags.RUN_FIRST, None, tuple()))
+        self.assertEqual(self.Decorated.pulled.get_signal_args(),
+                         (GObject.SignalFlags.RUN_LAST, None, tuple()))
+        self.assertEqual(self.Decorated.stomped.get_signal_args(),
+                         (GObject.SignalFlags.RUN_FIRST, None, (int,)))
+
+    def testClosuresCalled(self):
+        decorated = self.Decorated()
+        self.assertEqual(decorated.value, 0)
+        decorated.pushed.emit()
+        self.assertEqual(decorated.value, 1)
+        decorated.pulled.emit()
+        self.assertEqual(decorated.value, 0)
+
+    def testSignalCopy(self):
+        blah = self.Decorated.stomped.copy('blah')
+        self.assertEqual(str(blah), blah)
+        self.assertEqual(blah.func, self.Decorated.stomped.func)
+        self.assertEqual(blah.flags, self.Decorated.stomped.flags)
+        self.assertEqual(blah.return_type, self.Decorated.stomped.return_type)
+        self.assertEqual(blah.arg_types, self.Decorated.stomped.arg_types)
+        self.assertEqual(blah.__doc__, self.Decorated.stomped.__doc__)
+
+    def testDocString(self):
+        # Test the two techniques for setting doc strings on the signals
+        # class variables, through the "doc" keyword or as the getter doc string.
+        self.assertEqual(self.Decorated.stomped.__doc__, 'this will stomp')
+        self.assertEqual(self.Decorated.pushed.__doc__, 'this will push')
+
+    def testUnnamedSignalGetsNamed(self):
+        self.assertEqual(str(self.Decorated.unnamed), 'unnamed')
+
+    def testUnnamedSignalGetsCalled(self):
+        obj = self.Decorated()
+        obj.connect('unnamed', self.onUnnamed)
+        self.assertEqual(self.unnamedCalled, False)
+        obj.emit('unnamed')
+        self.assertEqual(self.unnamedCalled, True)
+
+    def NOtestOverriddenSignal(self):
+        # Test that the pushed signal is called in with super and the override
+        # which should both increment the "value" to 3
+        obj = self.DecoratedOverride()
+        obj.connect("notify", obj.on_notify)
+        self.assertEqual(obj.value, 0)
+        #obj.notify.emit()
+        obj.value = 1
+        self.assertEqual(obj.value, 1)
+        self.assertTrue(obj.overridden_closure_called)
+        self.assertTrue(obj.notify_called)
+
+
+class TestSignalConnectors(unittest.TestCase):
+    class CustomButton(GObject.GObject):
+        value = 0
+
+        @GObject.Signal(arg_types=(int,))
+        def clicked(self, value):
+            self.value = value
+
+    def setUp(self):
+        self.obj = None
+        self.value = None
+
+    def onClicked(self, obj, value):
+        self.obj = obj
+        self.value = value
+
+    def testSignalEmit(self):
+        # standard callback connection with different forms of emit.
+        obj = self.CustomButton()
+        obj.connect('clicked', self.onClicked)
+
+        # vanilla
+        obj.emit('clicked', 1)
+        self.assertEqual(obj.value, 1)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 1)
+
+        # using class signal as param
+        self.obj = None
+        self.value = None
+        obj.emit(self.CustomButton.clicked, 1)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 1)
+
+        # using bound signal as param
+        self.obj = None
+        self.value = None
+        obj.emit(obj.clicked, 1)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 1)
+
+        # using bound signal with emit
+        self.obj = None
+        self.value = None
+        obj.clicked.emit(1)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 1)
+
+    def testSignalClassConnect(self):
+        obj = self.CustomButton()
+        obj.connect(self.CustomButton.clicked, self.onClicked)
+        obj.emit('clicked', 2)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 2)
+
+    def testSignalBoundConnect(self):
+        obj = self.CustomButton()
+        obj.clicked.connect(self.onClicked)
+        obj.emit('clicked', 3)
+        self.assertEqual(obj, self.obj)
+        self.assertEqual(self.value, 3)
+
+
+# For this test to work with both python2 and 3 we need to dynamically
+# exec the given code due to the new syntax causing an error in python 2.
+annotated_class_code = """
+class AnnotatedSignalClass(GObject.GObject):
+    @GObject.Signal
+    def sig1(self, a:int, b:float):
+        pass
+
+    @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
+    def sig2_with_return(self, a:int, b:float) -> str:
+        return "test"
+"""
+
+
+class TestPython3Signals(unittest.TestCase):
+    AnnotatedClass = None
+
+    def setUp(self):
+        if sys.version_info >= (3, 0):
+            exec(annotated_class_code, globals(), globals())
+            self.assertTrue('AnnotatedSignalClass' in globals())
+            self.AnnotatedClass = globals()['AnnotatedSignalClass']
+
+    def testAnnotations(self):
+        if self.AnnotatedClass:
+            self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig1.func),
+                             (None, (int, float)))
+            self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig2_with_return.func),
+                             (str, (int, float)))
+
+            self.assertEqual(self.AnnotatedClass.sig2_with_return.get_signal_args(),
+                             (GObject.SignalFlags.RUN_LAST, str, (int, float)))
+            self.assertEqual(self.AnnotatedClass.sig2_with_return.arg_types,
+                             (int, float))
+            self.assertEqual(self.AnnotatedClass.sig2_with_return.return_type,
+                             str)
+
 
 if __name__ == '__main__':
     unittest.main()
