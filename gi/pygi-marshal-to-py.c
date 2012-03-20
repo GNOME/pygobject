@@ -521,9 +521,10 @@ _pygi_hash_pointer_to_arg (GIArgument *arg,
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_INTERFACE:
             break;
         default:
-            g_assert_not_reached();
+            g_critical("Unsupported type %s", g_type_tag_to_string(type_tag));
     }
 }
 
