@@ -19,6 +19,11 @@ from gi.repository import GdkPixbuf
 import gi.overrides as overrides
 import gi.types
 
+# in general we don't want tests to raise warnings, except when explicitly
+# testing with bad values; in those cases it will temporarily be set back to
+# ERROR
+GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_WARNING)
+
 class TestGLib(unittest.TestCase):
 
     def test_gvariant_create(self):
