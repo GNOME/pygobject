@@ -24,7 +24,7 @@ description = """
 GtkEntry allows to display icons and progress information. This demo shows how to use these features in a search entry.
  """
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
+from gi.repository import Gtk, GObject
 
 (PIXBUF_COL,
  TEXT_COL) = range(2)
@@ -218,10 +218,10 @@ class SearchboxApp:
         self.start_search(button, entry)
 
     def search_entry_destroyed(self, widget):
-        if finish_search_id != 0:
-            GObject.source_remove(finish_search_id)
-        if search_progress_id != 0:
-            GObject.source_remove(search_progress_id)
+        if self.finish_search_id != 0:
+            GObject.source_remove(self.finish_search_id)
+        if self.search_progress_id != 0:
+            GObject.source_remove(self.search_progress_id)
 
         self.window = None
 
@@ -245,7 +245,7 @@ class SearchboxApp:
         menu.append (item)
 
 def main(demoapp=None):
-    app = SearchboxApp(demoapp)
+    SearchboxApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

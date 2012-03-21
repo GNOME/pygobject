@@ -24,17 +24,15 @@ description = """
 Demonstrates a typical application window with menubar, toolbar, statusbar.
 """
 
-
 import os
-import sys
 
-from gi.repository import GLib, GdkPixbuf, Gdk, Gtk
+from gi.repository import GdkPixbuf, Gtk
 
 
-global infobar
-global window
-global messagelabel
-global _demoapp
+infobar = None
+window = None
+messagelabel = None
+_demoapp = None
 
 def widget_destroy(widget, button):
     widget.destroy()
@@ -280,6 +278,7 @@ def register_stock_icons():
 
     Gtk.stock_add(item, 1)
     '''
+    global _demoapp
 
     factory = Gtk.IconFactory()
     factory.add_default()

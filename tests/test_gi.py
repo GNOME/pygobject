@@ -764,9 +764,6 @@ class TestArray(unittest.TestCase):
     def test_array_zero_terminated_out(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
 
-    def test_array_zero_terminated_out(self):
-        self.assertEquals(['0', '1', '2'], GIMarshallingTests.array_zero_terminated_out())
-
     def test_array_zero_terminated_inout(self):
         self.assertEquals(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
 
@@ -778,9 +775,6 @@ class TestGStrv(unittest.TestCase):
 
     def test_gstrv_in(self):
         GIMarshallingTests.gstrv_in(Sequence(['0', '1', '2']))
-
-    def test_gstrv_out(self):
-        self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_out())
 
     def test_gstrv_out(self):
         self.assertEquals(['0', '1', '2'], GIMarshallingTests.gstrv_out())
@@ -981,7 +975,7 @@ class TestGHashTable(unittest.TestCase):
     def test_ghashtable_int_none_return(self):
         self.assertEquals({-1: 1, 0: 0, 1: -1, 2: -2}, GIMarshallingTests.ghashtable_int_none_return())
 
-    def test_ghashtable_int_none_return(self):
+    def test_ghashtable_int_none_return2(self):
         self.assertEquals({'-1': '1', '0': '0', '1': '-1', '2': '-2'}, GIMarshallingTests.ghashtable_utf8_none_return())
 
     def test_ghashtable_int_container_return(self):

@@ -213,7 +213,7 @@ class IconViewApp:
             store.append((path, name, pixbuf, is_dir))
 
 def main(demoapp=None):
-    app = IconViewApp(demoapp)
+    IconViewApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

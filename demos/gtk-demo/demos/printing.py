@@ -25,7 +25,6 @@ GtkPrintOperation offers a simple API to support printing in a cross-platform wa
 """
 
 from gi.repository import Gtk, GLib, Pango, PangoCairo
-import cairo
 import math
 import os
 
@@ -94,7 +93,7 @@ class PrintingApp:
         if not os.path.isfile(file_path):
             file_path = os.path.join('demos', file_path)
             if not os.path.isfile:
-                raise FileNotFoundError()
+                raise Exception("file not found: " % (file_path, ))
 
         # in reality you should most likely not read the entire
         # file into a buffer

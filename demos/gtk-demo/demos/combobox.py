@@ -29,7 +29,7 @@ How the options are displayed is controlled by cell renderers.
  """
 
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 
 (PIXBUF_COL,
@@ -331,7 +331,7 @@ class ComboboxApp:
         entry.append_text('Three')
 
 def main(demoapp=None):
-    app = ComboboxApp(demoapp)
+    ComboboxApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

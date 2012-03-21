@@ -110,9 +110,14 @@ RUN_TESTS_ENV_VARS= \
 	TESTS_BUILDDIR=$(builddir)
 RUN_TESTS_LAUNCH=$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
+check-local: check-pyflakes
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
 	TEST_FILES="$(TEST_FILES_STATIC)" $(RUN_TESTS_LAUNCH)
 	TEST_FILES="$(TEST_FILES_GI)" $(RUN_TESTS_LAUNCH)
+
+check-pyflakes:
+	@echo "  CHECK Pyflakes"
+	@pyflakes $(top_srcdir)
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check

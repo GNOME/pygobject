@@ -65,7 +65,7 @@ class EntryBufferApp:
         Gtk.main_quit()
 
 def main(demoapp=None):
-    app = EntryBufferApp()
+    EntryBufferApp()
     Gtk.main()
 
 if __name__ == '__main__':

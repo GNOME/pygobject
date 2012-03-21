@@ -27,7 +27,7 @@ Demonstrates an interface loaded from a XML description.
 
 import os
 
-from gi.repository import Gtk, GdkPixbuf, Gdk
+from gi.repository import Gtk
 
 
 class BuilderApp:
@@ -56,7 +56,7 @@ class BuilderApp:
         Gtk.main_quit()
 
 def main(demoapp=None):
-    app = BuilderApp(demoapp)
+    BuilderApp(demoapp)
     Gtk.main()
 
 if __name__ == '__main__':

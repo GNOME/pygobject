@@ -42,6 +42,7 @@ else:
     _bytes = str
 
 import gi._glib
+gi # pyflakes
 _glib = sys.modules['gi._glib._glib']
 
 __all__ = [

@@ -48,7 +48,7 @@ class TestChaining(unittest.TestCase):
         self.inst.emit("my_signal", 42)
         assert self.inst.arg == 42
 
-    def testChaining(self):
+    def testChaining2(self):
         inst2 = D()
         inst2.emit("my_signal", 44)
         assert inst2.arg == 44
@@ -197,7 +197,7 @@ class TestEmissionHook(unittest.TestCase):
         def _emission_hook(obj):
             obj.status += 1
             return False
-        hook_id = GObject.add_emission_hook(obj, "signal", _emission_hook)
+        GObject.add_emission_hook(obj, "signal", _emission_hook)
         obj.emit('signal')
         obj.emit('signal')
         self.assertEqual(obj.status, 3)

@@ -27,7 +27,7 @@ through these steps.
 """
 
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 
 
 class AssistantApp:
@@ -126,7 +126,7 @@ class AssistantApp:
         self.assistant.set_page_header_image(label, pixbuf)
 
 def main(demoapp=None):
-    app = AssistantApp()
+    AssistantApp()
     Gtk.main()
 
 if __name__ == '__main__':

@@ -39,9 +39,11 @@ try:
     # Python 3 
     from collections import UserList
     from imp import reload
+    UserList  # pyflakes
 except ImportError:
     # Python 2 ships that in a different module
     from UserList import UserList
+    UserList  # pyflakes
 
 import gi
 from gi.repository import GObject

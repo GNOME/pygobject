@@ -67,7 +67,7 @@ a program (exclusively) via keyboard input."""
         dialog.destroy()
 
 def main(demoapp=None):
-    app = LinksApp()
+    LinksApp()
     Gtk.main()
 
 if __name__ == '__main__':

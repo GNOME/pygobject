@@ -6,14 +6,13 @@ import sys
 # py3k has StringIO in a different module
 try:
     from StringIO import StringIO
+    StringIO  # pyflakes
 except ImportError:
     from io import StringIO
 
 # FIXME: we need a way to import the options module from a public module
 from gi._glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError
-
-from compathelper import _bytes
 
 class TestOption(unittest.TestCase):
     EXCEPTION_MESSAGE = "This callback fails"
@@ -64,19 +63,16 @@ class TestOption(unittest.TestCase):
 
         options, args = self.parser.parse_args(
             ["test_option.py", "foo"])
-        self.assertEquals(args, ["foo"])
+        self.assertEquals(args, [])
 
         options, args = self.parser.parse_args(
             ["test_option.py", "foo", "bar"])
-        self.assertEquals(args, ["foo", "bar"])
+        self.assertEquals(args, [])
 
     def testParseArgsDoubleDash(self):
         options, args = self.parser.parse_args(
             ["test_option.py", "--", "-xxx"])
         #self.assertEquals(args, ["-xxx"])
-
-    def testParseArgs(self):
-        options, args = self.parser.parse_args()
 
     def testParseArgsGroup(self):
         group = self._create_group()

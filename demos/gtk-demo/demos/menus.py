@@ -47,8 +47,6 @@ class MenusApp:
         menubar = Gtk.MenuBar()
         box1.pack_start(menubar, False, True, 0)
 
-        menu = self.create_menu(2, True)
-
         menuitem = Gtk.MenuItem(label='test\nline2')
         menuitem.set_submenu(self.create_menu(3, True))
         menubar.append(menuitem)
@@ -78,7 +76,6 @@ class MenusApp:
             return None
 
         menu = Gtk.Menu()
-        group = None
 
         if tearoff:
             menuitem = Gtk.TearoffMenuItem()
@@ -115,7 +112,7 @@ class MenusApp:
             menubar.props.pack_direction = Gtk.PackDirection.LTR
 
 def main(demoapp=None):
-    app = MenusApp()
+    MenusApp()
     Gtk.main()
 
 if __name__ == '__main__':

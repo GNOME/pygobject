@@ -24,10 +24,10 @@ description = """GtkImage is used to display an image; the image can be in a num
 This demo code shows some of the more obscure cases, in the simple case a call to gtk_image_new_from_file() is all you need.
 """
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Gio, GObject
 import os
-import math
 from os import path
+
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Gio, GObject
 
 class ImagesApp:
     def __init__(self):
@@ -63,7 +63,7 @@ class ImagesApp:
         filename = os.path.join(self.base_path, 'gtk-logo-rgb.gif')
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
         transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
-        image = Gtk.Image.new_from_pixbuf(pixbuf)
+        image = Gtk.Image.new_from_pixbuf(transparent)
         frame.add(image)
 
         # Animation
@@ -293,7 +293,7 @@ class ImagesApp:
         Gtk.main_quit()
 
 def main(demoapp=None):
-    app = ImagesApp()
+    ImagesApp()
     Gtk.main()
 
 if __name__ == '__main__':

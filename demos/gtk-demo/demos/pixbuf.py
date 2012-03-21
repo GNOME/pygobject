@@ -173,7 +173,7 @@ class PixbufApp:
         Gtk.main_quit()
 
 def main(demoapp=None):
-    app = PixbufApp()
+    PixbufApp()
     Gtk.main()
 
 if __name__ == '__main__':

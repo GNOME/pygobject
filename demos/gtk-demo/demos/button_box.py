@@ -113,7 +113,7 @@ class ButtonBoxApp:
         return frame
 
 def main(demoapp=None):
-    app = ButtonBoxApp()
+    ButtonBoxApp()
     Gtk.main()
 
 if __name__ == '__main__':

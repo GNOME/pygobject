@@ -24,7 +24,7 @@ description = """
 Dialog widgets are used to pop up a transient window for user feedback.
 """
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 
 class DialogsApp:
     def __init__(self):
@@ -146,7 +146,7 @@ class DialogsApp:
         dialog.destroy()
 
 def main(demoapp=None):
-    app = DialogsApp()
+    DialogsApp()
     Gtk.main()
 
 if __name__ == '__main__':

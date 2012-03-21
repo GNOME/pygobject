@@ -224,7 +224,7 @@ class ClipboardApp:
         self.menu.popup(None, None, None, None, event.button, event.time)
 
 def main(demoapp=None):
-    app = ClipboardApp()
+    ClipboardApp()
     Gtk.main()
 
 if __name__ == '__main__':

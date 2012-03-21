@@ -90,9 +90,9 @@ class TestSource(unittest.TestCase):
 
 
 class TestTimeout(unittest.TestCase):
-     def test504337(self):
-        timeout_source = GLib.Timeout(20)
-        idle_source = GLib.Idle()
+    def test504337(self):
+        GLib.Timeout(20)
+        GLib.Idle()
 
 
 if __name__ == '__main__':

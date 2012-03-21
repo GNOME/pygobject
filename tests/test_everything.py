@@ -246,7 +246,8 @@ class TestCallbacks(unittest.TestCase):
         """
         def callback():
             x = 1 / 0
-            
+            print x
+
         try:
             Everything.test_simple_callback(callback)
         except ZeroDivisionError:
@@ -259,6 +260,7 @@ class TestCallbacks(unittest.TestCase):
         """
         def badcallback():
             x = 1 / 0
+            print x
 
         def callback():
             Everything.test_boolean(True)
@@ -373,7 +375,7 @@ class TestCallbacks(unittest.TestCase):
             return 42
 
         TestCallbacks.called = False
-        obj_ = Everything.TestObj.new_callback(callbackWithUserData, None)
+        Everything.TestObj.new_callback(callbackWithUserData, None)
         self.assertTrue(TestCallbacks.called)
 
     def test_callback_none(self):

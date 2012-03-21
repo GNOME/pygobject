@@ -117,14 +117,14 @@ class RotatedTextApp:
         logical_rect.y = -ascent
         logical_rect.height = ascent
 
-        ink_rect = logical_rect
 
         # Set fancy shape attributes for all hearts
         attrs = Pango.AttrList()
-        p = BYTES_TEXT.find(BYTES_HEART)
 
         # FIXME: attr_shape_new_with_data isn't introspectable
         '''
+        ink_rect = logical_rect
+        p = BYTES_TEXT.find(BYTES_HEART)
         while (p != -1):
             attr = Pango.attr_shape_new_with_data(ink_rect,
                                                   logical_rect,
@@ -189,7 +189,7 @@ class RotatedTextApp:
         return False
 
 def main(demoapp=None):
-    app = RotatedTextApp()
+    RotatedTextApp()
     Gtk.main()
 
 if __name__ == '__main__':

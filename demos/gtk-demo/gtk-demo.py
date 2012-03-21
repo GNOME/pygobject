@@ -20,14 +20,13 @@
 # USA
 
 
-import os
-import sys
 import codecs
-import glob
-import tokenize
 import keyword
+import os
+import tokenize
+import sys
 
-from gi.repository import GLib, GObject, Gio, Pango, GdkPixbuf, Gtk
+from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk
 
 
 

@@ -67,7 +67,7 @@ class PickersApp:
         self.window.show_all()
 
 def main(demoapp=None):
-    app = PickersApp()
+    PickersApp()
     Gtk.main()
 
 if __name__ == '__main__':

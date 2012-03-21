@@ -4,7 +4,6 @@
 import unittest
 
 import sys
-import os
 sys.path.insert(0, "../")
 
 from gi.repository import Gdk
@@ -15,9 +14,6 @@ import gi.pygtkcompat
 gi.pygtkcompat.enable()
 gi.pygtkcompat.enable_gtk(version='3.0')
 
-import atk
-import pango
-import pangocairo
 import gtk
 import gtk.gdk
 

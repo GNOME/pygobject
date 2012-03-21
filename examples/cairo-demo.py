@@ -4,7 +4,7 @@ Based on cairo-demo/X11/cairo-demo.c
 """
 
 import cairo
-from gi.repository import Gdk, Gtk
+from gi.repository import Gtk
 
 SIZE = 30
 

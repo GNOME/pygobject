@@ -94,7 +94,7 @@ class IconviewEditApp:
         model.set_row(iter_, [text])
 
 def main(demoapp=None):
-    app = IconviewEditApp()
+    IconviewEditApp()
     Gtk.main()
 
 if __name__ == '__main__':

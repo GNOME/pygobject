@@ -25,7 +25,7 @@ GtkExpander allows to provide additional content that is initially hidden.
 This is also known as "disclosure triangle".
 """
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 
 class ExpanderApp:
     def __init__(self):
@@ -53,7 +53,7 @@ class ExpanderApp:
         self.window.show_all()
 
 def main(demoapp=None):
-    app = ExpanderApp()
+    ExpanderApp()
     Gtk.main()
 
 if __name__ == '__main__':

@@ -92,7 +92,7 @@ class InfobarApp:
         dialog.destroy()
 
 def main(demoapp=None):
-    app = InfobarApp()
+    InfobarApp()
     Gtk.main()
 
 if __name__ == '__main__':

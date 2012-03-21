@@ -5,7 +5,7 @@ import struct
 import unittest
 
 from gi.repository import GObject
-from  gi.repository.GObject import GType, GEnum, new, PARAM_READWRITE, \
+from  gi.repository.GObject import GType, new, PARAM_READWRITE, \
      PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
      TYPE_INT, TYPE_UINT, TYPE_LONG, \
@@ -317,7 +317,7 @@ class TestProperty(unittest.TestCase):
             def value(self):
                 return self._value
             @value.setter
-            def value(self, value):
+            def value_setter(self, value):
                 self._value = value
 
         o = C()
@@ -333,7 +333,7 @@ class TestProperty(unittest.TestCase):
             def typedValue(self):
                 return self._value
             @typedValue.setter
-            def typedValue(self, value):
+            def typedValue_setter(self, value):
                 self._value = value
 
         o = C()
@@ -357,8 +357,8 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, flags=-10)
 
     def testDefaults(self):
-        p1 = GObject.Property(type=bool, default=True)
-        p2 = GObject.Property(type=bool, default=False)
+        GObject.Property(type=bool, default=True)
+        GObject.Property(type=bool, default=False)
 
     def testNameWithUnderscore(self):
         class C(GObject.GObject):
@@ -468,7 +468,7 @@ class TestProperty(unittest.TestCase):
         class PropertyObjectSubclass(GObject.GObject):
             obj = GObject.Property(type=ObjectSubclass)
 
-        obj1 = PropertyObjectSubclass(obj=ObjectSubclass())
+        PropertyObjectSubclass(obj=ObjectSubclass())
 
     def testPropertySubclass(self):
         # test for #470718

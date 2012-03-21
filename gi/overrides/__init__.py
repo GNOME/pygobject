@@ -1,4 +1,3 @@
-import sys
 import types
 
 from gi import _gobject

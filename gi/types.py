@@ -33,6 +33,9 @@ from ._gi import \
     register_interface_info, \
     hook_up_vfunc_implementation
 
+
+StructInfo  # pyflakes
+
 if sys.version_info > (3, 0):
     def callable(obj):
         return hasattr(obj, '__call__')

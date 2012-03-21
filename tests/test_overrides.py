@@ -239,7 +239,7 @@ class TestGLib(unittest.TestCase):
         res = GLib.Variant('v', GLib.Variant.new_int32(-42)).unpack()
         self.assertEqual(res, -42)
 
-        variant = GLib.Variant('v', GLib.Variant('v', GLib.Variant('i', 42)))
+        GLib.Variant('v', GLib.Variant('v', GLib.Variant('i', 42)))
         self.assertEqual(res, -42)
 
         # tuple
@@ -1052,14 +1052,14 @@ class TestGtk(unittest.TestCase):
         for i in range(1, 93):
             label = 'this is row #%d' % i
             testobj = TestGtk.TestClass(self, i, label)
-            parent = list_store.append((i,
-                                        label,
-                                        testobj,
-                                        test_pyobj,
-                                        test_pydict,
-                                        test_pylist,
-                                        i % 2,
-                                        bool(i % 2)))
+            list_store.append((i,
+                               label,
+                               testobj,
+                               test_pyobj,
+                               test_pydict,
+                               test_pylist,
+                               i % 2,
+                               bool(i % 2)))
 
         i = 93
         label = _unicode('this is row #93')
@@ -1529,10 +1529,10 @@ class TestGtk(unittest.TestCase):
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(title='This is just a test',
-                                    cell_renderer=cell,
-                                    text=0,
-                                    style=2)
+        Gtk.TreeViewColumn(title='This is just a test',
+                           cell_renderer=cell,
+                           text=0,
+                           style=2)
 
     def test_tree_selection(self):
         store = Gtk.ListStore(int, str)
@@ -1846,9 +1846,9 @@ class TestGtk(unittest.TestCase):
 
     def test_iconset(self):
         # PyGTK compat
-        iconset = Gtk.IconSet()
+        Gtk.IconSet()
         pixbuf = GdkPixbuf.Pixbuf()
-        iconset = Gtk.IconSet(pixbuf)
+        Gtk.IconSet(pixbuf)
 
     def test_viewport(self):
         # PyGTK compat
