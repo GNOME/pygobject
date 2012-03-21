@@ -74,7 +74,8 @@ class TestGTKCompat(unittest.TestCase):
         gtk.gdk.Pixbuf()
 
     def testPixbufLoader(self):
-        gtk.gdk.PixbufLoader('png')
+        loader = gtk.gdk.PixbufLoader('png')
+        loader.close()
 
     def testGdkWindow(self):
         w = gtk.Window()
