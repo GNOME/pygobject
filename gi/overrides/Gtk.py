@@ -809,19 +809,23 @@ class TreeModel(Gtk.TreeModel):
             raise ValueError('row sequence has the incorrect number of elements')
 
         result = []
-        for i in range(n_columns):
-            value = row[i]
-            result.append(self._convert_value(i, value))
-        return result
+        columns = []
+        for cur_col, value in enumerate(row):
+            # do not try to set None values, they are causing warnings
+            if value is None:
+                continue
+            result.append(self._convert_value(cur_col, value))
+            columns.append(cur_col)
+        return (result, columns)
 
     def set_row(self, treeiter, row):
-        converted_row = self._convert_row(row)
-        for i in range(self.get_n_columns()):
-            value = row[i]
+        converted_row, columns = self._convert_row(row)
+        for column in columns:
+            value = row[column]
             if value is None:
                continue  # None means skip this row
 
-            self.set_value(treeiter, i, value)
+            self.set_value(treeiter, column, value)
 
     def _convert_value(self, column, value):
             if value is None:
@@ -949,8 +953,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
     def _do_insert(self, position, row):
         if row is not None:
-            row = self._convert_row(row)
-            columns = range(len(row))
+            row, columns = self._convert_row(row)
             treeiter = self.insert_with_valuesv(position, columns, row)
         else:
             treeiter = Gtk.ListStore.insert(self, position)
@@ -1179,8 +1182,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
     def _do_insert(self, parent, position, row):
         if row is not None:
-            row = self._convert_row(row)
-            columns = range(len(row))
+            row, columns = self._convert_row(row)
             treeiter = self.insert_with_values(parent, position, columns, row)
         else:
             treeiter = Gtk.TreeStore.insert(self, parent, position)
