@@ -19,11 +19,6 @@ from gi.repository import GdkPixbuf
 import gi.overrides as overrides
 import gi.types
 
-# in general we don't want tests to raise warnings, except when explicitly
-# testing with bad values; in those cases it will temporarily be set back to
-# ERROR
-GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_WARNING)
-
 class TestGLib(unittest.TestCase):
 
     def test_gvariant_create(self):
@@ -1519,13 +1514,18 @@ class TestGtk(unittest.TestCase):
         store.append((0, "foo"))
         store.append((1, "bar"))
         view = Gtk.TreeView()
-        # We can't easily call get_cursor() to make sure this works as
-        # expected as we need to realize and focus the column
+        # FIXME: We can't easily call get_cursor() to make sure this works as
+        # expected as we need to realize and focus the column; the following
+        # will raise a Gtk-CRITICAL which we ignore for now
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_WARNING|
+                          GLib.LogLevelFlags.LEVEL_ERROR)
         view.set_cursor(store[1].path)
         view.set_cursor(str(store[1].path))
 
         view.get_cell_area(store[1].path)
         view.get_cell_area(str(store[1].path))
+
+        GLib.log_set_always_fatal(old_mask)
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()

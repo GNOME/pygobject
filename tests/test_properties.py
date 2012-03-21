@@ -407,28 +407,34 @@ class TestProperty(unittest.TestCase):
             def __init__(self):
                 GObject.GObject.__init__(self)
 
-        o = C()
-        self.assertEqual(o.prop_int, 1)
+        # we test known-bad values here which cause Gtk-WARNING logs.
+        # Explicitly allow these for this test.
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL)
+        try:
+            o = C()
+            self.assertEqual(o.prop_int, 1)
 
-        o.prop_int = 5
-        self.assertEqual(o.prop_int, 5)
+            o.prop_int = 5
+            self.assertEqual(o.prop_int, 5)
 
-        o.prop_int = 0
-        self.assertEqual(o.prop_int, 5)
+            o.prop_int = 0
+            self.assertEqual(o.prop_int, 5)
 
-        o.prop_int = 101
-        self.assertEqual(o.prop_int, 5)
+            o.prop_int = 101
+            self.assertEqual(o.prop_int, 5)
 
-        self.assertEqual(o.prop_float, 1.1)
+            self.assertEqual(o.prop_float, 1.1)
 
-        o.prop_float = 7.75
-        self.assertEqual(o.prop_float, 7.75)
+            o.prop_float = 7.75
+            self.assertEqual(o.prop_float, 7.75)
 
-        o.prop_float = 0.09
-        self.assertEqual(o.prop_float, 7.75)
+            o.prop_float = 0.09
+            self.assertEqual(o.prop_float, 7.75)
 
-        o.prop_float = 10.51
-        self.assertEqual(o.prop_float, 7.75)
+            o.prop_float = 10.51
+            self.assertEqual(o.prop_float, 7.75)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
     def testMultipleInstances(self):
         class C(GObject.GObject):

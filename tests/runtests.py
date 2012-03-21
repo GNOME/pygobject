@@ -13,6 +13,7 @@ if '--help' in sys.argv:
 
 # force untranslated messages, as we check for them in some tests
 os.environ['LC_MESSAGES'] = 'C'
+os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:
