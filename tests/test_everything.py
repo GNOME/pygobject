@@ -246,7 +246,7 @@ class TestCallbacks(unittest.TestCase):
         """
         def callback():
             x = 1 / 0
-            print x
+            self.fail('unexpected surviving zero divsion:' + str(x))
 
         try:
             Everything.test_simple_callback(callback)
@@ -260,7 +260,7 @@ class TestCallbacks(unittest.TestCase):
         """
         def badcallback():
             x = 1 / 0
-            print x
+            self.fail('unexpected surviving zero divsion:' + str(x))
 
         def callback():
             Everything.test_boolean(True)

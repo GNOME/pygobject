@@ -14,8 +14,26 @@ import gi.pygtkcompat
 gi.pygtkcompat.enable()
 gi.pygtkcompat.enable_gtk(version='3.0')
 
+import atk
+import pango
+import pangocairo
 import gtk
 import gtk.gdk
+
+
+class TestATKCompat(unittest.TestCase):
+    def testObject(self):
+        self.failUnless(hasattr(atk, 'Object'))
+
+
+class TestPangoCompat(unittest.TestCase):
+    def testLayout(self):
+        self.failUnless(hasattr(pango, 'Layout'))
+
+
+class TestPangoCairoCompat(unittest.TestCase):
+    def testErrorUnderlinePath(self):
+        self.failUnless(hasattr(pangocairo, 'error_underline_path'))
 
 
 class TestGTKCompat(unittest.TestCase):
