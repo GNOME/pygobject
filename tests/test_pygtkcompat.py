@@ -84,6 +84,28 @@ class TestGTKCompat(unittest.TestCase):
         self.assertEquals(padding, 0)
         self.assertEquals(pack_type, gtk.PACK_END)
 
+    def testComboBoxEntry(self):
+        liststore = gtk.ListStore(int, str)
+        liststore.append((1, 'One'))
+        liststore.append((2, 'Two'))
+        liststore.append((3, 'Three'))
+        combo = gtk.ComboBoxEntry(model=liststore)
+        combo.set_text_column(1)
+        combo.set_active(0)
+        self.assertEquals(combo.get_text_column(), 1)
+        self.assertEquals(combo.get_child().get_text(), 'One')
+        combo = gtk.combo_box_entry_new()
+        combo.set_model(liststore)
+        combo.set_text_column(1)
+        combo.set_active(0)
+        self.assertEquals(combo.get_text_column(), 1)
+        self.assertEquals(combo.get_child().get_text(), 'One')
+        combo = gtk.combo_box_entry_new_with_model(liststore)
+        combo.set_text_column(1)
+        combo.set_active(0)
+        self.assertEquals(combo.get_text_column(), 1)
+        self.assertEquals(combo.get_child().get_text(), 'One')
+
     def testPixbuf(self):
         gtk.gdk.Pixbuf()
 

@@ -262,6 +262,25 @@ def enable_gtk(version='2.0'):
         orig_combo_row_separator_func(self, callback, user_data)
     Gtk.ComboBox.set_row_separator_func = combo_row_separator_func
 
+    # ComboBoxEntry
+
+    class ComboBoxEntry(Gtk.ComboBox):
+        def __init__(self, **kwds):
+            Gtk.ComboBox.__init__(self, has_entry=True, **kwds)
+        def set_text_column (self, text_column):
+            self.set_entry_text_column(text_column)
+        def get_text_column (self):
+            return self.get_entry_text_column()
+    Gtk.ComboBoxEntry = ComboBoxEntry
+
+    def combo_box_entry_new():
+        return Gtk.ComboBoxEntry()
+    Gtk.combo_box_entry_new = combo_box_entry_new
+
+    def combo_box_entry_new_with_model(model):
+        return Gtk.ComboBoxEntry(model=model)
+    Gtk.combo_box_entry_new_with_model = combo_box_entry_new_with_model
+
     # Container
 
     def install_child_property(container, flag, pspec):
