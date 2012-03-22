@@ -72,10 +72,9 @@ class IconviewEditApp:
         color = Gdk.color_parse(text)
         pixel = 0
         if color is not None:
-            pixel = \
-              (color.red   >> 8) << 24 | \
-              (color.green >> 8) << 16 | \
-              (color.blue  >> 8) << 8
+            pixel = ((color.red >> 8) << 24 |
+                     (color.green >> 8) << 16 |
+                     (color.blue >> 8) << 8)
 
         pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 24, 24)
         pixbuf.fill(pixel)

@@ -35,20 +35,20 @@ class Bug:
         self.description = description
 
 # initial data we use to fill in the store
-data = [Bug(False, 60482, "Normal",     "scrollable notebooks and hidden tabs"),
-        Bug(False, 60620, "Critical",   "gdk_window_clear_area (gdkwindow-win32.c) is not thread-safe"),
-        Bug(False, 50214, "Major",      "Xft support does not clean up correctly"),
-        Bug(True,  52877, "Major",      "GtkFileSelection needs a refresh method. "),
-        Bug(False, 56070, "Normal",     "Can't click button after setting in sensitive"),
-        Bug(True,  56355, "Normal",     "GtkLabel - Not all changes propagate correctly"),
-        Bug(False, 50055, "Normal",     "Rework width/height computations for TreeView"),
-        Bug(False, 58278, "Normal",     "gtk_dialog_set_response_sensitive () doesn't work"),
-        Bug(False, 55767, "Normal",     "Getters for all setters"),
-        Bug(False, 56925, "Normal",     "Gtkcalender size"),
-        Bug(False, 56221, "Normal",     "Selectable label needs right-click copy menu"),
-        Bug(True,  50939, "Normal",     "Add shift clicking to GtkTextView"),
-        Bug(False, 6112,  "Enhancement", "netscape-like collapsable toolbars"),
-        Bug(False, 1,     "Normal",     "First bug :=)")]
+data = [Bug(False, 60482, "Normal", "scrollable notebooks and hidden tabs"),
+        Bug(False, 60620, "Critical", "gdk_window_clear_area (gdkwindow-win32.c) is not thread-safe"),
+        Bug(False, 50214, "Major", "Xft support does not clean up correctly"),
+        Bug(True, 52877, "Major", "GtkFileSelection needs a refresh method. "),
+        Bug(False, 56070, "Normal", "Can't click button after setting in sensitive"),
+        Bug(True, 56355, "Normal", "GtkLabel - Not all changes propagate correctly"),
+        Bug(False, 50055, "Normal", "Rework width/height computations for TreeView"),
+        Bug(False, 58278, "Normal", "gtk_dialog_set_response_sensitive () doesn't work"),
+        Bug(False, 55767, "Normal", "Getters for all setters"),
+        Bug(False, 56925, "Normal", "Gtkcalender size"),
+        Bug(False, 56221, "Normal", "Selectable label needs right-click copy menu"),
+        Bug(True, 50939, "Normal", "Add shift clicking to GtkTextView"),
+        Bug(False, 6112, "Enhancement", "netscape-like collapsable toolbars"),
+        Bug(False, 1, "Normal", "First bug :=)")]
 
 
 class ListStoreApp:

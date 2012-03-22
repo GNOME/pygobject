@@ -154,7 +154,7 @@ class RotatedTextApp:
 
         # Create a subtle gradient source and use it.
         pattern = cairo.LinearGradient(-self.RADIUS, -self.RADIUS,
-                                        self.RADIUS,  self.RADIUS)
+                                       self.RADIUS, self.RADIUS)
         pattern.add_color_stop_rgb(0.0, 0.5, 0.0, 0.0)
         pattern.add_color_stop_rgb(1.0, 0.0, 0.0, 0.5)
         cairo_ctx.set_source(pattern)

@@ -97,7 +97,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(variant.get_type_string(), 'a{sa{si}}')
         self.assertEquals(variant.n_children(), 0)
 
-        d = {'':     {'': 1, 'keyn1': 2},
+        d = {'': {'': 1, 'keyn1': 2},
              'key1': {'key11': 11, 'key12': 12}}
         variant = GLib.Variant('a{sa{si}}', d)
         self.assertEqual(variant.get_type_string(), 'a{sa{si}}')

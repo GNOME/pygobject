@@ -98,9 +98,9 @@ def about_cb(widget, user_data=None):
                'Tomeu Vizoso',
                'and many more...']
 
-    documentors =  ['David Malcolm',
-                    'Zack Goldberg',
-                    'and many more...']
+    documentors = ['David Malcolm',
+                   'Zack Goldberg',
+                   'and many more...']
 
     license = """
 This library is free software; you can redistribute it and/or
@@ -212,13 +212,13 @@ color_action_entries = (
 shape_action_entries = (
     ("Square", None,                            # name, stock id
      "_Square", "<control>S",                   # label, accelerator
-     "Square",  SHAPE_SQUARE),                  # tooltip, value
+     "Square", SHAPE_SQUARE),                   # tooltip, value
     ("Rectangle", None,                         # name, stock id
      "_Rectangle", "<control>R",                # label, accelerator
      "Rectangle", SHAPE_RECTANGLE),             # tooltip, value
     ("Oval", None,                              # name, stock id
      "_Oval", "<control>O",                     # label, accelerator
-     "Egg", SHAPE_OVAL ),                       # tooltip, value
+     "Egg", SHAPE_OVAL),                        # tooltip, value
 )
 
 ui_info = """

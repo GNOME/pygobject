@@ -1903,13 +1903,13 @@ class TestKeywordArgs(unittest.TestCase):
     def test_calling(self):
         kw_func = GIMarshallingTests.int_three_in_three_out
 
-        self.assertEquals(kw_func(1, 2, 3),                 (1, 2, 3))
+        self.assertEquals(kw_func(1, 2, 3), (1, 2, 3))
         self.assertEquals(kw_func(**{'a': 4, 'b': 5, 'c': 6}), (4, 5, 6))
-        self.assertEquals(kw_func(1, **{'b': 7, 'c': 8}),     (1, 7, 8))
-        self.assertEquals(kw_func(1, 7, **{'c': 8}),         (1, 7, 8))
-        self.assertEquals(kw_func(1, c=8, **{'b': 7}),       (1, 7, 8))
-        self.assertEquals(kw_func(2, c=4, b=3),             (2, 3, 4))
-        self.assertEquals(kw_func(a=2, c=4, b=3),           (2, 3, 4))
+        self.assertEquals(kw_func(1, **{'b': 7, 'c': 8}), (1, 7, 8))
+        self.assertEquals(kw_func(1, 7, **{'c': 8}), (1, 7, 8))
+        self.assertEquals(kw_func(1, c=8, **{'b': 7}), (1, 7, 8))
+        self.assertEquals(kw_func(2, c=4, b=3), (2, 3, 4))
+        self.assertEquals(kw_func(a=2, c=4, b=3), (2, 3, 4))
 
     def assertRaisesMessage(self, exception, message, func, *args, **kwargs):
         try:

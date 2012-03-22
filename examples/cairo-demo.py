@@ -34,8 +34,8 @@ def bowtie(ctx):
 
 def inf(ctx):
     ctx.move_to(0, SIZE)
-    ctx.rel_curve_to(0, SIZE, SIZE, SIZE,   2 * SIZE, 0)
-    ctx.rel_curve_to(SIZE, -SIZE,  2 * SIZE, -SIZE,   2 * SIZE, 0)
+    ctx.rel_curve_to(0, SIZE, SIZE, SIZE, 2 * SIZE, 0)
+    ctx.rel_curve_to(SIZE, -SIZE, 2 * SIZE, -SIZE, 2 * SIZE, 0)
     ctx.rel_curve_to(0, SIZE, -SIZE, SIZE, - 2 * SIZE, 0)
     ctx.rel_curve_to(-SIZE, -SIZE, - 2 * SIZE, -SIZE, - 2 * SIZE, 0)
     ctx.close_path()
