@@ -104,7 +104,7 @@ RUN_TESTS_ENV_VARS= \
 
 check-local: check-pyflakes
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
+	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning $(srcdir)/runtests.py
 
 check-pyflakes:
 	@echo "  CHECK Pyflakes"
