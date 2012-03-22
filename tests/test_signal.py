@@ -316,7 +316,7 @@ class SigPropClass(GObject.GObject):
                                   (GObject.TYPE_INT,))}
 
     __gproperties__ = {
-        'foo': (str, None, None, '', GObject.PARAM_WRITABLE|GObject.PARAM_CONSTRUCT),
+        'foo': (str, None, None, '', GObject.PARAM_WRITABLE | GObject.PARAM_CONSTRUCT),
         }
 
     signal_emission_failed = False

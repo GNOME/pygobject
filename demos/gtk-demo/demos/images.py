@@ -162,7 +162,7 @@ class ImagesApp:
                                            Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                            Gtk.MessageType.ERROR,
                                            Gtk.ButtonsType.CLOSE,
-                                           "Failure reading image file 'alphatest.png': %s" %str(e))
+                                           "Failure reading image file 'alphatest.png': %s" % (str(e), ))
 
                 self.image_stream.close()
                 self.image_stream = None

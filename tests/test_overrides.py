@@ -193,7 +193,7 @@ class TestGLib(unittest.TestCase):
         obj = {"frequency": GLib.Variant('t', 738000000),
             "hierarchy": GLib.Variant('i', 0),
             "bandwidth": GLib.Variant('x', 8),
-            "code-rate-hp": GLib.Variant('d', 2.0/3.0),
+            "code-rate-hp": GLib.Variant('d', 2.0 / 3.0),
             "constellation": GLib.Variant('s', "QAM16"),
             "guard-interval": GLib.Variant('u', 4),}
         variant = GLib.Variant('a{sv}', obj)
@@ -201,7 +201,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(variant.unpack(), {"frequency": 738000000,
             "hierarchy": 0,
             "bandwidth": 8,
-            "code-rate-hp": 2.0/3.0,
+            "code-rate-hp": 2.0 / 3.0,
             "constellation": "QAM16",
             "guard-interval": 4})
 
@@ -1517,8 +1517,8 @@ class TestGtk(unittest.TestCase):
         # FIXME: We can't easily call get_cursor() to make sure this works as
         # expected as we need to realize and focus the column; the following
         # will raise a Gtk-CRITICAL which we ignore for now
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_WARNING|
-                          GLib.LogLevelFlags.LEVEL_ERROR)
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_WARNING | GLib.LogLevelFlags.LEVEL_ERROR)
         view.set_cursor(store[1].path)
         view.set_cursor(str(store[1].path))
 

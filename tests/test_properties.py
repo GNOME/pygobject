@@ -31,18 +31,18 @@ class PropertyObject(GObject.GObject):
     normal = GObject.Property(type=str)
     construct = GObject.Property(
         type=str,
-        flags=PARAM_READWRITE|PARAM_CONSTRUCT, default='default')
+        flags=PARAM_READWRITE | PARAM_CONSTRUCT, default='default')
     construct_only = GObject.Property(
         type=str,
-        flags=PARAM_READWRITE|PARAM_CONSTRUCT_ONLY)
+        flags=PARAM_READWRITE | PARAM_CONSTRUCT_ONLY)
     uint64 = GObject.Property(
-        type=TYPE_UINT64, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
+        type=TYPE_UINT64, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
     enum = GObject.Property(
         type=Gio.SocketType, default=Gio.SocketType.STREAM)
 
     boxed = GObject.Property(
-        type=GLib.Regex, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
+        type=GLib.Regex, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
 
 class TestProperties(unittest.TestCase):
@@ -133,7 +133,7 @@ class TestProperties(unittest.TestCase):
             class TimeControl(GObject.GObject):
                 __gproperties__ = {
                     'time': (TYPE_UINT64, 'Time', 'Time',
-                             _long(0), (1<<64) - 1, _long(0),
+                             _long(0), (1 << 64) - 1, _long(0),
                              PARAM_READABLE)
                     }
         except OverflowError:
@@ -398,13 +398,13 @@ class TestProperty(unittest.TestCase):
 
             # Lower than minimum
             self.assertRaises(TypeError,
-                              GObject.Property, type=gtype, minimum=min-1,
+                              GObject.Property, type=gtype, minimum=min - 1,
                               maximum=max)
 
             # Higher than maximum
             self.assertRaises(TypeError,
                               GObject.Property, type=gtype, minimum=min,
-                              maximum=max+1)
+                              maximum=max + 1)
 
     def testMinMax(self):
         class C(GObject.GObject):
