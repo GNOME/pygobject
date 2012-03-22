@@ -91,7 +91,7 @@ class ListStoreApp:
         self.window.show_all()
 
         self.window.connect('delete-event', self.window_closed)
-        self.timeout = GObject.timeout_add (80, self.spinner_timeout)
+        self.timeout = GObject.timeout_add(80, self.spinner_timeout)
 
     def window_closed(self, window, event):
         if self.timeout != 0:

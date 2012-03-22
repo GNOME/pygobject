@@ -114,7 +114,7 @@ class SearchboxApp:
         entry.progress_pulse()
         return True
 
-    def search_progress_done (self, entry):
+    def search_progress_done(self, entry):
         entry.set_progress_fraction(0.0)
 
     def finish_search(self, button, entry):
@@ -151,7 +151,7 @@ class SearchboxApp:
     def clear_entry(self, entry):
         entry.set_text('')
 
-    def search_by_name (self, item, entry):
+    def search_by_name(self, item, entry):
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
                                   Gtk.STOCK_FIND)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
@@ -159,8 +159,8 @@ class SearchboxApp:
                                    'Click here to change the search type')
 
     def search_by_description(self, item, entry):
-        entry.set_icon_from_stock (Gtk.EntryIconPosition.PRIMARY,
-                                   Gtk.STOCK_EDIT)
+        entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
+                                  Gtk.STOCK_EDIT)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
                                     'Search by description\n' + \
                                     'Click here to change the search type')
@@ -212,7 +212,7 @@ class SearchboxApp:
         entry.set_icon_sensitive(Gtk.EntryIconPosition.SECONDARY, has_text)
         button.set_sensitive(has_text)
 
-    def activate_cb (self, entry, button):
+    def activate_cb(self, entry, button):
         if self.search_progress_id != 0:
             return
         self.start_search(button, entry)
@@ -242,7 +242,7 @@ class SearchboxApp:
         item = Gtk.MenuItem.new_with_label('Search by')
         item.show()
         item.set_submenu(search_menu)
-        menu.append (item)
+        menu.append(item)
 
 
 def main(demoapp=None):

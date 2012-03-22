@@ -131,8 +131,8 @@ class PrintingApp:
             layout.set_ellipsize(Pango.EllipsizeMode.START)
             (text_width, text_height) = layout.get_pixel_size()
 
-        cr.move_to ((width - text_width) / 2,
-                    (self.HEADER_HEIGHT - text_height) / 2)
+        cr.move_to((width - text_width) / 2,
+                   (self.HEADER_HEIGHT - text_height) / 2)
         PangoCairo.show_layout(cr, layout)
 
         page_str = "%d/%d" % (page_num + 1, print_data['num_pages'])
@@ -150,7 +150,7 @@ class PrintingApp:
         desc.set_size(print_data['font_size'] * Pango.SCALE)
         layout.set_font_description(desc)
 
-        cr.move_to (0, self.HEADER_HEIGHT + self.HEADER_GAP)
+        cr.move_to(0, self.HEADER_HEIGHT + self.HEADER_GAP)
         lines_pp = int(print_data['lines_per_page'])
         num_lines = print_data['num_lines']
         data_lines = print_data['lines']
@@ -163,7 +163,7 @@ class PrintingApp:
 
             layout.set_text(data_lines[line], -1)
             PangoCairo.show_layout(cr, layout)
-            cr.rel_move_to (0, font_size)
+            cr.rel_move_to(0, font_size)
             line += 1
 
     def end_print(self, operation, print_ctx, print_data):

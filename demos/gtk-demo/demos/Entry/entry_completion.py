@@ -45,7 +45,7 @@ class EntryBufferApp:
 
         label = Gtk.Label()
         label.set_markup('Completion demo, try writing <b>total</b> or <b>gnome</b> for example.')
-        vbox.pack_start (label, False, False, 0)
+        vbox.pack_start(label, False, False, 0)
 
         #create our entry
         entry = Gtk.Entry()

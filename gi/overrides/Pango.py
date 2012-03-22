@@ -39,7 +39,7 @@ class FontDescription(Pango.FontDescription):
 
     def __new__(cls, string=None):
         if string is not None:
-            return Pango.font_description_from_string (string)
+            return Pango.font_description_from_string(string)
         else:
             return Pango.FontDescription.__new__(cls)
 

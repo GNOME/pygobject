@@ -43,27 +43,27 @@ class PickersApp:
         label.set_alignment(0.0, 0.5)
         picker = Gtk.ColorButton()
         table.attach_defaults(label, 0, 1, 0, 1)
-        table.attach_defaults (picker, 1, 2, 0, 1)
+        table.attach_defaults(picker, 1, 2, 0, 1)
 
         label = Gtk.Label('Font:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FontButton()
         table.attach_defaults(label, 0, 1, 1, 2)
-        table.attach_defaults (picker, 1, 2, 1, 2)
+        table.attach_defaults(picker, 1, 2, 1, 2)
 
         label = Gtk.Label('File:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FileChooserButton.new('Pick a File',
                                            Gtk.FileChooserAction.OPEN)
         table.attach_defaults(label, 0, 1, 2, 3)
-        table.attach_defaults (picker, 1, 2, 2, 3)
+        table.attach_defaults(picker, 1, 2, 2, 3)
 
         label = Gtk.Label('Folder:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FileChooserButton.new('Pick a Folder',
                                            Gtk.FileChooserAction.SELECT_FOLDER)
         table.attach_defaults(label, 0, 1, 3, 4)
-        table.attach_defaults (picker, 1, 2, 3, 4)
+        table.attach_defaults(picker, 1, 2, 3, 4)
 
         self.window.show_all()
 

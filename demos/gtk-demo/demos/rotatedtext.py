@@ -139,7 +139,7 @@ class RotatedTextApp:
         '''
         return attrs
 
-    def rotated_text_draw (self, da, cairo_ctx):
+    def rotated_text_draw(self, da, cairo_ctx):
         # Create a cairo context and set up a transformation matrix so that the user
         # space coordinates for the centered square where we draw are [-RADIUS, RADIUS],
         # [-RADIUS, RADIUS].

@@ -136,7 +136,7 @@ class GtkDemoWindow(Gtk.Window):
         super(GtkDemoWindow, self).__init__(type=Gtk.WindowType.TOPLEVEL)
 
         self.set_title('PyGI GTK+ Code Demos')
-        self.set_default_size (600, 400)
+        self.set_default_size(600, 400)
         self.setup_default_icon()
 
         hbox = Gtk.HBox(homogeneous=False, spacing=0)
@@ -198,7 +198,7 @@ class GtkDemoWindow(Gtk.Window):
             raise IOError('Cannot find demo data file "%s"' % base)
 
     def setup_default_icon(self):
-        filename = self.find_file ('gtk-logo-rgb.gif')
+        filename = self.find_file('gtk-logo-rgb.gif')
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
         transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
         list = []

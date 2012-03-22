@@ -71,11 +71,11 @@ class DialogsApp:
         hbox.pack_start(table, False, False, 0)
 
         label = Gtk.Label.new_with_mnemonic("_Entry 1")
-        table.attach_defaults (label, 0, 1, 0, 1)
+        table.attach_defaults(label, 0, 1, 0, 1)
 
         self.entry1 = Gtk.Entry()
         table.attach_defaults(self.entry1, 1, 2, 0, 1)
-        label.set_mnemonic_widget (self.entry1)
+        label.set_mnemonic_widget(self.entry1)
 
         label = Gtk.Label.new_with_mnemonic("E_ntry 2")
 
@@ -95,7 +95,7 @@ class DialogsApp:
                             (Gtk.STOCK_OK, Gtk.ResponseType.OK,
                             "_Non-stock Button", Gtk.ResponseType.CANCEL))
 
-        content_area = dialog.get_content_area ()
+        content_area = dialog.get_content_area()
         hbox = Gtk.HBox(spacing=8)
         hbox.set_border_width(8)
         content_area.pack_start(hbox, False, False, 0)
@@ -117,10 +117,10 @@ class DialogsApp:
         label.set_mnemonic_widget(local_entry1)
 
         label = Gtk.Label.new_with_mnemonic("E_ntry 2")
-        table.attach_defaults (label, 0, 1, 1, 2)
+        table.attach_defaults(label, 0, 1, 1, 2)
 
         local_entry2 = Gtk.Entry()
-        local_entry2.set_text (self.entry2.get_text())
+        local_entry2.set_text(self.entry2.get_text())
         table.attach_defaults(local_entry2, 1, 2, 1, 2)
         label.set_mnemonic_widget(local_entry2)
 
@@ -140,7 +140,7 @@ class DialogsApp:
                                    Gtk.MessageType.INFO,
                                    Gtk.ButtonsType.OK,
                                    "This message box has been popped up the following\nnumber of times:")
-        dialog.format_secondary_text ('%d' % self.dialog_counter)
+        dialog.format_secondary_text('%d' % self.dialog_counter)
         dialog.run()
 
         self.dialog_counter += 1

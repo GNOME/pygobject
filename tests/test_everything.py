@@ -161,12 +161,12 @@ class TestEverything(unittest.TestCase):
     def test_ptrarray(self):
         # transfer container
         result = Everything.test_garray_container_return()
-        self.assertEquals (result, ['regress'])
+        self.assertEquals(result, ['regress'])
         result = None
 
         # transfer full
         result = Everything.test_garray_full_return()
-        self.assertEquals (result, ['regress'])
+        self.assertEquals(result, ['regress'])
         result = None
 
     def test_struct_gpointer(self):

@@ -127,8 +127,8 @@ class PixbufApp:
 
             r = radius + (radius / 3.0) * math.sin(f * 2.0 * math.pi)
 
-            xpos = math.floor (xmid + r * math.cos(ang) - iw / 2.0 + 0.5)
-            ypos = math.floor (ymid + r * math.sin(ang) - ih / 2.0 + 0.5)
+            xpos = math.floor(xmid + r * math.cos(ang) - iw / 2.0 + 0.5)
+            ypos = math.floor(ymid + r * math.sin(ang) - ih / 2.0 + 0.5)
 
             if i & 1:
                 k = math.sin(f * 2.0 * math.pi)

@@ -601,7 +601,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         self.assertRaises(TypeError, Gtk.ActionGroup)
 
-        action_group = Gtk.ActionGroup (name='TestActionGroup')
+        action_group = Gtk.ActionGroup(name='TestActionGroup')
         callback_data = "callback data"
 
         def test_action_callback_data(action, user_data):
@@ -610,7 +610,7 @@ class TestGtk(unittest.TestCase):
         def test_radio_action_callback_data(action, current, user_data):
             self.assertEquals(user_data, callback_data)
 
-        action_group.add_actions ([
+        action_group.add_actions([
             ('test-action1', None, 'Test Action 1',
              None, None, test_action_callback_data),
             ('test-action2', Gtk.STOCK_COPY, 'Test Action 2',
@@ -652,9 +652,9 @@ class TestGtk(unittest.TestCase):
         menubar = ui.get_widget("/menubar1")
         self.assertEquals(type(menubar), Gtk.MenuBar)
 
-        ag = Gtk.ActionGroup (name="ag1")
+        ag = Gtk.ActionGroup(name="ag1")
         ui.insert_action_group(ag)
-        ag2 = Gtk.ActionGroup (name="ag2")
+        ag2 = Gtk.ActionGroup(name="ag2")
         ui.insert_action_group(ag2)
         groups = ui.get_action_groups()
         self.assertEquals(ag, groups[-2])
@@ -741,21 +741,21 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.RecentChooserDialog, overrides.Gtk.RecentChooserDialog)
 
         # Gtk.Dialog
-        dialog = Gtk.Dialog (title='Foo',
-                             flags=Gtk.DialogFlags.MODAL,
-                             buttons=('test-button1', 1))
+        dialog = Gtk.Dialog(title='Foo',
+                            flags=Gtk.DialogFlags.MODAL,
+                            buttons=('test-button1', 1))
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
-        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
 
         self.assertEquals('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
-        button = dialog.get_widget_for_response (1)
+        button = dialog.get_widget_for_response(1)
         self.assertEquals('test-button1', button.get_label())
-        button = dialog.get_widget_for_response (2)
+        button = dialog.get_widget_for_response(2)
         self.assertEquals('test-button2', button.get_label())
-        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 
         # Gtk.AboutDialog
@@ -764,10 +764,10 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
         # Gtk.MessageDialog
-        dialog = Gtk.MessageDialog (title='message dialog test',
-                                    flags=Gtk.DialogFlags.MODAL,
-                                    buttons=Gtk.ButtonsType.OK,
-                                    message_format='dude!')
+        dialog = Gtk.MessageDialog(title='message dialog test',
+                                   flags=Gtk.DialogFlags.MODAL,
+                                   buttons=Gtk.ButtonsType.OK,
+                                   message_format='dude!')
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
@@ -791,19 +791,19 @@ class TestGtk(unittest.TestCase):
         self.assertEquals('color selection dialog test', dialog.get_title())
 
         # Gtk.FileChooserDialog
-        dialog = Gtk.FileChooserDialog (title='file chooser dialog test',
-                                        buttons=('test-button1', 1),
-                                        action=Gtk.FileChooserAction.SAVE)
+        dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
+                                       buttons=('test-button1', 1),
+                                       action=Gtk.FileChooserAction.SAVE)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
-        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEquals('file chooser dialog test', dialog.get_title())
-        button = dialog.get_widget_for_response (1)
+        button = dialog.get_widget_for_response(1)
         self.assertEquals('test-button1', button.get_label())
-        button = dialog.get_widget_for_response (2)
+        button = dialog.get_widget_for_response(2)
         self.assertEquals('test-button2', button.get_label())
-        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
         action = dialog.get_property('action')
         self.assertEquals(Gtk.FileChooserAction.SAVE, action)
@@ -817,19 +817,19 @@ class TestGtk(unittest.TestCase):
 
         # Gtk.RecentChooserDialog
         test_manager = Gtk.RecentManager()
-        dialog = Gtk.RecentChooserDialog (title='recent chooser dialog test',
-                                          buttons=('test-button1', 1),
-                                          manager=test_manager)
+        dialog = Gtk.RecentChooserDialog(title='recent chooser dialog test',
+                                         buttons=('test-button1', 1),
+                                         manager=test_manager)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
-        dialog.add_buttons ('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEquals('recent chooser dialog test', dialog.get_title())
-        button = dialog.get_widget_for_response (1)
+        button = dialog.get_widget_for_response(1)
         self.assertEquals('test-button1', button.get_label())
-        button = dialog.get_widget_for_response (2)
+        button = dialog.get_widget_for_response(2)
         self.assertEquals('test-button2', button.get_label())
-        button = dialog.get_widget_for_response (Gtk.ResponseType.CLOSE)
+        button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
 
     class TestClass(GObject.GObject):
@@ -1566,7 +1566,7 @@ class TestGtk(unittest.TestCase):
     def test_text_buffer(self):
         self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()
-        tag = buffer.create_tag ('title', font='Sans 18')
+        tag = buffer.create_tag('title', font='Sans 18')
 
         self.assertEquals(tag.props.name, 'title')
         self.assertEquals(tag.props.font, 'Sans 18')
@@ -1624,7 +1624,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
         buffer = Gtk.TextBuffer()
         buffer.set_text('Hello Jane Hello Bob')
-        tag = buffer.create_tag ('title', font='Sans 18')
+        tag = buffer.create_tag('title', font='Sans 18')
         (start, end) = buffer.get_bounds()
         start.forward_chars(10)
         buffer.apply_tag(tag, start, end)

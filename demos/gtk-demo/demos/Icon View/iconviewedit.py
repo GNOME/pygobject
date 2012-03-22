@@ -65,7 +65,7 @@ class IconviewEditApp:
 
         self.window.show_all()
 
-    def set_cell_color (self, cell_layout, cell, tree_model, iter_, icon_view):
+    def set_cell_color(self, cell_layout, cell, tree_model, iter_, icon_view):
 
         # FIXME return single element instead of tuple
         text = tree_model.get(iter_, self.COL_TEXT)[0]
@@ -82,7 +82,7 @@ class IconviewEditApp:
 
         cell.props.pixbuf = pixbuf
 
-    def edited (self, cell, path_string, text, icon_view):
+    def edited(self, cell, path_string, text, icon_view):
         model = icon_view.get_model()
         path = Gtk.TreePath(path_string)
 

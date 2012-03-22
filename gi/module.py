@@ -197,7 +197,7 @@ class IntrospectionModule(object):
         path = repository.get_typelib_path(self._namespace)
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
-    def __dir__ (self):
+    def __dir__(self):
         # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
         result = set(dir(self.__class__))
         result.update(self.__dict__.keys())
@@ -243,7 +243,7 @@ class DynamicModule(object):
 
         return getattr(self._introspection_module, name)
 
-    def __dir__ (self):
+    def __dir__(self):
         # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
         result = set(dir(self.__class__))
         result.update(self.__dict__.keys())

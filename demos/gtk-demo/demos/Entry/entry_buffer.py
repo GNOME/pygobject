@@ -44,7 +44,7 @@ class EntryBufferApp:
 
         label = Gtk.Label()
         label.set_markup('Entries share a buffer. Typing in one is reflected in the other.')
-        vbox.pack_start (label, False, False, 0)
+        vbox.pack_start(label, False, False, 0)
 
         # create a buffer
         buffer = Gtk.EntryBuffer()

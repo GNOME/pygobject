@@ -271,10 +271,10 @@ def enable_gtk(version='2.0'):
         def __init__(self, **kwds):
             Gtk.ComboBox.__init__(self, has_entry=True, **kwds)
 
-        def set_text_column (self, text_column):
+        def set_text_column(self, text_column):
             self.set_entry_text_column(text_column)
 
-        def get_text_column (self):
+        def get_text_column(self):
             return self.get_entry_text_column()
     Gtk.ComboBoxEntry = ComboBoxEntry
 
