@@ -112,7 +112,7 @@ class DrawingAreaApp:
 
         while i < width:
             j = spacing
-            ycount = xcount % 2 # start with even/odd depending on row
+            ycount = xcount % 2  # start with even/odd depending on row
             while j < height:
                 if ycount % 2:
                     cairo_ctx.set_source_rgb(0.45777, 0, 0.45777)
@@ -168,7 +168,7 @@ class DrawingAreaApp:
         return True
 
     def scribble_motion_notify_event(self, da, event):
-        if self.surface == None: # paranoia check, in case we haven't gotten a configure event
+        if self.surface == None:  # paranoia check, in case we haven't gotten a configure event
             return False
 
         # This call is very important; it requests the next motion event.
@@ -189,7 +189,7 @@ class DrawingAreaApp:
         return True
 
     def scribble_button_press_event(self, da, event):
-        if self.surface == None: # paranoia check, in case we haven't gotten a configure event
+        if self.surface == None:  # paranoia check, in case we haven't gotten a configure event
             return False
 
         if event.button == 1:

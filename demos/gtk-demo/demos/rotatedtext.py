@@ -95,7 +95,7 @@ class RotatedTextApp:
         cairo_ctx.scale(float(attr.inc_rect.width) / Pango.SCALE,
                         float(attr.inc_rect.height) / Pango.SCALE)
 
-        if int(attr.data) == 0x2665: # U+2665 BLACK HEART SUIT
+        if int(attr.data) == 0x2665:  # U+2665 BLACK HEART SUIT
             cairo_ctx.move_to(0.5, 0.0)
             cairo_ctx.line_to(0.9, -0.4)
             cairo_ctx.curve_to(1.1, -0.8, 0.5, -0.9, 0.5, -0.5)

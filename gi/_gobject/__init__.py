@@ -223,7 +223,7 @@ class GObjectMeta(type):
 
         props = []
         for name, prop in cls.__dict__.items():
-            if isinstance(prop, Property): # not same as the built-in
+            if isinstance(prop, Property):  # not same as the built-in
                 if name in gproperties:
                     raise ValueError
                 prop.name = name

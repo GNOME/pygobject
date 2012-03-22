@@ -25,7 +25,7 @@ from ._gi import _API, Repository
 # Force loading the GObject typelib so we have available the wrappers for
 # base classes such as GInitiallyUnowned
 import gi._gobject
-gi # pyflakes
+gi  # pyflakes
 
 _API = _API  # pyflakes
 

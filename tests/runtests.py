@@ -46,4 +46,4 @@ suite = loader.loadTestsFromNames(names)
 runner = unittest.TextTestRunner(verbosity=2)
 result = runner.run(suite)
 if not result.wasSuccessful():
-    sys.exit(1) # exit code so "make check" reports error
+    sys.exit(1)  # exit code so "make check" reports error

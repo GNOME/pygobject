@@ -84,7 +84,7 @@ class _VariantCreator(object):
     def _create_tuple(self, format, args):
         '''Handle the case where the outermost type of format is a tuple.'''
 
-        format = format[1:] # eat the '('
+        format = format[1:]  # eat the '('
         builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
         if args is not None:
             if not args or type(args[0]) != type(()):
@@ -110,7 +110,7 @@ class _VariantCreator(object):
             rest_format = self._create(rest_format, None)[1]
             if not rest_format.startswith('}'):
                 raise ValueError('dictionary type string not closed with }')
-            rest_format = rest_format[1:] # eat the}
+            rest_format = rest_format[1:]  # eat the}
             element_type = format[:len(format) - len(rest_format)]
             builder = GLib.VariantBuilder.new(variant_type_from_string(element_type))
         else:
@@ -121,7 +121,7 @@ class _VariantCreator(object):
 
                 if not rest_format.startswith('}'):
                     raise ValueError('dictionary type string not closed with }')
-                rest_format = rest_format[1:] # eat the}
+                rest_format = rest_format[1:]  # eat the}
 
                 entry = GLib.VariantBuilder.new(variant_type_from_string('{?*}'))
                 entry.add_value(key_v)
@@ -207,8 +207,8 @@ class Variant(GLib.Variant):
             'h': self.get_handle,
             'd': self.get_double,
             's': self.get_string,
-            'o': self.get_string, # object path
-            'g': self.get_string, # signature
+            'o': self.get_string,  # object path
+            'g': self.get_string,  # signature
         }
 
         # simple values
@@ -259,7 +259,7 @@ class Variant(GLib.Variant):
 
         result = []
         head = ''
-        tail = signature[1:-1] # eat the surrounding ()
+        tail = signature[1:-1]  # eat the surrounding ()
         while tail:
             c = tail[0]
             head += c

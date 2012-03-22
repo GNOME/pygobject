@@ -260,7 +260,7 @@ def mro(C):
             candidate = subclass_bases[0]
             not_head = [s for s in bases_of_subclasses if candidate in s[1:]]
             if not_head and _gobject.GInterface not in candidate.__bases__:
-                candidate = None # conflict, reject candidate
+                candidate = None  # conflict, reject candidate
             else:
                 break
 
@@ -270,7 +270,7 @@ def mro(C):
 
         bases.append(candidate)
 
-        for subclass_bases in bases_of_subclasses[:]: # remove candidate
+        for subclass_bases in bases_of_subclasses[:]:  # remove candidate
             if subclass_bases and subclass_bases[0] == candidate:
                 del subclass_bases[0]
                 if not subclass_bases:

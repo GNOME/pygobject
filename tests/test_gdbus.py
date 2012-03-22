@@ -25,7 +25,7 @@ class TestGDBusClient(unittest.TestCase):
         result = self.dbus_proxy.call_sync('ListNames', None,
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
         self.assertTrue(isinstance(result, GLib.Variant))
-        result = result.unpack()[0] # result is always a tuple
+        result = result.unpack()[0]  # result is always a tuple
         self.assertTrue(len(result) > 1)
         self.assertTrue('org.freedesktop.DBus' in result)
 
@@ -76,7 +76,7 @@ class TestGDBusClient(unittest.TestCase):
         main_loop.run()
 
         self.assertTrue(isinstance(data['result'], GLib.Variant))
-        result = data['result'].unpack()[0] # result is always a tuple
+        result = data['result'].unpack()[0]  # result is always a tuple
         self.assertTrue(len(result) > 1)
         self.assertTrue('org.freedesktop.DBus' in result)
 

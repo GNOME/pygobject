@@ -171,7 +171,7 @@ class ImagesApp:
                 dialog.show()
                 dialog.connect('response', lambda x, y: dialog.destroy())
 
-                return False # uninstall the timeout
+                return False  # uninstall the timeout
 
             try:
                 self.pixbuf_loader.write(buf)
@@ -190,9 +190,9 @@ class ImagesApp:
                 dialog.show()
                 dialog.connect('response', lambda x, y: dialog.destroy())
 
-                return False # uninstall the timeout
+                return False  # uninstall the timeout
 
-            if len(buf) < 256: # eof
+            if len(buf) < 256:  # eof
                 self.image_stream.close()
                 self.image_stream = None
 
@@ -213,7 +213,7 @@ class ImagesApp:
                     dialog.show()
                     dialog.connect('response', lambda x, y: dialog.destroy())
 
-                    return False # uninstall the timeout
+                    return False  # uninstall the timeout
         else:
             img_path = path.join(self.base_path, 'alphatest.png')
             try:
@@ -228,7 +228,7 @@ class ImagesApp:
                 dialog.show()
                 dialog.connect('response', lambda x, y: dialog.destroy())
 
-                return False # uninstall the timeout
+                return False  # uninstall the timeout
 
             if self.pixbuf_loader:
                 try:
