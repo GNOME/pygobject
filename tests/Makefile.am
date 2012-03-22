@@ -102,13 +102,12 @@ RUN_TESTS_ENV_VARS= \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	TESTS_BUILDDIR=$(builddir)
 
-check-local: check-pyflakes
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
-	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning $(srcdir)/runtests.py
-
-check-pyflakes:
-	@echo "  CHECK Pyflakes"
+	@echo "  CHECK  Pyflakes"
 	@pyflakes $(top_srcdir)
+	@echo "  CHECK  PEP8"
+	@pep8 --ignore=E501 --repeat --show-source $(top_srcdir)
+	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning $(srcdir)/runtests.py
 
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
