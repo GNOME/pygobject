@@ -1,3 +1,11 @@
+3.1.93  22-Mar-2012
+        - Fix warnings on None values in added tree/list store rows.
+          (#672463, Martin Pitt)
+        - Support marshalling GI_TYPE_TAG_INTERFACE (#668903, Alberto Mardegan)
+        - test_overrides: Find local gsettings schema with current glib
+          (Martin Pitt)
+        - pygtkcompat test: Properly clean up PixbufLoader (Martin Pitt)
+
 3.1.92  19-Mar-2012
         - Correct Gtk.TreePath.__iter__ to work with Python 3 (Johan Dahlin)
         - Fix test_everything.TestSignals.test_object_param_signal test case
