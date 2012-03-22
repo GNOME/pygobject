@@ -65,26 +65,6 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 
 all: $(LTLIBRARIES:.la=.so)
 
-TEST_FILES_STATIC = \
-	test_gobject.py \
-	test_interface.py \
-	test_mainloop.py \
-	test_option.py \
-	test_properties.py \
-	test_signal.py \
-	test_source.py \
-	test_subprocess.py \
-	test_thread.py \
-	test_uris.py
-
-
-TEST_FILES_GI = \
-	test_everything.py \
-	test_gi.py \
-	test_gdbus.py \
-	test_overrides.py \
-	test_pygtkcompat.py
-
 EXTRA_DIST = \
 	compathelper.py \
 	runtests.py \
@@ -94,9 +74,22 @@ EXTRA_DIST = \
 	test-thread.h \
 	test-unknown.h \
 	te_ST@nouppera \
-	org.gnome.test.gschema.xml
-
-EXTRA_DIST += $(TEST_FILES_STATIC) $(TEST_FILES_GI)
+	org.gnome.test.gschema.xml \
+	test_gobject.py \
+	test_interface.py \
+	test_mainloop.py \
+	test_option.py \
+	test_properties.py \
+	test_signal.py \
+	test_source.py \
+	test_subprocess.py \
+	test_thread.py \
+	test_uris.py \
+	test_everything.py \
+	test_gi.py \
+	test_gdbus.py \
+	test_overrides.py \
+	test_pygtkcompat.py
 
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so) file.txt~
@@ -108,12 +101,10 @@ RUN_TESTS_ENV_VARS= \
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	TESTS_BUILDDIR=$(builddir)
-RUN_TESTS_LAUNCH=$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check-local: check-pyflakes
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
-	TEST_FILES="$(TEST_FILES_STATIC)" $(RUN_TESTS_LAUNCH)
-	TEST_FILES="$(TEST_FILES_GI)" $(RUN_TESTS_LAUNCH)
+	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) $(srcdir)/runtests.py
 
 check-pyflakes:
 	@echo "  CHECK Pyflakes"

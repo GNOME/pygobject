@@ -15,6 +15,13 @@ if '--help' in sys.argv:
 os.environ['LC_MESSAGES'] = 'C'
 os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
 
+# make Gio able to find our gschemas.compiled in tests/. This needs to be set
+# before importing Gio. Support a separate build tree, so look in build dir
+# first.
+os.environ['GSETTINGS_BACKEND'] = 'memory'
+os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
+        os.path.dirname(__file__))
+
 # Load tests.
 if 'TEST_NAMES' in os.environ:
 	names = os.environ['TEST_NAMES'].split()

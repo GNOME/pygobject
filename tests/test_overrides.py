@@ -4,15 +4,9 @@
 import unittest
 
 import sys
-import os
 sys.path.insert(0, "../")
 
 from compathelper import _long, _unicode, _bytes
-
-os.environ['GSETTINGS_BACKEND'] = 'memory'
-# support a separate build tree, so look in build dir first
-os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
-        os.path.dirname(__file__))
 
 from gi.repository import GLib
 from gi.repository import GObject
