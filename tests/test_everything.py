@@ -522,9 +522,9 @@ class TestTortureProfile(unittest.TestCase):
 
         start_time = time.clock()
         for i in range(10000):
-            (y,z,q) = object_.torture_signature_0(5000,
-                                                  "Torture Test 1",
-                                                  12345)
+            (y, z, q) = object_.torture_signature_0(5000,
+                                                    "Torture Test 1",
+                                                    12345)
 
         end_time = time.clock()
         delta_time = end_time - start_time
@@ -535,9 +535,8 @@ class TestTortureProfile(unittest.TestCase):
 
         start_time = time.clock()
         for i in range(10000):
-            (y,z,q) = Everything.TestObj().torture_signature_0(5000,
-                                                               "Torture Test 2",
-                                                               12345)
+            (y, z, q) = Everything.TestObj().torture_signature_0(
+                5000, "Torture Test 2", 12345)
 
         end_time = time.clock()
         delta_time = end_time - start_time
@@ -548,9 +547,8 @@ class TestTortureProfile(unittest.TestCase):
         start_time = time.clock()
         for i in range(10000):
             try:
-                (y,z,q) = object_.torture_signature_1(5000,
-                                                      "Torture Test 3",
-                                                      12345)
+                (y, z, q) = object_.torture_signature_1(
+                    5000, "Torture Test 3", 12345)
             except:
                 pass
         end_time = time.clock()
@@ -566,11 +564,8 @@ class TestTortureProfile(unittest.TestCase):
         userdata = [1, 2, 3, 4]
         start_time = time.clock()
         for i in range(10000):
-            (y,z,q) = Everything.test_torture_signature_2(5000,
-                                                          callback,
-                                                          userdata,
-                                                          "Torture Test 4",
-                                                          12345)
+            (y, z, q) = Everything.test_torture_signature_2(
+                5000, callback, userdata, "Torture Test 4", 12345)
         end_time = time.clock()
         delta_time = end_time - start_time
         total_time += delta_time

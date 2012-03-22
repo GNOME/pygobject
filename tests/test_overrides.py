@@ -195,7 +195,7 @@ class TestGLib(unittest.TestCase):
             "bandwidth": GLib.Variant('x', 8),
             "code-rate-hp": GLib.Variant('d', 2.0 / 3.0),
             "constellation": GLib.Variant('s', "QAM16"),
-            "guard-interval": GLib.Variant('u', 4),}
+            "guard-interval": GLib.Variant('u', 4)}
         variant = GLib.Variant('a{sv}', obj)
         self.assertEqual(variant.get_type_string(), 'a{sv}')
         self.assertEqual(variant.unpack(), {"frequency": 738000000,

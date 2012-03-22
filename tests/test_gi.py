@@ -1935,7 +1935,7 @@ class TestKeywordArgs(unittest.TestCase):
         self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (0 given)",
                                  GIMarshallingTests.int_three_in_three_out, *(), **{})
         self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 non-keyword arguments (0 given)",
-                                 GIMarshallingTests.int_three_in_three_out, *(), **{'c':4})
+                                 GIMarshallingTests.int_three_in_three_out, *(), **{'c': 4})
 
         # test too many args
         self.assertRaisesMessage(TypeError, "int_three_in_three_out() takes exactly 3 arguments (4 given)",

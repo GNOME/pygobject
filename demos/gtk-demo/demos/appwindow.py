@@ -155,7 +155,7 @@ action_entries = (
      "Open first file",                         # tooltip
      activate_action),
     ("Save", Gtk.STOCK_SAVE,                    # name, stock id
-     "_Save","<control>S",                      # label, accelerator
+     "_Save", "<control>S",                     # label, accelerator
      "Save current file",                       # tooltip
      activate_action),
     ("SaveAs", Gtk.STOCK_SAVE,                  # name, stock id

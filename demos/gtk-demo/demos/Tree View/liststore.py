@@ -47,7 +47,7 @@ data = [Bug(False, 60482, "Normal",     "scrollable notebooks and hidden tabs"),
         Bug(False, 56925, "Normal",     "Gtkcalender size"),
         Bug(False, 56221, "Normal",     "Selectable label needs right-click copy menu"),
         Bug(True,  50939, "Normal",     "Add shift clicking to GtkTextView"),
-        Bug(False, 6112,  "Enhancement","netscape-like collapsable toolbars"),
+        Bug(False, 6112,  "Enhancement", "netscape-like collapsable toolbars"),
         Bug(False, 1,     "Normal",     "First bug :=)")]
 
 
