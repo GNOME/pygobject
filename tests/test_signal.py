@@ -10,8 +10,8 @@ from compathelper import _long
 
 
 class C(GObject.GObject):
-    __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
-                                   (GObject.TYPE_INT,)) }
+    __gsignals__ = {'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
+                                  (GObject.TYPE_INT,))}
 
     def do_my_signal(self, arg):
         self.arg = arg
@@ -155,8 +155,8 @@ class TestAccumulator(unittest.TestCase):
 
 
 class E(GObject.GObject):
-    __gsignals__ = { 'signal': (GObject.SignalFlags.RUN_FIRST, None,
-                                ()) }
+    __gsignals__ = {'signal': (GObject.SignalFlags.RUN_FIRST, None,
+                               ())}
 
     def __init__(self):
         GObject.GObject.__init__(self)
@@ -168,8 +168,8 @@ class E(GObject.GObject):
 
 
 class F(GObject.GObject):
-    __gsignals__ = { 'signal': (GObject.SignalFlags.RUN_FIRST, None,
-                                ()) }
+    __gsignals__ = {'signal': (GObject.SignalFlags.RUN_FIRST, None,
+                               ())}
 
     def __init__(self):
         GObject.GObject.__init__(self)
@@ -295,8 +295,8 @@ class TestClosures(unittest.TestCase):
 
     def testGString(self):
         class C(GObject.GObject):
-            __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_GSTRING,
-                                           (GObject.TYPE_GSTRING,)) }
+            __gsignals__ = {'my_signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_GSTRING,
+                                          (GObject.TYPE_GSTRING,))}
 
             def __init__(self, test):
                 GObject.GObject.__init__(self)
@@ -312,8 +312,8 @@ class TestClosures(unittest.TestCase):
 
 
 class SigPropClass(GObject.GObject):
-    __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
-                                   (GObject.TYPE_INT,)) }
+    __gsignals__ = {'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
+                                  (GObject.TYPE_INT,))}
 
     __gproperties__ = {
         'foo': (str, None, None, '', GObject.PARAM_WRITABLE|GObject.PARAM_CONSTRUCT),
