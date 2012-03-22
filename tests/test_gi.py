@@ -1465,7 +1465,7 @@ class TestGObject(unittest.TestCase):
         self.assertEquals(object_.__grefcount__, 1)
 
     def test_object_int(self):
-        object_ = GIMarshallingTests.Object(int = 42)
+        object_ = GIMarshallingTests.Object(int=42)
         self.assertEquals(object_.int_, 42)
 # FIXME: Don't work yet.
 #        object_.int_ = 0
@@ -1475,7 +1475,7 @@ class TestGObject(unittest.TestCase):
         GIMarshallingTests.Object.static_method()
 
     def test_object_method(self):
-        GIMarshallingTests.Object(int = 42).method()
+        GIMarshallingTests.Object(int=42).method()
         self.assertRaises(TypeError, GIMarshallingTests.Object.method, GObject.GObject())
         self.assertRaises(TypeError, GIMarshallingTests.Object.method)
 
@@ -1493,7 +1493,7 @@ class TestGObject(unittest.TestCase):
         object_.static_method()
 
     def test_sub_object_method(self):
-        object_ = GIMarshallingTests.SubObject(int = 42)
+        object_ = GIMarshallingTests.SubObject(int=42)
         object_.method()
 
     def test_sub_object_sub_method(self):
@@ -1524,11 +1524,11 @@ class TestGObject(unittest.TestCase):
         self.assertEquals(object_.__grefcount__, 1)
 
     def test_object_none_in(self):
-        object_ = GIMarshallingTests.Object(int = 42)
+        object_ = GIMarshallingTests.Object(int=42)
         GIMarshallingTests.Object.none_in(object_)
         self.assertEquals(object_.__grefcount__, 1)
 
-        object_ = GIMarshallingTests.SubObject(int = 42)
+        object_ = GIMarshallingTests.SubObject(int=42)
         GIMarshallingTests.Object.none_in(object_)
 
         object_ = GObject.GObject()
@@ -1550,7 +1550,7 @@ class TestGObject(unittest.TestCase):
         self.assertEquals(object_.__grefcount__, 1)
 
     def test_object_none_inout(self):
-        object_ = GIMarshallingTests.Object(int = 42)
+        object_ = GIMarshallingTests.Object(int=42)
         new_object = GIMarshallingTests.Object.none_inout(object_)
 
         self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
@@ -1563,10 +1563,10 @@ class TestGObject(unittest.TestCase):
         new_new_object = GIMarshallingTests.Object.none_inout(object_)
         self.assertTrue(new_new_object is new_object)
 
-        GIMarshallingTests.Object.none_inout(GIMarshallingTests.SubObject(int = 42))
+        GIMarshallingTests.Object.none_inout(GIMarshallingTests.SubObject(int=42))
 
     def test_object_full_inout(self):
-        object_ = GIMarshallingTests.Object(int = 42)
+        object_ = GIMarshallingTests.Object(int=42)
         new_object = GIMarshallingTests.Object.full_inout(object_)
 
         self.assertTrue(isinstance(new_object, GIMarshallingTests.Object))
@@ -1616,14 +1616,14 @@ class TestPythonGObject(unittest.TestCase):
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
 
-        object_ = self.Object(int = 42)
+        object_ = self.Object(int=42)
         self.assertTrue(isinstance(object_, self.Object))
 
     def test_object_method(self):
-        self.Object(int = 0).method()
+        self.Object(int=0).method()
 
     def test_object_vfuncs(self):
-        object_ = self.Object(int = 42)
+        object_ = self.Object(int=42)
         object_.method_int8_in(84)
         self.assertEqual(object_.val, 84)
         self.assertEqual(object_.method_int8_out(), 42)
@@ -1635,12 +1635,12 @@ class TestPythonGObject(unittest.TestCase):
             def __init__(self, int):
                 GIMarshallingTests.Object.__init__(self)
 
-        object_ = ObjectWithoutVFunc(int = 42)
+        object_ = ObjectWithoutVFunc(int=42)
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
 
     def test_subobject_parent_vfunc(self):
-        object_ = self.SubObject(int = 81)
+        object_ = self.SubObject(int=81)
         object_.method_with_default_implementation(87)
         self.assertEquals(object_.val, 87)
 

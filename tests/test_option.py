@@ -33,7 +33,7 @@ class TestOption(unittest.TestCase):
 
         group = OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
-            option_list = [
+            option_list=[
                 make_option("-f", "-u", "--file", "--unit-file",
                                    type="filename",
                                    dest="unit_file",

@@ -36,12 +36,12 @@ sys.path.insert(0, DEMOROOTDIR)
 
 
 class InputStream(object):
-    '''
+    """
     Simple Wrapper for File-like objects. [c]StringIO doesn't provide
     a readline function for use with generate_tokens.
     Using a iterator-like interface doesn't succeed, because the readline
     function isn't used in such a context. (see <python-lib>/tokenize.py)
-    '''
+    """
     def __init__(self, data):
         self.__data = [ '%s\n' % x for x in data.splitlines() ]
         self.__lcount = 0
@@ -153,7 +153,7 @@ class GtkDemoWindow(Gtk.Window):
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Info'))
 
         self.info_buffer = info_buffer
-        self.info_buffer.create_tag('title', font = 'Sans 18')
+        self.info_buffer.create_tag('title', font='Sans 18')
 
         (text_widget, source_buffer) = self.create_text(True)
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Source'))
@@ -266,10 +266,10 @@ class GtkDemoWindow(Gtk.Window):
         tree_view.set_size_request(200, -1)
 
         cell = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(title = 'Widget (double click for demo)',
-                                    cell_renderer = cell,
-                                    text = 0,
-                                    style = 2)
+        column = Gtk.TreeViewColumn(title='Widget (double click for demo)',
+                                    cell_renderer=cell,
+                                    text=0,
+                                    style=2)
 
         first_iter = tree_store.get_iter_first()
         if first_iter is not None:
@@ -282,14 +282,14 @@ class GtkDemoWindow(Gtk.Window):
 
         tree_view.collapse_all()
         tree_view.set_headers_visible(False)
-        scrolled_window = Gtk.ScrolledWindow(hadjustment = None,
-                                             vadjustment = None)
+        scrolled_window = Gtk.ScrolledWindow(hadjustment=None,
+                                             vadjustment=None)
         scrolled_window.set_policy(Gtk.PolicyType.NEVER,
                                    Gtk.PolicyType.AUTOMATIC)
 
         scrolled_window.add(tree_view)
 
-        label = Gtk.Label(label = 'Widget (double click for demo)')
+        label = Gtk.Label(label='Widget (double click for demo)')
 
         box = Gtk.Notebook()
         box.append_page(scrolled_window, label)
@@ -299,8 +299,8 @@ class GtkDemoWindow(Gtk.Window):
         return box
 
     def create_text(self, is_source):
-        scrolled_window = Gtk.ScrolledWindow(hadjustment = None,
-                                             vadjustment = None)
+        scrolled_window = Gtk.ScrolledWindow(hadjustment=None,
+                                             vadjustment=None)
         scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
                                    Gtk.PolicyType.AUTOMATIC)
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)

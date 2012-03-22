@@ -538,7 +538,7 @@ class TestGdk(unittest.TestCase):
         self.assertEquals(Gdk.Cursor, overrides.Gdk.Cursor)
         c = Gdk.Cursor(Gdk.CursorType.WATCH)
         self.assertNotEqual(c, None)
-        c = Gdk.Cursor(cursor_type = Gdk.CursorType.WATCH)
+        c = Gdk.Cursor(cursor_type=Gdk.CursorType.WATCH)
         self.assertNotEqual(c, None)
 
         display_manager = Gdk.DisplayManager.get()
@@ -598,7 +598,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         self.assertRaises(TypeError, Gtk.ActionGroup)
 
-        action_group = Gtk.ActionGroup (name = 'TestActionGroup')
+        action_group = Gtk.ActionGroup (name='TestActionGroup')
         callback_data = "callback data"
 
         def test_action_callback_data(action, user_data):
@@ -1565,7 +1565,7 @@ class TestGtk(unittest.TestCase):
     def test_text_buffer(self):
         self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()
-        tag = buffer.create_tag ('title', font = 'Sans 18')
+        tag = buffer.create_tag ('title', font='Sans 18')
 
         self.assertEquals(tag.props.name, 'title')
         self.assertEquals(tag.props.font, 'Sans 18')
@@ -1623,7 +1623,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
         buffer = Gtk.TextBuffer()
         buffer.set_text('Hello Jane Hello Bob')
-        tag = buffer.create_tag ('title', font = 'Sans 18')
+        tag = buffer.create_tag ('title', font='Sans 18')
         (start, end) = buffer.get_bounds()
         start.forward_chars(10)
         buffer.apply_tag(tag, start, end)

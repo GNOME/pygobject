@@ -118,7 +118,7 @@ __all__.append("RadioAction")
 
 class ActionGroup(Gtk.ActionGroup):
     def __init__(self, name, **kwds):
-        super(ActionGroup, self).__init__(name = name, **kwds)
+        super(ActionGroup, self).__init__(name=name, **kwds)
 
     def add_actions(self, entries, user_data=None):
         """

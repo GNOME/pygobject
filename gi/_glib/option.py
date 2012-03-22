@@ -212,7 +212,7 @@ class OptionGroup(optparse.OptionGroup):
 
         return group
 
-    def get_option_group(self, parser = None):
+    def get_option_group(self, parser=None):
         """ Returns the corresponding GOptionGroup object.
 
         Can be used as parameter for gnome_program_init(), gtk_init().

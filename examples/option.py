@@ -4,7 +4,7 @@
 from gobject.option import OptionGroup, OptionParser, make_option
 
 group = OptionGroup("example", "OptionGroup Example", "Shows all example options",
-    option_list = [
+    option_list=[
         make_option("--example",
                     action="store_true",
                     dest="example",
@@ -13,7 +13,7 @@ group = OptionGroup("example", "OptionGroup Example", "Shows all example options
 
 parser = OptionParser("NAMES ...",
     description="A simple gobject.option example.",
-    option_list = [
+    option_list=[
         make_option("--file", "-f",
                     type="filename",
                     action="store",

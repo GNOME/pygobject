@@ -44,8 +44,8 @@ class ColorSelectorApp:
         self.window.set_border_width(8)
         self.window.connect('destroy', lambda w: Gtk.main_quit())
 
-        vbox = Gtk.VBox(homogeneous = False,
-                        spacing = 8)
+        vbox = Gtk.VBox(homogeneous=False,
+                        spacing=8)
         vbox.set_border_width(8)
         self.window.add(vbox)
 

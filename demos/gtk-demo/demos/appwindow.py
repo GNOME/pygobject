@@ -319,10 +319,10 @@ def main(demoapp=None):
     window.add(table)
 
     action_group = Gtk.ActionGroup(name='AppWindowActions')
-    open_action = ToolMenuAction(name = 'Open',
-                             stock_id = Gtk.STOCK_OPEN,
-                             label = '_Open',
-                             tooltip = 'Open a file')
+    open_action = ToolMenuAction(name='Open',
+                                 stock_id=Gtk.STOCK_OPEN,
+                                 label='_Open',
+                                 tooltip='Open a file')
 
     action_group.add_action(open_action)
     action_group.add_actions(action_entries)
