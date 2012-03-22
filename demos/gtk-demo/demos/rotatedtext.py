@@ -118,7 +118,6 @@ class RotatedTextApp:
         logical_rect.y = -ascent
         logical_rect.height = ascent
 
-
         # Set fancy shape attributes for all hearts
         attrs = Pango.AttrList()
 

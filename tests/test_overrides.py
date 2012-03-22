@@ -808,7 +808,6 @@ class TestGtk(unittest.TestCase):
         action = dialog.get_property('action')
         self.assertEquals(Gtk.FileChooserAction.SAVE, action)
 
-
         # Gtk.FontSelectionDialog
         dialog = Gtk.ColorSelectionDialog("font selection dialog test")
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
