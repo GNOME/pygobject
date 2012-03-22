@@ -124,7 +124,7 @@ class PixbufApp:
             iw = pb.get_width()
             ih = pb.get_height()
 
-            r = radius + (radius / 3.0) * math.sin(f * 2.0 * math.pi);
+            r = radius + (radius / 3.0) * math.sin(f * 2.0 * math.pi)
 
             xpos = math.floor (xmid + r * math.cos(ang) - iw / 2.0 + 0.5)
             ypos = math.floor (ymid + r * math.sin(ang) - ih / 2.0 + 0.5)

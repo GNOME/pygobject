@@ -287,9 +287,9 @@ class TestCallbacks(unittest.TestCase):
             TestCallbacks.called = True
             return foo
 
-        Everything.test_callback_async(callback, 44);
-        i = Everything.test_callback_thaw_async();
-        self.assertEquals(44, i);
+        Everything.test_callback_async(callback, 44)
+        i = Everything.test_callback_thaw_async()
+        self.assertEquals(44, i)
         self.assertTrue(TestCallbacks.called)
 
     def test_callback_scope_call(self):
@@ -576,15 +576,15 @@ class TestAdvancedInterfaces(unittest.TestCase):
         self.assertNotEqual(obj1, obj2)
 
     def test_obj_skip_return_val(self):
-        obj = Everything.TestObj();
-        ret = obj.skip_return_val(50, 42.0, 60, 2, 3);
-        self.assertEquals(len(ret), 3);
-        self.assertEquals(ret[0], 51);
-        self.assertEquals(ret[1], 61);
-        self.assertEquals(ret[2], 32);
+        obj = Everything.TestObj()
+        ret = obj.skip_return_val(50, 42.0, 60, 2, 3)
+        self.assertEquals(len(ret), 3)
+        self.assertEquals(ret[0], 51)
+        self.assertEquals(ret[1], 61)
+        self.assertEquals(ret[2], 32)
 
     def test_obj_skip_return_val_no_out(self):
-        obj = Everything.TestObj();
+        obj = Everything.TestObj()
         # raises an error for 0, succeeds for any other value
         self.assertRaises(GLib.GError, obj.skip_return_val_no_out, 0)
 
@@ -593,7 +593,7 @@ class TestAdvancedInterfaces(unittest.TestCase):
 
 class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):
-        obj = Everything.TestObj();
+        obj = Everything.TestObj()
 
         def callback(obj, obj_param):
             self.assertEquals(obj_param.props.int, 3)

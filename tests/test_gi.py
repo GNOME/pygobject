@@ -1073,7 +1073,7 @@ class TestEnum(unittest.TestCase):
     def setUpClass(cls):
         '''Run tests under a test locale.
 
-        Upper case conversion of member names should not be locale specific;
+        Upper case conversion of member names should not be locale specific
         e.  g. in Turkish, "i".upper() == "i", which gives results like "iNVALiD"
 
         Run test under a locale which defines toupper('a') == 'a'

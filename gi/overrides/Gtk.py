@@ -1014,7 +1014,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
                 _set_lists(columns, values)
             elif isinstance(args[0], (tuple, list)):
                 if len(args) != 2:
-                    raise TypeError('Too many arguments');
+                    raise TypeError('Too many arguments')
                 _set_lists(args[0], args[1])
             elif isinstance(args[0], dict):
                 columns = args[0].keys()
@@ -1238,7 +1238,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
                 _set_lists(columns, values)
             elif isinstance(args[0], (tuple, list)):
                 if len(args) != 2:
-                    raise TypeError('Too many arguments');
+                    raise TypeError('Too many arguments')
                 _set_lists(args[0], args[1])
             elif isinstance(args[0], dict):
                 columns = args[0].keys()

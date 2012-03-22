@@ -353,7 +353,7 @@ def main(demoapp=None):
                  0, 0, 0)
 
 
-    infobar = Gtk.InfoBar();
+    infobar = Gtk.InfoBar()
     infobar.set_no_show_all(True)
     messagelabel = Gtk.Label()
     messagelabel.show()
@@ -388,7 +388,7 @@ def main(demoapp=None):
     buffer.connect('changed', update_statusbar, statusbar)
     buffer.connect('mark_set', mark_set_callback, statusbar)
 
-    update_statusbar(buffer, statusbar);
+    update_statusbar(buffer, statusbar)
 
     window.set_default_size(200, 200)
     window.show_all()

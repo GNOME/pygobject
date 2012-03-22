@@ -41,7 +41,7 @@ or activated via <a href="keynav">keynav</a>""")
 
         label.set_use_markup(True)
         label.connect("activate-link", self.activate_link)
-        self.window.add(label);
+        self.window.add(label)
         label.show()
 
         self.window.show()

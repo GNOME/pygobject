@@ -63,7 +63,7 @@ class PrintingApp:
         else:
             ext = '.pdf'
 
-        uri = "file://%s/gtk-demo%s" % (dir, ext);
+        uri = "file://%s/gtk-demo%s" % (dir, ext)
         settings.set(Gtk.PRINT_SETTINGS_OUTPUT_URI, uri)
         self.operation.set_print_settings(settings)
 
@@ -128,7 +128,7 @@ class PrintingApp:
 
         if text_width > width:
             layout.set_width(width)
-            layout.set_ellipsize(Pango.EllipsizeMode.START);
+            layout.set_ellipsize(Pango.EllipsizeMode.START)
             (text_width, text_height) = layout.get_pixel_size()
 
         cr.move_to ((width - text_width) / 2,
@@ -142,7 +142,7 @@ class PrintingApp:
         (text_width, text_height) = layout.get_pixel_size()
         cr.move_to(width - text_width - 4,
                    (self.HEADER_HEIGHT - text_height) / 2)
-        PangoCairo.show_layout(cr, layout);
+        PangoCairo.show_layout(cr, layout)
 
         layout = print_ctx.create_pango_layout()
 
@@ -159,7 +159,7 @@ class PrintingApp:
 
         for i in range(lines_pp):
             if line >= num_lines:
-                break;
+                break
 
             layout.set_text(data_lines[line], -1)
             PangoCairo.show_layout(cr, layout)

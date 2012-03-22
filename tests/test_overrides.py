@@ -602,10 +602,10 @@ class TestGtk(unittest.TestCase):
         callback_data = "callback data"
 
         def test_action_callback_data(action, user_data):
-            self.assertEquals(user_data, callback_data);
+            self.assertEquals(user_data, callback_data)
 
         def test_radio_action_callback_data(action, current, user_data):
-            self.assertEquals(user_data, callback_data);
+            self.assertEquals(user_data, callback_data)
 
         action_group.add_actions ([
             ('test-action1', None, 'Test Action 1',
@@ -672,7 +672,7 @@ class TestGtk(unittest.TestCase):
         class SignalCheck:
             def __init__(self):
                 self.sentinel = 0
-                self.after_sentinel = 0;
+                self.after_sentinel = 0
 
             def on_signal_1(self, *args):
                 self.sentinel += 1
@@ -969,7 +969,7 @@ class TestGtk(unittest.TestCase):
             obj = tree_store.get_value(treeiter, 2)
             obj.check(i, s)
             obj2 = tree_store.get_value(treeiter, 3)
-            self.assertEquals(obj, obj2);
+            self.assertEquals(obj, obj2)
 
             pyobj = tree_store.get_value(treeiter, 4)
             self.assertEquals(pyobj, test_pyobj)
