@@ -354,7 +354,7 @@ class TestGLib(unittest.TestCase):
 
         self.assertTrue(v2 in set([v1, v3]))
         self.assertTrue(v2 in frozenset([v1, v3]))
-        self.assertTrue(v2 in {v1: '1', v3: '2' })
+        self.assertTrue(v2 in {v1: '1', v3: '2'})
 
     def test_variant_compare(self):
         # Check if identical GVariant are equal
