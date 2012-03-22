@@ -64,7 +64,6 @@ class ClipboardApp:
         label = Gtk.Label(label='"Paste" will paste the text from the clipboard to the entry')
         vbox.pack_start(label, False, False, 0)
 
-
         hbox = Gtk.HBox(homogeneous=False, spacing=4)
         hbox.set_border_width(8)
         vbox.pack_start(hbox, False, False, 0)
@@ -222,6 +221,7 @@ class ClipboardApp:
         self.menu.append(item)
 
         self.menu.popup(None, None, None, None, event.button, event.time)
+
 
 def main(demoapp=None):
     ClipboardApp()

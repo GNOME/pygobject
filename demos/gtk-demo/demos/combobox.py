@@ -35,6 +35,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 (PIXBUF_COL,
  TEXT_COL) = range(2)
 
+
 class MaskEntry(Gtk.Entry):
     __gtype_name__ = 'MaskEntry'
 
@@ -65,6 +66,7 @@ class MaskEntry(Gtk.Entry):
 
     def changed_cb(self, entry):
         self.set_background()
+
 
 class ComboboxApp:
     def __init__(self, demoapp):
@@ -323,12 +325,12 @@ class ComboboxApp:
         sensitive = not tree_model.iter_has_child(treeiter)
         cell.set_property('sensitive', sensitive)
 
-
     def fill_combo_entry(self, entry):
         entry.append_text('One')
         entry.append_text('Two')
         entry.append_text('2\302\275')
         entry.append_text('Three')
+
 
 def main(demoapp=None):
     ComboboxApp(demoapp)

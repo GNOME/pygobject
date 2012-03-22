@@ -4,6 +4,7 @@ import unittest
 
 from gi.repository import GLib
 
+
 class Idle(GLib.Idle):
     def __init__(self, loop):
         GLib.Idle.__init__(self)

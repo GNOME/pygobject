@@ -60,6 +60,7 @@ class Widget(Gtk.Widget):
 Widget = override(Widget)
 __all__.append('Widget')
 
+
 class Container(Gtk.Container, Widget):
 
     def __len__(self):
@@ -85,6 +86,7 @@ class Container(Gtk.Container, Widget):
 Container = override(Container)
 __all__.append('Container')
 
+
 class Editable(Gtk.Editable):
 
     def insert_text(self, text, position):
@@ -102,6 +104,7 @@ class Editable(Gtk.Editable):
 Editable = override(Editable)
 __all__.append("Editable")
 
+
 class Action(Gtk.Action):
     def __init__(self, name, label, tooltip, stock_id, **kwds):
         Gtk.Action.__init__(self, name=name, label=label, tooltip=tooltip, stock_id=stock_id, **kwds)
@@ -109,12 +112,14 @@ class Action(Gtk.Action):
 Action = override(Action)
 __all__.append("Action")
 
+
 class RadioAction(Gtk.RadioAction):
     def __init__(self, name, label, tooltip, stock_id, value, **kwds):
         Gtk.RadioAction.__init__(self, name=name, label=label, tooltip=tooltip, stock_id=stock_id, value=value, **kwds)
 
 RadioAction = override(RadioAction)
 __all__.append("RadioAction")
+
 
 class ActionGroup(Gtk.ActionGroup):
     def __init__(self, name, **kwds):
@@ -214,7 +219,6 @@ class ActionGroup(Gtk.ActionGroup):
             # using inner function above since entries can leave out optional arguments
             _process_action(*e)
 
-
     def add_radio_actions(self, entries, value=None, on_change=None, user_data=None):
         """
         The add_radio_actions() method is a convenience method that creates a
@@ -282,6 +286,7 @@ class ActionGroup(Gtk.ActionGroup):
 ActionGroup = override(ActionGroup)
 __all__.append('ActionGroup')
 
+
 class UIManager(Gtk.UIManager):
     def add_ui_from_string(self, buffer):
         if not isinstance(buffer, _basestring):
@@ -296,6 +301,7 @@ class UIManager(Gtk.UIManager):
 
 UIManager = override(UIManager)
 __all__.append('UIManager')
+
 
 class ComboBox(Gtk.ComboBox, Container):
 
@@ -316,6 +322,7 @@ class Box(Gtk.Box):
 
 Box = override(Box)
 __all__.append('Box')
+
 
 class SizeGroup(Gtk.SizeGroup):
     def __init__(self, mode=Gtk.SizeGroupMode.VERTICAL):
@@ -385,6 +392,8 @@ __all__.append('Builder')
 
 # NOTE: This must come before any other Window/Dialog subclassing, to ensure
 # that we have a correct inheritance hierarchy.
+
+
 class Window(Gtk.Window):
     def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwargs):
         Gtk.Window.__init__(self, type=type, **kwargs)
@@ -458,6 +467,7 @@ class Dialog(Gtk.Dialog, Container):
 Dialog = override(Dialog)
 __all__.append('Dialog')
 
+
 class MessageDialog(Gtk.MessageDialog, Dialog):
     def __init__(self,
                  parent=None,
@@ -494,6 +504,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
 MessageDialog = override(MessageDialog)
 __all__.append('MessageDialog')
 
+
 class AboutDialog(Gtk.AboutDialog):
     def __init__(self, **kwds):
         Gtk.AboutDialog.__init__(self, **kwds)
@@ -501,12 +512,14 @@ class AboutDialog(Gtk.AboutDialog):
 AboutDialog = override(AboutDialog)
 __all__.append('AboutDialog')
 
+
 class ColorSelectionDialog(Gtk.ColorSelectionDialog):
     def __init__(self, title=None, **kwds):
         Gtk.ColorSelectionDialog.__init__(self, title=title, **kwds)
 
 ColorSelectionDialog = override(ColorSelectionDialog)
 __all__.append('ColorSelectionDialog')
+
 
 class FileChooserDialog(Gtk.FileChooserDialog):
     def __init__(self,
@@ -524,12 +537,14 @@ class FileChooserDialog(Gtk.FileChooserDialog):
 FileChooserDialog = override(FileChooserDialog)
 __all__.append('FileChooserDialog')
 
+
 class FontSelectionDialog(Gtk.FontSelectionDialog):
     def __init__(self, title=None, **kwds):
         Gtk.FontSelectionDialog.__init__(self, title=title, **kwds)
 
 FontSelectionDialog = override(FontSelectionDialog)
 __all__.append('FontSelectionDialog')
+
 
 class RecentChooserDialog(Gtk.RecentChooserDialog):
     def __init__(self,
@@ -548,6 +563,7 @@ class RecentChooserDialog(Gtk.RecentChooserDialog):
 
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
+
 
 class IconView(Gtk.IconView):
 
@@ -592,6 +608,7 @@ class IMContext(Gtk.IMContext):
 IMContext = override(IMContext)
 __all__.append('IMContext')
 
+
 class RecentInfo(Gtk.RecentInfo):
 
     def get_application_info(self, app_name):
@@ -601,6 +618,7 @@ class RecentInfo(Gtk.RecentInfo):
 
 RecentInfo = override(RecentInfo)
 __all__.append('RecentInfo')
+
 
 class TextBuffer(Gtk.TextBuffer):
     def _get_or_create_tag_table(self):
@@ -643,7 +661,7 @@ class TextBuffer(Gtk.TextBuffer):
         Gtk.TextBuffer.set_text(self, text, length)
 
     def insert(self, iter, text, length=-1):
-        if not isinstance(text , _basestring):
+        if not isinstance(text, _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
         Gtk.TextBuffer.insert(self, iter, text, length)
@@ -675,7 +693,7 @@ class TextBuffer(Gtk.TextBuffer):
         self.insert_with_tags(iter, text, *tag_objs)
 
     def insert_at_cursor(self, text, length=-1):
-        if not isinstance(text , _basestring):
+        if not isinstance(text, _basestring):
             raise TypeError('text must be a string, not %s' % type(text))
 
         Gtk.TextBuffer.insert_at_cursor(self, text, length)
@@ -689,6 +707,7 @@ class TextBuffer(Gtk.TextBuffer):
 
 TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
+
 
 class TextIter(Gtk.TextIter):
 
@@ -719,6 +738,7 @@ class TextIter(Gtk.TextIter):
 
 TextIter = override(TextIter)
 __all__.append('TextIter')
+
 
 class TreeModel(Gtk.TreeModel):
     def __len__(self):
@@ -927,6 +947,7 @@ class TreeModel(Gtk.TreeModel):
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
 
+
 class TreeSortable(Gtk.TreeSortable, ):
 
     def get_sort_column_id(self):
@@ -944,6 +965,7 @@ class TreeSortable(Gtk.TreeSortable, ):
 
 TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
+
 
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def __init__(self, *column_types):
@@ -975,6 +997,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
+
     def insert_before(self, sibling, row=None):
         treeiter = Gtk.ListStore.insert_before(self, sibling)
 
@@ -985,6 +1008,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
+
     def insert_after(self, sibling, row=None):
         treeiter = Gtk.ListStore.insert_after(self, sibling)
 
@@ -1025,6 +1049,7 @@ class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
 
 ListStore = override(ListStore)
 __all__.append('ListStore')
+
 
 class TreeModelRow(object):
 
@@ -1093,7 +1118,7 @@ class TreeModelRow(object):
                     "attempt to assign sequence of size %d to slice of size %d"
                         % (len(value), len(indexList)))
 
-            for i,v in enumerate(indexList):
+            for i, v in enumerate(indexList):
                 self.model.set_value(self.iter, v, value[i])
         else:
             raise TypeError("index must be an integer or slice, not %s" % type(key).__name__)
@@ -1109,6 +1134,7 @@ class TreeModelRow(object):
         return TreeModelRowIter(self.model, child_iter)
 
 __all__.append('TreeModelRow')
+
 
 class TreeModelRowIter(object):
 
@@ -1130,6 +1156,7 @@ class TreeModelRowIter(object):
         return self
 
 __all__.append('TreeModelRowIter')
+
 
 class TreePath(Gtk.TreePath):
 
@@ -1173,6 +1200,7 @@ class TreePath(Gtk.TreePath):
 TreePath = override(TreePath)
 __all__.append('TreePath')
 
+
 class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
     def __init__(self, *column_types):
@@ -1199,6 +1227,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
+
     def insert_before(self, parent, sibling, row=None):
         treeiter = Gtk.TreeStore.insert_before(self, parent, sibling)
 
@@ -1209,6 +1238,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
     # FIXME: sends two signals; check if this can use an atomic
     # insert_with_valuesv()
+
     def insert_after(self, parent, sibling, row=None):
         treeiter = Gtk.TreeStore.insert_after(self, parent, sibling)
 
@@ -1249,6 +1279,7 @@ class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
 
 TreeStore = override(TreeStore)
 __all__.append('TreeStore')
+
 
 class TreeView(Gtk.TreeView, Container):
 
@@ -1310,6 +1341,7 @@ class TreeView(Gtk.TreeView, Container):
 TreeView = override(TreeView)
 __all__.append('TreeView')
 
+
 class TreeViewColumn(Gtk.TreeViewColumn):
     def __init__(self, title='',
                  cell_renderer=None,
@@ -1332,6 +1364,7 @@ class TreeViewColumn(Gtk.TreeViewColumn):
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
+
 class TreeSelection(Gtk.TreeSelection):
 
     def select_path(self, path):
@@ -1347,6 +1380,7 @@ class TreeSelection(Gtk.TreeSelection):
             return (model, None)
 
     # for compatibility with PyGtk
+
     def get_selected_rows(self):
         rows, model = super(TreeSelection, self).get_selected_rows()
         return (model, rows)
@@ -1354,6 +1388,7 @@ class TreeSelection(Gtk.TreeSelection):
 
 TreeSelection = override(TreeSelection)
 __all__.append('TreeSelection')
+
 
 class Button(Gtk.Button, Container):
     def __init__(self, label=None, stock=None, use_stock=False, use_underline=False, **kwds):
@@ -1366,6 +1401,7 @@ class Button(Gtk.Button, Container):
 Button = override(Button)
 __all__.append('Button')
 
+
 class LinkButton(Gtk.LinkButton):
     def __init__(self, uri, label=None, **kwds):
         Gtk.LinkButton.__init__(self, uri=uri, label=label, **kwds)
@@ -1373,12 +1409,14 @@ class LinkButton(Gtk.LinkButton):
 LinkButton = override(LinkButton)
 __all__.append('LinkButton')
 
+
 class Label(Gtk.Label):
     def __init__(self, label=None, **kwds):
         Gtk.Label.__init__(self, label=label, **kwds)
 
 Label = override(Label)
 __all__.append('Label')
+
 
 class Adjustment(Gtk.Adjustment):
     def __init__(self, *args, **kwds):
@@ -1403,6 +1441,7 @@ class Adjustment(Gtk.Adjustment):
 Adjustment = override(Adjustment)
 __all__.append('Adjustment')
 
+
 class Table(Gtk.Table, Container):
     def __init__(self, rows=1, columns=1, homogeneous=False, **kwds):
         if 'n_rows' in kwds:
@@ -1413,11 +1452,12 @@ class Table(Gtk.Table, Container):
 
         Gtk.Table.__init__(self, n_rows=rows, n_columns=columns, homogeneous=homogeneous, **kwds)
 
-    def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
+    def attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, yoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, xpadding=0, ypadding=0):
         Gtk.Table.attach(self, child, left_attach, right_attach, top_attach, bottom_attach, xoptions, yoptions, xpadding, ypadding)
 
 Table = override(Table)
 __all__.append('Table')
+
 
 class ScrolledWindow(Gtk.ScrolledWindow):
     def __init__(self, hadjustment=None, vadjustment=None, **kwds):
@@ -1434,12 +1474,14 @@ class HScrollbar(Gtk.HScrollbar):
 HScrollbar = override(HScrollbar)
 __all__.append('HScrollbar')
 
+
 class VScrollbar(Gtk.VScrollbar):
     def __init__(self, adjustment=None):
         Gtk.VScrollbar.__init__(self, adjustment=adjustment)
 
 VScrollbar = override(VScrollbar)
 __all__.append('VScrollbar')
+
 
 class Paned(Gtk.Paned):
     def pack1(self, child, resize=False, shrink=True):
@@ -1497,11 +1539,15 @@ if Gtk._version != '2.0':
     __all__.append('Menu')
 
 _Gtk_main_quit = Gtk.main_quit
+
+
 @override(Gtk.main_quit)
 def main_quit(*args):
     _Gtk_main_quit()
 
 _Gtk_stock_lookup = Gtk.stock_lookup
+
+
 @override(Gtk.stock_lookup)
 def stock_lookup(*args):
     success, item = _Gtk_stock_lookup(*args)

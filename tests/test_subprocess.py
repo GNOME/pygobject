@@ -5,6 +5,7 @@ import unittest
 
 from gi.repository import GLib
 
+
 class TestProcess(unittest.TestCase):
 
     def _child_watch_cb(self, pid, condition, data):

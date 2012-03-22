@@ -212,6 +212,7 @@ class IconViewApp:
             pixbuf = self.file_to_icon_pixbuf(path)
             store.append((path, name, pixbuf, is_dir))
 
+
 def main(demoapp=None):
     IconViewApp(demoapp)
     Gtk.main()

@@ -30,8 +30,8 @@ import os
 
 
 class PrintingApp:
-    HEADER_HEIGHT = 10*72/25.4
-    HEADER_GAP = 3*72/25.4
+    HEADER_HEIGHT = 10 * 72 / 25.4
+    HEADER_GAP = 3 * 72 / 25.4
 
     def __init__(self):
         self.operation = Gtk.PrintOperation()
@@ -168,6 +168,7 @@ class PrintingApp:
 
     def end_print(self, operation, print_ctx, print_data):
         pass
+
 
 def main(demoapp=None):
     app = PrintingApp()

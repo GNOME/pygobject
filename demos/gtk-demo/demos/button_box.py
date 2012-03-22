@@ -112,6 +112,7 @@ class ButtonBoxApp:
 
         return frame
 
+
 def main(demoapp=None):
     ButtonBoxApp()
     Gtk.main()

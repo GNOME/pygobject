@@ -19,10 +19,10 @@ from compathelper import _bytes
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
     PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
-    CHAR_255='\xff'
+    CHAR_255 = '\xff'
 else:
     CONSTANT_UTF8 = "const ♥ utf8"
-    CHAR_255=bytes([255])
+    CHAR_255 = bytes([255])
 
 CONSTANT_NUMBER = 42
 
@@ -843,10 +843,10 @@ class TestGArray(unittest.TestCase):
         self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.garray_utf8_none_inout(Sequence(('0', '1', '2'))))
 
     def test_garray_utf8_container_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_container_inout(['0', '1', '2']))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.garray_utf8_container_inout(['0', '1', '2']))
 
     def test_garray_utf8_full_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.garray_utf8_full_inout(['0', '1', '2']))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.garray_utf8_full_inout(['0', '1', '2']))
 
 
 class TestGPtrArray(unittest.TestCase):
@@ -876,10 +876,10 @@ class TestGPtrArray(unittest.TestCase):
         self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gptrarray_utf8_none_inout(Sequence(('0', '1', '2'))))
 
     def test_gptrarray_utf8_container_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gptrarray_utf8_container_inout(['0', '1', '2']))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gptrarray_utf8_container_inout(['0', '1', '2']))
 
     def test_gptrarray_utf8_full_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gptrarray_utf8_full_inout(['0', '1', '2']))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gptrarray_utf8_full_inout(['0', '1', '2']))
 
 
 class TestGList(unittest.TestCase):
@@ -920,10 +920,10 @@ class TestGList(unittest.TestCase):
         self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_none_inout(Sequence(('0', '1', '2'))))
 
     def test_glist_utf8_container_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.glist_utf8_container_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_container_inout(('0', '1', '2')))
 
     def test_glist_utf8_full_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.glist_utf8_full_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.glist_utf8_full_inout(('0', '1', '2')))
 
 
 class TestGSList(unittest.TestCase):
@@ -964,10 +964,10 @@ class TestGSList(unittest.TestCase):
         self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gslist_utf8_none_inout(Sequence(('0', '1', '2'))))
 
     def test_gslist_utf8_container_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gslist_utf8_container_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gslist_utf8_container_inout(('0', '1', '2')))
 
     def test_gslist_utf8_full_inout(self):
-        self.assertEquals(['-2', '-1','0', '1'], GIMarshallingTests.gslist_utf8_full_inout(('0', '1', '2')))
+        self.assertEquals(['-2', '-1', '0', '1'], GIMarshallingTests.gslist_utf8_full_inout(('0', '1', '2')))
 
 
 class TestGHashTable(unittest.TestCase):
@@ -1699,6 +1699,7 @@ class TestMultiOutputArgs(unittest.TestCase):
     def test_int_return_out(self):
         self.assertEquals((6, 7), GIMarshallingTests.int_return_out())
 
+
 class TestGErrorException(unittest.TestCase):
     def test_gerror_exception(self):
         self.assertRaises(GObject.GError, GIMarshallingTests.gerror)
@@ -1712,6 +1713,7 @@ class TestGErrorException(unittest.TestCase):
 
 
 # Interface
+
 
 class TestInterfaces(unittest.TestCase):
 
@@ -1902,10 +1904,10 @@ class TestKeywordArgs(unittest.TestCase):
         kw_func = GIMarshallingTests.int_three_in_three_out
 
         self.assertEquals(kw_func(1, 2, 3),                 (1, 2, 3))
-        self.assertEquals(kw_func(**{'a':4, 'b':5, 'c':6}), (4, 5, 6))
-        self.assertEquals(kw_func(1, **{'b':7, 'c':8}),     (1, 7, 8))
-        self.assertEquals(kw_func(1, 7, **{'c':8}),         (1, 7, 8))
-        self.assertEquals(kw_func(1, c=8, **{'b':7}),       (1, 7, 8))
+        self.assertEquals(kw_func(**{'a': 4, 'b': 5, 'c': 6}), (4, 5, 6))
+        self.assertEquals(kw_func(1, **{'b': 7, 'c': 8}),     (1, 7, 8))
+        self.assertEquals(kw_func(1, 7, **{'c': 8}),         (1, 7, 8))
+        self.assertEquals(kw_func(1, c=8, **{'b': 7}),       (1, 7, 8))
         self.assertEquals(kw_func(2, c=4, b=3),             (2, 3, 4))
         self.assertEquals(kw_func(a=2, c=4, b=3),           (2, 3, 4))
 

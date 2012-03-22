@@ -57,6 +57,7 @@ __all__ = [
     "make_option",
 ]
 
+
 class Option(optparse.Option):
     """Represents a command line option
 
@@ -105,7 +106,6 @@ class Option(optparse.Option):
         if not self.help:
             raise ValueError("%s needs a help message.", self._long_opts[0])
 
-
     def _set_opt_string(self, opts):
         if self.REMAINING in opts:
             self._long_opts.append(self.REMAINING)
@@ -137,6 +137,7 @@ class Option(optparse.Option):
 
         for long_name in self._long_opts[len(self._short_opts):]:
             yield (long_name[2:], _bytes('\0'), flags, self.help, self.metavar)
+
 
 class OptionGroup(optparse.OptionGroup):
     """A group of command line options.
@@ -228,6 +229,7 @@ class OptionGroup(optparse.OptionGroup):
                 self.defaults[option.dest] = option.check_value(
                     opt_str, default)
         self.values = optparse.Values(self.defaults)
+
 
 class OptionParser(optparse.OptionParser):
     """Command line parser with GOption support.

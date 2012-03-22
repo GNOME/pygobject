@@ -29,6 +29,7 @@ from gi.repository import Gtk, GObject
 (PIXBUF_COL,
  TEXT_COL) = range(2)
 
+
 class SearchboxApp:
     def __init__(self, demoapp):
         self.demoapp = demoapp
@@ -199,7 +200,6 @@ class SearchboxApp:
 
         return menu
 
-
     def icon_press_cb(self, entry, position, event, menu):
         if position == Gtk.EntryIconPosition.PRIMARY:
             menu.popup(None, None, None, None,
@@ -243,6 +243,7 @@ class SearchboxApp:
         item.show()
         item.set_submenu(search_menu)
         menu.append (item)
+
 
 def main(demoapp=None):
     SearchboxApp(demoapp)

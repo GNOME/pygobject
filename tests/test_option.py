@@ -14,6 +14,7 @@ except ImportError:
 from gi._glib.option import OptionParser, OptionGroup, OptionValueError, \
      make_option, BadOptionError
 
+
 class TestOption(unittest.TestCase):
     EXCEPTION_MESSAGE = "This callback fails"
 

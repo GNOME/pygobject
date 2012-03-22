@@ -26,6 +26,7 @@ The GtkListStore is used to store data in list form, to be used later on by a Gt
 
 from gi.repository import Gtk, GObject
 
+
 class Bug:
     def __init__(self, is_fixed, number, severity, description):
         self.is_fixed = is_fixed
@@ -48,6 +49,7 @@ data = [Bug(False, 60482, "Normal",     "scrollable notebooks and hidden tabs"),
         Bug(True,  50939, "Normal",     "Add shift clicking to GtkTextView"),
         Bug(False, 6112,  "Enhancement","netscape-like collapsable toolbars"),
         Bug(False, 1,     "Normal",     "First bug :=)")]
+
 
 class ListStoreApp:
     (COLUMN_FIXED,
@@ -195,6 +197,7 @@ class ListStoreApp:
         is_fixed ^= 1
 
         model.set_value(iter_, self.COLUMN_FIXED, is_fixed)
+
 
 def main(demoapp=None):
     ListStoreApp()

@@ -40,6 +40,7 @@ if sys.version_info > (3, 0):
     def callable(obj):
         return hasattr(obj, '__call__')
 
+
 def Function(info):
 
     def function(*args, **kwargs):
@@ -172,6 +173,7 @@ class MetaClassHelper(object):
             value = NativeVFunc(vfunc_info)
             setattr(cls, name, value)
 
+
 def find_vfunc_info_in_interface(bases, vfunc_name):
     for base in bases:
         # All wrapped interfaces inherit from GInterface.
@@ -193,6 +195,7 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
 
     return None
 
+
 def find_vfunc_conflict_in_bases(vfunc, bases):
     for klass in bases:
         if not hasattr(klass, '__info__') or \
@@ -208,6 +211,7 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
         if aklass is not None:
             return aklass
     return None
+
 
 class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
 

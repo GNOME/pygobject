@@ -34,8 +34,10 @@ window = None
 messagelabel = None
 _demoapp = None
 
+
 def widget_destroy(widget, button):
     widget.destroy()
+
 
 def activate_action(action, user_data=None):
     global window
@@ -48,7 +50,6 @@ def activate_action(action, user_data=None):
         settings.set_property('gtk-application-prefer-dark-theme', value)
         return
 
-
     dialog = Gtk.MessageDialog(message_type=Gtk.MessageType.INFO,
                                buttons=Gtk.ButtonsType.CLOSE,
                                text='You activated action: "%s" of type %s' % (name, _type))
@@ -57,6 +58,7 @@ def activate_action(action, user_data=None):
     dialog.set_transient_for(window)
     dialog.connect('response', widget_destroy)
     dialog.show()
+
 
 def activate_radio_action(action, current, user_data=None):
     global infobar
@@ -72,6 +74,7 @@ def activate_radio_action(action, current, user_data=None):
         infobar.set_message_type(Gtk.MessageType(value))
         infobar.show()
 
+
 def update_statusbar(buffer, statusbar):
     statusbar.pop(0)
     count = buffer.get_char_count()
@@ -83,8 +86,10 @@ def update_statusbar(buffer, statusbar):
 
     statusbar.push(0, msg)
 
+
 def mark_set_callback(buffer, new_location, mark, data):
     update_statusbar(buffer, data)
+
 
 def about_cb(widget, user_data=None):
     global window
@@ -258,8 +263,10 @@ ui_info = """
 </ui>
 """
 
+
 def _quit(*args):
     Gtk.main_quit()
+
 
 def register_stock_icons():
     """
@@ -294,10 +301,13 @@ def register_stock_icons():
 
     factory.add('demo-gtk-logo', icon_set)
 
+
 class ToolMenuAction(Gtk.Action):
     __gtype_name__ = "GtkToolMenuAction"
+
     def do_create_tool_item(self):
         return Gtk.MenuToolButton()
+
 
 def main(demoapp=None):
     global infobar
@@ -351,7 +361,6 @@ def main(demoapp=None):
     table.attach(bar, 0, 1, 1, 2,
                  Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
                  0, 0, 0)
-
 
     infobar = Gtk.InfoBar()
     infobar.set_no_show_all(True)

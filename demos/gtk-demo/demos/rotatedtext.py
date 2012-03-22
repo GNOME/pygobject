@@ -42,6 +42,7 @@ else:
     HEART = "♥"
     BYTES_HEART = bytes(HEART, 'utf-8')
 
+
 class RotatedTextApp:
     RADIUS = 150
     N_WORDS = 5
@@ -184,9 +185,10 @@ class RotatedTextApp:
             PangoCairo.show_layout(cairo_ctx, layout)
 
             # Rotate for the next turn
-            cairo_ctx.rotate(math.pi*2 / self.N_WORDS)
+            cairo_ctx.rotate(math.pi * 2 / self.N_WORDS)
 
         return False
+
 
 def main(demoapp=None):
     RotatedTextApp()

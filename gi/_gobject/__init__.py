@@ -210,6 +210,7 @@ G_MAXOFFSET = constants.G_MAXOFFSET
 from .._glib import option
 sys.modules['gi._gobject.option'] = option
 
+
 class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"
     def __init__(cls, name, bases, dict_):

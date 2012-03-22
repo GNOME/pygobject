@@ -8,16 +8,20 @@ from gi.repository import GObject
 import testhelper
 from compathelper import _long
 
+
 class C(GObject.GObject):
     __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
                                    (GObject.TYPE_INT,)) }
+
     def do_my_signal(self, arg):
         self.arg = arg
+
 
 class D(C):
     def do_my_signal(self, arg2):
         self.arg2 = arg2
         C.do_my_signal(self, arg2)
+
 
 class TestSignalCreation(unittest.TestCase):
     # Bug 540376.
@@ -55,6 +59,8 @@ class TestChaining(unittest.TestCase):
         assert inst2.arg2 == 44
 
 # This is for bug 153718
+
+
 class TestGSignalsError(unittest.TestCase):
     def testInvalidType(self, *args):
         def foo():
@@ -66,9 +72,10 @@ class TestGSignalsError(unittest.TestCase):
     def testInvalidName(self, *args):
         def foo():
             class Foo(GObject.GObject):
-                __gsignals__ = {'not-exists' : 'override'}
+                __gsignals__ = {'not-exists': 'override'}
         self.assertRaises(TypeError, foo)
         gc.collect()
+
 
 class TestGPropertyError(unittest.TestCase):
     def testInvalidType(self, *args):
@@ -81,10 +88,11 @@ class TestGPropertyError(unittest.TestCase):
     def testInvalidName(self, *args):
         def foo():
             class Foo(GObject.GObject):
-                __gproperties__ = { None: None }
+                __gproperties__ = {None: None}
 
         self.assertRaises(TypeError, foo)
         gc.collect()
+
 
 class TestList(unittest.TestCase):
     def testListObject(self):
@@ -99,6 +107,7 @@ def my_accumulator(ihint, return_accu, handler_return, user_data):
         return False, return_accu
     return True, return_accu + handler_return
 
+
 class Foo(GObject.GObject):
     __gsignals__ = {
         'my-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_INT,
@@ -106,6 +115,7 @@ class Foo(GObject.GObject):
         'my-other-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
                                 (), GObject.signal_accumulator_true_handled)
         }
+
 
 class TestAccumulator(unittest.TestCase):
 
@@ -134,16 +144,20 @@ class TestAccumulator(unittest.TestCase):
     def _true_handler1(self, obj):
         self.__true_val = 1
         return False
+
     def _true_handler2(self, obj):
         self.__true_val = 2
         return True
+
     def _true_handler3(self, obj):
         self.__true_val = 3
         return False
 
+
 class E(GObject.GObject):
     __gsignals__ = { 'signal': (GObject.SignalFlags.RUN_FIRST, None,
                                 ()) }
+
     def __init__(self):
         GObject.GObject.__init__(self)
         self.status = 0
@@ -152,15 +166,18 @@ class E(GObject.GObject):
         assert self.status == 0
         self.status = 1
 
+
 class F(GObject.GObject):
     __gsignals__ = { 'signal': (GObject.SignalFlags.RUN_FIRST, None,
                                 ()) }
+
     def __init__(self):
         GObject.GObject.__init__(self)
         self.status = 0
 
     def do_signal(self):
         self.status += 1
+
 
 class TestEmissionHook(unittest.TestCase):
     def testAdd(self):
@@ -194,6 +211,7 @@ class TestEmissionHook(unittest.TestCase):
     def testCallbackReturnFalse(self):
         self.hook = False
         obj = F()
+
         def _emission_hook(obj):
             obj.status += 1
             return False
@@ -205,6 +223,7 @@ class TestEmissionHook(unittest.TestCase):
     def testCallbackReturnTrue(self):
         self.hook = False
         obj = F()
+
         def _emission_hook(obj):
             obj.status += 1
             return True
@@ -217,6 +236,7 @@ class TestEmissionHook(unittest.TestCase):
     def testCallbackReturnTrueButRemove(self):
         self.hook = False
         obj = F()
+
         def _emission_hook(obj):
             obj.status += 1
             return True
@@ -225,6 +245,7 @@ class TestEmissionHook(unittest.TestCase):
         GObject.remove_emission_hook(obj, "signal", hook_id)
         obj.emit('signal')
         self.assertEqual(obj.status, 3)
+
 
 class TestClosures(unittest.TestCase):
     def setUp(self):
@@ -276,9 +297,11 @@ class TestClosures(unittest.TestCase):
         class C(GObject.GObject):
             __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_GSTRING,
                                            (GObject.TYPE_GSTRING,)) }
+
             def __init__(self, test):
                 GObject.GObject.__init__(self)
                 self.test = test
+
             def do_my_signal(self, data):
                 self.data = data
                 self.test.assertEqual(len(data), 3)
@@ -286,6 +309,7 @@ class TestClosures(unittest.TestCase):
         c = C(self)
         data = c.emit("my_signal", "\01\00\02")
         self.assertEqual(data, "\02\00\01")
+
 
 class SigPropClass(GObject.GObject):
     __gsignals__ = { 'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
@@ -323,6 +347,7 @@ double = GObject.TYPE_DOUBLE
 uint = GObject.TYPE_UINT
 ulong = GObject.TYPE_ULONG
 
+
 class CM(GObject.GObject):
     __gsignals__ = dict(
         test1=(f, None, ()),
@@ -334,6 +359,7 @@ class CM(GObject.GObject):
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
     )
+
 
 class _TestCMarshaller:
     def setUp(self):
@@ -378,6 +404,8 @@ else:
     print()
 
 # Test for 374653
+
+
 class TestPyGValue(unittest.TestCase):
     def testNoneNULLBoxedConversion(self):
         class C(GObject.GObject):

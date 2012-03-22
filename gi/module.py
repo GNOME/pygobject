@@ -55,6 +55,7 @@ from .types import \
 
 repository = Repository.get_default()
 
+
 def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
 
@@ -208,6 +209,7 @@ class IntrospectionModule(object):
 
         return list(result)
 
+
 class DynamicModule(object):
     def __init__(self, namespace):
         self._namespace = namespace
@@ -257,6 +259,7 @@ class DynamicModule(object):
                                       self.__class__.__name__,
                                       self._namespace,
                                       path)
+
 
 class DynamicGObjectModule(DynamicModule):
     """Wrapper for the internal GObject module

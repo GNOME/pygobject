@@ -3,6 +3,8 @@ import types
 from gi import _gobject
 
 registry = None
+
+
 class _Registry(dict):
     def __setitem__(self, key, value):
         '''We do checks here to make sure only submodules of the override
@@ -29,7 +31,7 @@ class _Registry(dict):
             g_type.pytype = value
 
             # strip gi.overrides from module name
-            module =  value.__module__[13:]
+            module = value.__module__[13:]
             key = "%s.%s" % (module, value.__name__)
             super(_Registry, self).__setitem__(key, value)
 
@@ -53,6 +55,7 @@ class overridefunc(object):
         return wrapper
 
 registry = _Registry()
+
 
 def override(type_):
     '''Decorator for registering an override'''

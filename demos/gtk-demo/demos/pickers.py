@@ -26,6 +26,7 @@ These widgets are mainly intended for use in preference dialogs. They allow to s
 
 from gi.repository import Gtk
 
+
 class PickersApp:
     def __init__(self):
         self.window = Gtk.Window(title='Pickers')
@@ -65,6 +66,7 @@ class PickersApp:
         table.attach_defaults (picker, 1, 2, 3, 4)
 
         self.window.show_all()
+
 
 def main(demoapp=None):
     PickersApp()

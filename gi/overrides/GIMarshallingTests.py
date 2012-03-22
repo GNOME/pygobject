@@ -28,6 +28,7 @@ __all__ = []
 OVERRIDES_CONSTANT = 7
 __all__.append('OVERRIDES_CONSTANT')
 
+
 class OverridesStruct(GIMarshallingTests.OverridesStruct):
 
     def __new__(cls, long_):
@@ -42,6 +43,7 @@ class OverridesStruct(GIMarshallingTests.OverridesStruct):
 
 OverridesStruct = override(OverridesStruct)
 __all__.append('OverridesStruct')
+
 
 class OverridesObject(GIMarshallingTests.OverridesObject):
 

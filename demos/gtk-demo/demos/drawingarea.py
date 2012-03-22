@@ -197,6 +197,7 @@ class DrawingAreaApp:
 
         return True
 
+
 def main(demoapp=None):
     DrawingAreaApp()
     Gtk.main()

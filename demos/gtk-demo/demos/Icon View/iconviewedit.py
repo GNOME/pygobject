@@ -26,6 +26,7 @@ The GtkIconView widget supports Editing and Drag-and-Drop. This example also dem
 
 from gi.repository import Gtk, Gdk, GdkPixbuf
 
+
 class IconviewEditApp:
     COL_TEXT = 0
     NUM_COLS = 1
@@ -87,6 +88,7 @@ class IconviewEditApp:
 
         iter_ = model.get_iter(path)
         model.set_row(iter_, [text])
+
 
 def main(demoapp=None):
     IconviewEditApp()

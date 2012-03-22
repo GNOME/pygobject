@@ -125,6 +125,7 @@ class AssistantApp:
                                             None)
         self.assistant.set_page_header_image(label, pixbuf)
 
+
 def main(demoapp=None):
     AssistantApp()
     Gtk.main()

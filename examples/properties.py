@@ -1,5 +1,6 @@
 from gi.repository import GObject
 
+
 class MyObject(GObject.GObject):
 
     foo = GObject.Property(type=str, default='bar')

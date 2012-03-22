@@ -28,6 +28,7 @@ Gdk = modules['Gdk']._introspection_module
 
 __all__ = []
 
+
 class Color(Gdk.Color):
 
     def __init__(self, red, green, blue):
@@ -106,8 +107,10 @@ else:
             # Gdk.Window had to be made abstract,
             # this override allows using the standard constructor
             return Gdk.Window.new(parent, attributes, attributes_mask)
+
         def __init__(self, parent, attributes, attributes_mask):
             pass
+
         def cairo_create(self):
             return Gdk.cairo_create(self)
 
@@ -116,6 +119,7 @@ else:
 
 Gdk.EventType._2BUTTON_PRESS = getattr(Gdk.EventType, "2BUTTON_PRESS")
 Gdk.EventType._3BUTTON_PRESS = getattr(Gdk.EventType, "3BUTTON_PRESS")
+
 
 class Event(Gdk.Event):
     _UNION_MEMBERS = {
@@ -202,6 +206,7 @@ gsuccess_mask_funcs = ['get_state',
                        'get_coords',
                        'get_root_coords']
 
+
 def _gsuccess_mask(func):
     def cull_success(*args):
         result = func(*args)
@@ -235,6 +240,7 @@ for event_class in event_member_classes:
 
 # end GdkEvent overrides
 
+
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
         Gtk = modules['Gtk']._introspection_module
@@ -242,6 +248,7 @@ class DragContext(Gdk.DragContext):
 
 DragContext = override(DragContext)
 __all__.append('DragContext')
+
 
 class Cursor(Gdk.Cursor):
     def __new__(cls, *args, **kwds):
@@ -285,6 +292,8 @@ Cursor = override(Cursor)
 __all__.append('Cursor')
 
 _Gdk_color_parse = Gdk.color_parse
+
+
 @override(Gdk.color_parse)
 def color_parse(color):
     success, color = _Gdk_color_parse(color)

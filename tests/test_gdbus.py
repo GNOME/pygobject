@@ -10,6 +10,7 @@ from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
 
+
 class TestGDBusClient(unittest.TestCase):
     def setUp(self):
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)

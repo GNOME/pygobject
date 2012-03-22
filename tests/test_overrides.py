@@ -18,6 +18,7 @@ from gi.repository import GdkPixbuf
 import gi.overrides as overrides
 import gi.types
 
+
 class TestGLib(unittest.TestCase):
 
     def test_gvariant_create(self):
@@ -353,7 +354,7 @@ class TestGLib(unittest.TestCase):
 
         self.assertTrue(v2 in set([v1, v3]))
         self.assertTrue(v2 in frozenset([v1, v3]))
-        self.assertTrue(v2 in {v1: '1', v3:'2' })
+        self.assertTrue(v2 in {v1: '1', v3: '2' })
 
     def test_variant_compare(self):
         # Check if identical GVariant are equal
@@ -416,8 +417,8 @@ class TestGLib(unittest.TestCase):
         assert_equals_bool('ab', [True])
         assert_equals_bool('ab', [False])
         for number in numbers:
-            assert_equals_bool('a'+number, [])
-            assert_equals_bool('a'+number, [0])
+            assert_equals_bool('a' + number, [])
+            assert_equals_bool('a' + number, [0])
         assert_equals_bool('as', [])
         assert_equals_bool('as', [''])
         assert_equals_bool('ao', [])
@@ -429,7 +430,7 @@ class TestGLib(unittest.TestCase):
         # tuples
         assert_equals_bool('()', ())
         for number in numbers:
-            assert_equals_bool('('+number+')', (0,))
+            assert_equals_bool('(' + number + ')', (0,))
         assert_equals_bool('(s)', ('',))
         assert_equals_bool('(o)', ('/',))
         assert_equals_bool('(g)', ('',))
@@ -446,6 +447,7 @@ class TestGLib(unittest.TestCase):
         # variant types, recursive unpacking
         assert_equals_bool('v', GLib.Variant('i', 0))
         assert_equals_bool('v', GLib.Variant('i', 1))
+
 
 class TestPango(unittest.TestCase):
 
@@ -557,6 +559,7 @@ class TestGdk(unittest.TestCase):
         self.assertNotEqual(c, None)
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
 
+
 class TestGtk(unittest.TestCase):
 
     def test_container(self):
@@ -667,7 +670,6 @@ class TestGtk(unittest.TestCase):
                                 None,
                                 []),
             }
-
 
         class SignalCheck:
             def __init__(self):
@@ -853,8 +855,8 @@ class TestGtk(unittest.TestCase):
             pass
 
         test_pyobj = TestPyObject()
-        test_pydict = {1:1, "2":2, "3":"3"}
-        test_pylist = [1,"2", "3"]
+        test_pydict = {1: 1, "2": 2, "3": "3"}
+        test_pylist = [1, "2", "3"]
         tree_store = Gtk.TreeStore(int,
                                    'gchararray',
                                    TestGtk.TestClass,
@@ -1044,8 +1046,8 @@ class TestGtk(unittest.TestCase):
             pass
 
         test_pyobj = TestPyObject()
-        test_pydict = {1:1, "2":2, "3":"3"}
-        test_pylist = [1,"2", "3"]
+        test_pydict = {1: 1, "2": 2, "3": "3"}
+        test_pylist = [1, "2", "3"]
 
         list_store = Gtk.ListStore(int, str, 'GIOverrideTreeAPITest', object, object, object, bool, bool)
         for i in range(1, 93):
@@ -1147,7 +1149,6 @@ class TestGtk(unittest.TestCase):
                                            test_pylist,
                                            0,
                                            False))
-
 
         i = 95
         label = 'this is row #95'
@@ -1278,7 +1279,7 @@ class TestGtk(unittest.TestCase):
         p2 = Gtk.TreePath.new_from_string('1:2:3')
         self.assertEqual(p1, p2)
         self.assertEqual(str(p1), '1:2:3')
-        p1 = Gtk.TreePath((1,2,3))
+        p1 = Gtk.TreePath((1, 2, 3))
         p2 = Gtk.TreePath.new_from_string('1:2:3')
         self.assertEqual(p1, p2)
         self.assertEqual(str(p1), '1:2:3')
@@ -1339,7 +1340,7 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(tree_store)
         self.assertEqual(len(tree_store), 100)
 
-        for i,row in enumerate(tree_store):
+        for i, row in enumerate(tree_store):
             self.assertEqual(row.model, tree_store)
             self.assertEqual(row.parent, None)
 
@@ -1370,7 +1371,7 @@ class TestGtk(unittest.TestCase):
             self.assertEqual(tree_store.iter_n_children(row.iter), 20)
 
             child = tree_store.iter_children(row.iter)
-            for j,childrow in enumerate(row.iterchildren()):
+            for j, childrow in enumerate(row.iterchildren()):
                 child_path = tree_store.get_path(child)
                 self.assertEqual(childrow.path, child_path)
                 self.assertEqual(childrow.parent.path, row.path)
@@ -1408,7 +1409,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(i, 99)
 
         # negative indices
-        for i in range(-1,-100,-1):
+        for i in range(-1, -100, -1):
             i_real = i + 100
             self.assertEqual(tree_store[i][0], i_real)
 
@@ -1433,7 +1434,7 @@ class TestGtk(unittest.TestCase):
         last_row = tree_store[99]
         self.assertNotEqual(last_row, None)
 
-        for i,childrow in enumerate(last_row.iterchildren()):
+        for i, childrow in enumerate(last_row.iterchildren()):
             if i < 19:
                 self.assertTrue(tree_store.remove(childrow.iter))
             else:
@@ -1557,7 +1558,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(m, store)
         self.assertEqual(store.get_path(s), firstpath)
 
-        sel.select_path((0,0))
+        sel.select_path((0, 0))
         (m, s) = sel.get_selected()
         self.assertEqual(m, store)
         self.assertEqual(store.get_path(s), firstpath)
@@ -1694,7 +1695,7 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(Gtk.Editable, overrides.Gtk.Editable)
 
         # need to use Gtk.Entry because Editable is an interface
-        entry=Gtk.Entry()
+        entry = Gtk.Entry()
         pos = entry.insert_text('HeWorld', 0)
         self.assertEquals(pos, 7)
         pos = entry.insert_text('llo ', 2)
@@ -1717,16 +1718,16 @@ class TestGtk(unittest.TestCase):
         self.assertEquals(adjustment.get_page_size(), page_size)
 
     def test_adjustment(self):
-        adjustment =       Gtk.Adjustment(1, 0, 6, 4, 5, 3)
+        adjustment = Gtk.Adjustment(1, 0, 6, 4, 5, 3)
         self.adjustment_check(adjustment, 1, 0, 6, 4, 5, 3)
 
-        adjustment =       Gtk.Adjustment(1, 0, 6, 4, 5)
+        adjustment = Gtk.Adjustment(1, 0, 6, 4, 5)
         self.adjustment_check(adjustment, 1, 0, 6, 4, 5)
 
-        adjustment =       Gtk.Adjustment(1, 0, 6, 4)
+        adjustment = Gtk.Adjustment(1, 0, 6, 4)
         self.adjustment_check(adjustment, 1, 0, 6, 4)
 
-        adjustment =       Gtk.Adjustment(1, 0, 6)
+        adjustment = Gtk.Adjustment(1, 0, 6)
         self.adjustment_check(adjustment, 1, 0, 6)
 
         adjustment = Gtk.Adjustment()
@@ -1741,21 +1742,21 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(table, Gtk.Table))
         self.assertTrue(isinstance(table, Gtk.Container))
         self.assertTrue(isinstance(table, Gtk.Widget))
-        self.assertEquals(table.get_size(), (1,1))
+        self.assertEquals(table.get_size(), (1, 1))
         self.assertEquals(table.get_homogeneous(), False)
         table = Gtk.Table(2, 3)
-        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_size(), (2, 3))
         self.assertEquals(table.get_homogeneous(), False)
         table = Gtk.Table(2, 3, True)
-        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_size(), (2, 3))
         self.assertEquals(table.get_homogeneous(), True)
 
         # Test PyGTK interface
         table = Gtk.Table(rows=3, columns=2)
-        self.assertEquals(table.get_size(), (3,2))
+        self.assertEquals(table.get_size(), (3, 2))
         # Test using the actual property names
         table = Gtk.Table(n_rows=2, n_columns=3, homogeneous=True)
-        self.assertEquals(table.get_size(), (2,3))
+        self.assertEquals(table.get_size(), (2, 3))
         self.assertEquals(table.get_homogeneous(), True)
 
         label = Gtk.Label(label='Hello')
@@ -1789,7 +1790,7 @@ class TestGtk(unittest.TestCase):
         widget.drag_dest_get_track_motion()
         widget.drag_dest_set_track_motion(True)
         widget.drag_dest_get_target_list()
-        widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test',0, 0)]))
+        widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
         widget.drag_dest_unset()
 
         widget.drag_highlight()

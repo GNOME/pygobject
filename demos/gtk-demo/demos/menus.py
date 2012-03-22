@@ -28,6 +28,7 @@ GtkUIManager provides a higher-level interface for creating menu bars and menus;
 
 from gi.repository import Gtk
 
+
 class MenusApp:
     def __init__(self):
         self.window = Gtk.Window()
@@ -110,6 +111,7 @@ class MenusApp:
             menubar.props.pack_direction = Gtk.PackDirection.TTB
         else:
             menubar.props.pack_direction = Gtk.PackDirection.LTR
+
 
 def main(demoapp=None):
     MenusApp()

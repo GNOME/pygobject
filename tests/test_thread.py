@@ -5,6 +5,7 @@ import testhelper
 
 from gi.repository import GLib
 
+
 class TestThread(unittest.TestCase):
     def setUp(self):
         self.main = GLib.MainLoop()

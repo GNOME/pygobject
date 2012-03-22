@@ -29,6 +29,7 @@ from os import path
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Gio, GObject
 
+
 class ImagesApp:
     def __init__(self):
         self.pixbuf_loader = None
@@ -168,7 +169,7 @@ class ImagesApp:
                 self.load_timeout = 0
 
                 dialog.show()
-                dialog.connect('response', lambda x,y: dialog.destroy())
+                dialog.connect('response', lambda x, y: dialog.destroy())
 
                 return False # uninstall the timeout
 
@@ -187,7 +188,7 @@ class ImagesApp:
                 self.load_timeout = 0
 
                 dialog.show()
-                dialog.connect('response', lambda x,y: dialog.destroy())
+                dialog.connect('response', lambda x, y: dialog.destroy())
 
                 return False # uninstall the timeout
 
@@ -210,7 +211,7 @@ class ImagesApp:
                     self.load_timeout = 0
 
                     dialog.show()
-                    dialog.connect('response', lambda x,y: dialog.destroy())
+                    dialog.connect('response', lambda x, y: dialog.destroy())
 
                     return False # uninstall the timeout
         else:
@@ -225,7 +226,7 @@ class ImagesApp:
                                            str(e))
                 self.load_timeout = 0
                 dialog.show()
-                dialog.connect('response', lambda x,y: dialog.destroy())
+                dialog.connect('response', lambda x, y: dialog.destroy())
 
                 return False # uninstall the timeout
 
@@ -291,6 +292,7 @@ class ImagesApp:
             self.image_stream.close()
 
         Gtk.main_quit()
+
 
 def main(demoapp=None):
     ImagesApp()

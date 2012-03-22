@@ -26,6 +26,7 @@ else:
 
 from compathelper import _long
 
+
 class PropertyObject(GObject.GObject):
     normal = GObject.Property(type=str)
     construct = GObject.Property(
@@ -42,6 +43,7 @@ class PropertyObject(GObject.GObject):
 
     boxed = GObject.Property(
         type=GLib.Regex, flags=PARAM_READWRITE|PARAM_CONSTRUCT)
+
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -181,6 +183,7 @@ class TestProperties(unittest.TestCase):
         # kiwi code
         def max(c):
             return 2 ** ((8 * struct.calcsize(c)) - 1) - 1
+
         def umax(c):
             return 2 ** (8 * struct.calcsize(c)) - 1
 
@@ -245,7 +248,6 @@ class TestProperties(unittest.TestCase):
             obj.set_property(key, max)
             self.assertEqual(obj.get_property(key), max)
 
-
     def testMulti(self):
         obj = PropertyObject()
         obj.set_properties(normal="foo",
@@ -253,6 +255,7 @@ class TestProperties(unittest.TestCase):
         normal, uint64 = obj.get_properties("normal", "uint64")
         self.assertEqual(normal, "foo")
         self.assertEqual(uint64, 7)
+
 
 class TestProperty(unittest.TestCase):
     def testSimple(self):
@@ -313,9 +316,11 @@ class TestProperty(unittest.TestCase):
     def testDecoratorDefault(self):
         class C(GObject.GObject):
             _value = 'value'
+
             @GObject.Property
             def value(self):
                 return self._value
+
             @value.setter
             def value_setter(self, value):
                 self._value = value
@@ -329,9 +334,11 @@ class TestProperty(unittest.TestCase):
     def testDecoratorWithCall(self):
         class C(GObject.GObject):
             _value = 1
+
             @GObject.Property(type=int, default=1, minimum=1, maximum=10)
             def typedValue(self):
                 return self._value
+
             @typedValue.setter
             def typedValue_setter(self, value):
                 self._value = value
@@ -521,12 +528,14 @@ class TestProperty(unittest.TestCase):
             raise AssertionError
 
     # Bug 587637.
+
     def test_float_min(self):
         GObject.Property(type=float, minimum=-1)
         GObject.Property(type=GObject.TYPE_FLOAT, minimum=-1)
         GObject.Property(type=GObject.TYPE_DOUBLE, minimum=-1)
 
     # Bug 644039
+
     def testReferenceCount(self):
         # We can check directly if an object gets finalized, so we will
         # observe it indirectly through the refcount of a member object.

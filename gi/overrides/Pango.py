@@ -25,6 +25,7 @@ Pango = modules['Pango']._introspection_module
 
 __all__ = []
 
+
 class Context(Pango.Context):
 
     def get_metrics(self, desc, language=None):
@@ -44,6 +45,7 @@ class FontDescription(Pango.FontDescription):
 
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
+
 
 class Layout(Pango.Layout):
 

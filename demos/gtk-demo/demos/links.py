@@ -27,6 +27,7 @@ their URI, but it is possible to override this with a custom handler.
 
 from gi.repository import Gtk
 
+
 class LinksApp:
     def __init__(self):
         self.window = Gtk.Window()
@@ -65,6 +66,7 @@ a program (exclusively) via keyboard input."""
 
     def response_cb(self, dialog, response_id):
         dialog.destroy()
+
 
 def main(demoapp=None):
     LinksApp()

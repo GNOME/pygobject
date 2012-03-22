@@ -1,5 +1,6 @@
 from gi.repository import GObject
 
+
 class PyGObject(GObject.GObject):
     __gtype_name__ = 'PyGObject'
     __gproperties__ = {

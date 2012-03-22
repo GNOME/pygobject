@@ -25,6 +25,7 @@ GLib = modules['GLib']._introspection_module
 
 __all__ = []
 
+
 class _VariantCreator(object):
 
     _LEAF_CONSTRUCTORS = {
@@ -109,7 +110,7 @@ class _VariantCreator(object):
             rest_format = self._create(rest_format, None)[1]
             if not rest_format.startswith('}'):
                 raise ValueError('dictionary type string not closed with }')
-            rest_format = rest_format[1:] # eat the }
+            rest_format = rest_format[1:] # eat the}
             element_type = format[:len(format) - len(rest_format)]
             builder = GLib.VariantBuilder.new(variant_type_from_string(element_type))
         else:
@@ -120,7 +121,7 @@ class _VariantCreator(object):
 
                 if not rest_format.startswith('}'):
                     raise ValueError('dictionary type string not closed with }')
-                rest_format = rest_format[1:] # eat the }
+                rest_format = rest_format[1:] # eat the}
 
                 entry = GLib.VariantBuilder.new(variant_type_from_string('{?*}'))
                 entry.add_value(key_v)
@@ -149,6 +150,7 @@ class _VariantCreator(object):
         if args is not None:
             args = args[1:]
         return (builder.end(), rest_format, args)
+
 
 class Variant(GLib.Variant):
     def __new__(cls, format_string, value):
@@ -257,7 +259,7 @@ class Variant(GLib.Variant):
 
         result = []
         head = ''
-        tail = signature[1:-1] # eat the surrounding ( )
+        tail = signature[1:-1] # eat the surrounding ()
         while tail:
             c = tail[0]
             head += c
@@ -292,6 +294,7 @@ class Variant(GLib.Variant):
     #
     # Pythonic iterators
     #
+
     def __len__(self):
         if self.get_type_string() in ['s', 'o', 'g']:
             return len(self.get_string())
@@ -336,6 +339,7 @@ class Variant(GLib.Variant):
     #
     # Pythonic bool operations
     #
+
     def __nonzero__(self):
         return self.__bool__()
 
@@ -365,9 +369,11 @@ class Variant(GLib.Variant):
             res.append(v.get_child_value(0).unpack())
         return res
 
+
 @classmethod
 def new_tuple(cls, *elements):
     return variant_new_tuple(elements)
+
 
 def get_string(self):
     value, length = GLib.Variant.get_string(self)

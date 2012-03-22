@@ -29,6 +29,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 import os
 import math
 
+
 class PixbufApp:
     FRAME_DELAY = 50
     BACKGROUND_NAME = "background.jpg"
@@ -171,6 +172,7 @@ class PixbufApp:
     def cleanup_cb(self, widget):
         GObject.source_remove(self.timeout_id)
         Gtk.main_quit()
+
 
 def main(demoapp=None):
     PixbufApp()

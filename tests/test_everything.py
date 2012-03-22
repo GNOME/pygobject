@@ -67,7 +67,6 @@ class TestEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_unichar, "")
         self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
 
-
     def test_floating(self):
         e = Everything.TestFloating()
         self.assertEquals(e.__grefcount__, 1)
@@ -180,15 +179,16 @@ class TestEverything(unittest.TestCase):
 
         l2 = l1
         self.assertEqual(l1.data, l2.data)
-        self.assertEquals(getrefcount(l1), init_refcount+1)
+        self.assertEquals(getrefcount(l1), init_refcount + 1)
 
         l3 = copy.copy(l1)
         l3.data = 'bar'
         self.assertEqual(l1.data, 'foo')
         self.assertEqual(l2.data, 'foo')
         self.assertEqual(l3.data, 'bar')
-        self.assertEquals(getrefcount(l1), init_refcount+1)
+        self.assertEquals(getrefcount(l1), init_refcount + 1)
         self.assertEquals(getrefcount(l3), init_refcount)
+
 
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
@@ -233,6 +233,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_callback(self):
         TestCallbacks.called = False
+
         def callback():
             TestCallbacks.called = True
 
@@ -274,6 +275,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_return_value_callback(self):
         TestCallbacks.called = False
+
         def callback():
             TestCallbacks.called = True
             return 44
@@ -283,6 +285,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_callback_async(self):
         TestCallbacks.called = False
+
         def callback(foo):
             TestCallbacks.called = True
             return foo
@@ -294,6 +297,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_callback_scope_call(self):
         TestCallbacks.called = 0
+
         def callback():
             TestCallbacks.called += 1
             return 0
@@ -303,6 +307,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_callback_userdata(self):
         TestCallbacks.called = 0
+
         def callback(userdata):
             self.assertEquals(userdata, "Test%d" % TestCallbacks.called)
             TestCallbacks.called += 1
@@ -310,12 +315,13 @@ class TestCallbacks(unittest.TestCase):
 
         for i in range(100):
             val = Everything.test_callback_user_data(callback, "Test%d" % i)
-            self.assertEquals(val, i+1)
+            self.assertEquals(val, i + 1)
 
         self.assertEquals(TestCallbacks.called, 100)
 
     def test_callback_userdata_refcount(self):
         TestCallbacks.called = False
+
         def callback(userdata):
             TestCallbacks.called = True
             return 1
@@ -419,17 +425,18 @@ class TestCallbacks(unittest.TestCase):
             mydict['new'] = 42
             TestCallbacks.called = True
 
-        mydict = { 'foo': 1, 'bar': 2 }
+        mydict = {'foo': 1, 'bar': 2}
         TestCallbacks.called = False
         Everything.test_hash_table_callback(mydict, callback)
         self.assertTrue(TestCallbacks.called)
-        self.assertEqual(mydict, { 'foo': 1, 'bar': 2, 'new': 42 })
+        self.assertEqual(mydict, {'foo': 1, 'bar': 2, 'new': 42})
+
 
 class TestClosures(unittest.TestCase):
     def test_int_arg(self):
         def callback(num):
             self.called = True
-            return num+1
+            return num + 1
 
         self.called = False
         result = Everything.test_closure_one_arg(callback, 42)
@@ -437,6 +444,7 @@ class TestClosures(unittest.TestCase):
         self.assertEqual(result, 43)
 
     # https://bugzilla.gnome.org/show_bug.cgi?id=656554
+
     @unittest.expectedFailure
     def test_variant(self):
         def callback(variant):
@@ -449,6 +457,7 @@ class TestClosures(unittest.TestCase):
         self.assertTrue(self.called)
         self.assertEqual(result.get_type_string(), 'i')
         self.assertEqual(result.get_int32(), 43)
+
 
 class TestProperties(unittest.TestCase):
 
@@ -502,6 +511,7 @@ class TestProperties(unittest.TestCase):
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEquals(object_.props.boxed.some_int8, 42)
 
+
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
         import time
@@ -534,7 +544,6 @@ class TestTortureProfile(unittest.TestCase):
         total_time += delta_time
         print("%f secs" % delta_time)
 
-
         sys.stdout.write("\ttorture test 3 (10000 iterations): ")
         start_time = time.clock()
         for i in range(10000):
@@ -550,10 +559,11 @@ class TestTortureProfile(unittest.TestCase):
         print("%f secs" % delta_time)
 
         sys.stdout.write("\ttorture test 4 (10000 iterations): ")
+
         def callback(userdata):
             pass
 
-        userdata = [1,2,3,4]
+        userdata = [1, 2, 3, 4]
         start_time = time.clock()
         for i in range(10000):
             (y,z,q) = Everything.test_torture_signature_2(5000,
@@ -567,6 +577,7 @@ class TestTortureProfile(unittest.TestCase):
         print("%f secs" % delta_time)
         print("\t====")
         print("\tTotal: %f sec" % total_time)
+
 
 class TestAdvancedInterfaces(unittest.TestCase):
     def test_array_objs(self):
@@ -590,6 +601,7 @@ class TestAdvancedInterfaces(unittest.TestCase):
 
         ret = obj.skip_return_val_no_out(1)
         self.assertEquals(ret, None)
+
 
 class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):

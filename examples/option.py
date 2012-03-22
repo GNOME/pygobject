@@ -10,7 +10,6 @@ group = OptionGroup("example", "OptionGroup Example", "Shows all example options
                     dest="example",
                     help="An example option."),
     ])
-
 parser = OptionParser("NAMES ...",
     description="A simple gobject.option example.",
     option_list=[

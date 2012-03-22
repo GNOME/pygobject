@@ -29,7 +29,6 @@ import sys
 from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk
 
 
-
 DEMOROOTDIR = os.path.abspath(os.path.dirname(__file__))
 DEMOCODEDIR = os.path.join(DEMOROOTDIR, 'demos')
 sys.path.insert(0, DEMOROOTDIR)
@@ -43,7 +42,7 @@ class InputStream(object):
     function isn't used in such a context. (see <python-lib>/tokenize.py)
     """
     def __init__(self, data):
-        self.__data = [ '%s\n' % x for x in data.splitlines() ]
+        self.__data = ['%s\n' % x for x in data.splitlines()]
         self.__lcount = 0
 
     def readline(self):
@@ -340,9 +339,9 @@ class GtkDemoWindow(Gtk.Window):
         is_func = False
 
         def prepare_iters():
-            start_iter.set_line(srow-1)
+            start_iter.set_line(srow - 1)
             start_iter.set_line_offset(scol)
-            end_iter.set_line(erow-1)
+            end_iter.set_line(erow - 1)
             end_iter.set_line_offset(ecol)
 
         for x in tokenize.generate_tokens(InputStream(data).readline):
@@ -394,6 +393,7 @@ class GtkDemoWindow(Gtk.Window):
             if is_decorator is True:
                 is_decorator = False
 
+
 def main():
     mainloop = GLib.MainLoop()
 
@@ -402,6 +402,7 @@ def main():
     demowindow.show()
 
     mainloop.run()
+
 
 def quit(widget, event, mainloop):
     mainloop.quit()

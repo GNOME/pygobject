@@ -42,6 +42,7 @@ else:
     _basestring = basestring
     _long = long
 
+
 class Property(object):
     """
     Creates a new property which in conjunction with GObject subclass will
@@ -304,10 +305,10 @@ class Property(object):
     #
 
     def _default_setter(self, instance, value):
-        setattr(instance, '_property_helper_'+self.name, value)
+        setattr(instance, '_property_helper_' + self.name, value)
 
     def _default_getter(self, instance):
-        return getattr(instance, '_property_helper_'+self.name, self.default)
+        return getattr(instance, '_property_helper_' + self.name, self.default)
 
     def _readonly_setter(self, instance, value):
         self._exc = TypeError("%s property of %s is read-only" % (

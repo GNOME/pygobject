@@ -9,6 +9,7 @@ from gi.repository import GLib
 
 from compathelper import _bytes
 
+
 class TestMainLoop(unittest.TestCase):
     def testExceptionHandling(self):
         pipe_r, pipe_w = os.pipe()

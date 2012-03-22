@@ -64,6 +64,7 @@ class EntryBufferApp:
         self.window.destroy()
         Gtk.main_quit()
 
+
 def main(demoapp=None):
     EntryBufferApp()
     Gtk.main()

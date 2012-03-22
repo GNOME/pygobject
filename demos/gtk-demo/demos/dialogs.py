@@ -26,6 +26,7 @@ Dialog widgets are used to pop up a transient window for user feedback.
 
 from gi.repository import Gtk
 
+
 class DialogsApp:
     def __init__(self):
         self.dialog_counter = 1
@@ -144,6 +145,7 @@ class DialogsApp:
 
         self.dialog_counter += 1
         dialog.destroy()
+
 
 def main(demoapp=None):
     DialogsApp()

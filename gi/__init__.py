@@ -34,6 +34,7 @@ import os
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), 'overrides')
 
+
 def require_version(namespace, version):
     repository = Repository.get_default()
 
@@ -56,6 +57,7 @@ def require_version(namespace, version):
                          (namespace, version))
 
     _versions[namespace] = version
+
 
 def get_required_version(namespace):
     return _versions.get(namespace, None)

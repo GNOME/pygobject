@@ -55,6 +55,7 @@ class BuilderApp:
     def quit_activate(self, action):
         Gtk.main_quit()
 
+
 def main(demoapp=None):
     BuilderApp(demoapp)
     Gtk.main()

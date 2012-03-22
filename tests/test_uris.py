@@ -2,6 +2,7 @@ import unittest
 
 from gi.repository import GLib
 
+
 class TestUris(unittest.TestCase):
     def testExtractUris(self):
         uri_list_text = "# urn:isbn:0-201-08372-8\n" + \

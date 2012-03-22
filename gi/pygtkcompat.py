@@ -99,7 +99,7 @@ _unset = object()
 def enable_gtk(version='2.0'):
     # set the default encoding like PyGTK
     reload(sys)
-    if sys.version_info < (3,0):
+    if sys.version_info < (3, 0):
         sys.setdefaultencoding('utf-8')
 
     # atk
@@ -150,6 +150,7 @@ def enable_gtk(version='2.0'):
     Gdk.Window.get_frame_extents = get_frame_extents
 
     orig_get_origin = Gdk.Window.get_origin
+
     def get_origin(self):
         return orig_get_origin(self)[1:]
     Gdk.Window.get_origin = get_origin
@@ -205,11 +206,13 @@ def enable_gtk(version='2.0'):
     # TreeViewColumn
 
     orig_tree_view_column_pack_end = Gtk.TreeViewColumn.pack_end
+
     def tree_view_column_pack_end(self, cell, expand=True):
         orig_tree_view_column_pack_end(self, cell, expand)
     Gtk.TreeViewColumn.pack_end = tree_view_column_pack_end
 
     orig_tree_view_column_pack_start = Gtk.TreeViewColumn.pack_start
+
     def tree_view_column_pack_start(self, cell, expand=True):
         orig_tree_view_column_pack_start(self, cell, expand)
     Gtk.TreeViewColumn.pack_start = tree_view_column_pack_start
@@ -267,8 +270,10 @@ def enable_gtk(version='2.0'):
     class ComboBoxEntry(Gtk.ComboBox):
         def __init__(self, **kwds):
             Gtk.ComboBox.__init__(self, has_entry=True, **kwds)
+
         def set_text_column (self, text_column):
             self.set_entry_text_column(text_column)
+
         def get_text_column (self):
             return self.get_entry_text_column()
     Gtk.ComboBoxEntry = ComboBoxEntry
@@ -295,6 +300,7 @@ def enable_gtk(version='2.0'):
         combo.set_entry_text_column(0)
         return combo
     Gtk.combo_box_new_text = new_text
+
     def append_text(self, text):
         model = self.get_model()
         model.append([text])
@@ -327,6 +333,7 @@ def enable_gtk(version='2.0'):
 
     Gtk.widget_get_default_direction = Gtk.Widget.get_default_direction
     orig_size_request = Gtk.Widget.size_request
+
     def size_request(widget):
         class SizeRequest(UserList):
             def __init__(self, req):
@@ -360,12 +367,14 @@ def enable_gtk(version='2.0'):
     Gtk.Widget.style = StyleDescriptor()
 
     # gtk.unixprint
+
     class UnixPrint(object):
         pass
     unixprint = UnixPrint()
     sys.modules['gtkunixprint'] = unixprint
 
     # gtk.keysyms
+
     class Keysyms(object):
         pass
     keysyms = Keysyms()
@@ -405,6 +414,7 @@ def enable_gudev():
     from gi.repository import GUdev
     sys.modules['gudev'] = GUdev
 
+
 def enable_gst():
     gi.require_version('Gst', '0.10')
     from gi.repository import Gst
@@ -414,8 +424,8 @@ def enable_gst():
     Gst.element_register = Gst.Element.register
     Gst.element_factory_make = Gst.ElementFactory.make
     Gst.caps_new_any = Gst.Caps.new_any
-    Gst.get_pygst_version = lambda : (0, 10, 19)
-    Gst.get_gst_version = lambda : (0, 10, 40)
+    Gst.get_pygst_version = lambda: (0, 10, 19)
+    Gst.get_gst_version = lambda: (0, 10, 40)
 
     from gi.repository import GstInterfaces
     sys.modules['gst.interfaces'] = GstInterfaces

@@ -29,6 +29,7 @@ Gio = modules['Gio']._introspection_module
 
 __all__ = []
 
+
 class FileEnumerator(Gio.FileEnumerator):
     def __iter__(self):
         return self
@@ -47,6 +48,7 @@ class FileEnumerator(Gio.FileEnumerator):
 
 FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
+
 
 class Settings(Gio.Settings):
     '''Provide dictionary-like access to GLib.Settings.'''
@@ -99,6 +101,7 @@ class Settings(Gio.Settings):
 
 Settings = override(Settings)
 __all__.append('Settings')
+
 
 class _DBusProxyMethodCall:
     '''Helper class to implement DBusProxy method calls.'''
@@ -162,6 +165,7 @@ class _DBusProxyMethodCall:
             result = None
 
         return result
+
 
 class DBusProxy(Gio.DBusProxy):
     '''Provide comfortable and pythonic method calls.
