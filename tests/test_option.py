@@ -59,7 +59,7 @@ class TestOption(unittest.TestCase):
     def testParseArgs(self):
         options, args = self.parser.parse_args(
             ["test_option.py"])
-        self.failIf(args)
+        self.assertFalse(args)
 
         options, args = self.parser.parse_args(
             ["test_option.py", "foo"])
@@ -80,13 +80,13 @@ class TestOption(unittest.TestCase):
         options, args = self.parser.parse_args(
             ["test_option.py", "--test", "-f", "test"])
 
-        self.failIf(options.test)
+        self.assertFalse(options.test)
         self.assertEqual(options.unit_file, "test")
 
-        self.failUnless(group.values.test)
-        self.failIf(self.parser.values.test)
+        self.assertTrue(group.values.test)
+        self.assertFalse(self.parser.values.test)
         self.assertEqual(group.values.unit_file, "test")
-        self.failIf(args)
+        self.assertFalse(args)
 
     def testOptionValueError(self):
         self._create_group()

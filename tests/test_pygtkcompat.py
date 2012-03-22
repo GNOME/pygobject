@@ -23,17 +23,17 @@ import gtk.gdk
 
 class TestATKCompat(unittest.TestCase):
     def testObject(self):
-        self.failUnless(hasattr(atk, 'Object'))
+        self.assertTrue(hasattr(atk, 'Object'))
 
 
 class TestPangoCompat(unittest.TestCase):
     def testLayout(self):
-        self.failUnless(hasattr(pango, 'Layout'))
+        self.assertTrue(hasattr(pango, 'Layout'))
 
 
 class TestPangoCairoCompat(unittest.TestCase):
     def testErrorUnderlinePath(self):
-        self.failUnless(hasattr(pangocairo, 'error_underline_path'))
+        self.assertTrue(hasattr(pangocairo, 'error_underline_path'))
 
 
 class TestGTKCompat(unittest.TestCase):
@@ -51,11 +51,11 @@ class TestGTKCompat(unittest.TestCase):
     def testKeysyms(self):
         import gtk.keysyms
         self.assertEquals(gtk.keysyms.Escape, Gdk.KEY_Escape)
-        self.failUnless(gtk.keysyms._0, Gdk.KEY_0)
+        self.assertTrue(gtk.keysyms._0, Gdk.KEY_0)
 
     def testStyle(self):
         widget = gtk.Button()
-        self.failUnless(isinstance(widget.style.base[gtk.STATE_NORMAL],
+        self.assertTrue(isinstance(widget.style.base[gtk.STATE_NORMAL],
                                    gtk.gdk.Color))
 
     def testAlignment(self):
@@ -71,16 +71,16 @@ class TestGTKCompat(unittest.TestCase):
 
         box.pack_start(child)
         expand, fill, padding, pack_type = box.query_child_packing(child)
-        self.failUnless(expand)
-        self.failUnless(fill)
+        self.assertTrue(expand)
+        self.assertTrue(fill)
         self.assertEquals(padding, 0)
         self.assertEquals(pack_type, gtk.PACK_START)
 
         child = gtk.Button()
         box.pack_end(child)
         expand, fill, padding, pack_type = box.query_child_packing(child)
-        self.failUnless(expand)
-        self.failUnless(fill)
+        self.assertTrue(expand)
+        self.assertTrue(fill)
         self.assertEquals(padding, 0)
         self.assertEquals(pack_type, gtk.PACK_END)
 

@@ -51,10 +51,10 @@ class TestProperties(unittest.TestCase):
 
     def testListWithInstance(self):
         obj = PropertyObject()
-        self.failUnless(hasattr(obj.props, "normal"))
+        self.assertTrue(hasattr(obj.props, "normal"))
 
     def testListWithoutInstance(self):
-        self.failUnless(hasattr(PropertyObject.props, "normal"))
+        self.assertTrue(hasattr(PropertyObject.props, "normal"))
 
     def testSetNoInstance(self):
         def set(obj):
@@ -67,7 +67,7 @@ class TestProperties(unittest.TestCase):
             for pspec in obj:
                 gtype = GType(pspec)
                 self.assertEqual(gtype.parent.name, 'GParam')
-                self.failUnless(pspec.name in ['normal',
+                self.assertTrue(pspec.name in ['normal',
                                                'construct',
                                                'construct-only',
                                                'uint64',
@@ -262,10 +262,10 @@ class TestProperty(unittest.TestCase):
             float = GObject.Property(type=float)
             long = GObject.Property(type=_long)
 
-        self.failUnless(hasattr(C.props, 'str'))
-        self.failUnless(hasattr(C.props, 'int'))
-        self.failUnless(hasattr(C.props, 'float'))
-        self.failUnless(hasattr(C.props, 'long'))
+        self.assertTrue(hasattr(C.props, 'str'))
+        self.assertTrue(hasattr(C.props, 'int'))
+        self.assertTrue(hasattr(C.props, 'float'))
+        self.assertTrue(hasattr(C.props, 'long'))
 
         o = C()
         self.assertEqual(o.str, '')

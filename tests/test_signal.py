@@ -314,7 +314,7 @@ class SigPropClass(GObject.GObject):
 class TestSigProp(unittest.TestCase):
     def testEmitInPropertySetter(self):
         obj = SigPropClass()
-        self.failIf(obj.signal_emission_failed)
+        self.assertFalse(obj.signal_emission_failed)
 
 f = GObject.SignalFlags.RUN_FIRST
 l = GObject.SignalFlags.RUN_LAST
@@ -355,7 +355,7 @@ class _TestCMarshaller:
 
     def testTestReturnFloat(self):
         rv = self.obj.emit("test-float", 1.234)
-        self.failUnless(rv >= 1.233999 and rv <= 1.2400001, rv)
+        self.assertTrue(rv >= 1.233999 and rv <= 1.2400001, rv)
 
     def testTestReturnDouble(self):
         rv = self.obj.emit("test-double", 1.234)
