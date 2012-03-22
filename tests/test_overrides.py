@@ -9,6 +9,11 @@ sys.path.insert(0, "../")
 
 from compathelper import _long, _unicode, _bytes
 
+os.environ['GSETTINGS_BACKEND'] = 'memory'
+# support a separate build tree, so look in build dir first
+os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
+        os.path.dirname(__file__))
+
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gdk
@@ -1864,10 +1869,6 @@ class TestGtk(unittest.TestCase):
 
 class TestGio(unittest.TestCase):
     def setUp(self):
-        os.environ['GSETTINGS_BACKEND'] = 'memory'
-        # support a separate build tree, so look in build dir first
-        os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
-                os.path.dirname(__file__))
         self.settings = Gio.Settings('org.gnome.test')
         # we change the values in the tests, so set them to predictable start
         # value
