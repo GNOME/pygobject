@@ -76,4 +76,3 @@ class DynamicImporter(object):
         dynamic_module._load()
 
         return dynamic_module
-

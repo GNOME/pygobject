@@ -60,4 +60,3 @@ class Layout(Pango.Layout):
 
 Layout = override(Layout)
 __all__.append('Layout')
-

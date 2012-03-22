@@ -156,11 +156,11 @@ class Variant(GLib.Variant):
 
         format_string is a standard GVariant type signature, value is a Python
         object whose structure has to match the signature.
-        
+
         Examples:
           GLib.Variant('i', 1)
           GLib.Variant('(is)', (1, 'hello'))
-          GLib.Variant('(asa{sv})', ([], {'foo': GLib.Variant('b', True), 
+          GLib.Variant('(asa{sv})', ([], {'foo': GLib.Variant('b', True),
                                           'bar': GLib.Variant('i', 2)}))
         '''
         creator = _VariantCreator()
@@ -216,7 +216,7 @@ class Variant(GLib.Variant):
 
         # tuple
         if self.get_type_string().startswith('('):
-            res = [self.get_child_value(i).unpack() 
+            res = [self.get_child_value(i).unpack()
                     for i in range(self.n_children())]
             return tuple(res)
 
@@ -230,7 +230,7 @@ class Variant(GLib.Variant):
 
         # array
         if self.get_type_string().startswith('a'):
-            return [self.get_child_value(i).unpack() 
+            return [self.get_child_value(i).unpack()
                     for i in range(self.n_children())]
 
         # variant (just unbox transparently)
@@ -245,7 +245,7 @@ class Variant(GLib.Variant):
 
         If the signature is not a tuple, it returns one element with the entire
         signature. If the signature is an empty tuple, the result is [].
-        
+
         This is useful for e. g. iterating over method parameters which are
         passed as a single Variant.
         '''
@@ -377,4 +377,3 @@ setattr(Variant, 'new_tuple', new_tuple)
 setattr(Variant, 'get_string', get_string)
 
 __all__.append('Variant')
-

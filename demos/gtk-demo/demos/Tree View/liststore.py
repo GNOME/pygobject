@@ -87,7 +87,7 @@ class ListStoreApp:
 
         self.window.set_default_size(280, 250)
         self.window.show_all()
-        
+
         self.window.connect('delete-event', self.window_closed)
         self.timeout = GObject.timeout_add (80, self.spinner_timeout)
 
@@ -98,7 +98,7 @@ class ListStoreApp:
     def spinner_timeout(self):
         if self.model is None:
             return False
-            
+
         iter_ = self.model.get_iter_first()
         pulse = self.model.get(iter_, self.COLUMN_PULSE)[0]
         if pulse == 999999999:
@@ -120,7 +120,7 @@ class ListStoreApp:
                                    str,
                                    bool,
                                    bool)
-        
+
         col = 0
         for bug in data:
             if col == 1 or col == 3:
@@ -144,7 +144,7 @@ class ListStoreApp:
 
     def add_columns(self, treeview):
         model = treeview.get_model()
-        
+
         # column for is_fixed toggle
         renderer = Gtk.CellRendererToggle()
         renderer.connect('toggled', self.is_fixed_toggled, model)

@@ -296,49 +296,49 @@ def color_parse(color):
 if Gdk._version >= '3.0':
     SELECTION_PRIMARY = Gdk.atom_intern('PRIMARY', True)
     __all__.append('SELECTION_PRIMARY')
-    
+
     SELECTION_SECONDARY = Gdk.atom_intern('SECONDARY', True)
     __all__.append('SELECTION_SECONDARY')
-    
+
     SELECTION_CLIPBOARD = Gdk.atom_intern('CLIPBOARD', True)
     __all__.append('SELECTION_CLIPBOARD')
-    
+
     TARGET_BITMAP = Gdk.atom_intern('BITMAP', True)
     __all__.append('TARGET_BITMAP')
-    
+
     TARGET_COLORMAP = Gdk.atom_intern('COLORMAP', True)
     __all__.append('TARGET_COLORMAP')
-    
+
     TARGET_DRAWABLE = Gdk.atom_intern('DRAWABLE', True)
     __all__.append('TARGET_DRAWABLE')
-    
+
     TARGET_PIXMAP = Gdk.atom_intern('PIXMAP', True)
     __all__.append('TARGET_PIXMAP')
-    
+
     TARGET_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('TARGET_STRING')
-    
+
     SELECTION_TYPE_ATOM = Gdk.atom_intern('ATOM', True)
     __all__.append('SELECTION_TYPE_ATOM')
-    
+
     SELECTION_TYPE_BITMAP = Gdk.atom_intern('BITMAP', True)
     __all__.append('SELECTION_TYPE_BITMAP')
-    
+
     SELECTION_TYPE_COLORMAP = Gdk.atom_intern('COLORMAP', True)
     __all__.append('SELECTION_TYPE_COLORMAP')
-    
+
     SELECTION_TYPE_DRAWABLE = Gdk.atom_intern('DRAWABLE', True)
     __all__.append('SELECTION_TYPE_DRAWABLE')
-    
+
     SELECTION_TYPE_INTEGER = Gdk.atom_intern('INTEGER', True)
     __all__.append('SELECTION_TYPE_INTEGER')
-    
+
     SELECTION_TYPE_PIXMAP = Gdk.atom_intern('PIXMAP', True)
     __all__.append('SELECTION_TYPE_PIXMAP')
-    
+
     SELECTION_TYPE_WINDOW = Gdk.atom_intern('WINDOW', True)
     __all__.append('SELECTION_TYPE_WINDOW')
-    
+
     SELECTION_TYPE_STRING = Gdk.atom_intern('STRING', True)
     __all__.append('SELECTION_TYPE_STRING')
 

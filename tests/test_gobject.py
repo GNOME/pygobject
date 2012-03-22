@@ -123,7 +123,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEquals(obj.__grefcount__, 1)
 
- 
+
     def testFloatingAndSunkUsingGObjectNew(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.

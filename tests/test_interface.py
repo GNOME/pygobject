@@ -46,4 +46,3 @@ class TestIfaceImpl(unittest.TestCase):
         m = MyObject()
         m.iface_method()
         self.assertEqual(m.called, True)
-

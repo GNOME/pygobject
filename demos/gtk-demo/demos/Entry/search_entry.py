@@ -36,7 +36,7 @@ class SearchboxApp:
         self.window = Gtk.Dialog('Search Entry',
                                  buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE))
 
-        self.window.connect('response', lambda x, y: self.window.destroy()) 
+        self.window.connect('response', lambda x, y: self.window.destroy())
         self.window.connect('destroy', Gtk.main_quit)
 
         content_area = self.window.get_content_area()
@@ -134,7 +134,7 @@ class SearchboxApp:
     def start_search(self, button, entry):
         self.show_cancel_button()
         self.search_progress_id = GObject.timeout_add_seconds(1,
-                                                              self.start_search_feedback, 
+                                                              self.start_search_feedback,
                                                               entry)
         self.finish_search_id = GObject.timeout_add_seconds(15,
                                                             self.finish_search,

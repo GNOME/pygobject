@@ -48,13 +48,13 @@ class RotatedTextApp:
     FONT = "Serif 18"
 
     def __init__(self):
-    
+
         white = Gdk.RGBA()
         white.red = 1.0
         white.green = 1.0
         white.blue = 1.0
         white.alpha = 1.0
-        
+
         self.window = Gtk.Window(title="Rotated Text")
         self.window.set_default_size(4 * self.RADIUS, 2 * self.RADIUS)
         self.window.connect('destroy', Gtk.main_quit)
@@ -62,7 +62,7 @@ class RotatedTextApp:
         box = Gtk.HBox()
         box.set_homogeneous(True)
         self.window.add(box)
-        
+
         # add a drawing area
         da = Gtk.DrawingArea()
         box.add(da)
@@ -78,7 +78,7 @@ class RotatedTextApp:
 
         # Setup some fancy stuff on the label
         layout = label.get_layout()
-        
+
         PangoCairo.context_set_shape_renderer(layout.get_context(),
                                               self.fancy_shape_renderer,
                                               None)
@@ -110,7 +110,7 @@ class RotatedTextApp:
         metrics = pango_ctx.get_metrics(layout.get_font_description(),
                                         None)
         ascent = metrics.get_ascent()
-        
+
         logical_rect = Pango.Rectangle()
         logical_rect.x = 0
         logical_rect.width = ascent
@@ -137,7 +137,7 @@ class RotatedTextApp:
         attrs.insert(attr)
         '''
         return attrs
-        
+
     def rotated_text_draw (self, da, cairo_ctx):
         # Create a cairo context and set up a transformation matrix so that the user
         # space coordinates for the centered square where we draw are [-RADIUS, RADIUS],
@@ -149,11 +149,11 @@ class RotatedTextApp:
         cairo_ctx.translate(
                    device_radius + (width - 2 * device_radius) / 2,
                    device_radius + (height - 2 * device_radius) / 2)
-        cairo_ctx.scale(device_radius / self.RADIUS, 
+        cairo_ctx.scale(device_radius / self.RADIUS,
                         device_radius / self.RADIUS)
 
         # Create a subtle gradient source and use it.
-        pattern = cairo.LinearGradient(-self.RADIUS, -self.RADIUS, 
+        pattern = cairo.LinearGradient(-self.RADIUS, -self.RADIUS,
                                         self.RADIUS,  self.RADIUS)
         pattern.add_color_stop_rgb(0.0, 0.5, 0.0, 0.0)
         pattern.add_color_stop_rgb(1.0, 0.0, 0.0, 0.5)
@@ -178,14 +178,14 @@ class RotatedTextApp:
         for i in range(self.N_WORDS):
             # Inform Pango to re-layout the text with the new transformation matrix
             PangoCairo.update_layout(cairo_ctx, layout)
-    
+
             width, height = layout.get_pixel_size()
             cairo_ctx.move_to(-width / 2, -self.RADIUS * 0.9)
             PangoCairo.show_layout(cairo_ctx, layout)
 
             # Rotate for the next turn
             cairo_ctx.rotate(math.pi*2 / self.N_WORDS)
-  
+
         return False
 
 def main(demoapp=None):

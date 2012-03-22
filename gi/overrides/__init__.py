@@ -5,14 +5,14 @@ from gi import _gobject
 registry = None
 class _Registry(dict):
     def __setitem__(self, key, value):
-        '''We do checks here to make sure only submodules of the override 
+        '''We do checks here to make sure only submodules of the override
         module are added.  Key and value should be the same object and come
-        from the gi.override module.  
+        from the gi.override module.
 
         We add the override to the dict as "override_module.name".  For instance
         if we were overriding Gtk.Button you would retrive it as such:
         registry['Gtk.Button']
-        ''' 
+        '''
         if not key == value:
             raise KeyError('You have tried to modify the registry.  This should only be done by the override decorator')
 
@@ -26,7 +26,7 @@ class _Registry(dict):
         g_type = info.get_g_type()
         assert g_type != _gobject.TYPE_NONE
         if g_type != _gobject.TYPE_INVALID:
-            g_type.pytype = value 
+            g_type.pytype = value
 
             # strip gi.overrides from module name
             module =  value.__module__[13:]
@@ -61,5 +61,3 @@ def override(type_):
     else:
         registry.register(type_)
         return type_
-
-

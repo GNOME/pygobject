@@ -51,8 +51,8 @@ class IconviewEditApp:
         renderer = Gtk.CellRendererPixbuf()
         icon_view.pack_start(renderer, True)
         icon_view.set_cell_data_func(renderer,
-					                 self.set_cell_color,
-					                 None)
+                                     self.set_cell_color,
+                                     None)
 
         renderer = Gtk.CellRendererText()
         icon_view.pack_start(renderer, True)
@@ -64,27 +64,22 @@ class IconviewEditApp:
 
         self.window.show_all()
 
-    def set_cell_color (self,
-                        cell_layout,
-	                    cell,
-		                tree_model,
-	                    iter_,
-	                    icon_view):
+    def set_cell_color (self, cell_layout, cell, tree_model, iter_, icon_view):
 
-         # FIXME return single element instead of tuple
-         text = tree_model.get(iter_, self.COL_TEXT)[0]
-         color = Gdk.color_parse(text)
-         pixel = 0
-         if color is not None:
-             pixel = \
-               (color.red   >> 8) << 24 | \
-               (color.green >> 8) << 16 | \
-               (color.blue  >> 8) << 8
+        # FIXME return single element instead of tuple
+        text = tree_model.get(iter_, self.COL_TEXT)[0]
+        color = Gdk.color_parse(text)
+        pixel = 0
+        if color is not None:
+            pixel = \
+              (color.red   >> 8) << 24 | \
+              (color.green >> 8) << 16 | \
+              (color.blue  >> 8) << 8
 
-         pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 24, 24)
-         pixbuf.fill(pixel)
+        pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 24, 24)
+        pixbuf.fill(pixel)
 
-         cell.props.pixbuf = pixbuf
+        cell.props.pixbuf = pixbuf
 
     def edited (self, cell, path_string, text, icon_view):
         model = icon_view.get_model()

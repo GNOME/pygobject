@@ -165,7 +165,7 @@ class _DBusProxyMethodCall:
 
 class DBusProxy(Gio.DBusProxy):
     '''Provide comfortable and pythonic method calls.
-    
+
     This marshalls the method arguments into a GVariant, invokes the
     call_sync() method on the DBusProxy object, and unmarshalls the result
     GVariant back into a Python tuple.
@@ -193,7 +193,7 @@ class DBusProxy(Gio.DBusProxy):
       error_handler(proxy_object, exception, user_data) is called when it
       finishes. If error_handler is not given, result_handler is called with
       the exception object as result instead.
-    
+
     - user_data: Optional user data to pass to result_handler for
       asynchronous calls.
 

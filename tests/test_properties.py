@@ -90,7 +90,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.construct, "456")
         obj.props.construct = '789'
         self.assertEqual(obj.props.construct, "789")
-   
+
     def testUTF8(self):
         obj = new(PropertyObject, construct_only=UNICODE_UTF8)
         self.assertEqual(obj.props.construct_only, TEST_UTF8)

@@ -199,7 +199,7 @@ class ImagesApp:
                 # file was truncated we'll know on close that
                 # it was incomplete.
                 try:
-                   self.pixbuf_loader.close()
+                    self.pixbuf_loader.close()
                 except GObject.GError as e:
                     dialog = Gtk.MessageDialog(self.window,
                                                Gtk.DialogFlags.DESTROY_WITH_PARENT,

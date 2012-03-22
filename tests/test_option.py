@@ -114,4 +114,3 @@ class TestOption(unittest.TestCase):
 
         assert (sio.getvalue().split('\n')[-2] ==
                 "Exception: " + self.EXCEPTION_MESSAGE)
-

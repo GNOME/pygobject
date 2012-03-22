@@ -45,11 +45,11 @@ class DialogsApp:
         hbox = Gtk.HBox(spacing=8);
         vbox.pack_start(hbox, False, False, 0)
         button = Gtk.Button.new_with_mnemonic("_Message Dialog");
-     
+
         button.connect('clicked',
-		               self._message_dialog_clicked)
+                       self._message_dialog_clicked)
         hbox.pack_start(button, False, False, 0)
-        
+
         vbox.pack_start(Gtk.HSeparator(),
                         False, False, 0);
 
@@ -58,9 +58,9 @@ class DialogsApp:
         vbox.pack_start(hbox, False, False, 0)
         vbox2 = Gtk.VBox(spacing=0);
         button = Gtk.Button.new_with_mnemonic("_Interactive Dialog");
-     
+
         button.connect('clicked',
-		               self._interactive_dialog_clicked)
+                       self._interactive_dialog_clicked)
         hbox.pack_start(vbox2, False, False, 0)
         vbox2.pack_start(button, False, False, 0)
 
@@ -77,7 +77,7 @@ class DialogsApp:
         label.set_mnemonic_widget (self.entry1)
 
         label = Gtk.Label.new_with_mnemonic("E_ntry 2");
-      
+
         table.attach_defaults(label, 0, 1, 1, 2);
 
         self.entry2 = Gtk.Entry()
@@ -89,10 +89,10 @@ class DialogsApp:
     def _interactive_dialog_clicked(self, button):
         dialog = Gtk.Dialog('Interactive Dialog',
                             self.window,
-				            Gtk.DialogFlags.MODAL | 
+                            Gtk.DialogFlags.MODAL |
                             Gtk.DialogFlags.DESTROY_WITH_PARENT,
-				            (Gtk.STOCK_OK, Gtk.ResponseType.OK,
-                             "_Non-stock Button", Gtk.ResponseType.CANCEL))
+                            (Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                            "_Non-stock Button", Gtk.ResponseType.CANCEL))
 
         content_area = dialog.get_content_area ()
         hbox = Gtk.HBox(spacing=8)
@@ -122,7 +122,7 @@ class DialogsApp:
         local_entry2.set_text (self.entry2.get_text())
         table.attach_defaults(local_entry2, 1, 2, 1, 2)
         label.set_mnemonic_widget(local_entry2);
-  
+
         hbox.show_all();
 
         response = dialog.run()
@@ -134,10 +134,10 @@ class DialogsApp:
 
     def _message_dialog_clicked(self, button):
         dialog = Gtk.MessageDialog(self.window,
-				                   Gtk.DialogFlags.MODAL | 
+                                   Gtk.DialogFlags.MODAL |
                                    Gtk.DialogFlags.DESTROY_WITH_PARENT,
-				                   Gtk.MessageType.INFO,
-				                   Gtk.ButtonsType.OK,
+                                   Gtk.MessageType.INFO,
+                                   Gtk.ButtonsType.OK,
                                    "This message box has been popped up the following\nnumber of times:")
         dialog.format_secondary_text ('%d' % self.dialog_counter)
         dialog.run()

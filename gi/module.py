@@ -128,7 +128,7 @@ class IntrospectionModule(object):
                 # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
                 # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
                 ascii_upper_trans = maketrans(
-                        'abcdefgjhijklmnopqrstuvwxyz', 
+                        'abcdefgjhijklmnopqrstuvwxyz',
                         'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():
                     value_name = value_info.get_name().translate(ascii_upper_trans)
@@ -231,9 +231,9 @@ class DynamicModule(object):
                 return getattr(self._overrides_module, name, None)
         else:
             # check the registry just in case the module hasn't loaded yet
-            # TODO: Only gtypes are registered in the registry right now 
-            #       but it would be nice to register all overrides and 
-            #       get rid of the module imports. We might actually see a 
+            # TODO: Only gtypes are registered in the registry right now
+            #       but it would be nice to register all overrides and
+            #       get rid of the module imports. We might actually see a
             #       speedup.
             key = '%s.%s' % (self._namespace, name)
             if key in registry:
@@ -245,7 +245,7 @@ class DynamicModule(object):
         # Python's default dir() is just dir(self.__class__) + self.__dict__.keys()
         result = set(dir(self.__class__))
         result.update(self.__dict__.keys())
-        
+
         result.update(dir(self._introspection_module))
         override_exports = getattr(self._overrides_module, '__all__', ())
         result.update(override_exports)

@@ -36,7 +36,7 @@ import sys
 import warnings
 
 try:
-    # Python 3 
+    # Python 3
     from collections import UserList
     from imp import reload
     UserList  # pyflakes

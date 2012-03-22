@@ -21,7 +21,7 @@
 
 title = "Expander"
 description = """
-GtkExpander allows to provide additional content that is initially hidden. 
+GtkExpander allows to provide additional content that is initially hidden.
 This is also known as "disclosure triangle".
 """
 
@@ -29,7 +29,7 @@ from gi.repository import Gtk
 
 class ExpanderApp:
     def __init__(self):
-        self.window = Gtk.Dialog("GtkExpander", 
+        self.window = Gtk.Dialog("GtkExpander",
                                  None, 0,
                                  (Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE))
         self.window.set_resizable(False)
@@ -49,7 +49,7 @@ class ExpanderApp:
 
         label = Gtk.Label('Details can be shown or hidden')
         expander.add(label)
-        
+
         self.window.show_all()
 
 def main(demoapp=None):

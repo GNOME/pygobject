@@ -207,7 +207,7 @@ class OptionGroup(optparse.OptionGroup):
         entries = []
         for option in self.option_list:
             entries.extend(option._to_goptionentries())
- 
+
         group.add_entries(entries)
 
         return group

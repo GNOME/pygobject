@@ -120,15 +120,15 @@ Boston, MA 02111-1307, USA.
 
     about = Gtk.AboutDialog(parent=window,
                 program_name='GTK+ Code Demos',
-			    version='0.1',
-			    copyright='(C) 2010 The PyGI Team',
-			    license=license,
-			    website='http://live.gnome.org/PyGI',
-			    comments='Program to demonstrate PyGI functions.',
-			    authors=authors,
-			    documenters=documentors,
-			    logo=transparent,
-			    title='About GTK+ Code Demos')
+                            version='0.1',
+                            copyright='(C) 2010 The PyGI Team',
+                            license=license,
+                            website='http://live.gnome.org/PyGI',
+                            comments='Program to demonstrate PyGI functions.',
+                            authors=authors,
+                            documenters=documentors,
+                            logo=transparent,
+                            title='About GTK+ Code Demos')
 
     about.connect('response', widget_destroy)
     about.show()
