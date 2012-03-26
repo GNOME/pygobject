@@ -11,6 +11,8 @@ if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
 
+mydir = os.path.dirname(os.path.abspath(__file__))
+
 # force untranslated messages, as we check for them in some tests
 os.environ['LC_MESSAGES'] = 'C'
 
@@ -27,8 +29,8 @@ elif len(sys.argv) > 1:
         names.append(filename.replace('.py', ''))
 else:
 	names = []
-	for filename in glob.iglob("test_*.py"):
-		names.append(filename[:-3])
+        for filename in glob.iglob(os.path.join(mydir, 'test_*.py')):
+                names.append(os.path.basename(filename)[:-3])
 
 loader = unittest.TestLoader()
 suite = loader.loadTestsFromNames(names)
