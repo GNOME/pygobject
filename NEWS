@@ -1,3 +1,6 @@
+3.2.0   26-Mar-2012
+        - No changes since 3.1.93 except version number.
+
 3.1.93  22-Mar-2012
         - Fix warnings on None values in added tree/list store rows.
           (#672463, Martin Pitt)
