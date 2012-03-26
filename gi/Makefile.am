@@ -117,8 +117,17 @@ _gi_cairo_la_LDFLAGS = \
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
 
-all-local: $(LTLIBRARIES:.la=.so)
-check-local: $(LTLIBRARIES:.la=.so)
+# if we build in a separate tree, we need to symlink the *.py files from the
+# source tree; Python does not accept the extensions and modules in different
+# paths
+build_pylinks:
+	for f in $(pygi_PYTHON); do \
+	    [ -e $(builddir)/$$f ] || $(LN_S) $(srcdir)/$$f $(builddir)/$$f; \
+	done
+
+all-local: $(LTLIBRARIES:.la=.so) build_pylinks
+
+check-local: $(LTLIBRARIES:.la=.so) build_pylinks
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
 

@@ -82,9 +82,17 @@ if PLATFORM_WIN32
 _glib_la_CFLAGS += -DPLATFORM_WIN32
 endif
 
+# if we build in a separate tree, we need to symlink the *.py files from the
+# source tree; Python does not accept the extensions and modules in different
+# paths
+build_pylinks:
+	for f in $(pyglib_PYTHON); do \
+	    [ -e $(builddir)/$$f ] || $(LN_S) $(srcdir)/$$f $(builddir)/$$f; \
+	done
 
-all: $(pyglib_LTLIBRARIES:.la=.so)
-check-local: $(pyglib_LTLIBRARIES:.la=.so)
+
+all: $(pyglib_LTLIBRARIES:.la=.so) build_pylinks
+check-local: $(pyglib_LTLIBRARIES:.la=.so) build_pylinks
 clean-local:
 	rm -f $(pyglib_LTLIBRARIES:.la=.so)
 .la.so:

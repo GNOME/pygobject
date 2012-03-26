@@ -5,7 +5,9 @@ SUBDIRS = examples gi tests
 
 PLATFORM_VERSION = 3.0
 
-CLEANFILES =
+CLEANFILES = \
+	`find "$(builddir)" -type f -name "*.pyc" -print`
+
 EXTRA_DIST = \
 	ChangeLog.pre-2.18 \
 	pygobject-$(PLATFORM_VERSION).pc.in \
@@ -40,7 +42,7 @@ MAINTAINERCLEANFILES = \
 	$(srcdir)/m4/ltversion.m4 \
 	$(srcdir)/m4/lt~obsolete.m4 \
 	`find "$(srcdir)" -type f -name Makefile.in -print` \
-	`find "$(srcdir)" -type f -name "*.pyc" -print`
+	`find "$(builddir)" -type f -name "*.pyc" -print`
 
 BUILT_EXTRA_DIST = 		\
 	ChangeLog
