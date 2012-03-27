@@ -169,6 +169,25 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(result, ['regress'])
         result = None
 
+    def test_hash_return(self):
+        result = Everything.test_ghash_gvalue_return()
+        self.assertEquals(result['integer'], 12)
+        self.assertEquals(result['boolean'], True)
+        self.assertEquals(result['string'], 'some text')
+        strings = result['strings']
+        self.assertTrue('first' in strings)
+        self.assertTrue('second' in strings)
+        self.assertTrue('third' in strings)
+        result = None
+
+    @unittest.skip('marshalling of GStrv in GValue not working')
+    def test_hash_in_out(self):
+        result = Everything.test_ghash_gvalue_return()
+        # The following line will cause a failure, because we don't support
+        # marshalling GStrv in GValue.
+        Everything.test_ghash_gvalue_in(result)
+        result = None
+
     def test_struct_gpointer(self):
         l1 = GLib.List()
         self.assertEqual(l1.data, None)
