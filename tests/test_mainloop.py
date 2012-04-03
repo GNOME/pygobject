@@ -3,6 +3,9 @@
 import os
 import sys
 import select
+import signal
+import thread
+import time
 import unittest
 
 from gi.repository import GLib
@@ -11,7 +14,7 @@ from compathelper import _bytes
 
 
 class TestMainLoop(unittest.TestCase):
-    def testExceptionHandling(self):
+    def test_exception_handling(self):
         pipe_r, pipe_w = os.pipe()
 
         pid = os.fork()
@@ -50,3 +53,23 @@ class TestMainLoop(unittest.TestCase):
         #
         sys.excepthook = sys.__excepthook__
         assert not got_exception
+
+    def test_concurrency(self):
+        def on_usr1(signum, frame):
+            pass
+
+        try:
+            # create a thread which will terminate upon SIGUSR1 by way of
+            # interrupting sleep()
+            orig_handler = signal.signal(signal.SIGUSR1, on_usr1)
+            thread.start_new_thread(time.sleep, (10,))
+
+            # now create two main loops
+            loop1 = GLib.MainLoop()
+            loop2 = GLib.MainLoop()
+            GLib.timeout_add(100, lambda: os.kill(os.getpid(), signal.SIGUSR1))
+            GLib.timeout_add(500, loop1.quit)
+            loop1.run()
+            loop2.quit()
+        finally:
+            signal.signal(signal.SIGUSR1, orig_handler)
