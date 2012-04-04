@@ -16,6 +16,7 @@ from gi.repository.GObject import \
 
 from gi.repository import Gio
 from gi.repository import GLib
+from gi.repository import GIMarshallingTests
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -43,6 +44,10 @@ class PropertyObject(GObject.GObject):
 
     boxed = GObject.Property(
         type=GLib.Regex, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
+    flags = GObject.Property(
+        type=GIMarshallingTests.Flags, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
+        default=GIMarshallingTests.Flags.VALUE1)
 
 
 class TestProperties(unittest.TestCase):
@@ -74,8 +79,9 @@ class TestProperties(unittest.TestCase):
                                                'construct-only',
                                                'uint64',
                                                'enum',
+                                               'flags',
                                                'boxed'])
-            self.assertEqual(len(obj), 6)
+            self.assertEqual(len(obj), 7)
 
     def testNormal(self):
         obj = new(PropertyObject, normal="123")
@@ -167,6 +173,26 @@ class TestProperties(unittest.TestCase):
                           default=object())
         self.assertRaises(TypeError, GObject.Property, type=Gio.SocketType,
                           default=1)
+
+    def testFlags(self):
+        obj = new(PropertyObject)
+        self.assertEqual(obj.props.flags, GIMarshallingTests.Flags.VALUE1)
+        self.assertEqual(obj.flags, GIMarshallingTests.Flags.VALUE1)
+
+        obj.flags = GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE3
+        self.assertEqual(obj.props.flags, GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE3)
+        self.assertEqual(obj.flags, GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE3)
+
+        self.assertRaises(TypeError, setattr, obj, 'flags', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'flags', object())
+        self.assertRaises(TypeError, setattr, obj, 'flags', None)
+
+        self.assertRaises(TypeError, GObject.Property,
+                type=GIMarshallingTests.Flags, default='foo')
+        self.assertRaises(TypeError, GObject.Property,
+                type=GIMarshallingTests.Flags, default=object())
+        self.assertRaises(TypeError, GObject.Property,
+                type=GIMarshallingTests.Flags, default=None)
 
     def textBoxed(self):
         obj = new(PropertyObject)

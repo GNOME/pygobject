@@ -26,7 +26,7 @@ from . import _gobject
 from .constants import \
      TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
      TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
-     TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, \
+     TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, TYPE_FLAGS, \
      TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
      TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
      TYPE_PYOBJECT
@@ -218,6 +218,7 @@ class Property(object):
         elif (isinstance(type_, type) and
               issubclass(type_, (_gobject.GObject,
                                  _gobject.GEnum,
+                                 _gobject.GFlags,
                                  _gobject.GBoxed))):
             return type_.__gtype__
         elif type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
@@ -259,6 +260,10 @@ class Property(object):
                 raise TypeError("enum properties needs a default value")
             elif not _gobject.type_is_a(default, ptype):
                 raise TypeError("enum value %s must be an instance of %r" %
+                                (default, ptype))
+        elif _gobject.type_is_a(ptype, TYPE_FLAGS):
+            if not _gobject.type_is_a(default, ptype):
+                raise TypeError("flags value %s must be an instance of %r" %
                                 (default, ptype))
 
     def _get_minimum(self):
@@ -328,7 +333,7 @@ class Property(object):
                      TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE]:
             args = self.minimum, self.maximum, self.default
         elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
-              ptype.is_a(TYPE_ENUM)):
+              ptype.is_a(TYPE_ENUM) or ptype.is_a(TYPE_FLAGS)):
             args = (self.default,)
         elif ptype == TYPE_PYOBJECT:
             args = ()
