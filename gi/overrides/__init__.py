@@ -18,9 +18,10 @@ class _Registry(dict):
         if not key == value:
             raise KeyError('You have tried to modify the registry.  This should only be done by the override decorator')
 
-        info = getattr(value, '__info__')
-        if info == None:
-            raise KeyError('Can not override a type %s, which is not in a gobject introspection typelib' % value.__name__)
+        try:
+            info = getattr(value, '__info__')
+        except AttributeError:
+            raise TypeError('Can not override a type %s, which is not in a gobject introspection typelib' % value.__name__)
 
         if not value.__module__.startswith('gi.overrides'):
             raise KeyError('You have tried to modify the registry outside of the overrides module.  This is not allowed')

@@ -19,6 +19,19 @@ import gi.overrides as overrides
 import gi.types
 
 
+class TestRegistry(unittest.TestCase):
+
+    def test_non_gi(self):
+        class MyClass:
+            pass
+
+        try:
+            overrides.override(MyClass)
+            self.fail('unexpected success of overriding non-GI class')
+        except TypeError as e:
+            self.assertTrue('Can not override a type MyClass' in str(e))
+
+
 class TestGLib(unittest.TestCase):
 
     def test_gvariant_create(self):
