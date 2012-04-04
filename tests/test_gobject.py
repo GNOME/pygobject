@@ -154,6 +154,17 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEquals(obj.__grefcount__, 1)
 
+    def testUninitializedObject(self):
+        class Obj(GObject.GObject):
+            def __init__(self):
+                x = self.__grefcount__
+                super(Obj, self).__init__()
+                assert x >= 0  # quiesce pyflakes
+
+        # Accessing __grefcount__ before the object is initialized is wrong.
+        # Ensure we get a proper exception instead of a crash.
+        self.assertRaises(TypeError, Obj)
+
 
 class A(GObject.GObject):
     def __init__(self):

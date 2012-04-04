@@ -2058,6 +2058,10 @@ pygobject_get_dict(PyGObject *self, void *closure)
 static PyObject *
 pygobject_get_refcount(PyGObject *self, void *closure)
 {
+    if (self->obj == NULL) {
+	PyErr_Format(PyExc_TypeError, "GObject instance is not yet created");
+	return NULL;
+    }
     return PYGLIB_PyLong_FromLong(self->obj->ref_count);
 }
 
