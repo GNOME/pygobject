@@ -89,6 +89,30 @@ class TestSource(unittest.TestCase):
 
         assert dispatched[0]
 
+    def testIsDestroyedSimple(self):
+        s = GLib.Source()
+
+        self.assertFalse(s.is_destroyed())
+        s.destroy()
+        self.assertTrue(s.is_destroyed())
+
+        c = GLib.MainContext()
+        s = GLib.Source()
+        s.attach(c)
+        self.assertFalse(s.is_destroyed())
+        s.destroy()
+        self.assertTrue(s.is_destroyed())
+
+    def testIsDestroyedContext(self):
+        def f():
+            c = GLib.MainContext()
+            s = GLib.Source()
+            s.attach(c)
+            return s
+
+        s = f()
+        self.assertTrue(s.is_destroyed())
+
 
 class TestTimeout(unittest.TestCase):
     def test504337(self):

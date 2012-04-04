@@ -130,6 +130,20 @@ pyg_source_destroy(PyGSource *self)
 }
 
 static PyObject *
+pyg_source_is_destroyed(PyGSource *self)
+{
+    PyObject *result;
+
+    if (self->source == NULL || g_source_is_destroyed(self->source))
+        result = Py_True;
+    else
+        result = Py_False;
+
+    Py_INCREF(result);
+    return result;
+}
+
+static PyObject *
 pyg_source_set_callback(PyGSource *self, PyObject *args)
 {
     PyObject *first, *callback, *cbargs = NULL, *data;
@@ -255,6 +269,7 @@ pyg_source_get_current_time(PyGSource *self)
 static PyMethodDef pyg_source_methods[] = {
     { "attach", (PyCFunction)pyg_source_attach, METH_VARARGS|METH_KEYWORDS },
     { "destroy", (PyCFunction)pyg_source_destroy, METH_NOARGS },
+    { "is_destroyed", (PyCFunction)pyg_source_is_destroyed, METH_NOARGS },
     { "set_callback", (PyCFunction)pyg_source_set_callback, METH_VARARGS },
     { "get_context", (PyCFunction)pyg_source_get_context, METH_NOARGS },
     { "add_poll", (PyCFunction)pyg_source_add_poll, METH_KEYWORDS },
