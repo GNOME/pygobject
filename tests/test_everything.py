@@ -268,10 +268,10 @@ class TestCallbacks(unittest.TestCase):
             x = 1 / 0
             self.fail('unexpected surviving zero divsion:' + str(x))
 
-        try:
-            Everything.test_simple_callback(callback)
-        except ZeroDivisionError:
-            pass
+        # note that we do NOT expect the ZeroDivisionError to be propagated
+        # through from the callback, as it crosses the Python<->C boundary
+        # twice. (See GNOME #616279)
+        Everything.test_simple_callback(callback)
 
     def test_double_callback_exception(self):
         """
@@ -287,10 +287,10 @@ class TestCallbacks(unittest.TestCase):
             Everything.test_boolean(False)
             Everything.test_simple_callback(badcallback())
 
-        try:
-            Everything.test_simple_callback(callback)
-        except ZeroDivisionError:
-            pass
+        # note that we do NOT expect the ZeroDivisionError to be propagated
+        # through from the callback, as it crosses the Python<->C boundary
+        # twice. (See GNOME #616279)
+        Everything.test_simple_callback(callback)
 
     def test_return_value_callback(self):
         TestCallbacks.called = False
