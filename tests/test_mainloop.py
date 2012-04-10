@@ -4,10 +4,15 @@ import os
 import sys
 import select
 import signal
-import thread
 import time
 import unittest
 
+try:
+    from _thread import start_new_thread
+    start_new_thread  # pyflakes
+except ImportError:
+    # Python 2
+    from thread import start_new_thread
 from gi.repository import GLib
 
 from compathelper import _bytes
@@ -62,7 +67,7 @@ class TestMainLoop(unittest.TestCase):
             # create a thread which will terminate upon SIGUSR1 by way of
             # interrupting sleep()
             orig_handler = signal.signal(signal.SIGUSR1, on_usr1)
-            thread.start_new_thread(time.sleep, (10,))
+            start_new_thread(time.sleep, (10,))
 
             # now create two main loops
             loop1 = GLib.MainLoop()
