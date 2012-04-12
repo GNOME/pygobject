@@ -161,7 +161,9 @@ _sequence_cache_new (GITypeInfo *type_info,
     if (!sc->is_zero_terminated) {
         sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
         if (sc->fixed_size < 0)
-            sc->len_arg_index = g_type_info_get_array_length (type_info) + child_offset;
+            sc->len_arg_index = g_type_info_get_array_length (type_info);
+            if (sc->len_arg_index >= 0)
+                sc->len_arg_index += child_offset;
     }
 
     item_type_info = g_type_info_get_param_type (type_info, 0);

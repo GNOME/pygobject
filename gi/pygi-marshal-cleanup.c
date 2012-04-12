@@ -279,13 +279,13 @@ _wrap_c_array (PyGIInvokeState   *state,
                gpointer           data)
 {
     GArray *array_;
-    gsize   len;
+    gsize   len = 0;
   
     if (sequence_cache->fixed_size >= 0) {
         len = sequence_cache->fixed_size;
     } else if (sequence_cache->is_zero_terminated) {
         len = g_strv_length ((gchar **)data);
-    } else {
+    } else if (sequence_cache->len_arg_index >= 0) {
         GIArgument *len_arg = state->args[sequence_cache->len_arg_index];
         len = len_arg->v_long;
     }
