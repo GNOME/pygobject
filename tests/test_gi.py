@@ -744,6 +744,9 @@ class TestArray(unittest.TestCase):
         GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
                                                     [1, 2, 3])
 
+    def test_array_in_nonzero_nonlen(self):
+        GIMarshallingTests.array_in_nonzero_nonlen(1, 'abcd')
+
     def test_array_fixed_out_struct(self):
         struct1, struct2 = GIMarshallingTests.array_fixed_out_struct()
 
