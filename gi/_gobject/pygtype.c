@@ -923,6 +923,8 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    g_value_set_pointer(value, pyg_pointer_get(obj, gpointer));
 	else if (PYGLIB_CPointer_Check(obj))
 	    g_value_set_pointer(value, PYGLIB_CPointer_GetPointer(obj, NULL));
+	else if (G_VALUE_HOLDS_GTYPE (value))
+	    g_value_set_gtype (value, pyg_type_from_object (obj));
 	else
 	    return -1;
 	break;
@@ -1098,8 +1100,11 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
 	    return Py_None;
 	}
     case G_TYPE_POINTER:
-	return pyg_pointer_new(G_VALUE_TYPE(value),
-			       g_value_get_pointer(value));
+	if (G_VALUE_HOLDS_GTYPE (value))
+	    return pyg_type_wrapper_new (g_value_get_gtype (value));
+	else
+	    return pyg_pointer_new(G_VALUE_TYPE(value),
+				   g_value_get_pointer(value));
     case G_TYPE_BOXED: {
 	PyGTypeMarshal *bm;
 

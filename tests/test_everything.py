@@ -503,6 +503,10 @@ class TestProperties(unittest.TestCase):
         self.assertTrue(isinstance(object_.props.string, str))
         self.assertEquals(object_.props.string, 'mec')
 
+        self.assertEquals(object_.props.gtype, GObject.TYPE_INVALID)
+        object_.props.gtype = int
+        self.assertEquals(object_.props.gtype, GObject.TYPE_INT)
+
     def test_hash_table(self):
         object_ = Everything.TestObj()
         self.assertEquals(object_.props.hash_table, None)
@@ -529,6 +533,17 @@ class TestProperties(unittest.TestCase):
 
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEquals(object_.props.boxed.some_int8, 42)
+
+    def test_gtype(self):
+        object_ = Everything.TestObj()
+        self.assertEquals(object_.props.gtype, GObject.TYPE_INVALID)
+        object_.props.gtype = int
+        self.assertEquals(object_.props.gtype, GObject.TYPE_INT)
+
+        Everything.TestObj(gtype=int)
+        self.assertEquals(object_.props.gtype, GObject.TYPE_INT)
+        object_.props.gtype = str
+        self.assertEquals(object_.props.gtype, GObject.TYPE_STRING)
 
 
 class TestTortureProfile(unittest.TestCase):
