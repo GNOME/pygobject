@@ -540,7 +540,7 @@ class TestProperties(unittest.TestCase):
         object_.props.gtype = int
         self.assertEquals(object_.props.gtype, GObject.TYPE_INT)
 
-        Everything.TestObj(gtype=int)
+        object_ = Everything.TestObj(gtype=int)
         self.assertEquals(object_.props.gtype, GObject.TYPE_INT)
         object_.props.gtype = str
         self.assertEquals(object_.props.gtype, GObject.TYPE_STRING)
