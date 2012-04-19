@@ -8,8 +8,8 @@ from gi.repository import GObject
 from  gi.repository.GObject import GType, new, PARAM_READWRITE, \
      PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
-     TYPE_INT, TYPE_UINT, TYPE_LONG, \
-     TYPE_ULONG, TYPE_INT64, TYPE_UINT64
+     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
+     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE
 from gi.repository.GObject import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
@@ -49,6 +49,9 @@ class PropertyObject(GObject.GObject):
         type=GIMarshallingTests.Flags, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
         default=GIMarshallingTests.Flags.VALUE1)
 
+    gtype = GObject.Property(
+        type=TYPE_GTYPE, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -80,8 +83,9 @@ class TestProperties(unittest.TestCase):
                                                'uint64',
                                                'enum',
                                                'flags',
+                                               'gtype',
                                                'boxed'])
-            self.assertEqual(len(obj), 7)
+            self.assertEqual(len(obj), 8)
 
     def testNormal(self):
         obj = new(PropertyObject, normal="123")
@@ -193,6 +197,38 @@ class TestProperties(unittest.TestCase):
                 type=GIMarshallingTests.Flags, default=object())
         self.assertRaises(TypeError, GObject.Property,
                 type=GIMarshallingTests.Flags, default=None)
+
+    def testGType(self):
+        obj = new(PropertyObject)
+
+        self.assertEqual(obj.props.gtype, TYPE_NONE)
+        self.assertEqual(obj.gtype, TYPE_NONE)
+
+        obj.gtype = TYPE_UINT64
+        self.assertEqual(obj.props.gtype, TYPE_UINT64)
+        self.assertEqual(obj.gtype, TYPE_UINT64)
+
+        obj.gtype = TYPE_INVALID
+        self.assertEqual(obj.props.gtype, TYPE_INVALID)
+        self.assertEqual(obj.gtype, TYPE_INVALID)
+
+        # GType parameters do not support defaults in GLib
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
+                default=TYPE_INT)
+
+        # incompatible type
+        self.assertRaises(TypeError, setattr, obj, 'gtype', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'gtype', object())
+
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
+                default='foo')
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
+                default=object())
+
+        # set in constructor
+        obj = new(PropertyObject, gtype=TYPE_UINT)
+        self.assertEqual(obj.props.gtype, TYPE_UINT)
+        self.assertEqual(obj.gtype, TYPE_UINT)
 
     def textBoxed(self):
         obj = new(PropertyObject)

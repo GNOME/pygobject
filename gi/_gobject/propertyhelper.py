@@ -29,7 +29,7 @@ from .constants import \
      TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, TYPE_FLAGS, \
      TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
      TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
-     TYPE_PYOBJECT
+     TYPE_PYOBJECT, TYPE_GTYPE
 from .constants import \
      G_MAXFLOAT, G_MAXDOUBLE, \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
@@ -226,7 +226,7 @@ class Property(object):
                        TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
                        TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
                        TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
-                       TYPE_PYOBJECT]:
+                       TYPE_PYOBJECT, TYPE_GTYPE]:
             return type_
         else:
             raise TypeError("Unsupported type: %r" % (type_,))
@@ -255,6 +255,9 @@ class Property(object):
         elif ptype == TYPE_PYOBJECT:
             if default is not None:
                 raise TypeError("object types does not have default values")
+        elif ptype == TYPE_GTYPE:
+            if default is not None:
+                raise TypeError("GType types does not have default values")
         elif _gobject.type_is_a(ptype, TYPE_ENUM):
             if default is None:
                 raise TypeError("enum properties needs a default value")
@@ -335,7 +338,7 @@ class Property(object):
         elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
               ptype.is_a(TYPE_ENUM) or ptype.is_a(TYPE_FLAGS)):
             args = (self.default,)
-        elif ptype == TYPE_PYOBJECT:
+        elif ptype in [TYPE_PYOBJECT, TYPE_GTYPE]:
             args = ()
         elif ptype.is_a(TYPE_OBJECT) or ptype.is_a(TYPE_BOXED):
             args = ()

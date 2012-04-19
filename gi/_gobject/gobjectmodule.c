@@ -719,7 +719,10 @@ create_property (const gchar  *prop_name,
     case G_TYPE_POINTER:
 	if (!PyArg_ParseTuple(args, ""))
 	    return NULL;
-	pspec = g_param_spec_pointer (prop_name, nick, blurb, flags);
+	if (prop_type == G_TYPE_GTYPE)
+	    pspec = g_param_spec_gtype (prop_name, nick, blurb, G_TYPE_NONE, flags);
+	else
+	    pspec = g_param_spec_pointer (prop_name, nick, blurb, flags);
 	break;
     case G_TYPE_OBJECT:
 	if (!PyArg_ParseTuple(args, ""))
