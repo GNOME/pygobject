@@ -45,6 +45,7 @@ TYPE_BOXED = _gobject.type_from_name('GBoxed')
 TYPE_PARAM = _gobject.type_from_name('GParam')
 TYPE_OBJECT = _gobject.type_from_name('GObject')
 TYPE_PYOBJECT = _gobject.type_from_name('PyObject')
+TYPE_GTYPE = _gobject.type_from_name('GType')
 TYPE_UNICHAR = TYPE_UINT
 
 # do a little dance to maintain API compatibility
