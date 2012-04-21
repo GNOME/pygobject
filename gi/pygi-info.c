@@ -1114,6 +1114,7 @@ _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
 
     py_value = _pygi_argument_to_object (&value, type_info, GI_TRANSFER_NOTHING);
 
+    g_constant_info_free_value (self->info, &value);
     g_base_info_unref ( (GIBaseInfo *) type_info);
 
     return py_value;
