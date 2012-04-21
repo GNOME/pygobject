@@ -38,19 +38,19 @@ class TestPangoCairoCompat(unittest.TestCase):
 
 class TestGTKCompat(unittest.TestCase):
     def testButtons(self):
-        self.assertEquals(Gdk._2BUTTON_PRESS, 5)
-        self.assertEquals(Gdk.BUTTON_PRESS, 4)
+        self.assertEqual(Gdk._2BUTTON_PRESS, 5)
+        self.assertEqual(Gdk.BUTTON_PRESS, 4)
 
     def testEnums(self):
-        self.assertEquals(gtk.WINDOW_TOPLEVEL, Gtk.WindowType.TOPLEVEL)
-        self.assertEquals(gtk.PACK_START, Gtk.PackType.START)
+        self.assertEqual(gtk.WINDOW_TOPLEVEL, Gtk.WindowType.TOPLEVEL)
+        self.assertEqual(gtk.PACK_START, Gtk.PackType.START)
 
     def testFlags(self):
-        self.assertEquals(gtk.EXPAND, Gtk.AttachOptions.EXPAND)
+        self.assertEqual(gtk.EXPAND, Gtk.AttachOptions.EXPAND)
 
     def testKeysyms(self):
         import gtk.keysyms
-        self.assertEquals(gtk.keysyms.Escape, Gdk.KEY_Escape)
+        self.assertEqual(gtk.keysyms.Escape, Gdk.KEY_Escape)
         self.assertTrue(gtk.keysyms._0, Gdk.KEY_0)
 
     def testStyle(self):
@@ -60,10 +60,10 @@ class TestGTKCompat(unittest.TestCase):
 
     def testAlignment(self):
         a = gtk.Alignment()
-        self.assertEquals(a.props.xalign, 0.0)
-        self.assertEquals(a.props.yalign, 0.0)
-        self.assertEquals(a.props.xscale, 0.0)
-        self.assertEquals(a.props.yscale, 0.0)
+        self.assertEqual(a.props.xalign, 0.0)
+        self.assertEqual(a.props.yalign, 0.0)
+        self.assertEqual(a.props.xscale, 0.0)
+        self.assertEqual(a.props.yscale, 0.0)
 
     def testBox(self):
         box = gtk.Box()
@@ -73,16 +73,16 @@ class TestGTKCompat(unittest.TestCase):
         expand, fill, padding, pack_type = box.query_child_packing(child)
         self.assertTrue(expand)
         self.assertTrue(fill)
-        self.assertEquals(padding, 0)
-        self.assertEquals(pack_type, gtk.PACK_START)
+        self.assertEqual(padding, 0)
+        self.assertEqual(pack_type, gtk.PACK_START)
 
         child = gtk.Button()
         box.pack_end(child)
         expand, fill, padding, pack_type = box.query_child_packing(child)
         self.assertTrue(expand)
         self.assertTrue(fill)
-        self.assertEquals(padding, 0)
-        self.assertEquals(pack_type, gtk.PACK_END)
+        self.assertEqual(padding, 0)
+        self.assertEqual(pack_type, gtk.PACK_END)
 
     def testComboBoxEntry(self):
         liststore = gtk.ListStore(int, str)
@@ -92,19 +92,19 @@ class TestGTKCompat(unittest.TestCase):
         combo = gtk.ComboBoxEntry(model=liststore)
         combo.set_text_column(1)
         combo.set_active(0)
-        self.assertEquals(combo.get_text_column(), 1)
-        self.assertEquals(combo.get_child().get_text(), 'One')
+        self.assertEqual(combo.get_text_column(), 1)
+        self.assertEqual(combo.get_child().get_text(), 'One')
         combo = gtk.combo_box_entry_new()
         combo.set_model(liststore)
         combo.set_text_column(1)
         combo.set_active(0)
-        self.assertEquals(combo.get_text_column(), 1)
-        self.assertEquals(combo.get_child().get_text(), 'One')
+        self.assertEqual(combo.get_text_column(), 1)
+        self.assertEqual(combo.get_child().get_text(), 'One')
         combo = gtk.combo_box_entry_new_with_model(liststore)
         combo.set_text_column(1)
         combo.set_active(0)
-        self.assertEquals(combo.get_text_column(), 1)
-        self.assertEquals(combo.get_child().get_text(), 'One')
+        self.assertEqual(combo.get_text_column(), 1)
+        self.assertEqual(combo.get_child().get_text(), 'One')
 
     def testPixbuf(self):
         gtk.gdk.Pixbuf()
@@ -116,4 +116,4 @@ class TestGTKCompat(unittest.TestCase):
     def testGdkWindow(self):
         w = gtk.Window()
         w.realize()
-        self.assertEquals(w.get_window().get_origin(), (0, 0))
+        self.assertEqual(w.get_window().get_origin(), (0, 0))

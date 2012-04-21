@@ -64,16 +64,16 @@ class TestOption(unittest.TestCase):
 
         options, args = self.parser.parse_args(
             ["test_option.py", "foo"])
-        self.assertEquals(args, [])
+        self.assertEqual(args, [])
 
         options, args = self.parser.parse_args(
             ["test_option.py", "foo", "bar"])
-        self.assertEquals(args, [])
+        self.assertEqual(args, [])
 
     def testParseArgsDoubleDash(self):
         options, args = self.parser.parse_args(
             ["test_option.py", "--", "-xxx"])
-        #self.assertEquals(args, ["-xxx"])
+        #self.assertEqual(args, ["-xxx"])
 
     def testParseArgsGroup(self):
         group = self._create_group()

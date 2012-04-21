@@ -39,15 +39,15 @@ class TestGLib(unittest.TestCase):
 
         variant = GLib.Variant('i', 42)
         self.assertTrue(isinstance(variant, GLib.Variant))
-        self.assertEquals(variant.get_int32(), 42)
+        self.assertEqual(variant.get_int32(), 42)
 
         variant = GLib.Variant('s', '')
         self.assertTrue(isinstance(variant, GLib.Variant))
-        self.assertEquals(variant.get_string(), '')
+        self.assertEqual(variant.get_string(), '')
 
         variant = GLib.Variant('s', 'hello')
         self.assertTrue(isinstance(variant, GLib.Variant))
-        self.assertEquals(variant.get_string(), 'hello')
+        self.assertEqual(variant.get_string(), 'hello')
 
         # boxed variant
         variant = GLib.Variant('v', GLib.Variant('i', 42))
@@ -55,34 +55,34 @@ class TestGLib(unittest.TestCase):
         self.assertTrue(isinstance(variant.get_variant(), GLib.Variant))
         self.assertEqual(variant.get_type_string(), 'v')
         self.assertEqual(variant.get_variant().get_type_string(), 'i')
-        self.assertEquals(variant.get_variant().get_int32(), 42)
+        self.assertEqual(variant.get_variant().get_int32(), 42)
 
         variant = GLib.Variant('v', GLib.Variant('v', GLib.Variant('i', 42)))
         self.assertEqual(variant.get_type_string(), 'v')
         self.assertEqual(variant.get_variant().get_type_string(), 'v')
         self.assertEqual(variant.get_variant().get_variant().get_type_string(), 'i')
-        self.assertEquals(variant.get_variant().get_variant().get_int32(), 42)
+        self.assertEqual(variant.get_variant().get_variant().get_int32(), 42)
 
         # tuples
 
         variant = GLib.Variant('()', ())
         self.assertEqual(variant.get_type_string(), '()')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         variant = GLib.Variant('(i)', (3,))
         self.assertEqual(variant.get_type_string(), '(i)')
         self.assertTrue(isinstance(variant, GLib.Variant))
-        self.assertEquals(variant.n_children(), 1)
+        self.assertEqual(variant.n_children(), 1)
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_int32(), 3)
+        self.assertEqual(variant.get_child_value(0).get_int32(), 3)
 
         variant = GLib.Variant('(ss)', ('mec', 'mac'))
         self.assertEqual(variant.get_type_string(), '(ss)')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_string(), 'mec')
-        self.assertEquals(variant.get_child_value(1).get_string(), 'mac')
+        self.assertEqual(variant.get_child_value(0).get_string(), 'mec')
+        self.assertEqual(variant.get_child_value(1).get_string(), 'mac')
 
         # nested tuples
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
@@ -94,7 +94,7 @@ class TestGLib(unittest.TestCase):
         variant = GLib.Variant('a{si}', {})
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEqual(variant.get_type_string(), 'a{si}')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         variant = GLib.Variant('a{si}', {'': 1, 'key1': 2, 'key2': 3})
         self.assertEqual(variant.get_type_string(), 'a{si}')
@@ -108,7 +108,7 @@ class TestGLib(unittest.TestCase):
         variant = GLib.Variant('a{sa{si}}', {})
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertEqual(variant.get_type_string(), 'a{sa{si}}')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         d = {'': {'': 1, 'keyn1': 2},
              'key1': {'key11': 11, 'key12': 12}}
@@ -121,47 +121,47 @@ class TestGLib(unittest.TestCase):
 
         variant = GLib.Variant('ai', [])
         self.assertEqual(variant.get_type_string(), 'ai')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         variant = GLib.Variant('ai', [1, 2])
         self.assertEqual(variant.get_type_string(), 'ai')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_int32(), 1)
-        self.assertEquals(variant.get_child_value(1).get_int32(), 2)
+        self.assertEqual(variant.get_child_value(0).get_int32(), 1)
+        self.assertEqual(variant.get_child_value(1).get_int32(), 2)
 
         variant = GLib.Variant('as', [])
         self.assertEqual(variant.get_type_string(), 'as')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         variant = GLib.Variant('as', [''])
         self.assertEqual(variant.get_type_string(), 'as')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_string(), '')
+        self.assertEqual(variant.get_child_value(0).get_string(), '')
 
         variant = GLib.Variant('as', ['hello', 'world'])
         self.assertEqual(variant.get_type_string(), 'as')
         self.assertTrue(isinstance(variant, GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(0), GLib.Variant))
         self.assertTrue(isinstance(variant.get_child_value(1), GLib.Variant))
-        self.assertEquals(variant.get_child_value(0).get_string(), 'hello')
-        self.assertEquals(variant.get_child_value(1).get_string(), 'world')
+        self.assertEqual(variant.get_child_value(0).get_string(), 'hello')
+        self.assertEqual(variant.get_child_value(1).get_string(), 'world')
 
         # nested arrays
         variant = GLib.Variant('aai', [])
         self.assertEqual(variant.get_type_string(), 'aai')
-        self.assertEquals(variant.n_children(), 0)
+        self.assertEqual(variant.n_children(), 0)
 
         variant = GLib.Variant('aai', [[]])
         self.assertEqual(variant.get_type_string(), 'aai')
-        self.assertEquals(variant.n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).n_children(), 0)
+        self.assertEqual(variant.n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).n_children(), 0)
 
         variant = GLib.Variant('aai', [[1, 2], [3, 4, 5]])
         self.assertEqual(variant.get_type_string(), 'aai')
-        self.assertEquals(variant.unpack(), [[1, 2], [3, 4, 5]])
+        self.assertEqual(variant.unpack(), [[1, 2], [3, 4, 5]])
 
         #
         # complex types
@@ -169,20 +169,20 @@ class TestGLib(unittest.TestCase):
 
         variant = GLib.Variant('(as)', ([],))
         self.assertEqual(variant.get_type_string(), '(as)')
-        self.assertEquals(variant.n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).n_children(), 0)
+        self.assertEqual(variant.n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).n_children(), 0)
 
         variant = GLib.Variant('(as)', ([''],))
         self.assertEqual(variant.get_type_string(), '(as)')
-        self.assertEquals(variant.n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), '')
+        self.assertEqual(variant.n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).get_child_value(0).get_string(), '')
 
         variant = GLib.Variant('(as)', (['hello'],))
         self.assertEqual(variant.get_type_string(), '(as)')
-        self.assertEquals(variant.n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).n_children(), 1)
-        self.assertEquals(variant.get_child_value(0).get_child_value(0).get_string(), 'hello')
+        self.assertEqual(variant.n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).n_children(), 1)
+        self.assertEqual(variant.get_child_value(0).get_child_value(0).get_string(), 'hello')
 
         obj = {'a1': (1, True), 'a2': (2, False)}
         variant = GLib.Variant('a{s(ib)}', obj)
@@ -466,21 +466,21 @@ class TestPango(unittest.TestCase):
 
     def test_default_font_description(self):
         desc = Pango.FontDescription()
-        self.assertEquals(desc.get_variant(), Pango.Variant.NORMAL)
+        self.assertEqual(desc.get_variant(), Pango.Variant.NORMAL)
 
     def test_font_description(self):
         desc = Pango.FontDescription('monospace')
-        self.assertEquals(desc.get_family(), 'monospace')
-        self.assertEquals(desc.get_variant(), Pango.Variant.NORMAL)
+        self.assertEqual(desc.get_family(), 'monospace')
+        self.assertEqual(desc.get_variant(), Pango.Variant.NORMAL)
 
     def test_layout(self):
         self.assertRaises(TypeError, Pango.Layout)
         context = Pango.Context()
         layout = Pango.Layout(context)
-        self.assertEquals(layout.get_context(), context)
+        self.assertEqual(layout.get_context(), context)
 
         layout.set_markup("Foobar")
-        self.assertEquals(layout.get_text(), "Foobar")
+        self.assertEqual(layout.get_text(), "Foobar")
 
 
 class TestGdk(unittest.TestCase):
@@ -491,37 +491,37 @@ class TestGdk(unittest.TestCase):
         attributes_mask = Gdk.WindowAttributesType.X | \
             Gdk.WindowAttributesType.Y
         window = Gdk.Window(None, attribute, attributes_mask)
-        self.assertEquals(window.get_window_type(), Gdk.WindowType.CHILD)
+        self.assertEqual(window.get_window_type(), Gdk.WindowType.CHILD)
 
     def test_color(self):
         color = Gdk.Color(100, 200, 300)
-        self.assertEquals(color.red, 100)
-        self.assertEquals(color.green, 200)
-        self.assertEquals(color.blue, 300)
-        self.assertEquals(color, Gdk.Color(100, 200, 300))
+        self.assertEqual(color.red, 100)
+        self.assertEqual(color.green, 200)
+        self.assertEqual(color.blue, 300)
+        self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEquals(color, Gdk.Color(1, 2, 3))
 
     def test_rgba(self):
-        self.assertEquals(Gdk.RGBA, overrides.Gdk.RGBA)
+        self.assertEqual(Gdk.RGBA, overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
-        self.assertEquals(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
+        self.assertEqual(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
         self.assertNotEquals(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
-        self.assertEquals(rgba.red, 0.1)
-        self.assertEquals(rgba.green, 0.2)
-        self.assertEquals(rgba.blue, 0.3)
-        self.assertEquals(rgba.alpha, 0.4)
+        self.assertEqual(rgba.red, 0.1)
+        self.assertEqual(rgba.green, 0.2)
+        self.assertEqual(rgba.blue, 0.3)
+        self.assertEqual(rgba.alpha, 0.4)
         rgba.green = 0.9
-        self.assertEquals(rgba.green, 0.9)
+        self.assertEqual(rgba.green, 0.9)
 
     def test_event(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
-        self.assertEquals(event.type, Gdk.EventType.CONFIGURE)
-        self.assertEquals(event.send_event, 0)
+        self.assertEqual(event.type, Gdk.EventType.CONFIGURE)
+        self.assertEqual(event.send_event, 0)
 
         event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
         event.x_root, event.y_root = 0, 5
-        self.assertEquals(event.x_root, 0)
-        self.assertEquals(event.y_root, 5)
+        self.assertEqual(event.x_root, 0)
+        self.assertEqual(event.y_root, 5)
 
         event = Gdk.Event()
         event.type = Gdk.EventType.SCROLL
@@ -531,12 +531,12 @@ class TestGdk(unittest.TestCase):
         def button_press_cb(button, event):
             self.assertTrue(isinstance(event, Gdk.EventButton))
             self.assertTrue(event.type == Gdk.EventType.BUTTON_PRESS)
-            self.assertEquals(event.send_event, 0)
-            self.assertEquals(event.get_state(), Gdk.ModifierType.CONTROL_MASK)
-            self.assertEquals(event.get_root_coords(), (2, 5))
+            self.assertEqual(event.send_event, 0)
+            self.assertEqual(event.get_state(), Gdk.ModifierType.CONTROL_MASK)
+            self.assertEqual(event.get_root_coords(), (2, 5))
 
             event.time = 12345
-            self.assertEquals(event.get_time(), 12345)
+            self.assertEqual(event.get_time(), 12345)
 
         w = Gtk.Window()
         b = Gtk.Button()
@@ -550,7 +550,7 @@ class TestGdk(unittest.TestCase):
                                  Gdk.EventType.BUTTON_PRESS)
 
     def test_cursor(self):
-        self.assertEquals(Gdk.Cursor, overrides.Gdk.Cursor)
+        self.assertEqual(Gdk.Cursor, overrides.Gdk.Cursor)
         c = Gdk.Cursor(Gdk.CursorType.WATCH)
         self.assertNotEqual(c, None)
         c = Gdk.Cursor(cursor_type=Gdk.CursorType.WATCH)
@@ -593,35 +593,35 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(l, [label, label2])
 
     def test_actions(self):
-        self.assertEquals(Gtk.Action, overrides.Gtk.Action)
+        self.assertEqual(Gtk.Action, overrides.Gtk.Action)
         self.assertRaises(TypeError, Gtk.Action)
         action = Gtk.Action("test", "Test", "Test Action", Gtk.STOCK_COPY)
-        self.assertEquals(action.get_name(), "test")
-        self.assertEquals(action.get_label(), "Test")
-        self.assertEquals(action.get_tooltip(), "Test Action")
-        self.assertEquals(action.get_stock_id(), Gtk.STOCK_COPY)
+        self.assertEqual(action.get_name(), "test")
+        self.assertEqual(action.get_label(), "Test")
+        self.assertEqual(action.get_tooltip(), "Test Action")
+        self.assertEqual(action.get_stock_id(), Gtk.STOCK_COPY)
 
-        self.assertEquals(Gtk.RadioAction, overrides.Gtk.RadioAction)
+        self.assertEqual(Gtk.RadioAction, overrides.Gtk.RadioAction)
         self.assertRaises(TypeError, Gtk.RadioAction)
         action = Gtk.RadioAction("test", "Test", "Test Action", Gtk.STOCK_COPY, 1)
-        self.assertEquals(action.get_name(), "test")
-        self.assertEquals(action.get_label(), "Test")
-        self.assertEquals(action.get_tooltip(), "Test Action")
-        self.assertEquals(action.get_stock_id(), Gtk.STOCK_COPY)
-        self.assertEquals(action.get_current_value(), 1)
+        self.assertEqual(action.get_name(), "test")
+        self.assertEqual(action.get_label(), "Test")
+        self.assertEqual(action.get_tooltip(), "Test Action")
+        self.assertEqual(action.get_stock_id(), Gtk.STOCK_COPY)
+        self.assertEqual(action.get_current_value(), 1)
 
     def test_actiongroup(self):
-        self.assertEquals(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
+        self.assertEqual(Gtk.ActionGroup, overrides.Gtk.ActionGroup)
         self.assertRaises(TypeError, Gtk.ActionGroup)
 
         action_group = Gtk.ActionGroup(name='TestActionGroup')
         callback_data = "callback data"
 
         def test_action_callback_data(action, user_data):
-            self.assertEquals(user_data, callback_data)
+            self.assertEqual(user_data, callback_data)
 
         def test_radio_action_callback_data(action, current, user_data):
-            self.assertEquals(user_data, callback_data)
+            self.assertEqual(user_data, callback_data)
 
         action_group.add_actions([
             ('test-action1', None, 'Test Action 1',
@@ -653,7 +653,7 @@ class TestGtk(unittest.TestCase):
             action.activate()
 
     def test_uimanager(self):
-        self.assertEquals(Gtk.UIManager, overrides.Gtk.UIManager)
+        self.assertEqual(Gtk.UIManager, overrides.Gtk.UIManager)
         ui = Gtk.UIManager()
         ui.add_ui_from_string(
 """
@@ -663,18 +663,18 @@ class TestGtk(unittest.TestCase):
 """
 )
         menubar = ui.get_widget("/menubar1")
-        self.assertEquals(type(menubar), Gtk.MenuBar)
+        self.assertEqual(type(menubar), Gtk.MenuBar)
 
         ag = Gtk.ActionGroup(name="ag1")
         ui.insert_action_group(ag)
         ag2 = Gtk.ActionGroup(name="ag2")
         ui.insert_action_group(ag2)
         groups = ui.get_action_groups()
-        self.assertEquals(ag, groups[-2])
-        self.assertEquals(ag2, groups[-1])
+        self.assertEqual(ag, groups[-2])
+        self.assertEqual(ag2, groups[-1])
 
     def test_builder(self):
-        self.assertEquals(Gtk.Builder, overrides.Gtk.Builder)
+        self.assertEqual(Gtk.Builder, overrides.Gtk.Builder)
 
         class SignalTest(GObject.GObject):
             __gtype_name__ = "GIOverrideSignalTest"
@@ -737,21 +737,21 @@ class TestGtk(unittest.TestCase):
 
         # call their notify signals and check sentinel
         objects = builder.get_objects()
-        self.assertEquals(len(objects), 2)
+        self.assertEqual(len(objects), 2)
         for obj in objects:
             obj.emit('test-signal')
 
-        self.assertEquals(signal_checker.sentinel, 4)
-        self.assertEquals(signal_checker.after_sentinel, 2)
+        self.assertEqual(signal_checker.sentinel, 4)
+        self.assertEqual(signal_checker.after_sentinel, 2)
 
     def test_dialogs(self):
-        self.assertEquals(Gtk.Dialog, overrides.Gtk.Dialog)
-        self.assertEquals(Gtk.AboutDialog, overrides.Gtk.AboutDialog)
-        self.assertEquals(Gtk.MessageDialog, overrides.Gtk.MessageDialog)
-        self.assertEquals(Gtk.ColorSelectionDialog, overrides.Gtk.ColorSelectionDialog)
-        self.assertEquals(Gtk.FileChooserDialog, overrides.Gtk.FileChooserDialog)
-        self.assertEquals(Gtk.FontSelectionDialog, overrides.Gtk.FontSelectionDialog)
-        self.assertEquals(Gtk.RecentChooserDialog, overrides.Gtk.RecentChooserDialog)
+        self.assertEqual(Gtk.Dialog, overrides.Gtk.Dialog)
+        self.assertEqual(Gtk.AboutDialog, overrides.Gtk.AboutDialog)
+        self.assertEqual(Gtk.MessageDialog, overrides.Gtk.MessageDialog)
+        self.assertEqual(Gtk.ColorSelectionDialog, overrides.Gtk.ColorSelectionDialog)
+        self.assertEqual(Gtk.FileChooserDialog, overrides.Gtk.FileChooserDialog)
+        self.assertEqual(Gtk.FontSelectionDialog, overrides.Gtk.FontSelectionDialog)
+        self.assertEqual(Gtk.RecentChooserDialog, overrides.Gtk.RecentChooserDialog)
 
         # Gtk.Dialog
         dialog = Gtk.Dialog(title='Foo',
@@ -762,14 +762,14 @@ class TestGtk(unittest.TestCase):
 
         dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
 
-        self.assertEquals('Foo', dialog.get_title())
+        self.assertEqual('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
         button = dialog.get_widget_for_response(1)
-        self.assertEquals('test-button1', button.get_label())
+        self.assertEqual('test-button1', button.get_label())
         button = dialog.get_widget_for_response(2)
-        self.assertEquals('test-button2', button.get_label())
+        self.assertEqual('test-button2', button.get_label())
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
-        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
 
         # Gtk.AboutDialog
         dialog = Gtk.AboutDialog()
@@ -784,10 +784,10 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
-        self.assertEquals('message dialog test', dialog.get_title())
+        self.assertEqual('message dialog test', dialog.get_title())
         self.assertTrue(dialog.get_modal())
         text = dialog.get_property('text')
-        self.assertEquals('dude!', text)
+        self.assertEqual('dude!', text)
 
         dialog.format_secondary_text('2nd text')
         self.assertEqual(dialog.get_property('secondary-text'), '2nd text')
@@ -801,7 +801,7 @@ class TestGtk(unittest.TestCase):
         dialog = Gtk.ColorSelectionDialog("color selection dialog test")
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
-        self.assertEquals('color selection dialog test', dialog.get_title())
+        self.assertEqual('color selection dialog test', dialog.get_title())
 
         # Gtk.FileChooserDialog
         dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
@@ -811,21 +811,21 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
         dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
-        self.assertEquals('file chooser dialog test', dialog.get_title())
+        self.assertEqual('file chooser dialog test', dialog.get_title())
         button = dialog.get_widget_for_response(1)
-        self.assertEquals('test-button1', button.get_label())
+        self.assertEqual('test-button1', button.get_label())
         button = dialog.get_widget_for_response(2)
-        self.assertEquals('test-button2', button.get_label())
+        self.assertEqual('test-button2', button.get_label())
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
-        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
         action = dialog.get_property('action')
-        self.assertEquals(Gtk.FileChooserAction.SAVE, action)
+        self.assertEqual(Gtk.FileChooserAction.SAVE, action)
 
         # Gtk.FontSelectionDialog
         dialog = Gtk.ColorSelectionDialog("font selection dialog test")
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
-        self.assertEquals('font selection dialog test', dialog.get_title())
+        self.assertEqual('font selection dialog test', dialog.get_title())
 
         # Gtk.RecentChooserDialog
         test_manager = Gtk.RecentManager()
@@ -836,13 +836,13 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
         dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
-        self.assertEquals('recent chooser dialog test', dialog.get_title())
+        self.assertEqual('recent chooser dialog test', dialog.get_title())
         button = dialog.get_widget_for_response(1)
-        self.assertEquals('test-button1', button.get_label())
+        self.assertEqual('test-button1', button.get_label())
         button = dialog.get_widget_for_response(2)
-        self.assertEquals('test-button2', button.get_label())
+        self.assertEqual('test-button2', button.get_label())
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
-        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
 
     class TestClass(GObject.GObject):
         __gtype_name__ = "GIOverrideTreeAPITest"
@@ -854,14 +854,14 @@ class TestGtk(unittest.TestCase):
             self.string_value = string_value
 
         def check(self, int_value, string_value):
-            self.tester.assertEquals(int_value, self.int_value)
-            self.tester.assertEquals(string_value, self.string_value)
+            self.tester.assertEqual(int_value, self.int_value)
+            self.tester.assertEqual(string_value, self.string_value)
 
     def test_tree_store(self):
-        self.assertEquals(Gtk.TreeStore, overrides.Gtk.TreeStore)
-        self.assertEquals(Gtk.ListStore, overrides.Gtk.ListStore)
-        self.assertEquals(Gtk.TreeModel, overrides.Gtk.TreeModel)
-        self.assertEquals(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
+        self.assertEqual(Gtk.TreeStore, overrides.Gtk.TreeStore)
+        self.assertEqual(Gtk.ListStore, overrides.Gtk.ListStore)
+        self.assertEqual(Gtk.TreeModel, overrides.Gtk.TreeModel)
+        self.assertEqual(Gtk.TreeViewColumn, overrides.Gtk.TreeViewColumn)
 
         class TestPyObject(object):
             pass
@@ -970,7 +970,7 @@ class TestGtk(unittest.TestCase):
         # len gets the number of children in the root node
         # since we kept appending to the previous node
         # there should only be one child of the root
-        self.assertEquals(len(tree_store), 1)
+        self.assertEqual(len(tree_store), 1)
 
         # walk the tree to see if the values were stored correctly
         parent = None
@@ -983,38 +983,38 @@ class TestGtk(unittest.TestCase):
             obj = tree_store.get_value(treeiter, 2)
             obj.check(i, s)
             obj2 = tree_store.get_value(treeiter, 3)
-            self.assertEquals(obj, obj2)
+            self.assertEqual(obj, obj2)
 
             pyobj = tree_store.get_value(treeiter, 4)
-            self.assertEquals(pyobj, test_pyobj)
+            self.assertEqual(pyobj, test_pyobj)
             pydict = tree_store.get_value(treeiter, 5)
-            self.assertEquals(pydict, test_pydict)
+            self.assertEqual(pydict, test_pydict)
             pylist = tree_store.get_value(treeiter, 6)
-            self.assertEquals(pylist, test_pylist)
+            self.assertEqual(pylist, test_pylist)
 
             bool_1 = tree_store.get_value(treeiter, 7)
             bool_2 = tree_store.get_value(treeiter, 8)
-            self.assertEquals(bool_1, bool_2)
+            self.assertEqual(bool_1, bool_2)
             self.assertTrue(isinstance(bool_1, bool))
             self.assertTrue(isinstance(bool_2, bool))
 
             uint_ = tree_store.get_value(treeiter, 9)
-            self.assertEquals(uint_, i)
+            self.assertEqual(uint_, i)
             ulong_ = tree_store.get_value(treeiter, 10)
-            self.assertEquals(ulong_, GObject.G_MAXULONG)
+            self.assertEqual(ulong_, GObject.G_MAXULONG)
             int64_ = tree_store.get_value(treeiter, 11)
-            self.assertEquals(int64_, GObject.G_MININT64)
+            self.assertEqual(int64_, GObject.G_MININT64)
             uint64_ = tree_store.get_value(treeiter, 12)
-            self.assertEquals(uint64_, 0xffffffffffffffff)
+            self.assertEqual(uint64_, 0xffffffffffffffff)
             uchar_ = tree_store.get_value(treeiter, 13)
-            self.assertEquals(ord(uchar_), 254)
+            self.assertEqual(ord(uchar_), 254)
             char_ = tree_store.get_value(treeiter, 14)
-            self.assertEquals(char_, 'a')
+            self.assertEqual(char_, 'a')
 
             parent = treeiter
             treeiter = tree_store.iter_children(parent)
 
-        self.assertEquals(i, 99)
+        self.assertEqual(i, 99)
 
     def test_tree_store_signals(self):
         tree_store = Gtk.TreeStore(int, bool)
@@ -1208,7 +1208,7 @@ class TestGtk(unittest.TestCase):
                                    0,
                                    False))
 
-        self.assertEquals(len(list_store), 103)
+        self.assertEqual(len(list_store), 103)
 
         # walk the list to see if the values were stored correctly
         i = 0
@@ -1217,21 +1217,21 @@ class TestGtk(unittest.TestCase):
         counter = 0
         while treeiter:
             i = list_store.get_value(treeiter, 0)
-            self.assertEquals(i, counter)
+            self.assertEqual(i, counter)
             s = list_store.get_value(treeiter, 1)
             obj = list_store.get_value(treeiter, 2)
             obj.check(i, s)
 
             pyobj = list_store.get_value(treeiter, 3)
-            self.assertEquals(pyobj, test_pyobj)
+            self.assertEqual(pyobj, test_pyobj)
             pydict = list_store.get_value(treeiter, 4)
-            self.assertEquals(pydict, test_pydict)
+            self.assertEqual(pydict, test_pydict)
             pylist = list_store.get_value(treeiter, 5)
-            self.assertEquals(pylist, test_pylist)
+            self.assertEqual(pylist, test_pylist)
 
             bool_1 = list_store.get_value(treeiter, 6)
             bool_2 = list_store.get_value(treeiter, 7)
-            self.assertEquals(bool_1, bool_2)
+            self.assertEqual(bool_1, bool_2)
             self.assertTrue(isinstance(bool_1, bool))
             self.assertTrue(isinstance(bool_2, bool))
 
@@ -1239,7 +1239,7 @@ class TestGtk(unittest.TestCase):
 
             counter += 1
 
-        self.assertEquals(i, 102)
+        self.assertEqual(i, 102)
 
     def test_list_store_signals(self):
         list_store = Gtk.ListStore(int, bool)
@@ -1302,7 +1302,7 @@ class TestGtk(unittest.TestCase):
         self.assertFalse(p1 < None)
         self.assertFalse(p1 <= None)
 
-        self.assertEquals(tuple(p1), (1, 2, 3))
+        self.assertEqual(tuple(p1), (1, 2, 3))
 
     def test_tree_model(self):
         tree_store = Gtk.TreeStore(int, str)
@@ -1576,12 +1576,12 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(store.get_path(s), firstpath)
 
     def test_text_buffer(self):
-        self.assertEquals(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
+        self.assertEqual(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
         buffer = Gtk.TextBuffer()
         tag = buffer.create_tag('title', font='Sans 18')
 
-        self.assertEquals(tag.props.name, 'title')
-        self.assertEquals(tag.props.font, 'Sans 18')
+        self.assertEqual(tag.props.name, 'title')
+        self.assertEqual(tag.props.font, 'Sans 18')
 
         (start, end) = buffer.get_bounds()
 
@@ -1591,12 +1591,12 @@ class TestGtk(unittest.TestCase):
         buffer.set_text('Hello Jane Hello Bob')
         (start, end) = buffer.get_bounds()
         text = buffer.get_text(start, end, False)
-        self.assertEquals(text, 'Hello Jane Hello Bob')
+        self.assertEqual(text, 'Hello Jane Hello Bob')
 
         buffer.set_text('')
         (start, end) = buffer.get_bounds()
         text = buffer.get_text(start, end, False)
-        self.assertEquals(text, '')
+        self.assertEqual(text, '')
 
         buffer.insert(end, 'HelloHello')
         buffer.insert(end, ' Bob')
@@ -1608,10 +1608,10 @@ class TestGtk(unittest.TestCase):
 
         (start, end) = buffer.get_bounds()
         text = buffer.get_text(start, end, False)
-        self.assertEquals(text, 'Hello Jane Hello Bob')
+        self.assertEqual(text, 'Hello Jane Hello Bob')
 
         sel = buffer.get_selection_bounds()
-        self.assertEquals(sel, ())
+        self.assertEqual(sel, ())
         buffer.select_range(start, end)
         sel = buffer.get_selection_bounds()
         self.assertTrue(sel[0].equal(start))
@@ -1633,7 +1633,7 @@ class TestGtk(unittest.TestCase):
                 buffer.get_start_iter(), 'HelloHello', 'unknowntag')
 
     def test_text_iter(self):
-        self.assertEquals(Gtk.TextIter, overrides.Gtk.TextIter)
+        self.assertEqual(Gtk.TextIter, overrides.Gtk.TextIter)
         buffer = Gtk.TextBuffer()
         buffer.set_text('Hello Jane Hello Bob')
         tag = buffer.create_tag('title', font='Sans 18')
@@ -1650,7 +1650,7 @@ class TestGtk(unittest.TestCase):
         self.assertFalse(start.toggles_tag())
 
     def test_buttons(self):
-        self.assertEquals(Gtk.Button, overrides.Gtk.Button)
+        self.assertEqual(Gtk.Button, overrides.Gtk.Button)
 
         # test Gtk.Button
         button = Gtk.Button()
@@ -1658,13 +1658,13 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
         button = Gtk.Button(stock=Gtk.STOCK_CLOSE)
-        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
 
         # test Gtk.Button use_stock
         button = Gtk.Button(label=Gtk.STOCK_CLOSE, use_stock=True, use_underline=True)
-        self.assertEquals(Gtk.STOCK_CLOSE, button.get_label())
+        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
 
@@ -1674,8 +1674,8 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Button))
         self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
-        self.assertEquals('http://www.Gtk.org', button.get_uri())
-        self.assertEquals('Gtk', button.get_label())
+        self.assertEqual('http://www.Gtk.org', button.get_uri())
+        self.assertEqual('Gtk', button.get_label())
 
     def test_inheritance(self):
         for name in overrides.Gtk.__all__:
@@ -1704,30 +1704,30 @@ class TestGtk(unittest.TestCase):
                             "%r does not inherit from override %r" % (klass, over,))
 
     def test_editable(self):
-        self.assertEquals(Gtk.Editable, overrides.Gtk.Editable)
+        self.assertEqual(Gtk.Editable, overrides.Gtk.Editable)
 
         # need to use Gtk.Entry because Editable is an interface
         entry = Gtk.Entry()
         pos = entry.insert_text('HeWorld', 0)
-        self.assertEquals(pos, 7)
+        self.assertEqual(pos, 7)
         pos = entry.insert_text('llo ', 2)
-        self.assertEquals(pos, 6)
+        self.assertEqual(pos, 6)
         text = entry.get_chars(0, 11)
-        self.assertEquals('Hello World', text)
+        self.assertEqual('Hello World', text)
 
     def test_label(self):
         label = Gtk.Label(label='Hello')
         self.assertTrue(isinstance(label, Gtk.Widget))
-        self.assertEquals(label.get_text(), 'Hello')
+        self.assertEqual(label.get_text(), 'Hello')
 
     def adjustment_check(self, adjustment, value=0.0, lower=0.0, upper=0.0,
                          step_increment=0.0, page_increment=0.0, page_size=0.0):
-        self.assertEquals(adjustment.get_value(), value)
-        self.assertEquals(adjustment.get_lower(), lower)
-        self.assertEquals(adjustment.get_upper(), upper)
-        self.assertEquals(adjustment.get_step_increment(), step_increment)
-        self.assertEquals(adjustment.get_page_increment(), page_increment)
-        self.assertEquals(adjustment.get_page_size(), page_size)
+        self.assertEqual(adjustment.get_value(), value)
+        self.assertEqual(adjustment.get_lower(), lower)
+        self.assertEqual(adjustment.get_upper(), upper)
+        self.assertEqual(adjustment.get_step_increment(), step_increment)
+        self.assertEqual(adjustment.get_page_increment(), page_increment)
+        self.assertEqual(adjustment.get_page_size(), page_size)
 
     def test_adjustment(self):
         adjustment = Gtk.Adjustment(1, 0, 6, 4, 5, 3)
@@ -1754,27 +1754,27 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(table, Gtk.Table))
         self.assertTrue(isinstance(table, Gtk.Container))
         self.assertTrue(isinstance(table, Gtk.Widget))
-        self.assertEquals(table.get_size(), (1, 1))
-        self.assertEquals(table.get_homogeneous(), False)
+        self.assertEqual(table.get_size(), (1, 1))
+        self.assertEqual(table.get_homogeneous(), False)
         table = Gtk.Table(2, 3)
-        self.assertEquals(table.get_size(), (2, 3))
-        self.assertEquals(table.get_homogeneous(), False)
+        self.assertEqual(table.get_size(), (2, 3))
+        self.assertEqual(table.get_homogeneous(), False)
         table = Gtk.Table(2, 3, True)
-        self.assertEquals(table.get_size(), (2, 3))
-        self.assertEquals(table.get_homogeneous(), True)
+        self.assertEqual(table.get_size(), (2, 3))
+        self.assertEqual(table.get_homogeneous(), True)
 
         # Test PyGTK interface
         table = Gtk.Table(rows=3, columns=2)
-        self.assertEquals(table.get_size(), (3, 2))
+        self.assertEqual(table.get_size(), (3, 2))
         # Test using the actual property names
         table = Gtk.Table(n_rows=2, n_columns=3, homogeneous=True)
-        self.assertEquals(table.get_size(), (2, 3))
-        self.assertEquals(table.get_homogeneous(), True)
+        self.assertEqual(table.get_size(), (2, 3))
+        self.assertEqual(table.get_homogeneous(), True)
 
         label = Gtk.Label(label='Hello')
         self.assertTrue(isinstance(label, Gtk.Widget))
         table.attach(label, 0, 1, 0, 1)
-        self.assertEquals(label, table.get_children()[0])
+        self.assertEqual(label, table.get_children()[0])
 
     def test_scrolledwindow(self):
         sw = Gtk.ScrolledWindow()
@@ -1782,9 +1782,9 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(sw, Gtk.Container))
         self.assertTrue(isinstance(sw, Gtk.Widget))
         sb = sw.get_hscrollbar()
-        self.assertEquals(sw.get_hadjustment(), sb.get_adjustment())
+        self.assertEqual(sw.get_hadjustment(), sb.get_adjustment())
         sb = sw.get_vscrollbar()
-        self.assertEquals(sw.get_vadjustment(), sb.get_adjustment())
+        self.assertEqual(sw.get_vadjustment(), sb.get_adjustment())
 
     def test_widget_drag_methods(self):
         widget = Gtk.Button()
@@ -1836,25 +1836,25 @@ class TestGtk(unittest.TestCase):
 
         hscrollbar = Gtk.HScrollbar(adjustment)
         vscrollbar = Gtk.VScrollbar(adjustment)
-        self.assertEquals(hscrollbar.props.adjustment, adjustment)
-        self.assertEquals(vscrollbar.props.adjustment, adjustment)
+        self.assertEqual(hscrollbar.props.adjustment, adjustment)
+        self.assertEqual(vscrollbar.props.adjustment, adjustment)
 
     def test_iconview(self):
         # PyGTK compat
         iconview = Gtk.IconView()
-        self.assertEquals(iconview.props.model, None)
+        self.assertEqual(iconview.props.model, None)
 
         model = Gtk.ListStore(str)
         iconview = Gtk.IconView(model)
-        self.assertEquals(iconview.props.model, model)
+        self.assertEqual(iconview.props.model, model)
 
     def test_toolbutton(self):
         # PyGTK compat
         button = Gtk.ToolButton()
-        self.assertEquals(button.props.stock_id, None)
+        self.assertEqual(button.props.stock_id, None)
 
         button = Gtk.ToolButton('gtk-new')
-        self.assertEquals(button.props.stock_id, 'gtk-new')
+        self.assertEqual(button.props.stock_id, 'gtk-new')
 
     def test_iconset(self):
         # PyGTK compat
@@ -1870,8 +1870,8 @@ class TestGtk(unittest.TestCase):
         viewport = Gtk.Viewport(hadjustment=hadjustment,
                                 vadjustment=vadjustment)
 
-        self.assertEquals(viewport.props.vadjustment, vadjustment)
-        self.assertEquals(viewport.props.hadjustment, hadjustment)
+        self.assertEqual(viewport.props.vadjustment, vadjustment)
+        self.assertEqual(viewport.props.hadjustment, hadjustment)
 
 
 class TestGio(unittest.TestCase):
@@ -1883,7 +1883,7 @@ class TestGio(unittest.TestCase):
         self.settings.reset('test-array')
 
     def test_file_enumerator(self):
-        self.assertEquals(Gio.FileEnumerator, overrides.Gio.FileEnumerator)
+        self.assertEqual(Gio.FileEnumerator, overrides.Gio.FileEnumerator)
         f = Gio.file_new_for_path("./")
 
         iter_info = []
@@ -1898,7 +1898,7 @@ class TestGio(unittest.TestCase):
                 break
             next_info.append(info.get_name())
 
-        self.assertEquals(iter_info, next_info)
+        self.assertEqual(iter_info, next_info)
 
     def test_gsettings_native(self):
         self.assertTrue('test-array' in self.settings.list_keys())

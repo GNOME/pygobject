@@ -370,9 +370,9 @@ class TestProperty(unittest.TestCase):
                 GObject.GObject.__init__(self)
 
         o = C()
-        self.assertEquals(o._value, None)
+        self.assertEqual(o._value, None)
         o.prop = 'bar'
-        self.assertEquals(o._value, 'bar')
+        self.assertEqual(o._value, 'bar')
         self.assertRaises(TypeError, getattr, o, 'prop')
 
     def testDecoratorDefault(self):
@@ -549,9 +549,9 @@ class TestProperty(unittest.TestCase):
 
         b = B()
         b.prop2 = 10
-        self.assertEquals(b.prop2, 10)
+        self.assertEqual(b.prop2, 10)
         b.prop1 = 20
-        self.assertEquals(b.prop1, 20)
+        self.assertEqual(b.prop1, 20)
 
     def testPropertySubclassCustomSetter(self):
         # test for #523352
@@ -566,13 +566,13 @@ class TestProperty(unittest.TestCase):
             second = GObject.Property(type=str, getter=get_second)
 
         a = A()
-        self.assertEquals(a.first, 'first')
+        self.assertEqual(a.first, 'first')
         self.assertRaises(TypeError, setattr, a, 'first', 'foo')
 
         b = B()
-        self.assertEquals(b.first, 'first')
+        self.assertEqual(b.first, 'first')
         self.assertRaises(TypeError, setattr, b, 'first', 'foo')
-        self.assertEquals(b.second, 'second')
+        self.assertEqual(b.second, 'second')
         self.assertRaises(TypeError, setattr, b, 'second', 'foo')
 
     def testPropertySubclassCustomSetterError(self):
@@ -610,14 +610,14 @@ class TestProperty(unittest.TestCase):
         # want to observe. Its refcount is increased by one.
         t = PropertyObject(normal="test")
         t.o = o
-        self.assertEquals(sys.getrefcount(o), rc + 1)
+        self.assertEqual(sys.getrefcount(o), rc + 1)
 
         # Now we want to ensure we do not leak any references to our
         # object with properties. If no ref is leaked, then when deleting
         # the local reference to this object, its reference count shoud
         # drop to zero, and our dummy object should loose one reference.
         del t
-        self.assertEquals(sys.getrefcount(o), rc)
+        self.assertEqual(sys.getrefcount(o), rc)
 
     def testDocStringAsBlurb(self):
         class C(GObject.GObject):
