@@ -75,8 +75,6 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/\.window\.set_type_hint/.set_type_hint/g;" \
     -pe "s/\.window\.set_skip_taskbar_hint/.set_skip_taskbar_hint/g;" \
     -pe "s/\.window\.set_transient_for/.set_transient_for/g;" \
-    -pe "s/self.drag_source_unset\(\)/Gtk.drag_source_unset\(self\)/g;" \
-    -pe "s/self.drag_dest_unset\(\)/Gtk.drag_dest_unset\(self\)/g;" \
     -pe "s/Gtk.Alignment\(/Gtk.Alignment.new\(/g;" \
     -pe "s/self._model.filter_new\(\)/Gtk.TreeModelFilter.new\(self._model, None\)/g;" \
     -pe "#s/Gtk.Window.__init__\(self\)/Gtk.Window.__init__\(Gtk.WindowType.TOPLEVEL\)/g;" \
@@ -94,7 +92,6 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.((?:Accel)?Label)\(label=label=/Gtk.\1\(label=/g;" \
     -pe "s/len\(self._content.get_children\(\)\) > 0/self._content.get_children\(\)/g;" \
     -pe "s/len\(self.menu.get_children\(\)\) > 0/self.menu.get_children\(\)/g;" \
-    -pe "s/([^\.^ ]*)\.drag_dest_set\(/Gtk.drag_dest_set\(\1, /g;" \
     -pe "s/import gobject\n/from gi.repository import GObject\n/g;" \
     -pe "s/Gtk\..*\.__init__/gobject.GObject.__init__/g;" \
 \
