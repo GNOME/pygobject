@@ -1241,6 +1241,37 @@ class TestGtk(unittest.TestCase):
 
         self.assertEqual(i, 102)
 
+    def test_list_store_sort(self):
+        def comp1(model, row1, row2, user_data):
+            v1 = model[row1][1]
+            v2 = model[row2][1]
+
+            # make "m" smaller than anything else
+            if v1.startswith('m') and not v2.startswith('m'):
+                return -1
+            if v2.startswith('m') and not v1.startswith('m'):
+                return 1
+            return cmp(v1, v2)
+
+        list_store = Gtk.ListStore(int, str)
+        list_store.set_sort_func(2, comp1, None)
+        list_store.append((1, 'apples'))
+        list_store.append((3, 'oranges'))
+        list_store.append((2, 'mango'))
+
+        # not sorted yet, should be original order
+        self.assertEqual([list(i) for i in list_store],
+                [[1, 'apples'], [3, 'oranges'], [2, 'mango']])
+
+        # sort with our custom function
+        list_store.set_sort_column_id(2, Gtk.SortType.ASCENDING)
+        self.assertEqual([list(i) for i in list_store],
+                [[2, 'mango'], [1, 'apples'], [3, 'oranges']])
+
+        list_store.set_sort_column_id(2, Gtk.SortType.DESCENDING)
+        self.assertEqual([list(i) for i in list_store],
+                [[3, 'oranges'], [1, 'apples'], [2, 'mango']])
+
     def test_list_store_signals(self):
         list_store = Gtk.ListStore(int, bool)
 
