@@ -802,6 +802,12 @@ class TreeModel(Gtk.TreeModel):
         if success:
             return next_iter
 
+    def iter_previous(self, aiter):
+        prev_iter = aiter.copy()
+        success = super(TreeModel, self).iter_previous(prev_iter)
+        if success:
+            return prev_iter
+
     def iter_children(self, aiter):
         success, child_iter = super(TreeModel, self).iter_children(aiter)
         if success:
