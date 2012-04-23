@@ -89,6 +89,7 @@ EXTRA_DIST = \
 	test_gi.py \
 	test_gdbus.py \
 	test_overrides.py \
+	test_atoms.py \
 	test_pygtkcompat.py
 
 clean-local:

@@ -855,10 +855,20 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             item_arg_cache->from_py_cleanup = NULL;
                         }
                     } else if (!is_boxed) {
-                        memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
+                        /* HACK: Gdk.Atom is merely an integer wrapped in a pointer,
+                         * so we must not dereference it; just copy the pointer
+                         * value, and don't attempt to free it. TODO: find out
+                         * if there are other data types with similar behaviour
+                         * and generalize. */
+                        if (g_strcmp0 (item_iface_cache->type_name, "Gdk.Atom") == 0) {
+                            g_assert (item_size == sizeof (item.v_pointer));
+                            memcpy (array_->data + (i * item_size), &item.v_pointer, item_size);
+                        } else {
+                            memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
 
-                        if (from_py_cleanup)
-                            from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                            if (from_py_cleanup)
+                                from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                        }
                     } else {
                         g_array_insert_val (array_, i, item);
                     }
