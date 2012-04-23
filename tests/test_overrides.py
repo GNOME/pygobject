@@ -1350,6 +1350,8 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(tree_store)
         self.assertEqual(len(tree_store), 100)
 
+        self.assertEqual(tree_store.iter_previous(tree_store.get_iter(0)), None)
+
         for i,row in enumerate(tree_store):
             self.assertEqual(row.model, tree_store)
             self.assertEqual(row.parent, None)
@@ -1375,6 +1377,8 @@ class TestGtk(unittest.TestCase):
             next = tree_store.iter_next(aiter)
             if i < len(tree_store) - 1:
                 self.assertEqual(tree_store.get_path(next), row.next.path)
+                self.assertEqual(tree_store.get_path(tree_store.iter_previous(next)),
+                                 tree_store.get_path(aiter))
             else:
                 self.assertEqual(next, None)
 
