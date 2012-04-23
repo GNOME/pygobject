@@ -129,7 +129,7 @@ class TestGDBusClient(unittest.TestCase):
 
         # test keyword argument; timeout=0 will fail immediately
         try:
-            self.dbus_proxy.GetConnectionUnixProcessID('()', timeout=0)
+            self.dbus_proxy.GetConnectionUnixProcessID('(s)', '1', timeout=0)
             self.fail('call with timeout=0 should raise an exception')
         except Exception as e:
             self.assertTrue('Timeout' in str(e), str(e))
