@@ -333,8 +333,8 @@ __all__.append('SizeGroup')
 
 
 class MenuItem(Gtk.MenuItem):
-    def __init__(self, label=None):
-        super(MenuItem, self).__init__(label=label)
+    def __init__(self, label=None, **kwds):
+        super(MenuItem, self).__init__(label=label, **kwds)
 
 MenuItem = override(MenuItem)
 __all__.append('MenuItem')
@@ -395,8 +395,8 @@ __all__.append('Builder')
 
 
 class Window(Gtk.Window):
-    def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwargs):
-        Gtk.Window.__init__(self, type=type, **kwargs)
+    def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwds):
+        Gtk.Window.__init__(self, type=type, **kwds)
 
 Window = override(Window)
 __all__.append('Window')
@@ -567,8 +567,8 @@ __all__.append('RecentChooserDialog')
 
 class IconView(Gtk.IconView):
 
-    def __init__(self, model=None):
-        Gtk.IconView.__init__(self, model=model)
+    def __init__(self, model=None, **kwds):
+        Gtk.IconView.__init__(self, model=model, **kwds)
 
     def get_item_at_pos(self, x, y):
         success, path, cell = super(IconView, self).get_item_at_pos(x, y)
@@ -591,8 +591,8 @@ __all__.append('IconView')
 
 class ToolButton(Gtk.ToolButton):
 
-    def __init__(self, stock_id=None):
-        Gtk.ToolButton.__init__(self, stock_id=stock_id)
+    def __init__(self, stock_id=None, **kwds):
+        Gtk.ToolButton.__init__(self, stock_id=stock_id, **kwds)
 
 ToolButton = override(ToolButton)
 __all__.append('ToolButton')
@@ -1474,16 +1474,16 @@ __all__.append('ScrolledWindow')
 
 
 class HScrollbar(Gtk.HScrollbar):
-    def __init__(self, adjustment=None):
-        Gtk.HScrollbar.__init__(self, adjustment=adjustment)
+    def __init__(self, adjustment=None, **kwds):
+        Gtk.HScrollbar.__init__(self, adjustment=adjustment, **kwds)
 
 HScrollbar = override(HScrollbar)
 __all__.append('HScrollbar')
 
 
 class VScrollbar(Gtk.VScrollbar):
-    def __init__(self, adjustment=None):
-        Gtk.VScrollbar.__init__(self, adjustment=adjustment)
+    def __init__(self, adjustment=None, **kwds):
+        Gtk.VScrollbar.__init__(self, adjustment=adjustment, **kwds)
 
 VScrollbar = override(VScrollbar)
 __all__.append('VScrollbar')
@@ -1501,9 +1501,10 @@ __all__.append('Paned')
 
 
 class Arrow(Gtk.Arrow):
-    def __init__(self, arrow_type, shadow_type):
+    def __init__(self, arrow_type, shadow_type, **kwds):
         Gtk.Arrow.__init__(self, arrow_type=arrow_type,
-                           shadow_type=shadow_type)
+                           shadow_type=shadow_type,
+                           **kwds)
 
 Arrow = override(Arrow)
 __all__.append('Arrow')
@@ -1522,9 +1523,10 @@ __all__.append('IconSet')
 
 
 class Viewport(Gtk.Viewport):
-    def __init__(self, hadjustment=None, vadjustment=None):
+    def __init__(self, hadjustment=None, vadjustment=None, **kwds):
         Gtk.Viewport.__init__(self, hadjustment=hadjustment,
-                              vadjustment=vadjustment)
+                              vadjustment=vadjustment,
+                              **kwds)
 
 Viewport = override(Viewport)
 __all__.append('Viewport')

@@ -1860,6 +1860,12 @@ class TestGtk(unittest.TestCase):
         button = Gtk.ToolButton('gtk-new')
         self.assertEqual(button.props.stock_id, 'gtk-new')
 
+        icon = Gtk.Image.new_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.SMALL_TOOLBAR)
+
+        button = Gtk.ToolButton(label='mylabel', icon_widget=icon)
+        self.assertEqual(button.props.label, 'mylabel')
+        self.assertEqual(button.props.icon_widget, icon)
+
     def test_iconset(self):
         # PyGTK compat
         Gtk.IconSet()
