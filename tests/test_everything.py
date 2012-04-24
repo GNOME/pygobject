@@ -174,19 +174,21 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(result['integer'], 12)
         self.assertEqual(result['boolean'], True)
         self.assertEqual(result['string'], 'some text')
-        strings = result['strings']
-        self.assertTrue('first' in strings)
-        self.assertTrue('second' in strings)
-        self.assertTrue('third' in strings)
+        self.assertEqual(result['strings'], ['first', 'second', 'third'])
         result = None
 
-    @unittest.skip('marshalling of GStrv in GValue not working')
-    def test_hash_in_out(self):
-        result = Everything.test_ghash_gvalue_return()
-        # The following line will cause a failure, because we don't support
-        # marshalling GStrv in GValue.
-        Everything.test_ghash_gvalue_in(result)
-        result = None
+    def test_hash_in(self):
+        #data = {'integer': 12, 'boolean': True, 'string': 'some text',
+        #        'strings': ['first', 'second', 'third']}
+        # above does not work due to https://bugzilla.gnome.org/show_bug.cgi?id=666636
+        # so use workaround to explicitly build a GStrV object
+        class GStrv(list):
+            __gtype__ = GObject.type_from_name('GStrv')
+
+        data = {'integer': 12, 'boolean': True, 'string': 'some text',
+                'strings': GStrv(['first', 'second', 'third'])}
+        Everything.test_ghash_gvalue_in(data)
+        data = None
 
     def test_struct_gpointer(self):
         l1 = GLib.List()
