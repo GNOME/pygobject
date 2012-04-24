@@ -175,18 +175,24 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(result['boolean'], True)
         self.assertEqual(result['string'], 'some text')
         self.assertEqual(result['strings'], ['first', 'second', 'third'])
+        self.assertEqual(result['flags'], Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3)
+        self.assertEqual(result['enum'], Everything.TestEnum.VALUE2)
         result = None
 
     def test_hash_in(self):
-        #data = {'integer': 12, 'boolean': True, 'string': 'some text',
-        #        'strings': ['first', 'second', 'third']}
-        # above does not work due to https://bugzilla.gnome.org/show_bug.cgi?id=666636
-        # so use workaround to explicitly build a GStrV object
+        # specifying a simple string array for "strings" does not work due to
+        # https://bugzilla.gnome.org/show_bug.cgi?id=666636
+        # workaround by explicitly building a GStrv object
         class GStrv(list):
             __gtype__ = GObject.type_from_name('GStrv')
 
-        data = {'integer': 12, 'boolean': True, 'string': 'some text',
-                'strings': GStrv(['first', 'second', 'third'])}
+        data = {'integer': 12,
+                'boolean': True,
+                'string': 'some text',
+                'strings': GStrv(['first', 'second', 'third']),
+                'flags': Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3,
+                'enum': Everything.TestEnum.VALUE2,
+               }
         Everything.test_ghash_gvalue_in(data)
         data = None
 
