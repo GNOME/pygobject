@@ -113,6 +113,9 @@ check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.t
 check.gdb:
 	EXEC_NAME="gdb --args" $(MAKE) check
 
+check.nemiver:
+	EXEC_NAME="nemiver" $(MAKE) check
+
 check.valgrind:
 	EXEC_NAME="valgrind --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
 

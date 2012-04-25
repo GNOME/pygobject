@@ -127,6 +127,9 @@ dist-hook: $(BUILT_EXTRA_DIST)
 check.gdb:
 	cd tests && $(MAKE) check.gdb
 
+check.nemiver:
+	cd tests && $(MAKE) check.nemiver
+
 check.valgrind:
 	cd tests && $(MAKE) check.valgrind
 
