@@ -339,7 +339,7 @@ def enable_gtk(version='2.0'):
             def __init__(self, req):
                 self.height = req.height
                 self.width = req.width
-                UserList.UserList.__init__(self, [self.width,
+                UserList.__init__(self, [self.width,
                                                   self.height])
         return SizeRequest(orig_size_request(widget))
     Gtk.Widget.size_request = size_request
