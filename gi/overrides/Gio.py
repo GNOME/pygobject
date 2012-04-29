@@ -53,8 +53,8 @@ __all__.append('FileEnumerator')
 class Settings(Gio.Settings):
     '''Provide dictionary-like access to GLib.Settings.'''
 
-    def __init__(self, schema, path=None, backend=None):
-        Gio.Settings.__init__(self, schema=schema, backend=backend, path=path)
+    def __init__(self, schema, path=None, backend=None, **kwargs):
+        Gio.Settings.__init__(self, schema=schema, backend=backend, path=path, **kwargs)
 
     def __contains__(self, key):
         return key in self.list_keys()
