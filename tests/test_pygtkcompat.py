@@ -92,6 +92,10 @@ class TestGTKCompat(unittest.TestCase):
         self.assertEquals(combo.get_text_column(), 1)
         self.assertEquals(combo.get_child().get_text(), 'One')
 
+    def testSizeRequest(self):
+        box = gtk.Box()
+        self.assertEqual(box.size_request(), [0, 0])
+
     def testPixbuf(self):
         gtk.gdk.Pixbuf()
 
