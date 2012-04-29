@@ -95,8 +95,16 @@ release-tag:
               $$ROOT \
               svn+ssh://johan@svn.gnome.org/svn/pygobject/tags/PYGOBJECT_$$SVNVERSION
 
+release-news:
+	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
+	last=`head -n1 NEWS | cut -f1 -d' '`; \
+	git log --format='format:        - %s (%aN)%n%b' 3.1.92.. | \
+	  sed -n '/^        -/ p; /bugzilla.gnome.org/ { s/^.*id=\([0-9]\+\).*$$/          (#\1)/; p}' >> NEWS.tmp
+	echo >> NEWS.tmp
+	cat NEWS >> NEWS.tmp
+	mv NEWS.tmp NEWS
 
-.PHONY: ChangeLog
+.PHONY: ChangeLog release-news
 
 ChangeLog:
 	@echo Creating $@
