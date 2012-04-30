@@ -155,6 +155,9 @@ def enable_gtk(version='2.0'):
         return orig_get_origin(self)[1:]
     Gdk.Window.get_origin = get_origin
 
+    Gdk.screen_width = Gdk.Screen.width
+    Gdk.screen_height = Gdk.Screen.height
+
     # gtk
     gi.require_version('Gtk', version)
     from gi.repository import Gtk
@@ -309,8 +312,19 @@ def enable_gtk(version='2.0'):
     Gtk.icon_theme_get_default = Gtk.IconTheme.get_default
     Gtk.image_new_from_pixbuf = Gtk.Image.new_from_pixbuf
     Gtk.image_new_from_stock = Gtk.Image.new_from_stock
+    Gtk.image_new_from_animation = Gtk.Image.new_from_animation
+    Gtk.image_new_from_icon_set = Gtk.Image.new_from_icon_set
+    Gtk.image_new_from_file = Gtk.Image.new_from_file
     Gtk.settings_get_default = Gtk.Settings.get_default
     Gtk.window_set_default_icon = Gtk.Window.set_default_icon
+    Gtk.clipboard_get = Gtk.Clipboard.get
+
+    #AccelGroup
+    Gtk.AccelGroup.connect_group = Gtk.AccelGroup.connect
+
+    #StatusIcon
+    Gtk.status_icon_position_menu = Gtk.StatusIcon.position_menu
+    Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
 
     # Scale
 
