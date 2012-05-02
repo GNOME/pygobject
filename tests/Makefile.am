@@ -101,6 +101,7 @@ RUN_TESTS_ENV_VARS= \
 	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
+	MALLOC_PERTURB_=85 \
 	TESTS_BUILDDIR=$(builddir)
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
