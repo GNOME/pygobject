@@ -499,13 +499,13 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(color.green, 200)
         self.assertEqual(color.blue, 300)
         self.assertEqual(color, Gdk.Color(100, 200, 300))
-        self.assertNotEquals(color, Gdk.Color(1, 2, 3))
+        self.assertNotEqual(color, Gdk.Color(1, 2, 3))
 
     def test_rgba(self):
         self.assertEqual(Gdk.RGBA, overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
         self.assertEqual(rgba, Gdk.RGBA(0.1, 0.2, 0.3, 0.4))
-        self.assertNotEquals(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
+        self.assertNotEqual(rgba, Gdk.RGBA(0.0, 0.2, 0.3, 0.4))
         self.assertEqual(rgba.red, 0.1)
         self.assertEqual(rgba.green, 0.2)
         self.assertEqual(rgba.blue, 0.3)
@@ -1374,7 +1374,7 @@ class TestGtk(unittest.TestCase):
         for i in range(100):
             label = 'this is row #%d' % i
             parent = tree_store.append(None, (DerivedIntType(i), DerivedStrType(label),))
-            self.assertNotEquals(parent, None)
+            self.assertNotEqual(parent, None)
             for j in range(20):
                 label = 'this is child #%d of node #%d' % (j, i)
                 child = tree_store.append(parent, (j, label,))
@@ -1866,8 +1866,8 @@ class TestGtk(unittest.TestCase):
 
         hscrollbar = Gtk.HScrollbar()
         vscrollbar = Gtk.VScrollbar()
-        self.assertNotEquals(hscrollbar.props.adjustment, adjustment)
-        self.assertNotEquals(vscrollbar.props.adjustment, adjustment)
+        self.assertNotEqual(hscrollbar.props.adjustment, adjustment)
+        self.assertNotEqual(vscrollbar.props.adjustment, adjustment)
 
         hscrollbar = Gtk.HScrollbar(adjustment)
         vscrollbar = Gtk.VScrollbar(adjustment)

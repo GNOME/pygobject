@@ -499,12 +499,12 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(object_.props.float, 0.0)
         object_.props.float = 42.42
         self.assertTrue(isinstance(object_.props.float, float))
-        self.assertAlmostEquals(object_.props.float, 42.42, places=5)
+        self.assertAlmostEqual(object_.props.float, 42.42, places=5)
 
         self.assertEqual(object_.props.double, 0.0)
         object_.props.double = 42.42
         self.assertTrue(isinstance(object_.props.double, float))
-        self.assertAlmostEquals(object_.props.double, 42.42, places=5)
+        self.assertAlmostEqual(object_.props.double, 42.42, places=5)
 
         self.assertEqual(object_.props.string, None)
         object_.props.string = 'mec'

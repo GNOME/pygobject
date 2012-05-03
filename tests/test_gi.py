@@ -562,7 +562,7 @@ class TestFloat(unittest.TestCase):
     MIN = GObject.constants.G_MINFLOAT
 
     def test_float_return(self):
-        self.assertAlmostEquals(self.MAX, GIMarshallingTests.float_return())
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_return())
 
     def test_float_in(self):
         GIMarshallingTests.float_in(Number(self.MAX))
@@ -570,10 +570,10 @@ class TestFloat(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.float_in, "self.MAX")
 
     def test_float_out(self):
-        self.assertAlmostEquals(self.MAX, GIMarshallingTests.float_out())
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_out())
 
     def test_float_inout(self):
-        self.assertAlmostEquals(self.MIN, GIMarshallingTests.float_inout(Number(self.MAX)))
+        self.assertAlmostEqual(self.MIN, GIMarshallingTests.float_inout(Number(self.MAX)))
 
 
 class TestDouble(unittest.TestCase):
@@ -582,7 +582,7 @@ class TestDouble(unittest.TestCase):
     MIN = GObject.constants.G_MINDOUBLE
 
     def test_double_return(self):
-        self.assertAlmostEquals(self.MAX, GIMarshallingTests.double_return())
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_return())
 
     def test_double_in(self):
         GIMarshallingTests.double_in(Number(self.MAX))
@@ -590,10 +590,10 @@ class TestDouble(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.double_in, "self.MAX")
 
     def test_double_out(self):
-        self.assertAlmostEquals(self.MAX, GIMarshallingTests.double_out())
+        self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_out())
 
     def test_double_inout(self):
-        self.assertAlmostEquals(self.MIN, GIMarshallingTests.double_inout(Number(self.MAX)))
+        self.assertAlmostEqual(self.MIN, GIMarshallingTests.double_inout(Number(self.MAX)))
 
 
 class TestGType(unittest.TestCase):
