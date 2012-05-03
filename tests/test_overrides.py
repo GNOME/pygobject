@@ -1251,7 +1251,7 @@ class TestGtk(unittest.TestCase):
                 return -1
             if v2.startswith('m') and not v1.startswith('m'):
                 return 1
-            return cmp(v1, v2)
+            return (v1 > v2) - (v1 < v2)
 
         list_store = Gtk.ListStore(int, str)
         list_store.set_sort_func(2, comp1, None)
