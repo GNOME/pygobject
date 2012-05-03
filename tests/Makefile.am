@@ -2,8 +2,8 @@ CLEANFILES =
 noinst_LTLIBRARIES = libregress.la libgimarshallingtests.la
 
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
-libregress_la_CFLAGS = $(GIO_CFLAGS) $(PYCAIRO_CFLAGS)
-libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(PYCAIRO_LIBS)
+libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
+libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(CAIRO_LIBS)
 nodist_libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
 libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
 libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS)

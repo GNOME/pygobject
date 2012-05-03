@@ -9,7 +9,11 @@ sys.path.insert(0, "../")
 from sys import getrefcount
 
 import copy
-import cairo
+try:
+    import cairo
+    has_cairo = True
+except ImportError:
+    has_cairo = False
 
 from gi.repository import GObject
 from gi.repository import GLib
@@ -25,6 +29,7 @@ else:
 
 class TestEverything(unittest.TestCase):
 
+    @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_cairo_context(self):
         context = Everything.test_cairo_context_full_return()
         self.assertTrue(isinstance(context, cairo.Context))
@@ -33,6 +38,7 @@ class TestEverything(unittest.TestCase):
         context = cairo.Context(surface)
         Everything.test_cairo_context_none_in(context)
 
+    @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_cairo_surface(self):
         surface = Everything.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
