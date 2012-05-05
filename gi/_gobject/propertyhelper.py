@@ -29,7 +29,7 @@ from .constants import \
      TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, TYPE_FLAGS, \
      TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
      TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
-     TYPE_PYOBJECT, TYPE_GTYPE
+     TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV
 from .constants import \
      G_MAXFLOAT, G_MAXDOUBLE, \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
@@ -226,7 +226,7 @@ class Property(object):
                        TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
                        TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
                        TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
-                       TYPE_PYOBJECT, TYPE_GTYPE]:
+                       TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV]:
             return type_
         else:
             raise TypeError("Unsupported type: %r" % (type_,))
@@ -268,6 +268,12 @@ class Property(object):
             if not _gobject.type_is_a(default, ptype):
                 raise TypeError("flags value %s must be an instance of %r" %
                                 (default, ptype))
+        elif _gobject.type_is_a(ptype, TYPE_STRV) and default is not None:
+            if not isinstance(default, list):
+                raise TypeError("Strv value %s must be a list" % repr(default))
+            for val in default:
+                if type(val) not in (str, bytes):
+                    raise TypeError("Strv value %s must contain only strings" % str(default))
 
     def _get_minimum(self):
         ptype = self.type

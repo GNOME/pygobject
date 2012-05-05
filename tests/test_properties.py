@@ -9,7 +9,7 @@ from  gi.repository.GObject import GType, new, PARAM_READWRITE, \
      PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
      TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
-     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE
+     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV
 from gi.repository.GObject import \
      G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
      G_MAXULONG
@@ -52,6 +52,9 @@ class PropertyObject(GObject.GObject):
     gtype = GObject.Property(
         type=TYPE_GTYPE, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
+    strings = GObject.Property(
+        type=TYPE_STRV, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
 
 class TestProperties(unittest.TestCase):
     def testGetSet(self):
@@ -84,8 +87,9 @@ class TestProperties(unittest.TestCase):
                                                'enum',
                                                'flags',
                                                'gtype',
+                                               'strings',
                                                'boxed'])
-            self.assertEqual(len(obj), 8)
+            self.assertEqual(len(obj), 9)
 
     def testNormal(self):
         obj = new(PropertyObject, normal="123")
@@ -240,6 +244,56 @@ class TestProperties(unittest.TestCase):
 
         self.assertRaises(TypeError, setattr, obj, 'boxed', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'boxed', object())
+
+    def testStrings(self):
+        obj = new(PropertyObject)
+
+        # Should work with actual GStrv objects as well as
+        # Python string lists
+        class GStrv(list):
+            __gtype__ = GObject.TYPE_STRV
+
+        self.assertEqual(obj.props.strings, GStrv([]))
+        self.assertEqual(obj.strings, GStrv([]))
+        self.assertEqual(obj.props.strings, [])
+        self.assertEqual(obj.strings, [])
+
+        obj.strings = ['hello', 'world']
+        self.assertEqual(obj.props.strings, ['hello', 'world'])
+        self.assertEqual(obj.strings, ['hello', 'world'])
+
+        obj.strings = GStrv(['hello', 'world'])
+        self.assertEqual(obj.props.strings, GStrv(['hello', 'world']))
+        self.assertEqual(obj.strings, GStrv(['hello', 'world']))
+
+        obj.strings = []
+        self.assertEqual(obj.strings, [])
+        obj.strings = GStrv([])
+        self.assertEqual(obj.strings, GStrv([]))
+
+        p = GObject.Property(type=TYPE_STRV, default=['hello', '1'])
+        self.assertEqual(p.default, ['hello', '1'])
+        self.assertEqual(p.type, TYPE_STRV)
+        p = GObject.Property(type=TYPE_STRV, default=GStrv(['hello', '1']))
+        self.assertEqual(p.default, ['hello', '1'])
+        self.assertEqual(p.type, TYPE_STRV)
+
+        # set in constructor
+        obj = new(PropertyObject, strings=['hello', 'world'])
+        self.assertEqual(obj.props.strings, ['hello', 'world'])
+        self.assertEqual(obj.strings, ['hello', 'world'])
+
+        # wrong types
+        self.assertRaises(TypeError, setattr, obj, 'strings', 1)
+        self.assertRaises(TypeError, setattr, obj, 'strings', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'strings', ['foo', 1])
+
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
+                default=1)
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
+                default='foo')
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
+                default=['hello', 1])
 
     def testRange(self):
         # kiwi code
