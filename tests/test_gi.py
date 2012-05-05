@@ -795,12 +795,12 @@ class TestArrayGVariant(unittest.TestCase):
 
     def test_array_gvariant_container_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
-        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
+        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_container_in(v)]
         self.assertEqual([27, "Hello"], returned)
 
     def test_array_gvariant_full_in(self):
         v = [GLib.Variant("i", 27), GLib.Variant("s", "Hello")]
-        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_none_in(v)]
+        returned = [GLib.Variant.unpack(r) for r in GIMarshallingTests.array_gvariant_full_in(v)]
         self.assertEqual([27, "Hello"], returned)
 
     def test_bytearray_gvariant(self):
