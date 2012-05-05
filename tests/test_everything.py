@@ -190,7 +190,7 @@ class TestEverything(unittest.TestCase):
         # https://bugzilla.gnome.org/show_bug.cgi?id=666636
         # workaround by explicitly building a GStrv object
         class GStrv(list):
-            __gtype__ = GObject.type_from_name('GStrv')
+            __gtype__ = GObject.TYPE_STRV
 
         data = {'integer': 12,
                 'boolean': True,

@@ -411,7 +411,7 @@ class TestPyGValue(unittest.TestCase):
         class C(GObject.GObject):
             __gsignals__ = dict(my_boxed_signal=(
                 GObject.SignalFlags.RUN_LAST,
-                GObject.type_from_name('GStrv'), ()))
+                GObject.TYPE_STRV, ()))
 
         obj = C()
         obj.connect('my-boxed-signal', lambda obj: None)
