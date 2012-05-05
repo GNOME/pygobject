@@ -171,6 +171,9 @@ class Variant(GLib.Variant):
             raise TypeError('invalid remaining format string: "%s"' % rest_format)
         return v
 
+    def __del__(self):
+        self.unref()
+
     def __repr__(self):
         return '<GLib.Variant(%s)>' % getattr(self, 'print')(True)
 
