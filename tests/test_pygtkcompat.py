@@ -117,6 +117,14 @@ class TestGTKCompat(unittest.TestCase):
         loader = gtk.gdk.PixbufLoader('png')
         loader.close()
 
+    def testPixbufFormats(self):
+        formats = gtk.gdk.pixbuf_get_formats()
+        self.assertEqual(type(formats[0]), dict)
+        self.assertTrue('name' in formats[0])
+        self.assertTrue('description' in formats[0])
+        self.assertTrue('mime_types' in formats[0])
+        self.assertEqual(type(formats[0]['extensions']), list)
+
     def testGdkWindow(self):
         w = gtk.Window()
         w.realize()

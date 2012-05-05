@@ -135,6 +135,26 @@ def enable_gtk(version='2.0'):
     Gdk.pixbuf_new_from_file = GdkPixbuf.Pixbuf.new_from_file
     Gdk.PixbufLoader = GdkPixbuf.PixbufLoader.new_with_type
 
+    orig_get_formats = GdkPixbuf.Pixbuf.get_formats
+
+    def get_formats():
+        formats = orig_get_formats()
+        result = []
+
+        def make_dict(format_):
+            result = {}
+            result['description'] = format_.get_description()
+            result['name'] = format_.get_name()
+            result['mime_types'] = format_.get_mime_types()
+            result['extensions'] = format_.get_extensions()
+            return result
+
+        for format_ in formats:
+            result.append(make_dict(format_))
+        return result
+
+    Gdk.pixbuf_get_formats = get_formats
+
     orig_get_frame_extents = Gdk.Window.get_frame_extents
 
     def get_frame_extents(window):
