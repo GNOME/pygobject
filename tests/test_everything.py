@@ -476,13 +476,12 @@ class TestClosures(unittest.TestCase):
         self.assertTrue(self.called)
         self.assertEqual(result, 43)
 
-    # https://bugzilla.gnome.org/show_bug.cgi?id=656554
-
-    @unittest.expectedFailure
     def test_variant(self):
         def callback(variant):
-            self.assertEqual(variant.get_type_string(), 'i')
             self.called = True
+            if variant is None:
+                return None
+            self.assertEqual(variant.get_type_string(), 'i')
             return GLib.Variant('i', variant.get_int32() + 1)
 
         self.called = False
@@ -490,6 +489,15 @@ class TestClosures(unittest.TestCase):
         self.assertTrue(self.called)
         self.assertEqual(result.get_type_string(), 'i')
         self.assertEqual(result.get_int32(), 43)
+
+        self.called = False
+        result = Everything.test_closure_variant(callback, None)
+        self.assertTrue(self.called)
+        self.assertEqual(result, None)
+
+        self.called = False
+        self.assertRaises(TypeError, Everything.test_closure_variant, callback, 'foo')
+        self.assertFalse(self.called)
 
 
 class TestProperties(unittest.TestCase):
