@@ -2043,3 +2043,14 @@ class TestPropertiesObject(unittest.TestCase):
         self.assertEqual(self.obj.props.some_double, 0)
         self.obj.props.some_double = GObject.G_MAXDOUBLE
         self.assertEqual(self.obj.props.some_double, GObject.G_MAXDOUBLE)
+
+    def test_strv(self):
+        self.assertEqual(self.obj.props.some_strv, [])
+        self.obj.props.some_strv = ['hello', 'world']
+        self.assertEqual(self.obj.props.some_strv, ['hello', 'world'])
+
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_strv', [1, 2])
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_strv', ['foo', 1])
+
+        obj = GIMarshallingTests.PropertiesObject(some_strv=['hello', 'world'])
+        self.assertEqual(obj.props.some_strv, ['hello', 'world'])

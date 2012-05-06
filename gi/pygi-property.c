@@ -213,6 +213,25 @@ pygi_get_property_value_real (PyGObject *instance,
         case GI_TYPE_TAG_GLIST:
             arg.v_pointer = g_value_get_pointer (&value);
             break;
+        case GI_TYPE_TAG_ARRAY:
+        {
+            gchar** strings;
+            GArray *arg_items;
+            int i;
+
+            strings = g_value_get_boxed (&value);
+            if (strings == NULL)
+                arg.v_pointer = NULL;
+            else {
+                arg_items = g_array_sized_new (TRUE, TRUE, sizeof (GIArgument), g_strv_length (strings));
+                g_array_set_size (arg_items, g_strv_length (strings));
+                for (i = 0; strings[i] != NULL; ++i) {
+                    g_array_index (arg_items, GIArgument, i).v_string = strings[i];
+                }
+                arg.v_pointer = arg_items;
+            }
+            break;
+        }
         default:
             PyErr_Format (PyExc_NotImplementedError,
                           "Retrieving properties of type %s is not implemented",
@@ -366,6 +385,23 @@ pygi_set_property_value_real (PyGObject *instance,
         case GI_TYPE_TAG_GLIST:
             g_value_set_pointer (&value, arg.v_pointer);
             break;
+        case GI_TYPE_TAG_ARRAY:
+        {
+            GArray *arg_items = (GArray*) arg.v_pointer;
+            gchar** strings;
+            int i;
+
+            if (arg_items == NULL)
+                goto out;
+
+            strings = g_new0 (char*, arg_items->len);
+            for (i = 0; i < arg_items->len; ++i) {
+                strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
+            }
+            g_array_free (arg_items, TRUE);
+            g_value_set_boxed (&value, strings);
+            break;
+        }
         default:
             PyErr_Format (PyExc_NotImplementedError,
                           "Setting properties of type %s is not implemented",
