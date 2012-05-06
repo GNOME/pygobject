@@ -1987,6 +1987,9 @@ class TestPropertiesObject(unittest.TestCase):
         self.obj.props.some_boolean = True
         self.assertEqual(self.obj.props.some_boolean, True)
 
+        obj = GIMarshallingTests.PropertiesObject(some_boolean=True)
+        self.assertEqual(obj.props.some_boolean, True)
+
     @unittest.expectedFailure
     def test_char(self):
         # gobject-introspection thinks it has a guint8 type tag, which is
@@ -1999,50 +2002,80 @@ class TestPropertiesObject(unittest.TestCase):
 
         GLib.log_set_always_fatal(old_mask)
 
+        obj = GIMarshallingTests.PropertiesObject(some_char=-42)
+        self.assertEqual(obj.props.some_char, -42)
+
     def test_uchar(self):
         self.assertEqual(self.obj.props.some_uchar, 0)
         self.obj.props.some_uchar = GObject.G_MAXUINT8
         self.assertEqual(self.obj.props.some_uchar, GObject.G_MAXUINT8)
+
+        obj = GIMarshallingTests.PropertiesObject(some_uchar=42)
+        self.assertEqual(obj.props.some_uchar, 42)
 
     def test_int(self):
         self.assertEqual(self.obj.props.some_int, 0)
         self.obj.props.some_int = GObject.G_MAXINT
         self.assertEqual(self.obj.props.some_int, GObject.G_MAXINT)
 
+        obj = GIMarshallingTests.PropertiesObject(some_int=-42)
+        self.assertEqual(obj.props.some_int, -42)
+
     def test_uint(self):
         self.assertEqual(self.obj.props.some_uint, 0)
         self.obj.props.some_uint = GObject.G_MAXUINT
         self.assertEqual(self.obj.props.some_uint, GObject.G_MAXUINT)
+
+        obj = GIMarshallingTests.PropertiesObject(some_uint=42)
+        self.assertEqual(obj.props.some_uint, 42)
 
     def test_long(self):
         self.assertEqual(self.obj.props.some_long, 0)
         self.obj.props.some_long = GObject.G_MAXLONG
         self.assertEqual(self.obj.props.some_long, GObject.G_MAXLONG)
 
+        obj = GIMarshallingTests.PropertiesObject(some_long=-42)
+        self.assertEqual(obj.props.some_long, -42)
+
     def test_ulong(self):
         self.assertEqual(self.obj.props.some_ulong, 0)
         self.obj.props.some_ulong = GObject.G_MAXULONG
         self.assertEqual(self.obj.props.some_ulong, GObject.G_MAXULONG)
+
+        obj = GIMarshallingTests.PropertiesObject(some_ulong=42)
+        self.assertEqual(obj.props.some_ulong, 42)
 
     def test_int64(self):
         self.assertEqual(self.obj.props.some_int64, 0)
         self.obj.props.some_int64 = GObject.G_MAXINT64
         self.assertEqual(self.obj.props.some_int64, GObject.G_MAXINT64)
 
+        obj = GIMarshallingTests.PropertiesObject(some_int64=-4200000000000000)
+        self.assertEqual(obj.props.some_int64, -4200000000000000)
+
     def test_uint64(self):
         self.assertEqual(self.obj.props.some_uint64, 0)
         self.obj.props.some_uint64 = GObject.G_MAXUINT64
         self.assertEqual(self.obj.props.some_uint64, GObject.G_MAXUINT64)
+
+        obj = GIMarshallingTests.PropertiesObject(some_uint64=4200000000000000)
+        self.assertEqual(obj.props.some_uint64, 4200000000000000)
 
     def test_float(self):
         self.assertEqual(self.obj.props.some_float, 0)
         self.obj.props.some_float = GObject.G_MAXFLOAT
         self.assertEqual(self.obj.props.some_float, GObject.G_MAXFLOAT)
 
+        obj = GIMarshallingTests.PropertiesObject(some_float=42.42)
+        self.assertAlmostEqual(obj.props.some_float, 42.42, 4)
+
     def test_double(self):
         self.assertEqual(self.obj.props.some_double, 0)
         self.obj.props.some_double = GObject.G_MAXDOUBLE
         self.assertEqual(self.obj.props.some_double, GObject.G_MAXDOUBLE)
+
+        obj = GIMarshallingTests.PropertiesObject(some_double=42.42)
+        self.assertAlmostEqual(obj.props.some_double, 42.42)
 
     def test_strv(self):
         self.assertEqual(self.obj.props.some_strv, [])
