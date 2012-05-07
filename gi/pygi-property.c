@@ -287,6 +287,9 @@ pygi_set_property_value_real (PyGObject *instance,
     transfer = g_property_info_get_ownership_transfer (property_info);
     arg = _pygi_argument_from_object (py_value, type_info, transfer);
 
+    if (PyErr_Occurred())
+        goto out;
+
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
 
     // FIXME: Lots of types still unhandled
