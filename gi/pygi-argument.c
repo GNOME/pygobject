@@ -728,14 +728,9 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *int_;
 
-            if (!PyObject_TypeCheck (object, &PyInt_Type) && 
-                !PyObject_TypeCheck (object, &PyLong_Type)) {
-                PyErr_SetString (PyExc_TypeError, "expected int or long argument");
-                break;
-            }
-
             int_ = PYGLIB_PyNumber_Long (object);
             if (int_ == NULL) {
+                PyErr_SetString (PyExc_TypeError, "expected int argument");
                 break;
             }
 
@@ -758,14 +753,9 @@ _pygi_argument_from_object (PyObject   *object,
             PyObject *number;
             guint64 value;
 
-            if (!PyObject_TypeCheck (object, &PyInt_Type) && 
-                !PyObject_TypeCheck (object, &PyLong_Type)) {
-                PyErr_SetString (PyExc_TypeError, "expected int or long argument");
-                break;
-            }
-
             number = PYGLIB_PyNumber_Long (object);
             if (number == NULL) {
+                PyErr_SetString (PyExc_TypeError, "expected int argument");
                 break;
             }
 
@@ -794,14 +784,9 @@ _pygi_argument_from_object (PyObject   *object,
             PyObject *number;
             gint64 value;
 
-            if (!PyObject_TypeCheck (object, &PyInt_Type) && 
-                !PyObject_TypeCheck (object, &PyLong_Type)) {
-                PyErr_SetString (PyExc_TypeError, "expected int or long argument");
-                break;
-            }
-
             number = PYGLIB_PyNumber_Long (object);
             if (number == NULL) {
+                PyErr_SetString (PyExc_TypeError, "expected int argument");
                 break;
             }
 
@@ -822,15 +807,9 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *float_;
 
-            if (!PyObject_TypeCheck (object, &PyFloat_Type) && 
-                !PyObject_TypeCheck (object, &PyInt_Type) && 
-                !PyObject_TypeCheck (object, &PyLong_Type)) {
-                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
-                break;
-            }
-
             float_ = PyNumber_Float (object);
             if (float_ == NULL) {
+                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
                 break;
             }
 
@@ -843,15 +822,9 @@ _pygi_argument_from_object (PyObject   *object,
         {
             PyObject *float_;
 
-            if (!PyObject_TypeCheck (object, &PyFloat_Type) && 
-                !PyObject_TypeCheck (object, &PyInt_Type) && 
-                !PyObject_TypeCheck (object, &PyLong_Type)) {
-                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
-                break;
-            }
-
             float_ = PyNumber_Float (object);
             if (float_ == NULL) {
+                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
                 break;
             }
 
@@ -985,7 +958,10 @@ _pygi_argument_from_object (PyObject   *object,
 
             /* Note, strings are sequences, but we cannot accept them here */
             if (!PySequence_Check (object) || 
-                PyString_Check (object) || PyUnicode_Check (object)) {
+#if PY_VERSION_HEX < 0x03000000
+                PyString_Check (object) || 
+#endif
+                PyUnicode_Check (object)) {
                 PyErr_SetString (PyExc_TypeError, "expected sequence");
                 break;
             }
