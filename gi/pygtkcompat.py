@@ -385,9 +385,9 @@ def enable_gtk(version='2.0'):
 
         def __getitem__(self, state):
             color = self.context.get_background_color(state)
-            return Gdk.Color(red=color.red,
-                             green=color.green,
-                             blue=color.blue)
+            return Gdk.Color(red=int(color.red * 65535),
+                             green=int(color.green * 65535),
+                             blue=int(color.blue *65535))
 
     class Styles(object):
         def __init__(self, widget):
