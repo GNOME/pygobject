@@ -118,6 +118,6 @@ check.nemiver:
 	EXEC_NAME="nemiver" $(MAKE) check
 
 check.valgrind:
-	EXEC_NAME="valgrind --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
 
 -include $(top_srcdir)/git.mk

@@ -30,6 +30,7 @@ __all__ = []
 
 
 class Color(Gdk.Color):
+    MAX_VALUE = 65535
 
     def __init__(self, red, green, blue):
         Gdk.Color.__init__(self)
@@ -45,6 +46,28 @@ class Color(Gdk.Color):
 
     def __repr__(self):
         return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
+
+    red_float = property(fget=lambda self: self.red / float(self.MAX_VALUE),
+                         fset=lambda self, v: setattr(self, 'red', int(v * self.MAX_VALUE)))
+
+    green_float = property(fget=lambda self: self.green / float(self.MAX_VALUE),
+                           fset=lambda self, v: setattr(self, 'green', int(v * self.MAX_VALUE)))
+
+    blue_float = property(fget=lambda self: self.blue / float(self.MAX_VALUE),
+                          fset=lambda self, v: setattr(self, 'blue', int(v * self.MAX_VALUE)))
+
+    def to_floats(self):
+        """Return (red_float, green_float, blue_float) triple."""
+
+        return (self.red_float, self.green_float, self.blue_float)
+
+    @staticmethod
+    def from_floats(red, green, blue):
+        """Return a new Color object from red/green/blue values from 0.0 to 1.0."""
+
+        return Color(int(red * Color.MAX_VALUE),
+                     int(green * Color.MAX_VALUE),
+                     int(blue * Color.MAX_VALUE))
 
 Color = override(Color)
 __all__.append('Color')
@@ -66,6 +89,27 @@ if Gdk._version == '3.0':
 
         def __repr__(self):
             return '<Gdk.Color(red=%f, green=%f, blue=%f, alpha=%f)>' % (self.red, self.green, self.blue, self.alpha)
+
+        def __iter__(self):
+            """Iterator which allows easy conversion to tuple and list types."""
+
+            yield self.red
+            yield self.green
+            yield self.blue
+            yield self.alpha
+
+        def to_color(self):
+            """Converts this RGBA into a Color instance which excludes alpha."""
+
+            return Color(int(self.red * Color.MAX_VALUE),
+                         int(self.green * Color.MAX_VALUE),
+                         int(self.blue * Color.MAX_VALUE))
+
+        @classmethod
+        def from_color(cls, color):
+            """Returns a new RGBA instance given a Color instance."""
+
+            return cls(color.red_float, color.green_float, color.blue_float)
 
     RGBA = override(RGBA)
     __all__.append('RGBA')

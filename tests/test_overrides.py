@@ -501,6 +501,19 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEqual(color, Gdk.Color(1, 2, 3))
 
+    def test_color_floats(self):
+        self.assertEqual(Gdk.Color(13107, 21845, 65535),
+                         Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0))
+
+        self.assertEqual(Gdk.Color(13107, 21845, 65535).to_floats(),
+                         (0.2, 1.0 / 3.0, 1.0))
+
+        self.assertEqual(Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 0.5).to_color(),
+                         Gdk.Color.from_floats(0.2, 1.0 / 3.0, 1.0))
+
+        self.assertEqual(Gdk.RGBA.from_color(Gdk.Color(13107, 21845, 65535)),
+                         Gdk.RGBA(0.2, 1.0 / 3.0, 1.0, 1.0))
+
     def test_rgba(self):
         self.assertEqual(Gdk.RGBA, overrides.Gdk.RGBA)
         rgba = Gdk.RGBA(0.1, 0.2, 0.3, 0.4)
@@ -512,6 +525,10 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(rgba.alpha, 0.4)
         rgba.green = 0.9
         self.assertEqual(rgba.green, 0.9)
+
+        # Iterator/tuple convsersion
+        self.assertEqual(tuple(Gdk.RGBA(0.1, 0.2, 0.3, 0.4)),
+                         (0.1, 0.2, 0.3, 0.4))
 
     def test_event(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
