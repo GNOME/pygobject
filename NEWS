@@ -27,10 +27,11 @@
 	- Fix test_mainloop.py for Python 3 (Martin Pitt)
 	- Make callback exception propagation test stricter (Martin Pitt)
 	  (#616279)
-	- Add context management to freeze_notify() and handler_block().
-	  (Simon Feltman) (#672324)
+	- [API add] Add context management to freeze_notify() and
+	  handler_block(). (Simon Feltman) (#672324)
 	- Add support for GFlags properties (Martin Pitt) (#620943)
-	- Wrap GLib.Source.is_destroyed() method (Martin Pitt) (#524719)
+	- [API add] Wrap GLib.Source.is_destroyed() method (Martin Pitt)
+	  (#524719)
 	- Fix error message when trying to override a non-GI class
 	  (Martin Pitt) (#646667)
 	- Fix segfault when accessing __grefcount__ before creating the GObject
