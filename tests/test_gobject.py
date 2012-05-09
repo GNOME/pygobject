@@ -1,5 +1,6 @@
 # -*- Mode: Python -*-
 
+import gc
 import unittest
 
 from gi.repository import GObject
@@ -345,6 +346,95 @@ class TestContextManagers(unittest.TestCase):
         # Verify we are still not in a handler block context.
         self.obj.props.prop = 2
         self.assertEqual(self.tracking, [2])
+
+
+class TestPropertyBindings(unittest.TestCase):
+    class TestObject(GObject.GObject):
+        int_prop = GObject.Property(default=0, type=int)
+
+    def setUp(self):
+        self.source = self.TestObject()
+        self.target = self.TestObject()
+
+    def testDefaultBinding(self):
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                       GObject.BindingFlags.DEFAULT)
+        binding = binding  # PyFlakes
+
+        # Test setting value on source gets pushed to target
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 1)
+
+        # Test setting value on target does not change source
+        self.target.props.int_prop = 2
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 2)
+
+    def testBiDirectionalBinding(self):
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                       GObject.BindingFlags.BIDIRECTIONAL)
+        binding = binding  # PyFlakes
+
+        # Test setting value on source gets pushed to target
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 1)
+
+        # Test setting value on target does not change source
+        self.target.props.int_prop = 2
+        self.assertEqual(self.source.int_prop, 2)
+        self.assertEqual(self.target.int_prop, 2)
+
+    def testExplicitUnbindClearsConnection(self):
+        self.assertEqual(self.source.int_prop, 0)
+        self.assertEqual(self.target.int_prop, 0)
+
+        # Test deleting binding reference removes binding.
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop')
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 1)
+
+        binding.unbind()
+        self.assertEqual(binding(), None)
+
+        self.source.int_prop = 10
+        self.assertEqual(self.source.int_prop, 10)
+        self.assertEqual(self.target.int_prop, 1)
+
+        # An already unbound BindingWeakRef will raise if unbind is attempted a second time.
+        self.assertRaises(ValueError, binding.unbind)
+
+    def testReferenceCounts(self):
+        self.assertEqual(self.source.__grefcount__, 1)
+        self.assertEqual(self.target.__grefcount__, 1)
+
+        # Binding ref count will be 2 do to the initial ref implicitly held by
+        # the act of binding and the ref incurred by using __call__ to generate
+        # a wrapper from the weak binding ref within python.
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop')
+        self.assertEqual(binding().__grefcount__, 2)
+
+        # Creating a binding does not inc refs on source and target (they are weak
+        # on the binding object itself)
+        self.assertEqual(self.source.__grefcount__, 1)
+        self.assertEqual(self.target.__grefcount__, 1)
+
+        # Use GObject.get_property because the "props" accessor leaks.
+        # Note property names are canonicalized.
+        self.assertEqual(binding().get_property('source'), self.source)
+        self.assertEqual(binding().get_property('source_property'), 'int-prop')
+        self.assertEqual(binding().get_property('target'), self.target)
+        self.assertEqual(binding().get_property('target_property'), 'int-prop')
+        self.assertEqual(binding().get_property('flags'), GObject.BindingFlags.DEFAULT)
+
+        # Delete reference to source or target and the binding should listen.
+        ref = self.source.weak_ref()
+        del self.source
+        gc.collect()
+        self.assertEqual(ref(), None)
+        self.assertEqual(binding(), None)
 
 if __name__ == '__main__':
     unittest.main()

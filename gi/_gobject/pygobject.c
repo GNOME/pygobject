@@ -38,8 +38,8 @@ static int  pygobject_clear(PyGObject *self);
 static PyObject * pyg_type_get_bases(GType gtype);
 static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
+static PyObject * pygbinding_weak_ref_new(GObject *obj);
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
-static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
 static void pygobject_inherit_slots(PyTypeObject *type, PyObject *bases,
 				    gboolean check_for_present);
 static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
@@ -1485,6 +1485,50 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     return result;
 }
 
+
+static PyObject *
+pygobject_bind_property(PyGObject *self, PyObject *args)
+{
+	gchar *source_name, *target_name;
+	gchar *source_canon, *target_canon;
+	PyObject *target, *source_repr, *target_repr, *pybinding;
+	GBinding *binding;
+	GBindingFlags flags = G_BINDING_DEFAULT;
+
+	if (!PyArg_ParseTuple(args, "sOs|i:GObject.bind_property",
+	                      &source_name, &target, &target_name, &flags))
+		return NULL;
+
+	CHECK_GOBJECT(self);
+	if (!PyObject_TypeCheck(target, &PyGObject_Type)) {
+		PyErr_SetString(PyExc_TypeError, "Second argument must be a GObject");
+		return NULL;
+	}
+
+	/* Canonicalize underscores to hyphens. Note the results must be freed. */
+	source_canon = g_strdelimit(g_strdup(source_name), "_", '-');
+	target_canon = g_strdelimit(g_strdup(target_name), "_", '-');
+
+	binding = g_object_bind_property(G_OBJECT(self->obj), source_canon,
+	                                 pygobject_get(target), target_canon, flags);
+	g_free(source_canon);
+	g_free(target_canon);
+	source_canon = target_canon = NULL;
+
+	if (binding == NULL) {
+		source_repr = PyObject_Repr((PyObject*)self);
+		target_repr = PyObject_Repr(target);
+		PyErr_Format(PyExc_TypeError, "Cannot create binding from %s.%s to %s.%s",
+		             PYGLIB_PyUnicode_AsString(source_repr), source_name,
+		             PYGLIB_PyUnicode_AsString(target_repr), target_name);
+		Py_DECREF(source_repr);
+		Py_DECREF(target_repr);
+		return NULL;
+	}
+
+	return pygbinding_weak_ref_new(binding);
+}
+
 static PyObject *
 pygobject_freeze_notify(PyGObject *self, PyObject *args)
 {
@@ -2118,11 +2162,13 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
     return PYGLIB_PyLong_FromLong(retval);
 }
 
+
 static PyMethodDef pygobject_methods[] = {
     { "get_property", (PyCFunction)pygobject_get_property, METH_VARARGS },
     { "get_properties", (PyCFunction)pygobject_get_properties, METH_VARARGS },
     { "set_property", (PyCFunction)pygobject_set_property, METH_VARARGS },
     { "set_properties", (PyCFunction)pygobject_set_properties, METH_VARARGS|METH_KEYWORDS },
+    { "bind_property", (PyCFunction)pygobject_bind_property, METH_VARARGS|METH_KEYWORDS },
     { "freeze_notify", (PyCFunction)pygobject_freeze_notify, METH_VARARGS },
     { "notify", (PyCFunction)pygobject_notify, METH_VARARGS },
     { "thaw_notify", (PyCFunction)pygobject_thaw_notify, METH_VARARGS },
@@ -2325,6 +2371,54 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
     }
 }
 
+
+/* -------------- GBinding Weak Reference ----------------- */
+
+/**
+ * BindingWeakRef
+ *
+ * The BindingWeakRef object is used to manage GBinding objects within python
+ * created through GObject.bind_property. It is a sub-class PyGObjectWeakRef so
+ * that we can maintain the same reference counting semantics between Python
+ * and GObject Binding objects. This gives explicit direct control of the
+ * binding lifetime by using the "unbind" method on the BindingWeakRef object
+ * along with implicit management based on the lifetime of the source or
+ * target objects.
+ */
+
+PYGLIB_DEFINE_TYPE("gi._gobject.GBindingWeakRef", PyGBindingWeakRef_Type, PyGObjectWeakRef);
+
+static PyObject *
+pygbinding_weak_ref_new(GObject *obj)
+{
+	PyGObjectWeakRef *self;
+
+	self = PyObject_GC_New(PyGObjectWeakRef, &PyGBindingWeakRef_Type);
+	self->callback = NULL;
+	self->user_data = NULL;
+	self->obj = obj;
+	g_object_weak_ref(self->obj, (GWeakNotify) pygobject_weak_ref_notify, self);
+	return (PyObject *) self;
+}
+
+static PyObject *
+pygbinding_weak_ref_unbind(PyGObjectWeakRef *self, PyObject *args)
+{
+    if (!self->obj) {
+        PyErr_SetString(PyExc_ValueError, "weak binding ref already unreffed");
+        return NULL;
+    }
+    g_object_unref(self->obj);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef pygbinding_weak_ref_methods[] = {
+    { "unbind", (PyCFunction)pygbinding_weak_ref_unbind, METH_NOARGS},
+    { NULL, NULL, 0}
+};
+
+
 static gpointer
 pyobject_copy(gpointer boxed)
 {
@@ -2426,6 +2520,14 @@ pygobject_object_register_types(PyObject *d)
     if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
         return;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
+
+    PyGBindingWeakRef_Type.tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC;
+    PyGBindingWeakRef_Type.tp_doc = "A GBinding weak reference";
+    PyGBindingWeakRef_Type.tp_methods = pygbinding_weak_ref_methods;
+    PyGBindingWeakRef_Type.tp_base = &PyGObjectWeakRef_Type;
+    if (PyType_Ready(&PyGBindingWeakRef_Type) < 0)
+        return;
+    PyDict_SetItemString(d, "GBindingWeakRef", (PyObject *) &PyGBindingWeakRef_Type);
 
     PyGContextFreezeNotify_Type.tp_dealloc = (destructor)pygcontext_freeze_notify_dealloc;
     PyGContextFreezeNotify_Type.tp_flags = Py_TPFLAGS_DEFAULT;
