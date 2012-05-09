@@ -112,6 +112,79 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+
+PyObject *
+cairo_path_to_arg (PyObject        *value,
+                   GIInterfaceInfo *interface_info,
+                   GITransfer       transfer,
+                   GIArgument      *arg)
+{
+    cairo_path_t *path;
+
+    g_assert (transfer == GI_TRANSFER_NOTHING);
+
+    path = ( (PycairoPath*) value)->path;
+    if (!path) {
+        PyErr_SetString (PyExc_ValueError, "Path instance wrapping a NULL path");
+        return NULL;
+    }
+
+    arg->v_pointer = path;
+    Py_RETURN_NONE;
+}
+
+PyObject *
+cairo_path_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+{
+    cairo_path_t *path = (cairo_path_t*) data;
+
+    return PycairoPath_FromPath (path);
+}
+
+PyObject *
+cairo_path_release (GIBaseInfo *base_info,
+                    gpointer    struct_)
+{
+    cairo_path_destroy ( (cairo_path_t*) struct_);
+    Py_RETURN_NONE;
+}
+
+PyObject *
+cairo_font_options_to_arg (PyObject        *value,
+                           GIInterfaceInfo *interface_info,
+                           GITransfer       transfer,
+                           GIArgument      *arg)
+{
+    cairo_font_options_t *font_options;
+
+    g_assert (transfer == GI_TRANSFER_NOTHING);
+
+    font_options = ( (PycairoFontOptions*) value)->font_options;
+    if (!font_options) {
+        PyErr_SetString (PyExc_ValueError, "FontOptions instance wrapping a NULL font_options");
+        return NULL;
+    }
+
+    arg->v_pointer = font_options;
+    Py_RETURN_NONE;
+}
+
+PyObject *
+cairo_font_options_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+{
+    cairo_font_options_t *font_options = (cairo_font_options_t*) data;
+
+    return PycairoFontOptions_FromFontOptions (cairo_font_options_copy (font_options));
+}
+
+PyObject *
+cairo_font_options_release (GIBaseInfo *base_info,
+                            gpointer    struct_)
+{
+    cairo_font_options_destroy ( (cairo_font_options_t*) struct_);
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
@@ -135,5 +208,17 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_surface_to_arg,
                                   cairo_surface_from_arg,
                                   cairo_surface_release);
+
+    pygi_register_foreign_struct ("cairo",
+                                  "Path",
+                                  cairo_path_to_arg,
+                                  cairo_path_from_arg,
+                                  cairo_path_release);
+
+    pygi_register_foreign_struct ("cairo",
+                                  "FontOptions",
+                                  cairo_font_options_to_arg,
+                                  cairo_font_options_from_arg,
+                                  cairo_font_options_release);
 }
 PYGLIB_MODULE_END;

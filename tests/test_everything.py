@@ -18,6 +18,7 @@ except ImportError:
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
+from gi.repository import Gtk
 from gi.repository import Regress as Everything
 
 if sys.version_info < (3, 0):
@@ -672,3 +673,10 @@ class TestSignals(unittest.TestCase):
 
         obj.connect('sig-with-obj', callback)
         obj.emit_sig_with_obj()
+
+
+class TestPango(unittest.TestCase):
+    def test_cairo_font_options(self):
+        screen = Gtk.Window().get_screen()
+        font_opts = screen.get_font_options()
+        self.assertEqual(type(font_opts.get_subpixel_order()), int)
