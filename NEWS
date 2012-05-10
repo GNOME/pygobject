@@ -1,9 +1,9 @@
 3.2.1  10-May-2012
-        - Reindent files in tests to use 4-space indentation (Sebastian Pölsterl
+        - Reindent files in tests to use 4-space indentation (Sebastian Pölsterl)
         - Add missing override for TreeModel.iter_previous() (Martin Pitt)
         - GSettings: allow extra keyword arguments (Giovanni Campagna)
         - pygtkcompat: Correct Userlist module use (Jose Rostagno)
-        - test_gdbus: Call GetConnectionUnixProcessID() with correct signature (
+        - test_gdbus: Call GetConnectionUnixProcessID() with correct signature (Martin Pitt)
         - GTK overrides: Add missing keyword arguments (Martin Pitt)
         - pygi-convert.py: Drop obsolete drag method conversions (Martin Pitt)
         - Fix len_arg_index for array arguments (Bastian Winkler)
