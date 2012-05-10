@@ -49,7 +49,7 @@ if sys.version_info >= (3, 0):
     for tests that need to write to intefaces that take unicode in
     python 2
 
-    python 3 strings are unicode encoded as UTF-8 so the unicode object 
+    python 3 strings are unicode encoded as UTF-8 so the unicode object
     doesn't exist
 
     python 2 differs between a string an unicode string and you must specify

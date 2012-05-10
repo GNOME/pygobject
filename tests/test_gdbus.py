@@ -15,20 +15,20 @@ class TestGDBusClient(unittest.TestCase):
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
 
         self.dbus_proxy = Gio.DBusProxy.new_sync(self.bus,
-                Gio.DBusProxyFlags.NONE, None, 
+                Gio.DBusProxyFlags.NONE, None,
                 'org.freedesktop.DBus',
                 '/org/freedesktop/DBus',
                 'org.freedesktop.DBus', None)
 
     def test_native_calls_sync(self):
-        result = self.dbus_proxy.call_sync('ListNames', None, 
+        result = self.dbus_proxy.call_sync('ListNames', None,
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
         self.assertTrue(isinstance(result, GLib.Variant))
         result = result.unpack()[0] # result is always a tuple
         self.assertTrue(len(result) > 1)
         self.assertTrue('org.freedesktop.DBus' in result)
 
-        result = self.dbus_proxy.call_sync('GetNameOwner', 
+        result = self.dbus_proxy.call_sync('GetNameOwner',
                 GLib.Variant('(s)', ('org.freedesktop.DBus',)),
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None)
         self.assertTrue(isinstance(result, GLib.Variant))
@@ -45,7 +45,7 @@ class TestGDBusClient(unittest.TestCase):
 
         # error case: invalid argument
         try:
-            self.dbus_proxy.call_sync('GetConnectionUnixProcessID', 
+            self.dbus_proxy.call_sync('GetConnectionUnixProcessID',
                     GLib.Variant('(s)', (' unknown',)),
                     Gio.DBusCallFlags.NO_AUTO_START, 500, None)
             self.fail('call with invalid arguments should raise an exception')
@@ -69,7 +69,7 @@ class TestGDBusClient(unittest.TestCase):
 
         main_loop = GObject.MainLoop()
         data = {'main_loop': main_loop}
-        self.dbus_proxy.call('ListNames', None, 
+        self.dbus_proxy.call('ListNames', None,
                 Gio.DBusCallFlags.NO_AUTO_START, 500, None,
                 call_done, data)
         main_loop.run()
@@ -204,4 +204,3 @@ class TestGDBusClient(unittest.TestCase):
 
         self.assertTrue(isinstance(data['error'], Exception))
         self.assertTrue('InvalidArgs' in str(data['error']), str(data['error']))
-

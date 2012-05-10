@@ -66,7 +66,7 @@ class TestEverything(unittest.TestCase):
         self.assertEquals(UNICHAR, Everything.test_unichar(UNICHAR))
         self.assertRaises(TypeError, Everything.test_unichar, "")
         self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
-        
+
 
     def test_floating(self):
         e = Everything.TestFloating()
@@ -140,22 +140,22 @@ class TestEverything(unittest.TestCase):
         gtype = Everything.test_gtype(ARegisteredClass)
         self.assertEquals(ARegisteredClass.__gtype__, gtype)
         self.assertRaises(TypeError, Everything.test_gtype, 'ARegisteredClass')
-        
+
     def test_dir(self):
         attr_list = dir(Everything)
-        
+
         # test that typelib attributes are listed
         self.assertTrue('TestStructA' in attr_list)
-        
+
         # test that class attributes and methods are listed
         self.assertTrue('__class__' in attr_list)
         self.assertTrue('__dir__' in attr_list)
         self.assertTrue('__repr__' in attr_list)
-        
+
         # test that instance members are listed
         self.assertTrue('_namespace' in attr_list)
         self.assertTrue('_version' in attr_list)
-        
+
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))
 
@@ -235,7 +235,7 @@ class TestCallbacks(unittest.TestCase):
         TestCallbacks.called = False
         def callback():
             TestCallbacks.called = True
-        
+
         Everything.test_simple_callback(callback)
         self.assertTrue(TestCallbacks.called)
 
@@ -246,7 +246,7 @@ class TestCallbacks(unittest.TestCase):
         """
         def callback():
             x = 1 / 0
-            
+
         try:
             Everything.test_simple_callback(callback)
         except ZeroDivisionError:
@@ -278,7 +278,7 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertEquals(Everything.test_callback(callback), 44)
         self.assertTrue(TestCallbacks.called)
-    
+
     def test_callback_async(self):
         TestCallbacks.called = False
         def callback(foo):
@@ -305,11 +305,11 @@ class TestCallbacks(unittest.TestCase):
             self.assertEquals(userdata, "Test%d" % TestCallbacks.called)
             TestCallbacks.called += 1
             return TestCallbacks.called
-        
+
         for i in range(100):
             val = Everything.test_callback_user_data(callback, "Test%d" % i)
             self.assertEquals(val, i+1)
-            
+
         self.assertEquals(TestCallbacks.called, 100)
 
     def test_callback_userdata_refcount(self):
@@ -323,7 +323,7 @@ class TestCallbacks(unittest.TestCase):
         start_ref_count = getrefcount(ud)
         for i in range(100):
             Everything.test_callback_destroy_notify(callback, ud)
-            
+
         Everything.test_callback_thaw_notifications()
         end_ref_count = getrefcount(ud)
 

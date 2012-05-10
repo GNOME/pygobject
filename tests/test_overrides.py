@@ -11,7 +11,7 @@ from compathelper import _long, _unicode, _bytes
 
 os.environ['GSETTINGS_BACKEND'] = 'memory'
 # support a separate build tree, so look in build dir first
-os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR', 
+os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR',
         os.path.dirname(__file__))
 
 from gi.repository import GLib
@@ -346,15 +346,15 @@ class TestGLib(unittest.TestCase):
 
         self.assertEqual(GLib.Variant.split_signature('(iso)'), ['i', 's', 'o'])
 
-        self.assertEqual(GLib.Variant.split_signature('(s(ss)i(ii))'), 
+        self.assertEqual(GLib.Variant.split_signature('(s(ss)i(ii))'),
                 ['s', '(ss)', 'i', '(ii)'])
 
         self.assertEqual(GLib.Variant.split_signature('(as)'), ['as'])
 
-        self.assertEqual(GLib.Variant.split_signature('(s(ss)iaiaasa(ii))'), 
+        self.assertEqual(GLib.Variant.split_signature('(s(ss)iaiaasa(ii))'),
                 ['s', '(ss)', 'i', 'ai', 'aas', 'a(ii)'])
 
-        self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'), 
+        self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'),
                 ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
 
     def test_variant_hash(self):
@@ -975,41 +975,41 @@ class TestGtk(unittest.TestCase):
 
         treeiter = tree_store.iter_children(parent)
         while treeiter:
-           i = tree_store.get_value(treeiter, 0)
-           s = tree_store.get_value(treeiter, 1)
-           obj = tree_store.get_value(treeiter, 2)
-           obj.check(i, s)
-           obj2 = tree_store.get_value(treeiter, 3)
-           self.assertEquals(obj, obj2);
+            i = tree_store.get_value(treeiter, 0)
+            s = tree_store.get_value(treeiter, 1)
+            obj = tree_store.get_value(treeiter, 2)
+            obj.check(i, s)
+            obj2 = tree_store.get_value(treeiter, 3)
+            self.assertEquals(obj, obj2);
 
-           pyobj = tree_store.get_value(treeiter, 4)
-           self.assertEquals(pyobj, test_pyobj)
-           pydict = tree_store.get_value(treeiter, 5)
-           self.assertEquals(pydict, test_pydict)
-           pylist = tree_store.get_value(treeiter, 6)
-           self.assertEquals(pylist, test_pylist)
+            pyobj = tree_store.get_value(treeiter, 4)
+            self.assertEquals(pyobj, test_pyobj)
+            pydict = tree_store.get_value(treeiter, 5)
+            self.assertEquals(pydict, test_pydict)
+            pylist = tree_store.get_value(treeiter, 6)
+            self.assertEquals(pylist, test_pylist)
 
-           bool_1 = tree_store.get_value(treeiter, 7)
-           bool_2 = tree_store.get_value(treeiter, 8)
-           self.assertEquals(bool_1, bool_2)
-           self.assertTrue(isinstance(bool_1, bool))
-           self.assertTrue(isinstance(bool_2, bool))
+            bool_1 = tree_store.get_value(treeiter, 7)
+            bool_2 = tree_store.get_value(treeiter, 8)
+            self.assertEquals(bool_1, bool_2)
+            self.assertTrue(isinstance(bool_1, bool))
+            self.assertTrue(isinstance(bool_2, bool))
 
-           uint_ = tree_store.get_value(treeiter, 9)
-           self.assertEquals(uint_, i)
-           ulong_ = tree_store.get_value(treeiter, 10)
-           self.assertEquals(ulong_, GObject.G_MAXULONG)
-           int64_ = tree_store.get_value(treeiter, 11)
-           self.assertEquals(int64_, GObject.G_MININT64)
-           uint64_ = tree_store.get_value(treeiter, 12)
-           self.assertEquals(uint64_, 0xffffffffffffffff)
-           uchar_ = tree_store.get_value(treeiter, 13)
-           self.assertEquals(ord(uchar_), 254)
-           char_ = tree_store.get_value(treeiter, 14)
-           self.assertEquals(char_, 'a')
+            uint_ = tree_store.get_value(treeiter, 9)
+            self.assertEquals(uint_, i)
+            ulong_ = tree_store.get_value(treeiter, 10)
+            self.assertEquals(ulong_, GObject.G_MAXULONG)
+            int64_ = tree_store.get_value(treeiter, 11)
+            self.assertEquals(int64_, GObject.G_MININT64)
+            uint64_ = tree_store.get_value(treeiter, 12)
+            self.assertEquals(uint64_, 0xffffffffffffffff)
+            uchar_ = tree_store.get_value(treeiter, 13)
+            self.assertEquals(ord(uchar_), 254)
+            char_ = tree_store.get_value(treeiter, 14)
+            self.assertEquals(char_, 'a')
 
-           parent = treeiter
-           treeiter = tree_store.iter_children(parent)
+            parent = treeiter
+            treeiter = tree_store.iter_children(parent)
 
         self.assertEquals(i, 99)
 
@@ -1124,7 +1124,7 @@ class TestGtk(unittest.TestCase):
         list_store.set_value(treeiter, 2, TestGtk.TestClass(self, i, label))
         list_store.set_value(treeiter, 4, test_pydict)
         list_store.set_value(treeiter, 7, True)
- 
+
         # this should append
         i = 99
         label = 'this is row #99'

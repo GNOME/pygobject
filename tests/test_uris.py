@@ -12,4 +12,3 @@ class TestUris(unittest.TestCase):
         assert uri_list[0] == "http://www.huh.org/books/foo.html"
         assert uri_list[1] == "http://www.huh.org/books/foo.pdf"
         assert uri_list[2] == "ftp://ftp.foo.org/books/foo.txt"
-
