@@ -71,9 +71,8 @@ def _install_enums(module, dest=None, strip=''):
         try:
             if issubclass(obj, GObject.GFlags):
                 for value, flag in obj.__flags_values__.items():
-                    for name in flag.value_names:
-                        name = name.replace(modname + '_', '')
-                        setattr(dest, name, flag)
+                    name = flag.value_names[-1].replace(modname + '_', '')
+                    setattr(dest, name, flag)
         except TypeError:
             continue
 
