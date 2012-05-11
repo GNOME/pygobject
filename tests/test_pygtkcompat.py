@@ -33,6 +33,7 @@ class TestGTKCompat(unittest.TestCase):
 
     def testFlags(self):
         self.assertEquals(gtk.EXPAND, Gtk.AttachOptions.EXPAND)
+        self.assertEqual(gtk.gdk.SHIFT_MASK, Gdk.ModifierType.SHIFT_MASK)
 
     def testKeysyms(self):
         import gtk.keysyms
