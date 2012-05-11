@@ -1466,6 +1466,15 @@ class TestGtk(unittest.TestCase):
         self.assertRaises(ValueError, tree_store.get, aiter, 1, 100)
         self.assertEqual(tree_store.get(aiter, 0, 1), (10, 'this is row #10'))
 
+        # check __delitem__
+        self.assertEqual(len(tree_store), 100)
+        aiter = tree_store.get_iter(10)
+        del tree_store[aiter]
+        self.assertEqual(len(tree_store), 99)
+        self.assertRaises(TypeError, tree_store.__delitem__, None)
+        self.assertRaises(IndexError, tree_store.__delitem__, -101)
+        self.assertRaises(IndexError, tree_store.__delitem__, 101)
+
     def test_tree_model_edit(self):
         model = Gtk.ListStore(int, str, float)
         model.append([1, "one", -0.1])

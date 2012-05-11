@@ -731,9 +731,9 @@ class TreeModel(Gtk.TreeModel):
     # alias for Python 2.x object protocol
     __nonzero__ = __bool__
 
-    def __getitem__(self, key):
+    def _getiter(self, key):
         if isinstance(key, Gtk.TreeIter):
-            return TreeModelRow(self, key)
+            return key
         elif isinstance(key, int) and key < 0:
             index = len(self) + key
             if index < 0:
@@ -742,17 +742,25 @@ class TreeModel(Gtk.TreeModel):
                 aiter = self.get_iter(index)
             except ValueError:
                 raise IndexError("could not find tree path '%s'" % key)
-            return TreeModelRow(self, aiter)
+            return aiter
         else:
             try:
                 aiter = self.get_iter(key)
             except ValueError:
                 raise IndexError("could not find tree path '%s'" % key)
-            return TreeModelRow(self, aiter)
+            return aiter
+
+    def __getitem__(self, key):
+        aiter = self._getiter(key)
+        return TreeModelRow(self, aiter)
 
     def __setitem__(self, key, value):
         row = self[key]
         self.set_row(row.iter, value)
+
+    def __delitem__(self, key):
+        aiter = self._getiter(key)
+        self.remove(aiter)
 
     def __iter__(self):
         return TreeModelRowIter(self, self.get_iter_first())
