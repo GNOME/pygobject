@@ -1088,6 +1088,10 @@ class TreeModelRow(object):
         return self.get_next()
 
     @property
+    def previous(self):
+        return self.get_previous()
+
+    @property
     def parent(self):
         return self.get_parent()
 
@@ -1095,6 +1099,11 @@ class TreeModelRow(object):
         next_iter = self.model.iter_next(self.iter)
         if next_iter:
             return TreeModelRow(self.model, next_iter)
+
+    def get_previous(self):
+        prev_iter = self.model.iter_previous(self.iter)
+        if prev_iter:
+            return TreeModelRow(self.model, prev_iter)
 
     def get_parent(self):
         parent_iter = self.model.iter_parent(self.iter)
