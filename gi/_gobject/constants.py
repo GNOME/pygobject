@@ -45,6 +45,7 @@ TYPE_OBJECT = _gobject.type_from_name('GObject')
 TYPE_PYOBJECT = _gobject.type_from_name('PyObject')
 TYPE_GTYPE = _gobject.type_from_name('GType')
 TYPE_STRV = _gobject.type_from_name('GStrv')
+TYPE_VARIANT = _gobject.type_from_name('GVariant')
 TYPE_UNICHAR = TYPE_UINT
 
 # do a little dance to maintain API compatibility
