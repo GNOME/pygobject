@@ -1,3 +1,8 @@
+3.2.2  14-May-2012
+        - pygtkcompat: Correctly set flags (Jose Rostagno) (#675911)
+        - Gtk overrides: Implement __delitem__ on TreeModel (Jose Rostagno)
+          (#675892)
+
 3.2.1  10-May-2012
         - Reindent files in tests to use 4-space indentation (Sebastian Pölsterl)
         - Add missing override for TreeModel.iter_previous() (Martin Pitt)
