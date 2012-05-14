@@ -1696,6 +1696,33 @@ class TestPythonGObject(unittest.TestCase):
         GIMarshallingTests.SubSubObject.do_method_deep_hierarchy(sub_sub_sub_object, 5)
         self.assertEqual(sub_sub_sub_object.props.int, 5)
 
+    def test_python_subsubobject_vfunc(self):
+        class PySubObject(GIMarshallingTests.Object):
+            def __init__(self):
+                GIMarshallingTests.Object.__init__(self)
+                self.sub_method_int8_called = 0
+
+            def do_method_int8_in(self, int8):
+                self.sub_method_int8_called += 1
+
+        class PySubSubObject(PySubObject):
+            def __init__(self):
+                PySubObject.__init__(self)
+                self.subsub_method_int8_called = 0
+
+            def do_method_int8_in(self, int8):
+                self.subsub_method_int8_called += 1
+
+        so = PySubObject()
+        so.method_int8_in(1)
+        self.assertEqual(so.sub_method_int8_called, 1)
+
+        # it should call the method on the SubSub object only
+        sso = PySubSubObject()
+        sso.method_int8_in(1)
+        self.assertEqual(sso.subsub_method_int8_called, 1)
+        self.assertEqual(sso.sub_method_int8_called, 0)
+
     def test_callback_in_vfunc(self):
         class SubObject(GIMarshallingTests.Object):
             def __init__(self):

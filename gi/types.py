@@ -121,10 +121,10 @@ class MetaClassHelper(object):
 
             # If a method name starts with "do_" assume it is a vfunc, and search
             # in the base classes for a method with the same name to override.
-            # Recursion is not necessary here because getattr() searches all
-            # super class attributes as well.
+            # Recursion is necessary as overriden methods in most immediate parent
+            # classes may shadow vfuncs from classes higher in the hierarchy.
             vfunc_info = None
-            for base in cls.__bases__:
+            for base in cls.__mro__:
                 method = getattr(base, vfunc_name, None)
                 if method is not None and hasattr(method, '__info__') and \
                         isinstance(method.__info__, VFuncInfo):
