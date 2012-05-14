@@ -381,7 +381,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 1)
 
-        # Test setting value on target does not change source
+        # Test setting value on target also changes source
         self.target.props.int_prop = 2
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 2)
