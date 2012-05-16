@@ -1485,18 +1485,113 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     return result;
 }
 
+/* custom closure for gobject bindings */
+static void
+pygbinding_closure_invalidate(gpointer data, GClosure *closure)
+{
+    PyGClosure *pc = (PyGClosure *)closure;
+    PyGILState_STATE state;
+
+    state = pyglib_gil_state_ensure();
+    Py_XDECREF(pc->callback);
+    Py_XDECREF(pc->extra_args);
+    pyglib_gil_state_release(state);
+
+    pc->callback = NULL;
+    pc->extra_args = NULL;
+}
+
+static void
+pygbinding_marshal (GClosure     *closure,
+                    GValue       *return_value,
+                    guint         n_param_values,
+                    const GValue *param_values,
+                    gpointer      invocation_hint,
+                    gpointer      marshal_data)
+{
+    PyGILState_STATE state;
+    PyGClosure *pc = (PyGClosure *)closure;
+    PyObject *params, *ret;
+    GValue *out_value;
+
+    state = pyglib_gil_state_ensure();
+
+    /* construct Python tuple for the parameter values */
+    params = PyTuple_New(2);
+    PyTuple_SetItem (params, 0, pyg_value_as_pyobject(&param_values[0], FALSE));
+    PyTuple_SetItem (params, 1, pyg_value_as_pyobject(&param_values[1], FALSE));
+
+    /* params passed to function may have extra arguments */
+    if (pc->extra_args) {
+        PyObject *tuple = params;
+        params = PySequence_Concat(tuple, pc->extra_args);
+        Py_DECREF(tuple);
+    }
+    ret = PyObject_CallObject(pc->callback, params);
+    if (!ret) {
+        PyErr_Print ();
+        goto out;
+    } else if (ret == Py_None) {
+        g_value_set_boolean (return_value, FALSE);
+        goto out;
+    }
+
+    out_value = g_value_get_boxed (&param_values[2]);
+    if (pyg_value_from_pyobject (out_value, ret) != 0) {
+        PyErr_SetString (PyExc_ValueError, "can't convert value");
+        PyErr_Print ();
+        g_value_set_boolean (return_value, FALSE);
+    } else {
+        g_value_set_boolean (return_value, TRUE);
+    }
+
+    Py_DECREF(ret);
+
+out:
+    Py_DECREF(params);
+    pyglib_gil_state_release(state);
+}
+
+static GClosure *
+pygbinding_closure_new (PyObject *callback, PyObject *extra_args)
+{
+    GClosure *closure;
+
+    g_return_val_if_fail(callback != NULL, NULL);
+    closure = g_closure_new_simple(sizeof(PyGClosure), NULL);
+    g_closure_add_invalidate_notifier(closure, NULL, pygbinding_closure_invalidate);
+    g_closure_set_marshal(closure, pygbinding_marshal);
+    Py_INCREF(callback);
+    ((PyGClosure *)closure)->callback = callback;
+    if (extra_args && extra_args != Py_None) {
+        Py_INCREF(extra_args);
+        if (!PyTuple_Check(extra_args)) {
+            PyObject *tmp = PyTuple_New(1);
+            PyTuple_SetItem(tmp, 0, extra_args);
+            extra_args = tmp;
+        }
+        ((PyGClosure *)closure)->extra_args = extra_args;
+    }
+    return closure;
+}
 
 static PyObject *
 pygobject_bind_property(PyGObject *self, PyObject *args)
 {
 	gchar *source_name, *target_name;
 	gchar *source_canon, *target_canon;
-	PyObject *target, *source_repr, *target_repr, *pybinding;
+	PyObject *target, *source_repr, *target_repr;
+	PyObject *transform_to, *transform_from, *user_data = NULL;
 	GBinding *binding;
 	GBindingFlags flags = G_BINDING_DEFAULT;
+	GClosure *to_closure = NULL, *from_closure = NULL;
 
-	if (!PyArg_ParseTuple(args, "sOs|i:GObject.bind_property",
-	                      &source_name, &target, &target_name, &flags))
+	transform_from = NULL;
+	transform_to = NULL;
+
+	if (!PyArg_ParseTuple(args, "sOs|iOOO:GObject.bind_property",
+			      &source_name, &target, &target_name, &flags,
+			      &transform_to, &transform_from, &user_data))
 		return NULL;
 
 	CHECK_GOBJECT(self);
@@ -1505,12 +1600,31 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 		return NULL;
 	}
 
+	if (transform_to && transform_to != Py_None) {
+		if (!PyCallable_Check (transform_to)) {
+			PyErr_SetString (PyExc_TypeError,
+					 "transform_to must be callable or None");
+			return NULL;
+		}
+		to_closure = pygbinding_closure_new (transform_to, user_data);
+	}
+
+	if (transform_from && transform_from != Py_None) {
+		if (!PyCallable_Check (transform_from)) {
+			PyErr_SetString (PyExc_TypeError,
+					 "transform_from must be callable or None");
+			return NULL;
+		}
+		from_closure = pygbinding_closure_new (transform_from, user_data);
+	}
+
 	/* Canonicalize underscores to hyphens. Note the results must be freed. */
 	source_canon = g_strdelimit(g_strdup(source_name), "_", '-');
 	target_canon = g_strdelimit(g_strdup(target_name), "_", '-');
 
-	binding = g_object_bind_property(G_OBJECT(self->obj), source_canon,
-	                                 pygobject_get(target), target_canon, flags);
+	binding = g_object_bind_property_with_closures (G_OBJECT(self->obj), source_canon,
+							pygobject_get(target), target_canon,
+							flags, to_closure, from_closure);
 	g_free(source_canon);
 	g_free(target_canon);
 	source_canon = target_canon = NULL;
@@ -1519,14 +1633,14 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 		source_repr = PyObject_Repr((PyObject*)self);
 		target_repr = PyObject_Repr(target);
 		PyErr_Format(PyExc_TypeError, "Cannot create binding from %s.%s to %s.%s",
-		             PYGLIB_PyUnicode_AsString(source_repr), source_name,
-		             PYGLIB_PyUnicode_AsString(target_repr), target_name);
+			     PYGLIB_PyUnicode_AsString(source_repr), source_name,
+			     PYGLIB_PyUnicode_AsString(target_repr), target_name);
 		Py_DECREF(source_repr);
 		Py_DECREF(target_repr);
 		return NULL;
 	}
 
-	return pygbinding_weak_ref_new(binding);
+	return pygbinding_weak_ref_new(G_OBJECT (binding));
 }
 
 static PyObject *

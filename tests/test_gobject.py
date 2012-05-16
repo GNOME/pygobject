@@ -386,6 +386,65 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 2)
 
+    def testTransformToOnly(self):
+        def transform_to(binding, value, user_data=None):
+            self.assertEqual(user_data, 'test-data')
+            return value * 2
+
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                       GObject.BindingFlags.DEFAULT,
+                                       transform_to, None, 'test-data')
+        binding = binding  # PyFlakes
+
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 2)
+
+        self.target.props.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 1)
+
+    def testTransformFromOnly(self):
+        def transform_from(binding, value, user_data=None):
+            self.assertEqual(user_data, None)
+            return value * 2
+
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                       GObject.BindingFlags.BIDIRECTIONAL,
+                                       None, transform_from)
+        binding = binding  # PyFlakes
+
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 1)
+
+        self.target.props.int_prop = 1
+        self.assertEqual(self.source.int_prop, 2)
+        self.assertEqual(self.target.int_prop, 1)
+
+    def testTransformBidrectional(self):
+        def transform_to(binding, value, user_data=None):
+            self.assertEqual(user_data, 'test-data')
+            return value * 2
+
+        def transform_from(binding, value, user_data=None):
+            self.assertEqual(user_data, 'test-data')
+            return value / 2
+
+        # bidirectional bindings
+        binding = self.source.bind_property('int_prop', self.target, 'int_prop',
+                                       GObject.BindingFlags.BIDIRECTIONAL,
+                                       transform_to, transform_from, 'test-data')
+        binding = binding  # PyFlakes
+
+        self.source.int_prop = 1
+        self.assertEqual(self.source.int_prop, 1)
+        self.assertEqual(self.target.int_prop, 2)
+
+        self.target.props.int_prop = 4
+        self.assertEqual(self.source.int_prop, 2)
+        self.assertEqual(self.target.int_prop, 4)
+
     def testExplicitUnbindClearsConnection(self):
         self.assertEqual(self.source.int_prop, 0)
         self.assertEqual(self.target.int_prop, 0)
