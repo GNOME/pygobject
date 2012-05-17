@@ -72,6 +72,23 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
         case GI_TYPE_TAG_DOUBLE:
            *((gdouble *) out_arg) = arg.v_double;
            break;
+        case GI_TYPE_TAG_INTERFACE:
+        {
+           GIBaseInfo *interface;
+           GIInfoType interface_type;
+
+           interface = g_type_info_get_interface (type_info);
+           interface_type = g_base_info_get_type (interface);
+
+           if (!g_type_info_is_pointer (type_info) &&
+	       interface_type == GI_INFO_TYPE_STRUCT) {
+               gsize item_size = _pygi_g_type_info_size (type_info);
+               memcpy (out_arg, arg.v_pointer, item_size);
+               break;
+           }
+        }
+
+        /* Fall through */
         default:
            *((GIArgument *) out_arg) = arg;
            break;

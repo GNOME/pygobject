@@ -1629,6 +1629,9 @@ class TestPythonGObject(unittest.TestCase):
         def do_vfunc_return_value_and_multiple_out_parameters(self):
             return (5, 42, 99)
 
+        def do_vfunc_caller_allocated_out_parameter(self):
+            return 'hello'
+
     class SubObject(GIMarshallingTests.SubObject):
         def __init__(self, int):
             GIMarshallingTests.SubObject.__init__(self)
@@ -1664,6 +1667,8 @@ class TestPythonGObject(unittest.TestCase):
 
         self.assertEqual(object_.vfunc_return_value_and_one_out_parameter(), (5, 42))
         self.assertEqual(object_.vfunc_return_value_and_multiple_out_parameters(), (5, 42, 99))
+
+        self.assertEqual(object_.vfunc_caller_allocated_out_parameter(), 'hello')
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
             def __init__(self, int):
