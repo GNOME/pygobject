@@ -1112,9 +1112,13 @@ array_success:
                         result = pygi_struct_foreign_convert_to_g_argument (
                                      object, info, transfer, &arg);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        arg.v_pointer = pyg_boxed_get (object, void);
-                        if (transfer == GI_TRANSFER_EVERYTHING) {
-                            arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
+                        if (pyg_boxed_check (object, type)) {
+                            arg.v_pointer = pyg_boxed_get (object, void);
+                            if (transfer == GI_TRANSFER_EVERYTHING) {
+                                arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
+                            }
+                        } else {
+                            PyErr_Format (PyExc_TypeError, "wrong boxed type");
                         }
                     } else if (g_type_is_a (type, G_TYPE_POINTER) || 
                                g_type_is_a (type, G_TYPE_VARIANT) || 

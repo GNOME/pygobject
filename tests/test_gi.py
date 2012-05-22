@@ -2190,3 +2190,22 @@ class TestPropertiesObject(unittest.TestCase):
 
         obj = GIMarshallingTests.PropertiesObject(some_strv=['hello', 'world'])
         self.assertEqual(obj.props.some_strv, ['hello', 'world'])
+
+    def test_boxed_struct(self):
+        self.assertEqual(self.obj.props.some_boxed_struct, None)
+
+        class GStrv(list):
+            __gtype__ = GObject.TYPE_STRV
+
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+
+        self.obj.props.some_boxed_struct = struct1
+        self.assertEqual(self.obj.props.some_boxed_struct.long_, 1)
+        self.assertEqual(self.obj.some_boxed_struct.long_, 1)
+
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_boxed_struct', 1)
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_boxed_struct', 'foo')
+
+        obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
+        self.assertEqual(obj.props.some_boxed_struct.long_, 1)
