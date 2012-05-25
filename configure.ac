@@ -185,7 +185,7 @@ dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
 
 # we always need cairo (not pycairo) for building the tests
-PKG_CHECK_MODULES(CAIRO, cairo)
+PKG_CHECK_MODULES(CAIRO, cairo cairo-gobject)
 
 AC_ARG_ENABLE(cairo,
     AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
