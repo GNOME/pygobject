@@ -689,6 +689,9 @@ class TestArray(unittest.TestCase):
     def test_array_in(self):
         GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
 
+    def test_array_in_len_zero_terminated(self):
+        GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
+
     def test_array_uint8_in(self):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
         GIMarshallingTests.array_uint8_in(_bytes("abcd"))
