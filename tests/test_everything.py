@@ -556,6 +556,14 @@ class TestProperties(unittest.TestCase):
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEqual(object_.props.boxed.some_int8, 42)
 
+    def test_boxed_equality(self):
+        boxed = Everything.TestBoxedC()
+        # TestBoxedC uses refcounting, so we know that
+        # the pointer is the same when copied
+        copy = boxed.copy()
+        self.assertEqual(boxed, copy)
+        self.assertNotEqual(id(boxed), id(copy))
+
     def test_gtype(self):
         object_ = Everything.TestObj()
         self.assertEqual(object_.props.gtype, GObject.TYPE_INVALID)

@@ -50,7 +50,8 @@ pyg_boxed_dealloc(PyGBoxed *self)
 static PyObject*
 pyg_boxed_richcompare(PyObject *self, PyObject *other, int op)
 {
-    if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGBoxed_Type)
+    if (Py_TYPE(self) == Py_TYPE(other) &&
+        PyObject_IsInstance(self, (PyObject*)&PyGBoxed_Type))
         return _pyglib_generic_ptr_richcompare(((PyGBoxed*)self)->boxed,
                                                ((PyGBoxed*)other)->boxed,
                                                op);
