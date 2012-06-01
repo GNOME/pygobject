@@ -234,13 +234,13 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.gtype, TYPE_UINT)
         self.assertEqual(obj.gtype, TYPE_UINT)
 
-    def textBoxed(self):
+    def testBoxed(self):
         obj = new(PropertyObject)
 
         regex = GLib.Regex.new('[a-z]*', 0, 0)
         obj.props.boxed = regex
         self.assertEqual(obj.props.boxed.get_pattern(), '[a-z]*')
-        self.assertEqual(obj.boxed.get_patttern(), '[a-z]*')
+        self.assertEqual(obj.boxed.get_pattern(), '[a-z]*')
 
         self.assertRaises(TypeError, setattr, obj, 'boxed', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'boxed', object())
