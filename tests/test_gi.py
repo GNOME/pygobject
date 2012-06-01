@@ -1614,6 +1614,21 @@ class TestPythonGObject(unittest.TestCase):
             GIMarshallingTests.Object.do_method_with_default_implementation(self, int8)
             self.props.int += int8
 
+        def do_vfunc_return_value_only(self):
+            return 4242
+
+        def do_vfunc_one_out_parameter(self):
+            return 42.42
+
+        def do_vfunc_multiple_out_parameters(self):
+            return (42.42, 3.14)
+
+        def do_vfunc_return_value_and_one_out_parameter(self):
+            return (5, 42)
+
+        def do_vfunc_return_value_and_multiple_out_parameters(self):
+            return (5, 42, 99)
+
     class SubObject(GIMarshallingTests.SubObject):
         def __init__(self, int):
             GIMarshallingTests.SubObject.__init__(self)
@@ -1639,6 +1654,16 @@ class TestPythonGObject(unittest.TestCase):
 
         object_.method_with_default_implementation(42)
         self.assertEqual(object_.props.int, 84)
+
+        self.assertEqual(object_.vfunc_return_value_only(), 4242)
+        self.assertAlmostEqual(object_.vfunc_one_out_parameter(), 42.42, places=5)
+
+        (a, b) = object_.vfunc_multiple_out_parameters()
+        self.assertAlmostEqual(a, 42.42, places=5)
+        self.assertAlmostEqual(b, 3.14, places=5)
+
+        self.assertEqual(object_.vfunc_return_value_and_one_out_parameter(), (5, 42))
+        self.assertEqual(object_.vfunc_return_value_and_multiple_out_parameters(), (5, 42, 99))
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
             def __init__(self, int):
