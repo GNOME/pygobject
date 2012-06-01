@@ -1039,6 +1039,9 @@ class TestGValue(unittest.TestCase):
     def test_gvalue_out(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out())
 
+    def test_gvalue_out_caller_allocates(self):
+        self.assertEqual(42, GIMarshallingTests.gvalue_out_caller_allocates())
+
     def test_gvalue_inout(self):
         self.assertEqual('42', GIMarshallingTests.gvalue_inout(42))
         value = GObject.Value()
