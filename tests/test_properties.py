@@ -5,7 +5,7 @@ import struct
 import unittest
 
 from gi.repository import GObject
-from  gi.repository.GObject import GType, new, PARAM_READWRITE, \
+from gi.repository.GObject import GType, new, PARAM_READWRITE, \
      PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
      TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
