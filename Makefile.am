@@ -98,7 +98,7 @@ release-tag:
 release-news:
 	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
 	last=`head -n1 NEWS | cut -f1 -d' '`; \
-	git log --format='format:        - %s (%aN)%n%b' 3.1.92.. | \
+	git log --format='format:        - %s (%aN)%n%b' $$last.. | \
 	  sed -n '/^        -/ p; /bugzilla.gnome.org/ { s/^.*id=\([0-9]\+\).*$$/          (#\1)/; p}' >> NEWS.tmp
 	echo >> NEWS.tmp
 	cat NEWS >> NEWS.tmp
