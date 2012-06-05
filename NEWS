@@ -1,3 +1,47 @@
+3.3.2   05-Jun-2012
+	- foreign: Register cairo.Path and cairo.FontOptions foreign structs
+	  (Bastian Winkler) (#677388)
+        - Check types in GBoxed assignments (Marien Zwart) (#676603)
+	- [API add] Gtk overrides: Add TreeModelRow.get_previous()
+	  (Bastian Winkler) (#677389)
+	- [API add] Add missing GObject.TYPE_VARIANT (Bastian Winkler) (#677387)
+        - Fix boxed type equality (Jasper St. Pierre) (#677249)
+        - Fix TestProperties.testBoxed test (Jose Rostagno) (#676644)
+	- Fix handling of by-reference structs as out parameters
+	  (Carlos Garnacho) (#653151)
+	- tests: Add more vfunc checks for GIMarshallingTestsObject
+	  (Martin Pitt)
+        - Test caller-allocated GValue out parameter (Martin Pitt) (#653151)
+        - GObject.bind_property: Support transform functions (Bastian Winkler)
+          (#676169)
+        - Fix lookup of vfuncs in parent classes (Carlos Garnacho) (#672864)
+        - tests/test_properties.py: Fix whitespace (Martin Pitt)
+        - gi: Support zero-terminated arrays with length arguments
+	  (Jasper St. Pierre) (#677124)
+        - [API add] Add GObject.bind_property method (Simon Feltman) (#675582)
+        - pygtkcompat: Correctly set flags (Jose Rostagno) (#675911)
+        - Gtk overrides: Implement __delitem__ on TreeModel (Jose Rostagno)
+          (#675892)
+        - Gdk Color override should support red/green/blue_float properties
+	  (Simon Feltman) (#675579)
+        - Support marshalling of GVariants for closures (Martin Pitt) (#656554)
+        - _pygi_argument_from_object(): Check for compatible data type
+	  (Martin Pitt)
+        - pygtkcompat: Fix color conversion (Martin Pitt)
+        - test_gi: Check setting properties in constructor (Martin Pitt)
+        - Support getting and setting GStrv properties (Martin Pitt)
+        - Support defining GStrv properties from Python (Martin Pitt)
+        - Add GObject.TYPE_STRV constant (Martin Pitt)
+        - Unref GVariants when destroying the wrapper (Martin Pitt) (#675472)
+        - Fix TestArrayGVariant test cases (Martin Pitt)
+        - pygtkcompat: Add gdk.pixbuf_get_formats compat code (Jose Rostagno)
+          (#675489)
+        - pygtkcompat: Add some more compat functions (Jose Rostagno) (#675489)
+        - Fix tests for Python 3 (Martin Pitt)
+        - Fix building with --disable-cairo (Martin Pitt)
+        - tests: Fix deprecated assertions (Martin Pitt)
+        - Run tests with MALLOC_PERTURB_ (Martin Pitt)
+
 3.3.1   30-Apr-2012
 	- GSettings: allow extra keyword arguments (Giovanni Campagna)
 	  (#675105)
