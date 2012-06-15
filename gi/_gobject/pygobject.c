@@ -57,15 +57,28 @@ GQuark pygobject_instance_data_key;
 void
 pygobject_data_free(PyGObjectData *data)
 {
-    PyGILState_STATE state = pyglib_gil_state_ensure();
+    /* This function may be called after the python interpreter has already
+     * been shut down. If this happens, we cannot do any python calls, so just
+     * free the memory. */
+    PyGILState_STATE state;
+    PyThreadState *_save = NULL;
+
     GSList *closures, *tmp;
-    Py_DECREF(data->type);
+
+    if (Py_IsInitialized()) {
+	state = pyglib_gil_state_ensure();
+	Py_DECREF(data->type);
+	/* We cannot use pyg_begin_allow_threads here because this is inside
+	 * a branch. */
+	if (pyg_threads_enabled)
+	    _save = PyEval_SaveThread();
+    }
+
     tmp = closures = data->closures;
 #ifndef NDEBUG
     data->closures = NULL;
     data->type = NULL;
 #endif
-    pyg_begin_allow_threads;
     while (tmp) {
  	GClosure *closure = tmp->data;
  
@@ -74,13 +87,17 @@ pygobject_data_free(PyGObjectData *data)
  	tmp = tmp->next;
  	g_closure_invalidate(closure);
     }
-    pyg_end_allow_threads;
  
     if (data->closures != NULL)
  	g_warning("invalidated all closures, but data->closures != NULL !");
 
     g_free(data);
-    pyglib_gil_state_release(state);
+
+    if (Py_IsInitialized()) {
+	if (pyg_threads_enabled)
+	    PyEval_RestoreThread(_save);
+	pyglib_gil_state_release(state);
+    }
 }
 
 static inline PyGObjectData *
