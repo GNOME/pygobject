@@ -230,6 +230,7 @@ class TestGLib(unittest.TestCase):
         self.assertRaises(TypeError, GLib.Variant, 'i', 'hello')
         self.assertRaises(TypeError, GLib.Variant, 's', 42)
         self.assertRaises(TypeError, GLib.Variant, '(ss)', 'mec', 'mac')
+        self.assertRaises(TypeError, GLib.Variant, '(s)', 'hello')
 
         # unimplemented data type
         self.assertRaises(NotImplementedError, GLib.Variant, 'Q', 1)
