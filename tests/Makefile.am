@@ -75,6 +75,7 @@ EXTRA_DIST = \
 	test-unknown.h \
 	te_ST@nouppera \
 	org.gnome.test.gschema.xml \
+	test_glib.py \
 	test_gobject.py \
 	test_interface.py \
 	test_mainloop.py \

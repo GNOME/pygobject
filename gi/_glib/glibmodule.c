@@ -598,8 +598,14 @@ pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
         return NULL;
 
     ret = g_find_program_in_path(program);
-    retval = PYGLIB_PyUnicode_FromString(ret);
-    g_free(ret);
+
+    if (ret != NULL) {
+        retval = PYGLIB_PyUnicode_FromString(ret);
+        g_free(ret);
+    } else {
+        Py_INCREF(Py_None);
+        retval = Py_None;
+    }
     return retval;
 }
 
