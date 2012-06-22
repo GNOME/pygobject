@@ -255,7 +255,7 @@ def _gsuccess_mask(func):
     def cull_success(*args):
         result = func(*args)
         success = result[0]
-        if success == False:
+        if not success:
             return None
         else:
             if len(result) == 2:

@@ -477,7 +477,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
                  message_format=None,
                  **kwds):
 
-        if message_format != None:
+        if message_format:
             kwds['text'] = message_format
 
         # type keyword is used for backwards compat with PyGTK

@@ -168,7 +168,7 @@ class DrawingAreaApp:
         return True
 
     def scribble_motion_notify_event(self, da, event):
-        if self.surface == None:  # paranoia check, in case we haven't gotten a configure event
+        if self.surface is None:  # paranoia check, in case we haven't gotten a configure event
             return False
 
         # This call is very important; it requests the next motion event.
@@ -189,7 +189,7 @@ class DrawingAreaApp:
         return True
 
     def scribble_button_press_event(self, da, event):
-        if self.surface == None:  # paranoia check, in case we haven't gotten a configure event
+        if self.surface is None:  # paranoia check, in case we haven't gotten a configure event
             return False
 
         if event.button == 1:

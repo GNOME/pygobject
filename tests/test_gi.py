@@ -1767,10 +1767,10 @@ class TestPythonGObject(unittest.TestCase):
 
         _object = SubObject()
         _object.call_vfunc_with_callback()
-        self.assertTrue(_object.worked == True)
+        self.assertTrue(_object.worked)
         _object.worked = False
         _object.call_vfunc_with_callback()
-        self.assertTrue(_object.worked == True)
+        self.assertTrue(_object.worked)
 
 
 class TestMultiOutputArgs(unittest.TestCase):

@@ -150,7 +150,7 @@ class ClipboardApp:
         clipboard.set_text(entry.get_text(), -1)
 
     def paste_received(self, clipboard, text, entry):
-        if text != None:
+        if text is not None:
             entry.set_text(text)
 
     def paste_button_clicked(self, button, entry):
@@ -199,7 +199,7 @@ class ClipboardApp:
         clipboard = Gtk.Clipboard.get(atom)
         pixbuf = clipboard.wait_for_image()
 
-        if pixbuf != None:
+        if pixbuf is not None:
             data.set_from_pixbuf(pixbuf)
 
     def button_press(self, widget, event, data):

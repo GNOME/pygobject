@@ -366,10 +366,10 @@ class GtkDemoWindow(Gtk.Window):
                     prepare_iters()
                     self.source_buffer.apply_tag_by_name('italic', start_iter, end_iter)
                 else:
-                    if is_func is True:
+                    if is_func:
                         prepare_iters()
                         self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
-                    elif is_decorator is True:
+                    elif is_decorator:
                         prepare_iters()
                         self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
             elif tok_type == tokenize.STRING:
@@ -387,10 +387,10 @@ class GtkDemoWindow(Gtk.Window):
                     is_decorator = True
                     continue
 
-            if is_func is True:
+            if is_func:
                 is_func = False
 
-            if is_decorator is True:
+            if is_decorator:
                 is_decorator = False
 
 
