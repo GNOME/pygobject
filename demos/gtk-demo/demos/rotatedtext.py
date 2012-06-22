@@ -147,8 +147,8 @@ class RotatedTextApp:
         height = da.get_allocated_height()
         device_radius = min(width, height) / 2.0
         cairo_ctx.translate(
-                   device_radius + (width - 2 * device_radius) / 2,
-                   device_radius + (height - 2 * device_radius) / 2)
+            device_radius + (width - 2 * device_radius) / 2,
+            device_radius + (height - 2 * device_radius) / 2)
         cairo_ctx.scale(device_radius / self.RADIUS,
                         device_radius / self.RADIUS)
 
@@ -162,8 +162,8 @@ class RotatedTextApp:
         # Create a PangoContext and set up our shape renderer
         context = da.create_pango_context()
         PangoCairo.context_set_shape_renderer(context,
-                                               self.fancy_shape_renderer,
-                                               None)
+                                              self.fancy_shape_renderer,
+                                              None)
 
         # Create a PangoLayout, set the text, font, and attributes */
         layout = Pango.Layout(context=context)

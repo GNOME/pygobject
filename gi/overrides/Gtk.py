@@ -555,11 +555,11 @@ class RecentChooserDialog(Gtk.RecentChooserDialog):
                  **kwds):
 
         Gtk.RecentChooserDialog.__init__(self,
-                recent_manager=manager,
-                title=title,
-                parent=parent,
-                buttons=buttons,
-                **kwds)
+                                         recent_manager=manager,
+                                         title=title,
+                                         parent=parent,
+                                         buttons=buttons,
+                                         **kwds)
 
 RecentChooserDialog = override(RecentChooserDialog)
 __all__.append('RecentChooserDialog')
@@ -713,7 +713,7 @@ class TextIter(Gtk.TextIter):
 
     def forward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).forward_search(string,
-            flags, limit)
+                                                                               flags, limit)
         if success:
             return (match_start, match_end)
         else:
@@ -721,7 +721,7 @@ class TextIter(Gtk.TextIter):
 
     def backward_search(self, string, flags, limit):
         success, match_start, match_end = super(TextIter, self).backward_search(string,
-            flags, limit)
+                                                                                flags, limit)
         if success:
             return (match_start, match_end)
         else:
@@ -1139,7 +1139,7 @@ class TreeModelRow(object):
             if len(indexList) != len(value):
                 raise ValueError(
                     "attempt to assign sequence of size %d to slice of size %d"
-                        % (len(value), len(indexList)))
+                    % (len(value), len(indexList)))
 
             for i, v in enumerate(indexList):
                 self.model.set_value(self.iter, v, value[i])

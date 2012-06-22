@@ -12,7 +12,7 @@ except ImportError:
 
 # FIXME: we need a way to import the options module from a public module
 from gi._glib.option import OptionParser, OptionGroup, OptionValueError, \
-     make_option, BadOptionError
+    make_option, BadOptionError
 
 
 class TestOption(unittest.TestCase):
@@ -20,9 +20,9 @@ class TestOption(unittest.TestCase):
 
     def setUp(self):
         self.parser = OptionParser("NAMES...",
-                                     description="Option unit test")
+                                   description="Option unit test")
         self.parser.add_option("-t", "--test", help="Unit test option",
-                          action="store_false", dest="test", default=True)
+                               action="store_false", dest="test", default=True)
         self.parser.add_option("--g-fatal-warnings",
                                action="store_true",
                                dest="fatal_warnings",
@@ -36,18 +36,18 @@ class TestOption(unittest.TestCase):
             "unittest", "Unit test options", "Show all unittest options",
             option_list=[
                 make_option("-f", "-u", "--file", "--unit-file",
-                                   type="filename",
-                                   dest="unit_file",
-                                   help="Unit test option"),
+                            type="filename",
+                            dest="unit_file",
+                            help="Unit test option"),
                 make_option("--test-integer",
-                                   type="int",
-                                   dest="test_integer",
-                                   help="Unit integer option"),
+                            type="int",
+                            dest="test_integer",
+                            help="Unit integer option"),
                 make_option("--callback-failure-test",
-                                   action="callback",
-                                   callback=option_callback,
-                                   dest="test_integer",
-                                   help="Unit integer option"),
+                            action="callback",
+                            callback=option_callback,
+                            dest="test_integer",
+                            help="Unit integer option"),
             ])
         group.add_option("-t", "--test",
                          action="store_false",

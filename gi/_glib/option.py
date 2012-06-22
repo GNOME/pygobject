@@ -32,7 +32,7 @@ GOptionGroup in glib.
 import sys
 import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
-                     BadOptionError, OptionConflictError
+    BadOptionError, OptionConflictError
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -201,7 +201,7 @@ class OptionGroup(optparse.OptionGroup):
                 raise gerror
 
         group = _glib.OptionGroup(self.name, self.description,
-                                    self.help_description, callback)
+                                  self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
 
@@ -305,7 +305,7 @@ class OptionParser(optparse.OptionParser):
     def add_option_group(self, *args, **kwargs):
         if isinstance(args[0], _basestring):
             optparse.OptionParser.add_option_group(self,
-                OptionGroup(self, *args, **kwargs))
+                                                   OptionGroup(self, *args, **kwargs))
             return
         elif len(args) == 1 and not kwargs:
             if isinstance(args[0], OptionGroup):

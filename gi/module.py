@@ -154,7 +154,7 @@ class IntrospectionModule(object):
             if isinstance(info, ObjectInfo):
                 parent = get_parent_for_object(info)
                 interfaces = tuple(interface for interface in get_interfaces_for_object(info)
-                        if not issubclass(parent, interface))
+                                   if not issubclass(parent, interface))
                 bases = (parent,) + interfaces
                 metaclass = GObjectMeta
             elif isinstance(info, CallbackInfo):
@@ -166,9 +166,9 @@ class IntrospectionModule(object):
             elif isinstance(info, (StructInfo, UnionInfo)):
                 if g_type.is_a(_gobject.TYPE_BOXED):
                     bases = (Boxed,)
-                elif g_type.is_a(_gobject.TYPE_POINTER) or \
-                     g_type == _gobject.TYPE_NONE or \
-                     g_type.fundamental == g_type:
+                elif (g_type.is_a(_gobject.TYPE_POINTER) or
+                      g_type == _gobject.TYPE_NONE or
+                      g_type.fundamental == g_type):
                     bases = (Struct,)
                 else:
                     raise TypeError("unable to create a wrapper for %s.%s" % (info.get_namespace(), info.get_name()))
@@ -261,9 +261,9 @@ class DynamicModule(object):
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
         return "<%s.%s %r from %r>" % (self.__class__.__module__,
-                                      self.__class__.__name__,
-                                      self._namespace,
-                                      path)
+                                       self.__class__.__name__,
+                                       self._namespace,
+                                       path)
 
 
 class DynamicGObjectModule(DynamicModule):

@@ -94,14 +94,14 @@ class ClipboardApp:
 
         # make ebox a drag source
         ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
-                            None, Gdk.DragAction.COPY)
+                             None, Gdk.DragAction.COPY)
         ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
         ebox.drag_dest_set(Gtk.DestDefaults.ALL,
-                          None, Gdk.DragAction.COPY)
+                           None, Gdk.DragAction.COPY)
         ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 
@@ -118,14 +118,14 @@ class ClipboardApp:
 
         # make ebox a drag source
         ebox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
-                            None, Gdk.DragAction.COPY)
+                             None, Gdk.DragAction.COPY)
         ebox.drag_source_add_image_targets()
         ebox.connect('drag-begin', self.drag_begin, image)
         ebox.connect('drag-data-get', self.drag_data_get, image)
 
         # accept drops on ebox
         ebox.drag_dest_set(Gtk.DestDefaults.ALL,
-                          None, Gdk.DragAction.COPY)
+                           None, Gdk.DragAction.COPY)
         ebox.drag_dest_add_image_targets()
         ebox.connect('drag-data-received', self.drag_data_received, image)
 

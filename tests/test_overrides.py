@@ -204,19 +204,21 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(variant.unpack(), obj)
 
         obj = {"frequency": GLib.Variant('t', 738000000),
-            "hierarchy": GLib.Variant('i', 0),
-            "bandwidth": GLib.Variant('x', 8),
-            "code-rate-hp": GLib.Variant('d', 2.0 / 3.0),
-            "constellation": GLib.Variant('s', "QAM16"),
-            "guard-interval": GLib.Variant('u', 4)}
+               "hierarchy": GLib.Variant('i', 0),
+               "bandwidth": GLib.Variant('x', 8),
+               "code-rate-hp": GLib.Variant('d', 2.0 / 3.0),
+               "constellation": GLib.Variant('s', "QAM16"),
+               "guard-interval": GLib.Variant('u', 4)}
         variant = GLib.Variant('a{sv}', obj)
         self.assertEqual(variant.get_type_string(), 'a{sv}')
-        self.assertEqual(variant.unpack(), {"frequency": 738000000,
-            "hierarchy": 0,
-            "bandwidth": 8,
-            "code-rate-hp": 2.0 / 3.0,
-            "constellation": "QAM16",
-            "guard-interval": 4})
+        self.assertEqual(variant.unpack(),
+                         {"frequency": 738000000,
+                          "hierarchy": 0,
+                          "bandwidth": 8,
+                          "code-rate-hp": 2.0 / 3.0,
+                          "constellation": "QAM16",
+                          "guard-interval": 4
+                         })
 
     def test_gvariant_create_errors(self):
         # excess arguments
@@ -258,7 +260,7 @@ class TestGLib(unittest.TestCase):
 
         # tuple
         res = GLib.Variant.new_tuple(GLib.Variant.new_int32(-1),
-                GLib.Variant.new_string('hello')).unpack()
+                                     GLib.Variant.new_string('hello')).unpack()
         self.assertEqual(res, (-1, 'hello'))
 
         # array
@@ -294,7 +296,7 @@ class TestGLib(unittest.TestCase):
 
         # tuple index access
         v = GLib.Variant.new_tuple(GLib.Variant.new_int32(-1),
-                GLib.Variant.new_string('hello'))
+                                   GLib.Variant.new_string('hello'))
         self.assertEqual(len(v), 2)
         self.assertEqual(v[0], -1)
         self.assertEqual(v[1], 'hello')
@@ -351,15 +353,15 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.Variant.split_signature('(iso)'), ['i', 's', 'o'])
 
         self.assertEqual(GLib.Variant.split_signature('(s(ss)i(ii))'),
-                ['s', '(ss)', 'i', '(ii)'])
+                         ['s', '(ss)', 'i', '(ii)'])
 
         self.assertEqual(GLib.Variant.split_signature('(as)'), ['as'])
 
         self.assertEqual(GLib.Variant.split_signature('(s(ss)iaiaasa(ii))'),
-                ['s', '(ss)', 'i', 'ai', 'aas', 'a(ii)'])
+                         ['s', '(ss)', 'i', 'ai', 'aas', 'a(ii)'])
 
         self.assertEqual(GLib.Variant.split_signature('(a{iv}(ii)((ss)a{s(ss)}))'),
-                ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
+                         ['a{iv}', '(ii)', '((ss)a{s(ss)})'])
 
     def test_variant_hash(self):
         v1 = GLib.Variant('s', 'somestring')
@@ -645,12 +647,12 @@ class TestGtk(unittest.TestCase):
             ('test-action1', None, 'Test Action 1',
              None, None, test_action_callback_data),
             ('test-action2', Gtk.STOCK_COPY, 'Test Action 2',
-              None, None, test_action_callback_data)], callback_data)
+             None, None, test_action_callback_data)], callback_data)
         action_group.add_toggle_actions([
             ('test-toggle-action1', None, 'Test Toggle Action 1',
              None, None, test_action_callback_data, False),
             ('test-toggle-action2', Gtk.STOCK_COPY, 'Test Toggle Action 2',
-              None, None, test_action_callback_data, True)], callback_data)
+             None, None, test_action_callback_data, True)], callback_data)
         action_group.add_radio_actions([
             ('test-radio-action1', None, 'Test Radio Action 1'),
             ('test-radio-action2', Gtk.STOCK_COPY, 'Test Radio Action 2')], 1,
@@ -742,8 +744,7 @@ class TestGtk(unittest.TestCase):
       <signal name="test-signal" handler="on_signal_4" />
   </object>
 </interface>
-""",
-            ['object3'])
+""", ['object3'])
 
         # hook up signals
         builder.connect_signals(signal_checker)
@@ -1212,14 +1213,14 @@ class TestGtk(unittest.TestCase):
         label = 'this is row #102'
         treeiter = list_store.append()
         list_store.set(treeiter, (1, 0, 2, 3, 4, 5, 6, 7),
-                                  (label,
-                                   i,
-                                   TestGtk.TestClass(self, i, label),
-                                   test_pyobj,
-                                   test_pydict,
-                                   test_pylist,
-                                   0,
-                                   False))
+                                 (label,
+                                  i,
+                                  TestGtk.TestClass(self, i, label),
+                                  test_pyobj,
+                                  test_pydict,
+                                  test_pylist,
+                                  0,
+                                  False))
 
         self.assertEqual(len(list_store), 103)
 
@@ -1274,16 +1275,16 @@ class TestGtk(unittest.TestCase):
 
         # not sorted yet, should be original order
         self.assertEqual([list(i) for i in list_store],
-                [[1, 'apples'], [3, 'oranges'], [2, 'mango']])
+                         [[1, 'apples'], [3, 'oranges'], [2, 'mango']])
 
         # sort with our custom function
         list_store.set_sort_column_id(2, Gtk.SortType.ASCENDING)
         self.assertEqual([list(i) for i in list_store],
-                [[2, 'mango'], [1, 'apples'], [3, 'oranges']])
+                         [[2, 'mango'], [1, 'apples'], [3, 'oranges']])
 
         list_store.set_sort_column_id(2, Gtk.SortType.DESCENDING)
         self.assertEqual([list(i) for i in list_store],
-                [[3, 'oranges'], [1, 'apples'], [2, 'mango']])
+                         [[3, 'oranges'], [1, 'apples'], [2, 'mango']])
 
     def test_list_store_signals(self):
         list_store = Gtk.ListStore(int, bool)
@@ -1686,7 +1687,7 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(start.has_tag(tag))
 
         self.assertRaises(ValueError, buffer.insert_with_tags_by_name,
-                buffer.get_start_iter(), 'HelloHello', 'unknowntag')
+                          buffer.get_start_iter(), 'HelloHello', 'unknowntag')
 
     def test_text_iter(self):
         self.assertEqual(Gtk.TextIter, overrides.Gtk.TextIter)
@@ -1757,7 +1758,7 @@ class TestGtk(unittest.TestCase):
                 for kl in classes:
                     if kl.get_name() == name:
                         self.assertTrue(issubclass(klass, over,),
-                            "%r does not inherit from override %r" % (klass, over,))
+                                        "%r does not inherit from override %r" % (klass, over,))
 
     def test_editable(self):
         self.assertEqual(Gtk.Editable, overrides.Gtk.Editable)

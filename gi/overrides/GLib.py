@@ -222,7 +222,7 @@ class Variant(GLib.Variant):
         # tuple
         if self.get_type_string().startswith('('):
             res = [self.get_child_value(i).unpack()
-                    for i in range(self.n_children())]
+                   for i in range(self.n_children())]
             return tuple(res)
 
         # dictionary

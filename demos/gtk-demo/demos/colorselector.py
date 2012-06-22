@@ -64,9 +64,9 @@ class ColorSelectorApp:
         frame.add(self.da)
 
         alignment = Gtk.Alignment(xalign=1.0,
-                                 yalign=0.5,
-                                 xscale=0.0,
-                                 yscale=0.0)
+                                  yalign=0.5,
+                                  xscale=0.0,
+                                  yscale=0.0)
 
         button = Gtk.Button(label='_Change the above color',
                             use_underline=True)

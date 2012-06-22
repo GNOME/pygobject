@@ -1012,16 +1012,19 @@ class TestGHashTable(unittest.TestCase):
         self.assertEqual({'-1': '1', '0': '0', '1': '-1', '2': '-2'}, GIMarshallingTests.ghashtable_utf8_full_out())
 
     def test_ghashtable_utf8_none_inout(self):
+        i = {'-1': '1', '0': '0', '1': '-1', '2': '-2'}
         self.assertEqual({'-1': '1', '0': '0', '1': '1'},
-            GIMarshallingTests.ghashtable_utf8_none_inout({'-1': '1', '0': '0', '1': '-1', '2': '-2'}))
+                         GIMarshallingTests.ghashtable_utf8_none_inout(i))
 
     def test_ghashtable_utf8_container_inout(self):
+        i = {'-1': '1', '0': '0', '1': '-1', '2': '-2'}
         self.assertEqual({'-1': '1', '0': '0', '1': '1'},
-            GIMarshallingTests.ghashtable_utf8_container_inout({'-1': '1', '0': '0', '1': '-1', '2': '-2'}))
+                         GIMarshallingTests.ghashtable_utf8_container_inout(i))
 
     def test_ghashtable_utf8_full_inout(self):
+        i = {'-1': '1', '0': '0', '1': '-1', '2': '-2'}
         self.assertEqual({'-1': '1', '0': '0', '1': '1'},
-            GIMarshallingTests.ghashtable_utf8_full_inout({'-1': '1', '0': '0', '1': '-1', '2': '-2'}))
+                         GIMarshallingTests.ghashtable_utf8_full_inout(i))
 
 
 class TestGValue(unittest.TestCase):
@@ -1088,9 +1091,9 @@ class TestEnum(unittest.TestCase):
         Run test under a locale which defines toupper('a') == 'a'
         '''
         cls.locale_dir = tempfile.mkdtemp()
-        subprocess.check_call(['localedef', '-i',
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera'),
-            '-c', '-f', 'UTF-8', os.path.join(cls.locale_dir, 'te_ST.UTF-8@nouppera')])
+        src = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'te_ST@nouppera')
+        dest = os.path.join(cls.locale_dir, 'te_ST.UTF-8@nouppera')
+        subprocess.check_call(['localedef', '-i', src, '-c', '-f', 'UTF-8', dest])
         os.environ['LOCPATH'] = cls.locale_dir
         locale.setlocale(locale.LC_ALL, 'te_ST.UTF-8@nouppera')
 

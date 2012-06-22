@@ -18,8 +18,7 @@ class D(C):
 
 
 def my_signal_handler(object, arg, *extra):
-    print "handler for `my_signal' called with argument", arg, \
-          "and extra args", extra
+    print "handler for `my_signal' called with argument", arg, "and extra args", extra
 
 inst = C()
 inst2 = D()

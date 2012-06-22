@@ -148,14 +148,15 @@ class MetaClassHelper(object):
                 if ambiguous_base is not None:
                     base_info = vfunc_info.get_container()
                     raise TypeError('Method %s() on class %s.%s is ambiguous '
-                            'with methods in base classes %s.%s and %s.%s' %
-                            (vfunc_name,
-                             cls.__info__.get_namespace(),
-                             cls.__info__.get_name(),
-                             base_info.get_namespace(),
-                             base_info.get_name(),
-                             ambiguous_base.__info__.get_namespace(),
-                             ambiguous_base.__info__.get_name()))
+                                    'with methods in base classes %s.%s and %s.%s' %
+                                    (vfunc_name,
+                                     cls.__info__.get_namespace(),
+                                     cls.__info__.get_name(),
+                                     base_info.get_namespace(),
+                                     base_info.get_name(),
+                                     ambiguous_base.__info__.get_namespace(),
+                                     ambiguous_base.__info__.get_name()
+                                    ))
                 hook_up_vfunc_implementation(vfunc_info, cls.__gtype__,
                                              py_vfunc)
 

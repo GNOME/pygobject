@@ -111,7 +111,7 @@ def my_accumulator(ihint, return_accu, handler_return, user_data):
 class Foo(GObject.GObject):
     __gsignals__ = {
         'my-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_INT,
-                                   (), my_accumulator, "accum data"),
+                          (), my_accumulator, "accum data"),
         'my-other-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
                                 (), GObject.signal_accumulator_true_handled)
         }

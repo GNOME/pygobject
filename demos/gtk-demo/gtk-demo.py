@@ -95,9 +95,7 @@ class DemoTreeStore(Gtk.TreeStore):
             fullpath = os.path.join(DEMOCODEDIR, filename)
             initfile = os.path.join(os.path.dirname(fullpath), '__init__.py')
 
-            if fullpath != initfile \
-            and os.path.isfile(initfile) \
-            and fullpath.endswith('.py'):
+            if fullpath != initfile and os.path.isfile(initfile) and fullpath.endswith('.py'):
                 parentname = os.path.dirname(os.path.relpath(fullpath, DEMOCODEDIR))
 
                 if parentname:
@@ -186,7 +184,7 @@ class GtkDemoWindow(Gtk.Window):
         base_file = os.path.join(dir, base)
 
         if (GLib.file_test(logo_file, GLib.FileTest.EXISTS) and
-             GLib.file_test(base_file, GLib.FileTest.EXISTS)):
+                GLib.file_test(base_file, GLib.FileTest.EXISTS)):
             return base_file
         else:
             filename = os.path.join(DEMOCODEDIR, base)

@@ -6,13 +6,12 @@ import unittest
 
 from gi.repository import GObject
 from gi.repository.GObject import GType, new, PARAM_READWRITE, \
-     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
+    PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
-     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
-     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV
+    TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
+    TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV
 from gi.repository.GObject import \
-     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
-     G_MAXULONG
+    G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG
 
 from gi.repository import Gio
 from gi.repository import GLib
@@ -196,11 +195,11 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, setattr, obj, 'flags', None)
 
         self.assertRaises(TypeError, GObject.Property,
-                type=GIMarshallingTests.Flags, default='foo')
+                          type=GIMarshallingTests.Flags, default='foo')
         self.assertRaises(TypeError, GObject.Property,
-                type=GIMarshallingTests.Flags, default=object())
+                          type=GIMarshallingTests.Flags, default=object())
         self.assertRaises(TypeError, GObject.Property,
-                type=GIMarshallingTests.Flags, default=None)
+                          type=GIMarshallingTests.Flags, default=None)
 
     def testGType(self):
         obj = new(PropertyObject)
@@ -218,16 +217,16 @@ class TestProperties(unittest.TestCase):
 
         # GType parameters do not support defaults in GLib
         self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
-                default=TYPE_INT)
+                          default=TYPE_INT)
 
         # incompatible type
         self.assertRaises(TypeError, setattr, obj, 'gtype', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'gtype', object())
 
         self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
-                default='foo')
+                          default='foo')
         self.assertRaises(TypeError, GObject.Property, type=TYPE_GTYPE,
-                default=object())
+                          default=object())
 
         # set in constructor
         obj = new(PropertyObject, gtype=TYPE_UINT)
@@ -289,11 +288,11 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, setattr, obj, 'strings', ['foo', 1])
 
         self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
-                default=1)
+                          default=1)
         self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
-                default='foo')
+                          default='foo')
         self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
-                default=['hello', 1])
+                          default=['hello', 1])
 
     def testRange(self):
         # kiwi code
@@ -507,8 +506,7 @@ class TestProperty(unittest.TestCase):
         for gtype, min, max in types:
             # Normal, everything is alright
             prop = GObject.Property(type=gtype, minimum=min, maximum=max)
-            subtype = type('', (GObject.GObject,),
-                         dict(prop=prop))
+            subtype = type('', (GObject.GObject,), dict(prop=prop))
             self.assertEqual(subtype.props.prop.minimum, min)
             self.assertEqual(subtype.props.prop.maximum, max)
 

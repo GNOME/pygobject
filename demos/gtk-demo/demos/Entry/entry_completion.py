@@ -32,9 +32,9 @@ from gi.repository import Gtk
 class EntryBufferApp:
     def __init__(self):
         self.window = Gtk.Dialog('Gtk.EntryCompletion',
-                            None,
-                            0,
-                            [Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE])
+                                 None,
+                                 0,
+                                 [Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE])
         self.window.connect('response', self.destroy)
         self.window.connect('destroy', lambda x: Gtk.main_quit())
         self.window.set_resizable(False)

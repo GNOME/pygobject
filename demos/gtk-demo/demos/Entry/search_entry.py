@@ -155,8 +155,8 @@ class SearchboxApp:
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
                                   Gtk.STOCK_FIND)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
-                                   'Search by name\n' +
-                                   'Click here to change the search type')
+                                    'Search by name\n' +
+                                    'Click here to change the search type')
 
     def search_by_description(self, item, entry):
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,

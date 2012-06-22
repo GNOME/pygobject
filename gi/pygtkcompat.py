@@ -194,7 +194,7 @@ def enable_gtk(version='2.0'):
 
     def set_tool_item_type(menuaction, gtype):
         warnings.warn('set_tool_item_type() is not supported',
-                DeprecationWarning, stacklevel=2)
+                      DeprecationWarning, stacklevel=2)
     Gtk.Action.set_tool_item_type = classmethod(set_tool_item_type)
 
     # Alignment
@@ -312,7 +312,7 @@ def enable_gtk(version='2.0'):
 
     def install_child_property(container, flag, pspec):
         warnings.warn('install_child_property() is not supported',
-                DeprecationWarning, stacklevel=2)
+                      DeprecationWarning, stacklevel=2)
     Gtk.Container.install_child_property = classmethod(install_child_property)
 
     def new_text():
@@ -372,8 +372,7 @@ def enable_gtk(version='2.0'):
             def __init__(self, req):
                 self.height = req.height
                 self.width = req.width
-                UserList.__init__(self, [self.width,
-                                                  self.height])
+                UserList.__init__(self, [self.width, self.height])
         return SizeRequest(orig_size_request(widget))
     Gtk.Widget.size_request = size_request
     Gtk.Widget.hide_all = Gtk.Widget.hide

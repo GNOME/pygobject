@@ -141,14 +141,17 @@ class _DBusProxyMethodCall:
         if 'result_handler' in kwargs:
             # asynchronous call
             user_data = (kwargs['result_handler'],
-                    kwargs.get('error_handler'), kwargs.get('user_data'))
+                         kwargs.get('error_handler'),
+                         kwargs.get('user_data'))
             self.dbus_proxy.call(self.method_name, arg_variant,
-                    kwargs.get('flags', 0), kwargs.get('timeout', -1), None,
-                    self.__async_result_handler, user_data)
+                                 kwargs.get('flags', 0), kwargs.get('timeout', -1), None,
+                                 self.__async_result_handler, user_data)
         else:
             # synchronous call
             result = self.dbus_proxy.call_sync(self.method_name, arg_variant,
-                    kwargs.get('flags', 0), kwargs.get('timeout', -1), None)
+                                               kwargs.get('flags', 0),
+                                               kwargs.get('timeout', -1),
+                                               None)
             return self._unpack_result(result)
 
     @classmethod

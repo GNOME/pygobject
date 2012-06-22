@@ -13,7 +13,7 @@ class TestGObjectAPI(unittest.TestCase):
         obj = GObject.GObject()
 
         self.assertEqual(obj.__module__,
-                          'gi._gobject._gobject')
+                         'gi._gobject._gobject')
 
 
 class TestReferenceCounting(unittest.TestCase):
@@ -358,7 +358,7 @@ class TestPropertyBindings(unittest.TestCase):
 
     def testDefaultBinding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                       GObject.BindingFlags.DEFAULT)
+                                            GObject.BindingFlags.DEFAULT)
         binding = binding  # PyFlakes
 
         # Test setting value on source gets pushed to target
@@ -373,7 +373,7 @@ class TestPropertyBindings(unittest.TestCase):
 
     def testBiDirectionalBinding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                       GObject.BindingFlags.BIDIRECTIONAL)
+                                            GObject.BindingFlags.BIDIRECTIONAL)
         binding = binding  # PyFlakes
 
         # Test setting value on source gets pushed to target
@@ -392,8 +392,8 @@ class TestPropertyBindings(unittest.TestCase):
             return value * 2
 
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                       GObject.BindingFlags.DEFAULT,
-                                       transform_to, None, 'test-data')
+                                            GObject.BindingFlags.DEFAULT,
+                                            transform_to, None, 'test-data')
         binding = binding  # PyFlakes
 
         self.source.int_prop = 1
@@ -410,8 +410,8 @@ class TestPropertyBindings(unittest.TestCase):
             return value * 2
 
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                       GObject.BindingFlags.BIDIRECTIONAL,
-                                       None, transform_from)
+                                            GObject.BindingFlags.BIDIRECTIONAL,
+                                            None, transform_from)
         binding = binding  # PyFlakes
 
         self.source.int_prop = 1
@@ -433,8 +433,8 @@ class TestPropertyBindings(unittest.TestCase):
 
         # bidirectional bindings
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
-                                       GObject.BindingFlags.BIDIRECTIONAL,
-                                       transform_to, transform_from, 'test-data')
+                                            GObject.BindingFlags.BIDIRECTIONAL,
+                                            transform_to, transform_from, 'test-data')
         binding = binding  # PyFlakes
 
         self.source.int_prop = 1
