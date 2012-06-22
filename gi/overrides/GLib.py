@@ -87,7 +87,7 @@ class _VariantCreator(object):
         format = format[1:]  # eat the '('
         builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
         if args is not None:
-            if not args or type(args[0]) != type(()):
+            if not args or not isinstance(args[0], tuple):
                 raise TypeError('expected tuple argument')
 
             for i in range(len(args[0])):

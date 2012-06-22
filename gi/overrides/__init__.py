@@ -60,7 +60,7 @@ registry = _Registry()
 
 def override(type_):
     '''Decorator for registering an override'''
-    if type(type_) == types.FunctionType:
+    if isinstance(type_, types.FunctionType):
         return overridefunc(type_)
     else:
         registry.register(type_)
