@@ -155,21 +155,21 @@ class SearchboxApp:
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
                                   Gtk.STOCK_FIND)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
-                                   'Search by name\n' + \
+                                   'Search by name\n' +
                                    'Click here to change the search type')
 
     def search_by_description(self, item, entry):
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
                                   Gtk.STOCK_EDIT)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
-                                    'Search by description\n' + \
+                                    'Search by description\n' +
                                     'Click here to change the search type')
 
     def search_by_file(self, item, entry):
         entry.set_icon_from_stock(Gtk.EntryIconPosition.PRIMARY,
                                   Gtk.STOCK_OPEN)
         entry.set_icon_tooltip_text(Gtk.EntryIconPosition.PRIMARY,
-                                    'Search by file name\n' + \
+                                    'Search by file name\n' +
                                     'Click here to change the search type')
 
     def create_search_menu(self, entry):

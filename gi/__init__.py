@@ -41,11 +41,11 @@ def require_version(namespace, version):
     if namespace in repository.get_loaded_namespaces():
         loaded_version = repository.get_version(namespace)
         if loaded_version != version:
-            raise ValueError('Namespace %s is already loaded with version %s' % \
+            raise ValueError('Namespace %s is already loaded with version %s' %
                              (namespace, loaded_version))
 
     if namespace in _versions and _versions[namespace] != version:
-        raise ValueError('Namespace %s already requires version %s' % \
+        raise ValueError('Namespace %s already requires version %s' %
                          (namespace, _versions[namespace]))
 
     available_versions = repository.enumerate_versions(namespace)
@@ -53,7 +53,7 @@ def require_version(namespace, version):
         raise ValueError('Namespace %s not available' % namespace)
 
     if version not in available_versions:
-        raise ValueError('Namespace %s not available for version %s' % \
+        raise ValueError('Namespace %s not available for version %s' %
                          (namespace, version))
 
     _versions[namespace] = version

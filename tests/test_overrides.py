@@ -673,9 +673,7 @@ class TestGtk(unittest.TestCase):
     def test_uimanager(self):
         self.assertEqual(Gtk.UIManager, overrides.Gtk.UIManager)
         ui = Gtk.UIManager()
-        ui.add_ui_from_string(
-"""
-<ui>
+        ui.add_ui_from_string("""<ui>
     <menubar name="menubar1"></menubar>
 </ui>
 """
@@ -722,8 +720,7 @@ class TestGtk(unittest.TestCase):
         builder = Gtk.Builder()
 
         # add object1 to the builder
-        builder.add_from_string(
-"""
+        builder.add_from_string("""
 <interface>
   <object class="GIOverrideSignalTest" id="object1">
       <signal name="test-signal" after="yes" handler="on_signal_after" />
@@ -733,8 +730,7 @@ class TestGtk(unittest.TestCase):
 """)
 
         # only add object3 to the builder
-        builder.add_objects_from_string(
-"""
+        builder.add_objects_from_string("""
 <interface>
   <object class="GIOverrideSignalTest" id="object2">
       <signal name="test-signal" handler="on_signal_2" />
@@ -746,7 +742,6 @@ class TestGtk(unittest.TestCase):
       <signal name="test-signal" handler="on_signal_4" />
   </object>
 </interface>
-
 """,
             ['object3'])
 

@@ -104,7 +104,7 @@ class IntrospectionModule(object):
         info = repository.find_by_name(self._namespace, name)
         if not info:
             raise AttributeError("%r object has no attribute %r" % (
-                    self.__name__, name))
+                                 self.__name__, name))
 
         if isinstance(info, EnumInfo):
             g_type = info.get_g_type()
@@ -131,8 +131,8 @@ class IntrospectionModule(object):
                 # identifier conversion (e. g. in Turkish 'i'.upper() == 'i')
                 # see https://bugzilla.gnome.org/show_bug.cgi?id=649165
                 ascii_upper_trans = maketrans(
-                        'abcdefgjhijklmnopqrstuvwxyz',
-                        'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
+                    'abcdefgjhijklmnopqrstuvwxyz',
+                    'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():
                     value_name = value_info.get_name().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))

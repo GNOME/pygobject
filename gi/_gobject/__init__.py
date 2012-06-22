@@ -238,11 +238,9 @@ class GObjectMeta(type):
 
         cls.__gproperties__ = gproperties
 
-        if ('do_get_property' in cls.__dict__ or
-            'do_set_property' in cls.__dict__):
+        if 'do_get_property' in cls.__dict__ or 'do_set_property' in cls.__dict__:
             for prop in props:
-                if (prop.fget != prop._default_getter or
-                    prop.fset != prop._default_setter):
+                if prop.fget != prop._default_getter or prop.fset != prop._default_setter:
                     raise TypeError(
                         "GObject subclass %r defines do_get/set_property"
                         " and it also uses a property with a custom setter"
