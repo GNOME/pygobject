@@ -109,7 +109,7 @@ check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.t
 	@echo "  CHECK  Pyflakes"
 	@pyflakes $(top_srcdir)
 	@echo "  CHECK  PEP8"
-	@pep8 --ignore=E501 --repeat --show-source $(top_srcdir)
+	@pep8 --ignore=E501,E123 --repeat --show-source $(top_srcdir)
 	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning $(srcdir)/runtests.py
 
 check.gdb:
