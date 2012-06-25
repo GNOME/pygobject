@@ -134,7 +134,7 @@ class IntrospectionModule(object):
                     'abcdefgjhijklmnopqrstuvwxyz',
                     'ABCDEFGJHIJKLMNOPQRSTUVWXYZ')
                 for value_info in info.get_values():
-                    value_name = value_info.get_name().translate(ascii_upper_trans)
+                    value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))
 
             if g_type != _gobject.TYPE_NONE:

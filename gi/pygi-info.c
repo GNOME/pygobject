@@ -135,6 +135,12 @@ _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_base_info_get_name_unescaped (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyUnicode_FromString (g_base_info_get_name (self->info));
+}
+
+static PyObject *
 _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 {
     return PYGLIB_PyUnicode_FromString (g_base_info_get_namespace (self->info));
@@ -157,6 +163,7 @@ _wrap_g_base_info_get_container (PyGIBaseInfo *self)
 
 static PyMethodDef _PyGIBaseInfo_methods[] = {
     { "get_name", (PyCFunction) _wrap_g_base_info_get_name, METH_NOARGS },
+    { "get_name_unescaped", (PyCFunction) _wrap_g_base_info_get_name_unescaped, METH_NOARGS },
     { "get_namespace", (PyCFunction) _wrap_g_base_info_get_namespace, METH_NOARGS },
     { "get_container", (PyCFunction) _wrap_g_base_info_get_container, METH_NOARGS },
     { NULL, NULL, 0 }

@@ -2229,3 +2229,6 @@ class TestKeywords(unittest.TestCase):
         # we cannot currently instantiate GLib.Timer objects, so just ensure
         # the method exists
         self.assertTrue(callable(GLib.Timer.continue_))
+
+    def test_uppercase(self):
+        self.assertEqual(GLib.IOCondition.IN.value_nicks, ['in'])
