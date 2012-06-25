@@ -1,3 +1,18 @@
+3.3.3   25-Jun-2012
+        - Remove obsolete release-tag make target (Martin Pitt)
+	- Do not do any python calls when GObjects are destroyed after the
+	  python interpreter has been finalized (Simon Schampijer) (#678046)
+        - Do not change constructor-only "type" Window property (Martin Pitt)
+          (#678510)
+        - Escape identifiers which are Python keywords (Martin Pitt) (#676746)
+	- Fix code for PEP-8 violations detected by the latest pep8 checker.
+          (Martin Pitt)
+        - Fix crash in GLib.find_program_in_path() (Martin Pitt) (#678119)
+        - Revert "Do not bind gobject_get_data() and gobject_set_data()" (Martin Pitt)
+	  (#641944)
+        - GVariant: Raise proper TypeError on invalid tuple input (David Keijser)
+          (#678317)
+
 3.3.2   05-Jun-2012
 	- foreign: Register cairo.Path and cairo.FontOptions foreign structs
 	  (Bastian Winkler) (#677388)
