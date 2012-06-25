@@ -334,7 +334,10 @@ __all__.append('SizeGroup')
 
 class MenuItem(Gtk.MenuItem):
     def __init__(self, label=None, **kwds):
-        super(MenuItem, self).__init__(label=label, **kwds)
+        if label:
+            super(MenuItem, self).__init__(label=label, **kwds)
+        else:
+            super(MenuItem, self).__init__(**kwds)
 
 MenuItem = override(MenuItem)
 __all__.append('MenuItem')
