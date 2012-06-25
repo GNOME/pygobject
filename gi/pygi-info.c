@@ -95,7 +95,43 @@ PYGLIB_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
-    return PYGLIB_PyUnicode_FromString (g_base_info_get_name (self->info));
+    /* It may be better to use keyword.iskeyword(); keep in sync with
+     * python -c 'import keyword; print(keyword.kwlist)' */
+#if PY_VERSION_HEX < 0x03000000
+    /* Python 2.x */
+    static const gchar* keywords[] = {"and", "as", "assert", "break", "class",
+        "continue", "def", "del", "elif", "else", "except", "exec", "finally",
+        "for", "from", "global", "if", "import", "in", "is", "lambda", "not",
+        "or", "pass", "print", "raise", "return", "try", "while", "with",
+        "yield", NULL};
+#elif PY_VERSION_HEX < 0x04000000
+    /* Python 3.x; note that we explicitly keep "print"; it is not a keyword
+     * any more, but we do not want to break API between Python versions */
+    static const gchar* keywords[] = {"False", "None", "True", "and", "as",
+        "assert", "break", "class", "continue", "def", "del", "elif", "else",
+        "except", "finally", "for", "from", "global", "if", "import", "in",
+        "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return",
+        "try", "while", "with", "yield",
+        "print", NULL};
+#else
+    #error Need keyword list for this major Python version
+#endif
+
+    const gchar *name, **i;
+
+    name = g_base_info_get_name (self->info);
+
+    /* escape keywords */
+    for (i = keywords; *i != NULL; ++i) {
+        if (strcmp (name, *i) == 0) {
+            gchar *escaped = g_strconcat (name, "_", NULL);
+            PyObject *obj = PYGLIB_PyUnicode_FromString (escaped);
+            g_free (escaped);
+            return obj;
+        }
+    }
+
+    return PYGLIB_PyUnicode_FromString (name);
 }
 
 static PyObject *

@@ -2212,3 +2212,20 @@ class TestPropertiesObject(unittest.TestCase):
 
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(obj.props.some_boxed_struct.long_, 1)
+
+
+class TestKeywords(unittest.TestCase):
+    def test_method(self):
+        # g_variant_print()
+        v = GLib.Variant('i', 1)
+        self.assertEqual(v.print_(False), '1')
+
+    def test_function(self):
+        # g_thread_yield()
+        self.assertEqual(GLib.Thread.yield_(), None)
+
+    def test_struct_method(self):
+        # g_timer_continue()
+        # we cannot currently instantiate GLib.Timer objects, so just ensure
+        # the method exists
+        self.assertTrue(callable(GLib.Timer.continue_))
