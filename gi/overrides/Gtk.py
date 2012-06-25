@@ -396,7 +396,13 @@ __all__.append('Builder')
 
 class Window(Gtk.Window):
     def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwds):
-        Gtk.Window.__init__(self, type=type, **kwds)
+        # type is a construct-only property; if it is already set (e. g. by
+        # GtkBuilder), do not try to set it again and just ignore it
+        try:
+            self.get_property('type')
+            Gtk.Window.__init__(self, **kwds)
+        except TypeError:
+            Gtk.Window.__init__(self, type=type, **kwds)
 
 Window = override(Window)
 __all__.append('Window')

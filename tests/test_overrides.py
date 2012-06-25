@@ -758,6 +758,42 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(signal_checker.sentinel, 4)
         self.assertEqual(signal_checker.after_sentinel, 2)
 
+    def test_window(self):
+        # standard Window
+        w = Gtk.Window()
+        self.assertEqual(w.get_property('type'), Gtk.WindowType.TOPLEVEL)
+
+        # type works as keyword argument
+        w = Gtk.Window(type=Gtk.WindowType.POPUP)
+        self.assertEqual(w.get_property('type'), Gtk.WindowType.POPUP)
+
+        # pygtk compatible positional argument
+        w = Gtk.Window(Gtk.WindowType.POPUP)
+        self.assertEqual(w.get_property('type'), Gtk.WindowType.POPUP)
+
+        class TestWindow(Gtk.Window):
+            __gtype_name__ = "TestWindow"
+
+        # works from builder
+        builder = Gtk.Builder()
+        builder.add_from_string('''
+<interface>
+  <object class="GtkWindow" id="win">
+    <property name="type">popup</property>
+  </object>
+  <object class="TestWindow" id="testwin">
+  </object>
+  <object class="TestWindow" id="testpop">
+    <property name="type">popup</property>
+  </object>
+</interface>''')
+        self.assertEqual(builder.get_object('win').get_property('type'),
+                         Gtk.WindowType.POPUP)
+        self.assertEqual(builder.get_object('testwin').get_property('type'),
+                         Gtk.WindowType.TOPLEVEL)
+        self.assertEqual(builder.get_object('testpop').get_property('type'),
+                         Gtk.WindowType.POPUP)
+
     def test_dialogs(self):
         self.assertEqual(Gtk.Dialog, overrides.Gtk.Dialog)
         self.assertEqual(Gtk.AboutDialog, overrides.Gtk.AboutDialog)
