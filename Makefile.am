@@ -87,14 +87,6 @@ doc-dist:
 	tar cfz $(PACKAGE)-docs.tar.gz pygobject
 	rm -fr pygobject
 
-release-tag:
-	@ROOT=`svn info --xml|egrep ^"<url>"|cut -d\> -f2|cut -d\< -f1`; \
-	SVNVERSION=`echo $(VERSION)|sed s/\\\./_/g`;\
-	  echo "* Tagging $(VERSION)"; \
-          svn cp -m "Tag $(VERSION)" \
-              $$ROOT \
-              svn+ssh://johan@svn.gnome.org/svn/pygobject/tags/PYGOBJECT_$$SVNVERSION
-
 release-news:
 	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
 	last=`head -n1 NEWS | cut -f1 -d' '`; \
@@ -105,21 +97,6 @@ release-news:
 	mv NEWS.tmp NEWS
 
 .PHONY: ChangeLog release-news
-
-ChangeLog:
-	@echo Creating $@
-	@if test -d "$(srcdir)/.git"; then \
-	  (GIT_DIR=$(top_srcdir)/.git ./missing --run git log PYGOBJECT_2_17_0^^.. --stat) | fmt --split-only > $@.tmp \
-	  && mv -f $@.tmp $@ \
-	  || ($(RM) $@.tmp; \
-	      echo Failed to generate ChangeLog, your ChangeLog may be outdated >&2; \
-	      (test -f $@ || echo git-log is required to generate this file >> $@)); \
-	else \
-	  test -f $@ || \
-	  (echo A git checkout and git-log is required to generate ChangeLog >&2 && \
-	  echo A git checkout and git-log is required to generate this file >> $@); \
-	fi
-
 
 distclean-local:
 	if test $(srcdir) = .; then :; else \
