@@ -1,3 +1,6 @@
+3.3.3.1 25-Jun-2012
+        - Do not escape enum and flag names that are Python keywords (Martin Pitt)
+
 3.3.3   25-Jun-2012
         - Remove obsolete release-tag make target (Martin Pitt)
 	- Do not do any python calls when GObjects are destroyed after the
