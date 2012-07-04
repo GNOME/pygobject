@@ -1229,6 +1229,9 @@ class TreePath(Gtk.TreePath):
     def __iter__(self):
         return (int(part) for part in str(self).split(':'))
 
+    def __len__(self):
+        return self.get_depth()
+
 TreePath = override(TreePath)
 __all__.append('TreePath')
 
