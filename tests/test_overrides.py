@@ -464,6 +464,11 @@ class TestGLib(unittest.TestCase):
         assert_equals_bool('v', GLib.Variant('i', 0))
         assert_equals_bool('v', GLib.Variant('i', 1))
 
+    def test_variant_repr(self):
+        v = GLib.Variant('(is)', (1, 'somestring'))
+        self.assertEqual(str(v), "(1, 'somestring')")
+        self.assertEqual(repr(v), "GLib.Variant('(is)', (1, 'somestring'))")
+
 
 class TestPango(unittest.TestCase):
 

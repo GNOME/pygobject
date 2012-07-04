@@ -169,13 +169,17 @@ class Variant(GLib.Variant):
         (v, rest_format, _) = creator._create(format_string, [value])
         if rest_format:
             raise TypeError('invalid remaining format string: "%s"' % rest_format)
+        v.format_string = format_string
         return v
 
     def __del__(self):
         self.unref()
 
+    def __str__(self):
+        return self.print_(True)
+
     def __repr__(self):
-        return '<GLib.Variant(%s)>' % getattr(self, 'print')(True)
+        return "GLib.Variant('%s', %s)" % (self.format_string, self.print_(True))
 
     def __eq__(self, other):
         try:
