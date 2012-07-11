@@ -85,6 +85,11 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/pack_start\(([^,]*), fill=([^,\)]*)\)/pack_start\(\1, True, \2, 0\)/g;" \
     -pe "s/pack_start\(([^,]*), expand=([^,\)]*)\)/pack_start\(\1, \2, True, 0\)/g;" \
     -pe "s/pack_start\(([^,]*),(\s*)padding=([A-Za-z0-9._]*)\)/pack_start\(\1,\2True, True,\2\3\)/g;" \
+    -pe "s/column.pack_end\(([^,\)]*)\)/column.pack_end\(\1, True\)/g;" \
+    -pe "s/pack_end\(([^,\)]*)\)/pack_end\(\1, True, True, 0\)/g;" \
+    -pe "s/pack_end\(([^,]*), fill=([^,\)]*)\)/pack_end\(\1, True, \2, 0\)/g;" \
+    -pe "s/pack_end\(([^,]*), expand=([^,\)]*)\)/pack_end\(\1, \2, True, 0\)/g;" \
+    -pe "s/pack_end\(([^,]*),(\s*)padding=([A-Za-z0-9._]*)\)/pack_end\(\1,\2True, True,\2\3\)/g;" \
     -pe "#s/Gtk.HBox\(\)/Gtk.HBox\(False, 0\)/g;" \
     -pe "#s/Gtk.VBox\(\)/Gtk.VBox\(False, 0\)/g;" \
     -pe "s/Gtk.Label\s*\(([^,\)]+)\)/Gtk.Label\(label=\1\)/g;" \
