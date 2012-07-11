@@ -1745,7 +1745,7 @@ pygobject_set_data(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_connect(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args;
+    PyObject *first, *callback, *extra_args, *repr = NULL;
     gchar *name;
     guint sigid, len;
     gulong handlerid;
@@ -1773,9 +1773,11 @@ pygobject_connect(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1796,7 +1798,7 @@ pygobject_connect(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_connect_after(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args;
+    PyObject *first, *callback, *extra_args, *repr = NULL;
     gchar *name;
     guint sigid;
     gulong handlerid;
@@ -1826,9 +1828,11 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 2, len);
@@ -1849,7 +1853,7 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_connect_object(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *object;
+    PyObject *first, *callback, *extra_args, *object, *repr = NULL;
     gchar *name;
     guint sigid;
     gulong handlerid;
@@ -1879,9 +1883,11 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1902,7 +1908,7 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_connect_object_after(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *object;
+    PyObject *first, *callback, *extra_args, *object, *repr = NULL;
     gchar *name;
     guint sigid;
     gulong handlerid;
@@ -1932,9 +1938,11 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -2013,7 +2021,7 @@ pygobject_emit(PyGObject *self, PyObject *args)
     guint signal_id, i;
     Py_ssize_t len;
     GQuark detail;
-    PyObject *first, *py_ret;
+    PyObject *first, *py_ret, *repr = NULL;
     gchar *name;
     GSignalQuery query;
     GValue *params, ret = { 0, };
@@ -2034,9 +2042,11 @@ pygobject_emit(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     g_signal_query(signal_id, &query);
@@ -2102,6 +2112,7 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     gchar *signal;
     guint signal_id;
     GQuark detail;
+    PyObject *repr = NULL;
 
     if (!PyArg_ParseTuple(args, "s:GObject.stop_emission", &signal))
 	return NULL;
@@ -2110,9 +2121,11 @@ pygobject_stop_emission(PyGObject *self, PyObject *args)
     
     if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
 			     &signal_id, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+		     PYGLIB_PyUnicode_AsString(repr),
 		     signal);
+	Py_DECREF(repr);
 	return NULL;
     }
     g_signal_stop_emission(self->obj, signal_id, detail);
@@ -2242,7 +2255,7 @@ pygobject_deepcopy(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 {
-    PyObject *pyfunc = NULL;
+    PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
     
@@ -2258,8 +2271,10 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     PYGLIB_PyUnicode_AsString(repr));
+	Py_DECREF(repr);
 	return NULL;
     }
     
@@ -2274,7 +2289,7 @@ pygobject_disconnect_by_func(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 {
-    PyObject *pyfunc = NULL;
+    PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
     
@@ -2290,8 +2305,10 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     PYGLIB_PyUnicode_AsString(repr));
+	Py_DECREF(repr);
 	return NULL;
     }
     
@@ -2306,7 +2323,7 @@ pygobject_handler_block_by_func(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 {
-    PyObject *pyfunc = NULL;
+    PyObject *pyfunc = NULL, *repr = NULL;
     GClosure *closure = NULL;
     guint retval;
     
@@ -2322,8 +2339,10 @@ pygobject_handler_unblock_by_func(PyGObject *self, PyObject *args)
 
     closure = gclosure_from_pyfunc(self, pyfunc);
     if (!closure) {
+	repr = PyObject_Repr((PyObject*)pyfunc);
 	PyErr_Format(PyExc_TypeError, "nothing connected to %s",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)pyfunc)));
+		     PYGLIB_PyUnicode_AsString(repr));
+	Py_DECREF(repr);
 	return NULL;
     }
     

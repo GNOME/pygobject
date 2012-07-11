@@ -401,6 +401,8 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
 
         if (PyUnicode_Check (py_str)) {
             PyObject *py_bytes = PyUnicode_AsUTF8String (py_str);
+            Py_DECREF (py_str);
+
             if (py_bytes == NULL)
                 return FALSE;
 
@@ -413,9 +415,9 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
             Py_DECREF (py_bytes);
         } else {
             long_str = g_strdup (PYGLIB_PyBytes_AsString(py_str));
+            Py_DECREF (py_str);
         }
 
-        Py_DECREF (py_str);
         PyErr_Format (PyExc_ValueError, "%s not in range %ld to %ld",
                       long_str, G_MININT64, G_MAXINT64);
 
@@ -479,6 +481,8 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
 
         if (PyUnicode_Check (py_str)) {
             PyObject *py_bytes = PyUnicode_AsUTF8String (py_str);
+            Py_DECREF (py_str);
+
             if (py_bytes == NULL)
                 return FALSE;
 
@@ -491,9 +495,8 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
             Py_DECREF (py_bytes);
         } else {
             long_str = g_strdup (PYGLIB_PyBytes_AsString (py_str));
+            Py_DECREF (py_str);
         }
-
-        Py_DECREF (py_str);
 
         PyErr_Format (PyExc_ValueError, "%s not in range %d to %lu",
                       long_str, 0, G_MAXUINT64);

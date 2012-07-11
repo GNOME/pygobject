@@ -120,6 +120,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 {
     const gchar *name;
     GType type;
+    PyObject *repr = NULL;
 #if 0
     if (PyErr_Warn(PyExc_DeprecationWarning,
 		   "gobject.type_from_name is deprecated; "
@@ -131,9 +132,11 @@ pyg_type_from_name (PyObject *self, PyObject *args)
     type = _pyg_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
+    repr = PyObject_Repr((PyObject*)self);
     PyErr_Format(PyExc_RuntimeError, "%s: unknown type name: %s",
-         PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+         PYGLIB_PyUnicode_AsString(repr),
 		 name);
+    Py_DECREF(repr);
     return NULL;
 }
 
@@ -1881,7 +1884,7 @@ out:
 static PyObject *
 pyg_add_emission_hook(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *data;
+    PyObject *first, *callback, *extra_args, *data, *repr;
     gchar *name;
     gulong hook_id;
     guint sigid;
@@ -1913,9 +1916,11 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
     }
 
     if (!g_signal_parse_name(name, gtype, &sigid, &detail, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-			PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+			PYGLIB_PyUnicode_AsString(repr),
 		     name);
+	Py_DECREF(repr);
 	return NULL;
     }
     extra_args = PySequence_GetSlice(args, 3, len);
@@ -1937,7 +1942,7 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 static PyObject *
 pyg_remove_emission_hook(PyGObject *self, PyObject *args)
 {
-    PyObject *pygtype;
+    PyObject *pygtype, *repr;
     char *name;
     guint signal_id;
     gulong hook_id;
@@ -1952,9 +1957,11 @@ pyg_remove_emission_hook(PyGObject *self, PyObject *args)
     }
 
     if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
+	repr = PyObject_Repr((PyObject*)self);
 	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-                 PYGLIB_PyUnicode_AsString(PyObject_Repr((PyObject*)self)),
+                 PYGLIB_PyUnicode_AsString(repr),
                  name);
+	Py_DECREF(repr);
 	return NULL;
     }
 

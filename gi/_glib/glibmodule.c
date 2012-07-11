@@ -547,10 +547,13 @@ pyglib_get_application_name(PyObject *self)
 static PyObject*
 pyglib_set_application_name(PyObject *self, PyObject *arg)
 {
+    PyObject *repr = NULL;
     if (!PYGLIB_PyUnicode_Check(arg)) {
+	repr = PyObject_Repr(arg);
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr(arg)));
+		     PYGLIB_PyUnicode_AsString(repr));
+	Py_DECREF(repr);
 	return NULL;
     }
     g_set_application_name(PYGLIB_PyUnicode_AsString(arg));
@@ -574,10 +577,13 @@ pyglib_get_prgname(PyObject *self)
 static PyObject*
 pyglib_set_prgname(PyObject *self, PyObject *arg)
 {
+    PyObject *repr = NULL;
     if (!PYGLIB_PyUnicode_Check(arg)) {
+	repr = PyObject_Repr(arg);
 	PyErr_Format(PyExc_TypeError,
 		     "first argument must be a string, not '%s'",
-		     PYGLIB_PyUnicode_AsString(PyObject_Repr(arg)));
+		     PYGLIB_PyUnicode_AsString(repr));
+	Py_DECREF(repr);
 	return NULL;
     }
     g_set_prgname(PYGLIB_PyUnicode_AsString(arg));
