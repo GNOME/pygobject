@@ -1277,6 +1277,8 @@ _args_cache_generate (GICallableInfo *callable_info,
                         return_direction,
                         -1,
                         -1);
+    if (return_cache == NULL)
+        return FALSE;
 
     return_cache->is_skipped = g_callable_info_skip_return (callable_info);
     callable_cache->return_cache = return_cache;
