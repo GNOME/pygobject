@@ -123,6 +123,12 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.MODIFIER_MASK/Gdk.ModifierType.MODIFIER_MASK/g;" \
     -pe "s/Gdk.([A-Z_0-9]*)_MASK/Gdk.EventMask.\1_MASK/g;" \
     -pe "s/Gdk.VISIBILITY_FULLY_OBSCURED/Gdk.VisibilityState.FULLY_OBSCURED/g;" \
+    -pe "s/Gdk.NOTIFY_ANCESTOR/Gdk.NotifyType.ANCESTOR/g;" \
+    -pe "s/Gdk.NOTIFY_INFERIOR/Gdk.NotifyType.INFERIOR/g;" \
+    -pe "s/Gdk.NOTIFY_NONLINEAR_VIRTUAL/Gdk.NotifyType.NONLINEAR_VIRTUAL/g;" \
+    -pe "s/Gdk.NOTIFY_NONLINEAR/Gdk.NotifyType.NONLINEAR/g;" \
+    -pe "s/Gdk.NOTIFY_UNKNOWN/Gdk.NotifyType.UNKNOWN/g;" \
+    -pe "s/Gdk.NOTIFY_VIRTUAL/Gdk.NotifyType.VIRTUAL/g;" \
     -pe "s/Gdk.BUTTON_PRESS/Gdk.EventType.BUTTON_PRESS/g;" \
     -pe "s/Gdk.ACTION_/Gdk.DragAction./g;" \
     -pe "s/Gdk.GRAB_/Gdk.GrabStatus./g;" \
