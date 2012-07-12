@@ -1147,6 +1147,7 @@ _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
     GITypeInfo *type_info;
     GIArgument value;
     PyObject *py_value;
+    gboolean free_array = FALSE;
 
     if (g_constant_info_get_value ( (GIConstantInfo *) self->info, &value) < 0) {
         PyErr_SetString (PyExc_RuntimeError, "unable to get value");
@@ -1155,7 +1156,16 @@ _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
 
     type_info = g_constant_info_get_type ( (GIConstantInfo *) self->info);
 
+    if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
+        value.v_pointer = _pygi_argument_to_array (&value, NULL,
+                                                   type_info, &free_array);
+    }
+
     py_value = _pygi_argument_to_object (&value, type_info, GI_TRANSFER_NOTHING);
+    
+    if (free_array) {
+        g_array_free (value.v_pointer, FALSE);
+    }
 
     g_constant_info_free_value (self->info, &value);
     g_base_info_unref ( (GIBaseInfo *) type_info);
@@ -1202,6 +1212,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     GITypeInfo *field_type_info;
     GIArgument value;
     PyObject *py_value = NULL;
+    gboolean free_array = FALSE;
 
     memset(&value, 0, sizeof(GIArgument));
 
@@ -1278,18 +1289,15 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
         goto out;
     }
 
-    if ( (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) &&
-            (g_type_info_get_array_type (field_type_info) == GI_ARRAY_TYPE_C)) {
+    if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) {
         value.v_pointer = _pygi_argument_to_array (&value, NULL,
-                                                   field_type_info, FALSE);
+                                                   field_type_info, &free_array);
     }
 
 argument_to_object:
     py_value = _pygi_argument_to_object (&value, field_type_info, GI_TRANSFER_NOTHING);
 
-    if ( (value.v_pointer != NULL) &&
-            (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) &&
-               (g_type_info_get_array_type (field_type_info) == GI_ARRAY_TYPE_C)) {
+    if (free_array) {
         g_array_free (value.v_pointer, FALSE);
     }
 

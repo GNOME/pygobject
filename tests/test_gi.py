@@ -1643,6 +1643,16 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_with_default_implementation(self, int8):
             self.val = int8
 
+    class Interface3Impl(GObject.Object, GIMarshallingTests.Interface3):
+        def __init__(self):
+            GObject.Object.__init__(self)
+            self.variants = None
+            self.n_variants = None
+
+        def do_test_variant_array_in(self, variants, n_variants):
+            self.variants = variants
+            self.n_variants = n_variants
+
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
 
@@ -1731,6 +1741,14 @@ class TestPythonGObject(unittest.TestCase):
         sub_sub_sub_object = SubSubSubObject()
         GIMarshallingTests.SubSubObject.do_method_deep_hierarchy(sub_sub_sub_object, 5)
         self.assertEqual(sub_sub_sub_object.props.int, 5)
+
+    def test_interface3impl(self):
+        iface3 = self.Interface3Impl()
+        variants = [GLib.Variant('i', 27), GLib.Variant('s', 'Hello')]
+        iface3.test_variant_array_in(variants)
+        self.assertEqual(iface3.n_variants, 2)
+        self.assertEqual(iface3.variants[0].unpack(), 27)
+        self.assertEqual(iface3.variants[1].unpack(), 'Hello')
 
     def test_python_subsubobject_vfunc(self):
         class PySubObject(GIMarshallingTests.Object):

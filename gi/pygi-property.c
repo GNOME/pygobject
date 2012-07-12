@@ -211,6 +211,7 @@ pygi_get_property_value_real (PyGObject *instance,
             arg.v_pointer = g_value_get_boxed (&value);
             break;
         case GI_TYPE_TAG_GLIST:
+        case GI_TYPE_TAG_GSLIST:
             arg.v_pointer = g_value_get_pointer (&value);
             break;
         case GI_TYPE_TAG_ARRAY:

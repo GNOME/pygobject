@@ -185,10 +185,12 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                 case GI_TYPE_TAG_GHASH:
                 case GI_TYPE_TAG_GLIST:
                 case GI_TYPE_TAG_GSLIST:
+                case GI_TYPE_TAG_ARRAY:
                 case GI_TYPE_TAG_VOID:
                     g_args[i].v_pointer = * (gpointer *) args[i];
                     break;
                 default:
+                    g_warning ("Unhandled type tag %s", g_type_tag_to_string (tag));
                     g_args[i].v_pointer = 0;
             }
         }
@@ -235,6 +237,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
             GITransfer transfer = g_arg_info_get_ownership_transfer (arg_info);
             PyObject *value;
             GIArgument *arg;
+            gboolean free_array = FALSE;
 
             if (direction == GI_DIRECTION_IN && arg_tag == GI_TYPE_TAG_VOID &&
                     g_type_info_is_pointer (arg_type)) {
@@ -290,8 +293,16 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                     arg = (GIArgument*) &g_args[i];
                 else
                     arg = (GIArgument*) g_args[i].v_pointer;
+                
+                if (g_type_info_get_tag (arg_type) == GI_TYPE_TAG_ARRAY)
+                    arg->v_pointer = _pygi_argument_to_array (arg, args, 
+                                                              arg_type, &free_array);
 
                 value = _pygi_argument_to_object (arg, arg_type, transfer);
+                
+                if (free_array)
+                    g_array_free (arg->v_pointer, FALSE);
+                
                 if (value == NULL) {
                     g_base_info_unref (arg_type);
                     g_base_info_unref (arg_info);
