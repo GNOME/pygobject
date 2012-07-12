@@ -134,6 +134,9 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.NOTIFY_NONLINEAR/Gdk.NotifyType.NONLINEAR/g;" \
     -pe "s/Gdk.NOTIFY_UNKNOWN/Gdk.NotifyType.UNKNOWN/g;" \
     -pe "s/Gdk.NOTIFY_VIRTUAL/Gdk.NotifyType.VIRTUAL/g;" \
+    -pe "s/Gdk.PROP_MODE_APPEND/Gdk.PropMode.APPEND/g;" \
+    -pe "s/Gdk.PROP_MODE_PREPEND/Gdk.PropMode.PREPEND/g;" \
+    -pe "s/Gdk.PROP_MODE_REPLACE/Gdk.PropMode.REPLACE/g;" \
     -pe "s/Gdk.BUTTON_PRESS/Gdk.EventType.BUTTON_PRESS/g;" \
     -pe "s/Gdk.ACTION_/Gdk.DragAction./g;" \
     -pe "s/Gdk.GRAB_/Gdk.GrabStatus./g;" \
