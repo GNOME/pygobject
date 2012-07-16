@@ -10,6 +10,8 @@ import shutil
 import os
 import locale
 import subprocess
+from io import StringIO
+
 from gi.repository import GObject, GLib
 
 from gi.repository import GIMarshallingTests
@@ -2274,3 +2276,16 @@ class TestModule(unittest.TestCase):
         for item_name in _dir:
             item = getattr(GIMarshallingTests, item_name)
             self.assertTrue(hasattr(item, '__class__'))
+
+    def test_help(self):
+        orig_stdout = sys.stdout
+        try:
+            sys.stdout = StringIO()
+            help(GIMarshallingTests)
+            output = sys.stdout.getvalue()
+        finally:
+            sys.stdout = orig_stdout
+
+        self.assertTrue('SimpleStruct' in output, output)
+        self.assertTrue('Interface2' in output, output)
+        self.assertTrue('method_array_inout' in output, output)

@@ -23,6 +23,7 @@
 from __future__ import absolute_import
 
 import sys
+import types
 
 _have_py3 = (sys.version_info.major >= 3)
 
@@ -228,7 +229,7 @@ class IntrospectionModule(object):
         return list(result)
 
 
-class DynamicModule(object):
+class DynamicModule(types.ModuleType):
     def __init__(self, namespace):
         self._namespace = namespace
         self._introspection_module = None
