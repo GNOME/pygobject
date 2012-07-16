@@ -10,7 +10,7 @@ import shutil
 import os
 import locale
 import subprocess
-from io import StringIO
+from io import StringIO, BytesIO
 
 from gi.repository import GObject, GLib
 
@@ -2280,7 +2280,10 @@ class TestModule(unittest.TestCase):
     def test_help(self):
         orig_stdout = sys.stdout
         try:
-            sys.stdout = StringIO()
+            if sys.version_info.major < 3:
+                sys.stdout = BytesIO()
+            else:
+                sys.stdout = StringIO()
             help(GIMarshallingTests)
             output = sys.stdout.getvalue()
         finally:
