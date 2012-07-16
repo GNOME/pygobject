@@ -1,3 +1,31 @@
+3.3.4   16-Jul-2012
+        - pygi-convert.sh: Drop bogus filter_new() conversion (Martin Pitt)
+          (#679999)
+        - Fix help() for GI modules (Martin Pitt) (#679804)
+        - Skip gi.CallbackInfo objects from a module's dir() (Martin Pitt)
+          (#679804)
+        - Fix __path__ module attribute (Martin Pitt)
+        - pygi-convert.sh: Fix some child → getChild() false positives
+	  (Joe R. Nassimian) (#680004)
+	- Fix array handling for interfaces, properties, and signals
+	  (Mikkel Kamstrup Erlandsen) (#667244)
+	- Add conversion of the Gdk.PropMode constants to pygi-convert.sh
+	  script (Manuel Quiñones) (#679775)
+	- Add the same rules for pack_start to convert pack_end (Manuel
+	  Quiñones) (#679760)
+        - Add error-checking for the case where _arg_cache_new() fails
+	  (Dave Malcolm) (#678914)
+	- Add conversion of the Gdk.NotifyType constants to pygi-convert.sh
+	  script (Manuel Quiñones) (#679754)
+	- Fix PyObject_Repr and PyObject_Str reference leaks (Simon Feltman)
+          (#675857)
+	- [API add] Gtk overrides: Add TreePath.__len__() (Martin Pitt)
+          (#679199)
+        - GLib.Variant: Fix repr(), add proper str() (Martin Pitt) (#679336)
+        - m4/python.m4: Update Python version list (Martin Pitt)
+        - Remove "label" property from Gtk.MenuItem if it is not set
+	  (Micah Carrick) (#670575)
+
 3.3.3.1 25-Jun-2012
         - Do not escape enum and flag names that are Python keywords (Martin Pitt)
 
