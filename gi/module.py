@@ -22,6 +22,10 @@
 
 from __future__ import absolute_import
 
+import sys
+
+_have_py3 = (sys.version_info.major >= 3)
+
 from . import _glib, _gobject
 try:
     maketrans = ''.maketrans
@@ -96,6 +100,9 @@ class IntrospectionModule(object):
 
         repository.require(self._namespace, self._version)
         self.__path__ = repository.get_typelib_path(self._namespace)
+        if _have_py3:
+            # get_typelib_path() delivers bytes, not a string
+            self.__path__ = self.__path__.decode('UTF-8')
 
         if self._version is None:
             self._version = repository.get_version(self._namespace)
@@ -200,6 +207,9 @@ class IntrospectionModule(object):
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
+        if _have_py3:
+            # get_typelib_path() delivers bytes, not a string
+            path = path.decode('UTF-8')
         return "<IntrospectionModule %r from %r>" % (self._namespace, path)
 
     def __dir__(self):
@@ -230,6 +240,9 @@ class DynamicModule(object):
         overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
         self._overrides_module = getattr(overrides_modules, self._namespace, None)
         self.__path__ = repository.get_typelib_path(self._namespace)
+        if _have_py3:
+            # get_typelib_path() delivers bytes, not a string
+            self.__path__ = self.__path__.decode('UTF-8')
 
     def __getattr__(self, name):
         if self._overrides_module is not None:
@@ -260,6 +273,10 @@ class DynamicModule(object):
 
     def __repr__(self):
         path = repository.get_typelib_path(self._namespace)
+        if _have_py3:
+            # get_typelib_path() delivers bytes, not a string
+            path = path.decode('UTF-8')
+
         return "<%s.%s %r from %r>" % (self.__class__.__module__,
                                        self.__class__.__name__,
                                        self._namespace,

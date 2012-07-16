@@ -2250,3 +2250,13 @@ class TestKeywords(unittest.TestCase):
 
     def test_uppercase(self):
         self.assertEqual(GLib.IOCondition.IN.value_nicks, ['in'])
+
+
+class TestModule(unittest.TestCase):
+    def test_path(self):
+        self.assertTrue(GIMarshallingTests.__path__.endswith('GIMarshallingTests-1.0.typelib'),
+                        GIMarshallingTests.__path__)
+
+    def test_str(self):
+        self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
+                        str(GIMarshallingTests))
