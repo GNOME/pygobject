@@ -2260,3 +2260,17 @@ class TestModule(unittest.TestCase):
     def test_str(self):
         self.assertTrue("'GIMarshallingTests' from '" in str(GIMarshallingTests),
                         str(GIMarshallingTests))
+
+    def test_dir(self):
+        _dir = dir(GIMarshallingTests)
+        self.assertGreater(len(_dir), 10)
+
+        self.assertTrue('SimpleStruct' in _dir)
+        self.assertTrue('Interface2' in _dir)
+        self.assertTrue('CONSTANT_GERROR_CODE' in _dir)
+        self.assertTrue('array_zero_terminated_inout' in _dir)
+
+        # assert that dir() does not contain garbage
+        for item_name in _dir:
+            item = getattr(GIMarshallingTests, item_name)
+            self.assertTrue(hasattr(item, '__class__'))

@@ -218,9 +218,12 @@ class IntrospectionModule(object):
         result.update(self.__dict__.keys())
 
         # update *set* because some repository attributes have already been
-        # wrapped by __getattr__() and included in self.__dict__
+        # wrapped by __getattr__() and included in self.__dict__; but skip
+        # Callback types, as these are not real objects which we can actually
+        # get
         namespace_infos = repository.get_infos(self._namespace)
-        result.update(info.get_name() for info in namespace_infos)
+        result.update(info.get_name() for info in namespace_infos if
+                      not isinstance(info, CallbackInfo))
 
         return list(result)
 
