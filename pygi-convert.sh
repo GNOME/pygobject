@@ -78,7 +78,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.Alignment\(/Gtk.Alignment.new\(/g;" \
     -pe "s/self._model.filter_new\(\)/Gtk.TreeModelFilter.new\(self._model, None\)/g;" \
     -pe "#s/Gtk.Window.__init__\(self\)/Gtk.Window.__init__\(Gtk.WindowType.TOPLEVEL\)/g;" \
-    -pe "s/\.child([^_a-z])/.get_child\(\)\1/g;" \
+    -pe "s/\.child([^_A-Za-z])/.get_child\(\)\1/g;" \
 \
     -pe "s/column.pack_start\(([^,\)]*)\)/column.pack_start\(\1, True\)/g;" \
     -pe "s/pack_start\(([^,\)]*)\)/pack_start\(\1, True, True, 0\)/g;" \
