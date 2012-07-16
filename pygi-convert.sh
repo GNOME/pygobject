@@ -76,7 +76,6 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/\.window\.set_skip_taskbar_hint/.set_skip_taskbar_hint/g;" \
     -pe "s/\.window\.set_transient_for/.set_transient_for/g;" \
     -pe "s/Gtk.Alignment\(/Gtk.Alignment.new\(/g;" \
-    -pe "s/self._model.filter_new\(\)/Gtk.TreeModelFilter.new\(self._model, None\)/g;" \
     -pe "#s/Gtk.Window.__init__\(self\)/Gtk.Window.__init__\(Gtk.WindowType.TOPLEVEL\)/g;" \
     -pe "s/\.child([^_A-Za-z])/.get_child\(\)\1/g;" \
 \
