@@ -99,6 +99,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/import gobject\n/from gi.repository import GObject\n/g;" \
     -pe "s/Gtk\..*\.__init__/gobject.GObject.__init__/g;" \
 \
+    -pe "s/rsvg.Handle\s*\(data=([^,\)]+)\)/Rsvg.Handle.new_from_data(\1)/g;" \
+\
     -pe "s/from gtk import gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/import gtk.gdk as gdk\n/from gi.repository import Gdk\n/g;" \
     -pe "s/Gtk.gdk.x11_/GdkX11.x11_/g;" \
