@@ -147,6 +147,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gdk.(WATCH)/Gdk.CursorType.\1/g;" \
     -pe "s/Gdk.(ARROW)/Gdk.CursorType.\1/g;" \
     -pe "s/Gdk.(CLOCK)/Gdk.CursorType.\1/g;" \
+    -pe "s/Gdk.WINDOW_STATE_(ABOVE|BELOW|FOCUSED|FULLSCREEN|ICONIFIED|MAXIMIZED|STICKY|WITHDRAWN)/Gdk.WindowState.\1/g;" \
     -pe "s/Gdk.Cursor\s*\(/Gdk.Cursor.new\(/g;" \
     -pe "s/#Gdk.Rectangle\(([^,\)]*), ([^,\)]*), ([^,\)]*), ([^,\)]*)\)/\1, \2, \3, \4/g;" \
     -pe "s/Gdk.Rectangle//g;" \
