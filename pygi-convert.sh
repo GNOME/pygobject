@@ -58,6 +58,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.TREE_VIEW_DROP_/Gtk.TreeViewDropPosition./g;" \
     -pe "s/Gtk.TRUE/True/g;" \
     -pe "s/Gtk.WINDOW_/Gtk.WindowType./g;" \
+    -pe "s/Gtk.DEST_DEFAULT_/Gtk.DestDefaults./g;" \
     -pe "s/Gtk.WIN_POS_/Gtk.WindowPosition./g;" \
     -pe "s/Gtk.WRAP_/Gtk.WrapMode./g;" \
     -pe "s/Gtk.UI_MANAGER_/Gtk.UIManagerItemType./g;" \
