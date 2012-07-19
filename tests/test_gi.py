@@ -12,6 +12,7 @@ import locale
 import subprocess
 from io import StringIO, BytesIO
 
+import gi
 from gi.repository import GObject, GLib
 
 from gi.repository import GIMarshallingTests
@@ -2292,3 +2293,18 @@ class TestModule(unittest.TestCase):
         self.assertTrue('SimpleStruct' in output, output)
         self.assertTrue('Interface2' in output, output)
         self.assertTrue('method_array_inout' in output, output)
+
+
+class TestProjectVersion(unittest.TestCase):
+    def test_version_str(self):
+        self.assertGreaterEqual(gi.__version__, "3.3.5")
+
+    def test_version_info(self):
+        self.assertEqual(len(gi.version_info), 3)
+        self.assertGreaterEqual(gi.version_info, (3, 3, 5))
+
+    def test_check_version(self):
+        self.assertRaises(ValueError, gi.check_version, (99, 0, 0))
+        self.assertRaises(ValueError, gi.check_version, "99.0.0")
+        gi.check_version((3, 3, 5))
+        gi.check_version("3.3.5")

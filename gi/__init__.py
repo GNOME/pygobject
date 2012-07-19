@@ -34,6 +34,22 @@ import os
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), 'overrides')
 
+version_info = gi._gobject.pygobject_version[:]
+__version__ = "{0}.{1}.{2}".format(*version_info)
+
+
+def check_version(version):
+    if isinstance(version, str):
+        version_list = tuple(map(int, version.split(".")))
+    else:
+        version_list = version
+
+    if version_list > version_info:
+        raise ValueError((
+            "pygobject's version %s required, and available version "
+            "%s is not recent enough") % (version, __version__)
+        )
+
 
 def require_version(namespace, version):
     repository = Repository.get_default()
