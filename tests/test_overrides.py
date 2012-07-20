@@ -1652,6 +1652,12 @@ class TestGtk(unittest.TestCase):
                            text=0,
                            style=2)
 
+    def test_tree_view_column_set_attributes(self):
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn()
+        column.pack_start(cell, expand=True)
+        column.set_attributes(cell, text=0, style=2)
+
     def test_tree_selection(self):
         store = Gtk.ListStore(int, str)
         for i in range(10):

@@ -1399,6 +1399,13 @@ class TreeViewColumn(Gtk.TreeViewColumn):
     def set_cell_data_func(self, cell_renderer, func, func_data=None):
         super(TreeViewColumn, self).set_cell_data_func(cell_renderer, func, func_data)
 
+    def set_attributes(self, cell_renderer, **attributes):
+        Gtk.CellLayout.clear_attributes(self, cell_renderer)
+
+        for (name, value) in attributes.items():
+            Gtk.CellLayout.add_attribute(self, cell_renderer, name, value)
+
+
 TreeViewColumn = override(TreeViewColumn)
 __all__.append('TreeViewColumn')
 
