@@ -1392,6 +1392,10 @@ class TestGtk(unittest.TestCase):
         self.assertFalse(p1 <= None)
 
         self.assertEqual(tuple(p1), (1, 2, 3))
+        self.assertEqual(p1[0], 1)
+        self.assertEqual(p1[1], 2)
+        self.assertEqual(p1[2], 3)
+        self.assertRaises(IndexError, p1.__getitem__, 3)
 
     def test_tree_model(self):
         tree_store = Gtk.TreeStore(int, str)

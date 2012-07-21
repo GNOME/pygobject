@@ -1227,10 +1227,13 @@ class TreePath(Gtk.TreePath):
         return other is None or self.compare(other) >= 0
 
     def __iter__(self):
-        return (int(part) for part in str(self).split(':'))
+        return iter(self.get_indices())
 
     def __len__(self):
         return self.get_depth()
+
+    def __getitem__(self, index):
+        return self.get_indices()[index]
 
 TreePath = override(TreePath)
 __all__.append('TreePath')
