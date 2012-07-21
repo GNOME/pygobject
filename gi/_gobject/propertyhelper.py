@@ -74,6 +74,50 @@ class Property(object):
         def propInt(self, value):
             ...
     """
+    _type_from_pytype_lookup = {
+        # Put long_ first in case long_ and int are the same so int clobbers long_
+        _long: TYPE_LONG,
+        int: TYPE_INT,
+        bool: TYPE_BOOLEAN,
+        float: TYPE_DOUBLE,
+        str: TYPE_STRING,
+        object: TYPE_PYOBJECT,
+    }
+
+    _min_value_lookup = {
+        TYPE_UINT: 0,
+        TYPE_ULONG: 0,
+        TYPE_UINT64: 0,
+        # Remember that G_MINFLOAT and G_MINDOUBLE are something different.
+        TYPE_FLOAT: -G_MAXFLOAT,
+        TYPE_DOUBLE: -G_MAXDOUBLE,
+        TYPE_INT: G_MININT,
+        TYPE_LONG: G_MINLONG,
+        TYPE_INT64: -2 ** 62 - 1,
+    }
+
+    _max_value_lookup = {
+        TYPE_UINT: G_MAXUINT,
+        TYPE_ULONG: G_MAXULONG,
+        TYPE_INT64: 2 ** 62 - 1,
+        TYPE_UINT64: 2 ** 63 - 1,
+        TYPE_FLOAT: G_MAXFLOAT,
+        TYPE_DOUBLE: G_MAXDOUBLE,
+        TYPE_INT: G_MAXINT,
+        TYPE_LONG: G_MAXLONG,
+    }
+
+    _default_lookup = {
+        TYPE_INT: 0,
+        TYPE_UINT: 0,
+        TYPE_LONG: 0,
+        TYPE_ULONG: 0,
+        TYPE_INT64: 0,
+        TYPE_UINT64: 0,
+        TYPE_STRING: '',
+        TYPE_FLOAT: 0.0,
+        TYPE_DOUBLE: 0.0,
+    }
 
     class __metaclass__(type):
         def __repr__(self):
@@ -203,48 +247,28 @@ class Property(object):
         return self
 
     def _type_from_python(self, type_):
-        if type_ == _long:
-            return TYPE_LONG
-        elif type_ == int:
-            return TYPE_INT
-        elif type_ == bool:
-            return TYPE_BOOLEAN
-        elif type_ == float:
-            return TYPE_DOUBLE
-        elif type_ == str:
-            return TYPE_STRING
-        elif type_ == object:
-            return TYPE_PYOBJECT
+        if type_ in self._type_from_pytype_lookup:
+            return self._type_from_pytype_lookup[type_]
         elif (isinstance(type_, type) and
               issubclass(type_, (_gobject.GObject,
                                  _gobject.GEnum,
                                  _gobject.GFlags,
                                  _gobject.GBoxed))):
             return type_.__gtype__
-        elif type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
+        elif type_ in (TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                        TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
                        TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
                        TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
                        TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
-                       TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV]:
+                       TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV):
             return type_
         else:
             raise TypeError("Unsupported type: %r" % (type_,))
 
     def _get_default(self, default):
-        ptype = self.type
         if default is not None:
             return default
-
-        if ptype in [TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG,
-                     TYPE_INT64, TYPE_UINT64]:
-            return 0
-        elif ptype == TYPE_STRING:
-            return ''
-        elif ptype == TYPE_FLOAT or ptype == TYPE_DOUBLE:
-            return 0.0
-        else:
-            return None
+        return self._default_lookup.get(self.type, None)
 
     def _check_default(self):
         ptype = self.type
@@ -276,43 +300,10 @@ class Property(object):
                     raise TypeError("Strv value %s must contain only strings" % str(default))
 
     def _get_minimum(self):
-        ptype = self.type
-        if ptype in [TYPE_UINT, TYPE_ULONG, TYPE_UINT64]:
-            return 0
-        # Remember that G_MINFLOAT and G_MINDOUBLE are something different.
-        elif ptype == TYPE_FLOAT:
-            return -G_MAXFLOAT
-        elif ptype == TYPE_DOUBLE:
-            return -G_MAXDOUBLE
-        elif ptype == TYPE_INT:
-            return G_MININT
-        elif ptype == TYPE_LONG:
-            return G_MINLONG
-        elif ptype == TYPE_INT64:
-            return -2 ** 62 - 1
-
-        return None
+        return self._min_value_lookup.get(self.type, None)
 
     def _get_maximum(self):
-        ptype = self.type
-        if ptype == TYPE_UINT:
-            return G_MAXUINT
-        elif ptype == TYPE_ULONG:
-            return G_MAXULONG
-        elif ptype == TYPE_INT64:
-            return 2 ** 62 - 1
-        elif ptype == TYPE_UINT64:
-            return 2 ** 63 - 1
-        elif ptype == TYPE_FLOAT:
-            return G_MAXFLOAT
-        elif ptype == TYPE_DOUBLE:
-            return G_MAXDOUBLE
-        elif ptype == TYPE_INT:
-            return G_MAXINT
-        elif ptype == TYPE_LONG:
-            return G_MAXLONG
-
-        return None
+        return self._max_value_lookup.get(self.type, None)
 
     #
     # Getter and Setter
@@ -338,13 +329,13 @@ class Property(object):
 
     def get_pspec_args(self):
         ptype = self.type
-        if ptype in [TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG,
-                     TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE]:
+        if ptype in (TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG,
+                     TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE):
             args = self.minimum, self.maximum, self.default
         elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
               ptype.is_a(TYPE_ENUM) or ptype.is_a(TYPE_FLAGS)):
             args = (self.default,)
-        elif ptype in [TYPE_PYOBJECT, TYPE_GTYPE]:
+        elif ptype in (TYPE_PYOBJECT, TYPE_GTYPE):
             args = ()
         elif ptype.is_a(TYPE_OBJECT) or ptype.is_a(TYPE_BOXED):
             args = ()

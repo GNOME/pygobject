@@ -2,6 +2,7 @@
 
 import sys
 import struct
+import types
 import unittest
 
 from gi.repository import GObject
@@ -9,7 +10,11 @@ from gi.repository.GObject import GType, new, PARAM_READWRITE, \
     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
 from gi.repository.GObject import \
     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
-    TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV
+    TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV, \
+    TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, TYPE_BOOLEAN, TYPE_FLOAT, \
+    TYPE_DOUBLE, TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
+    TYPE_STRING, TYPE_PYOBJECT
+
 from gi.repository.GObject import \
     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG
 
@@ -312,22 +317,22 @@ class TestProperties(unittest.TestCase):
         minint64 = -maxint64 - 1
         maxuint64 = umax('Q')
 
-        types = dict(int=(TYPE_INT, minint, maxint),
-                     uint=(TYPE_UINT, 0, maxuint),
-                     long=(TYPE_LONG, minlong, maxlong),
-                     ulong=(TYPE_ULONG, 0, maxulong),
-                     int64=(TYPE_INT64, minint64, maxint64),
-                     uint64=(TYPE_UINT64, 0, maxuint64))
+        types_ = dict(int=(TYPE_INT, minint, maxint),
+                      uint=(TYPE_UINT, 0, maxuint),
+                      long=(TYPE_LONG, minlong, maxlong),
+                      ulong=(TYPE_ULONG, 0, maxulong),
+                      int64=(TYPE_INT64, minint64, maxint64),
+                      uint64=(TYPE_UINT64, 0, maxuint64))
 
-        def build_gproperties(types):
+        def build_gproperties(types_):
             d = {}
-            for key, (gtype, min, max) in types.items():
+            for key, (gtype, min, max) in types_.items():
                 d[key] = (gtype, 'blurb', 'desc', min, max, 0,
                           PARAM_READABLE | PARAM_WRITABLE)
             return d
 
         class RangeCheck(GObject.GObject):
-            __gproperties__ = build_gproperties(types)
+            __gproperties__ = build_gproperties(types_)
 
             def __init__(self):
                 self.values = {}
@@ -353,7 +358,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(RangeCheck.props.uint64.maximum, maxuint64)
 
         obj = RangeCheck()
-        for key, (gtype, min, max) in types.items():
+        for key, (gtype, min, max) in types_.items():
             self.assertEqual(obj.get_property(key),
                              getattr(RangeCheck.props, key).default_value)
 
@@ -494,7 +499,7 @@ class TestProperty(unittest.TestCase):
         minint64 = -2 ** 62 - 1
         maxuint64 = 2 ** 63 - 1
 
-        types = [
+        types_ = [
             (TYPE_INT, G_MININT, G_MAXINT),
             (TYPE_UINT, 0, G_MAXUINT),
             (TYPE_LONG, G_MINLONG, G_MAXLONG),
@@ -503,7 +508,7 @@ class TestProperty(unittest.TestCase):
             (TYPE_UINT64, 0, maxuint64),
             ]
 
-        for gtype, min, max in types:
+        for gtype, min, max in types_:
             # Normal, everything is alright
             prop = GObject.Property(type=gtype, minimum=min, maximum=max)
             subtype = type('', (GObject.GObject,), dict(prop=prop))
@@ -680,6 +685,30 @@ class TestProperty(unittest.TestCase):
 
         self.assertEqual(C.blurbed.blurb, 'blurbed doc string')
 
+    def testPythonToGLibTypeMapping(self):
+        tester = GObject.Property()
+        self.assertEqual(tester._type_from_python(int), GObject.TYPE_INT)
+        if sys.version_info < (3, 0):
+            self.assertEqual(tester._type_from_python(long), GObject.TYPE_LONG)
+        self.assertEqual(tester._type_from_python(bool), GObject.TYPE_BOOLEAN)
+        self.assertEqual(tester._type_from_python(float), GObject.TYPE_DOUBLE)
+        self.assertEqual(tester._type_from_python(str), GObject.TYPE_STRING)
+        self.assertEqual(tester._type_from_python(object), GObject.TYPE_PYOBJECT)
+
+        self.assertEqual(tester._type_from_python(GObject.GObject), GObject.GObject.__gtype__)
+        self.assertEqual(tester._type_from_python(GObject.GEnum), GObject.GEnum.__gtype__)
+        self.assertEqual(tester._type_from_python(GObject.GFlags), GObject.GFlags.__gtype__)
+        self.assertEqual(tester._type_from_python(GObject.GBoxed), GObject.GBoxed.__gtype__)
+
+        for type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
+                      TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,
+                      TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
+                      TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
+                      TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
+                      TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV]:
+            self.assertEqual(tester._type_from_python(type_), type_)
+
+        self.assertRaises(TypeError, tester._type_from_python, types.CodeType)
 
 if __name__ == '__main__':
     unittest.main()
