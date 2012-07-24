@@ -84,5 +84,3 @@ clean-local:
 	rm -f $(pygobject_LTLIBRARIES:.la=.so)
 .la.so:
 	$(LN_S) .libs/$@ $@ || true
-
--include $(top_srcdir)/git.mk

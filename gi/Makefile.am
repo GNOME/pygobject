@@ -132,6 +132,3 @@ all-local: $(LTLIBRARIES:.la=.so) build_pylinks
 check-local: $(LTLIBRARIES:.la=.so) build_pylinks
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so)
-
-
--include $(top_srcdir)/git.mk

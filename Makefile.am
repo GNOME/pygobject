@@ -132,6 +132,3 @@ check.nemiver:
 
 check.valgrind:
 	cd tests && $(MAKE) check.valgrind
-
-
--include $(top_srcdir)/git.mk
