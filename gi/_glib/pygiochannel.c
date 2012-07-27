@@ -12,6 +12,8 @@
 #include "pyglib-private.h"
 #include "pygsource.h"
 
+#include "pygiochannel.h"
+
 typedef struct {
     PyObject_HEAD
     GIOChannel *channel;

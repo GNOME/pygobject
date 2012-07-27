@@ -27,6 +27,8 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 
+#include "pygspawn.h"
+
 struct _PyGChildSetupData {
     PyObject *func;
     PyObject *data;
