@@ -1274,7 +1274,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
 
                 offset = g_field_info_get_offset ( (GIFieldInfo *) self->info);
 
-                value.v_pointer = pointer + offset;
+                value.v_pointer = (char*) pointer + offset;
 
                 goto argument_to_object;
             }
@@ -1410,7 +1410,7 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
                 size = g_struct_info_get_size ( (GIStructInfo *) info);
                 g_assert (size > 0);
 
-                g_memmove (pointer + offset, value.v_pointer, size);
+                g_memmove ((char*) pointer + offset, value.v_pointer, size);
 
                 g_base_info_unref (info);
 
