@@ -14,7 +14,7 @@ static PyObject * _wrap_TestInterface__do_iface_method(PyObject *cls,
 						       PyObject *args,
 						       PyObject *kwargs);
 
-GType
+static GType
 test_type_get_type(void)
 {
     static GType gtype = 0;
@@ -339,7 +339,7 @@ test_object_callback (GObject *object, GObject *o)
   return o;
 }
 
-void
+static void
 connectcallbacks (GObject *object)
 {
 

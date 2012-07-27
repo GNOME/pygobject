@@ -171,15 +171,6 @@ pygi_marshal_cleanup_args_to_py_parameter_fail (PyGIInvokeState   *state,
     state->failed = TRUE;
 }
 
-void 
-_pygi_marshal_cleanup_closure_unref (PyGIInvokeState *state,
-                                     PyGIArgCache    *arg_cache,
-                                     gpointer         data,
-                                     gboolean         was_processed)
-{
-    g_closure_unref ( (GClosure *)data);
-}
-
 void
 _pygi_marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
                                     PyGIArgCache    *arg_cache,

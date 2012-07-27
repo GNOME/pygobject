@@ -671,7 +671,7 @@ pyg_type_get_bases(GType gtype)
  *
  * Returns: a PyTypeObject for the new type or NULL if it couldn't be created
  */
-PyTypeObject *
+static PyTypeObject *
 pygobject_new_with_interfaces(GType gtype)
 {
     PyGILState_STATE state;

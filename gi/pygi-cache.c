@@ -43,7 +43,7 @@ PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                                              gssize c_arg_index,
                                              gssize py_arg_index);
 /* cleanup */
-void
+static void
 _pygi_arg_cache_free (PyGIArgCache *cache)
 {
     if (cache == NULL)

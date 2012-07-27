@@ -749,7 +749,7 @@ create_property (const gchar  *prop_name,
     return pspec;
 }
 
-GParamSpec *
+static GParamSpec *
 pyg_param_spec_from_object (PyObject *tuple)
 {
     gint val_length;
@@ -1810,7 +1810,7 @@ pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
 }
 
 /* Only for backwards compatibility */
-int
+static int
 pygobject_enable_threads(void)
 {
     if (!pyglib_enable_threads())

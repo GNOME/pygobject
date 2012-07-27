@@ -53,7 +53,7 @@ test_interface_get_type (void)
   return gtype;
 }
 
-void test_unknown_iface_method (TestInterface *iface)
+static void test_unknown_iface_method (TestInterface *iface)
 {
 }
 

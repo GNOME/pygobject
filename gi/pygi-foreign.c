@@ -41,7 +41,7 @@ typedef struct {
 
 static GPtrArray *foreign_structs = NULL;
 
-void
+static void
 init_foreign_structs ()
 {
     foreign_structs = g_ptr_array_new ();
