@@ -171,24 +171,6 @@ _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
 }
 #endif
 
-int
-pyglib_gil_state_ensure_py23 (void)
-{
-#ifdef DISABLE_THREADING
-    return 0;
-#else
-    return PyGILState_Ensure();
-#endif
-}
-
-void
-pyglib_gil_state_release_py23 (int flag)
-{
-#ifndef DISABLE_THREADING
-    PyGILState_Release(flag);
-#endif
-}
-
 /**
  * pyglib_block_threads:
  *
