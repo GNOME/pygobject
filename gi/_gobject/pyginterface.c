@@ -28,6 +28,8 @@
 #include "pyglib.h"
 #include "pygobject-private.h"
 
+#include "pyginterface.h"
+
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;
 

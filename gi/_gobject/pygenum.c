@@ -30,6 +30,8 @@
 
 #include "pygi.h"
 
+#include "pygenum.h"
+
 GQuark pygenum_class_key;
 
 PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
