@@ -131,8 +131,16 @@ def enable_gtk(version='2.0'):
 
     Gdk.screen_get_default = Gdk.Screen.get_default
     Gdk.Pixbuf = GdkPixbuf.Pixbuf
-    Gdk.pixbuf_new_from_file = GdkPixbuf.Pixbuf.new_from_file
     Gdk.PixbufLoader = GdkPixbuf.PixbufLoader.new_with_type
+    Gdk.pixbuf_new_from_data = GdkPixbuf.Pixbuf.new_from_data
+    Gdk.pixbuf_new_from_file = GdkPixbuf.Pixbuf.new_from_file
+    Gdk.pixbuf_new_from_file_at_scale = GdkPixbuf.Pixbuf.new_from_file_at_scale
+    Gdk.pixbuf_new_from_file_at_size = GdkPixbuf.Pixbuf.new_from_file_at_size
+    Gdk.pixbuf_new_from_inline = GdkPixbuf.Pixbuf.new_from_inline
+    Gdk.pixbuf_new_from_stream = GdkPixbuf.Pixbuf.new_from_stream
+    Gdk.pixbuf_new_from_stream_at_scale = GdkPixbuf.Pixbuf.new_from_stream_at_scale
+    Gdk.pixbuf_new_from_xpm_data = GdkPixbuf.Pixbuf.new_from_xpm_data
+    Gdk.pixbuf_get_file_info = GdkPixbuf.Pixbuf.get_file_info
 
     orig_get_formats = GdkPixbuf.Pixbuf.get_formats
 
