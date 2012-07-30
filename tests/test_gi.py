@@ -13,7 +13,7 @@ import subprocess
 from io import StringIO, BytesIO
 
 import gi
-from gi.repository import GObject, GLib
+from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
 
@@ -1873,6 +1873,61 @@ class TestInterfaces(unittest.TestCase):
         class TestInterfaceImpl3(self.TestInterfaceImpl,
                                  GIMarshallingTests.Interface2):
             pass
+
+    def test_type_mismatch(self):
+        obj = GIMarshallingTests.Object()
+
+        # wrong type for first argument: interface
+        enum = Gio.File.new_for_path('.').enumerate_children(
+            '', Gio.FileQueryInfoFlags.NONE, None)
+        try:
+            enum.next_file(obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('cancellable' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.Cancellable' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for self argument: interface
+        try:
+            Gio.FileEnumerator.next_file(obj, None)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('self' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.FileEnumerator' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for first argument: GObject
+        var = GLib.Variant('s', 'mystring')
+        action = Gio.SimpleAction.new('foo', var.get_type())
+        try:
+            action.activate(obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('parameter' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected GLib.Variant' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+        # wrong type for self argument: GObject
+        try:
+            Gio.SimpleAction.activate(obj, obj)
+            self.fail('call with wrong type argument unexpectedly succeeded')
+        except TypeError as e:
+            # should have argument name
+            self.assertTrue('self' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.Action' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
 
 
 class TestInterfaceClash(unittest.TestCase):

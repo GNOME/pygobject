@@ -1438,10 +1438,17 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
     } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
         /* first check to see if this is a member of the expected union */
         if (!_is_union_member (iface_cache, py_arg)) {
-            if (!PyErr_Occurred())
-                PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
+            if (!PyErr_Occurred()) {
+                PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
+
+                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+                              arg_cache->arg_name ? arg_cache->arg_name : "self",
                               iface_cache->type_name,
-                              iface_cache->py_type->ob_type->tp_name);
+                              module ? _PyUnicode_AsString(module) : "<unknown module>",
+                              py_arg->ob_type->tp_name);
+                if (module)
+                    Py_DECREF (module);
+            }
 
             return FALSE;
         }
@@ -1490,9 +1497,15 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
     }
 
     if (!PyObject_IsInstance (py_arg, ( (PyGIInterfaceCache *)arg_cache)->py_type)) {
-        PyErr_Format (PyExc_TypeError, "Expected %s, but got %s",
+        PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
+
+        PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+                      arg_cache->arg_name ? arg_cache->arg_name : "self",
                       ( (PyGIInterfaceCache *)arg_cache)->type_name,
-                      ( (PyGIInterfaceCache *)arg_cache)->py_type->ob_type->tp_name);
+                      module ? _PyUnicode_AsString(module) : "<unknown module>",
+                      py_arg->ob_type->tp_name);
+        if (module)
+            Py_DECREF (module);
         return FALSE;
     }
 
@@ -1534,12 +1547,17 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
             if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
                 /* wait, we might be a member of a union so manually check */
                 if (!_is_union_member (iface_cache, py_arg)) {
-                    if (!PyErr_Occurred())
+                    if (!PyErr_Occurred()) {
+                        PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
                         PyErr_Format (PyExc_TypeError,
-                                      "Expected a %s, but got %s",
+                                      "argument %s: Expected a %s, but got %s.%s",
+                                      arg_cache->arg_name ? arg_cache->arg_name : "self",
                                       iface_cache->type_name,
+                                      module ? _PyUnicode_AsString(module) : "<unknown module>",
                                       py_arg->ob_type->tp_name);
-
+                        if (module)
+                            Py_DECREF (module);
+                    }
                     return FALSE;
                 }
             }
@@ -1565,9 +1583,14 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
                 GType expected_type = iface_cache->g_type;
 
                 if (!g_type_is_a (obj_type, expected_type)) {
-                    PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
+                    PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
+                    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+                                  arg_cache->arg_name ? arg_cache->arg_name : "self",
                                   iface_cache->type_name,
+                                  module ? _PyUnicode_AsString(module) : "<unknown module>",
                                   py_arg->ob_type->tp_name);
+                    if (module)
+                        Py_DECREF (module);
                     return FALSE;
                 }
             }
