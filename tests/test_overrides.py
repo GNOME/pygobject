@@ -1570,6 +1570,15 @@ class TestGtk(unittest.TestCase):
         self.assertRaises(IndexError, tree_store.__delitem__, -101)
         self.assertRaises(IndexError, tree_store.__delitem__, 101)
 
+    def test_tree_model_get_iter_fail(self):
+        # TreeModel class with a failing get_iter()
+        class MyTreeModel(GObject.GObject, Gtk.TreeModel):
+            def do_get_iter(self, iter):
+                return (False, None)
+
+        tm = MyTreeModel()
+        self.assertEqual(tm.get_iter_first(), None)
+
     def test_tree_model_edit(self):
         model = Gtk.ListStore(int, str, float)
         model.append([1, "one", -0.1])

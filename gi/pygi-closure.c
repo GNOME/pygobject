@@ -81,9 +81,13 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
            interface_type = g_base_info_get_type (interface);
 
            if (!g_type_info_is_pointer (type_info) &&
-	       interface_type == GI_INFO_TYPE_STRUCT) {
-               gsize item_size = _pygi_g_type_info_size (type_info);
-               memcpy (out_arg, arg.v_pointer, item_size);
+               interface_type == GI_INFO_TYPE_STRUCT) {
+               if (object == Py_None) {
+                   arg.v_pointer = NULL;
+               } else {
+                   gsize item_size = _pygi_g_type_info_size (type_info);
+                   memcpy (out_arg, arg.v_pointer, item_size);
+               }
                break;
            }
         }
