@@ -1662,10 +1662,26 @@ class TestGtk(unittest.TestCase):
                            style=2)
 
     def test_tree_view_column_set_attributes(self):
-        cell = Gtk.CellRendererText()
+        store = Gtk.ListStore(int, str)
+        directors = ['Fellini', 'Tarantino', 'Tarkovskiy']
+        for i, director in enumerate(directors):
+            store.append([i, director])
+
+        treeview = Gtk.TreeView()
+        treeview.set_model(store)
+
         column = Gtk.TreeViewColumn()
+        treeview.append_column(column)
+
+        cell = Gtk.CellRendererText()
         column.pack_start(cell, expand=True)
-        column.set_attributes(cell, text=0, style=2)
+        column.set_attributes(cell, text=1)
+
+        # This will make cell.props.text receive a value, otherwise it
+        # will be None.
+        treeview.get_preferred_size()
+
+        self.assertTrue(cell.props.text in directors)
 
     def test_tree_selection(self):
         store = Gtk.ListStore(int, str)
