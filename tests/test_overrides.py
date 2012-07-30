@@ -1761,6 +1761,25 @@ class TestGtk(unittest.TestCase):
         self.assertFalse(start.ends_tag())
         self.assertFalse(start.toggles_tag())
 
+    def test_text_buffer_search(self):
+        buffer = Gtk.TextBuffer()
+        buffer.set_text('Hello World Hello GNOME')
+
+        i = buffer.get_iter_at_offset(0)
+        self.assertTrue(isinstance(i, Gtk.TextIter))
+
+        self.assertEqual(i.forward_search('world', 0, None), None)
+
+        (start, end) = i.forward_search('World', 0, None)
+        self.assertEqual(start.get_offset(), 6)
+        self.assertEqual(end.get_offset(), 11)
+
+        (start, end) = i.forward_search('world',
+                                        Gtk.TextSearchFlags.CASE_INSENSITIVE,
+                                        None)
+        self.assertEqual(start.get_offset(), 6)
+        self.assertEqual(end.get_offset(), 11)
+
     def test_buttons(self):
         self.assertEqual(Gtk.Button, overrides.Gtk.Button)
 
