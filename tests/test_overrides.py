@@ -8,15 +8,32 @@ sys.path.insert(0, "../")
 
 from compathelper import _long, _unicode, _bytes
 
-from gi.repository import GLib
-from gi.repository import GObject
-from gi.repository import Gdk
-from gi.repository import Gtk
-from gi.repository import Gio
-from gi.repository import Pango
-from gi.repository import GdkPixbuf
 import gi.overrides as overrides
 import gi.types
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Gio
+
+try:
+    from gi.repository import GdkPixbuf
+    GdkPixbuf  # pyflakes
+except ImportError:
+    GdkPixbuf = None
+
+try:
+    from gi.repository import Atk, Pango
+    (Atk, Pango)  # pyflakes
+except ImportError:
+    Pango = None
+
+Gtk = None
+if Pango:
+    try:
+        from gi.repository import Gdk
+        from gi.repository import Gtk
+        Gtk  # pyflakes
+    except ImportError:
+        Gtk = None
 
 
 class TestRegistry(unittest.TestCase):
@@ -470,6 +487,7 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(repr(v), "GLib.Variant('(is)', (1, 'somestring'))")
 
 
+@unittest.skipUnless(Pango, 'Pango not available')
 class TestPango(unittest.TestCase):
 
     def test_default_font_description(self):
@@ -491,6 +509,7 @@ class TestPango(unittest.TestCase):
         self.assertEqual(layout.get_text(), "Foobar")
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestGdk(unittest.TestCase):
 
     def test_constructor(self):
@@ -598,6 +617,7 @@ class TestGdk(unittest.TestCase):
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestGtk(unittest.TestCase):
 
     def test_container(self):

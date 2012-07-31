@@ -1,8 +1,13 @@
 import unittest
 
-from gi.repository import Gdk, Gtk
+try:
+    from gi.repository import Atk, Gdk, Gtk
+    (Atk, Gdk)  # pyflakes
+except:
+    Gdk = None
 
 
+@unittest.skipUnless(Gdk, 'Gdk not available')
 class TestGdkAtom(unittest.TestCase):
     def test_create(self):
         atom = Gdk.Atom.intern('my_string', False)

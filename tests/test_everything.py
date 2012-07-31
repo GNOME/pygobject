@@ -15,11 +15,17 @@ try:
 except ImportError:
     has_cairo = False
 
+#import gi
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
-from gi.repository import Gtk
 from gi.repository import Regress as Everything
+
+try:
+    from gi.repository import Gtk
+    Gtk  # pyflakes
+except:
+    Gtk = None
 
 if sys.version_info < (3, 0):
     UNICHAR = "\xe2\x99\xa5"
@@ -676,6 +682,7 @@ class TestSignals(unittest.TestCase):
 
 
 class TestPango(unittest.TestCase):
+    @unittest.skipUnless(Gtk, 'Gtk not available')
     def test_cairo_font_options(self):
         screen = Gtk.Window().get_screen()
         font_opts = screen.get_font_options()

@@ -6,36 +6,46 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
-from gi.repository import Gdk
-from gi.repository import Gtk
+try:
+    from gi.repository import Pango
+    from gi.repository import Atk
+    from gi.repository import Gdk
+    from gi.repository import Gtk
+    (Atk, Gtk, Pango)  # pyflakes
 
-import gi.pygtkcompat
+    import gi.pygtkcompat
 
-gi.pygtkcompat.enable()
-gi.pygtkcompat.enable_gtk(version='3.0')
+    gi.pygtkcompat.enable()
+    gi.pygtkcompat.enable_gtk(version='3.0')
 
-import atk
-import pango
-import pangocairo
-import gtk
-import gtk.gdk
+    import atk
+    import pango
+    import pangocairo
+    import gtk
+    import gtk.gdk
+except ImportError:
+    Gtk = None
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestATKCompat(unittest.TestCase):
     def testObject(self):
         self.assertTrue(hasattr(atk, 'Object'))
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestPangoCompat(unittest.TestCase):
     def testLayout(self):
         self.assertTrue(hasattr(pango, 'Layout'))
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestPangoCairoCompat(unittest.TestCase):
     def testErrorUnderlinePath(self):
         self.assertTrue(hasattr(pangocairo, 'error_underline_path'))
 
 
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestGTKCompat(unittest.TestCase):
     def testButtons(self):
         self.assertEqual(Gdk._2BUTTON_PRESS, 5)
