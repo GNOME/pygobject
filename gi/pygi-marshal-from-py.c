@@ -457,10 +457,10 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
 
 #if PY_VERSION_HEX < 0x03000000
     if (PyInt_Check (py_long)) {
-        long long_ = PyInt_AsLong (py_long);
+        gint64 long_ = (gint64) PyInt_AsLong (py_long);
         if (long_ < 0) {
-            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %lu",
-                          long_, 0, G_MAXUINT64);
+            PyErr_Format (PyExc_ValueError, "%" G_GUINT64_FORMAT " not in range %d to %" G_GUINT64_FORMAT,
+                          (gint64) long_, 0, G_MAXUINT64);
             return FALSE;
         }
         ulong_ = long_;
