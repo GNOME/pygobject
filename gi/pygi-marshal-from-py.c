@@ -1441,10 +1441,11 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
             if (!PyErr_Occurred()) {
                 PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
 
-                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
                               arg_cache->arg_name ? arg_cache->arg_name : "self",
                               iface_cache->type_name,
-                              module ? PYGLIB_PyUnicode_AsString(module) : "<unknown module>",
+                              module ? PYGLIB_PyUnicode_AsString(module) : "",
+                              module ? "." : "",
                               py_arg->ob_type->tp_name);
                 if (module)
                     Py_DECREF (module);
@@ -1499,10 +1500,11 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
     if (!PyObject_IsInstance (py_arg, ( (PyGIInterfaceCache *)arg_cache)->py_type)) {
         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
 
-        PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+        PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
                       arg_cache->arg_name ? arg_cache->arg_name : "self",
                       ( (PyGIInterfaceCache *)arg_cache)->type_name,
-                      module ? PYGLIB_PyUnicode_AsString(module) : "<unknown module>",
+                      module ? PYGLIB_PyUnicode_AsString(module) : "",
+                      module ? "." : "",
                       py_arg->ob_type->tp_name);
         if (module)
             Py_DECREF (module);
@@ -1550,10 +1552,11 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
                     if (!PyErr_Occurred()) {
                         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
                         PyErr_Format (PyExc_TypeError,
-                                      "argument %s: Expected a %s, but got %s.%s",
+                                      "argument %s: Expected a %s, but got %s%s%s",
                                       arg_cache->arg_name ? arg_cache->arg_name : "self",
                                       iface_cache->type_name,
-                                      module ? PYGLIB_PyUnicode_AsString(module) : "<unknown module>",
+                                      module ? PYGLIB_PyUnicode_AsString(module) : "",
+                                      module ? "." : "",
                                       py_arg->ob_type->tp_name);
                         if (module)
                             Py_DECREF (module);
@@ -1584,10 +1587,11 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
 
                 if (!g_type_is_a (obj_type, expected_type)) {
                     PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-                    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s.%s",
+                    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
                                   arg_cache->arg_name ? arg_cache->arg_name : "self",
                                   iface_cache->type_name,
-                                  module ? PYGLIB_PyUnicode_AsString(module) : "<unknown module>",
+                                  module ? PYGLIB_PyUnicode_AsString(module) : "",
+                                  module ? "." : "",
                                   py_arg->ob_type->tp_name);
                     if (module)
                         Py_DECREF (module);
