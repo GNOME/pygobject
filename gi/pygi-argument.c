@@ -438,8 +438,8 @@ check_number_release:
             }
 
             if (size != 1) {
-                PyErr_Format (PyExc_TypeError, "Must be a one character string, not %ld characters",
-                              size);
+                PyErr_Format (PyExc_TypeError, "Must be a one character string, not %" G_GINT64_FORMAT " characters",
+                              (gint64)size);
                 retval = 0;
                 break;
             }
