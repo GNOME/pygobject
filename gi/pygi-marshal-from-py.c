@@ -369,7 +369,7 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
                              GIArgument        *arg)
 {
     PyObject *py_long;
-    long long long_;
+    gint64 long_;
 
     if (!PyNumber_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
@@ -383,10 +383,10 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
 
 #if PY_VERSION_HEX < 0x03000000
     if (PyInt_Check (py_long))
-        long_ = PyInt_AS_LONG (py_long);
+        long_ = (gint64) PyInt_AS_LONG (py_long);
     else
 #endif
-        long_ = PyLong_AsLongLong (py_long);
+        long_ = (gint64) PyLong_AsLongLong (py_long);
 
     Py_DECREF (py_long);
 
@@ -418,7 +418,7 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
             Py_DECREF (py_str);
         }
 
-        PyErr_Format (PyExc_ValueError, "%s not in range %ld to %ld",
+        PyErr_Format (PyExc_ValueError, "%s not in range %" G_GINT64_FORMAT " to %" G_GINT64_FORMAT,
                       long_str, G_MININT64, G_MAXINT64);
 
         g_free (long_str);
@@ -426,7 +426,7 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
     }
 
     if (long_ < G_MININT64 || long_ > G_MAXINT64) {
-        PyErr_Format (PyExc_ValueError, "%lld not in range %ld to %ld", long_, G_MININT64, G_MAXINT64);
+        PyErr_Format (PyExc_ValueError, "%" G_GINT64_FORMAT " not in range %" G_GINT64_FORMAT " to %" G_GINT64_FORMAT, long_, G_MININT64, G_MAXINT64);
         return FALSE;
     }
 
@@ -498,7 +498,7 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
             Py_DECREF (py_str);
         }
 
-        PyErr_Format (PyExc_ValueError, "%s not in range %d to %lu",
+        PyErr_Format (PyExc_ValueError, "%s not in range %d to %" G_GUINT64_FORMAT,
                       long_str, 0, G_MAXUINT64);
 
         g_free (long_str);
@@ -506,7 +506,7 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
     }
 
     if (ulong_ > G_MAXUINT64) {
-        PyErr_Format (PyExc_ValueError, "%lu not in range %d to %lu", ulong_, 0, G_MAXUINT64);
+        PyErr_Format (PyExc_ValueError, "%" G_GUINT64_FORMAT " not in range %d to %" G_GUINT64_FORMAT, ulong_, 0, G_MAXUINT64);
         return FALSE;
     }
 
@@ -628,8 +628,8 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
     }
 
     if (size != 1) {
-       PyErr_Format (PyExc_TypeError, "Must be a one character string, not %ld characters",
-                     size);
+       PyErr_Format (PyExc_TypeError, "Must be a one character string, not %" G_GINT64_FORMAT " characters",
+                     (gint64) size);
        g_free (string_);
        return FALSE;
     }
