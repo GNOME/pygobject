@@ -415,6 +415,29 @@ err:
     return NULL;
 }
 
+static void
+_pygi_hash_pointer_to_arg (GIArgument *arg,
+                           GITypeTag  type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT8:
+            arg->v_int8 = GPOINTER_TO_INT(arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_INT16:
+            arg->v_int16 = GPOINTER_TO_INT(arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_INT32:
+            arg->v_int32 = GPOINTER_TO_INT(arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_INTERFACE:
+            break;
+        default:
+            g_critical("Unsupported type %s", g_type_tag_to_string(type_tag));
+    }
+}
+
 PyObject *
 _pygi_marshal_to_py_glist (PyGIInvokeState   *state,
                            PyGICallableCache *callable_cache,
@@ -446,10 +469,11 @@ _pygi_marshal_to_py_glist (PyGIInvokeState   *state,
         PyObject *py_item;
 
         item_arg.v_pointer = list_->data;
-        py_item = item_to_py_marshaller ( state,
-                                        callable_cache,
-                                        item_arg_cache,
-                                       &item_arg);
+        _pygi_hash_pointer_to_arg (&item_arg, item_arg_cache->type_tag);
+        py_item = item_to_py_marshaller (state,
+                                         callable_cache,
+                                         item_arg_cache,
+                                         &item_arg);
 
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
@@ -494,10 +518,11 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
         PyObject *py_item;
 
         item_arg.v_pointer = list_->data;
-        py_item = item_to_py_marshaller ( state,
+        _pygi_hash_pointer_to_arg (&item_arg, item_arg_cache->type_tag);
+        py_item = item_to_py_marshaller (state,
                                         callable_cache,
                                         item_arg_cache,
-                                       &item_arg);
+                                        &item_arg);
 
         if (py_item == NULL) {
             Py_CLEAR (py_obj);
@@ -509,23 +534,6 @@ _pygi_marshal_to_py_gslist (PyGIInvokeState   *state,
     }
 
     return py_obj;
-}
-
-static void
-_pygi_hash_pointer_to_arg (GIArgument *arg,
-                           GITypeTag  type_tag)
-{
-    switch (type_tag) {
-        case GI_TYPE_TAG_INT32:
-            arg->v_int32 = GPOINTER_TO_INT(arg->v_pointer);
-            break;
-        case GI_TYPE_TAG_UTF8:
-        case GI_TYPE_TAG_FILENAME:
-        case GI_TYPE_TAG_INTERFACE:
-            break;
-        default:
-            g_critical("Unsupported type %s", g_type_tag_to_string(type_tag));
-    }
 }
 
 PyObject *

@@ -736,6 +736,33 @@ _pygi_marshal_from_py_filename (PyGIInvokeState   *state,
     return TRUE;
 }
 
+static gpointer
+_pygi_arg_to_hash_pointer (const GIArgument *arg,
+                           GITypeTag        type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT8:
+            return GINT_TO_POINTER(arg->v_int8);
+        case GI_TYPE_TAG_UINT8:
+            return GINT_TO_POINTER(arg->v_uint8);
+        case GI_TYPE_TAG_INT16:
+            return GINT_TO_POINTER(arg->v_int16);
+        case GI_TYPE_TAG_UINT16:
+            return GINT_TO_POINTER(arg->v_uint16);
+        case GI_TYPE_TAG_INT32:
+            return GINT_TO_POINTER(arg->v_int32);
+        case GI_TYPE_TAG_UINT32:
+            return GINT_TO_POINTER(arg->v_uint32);
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_INTERFACE:
+            return arg->v_pointer;
+        default:
+            g_critical("Unsupported type %s", g_type_tag_to_string(type_tag));
+            return arg->v_pointer;
+    }
+}
+
 gboolean
 _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
@@ -985,7 +1012,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
                                  &item))
             goto err;
 
-        list_ = g_list_prepend (list_, item.v_pointer);
+        list_ = g_list_prepend (list_, _pygi_arg_to_hash_pointer (&item, sequence_cache->item_cache->type_tag));
         continue;
 err:
         /* FIXME: clean up list
@@ -1052,7 +1079,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
                             &item))
             goto err;
 
-        list_ = g_slist_prepend (list_, item.v_pointer);
+        list_ = g_slist_prepend (list_, _pygi_arg_to_hash_pointer (&item, sequence_cache->item_cache->type_tag));
         continue;
 err:
         /* FIXME: Clean up list
@@ -1068,23 +1095,6 @@ err:
 
     arg->v_pointer = g_slist_reverse (list_);
     return TRUE;
-}
-
-static gpointer
-_pygi_arg_to_hash_pointer (const GIArgument *arg,
-                           GITypeTag        type_tag)
-{
-    switch (type_tag) {
-        case GI_TYPE_TAG_INT32:
-            return GINT_TO_POINTER(arg->v_int32);
-        case GI_TYPE_TAG_UTF8:
-        case GI_TYPE_TAG_FILENAME:
-        case GI_TYPE_TAG_INTERFACE:
-            return arg->v_pointer;
-        default:
-            g_critical("Unsupported type %s", g_type_tag_to_string(type_tag));
-            return arg->v_pointer;
-    }
 }
 
 gboolean
