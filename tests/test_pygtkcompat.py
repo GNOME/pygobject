@@ -6,6 +6,8 @@ import unittest
 import sys
 sys.path.insert(0, "../")
 
+from gi.repository import GLib
+
 try:
     from gi.repository import Pango
     from gi.repository import Atk
@@ -100,7 +102,11 @@ class TestGTKCompat(unittest.TestCase):
         liststore.append((1, 'One'))
         liststore.append((2, 'Two'))
         liststore.append((3, 'Three'))
+        # might cause a Pango warning, do not break on this
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
         combo = gtk.ComboBoxEntry(model=liststore)
+        GLib.log_set_always_fatal(old_mask)
         combo.set_text_column(1)
         combo.set_active(0)
         self.assertEqual(combo.get_text_column(), 1)

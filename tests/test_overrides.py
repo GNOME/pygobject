@@ -1697,9 +1697,13 @@ class TestGtk(unittest.TestCase):
         column.pack_start(cell, expand=True)
         column.set_attributes(cell, text=1)
 
+        # might cause a Pango warning, do not break on this
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
         # This will make cell.props.text receive a value, otherwise it
         # will be None.
         treeview.get_preferred_size()
+        GLib.log_set_always_fatal(old_mask)
 
         self.assertTrue(cell.props.text in directors)
 
