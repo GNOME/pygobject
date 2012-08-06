@@ -412,9 +412,6 @@ _pygi_closure_handle (ffi_cif *cif,
 {
     PyGILState_STATE state;
     PyGICClosure *closure = data;
-    GITypeTag  return_tag;
-    GITransfer return_transfer;
-    GITypeInfo *return_type;
     PyObject *retval;
     PyObject *py_args;
     GIArgument *out_args = NULL;
@@ -422,10 +419,6 @@ _pygi_closure_handle (ffi_cif *cif,
     /* Lock the GIL as we are coming into this code without the lock and we
       may be executing python code */
     state = PyGILState_Ensure();
-
-    return_type = g_callable_info_get_return_type (closure->info);
-    return_tag = g_type_info_get_tag (return_type);
-    return_transfer = g_callable_info_get_caller_owns (closure->info);
 
     if (!_pygi_closure_convert_arguments ( (GICallableInfo *) closure->info, args,
                                            closure->user_data,
@@ -447,7 +440,6 @@ _pygi_closure_handle (ffi_cif *cif,
 
 end:
     g_free (out_args);
-    g_base_info_unref ( (GIBaseInfo*) return_type);
 
     PyGILState_Release (state);
 
