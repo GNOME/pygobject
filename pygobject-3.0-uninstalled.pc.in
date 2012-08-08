@@ -1,12 +1,12 @@
 # you can use the --variable=pygobjectincludedir argument to
 # pkg-config to get this value. You might want to use this to
 # install additional headers.
-pygobjectincludedir=${pc_top_builddir}/${pcfiledir}/gi/_gobject
-overridesdir=${pc_top_builddir}/${pcfiledir}/gi/overrides
+pygobjectincludedir=${pcfiledir}/gi/_gobject
+overridesdir=${pcfiledir}/gi/overrides
 
 Name: PyGObject
 Description: Python bindings for GObject
 Requires: gobject-2.0
 Requires.private: @LIBFFI_PC@
 Version: @VERSION@
-Cflags: -I${pc_top_builddir}/${pcfiledir}/gi/_gobject
+Cflags: -I${pcfiledir}/gi/_gobject
