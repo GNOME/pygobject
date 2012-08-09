@@ -990,6 +990,14 @@ TreeSortable = override(TreeSortable)
 __all__.append('TreeSortable')
 
 
+class TreeModelSort(Gtk.TreeModelSort):
+    def __init__(self, model, **kwds):
+        Gtk.TreeModelSort.__init__(self, model=model, **kwds)
+
+TreeModelSort = override(TreeModelSort)
+__all__.append('TreeModelSort')
+
+
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
     def __init__(self, *column_types):
         Gtk.ListStore.__init__(self)
