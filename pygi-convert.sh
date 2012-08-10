@@ -25,6 +25,11 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.BUTTONBOX_/Gtk.ButtonBoxStyle./g;" \
     -pe "s/Gtk.BUTTONS_/Gtk.ButtonsType./g;" \
     -pe "s/Gtk.CELL_RENDERER_MODE_/Gtk.CellRendererMode./g;" \
+    -pe "s/Gtk.CELL_RENDERER_FOCUSED/Gtk.CellRendererState.FOCUSED/g;" \
+    -pe "s/Gtk.CELL_RENDERER_INSENSITIVE/Gtk.CellRendererState.INSENSITIVE/g;" \
+    -pe "s/Gtk.CELL_RENDERER_PRELIT/Gtk.CellRendererState.PRELIT/g;" \
+    -pe "s/Gtk.CELL_RENDERER_SORTED/Gtk.CellRendererState.SORTED/g;" \
+    -pe "s/Gtk.CELL_RENDERER_SELECTED/Gtk.CellRendererState.SELECTED/g;" \
     -pe "s/Gtk.CORNER_/Gtk.CornerType./g;" \
     -pe "s/Gtk.DIALOG_/Gtk.DialogFlags./g;" \
     -pe "s/Gtk.ENTRY_ICON_/Gtk.EntryIconPosition./g;" \
