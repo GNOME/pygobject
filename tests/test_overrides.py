@@ -932,6 +932,13 @@ class TestGtk(unittest.TestCase):
             self.tester.assertEqual(int_value, self.int_value)
             self.tester.assertEqual(string_value, self.string_value)
 
+    def test_tree_model_sort(self):
+        self.assertEqual(Gtk.TreeModelSort, overrides.Gtk.TreeModelSort)
+        self.assertRaises(TypeError, Gtk.TreeModelSort)
+        model = Gtk.TreeStore(int, bool)
+        model_sort = Gtk.TreeModelSort(model)
+        self.assertEqual(model_sort.get_model(), model)
+
     def test_tree_store(self):
         self.assertEqual(Gtk.TreeStore, overrides.Gtk.TreeStore)
         self.assertEqual(Gtk.ListStore, overrides.Gtk.ListStore)
