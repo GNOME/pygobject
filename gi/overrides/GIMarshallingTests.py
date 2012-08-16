@@ -63,6 +63,7 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
         return self
 
     def method(self):
+        """Overridden doc string."""
         return GIMarshallingTests.OverridesObject.method(self) / 7
 
 OverridesObject = override(OverridesObject)

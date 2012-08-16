@@ -39,6 +39,7 @@ PyObject *_pygi_type_import_by_gi_info (GIBaseInfo *info);
 
 PyObject *_pygi_type_get_from_g_type (GType g_type);
 
+PyObject *_pygi_get_py_type_hint (GITypeTag type_tag);
 
 G_END_DECLS
 
