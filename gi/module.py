@@ -240,9 +240,12 @@ class DynamicModule(types.ModuleType):
         version = gi.get_required_version(self._namespace)
         self._introspection_module = IntrospectionModule(self._namespace,
                                                          version)
+        try:
+            overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
+            self._overrides_module = getattr(overrides_modules, self._namespace, None)
+        except ImportError:
+            self._overrides_module = None
 
-        overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
-        self._overrides_module = getattr(overrides_modules, self._namespace, None)
         self.__path__ = repository.get_typelib_path(self._namespace)
         if _have_py3:
             # get_typelib_path() delivers bytes, not a string

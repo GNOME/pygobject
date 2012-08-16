@@ -45,7 +45,7 @@ _pygobject_import (void)
         return 1;
     }
 
-    from_list = Py_BuildValue ("(ss)", "GObject", "GTypeWrapper");
+    from_list = Py_BuildValue ("(ss)", "GObject", "GType");
     if (from_list == NULL) {
         return -1;
     }
