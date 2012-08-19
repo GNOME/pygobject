@@ -37,18 +37,15 @@ PYGLIB_DEFINE_TYPE("gobject.GFlags", PyGFlags_Type, PyGFlags);
 
 static PyObject *
 pyg_flags_val_new(PyObject* subclass, GType gtype, PyObject *intval)
-{     
-    PyObject *item;
-    
-#if PY_VERSION_HEX >= 0x03000000
-    item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
-                               subclass, intval);
-#else
-    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
-    ((PyIntObject*)item)->ob_ival = PyInt_AS_LONG(intval);
-#endif    
-    ((PyGFlags*)item)->gtype = gtype;
-    
+{
+    PyObject *args, *item;
+    args = Py_BuildValue("(O)", intval);
+    item =  (&PYGLIB_PyLong_Type)->tp_new((PyTypeObject*)subclass, args, NULL);
+    Py_DECREF(args);
+    if (!item)
+	return NULL;
+    ((PyGEnum*)item)->gtype = gtype;
+
     return item;
 }
 

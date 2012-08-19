@@ -27,7 +27,6 @@
 
 #include <pyglib.h>
 #include "pygobject-private.h"
-
 #include "pygi.h"
 
 #include "pygenum.h"
@@ -38,18 +37,15 @@ PYGLIB_DEFINE_TYPE("gobject.GEnum", PyGEnum_Type, PyGEnum);
 
 static PyObject *
 pyg_enum_val_new(PyObject* subclass, GType gtype, PyObject *intval)
-{     
-    PyObject *item;
-    
-#if PY_VERSION_HEX >= 0x03000000
-    item = PyObject_CallMethod((PyObject*)&PyLong_Type, "__new__", "OO",
-                               subclass, intval);
-#else
-    item = ((PyTypeObject *)subclass)->tp_alloc((PyTypeObject *)subclass, 0);
-    ((PyIntObject*)item)->ob_ival = PyInt_AS_LONG(intval);
-#endif    
+{
+    PyObject *args, *item;
+    args = Py_BuildValue("(O)", intval);
+    item =  (&PYGLIB_PyLong_Type)->tp_new((PyTypeObject*)subclass, args, NULL);
+    Py_DECREF(args);
+    if (!item)
+	return NULL;
     ((PyGEnum*)item)->gtype = gtype;
-    
+
     return item;
 }
 
@@ -204,6 +200,10 @@ pyg_enum_from_gtype (GType gtype, int value)
     return retval;
 }
 
+/*
+ * pyg_enum_add
+ * Dynamically create a class derived from PyGEnum based on the given GType.
+ */
 PyObject *
 pyg_enum_add (PyObject *   module,
 	      const char * typename,
@@ -224,6 +224,9 @@ pyg_enum_add (PyObject *   module,
 
     state = pyglib_gil_state_ensure();
 
+    /* Create a new type derived from GEnum. This is the same as:
+     * >>> stub = type(typename, (GEnum,), {})
+     */
     instance_dict = PyDict_New();
     stub = PyObject_CallFunction((PyObject *)&PyType_Type, "s(O)O",
                                  typename, (PyObject *)&PyGEnum_Type,
@@ -356,7 +359,7 @@ pygobject_enum_register_types(PyObject *d)
     PyGEnum_Type.tp_new = pyg_enum_new;
 #else
     PyGEnum_Type.tp_new = PyLong_Type.tp_new;
-    PyGEnum_Type.tp_hash = PyLong_Type.tp_hash;    
+    PyGEnum_Type.tp_hash = PyLong_Type.tp_hash;
 #endif
     PyGEnum_Type.tp_repr = (reprfunc)pyg_enum_repr;
     PyGEnum_Type.tp_str = (reprfunc)pyg_enum_repr;
