@@ -31,6 +31,44 @@
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
+static gboolean
+gi_argument_to_gssize (GIArgument *arg_in,
+                       GITypeTag  type_tag,
+                       gssize *gssize_out)
+{
+    switch (type_tag) {
+      case GI_TYPE_TAG_INT8:
+          *gssize_out = arg_in->v_int8;
+          return TRUE;
+      case GI_TYPE_TAG_UINT8:
+          *gssize_out = arg_in->v_uint8;
+          return TRUE;
+      case GI_TYPE_TAG_INT16:
+          *gssize_out = arg_in->v_int16;
+          return TRUE;
+      case GI_TYPE_TAG_UINT16:
+          *gssize_out = arg_in->v_uint16;
+          return TRUE;
+      case GI_TYPE_TAG_INT32:
+          *gssize_out = arg_in->v_int32;
+          return TRUE;
+      case GI_TYPE_TAG_UINT32:
+          *gssize_out = arg_in->v_uint32;
+          return TRUE;
+      case GI_TYPE_TAG_INT64:
+          *gssize_out = arg_in->v_int64;
+          return TRUE;
+      case GI_TYPE_TAG_UINT64:
+          *gssize_out = arg_in->v_uint64;
+          return TRUE;
+      default:
+          PyErr_Format (PyExc_TypeError,
+                        "Unable to marshal %s to gssize",
+                        g_type_tag_to_string(type_tag));
+          return FALSE;
+    }
+}
+
 void
 _pygi_hash_pointer_to_arg (GIArgument *arg,
                            GITypeTag  type_tag)
@@ -708,6 +746,7 @@ check_number_release:
  * @arg: The argument to convert
  * @args: Arguments to method invocation, possibly contaning the array length.
  *        Set to NULL if this is not for a method call
+ * @callable_info: Info on the callable, if this a method call; otherwise NULL
  * @type_info: The type info for @arg
  * @out_free_array: A return location for a gboolean that indicates whether
  *                  or not the wrapped GArray should be freed
@@ -725,6 +764,7 @@ check_number_release:
 GArray *
 _pygi_argument_to_array (GIArgument  *arg,
                          GIArgument  *args[],
+                         GICallableInfo *callable_info,                  
                          GITypeInfo  *type_info,
                          gboolean    *out_free_array)
 {
@@ -762,12 +802,19 @@ _pygi_argument_to_array (GIArgument  *arg,
                         return g_array;
                     }
                     gint length_arg_pos;
+                    GIArgInfo *length_arg_info;
+                    GITypeInfo *length_type_info;
 
                     length_arg_pos = g_type_info_get_array_length (type_info);
                     g_assert (length_arg_pos >= 0);
-
-                    /* FIXME: Take into account the type of the length argument */
-                    length = args[length_arg_pos]->v_int;
+                    g_assert (callable_info);
+                    length_arg_info = g_callable_info_get_arg (callable_info, length_arg_pos);
+                    length_type_info = g_arg_info_get_type (length_arg_info);
+                    if (!gi_argument_to_gssize (args[length_arg_pos],
+                                                g_type_info_get_tag (length_type_info),
+                                                &length)) {
+                        return NULL;
+                    }
                 }
             }
 

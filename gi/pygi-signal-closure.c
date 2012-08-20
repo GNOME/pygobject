@@ -154,7 +154,7 @@ pygi_signal_closure_marshal(GClosure *closure,
             arg = _pygi_argument_from_g_value(&param_values[i], &type_info);
             
             if (g_type_info_get_tag (&type_info) == GI_TYPE_TAG_ARRAY) {
-                arg.v_pointer = _pygi_argument_to_array (&arg, NULL,
+                arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL,
                                                          &type_info, &free_array);
             }
             
