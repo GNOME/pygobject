@@ -2067,6 +2067,20 @@ class TestGErrorReturn(unittest.TestCase):
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
+class TestParamSpec(unittest.TestCase):
+    def test_param_spec_return(self):
+        obj = GIMarshallingTests.param_spec_return()
+        self.assertEqual(obj.name, 'test-param')
+        self.assertEqual(obj.nick, 'test')
+        self.assertEqual(obj.value_type, GObject.TYPE_STRING)
+
+    def test_param_spec_out(self):
+        obj = GIMarshallingTests.param_spec_out()
+        self.assertEqual(obj.name, 'test-param')
+        self.assertEqual(obj.nick, 'test')
+        self.assertEqual(obj.value_type, GObject.TYPE_STRING)
+
+
 class TestKeywordArgs(unittest.TestCase):
 
     def test_calling(self):

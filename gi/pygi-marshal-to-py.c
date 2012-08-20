@@ -879,10 +879,18 @@ _pygi_marshal_to_py_interface_object (PyGIInvokeState   *state,
         return py_obj;
     }
 
-    py_obj = pygobject_new (arg->v_pointer);
-
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_unref (arg->v_pointer);
+    if (G_IS_PARAM_SPEC(arg->v_pointer))
+    {
+    	py_obj = pyg_param_spec_new (arg->v_pointer);
+    	if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+    	    		g_param_spec_unref (arg->v_pointer);
+    }
+    else
+    {
+    	py_obj = pygobject_new (arg->v_pointer);
+    	if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+    		g_object_unref (arg->v_pointer);
+    }
 
     return py_obj;
 }
