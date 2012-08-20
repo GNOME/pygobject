@@ -1,3 +1,16 @@
+3.3.90  20-Aug-2012
+        - Implement marshalling for GParamSpec (Mathieu Duponchelle) (#681565)
+        - Fix erronous import statements for Python 3.3 (Simon Feltman)
+          (#682051)
+        - Do not fail tests if pyflakes or pep8 are not installed (Martin Pitt)
+        - Fix PEP-8 whitespace checking and issues in the code (Martin Pitt)
+        - Fix unmarshalling of gssize (David Malcolm) (#680693)
+        - Fix various endianess errors (David Malcolm) (#680692)
+        - Gtk overrides: Add TreeModelSort.__init__(self, model)
+	  (Simon Feltman) (#681477)
+        - Convert Gtk.CellRendererState in the pygi-convert script
+	  (Manuel Quiñones) (#681596)
+
 3.3.5   06-Aug-2012
         - Fix list marshalling on big-endian machines (Martin Pitt)
           (#680693)
