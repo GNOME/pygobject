@@ -107,9 +107,9 @@ RUN_TESTS_ENV_VARS= \
 
 check-local: $(LTLIBRARIES:.la=.so) Regress-1.0.typelib GIMarshallingTests-1.0.typelib gschemas.compiled
 	@echo "  CHECK  Pyflakes"
-	@type pyflakes >/dev/null 2>&1 && pyflakes $(top_srcdir) || echo "skipped, pyflakes not installed"
+	@if type pyflakes >/dev/null 2>&1; then pyflakes $(top_srcdir); else echo "skipped, pyflakes not installed"; fi
 	@echo "  CHECK  PEP8"
-	@type pep8 >/dev/null 2>&1 && pep8 --ignore=E501,E123,E124 --repeat --show-source $(top_srcdir) || echo "skipped, pep8 not installed"
+	@if type pep8 >/dev/null 2>&1; then pep8 --ignore=E501,E123,E124 --repeat --show-source $(top_srcdir); else echo "skipped, pep8 not installed"; fi
 	$(RUN_TESTS_ENV_VARS) $(DBUS_LAUNCH) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning $(srcdir)/runtests.py
 
 check.gdb:
