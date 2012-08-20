@@ -1393,6 +1393,8 @@ _args_cache_generate (GICallableInfo *callable_info,
                 callable_cache->n_to_py_child_args++;
             }
 
+            arg_cache->type_tag = g_type_info_get_tag (type_info);
+
             g_base_info_unref ( (GIBaseInfo *)arg_info);
             continue;
         }

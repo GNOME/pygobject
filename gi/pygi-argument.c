@@ -31,6 +31,56 @@
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
+void
+_pygi_hash_pointer_to_arg (GIArgument *arg,
+                           GITypeTag  type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT8:
+            arg->v_int8 = GPOINTER_TO_INT (arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_INT16:
+            arg->v_int16 = GPOINTER_TO_INT (arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_INT32:
+            arg->v_int32 = GPOINTER_TO_INT (arg->v_pointer);
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_INTERFACE:
+            break;
+        default:
+            g_critical ("Unsupported type %s", g_type_tag_to_string(type_tag));
+    }
+}
+
+gpointer
+_pygi_arg_to_hash_pointer (const GIArgument *arg,
+                           GITypeTag        type_tag)
+{
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT8:
+            return GINT_TO_POINTER (arg->v_int8);
+        case GI_TYPE_TAG_UINT8:
+            return GINT_TO_POINTER (arg->v_uint8);
+        case GI_TYPE_TAG_INT16:
+            return GINT_TO_POINTER (arg->v_int16);
+        case GI_TYPE_TAG_UINT16:
+            return GINT_TO_POINTER (arg->v_uint16);
+        case GI_TYPE_TAG_INT32:
+            return GINT_TO_POINTER (arg->v_int32);
+        case GI_TYPE_TAG_UINT32:
+            return GINT_TO_POINTER (arg->v_uint32);
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+        case GI_TYPE_TAG_INTERFACE:
+            return arg->v_pointer;
+        default:
+            g_critical ("Unsupported type %s", g_type_tag_to_string(type_tag));
+            return arg->v_pointer;
+    }
+}
+
 static void
 _pygi_g_type_tag_py_bounds (GITypeTag   type_tag,
                             PyObject  **lower,
@@ -1196,7 +1246,7 @@ array_success:
                         break;
                     }
 
-                    arg.v_long = PYGLIB_PyLong_AsLong (int_);
+                    arg.v_int = PYGLIB_PyLong_AsLong (int_);
 
                     Py_DECREF (int_);
 
@@ -1369,7 +1419,8 @@ list_item_error:
                     goto hash_table_item_error;
                 }
 
-                g_hash_table_insert (hash_table, key.v_pointer, value.v_pointer);
+                g_hash_table_insert (hash_table, key.v_pointer,
+                                     _pygi_arg_to_hash_pointer (&value, g_type_info_get_tag (value_type_info)));
                 continue;
 
 hash_table_item_error:
@@ -1713,21 +1764,21 @@ _pygi_argument_to_object (GIArgument  *arg,
                             return NULL;
 
                         py_args = PyTuple_New (1);
-                        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (arg->v_long)) != 0) {
+                        if (PyTuple_SetItem (py_args, 0, PyLong_FromLong (arg->v_int)) != 0) {
                             Py_DECREF (py_args);
                             Py_DECREF (py_type);
                             return NULL;
                         }
 
-                        object = PyObject_CallFunction (py_type, "l", arg->v_long);
+                        object = PyObject_CallFunction (py_type, "i", arg->v_int);
 
                         Py_DECREF (py_args);
                         Py_DECREF (py_type);
 
                     } else if (info_type == GI_INFO_TYPE_ENUM) {
-                        object = pyg_enum_from_gtype (type, arg->v_long);
+                        object = pyg_enum_from_gtype (type, arg->v_int);
                     } else {
-                        object = pyg_flags_from_gtype (type, arg->v_long);
+                        object = pyg_flags_from_gtype (type, arg->v_int);
                     }
 
                     break;
@@ -1840,6 +1891,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                     break;
                 }
 
+                _pygi_hash_pointer_to_arg (&value, g_type_info_get_tag (value_type_info));
                 py_value = _pygi_argument_to_object (&value, value_type_info, item_transfer);
                 if (py_value == NULL) {
                     Py_DECREF (py_key);

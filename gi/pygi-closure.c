@@ -28,6 +28,57 @@
 static GSList* async_free_list;
 
 static void
+_pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
+                                      GITypeInfo *type_info,
+                                      GITransfer transfer)
+{
+    GIArgument arg = _pygi_argument_from_object (object, type_info, transfer);
+    GITypeTag type_tag = g_type_info_get_tag (type_info);
+
+    if (retval == NULL)
+        return;
+
+    switch (type_tag) {
+        case GI_TYPE_TAG_BOOLEAN:
+           *((ffi_sarg *) retval) = arg.v_boolean;
+           break;
+        case GI_TYPE_TAG_INT8:
+           *((ffi_sarg *) retval) = arg.v_int8;
+           break;
+        case GI_TYPE_TAG_UINT8:
+           *((ffi_arg *) retval) = arg.v_uint8;
+           break;
+        case GI_TYPE_TAG_INT16:
+           *((ffi_sarg *) retval) = arg.v_int16;
+           break;
+        case GI_TYPE_TAG_UINT16:
+           *((ffi_arg *) retval) = arg.v_uint16;
+           break;
+        case GI_TYPE_TAG_INT32:
+           *((ffi_sarg *) retval) = arg.v_int32;
+           break;
+        case GI_TYPE_TAG_UINT32:
+           *((ffi_arg *) retval) = arg.v_uint32;
+           break;
+        case GI_TYPE_TAG_INT64:
+           *((ffi_sarg *) retval) = arg.v_int64;
+           break;
+        case GI_TYPE_TAG_UINT64:
+           *((ffi_arg *) retval) = arg.v_uint64;
+           break;
+        case GI_TYPE_TAG_FLOAT:
+           *((gfloat *) retval) = arg.v_float;
+           break;
+        case GI_TYPE_TAG_DOUBLE:
+           *((gdouble *) retval) = arg.v_double;
+           break;
+        default:
+           *((GIArgument *) retval) = arg;
+           break;
+      }
+}
+
+static void
 _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
                                             GITypeInfo *type_info,
                                             GITransfer transfer)
@@ -299,7 +350,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                     arg = (GIArgument*) g_args[i].v_pointer;
                 
                 if (g_type_info_get_tag (arg_type) == GI_TYPE_TAG_ARRAY)
-                    arg->v_pointer = _pygi_argument_to_array (arg, args, 
+                    arg->v_pointer = _pygi_argument_to_array (arg, (GIArgument **) args, 
                                                               arg_type, &free_array);
 
                 value = _pygi_argument_to_object (arg, arg_type, transfer);
@@ -358,10 +409,10 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
         GITransfer transfer = g_callable_info_get_caller_owns (callable_info);
         if (PyTuple_Check (py_retval)) {
             PyObject *item = PyTuple_GET_ITEM (py_retval, 0);
-            _pygi_closure_assign_pyobj_to_out_argument (resp, item,
+            _pygi_closure_assign_pyobj_to_retval (resp, item,
                 return_type_info, transfer);
         } else {
-            _pygi_closure_assign_pyobj_to_out_argument (resp, py_retval,
+            _pygi_closure_assign_pyobj_to_retval (resp, py_retval,
                 return_type_info, transfer);
         }
         i_py_retval++;

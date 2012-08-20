@@ -30,6 +30,12 @@ G_BEGIN_DECLS
 
 
 /* Private */
+gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
+                                    GITypeTag         type_tag);
+
+void _pygi_hash_pointer_to_arg (GIArgument *arg,
+                                GITypeTag   type_tag);
+
 gint _pygi_g_type_interface_check_object (GIBaseInfo *info,
                                           PyObject   *object);
 
