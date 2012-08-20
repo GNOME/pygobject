@@ -154,8 +154,7 @@ class IconViewApp:
 
         # set sort column and function
         store.set_default_sort_func(self.sort_func)
-        store.set_sort_column_id(-1,
-                                 Gtk.SortType.ASCENDING)
+        store.set_sort_column_id(-1, Gtk.SortType.ASCENDING)
 
         return store
 

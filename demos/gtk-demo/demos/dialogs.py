@@ -93,7 +93,7 @@ class DialogsApp:
                             Gtk.DialogFlags.MODAL |
                             Gtk.DialogFlags.DESTROY_WITH_PARENT,
                             (Gtk.STOCK_OK, Gtk.ResponseType.OK,
-                            "_Non-stock Button", Gtk.ResponseType.CANCEL))
+                             "_Non-stock Button", Gtk.ResponseType.CANCEL))
 
         content_area = dialog.get_content_area()
         hbox = Gtk.HBox(spacing=8)
