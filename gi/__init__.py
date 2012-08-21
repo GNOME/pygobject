@@ -20,6 +20,10 @@
 
 from __future__ import absolute_import
 
+# support overrides in different directories than our gi module
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
+
 from ._gi import _API, Repository
 
 # Force loading the GObject typelib so we have available the wrappers for

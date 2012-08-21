@@ -10,6 +10,7 @@ import gi.types
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gio
+from gi.repository import Regress
 
 try:
     from gi.repository import GdkPixbuf
@@ -44,6 +45,11 @@ class TestRegistry(unittest.TestCase):
             self.fail('unexpected success of overriding non-GI class')
         except TypeError as e:
             self.assertTrue('Can not override a type MyClass' in str(e))
+
+    def test_separate_path(self):
+        # Regress override is in tests/gi/overrides, separate from gi/overrides
+        # https://bugzilla.gnome.org/show_bug.cgi?id=680913
+        self.assertEqual(Regress.REGRESS_OVERRIDE, 42)
 
 
 class TestGLib(unittest.TestCase):
