@@ -2095,6 +2095,17 @@ class TestGio(unittest.TestCase):
 
         self.assertEqual(iter_info, next_info)
 
+    def test_menu_item(self):
+        menu = Gio.Menu()
+        item = Gio.MenuItem()
+        item.set_attribute([("label", "s", "Test"),
+                            ("action", "s", "app.test")])
+        menu.append_item(item)
+        value = menu.get_item_attribute_value(0, "label", GLib.VariantType.new("s"))
+        self.assertEqual("Test", value.unpack())
+        value = menu.get_item_attribute_value(0, "action", GLib.VariantType.new("s"))
+        self.assertEqual("app.test", value.unpack())
+
     def test_gsettings_native(self):
         self.assertTrue('test-array' in self.settings.list_keys())
 

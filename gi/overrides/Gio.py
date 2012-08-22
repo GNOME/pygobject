@@ -50,6 +50,16 @@ FileEnumerator = override(FileEnumerator)
 __all__.append('FileEnumerator')
 
 
+class MenuItem(Gio.MenuItem):
+    def set_attribute(self, attributes):
+        for (name, format_string, value) in attributes:
+            self.set_attribute_value(name, GLib.Variant(format_string, value))
+
+
+MenuItem = override(MenuItem)
+__all__.append('MenuItem')
+
+
 class Settings(Gio.Settings):
     '''Provide dictionary-like access to GLib.Settings.'''
 
