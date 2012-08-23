@@ -33,14 +33,6 @@
         } while (0)
 #endif
 
-/* Compilation on Python 2.4 */
-#if PY_VERSION_HEX < 0x02050000
-typedef int Py_ssize_t;
-#define PY_SSIZE_T_MAX INT_MAX
-#define PY_SSIZE_T_MIN INT_MIN
-typedef inquiry lenfunc;
-#endif
-
 /* PyCObject superceded by PyCapsule on Python >= 2.7
  * However since this effects header files used by
  * static bindings we are only applying the change to

@@ -7,6 +7,33 @@ import sys
 
 import unittest
 
+# provide missing unittest decorators and API for python 2.6; these decorators
+# do not actually work, just avoid the syntax failure
+if sys.version_info[:2] == (2, 6):
+    def skipUnless(condition, reason):
+        if not condition:
+            sys.stderr.write('[expected failure] ')
+        return lambda obj: obj
+
+    unittest.skipUnless = skipUnless
+    unittest.expectedFailure = lambda obj: obj
+
+    def assertGreater(self, a, b, msg=None):
+        if not a > b:
+            self.fail('%s not greater than %s' % (repr(a), repr(b)))
+
+    def assertGreaterEqual(self, a, b, msg=None):
+        if not a >= b:
+            self.fail('%s not greater than or equal to %s' % (repr(a), repr(b)))
+
+    def assertIsInstance(self, obj, cls, msg=None):
+        if not isinstance(obj, cls):
+            self.fail('%s is not an instance of %r' % (repr(obj), cls))
+
+    unittest.TestCase.assertGreaterEqual = assertGreaterEqual
+    unittest.TestCase.assertGreater = assertGreater
+    unittest.TestCase.assertIsInstance = assertIsInstance
+
 if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)

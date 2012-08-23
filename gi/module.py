@@ -25,7 +25,7 @@ from __future__ import absolute_import
 import sys
 import types
 
-_have_py3 = (sys.version_info.major >= 3)
+_have_py3 = (sys.version_info[0] >= 3)
 
 from . import _glib, _gobject
 try:

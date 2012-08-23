@@ -2358,7 +2358,7 @@ class TestModule(unittest.TestCase):
     def test_help(self):
         orig_stdout = sys.stdout
         try:
-            if sys.version_info.major < 3:
+            if sys.version_info < (3, 0):
                 sys.stdout = BytesIO()
             else:
                 sys.stdout = StringIO()

@@ -2445,16 +2445,8 @@ pygobject_register_constants(PyObject *m)
     PyModule_AddObject(m,       "G_MININT64", PyLong_FromLongLong(G_MININT64));
     PyModule_AddObject(m,       "G_MAXINT64", PyLong_FromLongLong(G_MAXINT64));
     PyModule_AddObject(m,       "G_MAXUINT64", PyLong_FromUnsignedLongLong(G_MAXUINT64));
-#if PY_VERSION_HEX < 0x02050000 /* 2.3, 2.4 */
-    PyModule_AddObject(m,       "G_MAXSIZE", PyLong_FromUnsignedLongLong(G_MAXSIZE));
-    PyModule_AddObject(m,       "G_MAXSSIZE", PyLong_FromUnsignedLongLong(G_MAXSSIZE));
-#elif PY_VERSION_HEX < 0x02060000 /* 2.5 */
-    PyModule_AddObject(m,       "G_MAXSIZE", PYGLIB_PyLong_FromSize_t(G_MAXSIZE));
-    PyModule_AddObject(m,       "G_MAXSSIZE", PYGLIB_PyLong_FromSsize_t(G_MAXSSIZE));
-#else /* 2.6+ */
     PyModule_AddObject(m,       "G_MAXSIZE", PyLong_FromSize_t(G_MAXSIZE));
     PyModule_AddObject(m,       "G_MAXSSIZE", PyLong_FromSsize_t(G_MAXSSIZE));
-#endif
     PyModule_AddObject(m,       "G_MINOFFSET", PyLong_FromLongLong(G_MINOFFSET));
     PyModule_AddObject(m,       "G_MAXOFFSET", PyLong_FromLongLong(G_MAXOFFSET));
 

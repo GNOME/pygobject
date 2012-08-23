@@ -6,7 +6,7 @@ AC_PREREQ(2.52)
 # Python 3 as python3 to configure to compile pygobject under Python 3
 # you would do this:
 # $> PYTHON=python3 ./configure
-m4_define(python_min_ver, 2.5.2)
+m4_define(python_min_ver, 2.6)
 m4_define(python3_min_ver, 3.1)
 
 dnl the pygobject version number
