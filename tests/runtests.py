@@ -12,6 +12,9 @@ if '--help' in sys.argv:
     sys.exit(0)
 
 mydir = os.path.dirname(os.path.abspath(__file__))
+# The ordering of sys.path should be ['.../pyobject', '.../pygobject/tests']
+sys.path.insert(0, mydir)
+sys.path.insert(0, os.path.dirname(mydir))
 
 # force untranslated messages, as we check for them in some tests
 os.environ['LC_MESSAGES'] = 'C'

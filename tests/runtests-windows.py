@@ -7,8 +7,12 @@ import sys
 import glob
 import unittest
 
+mydir = os.path.dirname(os.path.abspath(__file__))
+# The ordering of sys.path should be ['.../pyobject', '.../pygobject/tests']
+sys.path.insert(0, mydir)
+sys.path.insert(0, os.path.dirname(mydir))
+
 os.environ['PYGTK_USE_GIL_STATE_API'] = ''
-sys.path.insert(0, os.path.dirname(__file__))
 sys.argv.append('--g-fatal-warnings')
 
 from gi.repository import GObject

@@ -5,7 +5,6 @@
 import unittest
 
 import sys
-sys.path.insert(0, "../")
 from sys import getrefcount
 
 import copy

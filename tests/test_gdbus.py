@@ -3,9 +3,6 @@
 
 import unittest
 
-import sys
-sys.path.insert(0, "../")
-
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio

@@ -3,9 +3,6 @@
 
 import unittest
 
-import sys
-sys.path.insert(0, "../")
-
 from compathelper import _long, _unicode, _bytes
 
 import gi.overrides as overrides
