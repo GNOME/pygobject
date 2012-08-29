@@ -1681,20 +1681,24 @@ _pygi_argument_to_object (GIArgument  *arg,
                 /* Return as a byte array */
                 if (arg->v_pointer == NULL) {
                     object = PYGLIB_PyBytes_FromString ("");
+                    g_base_info_unref ( (GIBaseInfo *) item_type_info);
                     break;
                 }
 
                 object = PYGLIB_PyBytes_FromStringAndSize(array->data, array->len);
+                g_base_info_unref ( (GIBaseInfo *) item_type_info);
                 break;
 
             } else {
                 if (arg->v_pointer == NULL) {
                     object = PyList_New (0);
+                    g_base_info_unref ( (GIBaseInfo *) item_type_info);
                     break;
                 }
 
                 object = PyList_New (array->len);
                 if (object == NULL) {
+                    g_base_info_unref ( (GIBaseInfo *) item_type_info);
                     break;
                 }
 
