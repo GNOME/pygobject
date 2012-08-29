@@ -2,7 +2,7 @@ import warnings
 from gi import PyGIDeprecationWarning
 
 warnings.warn('gi.pygtkcompat is being deprecated in favor of using "pygtkcompat" directly.',
-              PyGIDeprecationWarning, stacklevel=2)
+              PyGIDeprecationWarning)
 
 # pyflakes.ignore
 from pygtkcompat import (enable,

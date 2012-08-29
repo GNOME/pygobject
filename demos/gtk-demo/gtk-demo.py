@@ -277,7 +277,7 @@ class GtkDemoWindow(Gtk.Window):
 
         tree_view.append_column(column)
 
-        tree_view.collapse_all()
+        tree_view.expand_all()
         tree_view.set_headers_visible(False)
         scrolled_window = Gtk.ScrolledWindow(hadjustment=None,
                                              vadjustment=None)

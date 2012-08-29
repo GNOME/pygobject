@@ -2,6 +2,7 @@ pygtkcompatdir = $(pyexecdir)/pygtkcompat
 
 pygtkcompat_PYTHON = \
 	__init__.py \
+	generictreemodel.py \
 	pygtkcompat.py
 
 # if we build in a separate tree, we need to symlink the *.py files from the

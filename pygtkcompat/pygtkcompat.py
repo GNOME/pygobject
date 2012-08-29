@@ -427,6 +427,9 @@ def enable_gtk(version='2.0'):
             value = getattr(Gdk, name)
             setattr(keysyms, target, value)
 
+    from . import generictreemodel
+    Gtk.GenericTreeModel = generictreemodel.GenericTreeModel
+
 
 def enable_vte():
     gi.require_version('Vte', '0.0')
