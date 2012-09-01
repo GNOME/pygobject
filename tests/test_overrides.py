@@ -2,6 +2,8 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
+import ctypes
+import sys
 
 from compathelper import _long, _unicode, _bytes
 
@@ -618,6 +620,19 @@ class TestGdk(unittest.TestCase):
 
         self.assertNotEqual(c, None)
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
+
+
+class RawTreeIter(ctypes.Structure):
+    """Class used for testing Gtk.TreeIter raw data."""
+    _fields_ = [('stamp', ctypes.c_int),
+                ('user_data', ctypes.c_void_p),
+                ('user_data2', ctypes.c_void_p),
+                ('user_data3', ctypes.c_void_p)]
+
+    @classmethod
+    def from_iter(cls, iter):
+        offset = sys.getsizeof(object())  # size of PyObject_HEAD
+        return ctypes.POINTER(cls).from_address(id(iter) + offset)
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -1747,6 +1762,32 @@ class TestGtk(unittest.TestCase):
         (m, s) = sel.get_selected()
         self.assertEqual(m, store)
         self.assertEqual(store.get_path(s), firstpath)
+
+    def test_tree_iter_user_data_int(self):
+        pyiter = Gtk.TreeIter()
+        rawiter = RawTreeIter.from_iter(pyiter)
+
+        initial_ref_count = sys.getrefcount(1)
+        pyiter.user_data = 1
+
+        # verify setting int value increases refcount of the "1" object
+        self.assertEqual(sys.getrefcount(1), initial_ref_count + 1)
+        # verify the address of the '1' object is what user_data is actually set to.
+        self.assertEqual(id(1), rawiter.contents.user_data)
+
+    def test_tree_iter_user_data_null(self):
+        pyiter = Gtk.TreeIter()
+        rawiter = RawTreeIter.from_iter(pyiter)
+
+        self.assertEqual(pyiter.user_data, None)
+        self.assertEqual(rawiter.contents.user_data, None)
+
+        # Setting user_data to None should not increase None's ref count.
+        # and the raw iters user_data should also come back as None/NULL.
+        initial_ref_count = sys.getrefcount(None)
+        pyiter.user_data = None
+        self.assertEqual(sys.getrefcount(None), initial_ref_count)
+        self.assertEqual(rawiter.contents.user_data, None)
 
     def test_text_buffer(self):
         self.assertEqual(Gtk.TextBuffer, overrides.Gtk.TextBuffer)
