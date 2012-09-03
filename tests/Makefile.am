@@ -96,7 +96,11 @@ EXTRA_DIST = \
 	test_overrides_gdk.py \
 	test_overrides_gtk.py \
 	test_atoms.py \
-	test_pygtkcompat.py
+	test_pygtkcompat.py \
+	gi/__init__.py \
+	gi/overrides/__init__.py \
+	gi/overrides/Regress.py \
+	$(NULL)
 
 clean-local:
 	rm -f $(LTLIBRARIES:.la=.so) file.txt~
