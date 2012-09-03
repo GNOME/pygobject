@@ -339,6 +339,14 @@ test_object_callback (GObject *object, GObject *o)
   return o;
 }
 
+static GParamSpec *
+test_paramspec_callback (GObject *object)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+
+  return g_param_spec_boolean ("test-param", "test", "test boolean", TRUE, G_PARAM_READABLE);
+}
+
 static void
 connectcallbacks (GObject *object)
 {
@@ -380,6 +388,10 @@ connectcallbacks (GObject *object)
   g_signal_connect (G_OBJECT (object),
                     "test_object",
                     G_CALLBACK (test_object_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_paramspec",
+                    G_CALLBACK (test_paramspec_callback), 
                     NULL);
 }
 

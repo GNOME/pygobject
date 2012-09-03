@@ -359,6 +359,7 @@ class CM(GObject.GObject):
         test_double=(l, gdouble, (gdouble, )),
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
+        test_paramspec=(l, GObject.ParamSpec, ()),
     )
 
 
@@ -395,6 +396,11 @@ class _TestCMarshaller:
     def testTestReturnObject(self):
         rv = self.obj.emit("test-object", self)
         self.assertEqual(rv, self)
+
+    def testTestReturnParamSpec(self):
+        rv = self.obj.emit("test-paramspec")
+        self.assertEqual(rv.name, "test-param")
+        self.assertEqual(rv.nick, "test")
 
 if 'generic-c-marshaller' in GObject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
