@@ -247,12 +247,6 @@ def enable_gtk(version='2.0'):
         orig_tree_view_column_pack_start(self, cell, expand)
     Gtk.TreeViewColumn.pack_start = tree_view_column_pack_start
 
-    # TreeView
-
-    def insert_column_with_attributes(view, position, title, cell, *args, **kwargs):
-        pass
-    Gtk.TreeView.insert_column_with_attributes = insert_column_with_attributes
-
     # CellLayout
 
     orig_cell_pack_end = Gtk.CellLayout.pack_end
