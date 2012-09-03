@@ -234,11 +234,13 @@ class TestEverything(unittest.TestCase):
         try:
             Everything.TestBoxedPrivate()
             self.fail('allocating disguised struct without default constructor unexpectedly succeeded')
-        except TypeError as e:
-            self.assertTrue('TestBoxedPrivate' in str(e), str(e))
-            self.assertTrue('override' in str(e), str(e))
-            self.assertTrue('constructor' in str(e), str(e))
-            tb = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+        except TypeError:
+            (e_type, e_value, e_tb) = sys.exc_info()
+            self.assertEqual(e_type, TypeError)
+            self.assertTrue('TestBoxedPrivate' in str(e_value), str(e_value))
+            self.assertTrue('override' in str(e_value), str(e_value))
+            self.assertTrue('constructor' in str(e_value), str(e_value))
+            tb = ''.join(traceback.format_exception(e_type, e_value, e_tb))
             self.assertTrue('tests/test_everything.py", line' in tb, tb)
 
 
