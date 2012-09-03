@@ -39,9 +39,13 @@ if '--help' in sys.argv:
     sys.exit(0)
 
 mydir = os.path.dirname(os.path.abspath(__file__))
-# The ordering of sys.path should be ['.../pyobject', '.../pygobject/tests']
-sys.path.insert(0, mydir)
-sys.path.insert(0, os.path.dirname(mydir))
+tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
+builddir = os.path.dirname(tests_builddir)
+
+# we have to do this here instead of Makefile.am so that the implicitly added
+# directory for the source file comes after the builddir
+sys.path.insert(0, tests_builddir)
+sys.path.insert(0, builddir)
 
 # force untranslated messages, as we check for them in some tests
 os.environ['LC_MESSAGES'] = 'C'
@@ -51,8 +55,7 @@ os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
 # before importing Gio. Support a separate build tree, so look in build dir
 # first.
 os.environ['GSETTINGS_BACKEND'] = 'memory'
-os.environ['GSETTINGS_SCHEMA_DIR'] = os.environ.get('TESTS_BUILDDIR',
-                                                    os.path.dirname(__file__))
+os.environ['GSETTINGS_SCHEMA_DIR'] = tests_builddir
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:

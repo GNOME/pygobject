@@ -8,9 +8,13 @@ import glob
 import unittest
 
 mydir = os.path.dirname(os.path.abspath(__file__))
-# The ordering of sys.path should be ['.../pyobject', '.../pygobject/tests']
-sys.path.insert(0, mydir)
-sys.path.insert(0, os.path.dirname(mydir))
+tests_builddir = os.path.abspath(os.environ.get('TESTS_BUILDDIR', os.path.dirname(__file__)))
+builddir = os.path.dirname(tests_builddir)
+
+# we have to do this here instead of Makefile.am so that the implicitly added
+# directory for the source file comes after the builddir
+sys.path.insert(0, tests_builddir)
+sys.path.insert(0, builddir)
 
 os.environ['PYGTK_USE_GIL_STATE_API'] = ''
 sys.argv.append('--g-fatal-warnings')
