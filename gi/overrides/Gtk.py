@@ -1384,6 +1384,13 @@ class TreeView(Gtk.TreeView, Container):
             path = TreePath(path)
         return super(TreeView, self).get_cell_area(path, column)
 
+    def insert_column_with_attributes(self, position, title, cell, **kwargs):
+        column = TreeViewColumn()
+        column.set_title(title)
+        column.pack_start(cell, False)
+        self.insert_column(column, position)
+        column.set_attributes(cell, **kwargs)
+
 TreeView = override(TreeView)
 __all__.append('TreeView')
 

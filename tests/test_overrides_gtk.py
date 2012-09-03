@@ -1339,6 +1339,44 @@ class TestTreeView(unittest.TestCase):
                            text=0,
                            style=2)
 
+    def test_tree_view_add_column_with_attributes(self):
+        model = Gtk.ListStore(str, str, str)
+        # deliberately use out-of-order sorting here; we assign column 0 to
+        # model index 2, etc.
+        model.append(['cell13', 'cell11', 'cell12'])
+        model.append(['cell23', 'cell21', 'cell22'])
+
+        tree = Gtk.TreeView(model)
+        cell1 = Gtk.CellRendererText()
+        cell2 = Gtk.CellRendererText()
+        cell3 = Gtk.CellRendererText()
+        cell4 = Gtk.CellRendererText()
+
+        tree.insert_column_with_attributes(0, 'Head2', cell2, text=2)
+        tree.insert_column_with_attributes(0, 'Head1', cell1, text=1)
+        tree.insert_column_with_attributes(-1, 'Head3', cell3, text=0)
+        # unconnected
+        tree.insert_column_with_attributes(-1, 'Head4', cell3)
+
+        self.assertEqual(tree.get_column(0).get_title(), 'Head1')
+        self.assertEqual(tree.get_column(1).get_title(), 'Head2')
+        self.assertEqual(tree.get_column(2).get_title(), 'Head3')
+        self.assertEqual(tree.get_column(3).get_title(), 'Head4')
+
+        # might cause a Pango warning, do not break on this
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
+        # This will make cell.props.text receive a value, otherwise it
+        # will be None.
+        tree.get_preferred_size()
+        GLib.log_set_always_fatal(old_mask)
+
+        # cursor should be at the first row
+        self.assertEqual(cell1.props.text, 'cell11')
+        self.assertEqual(cell2.props.text, 'cell12')
+        self.assertEqual(cell3.props.text, 'cell13')
+        self.assertEqual(cell4.props.text, None)
+
     def test_tree_view_column_set_attributes(self):
         store = Gtk.ListStore(int, str)
         directors = ['Fellini', 'Tarantino', 'Tarkovskiy']
