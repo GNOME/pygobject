@@ -1658,7 +1658,7 @@ _pygi_argument_to_object (GIArgument  *arg,
             GITypeTag item_type_tag;
             GITransfer item_transfer;
             gsize i, item_size;
-            
+
             if (arg->v_pointer == NULL)
                 return PyList_New (0);
             
@@ -1679,45 +1679,30 @@ _pygi_argument_to_object (GIArgument  *arg,
 
             if (item_type_tag == GI_TYPE_TAG_UINT8) {
                 /* Return as a byte array */
-                if (arg->v_pointer == NULL) {
-                    object = PYGLIB_PyBytes_FromString ("");
-                    g_base_info_unref ( (GIBaseInfo *) item_type_info);
-                    break;
-                }
-
-                object = PYGLIB_PyBytes_FromStringAndSize(array->data, array->len);
-                g_base_info_unref ( (GIBaseInfo *) item_type_info);
-                break;
-
+                object = PYGLIB_PyBytes_FromStringAndSize (array->data, array->len);
             } else {
-                if (arg->v_pointer == NULL) {
-                    object = PyList_New (0);
-                    g_base_info_unref ( (GIBaseInfo *) item_type_info);
-                    break;
-                }
-
                 object = PyList_New (array->len);
                 if (object == NULL) {
+                    g_critical ("Failure to allocate array for %u items", array->len);
                     g_base_info_unref ( (GIBaseInfo *) item_type_info);
                     break;
                 }
 
-            }            
+                for (i = 0; i < array->len; i++) {
+                    GIArgument item = { 0 };
+                    PyObject *py_item;
+                    
+                    memcpy (&item, array->data + i * item_size, item_size);
 
-            for (i = 0; i < array->len; i++) {
-                GIArgument item = { 0 };
-                PyObject *py_item;
-                
-                memcpy (&item, array->data + i * item_size, item_size);
+                    py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
+                    if (py_item == NULL) {
+                        Py_CLEAR (object);
+                        _PyGI_ERROR_PREFIX ("Item %zu: ", i);
+                        break;
+                    }
 
-                py_item = _pygi_argument_to_object (&item, item_type_info, item_transfer);
-                if (py_item == NULL) {
-                    Py_CLEAR (object);
-                    _PyGI_ERROR_PREFIX ("Item %zu: ", i);
-                    break;
+                    PyList_SET_ITEM (object, i, py_item);
                 }
-
-                PyList_SET_ITEM (object, i, py_item);
             }
 
             g_base_info_unref ( (GIBaseInfo *) item_type_info);
