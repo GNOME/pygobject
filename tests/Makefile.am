@@ -90,6 +90,11 @@ EXTRA_DIST = \
 	test_gi.py \
 	test_gdbus.py \
 	test_overrides.py \
+	test_overrides_gio.py \
+	test_overrides_glib.py \
+	test_overrides_pango.py \
+	test_overrides_gdk.py \
+	test_overrides_gtk.py \
 	test_atoms.py \
 	test_pygtkcompat.py
 
