@@ -1,3 +1,35 @@
+3.3.91  03-Sep-2012
+        - Fix exception test case for Python 2 (Martin Pitt)
+        - Bump g-i dependency to >= 1.3.9 (Martin Pitt)
+        - Show proper exception when trying to allocate a disguised struct
+          (Martin Pitt) (#639972)
+        - Support marshalling GParamSpec signal arguments (Mark Nauwelaerts)
+          (#683099)
+        - Add test for a signal that returns a GParamSpec (Martin Pitt)
+          (#683265)
+        - [API add] Add Signal class for adding and connecting custom signals.
+          (Simon Feltman) (#434924)
+        - Fix pygtkcompat's Gtk.TreeView.insert_column_with_attributes()
+          (Martin Pitt)
+        - Add override for Gtk.TreeView.insert_column_with_attributes()
+          (Marta Maria Casetti) (#679415)
+        - .gitignore: Add missing built files (Martin Pitt)
+        - Ship tests/gi in tarball (Martin Pitt)
+        - Split test_overrides.py (Martin Pitt) (#683188)
+        - _pygi_argument_to_object(): Clean up array unmarshalling (Martin Pitt)
+        - Fix memory leak in _pygi_argument_to_object() (Alban Browaeys)
+          (#682979)
+        - Fix setting pointer fields/arguments to NULL using None.
+          (Simon Feltman) (#683150)
+        - Fix for python 2.6, officially drop support for < 2.6 (Martin Pitt)
+          (#682422)
+        - Allow overrides in other directories than gi itself
+          (Thibault Saunier) (#680913)
+        - Clean up sys.path handling in tests (Simon Feltman) (#680913)
+        - Fix dynamic creation of enum and flag gi types for Python 3.3
+          (Simon Feltman) (#682323)
+        - [API add] Override g_menu_item_set_attribute (Paolo Borelli) (#682436)
+
 3.3.90  20-Aug-2012
         - Implement marshalling for GParamSpec (Mathieu Duponchelle) (#681565)
         - Fix erronous import statements for Python 3.3 (Simon Feltman)
