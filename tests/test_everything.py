@@ -3,6 +3,7 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
+import traceback
 
 import sys
 from sys import getrefcount
@@ -227,6 +228,18 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(l3.data, 'bar')
         self.assertEqual(getrefcount(l1), init_refcount + 1)
         self.assertEqual(getrefcount(l3), init_refcount)
+
+    def test_struct_opaque(self):
+        # we should get a sensible error message
+        try:
+            Everything.TestBoxedPrivate()
+            self.fail('allocating disguised struct without default constructor unexpectedly succeeded')
+        except TypeError as e:
+            self.assertTrue('TestBoxedPrivate' in str(e), str(e))
+            self.assertTrue('override' in str(e), str(e))
+            self.assertTrue('constructor' in str(e), str(e))
+            tb = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+            self.assertTrue('tests/test_everything.py", line' in tb, tb)
 
 
 class TestNullableArgs(unittest.TestCase):

@@ -74,6 +74,13 @@ _struct_new (PyTypeObject *type,
     }
 
     size = g_struct_info_get_size ( (GIStructInfo *) info);
+    if (size == 0) {
+        PyErr_Format (PyExc_TypeError,
+            "cannot allocate disguised struct %s.%s; consider adding a constructor to the library or to the overrides",
+            g_base_info_get_namespace (info),
+            g_base_info_get_name (info));
+        goto out;
+    }
     pointer = g_try_malloc0 (size);
     if (pointer == NULL) {
         PyErr_NoMemory();
