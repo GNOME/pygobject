@@ -1833,6 +1833,11 @@ _pygi_argument_to_object (GIArgument  *arg,
                         break;
                     }
 
+                    if (G_IS_PARAM_SPEC (arg->v_pointer)) {
+                      object = pyg_param_spec_new (arg->v_pointer);
+                      break;
+                    }
+
                     /* since we will unref the object when the
                      * wrapper is destroyed and we don't want
                      * GTK removing the object while the
@@ -2051,7 +2056,10 @@ _pygi_argument_from_g_value(const GValue *value,
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    arg.v_pointer = g_value_get_object (value);
+                    if (G_VALUE_HOLDS_PARAM (value))
+                      arg.v_pointer = g_value_get_param (value);
+                    else
+                      arg.v_pointer = g_value_get_object (value);
                     break;
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:

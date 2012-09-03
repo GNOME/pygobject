@@ -362,6 +362,8 @@ class CM(GObject.GObject):
         test_paramspec=(l, GObject.ParamSpec, ()),
     )
 
+    testprop = GObject.Property(type=int)
+
 
 class _TestCMarshaller:
     def setUp(self):
@@ -401,6 +403,18 @@ class _TestCMarshaller:
         rv = self.obj.emit("test-paramspec")
         self.assertEqual(rv.name, "test-param")
         self.assertEqual(rv.nick, "test")
+
+    def testTestParamSpecArgFromC(self):
+        self.notify_called = False
+
+        def cb_notify(obj, prop):
+            self.notify_called = True
+            self.assertEqual(obj, self.obj)
+            self.assertEqual(prop.name, "testprop")
+
+        self.obj.connect("notify", cb_notify)
+        self.obj.set_property("testprop", 42)
+        self.assertTrue(self.notify_called)
 
 if 'generic-c-marshaller' in GObject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
