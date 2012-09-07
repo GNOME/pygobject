@@ -1430,9 +1430,21 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
         offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
         value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
 
+        /* Decrement the previous python object stashed on the void pointer.
+         * This seems somewhat dangerous as the code is blindly assuming any
+         * void pointer field stores a python object pointer and then decrefs it.
+         * This is essentially the same as something like:
+         *  Py_XDECREF(struct->void_ptr); */
         Py_XDECREF(G_STRUCT_MEMBER (gpointer, pointer, offset));
+
+        /* Assign and increment the newly assigned object. At this point the value
+         * arg will hold a pointer the python object "py_value" or NULL.
+         * This is essentially:
+         *  struct->void_ptr = value.v_pointer;
+         *  Py_XINCREF(struct->void_ptr);
+         */
         G_STRUCT_MEMBER (gpointer, pointer, offset) = (gpointer)value.v_pointer;
-        Py_XINCREF(py_value);
+        Py_XINCREF(G_STRUCT_MEMBER (gpointer, pointer, offset));
 
         retval = Py_None;
         goto out;

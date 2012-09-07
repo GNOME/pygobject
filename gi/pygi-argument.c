@@ -867,13 +867,7 @@ _pygi_argument_from_object (PyObject   *object,
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-            if (object == Py_None) {
-                Py_DECREF(Py_None);
-                arg.v_pointer = NULL;
-            } else {
-                /* This will leak a reference to the python object. */
-                arg.v_pointer = object;
-            }
+            arg.v_pointer = object == Py_None ? NULL : object;
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
