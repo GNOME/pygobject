@@ -694,6 +694,58 @@ class TestSignals(unittest.TestCase):
         obj.connect('sig-with-obj', callback)
         obj.emit_sig_with_obj()
 
+    def test_int64_param_from_py(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-int64-prop', callback)
+        rv = obj.emit('sig-with-int64-prop', GObject.G_MAXINT64)
+        self.assertEqual(rv, GObject.G_MAXINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    def test_uint64_param_from_py(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-uint64-prop', callback)
+        rv = obj.emit('sig-with-uint64-prop', GObject.G_MAXUINT64)
+        self.assertEqual(rv, GObject.G_MAXUINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
+    def test_int64_param_from_c(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-int64-prop', callback)
+        obj.emit_sig_with_int64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    def test_uint64_param_from_c(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-uint64-prop', callback)
+        obj.emit_sig_with_uint64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
 
 class TestPango(unittest.TestCase):
     @unittest.skipUnless(Gtk, 'Gtk not available')
