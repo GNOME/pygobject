@@ -347,6 +347,7 @@ gfloat = GObject.TYPE_FLOAT
 gdouble = GObject.TYPE_DOUBLE
 guint = GObject.TYPE_UINT
 gulong = GObject.TYPE_ULONG
+gint64 = GObject.TYPE_INT64
 
 
 class CM(GObject.GObject):
@@ -357,6 +358,7 @@ class CM(GObject.GObject):
         test4=(f, None, (bool, _long, gfloat, gdouble, int, guint, gulong)),
         test_float=(l, gfloat, (gfloat,)),
         test_double=(l, gdouble, (gdouble, )),
+        test_int64=(l, gint64, (gint64, )),
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
         test_paramspec=(l, GObject.ParamSpec, ()),
@@ -390,6 +392,16 @@ class _TestCMarshaller:
     def testTestReturnDouble(self):
         rv = self.obj.emit("test-double", 1.234)
         self.assertEqual(rv, 1.234)
+
+    def testTestReturnInt64(self):
+        rv = self.obj.emit("test-int64", 102030405)
+        self.assertEqual(rv, 102030405)
+
+        rv = self.obj.emit("test-int64", GObject.G_MAXINT64)
+        self.assertEqual(rv, GObject.G_MAXINT64 - 1)
+
+        rv = self.obj.emit("test-int64", GObject.G_MININT64)
+        self.assertEqual(rv, GObject.G_MININT64)
 
     def testTestReturnString(self):
         rv = self.obj.emit("test-string", "str")

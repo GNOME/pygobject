@@ -322,6 +322,16 @@ test_double_callback (GObject *object, double d)
   return d;
 }
 
+static gint64 *
+test_int64_callback (GObject *object, gint64 i)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), -1);
+
+  if (i == G_MAXINT64)
+      return i-1;
+  return i;
+}
+
 static char *
 test_string_callback (GObject *object, char *s)
 {
@@ -380,6 +390,10 @@ connectcallbacks (GObject *object)
   g_signal_connect (G_OBJECT (object),
                     "test_double",
                     G_CALLBACK (test_double_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_int64",
+                    G_CALLBACK (test_int64_callback), 
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_string",
