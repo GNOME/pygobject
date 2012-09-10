@@ -1042,8 +1042,17 @@ class TestGValue(unittest.TestCase):
         value.set_int(42)
         GIMarshallingTests.gvalue_in(value)
 
+    def test_gvalue_int64_in(self):
+        value = GObject.Value()
+        value.init(GObject.TYPE_INT64)
+        value.set_int64(GObject.G_MAXINT64)
+        GIMarshallingTests.gvalue_int64_in(value)
+
     def test_gvalue_out(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out())
+
+    def test_gvalue_int64_out(self):
+        self.assertEqual(GObject.G_MAXINT64, GIMarshallingTests.gvalue_int64_out())
 
     def test_gvalue_out_caller_allocates(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out_caller_allocates())
