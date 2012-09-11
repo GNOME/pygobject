@@ -358,6 +358,19 @@ test_paramspec_callback (GObject *object)
 }
 
 static GValue *
+test_gvalue_callback (GObject *object, const GValue *v)
+{
+  GValue *ret = g_malloc0 (sizeof (GValue));
+
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+  g_return_val_if_fail (G_IS_VALUE (v), NULL);
+
+  g_value_init (ret, G_VALUE_TYPE (v));
+  g_value_copy (v, ret);
+  return ret;
+}
+
+static GValue *
 test_gvalue_ret_callback (GObject *object, GType type)
 {
   GValue *ret = g_malloc0 (sizeof (GValue));
@@ -438,6 +451,10 @@ connectcallbacks (GObject *object)
   g_signal_connect (G_OBJECT (object),
                     "test_paramspec",
                     G_CALLBACK (test_paramspec_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_gvalue",
+                    G_CALLBACK (test_gvalue_callback), 
                     NULL);
   g_signal_connect (G_OBJECT (object),
                     "test_gvalue_ret",

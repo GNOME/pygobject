@@ -362,6 +362,7 @@ class CM(GObject.GObject):
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
         test_paramspec=(l, GObject.ParamSpec, ()),
+        test_gvalue=(l, GObject.Value, (GObject.Value, )),
         test_gvalue_ret=(l, GObject.Value, (GObject.TYPE_GTYPE, )),
     )
 
@@ -428,6 +429,46 @@ class _TestCMarshaller:
         self.obj.connect("notify", cb_notify)
         self.obj.set_property("testprop", 42)
         self.assertTrue(self.notify_called)
+
+    def testTestValue(self):
+        # implicit int
+        rv = self.obj.emit("test-gvalue", 42)
+        self.assertEqual(rv, 42)
+
+        # explicit float
+        v = GObject.Value()
+        v.init(gfloat)
+        v.set_float(1.234)
+        rv = self.obj.emit("test-gvalue", v)
+        self.assertAlmostEqual(rv, 1.234, 4)
+
+        # implicit float
+        rv = self.obj.emit("test-gvalue", 1.234)
+        self.assertAlmostEqual(rv, 1.234, 4)
+
+        # explicit int64
+        v = GObject.Value()
+        v.init(gint64)
+        v.set_int64(GObject.G_MAXINT64)
+        rv = self.obj.emit("test-gvalue", v)
+        self.assertEqual(rv, GObject.G_MAXINT64)
+
+        # implicit int64
+        # does not work, see https://bugzilla.gnome.org/show_bug.cgi?id=683775
+        #rv = self.obj.emit("test-gvalue", GObject.G_MAXINT64)
+        #self.assertEqual(rv, GObject.G_MAXINT64)
+
+        # explicit uint64
+        v = GObject.Value()
+        v.init(GObject.TYPE_UINT64)
+        v.set_uint64(GObject.G_MAXUINT64)
+        rv = self.obj.emit("test-gvalue", v)
+        self.assertEqual(rv, GObject.G_MAXUINT64)
+
+        # implicit uint64
+        # does not work, see https://bugzilla.gnome.org/show_bug.cgi?id=683775
+        #rv = self.obj.emit("test-gvalue", GObject.G_MAXUINT64)
+        #self.assertEqual(rv, GObject.G_MAXUINT64)
 
     def testTestReturnValue(self):
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT),
