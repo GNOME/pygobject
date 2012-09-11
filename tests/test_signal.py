@@ -341,29 +341,23 @@ class TestSigProp(unittest.TestCase):
         obj = SigPropClass()
         self.assertFalse(obj.signal_emission_failed)
 
-f = GObject.SignalFlags.RUN_FIRST
-l = GObject.SignalFlags.RUN_LAST
-gfloat = GObject.TYPE_FLOAT
-gdouble = GObject.TYPE_DOUBLE
-guint = GObject.TYPE_UINT
-gulong = GObject.TYPE_ULONG
-gint64 = GObject.TYPE_INT64
-
 
 class CM(GObject.GObject):
     __gsignals__ = dict(
-        test1=(f, None, ()),
-        test2=(l, None, (str,)),
-        test3=(l, int, (gdouble,)),
-        test4=(f, None, (bool, _long, gfloat, gdouble, int, guint, gulong)),
-        test_float=(l, gfloat, (gfloat,)),
-        test_double=(l, gdouble, (gdouble, )),
-        test_int64=(l, gint64, (gint64, )),
-        test_string=(l, str, (str, )),
-        test_object=(l, object, (object, )),
-        test_paramspec=(l, GObject.ParamSpec, ()),
-        test_gvalue=(l, GObject.Value, (GObject.Value, )),
-        test_gvalue_ret=(l, GObject.Value, (GObject.TYPE_GTYPE, )),
+        test1=(GObject.SignalFlags.RUN_FIRST, None, ()),
+        test2=(GObject.SignalFlags.RUN_LAST, None, (str,)),
+        test3=(GObject.SignalFlags.RUN_LAST, int, (GObject.TYPE_DOUBLE,)),
+        test4=(GObject.SignalFlags.RUN_FIRST, None,
+               (bool, _long, GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE, int,
+                GObject.TYPE_UINT, GObject.TYPE_ULONG)),
+        test_float=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_FLOAT, (GObject.TYPE_FLOAT,)),
+        test_double=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_DOUBLE, (GObject.TYPE_DOUBLE,)),
+        test_int64=(GObject.SignalFlags.RUN_LAST, GObject.TYPE_INT64, (GObject.TYPE_INT64,)),
+        test_string=(GObject.SignalFlags.RUN_LAST, str, (str,)),
+        test_object=(GObject.SignalFlags.RUN_LAST, object, (object,)),
+        test_paramspec=(GObject.SignalFlags.RUN_LAST, GObject.ParamSpec, ()),
+        test_gvalue=(GObject.SignalFlags.RUN_LAST, GObject.Value, (GObject.Value,)),
+        test_gvalue_ret=(GObject.SignalFlags.RUN_LAST, GObject.Value, (GObject.TYPE_GTYPE,)),
     )
 
     testprop = GObject.Property(type=int)
@@ -437,7 +431,7 @@ class _TestCMarshaller:
 
         # explicit float
         v = GObject.Value()
-        v.init(gfloat)
+        v.init(GObject.TYPE_FLOAT)
         v.set_float(1.234)
         rv = self.obj.emit("test-gvalue", v)
         self.assertAlmostEqual(rv, 1.234, 4)
@@ -448,7 +442,7 @@ class _TestCMarshaller:
 
         # explicit int64
         v = GObject.Value()
-        v.init(gint64)
+        v.init(GObject.TYPE_INT64)
         v.set_int64(GObject.G_MAXINT64)
         rv = self.obj.emit("test-gvalue", v)
         self.assertEqual(rv, GObject.G_MAXINT64)
