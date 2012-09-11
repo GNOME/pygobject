@@ -357,6 +357,38 @@ test_paramspec_callback (GObject *object)
   return g_param_spec_boolean ("test-param", "test", "test boolean", TRUE, G_PARAM_READABLE);
 }
 
+static GValue *
+test_gvalue_ret_callback (GObject *object, GType type)
+{
+  GValue *ret = g_malloc0 (sizeof (GValue));
+
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+
+  g_value_init (ret, type);
+
+  switch (type) {
+    case G_TYPE_INT:
+      g_value_set_int(ret, G_MAXINT);
+      break;
+    case G_TYPE_INT64:
+      g_value_set_int64(ret, G_MAXINT64);
+      break;
+    case G_TYPE_UINT:
+      g_value_set_uint(ret, G_MAXUINT);
+      break;
+    case G_TYPE_UINT64:
+      g_value_set_uint64(ret, G_MAXUINT64);
+      break;
+    case G_TYPE_STRING:
+      g_value_set_string(ret, "hello");
+      break;
+    default:
+      g_critical ("test_gvalue_ret_callback() does not support type %s", g_type_name (type));
+  }
+
+  return ret;
+}
+
 static void
 connectcallbacks (GObject *object)
 {
@@ -406,6 +438,10 @@ connectcallbacks (GObject *object)
   g_signal_connect (G_OBJECT (object),
                     "test_paramspec",
                     G_CALLBACK (test_paramspec_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_gvalue_ret",
+                    G_CALLBACK (test_gvalue_ret_callback), 
                     NULL);
 }
 

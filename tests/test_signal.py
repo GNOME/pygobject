@@ -362,6 +362,7 @@ class CM(GObject.GObject):
         test_string=(l, str, (str, )),
         test_object=(l, object, (object, )),
         test_paramspec=(l, GObject.ParamSpec, ()),
+        test_gvalue_ret=(l, GObject.Value, (GObject.TYPE_GTYPE, )),
     )
 
     testprop = GObject.Property(type=int)
@@ -427,6 +428,18 @@ class _TestCMarshaller:
         self.obj.connect("notify", cb_notify)
         self.obj.set_property("testprop", 42)
         self.assertTrue(self.notify_called)
+
+    def testTestReturnValue(self):
+        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT),
+                         GObject.G_MAXINT)
+        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT),
+                         GObject.G_MAXUINT)
+        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT64),
+                         GObject.G_MAXINT64)
+        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT64),
+                         GObject.G_MAXUINT64)
+        self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_STRING),
+                         "hello")
 
 if 'generic-c-marshaller' in GObject.features:
     class TestCMarshaller(_TestCMarshaller, unittest.TestCase):
