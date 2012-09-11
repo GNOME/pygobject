@@ -79,14 +79,14 @@ class TestGSignalsError(unittest.TestCase):
 
 
 class TestGPropertyError(unittest.TestCase):
-    def testInvalidType(self, *args):
+    def test_invalid_type(self, *args):
         def foo():
             class Foo(GObject.GObject):
                 __gproperties__ = None
         self.assertRaises(TypeError, foo)
         gc.collect()
 
-    def testInvalidName(self, *args):
+    def test_invalid_name(self, *args):
         def foo():
             class Foo(GObject.GObject):
                 __gproperties__ = {None: None}
@@ -96,7 +96,7 @@ class TestGPropertyError(unittest.TestCase):
 
 
 class TestList(unittest.TestCase):
-    def testListObject(self):
+    def test_list_names(self):
         self.assertEqual(GObject.signal_list_names(C), ('my-signal',))
 
 
@@ -120,7 +120,7 @@ class Foo(GObject.GObject):
 
 class TestAccumulator(unittest.TestCase):
 
-    def testAccumulator(self):
+    def test_accumulator(self):
         inst = Foo()
         inst.connect("my-acc-signal", lambda obj: 1)
         inst.connect("my-acc-signal", lambda obj: 2)
@@ -131,7 +131,7 @@ class TestAccumulator(unittest.TestCase):
         retval = inst.emit("my-acc-signal")
         self.assertEqual(retval, 3)
 
-    def testAccumulatorTrueHandled(self):
+    def test_accumulator_true_handled(self):
         inst = Foo()
         inst.connect("my-other-acc-signal", self._true_handler1)
         inst.connect("my-other-acc-signal", self._true_handler2)
@@ -181,7 +181,7 @@ class F(GObject.GObject):
 
 
 class TestEmissionHook(unittest.TestCase):
-    def testAdd(self):
+    def test_add(self):
         self.hook = True
         e = E()
         e.connect('signal', self._callback)
@@ -189,7 +189,7 @@ class TestEmissionHook(unittest.TestCase):
         e.emit('signal')
         self.assertEqual(e.status, 3)
 
-    def testRemove(self):
+    def test_remove(self):
         self.hook = False
         e = E()
         e.connect('signal', self._callback)
@@ -209,7 +209,7 @@ class TestEmissionHook(unittest.TestCase):
             self.assertEqual(e.status, 1)
         e.status = 3
 
-    def testCallbackReturnFalse(self):
+    def test_callback_return_false(self):
         self.hook = False
         obj = F()
 
@@ -221,7 +221,7 @@ class TestEmissionHook(unittest.TestCase):
         obj.emit('signal')
         self.assertEqual(obj.status, 3)
 
-    def testCallbackReturnTrue(self):
+    def test_callback_return_true(self):
         self.hook = False
         obj = F()
 
@@ -234,7 +234,7 @@ class TestEmissionHook(unittest.TestCase):
         GObject.remove_emission_hook(obj, "signal", hook_id)
         self.assertEqual(obj.status, 4)
 
-    def testCallbackReturnTrueButRemove(self):
+    def test_callback_return_true_but_remove(self):
         self.hook = False
         obj = F()
 
@@ -255,21 +255,21 @@ class TestClosures(unittest.TestCase):
     def _callback(self, e):
         self.count += 1
 
-    def testDisconnect(self):
+    def test_disconnect(self):
         e = E()
         e.connect('signal', self._callback)
         e.disconnect_by_func(self._callback)
         e.emit('signal')
         self.assertEqual(self.count, 0)
 
-    def testHandlerBlock(self):
+    def test_handler_block(self):
         e = E()
         e.connect('signal', self._callback)
         e.handler_block_by_func(self._callback)
         e.emit('signal')
         self.assertEqual(self.count, 0)
 
-    def testHandlerUnBlock(self):
+    def test_handler_unblock(self):
         e = E()
         signal_id = e.connect('signal', self._callback)
         e.handler_block(signal_id)
@@ -277,7 +277,7 @@ class TestClosures(unittest.TestCase):
         e.emit('signal')
         self.assertEqual(self.count, 1)
 
-    def testHandlerBlockMethod(self):
+    def test_handler_block_method(self):
         # Filed as #375589
         class A:
             def __init__(self):
@@ -337,7 +337,7 @@ class SigPropClass(GObject.GObject):
 
 
 class TestSigProp(unittest.TestCase):
-    def testEmitInPropertySetter(self):
+    def test_emit_in_property_setter(self):
         obj = SigPropClass()
         self.assertFalse(obj.signal_emission_failed)
 
@@ -374,28 +374,28 @@ class _TestCMarshaller:
         self.obj = CM()
         testhelper.connectcallbacks(self.obj)
 
-    def testTest1(self):
+    def test_test1(self):
         self.obj.emit("test1")
 
-    def testTest2(self):
+    def test_test2(self):
         self.obj.emit("test2", "string")
 
-    def testTest3(self):
+    def test_test3(self):
         rv = self.obj.emit("test3", 42.0)
         self.assertEqual(rv, 20)
 
-    def testTest4(self):
+    def test_test4(self):
         self.obj.emit("test4", True, _long(10), 3.14, 1.78, 20, _long(30), _long(31))
 
-    def testTestReturnFloat(self):
+    def test_float(self):
         rv = self.obj.emit("test-float", 1.234)
         self.assertTrue(rv >= 1.233999 and rv <= 1.2400001, rv)
 
-    def testTestReturnDouble(self):
+    def test_double(self):
         rv = self.obj.emit("test-double", 1.234)
         self.assertEqual(rv, 1.234)
 
-    def testTestReturnInt64(self):
+    def test_int64(self):
         rv = self.obj.emit("test-int64", 102030405)
         self.assertEqual(rv, 102030405)
 
@@ -405,20 +405,20 @@ class _TestCMarshaller:
         rv = self.obj.emit("test-int64", GObject.G_MININT64)
         self.assertEqual(rv, GObject.G_MININT64)
 
-    def testTestReturnString(self):
+    def test_string(self):
         rv = self.obj.emit("test-string", "str")
         self.assertEqual(rv, "str")
 
-    def testTestReturnObject(self):
+    def test_object(self):
         rv = self.obj.emit("test-object", self)
         self.assertEqual(rv, self)
 
-    def testTestReturnParamSpec(self):
+    def test_paramspec(self):
         rv = self.obj.emit("test-paramspec")
         self.assertEqual(rv.name, "test-param")
         self.assertEqual(rv.nick, "test")
 
-    def testTestParamSpecArgFromC(self):
+    def test_C_paramspec(self):
         self.notify_called = False
 
         def cb_notify(obj, prop):
@@ -430,7 +430,7 @@ class _TestCMarshaller:
         self.obj.set_property("testprop", 42)
         self.assertTrue(self.notify_called)
 
-    def testTestValue(self):
+    def test_gvalue(self):
         # implicit int
         rv = self.obj.emit("test-gvalue", 42)
         self.assertEqual(rv, 42)
@@ -470,7 +470,7 @@ class _TestCMarshaller:
         #rv = self.obj.emit("test-gvalue", GObject.G_MAXUINT64)
         #self.assertEqual(rv, GObject.G_MAXUINT64)
 
-    def testTestReturnValue(self):
+    def test_gvalue_ret(self):
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT),
                          GObject.G_MAXINT)
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT),
@@ -494,7 +494,7 @@ else:
 
 
 class TestPyGValue(unittest.TestCase):
-    def testNoneNULLBoxedConversion(self):
+    def test_none_null_boxed_conversion(self):
         class C(GObject.GObject):
             __gsignals__ = dict(my_boxed_signal=(
                 GObject.SignalFlags.RUN_LAST,
@@ -542,7 +542,7 @@ class TestSignalDecorator(unittest.TestCase):
     def onUnnamed(self, obj):
         self.unnamedCalled = True
 
-    def testGetSignalArgs(self):
+    def test_get_signal_args(self):
         self.assertEqual(self.Decorated.pushed.get_signal_args(),
                          (GObject.SignalFlags.RUN_FIRST, None, tuple()))
         self.assertEqual(self.Decorated.pulled.get_signal_args(),
@@ -550,7 +550,7 @@ class TestSignalDecorator(unittest.TestCase):
         self.assertEqual(self.Decorated.stomped.get_signal_args(),
                          (GObject.SignalFlags.RUN_FIRST, None, (int,)))
 
-    def testClosuresCalled(self):
+    def test_closures_called(self):
         decorated = self.Decorated()
         self.assertEqual(decorated.value, 0)
         decorated.pushed.emit()
@@ -558,7 +558,7 @@ class TestSignalDecorator(unittest.TestCase):
         decorated.pulled.emit()
         self.assertEqual(decorated.value, 0)
 
-    def testSignalCopy(self):
+    def test_signal_copy(self):
         blah = self.Decorated.stomped.copy('blah')
         self.assertEqual(str(blah), blah)
         self.assertEqual(blah.func, self.Decorated.stomped.func)
@@ -567,23 +567,23 @@ class TestSignalDecorator(unittest.TestCase):
         self.assertEqual(blah.arg_types, self.Decorated.stomped.arg_types)
         self.assertEqual(blah.__doc__, self.Decorated.stomped.__doc__)
 
-    def testDocString(self):
+    def test_doc_string(self):
         # Test the two techniques for setting doc strings on the signals
         # class variables, through the "doc" keyword or as the getter doc string.
         self.assertEqual(self.Decorated.stomped.__doc__, 'this will stomp')
         self.assertEqual(self.Decorated.pushed.__doc__, 'this will push')
 
-    def testUnnamedSignalGetsNamed(self):
+    def test_unnamed_signal_gets_named(self):
         self.assertEqual(str(self.Decorated.unnamed), 'unnamed')
 
-    def testUnnamedSignalGetsCalled(self):
+    def test_unnamed_signal_gets_called(self):
         obj = self.Decorated()
         obj.connect('unnamed', self.onUnnamed)
         self.assertEqual(self.unnamedCalled, False)
         obj.emit('unnamed')
         self.assertEqual(self.unnamedCalled, True)
 
-    def NOtestOverriddenSignal(self):
+    def NOtest_overridden_signal(self):
         # Test that the pushed signal is called in with super and the override
         # which should both increment the "value" to 3
         obj = self.DecoratedOverride()
@@ -608,14 +608,14 @@ class TestSignalConnectors(unittest.TestCase):
         self.obj = None
         self.value = None
 
-    def onClicked(self, obj, value):
+    def on_clicked(self, obj, value):
         self.obj = obj
         self.value = value
 
-    def testSignalEmit(self):
+    def test_signal_emit(self):
         # standard callback connection with different forms of emit.
         obj = self.CustomButton()
-        obj.connect('clicked', self.onClicked)
+        obj.connect('clicked', self.on_clicked)
 
         # vanilla
         obj.emit('clicked', 1)
@@ -644,16 +644,16 @@ class TestSignalConnectors(unittest.TestCase):
         self.assertEqual(obj, self.obj)
         self.assertEqual(self.value, 1)
 
-    def testSignalClassConnect(self):
+    def test_signal_class_connect(self):
         obj = self.CustomButton()
-        obj.connect(self.CustomButton.clicked, self.onClicked)
+        obj.connect(self.CustomButton.clicked, self.on_clicked)
         obj.emit('clicked', 2)
         self.assertEqual(obj, self.obj)
         self.assertEqual(self.value, 2)
 
-    def testSignalBoundConnect(self):
+    def test_signal_bound_connect(self):
         obj = self.CustomButton()
-        obj.clicked.connect(self.onClicked)
+        obj.clicked.connect(self.on_clicked)
         obj.emit('clicked', 3)
         self.assertEqual(obj, self.obj)
         self.assertEqual(self.value, 3)
@@ -682,7 +682,7 @@ class TestPython3Signals(unittest.TestCase):
             self.assertTrue('AnnotatedSignalClass' in globals())
             self.AnnotatedClass = globals()['AnnotatedSignalClass']
 
-    def testAnnotations(self):
+    def test_annotations(self):
         if self.AnnotatedClass:
             self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig1.func),
                              (None, (int, float)))
