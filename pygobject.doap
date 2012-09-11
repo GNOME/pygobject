@@ -55,4 +55,11 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
       <gnome:userid>sebp</gnome:userid>
     </foaf:Person>
   </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Simon Feltman</foaf:name>
+      <foaf:mbox rdf:resource="mailto:s.feltman@gmail.com" />
+      <gnome:userid>sfeltman</gnome:userid>
+    </foaf:Person>
+  </maintainer>
 </Project>
