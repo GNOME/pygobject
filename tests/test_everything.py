@@ -690,9 +690,12 @@ class TestSignals(unittest.TestCase):
         def callback(obj, obj_param):
             self.assertEqual(obj_param.props.int, 3)
             self.assertGreater(obj_param.__grefcount__, 1)
+            obj.called = True
 
+        obj.called = False
         obj.connect('sig-with-obj', callback)
         obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
 
     def test_int64_param_from_py(self):
         obj = Everything.TestObj()
