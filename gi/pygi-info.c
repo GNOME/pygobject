@@ -1427,6 +1427,14 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
             && g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID) {
         int offset;
 
+        if (py_value != Py_None && !PYGLIB_PyLong_Check(py_value)) {
+            if (PyErr_WarnEx(PyExc_RuntimeWarning,
+                         "Usage of gpointers to store objects has been deprecated. "
+                         "Please integer values instead, see: https://bugzilla.gnome.org/show_bug.cgi?id=683599",
+                         1))
+                goto out;
+        }
+
         offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
         value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
 
