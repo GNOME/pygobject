@@ -2735,6 +2735,27 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(obj.props.some_boxed_struct.long_, 1)
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject, 'some_boxed_glist'),
+                         'too old gobject-introspection')
+    def test_boxed_glist(self):
+        self.assertEqual(self.obj.props.some_boxed_glist, [])
+
+        l = [GObject.G_MININT, 42, GObject.G_MAXINT]
+        self.obj.props.some_boxed_glist = l
+        self.assertEqual(self.obj.props.some_boxed_glist, l)
+        self.obj.props.some_boxed_glist = []
+        self.assertEqual(self.obj.props.some_boxed_glist, [])
+
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_boxed_glist', 1)
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_boxed_glist', 'foo')
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_boxed_glist', ['a'])
+
+    @unittest.expectedFailure
+    def test_boxed_glist_ctor(self):
+        l = [GObject.G_MININT, 42, GObject.G_MAXINT]
+        obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=l)
+        self.assertEqual(obj.props.some_boxed_glist, l)
+
     @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject, 'some_variant'),
                          'too old gobject-introspection')
     def test_variant(self):

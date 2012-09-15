@@ -217,7 +217,10 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
             break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
-            arg.v_pointer = g_value_get_pointer (&value);
+            if (G_VALUE_HOLDS_BOXED(&value))
+                arg.v_pointer = g_value_get_boxed (&value);
+            else
+                arg.v_pointer = g_value_get_pointer (&value);
             break;
         case GI_TYPE_TAG_ARRAY:
         {
@@ -384,7 +387,10 @@ pygi_set_property_value_real (PyGObject *instance,
             g_value_set_boxed (&value, arg.v_pointer);
             break;
         case GI_TYPE_TAG_GLIST:
-            g_value_set_pointer (&value, arg.v_pointer);
+            if (G_VALUE_HOLDS_BOXED(&value))
+                g_value_set_boxed (&value, arg.v_pointer);
+            else
+                g_value_set_pointer (&value, arg.v_pointer);
             break;
         case GI_TYPE_TAG_ARRAY:
         {
