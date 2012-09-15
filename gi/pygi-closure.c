@@ -508,8 +508,6 @@ _pygi_closure_handle (ffi_cif *cif,
 end:
     g_free (out_args);
 
-    PyGILState_Release (state);
-
     /* Now that the closure has finished we can make a decision about how
        to free it.  Scope call gets free'd at the end of wrap_g_function_info_invoke.
        Scope notified will be freed when the notify is called.
@@ -532,6 +530,8 @@ end:
             g_error ("Invalid scope reached inside %s.  Possibly a bad annotation?",
                      g_base_info_get_name (closure->info));
     }
+
+    PyGILState_Release (state);
 }
 
 void _pygi_invoke_closure_free (gpointer data)
