@@ -226,6 +226,8 @@ build_parameter_list(GObjectClass *class)
 	g_free(name);
     }
 
+    g_type_class_unref(class);
+
     if (props)
         g_free(props);
     
@@ -255,8 +257,10 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 
     if (self->pygobject != NULL) {
         ret = pygi_get_property_value (self->pygobject, attr_name);
-        if (ret != NULL)
+        if (ret != NULL) {
+	    g_type_class_unref(class);
             return ret;
+	}
     }
 
     pspec = g_object_class_find_property(class, attr_name);
