@@ -1069,6 +1069,13 @@ _wrap_g_object_info_get_vfuncs (PyGIBaseInfo *self)
     return _get_vfuncs (self, GI_INFO_TYPE_OBJECT);
 }
 
+static PyObject *
+_wrap_g_object_info_get_abstract (PyGIBaseInfo *self)
+{
+    gboolean is_abstract  = g_object_info_get_abstract ( (GIObjectInfo*) self->info);
+    return PyBool_FromLong (is_abstract);
+}
+
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction) _wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_object_info_get_methods, METH_NOARGS },
@@ -1076,6 +1083,7 @@ static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_interfaces", (PyCFunction) _wrap_g_object_info_get_interfaces, METH_NOARGS },
     { "get_constants", (PyCFunction) _wrap_g_object_info_get_constants, METH_NOARGS },
     { "get_vfuncs", (PyCFunction) _wrap_g_object_info_get_vfuncs, METH_NOARGS },
+    { "get_abstract", (PyCFunction) _wrap_g_object_info_get_abstract, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

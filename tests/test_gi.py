@@ -2394,3 +2394,15 @@ class TestProjectVersion(unittest.TestCase):
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
         gi.check_version((3, 3, 5))
         gi.check_version("3.3.5")
+
+
+class TestObjectInfo(unittest.TestCase):
+    def test_get_abstract_with_abstract(self):
+        repo = gi.gi.Repository.get_default()
+        info = repo.find_by_name('GObject', 'TypeModule')
+        self.assertTrue(info.get_abstract())
+
+    def test_get_abstract_with_concrete(self):
+        repo = gi.gi.Repository.get_default()
+        info = repo.find_by_name('GObject', 'Object')
+        self.assertFalse(info.get_abstract())
