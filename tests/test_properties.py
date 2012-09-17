@@ -60,26 +60,26 @@ class PropertyObject(GObject.GObject):
         type=TYPE_STRV, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
 
-class TestProperties(unittest.TestCase):
-    def testGetSet(self):
+class TestPropertyObject(unittest.TestCase):
+    def test_get_set(self):
         obj = PropertyObject()
         obj.props.normal = "value"
         self.assertEqual(obj.props.normal, "value")
 
-    def testListWithInstance(self):
+    def test_hasattr_on_object(self):
         obj = PropertyObject()
         self.assertTrue(hasattr(obj.props, "normal"))
 
-    def testListWithoutInstance(self):
+    def test_hasattr_on_class(self):
         self.assertTrue(hasattr(PropertyObject.props, "normal"))
 
-    def testSetNoInstance(self):
+    def test_set_on_class(self):
         def set(obj):
             obj.props.normal = "foobar"
 
         self.assertRaises(TypeError, set, PropertyObject)
 
-    def testIterator(self):
+    def test_iteration(self):
         for obj in (PropertyObject.props, PropertyObject().props):
             for pspec in obj:
                 gtype = GType(pspec)
@@ -95,7 +95,7 @@ class TestProperties(unittest.TestCase):
                                                'boxed'])
             self.assertEqual(len(obj), 9)
 
-    def testNormal(self):
+    def test_normal(self):
         obj = new(PropertyObject, normal="123")
         self.assertEqual(obj.props.normal, "123")
         obj.set_property('normal', '456')
@@ -103,7 +103,7 @@ class TestProperties(unittest.TestCase):
         obj.props.normal = '789'
         self.assertEqual(obj.props.normal, "789")
 
-    def testConstruct(self):
+    def test_construct(self):
         obj = new(PropertyObject, construct="123")
         self.assertEqual(obj.props.construct, "123")
         obj.set_property('construct', '456')
@@ -111,7 +111,7 @@ class TestProperties(unittest.TestCase):
         obj.props.construct = '789'
         self.assertEqual(obj.props.construct, "789")
 
-    def testUTF8(self):
+    def test_utf8(self):
         obj = new(PropertyObject, construct_only=UNICODE_UTF8)
         self.assertEqual(obj.props.construct_only, TEST_UTF8)
         obj.set_property('construct', UNICODE_UTF8)
@@ -119,7 +119,7 @@ class TestProperties(unittest.TestCase):
         obj.props.normal = UNICODE_UTF8
         self.assertEqual(obj.props.normal, TEST_UTF8)
 
-    def testIntToStr(self):
+    def test_int_to_str(self):
         obj = new(PropertyObject, construct_only=1)
         self.assertEqual(obj.props.construct_only, '1')
         obj.set_property('construct', '2')
@@ -127,7 +127,7 @@ class TestProperties(unittest.TestCase):
         obj.props.normal = 3
         self.assertEqual(obj.props.normal, '3')
 
-    def testConstructOnly(self):
+    def test_construct_only(self):
         obj = new(PropertyObject, construct_only="123")
         self.assertEqual(obj.props.construct_only, "123")
         self.assertRaises(TypeError,
@@ -135,7 +135,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError,
                           obj.set_property, 'construct-only', '456')
 
-    def testUint64(self):
+    def test_uint64(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.uint64, 0)
         obj.props.uint64 = _long(1)
@@ -146,7 +146,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", _long(-1))
         self.assertRaises((TypeError, OverflowError), obj.set_property, "uint64", -1)
 
-    def testUInt64DefaultValue(self):
+    def test_uint64_default_value(self):
         try:
             class TimeControl(GObject.GObject):
                 __gproperties__ = {
@@ -158,7 +158,7 @@ class TestProperties(unittest.TestCase):
             (etype, ex) = sys.exc_info()[2:]
             self.fail(str(ex))
 
-    def testEnum(self):
+    def test_enum(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.enum, Gio.SocketType.STREAM)
         self.assertEqual(obj.enum, Gio.SocketType.STREAM)
@@ -186,7 +186,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=Gio.SocketType,
                           default=1)
 
-    def testFlags(self):
+    def test_flags(self):
         obj = new(PropertyObject)
         self.assertEqual(obj.props.flags, GIMarshallingTests.Flags.VALUE1)
         self.assertEqual(obj.flags, GIMarshallingTests.Flags.VALUE1)
@@ -206,7 +206,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property,
                           type=GIMarshallingTests.Flags, default=None)
 
-    def testGType(self):
+    def test_gtype(self):
         obj = new(PropertyObject)
 
         self.assertEqual(obj.props.gtype, TYPE_NONE)
@@ -238,7 +238,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(obj.props.gtype, TYPE_UINT)
         self.assertEqual(obj.gtype, TYPE_UINT)
 
-    def testBoxed(self):
+    def test_boxed(self):
         obj = new(PropertyObject)
 
         regex = GLib.Regex.new('[a-z]*', 0, 0)
@@ -249,7 +249,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, setattr, obj, 'boxed', 'foo')
         self.assertRaises(TypeError, setattr, obj, 'boxed', object())
 
-    def testStrings(self):
+    def test_strings(self):
         obj = new(PropertyObject)
 
         # Should work with actual GStrv objects as well as
@@ -299,7 +299,7 @@ class TestProperties(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
                           default=['hello', 1])
 
-    def testRange(self):
+    def test_range(self):
         # kiwi code
         def max(c):
             return 2 ** ((8 * struct.calcsize(c)) - 1) - 1
@@ -368,7 +368,7 @@ class TestProperties(unittest.TestCase):
             obj.set_property(key, max)
             self.assertEqual(obj.get_property(key), max)
 
-    def testMulti(self):
+    def test_multi(self):
         obj = PropertyObject()
         obj.set_properties(normal="foo",
                            uint64=7)
@@ -378,7 +378,7 @@ class TestProperties(unittest.TestCase):
 
 
 class TestProperty(unittest.TestCase):
-    def testSimple(self):
+    def test_simple(self):
         class C(GObject.GObject):
             str = GObject.Property(type=str)
             int = GObject.Property(type=int)
@@ -407,7 +407,7 @@ class TestProperty(unittest.TestCase):
         o.long = _long(100)
         self.assertEqual(o.long, _long(100))
 
-    def testCustomGetter(self):
+    def test_custom_getter(self):
         class C(GObject.GObject):
             def get_prop(self):
                 return 'value'
@@ -417,7 +417,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.prop, 'value')
         self.assertRaises(TypeError, setattr, o, 'prop', 'xxx')
 
-    def testCustomSetter(self):
+    def test_custom_setter(self):
         class C(GObject.GObject):
             def set_prop(self, value):
                 self._value = value
@@ -433,7 +433,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o._value, 'bar')
         self.assertRaises(TypeError, getattr, o, 'prop')
 
-    def testDecoratorDefault(self):
+    def test_decorator_default(self):
         class C(GObject.GObject):
             _value = 'value'
 
@@ -451,7 +451,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.value, 'blah')
         self.assertEqual(o.props.value, 'blah')
 
-    def testDecoratorWithCall(self):
+    def test_decorator_with_call(self):
         class C(GObject.GObject):
             _value = 1
 
@@ -469,7 +469,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.typedValue, 5)
         self.assertEqual(o.props.typedValue, 5)
 
-    def testErrors(self):
+    def test_errors(self):
         self.assertRaises(TypeError, GObject.Property, type='str')
         self.assertRaises(TypeError, GObject.Property, nick=False)
         self.assertRaises(TypeError, GObject.Property, blurb=False)
@@ -483,18 +483,18 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=complex)
         self.assertRaises(TypeError, GObject.Property, flags=-10)
 
-    def testDefaults(self):
+    def test_defaults(self):
         GObject.Property(type=bool, default=True)
         GObject.Property(type=bool, default=False)
 
-    def testNameWithUnderscore(self):
+    def test_name_with_underscore(self):
         class C(GObject.GObject):
             prop_name = GObject.Property(type=int)
         o = C()
         o.prop_name = 10
         self.assertEqual(o.prop_name, 10)
 
-    def testRange(self):
+    def test_range(self):
         maxint64 = 2 ** 62 - 1
         minint64 = -2 ** 62 - 1
         maxuint64 = 2 ** 63 - 1
@@ -525,7 +525,7 @@ class TestProperty(unittest.TestCase):
                               GObject.Property, type=gtype, minimum=min,
                               maximum=max + 1)
 
-    def testMinMax(self):
+    def test_min_max(self):
         class C(GObject.GObject):
             prop_int = GObject.Property(type=int, minimum=1, maximum=100, default=1)
             prop_float = GObject.Property(type=float, minimum=0.1, maximum=10.5, default=1.1)
@@ -562,7 +562,7 @@ class TestProperty(unittest.TestCase):
         finally:
             GLib.log_set_always_fatal(old_mask)
 
-    def testMultipleInstances(self):
+    def test_multiple_instances(self):
         class C(GObject.GObject):
             prop = GObject.Property(type=str, default='default')
 
@@ -574,7 +574,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o1.prop, 'value')
         self.assertEqual(o2.prop, 'default')
 
-    def testObjectProperty(self):
+    def test_object_property(self):
         class PropertyObject(GObject.GObject):
             obj = GObject.Property(type=GObject.GObject)
 
@@ -587,7 +587,7 @@ class TestProperty(unittest.TestCase):
         pobj1 = pobj2.obj
         self.assertEqual(hash(pobj1), obj1_hash)
 
-    def testObjectSubclassProperty(self):
+    def test_object_subclass_property(self):
         class ObjectSubclass(GObject.GObject):
             __gtype_name__ = 'ObjectSubclass'
 
@@ -596,7 +596,7 @@ class TestProperty(unittest.TestCase):
 
         PropertyObjectSubclass(obj=ObjectSubclass())
 
-    def testPropertySubclass(self):
+    def test_property_subclass(self):
         # test for #470718
         class A(GObject.GObject):
             prop1 = GObject.Property(type=int)
@@ -610,7 +610,7 @@ class TestProperty(unittest.TestCase):
         b.prop1 = 20
         self.assertEqual(b.prop1, 20)
 
-    def testPropertySubclassCustomSetter(self):
+    def test_property_subclass_custom_setter(self):
         # test for #523352
         class A(GObject.GObject):
             def get_first(self):
@@ -632,7 +632,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(b.second, 'second')
         self.assertRaises(TypeError, setattr, b, 'second', 'foo')
 
-    def testPropertySubclassCustomSetterError(self):
+    def test_property_subclass_custom_setter_error(self):
         try:
             class A(GObject.GObject):
                 def get_first(self):
@@ -655,7 +655,7 @@ class TestProperty(unittest.TestCase):
 
     # Bug 644039
 
-    def testReferenceCount(self):
+    def test_reference_count(self):
         # We can check directly if an object gets finalized, so we will
         # observe it indirectly through the refcount of a member object.
 
@@ -676,7 +676,7 @@ class TestProperty(unittest.TestCase):
         del t
         self.assertEqual(sys.getrefcount(o), rc)
 
-    def testDocStringAsBlurb(self):
+    def test_doc_string_as_blurb(self):
         class C(GObject.GObject):
             @GObject.Property
             def blurbed(self):
@@ -685,7 +685,7 @@ class TestProperty(unittest.TestCase):
 
         self.assertEqual(C.blurbed.blurb, 'blurbed doc string')
 
-    def testPythonToGLibTypeMapping(self):
+    def test_python_to_glib_type_mapping(self):
         tester = GObject.Property()
         self.assertEqual(tester._type_from_python(int), GObject.TYPE_INT)
         if sys.version_info < (3, 0):
