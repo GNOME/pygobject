@@ -8,7 +8,7 @@ Making a release
 5. Upload tarball: scp pygobject-3.X.Y.tar.gz tomeuv@master.gnome.org:
 6. Install tarball: ssh tomeuv@master.gnome.org 'ftpadmin install pygobject-3.X.Y.tar.gz'
 7. Send release announcements to gnome-announce-list@gnome.org; pygtk@daa.com.au; python-hackers-list@gnome.org; python-announce-list@python.org
-8. blog about it
+8. blog about it (include the HTMLized NEWS that "make release-news" prints)
 9. Commit post-release version bump
 
 Based on http://live.gnome.org/MaintainersCorner/Releasing

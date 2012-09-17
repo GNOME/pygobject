@@ -89,12 +89,22 @@ doc-dist:
 
 release-news:
 	printf "%-8s%s\n" "$(VERSION)" "`LC_TIME=C date '+%d-%b-%Y'`" > NEWS.tmp
-	last=`head -n1 NEWS | cut -f1 -d' '`; \
-	git log --format='format:        - %s (%aN)%n%b' $$last.. | \
-	  sed -n '/^        -/ p; /bugzilla.gnome.org/ { s/^.*id=\([0-9]\+\).*$$/          (#\1)/; p}' >> NEWS.tmp
-	echo >> NEWS.tmp
-	cat NEWS >> NEWS.tmp
-	mv NEWS.tmp NEWS
+
+	@echo -e "\n\n\nFor blogging, you can copy&paste this HTML formatted news:"
+	@echo "-------------- 8< -------------"
+	@last=`head -n1 NEWS | cut -f1 -d' '`; \
+        echo "<ul>"; \
+	for commit in `git rev-list $$last..`; do \
+	   data=`git log --format="format:%s%n%an%n%b" $$commit^..$$commit`; \
+	   echo "$$data" | perl -e '$$subj = <>; chomp $$subj; $$author = <>; chomp $$author; while (<>) { if (/bugzilla.gnome.org.*id=([0-9]+)/) { $$bug = $$1 }};  print "  <li>$$subj ($$author)"; if ($$bug) { print " (<a href=\"https://bugzilla.gnome.org/show_bug.cgi?id=$$bug\">#$$bug</a>)"; }; print "</li>\n"'; \
+	   echo "$$data" | perl -e '$$subj = <>; chomp $$subj; $$author = <>; chomp $$author; while (<>) { if (/bugzilla.gnome.org.*id=([0-9]+)/) { $$bug = $$1 }};  print "        - $$subj ($$author)"; if ($$bug) { print " (#$$bug)"; }; print "\n"' >> NEWS.tmp; \
+        done
+	@echo "</ul>"
+	@echo "-------------- 8< -------------"
+
+	@echo >> NEWS.tmp
+	@cat NEWS >> NEWS.tmp
+	@mv NEWS.tmp NEWS
 
 .PHONY: ChangeLog release-news
 
