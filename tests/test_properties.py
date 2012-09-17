@@ -610,6 +610,18 @@ class TestProperty(unittest.TestCase):
         b.prop1 = 20
         self.assertEqual(b.prop1, 20)
 
+    def test_property_subclass_c(self):
+        class A(GIMarshallingTests.PropertiesObject):
+            prop1 = GObject.Property(type=int)
+
+        a = A()
+        a.prop1 = 10
+        self.assertEqual(a.prop1, 10)
+
+        # also has parent properties
+        a.props.some_int = 20
+        self.assertEqual(a.props.some_int, 20)
+
     def test_property_subclass_custom_setter(self):
         # test for #523352
         class A(GObject.GObject):
