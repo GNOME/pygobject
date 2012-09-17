@@ -1371,6 +1371,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
     gchar *param_name;
     GParamSpec *pspec;
     PyObject *pvalue;
+    int ret = -1;
 
     if (!PyArg_ParseTuple(args, "sO:GObject.set_property", &param_name,
 			  &pvalue))
@@ -1387,9 +1388,17 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 	return NULL;
     }
     
+    ret = pygi_set_property_value (self, pspec, pvalue);
+    if (ret == 0)
+	goto done;
+    else if (PyErr_Occurred())
+        return  NULL;
+
     if (!set_property_from_pspec(self->obj, pspec, pvalue))
 	return NULL;
-    
+
+done:
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -1413,6 +1422,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
     while (kwargs && PyDict_Next (kwargs, &pos, &key, &value)) {
 	gchar *key_str = PYGLIB_PyUnicode_AsString(key);
 	GParamSpec *pspec;
+	int ret = -1;
 
 	pspec = g_object_class_find_property(class, key_str);
 	if (!pspec) {
@@ -1424,6 +1434,12 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
 	    PyErr_SetString(PyExc_TypeError, buf);
 	    goto exit;
 	}
+
+	ret = pygi_set_property_value (self, pspec, value);
+	if (ret == 0)
+	    goto exit;
+	else if (PyErr_Occurred())
+            goto exit;
 
 	if (!set_property_from_pspec(G_OBJECT(self->obj), pspec, value))
 	    goto exit;
