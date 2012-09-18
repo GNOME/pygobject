@@ -596,6 +596,18 @@ class TestProperties(unittest.TestCase):
         object_.props.gtype = str
         self.assertEqual(object_.props.gtype, GObject.TYPE_STRING)
 
+    def test_parent_class(self):
+        class A(Everything.TestObj):
+            prop1 = GObject.Property(type=int)
+
+        a = A()
+        a.props.int = 20
+        self.assertEqual(a.props.int, 20)
+
+        # test parent property which needs introspection
+        a.props.list = ("str1", "str2")
+        self.assertEqual(a.props.list, ["str1", "str2"])
+
 
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):

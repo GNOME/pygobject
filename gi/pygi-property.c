@@ -54,26 +54,26 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
 
     repository = g_irepository_get_default();
     info = g_irepository_find_by_gtype (repository, g_type);
-    if (info == NULL) {
-        return NULL;
-    }
+    if (info != NULL) {
 
-    n_infos = g_object_info_get_n_properties ( (GIObjectInfo *) info);
-    for (i = 0; i < n_infos; i++) {
-        GIPropertyInfo *property_info;
+        n_infos = g_object_info_get_n_properties ( (GIObjectInfo *) info);
+        for (i = 0; i < n_infos; i++) {
+            GIPropertyInfo *property_info;
 
-        property_info = g_object_info_get_property ( (GIObjectInfo *) info, i);
-        g_assert (info != NULL);
+            property_info = g_object_info_get_property ( (GIObjectInfo *) info,
+                                                         i);
+            g_assert (info != NULL);
 
-        if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
-            g_base_info_unref (info);
-            return property_info;
+            if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
+                g_base_info_unref (info);
+                return property_info;
+            }
+
+            g_base_info_unref (property_info);
         }
 
-        g_base_info_unref (property_info);
+        g_base_info_unref (info);
     }
-
-    g_base_info_unref (info);
 
     parent = g_type_parent (g_type);
     if (parent > 0)
