@@ -1991,6 +1991,11 @@ _pygi_argument_from_g_value(const GValue *value,
     GIArgument arg = { 0, };
 
     GITypeTag type_tag = g_type_info_get_tag (type_info);
+
+    /* For the long handling: long can be equivalent to
+       int32 or int64, depending on the architecture, but
+       gi doesn't tell us (and same for ulong)
+    */
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
             arg.v_boolean = g_value_get_boolean (value);
@@ -1998,18 +2003,30 @@ _pygi_argument_from_g_value(const GValue *value,
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
-            arg.v_int = g_value_get_int (value);
+	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
+		arg.v_int = g_value_get_long (value);
+	    else
+		arg.v_int = g_value_get_int (value);
             break;
         case GI_TYPE_TAG_INT64:
-            arg.v_int64 = g_value_get_int64 (value);
+	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
+		arg.v_int64 = g_value_get_long (value);
+	    else
+		arg.v_int64 = g_value_get_int64 (value);
             break;
         case GI_TYPE_TAG_UINT8:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
-            arg.v_uint = g_value_get_uint (value);
+	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
+		arg.v_uint = g_value_get_ulong (value);
+	    else
+		arg.v_uint = g_value_get_uint (value);
             break;
         case GI_TYPE_TAG_UINT64:
-            arg.v_uint64 = g_value_get_uint64 (value);
+	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
+		arg.v_uint64 = g_value_get_ulong (value);
+	    else
+		arg.v_uint64 = g_value_get_uint64 (value);
             break;
         case GI_TYPE_TAG_UNICHAR:
             arg.v_uint32 = g_value_get_schar (value);
