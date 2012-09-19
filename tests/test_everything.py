@@ -4,14 +4,10 @@
 
 import unittest
 import traceback
+import ctypes
 import warnings
-import gc
-gc
-
 import sys
-from sys import getrefcount
 
-import copy
 try:
     import cairo
     has_cairo = True
@@ -35,6 +31,17 @@ if sys.version_info < (3, 0):
     PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
 else:
     UNICHAR = "♥"
+
+
+class RawGList(ctypes.Structure):
+    _fields_ = [('data', ctypes.c_void_p),
+                ('next', ctypes.c_void_p),
+                ('prev', ctypes.c_void_p)]
+
+    @classmethod
+    def from_wrapped(cls, obj):
+        offset = sys.getsizeof(object())  # size of PyObject_HEAD
+        return ctypes.POINTER(cls).from_address(id(obj) + offset)
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
@@ -212,24 +219,24 @@ class TestEverything(unittest.TestCase):
         data = None
 
     def test_struct_gpointer(self):
-        l1 = GLib.List()
-        self.assertEqual(l1.data, None)
-        init_refcount = getrefcount(l1)
+        glist = GLib.List()
+        raw = RawGList.from_wrapped(glist)
 
-        l1.data = 'foo'
-        self.assertEqual(l1.data, 'foo')
+        self.assertEqual(glist.data, None)
+        self.assertEqual(raw.contents.data, None)
 
-        l2 = l1
-        self.assertEqual(l1.data, l2.data)
-        self.assertEqual(getrefcount(l1), init_refcount + 1)
+        glist.data = 123
+        self.assertEqual(glist.data, 123)
+        self.assertEqual(raw.contents.data, 123)
 
-        l3 = copy.copy(l1)
-        l3.data = 'bar'
-        self.assertEqual(l1.data, 'foo')
-        self.assertEqual(l2.data, 'foo')
-        self.assertEqual(l3.data, 'bar')
-        self.assertEqual(getrefcount(l1), init_refcount + 1)
-        self.assertEqual(getrefcount(l3), init_refcount)
+        glist.data = None
+        self.assertEqual(glist.data, None)
+        self.assertEqual(raw.contents.data, None)
+
+        # Setting to anything other than an int should raise
+        self.assertRaises(TypeError, setattr, glist.data, 'nan')
+        self.assertRaises(TypeError, setattr, glist.data, object())
+        self.assertRaises(TypeError, setattr, glist.data, 123.321)
 
     def test_struct_opaque(self):
         # we should get a sensible error message

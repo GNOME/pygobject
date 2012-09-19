@@ -1433,34 +1433,14 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
         g_base_info_unref (info);
     } else if (g_type_info_is_pointer (field_type_info)
             && g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID) {
-        int offset;
 
-        if (py_value != Py_None && !PYGLIB_PyLong_Check(py_value)) {
-            if (PyErr_WarnEx(PyExc_RuntimeWarning,
-                         "Usage of gpointers to store objects is being deprecated. "
-                         "Please use integer values only, see: https://bugzilla.gnome.org/show_bug.cgi?id=683599",
-                         1))
-                goto out;
+        value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
+        if (PyErr_Occurred()) {
+            goto out;
         }
 
-        offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
-        value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
-
-        /* Decrement the previous python object stashed on the void pointer.
-         * This seems somewhat dangerous as the code is blindly assuming any
-         * void pointer field stores a python object pointer and then decrefs it.
-         * This is essentially the same as something like:
-         *  Py_XDECREF(struct->void_ptr); */
-        Py_XDECREF(G_STRUCT_MEMBER (gpointer, pointer, offset));
-
-        /* Assign and increment the newly assigned object. At this point the value
-         * arg will hold a pointer the python object "py_value" or NULL.
-         * This is essentially:
-         *  struct->void_ptr = value.v_pointer;
-         *  Py_XINCREF(struct->void_ptr);
-         */
+        int offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
         G_STRUCT_MEMBER (gpointer, pointer, offset) = (gpointer)value.v_pointer;
-        Py_XINCREF(G_STRUCT_MEMBER (gpointer, pointer, offset));
 
         retval = Py_None;
         goto out;

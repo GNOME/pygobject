@@ -879,7 +879,15 @@ _pygi_argument_from_object (PyObject   *object,
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-            arg.v_pointer = object == Py_None ? NULL : object;
+            if (object == Py_None) {
+                arg.v_pointer = NULL;
+            } else if (!PYGLIB_PyLong_Check(object)  && !PyLong_Check(object)) {
+                PyErr_SetString(PyExc_TypeError,
+                    "Pointer assignment is restricted to integer values. "
+                    "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
+            } else {
+                arg.v_pointer = PyLong_AsVoidPtr (object);
+            }
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
@@ -1531,15 +1539,22 @@ _pygi_argument_to_object (GIArgument  *arg,
     type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
+        {
             if (g_type_info_is_pointer (type_info) &&
                     (arg->v_pointer != NULL)) {
-                /* Raw Python objects are passed to void* args */
                 g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-                object = arg->v_pointer;
-            } else
+                object = PyLong_FromVoidPtr (arg->v_pointer);
+            } else {
+                /* None is used instead of zero for parity with ctypes.
+                 * This is helpful in case the values are being used for
+                 * actual memory addressing, in which case None will
+                 * raise as opposed to 0 which will crash.
+                 */
                 object = Py_None;
-            Py_XINCREF (object);
+                Py_INCREF (object);
+            }
             break;
+        }
         case GI_TYPE_TAG_BOOLEAN:
         {
             object = PyBool_FromLong (arg->v_boolean);
