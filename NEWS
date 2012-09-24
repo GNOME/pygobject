@@ -1,3 +1,6 @@
+3.4.0   24-Sep-2012
+        - Bump g-i dependency to 1.33.14 (Martin Pitt)
+
 3.3.92  17-Sep-2012
         - [API add] Add ObjectInfo.get_abstract method (Simon Feltman) (#675581)
 	- Add deprecation warning when setting gpointers to anything other than
