@@ -266,14 +266,13 @@ py_io_channel_write_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     Py_ssize_t buf_len;
     gsize count;
     GError* error = NULL;
-    GIOStatus status;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#:gi._glib.IOChannel.write",
                                      kwlist, &buf, &buf_len))
         return NULL;
 	
     pyglib_unblock_threads();
-    status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
+    g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
     pyglib_block_threads();
     if (pyglib_error_check(&error))
 	return NULL;
@@ -289,7 +288,6 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     Py_ssize_t buf_len;
     gsize count;
     GError* error = NULL;
-    GIOStatus status;
     PyObject *iter, *value, *pylines;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:gi._glib.IOChannel.writelines",
@@ -312,7 +310,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         }
         PYGLIB_PyUnicode_AsStringAndSize(value, &buf, &buf_len);
         pyglib_unblock_threads();
-        status = g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
+        g_io_channel_write_chars(self->channel, buf, buf_len, &count, &error);
         pyglib_unblock_threads();
         Py_DECREF(value);
         if (pyglib_error_check(&error)) {
@@ -554,13 +552,12 @@ py_io_channel_read_line(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     gchar *str_return = NULL;
     GError *error = NULL;
     gint size_hint = -1;
-    GIOStatus status;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:gi._glib.IOChannel.readline", kwlist,
                                      &size_hint))
         return NULL;
 
-    status = g_io_channel_read_line(self->channel, &str_return, &length,
+    g_io_channel_read_line(self->channel, &str_return, &length,
                                     &terminator_pos, &error);
     if (pyglib_error_check(&error))
         return NULL;

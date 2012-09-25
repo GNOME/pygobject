@@ -1260,9 +1260,7 @@ array_success:
 
                         arg.v_pointer = closure;
                     } else if (g_struct_info_is_foreign (info)) {
-                        PyObject *result;
-                        result = pygi_struct_foreign_convert_to_g_argument (
-                                     object, info, transfer, &arg);
+                        pygi_struct_foreign_convert_to_g_argument (object, info, transfer, &arg);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
                         if (pyg_boxed_check (object, type)) {
                             arg.v_pointer = pyg_boxed_get (object, void);

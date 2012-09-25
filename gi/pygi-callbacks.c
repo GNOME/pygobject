@@ -77,7 +77,6 @@ _pygi_scan_for_callbacks (GIFunctionInfo *function_info,
 
     n_args = g_callable_info_get_n_args ( (GICallableInfo *) function_info);
     for (i = 0; i < n_args; i++) {
-        GIDirection direction;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
         guint8 destroy, closure;
@@ -111,7 +110,6 @@ _pygi_scan_for_callbacks (GIFunctionInfo *function_info,
         destroy = g_arg_info_get_destroy (arg_info);
         
         closure = g_arg_info_get_closure (arg_info);
-        direction = g_arg_info_get_direction (arg_info);
 
         if (destroy > 0 && destroy < n_args) {
             if (*destroy_notify_index != G_MAXUINT8) {
@@ -153,7 +151,6 @@ _pygi_create_callback (GIBaseInfo  *function_info,
     GIArgInfo *callback_arg;
     GITypeInfo *callback_type;
     GICallbackInfo *callback_info;
-    GIScopeType scope;
     gboolean found_py_function;
     PyObject *py_function;
     guint8 i, py_argv_pos;
@@ -161,7 +158,6 @@ _pygi_create_callback (GIBaseInfo  *function_info,
     gboolean allow_none;
 
     callback_arg = g_callable_info_get_arg ( (GICallableInfo*) function_info, callback_index);
-    scope = g_arg_info_get_scope (callback_arg);
     allow_none = g_arg_info_may_be_null (callback_arg);
 
     callback_type = g_arg_info_get_type (callback_arg);
