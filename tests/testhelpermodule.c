@@ -322,7 +322,7 @@ test_double_callback (GObject *object, double d)
   return d;
 }
 
-static gint64 *
+static gint64
 test_int64_callback (GObject *object, gint64 i)
 {
   g_return_val_if_fail (G_IS_OBJECT (object), -1);
