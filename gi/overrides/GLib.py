@@ -85,11 +85,23 @@ class _VariantCreator(object):
         '''Handle the case where the outermost type of format is a tuple.'''
 
         format = format[1:]  # eat the '('
-        builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
-        if args is not None:
+        if args is None:
+            # empty value: we need to call _create() to parse the subtype
+            rest_format = format
+            while rest_format:
+                if rest_format.startswith(')'):
+                    break
+                rest_format = self._create(rest_format, None)[1]
+            else:
+                raise TypeError('tuple type string not closed with )')
+
+            rest_format = rest_format[1:]  # eat the )
+            return (None, rest_format, None)
+        else:
             if not args or not isinstance(args[0], tuple):
                 raise TypeError('expected tuple argument')
 
+            builder = GLib.VariantBuilder.new(variant_type_from_string('r'))
             for i in range(len(args[0])):
                 if format.startswith(')'):
                     raise TypeError('too many arguments for tuple signature')
@@ -97,7 +109,11 @@ class _VariantCreator(object):
                 (v, format, _) = self._create(format, args[0][i:])
                 builder.add_value(v)
             args = args[1:]
-        return (builder.end(), format[1:], args)
+            if not format.startswith(')'):
+                raise TypeError('tuple type string not closed with )')
+
+            rest_format = format[1:]  # eat the )
+            return (builder.end(), rest_format, args)
 
     def _create_dict(self, format, args):
         '''Handle the case where the outermost type of format is a dict.'''
@@ -109,8 +125,8 @@ class _VariantCreator(object):
             rest_format = self._create(format[2:], None)[1]
             rest_format = self._create(rest_format, None)[1]
             if not rest_format.startswith('}'):
-                raise ValueError('dictionary type string not closed with }')
-            rest_format = rest_format[1:]  # eat the}
+                raise TypeError('dictionary type string not closed with }')
+            rest_format = rest_format[1:]  # eat the }
             element_type = format[:len(format) - len(rest_format)]
             builder = GLib.VariantBuilder.new(variant_type_from_string(element_type))
         else:
@@ -120,8 +136,8 @@ class _VariantCreator(object):
                 (val_v, rest_format, _) = self._create(rest_format, [v])
 
                 if not rest_format.startswith('}'):
-                    raise ValueError('dictionary type string not closed with }')
-                rest_format = rest_format[1:]  # eat the}
+                    raise TypeError('dictionary type string not closed with }')
+                rest_format = rest_format[1:]  # eat the }
 
                 entry = GLib.VariantBuilder.new(variant_type_from_string('{?*}'))
                 entry.add_value(key_v)
