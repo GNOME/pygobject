@@ -376,12 +376,12 @@ _pygi_marshal_from_py_uint16 (PyGIInvokeState   *state,
 
     if (PyErr_Occurred ()) {
         PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%li not in range %d to %d", long_, 0, 65535);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
         return FALSE;
     }
 
     if (long_ < 0 || long_ > 65535) {
-        PyErr_Format (PyExc_ValueError, "%li not in range %d to %d", long_, 0, 65535);
+        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
         return FALSE;
     }
 
@@ -460,12 +460,12 @@ _pygi_marshal_from_py_uint32 (PyGIInvokeState   *state,
 
     if (PyErr_Occurred ()) {
         PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %u", long_, 0, G_MAXUINT32);
+        PyErr_Format (PyExc_ValueError, "%lld not in range %i to %u", long_, 0, G_MAXUINT32);
         return FALSE;
     }
 
     if (long_ < 0 || long_ > G_MAXUINT32) {
-        PyErr_Format (PyExc_ValueError, "%lli not in range %i to %u", long_, 0, G_MAXUINT32);
+        PyErr_Format (PyExc_ValueError, "%lld not in range %i to %u", long_, 0, G_MAXUINT32);
         return FALSE;
     }
 
@@ -531,15 +531,10 @@ _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
             Py_DECREF (py_str);
         }
 
-        PyErr_Format (PyExc_ValueError, "%s not in range %" G_GINT64_FORMAT " to %" G_GINT64_FORMAT,
-                      long_str, G_MININT64, G_MAXINT64);
+        PyErr_Format (PyExc_ValueError, "%s not in range %lld to %lld",
+                      long_str, (long long) G_MININT64, (long long) G_MAXINT64);
 
         g_free (long_str);
-        return FALSE;
-    }
-
-    if (long_ < G_MININT64 || long_ > G_MAXINT64) {
-        PyErr_Format (PyExc_ValueError, "%" G_GINT64_FORMAT " not in range %" G_GINT64_FORMAT " to %" G_GINT64_FORMAT, long_, G_MININT64, G_MAXINT64);
         return FALSE;
     }
 
@@ -741,8 +736,8 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
     }
 
     if (size != 1) {
-       PyErr_Format (PyExc_TypeError, "Must be a one character string, not %" G_GINT64_FORMAT " characters",
-                     (gint64) size);
+       PyErr_Format (PyExc_TypeError, "Must be a one character string, not %lld characters",
+                     (long long) size);
        g_free (string_);
        return FALSE;
     }
