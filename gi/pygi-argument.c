@@ -810,11 +810,14 @@ _pygi_argument_to_array (GIArgument  *arg,
                     g_assert (callable_info);
                     length_arg_info = g_callable_info_get_arg (callable_info, length_arg_pos);
                     length_type_info = g_arg_info_get_type (length_arg_info);
+                    g_base_info_unref ( (GIBaseInfo *) length_arg_info);
                     if (!gi_argument_to_gssize (args[length_arg_pos],
                                                 g_type_info_get_tag (length_type_info),
                                                 &length)) {
+                        g_base_info_unref ( (GIBaseInfo *) length_type_info);
                         return NULL;
                     }
+                    g_base_info_unref ( (GIBaseInfo *) length_type_info);
                 }
             }
 
