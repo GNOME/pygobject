@@ -1168,6 +1168,20 @@ _wrap_g_object_info_get_abstract (PyGIBaseInfo *self)
     return PyBool_FromLong (is_abstract);
 }
 
+static PyObject *
+_wrap_g_object_info_get_class_struct (PyGIBaseInfo *self)
+{
+    GIBaseInfo *info;
+
+    info = g_object_info_get_class_struct ((GIObjectInfo*)self->info);
+
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    return _pygi_info_new (info);
+}
+
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction) _wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_object_info_get_methods, METH_NOARGS },
@@ -1176,6 +1190,7 @@ static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_constants", (PyCFunction) _wrap_g_object_info_get_constants, METH_NOARGS },
     { "get_vfuncs", (PyCFunction) _wrap_g_object_info_get_vfuncs, METH_NOARGS },
     { "get_abstract", (PyCFunction) _wrap_g_object_info_get_abstract, METH_NOARGS },
+    { "get_class_struct", (PyCFunction) _wrap_g_object_info_get_class_struct, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

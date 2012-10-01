@@ -2867,6 +2867,10 @@ class TestObjectInfo(unittest.TestCase):
         info = repo.find_by_name('GObject', 'Object')
         self.assertFalse(info.get_abstract())
 
+    def test_get_class_struct(self):
+        self.assertEqual(GObject.Object.__info__.get_class_struct(),
+                         GObject.ObjectClass.__info__)
+
 
 class TestSignatureArgs(unittest.TestCase):
     def test_split_args_multi_out(self):
