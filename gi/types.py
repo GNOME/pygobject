@@ -55,6 +55,17 @@ class MetaClassHelper(object):
         for method_info in cls.__info__.get_methods():
             setattr(cls, method_info.__name__, method_info)
 
+    def _setup_class_methods(cls):
+        info = cls.__info__
+        class_struct = info.get_class_struct()
+        if class_struct is None:
+            return
+        for method_info in class_struct.get_methods():
+            name = method_info.__name__
+            # Don't mask regular methods or base class methods with TypeClass methods.
+            if not hasattr(cls, name):
+                setattr(cls, name, classmethod(method_info))
+
     def _setup_fields(cls):
         for field_info in cls.__info__.get_fields():
             name = field_info.get_name().replace('-', '_')
@@ -211,6 +222,8 @@ class GObjectMeta(_GObjectMetaBase, MetaClassHelper):
         if is_python_defined:
             cls._setup_vfuncs()
         elif is_gi_defined:
+            if isinstance(cls.__info__, ObjectInfo):
+                cls._setup_class_methods()
             cls._setup_methods()
             cls._setup_constants()
             cls._setup_native_vfuncs()

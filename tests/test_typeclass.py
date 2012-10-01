@@ -63,5 +63,18 @@ class TestCoercion(unittest.TestCase):
             GObject.ObjectClass.find_property(42, 'some-int')
 
 
+class TestTypeClassMethodsMovedToClass(unittest.TestCase):
+    def test_list_child_properties(self):
+        pspecs = GIMarshallingTests.PropertiesObject.list_properties()
+        pnames = [pspec.name for pspec in pspecs]
+        self.assertTrue('some-int' in pnames)
+        self.assertTrue('some-float' in pnames)
+        self.assertTrue('some-char' in pnames)
+
+    def test_find_child_property(self):
+        pspec = GIMarshallingTests.PropertiesObject.find_property('some-int')
+        self.assertEqual(pspec.name, 'some-int')
+
+
 if __name__ == '__main__':
     unittest.main()
