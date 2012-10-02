@@ -55,18 +55,21 @@ pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
 pyexec_LTLIBRARIES =
 
 # install pth file.
+
+EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM)
+
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pythondir)
+	cp $(top_srcdir)/PKG-INFO $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
 uninstall-local:
-
-EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM).egg
+	rm -f $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
 
 egg: EGG_TMPDIR:=$(TMPDIR)/$(PACKAGE)-$(PACKAGE_VERSION)
 egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
 	rm -fr $(EGG_TMPDIR)
-	echo $(EGG_NAME)
+	echo $(EGG_NAME).egg
 	$(MKDIR_P) $(EGG_TMPDIR)
 	$(MKDIR_P) $(EGG_TMPDIR)/EGG-INFO
 	$(MAKE) -C gobject install-pkgpyexecLTLIBRARIES pkgpyexecdir=$(EGG_TMPDIR)
@@ -74,8 +77,8 @@ egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
 	$(INSTALL) PKG-INFO $(EGG_TMPDIR)/EGG-INFO
 	echo "gobject.so" >> $(EGG_TMPDIR)/EGG-INFO/native_libs.txt
 	( echo "gobject" ) >> $(EGG_TMPDIR)/EGG-INFO/top_level.txt
-	cd $(EGG_TMPDIR) && zip -rq $(EGG_NAME) .
-	mv $(EGG_TMPDIR)/$(EGG_NAME) .
+	cd $(EGG_TMPDIR) && zip -rq $(EGG_NAME).egg .
+	mv $(EGG_TMPDIR)/$(EGG_NAME).egg .
 	rm -fr $(EGG_TMPDIR)
 
 doc-dist:
