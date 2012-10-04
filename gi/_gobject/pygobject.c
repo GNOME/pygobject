@@ -252,7 +252,9 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     class = g_type_class_ref(self->gtype);
     
     if (!strcmp(attr_name, "__members__")) {
-	return build_parameter_list(class);
+        ret = build_parameter_list(class);
+        g_type_class_unref(class);
+	return ret;
     }
 
     if (self->pygobject != NULL) {
