@@ -60,7 +60,7 @@ EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM)
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pythondir)
-	cp $(top_srcdir)/PKG-INFO $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
+	cp $(top_builddir)/PKG-INFO $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
 uninstall-local:
