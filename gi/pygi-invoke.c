@@ -315,6 +315,12 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         return FALSE;
     }
 
+    state->args_data = g_slice_alloc0 (cache->n_args * sizeof (gpointer));
+    if (state->args_data == NULL && cache->n_args != 0) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
     state->in_args = g_slice_alloc0 (cache->n_from_py_args * sizeof(GIArgument));
     if (state->in_args == NULL && cache->n_from_py_args != 0) {
         PyErr_NoMemory ();
@@ -342,6 +348,7 @@ static inline void
 _invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
 {
     g_slice_free1 (cache->n_args * sizeof(GIArgument *), state->args);
+    g_slice_free1 (cache->n_args * sizeof(gpointer), state->args_data);
     g_slice_free1 (cache->n_from_py_args * sizeof(GIArgument), state->in_args);
     g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_args);
     g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_values);

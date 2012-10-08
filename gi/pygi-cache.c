@@ -678,6 +678,7 @@ _arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
         callable_cache->args_cache[callback_cache->destroy_notify_index] = destroy_arg_cache;
     }
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
+    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
 }
 
 static void

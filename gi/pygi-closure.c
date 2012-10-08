@@ -455,6 +455,24 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
     }
 }
 
+static void
+_pygi_invoke_closure_clear_py_data(PyGICClosure *invoke_closure)
+{
+    PyGILState_STATE state = PyGILState_Ensure();
+
+    if (invoke_closure->function != NULL) {
+        Py_DECREF (invoke_closure->function);
+        invoke_closure->function = NULL;
+    }
+
+    if (invoke_closure->user_data != NULL) {
+        Py_DECREF (invoke_closure->user_data);
+        invoke_closure->user_data = NULL;
+    }
+
+    PyGILState_Release (state);
+}
+
 void
 _pygi_closure_handle (ffi_cif *cif,
                       void    *result,
@@ -495,10 +513,12 @@ end:
     PyGILState_Release (state);
 
     /* Now that the closure has finished we can make a decision about how
-       to free it.  Scope call gets free'd at the end of wrap_g_function_info_invoke
-       scope notified will be freed,  when the notify is called and we can free async
-       anytime we want as long as its after we return from this function (you can't free the closure
-       you are currently using!)
+       to free it.  Scope call gets free'd at the end of wrap_g_function_info_invoke.
+       Scope notified will be freed when the notify is called.
+       Scope async closures free only their python data now and the closure later
+       during the next creation of a closure. This minimizes potential ref leaks
+       at least in regards to the python objects.
+       (you can't free the closure you are currently using!)
     */
     switch (closure->scope) {
         case GI_SCOPE_TYPE_CALL:
@@ -507,6 +527,7 @@ end:
         case GI_SCOPE_TYPE_ASYNC:
             /* Append this PyGICClosure to a list of closure that we will free
                after we're done with this function invokation */
+            _pygi_invoke_closure_clear_py_data(closure);
             async_free_list = g_slist_prepend (async_free_list, closure);
             break;
         default:
@@ -517,11 +538,7 @@ end:
 
 void _pygi_invoke_closure_free (gpointer data)
 {
-    PyGILState_STATE state;
     PyGICClosure* invoke_closure = (PyGICClosure *) data;
-
-    state = PyGILState_Ensure();
-    Py_DECREF (invoke_closure->function);
 
     g_callable_info_free_closure (invoke_closure->info,
                                   invoke_closure->closure);
@@ -529,8 +546,7 @@ void _pygi_invoke_closure_free (gpointer data)
     if (invoke_closure->info)
         g_base_info_unref ( (GIBaseInfo*) invoke_closure->info);
 
-    Py_XDECREF (invoke_closure->user_data);
-    PyGILState_Release (state);
+    _pygi_invoke_closure_clear_py_data(invoke_closure);
 
     g_slice_free (PyGICClosure, invoke_closure);
 }
@@ -553,11 +569,10 @@ _pygi_make_native_closure (GICallableInfo* info,
     closure = g_slice_new0 (PyGICClosure);
     closure->info = (GICallableInfo *) g_base_info_ref ( (GIBaseInfo *) info);
     closure->function = py_function;
-    closure->user_data = py_user_data;
+    closure->user_data = py_user_data ? py_user_data : Py_None;
 
     Py_INCREF (py_function);
-    if (closure->user_data)
-        Py_INCREF (closure->user_data);
+    Py_INCREF (closure->user_data);
 
     fficlosure =
         g_callable_info_prepare_closure (info, &closure->cif, _pygi_closure_handle,

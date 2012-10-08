@@ -1305,6 +1305,15 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
     return FALSE;
 }
 
+/* _pygi_destroy_notify_dummy:
+ *
+ * Dummy method used in the occasion when a method has a GDestroyNotify
+ * argument without user data.
+ */
+static void
+_pygi_destroy_notify_dummy (gpointer data) {
+}
+
 gboolean
 _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,
@@ -1324,17 +1333,14 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     if (callback_cache->user_data_index > 0) {
         user_data_cache = callable_cache->args_cache[callback_cache->user_data_index];
         if (user_data_cache->py_arg_index < state->n_py_in_args) {
+            /* py_user_data is a borrowed reference. */
             py_user_data = PyTuple_GetItem (state->py_in_args, user_data_cache->py_arg_index);
             if (!py_user_data)
                 return FALSE;
-        } else {
-            py_user_data = Py_None;
-            Py_INCREF (Py_None);
         }
     }
 
     if (py_arg == Py_None && !(py_user_data == Py_None || py_user_data == NULL)) {
-        Py_DECREF (py_user_data);
         PyErr_Format (PyExc_TypeError,
                       "When passing None for a callback userdata must also be None");
 
@@ -1342,12 +1348,10 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     }
 
     if (py_arg == Py_None) {
-        Py_XDECREF (py_user_data);
         return TRUE;
     }
 
     if (!PyCallable_Check (py_arg)) {
-        Py_XDECREF (py_user_data);
         PyErr_Format (PyExc_TypeError,
                       "Callback needs to be a function or method not %s",
                       py_arg->ob_type->tp_name);
@@ -1355,21 +1359,52 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    if (callback_cache->destroy_notify_index > 0)
-        destroy_cache = callable_cache->args_cache[callback_cache->destroy_notify_index];
-
     callable_info = (GICallableInfo *)callback_cache->interface_info;
 
     closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data);
     arg->v_pointer = closure->closure;
+
+    /* The PyGICClosure instance is used as user data passed into the C function.
+     * The return trip to python will marshal this back and pull the python user data out.
+     */
     if (user_data_cache != NULL) {
         state->in_args[user_data_cache->c_arg_index].v_pointer = closure;
     }
 
-    if (destroy_cache) {
-        PyGICClosure *destroy_notify = _pygi_destroy_notify_create ();
-        state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
+    /* Setup a GDestroyNotify callback if this method supports it along with
+     * a user data field. The user data field is a requirement in order
+     * free resources and ref counts associated with this arguments closure.
+     * In case a user data field is not available, show a warning giving
+     * explicit information and setup a dummy notification to avoid a crash
+     * later on in _pygi_destroy_notify_callback_closure.
+     */
+    if (callback_cache->destroy_notify_index > 0) {
+        destroy_cache = callable_cache->args_cache[callback_cache->destroy_notify_index];
     }
+
+    if (destroy_cache) {
+        if (user_data_cache != NULL) {
+            PyGICClosure *destroy_notify = _pygi_destroy_notify_create ();
+            state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
+        } else {
+            gchar *msg = g_strdup_printf("Callables passed to %s will leak references because "
+                                         "the method does not support a user_data argument. "
+                                         "See: https://bugzilla.gnome.org/show_bug.cgi?id=685598",
+                                         callable_cache->name);
+            if (PyErr_WarnEx(PyExc_RuntimeWarning, msg, 2)) {
+                g_free(msg);
+                _pygi_invoke_closure_free(closure);
+                return FALSE;
+            }
+            g_free(msg);
+            state->in_args[destroy_cache->c_arg_index].v_pointer = _pygi_destroy_notify_dummy;
+        }
+    }
+
+    /* Store the PyGIClosure as extra args data so _pygi_marshal_cleanup_from_py_interface_callback
+     * can clean it up later for GI_SCOPE_TYPE_CALL based closures.
+     */
+    state->args_data[arg_cache->c_arg_index] = closure;
 
     return TRUE;
 }
