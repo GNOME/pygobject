@@ -107,8 +107,11 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(self.settings['test-string'], 'Goodbye')
         self.settings['test-array'] = [3, 4, 5]
         self.assertEqual(self.settings['test-array'], [3, 4, 5])
+        self.settings['test-enum'] = 'pear'
+        self.assertEqual(self.settings['test-enum'], 'pear')
 
         self.assertRaises(TypeError, self.settings.__setitem__, 'test-string', 1)
+        self.assertRaises(ValueError, self.settings.__setitem__, 'test-enum', 'plum')
         self.assertRaises(KeyError, self.settings.__setitem__, 'unknown', 'moo')
 
     def test_empty(self):

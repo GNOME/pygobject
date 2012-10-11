@@ -101,8 +101,15 @@ class Settings(Gio.Settings):
             type_str = v.get_child_value(0).get_type_string()
             assert type_str.startswith('a')
             type_str = type_str[1:]
+        elif type_ == 'enum':
+            # v is an array with the allowed values
+            assert v.get_child_value(0).get_type_string().startswith('a')
+            type_str = v.get_child_value(0).get_child_value(0).get_type_string()
+            allowed = v.unpack()
+            if value not in allowed:
+                raise ValueError('value %s is not an allowed enum (%s)' % (value, allowed))
         else:
-            raise NotImplementedError('Cannot handle allowed type range class' + str(type_))
+            raise NotImplementedError('Cannot handle allowed type range class ' + str(type_))
 
         self.set_value(key, GLib.Variant(type_str, value))
 
