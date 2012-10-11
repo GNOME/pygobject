@@ -1,4 +1,10 @@
 <schemalist>
+    <enum id="org.gnome.test.FruitType">
+        <value nick="banana" value="0"/>
+        <value nick="apple" value="1"/>
+        <value nick="pear" value="2"/>
+    </enum>
+
     <schema id="org.gnome.test" path="/tests/">
 	<key name="test-boolean" type="b">
 	    <default>true</default>
@@ -11,6 +17,9 @@
 	</key>
 	<key name="test-array" type="ai">
 	    <default>[1,2]</default>
+	</key>
+	<key name="test-enum" enum="org.gnome.test.FruitType">
+	    <default>'banana'</default>
 	</key>
     </schema>
 

@@ -45,6 +45,8 @@ class TestGSettings(unittest.TestCase):
         # value
         self.settings.reset('test-string')
         self.settings.reset('test-array')
+        self.settings.reset('test-boolean')
+        self.settings.reset('test-enum')
 
     def test_native(self):
         self.assertTrue('test-array' in self.settings.list_keys())
@@ -80,25 +82,27 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(with_path.get_property('path'), '/mypath/')
         self.assertEqual(with_path['np-int'], 42)
 
-    def test_override(self):
-        # dictionary interface
-        self.assertEqual(len(self.settings), 4)
+    def test_dictionary_api(self):
+        self.assertEqual(len(self.settings), 5)
         self.assertTrue('test-array' in self.settings)
         self.assertTrue('test-array' in self.settings.keys())
         self.assertFalse('nonexisting' in self.settings)
         self.assertFalse(4 in self.settings)
         self.assertEqual(bool(self.settings), True)
 
-        # get various types
+    def test_get(self):
         self.assertEqual(self.settings['test-boolean'], True)
         self.assertEqual(self.settings['test-string'], 'Hello')
+        self.assertEqual(self.settings['test-enum'], 'banana')
         self.assertEqual(self.settings['test-array'], [1, 2])
         self.assertEqual(self.settings['test-tuple'], (1, 2))
 
         self.assertRaises(KeyError, self.settings.__getitem__, 'unknown')
         self.assertRaises(KeyError, self.settings.__getitem__, 2)
 
-        # set a value
+    def test_set(self):
+        self.settings['test-boolean'] = False
+        self.assertEqual(self.settings['test-boolean'], False)
         self.settings['test-string'] = 'Goodbye'
         self.assertEqual(self.settings['test-string'], 'Goodbye')
         self.settings['test-array'] = [3, 4, 5]
