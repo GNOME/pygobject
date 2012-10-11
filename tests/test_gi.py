@@ -819,6 +819,9 @@ class TestGArray(unittest.TestCase):
     def test_garray_int_none_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.garray_int_none_return())
 
+    def test_garray_uint64_none_return(self):
+        self.assertEqual([0, GObject.G_MAXUINT64], GIMarshallingTests.garray_uint64_none_return())
+
     def test_garray_utf8_none_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_none_return())
 
@@ -835,6 +838,9 @@ class TestGArray(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, None)
+
+    def test_garray_uint64_none_in(self):
+        GIMarshallingTests.garray_uint64_none_in(Sequence([0, GObject.G_MAXUINT64]))
 
     def test_garray_utf8_none_in(self):
         GIMarshallingTests.garray_utf8_none_in(Sequence(['0', '1', '2']))
@@ -896,6 +902,9 @@ class TestGList(unittest.TestCase):
     def test_glist_int_none_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.glist_int_none_return())
 
+    def test_glist_uint32_none_return(self):
+        self.assertEqual([0, GObject.G_MAXUINT32], GIMarshallingTests.glist_uint32_none_return())
+
     def test_glist_utf8_none_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_none_return())
 
@@ -912,6 +921,9 @@ class TestGList(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, None)
+
+    def test_glist_uint32_none_in(self):
+        GIMarshallingTests.glist_uint32_none_in(Sequence((0, GObject.G_MAXUINT32)))
 
     def test_glist_utf8_none_in(self):
         GIMarshallingTests.glist_utf8_none_in(Sequence(('0', '1', '2')))
