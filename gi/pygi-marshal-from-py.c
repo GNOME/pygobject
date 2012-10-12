@@ -565,13 +565,13 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
 
 #if PY_VERSION_HEX < 0x03000000
     if (PyInt_Check (py_long)) {
-        guint64 long_ = (guint64) PyInt_AsLong (py_long);
-        if (long_ > G_MAXUINT64) {
+        long long_ =  PyInt_AsLong (py_long);
+        if (long_ < 0 || long_ > G_MAXUINT64) {
             PyErr_Format (PyExc_ValueError, "%" G_GUINT64_FORMAT " not in range %d to %" G_GUINT64_FORMAT,
                           (gint64) long_, 0, G_MAXUINT64);
             return FALSE;
         }
-        ulong_ = long_;
+        ulong_ = (guint64) long_;
     } else
 #endif
         ulong_ = PyLong_AsUnsignedLongLong (py_long);
