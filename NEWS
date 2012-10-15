@@ -1,3 +1,21 @@
+3.4.1   15-Oct-2012
+        - Skip Regress tests with --disable-cairo (Martin Pitt) (#685094)
+        - Fix leak with python callables as closure argument. (Simon Feltman) (#685598)
+        - Gio overrides: Handle setting GSettings enum keys (Martin Pitt) (#685947)
+        - Fix unsigned values in GArray/GList/GSList/GHash (Martin Pitt) (#685860)
+        - _pygi_marshal_from_py_uint64(): Use correct data type in py2.7 check (Alban Browaeys) (#685000)
+        - Install an .egg-info file (Johan Dahlin) (#680138)
+        - PyGProps_getattro(): Fix GObjectClass leak (Johan Dahlin) (#685218)
+        - pygobject.c: Don't leak GObjectClass reference (Olivier Crête) (#684062)
+        - Fix memory leak in _pygi_argument_to_array() (Alban Browaeys) (#685082)
+        - Fix error messages for out of range numbers (Martin Pitt) (#684314)
+        - Kill dbus-daemon after running tests (Martin Pitt) (#685009)
+        - GVariant overrides: Support empty tuple arrays (Martin Pitt) (#684928)
+        - tests: Fix wrong return type in test_int64_callback() (Martin Pitt) (#684700)
+        - Fix GValue marshalling of long and unsigned long (Giovanni Campagna) (#684331)
+        - Clean up deprecation message for assigning gpointers to objects. (Simon Feltman) (#683599)
+        - pygi-property: Lookup property in base classes of non-introspected types (Olivier Crête) (#684058)
+
 3.4.0   24-Sep-2012
         - Bump g-i dependency to 1.33.14 (Martin Pitt)
 
