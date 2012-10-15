@@ -10,6 +10,7 @@ import shutil
 import os
 import locale
 import subprocess
+import gc
 from io import StringIO, BytesIO
 
 import gi
@@ -1623,6 +1624,8 @@ class TestGObject(unittest.TestCase):
 class TestPythonGObject(unittest.TestCase):
 
     class Object(GIMarshallingTests.Object):
+        return_for_caller_allocated_out_parameter = 'test caller alloc return'
+
         def __init__(self, int):
             GIMarshallingTests.Object.__init__(self)
             self.val = None
@@ -1657,7 +1660,7 @@ class TestPythonGObject(unittest.TestCase):
             return (5, 42, 99)
 
         def do_vfunc_caller_allocated_out_parameter(self):
-            return 'hello'
+            return self.return_for_caller_allocated_out_parameter
 
     class SubObject(GIMarshallingTests.SubObject):
         def __init__(self, int):
@@ -1705,7 +1708,8 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.vfunc_return_value_and_one_out_parameter(), (5, 42))
         self.assertEqual(object_.vfunc_return_value_and_multiple_out_parameters(), (5, 42, 99))
 
-        self.assertEqual(object_.vfunc_caller_allocated_out_parameter(), 'hello')
+        self.assertEqual(object_.vfunc_caller_allocated_out_parameter(),
+                         object_.return_for_caller_allocated_out_parameter)
 
         class ObjectWithoutVFunc(GIMarshallingTests.Object):
             def __init__(self, int):
@@ -1714,6 +1718,19 @@ class TestPythonGObject(unittest.TestCase):
         object_ = ObjectWithoutVFunc(int=42)
         object_.method_with_default_implementation(84)
         self.assertEqual(object_.props.int, 84)
+
+    def test_vfunc_return_ref_count(self):
+        obj = self.Object(int=42)
+        ref_count = sys.getrefcount(obj.return_for_caller_allocated_out_parameter)
+        ret = obj.vfunc_caller_allocated_out_parameter()
+        gc.collect()
+
+        # Make sure the return and what the vfunc returned
+        # are equal but not the same object.
+        self.assertEqual(ret, obj.return_for_caller_allocated_out_parameter)
+        self.assertFalse(ret is obj.return_for_caller_allocated_out_parameter)
+        self.assertEqual(sys.getrefcount(obj.return_for_caller_allocated_out_parameter),
+                         ref_count)
 
     def test_subobject_parent_vfunc(self):
         object_ = self.SubObject(int=81)
