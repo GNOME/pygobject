@@ -15,6 +15,7 @@ import copy
 try:
     import cairo
     has_cairo = True
+    from gi.repository import Regress as Everything
 except ImportError:
     has_cairo = False
 
@@ -22,7 +23,6 @@ except ImportError:
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
-from gi.repository import Regress as Everything
 
 try:
     from gi.repository import Gtk
@@ -37,9 +37,9 @@ else:
     UNICHAR = "♥"
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestEverything(unittest.TestCase):
 
-    @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_cairo_context(self):
         context = Everything.test_cairo_context_full_return()
         self.assertTrue(isinstance(context, cairo.Context))
@@ -48,7 +48,6 @@ class TestEverything(unittest.TestCase):
         context = cairo.Context(surface)
         Everything.test_cairo_context_none_in(context)
 
-    @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_cairo_surface(self):
         surface = Everything.test_cairo_surface_none_return()
         self.assertTrue(isinstance(surface, cairo.ImageSurface))
@@ -247,6 +246,7 @@ class TestEverything(unittest.TestCase):
             self.assertTrue('tests/test_everything.py", line' in tb, tb)
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestNullableArgs(unittest.TestCase):
     def test_in_nullable_hash(self):
         Everything.test_ghash_null_in(None)
@@ -284,6 +284,7 @@ class TestNullableArgs(unittest.TestCase):
         self.assertEqual(None, Everything.TestObj.null_out())
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestCallbacks(unittest.TestCase):
     called = False
     main_loop = GObject.MainLoop()
@@ -553,6 +554,7 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(mydict, {'foo': 1, 'bar': 2, 'new': 42})
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestClosures(unittest.TestCase):
     def test_int_arg(self):
         def callback(num):
@@ -588,6 +590,7 @@ class TestClosures(unittest.TestCase):
         self.assertFalse(self.called)
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestProperties(unittest.TestCase):
 
     def test_basic(self):
@@ -676,6 +679,7 @@ class TestProperties(unittest.TestCase):
         self.assertEqual(a.props.list, ["str1", "str2"])
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestTortureProfile(unittest.TestCase):
     def test_torture_profile(self):
         import time
@@ -738,6 +742,7 @@ class TestTortureProfile(unittest.TestCase):
         print("\tTotal: %f sec" % total_time)
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestAdvancedInterfaces(unittest.TestCase):
     def test_array_objs(self):
         obj1, obj2 = Everything.test_array_fixed_out_objects()
@@ -762,6 +767,7 @@ class TestAdvancedInterfaces(unittest.TestCase):
         self.assertEqual(ret, None)
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestSignals(unittest.TestCase):
     def test_object_param_signal(self):
         obj = Everything.TestObj()
@@ -829,8 +835,9 @@ class TestSignals(unittest.TestCase):
         self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
 
 
+@unittest.skipUnless(has_cairo, 'built without cairo support')
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestPango(unittest.TestCase):
-    @unittest.skipUnless(Gtk, 'Gtk not available')
     def test_cairo_font_options(self):
         screen = Gtk.Window().get_screen()
         font_opts = screen.get_font_options()

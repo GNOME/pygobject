@@ -4,7 +4,11 @@
 import unittest
 
 import gi.overrides
-from gi.repository import Regress
+try:
+    from gi.repository import Regress
+    Regress  # pyflakes
+except ImportError:
+    Regress = None
 
 
 class TestRegistry(unittest.TestCase):
@@ -18,6 +22,7 @@ class TestRegistry(unittest.TestCase):
         except TypeError as e:
             self.assertTrue('Can not override a type MyClass' in str(e))
 
+    @unittest.skipUnless(Regress, 'built without cairo support')
     def test_separate_path(self):
         # Regress override is in tests/gi/overrides, separate from gi/overrides
         # https://bugzilla.gnome.org/show_bug.cgi?id=680913

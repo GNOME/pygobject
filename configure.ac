@@ -184,9 +184,6 @@ AC_SUBST(LIBFFI_PC)
 dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
 
-# we always need cairo (not pycairo) for building the tests
-PKG_CHECK_MODULES(CAIRO, cairo cairo-gobject)
-
 AC_ARG_ENABLE(cairo,
     AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
     enable_cairo=$enableval,
@@ -201,6 +198,8 @@ GI_DATADIR=$($PKG_CONFIG --variable=gidatadir gobject-introspection-1.0)
 AC_SUBST(GI_DATADIR)
 
 if test "$enable_cairo" != no; then
+    PKG_CHECK_MODULES(CAIRO, cairo cairo-gobject)
+
     if test $build_py3k = true; then
         PKG_CHECK_MODULES(PYCAIRO,
             py3cairo >= py3cairo_required_version
