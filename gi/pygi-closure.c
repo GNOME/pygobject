@@ -506,6 +506,7 @@ _pygi_closure_handle (ffi_cif *cif,
     }
 
     _pygi_closure_set_out_arguments (closure->info, retval, out_args, result);
+    Py_DECREF (retval);
 
 end:
     g_free (out_args);
