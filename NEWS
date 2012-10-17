@@ -1,3 +1,8 @@
+3.4.1.1 17-Oct-2012
+        - Bump g-i dependency to >= 1.34.1.1 (Paolo Borelli)
+        - Fix leaked vfunc return values (Simon Feltman) (#686140)
+        - Install egg-info files in the right dir  Kalev Lember) (#686315)
+
 3.4.1   15-Oct-2012
         - Skip Regress tests with --disable-cairo (Martin Pitt) (#685094)
         - Fix leak with python callables as closure argument. (Simon Feltman) (#685598)
