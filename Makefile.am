@@ -59,12 +59,12 @@ pyexec_LTLIBRARIES =
 EGG_NAME = $(PACKAGE)-$(PACKAGE_VERSION)-py$(PYTHON_VERSION)-$(PLATFORM)
 
 install-data-local:
-	$(mkinstalldirs) $(DESTDIR)$(pythondir)
-	cp $(top_builddir)/PKG-INFO $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
+	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
+	cp $(top_builddir)/PKG-INFO $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(pyexecdir)
 uninstall-local:
-	rm -f $(DESTDIR)$(pythondir)/$(EGG_NAME).egg-info
+	rm -f $(DESTDIR)$(pyexecdir)/$(EGG_NAME).egg-info
 
 egg: EGG_TMPDIR:=$(TMPDIR)/$(PACKAGE)-$(PACKAGE_VERSION)
 egg: $(top_srcdir)/gobject/gobject.la PKG-INFO
