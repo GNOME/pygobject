@@ -19,8 +19,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import signal
+
 from ..importer import modules
-from .._gi import variant_new_tuple, variant_type_from_string
+from .._gi import variant_new_tuple, variant_type_from_string, source_new, source_set_callback
+from ..overrides import override
 
 GLib = modules['GLib']._introspection_module
 
@@ -422,3 +425,114 @@ for n in ['DESKTOP', 'DOCUMENTS', 'DOWNLOAD', 'MUSIC', 'PICTURES',
           'PUBLIC_SHARE', 'TEMPLATES', 'VIDEOS']:
     exec('USER_DIRECTORY_%s = GLib.UserDirectory.DIRECTORY_%s' % (n, n))
     __all__.append('USER_DIRECTORY_' + n)
+
+
+class MainLoop(GLib.MainLoop):
+    # Backwards compatible constructor API
+    def __new__(cls, context=None):
+        return GLib.MainLoop.new(context, False)
+
+    # Retain classic pygobject behaviour of quitting main loops on SIGINT
+    def __init__(self, context=None):
+        def _handler(loop):
+            loop.quit()
+            loop._quit_by_sigint = True
+
+        self._signal_source = GLib.unix_signal_add_full(
+            GLib.PRIORITY_DEFAULT, signal.SIGINT, _handler, self)
+
+    def __del__(self):
+        GLib.source_remove(self._signal_source)
+
+    def run(self):
+        super(MainLoop, self).run()
+        if hasattr(self, '_quit_by_sigint'):
+            # caught by _main_loop_sigint_handler()
+            raise KeyboardInterrupt
+
+MainLoop = override(MainLoop)
+__all__.append('MainLoop')
+
+
+class MainContext(GLib.MainContext):
+    # Backwards compatible API with default value
+    def iteration(self, may_block=True):
+        return super(MainContext, self).iteration(may_block)
+
+MainContext = override(MainContext)
+__all__.append('MainContext')
+
+
+class Source(GLib.Source):
+    def __new__(cls):
+        # use our custom pyg_source_new() here as g_source_new() is not
+        # bindable
+        source = source_new()
+        source.__class__ = cls
+        setattr(source, '__pygi_custom_source', True)
+        return source
+
+    # Backwards compatible API for optional arguments
+    def attach(self, context=None):
+        id = super(Source, self).attach(context)
+        return id
+
+    def set_callback(self, fn, user_data=None):
+        if hasattr(self, '__pygi_custom_source'):
+            # use our custom pyg_source_set_callback() if for a GSource object
+            # with custom functions
+            source_set_callback(self, fn, user_data)
+        else:
+            # otherwise, for Idle and Timeout, use the standard method
+            super(Source, self).set_callback(fn, user_data)
+
+    def get_current_time(self):
+        return GLib.get_real_time() * 0.000001
+
+    # as get/set_priority are introspected, we can't use the static
+    # property(get_priority, ..) here
+    def __get_priority(self):
+        return self.get_priority()
+
+    def __set_priority(self, value):
+        self.set_priority(value)
+
+    priority = property(__get_priority, __set_priority)
+
+    def __get_can_recurse(self):
+        return self.get_can_recurse()
+
+    def __set_can_recurse(self, value):
+        self.set_can_recurse(value)
+
+    can_recurse = property(__get_can_recurse, __set_can_recurse)
+
+Source = override(Source)
+__all__.append('Source')
+
+
+class Idle(Source):
+    def __new__(cls, priority=GLib.PRIORITY_DEFAULT):
+        source = GLib.idle_source_new()
+        source.__class__ = cls
+        return source
+
+    def __init__(self, priority=GLib.PRIORITY_DEFAULT):
+        super(Source, self).__init__()
+        if priority != GLib.PRIORITY_DEFAULT:
+            self.set_priority(priority)
+
+__all__.append('Idle')
+
+
+class Timeout(Source):
+    def __new__(cls, interval=0, priority=GLib.PRIORITY_DEFAULT):
+        source = GLib.timeout_source_new(interval)
+        source.__class__ = cls
+        return source
+
+    def __init__(self, interval=0, priority=GLib.PRIORITY_DEFAULT):
+        if priority != GLib.PRIORITY_DEFAULT:
+            self.set_priority(priority)
+
+__all__.append('Timeout')

@@ -27,6 +27,14 @@ __all__ = []
 for name in ['markup_escape_text', 'get_application_name',
              'set_application_name', 'get_prgname', 'set_prgname',
              'main_depth', 'filename_display_basename',
-             'filename_display_name', 'uri_list_extract_uris']:
+             'filename_display_name', 'uri_list_extract_uris',
+             'MainLoop', 'MainContext', 'main_context_default',
+             'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD']:
+    globals()[name] = getattr(GLib, name)
+    __all__.append(name)
+
+# constants are also deprecated, but cannot mark them as such
+for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
+             'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)

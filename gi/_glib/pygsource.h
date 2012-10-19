@@ -22,9 +22,6 @@
 #ifndef __PYG_SOURCE_H__
 #define __PYG_SOURCE_H__
 
-extern PyTypeObject PyGSource_Type;
-extern PyTypeObject PyGIdle_Type;
-extern PyTypeObject PyGTimeout_Type;
 extern PyTypeObject PyGPollFD_Type;
 
 typedef struct

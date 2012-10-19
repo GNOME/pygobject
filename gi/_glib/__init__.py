@@ -27,15 +27,10 @@ _PyGLib_API = _glib._PyGLib_API
 # Types
 GError = _glib.GError
 IOChannel = _glib.IOChannel
-Idle = _glib.Idle
-MainContext = _glib.MainContext
-MainLoop = _glib.MainLoop
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
 PollFD = _glib.PollFD
-Source = _glib.Source
-Timeout = _glib.Timeout
 
 # Constants
 IO_ERR = _glib.IO_ERR
@@ -68,11 +63,6 @@ OPTION_FLAG_NO_ARG = _glib.OPTION_FLAG_NO_ARG
 OPTION_FLAG_OPTIONAL_ARG = _glib.OPTION_FLAG_OPTIONAL_ARG
 OPTION_FLAG_REVERSE = _glib.OPTION_FLAG_REVERSE
 OPTION_REMAINING = _glib.OPTION_REMAINING
-PRIORITY_DEFAULT = _glib.PRIORITY_DEFAULT
-PRIORITY_DEFAULT_IDLE = _glib.PRIORITY_DEFAULT_IDLE
-PRIORITY_HIGH = _glib.PRIORITY_HIGH
-PRIORITY_HIGH_IDLE = _glib.PRIORITY_HIGH_IDLE
-PRIORITY_LOW = _glib.PRIORITY_LOW
 SPAWN_CHILD_INHERITS_STDIN = _glib.SPAWN_CHILD_INHERITS_STDIN
 SPAWN_DO_NOT_REAP_CHILD = _glib.SPAWN_DO_NOT_REAP_CHILD
 SPAWN_FILE_AND_ARGV_ZERO = _glib.SPAWN_FILE_AND_ARGV_ZERO
@@ -88,9 +78,7 @@ get_current_time = _glib.get_current_time
 glib_version = _glib.glib_version
 idle_add = _glib.idle_add
 io_add_watch = _glib.io_add_watch
-main_context_default = _glib.main_context_default
 pyglib_version = _glib.pyglib_version
-source_remove = _glib.source_remove
 spawn_async = _glib.spawn_async
 threads_init = _glib.threads_init
 timeout_add = _glib.timeout_add

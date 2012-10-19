@@ -163,9 +163,6 @@ class TestSource(unittest.TestCase):
         self.assertGreater(time, 1300000000.0)
         self.assertLess(time, 2000000000.0)
 
-    # currently broken with Python 3,
-    # https://bugzilla.gnome.org/show_bug.cgi?id=686443
-    @unittest.expectedFailure
     def testAddRemovePoll(self):
         # FIXME: very shallow test, only verifies the API signature
         pollfd = GLib.PollFD(99, GLib.IO_IN | GLib.IO_HUP)

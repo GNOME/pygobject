@@ -11,8 +11,6 @@ HTML_FILES =					\
 	html/class-gobjectginterface.html	\
 	html/class-gobjectgpointer.html		\
 	html/class-gobject.html			\
-	html/class-glibmaincontext.html		\
-	html/class-glibmainloop.html		\
 	html/glib-constants.html		\
 	html/glib-functions.html		\
 	html/gobject-class-reference.html	\
@@ -37,9 +35,7 @@ XML_FILES = 						\
 	reference/pygobject-gpointer.xml 		\
 	reference/pyglib-classes.xml 			\
 	reference/pyglib-constants.xml 			\
-	reference/pyglib-functions.xml			\
-	reference/pyglib-maincontext.xml 		\
-	reference/pyglib-mainloop.xml
+	reference/pyglib-functions.xml
 
 XSL_FILES =			\
 	xsl/common.xsl 		\

@@ -58,10 +58,6 @@ _glib_la_SOURCES = \
 	pygoptioncontext.h \
 	pygoptiongroup.c \
 	pygoptiongroup.h \
-	pygmaincontext.c \
-	pygmaincontext.h \
-	pygmainloop.c \
-	pygmainloop.h \
 	pygsource.c \
 	pygsource.h \
 	pygspawn.c \

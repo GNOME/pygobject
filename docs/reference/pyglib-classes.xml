@@ -7,8 +7,6 @@
 <title>PyGlibClass Reference</title>
 
 <!-- GLIB CLASSES -->
-<xi:include href="pyglib-maincontext.xml"/>
-<xi:include href="pyglib-mainloop.xml"/>
 <xi:include href="pyglib-functions.xml"/>
 <xi:include href="pyglib-constants.xml"/>
 

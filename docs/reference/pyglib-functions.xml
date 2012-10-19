@@ -37,14 +37,6 @@ linkend="function-glib--io-add-watch">glib.io_add_watch</link></methodname>
 	<methodparam><parameter>callback</parameter></methodparam>
 	<methodparam><parameter>...</parameter></methodparam>
   </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-glib--source-remove">glib.source_remove</link></methodname>
-	<methodparam><parameter>tag</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-glib--main-context-default">glib.main_context_default</link></methodname>
-	<methodparam></methodparam>
-      </methodsynopsis><methodsynopsis language="python">
         <methodname><link linkend="function-glib--child-watch-add">glib.child_watch_add</link></methodname>
         <methodparam><parameter role="keyword">pid</parameter></methodparam>
         <methodparam><parameter role="keyword">function</parameter></methodparam>
@@ -331,56 +323,6 @@ function.</para>
 will be automatically removed from the list of event sources and will not be
 called again. If it returns <literal>True</literal> it will be called again
 when the condition is matched.</para>
-
-    </refsect2>
-
-    <refsect2 id="function-glib--source-remove">
-      <title>glib.source_remove</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>glib.source_remove</methodname>
-	  <methodparam><parameter>tag</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><parameter>tag</parameter>&nbsp;:</term>
-	  <listitem><simpara>an integer ID</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara><literal>True</literal> if the event source was
-removed</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>The <function>glib.source_remove</function>() function
-removes the event source specified by tag (as returned by the <link
-linkend="function-glib--idle-add"><function>glib.idle_add</function>()</link>, 
-<link
-linkend="function-glib--timeout-add"><function>glib.timeout_add</function></link>() 
-and <link
-linkend="function-glib--io-add-watch"><function>glib.io_add_watch</function>()</link> 
-functions)</para>
-
-    </refsect2>
-
-    <refsect2 id="function-glib--main-context-default">
-      <title>glib.main_context_default</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>glib.main_context_default</methodname>
-	  <methodparam></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara>the default glib.MainContext
-object</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>The <function>glib.main_context_default</function>() function
-returns the default glib.MainContext object.</para>
 
     </refsect2>
 

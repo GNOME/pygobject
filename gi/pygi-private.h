@@ -32,6 +32,7 @@
 #include "pygi-signal-closure.h"
 #include "pygi-invoke.h"
 #include "pygi-cache.h"
+#include "pygi-source.h"
 
 G_BEGIN_DECLS
 #if PY_VERSION_HEX >= 0x03000000

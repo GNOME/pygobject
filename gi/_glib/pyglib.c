@@ -27,7 +27,6 @@
 #include <pythread.h>
 #include "pyglib.h"
 #include "pyglib-private.h"
-#include "pygmaincontext.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 
@@ -408,20 +407,6 @@ pyglib_register_exception_for_domain(gchar *name,
 		   exception);
     
     return exception;
-}
-
-/**
- * pyglib_main_context_new:
- * @context: a GMainContext.
- *
- * Creates a wrapper for a GMainContext.
- *
- * Returns: the GMainContext wrapper.
- */
-PyObject *
-pyglib_main_context_new(GMainContext *context)
-{
-    return _PyGLib_API->main_context_new(context);
 }
 
 /**

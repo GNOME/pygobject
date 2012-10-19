@@ -73,59 +73,6 @@ condition to watch for on an event source.</para>
 
     </refsect2>
 
-    <refsect2 id="glib-priority-constants">
-      <title id="glib-priority-constants-title">Glib Priority Constants</title>
-
-      <para>The Priority constants specify </para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>glib.PRIORITY_HIGH</literal></term>
-	  <listitem>
-	    <simpara>Use this for high priority event sources.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.PRIORITY_DEFAULT</literal></term>
-	  <listitem>
-	    <simpara>Use this for default priority event sources.  This
-	    priority is used when adding timeout functions with the <link
-	    linkend="function-glib--timeout-add"><function>glib.timeout_add</function>()</link>
-	    function. This priority is also used for events from the X
-	    server.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.PRIORITY_HIGH_IDLE</literal></term>
-	  <listitem>
-	    <simpara>Use this for high priority idle functions. For example,
-	    glib.PRIORITY_HIGH_IDLE + 10 is used for resizing operations;
-	    and, glib.PRIORITY_HIGH_IDLE + 20, for redrawing
-	    operations. (This is done to ensure that any pending resizes are
-	    processed before any pending redraws, so that widgets are not
-	    redrawn twice unnecessarily.)</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.PRIORITY_DEFAULT_IDLE</literal></term>
-	  <listitem>
-	    <simpara>Use this for default priority idle functions. This
-	    priority is used when adding idle functions with the <link
-	    linkend="function-glib--idle-add"><function>glib.idle_add</function>()</link>
-	    function.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.PRIORITY_LOW</literal></term>
-	  <listitem>
-	    <simpara>Use this for very low priority background
-	    tasks.</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-    </refsect2>
-
     <refsect2 id="glib-spawn-flag-constants">
       <title id="glib-spawn-flag-constants-title">Glib Spawn Flag Constants</title>
 

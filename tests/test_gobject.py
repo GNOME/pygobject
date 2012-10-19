@@ -30,6 +30,8 @@ class TestGObjectAPI(unittest.TestCase):
         context = GObject.MainContext()
         self.assertFalse(context.pending())
 
+            self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)
+
 
 class TestReferenceCounting(unittest.TestCase):
     def testRegularObject(self):

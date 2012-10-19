@@ -30,8 +30,6 @@
 #include "pyglib.h"
 #include "pyglib-private.h"
 #include "pygiochannel.h"
-#include "pygmaincontext.h"
-#include "pygmainloop.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygsource.h"
@@ -308,23 +306,6 @@ pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
     return PYGLIB_PyLong_FromLong(handler_id);
 }
 
-static PyObject *
-pyglib_source_remove(PyObject *self, PyObject *args)
-{
-    guint tag;
-
-    if (!PyArg_ParseTuple(args, "I:source_remove", &tag))
-	return NULL;
-
-    return PyBool_FromLong(g_source_remove(tag));
-}
-
-static PyObject *
-pyglib_main_context_default(PyObject *unused)
-{
-    return pyglib_main_context_new(g_main_context_default());
-}
-
 static void
 child_watch_func(GPid pid, gint status, gpointer data)
 {
@@ -465,12 +446,6 @@ static PyMethodDef _glib_functions[] = {
       "data specified by data when the child indicated by pid exits.\n"
       "Condition is a combination of glib.IO_IN, glib.IO_OUT, glib.IO_PRI,\n"
       "gio.IO_ERR and gio.IO_HUB." },
-    { "source_remove",
-      (PyCFunction)pyglib_source_remove, METH_VARARGS,
-      "source_remove(source_id) -> True if removed\n"
-      "Removes the event source specified by source id as returned by the\n"
-      "glib.idle_add(), glib.timeout_add() or glib.io_add_watch()\n"
-      "functions." },
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
       "spawn_async(argv, envp=None, working_directory=None,\n"
@@ -479,11 +454,6 @@ static PyMethodDef _glib_functions[] = {
       "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
       "Execute a child program asynchronously within a glib.MainLoop()\n"
       "See the reference manual for a complete reference." },
-    { "main_context_default",
-      (PyCFunction)pyglib_main_context_default, METH_NOARGS,
-      "main_context_default() -> a main context\n"
-      "Returns the default main context. This is the main context used\n"
-      "for main loop functions when a main loop is not explicitly specified." },
     { "filename_from_utf8",
       (PyCFunction)pyglib_filename_from_utf8, METH_VARARGS },
     { "get_current_time",
@@ -498,7 +468,7 @@ static struct _PyGLib_Functions pyglib_api = {
     NULL,  /* gerror_exception */
     NULL,  /* block_threads */
     NULL,  /* unblock_threads */
-    pyg_main_context_new,
+    NULL,  /* pyg_main_context_new */
     pyg_option_context_new,
     pyg_option_group_new,
 };
@@ -572,17 +542,6 @@ pyglib_register_constants(PyObject *m)
     PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
 			    G_SPAWN_FILE_AND_ARGV_ZERO);
 
-    PyModule_AddIntConstant(m, "PRIORITY_HIGH",
-			    G_PRIORITY_HIGH);
-    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT",
-			    G_PRIORITY_DEFAULT);
-    PyModule_AddIntConstant(m, "PRIORITY_HIGH_IDLE",
-			    G_PRIORITY_HIGH_IDLE);
-    PyModule_AddIntConstant(m, "PRIORITY_DEFAULT_IDLE",
-			    G_PRIORITY_DEFAULT_IDLE);
-    PyModule_AddIntConstant(m, "PRIORITY_LOW",
-			    G_PRIORITY_LOW);
-
     PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);
     PyModule_AddIntConstant(m, "IO_OUT",  G_IO_OUT);
     PyModule_AddIntConstant(m, "IO_PRI",  G_IO_PRI);
@@ -652,8 +611,6 @@ PYGLIB_MODULE_START(_glib, "_glib")
     pyglib_register_error(d);
     pyglib_register_version_tuples(d);
     pyglib_iochannel_register_types(d);
-    pyglib_mainloop_register_types(d);
-    pyglib_maincontext_register_types(d);
     pyglib_source_register_types(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);

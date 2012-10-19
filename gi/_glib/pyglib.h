@@ -42,7 +42,6 @@ gboolean pyglib_gerror_exception_check(GError **error);
 PyObject *pyglib_register_exception_for_domain(gchar *name,
 					       gint error_domain);
 gboolean pyglib_threads_enabled(void);
-PyObject * pyglib_main_context_new(GMainContext *context);
 void pyglib_set_thread_block_funcs(PyGLibThreadBlockFunc block_threads_func,
 				   PyGLibThreadBlockFunc unblock_threads_func);
 void pyglib_block_threads(void);

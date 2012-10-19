@@ -455,6 +455,13 @@ _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
     return py_variant;
 }
 
+static PyObject *
+_wrap_pyg_source_new (PyObject *self, PyObject *args)
+{
+    return pyg_source_new ();
+}
+
+
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "enum_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_enum_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
@@ -465,6 +472,8 @@ static PyMethodDef _gi_functions[] = {
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
     { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
+    { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
+    { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

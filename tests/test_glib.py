@@ -72,16 +72,32 @@ https://my.org/q?x=1&y=2
         self.assertFalse(ml.is_running())
 
         context = ml.get_context()
-        self.assertFalse(context.pending())
+        self.assertEqual(context, GLib.MainContext.default())
+        self.assertTrue(context.is_owner() in [True, False])
+        self.assertTrue(context.pending() in [True, False])
         self.assertFalse(context.iteration(False))
+
+    def test_main_loop_with_context(self):
+        context = GLib.MainContext()
+        ml = GLib.MainLoop(context)
+        self.assertFalse(ml.is_running())
+        self.assertEqual(ml.get_context(), context)
 
     def test_main_context(self):
         # constructor
         context = GLib.MainContext()
+        self.assertTrue(context.is_owner() in [True, False])
         self.assertFalse(context.pending())
         self.assertFalse(context.iteration(False))
 
+        # GLib API
+        context = GLib.MainContext.default()
+        self.assertTrue(context.is_owner() in [True, False])
+        self.assertTrue(context.pending() in [True, False])
+        self.assertTrue(context.iteration(False) in [True, False])
+
         # backwards compatible API
         context = GLib.main_context_default()
-        self.assertFalse(context.pending())
-        self.assertFalse(context.iteration(False))
+        self.assertTrue(context.is_owner() in [True, False])
+        self.assertTrue(context.pending() in [True, False])
+        self.assertTrue(context.iteration(False) in [True, False])
