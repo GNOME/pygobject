@@ -287,7 +287,7 @@ class TestNullableArgs(unittest.TestCase):
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestCallbacks(unittest.TestCase):
     called = False
-    main_loop = GObject.MainLoop()
+    main_loop = GLib.MainLoop()
 
     def test_callback(self):
         TestCallbacks.called = False
@@ -398,7 +398,7 @@ class TestCallbacks(unittest.TestCase):
 
     def test_async_ready_callback(self):
         TestCallbacks.called = False
-        TestCallbacks.main_loop = GObject.MainLoop()
+        TestCallbacks.main_loop = GLib.MainLoop()
 
         def callback(obj, result, user_data):
             TestCallbacks.main_loop.quit()
