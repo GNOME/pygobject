@@ -653,6 +653,49 @@ class TestSignalConnectors(unittest.TestCase):
         self.assertEqual(self.value, 3)
 
 
+class TestInstallSignals(unittest.TestCase):
+    # These tests only test how signalhelper.install_signals works
+    # with the __gsignals__ dict and therefore does not need to use
+    # GObject as a base class because that would automatically call
+    # install_signals within the meta-class.
+    class Base(object):
+        __gsignals__ = {'test': (0, None, tuple())}
+
+    class Sub1(Base):
+        pass
+
+    class Sub2(Base):
+        @GObject.Signal
+        def sub2test(self):
+            pass
+
+    def setUp(self):
+        self.assertEqual(len(self.Base.__gsignals__), 1)
+        signalhelper.install_signals(self.Base)
+        self.assertEqual(len(self.Base.__gsignals__), 1)
+
+    def test_subclass_gets_empty_gsignals_dict(self):
+        # Installing signals will add the __gsignals__ dict to a class
+        # if it doesn't already exists.
+        self.assertFalse('__gsignals__' in self.Sub1.__dict__)
+        signalhelper.install_signals(self.Sub1)
+        self.assertTrue('__gsignals__' in self.Sub1.__dict__)
+        # Sub1 should only contain an empty signals dict, this tests:
+        # https://bugzilla.gnome.org/show_bug.cgi?id=686496
+        self.assertEqual(self.Sub1.__dict__['__gsignals__'], {})
+
+    def test_subclass_with_decorator_gets_gsignals_dict(self):
+        self.assertFalse('__gsignals__' in self.Sub2.__dict__)
+        signalhelper.install_signals(self.Sub2)
+        self.assertTrue('__gsignals__' in self.Sub2.__dict__)
+        self.assertEqual(len(self.Base.__gsignals__), 1)
+        self.assertEqual(len(self.Sub2.__gsignals__), 1)
+        self.assertTrue('sub2test' in self.Sub2.__gsignals__)
+
+        # Make sure the vfunc was added
+        self.assertTrue(hasattr(self.Sub2, 'do_sub2test'))
+
+
 # For this test to work with both python2 and 3 we need to dynamically
 # exec the given code due to the new syntax causing an error in python 2.
 annotated_class_code = """
