@@ -223,7 +223,7 @@ def install_signals(cls):
     """Adds Signal instances on a GObject derived class into the '__gsignals__'
     dictionary to be picked up and registered as real GObject signals.
     """
-    gsignals = getattr(cls, '__gsignals__', {})
+    gsignals = cls.__dict__.get('__gsignals__', {})
     newsignals = {}
     for name, signal in cls.__dict__.items():
         if isinstance(signal, Signal):
