@@ -21,6 +21,7 @@ from gi.repository.GObject import \
 from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GIMarshallingTests
+from gi._gobject import propertyhelper
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -721,6 +722,68 @@ class TestProperty(unittest.TestCase):
             self.assertEqual(tester._type_from_python(type_), type_)
 
         self.assertRaises(TypeError, tester._type_from_python, types.CodeType)
+
+
+class TestInstallProperties(unittest.TestCase):
+    # These tests only test how signalhelper.install_signals works
+    # with the __gsignals__ dict and therefore does not need to use
+    # GObject as a base class because that would automatically call
+    # install_signals within the meta-class.
+    class Base(object):
+        __gproperties__ = {'test': (0, '', '', 0, 0, 0, 0)}
+
+    class Sub1(Base):
+        pass
+
+    class Sub2(Base):
+        @GObject.Property(type=int)
+        def sub2test(self):
+            return 123
+
+    class ClassWithPropertyAndGetterVFunc(object):
+        @GObject.Property(type=int)
+        def sub2test(self):
+            return 123
+
+        def do_get_property(self, name):
+            return 321
+
+    class ClassWithPropertyRedefined(object):
+        __gproperties__ = {'test': (0, '', '', 0, 0, 0, 0)}
+        test = GObject.Property(type=int)
+
+    def setUp(self):
+        propertyhelper.install_properties(self.Base)
+
+    def test_subclass_without_properties_is_not_modified(self):
+        self.assertFalse('__gproperties__' in self.Sub1.__dict__)
+        propertyhelper.install_properties(self.Sub1)
+        self.assertFalse('__gproperties__' in self.Sub1.__dict__)
+
+    def test_subclass_with_decorator_gets_gproperties_dict(self):
+        # Sub2 has Property instances but will not have a __gproperties__
+        # until install_properties is called
+        self.assertFalse('__gproperties__' in self.Sub2.__dict__)
+        self.assertFalse('do_get_property' in self.Sub2.__dict__)
+        self.assertFalse('do_set_property' in self.Sub2.__dict__)
+
+        propertyhelper.install_properties(self.Sub2)
+        self.assertTrue('__gproperties__' in self.Sub2.__dict__)
+        self.assertEqual(len(self.Base.__gproperties__), 2)
+        self.assertEqual(len(self.Sub2.__gproperties__), 2)
+        self.assertTrue('sub2test' in self.Sub2.__gproperties__)
+
+        # get/set vfuncs should have been added
+        self.assertTrue('do_get_property' in self.Sub2.__dict__)
+        self.assertTrue('do_set_property' in self.Sub2.__dict__)
+
+    def test_object_with_property_and_do_get_property_vfunc_raises(self):
+        self.assertRaises(TypeError, propertyhelper.install_properties,
+                          self.ClassWithPropertyAndGetterVFunc)
+
+    def test_same_name_property_definitions_raises(self):
+        self.assertRaises(ValueError, propertyhelper.install_properties,
+                          self.ClassWithPropertyRedefined)
 
 if __name__ == '__main__':
     unittest.main()

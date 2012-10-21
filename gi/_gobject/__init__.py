@@ -30,7 +30,7 @@ if 'gobject' in sys.modules:
 from .. import _glib
 from . import _gobject
 from . import constants
-from .propertyhelper import Property
+from . import propertyhelper
 from . import signalhelper
 
 GBoxed = _gobject.GBoxed
@@ -211,6 +211,7 @@ G_MAXSSIZE = constants.G_MAXSSIZE
 G_MINOFFSET = constants.G_MINOFFSET
 G_MAXOFFSET = constants.G_MAXOFFSET
 
+Property = propertyhelper.Property
 Signal = signalhelper.Signal
 SignalOverride = signalhelper.SignalOverride
 
@@ -222,49 +223,9 @@ class GObjectMeta(type):
     "Metaclass for automatically registering GObject classes"
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
-        cls._install_properties()
+        propertyhelper.install_properties(cls)
         signalhelper.install_signals(cls)
         cls._type_register(cls.__dict__)
-
-    def _install_properties(cls):
-        gproperties = getattr(cls, '__gproperties__', {})
-
-        props = []
-        for name, prop in cls.__dict__.items():
-            if isinstance(prop, Property):  # not same as the built-in
-                if name in gproperties:
-                    raise ValueError
-                prop.name = name
-                gproperties[name] = prop.get_pspec_args()
-                props.append(prop)
-
-        if not props:
-            return
-
-        cls.__gproperties__ = gproperties
-
-        if 'do_get_property' in cls.__dict__ or 'do_set_property' in cls.__dict__:
-            for prop in props:
-                if prop.fget != prop._default_getter or prop.fset != prop._default_setter:
-                    raise TypeError(
-                        "GObject subclass %r defines do_get/set_property"
-                        " and it also uses a property with a custom setter"
-                        " or getter. This is not allowed" % (
-                        cls.__name__,))
-
-        def obj_get_property(self, pspec):
-            name = pspec.name.replace('-', '_')
-            prop = getattr(cls, name, None)
-            if prop:
-                return prop.fget(self)
-        cls.do_get_property = obj_get_property
-
-        def obj_set_property(self, pspec, value):
-            name = pspec.name.replace('-', '_')
-            prop = getattr(cls, name, None)
-            if prop:
-                prop.fset(self, value)
-        cls.do_set_property = obj_set_property
 
     def _type_register(cls, namespace):
         ## don't register the class if already registered
