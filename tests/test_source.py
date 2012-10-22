@@ -59,7 +59,13 @@ class TestSource(unittest.TestCase):
 
         loop.run()
 
-        assert self.pos >= 0 and idle.count >= 0
+        m.destroy()
+        idle.destroy()
+
+        self.assertGreater(self.pos, 0)
+        self.assertGreaterEqual(idle.count, 0)
+        self.assertTrue(m.is_destroyed())
+        self.assertTrue(idle.is_destroyed())
 
     def testSourcePrepare(self):
         # this test may not terminate if prepare() is wrapped incorrectly
