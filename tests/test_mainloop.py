@@ -41,23 +41,24 @@ class TestMainLoop(unittest.TestCase):
         os.close(pipe_w)
 
         def excepthook(type, value, traceback):
-            assert type is Exception
-            assert value.args[0] == "deadbabe"
+            self.assertTrue(type is Exception)
+            self.assertEqual(value.args[0], "deadbabe")
         sys.excepthook = excepthook
-
-        got_exception = False
         try:
-            loop.run()
-        except:
-            got_exception = True
+            got_exception = False
+            try:
+                loop.run()
+            except:
+                got_exception = True
+        finally:
+            sys.excepthook = sys.__excepthook__
 
         #
         # The exception should be handled (by printing it)
         # immediately on return from child_died() rather
         # than here. See bug #303573
         #
-        sys.excepthook = sys.__excepthook__
-        assert not got_exception
+        self.assertFalse(got_exception)
 
     def test_concurrency(self):
         def on_usr1(signum, frame):
