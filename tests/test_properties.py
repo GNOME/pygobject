@@ -753,7 +753,9 @@ class TestInstallProperties(unittest.TestCase):
         test = GObject.Property(type=int)
 
     def setUp(self):
+        self.assertEqual(len(self.Base.__gproperties__), 1)
         propertyhelper.install_properties(self.Base)
+        self.assertEqual(len(self.Base.__gproperties__), 1)
 
     def test_subclass_without_properties_is_not_modified(self):
         self.assertFalse('__gproperties__' in self.Sub1.__dict__)
@@ -769,8 +771,8 @@ class TestInstallProperties(unittest.TestCase):
 
         propertyhelper.install_properties(self.Sub2)
         self.assertTrue('__gproperties__' in self.Sub2.__dict__)
-        self.assertEqual(len(self.Base.__gproperties__), 2)
-        self.assertEqual(len(self.Sub2.__gproperties__), 2)
+        self.assertEqual(len(self.Base.__gproperties__), 1)
+        self.assertEqual(len(self.Sub2.__gproperties__), 1)
         self.assertTrue('sub2test' in self.Sub2.__gproperties__)
 
         # get/set vfuncs should have been added

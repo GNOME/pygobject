@@ -350,7 +350,7 @@ def install_properties(cls):
     Scans the given class for instances of Property and merges them
     into the classes __gproperties__ dict if it exists or adds it if not.
     """
-    gproperties = getattr(cls, '__gproperties__', {})
+    gproperties = cls.__dict__.get('__gproperties__', {})
 
     props = []
     for name, prop in cls.__dict__.items():
