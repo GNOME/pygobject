@@ -59,3 +59,8 @@ https://my.org/q?x=1&y=2
         self.assertEqual(res, ['http://example.com',
                                'https://my.org/q?x=1&y=2',
                                'http://gnome.org/new'])
+
+    def test_current_time(self):
+        tm = GLib.get_current_time()
+        self.assertTrue(isinstance(tm, float))
+        self.assertGreater(tm, 1350000000.0)
