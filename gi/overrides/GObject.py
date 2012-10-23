@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import gi.overrides
 from gi.repository import GLib
 
 __all__ = []
@@ -30,7 +31,7 @@ for name in ['markup_escape_text', 'get_application_name',
              'filename_display_name', 'uri_list_extract_uris',
              'MainLoop', 'MainContext', 'main_context_default',
              'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD']:
-    globals()[name] = getattr(GLib, name)
+    globals()[name] = gi.overrides.deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
 
 # constants are also deprecated, but cannot mark them as such

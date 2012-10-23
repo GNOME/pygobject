@@ -2,6 +2,7 @@
 
 import gc
 import unittest
+import warnings
 
 from gi.repository import GObject
 import sys
@@ -16,19 +17,22 @@ class TestGObjectAPI(unittest.TestCase):
                          'gi._gobject._gobject')
 
     def testCompatAPI(self):
-        # GObject formerly exposed a lot of GLib's functions
-        self.assertEqual(GObject.markup_escape_text('foo'), 'foo')
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            # GObject formerly exposed a lot of GLib's functions
+            self.assertEqual(GObject.markup_escape_text('foo'), 'foo')
 
-    def testMainContextAPI(self):
-        # backwards compatible alias API
-        ml = GObject.MainLoop()
-        self.assertFalse(ml.is_running())
+            ml = GObject.MainLoop()
+            self.assertFalse(ml.is_running())
 
-        context = GObject.main_context_default()
-        self.assertTrue(context.pending() in [False, True])
+            context = GObject.main_context_default()
+            self.assertTrue(context.pending() in [False, True])
 
-        context = GObject.MainContext()
-        self.assertFalse(context.pending())
+            context = GObject.MainContext()
+            self.assertFalse(context.pending())
+
+            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
+            self.assertTrue('GLib.markup_escape_text' in str(w[0]), str(w[0]))
 
             self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)
 
