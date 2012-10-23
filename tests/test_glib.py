@@ -64,3 +64,24 @@ https://my.org/q?x=1&y=2
         tm = GLib.get_current_time()
         self.assertTrue(isinstance(tm, float))
         self.assertGreater(tm, 1350000000.0)
+
+    def test_main_loop(self):
+        # note we do not test run() here, as we use this in countless other
+        # tests
+        ml = GLib.MainLoop()
+        self.assertFalse(ml.is_running())
+
+        context = ml.get_context()
+        self.assertFalse(context.pending())
+        self.assertFalse(context.iteration(False))
+
+    def test_main_context(self):
+        # constructor
+        context = GLib.MainContext()
+        self.assertFalse(context.pending())
+        self.assertFalse(context.iteration(False))
+
+        # backwards compatible API
+        context = GLib.main_context_default()
+        self.assertFalse(context.pending())
+        self.assertFalse(context.iteration(False))

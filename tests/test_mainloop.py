@@ -79,3 +79,19 @@ class TestMainLoop(unittest.TestCase):
             loop2.quit()
         finally:
             signal.signal(signal.SIGUSR1, orig_handler)
+
+    def test_sigint(self):
+        pid = os.fork()
+        if pid == 0:
+            time.sleep(0.5)
+            os.kill(os.getppid(), signal.SIGINT)
+            os._exit(0)
+
+        loop = GLib.MainLoop()
+        try:
+            loop.run()
+            self.fail('expected KeyboardInterrupt exception')
+        except KeyboardInterrupt:
+            pass
+        self.assertFalse(loop.is_running())
+        os.waitpid(pid, 0)

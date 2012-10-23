@@ -19,6 +19,17 @@ class TestGObjectAPI(unittest.TestCase):
         # GObject formerly exposed a lot of GLib's functions
         self.assertEqual(GObject.markup_escape_text('foo'), 'foo')
 
+    def testMainContextAPI(self):
+        # backwards compatible alias API
+        ml = GObject.MainLoop()
+        self.assertFalse(ml.is_running())
+
+        context = GObject.main_context_default()
+        self.assertTrue(context.pending() in [False, True])
+
+        context = GObject.MainContext()
+        self.assertFalse(context.pending())
+
 
 class TestReferenceCounting(unittest.TestCase):
     def testRegularObject(self):

@@ -49,13 +49,17 @@ class TestSource(unittest.TestCase):
         self.setup_timeout(loop)
 
         idle = Idle(loop)
+        self.assertEqual(idle.get_context(), None)
         idle.attach()
+        self.assertEqual(idle.get_context(), GLib.main_context_default())
 
         self.pos = 0
 
         m = MySource()
+        self.assertEqual(m.get_context(), None)
         m.set_callback(self.my_callback, loop)
         m.attach()
+        self.assertEqual(m.get_context(), GLib.main_context_default())
 
         loop.run()
 
@@ -129,6 +133,46 @@ class TestSource(unittest.TestCase):
         self.assertEqual(GLib.source_remove(GObject.G_MAXINT32), False)
         self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
         self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
+
+    def testRecurseProperty(self):
+        s = GLib.Idle()
+        self.assertTrue(s.can_recurse in [False, True])
+        s.can_recurse = False
+        self.assertFalse(s.can_recurse)
+
+    def testPriority(self):
+        s = GLib.Idle()
+        self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT_IDLE)
+        s.priority = GLib.PRIORITY_HIGH
+        self.assertEqual(s.priority, GLib.PRIORITY_HIGH)
+
+        s = GLib.Idle(GLib.PRIORITY_LOW)
+        self.assertEqual(s.priority, GLib.PRIORITY_LOW)
+
+        s = GLib.Timeout(1, GLib.PRIORITY_LOW)
+        self.assertEqual(s.priority, GLib.PRIORITY_LOW)
+
+        s = GLib.Source()
+        self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT)
+
+    def testGetCurrentTime(self):
+        s = GLib.Idle()
+        time = s.get_current_time()
+        self.assertTrue(isinstance(time, float))
+        # plausibility check, and check magnitude of result
+        self.assertGreater(time, 1300000000.0)
+        self.assertLess(time, 2000000000.0)
+
+    # currently broken with Python 3,
+    # https://bugzilla.gnome.org/show_bug.cgi?id=686443
+    @unittest.expectedFailure
+    def testAddRemovePoll(self):
+        # FIXME: very shallow test, only verifies the API signature
+        pollfd = GLib.PollFD(99, GLib.IO_IN | GLib.IO_HUP)
+        self.assertEqual(pollfd.fd, 99)
+        source = GLib.Source()
+        source.add_poll(pollfd)
+        source.remove_poll(pollfd)
 
 
 class TestTimeout(unittest.TestCase):
