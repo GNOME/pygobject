@@ -4,6 +4,7 @@ pygioverrides_PYTHON = \
 	GLib.py \
 	Gtk.py \
 	Gdk.py \
+	GObject.py \
 	Gio.py \
 	GIMarshallingTests.py \
 	Pango.py \

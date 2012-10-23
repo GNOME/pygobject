@@ -2,6 +2,7 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 #
 # Copyright (C) 2010 Tomeu Vizoso <tomeu.vizoso@collabora.co.uk>
+# Copyright (C) 2011, 2012 Canonical Ltd.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -406,3 +407,18 @@ setattr(Variant, 'new_tuple', new_tuple)
 setattr(Variant, 'get_string', get_string)
 
 __all__.append('Variant')
+
+
+def markup_escape_text(text, length=-1):
+    if isinstance(text, bytes):
+        return GLib.markup_escape_text(text.decode('UTF-8'), length)
+    else:
+        return GLib.markup_escape_text(text, length)
+__all__.append('markup_escape_text')
+
+
+# backwards compatible names from old static bindings
+for n in ['DESKTOP', 'DOCUMENTS', 'DOWNLOAD', 'MUSIC', 'PICTURES',
+          'PUBLIC_SHARE', 'TEMPLATES', 'VIDEOS']:
+    exec('USER_DIRECTORY_%s = GLib.UserDirectory.DIRECTORY_%s' % (n, n))
+    __all__.append('USER_DIRECTORY_' + n)

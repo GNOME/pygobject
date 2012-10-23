@@ -1,9 +1,12 @@
 # -*- Mode: Python -*-
+# encoding: UTF-8
 
 import unittest
 import os.path
 
 from gi.repository import GLib
+
+from compathelper import _unicode, _bytes
 
 
 class TestGLib(unittest.TestCase):
@@ -13,3 +16,46 @@ class TestGLib(unittest.TestCase):
         self.assertTrue(os.path.exists(bash_path))
 
         self.assertEqual(GLib.find_program_in_path('non existing'), None)
+
+    def test_markup_escape_text(self):
+        self.assertEqual(GLib.markup_escape_text(_unicode('a&bä')), 'a&amp;bä')
+        self.assertEqual(GLib.markup_escape_text(_bytes('a&b\x05')), 'a&amp;b&#x5;')
+
+        # with explicit length argument
+        self.assertEqual(GLib.markup_escape_text(_bytes('a\x05\x01\x02'), 2), 'a&#x5;')
+
+    def test_progname(self):
+        GLib.set_prgname('moo')
+        self.assertEqual(GLib.get_prgname(), 'moo')
+
+    def test_appname(self):
+        GLib.set_application_name('moo')
+        self.assertEqual(GLib.get_application_name(), 'moo')
+
+    def test_xdg_dirs(self):
+        self.assertTrue(os.path.isdir(GLib.get_user_data_dir()))
+        self.assertTrue(os.path.isdir(GLib.get_user_special_dir(GLib.USER_DIRECTORY_DESKTOP)))
+        # also works with backwards compatible enum names
+        self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
+                         GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
+
+        for d in GLib.get_system_config_dirs():
+            self.assertTrue('/' in d, d)
+        for d in GLib.get_system_data_dirs():
+            self.assertTrue('/' in d, d)
+
+    def test_main_depth(self):
+        self.assertEqual(GLib.main_depth(), 0)
+
+    def test_filenames(self):
+        self.assertEqual(GLib.filename_display_name('foo'), 'foo')
+        self.assertEqual(GLib.filename_display_basename('bar/foo'), 'foo')
+
+    def test_uri_extract(self):
+        res = GLib.uri_list_extract_uris('''# some comment
+http://example.com
+https://my.org/q?x=1&y=2
+            http://gnome.org/new''')
+        self.assertEqual(res, ['http://example.com',
+                               'https://my.org/q?x=1&y=2',
+                               'http://gnome.org/new'])

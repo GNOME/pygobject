@@ -389,121 +389,12 @@ pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyglib_markup_escape_text(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "text", NULL };
-    char *text_in, *text_out;
-    Py_ssize_t text_size;
-    PyObject *retval;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s#:glib.markup_escape_text", kwlist,
-                                     &text_in, &text_size))
-        return NULL;
-
-    text_out = g_markup_escape_text(text_in, text_size);
-    retval = PYGLIB_PyUnicode_FromString(text_out);
-    g_free(text_out);
-    return retval;
-}
-
-static PyObject *
 pyglib_get_current_time(PyObject *unused)
 {
     GTimeVal timeval;
 
     g_get_current_time(&timeval);
     return pyglib_float_from_timeval(timeval);
-}
-
-static PyObject*
-get_user_dir(const char *path)
-{
-    if (path)
-        return PYGLIB_PyUnicode_FromString(path);
-    else {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-}
-
-static PyObject*
-pyglib_get_user_config_dir(PyObject *self)
-{
-    return get_user_dir(g_get_user_config_dir());
-}
-
-static PyObject*
-pyglib_get_user_cache_dir(PyObject *self)
-{
-    return get_user_dir(g_get_user_cache_dir());
-}
-
-static PyObject*
-pyglib_get_user_data_dir(PyObject *self)
-{
-    return get_user_dir(g_get_user_data_dir());
-}
-
-static PyObject *
-pyglib_get_user_special_dir(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "directory", NULL };
-    guint directory;
-    const char *path;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "i:glib.get_user_special_dir", kwlist,
-                                     &directory))
-        return NULL;
-
-    path = g_get_user_special_dir(directory);
-    if (path)
-        return PYGLIB_PyUnicode_FromString(path);
-    else {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-}
-
-static PyObject *
-pyglib_main_depth(PyObject *unused)
-{
-    return PYGLIB_PyLong_FromLong(g_main_depth());
-}
-
-static PyObject *
-pyglib_filename_display_name(PyObject *self, PyObject *args)
-{
-    PyObject *py_display_name;
-    char *filename, *display_name;
-    
-    if (!PyArg_ParseTuple(args, "s:glib.filename_display_name",
-			  &filename))
-	return NULL;
-
-    display_name = g_filename_display_name(filename);
-    py_display_name = PyUnicode_DecodeUTF8(display_name,
-					   strlen(display_name), NULL);
-    g_free(display_name);
-    return py_display_name;
-}
-
-static PyObject *
-pyglib_filename_display_basename(PyObject *self, PyObject *args)
-{
-    PyObject *py_display_basename;
-    char *filename, *display_basename;
-    
-    if (!PyArg_ParseTuple(args, "s:glib.filename_display_basename",
-			  &filename))
-	return NULL;
-
-    display_basename = g_filename_display_basename(filename);
-    py_display_basename = PyUnicode_DecodeUTF8(display_basename,
-					       strlen(display_basename), NULL);
-    g_free(display_basename);
-    return py_display_basename;
 }
 
 static PyObject *
@@ -528,161 +419,6 @@ pyglib_filename_from_utf8(PyObject *self, PyObject *args)
     py_filename = PYGLIB_PyUnicode_FromStringAndSize(filename, bytes_written);
     g_free(filename);
     return py_filename;
-}
-
-
-static PyObject*
-pyglib_get_application_name(PyObject *self)
-{
-    const char *name;
-
-    name = g_get_application_name();
-    if (!name) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return PYGLIB_PyUnicode_FromString(name);
-}
-
-static PyObject*
-pyglib_set_application_name(PyObject *self, PyObject *arg)
-{
-    PyObject *repr = NULL;
-    if (!PYGLIB_PyUnicode_Check(arg)) {
-	repr = PyObject_Repr(arg);
-	PyErr_Format(PyExc_TypeError,
-		     "first argument must be a string, not '%s'",
-		     PYGLIB_PyUnicode_AsString(repr));
-	Py_DECREF(repr);
-	return NULL;
-    }
-    g_set_application_name(PYGLIB_PyUnicode_AsString(arg));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject*
-pyglib_get_prgname(PyObject *self)
-{
-    char *name;
-
-    name = g_get_prgname();
-    if (!name) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return PYGLIB_PyUnicode_FromString(name);
-}
-
-static PyObject*
-pyglib_set_prgname(PyObject *self, PyObject *arg)
-{
-    PyObject *repr = NULL;
-    if (!PYGLIB_PyUnicode_Check(arg)) {
-	repr = PyObject_Repr(arg);
-	PyErr_Format(PyExc_TypeError,
-		     "first argument must be a string, not '%s'",
-		     PYGLIB_PyUnicode_AsString(repr));
-	Py_DECREF(repr);
-	return NULL;
-    }
-    g_set_prgname(PYGLIB_PyUnicode_AsString(arg));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-pyglib_find_program_in_path(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "program", NULL };
-    char *program, *ret;
-    PyObject *retval;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "s:glib.find_program_in_path", kwlist,
-                                     &program))
-        return NULL;
-
-    ret = g_find_program_in_path(program);
-
-    if (ret != NULL) {
-        retval = PYGLIB_PyUnicode_FromString(ret);
-        g_free(ret);
-    } else {
-        Py_INCREF(Py_None);
-        retval = Py_None;
-    }
-    return retval;
-}
-
-static PyObject *
-pyglib_uri_list_extract_uris(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "uri_list", NULL };
-    char *uri_list;
-    char **uris, **tmp;
-    int i = 0, j;
-    PyObject *ret;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"s:uri_list_extract_uris", kwlist, &uri_list))
-        return NULL;
-
-    uris = (char **)g_uri_list_extract_uris(uri_list);
-    if (!uris) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-
-    tmp = uris;
-    while (*tmp)
-        tmp++, i++;
-
-    ret = PyTuple_New(i);
-    for (j = 0; j < i; j++)
-        PyTuple_SetItem(ret, j, PYGLIB_PyUnicode_FromString(uris[j]));
-
-    g_strfreev(uris);
-
-    return ret;
-}
-
-/* FIXME: we should use strv_to_pylist (in pygio-utils.h) here, but that
- * function should be moved into pyglib first. See
- * https://bugzilla.gnome.org/show_bug.cgi?id=630508
- */
-static PyObject *
-tuple_of_strings_from_dirs(const gchar* const *dirs)
-{
-    char **tmp;
-    int i = 0, j;
-    PyObject *ret;
-
-    if (!dirs) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-
-    tmp = (char **)dirs;
-    while (*tmp)
-        tmp++, i++;
-
-    ret = PyTuple_New(i);
-    for (j = 0; j < i; j++)
-        PyTuple_SetItem(ret, j, PYGLIB_PyUnicode_FromString(dirs[j]));
-
-    return ret;
-}
-
-static PyObject*
-pyglib_get_system_config_dirs(PyObject *self)
-{
-    return tuple_of_strings_from_dirs(g_get_system_config_dirs());
-}
-
-static PyObject*
-pyglib_get_system_data_dirs(PyObject *self)
-{
-    return tuple_of_strings_from_dirs(g_get_system_data_dirs());
 }
 
 static PyMethodDef _glib_functions[] = {
@@ -748,48 +484,10 @@ static PyMethodDef _glib_functions[] = {
       "main_context_default() -> a main context\n"
       "Returns the default main context. This is the main context used\n"
       "for main loop functions when a main loop is not explicitly specified." },
-    { "main_depth",
-      (PyCFunction)pyglib_main_depth, METH_NOARGS,
-      "main_depth() -> stack depth\n"
-      "Returns the depth of the stack of calls in the main context." },
-    { "filename_display_name",
-      (PyCFunction)pyglib_filename_display_name, METH_VARARGS },
-    { "filename_display_basename",
-      (PyCFunction)pyglib_filename_display_basename, METH_VARARGS },
     { "filename_from_utf8",
       (PyCFunction)pyglib_filename_from_utf8, METH_VARARGS },
-    { "get_application_name",
-      (PyCFunction)pyglib_get_application_name, METH_NOARGS },
-    { "set_application_name",
-      (PyCFunction)pyglib_set_application_name, METH_O },
-    { "get_prgname",
-      (PyCFunction)pyglib_get_prgname, METH_NOARGS },
-    { "set_prgname",
-      (PyCFunction)pyglib_set_prgname, METH_O },
     { "get_current_time",
       (PyCFunction)pyglib_get_current_time, METH_NOARGS },
-    { "get_user_cache_dir",
-      (PyCFunction)pyglib_get_user_cache_dir, METH_NOARGS },
-    { "get_user_config_dir",
-      (PyCFunction)pyglib_get_user_config_dir, METH_NOARGS },
-    { "get_user_data_dir",
-      (PyCFunction)pyglib_get_user_data_dir, METH_NOARGS },
-    { "get_user_special_dir",
-      (PyCFunction)pyglib_get_user_special_dir, METH_VARARGS|METH_KEYWORDS },
-    { "markup_escape_text",
-      (PyCFunction)pyglib_markup_escape_text, METH_VARARGS|METH_KEYWORDS },
-    { "find_program_in_path",
-      (PyCFunction)pyglib_find_program_in_path, METH_VARARGS|METH_KEYWORDS },
-    { "uri_list_extract_uris",
-      (PyCFunction)pyglib_uri_list_extract_uris, METH_VARARGS|METH_KEYWORDS,
-      "uri_list_extract_uris(uri_list) -> tuple of strings holding URIs\n"
-      "Splits an string containing an URI list conforming to the \n"
-      "text/uri-list mime type defined in RFC 2483 into individual URIs, \n"
-      "discarding any comments. The URIs are not validated." },
-    { "get_system_config_dirs",
-      (PyCFunction)pyglib_get_system_config_dirs, METH_NOARGS },
-    { "get_system_data_dirs",
-      (PyCFunction)pyglib_get_system_data_dirs, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -939,23 +637,6 @@ pyglib_register_constants(PyObject *m)
     PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
 			    G_OPTION_ERROR_FAILED);
  
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_DESKTOP",
-                            G_USER_DIRECTORY_DESKTOP);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_DOCUMENTS",
-                            G_USER_DIRECTORY_DOCUMENTS);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_DOWNLOAD",
-                            G_USER_DIRECTORY_DOWNLOAD);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_MUSIC",
-                            G_USER_DIRECTORY_MUSIC);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_PICTURES",
-                            G_USER_DIRECTORY_PICTURES);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_PUBLIC_SHARE",
-                            G_USER_DIRECTORY_PUBLIC_SHARE);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_TEMPLATES",
-                            G_USER_DIRECTORY_TEMPLATES);
-    PyModule_AddIntConstant(m, "USER_DIRECTORY_VIDEOS",
-                            G_USER_DIRECTORY_VIDEOS);
-
     PyModule_AddStringConstant(m, "OPTION_REMAINING",
 			       G_OPTION_REMAINING);
     PyModule_AddStringConstant(m, "OPTION_ERROR",

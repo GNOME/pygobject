@@ -15,6 +15,10 @@ class TestGObjectAPI(unittest.TestCase):
         self.assertEqual(obj.__module__,
                          'gi._gobject._gobject')
 
+    def testCompatAPI(self):
+        # GObject formerly exposed a lot of GLib's functions
+        self.assertEqual(GObject.markup_escape_text('foo'), 'foo')
+
 
 class TestReferenceCounting(unittest.TestCase):
     def testRegularObject(self):
