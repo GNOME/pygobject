@@ -3,6 +3,7 @@
 #
 # Copyright (C) 2012 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
+# Copyright (C) 2012 Simon Feltman <sfeltman@src.gnome.org>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,7 +25,9 @@ from collections import namedtuple
 
 import gi.overrides
 import gi.module
+from gi.overrides import override
 from gi.repository import GLib
+
 from gi._gobject import _gobject
 from gi._gobject import propertyhelper
 from gi._gobject import signalhelper
@@ -274,6 +277,77 @@ def signal_query(id_or_name, type_=None):
     return SignalQuery(*res)
 
 __all__.append('signal_query')
+
+
+class Object(GObjectModule.Object):
+    def _unsupported_method(self, *args, **kargs):
+        raise RuntimeError('This method is currently unsupported.')
+
+    def _unsupported_data_method(self, *args, **kargs):
+        raise RuntimeError('Data access methods are unsupported. '
+                           'Use normal Python attributes instead')
+
+    # Generic data methods are not needed in python as it can be handled
+    # with standard attribute access: https://bugzilla.gnome.org/show_bug.cgi?id=641944
+    get_data = _unsupported_data_method
+    get_qdata = _unsupported_data_method
+    set_data = _unsupported_data_method
+    steal_data = _unsupported_data_method
+    steal_qdata = _unsupported_data_method
+    replace_data = _unsupported_data_method
+    replace_qdata = _unsupported_data_method
+
+    # The following methods as unsupported until we verify
+    # they work as gi methods.
+    bind_property_full = _unsupported_method
+    compat_control = _unsupported_method
+    force_floating = _unsupported_method
+    interface_find_property = _unsupported_method
+    interface_install_property = _unsupported_method
+    interface_list_properties = _unsupported_method
+    is_floating = _unsupported_method
+    notify_by_pspec = _unsupported_method
+    ref = _unsupported_method
+    ref_count = _unsupported_method
+    ref_sink = _unsupported_method
+    run_dispose = _unsupported_method
+    unref = _unsupported_method
+    watch_closure = _unsupported_method
+
+    # The following methods are static APIs which need to leap frog the
+    # gi methods until we verify the gi methods can replace them.
+    get_property = _gobject.GObject.get_property
+    get_properties = _gobject.GObject.get_properties
+    set_property = _gobject.GObject.set_property
+    set_properties = _gobject.GObject.set_properties
+    bind_property = _gobject.GObject.bind_property
+    freeze_notify = _gobject.GObject.freeze_notify
+    notify = _gobject.GObject.notify
+    thaw_notify = _gobject.GObject.thaw_notify
+    connect = _gobject.GObject.connect
+    connect_after = _gobject.GObject.connect_after
+    connect_object = _gobject.GObject.connect_object
+    connect_object_after = _gobject.GObject.connect_object_after
+    disconnect = _gobject.GObject.disconnect
+    disconnect_by_func = _gobject.GObject.disconnect_by_func
+    handler_disconnect = _gobject.GObject.handler_disconnect
+    handler_is_connected = _gobject.GObject.handler_is_connected
+    handler_block = _gobject.GObject.handler_block
+    handler_unblock = _gobject.GObject.handler_unblock
+    handler_block_by_func = _gobject.GObject.handler_block_by_func
+    handler_unblock_by_func = _gobject.GObject.handler_unblock_by_func
+    emit = _gobject.GObject.emit
+    emit_stop_by_name = _gobject.GObject.emit_stop_by_name
+    stop_emission = _gobject.GObject.stop_emission
+    chain = _gobject.GObject.chain
+    weak_ref = _gobject.GObject.weak_ref
+    __copy__ = _gobject.GObject.__copy__
+    __deepcopy__ = _gobject.GObject.__deepcopy__
+
+
+Object = override(Object)
+GObject = Object
+__all__ += ['Object', 'GObject']
 
 
 Property = propertyhelper.Property

@@ -1,21 +1,42 @@
 # -*- Mode: Python -*-
 
+import sys
 import gc
 import unittest
 import warnings
 
 from gi.repository import GObject
 from gi import PyGIDeprecationWarning
-import sys
+from gi.module import get_introspection_module
+from gi._gobject import _gobject
+
 import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
-    def test_module(self):
-        obj = GObject.GObject()
+    def test_gobject_inheritance(self):
+        # GObject.Object is a class hierarchy as follows:
+        # overrides.Object -> introspection.Object -> static.GObject
+        GIObjectModule = get_introspection_module('GObject')
+        self.assertTrue(issubclass(GObject.Object, GIObjectModule.Object))
+        self.assertTrue(issubclass(GIObjectModule.Object, _gobject.GObject))
 
-        self.assertEqual(obj.__module__,
-                         'gi._gobject._gobject')
+        self.assertEqual(_gobject.GObject.__gtype__, GObject.TYPE_OBJECT)
+        self.assertEqual(GIObjectModule.Object.__gtype__, GObject.TYPE_OBJECT)
+        self.assertEqual(GObject.Object.__gtype__, GObject.TYPE_OBJECT)
+
+        # The pytype wrapper should hold the outer most Object class from overrides.
+        self.assertEqual(GObject.TYPE_OBJECT.pytype, GObject.Object)
+
+    @unittest.skipIf(sys.version_info[:2] < (2, 7), 'Python 2.7 is required')
+    def test_gobject_unsupported_overrides(self):
+        obj = GObject.Object()
+
+        with self.assertRaisesRegex(RuntimeError, 'Data access methods are unsupported.*'):
+            obj.get_data()
+
+        with self.assertRaisesRegex(RuntimeError, 'This method is currently unsupported.*'):
+            obj.force_floating()
 
     def test_compat_api(self):
         with warnings.catch_warnings(record=True) as w:

@@ -171,6 +171,11 @@ class MetaClassHelper(object):
         if class_info is None or not isinstance(class_info, ObjectInfo):
             return
 
+        # Special case skipping of vfuncs for GObject.Object because they will break
+        # the static bindings which will try to use them.
+        if cls.__module__ == 'gi.repository.GObject' and cls.__name__ == 'Object':
+            return
+
         for vfunc_info in class_info.get_vfuncs():
             name = 'do_%s' % vfunc_info.get_name()
             value = NativeVFunc(vfunc_info)
@@ -183,8 +188,10 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # This can be seen in IntrospectionModule.__getattr__() in module.py.
         # We do not need to search regular classes here, only wrapped interfaces.
         # We also skip GInterface, because it is not wrapped and has no __info__ attr.
+        # Skip bases without __info__ (static _gobject._gobject.GObject)
         if base is GInterface or\
                 not issubclass(base, GInterface) or\
+                not '__info__' in base.__dict__ or\
                 not isinstance(base.__info__, InterfaceInfo):
             continue
 

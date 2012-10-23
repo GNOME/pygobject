@@ -81,14 +81,14 @@ def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
 
     if not parent_object_info:
+        # Special case GObject.Object as being derived from the static GObject.
+        if object_info.get_namespace() == 'GObject' and object_info.get_name() == 'Object':
+            return GObject
+
         return object
 
     namespace = parent_object_info.get_namespace()
     name = parent_object_info.get_name()
-
-    # Workaround for GObject.Object and GObject.InitiallyUnowned.
-    if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
-        return GObject
 
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
@@ -171,13 +171,6 @@ class IntrospectionModule(object):
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
 
-            # Check if there is already a Python wrapper.
-            if g_type != TYPE_NONE:
-                type_ = g_type.pytype
-                if type_ is not None:
-                    self.__dict__[name] = type_
-                    return type_
-
             # Create a wrapper.
             if isinstance(info, ObjectInfo):
                 parent = get_parent_for_object(info)
@@ -204,6 +197,17 @@ class IntrospectionModule(object):
             else:
                 raise NotImplementedError(info)
 
+            # Check if there is already a Python wrapper that is not a parent class
+            # of the wrapper being created. If it is a parent, it is ok to clobber
+            # g_type.pytype with a new child class wrapper of the existing parent.
+            # Note that the return here never occurs under normal circumstances due
+            # to caching on the __dict__ itself.
+            if g_type != TYPE_NONE:
+                type_ = g_type.pytype
+                if type_ is not None and type_ not in bases:
+                    self.__dict__[name] = type_
+                    return type_
+
             name = info.get_name()
             dict_ = {
                 '__info__': info,
@@ -223,9 +227,9 @@ class IntrospectionModule(object):
         else:
             raise NotImplementedError(info)
 
-        # Cache the newly created attribute wrapper which will then be
+        # Cache the newly created wrapper which will then be
         # available directly on this introspection module instead of being
-        # retrieved through the __getattr__ we are currently in.
+        # lazily constructed through the __getattr__ we are currently in.
         self.__dict__[name] = wrapper
         return wrapper
 

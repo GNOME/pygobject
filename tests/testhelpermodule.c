@@ -606,7 +606,7 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 
   d = PyModule_GetDict(module);
 
-  if ((m = PyImport_ImportModule("gi._gobject")) != NULL) {
+  if ((m = PyImport_ImportModule("gi._gobject._gobject")) != NULL) {
     PyObject *moddict = PyModule_GetDict(m);
     
     _PyGObject_Type = (PyTypeObject *)PyDict_GetItemString(moddict, "GObject");
