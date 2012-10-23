@@ -313,7 +313,7 @@ pyglib_source_remove(PyObject *self, PyObject *args)
 {
     guint tag;
 
-    if (!PyArg_ParseTuple(args, "i:source_remove", &tag))
+    if (!PyArg_ParseTuple(args, "I:source_remove", &tag))
 	return NULL;
 
     return PyBool_FromLong(g_source_remove(tag));

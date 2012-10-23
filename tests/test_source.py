@@ -2,7 +2,7 @@
 
 import unittest
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 
 
 class Idle(GLib.Idle):
@@ -118,6 +118,17 @@ class TestSource(unittest.TestCase):
 
         s = f()
         self.assertTrue(s.is_destroyed())
+
+    def testRemove(self):
+        s = GLib.idle_add(dir)
+        self.assertEqual(GLib.source_remove(s), True)
+        # s is now removed, should fail now
+        self.assertEqual(GLib.source_remove(s), False)
+
+        # accepts large source IDs (they are unsigned)
+        self.assertEqual(GLib.source_remove(GObject.G_MAXINT32), False)
+        self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
+        self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
 
 
 class TestTimeout(unittest.TestCase):
