@@ -23,7 +23,7 @@ import signal
 
 from ..importer import modules
 from .._gi import variant_new_tuple, variant_type_from_string, source_new, source_set_callback
-from ..overrides import override
+from ..overrides import override, deprecated
 
 GLib = modules['GLib']._introspection_module
 
@@ -488,6 +488,9 @@ class Source(GLib.Source):
 
     def get_current_time(self):
         return GLib.get_real_time() * 0.000001
+
+    get_current_time = deprecated(get_current_time,
+                                  'GLib.Source.get_time() or GLib.get_real_time()')
 
     # as get/set_priority are introspected, we can't use the static
     # property(get_priority, ..) here

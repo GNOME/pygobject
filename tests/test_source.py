@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 
 import unittest
+import warnings
 
 from gi.repository import GLib, GObject
 
@@ -156,8 +157,13 @@ class TestSource(unittest.TestCase):
         self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT)
 
     def testGetCurrentTime(self):
+        # Note, deprecated API
         s = GLib.Idle()
-        time = s.get_current_time()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter('always')
+            time = s.get_current_time()
+            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
+
         self.assertTrue(isinstance(time, float))
         # plausibility check, and check magnitude of result
         self.assertGreater(time, 1300000000.0)
