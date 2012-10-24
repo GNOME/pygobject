@@ -183,5 +183,40 @@ class TestSource(unittest.TestCase):
         GLib.Idle()
 
 
+class TestUserData(unittest.TestCase):
+    def test_idle_no_data(self):
+        ml = GLib.MainLoop()
+        def cb():
+            ml.quit()
+        GLib.idle_add(cb)
+        ml.run()
+
+    def test_timeout_no_data(self):
+        ml = GLib.MainLoop()
+        def cb():
+            ml.quit()
+        GLib.timeout_add(50, cb)
+        ml.run()
+
+    def test_idle_data(self):
+        ml = GLib.MainLoop()
+        def cb(data):
+            data['called'] = True
+            ml.quit()
+        data = {}
+        GLib.idle_add(cb, data)
+        ml.run()
+        self.assertTrue(data['called'])
+
+    def test_timeout_data(self):
+        ml = GLib.MainLoop()
+        def cb(data):
+            data['called'] = True
+            ml.quit()
+        data = {}
+        GLib.timeout_add(50, cb, data)
+        ml.run()
+        self.assertTrue(data['called'])
+
 if __name__ == '__main__':
     unittest.main()
