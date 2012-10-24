@@ -191,7 +191,7 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
         return NULL;
 	
     if (max_count == 0)
-	return PYGLIB_PyUnicode_FromString("");
+	return PYGLIB_PyBytes_FromString("");
     
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
@@ -233,23 +233,6 @@ py_io_channel_read_chars(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
 	if (PYGLIB_PyBytes_Resize(&ret_obj, total_read) == -1)
 	    goto failure;
     }
-
-#if PY_VERSION_HEX >= 0x03000000
-    /* If this is not UTF8 encoded channel return the raw bytes */
-    if (g_io_channel_get_encoding(self->channel) != NULL)
-        return ret_obj;
-
-    /* convert to Unicode string */
-    {
-	PyObject *unicode_obj;
-
-	unicode_obj = PyUnicode_FromString(PyBytes_AS_STRING(ret_obj));
-	if (unicode_obj == NULL)
-	    goto failure;
-	Py_DECREF(ret_obj);
-	ret_obj = unicode_obj;
-    }
-#endif
 
     return ret_obj;
 
@@ -298,9 +281,11 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
     
     while (1) {
         value = PyIter_Next(iter);
+        if (value == NULL)
+            break;
         if (PyErr_ExceptionMatches(PyExc_StopIteration)) {
             PyErr_Clear();
-            goto normal_exit;
+            break;
         }
         if (!PYGLIB_PyUnicode_Check(value)) {
             PyErr_SetString(PyExc_TypeError, "gi._glib.IOChannel.writelines must"
@@ -318,7 +303,7 @@ py_io_channel_write_lines(PyGIOChannel* self, PyObject *args, PyObject *kwargs)
             return NULL;
         }
     }
-normal_exit:
+
     Py_DECREF(iter);
     Py_INCREF(Py_None);
     return Py_None;
