@@ -56,8 +56,6 @@ _glib_la_SOURCES = \
 	pygoptioncontext.h \
 	pygoptiongroup.c \
 	pygoptiongroup.h \
-	pygsource.c \
-	pygsource.h \
 	pygspawn.c \
 	pygspawn.h
 _glib_la_CFLAGS = \

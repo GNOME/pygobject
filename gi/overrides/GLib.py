@@ -44,11 +44,10 @@ GError = _glib.GError
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
-PollFD = _glib.PollFD
 spawn_async = _glib.spawn_async
 threads_init = _glib.threads_init
 
-__all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid', 'PollFD',
+__all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']
 
 
@@ -787,6 +786,20 @@ class IOChannel(GLib.IOChannel):
 
 IOChannel = override(IOChannel)
 __all__.append('IOChannel')
+
+
+class PollFD(GLib.PollFD):
+    def __new__(cls, fd, events):
+        pollfd = GLib.PollFD()
+        pollfd.__class__ = cls
+        return pollfd
+
+    def __init__(self, fd, events):
+        self.fd = fd
+        self.events = events
+
+PollFD = override(PollFD)
+__all__.append('PollFD')
 
 
 # The real GLib API is child_watch_add(priority, pid, callback, data).

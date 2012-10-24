@@ -31,7 +31,6 @@
 #include "pyglib-private.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
-#include "pygsource.h"
 #include "pygspawn.h"
 
 /* ---------------- glib module functions -------------------- */
@@ -113,7 +112,6 @@ PYGLIB_MODULE_START(_glib, "_glib")
 
     pyglib_register_api(d);
     pyglib_register_error(d);
-    pyglib_source_register_types(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);
     pyglib_option_group_register_types(d);
