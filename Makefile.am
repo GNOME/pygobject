@@ -9,7 +9,6 @@ CLEANFILES = \
 	`find "$(builddir)" -type f -name "*.pyc" -print`
 
 EXTRA_DIST = \
-	ChangeLog.pre-2.18 \
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO \
 	PKG-INFO.in \
