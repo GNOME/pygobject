@@ -539,3 +539,11 @@ class Timeout(Source):
             self.set_priority(priority)
 
 __all__.append('Timeout')
+
+
+# work around wrong constants in GLib GIR, see
+# https://bugzilla.gnome.org/show_bug.cgi?id=685022
+MININT64 = -9223372036854775808
+MAXUINT64 = 18446744073709551615
+__all__.append('MININT64')
+__all__.append('MAXUINT64')
