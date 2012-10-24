@@ -333,7 +333,7 @@ should be a sequence of strings, to be passed as the argument vector for the
 child. The first string in <parameter>argv</parameter> is of course the name
 of the program to execute. By default, the name of the program must be a
 full path; the <envar>PATH</envar> shell variable will only be searched if
-you pass the <literal>glib.SPAWN_SEARCH_PATH</literal> flag in
+you pass the <literal>GLib.SpawnFlags.SEARCH_PATH</literal> flag in
 <parameter>flags</parameter>. The function returns a 4-tuple containing the
 child's process id and the file descriptors for the child's stdin, stdout
 and stderr. The stdin, stdout and stderr file descriptors are returned only
@@ -370,7 +370,7 @@ function.</para>
       <para><parameter>flags</parameter> should be the bitwise
 <literal>OR</literal> of the <xref linkend="glib-spawn-flag-constants"
 endterm="glib-spawn-flag-constants-title"></xref> you want to affect the
-function's behaviour. The <literal>glib.SPAWN_DO_NOT_REAP_CHILD</literal>
+function's behaviour. The <literal>GLib.SpawnFlags.DO_NOT_REAP_CHILD</literal>
 flag means that the child will not automatically be reaped; you must use a
 GChildWatch source to be notified about the death of the child
 process. Eventually you must call g_spawn_close_pid() on the child_pid, in
@@ -381,27 +381,27 @@ signal manually. On Windows, calling g_spawn_close_pid() is equivalent to
 calling <function>CloseHandle</function>() on the process handle
 returned).</para>
 
-      <para><literal>glib.SPAWN_LEAVE_DESCRIPTORS_OPEN</literal> means
+      <para><literal>GLib.SpawnFlags.LEAVE_DESCRIPTORS_OPEN</literal> means
 that the parent's open file descriptors will be inherited by the child;
 otherwise all descriptors except stdin/stdout/stderr will be closed before
 calling <function>exec</function>() in the
-child. <literal>glib.SPAWN_SEARCH_PATH</literal> means that
+child. <literal>GLib.SpawnFlags.SEARCH_PATH</literal> means that
 <parameter>argv</parameter>[0] need not be an absolute path, it will be
 looked for in the user's
-<envar>PATH</envar>. <literal>glib.SPAWN_STDOUT_TO_DEV_NULL</literal>
+<envar>PATH</envar>. <literal>GLib.SpawnFlags.STDOUT_TO_DEV_NULL</literal>
 means that the child's standard output will be discarded, instead of going
 to the same location as the parent's standard output. If you use this flag,
 <parameter>standard_output</parameter> must be
-<literal>None</literal>. <literal>glib.SPAWN_STDERR_TO_DEV_NULL</literal>
+<literal>None</literal>. <literal>GLib.SpawnFlags.STDERR_TO_DEV_NULL</literal>
 means that the child's standard error will be discarded, instead of going to
 the same location as the parent's standard error. If you use this flag,
 <parameter>standard_error</parameter> must be
-<literal>None</literal>. <literal>glib.SPAWN_CHILD_INHERITS_STDIN</literal>
+<literal>None</literal>. <literal>GLib.SpawnFlags.CHILD_INHERITS_STDIN</literal>
 means that the child will inherit the parent's standard input (by default,
 the child's standard input is attached to
 <filename>/dev/null</filename>). If you use this flag,
 <parameter>standard_input</parameter> must be
-<literal>None</literal>. <literal>glib.SPAWN_FILE_AND_ARGV_ZERO</literal>
+<literal>None</literal>. <literal>GLib.SpawnFlags.FILE_AND_ARGV_ZERO</literal>
 means that the first element of <parameter>argv</parameter> is the file to
 execute, while the remaining elements are the actual argument vector to pass
 to the file. Normally the <link
@@ -427,9 +427,9 @@ if you intend your software to be portable to Windows.</para>
 
       <para>The returned child process id can be used to send signals to the
 child, or to wait for the child if you specified the
-<literal>glib.SPAWN_DO_NOT_REAP_CHILD</literal> flag.  On Windows, child
+<literal>GLib.SpawnFlags.DO_NOT_REAP_CHILD</literal> flag.  On Windows, child
 pid will be returned only if you specified the
-<literal>glib.SPAWN_DO_NOT_REAP_CHILD</literal> flag.</para>
+<literal>GLib.SpawnFlags.DO_NOT_REAP_CHILD</literal> flag.</para>
 
       <para>The caller of the <link
 linkend="function-glib--spawn-async"><function>glib.spawn_async</function>()</link>
@@ -439,17 +439,17 @@ use.</para>
       <para>If <parameter>standard_input</parameter> is
 <literal>None</literal>, the child's standard input is attached to
 <filename>/dev/null</filename> unless
-<literal>glib.SPAWN_CHILD_INHERITS_STDIN</literal> is set.</para>
+<literal>GLib.SpawnFlags.CHILD_INHERITS_STDIN</literal> is set.</para>
 
       <para>If <parameter>standard_error</parameter> is
 <literal>None</literal>, the child's standard error goes to the same
 location as the parent's standard error unless
-<literal>glib.SPAWN_STDERR_TO_DEV_NULL</literal> is set.</para>
+<literal>GLib.SpawnFlags.STDERR_TO_DEV_NULL</literal> is set.</para>
 
       <para>If <parameter>standard_output</parameter> is
 <literal>None</literal>, the child's standard output goes to the same
 location as the parent's standard output unless
-<literal>glib.SPAWN_STDOUT_TO_DEV_NULL</literal> is set.</para>
+<literal>GLib.SpawnFlags.STDOUT_TO_DEV_NULL</literal> is set.</para>
 
       <para>If an error occurs, the glib.GError exception will be
 raised.</para>

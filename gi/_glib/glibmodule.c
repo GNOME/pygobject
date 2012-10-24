@@ -388,21 +388,6 @@ pyglib_register_version_tuples(PyObject *d)
 static void
 pyglib_register_constants(PyObject *m)
 {
-    PyModule_AddIntConstant(m, "SPAWN_LEAVE_DESCRIPTORS_OPEN",
-			    G_SPAWN_LEAVE_DESCRIPTORS_OPEN);
-    PyModule_AddIntConstant(m, "SPAWN_DO_NOT_REAP_CHILD",
-			    G_SPAWN_DO_NOT_REAP_CHILD);
-    PyModule_AddIntConstant(m, "SPAWN_SEARCH_PATH",
-			    G_SPAWN_SEARCH_PATH);
-    PyModule_AddIntConstant(m, "SPAWN_STDOUT_TO_DEV_NULL",
-			    G_SPAWN_STDOUT_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_STDERR_TO_DEV_NULL",
-			    G_SPAWN_STDERR_TO_DEV_NULL);
-    PyModule_AddIntConstant(m, "SPAWN_CHILD_INHERITS_STDIN",
-			    G_SPAWN_CHILD_INHERITS_STDIN);
-    PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
-			    G_SPAWN_FILE_AND_ARGV_ZERO);
-
     PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
 			    G_OPTION_FLAG_HIDDEN);
     PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",

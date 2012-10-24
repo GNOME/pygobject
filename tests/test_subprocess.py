@@ -17,8 +17,12 @@ class TestProcess(unittest.TestCase):
         self.loop = GLib.MainLoop()
         argv = [sys.executable, '-c', 'import sys']
         pid, stdin, stdout, stderr = GLib.spawn_async(
-            argv, flags=GLib.SPAWN_DO_NOT_REAP_CHILD)
+            argv, flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD)
         pid.close()
         GLib.child_watch_add(pid, self._child_watch_cb, 12345)
         self.loop.run()
         self.assertEqual(self.data, 12345)
+
+    def test_backwards_compat_flags(self):
+        self.assertEqual(GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+                         GLib.SPAWN_DO_NOT_REAP_CHILD)

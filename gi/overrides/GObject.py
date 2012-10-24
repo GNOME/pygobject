@@ -43,6 +43,10 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'IO_STATUS_AGAIN', 'IO_FLAG_APPEND', 'IO_FLAG_NONBLOCK',
              'IO_FLAG_IS_READABLE', 'IO_FLAG_IS_WRITEABLE',
              'IO_FLAG_IS_SEEKABLE', 'IO_FLAG_MASK', 'IO_FLAG_GET_MASK',
-             'IO_FLAG_SET_MASK']:
+             'IO_FLAG_SET_MASK',
+             'SPAWN_LEAVE_DESCRIPTORS_OPEN', 'SPAWN_DO_NOT_REAP_CHILD',
+             'SPAWN_SEARCH_PATH', 'SPAWN_STDOUT_TO_DEV_NULL',
+             'SPAWN_STDERR_TO_DEV_NULL', 'SPAWN_CHILD_INHERITS_STDIN',
+             'SPAWN_FILE_AND_ARGV_ZERO']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)
