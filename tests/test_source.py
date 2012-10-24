@@ -186,6 +186,7 @@ class TestSource(unittest.TestCase):
 class TestUserData(unittest.TestCase):
     def test_idle_no_data(self):
         ml = GLib.MainLoop()
+
         def cb():
             ml.quit()
         GLib.idle_add(cb)
@@ -193,6 +194,7 @@ class TestUserData(unittest.TestCase):
 
     def test_timeout_no_data(self):
         ml = GLib.MainLoop()
+
         def cb():
             ml.quit()
         GLib.timeout_add(50, cb)
@@ -200,6 +202,7 @@ class TestUserData(unittest.TestCase):
 
     def test_idle_data(self):
         ml = GLib.MainLoop()
+
         def cb(data):
             data['called'] = True
             ml.quit()
@@ -210,6 +213,7 @@ class TestUserData(unittest.TestCase):
 
     def test_timeout_data(self):
         ml = GLib.MainLoop()
+
         def cb(data):
             data['called'] = True
             ml.quit()
