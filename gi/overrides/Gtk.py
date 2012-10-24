@@ -22,7 +22,7 @@
 import sys
 from gi.repository import GObject
 from ..overrides import override
-from ..importer import modules
+from ..module import get_introspection_module
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -31,7 +31,8 @@ else:
     _basestring = basestring
     _callable = callable
 
-Gtk = modules['Gtk']._introspection_module
+Gtk = get_introspection_module('Gtk')
+
 __all__ = []
 
 if Gtk._version == '2.0':

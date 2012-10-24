@@ -19,9 +19,9 @@
 # USA
 
 from ..overrides import override
-from ..importer import modules
+from ..module import get_introspection_module
 
-Pango = modules['Pango']._introspection_module
+Pango = get_introspection_module('Pango')
 
 __all__ = []
 

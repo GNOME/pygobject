@@ -62,6 +62,9 @@ from .types import \
 
 repository = Repository.get_default()
 
+# Cache of IntrospectionModules that have been loaded.
+_introspection_modules = {}
+
 
 def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
@@ -92,7 +95,13 @@ def get_interfaces_for_object(object_info):
 
 
 class IntrospectionModule(object):
+    """An object which wraps an introspection typelib.
 
+    This wrapping creates a python module like representation of the typelib
+    using gi repository as a foundation. Accessing attributes of the module
+    will dynamically pull them in and create wrappers for the members.
+    These members are then cached on this introspection module.
+    """
     def __init__(self, namespace, version=None):
         repository.require(namespace, version)
         self._namespace = namespace
@@ -203,6 +212,9 @@ class IntrospectionModule(object):
         else:
             raise NotImplementedError(info)
 
+        # Cache the newly created attribute wrapper which will then be
+        # available directly on this introspection module instead of being
+        # retrieved through the __getattr__ we are currently in.
         self.__dict__[name] = wrapper
         return wrapper
 
@@ -229,7 +241,29 @@ class IntrospectionModule(object):
         return list(result)
 
 
+def get_introspection_module(namespace):
+    """
+    :Returns:
+        An object directly wrapping the gi module without overrides.
+    """
+    if namespace in _introspection_modules:
+        return _introspection_modules[namespace]
+
+    version = gi.get_required_version(namespace)
+    module = IntrospectionModule(namespace, version)
+    _introspection_modules[namespace] = module
+    return module
+
+
 class DynamicModule(types.ModuleType):
+    """A module composed of an IntrospectionModule and an overrides module.
+
+    DynamicModule wraps up an IntrospectionModule and an overrides module
+    into a single accessible module. This is what is returned from statements
+    like "from gi.repository import Foo". Accessing attributes on a DynamicModule
+    will first look overrides (or the gi.overrides.registry cache) and then
+    in the introspection module if it was not found as an override.
+    """
     def __init__(self, namespace):
         self._namespace = namespace
         self._introspection_module = None
@@ -237,9 +271,7 @@ class DynamicModule(types.ModuleType):
         self.__path__ = None
 
     def _load(self):
-        version = gi.get_required_version(self._namespace)
-        self._introspection_module = IntrospectionModule(self._namespace,
-                                                         version)
+        self._introspection_module = get_introspection_module(self._namespace)
         try:
             overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
             self._overrides_module = getattr(overrides_modules, self._namespace, None)

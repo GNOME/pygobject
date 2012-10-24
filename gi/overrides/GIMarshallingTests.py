@@ -19,9 +19,9 @@
 # USA
 
 from ..overrides import override
-from ..importer import modules
+from ..module import get_introspection_module
 
-GIMarshallingTests = modules['GIMarshallingTests']._introspection_module
+GIMarshallingTests = get_introspection_module('GIMarshallingTests')
 
 __all__ = []
 

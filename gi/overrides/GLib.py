@@ -21,11 +21,11 @@
 
 import signal
 
-from ..importer import modules
+from ..module import get_introspection_module
 from .._gi import variant_new_tuple, variant_type_from_string, source_new, source_set_callback
 from ..overrides import override, deprecated
 
-GLib = modules['GLib']._introspection_module
+GLib = get_introspection_module('GLib')
 
 __all__ = []
 

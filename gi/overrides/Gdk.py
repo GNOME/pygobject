@@ -20,11 +20,11 @@
 # USA
 
 from ..overrides import override
-from ..importer import modules
+from ..module import get_introspection_module
 
 import sys
 
-Gdk = modules['Gdk']._introspection_module
+Gdk = get_introspection_module('Gdk')
 
 __all__ = []
 
@@ -287,7 +287,7 @@ for event_class in event_member_classes:
 
 class DragContext(Gdk.DragContext):
     def finish(self, success, del_, time):
-        Gtk = modules['Gtk']._introspection_module
+        Gtk = get_introspection_module('Gtk')
         Gtk.drag_finish(self, success, del_, time)
 
 DragContext = override(DragContext)

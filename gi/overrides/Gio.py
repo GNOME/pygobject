@@ -19,13 +19,13 @@
 # USA
 
 from ..overrides import override
-from ..importer import modules
+from ..module import get_introspection_module
 
 from gi.repository import GLib
 
 import sys
 
-Gio = modules['Gio']._introspection_module
+Gio = get_introspection_module('Gio')
 
 __all__ = []
 
