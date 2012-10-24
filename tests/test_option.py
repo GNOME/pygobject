@@ -10,17 +10,15 @@ try:
 except ImportError:
     from io import StringIO
 
-# FIXME: we need a way to import the options module from a public module
-from gi._glib.option import OptionParser, OptionGroup, OptionValueError, \
-    make_option, BadOptionError
+from gi.repository import GLib
 
 
 class TestOption(unittest.TestCase):
     EXCEPTION_MESSAGE = "This callback fails"
 
     def setUp(self):
-        self.parser = OptionParser("NAMES...",
-                                   description="Option unit test")
+        self.parser = GLib.option.OptionParser("NAMES...",
+                                               description="Option unit test")
         self.parser.add_option("-t", "--test", help="Unit test option",
                                action="store_false", dest="test", default=True)
         self.parser.add_option("--g-fatal-warnings",
@@ -32,22 +30,22 @@ class TestOption(unittest.TestCase):
         def option_callback(option, opt, value, parser):
             raise Exception(self.EXCEPTION_MESSAGE)
 
-        group = OptionGroup(
+        group = GLib.option.OptionGroup(
             "unittest", "Unit test options", "Show all unittest options",
             option_list=[
-                make_option("-f", "-u", "--file", "--unit-file",
-                            type="filename",
-                            dest="unit_file",
-                            help="Unit test option"),
-                make_option("--test-integer",
-                            type="int",
-                            dest="test_integer",
-                            help="Unit integer option"),
-                make_option("--callback-failure-test",
-                            action="callback",
-                            callback=option_callback,
-                            dest="test_integer",
-                            help="Unit integer option"),
+                GLib.option.make_option("-f", "-u", "--file", "--unit-file",
+                                        type="filename",
+                                        dest="unit_file",
+                                        help="Unit test option"),
+                GLib.option.make_option("--test-integer",
+                                        type="int",
+                                        dest="test_integer",
+                                        help="Unit integer option"),
+                GLib.option.make_option("--callback-failure-test",
+                                        action="callback",
+                                        callback=option_callback,
+                                        dest="test_integer",
+                                        help="Unit integer option"),
             ])
         group.add_option("-t", "--test",
                          action="store_false",
@@ -91,16 +89,16 @@ class TestOption(unittest.TestCase):
 
     def test_option_value_error(self):
         self._create_group()
-        self.assertRaises(OptionValueError, self.parser.parse_args,
+        self.assertRaises(GLib.option.OptionValueError, self.parser.parse_args,
                           ["test_option.py", "--test-integer=text"])
 
     def test_bad_option_error(self):
-        self.assertRaises(BadOptionError,
+        self.assertRaises(GLib.option.BadOptionError,
                           self.parser.parse_args,
                           ["test_option.py", "--unknwon-option"])
 
     def test_option_group_constructor(self):
-        self.assertRaises(TypeError, OptionGroup)
+        self.assertRaises(TypeError, GLib.option.OptionGroup)
 
     def test_standard_error(self):
         self._create_group()
