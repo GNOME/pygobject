@@ -64,6 +64,15 @@ class TestConstant(unittest.TestCase):
     def test_constant_number(self):
         self.assertEqual(CONSTANT_NUMBER, GIMarshallingTests.CONSTANT_NUMBER)
 
+    def test_min_max_int(self):
+        self.assertEqual(GLib.MAXINT32, 2 ** 31 - 1)
+        self.assertEqual(GLib.MININT32, -2 ** 31)
+        self.assertEqual(GLib.MAXUINT32, 2 ** 32 - 1)
+
+        self.assertEqual(GLib.MAXINT64, 2 ** 63 - 1)
+        self.assertEqual(GLib.MININT64, -2 ** 63)
+        self.assertEqual(GLib.MAXUINT64, 2 ** 64 - 1)
+
 
 class TestBoolean(unittest.TestCase):
 

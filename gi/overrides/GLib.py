@@ -406,3 +406,11 @@ setattr(Variant, 'new_tuple', new_tuple)
 setattr(Variant, 'get_string', get_string)
 
 __all__.append('Variant')
+
+
+# work around wrong constants in GLib GIR, see
+# https://bugzilla.gnome.org/show_bug.cgi?id=685022
+MININT64 = -9223372036854775808
+MAXUINT64 = 18446744073709551615
+__all__.append('MININT64')
+__all__.append('MAXUINT64')
