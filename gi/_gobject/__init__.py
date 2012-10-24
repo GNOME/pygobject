@@ -82,9 +82,6 @@ type_parent = _gobject.type_parent
 type_register = _gobject.type_register
 
 spawn_async = _glib.spawn_async
-idle_add = _glib.idle_add
-timeout_add = _glib.timeout_add
-timeout_add_seconds = _glib.timeout_add_seconds
 io_add_watch = _glib.io_add_watch
 child_watch_add = _glib.child_watch_add
 get_current_time = _glib.get_current_time

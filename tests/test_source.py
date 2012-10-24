@@ -276,6 +276,25 @@ class TestUserData(unittest.TestCase):
         ml.run()
         self.assertTrue(data['called'])
 
+    def cb_no_data(self):
+        self.loop.quit()
+
+    def test_idle_method_callback_no_data(self):
+        self.loop = GLib.MainLoop()
+        GLib.idle_add(self.cb_no_data)
+        self.loop.run()
+
+    def cb_with_data(self, data):
+        data['called'] = True
+        self.loop.quit()
+
+    def test_idle_method_callback_with_data(self):
+        self.loop = GLib.MainLoop()
+        data = {}
+        GLib.idle_add(self.cb_with_data, data)
+        self.loop.run()
+        self.assertTrue(data['called'])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -541,6 +541,37 @@ class Timeout(Source):
 __all__.append('Timeout')
 
 
+__unspecified = object()
+
+
+# backwards compatible API
+def _glib_idle_adjust_callback(function, user_data):
+    if user_data is __unspecified:
+        # we have to call the callback without the user_data argument
+        return (lambda data: function(), None)
+    return (function, user_data)
+
+
+def idle_add(function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT_IDLE):
+    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
+    return GLib.idle_add(priority, function, user_data)
+
+__all__.append('idle_add')
+
+
+def timeout_add(interval, function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT):
+    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
+    return GLib.timeout_add(priority, interval, function, user_data)
+
+__all__.append('timeout_add')
+
+
+def timeout_add_seconds(interval, function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT):
+    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
+    return GLib.timeout_add_seconds(priority, interval, function, user_data)
+
+__all__.append('timeout_add_seconds')
+
 # work around wrong constants in GLib GIR, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=685022
 MININT64 = -9223372036854775808
