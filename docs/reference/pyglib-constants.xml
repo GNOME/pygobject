@@ -12,10 +12,7 @@
     <title>Synopsis</title>
 
     <programlisting>
-<xref linkend="glib-io-condition-constants" endterm="glib-io-condition-constants-title"></xref>
-<xref linkend="glib-priority-constants" endterm="glib-priority-constants-title"></xref>
 <xref linkend="glib-spawn-flag-constants" endterm="glib-spawn-flag-constants-title"></xref>
-<xref linkend="glib-user-directory-constants" endterm="glib-user-directory-constants-title"></xref>
 <xref linkend="glib-version-constants" endterm="glib-version-constants-title"></xref>
 </programlisting>
 
@@ -23,55 +20,6 @@
 
   <refsect1 id="glib-constants-description">
     <title>Description</title>
-
-    <refsect2 id="glib-io-condition-constants">
-      <title id="glib-io-condition-constants-title">Glib IO Condition Constants</title>
-
-      <para>The IO Condition constants are a set of bit-flags that specify a
-condition to watch for on an event source.</para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>glib.IO_IN</literal></term>
-	  <listitem>
-	    <simpara>There is data to read</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_OUT</literal></term>
-	  <listitem>
-	    <simpara>Data can be written (without blocking).</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_PRI</literal></term>
-	  <listitem>
-	    <simpara>There is urgent data to read.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_ERR</literal></term>
-	  <listitem>
-	    <simpara>Error condition.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_HUP</literal></term>
-	  <listitem>
-	    <simpara>Hung up (the connection has been broken, usually for
-	    pipes and sockets).</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_NVAL</literal></term>
-	  <listitem>
-	    <simpara>Invalid request. The file descriptor is not
-	    open.</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-    </refsect2>
 
     <refsect2 id="glib-spawn-flag-constants">
       <title id="glib-spawn-flag-constants-title">Glib Spawn Flag Constants</title>

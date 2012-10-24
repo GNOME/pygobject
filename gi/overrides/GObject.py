@@ -37,6 +37,12 @@ for name in ['markup_escape_text', 'get_application_name',
 
 # constants are also deprecated, but cannot mark them as such
 for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
-             'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW']:
+             'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW',
+             'IO_IN', 'IO_OUT', 'IO_PRI', 'IO_ERR', 'IO_HUP', 'IO_NVAL',
+             'IO_STATUS_ERROR', 'IO_STATUS_NORMAL', 'IO_STATUS_EOF',
+             'IO_STATUS_AGAIN', 'IO_FLAG_APPEND', 'IO_FLAG_NONBLOCK',
+             'IO_FLAG_IS_READABLE', 'IO_FLAG_IS_WRITEABLE',
+             'IO_FLAG_IS_SEEKABLE', 'IO_FLAG_MASK', 'IO_FLAG_GET_MASK',
+             'IO_FLAG_SET_MASK']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)

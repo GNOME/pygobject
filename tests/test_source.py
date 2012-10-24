@@ -171,7 +171,7 @@ class TestSource(unittest.TestCase):
 
     def test_add_remove_poll(self):
         # FIXME: very shallow test, only verifies the API signature
-        pollfd = GLib.PollFD(99, GLib.IO_IN | GLib.IO_HUP)
+        pollfd = GLib.PollFD(99, GLib.IOCondition.IN | GLib.IOCondition.HUP)
         self.assertEqual(pollfd.fd, 99)
         source = GLib.Source()
         source.add_poll(pollfd)

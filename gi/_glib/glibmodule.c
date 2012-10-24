@@ -403,38 +403,6 @@ pyglib_register_constants(PyObject *m)
     PyModule_AddIntConstant(m, "SPAWN_FILE_AND_ARGV_ZERO",
 			    G_SPAWN_FILE_AND_ARGV_ZERO);
 
-    PyModule_AddIntConstant(m, "IO_IN",   G_IO_IN);
-    PyModule_AddIntConstant(m, "IO_OUT",  G_IO_OUT);
-    PyModule_AddIntConstant(m, "IO_PRI",  G_IO_PRI);
-    PyModule_AddIntConstant(m, "IO_ERR",  G_IO_ERR);
-    PyModule_AddIntConstant(m, "IO_HUP",  G_IO_HUP);
-    PyModule_AddIntConstant(m, "IO_NVAL", G_IO_NVAL);
-
-    PyModule_AddIntConstant(m, "IO_STATUS_ERROR",
-			    G_IO_STATUS_ERROR);
-    PyModule_AddIntConstant(m, "IO_STATUS_NORMAL",
-			    G_IO_STATUS_NORMAL);
-    PyModule_AddIntConstant(m, "IO_STATUS_EOF",
-			    G_IO_STATUS_EOF);
-    PyModule_AddIntConstant(m, "IO_STATUS_AGAIN",
-			    G_IO_STATUS_AGAIN);
-    PyModule_AddIntConstant(m, "IO_FLAG_APPEND",
-			    G_IO_FLAG_APPEND);
-    PyModule_AddIntConstant(m, "IO_FLAG_NONBLOCK",
-			    G_IO_FLAG_NONBLOCK);
-    PyModule_AddIntConstant(m, "IO_FLAG_IS_READABLE",
-			    G_IO_FLAG_IS_READABLE);
-    PyModule_AddIntConstant(m, "IO_FLAG_IS_WRITEABLE",
-			    G_IO_FLAG_IS_WRITEABLE);
-    PyModule_AddIntConstant(m, "IO_FLAG_IS_SEEKABLE",
-			    G_IO_FLAG_IS_SEEKABLE);
-    PyModule_AddIntConstant(m, "IO_FLAG_MASK",
-			    G_IO_FLAG_MASK);
-    PyModule_AddIntConstant(m, "IO_FLAG_GET_MASK",
-			    G_IO_FLAG_GET_MASK);
-    PyModule_AddIntConstant(m, "IO_FLAG_SET_MASK",
-			    G_IO_FLAG_SET_MASK);
-
     PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
 			    G_OPTION_FLAG_HIDDEN);
     PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",

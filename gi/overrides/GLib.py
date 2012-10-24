@@ -423,8 +423,24 @@ __all__.append('markup_escape_text')
 # backwards compatible names from old static bindings
 for n in ['DESKTOP', 'DOCUMENTS', 'DOWNLOAD', 'MUSIC', 'PICTURES',
           'PUBLIC_SHARE', 'TEMPLATES', 'VIDEOS']:
-    exec('USER_DIRECTORY_%s = GLib.UserDirectory.DIRECTORY_%s' % (n, n))
+    globals()['USER_DIRECTORY_' + n] = getattr(GLib.UserDirectory, 'DIRECTORY_' + n)
     __all__.append('USER_DIRECTORY_' + n)
+
+for n in ['ERR', 'HUP', 'IN', 'NVAL', 'OUT', 'PRI']:
+    globals()['IO_' + n] = getattr(GLib.IOCondition, n)
+    __all__.append('IO_' + n)
+
+for n in ['APPEND', 'GET_MASK', 'IS_READABLE', 'IS_SEEKABLE',
+          'MASK', 'NONBLOCK', 'SET_MASK']:
+    globals()['IO_FLAG_' + n] = getattr(GLib.IOFlags, n)
+    __all__.append('IO_FLAG_' + n)
+# spelling for the win
+IO_FLAG_IS_WRITEABLE = GLib.IOFlags.IS_WRITABLE
+__all__.append('IO_FLAG_IS_WRITEABLE')
+
+for n in ['AGAIN', 'EOF', 'ERROR', 'NORMAL']:
+    globals()['IO_STATUS_' + n] = getattr(GLib.IOStatus, n)
+    __all__.append('IO_STATUS_' + n)
 
 
 class MainLoop(GLib.MainLoop):
