@@ -10,7 +10,7 @@ TestInterface = GObject.GType.from_name('TestInterface')
 
 
 class TestUnknown(unittest.TestCase):
-    def testFoo(self):
+    def test_unknown_interface(self):
         obj = testhelper.get_unknown()
         TestUnknownGType = GObject.GType.from_name('TestUnknown')
         TestUnknown = GObject.new(TestUnknownGType).__class__

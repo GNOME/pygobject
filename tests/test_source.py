@@ -44,7 +44,7 @@ class TestSource(unittest.TestCase):
         timeout.set_callback(self.timeout_callback, loop)
         timeout.attach()
 
-    def testSources(self):
+    def test_sources(self):
         loop = GLib.MainLoop()
 
         self.setup_timeout(loop)
@@ -72,7 +72,7 @@ class TestSource(unittest.TestCase):
         self.assertTrue(m.is_destroyed())
         self.assertTrue(idle.is_destroyed())
 
-    def testSourcePrepare(self):
+    def test_source_prepare(self):
         # this test may not terminate if prepare() is wrapped incorrectly
         dispatched = [False]
         loop = GLib.MainLoop()
@@ -100,7 +100,7 @@ class TestSource(unittest.TestCase):
 
         assert dispatched[0]
 
-    def testIsDestroyedSimple(self):
+    def test_is_destroyed_simple(self):
         s = GLib.Source()
 
         self.assertFalse(s.is_destroyed())
@@ -114,7 +114,7 @@ class TestSource(unittest.TestCase):
         s.destroy()
         self.assertTrue(s.is_destroyed())
 
-    def testIsDestroyedContext(self):
+    def test_is_destroyed_context(self):
         def f():
             c = GLib.MainContext()
             s = GLib.Source()
@@ -124,7 +124,7 @@ class TestSource(unittest.TestCase):
         s = f()
         self.assertTrue(s.is_destroyed())
 
-    def testRemove(self):
+    def test_remove(self):
         s = GLib.idle_add(dir)
         self.assertEqual(GLib.source_remove(s), True)
         # s is now removed, should fail now
@@ -135,13 +135,13 @@ class TestSource(unittest.TestCase):
         self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
         self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
 
-    def testRecurseProperty(self):
+    def test_recurse_property(self):
         s = GLib.Idle()
         self.assertTrue(s.can_recurse in [False, True])
         s.can_recurse = False
         self.assertFalse(s.can_recurse)
 
-    def testPriority(self):
+    def test_priority(self):
         s = GLib.Idle()
         self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT_IDLE)
         s.priority = GLib.PRIORITY_HIGH
@@ -156,7 +156,7 @@ class TestSource(unittest.TestCase):
         s = GLib.Source()
         self.assertEqual(s.priority, GLib.PRIORITY_DEFAULT)
 
-    def testGetCurrentTime(self):
+    def test_get_current_time(self):
         # Note, deprecated API
         s = GLib.Idle()
         with warnings.catch_warnings(record=True) as w:
@@ -169,7 +169,7 @@ class TestSource(unittest.TestCase):
         self.assertGreater(time, 1300000000.0)
         self.assertLess(time, 2000000000.0)
 
-    def testAddRemovePoll(self):
+    def test_add_remove_poll(self):
         # FIXME: very shallow test, only verifies the API signature
         pollfd = GLib.PollFD(99, GLib.IO_IN | GLib.IO_HUP)
         self.assertEqual(pollfd.fd, 99)
@@ -177,9 +177,8 @@ class TestSource(unittest.TestCase):
         source.add_poll(pollfd)
         source.remove_poll(pollfd)
 
-
-class TestTimeout(unittest.TestCase):
-    def test504337(self):
+    def test_out_of_scope_before_dispatch(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=504337
         GLib.Timeout(20)
         GLib.Idle()
 

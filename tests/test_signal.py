@@ -49,11 +49,11 @@ class TestChaining(unittest.TestCase):
 
         assert args[2:] == (1, 2, 3)
 
-    def testChaining(self):
+    def test_chaining(self):
         self.inst.emit("my_signal", 42)
         assert self.inst.arg == 42
 
-    def testChaining2(self):
+    def test_chaining2(self):
         inst2 = D()
         inst2.emit("my_signal", 44)
         assert inst2.arg == 44
@@ -63,14 +63,14 @@ class TestChaining(unittest.TestCase):
 
 
 class TestGSignalsError(unittest.TestCase):
-    def testInvalidType(self, *args):
+    def test_invalid_type(self, *args):
         def foo():
             class Foo(GObject.GObject):
                 __gsignals__ = None
         self.assertRaises(TypeError, foo)
         gc.collect()
 
-    def testInvalidName(self, *args):
+    def test_invalid_name(self, *args):
         def foo():
             class Foo(GObject.GObject):
                 __gsignals__ = {'not-exists': 'override'}
@@ -294,7 +294,7 @@ class TestClosures(unittest.TestCase):
         self.assertEqual(inst.a, 1)
         gc.collect()
 
-    def testGString(self):
+    def test_gstring(self):
         class C(GObject.GObject):
             __gsignals__ = {'my_signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_GSTRING,
                                           (GObject.TYPE_GSTRING,))}

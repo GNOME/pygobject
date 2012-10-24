@@ -10,13 +10,13 @@ import testhelper
 
 
 class TestGObjectAPI(unittest.TestCase):
-    def testGObjectModule(self):
+    def test_module(self):
         obj = GObject.GObject()
 
         self.assertEqual(obj.__module__,
                          'gi._gobject._gobject')
 
-    def testCompatAPI(self):
+    def test_compat_api(self):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             # GObject formerly exposed a lot of GLib's functions
@@ -38,21 +38,21 @@ class TestGObjectAPI(unittest.TestCase):
 
 
 class TestReferenceCounting(unittest.TestCase):
-    def testRegularObject(self):
+    def test_regular_object(self):
         obj = GObject.GObject()
         self.assertEqual(obj.__grefcount__, 1)
 
         obj = GObject.new(GObject.GObject)
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testFloating(self):
+    def test_floating(self):
         obj = testhelper.Floating()
         self.assertEqual(obj.__grefcount__, 1)
 
         obj = GObject.new(testhelper.Floating)
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testOwnedByLibrary(self):
+    def test_owned_by_library(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
@@ -65,7 +65,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testOwnedByLibraryOutOfScope(self):
+    def test_owned_by_library_out_of_scope(self):
         obj = testhelper.OwnedByLibrary()
         self.assertEqual(obj.__grefcount__, 2)
 
@@ -83,7 +83,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testOwnedByLibraryUsingGObjectNew(self):
+    def test_owned_by_library_using_gobject_new(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
@@ -96,7 +96,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testOwnedByLibraryOutOfScopeUsingGobjectNew(self):
+    def test_owned_by_library_out_of_scope_using_gobject_new(self):
         obj = GObject.new(testhelper.OwnedByLibrary)
         self.assertEqual(obj.__grefcount__, 2)
 
@@ -114,7 +114,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testFloatingAndSunk(self):
+    def test_floating_and_sunk(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
@@ -127,7 +127,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testFloatingAndSunkOutOfScope(self):
+    def test_floating_and_sunk_out_of_scope(self):
         obj = testhelper.FloatingAndSunk()
         self.assertEqual(obj.__grefcount__, 2)
 
@@ -145,7 +145,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testFloatingAndSunkUsingGObjectNew(self):
+    def test_floating_and_sunk_using_gobject_new(self):
         # Upon creation, the refcount of the object should be 2:
         # - someone already has a reference on the new object.
         # - the python wrapper should hold its own reference.
@@ -158,7 +158,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testFloatingAndSunkOutOfScopeUsingGObjectNew(self):
+    def test_floating_and_sunk_out_of_scope_using_gobject_new(self):
         obj = GObject.new(testhelper.FloatingAndSunk)
         self.assertEqual(obj.__grefcount__, 2)
 
@@ -176,7 +176,7 @@ class TestReferenceCounting(unittest.TestCase):
         obj.release()
         self.assertEqual(obj.__grefcount__, 1)
 
-    def testUninitializedObject(self):
+    def test_uninitialized_object(self):
         class Obj(GObject.GObject):
             def __init__(self):
                 x = self.__grefcount__
@@ -197,19 +197,19 @@ class TestPythonReferenceCounting(unittest.TestCase):
     # Newly created instances should alwayshave two references: one for
     # the GC, and one for the bound variable in the local scope.
 
-    def testNewInstanceHasTwoRefs(self):
+    def test_new_instance_has_two_refs(self):
         obj = GObject.GObject()
         self.assertEqual(sys.getrefcount(obj), 2)
 
-    def testNewInstanceHasTwoRefsUsingGObjectNew(self):
+    def test_new_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(GObject.GObject)
         self.assertEqual(sys.getrefcount(obj), 2)
 
-    def testNewSubclassInstanceHasTwoRefs(self):
+    def test_new_subclass_instance_has_two_refs(self):
         obj = A()
         self.assertEqual(sys.getrefcount(obj), 2)
 
-    def testNewSubclassInstanceHasTwoRefsUsingGObjectNew(self):
+    def test_new_subclass_instance_has_two_refs_using_gobject_new(self):
         obj = GObject.new(A)
         self.assertEqual(sys.getrefcount(obj), 2)
 
@@ -227,7 +227,7 @@ class TestContextManagers(unittest.TestCase):
         self.obj = self.ContextTestObject()
         self.handler = self.obj.connect('notify::prop', self.on_prop_set)
 
-    def testFreezeNotifyContext(self):
+    def test_freeze_notify_context(self):
         # Verify prop tracking list
         self.assertEqual(self.tracking, [])
         self.obj.props.prop = 1
@@ -251,7 +251,7 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2, 3])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-    def testHandlerBlockContext(self):
+    def test_handler_block_context(self):
         # Verify prop tracking list
         self.assertEqual(self.tracking, [])
         self.obj.props.prop = 1
@@ -275,7 +275,7 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-    def testFreezeNotifyContextNested(self):
+    def test_freeze_notify_context_nested(self):
         self.assertEqual(self.tracking, [])
         with self.obj.freeze_notify():
             self.obj.props.prop = 1
@@ -295,7 +295,7 @@ class TestContextManagers(unittest.TestCase):
         # and the last one sent.
         self.assertEqual(self.tracking, [3])
 
-    def testHandlerBlockContextNested(self):
+    def test_handler_block_context_nested(self):
         self.assertEqual(self.tracking, [])
         with self.obj.handler_block(self.handler):
             self.obj.props.prop = 1
@@ -316,7 +316,7 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.obj.props.prop, 3)
         self.assertEqual(self.tracking, [])
 
-    def testFreezeNotifyNormalUsageRefCounts(self):
+    def test_freeze_notify_normal_usage_ref_counts(self):
         # Ensure ref counts without using methods as context managers
         # maintain the same count.
         self.assertEqual(self.obj.__grefcount__, 1)
@@ -325,14 +325,14 @@ class TestContextManagers(unittest.TestCase):
         self.obj.thaw_notify()
         self.assertEqual(self.obj.__grefcount__, 1)
 
-    def testHandlerBlockNormalUsageRefCounts(self):
+    def test_handler_block_normal_usage_ref_counts(self):
         self.assertEqual(self.obj.__grefcount__, 1)
         self.obj.handler_block(self.handler)
         self.assertEqual(self.obj.__grefcount__, 1)
         self.obj.handler_unblock(self.handler)
         self.assertEqual(self.obj.__grefcount__, 1)
 
-    def testFreezeNotifyContextError(self):
+    def test_freeze_notify_context_error(self):
         # Test an exception occurring within a freeze context exits the context
         try:
             with self.obj.freeze_notify():
@@ -350,7 +350,7 @@ class TestContextManagers(unittest.TestCase):
         self.obj.props.prop = 2
         self.assertEqual(self.tracking, [1, 2])
 
-    def testHandlerBlockContextError(self):
+    def test_handler_block_context_error(self):
         # Test an exception occurring within a handler block exits the context
         try:
             with self.obj.handler_block(self.handler):
@@ -377,7 +377,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.source = self.TestObject()
         self.target = self.TestObject()
 
-    def testDefaultBinding(self):
+    def test_default_binding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.DEFAULT)
         binding = binding  # PyFlakes
@@ -392,7 +392,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 2)
 
-    def testBiDirectionalBinding(self):
+    def test_bidirectional_binding(self):
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.BIDIRECTIONAL)
         binding = binding  # PyFlakes
@@ -407,7 +407,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 2)
 
-    def testTransformToOnly(self):
+    def test_transform_to_only(self):
         def transform_to(binding, value, user_data=None):
             self.assertEqual(user_data, 'test-data')
             return value * 2
@@ -425,7 +425,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 1)
 
-    def testTransformFromOnly(self):
+    def test_transform_from_only(self):
         def transform_from(binding, value, user_data=None):
             self.assertEqual(user_data, None)
             return value * 2
@@ -443,7 +443,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 1)
 
-    def testTransformBidrectional(self):
+    def test_transform_bidirectional(self):
         def transform_to(binding, value, user_data=None):
             self.assertEqual(user_data, 'test-data')
             return value * 2
@@ -466,7 +466,7 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 4)
 
-    def testExplicitUnbindClearsConnection(self):
+    def test_explicit_unbind_clears_connection(self):
         self.assertEqual(self.source.int_prop, 0)
         self.assertEqual(self.target.int_prop, 0)
 
@@ -486,7 +486,7 @@ class TestPropertyBindings(unittest.TestCase):
         # An already unbound BindingWeakRef will raise if unbind is attempted a second time.
         self.assertRaises(ValueError, binding.unbind)
 
-    def testReferenceCounts(self):
+    def test_reference_counts(self):
         self.assertEqual(self.source.__grefcount__, 1)
         self.assertEqual(self.target.__grefcount__, 1)
 

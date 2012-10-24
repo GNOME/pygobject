@@ -12,7 +12,7 @@ class TestProcess(unittest.TestCase):
         self.data = data
         self.loop.quit()
 
-    def testChildWatch(self):
+    def test_child_watch(self):
         self.data = None
         self.loop = GLib.MainLoop()
         argv = [sys.executable, '-c', 'import sys']

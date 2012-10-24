@@ -57,7 +57,7 @@ class TestOption(unittest.TestCase):
         self.parser.add_option_group(group)
         return group
 
-    def testParseArgs(self):
+    def test_parse_args(self):
         options, args = self.parser.parse_args(
             ["test_option.py"])
         self.assertFalse(args)
@@ -70,12 +70,12 @@ class TestOption(unittest.TestCase):
             ["test_option.py", "foo", "bar"])
         self.assertEqual(args, [])
 
-    def testParseArgsDoubleDash(self):
+    def test_parse_args_double_dash(self):
         options, args = self.parser.parse_args(
             ["test_option.py", "--", "-xxx"])
         #self.assertEqual(args, ["-xxx"])
 
-    def testParseArgsGroup(self):
+    def test_parse_args_group(self):
         group = self._create_group()
 
         options, args = self.parser.parse_args(
@@ -89,20 +89,20 @@ class TestOption(unittest.TestCase):
         self.assertEqual(group.values.unit_file, "test")
         self.assertFalse(args)
 
-    def testOptionValueError(self):
+    def test_option_value_error(self):
         self._create_group()
         self.assertRaises(OptionValueError, self.parser.parse_args,
                           ["test_option.py", "--test-integer=text"])
 
-    def testBadOptionError(self):
+    def test_bad_option_error(self):
         self.assertRaises(BadOptionError,
                           self.parser.parse_args,
                           ["test_option.py", "--unknwon-option"])
 
-    def testOptionGroupConstructor(self):
+    def test_option_group_constructor(self):
         self.assertRaises(TypeError, OptionGroup)
 
-    def testStandardError(self):
+    def test_standard_error(self):
         self._create_group()
         sio = StringIO()
         old_stderr = sys.stderr

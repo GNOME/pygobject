@@ -37,12 +37,12 @@ GObject.type_register(MyObject)
 
 class TestIfaceImpl(unittest.TestCase):
 
-    def testReImplementInterface(self):
+    def test_reimplement_interface(self):
         m = MyUnknown()
         m.iface_method()
         self.assertEqual(m.called, True)
 
-    def testImplementInterface(self):
+    def test_implement_interface(self):
         m = MyObject()
         m.iface_method()
         self.assertEqual(m.called, True)
