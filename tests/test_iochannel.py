@@ -174,7 +174,7 @@ second line
         self.assertEqual(ch.read(), b'\x01\x02')
 
         # now test blocking case, after closing the write end
-        ch.set_flags(ch.get_flags() & ~GLib.IOFlags.NONBLOCK)
+        ch.set_flags(GLib.IOFlags(ch.get_flags() & ~GLib.IOFlags.NONBLOCK))
         os.write(w, b'\x03\x04')
         os.close(w)
         self.assertEqual(ch.read(), b'\x03\x04')
