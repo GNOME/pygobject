@@ -89,7 +89,6 @@ filename_from_utf8 = _glib.filename_from_utf8
 Pid = _glib.Pid
 GError = _glib.GError
 glib_version = _glib.glib_version
-IOChannel = _glib.IOChannel
 OptionGroup = _glib.OptionGroup
 OptionContext = _glib.OptionContext
 

@@ -22,7 +22,8 @@
 import signal
 
 from ..module import get_introspection_module
-from .._gi import variant_new_tuple, variant_type_from_string, source_new, source_set_callback
+from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
+                   source_set_callback, io_channel_read)
 from ..overrides import override, deprecated
 
 GLib = get_introspection_module('GLib')
@@ -563,36 +564,118 @@ class Timeout(Source):
 __all__.append('Timeout')
 
 
-__unspecified = object()
+_unspecified = object()
 
 
 # backwards compatible API
 def _glib_idle_adjust_callback(function, user_data):
-    if user_data is __unspecified:
+    if user_data is _unspecified:
         # we have to call the callback without the user_data argument
         return (lambda data: function(), None)
     return (function, user_data)
 
 
-def idle_add(function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT_IDLE):
+def idle_add(function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT_IDLE):
     (function, user_data) = _glib_idle_adjust_callback(function, user_data)
     return GLib.idle_add(priority, function, user_data)
 
 __all__.append('idle_add')
 
 
-def timeout_add(interval, function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT):
+def timeout_add(interval, function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT):
     (function, user_data) = _glib_idle_adjust_callback(function, user_data)
     return GLib.timeout_add(priority, interval, function, user_data)
 
 __all__.append('timeout_add')
 
 
-def timeout_add_seconds(interval, function, user_data=__unspecified, priority=GLib.PRIORITY_DEFAULT):
+def timeout_add_seconds(interval, function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT):
     (function, user_data) = _glib_idle_adjust_callback(function, user_data)
     return GLib.timeout_add_seconds(priority, interval, function, user_data)
 
 __all__.append('timeout_add_seconds')
+
+
+# backwards compatible API
+class IOChannel(GLib.IOChannel):
+    def __new__(cls, filedes=None, filename=None, mode=None, hwnd=None):
+        if filedes is not None:
+            return GLib.IOChannel.unix_new(filedes)
+        if filename is not None:
+            return GLib.IOChannel.new_file(filename, mode or 'r')
+        if hwnd is not None:
+            return GLib.IOChannel.win32_new_fd(hwnd)
+        raise TypeError('either a valid file descriptor, file name, or window handle must be supplied')
+
+    def read(self, max_count=-1):
+        return io_channel_read(self, max_count)
+
+    def readline(self, size_hint=-1):
+        # note, size_hint is just to maintain backwards compatible API; the
+        # old static binding did not actually use it
+        (status, buf, length, terminator_pos) = self.read_line()
+        if buf is None:
+            return ''
+        return buf
+
+    def readlines(self, size_hint=-1):
+        # note, size_hint is just to maintain backwards compatible API;
+        # the old static binding did not actually use it
+        lines = []
+        status = GLib.IOStatus.NORMAL
+        while status == GLib.IOStatus.NORMAL:
+            (status, buf, length, terminator_pos) = self.read_line()
+            # note, this appends an empty line after EOF; this is
+            # bug-compatible with the old static bindings
+            if buf is None:
+                buf = ''
+            lines.append(buf)
+        return lines
+
+    def write(self, buf, buflen=-1):
+        if not isinstance(buf, bytes):
+            buf = buf.encode('UTF-8')
+        if buflen == -1:
+            buflen = len(buf)
+        (status, written) = self.write_chars(buf, buflen)
+        return written
+
+    def writelines(self, lines):
+        for line in lines:
+            self.write(line)
+
+    _whence_map = {0: GLib.SeekType.SET, 1: GLib.SeekType.CUR, 2: GLib.SeekType.END}
+
+    def seek(self, offset, whence=0):
+        try:
+            w = self._whence_map[whence]
+        except KeyError:
+            raise ValueError("invalid 'whence' value")
+        return self.seek_position(offset, w)
+
+    def add_watch(self, condition, callback, user_data=_unspecified,
+                  priority=GLib.PRIORITY_DEFAULT):
+        if user_data is _unspecified:
+            # we have to call the callback without the user_data argument
+            func = lambda channel, cond, data: callback(channel, cond)
+            user_data = None
+        else:
+            func = callback
+        return GLib.io_add_watch(self, priority, condition, func, user_data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        (status, buf, length, terminator_pos) = self.read_line()
+        if status == GLib.IOStatus.NORMAL:
+            return buf
+        raise StopIteration
+
+
+IOChannel = override(IOChannel)
+__all__.append('IOChannel')
+
 
 # work around wrong constants in GLib GIR, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=685022

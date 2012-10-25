@@ -52,8 +52,6 @@ pyglib_LTLIBRARIES = _glib.la
 
 _glib_la_SOURCES = \
 	glibmodule.c \
-	pygiochannel.c \
-	pygiochannel.h \
 	pygoptioncontext.c \
 	pygoptioncontext.h \
 	pygoptiongroup.c \

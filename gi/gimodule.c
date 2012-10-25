@@ -23,6 +23,7 @@
 
 #include "pygi-private.h"
 #include "pygi.h"
+#include "pyglib.h"
 
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
@@ -461,6 +462,76 @@ _wrap_pyg_source_new (PyObject *self, PyObject *args)
     return pyg_source_new ();
 }
 
+#define CHUNK_SIZE 8192
+
+static PyObject*
+pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
+{
+    int max_count = -1;
+    PyObject *py_iochannel, *ret_obj = NULL;
+    gsize total_read = 0;
+    GError* error = NULL;
+    GIOStatus status = G_IO_STATUS_NORMAL;
+
+    if (!PyArg_ParseTuple (args, "Oi:pyg_channel_read", &py_iochannel, &max_count)) {
+        return NULL;
+    }
+    if (!pyg_boxed_check (py_iochannel, G_TYPE_IO_CHANNEL)) {
+        PyErr_SetString(PyExc_TypeError, "first argument is not a GLib.IOChannel");
+        return NULL;
+    }
+	
+    if (max_count == 0)
+        return PYGLIB_PyBytes_FromString("");
+    
+    while (status == G_IO_STATUS_NORMAL
+	   && (max_count == -1 || total_read < max_count)) {
+	gsize single_read;
+	char* buf;
+	gsize buf_size;
+	
+	if (max_count == -1) 
+	    buf_size = CHUNK_SIZE;
+	else {
+	    buf_size = max_count - total_read;
+	    if (buf_size > CHUNK_SIZE)
+		buf_size = CHUNK_SIZE;
+        }
+	
+	if ( ret_obj == NULL ) {
+	    ret_obj = PYGLIB_PyBytes_FromStringAndSize((char *)NULL, buf_size);
+	    if (ret_obj == NULL)
+		goto failure;
+	}
+	else if (buf_size + total_read > PYGLIB_PyBytes_Size(ret_obj)) {
+	    if (PYGLIB_PyBytes_Resize(&ret_obj, buf_size + total_read) == -1)
+		goto failure;
+	}
+       
+        buf = PYGLIB_PyBytes_AsString(ret_obj) + total_read;
+
+        pyglib_unblock_threads();
+        status = g_io_channel_read_chars(pyg_boxed_get (py_iochannel, GIOChannel),
+                                         buf, buf_size, &single_read, &error);
+        pyglib_block_threads();
+	if (pyglib_error_check(&error))
+	    goto failure;
+	
+	total_read += single_read;
+    }
+	
+    if ( total_read != PYGLIB_PyBytes_Size(ret_obj) ) {
+	if (PYGLIB_PyBytes_Resize(&ret_obj, total_read) == -1)
+	    goto failure;
+    }
+
+    return ret_obj;
+
+  failure:
+    Py_XDECREF(ret_obj);
+    return NULL;
+}
+
 
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
@@ -474,6 +545,7 @@ static PyMethodDef _gi_functions[] = {
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
+    { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

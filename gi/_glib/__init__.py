@@ -26,7 +26,6 @@ _PyGLib_API = _glib._PyGLib_API
 
 # Types
 GError = _glib.GError
-IOChannel = _glib.IOChannel
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid

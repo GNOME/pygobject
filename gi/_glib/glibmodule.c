@@ -29,7 +29,6 @@
 #include <glib.h>
 #include "pyglib.h"
 #include "pyglib-private.h"
-#include "pygiochannel.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygsource.h"
@@ -424,7 +423,6 @@ PYGLIB_MODULE_START(_glib, "_glib")
     pyglib_register_api(d);
     pyglib_register_error(d);
     pyglib_register_version_tuples(d);
-    pyglib_iochannel_register_types(d);
     pyglib_source_register_types(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);
