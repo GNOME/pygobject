@@ -31,7 +31,8 @@ for name in ['markup_escape_text', 'get_application_name',
              'filename_display_name', 'uri_list_extract_uris',
              'MainLoop', 'MainContext', 'main_context_default',
              'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD',
-             'idle_add', 'timeout_add', 'timeout_add_seconds']:
+             'idle_add', 'timeout_add', 'timeout_add_seconds',
+             'io_add_watch']:
     globals()[name] = gi.overrides.deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
 

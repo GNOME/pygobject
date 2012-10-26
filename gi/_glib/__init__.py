@@ -49,7 +49,6 @@ child_watch_add = _glib.child_watch_add
 filename_from_utf8 = _glib.filename_from_utf8
 get_current_time = _glib.get_current_time
 glib_version = _glib.glib_version
-io_add_watch = _glib.io_add_watch
 pyglib_version = _glib.pyglib_version
 spawn_async = _glib.spawn_async
 threads_init = _glib.threads_init

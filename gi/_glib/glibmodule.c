@@ -96,97 +96,6 @@ pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-static gboolean
-iowatch_marshal(GIOChannel *source,
-		GIOCondition condition,
-		gpointer user_data)
-{
-    PyGILState_STATE state;
-    PyObject *tuple, *func, *firstargs, *args, *ret;
-    gboolean res;
-
-    g_return_val_if_fail(user_data != NULL, FALSE);
-
-    state = pyglib_gil_state_ensure();
-
-    tuple = (PyObject *)user_data;
-    func = PyTuple_GetItem(tuple, 0);
-
-    /* arg vector is (fd, condtion, *args) */
-    firstargs = Py_BuildValue("(Oi)", PyTuple_GetItem(tuple, 1), condition);
-    args = PySequence_Concat(firstargs, PyTuple_GetItem(tuple, 2));
-    Py_DECREF(firstargs);
-
-    ret = PyObject_CallObject(func, args);
-    Py_DECREF(args);
-    if (!ret) {
-	PyErr_Print();
-	res = FALSE;
-    } else {
-        if (ret == Py_None) {
-            if (PyErr_Warn(PyExc_Warning,
-			   "_glib.io_add_watch callback returned None; "
-                           "should return True/False")) {
-                PyErr_Print();
-            }
-        }
-	res = PyObject_IsTrue(ret);
-	Py_DECREF(ret);
-    }
-
-    pyglib_gil_state_release(state);
-
-    return res;
-}
-
-static PyObject *
-pyglib_io_add_watch(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *first, *pyfd, *callback, *cbargs = NULL, *data;
-    gint fd, priority = G_PRIORITY_DEFAULT, condition;
-    Py_ssize_t len;
-    GIOChannel *iochannel;
-    guint handler_id;
-
-    len = PyTuple_Size(args);
-    if (len < 3) {
-	PyErr_SetString(PyExc_TypeError,
-			"io_add_watch requires at least 3 args");
-	return NULL;
-    }
-    first = PySequence_GetSlice(args, 0, 3);
-    if (!PyArg_ParseTuple(first, "OiO:io_add_watch", &pyfd, &condition,
-			  &callback)) {
-	Py_DECREF(first);
-        return NULL;
-    }
-    Py_DECREF(first);
-    fd = PyObject_AsFileDescriptor(pyfd);
-    if (fd < 0) {
-	return NULL;
-    }
-    if (!PyCallable_Check(callback)) {
-        PyErr_SetString(PyExc_TypeError, "third argument not callable");
-        return NULL;
-    }
-    if (get_handler_priority(&priority, kwargs) < 0)
-	return NULL;
-
-    cbargs = PySequence_GetSlice(args, 3, len);
-    if (cbargs == NULL)
-      return NULL;
-    data = Py_BuildValue("(OON)", callback, pyfd, cbargs);
-    if (data == NULL)
-      return NULL;
-    iochannel = g_io_channel_unix_new(fd);
-    handler_id = g_io_add_watch_full(iochannel, priority, condition,
-				     iowatch_marshal, data,
-				     (GDestroyNotify)_pyglib_destroy_notify);
-    g_io_channel_unref(iochannel);
-    
-    return PYGLIB_PyLong_FromLong(handler_id);
-}
-
 static void
 child_watch_func(GPid pid, gint status, gpointer data)
 {
@@ -290,13 +199,6 @@ static PyMethodDef _glib_functions[] = {
       "Initialize GLib for use from multiple threads. If you also use GTK+\n"
       "itself (i.e. GUI, not just PyGObject), use gtk.gdk.threads_init()\n"
       "instead." },
-    { "io_add_watch",
-      (PyCFunction)pyglib_io_add_watch, METH_VARARGS|METH_KEYWORDS,
-      "io_add_watch(fd, condition, callback, user_data=None) -> source id\n"
-      "  callable receives (fd, condition, user_data)\n"
-      "Arranges for the fd to be monitored by the main loop for the\n"
-      "specified condition. Condition is a combination of glib.IO_IN,\n"
-      "glib.IO_OUT, glib.IO_PRI, gio.IO_ERR and gio.IO_HUB.\n" },
     { "child_watch_add",
       (PyCFunction)pyglib_child_watch_add, METH_VARARGS|METH_KEYWORDS,
       "child_watch_add(pid, callable, user_data=None,\n"

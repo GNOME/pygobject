@@ -13,13 +13,6 @@
 
     <programlisting>
 <methodsynopsis language="python">
-	<methodname><link
-linkend="function-glib--io-add-watch">glib.io_add_watch</link></methodname>
-	<methodparam><parameter>fd</parameter></methodparam>
-	<methodparam><parameter>condition</parameter></methodparam>
-	<methodparam><parameter>callback</parameter></methodparam>
-	<methodparam><parameter>...</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
         <methodname><link linkend="function-glib--child-watch-add">glib.child_watch_add</link></methodname>
         <methodparam><parameter role="keyword">pid</parameter></methodparam>
         <methodparam><parameter role="keyword">function</parameter></methodparam>
@@ -61,105 +54,6 @@ module but are not directly associated with a specific class.</para>
 
   <refsect1>
     <title>Functions</title>
-
-    <refsect2 id="function-glib--io-add-watch">
-      <title>glib.io_add_watch</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>glib.io_add_watch</methodname>
-	  <methodparam><parameter>fd</parameter></methodparam>
-	  <methodparam><parameter>condition</parameter></methodparam>
-	  <methodparam><parameter>callback</parameter></methodparam>
-	  <methodparam><parameter>...</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><parameter>fd</parameter>&nbsp;:</term>
-	  <listitem><simpara>a Python file object or an integer file
-descriptor ID</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><parameter>condition</parameter>&nbsp;:</term>
-	  <listitem><simpara>a condition mask</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><parameter>callback</parameter>&nbsp;:</term>
-	  <listitem><simpara>a function to call</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><parameter>...</parameter>&nbsp;:</term>
-	  <listitem><simpara>additional arguments to pass to
-<parameter>callback</parameter></simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara>an integer ID of the event source</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>The <function>glib.io_add_watch</function>() function
-arranges for the file (specified by <parameter>fd</parameter>) to be
-monitored by the main loop for the specified
-<parameter>condition</parameter>. <parameter>fd</parameter> may be a Python
-file object or an integer file descriptor. The value of condition is a
-combination of:</para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>glib.IO_IN</literal></term>
-	  <listitem>
-	    <simpara>There is data to read.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_OUT</literal></term>
-	  <listitem>
-	    <simpara>Data can be written (without blocking). </simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_PRI</literal></term>
-	  <listitem>
-	    <simpara>There is urgent data to read.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_ERR</literal></term>
-	  <listitem>
-	    <simpara>Error condition.</simpara>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><literal>glib.IO_HUP</literal></term>
-	  <listitem>
-	    <simpara>Hung up (the connection has been broken, usually for
-pipes and sockets).</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-      <para>Additional arguments to pass to <parameter>callback</parameter>
-can be specified after <parameter>callback</parameter>. The idle priority
-may be specified as a keyword-value pair with the keyword "priority". The
-signature of the callback function is:</para>
-
-      <programlisting>
-  def callback(source, cb_condition, ...)
-</programlisting>
-
-      <para>where <parameter>source</parameter> is
-<parameter>fd</parameter>, the file descriptor;
-<parameter>cb_condition</parameter> is the condition that triggered the
-signal; and, <parameter>...</parameter> are the zero or more arguments that
-were passed to the <function>glib.io_add_watch</function>()
-function.</para>
-
-      <para>If the callback function returns <literal>False</literal> it
-will be automatically removed from the list of event sources and will not be
-called again. If it returns <literal>True</literal> it will be called again
-when the condition is matched.</para>
-
-    </refsect2>
 
     <refsect2 id="function-glib--markup-escape-text">
       <title>glib.markup_escape_text</title>

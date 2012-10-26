@@ -3,6 +3,7 @@
 
 import unittest
 import os.path
+import warnings
 
 from gi.repository import GLib
 
@@ -110,7 +111,12 @@ https://my.org/q?x=1&y=2
             call_data.append((fd, condition, os.read(fd, 1)))
             return True
 
-        GLib.io_add_watch(r, GLib.IOCondition.IN, cb)
+        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb)
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+
         ml = GLib.MainLoop()
         GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
         GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
@@ -128,7 +134,12 @@ https://my.org/q?x=1&y=2
             call_data.append((fd, condition, os.read(fd, 1), data))
             return True
 
-        GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo')
+        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo')
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+
         ml = GLib.MainLoop()
         GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
         GLib.timeout_add(100, lambda: os.write(w, b'b') and False)

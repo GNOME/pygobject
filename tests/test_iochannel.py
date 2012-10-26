@@ -6,6 +6,7 @@ import tempfile
 import os.path
 import fcntl
 import shutil
+import warnings
 
 from gi.repository import GLib
 
@@ -198,7 +199,7 @@ second line
         self.assertEqual(os.read(r, 10), b'\x03\x04')
         os.close(r)
 
-    def test_add_watch_no_data(self):
+    def test_deprecated_add_watch_no_data(self):
         (r, w) = os.pipe()
 
         ch = GLib.IOChannel(filedes=r)
@@ -213,7 +214,11 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        ch.add_watch(GLib.IOCondition.IN, cb)
+        # io_add_watch() method is deprecated, use GLib.io_add_watch
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            ch.add_watch(GLib.IOCondition.IN, cb)
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
 
         ml = GLib.MainLoop()
 
@@ -241,11 +246,70 @@ second line
             return True
 
         ml = GLib.MainLoop()
-        id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', GLib.PRIORITY_HIGH)
+        # io_add_watch() method is deprecated, use GLib.io_add_watch
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', GLib.PRIORITY_HIGH)
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
 
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)
 
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(cb_reads, [b'a', b'b'])
+
+    def test_add_watch_no_data(self):
+        (r, w) = os.pipe()
+
+        ch = GLib.IOChannel(filedes=r)
+        ch.set_encoding(None)
+        ch.set_flags(ch.get_flags() | GLib.IOFlags.NONBLOCK)
+
+        cb_reads = []
+
+        def cb(channel, condition):
+            self.assertEqual(channel, ch)
+            self.assertEqual(condition, GLib.IOCondition.IN)
+            cb_reads.append(channel.read())
+            return True
+
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
+
+        ml = GLib.MainLoop()
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_HIGH)
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(cb_reads, [b'a', b'b'])
+
+    def test_add_watch_with_data(self):
+        (r, w) = os.pipe()
+
+        ch = GLib.IOChannel(filedes=r)
+        ch.set_encoding(None)
+        ch.set_flags(ch.get_flags() | GLib.IOFlags.NONBLOCK)
+
+        cb_reads = []
+
+        def cb(channel, condition, data):
+            self.assertEqual(channel, ch)
+            self.assertEqual(condition, GLib.IOCondition.IN)
+            self.assertEqual(data, 'hello')
+            cb_reads.append(channel.read())
+            return True
+
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
+
+        ml = GLib.MainLoop()
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_HIGH)
         GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
         GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
         GLib.timeout_add(200, ml.quit)

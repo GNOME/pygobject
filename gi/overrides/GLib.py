@@ -20,6 +20,7 @@
 # USA
 
 import signal
+import warnings
 
 from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
@@ -596,6 +597,46 @@ def timeout_add_seconds(interval, function, user_data=_unspecified, priority=GLi
 __all__.append('timeout_add_seconds')
 
 
+# The real GLib API is io_add_watch(IOChannel, priority, condition, callback,
+# user_data). This needs to take into account several deprecated APIs:
+# - calling with an fd as first argument
+# - calling without a priority as second argument
+# and the usual "call without user_data", in which case the callback does not
+# get an user_data either.
+def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=_unspecified):
+    if not isinstance(priority, int) or isinstance(priority, GLib.IOCondition):
+        warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
+                      DeprecationWarning)
+        # shift the arguments around
+        user_data = callback
+        callback = condition
+        condition = priority
+        priority = GLib.PRIORITY_DEFAULT
+
+    if user_data is _unspecified:
+        # we have to call the callback without the user_data argument
+        func = lambda channel, cond, data: callback(channel, cond)
+        user_data = None
+    else:
+        func = callback
+
+    # backwards compatibility: Allow calling with fd
+    if isinstance(channel, int):
+        warnings.warn('Calling io_add_watch with a file descriptor is deprecated; call it with a GLib.IOChannel object',
+                      DeprecationWarning)
+        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        real_channel = GLib.IOChannel.unix_new(channel)
+    else:
+        assert isinstance(channel, GLib.IOChannel)
+        func_fdtransform = func
+        real_channel = channel
+
+    return GLib.io_add_watch(real_channel, priority, condition,
+                             func_fdtransform, user_data)
+
+__all__.append('io_add_watch')
+
+
 # backwards compatible API
 class IOChannel(GLib.IOChannel):
     def __new__(cls, filedes=None, filename=None, mode=None, hwnd=None):
@@ -655,13 +696,9 @@ class IOChannel(GLib.IOChannel):
 
     def add_watch(self, condition, callback, user_data=_unspecified,
                   priority=GLib.PRIORITY_DEFAULT):
-        if user_data is _unspecified:
-            # we have to call the callback without the user_data argument
-            func = lambda channel, cond, data: callback(channel, cond)
-            user_data = None
-        else:
-            func = callback
-        return GLib.io_add_watch(self, priority, condition, func, user_data)
+        return io_add_watch(self, priority, condition, callback, user_data)
+
+    add_watch = deprecated(add_watch, 'GLib.io_add_watch()')
 
     def __iter__(self):
         return self
