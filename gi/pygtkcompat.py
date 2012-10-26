@@ -202,7 +202,7 @@ def enable_gtk(version='2.0'):
 
     def set_tool_item_type(menuaction, gtype):
         warnings.warn('set_tool_item_type() is not supported',
-                      DeprecationWarning, stacklevel=2)
+                      gi.PyGIDeprecationWarning, stacklevel=2)
     Gtk.Action.set_tool_item_type = classmethod(set_tool_item_type)
 
     # Alignment
@@ -314,7 +314,7 @@ def enable_gtk(version='2.0'):
 
     def install_child_property(container, flag, pspec):
         warnings.warn('install_child_property() is not supported',
-                      DeprecationWarning, stacklevel=2)
+                      gi.PyGIDeprecationWarning, stacklevel=2)
     Gtk.Container.install_child_property = classmethod(install_child_property)
 
     def new_text():

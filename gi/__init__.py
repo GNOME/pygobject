@@ -81,3 +81,8 @@ def require_version(namespace, version):
 
 def get_required_version(namespace):
     return _versions.get(namespace, None)
+
+# note, DeprecationWarning would be more suitable as a base, but this
+# unhelpfully isn't shown by default and thus useless
+class PyGIDeprecationWarning(RuntimeWarning):
+    pass

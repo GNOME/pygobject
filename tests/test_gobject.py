@@ -5,6 +5,7 @@ import unittest
 import warnings
 
 from gi.repository import GObject
+from gi import PyGIDeprecationWarning
 import sys
 import testhelper
 
@@ -31,7 +32,7 @@ class TestGObjectAPI(unittest.TestCase):
             context = GObject.MainContext()
             self.assertFalse(context.pending())
 
-            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
             self.assertTrue('GLib.markup_escape_text' in str(w[0]), str(w[0]))
 
             self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)

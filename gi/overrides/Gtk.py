@@ -23,6 +23,7 @@ import sys
 from gi.repository import GObject
 from ..overrides import override
 from ..module import get_introspection_module
+from gi import PyGIDeprecationWarning
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -442,7 +443,7 @@ class Dialog(Gtk.Dialog, Container):
         if hasattr(Gtk.DialogFlags, "NO_SEPARATOR") and (flags & Gtk.DialogFlags.NO_SEPARATOR):
             self.set_has_separator(False)
             import warnings
-            warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", DeprecationWarning)
+            warnings.warn("Gtk.DialogFlags.NO_SEPARATOR has been depricated since Gtk+-3.0", PyGIDeprecationWarning)
 
         if buttons is not None:
             self.add_buttons(*buttons)
@@ -493,7 +494,7 @@ class MessageDialog(Gtk.MessageDialog, Dialog):
         # type keyword is used for backwards compat with PyGTK
         if 'type' in kwds:
             import warnings
-            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", DeprecationWarning)
+            warnings.warn("The use of the keyword type as a parameter of the Gtk.MessageDialog constructor has been depricated. Please use message_type instead.", PyGIDeprecationWarning)
             message_type = kwds.pop('type')
 
         Gtk.MessageDialog.__init__(self,

@@ -4,6 +4,7 @@ import unittest
 import warnings
 
 from gi.repository import GLib, GObject
+from gi import PyGIDeprecationWarning
 
 
 class Idle(GLib.Idle):
@@ -162,7 +163,7 @@ class TestSource(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             time = s.get_current_time()
-            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
 
         self.assertTrue(isinstance(time, float))
         # plausibility check, and check magnitude of result

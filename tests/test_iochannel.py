@@ -9,6 +9,7 @@ import shutil
 import warnings
 
 from gi.repository import GLib
+from gi import PyGIDeprecationWarning
 
 
 class IOChannel(unittest.TestCase):
@@ -218,7 +219,7 @@ second line
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             ch.add_watch(GLib.IOCondition.IN, cb)
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
 
@@ -250,7 +251,7 @@ second line
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', GLib.PRIORITY_HIGH)
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
                          GLib.PRIORITY_HIGH)

@@ -6,6 +6,7 @@ import os.path
 import warnings
 
 from gi.repository import GLib
+from gi import PyGIDeprecationWarning
 
 from compathelper import _unicode, _bytes
 
@@ -115,7 +116,7 @@ https://my.org/q?x=1&y=2
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             GLib.io_add_watch(r, GLib.IOCondition.IN, cb)
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
         GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
@@ -138,7 +139,7 @@ https://my.org/q?x=1&y=2
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
             GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo')
-            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
         GLib.timeout_add(10, lambda: os.write(w, b'a') and False)

@@ -26,6 +26,7 @@ from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
 from ..overrides import override, deprecated
+from gi import PyGIDeprecationWarning
 
 GLib = get_introspection_module('GLib')
 
@@ -606,7 +607,7 @@ __all__.append('timeout_add_seconds')
 def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=_unspecified):
     if not isinstance(priority, int) or isinstance(priority, GLib.IOCondition):
         warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
-                      DeprecationWarning)
+                      PyGIDeprecationWarning)
         # shift the arguments around
         user_data = callback
         callback = condition
@@ -623,7 +624,7 @@ def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=
     # backwards compatibility: Allow calling with fd
     if isinstance(channel, int):
         warnings.warn('Calling io_add_watch with a file descriptor is deprecated; call it with a GLib.IOChannel object',
-                      DeprecationWarning)
+                      PyGIDeprecationWarning)
         func_fdtransform = lambda _, cond, data: func(channel, cond, data)
         real_channel = GLib.IOChannel.unix_new(channel)
     else:

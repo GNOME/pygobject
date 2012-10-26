@@ -1,7 +1,7 @@
 import types
 import warnings
 
-from gi import _gobject
+from gi import _gobject, PyGIDeprecationWarning
 
 # support overrides in different directories than our gi module
 from pkgutil import extend_path
@@ -76,7 +76,7 @@ def deprecated(fn, replacement):
     '''Decorator for marking methods and classes as deprecated'''
     def wrapped(*args, **kwargs):
         warnings.warn('%s is deprecated; use %s instead' % (fn.__name__, replacement),
-                      DeprecationWarning, stacklevel=2)
+                      PyGIDeprecationWarning, stacklevel=2)
         return fn(*args, **kwargs)
     wrapped.__name__ = fn.__name__
     wrapped.__doc__ = fn.__doc__
