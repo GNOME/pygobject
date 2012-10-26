@@ -101,3 +101,39 @@ https://my.org/q?x=1&y=2
         self.assertTrue(context.is_owner() in [True, False])
         self.assertTrue(context.pending() in [True, False])
         self.assertTrue(context.iteration(False) in [True, False])
+
+    def test_io_add_watch_no_data(self):
+        (r, w) = os.pipe()
+        call_data = []
+
+        def cb(fd, condition):
+            call_data.append((fd, condition, os.read(fd, 1)))
+            return True
+
+        GLib.io_add_watch(r, GLib.IOCondition.IN, cb)
+        ml = GLib.MainLoop()
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a'),
+                                     (r, GLib.IOCondition.IN, b'b')])
+
+    def test_io_add_watch_with_data(self):
+        (r, w) = os.pipe()
+        call_data = []
+
+        def cb(fd, condition, data):
+            call_data.append((fd, condition, os.read(fd, 1), data))
+            return True
+
+        GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo')
+        ml = GLib.MainLoop()
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
+                                     (r, GLib.IOCondition.IN, b'b', 'moo')])
