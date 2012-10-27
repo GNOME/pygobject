@@ -44,29 +44,16 @@ _pygi_lookup_signal_from_g_type (GType g_type,
 {
     GIRepository *repository;
     GIBaseInfo *info;
-    gssize n_infos;
-    gssize i;
     GType parent;
 
     repository = g_irepository_get_default();
     info = g_irepository_find_by_gtype (repository, g_type);
     if (info != NULL) {
-        n_infos = g_object_info_get_n_signals ( (GIObjectInfo *) info);
-        for (i = 0; i < n_infos; i++) {
-            GISignalInfo *signal_info;
-
-            signal_info = g_object_info_get_signal ( (GIObjectInfo *) info, i);
-            g_assert (info != NULL);
-
-            if (strcmp (signal_name, g_base_info_get_name (signal_info)) == 0) {
-                g_base_info_unref (info);
-                return signal_info;
-            }
-
-            g_base_info_unref (signal_info);
-        }
-
+        GISignalInfo *signal_info;
+        signal_info = g_object_info_find_signal ((GIObjectInfo *) info, signal_name);
         g_base_info_unref (info);
+        if (signal_info != NULL)
+            return signal_info;
     }
 
     parent = g_type_parent (g_type);
