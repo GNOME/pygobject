@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 
 import sys
+import os
 import unittest
 import warnings
 
@@ -103,6 +104,9 @@ class TestProcess(unittest.TestCase):
         argv = [sys.executable, '-c', 'import sys']
         pid, stdin, stdout, stderr = GLib.spawn_async(
             argv, flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD)
+        self.assertEqual(stdin, None)
+        self.assertEqual(stdout, None)
+        self.assertEqual(stderr, None)
         pid.close()
         id = GLib.child_watch_add(GLib.PRIORITY_HIGH, pid, cb, 12345)
         self.assertEqual(self.loop.get_context().find_source_by_id(id).priority,
@@ -110,6 +114,31 @@ class TestProcess(unittest.TestCase):
         self.loop.run()
         self.assertEqual(self.data, 12345)
         self.assertEqual(self.status, 0)
+
+    def test_spawn_async_fds(self):
+        pid, stdin, stdout, stderr = GLib.spawn_async(
+            ['cat'], flags=GLib.SpawnFlags.SEARCH_PATH, standard_input=True,
+            standard_output=True, standard_error=True)
+        os.write(stdin, b'hello world!\n')
+        os.close(stdin)
+        out = os.read(stdout, 50)
+        os.close(stdout)
+        err = os.read(stderr, 50)
+        os.close(stderr)
+        pid.close()
+        self.assertEqual(out, b'hello world!\n')
+        self.assertEqual(err, b'')
+
+    def test_spawn_async_envp(self):
+        pid, stdin, stdout, stderr = GLib.spawn_async(
+            ['sh', '-c', 'echo $TEST_VAR'], ['TEST_VAR=moo!'],
+            flags=GLib.SpawnFlags.SEARCH_PATH, standard_output=True)
+        self.assertEqual(stdin, None)
+        self.assertEqual(stderr, None)
+        out = os.read(stdout, 50)
+        os.close(stdout)
+        pid.close()
+        self.assertEqual(out, b'moo!\n')
 
     def test_backwards_compat_flags(self):
         self.assertEqual(GLib.SpawnFlags.DO_NOT_REAP_CHILD,
