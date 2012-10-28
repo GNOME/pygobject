@@ -41,51 +41,6 @@
 
 /* ---------------- glib module functions -------------------- */
 
-struct _PyGChildData {
-    PyObject *func;
-    PyObject *data;
-};
-
-static gint
-get_handler_priority(gint *priority, PyObject *kwargs)
-{
-    Py_ssize_t len, pos;
-    PyObject *key, *val;
-
-    /* no keyword args? leave as default */
-    if (kwargs == NULL)	return 0;
-
-    len = PyDict_Size(kwargs);
-    if (len == 0) return 0;
-
-    if (len != 1) {
-	PyErr_SetString(PyExc_TypeError,
-			"expecting at most one keyword argument");
-	return -1;
-    }
-    pos = 0;
-    PyDict_Next(kwargs, &pos, &key, &val);
-    if (!PYGLIB_PyUnicode_Check(key)) {
-	PyErr_SetString(PyExc_TypeError,
-			"keyword argument name is not a string");
-	return -1;
-    }
-
-    if (strcmp(PYGLIB_PyUnicode_AsString(key), "priority") != 0) {
-	PyErr_SetString(PyExc_TypeError,
-			"only 'priority' keyword argument accepted");
-	return -1;
-    }
-
-    *priority = PYGLIB_PyLong_AsLong(val);
-    if (PyErr_Occurred()) {
-	PyErr_Clear();
-	PyErr_SetString(PyExc_ValueError, "could not get priority value");
-	return -1;
-    }
-    return 0;
-}
-
 static PyObject *
 pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
 {
