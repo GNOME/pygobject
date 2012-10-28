@@ -32,7 +32,7 @@ for name in ['markup_escape_text', 'get_application_name',
              'MainLoop', 'MainContext', 'main_context_default',
              'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD',
              'idle_add', 'timeout_add', 'timeout_add_seconds',
-             'io_add_watch']:
+             'io_add_watch', 'child_watch_add']:
     globals()[name] = gi.overrides.deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
 

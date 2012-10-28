@@ -82,7 +82,6 @@ type_parent = _gobject.type_parent
 type_register = _gobject.type_register
 
 spawn_async = _glib.spawn_async
-child_watch_add = _glib.child_watch_add
 get_current_time = _glib.get_current_time
 filename_from_utf8 = _glib.filename_from_utf8
 Pid = _glib.Pid

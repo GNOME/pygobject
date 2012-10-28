@@ -34,7 +34,7 @@ class TestMainLoop(unittest.TestCase):
             raise Exception("deadbabe")
 
         loop = GLib.MainLoop()
-        GLib.child_watch_add(pid, child_died, loop)
+        GLib.child_watch_add(GLib.PRIORITY_DEFAULT, pid, child_died, loop)
 
         os.close(pipe_r)
         os.write(pipe_w, _bytes("Y"))

@@ -715,6 +715,52 @@ IOChannel = override(IOChannel)
 __all__.append('IOChannel')
 
 
+# The real GLib API is child_watch_add(priority, pid, callback, data).
+# The old static bindings had the following API which we still need to support
+# for a while:
+#   child_watch_add(pid, callback, data=None, priority=GLib.PRIORITY_DEFAULT)
+# and the usual "call without user_data", in which case the callback does not
+# get an user_data either.
+def child_watch_add(priority_or_pid, pid_or_callback, *args, **kwargs):
+    if callable(pid_or_callback):
+        warnings.warn('Calling child_watch_add without priority as first argument is deprecated',
+                      PyGIDeprecationWarning)
+        pid = priority_or_pid
+        callback = pid_or_callback
+        if len(args) == 0:
+            user_data = kwargs.get('data', _unspecified)
+            priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+        elif len(args) == 1:
+            user_data = args[0]
+            priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+        elif len(args) == 2:
+            user_data = args[0]
+            priority = args[1]
+        else:
+            raise TypeError('expected at most 4 positional arguments')
+    else:
+        priority = priority_or_pid
+        pid = pid_or_callback
+        if len(args) == 0 or not callable(args[0]):
+            raise TypeError('expected callback as third argument')
+        callback = args[0]
+        if len(args) == 1:
+            user_data = kwargs.get('data', _unspecified)
+        else:
+            user_data = args[1]
+
+    if user_data is _unspecified:
+        # we have to call the callback without the user_data argument
+        func = lambda pid, status, data: callback(pid, status)
+        user_data = None
+    else:
+        func = callback
+
+    return GLib.child_watch_add(priority, pid, func, user_data)
+
+__all__.append('child_watch_add')
+
+
 # work around wrong constants in GLib GIR, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=685022
 MININT64 = -9223372036854775808

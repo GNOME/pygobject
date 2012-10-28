@@ -96,69 +96,6 @@ pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-static void
-child_watch_func(GPid pid, gint status, gpointer data)
-{
-    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
-    PyObject *retval;
-    PyGILState_STATE gil;
-
-    gil = pyglib_gil_state_ensure();
-    if (child_data->data)
-        retval = PyObject_CallFunction(child_data->func, "iiO", pid, status,
-                                       child_data->data);
-    else
-        retval = PyObject_CallFunction(child_data->func, "ii", pid, status);
-
-    if (retval)
-	Py_DECREF(retval);
-    else
-	PyErr_Print();
-
-    pyglib_gil_state_release(gil);
-}
-
-static void
-child_watch_dnotify(gpointer data)
-{
-    struct _PyGChildData *child_data = (struct _PyGChildData *) data;
-    Py_DECREF(child_data->func);
-    Py_XDECREF(child_data->data);
-    g_slice_free(struct _PyGChildData, child_data);
-}
-
-
-static PyObject *
-pyglib_child_watch_add(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "pid", "function", "data", "priority", NULL };
-    guint id;
-    gint priority = G_PRIORITY_DEFAULT;
-    int pid;
-    PyObject *func, *user_data = NULL;
-    struct _PyGChildData *child_data;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "iO|Oi:glib.child_watch_add", kwlist,
-                                     &pid, &func, &user_data, &priority))
-        return NULL;
-    if (!PyCallable_Check(func)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "_glib.child_watch_add: second argument must be callable");
-        return NULL;
-    }
-
-    child_data = g_slice_new(struct _PyGChildData);
-    child_data->func = func;
-    child_data->data = user_data;
-    Py_INCREF(child_data->func);
-    if (child_data->data)
-        Py_INCREF(child_data->data);
-    id = g_child_watch_add_full(priority, pid, child_watch_func,
-                                child_data, child_watch_dnotify);
-    return PYGLIB_PyLong_FromLong(id);
-}
-
 static PyObject *
 pyglib_get_current_time(PyObject *unused)
 {
@@ -199,15 +136,6 @@ static PyMethodDef _glib_functions[] = {
       "Initialize GLib for use from multiple threads. If you also use GTK+\n"
       "itself (i.e. GUI, not just PyGObject), use gtk.gdk.threads_init()\n"
       "instead." },
-    { "child_watch_add",
-      (PyCFunction)pyglib_child_watch_add, METH_VARARGS|METH_KEYWORDS,
-      "child_watch_add(pid, callable, user_data=None,\n"
-                       "priority=None) -> source id\n"
-      "  callable receives (pid, condition, user_data)\n"
-      "Sets the function specified by function to be called with the user\n"
-      "data specified by data when the child indicated by pid exits.\n"
-      "Condition is a combination of glib.IO_IN, glib.IO_OUT, glib.IO_PRI,\n"
-      "gio.IO_ERR and gio.IO_HUB." },
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
       "spawn_async(argv, envp=None, working_directory=None,\n"

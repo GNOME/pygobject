@@ -13,12 +13,6 @@
 
     <programlisting>
 <methodsynopsis language="python">
-        <methodname><link linkend="function-glib--child-watch-add">glib.child_watch_add</link></methodname>
-        <methodparam><parameter role="keyword">pid</parameter></methodparam>
-        <methodparam><parameter role="keyword">function</parameter></methodparam>
-        <methodparam><parameter role="keyword">data</parameter><initializer>None</initializer></methodparam>
-        <methodparam><parameter role="keyword">priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
-      </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
 linkend="function-glib--spawn-async">glib.spawn_async</link></methodname>
 	<methodparam><parameter role="keyword">argv</parameter></methodparam>
@@ -88,61 +82,6 @@ parser.</para>
       <para>Note that this function doesn't protect whitespace and line
 endings from being processed according to the XML rules for normalization of
 line endings and attribute values.</para>
-
-    </refsect2>
-
-    <refsect2 id="function-glib--child-watch-add">
-      <title>glib.child_watch_add</title>
-      
-      <programlisting><methodsynopsis language="python">
-        <methodname>glib.child_watch_add</methodname>
-        <methodparam><parameter role="keyword">pid</parameter></methodparam>
-        <methodparam><parameter role="keyword">function</parameter></methodparam>
-        <methodparam><parameter role="keyword">data</parameter><initializer>None</initializer></methodparam>
-        <methodparam><parameter role="keyword">priority</parameter><initializer>glib.PRIORITY_DEFAULT</initializer></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist role="params">
-        <varlistentry>
-          <term><parameter role="keyword">pid</parameter>&nbsp;:</term>
-          <listitem><simpara>process id of a child process to watch</simpara></listitem>
-        </varlistentry>
-        <varlistentry><term><parameter role="keyword">function</parameter>&nbsp;:</term>
-          <listitem><simpara>the function to call</simpara></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><parameter role="keyword">data</parameter>&nbsp;:</term>
-          <listitem><simpara>the optional data to pass to
-<parameter>function</parameter></simpara></listitem>
-        </varlistentry>
-         <varlistentry>
-          <term><parameter role="keyword">priority</parameter>&nbsp;:</term>
-          <listitem><simpara>the priority of the idle source - one of the
-<xref linkend="glib-priority-constants"
-endterm="glib-priority-constants-title"></xref></simpara></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><emphasis>Returns</emphasis>&nbsp;:</term>
-          <listitem><simpara>the id of event source.</simpara></listitem>
-        </varlistentry>
-      </variablelist>
-      <note>
-        <para>This function is available in PyGTK 2.6 and above.</para>
-      </note>
-
-      <para>The <function>glib.child_watch_add</function>() function sets
-the function specified by <parameter>function</parameter> to be called with
-the user data specified by <parameter>data</parameter> when the child
-indicated by <parameter>pid</parameter> exits. The signature for the
-callback is:</para>
-
-      <programlisting>
-def callback(pid, condition, user_data)
-</programlisting>
-
-      <para>where <parameter>pid</parameter> is is the child process id,
-<parameter>condition</parameter> is the status information about the child
-process and <parameter>user_data</parameter> is <parameter>data</parameter>
-PyGTK supports only a single callback per process id.</para>
 
     </refsect2>
 

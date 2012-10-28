@@ -45,7 +45,6 @@ OPTION_FLAG_REVERSE = _glib.OPTION_FLAG_REVERSE
 OPTION_REMAINING = _glib.OPTION_REMAINING
 
 # Functions
-child_watch_add = _glib.child_watch_add
 filename_from_utf8 = _glib.filename_from_utf8
 get_current_time = _glib.get_current_time
 glib_version = _glib.glib_version
