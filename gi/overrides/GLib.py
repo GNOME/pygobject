@@ -761,6 +761,14 @@ def child_watch_add(priority_or_pid, pid_or_callback, *args, **kwargs):
 __all__.append('child_watch_add')
 
 
+def get_current_time():
+    return GLib.get_real_time() * 0.000001
+
+get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
+
+__all__.append('get_current_time')
+
+
 # work around wrong constants in GLib GIR, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=685022
 MININT64 = -9223372036854775808

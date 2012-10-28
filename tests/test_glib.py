@@ -63,7 +63,11 @@ https://my.org/q?x=1&y=2
                                'http://gnome.org/new'])
 
     def test_current_time(self):
-        tm = GLib.get_current_time()
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            tm = GLib.get_current_time()
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+
         self.assertTrue(isinstance(tm, float))
         self.assertGreater(tm, 1350000000.0)
 

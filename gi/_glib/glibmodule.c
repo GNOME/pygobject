@@ -97,15 +97,6 @@ pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-pyglib_get_current_time(PyObject *unused)
-{
-    GTimeVal timeval;
-
-    g_get_current_time(&timeval);
-    return pyglib_float_from_timeval(timeval);
-}
-
-static PyObject *
 pyglib_filename_from_utf8(PyObject *self, PyObject *args)
 {
     char *filename, *utf8string;
@@ -146,8 +137,6 @@ static PyMethodDef _glib_functions[] = {
       "See the reference manual for a complete reference." },
     { "filename_from_utf8",
       (PyCFunction)pyglib_filename_from_utf8, METH_VARARGS },
-    { "get_current_time",
-      (PyCFunction)pyglib_get_current_time, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

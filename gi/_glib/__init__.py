@@ -46,7 +46,6 @@ OPTION_REMAINING = _glib.OPTION_REMAINING
 
 # Functions
 filename_from_utf8 = _glib.filename_from_utf8
-get_current_time = _glib.get_current_time
 glib_version = _glib.glib_version
 pyglib_version = _glib.pyglib_version
 spawn_async = _glib.spawn_async

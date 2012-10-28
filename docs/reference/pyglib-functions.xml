@@ -26,9 +26,6 @@ linkend="function-glib--spawn-async">glib.spawn_async</link></methodname>
  	<methodparam><parameter role="keyword">standard_error</parameter><initializer>None</initializer></methodparam>
      </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
-linkend="function-glib--get-current-time">glib.get_current_time</link></methodname>
-      </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
 linkend="function-glib--threads-init">glib.threads_init</link></methodname>
       </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
@@ -286,29 +283,6 @@ location as the parent's standard output unless
 
       <para>If an error occurs, the glib.GError exception will be
 raised.</para>
-
-    </refsect2>
-
-    <refsect2 id="function-glib--get-current-time">
-      <title>glib.get_current_time</title>
-      
-      <programlisting><methodsynopsis language="python">
-        <methodname>glib.get_current_time</methodname>
-	</methodsynopsis></programlisting>
-      <variablelist role="params">
-        <varlistentry>
-          <term><emphasis>Returns</emphasis>&nbsp;:</term>
-          <listitem><simpara>the current time as the number of seconds and
-microseconds from the epoch.</simpara></listitem>
-        </varlistentry>
-      </variablelist>
-      <note>
-        <para>This function is available in PyGTK 2.8 and above.</para>
-      </note>
-
-      <para>The <function>glib.get_current_time</function>() function
-reurns the current time of day as the number of seconds and microseconds
-from the epoch.</para>
 
     </refsect2>
 
