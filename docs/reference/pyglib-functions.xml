@@ -46,42 +46,6 @@ module but are not directly associated with a specific class.</para>
   <refsect1>
     <title>Functions</title>
 
-    <refsect2 id="function-glib--markup-escape-text">
-      <title>glib.markup_escape_text</title>
-
-      <programlisting><methodsynopsis language="python">
-	  <methodname>glib.markup_escape_text</methodname>
-	  <methodparam><parameter>text</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist>
-	<varlistentry>
-	  <term><parameter>text</parameter>&nbsp;:</term>
-	  <listitem><simpara>the UTF-8 string to be
-escaped</simpara></listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><emphasis>Returns</emphasis>&nbsp;:</term>
-	  <listitem><simpara>the escaped text</simpara></listitem>
-	</varlistentry>
-      </variablelist>
-
-      <note>
-        <para>This function is available in PyGTK 2.8 and above.</para>
-      </note>
-
-      <para>The <function>glib.markup_escape_text</function>() function
-escapes the string specified by <parameter>text</parameter> so that the
-markup parser will parse it verbatim. Less than, greater than, ampersand,
-etc. are replaced with the corresponding entities. This function would
-typically be used when writing out a file to be parsed with the markup
-parser.</para>
-
-      <para>Note that this function doesn't protect whitespace and line
-endings from being processed according to the XML rules for normalization of
-line endings and attribute values.</para>
-
-    </refsect2>
-
     <refsect2 id="function-glib--spawn-async">
       <title>glib.spawn_async</title>
       
