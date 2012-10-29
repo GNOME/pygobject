@@ -601,6 +601,7 @@ __all__.append('timeout_add_seconds')
 # The real GLib API is io_add_watch(IOChannel, priority, condition, callback,
 # user_data). This needs to take into account several deprecated APIs:
 # - calling with an fd as first argument
+# - calling with a Python file object as first argument
 # - calling without a priority as second argument
 # and the usual "call without user_data", in which case the callback does not
 # get an user_data either.
@@ -627,6 +628,12 @@ def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=
                       PyGIDeprecationWarning)
         func_fdtransform = lambda _, cond, data: func(channel, cond, data)
         real_channel = GLib.IOChannel.unix_new(channel)
+    elif isinstance(channel, file):
+        # backwards compatibility: Allow calling with Python file
+        warnings.warn('Calling io_add_watch with a file object is deprecated; call it with a GLib.IOChannel object',
+                      PyGIDeprecationWarning)
+        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        real_channel = GLib.IOChannel.unix_new(channel.fileno())
     else:
         assert isinstance(channel, GLib.IOChannel)
         func_fdtransform = func

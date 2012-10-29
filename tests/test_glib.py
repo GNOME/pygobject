@@ -4,6 +4,7 @@
 import unittest
 import os.path
 import warnings
+import subprocess
 
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
@@ -153,3 +154,28 @@ https://my.org/q?x=1&y=2
 
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
                                      (r, GLib.IOCondition.IN, b'b', 'moo')])
+
+    def test_io_add_watch_pyfile(self):
+        call_data = []
+
+        cmd = subprocess.Popen('sleep 0.1; echo hello; sleep 0.2; echo world',
+                               shell=True, stdout=subprocess.PIPE)
+
+        def cb(file, condition):
+            call_data.append((file, condition, file.readline()))
+            return True
+
+        # io_add_watch() takes an IOChannel, calling with a Python file is deprecated
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            GLib.io_add_watch(cmd.stdout, GLib.IOCondition.IN, cb)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+
+        ml = GLib.MainLoop()
+        GLib.timeout_add(400, ml.quit)
+        ml.run()
+
+        cmd.wait()
+
+        self.assertEqual(call_data, [(cmd.stdout, GLib.IOCondition.IN, b'hello\n'),
+                                     (cmd.stdout, GLib.IOCondition.IN, b'world\n')])
