@@ -628,7 +628,7 @@ def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=
                       PyGIDeprecationWarning)
         func_fdtransform = lambda _, cond, data: func(channel, cond, data)
         real_channel = GLib.IOChannel.unix_new(channel)
-    elif isinstance(channel, file):
+    elif hasattr(channel, 'fileno'):
         # backwards compatibility: Allow calling with Python file
         warnings.warn('Calling io_add_watch with a file object is deprecated; call it with a GLib.IOChannel object',
                       PyGIDeprecationWarning)
@@ -717,6 +717,8 @@ class IOChannel(GLib.IOChannel):
             return buf
         raise StopIteration
 
+    # Python 2.x compatibility
+    next = __next__
 
 IOChannel = override(IOChannel)
 __all__.append('IOChannel')
