@@ -251,7 +251,7 @@ second line
         # io_add_watch() method is deprecated, use GLib.io_add_watch
         with warnings.catch_warnings(record=True) as warn:
             warnings.simplefilter('always')
-            id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', GLib.PRIORITY_HIGH)
+            id = ch.add_watch(GLib.IOCondition.IN, cb, 'hello', priority=GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
@@ -279,7 +279,7 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
+        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
 
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
@@ -307,7 +307,38 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
+        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, 'hello', priority=GLib.PRIORITY_HIGH)
+
+        ml = GLib.MainLoop()
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_HIGH)
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(cb_reads, [b'a', b'b'])
+
+    def test_add_watch_with_multi_data(self):
+        (r, w) = os.pipe()
+
+        ch = GLib.IOChannel(filedes=r)
+        ch.set_encoding(None)
+        ch.set_flags(ch.get_flags() | GLib.IOFlags.NONBLOCK)
+
+        cb_reads = []
+
+        def cb(channel, condition, data1, data2, data3):
+            self.assertEqual(channel, ch)
+            self.assertEqual(condition, GLib.IOCondition.IN)
+            self.assertEqual(data1, 'a')
+            self.assertEqual(data2, 'b')
+            self.assertEqual(data3, 'c')
+            cb_reads.append(channel.read())
+            return True
+
+        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb,
+                               'a', 'b', 'c', priority=GLib.PRIORITY_HIGH)
 
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,

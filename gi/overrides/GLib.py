@@ -569,31 +569,55 @@ __all__.append('Timeout')
 _unspecified = object()
 
 
-# backwards compatible API
-def _glib_idle_adjust_callback(function, user_data):
-    if user_data is _unspecified:
-        # we have to call the callback without the user_data argument
-        return (lambda data: function(), None)
-    return (function, user_data)
+def idle_add(function, *args, **kwargs):
+    '''Add idle callback with variable arguments.
 
+    Accepts priority as keyword argument (default GLib.PRIORITY_DEFAULT_IDLE).
+    Remaining args and kwargs will be passed to callback.
+    '''
+    newkwargs = kwargs.copy()
+    if 'priority' in newkwargs:
+        priority = newkwargs.pop('priority')
+    else:
+        priority = GLib.PRIORITY_DEFAULT_IDLE
 
-def idle_add(function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT_IDLE):
-    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
-    return GLib.idle_add(priority, function, user_data)
+    return GLib.idle_add(priority, lambda _: function(*args, **newkwargs), None)
 
 __all__.append('idle_add')
 
 
-def timeout_add(interval, function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT):
-    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
-    return GLib.timeout_add(priority, interval, function, user_data)
+def timeout_add(interval, function, *args, **kwargs):
+    '''Add timeout callback with variable arguments.
+
+    Accepts priority as keyword argument (default GLib.PRIORITY_DEFAULT).
+    Remaining args and kwargs will be passed to callback.
+    '''
+    newkwargs = kwargs.copy()
+    if 'priority' in newkwargs:
+        priority = newkwargs.pop('priority')
+    else:
+        priority = GLib.PRIORITY_DEFAULT
+
+    return GLib.timeout_add(priority, interval,
+                            lambda _: function(*args, **newkwargs), None)
 
 __all__.append('timeout_add')
 
 
-def timeout_add_seconds(interval, function, user_data=_unspecified, priority=GLib.PRIORITY_DEFAULT):
-    (function, user_data) = _glib_idle_adjust_callback(function, user_data)
-    return GLib.timeout_add_seconds(priority, interval, function, user_data)
+def timeout_add_seconds(interval, function, *args, **kwargs):
+    '''Add timeout callback in seconds with variable arguments.
+
+    Accepts "priority" as keyword argument (default GLib.PRIORITY_DEFAULT).
+    Remaining args and kwargs will be passed to callback.
+    '''
+    newkwargs = kwargs.copy()
+    if 'priority' in newkwargs:
+        priority = newkwargs.pop('priority')
+    else:
+        priority = GLib.PRIORITY_DEFAULT
+
+    return GLib.timeout_add_seconds(priority, interval,
+                                    lambda _: function(*args, **newkwargs), None)
 
 __all__.append('timeout_add_seconds')
 
@@ -605,42 +629,33 @@ __all__.append('timeout_add_seconds')
 # - calling without a priority as second argument
 # and the usual "call without user_data", in which case the callback does not
 # get an user_data either.
-def io_add_watch(channel, priority, condition, callback=_unspecified, user_data=_unspecified):
-    if not isinstance(priority, int) or isinstance(priority, GLib.IOCondition):
-        warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
-                      PyGIDeprecationWarning)
-        # shift the arguments around
-        user_data = callback
-        callback = condition
-        condition = priority
+def io_add_watch(channel, condition, callback, *args, **kwargs):
+    newkwargs = kwargs.copy()
+    if 'priority' in newkwargs:
+        priority = newkwargs.pop('priority')
+    else:
         priority = GLib.PRIORITY_DEFAULT
 
-    if user_data is _unspecified:
-        # we have to call the callback without the user_data argument
-        func = lambda channel, cond, data: callback(channel, cond)
-        user_data = None
-    else:
-        func = callback
-
-    # backwards compatibility: Allow calling with fd
-    if isinstance(channel, int):
+    if isinstance(channel, GLib.IOChannel):
+        func_fdtransform = lambda chan, cond, data: callback(chan, cond, *args, **newkwargs)
+        real_channel = channel
+    elif isinstance(channel, int):
+        # backwards compatibility: Allow calling with fd
         warnings.warn('Calling io_add_watch with a file descriptor is deprecated; call it with a GLib.IOChannel object',
                       PyGIDeprecationWarning)
-        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        func_fdtransform = lambda _, cond, data: callback(channel, cond, *args, **newkwargs)
         real_channel = GLib.IOChannel.unix_new(channel)
     elif hasattr(channel, 'fileno'):
         # backwards compatibility: Allow calling with Python file
         warnings.warn('Calling io_add_watch with a file object is deprecated; call it with a GLib.IOChannel object',
                       PyGIDeprecationWarning)
-        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        func_fdtransform = lambda _, cond, data: callback(channel, cond, *args, **newkwargs)
         real_channel = GLib.IOChannel.unix_new(channel.fileno())
     else:
-        assert isinstance(channel, GLib.IOChannel)
-        func_fdtransform = func
-        real_channel = channel
+        raise TypeError('Expected a GLib.IOChannel, but got %s' % type(channel))
 
     return GLib.io_add_watch(real_channel, priority, condition,
-                             func_fdtransform, user_data)
+                             func_fdtransform, None)
 
 __all__.append('io_add_watch')
 
@@ -702,9 +717,8 @@ class IOChannel(GLib.IOChannel):
             raise ValueError("invalid 'whence' value")
         return self.seek_position(offset, w)
 
-    def add_watch(self, condition, callback, user_data=_unspecified,
-                  priority=GLib.PRIORITY_DEFAULT):
-        return io_add_watch(self, priority, condition, callback, user_data)
+    def add_watch(self, condition, callback, *args, **kwargs):
+        return io_add_watch(self, condition, callback, *args, **kwargs)
 
     add_watch = deprecated(add_watch, 'GLib.io_add_watch()')
 
