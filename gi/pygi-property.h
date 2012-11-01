@@ -30,10 +30,10 @@
 #include "pygi.h"
 
 PyObject *pygi_get_property_value_real (PyGObject *instance,
-                                        const gchar *attr_name);
+                                        GParamSpec *pspec);
 
 gint pygi_set_property_value_real (PyGObject *instance,
-                                   const gchar *attr_name,
+                                   GParamSpec *pspec,
                                    PyObject *py_value);
 
 #endif /* __PYGI_PROPERTY_H__ */

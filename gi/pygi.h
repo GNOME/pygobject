@@ -77,9 +77,9 @@ typedef PyObject * (*PyGIArgOverrideReleaseFunc) (GITypeInfo *type_info,
 struct PyGI_API {
     PyObject* (*type_import_by_g_type) (GType g_type);
     PyObject* (*get_property_value) (PyGObject *instance,
-                                     const gchar *attr_name);
+                                     GParamSpec *pspec);
     gint (*set_property_value) (PyGObject *instance,
-                                const gchar *attr_name,
+                                GParamSpec *pspec,
                                 PyObject *value);
     GClosure * (*signal_closure_new) (PyGObject *instance,
                                       const gchar *sig_name,
@@ -124,23 +124,23 @@ pygi_type_import_by_g_type (GType g_type)
 
 static inline PyObject *
 pygi_get_property_value (PyGObject *instance,
-                         const gchar *attr_name)
+                         GParamSpec *pspec)
 {
     if (_pygi_import() < 0) {
         return NULL;
     }
-    return PyGI_API->get_property_value(instance, attr_name);
+    return PyGI_API->get_property_value(instance, pspec);
 }
 
 static inline gint
 pygi_set_property_value (PyGObject *instance,
-                         const gchar *attr_name,
+                         GParamSpec *pspec,
                          PyObject *value)
 {
     if (_pygi_import() < 0) {
         return -1;
     }
-    return PyGI_API->set_property_value(instance, attr_name, value);
+    return PyGI_API->set_property_value(instance, pspec, value);
 }
 
 static inline GClosure *
