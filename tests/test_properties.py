@@ -21,6 +21,7 @@ from gi.repository.GObject import \
 
 from gi.repository import Gio
 from gi.repository import GLib
+from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 
 if sys.version_info < (3, 0):
@@ -59,6 +60,35 @@ class PropertyObject(GObject.GObject):
 
     strings = GObject.Property(
         type=TYPE_STRV, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
+
+class PropertyInheritanceObject(Regress.TestObj):
+    # override property from the base class, with a different type
+    string = GObject.Property(type=int)
+
+    # a property entirely defined at the Python level
+    python_prop = GObject.Property(type=str)
+
+
+class PropertySubClassObject(PropertyInheritanceObject):
+    # override property from the base class, with a different type
+    python_prop = GObject.Property(type=int)
+
+
+class TestPropertyInheritanceObject(unittest.TestCase):
+    def test_override_gi_property(self):
+        self.assertNotEqual(Regress.TestObj.props.string.value_type,
+                            PropertyInheritanceObject.props.string.value_type)
+        obj = PropertyInheritanceObject()
+        self.assertEqual(type(obj.props.string), int)
+        obj.props.string = 4
+        self.assertEqual(obj.props.string, 4)
+
+    def test_override_python_property(self):
+        obj = PropertySubClassObject()
+        self.assertEqual(type(obj.props.python_prop), int)
+        obj.props.python_prop = 5
+        self.assertEqual(obj.props.python_prop, 5)
 
 
 class TestPropertyObject(unittest.TestCase):

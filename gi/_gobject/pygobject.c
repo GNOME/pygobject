@@ -51,6 +51,25 @@ GQuark pygobject_wrapper_key;
 GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
 
+/* Copied from glib. gobject uses hyphens in property names, but in Python
+ * we can only represent hyphens as underscores. Convert underscores to
+ * hyphens for glib compatibility. */
+static void
+canonicalize_key (gchar *key)
+{
+    gchar *p;
+
+    for (p = key; *p != 0; p++)
+    {
+        gchar c = *p;
+
+        if (c != '-' &&
+            (c < '0' || c > '9') &&
+            (c < 'A' || c > 'Z') &&
+            (c < 'a' || c > 'z'))
+                *p = '-';
+    }
+}
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
@@ -237,7 +256,7 @@ build_parameter_list(GObjectClass *class)
 static PyObject*
 PyGProps_getattro(PyGProps *self, PyObject *attr)
 {
-    char *attr_name;
+    char *attr_name, *property_name;
     GObjectClass *class;
     GParamSpec *pspec;
     GValue value = { 0, };
@@ -257,15 +276,13 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 	return ret;
     }
 
-    if (self->pygobject != NULL) {
-        ret = pygi_get_property_value (self->pygobject, attr_name);
-        if (ret != NULL) {
-	    g_type_class_unref(class);
-            return ret;
-	}
-    }
-
-    pspec = g_object_class_find_property(class, attr_name);
+    /* g_object_class_find_property recurses through the class hierarchy,
+     * so the resulting pspec tells us the owner_type that owns the property
+     * we're dealing with. */
+    property_name = g_strdup(attr_name);
+    canonicalize_key(property_name);
+    pspec = g_object_class_find_property(class, property_name);
+    g_free(property_name);
     g_type_class_unref(class);
 
     if (!pspec) {
@@ -278,14 +295,23 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 	return NULL;
     }
 
-    /* If we're doing it without an instance, return a GParamSpec */
     if (!self->pygobject) {
+        /* If we're doing it without an instance, return a GParamSpec */
         return pyg_param_spec_new(pspec);
     }
+
+    /* See if the property's class is from the gi repository. If so,
+     * use gi to correctly read the property value. */
+    ret = pygi_get_property_value (self->pygobject, pspec);
+    if (ret != NULL) {
+        return ret;
+    }
     
+    /* If we reach here, it must be a property defined outside of gi.
+     * Just do a straightforward read. */
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     pyg_begin_allow_threads;
-    g_object_get_property(self->pygobject->obj, attr_name, &value);
+    g_object_get_property(self->pygobject->obj, pspec->name, &value);
     pyg_end_allow_threads;
     ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
@@ -295,7 +321,6 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 
 static gboolean
 set_property_from_pspec(GObject *obj,
-			char *attr_name,
 			GParamSpec *pspec,
 			PyObject *pvalue)
 {
@@ -304,13 +329,13 @@ set_property_from_pspec(GObject *obj,
     if (pspec->flags & G_PARAM_CONSTRUCT_ONLY) {
 	PyErr_Format(PyExc_TypeError,
 		     "property '%s' can only be set in constructor",
-		     attr_name);
+		     pspec->name);
 	return FALSE;
     }	
 
     if (!(pspec->flags & G_PARAM_WRITABLE)) {
 	PyErr_Format(PyExc_TypeError,
-		     "property '%s' is not writable", attr_name);
+		     "property '%s' is not writable", pspec->name);
 	return FALSE;
     }	
 
@@ -322,7 +347,7 @@ set_property_from_pspec(GObject *obj,
     }
 
     pyg_begin_allow_threads;
-    g_object_set_property(obj, attr_name, &value);
+    g_object_set_property(obj, pspec->name, &value);
     pyg_end_allow_threads;
 
     g_value_unset(&value);
@@ -336,7 +361,7 @@ static int
 PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
 {
     GParamSpec *pspec;
-    char *attr_name;
+    char *attr_name, *property_name;
     GObject *obj;
     int ret = -1;
     
@@ -358,20 +383,33 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
         return -1;
     }
 
-    ret = pygi_set_property_value (self->pygobject, attr_name, pvalue);
+    obj = self->pygobject->obj;
+
+    property_name = g_strdup(attr_name);
+    canonicalize_key(property_name);
+
+    /* g_object_class_find_property recurses through the class hierarchy,
+     * so the resulting pspec tells us the owner_type that owns the property
+     * we're dealing with. */
+    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj),
+                                         property_name);
+    g_free(property_name);
+    if (!pspec) {
+	return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
+    }
+
+    /* See if the property's class is from the gi repository. If so,
+     * use gi to correctly read the property value. */
+    ret = pygi_set_property_value (self->pygobject, pspec, pvalue);
     if (ret == 0)
         return 0;
     else if (ret == -1)
         if (PyErr_Occurred())
             return -1;
 
-    obj = self->pygobject->obj;
-    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(obj), attr_name);
-    if (!pspec) {
-	return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
-    }
-
-    if (!set_property_from_pspec(obj, attr_name, pspec, pvalue))
+    /* If we reach here, it must be a property defined outside of gi.
+     * Just do a straightforward set. */
+    if (!set_property_from_pspec(obj, pspec, pvalue))
 	return -1;
 				  
     return 0;
@@ -1458,7 +1496,7 @@ pygobject_set_property(PyGObject *self, PyObject *args)
 	return NULL;
     }
     
-    if (!set_property_from_pspec(self->obj, param_name, pspec, pvalue))
+    if (!set_property_from_pspec(self->obj, pspec, pvalue))
 	return NULL;
     
     Py_INCREF(Py_None);
@@ -1496,7 +1534,7 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
 	    goto exit;
 	}
 
-	if (!set_property_from_pspec(G_OBJECT(self->obj), key_str, pspec, value))
+	if (!set_property_from_pspec(G_OBJECT(self->obj), pspec, value))
 	    goto exit;
     }
 

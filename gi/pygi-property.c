@@ -25,92 +25,95 @@
 
 #include <girepository.h>
 
-/* Copied from glib */
-static void
-canonicalize_key (gchar *key)
+static GIPropertyInfo *
+lookup_property_from_object_info (GIObjectInfo *info, const gchar *attr_name)
 {
-    gchar *p;
+    gssize n_infos;
+    gssize i;
 
-    for (p = key; *p != 0; p++)
-    {
-        gchar c = *p;
+    n_infos = g_object_info_get_n_properties (info);
+    for (i = 0; i < n_infos; i++) {
+        GIPropertyInfo *property_info;
 
-        if (c != '-' &&
-            (c < '0' || c > '9') &&
-            (c < 'A' || c > 'Z') &&
-            (c < 'a' || c > 'z'))
-                *p = '-';
+        property_info = g_object_info_get_property (info, i);
+        g_assert (info != NULL);
+
+        if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
+            return property_info;
+        }
+
+        g_base_info_unref (property_info);
     }
+
+    return NULL;
+}
+
+static GIPropertyInfo *
+lookup_property_from_interface_info (GIInterfaceInfo *info,
+                                     const gchar *attr_name)
+{
+    gssize n_infos;
+    gssize i;
+
+    n_infos = g_interface_info_get_n_properties (info);
+    for (i = 0; i < n_infos; i++) {
+        GIPropertyInfo *property_info;
+
+        property_info = g_interface_info_get_property (info, i);
+        g_assert (info != NULL);
+
+        if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
+            return property_info;
+        }
+
+        g_base_info_unref (property_info);
+    }
+
+    return NULL;
 }
 
 static GIPropertyInfo *
 _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
 {
+    GIPropertyInfo *ret = NULL;
     GIRepository *repository;
     GIBaseInfo *info;
-    gssize n_infos;
-    gssize i;
-    GType parent;
 
     repository = g_irepository_get_default();
     info = g_irepository_find_by_gtype (repository, g_type);
-    if (info != NULL) {
+    if (info == NULL)
+       return NULL;
 
-        n_infos = g_object_info_get_n_properties ( (GIObjectInfo *) info);
-        for (i = 0; i < n_infos; i++) {
-            GIPropertyInfo *property_info;
+    if (GI_IS_OBJECT_INFO (info))
+        ret = lookup_property_from_object_info ((GIObjectInfo *) info,
+                                                attr_name);
+    else if (GI_IS_INTERFACE_INFO (info))
+        ret = lookup_property_from_interface_info ((GIInterfaceInfo *) info,
+                                                   attr_name);
 
-            property_info = g_object_info_get_property ( (GIObjectInfo *) info,
-                                                         i);
-            g_assert (info != NULL);
-
-            if (strcmp (attr_name, g_base_info_get_name (property_info)) == 0) {
-                g_base_info_unref (info);
-                return property_info;
-            }
-
-            g_base_info_unref (property_info);
-        }
-
-        g_base_info_unref (info);
-    }
-
-    parent = g_type_parent (g_type);
-    if (parent > 0)
-        return _pygi_lookup_property_from_g_type (parent, attr_name);
-
-    return NULL;
+    g_base_info_unref (info);
+    return ret;
 }
 
 PyObject *
-pygi_get_property_value_real (PyGObject *instance,
-                              const gchar *attr_name)
+pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
 {
-    GType g_type;
     GIPropertyInfo *property_info = NULL;
-    char *property_name = g_strdup (attr_name);
-    GParamSpec *pspec = NULL;
     GValue value = { 0, };
     GIArgument arg = { 0, };
     PyObject *py_value = NULL;
     GITypeInfo *type_info = NULL;
     GITransfer transfer;
 
-    canonicalize_key (property_name);
-
-    g_type = pyg_type_from_object ((PyObject *)instance);
-    property_info = _pygi_lookup_property_from_g_type (g_type, property_name);
+    /* The owner_type of the pspec gives us the exact type that introduced the
+     * property, even if it is a parent class of the instance in question. */
+    property_info = _pygi_lookup_property_from_g_type (pspec->owner_type, pspec->name);
 
     if (property_info == NULL)
         goto out;
 
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (instance->obj),
-                                          attr_name);
-    if (pspec == NULL)
-        goto out;
-
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
-    g_object_get_property (instance->obj, attr_name, &value);
+    g_object_get_property (instance->obj, pspec->name, &value);
 
     type_info = g_property_info_get_type (property_info);
     transfer = g_property_info_get_ownership_transfer (property_info);
@@ -243,7 +246,6 @@ pygi_get_property_value_real (PyGObject *instance,
     py_value = _pygi_argument_to_object (&arg, type_info, transfer);
 
 out:
-    g_free (property_name);
     if (property_info != NULL)
         g_base_info_unref (property_info);
     if (type_info != NULL)
@@ -254,31 +256,22 @@ out:
 
 gint
 pygi_set_property_value_real (PyGObject *instance,
-                              const gchar *attr_name,
+                              GParamSpec *pspec,
                               PyObject *py_value)
 {
-    GType g_type;
     GIPropertyInfo *property_info = NULL;
-    char *property_name = g_strdup (attr_name);
     GITypeInfo *type_info = NULL;
     GITypeTag type_tag;
     GITransfer transfer;
     GValue value = { 0, };
     GIArgument arg = { 0, };
-    GParamSpec *pspec = NULL;
     gint ret_value = -1;
 
-    canonicalize_key (property_name);
-
-    g_type = pyg_type_from_object ((PyObject *)instance);
-    property_info = _pygi_lookup_property_from_g_type (g_type, property_name);
-
+    /* The owner_type of the pspec gives us the exact type that introduced the
+     * property, even if it is a parent class of the instance in question. */
+    property_info = _pygi_lookup_property_from_g_type (pspec->owner_type,
+                                                       pspec->name);
     if (property_info == NULL)
-        goto out;
-
-    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (instance->obj),
-                                          attr_name);
-    if (pspec == NULL)
         goto out;
 
     if (! (pspec->flags & G_PARAM_WRITABLE))
@@ -413,12 +406,11 @@ pygi_set_property_value_real (PyGObject *instance,
             goto out;
     }
 
-    g_object_set_property (instance->obj, attr_name, &value);
+    g_object_set_property (instance->obj, pspec->name, &value);
 
     ret_value = 0;
 
 out:
-    g_free (property_name);
     if (property_info != NULL)
         g_base_info_unref (property_info);
     if (type_info != NULL)
