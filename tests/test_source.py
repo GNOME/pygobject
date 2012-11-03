@@ -218,6 +218,21 @@ class TestUserData(unittest.TestCase):
         ml.run()
         self.assertTrue(data['called'])
 
+    def test_idle_multidata(self):
+        ml = GLib.MainLoop()
+
+        def cb(data, data2):
+            data['called'] = True
+            data['data2'] = data2
+            ml.quit()
+        data = {}
+        id = GLib.idle_add(cb, data, 'hello')
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_DEFAULT_IDLE)
+        ml.run()
+        self.assertTrue(data['called'])
+        self.assertEqual(data['data2'], 'hello')
+
     def test_timeout_data(self):
         ml = GLib.MainLoop()
 
@@ -230,6 +245,21 @@ class TestUserData(unittest.TestCase):
                          GLib.PRIORITY_DEFAULT)
         ml.run()
         self.assertTrue(data['called'])
+
+    def test_timeout_multidata(self):
+        ml = GLib.MainLoop()
+
+        def cb(data, data2):
+            data['called'] = True
+            data['data2'] = data2
+            ml.quit()
+        data = {}
+        id = GLib.timeout_add(50, cb, data, 'hello')
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_DEFAULT)
+        ml.run()
+        self.assertTrue(data['called'])
+        self.assertEqual(data['data2'], 'hello')
 
     def test_idle_no_data_priority(self):
         ml = GLib.MainLoop()

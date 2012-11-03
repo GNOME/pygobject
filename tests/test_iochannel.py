@@ -201,7 +201,7 @@ second line
         self.assertEqual(os.read(r, 10), b'\x03\x04')
         os.close(r)
 
-    def test_deprecated_add_watch_no_data(self):
+    def test_deprecated_method_add_watch_no_data(self):
         (r, w) = os.pipe()
 
         ch = GLib.IOChannel(filedes=r)
@@ -231,7 +231,7 @@ second line
 
         self.assertEqual(cb_reads, [b'a', b'b'])
 
-    def test_add_watch_data_priority(self):
+    def test_deprecated_method_add_watch_data_priority(self):
         (r, w) = os.pipe()
 
         ch = GLib.IOChannel(filedes=r)
@@ -279,7 +279,7 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb)
 
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
@@ -307,7 +307,7 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, 'hello', priority=GLib.PRIORITY_HIGH)
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb, 'hello')
 
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,
@@ -337,8 +337,70 @@ second line
             cb_reads.append(channel.read())
             return True
 
-        id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb,
-                               'a', 'b', 'c', priority=GLib.PRIORITY_HIGH)
+        id = GLib.io_add_watch(ch, GLib.PRIORITY_HIGH, GLib.IOCondition.IN, cb,
+                               'a', 'b', 'c')
+
+        ml = GLib.MainLoop()
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_HIGH)
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(cb_reads, [b'a', b'b'])
+
+    def test_deprecated_add_watch_no_data(self):
+        (r, w) = os.pipe()
+
+        ch = GLib.IOChannel(filedes=r)
+        ch.set_encoding(None)
+        ch.set_flags(ch.get_flags() | GLib.IOFlags.NONBLOCK)
+
+        cb_reads = []
+
+        def cb(channel, condition):
+            self.assertEqual(channel, ch)
+            self.assertEqual(condition, GLib.IOCondition.IN)
+            cb_reads.append(channel.read())
+            return True
+
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, priority=GLib.PRIORITY_HIGH)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+
+        ml = GLib.MainLoop()
+        self.assertEqual(ml.get_context().find_source_by_id(id).priority,
+                         GLib.PRIORITY_HIGH)
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, lambda: os.write(w, b'b') and False)
+        GLib.timeout_add(200, ml.quit)
+        ml.run()
+
+        self.assertEqual(cb_reads, [b'a', b'b'])
+
+    def test_deprecated_add_watch_with_data(self):
+        (r, w) = os.pipe()
+
+        ch = GLib.IOChannel(filedes=r)
+        ch.set_encoding(None)
+        ch.set_flags(ch.get_flags() | GLib.IOFlags.NONBLOCK)
+
+        cb_reads = []
+
+        def cb(channel, condition, data):
+            self.assertEqual(channel, ch)
+            self.assertEqual(condition, GLib.IOCondition.IN)
+            self.assertEqual(data, 'hello')
+            cb_reads.append(channel.read())
+            return True
+
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            id = GLib.io_add_watch(ch, GLib.IOCondition.IN, cb, 'hello',
+                                   priority=GLib.PRIORITY_HIGH)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
         self.assertEqual(ml.get_context().find_source_by_id(id).priority,

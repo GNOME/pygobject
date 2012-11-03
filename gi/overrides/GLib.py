@@ -569,55 +569,36 @@ __all__.append('Timeout')
 _unspecified = object()
 
 
-def idle_add(function, *args, **kwargs):
-    '''Add idle callback with variable arguments.
+# backwards compatible API
+def idle_add(function, *user_data, **kwargs):
+    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
+    if len(user_data) == 1:
+        return GLib.idle_add(priority, function, user_data[0])
 
-    Accepts priority as keyword argument (default GLib.PRIORITY_DEFAULT_IDLE).
-    Remaining args and kwargs will be passed to callback.
-    '''
-    newkwargs = kwargs.copy()
-    if 'priority' in newkwargs:
-        priority = newkwargs.pop('priority')
-    else:
-        priority = GLib.PRIORITY_DEFAULT_IDLE
-
-    return GLib.idle_add(priority, lambda _: function(*args, **newkwargs), None)
+    # backwards compat: we have to call the callback with all the user_data arguments
+    return GLib.idle_add(priority, lambda data: function(*data), user_data)
 
 __all__.append('idle_add')
 
 
-def timeout_add(interval, function, *args, **kwargs):
-    '''Add timeout callback with variable arguments.
+def timeout_add(interval, function, *user_data, **kwargs):
+    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+    if len(user_data) == 1:
+        return GLib.timeout_add(priority, interval, function, user_data[0])
 
-    Accepts priority as keyword argument (default GLib.PRIORITY_DEFAULT).
-    Remaining args and kwargs will be passed to callback.
-    '''
-    newkwargs = kwargs.copy()
-    if 'priority' in newkwargs:
-        priority = newkwargs.pop('priority')
-    else:
-        priority = GLib.PRIORITY_DEFAULT
-
-    return GLib.timeout_add(priority, interval,
-                            lambda _: function(*args, **newkwargs), None)
+    # backwards compat: we have to call the callback with all the user_data arguments
+    return GLib.timeout_add(priority, interval, lambda data: function(*data), user_data)
 
 __all__.append('timeout_add')
 
 
-def timeout_add_seconds(interval, function, *args, **kwargs):
-    '''Add timeout callback in seconds with variable arguments.
+def timeout_add_seconds(interval, function, *user_data, **kwargs):
+    priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
+    if len(user_data) == 1:
+        return GLib.timeout_add_seconds(priority, interval, function, user_data[0])
 
-    Accepts "priority" as keyword argument (default GLib.PRIORITY_DEFAULT).
-    Remaining args and kwargs will be passed to callback.
-    '''
-    newkwargs = kwargs.copy()
-    if 'priority' in newkwargs:
-        priority = newkwargs.pop('priority')
-    else:
-        priority = GLib.PRIORITY_DEFAULT
-
-    return GLib.timeout_add_seconds(priority, interval,
-                                    lambda _: function(*args, **newkwargs), None)
+    # backwards compat: we have to call the callback with all the user_data arguments
+    return GLib.timeout_add_seconds(priority, interval, lambda data: function(*data), user_data)
 
 __all__.append('timeout_add_seconds')
 
@@ -627,35 +608,56 @@ __all__.append('timeout_add_seconds')
 # - calling with an fd as first argument
 # - calling with a Python file object as first argument
 # - calling without a priority as second argument
-# and the usual "call without user_data", in which case the callback does not
-# get an user_data either.
-def io_add_watch(channel, condition, callback, *args, **kwargs):
-    newkwargs = kwargs.copy()
-    if 'priority' in newkwargs:
-        priority = newkwargs.pop('priority')
-    else:
-        priority = GLib.PRIORITY_DEFAULT
+# and the usual "call without or multiple user_data", in which case the
+# callback gets the same user data arguments.
+def io_add_watch(channel, priority_, condition, callback=_unspecified, *user_data, **kwargs):
+    if not isinstance(priority_, int) or isinstance(priority_, GLib.IOCondition):
+        warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
+                      PyGIDeprecationWarning)
+        # shift the arguments around
+        if callback == _unspecified:
+            user_data = ()
+        else:
+            user_data = (callback,) + user_data
+        callback = condition
+        condition = priority_
+        priority_ = GLib.PRIORITY_DEFAULT
 
-    if isinstance(channel, GLib.IOChannel):
-        func_fdtransform = lambda chan, cond, data: callback(chan, cond, *args, **newkwargs)
-        real_channel = channel
-    elif isinstance(channel, int):
-        # backwards compatibility: Allow calling with fd
+    if len(user_data) != 1:
+        # we have to call the callback with the user_data arguments
+        func = lambda channel, cond, data: callback(channel, cond, *data)
+    elif user_data[0] == _unspecified:
+        user_data = None
+        func = lambda channel, cond, data: callback(channel, cond)
+    else:
+        user_data = user_data[0]
+        func = callback
+
+    # backwards compatibility: Allow calling with fd
+    if isinstance(channel, int):
         warnings.warn('Calling io_add_watch with a file descriptor is deprecated; call it with a GLib.IOChannel object',
                       PyGIDeprecationWarning)
-        func_fdtransform = lambda _, cond, data: callback(channel, cond, *args, **newkwargs)
+        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
         real_channel = GLib.IOChannel.unix_new(channel)
     elif hasattr(channel, 'fileno'):
         # backwards compatibility: Allow calling with Python file
         warnings.warn('Calling io_add_watch with a file object is deprecated; call it with a GLib.IOChannel object',
                       PyGIDeprecationWarning)
-        func_fdtransform = lambda _, cond, data: callback(channel, cond, *args, **newkwargs)
+        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
         real_channel = GLib.IOChannel.unix_new(channel.fileno())
     else:
-        raise TypeError('Expected a GLib.IOChannel, but got %s' % type(channel))
+        assert isinstance(channel, GLib.IOChannel)
+        func_fdtransform = func
+        real_channel = channel
 
-    return GLib.io_add_watch(real_channel, priority, condition,
-                             func_fdtransform, None)
+    # backwards compatibility: Call with priority kwarg
+    if 'priority' in kwargs:
+        warnings.warn('Calling io_add_watch with priority keyword argument is deprecated, put it as second positional argument',
+                      PyGIDeprecationWarning)
+        priority_ = kwargs['priority']
+
+    return GLib.io_add_watch(real_channel, priority_, condition,
+                             func_fdtransform, user_data)
 
 __all__.append('io_add_watch')
 
@@ -717,8 +719,9 @@ class IOChannel(GLib.IOChannel):
             raise ValueError("invalid 'whence' value")
         return self.seek_position(offset, w)
 
-    def add_watch(self, condition, callback, *args, **kwargs):
-        return io_add_watch(self, condition, callback, *args, **kwargs)
+    def add_watch(self, condition, callback, user_data=_unspecified,
+                  priority=GLib.PRIORITY_DEFAULT):
+        return io_add_watch(self, priority, condition, callback, user_data)
 
     add_watch = deprecated(add_watch, 'GLib.io_add_watch()')
 
