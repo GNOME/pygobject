@@ -37,6 +37,15 @@ class TestGObjectAPI(unittest.TestCase):
 
             self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)
 
+    def test_min_max_int(self):
+        self.assertEqual(GObject.G_MAXINT32, 2 ** 31 - 1)
+        self.assertEqual(GObject.G_MININT32, -2 ** 31)
+        self.assertEqual(GObject.G_MAXUINT32, 2 ** 32 - 1)
+
+        self.assertEqual(GObject.G_MAXINT64, 2 ** 63 - 1)
+        self.assertEqual(GObject.G_MININT64, -2 ** 63)
+        self.assertEqual(GObject.G_MAXUINT64, 2 ** 64 - 1)
+
 
 class TestReferenceCounting(unittest.TestCase):
     def test_regular_object(self):
