@@ -38,6 +38,10 @@ class TestGObjectAPI(unittest.TestCase):
             self.assertLess(GObject.PRIORITY_HIGH, GObject.PRIORITY_DEFAULT)
 
     def test_min_max_int(self):
+        self.assertEqual(GObject.G_MAXINT16, 2 ** 15 - 1)
+        self.assertEqual(GObject.G_MININT16, -2 ** 15)
+        self.assertEqual(GObject.G_MAXUINT16, 2 ** 16 - 1)
+
         self.assertEqual(GObject.G_MAXINT32, 2 ** 31 - 1)
         self.assertEqual(GObject.G_MININT32, -2 ** 31)
         self.assertEqual(GObject.G_MAXUINT32, 2 ** 32 - 1)

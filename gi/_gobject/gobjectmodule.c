@@ -2431,30 +2431,14 @@ pygobject_register_constants(PyObject *m)
     PyModule_AddIntConstant(m,  "G_MAXUSHORT", G_MAXUSHORT);
     PyModule_AddIntConstant(m,  "G_MININT", G_MININT);
     PyModule_AddIntConstant(m,  "G_MAXINT", G_MAXINT);
+    PyModule_AddObject(m,       "G_MAXUINT", PyLong_FromUnsignedLong(G_MAXUINT));
     PyModule_AddObject(m,       "G_MINLONG", PyLong_FromLong(G_MINLONG));
     PyModule_AddObject(m,       "G_MAXLONG", PyLong_FromLong(G_MAXLONG));
     PyModule_AddObject(m,       "G_MAXULONG", PyLong_FromUnsignedLong(G_MAXULONG));
-    PyModule_AddIntConstant(m,  "G_MININT8", G_MININT8);
-    PyModule_AddIntConstant(m,  "G_MAXINT8", G_MAXINT8);
-    PyModule_AddIntConstant(m,  "G_MAXUINT8", G_MAXUINT8);
-    PyModule_AddIntConstant(m,  "G_MININT16", G_MININT16);
-    PyModule_AddIntConstant(m,  "G_MAXINT16", G_MAXINT16);
-    PyModule_AddIntConstant(m,  "G_MAXUINT16", G_MAXUINT16);
-    PyModule_AddIntConstant(m,  "G_MININT32", G_MININT32);
-    PyModule_AddIntConstant(m,  "G_MAXINT32", G_MAXINT32);
-    PyModule_AddObject(m,       "G_MININT64", PyLong_FromLongLong(G_MININT64));
-    PyModule_AddObject(m,       "G_MAXINT64", PyLong_FromLongLong(G_MAXINT64));
-    PyModule_AddObject(m,       "G_MAXUINT64", PyLong_FromUnsignedLongLong(G_MAXUINT64));
     PyModule_AddObject(m,       "G_MAXSIZE", PyLong_FromSize_t(G_MAXSIZE));
     PyModule_AddObject(m,       "G_MAXSSIZE", PyLong_FromSsize_t(G_MAXSSIZE));
     PyModule_AddObject(m,       "G_MINOFFSET", PyLong_FromLongLong(G_MINOFFSET));
     PyModule_AddObject(m,       "G_MAXOFFSET", PyLong_FromLongLong(G_MAXOFFSET));
-
-    /* in order for test_properties to pass, G_MAXUINT must be initialized using
-       PyLong_FromUnsignedLong, despite AFAICT it is unecessary for 32bit int types.
-       In the interests of consistancy I did the same for MAXUINT32 */
-    PyModule_AddObject(m,       "G_MAXUINT32", PyLong_FromUnsignedLong(G_MAXUINT32));
-    PyModule_AddObject(m,       "G_MAXUINT", PyLong_FromUnsignedLong(G_MAXUINT));
 
     PyModule_AddIntConstant(m, "SIGNAL_RUN_FIRST", G_SIGNAL_RUN_FIRST);
     PyModule_AddIntConstant(m, "SIGNAL_RUN_LAST", G_SIGNAL_RUN_LAST);
