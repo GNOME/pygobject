@@ -4,7 +4,7 @@ import gc
 import unittest
 import sys
 
-from gi.repository import GObject
+from gi.repository import GObject, GLib
 from gi._gobject import signalhelper
 import testhelper
 from compathelper import _long
@@ -74,7 +74,11 @@ class TestGSignalsError(unittest.TestCase):
         def foo():
             class Foo(GObject.GObject):
                 __gsignals__ = {'not-exists': 'override'}
+        # do not stumble over the warning thrown by GLib
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL |
+                                             GLib.LogLevelFlags.LEVEL_ERROR)
         self.assertRaises(TypeError, foo)
+        GLib.log_set_always_fatal(old_mask)
         gc.collect()
 
 
