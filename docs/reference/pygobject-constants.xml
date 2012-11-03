@@ -299,25 +299,6 @@ by gobject.</para>
 
     </refsect2>
 
-    <refsect2 id="gobject-version-constants">
-      <title id="gobject-version-constants-title">GObject Version Constants</title>
-
-      <para>The Version constants specify the version of
-<literal>GLIB</literal> used by PyGTK as a 3-tuple containing the major,
-minor and patch release numbers.</para>
-
-      <variablelist>
-	<varlistentry>
-	  <term><literal>gobject.glib_version</literal></term>
-	  <listitem>
-	    <simpara>A 3-tuple containing (major, minor, patch) release
-	    numbers.</simpara>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-
-    </refsect2>
-
   </refsect1>
 
 </refentry>

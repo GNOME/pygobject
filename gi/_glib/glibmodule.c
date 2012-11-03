@@ -139,26 +139,6 @@ pyglib_register_error(PyObject *d)
 }
 
 static void
-pyglib_register_version_tuples(PyObject *d)
-{
-    PyObject *o;
-
-    /* glib version */
-    o = Py_BuildValue("(iii)", glib_major_version, glib_minor_version,
-		      glib_micro_version);
-    PyDict_SetItemString(d, "glib_version", o);
-    Py_DECREF(o);
-
-    /* pyglib version */
-    o = Py_BuildValue("(iii)",
-		      PYGLIB_MAJOR_VERSION,
-		      PYGLIB_MINOR_VERSION,
-		      PYGLIB_MICRO_VERSION);
-    PyDict_SetItemString(d, "pyglib_version", o);
-    Py_DECREF(o);
-}
-
-static void
 pyglib_register_constants(PyObject *m)
 {
     PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
@@ -196,7 +176,6 @@ PYGLIB_MODULE_START(_glib, "_glib")
     pyglib_register_constants(module);
     pyglib_register_api(d);
     pyglib_register_error(d);
-    pyglib_register_version_tuples(d);
     pyglib_source_register_types(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);

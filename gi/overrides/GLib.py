@@ -26,7 +26,7 @@ from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
 from ..overrides import override, deprecated
-from gi import PyGIDeprecationWarning
+from gi import PyGIDeprecationWarning, version_info
 
 GLib = get_introspection_module('GLib')
 
@@ -801,6 +801,12 @@ get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
 
 __all__.append('get_current_time')
 
+
+# obsolete constants for backwards compatibility
+glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
+__all__.append('glib_version')
+pyglib_version = version_info
+__all__.append('pyglib_version')
 
 # work around wrong constants in GLib GIR, see
 # https://bugzilla.gnome.org/show_bug.cgi?id=685022

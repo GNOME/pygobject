@@ -48,7 +48,8 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'SPAWN_LEAVE_DESCRIPTORS_OPEN', 'SPAWN_DO_NOT_REAP_CHILD',
              'SPAWN_SEARCH_PATH', 'SPAWN_STDOUT_TO_DEV_NULL',
              'SPAWN_STDERR_TO_DEV_NULL', 'SPAWN_CHILD_INHERITS_STDIN',
-             'SPAWN_FILE_AND_ARGV_ZERO']:
+             'SPAWN_FILE_AND_ARGV_ZERO',
+             'glib_version']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)
 

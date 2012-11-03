@@ -179,3 +179,15 @@ https://my.org/q?x=1&y=2
 
         self.assertEqual(call_data, [(cmd.stdout, GLib.IOCondition.IN, b'hello\n'),
                                      (cmd.stdout, GLib.IOCondition.IN, b'world\n')])
+
+    def test_glib_version(self):
+        (major, minor, micro) = GLib.glib_version
+        self.assertGreaterEqual(major, 2)
+        self.assertGreaterEqual(minor, 0)
+        self.assertGreaterEqual(micro, 0)
+
+    def test_pyglib_version(self):
+        (major, minor, micro) = GLib.pyglib_version
+        self.assertGreaterEqual(major, 3)
+        self.assertGreaterEqual(minor, 7)
+        self.assertGreaterEqual(micro, 2)

@@ -46,7 +46,5 @@ OPTION_REMAINING = _glib.OPTION_REMAINING
 
 # Functions
 filename_from_utf8 = _glib.filename_from_utf8
-glib_version = _glib.glib_version
-pyglib_version = _glib.pyglib_version
 spawn_async = _glib.spawn_async
 threads_init = _glib.threads_init
