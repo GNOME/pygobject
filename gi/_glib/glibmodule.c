@@ -34,11 +34,6 @@
 #include "pygsource.h"
 #include "pygspawn.h"
 
-#define PYGLIB_MAJOR_VERSION PYGOBJECT_MAJOR_VERSION
-#define PYGLIB_MINOR_VERSION PYGOBJECT_MINOR_VERSION
-#define PYGLIB_MICRO_VERSION PYGOBJECT_MICRO_VERSION
-
-
 /* ---------------- glib module functions -------------------- */
 
 static PyObject *
