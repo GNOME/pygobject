@@ -802,6 +802,14 @@ get_current_time = deprecated(get_current_time, 'GLib.get_real_time()')
 __all__.append('get_current_time')
 
 
+# backwards compatible API with default argument, and ignoring bytes_read
+# output argument
+def filename_from_utf8(utf8string, len=-1):
+    return GLib.filename_from_utf8(utf8string, len)[0]
+
+__all__.append('filename_from_utf8')
+
+
 # obsolete constants for backwards compatibility
 glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
 __all__.append('glib_version')

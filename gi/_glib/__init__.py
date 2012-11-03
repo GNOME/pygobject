@@ -45,6 +45,5 @@ OPTION_FLAG_REVERSE = _glib.OPTION_FLAG_REVERSE
 OPTION_REMAINING = _glib.OPTION_REMAINING
 
 # Functions
-filename_from_utf8 = _glib.filename_from_utf8
 spawn_async = _glib.spawn_async
 threads_init = _glib.threads_init

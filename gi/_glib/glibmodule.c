@@ -51,30 +51,6 @@ pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-static PyObject *
-pyglib_filename_from_utf8(PyObject *self, PyObject *args)
-{
-    char *filename, *utf8string;
-    Py_ssize_t utf8string_len;
-    gsize bytes_written;
-    GError *error = NULL;
-    PyObject *py_filename;
-    
-    if (!PyArg_ParseTuple(args, "s#:glib.filename_from_utf8",
-			  &utf8string, &utf8string_len))
-	return NULL;
-
-    filename = g_filename_from_utf8(utf8string, utf8string_len,
-				    NULL, &bytes_written, &error);
-    if (pyglib_error_check(&error)) {
-        g_free(filename);
-        return NULL;
-    }
-    py_filename = PYGLIB_PyUnicode_FromStringAndSize(filename, bytes_written);
-    g_free(filename);
-    return py_filename;
-}
-
 static PyMethodDef _glib_functions[] = {
     { "threads_init",
       (PyCFunction) pyglib_threads_init, METH_NOARGS,
@@ -90,8 +66,6 @@ static PyMethodDef _glib_functions[] = {
       "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
       "Execute a child program asynchronously within a glib.MainLoop()\n"
       "See the reference manual for a complete reference." },
-    { "filename_from_utf8",
-      (PyCFunction)pyglib_filename_from_utf8, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 

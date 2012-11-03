@@ -82,7 +82,6 @@ type_parent = _gobject.type_parent
 type_register = _gobject.type_register
 
 spawn_async = _glib.spawn_async
-filename_from_utf8 = _glib.filename_from_utf8
 Pid = _glib.Pid
 GError = _glib.GError
 OptionGroup = _glib.OptionGroup

@@ -54,6 +54,14 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.filename_display_name('foo'), 'foo')
         self.assertEqual(GLib.filename_display_basename('bar/foo'), 'foo')
 
+        # this is locale dependent, so we cannot completely verify the result
+        res = GLib.filename_from_utf8(_unicode('aäb'))
+        self.assertTrue(isinstance(res, bytes))
+        self.assertGreaterEqual(len(res), 3)
+
+        # with explicit length argument
+        self.assertEqual(GLib.filename_from_utf8(_unicode('aäb'), 1), b'a')
+
     def test_uri_extract(self):
         res = GLib.uri_list_extract_uris('''# some comment
 http://example.com

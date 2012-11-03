@@ -27,10 +27,6 @@ linkend="function-glib--spawn-async">glib.spawn_async</link></methodname>
      </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
 linkend="function-glib--threads-init">glib.threads_init</link></methodname>
-      </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-glib--filename-from-utf8">glib.filename_from_utf8</link></methodname>
- 	<methodparam><parameter>utf8string</parameter></methodparam>
       </methodsynopsis></programlisting>
 
   </refsect1>
@@ -289,34 +285,6 @@ raised.</para>
       <para>The <function>signal_accumulator_true_handled</function>()
       function is only used as accumulator argument when registering
       signals.</para>
-
-    </refsect2>
-
-    <refsect2 id="function-glib--filename-from-utf8">
-      <title>glib.filename_from_utf8</title>
-      
-      <programlisting><methodsynopsis language="python">
-        <methodname>glib.filename_from_utf8</methodname>
- 	<methodparam><parameter>utf8string</parameter></methodparam>
-	</methodsynopsis></programlisting>
-      <variablelist role="params">
-        <varlistentry>
-          <term><emphasis>utf8string</emphasis>&nbsp;:</term>
-          <listitem><simpara>a UTF-8 encoded string.</simpara></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><emphasis>Returns</emphasis>&nbsp;:</term>
-          <listitem><simpara>a filename encoded in the GLib filename
-          encoding.</simpara></listitem>
-        </varlistentry>
-      </variablelist>
-      <note>
-        <para>This function is available in PyGTK 2.10 and above.</para>
-      </note>
-
-      <para>The <function>filename_from_utf8</function>() function converts
-      a string from UTF-8 to the encoding GLib uses for filenames. Note that
-      on Windows GLib uses UTF-8 for filenames.</para>
 
     </refsect2>
 
