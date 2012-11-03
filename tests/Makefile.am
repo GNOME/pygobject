@@ -86,6 +86,7 @@ EXTRA_DIST = \
 	org.gnome.test.gschema.xml \
 	test_glib.py \
 	test_gobject.py \
+	test_gtype.py \
 	test_interface.py \
 	test_iochannel.py \
 	test_mainloop.py \

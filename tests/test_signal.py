@@ -734,5 +734,48 @@ class TestPython3Signals(unittest.TestCase):
                              str)
 
 
+class TestSignalModuleLevelFunctions(unittest.TestCase):
+    def test_signal_list_ids(self):
+        # This should not raise a SystemError:
+        # https://bugzilla.gnome.org/show_bug.cgi?id=687492
+        self.assertRaises(SystemError, GObject.signal_list_ids, GObject.TYPE_INVALID)
+
+        C_ids = GObject.signal_list_ids(C)
+        self.assertEqual(len(C_ids), 1)
+        # Note canonicalized names
+        self.assertEqual(GObject.signal_name(C_ids[0]), 'my-signal')
+        self.assertEqual(GObject.signal_name(-1), None)
+
+    def test_signal_lookup(self):
+        C_ids = GObject.signal_list_ids(C)
+        self.assertEqual(C_ids[0], GObject.signal_lookup('my_signal', C))
+        self.assertEqual(C_ids[0], GObject.signal_lookup('my-signal', C))
+
+        # This should not raise a SystemError:
+        # https://bugzilla.gnome.org/show_bug.cgi?id=687492
+        self.assertRaises(SystemError, GObject.signal_lookup,
+                          'NOT_A_SIGNAL_NAME', GObject.TYPE_INVALID)
+
+        # Invalid signal names return 0 instead of raising
+        self.assertEqual(GObject.signal_lookup('NOT_A_SIGNAL_NAME', C),
+                         0)
+
+    def test_signal_query(self):
+        my_signal_id, = GObject.signal_list_ids(C)
+
+        # Form is: (id, name, gtype, arg_count, return_type, (arg_type1, ...))
+        my_signal_expected_query_result = [my_signal_id, 'my-signal', C.__gtype__,
+                                           1, GObject.TYPE_NONE, (GObject.TYPE_INT,)]
+        # signal_query(name, type)
+        self.assertSequenceEqual(GObject.signal_query('my-signal', C),
+                                 my_signal_expected_query_result)
+        self.assertSequenceEqual(GObject.signal_query(my_signal_id),
+                                 my_signal_expected_query_result)
+        # invalid query returns None instead of raising
+        self.assertEqual(GObject.signal_query(-1), None)
+        self.assertEqual(GObject.signal_query('NOT_A_SIGNAL', C),
+                         None)
+
+
 if __name__ == '__main__':
     unittest.main()
