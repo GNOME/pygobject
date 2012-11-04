@@ -1,5 +1,6 @@
 import types
 import warnings
+import functools
 
 from gi import _gobject, PyGIDeprecationWarning
 
@@ -74,11 +75,9 @@ def override(type_):
 
 def deprecated(fn, replacement):
     '''Decorator for marking methods and classes as deprecated'''
+    @functools.wraps(fn)
     def wrapped(*args, **kwargs):
         warnings.warn('%s is deprecated; use %s instead' % (fn.__name__, replacement),
                       PyGIDeprecationWarning, stacklevel=2)
         return fn(*args, **kwargs)
-    wrapped.__name__ = fn.__name__
-    wrapped.__doc__ = fn.__doc__
-    wrapped.__dict__.update(fn.__dict__)
     return wrapped

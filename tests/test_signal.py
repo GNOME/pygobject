@@ -735,9 +735,10 @@ class TestPython3Signals(unittest.TestCase):
 
 
 class TestSignalModuleLevelFunctions(unittest.TestCase):
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=687492
+    @unittest.skipIf(sys.version_info < (2, 7), 'Requires Python >= 2.7')
     def test_signal_list_ids_with_invalid_type(self):
-        self.assertRaises(TypeError, GObject.signal_list_ids, GObject.TYPE_INVALID)
+        with self.assertRaisesRegexp(TypeError, 'type must be instantiable or an interface.*'):
+            GObject.signal_list_ids(GObject.TYPE_INVALID)
 
     @unittest.skipIf(sys.version_info < (2, 7), 'Requires Python >= 2.7')
     def test_signal_list_ids(self):
@@ -751,10 +752,10 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
         # There is no signal 0 in gobject
         self.assertEqual(GObject.signal_name(0), None)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=687492
+    @unittest.skipIf(sys.version_info < (2, 7), 'Requires Python >= 2.7')
     def test_signal_lookup_with_invalid_type(self):
-        self.assertRaises(TypeError, GObject.signal_lookup,
-                          'NOT_A_SIGNAL_NAME', GObject.TYPE_INVALID)
+        with self.assertRaisesRegexp(TypeError, 'type must be instantiable or an interface.*'):
+            GObject.signal_lookup('NOT_A_SIGNAL_NAME', GObject.TYPE_INVALID)
 
     @unittest.skipIf(sys.version_info < (2, 7), 'Requires Python >= 2.7')
     def test_signal_lookup(self):

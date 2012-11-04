@@ -31,14 +31,6 @@ linkend="function-gobject--type-is-a">gobject.type_is_a</link></methodname>
 	<methodparam><parameter>parent_type</parameter></methodparam>
   </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
-linkend="function-gobject--type-children">gobject.type_children</link></methodname>
-	<methodparam><parameter>type</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-gobject--type-interfaces">gobject.type_interfaces</link></methodname>
-	<methodparam><parameter>type</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
 linkend="function-gobject--type-register">gobject.type_register</link></methodname>
 	<methodparam><parameter>class</parameter></methodparam>
   </methodsynopsis><methodsynopsis language="python">
@@ -49,23 +41,6 @@ linkend="function-gobject--signal-new">gobject.signal_new</link></methodname>
 	<methodparam><parameter>flags</parameter></methodparam>
 	<methodparam><parameter>return_type</parameter></methodparam>
 	<methodparam><parameter>param_types</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-gobject--signal-list-names">gobject.signal_list_names</link></methodname>
-	<methodparam><parameter role="keyword">type</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-gobject--signal-list-ids">gobject.signal_list_ids</link></methodname>
-	<methodparam><parameter role="keyword">type</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-gobject--signal-lookup">gobject.signal_lookup</link></methodname>
-	<methodparam><parameter role="keyword">name</parameter></methodparam>
-	<methodparam><parameter role="keyword">type</parameter></methodparam>
-  </methodsynopsis><methodsynopsis language="python">
-	<methodname><link
-linkend="function-gobject--signal-name">gobject.signal_name</link></methodname>
-	<methodparam><parameter role="keyword">signal_id</parameter></methodparam>
   </methodsynopsis><methodsynopsis language="python">
 	<methodname><link
 linkend="function-gobject--signal-query1">gobject.signal_query</link></methodname>

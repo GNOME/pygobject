@@ -19,10 +19,24 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import sys
+from collections import namedtuple
+
 import gi.overrides
+import gi.module
 from gi.repository import GLib
+from gi._gobject import _gobject
+from gi._gobject import propertyhelper
+from gi._gobject import signalhelper
+
+GObjectModule = gi.module.get_introspection_module('GObject')
 
 __all__ = []
+
+
+from gi._glib import option
+sys.modules['gi._gobject.option'] = option
+
 
 # API aliases for backwards compatibility
 for name in ['markup_escape_text', 'get_application_name',
@@ -33,7 +47,8 @@ for name in ['markup_escape_text', 'get_application_name',
              'MainLoop', 'MainContext', 'main_context_default',
              'source_remove', 'Source', 'Idle', 'Timeout', 'PollFD',
              'idle_add', 'timeout_add', 'timeout_add_seconds',
-             'io_add_watch', 'child_watch_add', 'get_current_time']:
+             'io_add_watch', 'child_watch_add', 'get_current_time',
+             'spawn_async']:
     globals()[name] = gi.overrides.deprecated(getattr(GLib, name), 'GLib.' + name)
     __all__.append(name)
 
@@ -50,7 +65,11 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'SPAWN_SEARCH_PATH', 'SPAWN_STDOUT_TO_DEV_NULL',
              'SPAWN_STDERR_TO_DEV_NULL', 'SPAWN_CHILD_INHERITS_STDIN',
              'SPAWN_FILE_AND_ARGV_ZERO',
-             'glib_version']:
+             'OPTION_FLAG_HIDDEN', 'OPTION_FLAG_IN_MAIN', 'OPTION_FLAG_REVERSE',
+             'OPTION_FLAG_NO_ARG', 'OPTION_FLAG_FILENAME', 'OPTION_FLAG_OPTIONAL_ARG',
+             'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
+             'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
+             'OPTION_ERROR', 'glib_version']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)
 
@@ -70,3 +89,188 @@ G_MAXUINT64 = GLib.MAXUINT64
 __all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
+
+
+TYPE_INVALID = GObjectModule.type_from_name('invalid')
+TYPE_NONE = GObjectModule.type_from_name('void')
+TYPE_INTERFACE = GObjectModule.type_from_name('GInterface')
+TYPE_CHAR = GObjectModule.type_from_name('gchar')
+TYPE_UCHAR = GObjectModule.type_from_name('guchar')
+TYPE_BOOLEAN = GObjectModule.type_from_name('gboolean')
+TYPE_INT = GObjectModule.type_from_name('gint')
+TYPE_UINT = GObjectModule.type_from_name('guint')
+TYPE_LONG = GObjectModule.type_from_name('glong')
+TYPE_ULONG = GObjectModule.type_from_name('gulong')
+TYPE_INT64 = GObjectModule.type_from_name('gint64')
+TYPE_UINT64 = GObjectModule.type_from_name('guint64')
+TYPE_ENUM = GObjectModule.type_from_name('GEnum')
+TYPE_FLAGS = GObjectModule.type_from_name('GFlags')
+TYPE_FLOAT = GObjectModule.type_from_name('gfloat')
+TYPE_DOUBLE = GObjectModule.type_from_name('gdouble')
+TYPE_STRING = GObjectModule.type_from_name('gchararray')
+TYPE_POINTER = GObjectModule.type_from_name('gpointer')
+TYPE_BOXED = GObjectModule.type_from_name('GBoxed')
+TYPE_PARAM = GObjectModule.type_from_name('GParam')
+TYPE_OBJECT = GObjectModule.type_from_name('GObject')
+TYPE_PYOBJECT = GObjectModule.type_from_name('PyObject')
+TYPE_GTYPE = GObjectModule.type_from_name('GType')
+TYPE_STRV = GObjectModule.type_from_name('GStrv')
+TYPE_VARIANT = GObjectModule.type_from_name('GVariant')
+TYPE_GSTRING = GObjectModule.type_from_name('GString')
+TYPE_UNICHAR = TYPE_UINT
+__all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
+            'TYPE_UCHAR', 'TYPE_BOOLEAN', 'TYPE_INT', 'TYPE_UINT', 'TYPE_LONG',
+            'TYPE_ULONG', 'TYPE_INT64', 'TYPE_UINT64', 'TYPE_ENUM', 'TYPE_FLAGS',
+            'TYPE_FLOAT', 'TYPE_DOUBLE', 'TYPE_STRING', 'TYPE_POINTER',
+            'TYPE_BOXED', 'TYPE_PARAM', 'TYPE_OBJECT', 'TYPE_PYOBJECT',
+            'TYPE_GTYPE', 'TYPE_STRV', 'TYPE_VARIANT', 'TYPE_GSTRING', 'TYPE_UNICHAR']
+
+
+# Deprecated, use GLib directly
+Pid = GLib.Pid
+GError = GLib.GError
+OptionGroup = GLib.OptionGroup
+OptionContext = GLib.OptionContext
+__all__ += ['Pid', 'GError', 'OptionGroup', 'OptionContext']
+
+
+# Deprecated, use: GObject.ParamFlags.* directly
+PARAM_CONSTRUCT = GObjectModule.ParamFlags.CONSTRUCT
+PARAM_CONSTRUCT_ONLY = GObjectModule.ParamFlags.CONSTRUCT_ONLY
+PARAM_LAX_VALIDATION = GObjectModule.ParamFlags.LAX_VALIDATION
+PARAM_READABLE = GObjectModule.ParamFlags.READABLE
+PARAM_WRITABLE = GObjectModule.ParamFlags.WRITABLE
+# PARAM_READWRITE should come from the gi module but cannot due to:
+# https://bugzilla.gnome.org/show_bug.cgi?id=687615
+PARAM_READWRITE = PARAM_READABLE | PARAM_WRITABLE
+__all__ += ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
+            'PARAM_READABLE', 'PARAM_WRITABLE', 'PARAM_READWRITE']
+
+
+# Deprecated, use: GObject.SignalFlags.* directly
+SIGNAL_ACTION = GObjectModule.SignalFlags.ACTION
+SIGNAL_DETAILED = GObjectModule.SignalFlags.DETAILED
+SIGNAL_NO_HOOKS = GObjectModule.SignalFlags.NO_HOOKS
+SIGNAL_NO_RECURSE = GObjectModule.SignalFlags.NO_RECURSE
+SIGNAL_RUN_CLEANUP = GObjectModule.SignalFlags.RUN_CLEANUP
+SIGNAL_RUN_FIRST = GObjectModule.SignalFlags.RUN_FIRST
+SIGNAL_RUN_LAST = GObjectModule.SignalFlags.RUN_LAST
+__all__ += ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
+            'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
+            'SIGNAL_RUN_LAST']
+
+
+# Static types
+GBoxed = _gobject.GBoxed
+GEnum = _gobject.GEnum
+GFlags = _gobject.GFlags
+GInterface = _gobject.GInterface
+GObject = _gobject.GObject
+GObjectWeakRef = _gobject.GObjectWeakRef
+GParamSpec = _gobject.GParamSpec
+GPointer = _gobject.GPointer
+GType = _gobject.GType
+Warning = _gobject.Warning
+__all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
+            'GObjectWeakRef', 'GParamSpec', 'GPointer', 'GType',
+            'Warning']
+
+
+add_emission_hook = _gobject.add_emission_hook
+features = _gobject.features
+list_properties = _gobject.list_properties
+new = _gobject.new
+pygobject_version = _gobject.pygobject_version
+remove_emission_hook = _gobject.remove_emission_hook
+signal_accumulator_true_handled = _gobject.signal_accumulator_true_handled
+signal_new = _gobject.signal_new
+threads_init = _gobject.threads_init
+type_register = _gobject.type_register
+__all__ += ['add_emission_hook', 'features', 'list_properties',
+            'new', 'pygobject_version', 'remove_emission_hook',
+            'signal_accumulator_true_handled',
+            'signal_new', 'threads_init', 'type_register']
+
+
+def type_from_name(name):
+    type_ = GObjectModule.type_from_name(name)
+    if type_ == TYPE_INVALID:
+        raise RuntimeError('unknown type name: %s' % name)
+    return type_
+
+__all__.append('type_from_name')
+
+
+def type_parent(type_):
+    parent = GObjectModule.type_parent(type_)
+    if parent == TYPE_INVALID:
+        raise RuntimeError('no parent for type')
+    return parent
+
+__all__.append('type_parent')
+
+
+def _validate_type_for_signal_method(type_):
+    if hasattr(type_, '__gtype__'):
+        type_ = type_.__gtype__
+    if not type_.is_instantiatable() and not type_.is_interface():
+        raise TypeError('type must be instantiable or an interface, got %s' % type_)
+
+
+def signal_list_ids(type_):
+    _validate_type_for_signal_method(type_)
+    return GObjectModule.signal_list_ids(type_)
+
+__all__.append('signal_list_ids')
+
+
+def signal_list_names(type_):
+    ids = signal_list_ids(type_)
+    return tuple(GObjectModule.signal_name(i) for i in ids)
+
+__all__.append('signal_list_names')
+
+
+def signal_lookup(name, type_):
+    _validate_type_for_signal_method(type_)
+    return GObjectModule.signal_lookup(name, type_)
+
+__all__.append('signal_lookup')
+
+
+def signal_query(id_or_name, type_=None):
+    SignalQuery = namedtuple('SignalQuery',
+                             ['signal_id',
+                              'signal_name',
+                              'itype',
+                              'signal_flags',
+                              'return_type',
+                              # n_params',
+                              'param_types'])
+
+    # signal_query needs to use a static method until the following bugs are fixed:
+    # https://bugzilla.gnome.org/show_bug.cgi?id=687550
+    # https://bugzilla.gnome.org/show_bug.cgi?id=687545
+    # https://bugzilla.gnome.org/show_bug.cgi?id=687541
+    if type_ is not None:
+        id_or_name = signal_lookup(id_or_name, type_)
+
+    res = _gobject.signal_query(id_or_name)
+    if res is None:
+        return None
+
+    # Return a named tuple which allows indexing like the static bindings
+    # along with field like access of the gi struct.
+    # Note however that the n_params was not returned from the static bindings.
+    return SignalQuery(*res)
+
+__all__.append('signal_query')
+
+
+Property = propertyhelper.Property
+Signal = signalhelper.Signal
+SignalOverride = signalhelper.SignalOverride
+# Deprecated naming "property" available for backwards compatibility.
+# Keep this at the end of the file to avoid clobbering the builtin.
+property = Property
+__all__ += ['Property', 'Signal', 'SignalOverride', 'property']
