@@ -33,6 +33,7 @@ import sys
 import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
     BadOptionError, OptionConflictError
+from ..module import get_introspection_module
 
 if sys.version_info >= (3, 0):
     _basestring = str
@@ -42,8 +43,9 @@ else:
     _bytes = str
 
 import gi._glib
-gi  # pyflakes
-_glib = sys.modules['gi._glib._glib']
+GLib = get_introspection_module('GLib')
+
+OPTION_CONTEXT_ERROR_QUARK = GLib.quark_to_string(GLib.option_error_quark())
 
 __all__ = [
     "OptParseError",
@@ -92,7 +94,7 @@ class Option(optparse.Option):
         'optional_arg',
     ]
 
-    REMAINING = '--' + _glib.OPTION_REMAINING
+    REMAINING = '--' + GLib.OPTION_REMAINING
 
     def __init__(self, *args, **kwargs):
         optparse.Option.__init__(self, *args, **kwargs)
@@ -118,19 +120,19 @@ class Option(optparse.Option):
         flags = 0
 
         if self.hidden:
-            flags |= _glib.OPTION_FLAG_HIDDEN
+            flags |= GLib.OptionFlags.HIDDEN
 
         if self.in_main:
-            flags |= _glib.OPTION_FLAG_IN_MAIN
+            flags |= GLib.OptionFlags.IN_MAIN
 
         if self.takes_value():
             if self.optional_arg:
-                flags |= _glib.OPTION_FLAG_OPTIONAL_ARG
+                flags |= GLib.OptionFlags.OPTIONAL_ARG
         else:
-            flags |= _glib.OPTION_FLAG_NO_ARG
+            flags |= GLib.OptionFlags.NO_ARG
 
         if self.type == 'filename':
-            flags |= _glib.OPTION_FLAG_FILENAME
+            flags |= GLib.OptionFlags.FILENAME
 
         for (long_name, short_name) in zip(self._long_opts, self._short_opts):
             yield (long_name[2:], _bytes(short_name[1]), flags, self.help, self.metavar)
@@ -194,14 +196,14 @@ class OptionGroup(optparse.OptionGroup):
                 opt.process(option_name, option_value, self.values, parser)
             except OptionValueError:
                 error = sys.exc_info()[1]
-                gerror = _glib.GError(str(error))
-                gerror.domain = _glib.OPTION_ERROR
-                gerror.code = _glib.OPTION_ERROR_BAD_VALUE
+                gerror = gi._glib.GError(str(error))
+                gerror.domain = OPTION_CONTEXT_ERROR_QUARK
+                gerror.code = GLib.OptionError.BAD_VALUE
                 gerror.message = str(error)
                 raise gerror
 
-        group = _glib.OptionGroup(self.name, self.description,
-                                  self.help_description, callback)
+        group = gi._glib.OptionGroup(self.name, self.description,
+                                     self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
 
@@ -275,12 +277,12 @@ class OptionParser(optparse.OptionParser):
             parameter_string = self.usage + " - " + self.description
         else:
             parameter_string = self.usage
-        context = _glib.OptionContext(parameter_string)
+        context = gi._glib.OptionContext(parameter_string)
         context.set_help_enabled(self.help_enabled)
         context.set_ignore_unknown_options(self.ignore_unknown_options)
 
         for option_group in self.option_groups:
-            if isinstance(option_group, _glib.OptionGroup):
+            if isinstance(option_group, gi._glib.OptionGroup):
                 g_group = option_group
             else:
                 g_group = option_group.get_option_group(self)
@@ -293,7 +295,7 @@ class OptionParser(optparse.OptionParser):
                 opt = self._short_opt[option_name]
             opt.process(option_name, option_value, values, self)
 
-        main_group = _glib.OptionGroup(None, None, None, callback)
+        main_group = gi._glib.OptionGroup(None, None, None, callback)
         main_entries = []
         for option in self.option_list:
             main_entries.extend(option._to_goptionentries())
@@ -313,7 +315,7 @@ class OptionParser(optparse.OptionParser):
                     args[0].parser = self
                 if args[0].parser is not self:
                     raise ValueError("invalid OptionGroup (wrong parser)")
-            if isinstance(args[0], _glib.OptionGroup):
+            if isinstance(args[0], gi._glib.OptionGroup):
                 self.option_groups.append(args[0])
                 return
         optparse.OptionParser.add_option_group(self, *args, **kwargs)
@@ -338,15 +340,15 @@ class OptionParser(optparse.OptionParser):
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
-        except _glib.GError:
+        except gi._glib.GError:
             error = sys.exc_info()[1]
-            if error.domain != _glib.OPTION_ERROR:
+            if error.domain != OPTION_CONTEXT_ERROR_QUARK:
                 raise
-            if error.code == _glib.OPTION_ERROR_BAD_VALUE:
+            if error.code == GLib.OptionError.BAD_VALUE:
                 raise OptionValueError(error.message)
-            elif error.code == _glib.OPTION_ERROR_UNKNOWN_OPTION:
+            elif error.code == GLib.OptionError.UNKNOWN_OPTION:
                 raise BadOptionError(error.message)
-            elif error.code == _glib.OPTION_ERROR_FAILED:
+            elif error.code == GLib.OptionError.FAILED:
                 raise OptParseError(error.message)
             else:
                 raise

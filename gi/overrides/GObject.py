@@ -69,7 +69,7 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'OPTION_FLAG_NO_ARG', 'OPTION_FLAG_FILENAME', 'OPTION_FLAG_OPTIONAL_ARG',
              'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
              'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
-             'OPTION_ERROR', 'glib_version']:
+             'glib_version']:
     globals()[name] = getattr(GLib, name)
     __all__.append(name)
 

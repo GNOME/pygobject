@@ -32,6 +32,10 @@ GLib = get_introspection_module('GLib')
 
 __all__ = []
 
+from gi._glib import option
+option  # pyflakes
+__all__.append('option')
+
 
 class _VariantCreator(object):
 
@@ -450,6 +454,15 @@ for n in ['CHILD_INHERITS_STDIN', 'DO_NOT_REAP_CHILD', 'FILE_AND_ARGV_ZERO',
           'STDOUT_TO_DEV_NULL']:
     globals()['SPAWN_' + n] = getattr(GLib.SpawnFlags, n)
     __all__.append('SPAWN_' + n)
+
+for n in ['HIDDEN', 'IN_MAIN', 'REVERSE', 'NO_ARG', 'FILENAME', 'OPTIONAL_ARG',
+          'NOALIAS']:
+    globals()['OPTION_FLAG_' + n] = getattr(GLib.OptionFlags, n)
+    __all__.append('OPTION_FLAG_' + n)
+
+for n in ['UNKNOWN_OPTION', 'BAD_VALUE', 'FAILED']:
+    globals()['OPTION_ERROR_' + n] = getattr(GLib.OptionError, n)
+    __all__.append('OPTION_ERROR_' + n)
 
 
 class MainLoop(GLib.MainLoop):

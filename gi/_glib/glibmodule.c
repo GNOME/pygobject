@@ -112,42 +112,10 @@ pyglib_register_error(PyObject *d)
     pyglib_api.gerror_exception = gerror_class;
 }
 
-static void
-pyglib_register_constants(PyObject *m)
-{
-    PyModule_AddIntConstant(m, "OPTION_FLAG_HIDDEN",
-			    G_OPTION_FLAG_HIDDEN);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_IN_MAIN",
-			    G_OPTION_FLAG_IN_MAIN);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_REVERSE",
-			    G_OPTION_FLAG_REVERSE);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_NO_ARG",
-			    G_OPTION_FLAG_NO_ARG);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_FILENAME",
-			    G_OPTION_FLAG_FILENAME);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_OPTIONAL_ARG",
-			    G_OPTION_FLAG_OPTIONAL_ARG);
-    PyModule_AddIntConstant(m, "OPTION_FLAG_NOALIAS",
-			    G_OPTION_FLAG_NOALIAS); 
-
-    PyModule_AddIntConstant(m, "OPTION_ERROR_UNKNOWN_OPTION",
-			    G_OPTION_ERROR_UNKNOWN_OPTION);
-    PyModule_AddIntConstant(m, "OPTION_ERROR_BAD_VALUE",
-			    G_OPTION_ERROR_BAD_VALUE);
-    PyModule_AddIntConstant(m, "OPTION_ERROR_FAILED",
-			    G_OPTION_ERROR_FAILED);
- 
-    PyModule_AddStringConstant(m, "OPTION_REMAINING",
-			       G_OPTION_REMAINING);
-    PyModule_AddStringConstant(m, "OPTION_ERROR",
-			       (char*) g_quark_to_string(G_OPTION_ERROR));
-}
-
 PYGLIB_MODULE_START(_glib, "_glib")
 {
     PyObject *d = PyModule_GetDict(module);
 
-    pyglib_register_constants(module);
     pyglib_register_api(d);
     pyglib_register_error(d);
     pyglib_source_register_types(d);
