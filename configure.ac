@@ -19,8 +19,8 @@ dnl versions of packages we require ...
 m4_define(introspection_required_version, 1.33.14)
 m4_define(py2cairo_required_version, 1.2.0)
 m4_define(py3cairo_required_version, 1.10.0)
-m4_define(glib_required_version, 2.31.0)
-m4_define(gio_required_version, 2.31.0)
+m4_define(glib_required_version, 2.32.0)
+m4_define(gio_required_version, 2.32.0)
 
 AC_INIT(pygobject, pygobject_version,
         [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])

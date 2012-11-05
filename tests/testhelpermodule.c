@@ -602,7 +602,6 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 {
   PyObject *m, *d;
   
-  g_thread_init(NULL);
   pygobject_init(-1, -1, -1);
 
   d = PyModule_GetDict(module);
