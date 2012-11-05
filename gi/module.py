@@ -27,7 +27,7 @@ import types
 
 _have_py3 = (sys.version_info[0] >= 3)
 
-from . import _glib, _gobject
+from . import _glib
 try:
     maketrans = ''.maketrans
 except AttributeError:
@@ -60,6 +60,18 @@ from .types import \
     StructMeta, \
     Function
 
+from ._gobject._gobject import \
+    GInterface, \
+    GObject
+
+from ._gobject.constants import \
+    TYPE_NONE, \
+    TYPE_BOXED, \
+    TYPE_POINTER, \
+    TYPE_ENUM, \
+    TYPE_FLAGS
+
+
 repository = Repository.get_default()
 
 # Cache of IntrospectionModules that have been loaded.
@@ -77,7 +89,7 @@ def get_parent_for_object(object_info):
 
     # Workaround for GObject.Object and GObject.InitiallyUnowned.
     if namespace == 'GObject' and name == 'Object' or name == 'InitiallyUnowned':
-        return _gobject.GObject
+        return GObject
 
     module = __import__('gi.repository.%s' % namespace, fromlist=[name])
     return getattr(module, name)
@@ -129,16 +141,16 @@ class IntrospectionModule(object):
 
             if wrapper is None:
                 if info.is_flags():
-                    if g_type.is_a(_gobject.TYPE_FLAGS):
+                    if g_type.is_a(TYPE_FLAGS):
                         wrapper = flags_add(g_type)
                     else:
-                        assert g_type == _gobject.TYPE_NONE
+                        assert g_type == TYPE_NONE
                         wrapper = flags_register_new_gtype_and_add(info)
                 else:
-                    if g_type.is_a(_gobject.TYPE_ENUM):
+                    if g_type.is_a(TYPE_ENUM):
                         wrapper = enum_add(g_type)
                     else:
-                        assert g_type == _gobject.TYPE_NONE
+                        assert g_type == TYPE_NONE
                         wrapper = enum_register_new_gtype_and_add(info)
 
                 wrapper.__info__ = info
@@ -154,14 +166,14 @@ class IntrospectionModule(object):
                     value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))
 
-            if g_type != _gobject.TYPE_NONE:
+            if g_type != TYPE_NONE:
                 g_type.pytype = wrapper
 
         elif isinstance(info, RegisteredTypeInfo):
             g_type = info.get_g_type()
 
             # Check if there is already a Python wrapper.
-            if g_type != _gobject.TYPE_NONE:
+            if g_type != TYPE_NONE:
                 type_ = g_type.pytype
                 if type_ is not None:
                     self.__dict__[name] = type_
@@ -178,13 +190,13 @@ class IntrospectionModule(object):
                 bases = (CCallback,)
                 metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
-                bases = (_gobject.GInterface,)
+                bases = (GInterface,)
                 metaclass = GObjectMeta
             elif isinstance(info, (StructInfo, UnionInfo)):
-                if g_type.is_a(_gobject.TYPE_BOXED):
+                if g_type.is_a(TYPE_BOXED):
                     bases = (Boxed,)
-                elif (g_type.is_a(_gobject.TYPE_POINTER) or
-                      g_type == _gobject.TYPE_NONE or
+                elif (g_type.is_a(TYPE_POINTER) or
+                      g_type == TYPE_NONE or
                       g_type.fundamental == g_type):
                     bases = (Struct,)
                 else:
@@ -202,7 +214,7 @@ class IntrospectionModule(object):
             wrapper = metaclass(name, bases, dict_)
 
             # Register the new Python wrapper.
-            if g_type != _gobject.TYPE_NONE:
+            if g_type != TYPE_NONE:
                 g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):

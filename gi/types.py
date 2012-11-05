@@ -24,6 +24,8 @@ from __future__ import absolute_import
 
 import sys
 from . import _gobject
+from ._gobject._gobject import GInterface
+from ._gobject.constants import TYPE_INVALID
 
 from ._gi import \
     InterfaceInfo, \
@@ -181,8 +183,8 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # This can be seen in IntrospectionModule.__getattr__() in module.py.
         # We do not need to search regular classes here, only wrapped interfaces.
         # We also skip GInterface, because it is not wrapped and has no __info__ attr.
-        if base is _gobject.GInterface or\
-                not issubclass(base, _gobject.GInterface) or\
+        if base is GInterface or\
+                not issubclass(base, GInterface) or\
                 not isinstance(base.__info__, InterfaceInfo):
             continue
 
@@ -260,7 +262,7 @@ def mro(C):
         for subclass_bases in bases_of_subclasses:
             candidate = subclass_bases[0]
             not_head = [s for s in bases_of_subclasses if candidate in s[1:]]
-            if not_head and _gobject.GInterface not in candidate.__bases__:
+            if not_head and GInterface not in candidate.__bases__:
                 candidate = None  # conflict, reject candidate
             else:
                 break
@@ -287,7 +289,7 @@ class StructMeta(type, MetaClassHelper):
 
         # Avoid touching anything else than the base class.
         g_type = cls.__info__.get_g_type()
-        if g_type != _gobject.TYPE_INVALID and g_type.pytype is not None:
+        if g_type != TYPE_INVALID and g_type.pytype is not None:
             return
 
         cls._setup_fields()

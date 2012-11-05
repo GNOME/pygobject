@@ -2,7 +2,10 @@ import types
 import warnings
 import functools
 
-from gi import _gobject, PyGIDeprecationWarning
+from gi import PyGIDeprecationWarning
+from gi._gobject.constants import \
+    TYPE_NONE, \
+    TYPE_INVALID
 
 # support overrides in different directories than our gi module
 from pkgutil import extend_path
@@ -33,8 +36,8 @@ class _Registry(dict):
             raise KeyError('You have tried to modify the registry outside of the overrides module.  This is not allowed')
 
         g_type = info.get_g_type()
-        assert g_type != _gobject.TYPE_NONE
-        if g_type != _gobject.TYPE_INVALID:
+        assert g_type != TYPE_NONE
+        if g_type != TYPE_INVALID:
             g_type.pytype = value
 
             # strip gi.overrides from module name

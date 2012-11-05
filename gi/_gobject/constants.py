@@ -21,7 +21,7 @@
 
 from . import _gobject
 
-# TYPE_INVALID defined in gobjectmodule.c
+TYPE_INVALID = _gobject.TYPE_INVALID
 TYPE_NONE = _gobject.type_from_name('void')
 TYPE_INTERFACE = _gobject.type_from_name('GInterface')
 TYPE_CHAR = _gobject.type_from_name('gchar')
