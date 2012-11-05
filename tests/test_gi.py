@@ -334,8 +334,8 @@ class TestUInt64(unittest.TestCase):
 
 class TestShort(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXSHORT
-    MIN = GObject.constants.G_MINSHORT
+    MAX = GObject.G_MAXSHORT
+    MIN = GObject.G_MINSHORT
 
     def test_short_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.short_return_max())
@@ -367,7 +367,7 @@ class TestShort(unittest.TestCase):
 
 class TestUShort(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXUSHORT
+    MAX = GObject.G_MAXUSHORT
 
     def test_ushort_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ushort_return())
@@ -393,8 +393,8 @@ class TestUShort(unittest.TestCase):
 
 class TestInt(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXINT
-    MIN = GObject.constants.G_MININT
+    MAX = GObject.G_MAXINT
+    MIN = GObject.G_MININT
 
     def test_int_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.int_return_max())
@@ -427,7 +427,7 @@ class TestInt(unittest.TestCase):
 
 class TestUInt(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXUINT
+    MAX = GObject.G_MAXUINT
 
     def test_uint_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.uint_return())
@@ -453,8 +453,8 @@ class TestUInt(unittest.TestCase):
 
 class TestLong(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXLONG
-    MIN = GObject.constants.G_MINLONG
+    MAX = GObject.G_MAXLONG
+    MIN = GObject.G_MINLONG
 
     def test_long_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.long_return_max())
@@ -486,7 +486,7 @@ class TestLong(unittest.TestCase):
 
 class TestULong(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXULONG
+    MAX = GObject.G_MAXULONG
 
     def test_ulong_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ulong_return())
@@ -512,8 +512,8 @@ class TestULong(unittest.TestCase):
 
 class TestSSize(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXLONG
-    MIN = GObject.constants.G_MINLONG
+    MAX = GObject.G_MAXLONG
+    MIN = GObject.G_MINLONG
 
     def test_ssize_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ssize_return_max())
@@ -545,7 +545,7 @@ class TestSSize(unittest.TestCase):
 
 class TestSize(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXULONG
+    MAX = GObject.G_MAXULONG
 
     def test_size_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.size_return())
@@ -571,8 +571,8 @@ class TestSize(unittest.TestCase):
 
 class TestFloat(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXFLOAT
-    MIN = GObject.constants.G_MINFLOAT
+    MAX = GObject.G_MAXFLOAT
+    MIN = GObject.G_MINFLOAT
 
     def test_float_return(self):
         self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_return())
@@ -591,8 +591,8 @@ class TestFloat(unittest.TestCase):
 
 class TestDouble(unittest.TestCase):
 
-    MAX = GObject.constants.G_MAXDOUBLE
-    MIN = GObject.constants.G_MINDOUBLE
+    MAX = GObject.G_MAXDOUBLE
+    MIN = GObject.G_MINDOUBLE
 
     def test_double_return(self):
         self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_return())

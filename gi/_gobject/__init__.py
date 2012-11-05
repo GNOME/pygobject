@@ -65,23 +65,6 @@ TYPE_GTYPE = constants.TYPE_GTYPE
 TYPE_UNICHAR = constants.TYPE_UNICHAR
 TYPE_STRV = constants.TYPE_STRV
 TYPE_VARIANT = constants.TYPE_VARIANT
-G_MINFLOAT = constants.G_MINFLOAT
-G_MAXFLOAT = constants.G_MAXFLOAT
-G_MINDOUBLE = constants.G_MINDOUBLE
-G_MAXDOUBLE = constants.G_MAXDOUBLE
-G_MINSHORT = constants.G_MINSHORT
-G_MAXSHORT = constants.G_MAXSHORT
-G_MAXUSHORT = constants.G_MAXUSHORT
-G_MININT = constants.G_MININT
-G_MAXINT = constants.G_MAXINT
-G_MAXUINT = constants.G_MAXUINT
-G_MINLONG = constants.G_MINLONG
-G_MAXLONG = constants.G_MAXLONG
-G_MAXULONG = constants.G_MAXULONG
-G_MAXSIZE = constants.G_MAXSIZE
-G_MAXSSIZE = constants.G_MAXSSIZE
-G_MINOFFSET = constants.G_MINOFFSET
-G_MAXOFFSET = constants.G_MAXOFFSET
 
 
 class GObjectMeta(type):

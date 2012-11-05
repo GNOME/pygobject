@@ -90,6 +90,15 @@ __all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
 
+# these are not currently exported in GLib gir, presumably because they are
+# platform dependent; so get them from our static bindings
+for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
+             'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
+             'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
+             'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
+    globals()[name] = getattr(_gobject, name)
+    __all__.append(name)
+
 
 TYPE_INVALID = GObjectModule.type_from_name('invalid')
 TYPE_NONE = GObjectModule.type_from_name('void')

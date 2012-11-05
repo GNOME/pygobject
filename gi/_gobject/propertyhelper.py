@@ -30,7 +30,7 @@ from .constants import \
     TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
     TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
     TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV
-from .constants import \
+from ._gobject import \
     G_MAXFLOAT, G_MAXDOUBLE, \
     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
     G_MAXULONG
