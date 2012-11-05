@@ -183,7 +183,6 @@ PyObject *
 pyg_source_set_callback(PyGObject *self_module, PyObject *args)
 {
     PyObject *self, *first, *callback, *cbargs = NULL, *data;
-    PyObject        *source_py_type;
     gint len;
 
     len = PyTuple_Size (args);
@@ -200,7 +199,6 @@ pyg_source_set_callback(PyGObject *self_module, PyObject *args)
     }
     Py_DECREF(first);
     
-    source_py_type = _pygi_type_import_by_name ("GLib", "Source");
     if (!pyg_boxed_check (self, G_TYPE_SOURCE)) {
 	PyErr_SetString(PyExc_TypeError, "first argument is not a GLib.Source");
 	return NULL;
