@@ -34,6 +34,9 @@ if sys.version_info[:2] == (2, 6):
     unittest.TestCase.assertGreater = assertGreater
     unittest.TestCase.assertIsInstance = assertIsInstance
 
+if sys.version_info[:2] == (2, 7):
+    unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+
 if '--help' in sys.argv:
     print("Usage: ./runtests.py <testfiles>")
     sys.exit(0)
