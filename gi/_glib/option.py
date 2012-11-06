@@ -203,7 +203,7 @@ class OptionGroup(optparse.OptionGroup):
                 raise gerror
 
         group = _glib.OptionGroup(self.name, self.description,
-                                     self.help_description, callback)
+                                  self.help_description, callback)
         if self.translation_domain:
             group.set_translation_domain(self.translation_domain)
 
