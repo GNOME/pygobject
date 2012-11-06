@@ -66,12 +66,15 @@ build, it should be as simple as running:
     $ make
     $ make install
 
-If your Python interpreter isn't in the path, or is not called
-"python", you can set the PYTHON environment variable to the full path
-of the interpreter:
+By default, configure searches for a few well-known Python interpreter
+names, such as "python3", "python2", "python2.7", or "python".  If your
+Python interpreter isn't in the path, or is not called "python", you can
+configure pygobject to build against that with --with-python=<path> or
+setting the PYTHON environment variable:
 
-    $ PYTHON=/prefix/bin/python
-    $ export PYTHON
+   $ ./configure --with-python=python3
+   $ PYTHON=python3.2 ./configure
+   $ ./configure --with-python=~/my-patched-python/python
 
 If configure can't find GTK+, you may need to set the PKG_CONFIG_PATH
 environment variable to help it find the libraries.

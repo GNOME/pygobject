@@ -1,11 +1,17 @@
 -*- mode: m4 -*-
 AC_PREREQ(2.52)
 
-# The version of python used is determined by the executable pointed to by
-# the PYTHON environment variable.  For instance if your system installs
-# Python 3 as python3 to configure to compile pygobject under Python 3
-# you would do this:
-# $> PYTHON=python3 ./configure
+# The version of python used is determined by the executable pointed to by the
+# --with-python switch, or if that's not set, by the PYTHON environment
+# variable.  For instance if your system installs Python 3 as python3 to
+# configure to compile pygobject under Python 3 you would do this:
+#   $ ./configure --with-python=python3
+# or
+#   $ PYTHON=python3 ./configure
+#
+# You can also build against a full interpreter path, such as
+#   $ ./configure --with-python=~/my-patched-python/python
+
 m4_define(python_min_ver, 2.6)
 m4_define(python3_min_ver, 3.1)
 
@@ -85,6 +91,19 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
+# option to specify python interpreter to use; this just sets $PYTHON, so that
+# we will fallback to reading $PYTHON if --with-python is not given, and
+# python.m4 will get the expected input
+AC_ARG_WITH(python,
+  AC_HELP_STRING([--with-python=PATH], [Path to Python interpreter; searches $PATH if only a program name is given; if not given, searches for a few standard names such as "python3" or "python2"]),
+  [PYTHON="$withval"], [])
+if test x"$PYTHON" = xyes; then
+	AC_MSG_ERROR([--with-python option requires a path or program argument])
+fi
+if test -n "$PYTHON" && ! which "$PYTHON"; then
+	AC_MSG_ERROR([Python interpreter $PYTHON does not exist])
+fi
+
 # check that we have the minimum version of python necessary to build
 JD_PATH_PYTHON(python_min_ver)
 
@@ -130,7 +149,7 @@ AC_ARG_ENABLE(thread,
 AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
 if test "x$enable_thread" = xcheck_for_py3_module; then
   dnl Python 3 uses the _thread module so check for that
-  AM_CHECK_PYMOD(_thread,,,enable_thread=no)
+  AM_CHECK_PYMOD(_thread,,enable_thread=yes,enable_thread=no)
 fi
 
 AC_MSG_CHECKING(whether to enable threading in pygobject)
@@ -253,6 +272,12 @@ AC_CONFIG_FILES(
   PKG-INFO)
 AC_OUTPUT
 
-echo
-echo "libffi support: $have_libffi"
-echo
+AC_MSG_RESULT([
+	pygobject $VERSION
+
+	Using python interpreter:	$PYTHON
+	libffi support:			$have_libffi
+	cairo support:			$enable_cairo
+	thread support:			$enable_thread
+])
+
