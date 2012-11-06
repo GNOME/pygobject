@@ -27,7 +27,6 @@ import types
 
 _have_py3 = (sys.version_info[0] >= 3)
 
-from . import _glib
 try:
     maketrans = ''.maketrans
 except AttributeError:
@@ -332,62 +331,3 @@ class DynamicModule(types.ModuleType):
                                        self.__class__.__name__,
                                        self._namespace,
                                        path)
-
-
-class DynamicGObjectModule(DynamicModule):
-    """Wrapper for the internal GObject module
-
-    This class allows us to access both the static internal PyGObject module and the GI GObject module
-    through the same interface.  It is returned when by importing GObject from the gi repository:
-
-    from gi.repository import GObject
-
-    We use this because some PyGI interfaces generated from the GIR require GObject types not wrapped
-    by the static bindings.  This also allows access to module attributes in a way that is more
-    familiar to GI application developers.  Take signal flags as an example.  The G_SIGNAL_RUN_FIRST
-    flag would be accessed as GObject.SIGNAL_RUN_FIRST in the static bindings but in the dynamic bindings
-    can be accessed as GObject.SignalFlags.RUN_FIRST.  The latter follows a GI naming convention which
-    would be familiar to GI application developers in a number of languages.
-    """
-
-    def __init__(self):
-        DynamicModule.__init__(self, namespace='GObject')
-
-    def __getattr__(self, name):
-        from . import _gobject
-
-        # first see if this attr is in the internal _gobject module
-        attr = getattr(_gobject, name, None)
-
-        # if not in module assume request for an attr exported through GI
-        if attr is None:
-            attr = super(DynamicGObjectModule, self).__getattr__(name)
-
-        return attr
-
-
-class DynamicGLibModule(DynamicModule):
-    """Wrapper for the internal GLib module
-
-    This class allows us to access both the static internal PyGLib module and the GI GLib module
-    through the same interface.  It is returned when by importing GLib from the gi repository:
-
-    from gi.repository import GLib
-
-    We use this because some PyGI interfaces generated from the GIR require GLib types not wrapped
-    by the static bindings.  This also allows access to module attributes in a way that is more
-    familiar to GI application developers.
-    """
-
-    def __init__(self):
-        DynamicModule.__init__(self, namespace='GLib')
-
-    def __getattr__(self, name):
-        # first see if this attr is in the internal _gobject module
-        attr = getattr(_glib, name, None)
-
-        # if not in module assume request for an attr exported through GI
-        if attr is None:
-            attr = super(DynamicGLibModule, self).__getattr__(name)
-
-        return attr

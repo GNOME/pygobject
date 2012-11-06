@@ -1747,13 +1747,8 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.val, 87)
 
     def test_dynamic_module(self):
-        from gi.module import DynamicGObjectModule
-        self.assertTrue(isinstance(GObject, DynamicGObjectModule))
-        # compare the same enum from both the pygobject attrs and gi GObject attrs
-        self.assertEqual(GObject.SIGNAL_ACTION, GObject.SignalFlags.ACTION)
-        # compare a static gobject attr with a dynamic GObject attr
-        import gi._gobject
-        self.assertEqual(GObject.GObject, gi._gobject.GObject)
+        from gi.module import DynamicModule
+        self.assertTrue(isinstance(GObject, DynamicModule))
 
     def test_subobject_non_vfunc_do_method(self):
         class PythonObjectWithNonVFuncDoMethod:

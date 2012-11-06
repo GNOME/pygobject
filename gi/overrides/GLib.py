@@ -37,6 +37,20 @@ option  # pyflakes
 __all__.append('option')
 
 
+# Types and functions still needed from static bindings
+from gi._glib import _glib
+GError = _glib.GError
+OptionContext = _glib.OptionContext
+OptionGroup = _glib.OptionGroup
+Pid = _glib.Pid
+PollFD = _glib.PollFD
+spawn_async = _glib.spawn_async
+threads_init = _glib.threads_init
+
+__all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid', 'PollFD',
+            'spawn_async', 'threads_init']
+
+
 class _VariantCreator(object):
 
     _LEAF_CONSTRUCTORS = {

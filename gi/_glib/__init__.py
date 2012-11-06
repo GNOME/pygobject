@@ -23,14 +23,3 @@ from . import _glib
 
 # Internal API
 _PyGLib_API = _glib._PyGLib_API
-
-# Types
-GError = _glib.GError
-OptionContext = _glib.OptionContext
-OptionGroup = _glib.OptionGroup
-Pid = _glib.Pid
-PollFD = _glib.PollFD
-
-# Functions
-spawn_async = _glib.spawn_async
-threads_init = _glib.threads_init
