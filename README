@@ -45,7 +45,7 @@ Requirements
 ============
   * C compiler (GCC and MSVC supported)
   * Python 2.6 or higher
-  * Glib/Gio 2.32 or higher
+  * Glib/Gio 2.34.2 or higher
   * libffi (optional)
 
 Copyright Information
