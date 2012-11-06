@@ -41,6 +41,8 @@ m4_define([_GOBJECT_INTROSPECTION_CHECK_INTERNAL],
     ],dnl
     [auto],[dnl
         PKG_CHECK_EXISTS([gobject-introspection-1.0 >= $1], found_introspection=yes, found_introspection=no)
+	dnl Canonicalize enable_introspection
+	enable_introspection=$found_introspection
     ],dnl
     [dnl	
         AC_MSG_ERROR([invalid argument passed to --enable-introspection, should be one of @<:@no/auto/yes@:>@])
@@ -61,6 +63,7 @@ m4_define([_GOBJECT_INTROSPECTION_CHECK_INTERNAL],
        INTROSPECTION_TYPELIBDIR="$($PKG_CONFIG --variable=typelibdir gobject-introspection-1.0)"
        INTROSPECTION_CFLAGS=`$PKG_CONFIG --cflags gobject-introspection-1.0`
        INTROSPECTION_LIBS=`$PKG_CONFIG --libs gobject-introspection-1.0`
+       INTROSPECTION_MAKEFILE=`$PKG_CONFIG --variable=datadir gobject-introspection-1.0`/gobject-introspection-1.0/Makefile.introspection
     fi
     AC_SUBST(INTROSPECTION_SCANNER)
     AC_SUBST(INTROSPECTION_COMPILER)
@@ -69,6 +72,7 @@ m4_define([_GOBJECT_INTROSPECTION_CHECK_INTERNAL],
     AC_SUBST(INTROSPECTION_TYPELIBDIR)
     AC_SUBST(INTROSPECTION_CFLAGS)
     AC_SUBST(INTROSPECTION_LIBS)
+    AC_SUBST(INTROSPECTION_MAKEFILE)
 
     AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
 ])
