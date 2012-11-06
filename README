@@ -36,17 +36,16 @@ New versions of this package can be found at:
 Mailing list
 ============
 
-pygobject share mailing list with pygtk. You can subscribe to it through
-the web interface:
-  http://www.daa.com.au/mailman/listinfo/pygtk
+pygobject development is discussed on the GNOME python-hackers mailing list.
+You can subscribe to it through the web interface:
 
+  https://mail.gnome.org/mailman/listinfo/python-hackers-list/
 
 Requirements
 ============
   * C compiler (GCC and MSVC supported)
-  * Python 2.3.5 or higher
-  * Glib 2.22.4 or higher
-  * GIO 2.22.4 or higher
+  * Python 2.6 or higher
+  * Glib/Gio 2.32 or higher
   * libffi (optional)
 
 Copyright Information
@@ -99,7 +98,9 @@ Getting Help
 ============
 
 If you have questions about programming with PyGObject, you might want to
-send a message to the mailing list (information on subscribing is
-above).  Alternatively, your question may be answered in the PyGTK FAQ:
+check the documentation on
 
-    http://www.async.com.br/faq/pygtk/?req=index
+  https://live.gnome.org/PyGObject/
+
+If that does not help, send a message to the mailing list (information on
+subscribing is above), or join #python on irc.gnome.org.
