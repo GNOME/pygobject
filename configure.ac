@@ -85,7 +85,7 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
-# check that we have the minimum version of python necisary to build
+# check that we have the minimum version of python necessary to build
 JD_PATH_PYTHON(python_min_ver)
 
 # check if we are building for python 3

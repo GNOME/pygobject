@@ -146,7 +146,7 @@ AC_DEFUN([JD_PATH_PYTHON],
   dnl Find a Python interpreter.  Python versions prior to 2.0 are not
   dnl supported
   m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
-                    [python python2 python2.7 python2.6 python3 python3.2 python3.1])
+                    [python3 python3.3 python3.2 python3.1 python2 python2.7 python2.6 python])
 
   m4_if([$1],[],[
     dnl No version check is needed.
