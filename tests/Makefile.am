@@ -8,7 +8,7 @@ libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS)
 
 # This is a hack to make sure a shared library is built
 libgimarshallingtests.la: $(libgimarshallingtests_la_OBJECTS) $(libgimarshallingtests_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkgpyexecdir) $(libgimarshallingtests_la_LDFLAGS) $(libgimarshallingtests_la_OBJECTS) $(libgimarhallingtests_la_LIBADD) $(LIBS)
+	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(libgimarshallingtests_la_LDFLAGS) $(libgimarshallingtests_la_OBJECTS) $(libgimarhallingtests_la_LIBADD) $(LIBS)
 
 GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 	$(AM_V_GEN) g-ir-scanner --include=Gio-2.0 \
@@ -30,7 +30,7 @@ libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
 libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(CAIRO_LIBS)
 
 libregress.la: $(libregress_la_OBJECTS) $(libregress_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkgpyexecdir) $(libregress_la_LDFLAGS) $(libregress_la_OBJECTS) $(libregress_la_LIBADD) $(LIBS)
+	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(libregress_la_LDFLAGS) $(libregress_la_OBJECTS) $(libregress_la_LIBADD) $(LIBS)
 
 # g-i doesn't ship these as shared libraries anymore; we build them here
 Regress-1.0.gir: libregress.la Makefile
@@ -65,7 +65,7 @@ testhelper_la_SOURCES = \
 
 # This is a hack to make sure a shared library is built
 testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
-	$(LINK) -rpath $(pkgpyexecdir) $(testhelper_la_LDFLAGS) $(testhelper_la_OBJECTS) $(testhelper_la_LIBADD) $(LIBS)
+	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(testhelper_la_LDFLAGS) $(testhelper_la_OBJECTS) $(testhelper_la_LIBADD) $(LIBS)
 
 
 .la.so:

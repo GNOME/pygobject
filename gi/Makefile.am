@@ -119,7 +119,7 @@ _gi_cairo_la_LDFLAGS = \
 # build directory, which the Python interpreter can load
 # directly without having to know how to parse .la files.
 .la.so:
-	$(LN_S) .libs/$@ $@ || true
+	$(LN_S) -f .libs/$@ $@
 
 # if we build in a separate tree, we need to symlink the *.py files from the
 # source tree; Python does not accept the extensions and modules in different

@@ -90,4 +90,4 @@ check-local: $(pyglib_LTLIBRARIES:.la=.so) build_pylinks
 clean-local:
 	rm -f $(pyglib_LTLIBRARIES:.la=.so)
 .la.so:
-	$(LN_S) .libs/$@ $@ || true
+	$(LN_S) -f .libs/$@ $@
