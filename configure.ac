@@ -236,6 +236,7 @@ if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Werror=format-security])
   JH_ADD_CFLAG([-Werror=missing-include-dirs])
   JH_ADD_CFLAG([-Werror=format])
+  JH_ADD_CFLAG([-Werror=unused-variable])
   JH_ADD_CFLAG([-fno-strict-aliasing])
 
   case $host_os in

@@ -1063,7 +1063,6 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
     }
 
     for (i = 0; i < PyTuple_GET_SIZE(bases); ++i) {
-        guint k;
         PyObject *base = PyTuple_GET_ITEM(bases, i);
         GType itype;
         const GInterfaceInfo *iinfo;
