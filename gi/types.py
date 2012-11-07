@@ -191,7 +191,7 @@ def find_vfunc_info_in_interface(bases, vfunc_name):
         # Skip bases without __info__ (static _gobject._gobject.GObject)
         if base is GInterface or\
                 not issubclass(base, GInterface) or\
-                not '__info__' in base.__dict__ or\
+                not hasattr(base, '__info__') or\
                 not isinstance(base.__info__, InterfaceInfo):
             continue
 
