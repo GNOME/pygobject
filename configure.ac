@@ -28,7 +28,9 @@ m4_define(py3cairo_required_version, 1.10.0)
 m4_define(glib_required_version, 2.34.2)
 m4_define(gio_required_version, 2.34.2)
 
-AC_INIT([pygobject],[pygobject_version],[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
+AC_INIT([pygobject],[pygobject_version],
+	[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject],
+	[pygobject],[https://live.gnome.org/PyGObject/])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([gi/gimodule.c])
@@ -42,8 +44,7 @@ AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
 AM_CONFIG_HEADER(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
-AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
-AM_MAINTAINER_MODE([enable])
+AM_INIT_AUTOMAKE([1.11.1 foreign no-dist-gzip dist-xz])
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
@@ -74,17 +75,9 @@ esac
 AC_MSG_RESULT([$os_win32])
 AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
 
-AC_DISABLE_STATIC
+LT_PREREQ([2.2.6])
+LT_INIT([dlopen win32-dll disable-static])
 
-dnl XXXX hack to kill off all the libtool tags ...
-dnl it isn't like we are using C++ or Fortran.
-dnl (copied from libglade/configure.in)
-m4_define([_LT_AC_TAGCONFIG],[])
-
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
-dnl when using libtool 2.x create libtool early, because it's used in configure
-m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
 AM_PROG_CC_STDC
