@@ -1309,13 +1309,14 @@ class TestTreeView(unittest.TestCase):
         # will raise a Gtk-CRITICAL which we ignore for now
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_WARNING | GLib.LogLevelFlags.LEVEL_ERROR)
-        view.set_cursor(store[1].path)
-        view.set_cursor(str(store[1].path))
+        try:
+            view.set_cursor(store[1].path)
+            view.set_cursor(str(store[1].path))
 
-        view.get_cell_area(store[1].path)
-        view.get_cell_area(str(store[1].path))
-
-        GLib.log_set_always_fatal(old_mask)
+            view.get_cell_area(store[1].path)
+            view.get_cell_area(str(store[1].path))
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
@@ -1346,10 +1347,12 @@ class TestTreeView(unittest.TestCase):
         # might cause a Pango warning, do not break on this
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        # causes the widget to get realized and cellN.props.text receive a
-        # value, otherwise it will be None.
-        tree.get_preferred_size()
-        GLib.log_set_always_fatal(old_mask)
+        try:
+            # causes the widget to get realized and cellN.props.text receive a
+            # value, otherwise it will be None.
+            tree.get_preferred_size()
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
         self.assertEqual(tree.get_column(0).get_title(), 'Head1')
         self.assertEqual(tree.get_column(1).get_title(), 'Head2')
@@ -1381,10 +1384,12 @@ class TestTreeView(unittest.TestCase):
         # might cause a Pango warning, do not break on this
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        # This will make cell.props.text receive a value, otherwise it
-        # will be None.
-        treeview.get_preferred_size()
-        GLib.log_set_always_fatal(old_mask)
+        try:
+            # This will make cell.props.text receive a value, otherwise it
+            # will be None.
+            treeview.get_preferred_size()
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
         self.assertTrue(cell.props.text in directors)
 

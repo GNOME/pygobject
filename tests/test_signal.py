@@ -77,8 +77,10 @@ class TestGSignalsError(unittest.TestCase):
         # do not stumble over the warning thrown by GLib
         old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL |
                                              GLib.LogLevelFlags.LEVEL_ERROR)
-        self.assertRaises(TypeError, foo)
-        GLib.log_set_always_fatal(old_mask)
+        try:
+            self.assertRaises(TypeError, foo)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
         gc.collect()
 
 
