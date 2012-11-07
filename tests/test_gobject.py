@@ -271,20 +271,26 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-        # Using the context manager the tracking list should not be affected
-        # and the GObject reference count should go up.
+        pyref_count = sys.getrefcount(self.obj)
+
+        # Using the context manager the tracking list should not be affected.
+        # The GObject reference count should stay the same and the python
+        # object ref-count should go up.
         with self.obj.freeze_notify():
-            self.assertEqual(self.obj.__grefcount__, 2)
+            self.assertEqual(self.obj.__grefcount__, 1)
+            self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
             self.obj.props.prop = 3
             self.assertEqual(self.obj.props.prop, 3)
             self.assertEqual(self.tracking, [1, 2])
 
         # After the context manager, the prop should have been modified,
-        # the tracking list will be modified, and the GObject ref
+        # the tracking list will be modified, and the python object ref
         # count goes back down.
+        gc.collect()
         self.assertEqual(self.obj.props.prop, 3)
         self.assertEqual(self.tracking, [1, 2, 3])
         self.assertEqual(self.obj.__grefcount__, 1)
+        self.assertEqual(sys.getrefcount(self.obj), pyref_count)
 
     def test_handler_block_context(self):
         # Verify prop tracking list
@@ -295,10 +301,14 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
 
-        # Using the context manager the tracking list should not be affected
-        # and the GObject reference count should go up.
+        pyref_count = sys.getrefcount(self.obj)
+
+        # Using the context manager the tracking list should not be affected.
+        # The GObject reference count should stay the same and the python
+        # object ref-count should go up.
         with self.obj.handler_block(self.handler):
-            self.assertEqual(self.obj.__grefcount__, 2)
+            self.assertEqual(self.obj.__grefcount__, 1)
+            self.assertEqual(sys.getrefcount(self.obj), pyref_count + 1)
             self.obj.props.prop = 3
             self.assertEqual(self.obj.props.prop, 3)
             self.assertEqual(self.tracking, [1, 2])
@@ -306,9 +316,11 @@ class TestContextManagers(unittest.TestCase):
         # After the context manager, the prop should have been modified
         # the tracking list should have stayed the same and the GObject ref
         # count goes back down.
+        gc.collect()
         self.assertEqual(self.obj.props.prop, 3)
         self.assertEqual(self.tracking, [1, 2])
         self.assertEqual(self.obj.__grefcount__, 1)
+        self.assertEqual(sys.getrefcount(self.obj), pyref_count)
 
     def test_freeze_notify_context_nested(self):
         self.assertEqual(self.tracking, [])

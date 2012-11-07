@@ -596,7 +596,8 @@ class TestSignalDecorator(unittest.TestCase):
 
 class TestSignalConnectors(unittest.TestCase):
     class CustomButton(GObject.GObject):
-        value = 0
+        on_notify_called = False
+        value = GObject.Property(type=int)
 
         @GObject.Signal(arg_types=(int,))
         def clicked(self, value):
@@ -609,6 +610,16 @@ class TestSignalConnectors(unittest.TestCase):
     def on_clicked(self, obj, value):
         self.obj = obj
         self.value = value
+
+    def test_signal_notify(self):
+        def on_notify(obj, param):
+            obj.on_notify_called = True
+
+        obj = self.CustomButton()
+        obj.connect('notify', on_notify)
+        self.assertFalse(obj.on_notify_called)
+        obj.notify('value')
+        self.assertTrue(obj.on_notify_called)
 
     def test_signal_emit(self):
         # standard callback connection with different forms of emit.

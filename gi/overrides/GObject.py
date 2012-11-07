@@ -279,6 +279,29 @@ def signal_query(id_or_name, type_=None):
 __all__.append('signal_query')
 
 
+class _HandlerBlockManager(object):
+    def __init__(self, obj, handler_id):
+        self.obj = obj
+        self.handler_id = handler_id
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        _gobject.GObject.handler_unblock(self.obj, self.handler_id)
+
+
+class _FreezeNotifyManager(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.obj.thaw_notify()
+
+
 class Object(GObjectModule.Object):
     def _unsupported_method(self, *args, **kargs):
         raise RuntimeError('This method is currently unsupported.')
@@ -321,9 +344,6 @@ class Object(GObjectModule.Object):
     set_property = _gobject.GObject.set_property
     set_properties = _gobject.GObject.set_properties
     bind_property = _gobject.GObject.bind_property
-    freeze_notify = _gobject.GObject.freeze_notify
-    notify = _gobject.GObject.notify
-    thaw_notify = _gobject.GObject.thaw_notify
     connect = _gobject.GObject.connect
     connect_after = _gobject.GObject.connect_after
     connect_object = _gobject.GObject.connect_object
@@ -332,8 +352,6 @@ class Object(GObjectModule.Object):
     disconnect_by_func = _gobject.GObject.disconnect_by_func
     handler_disconnect = _gobject.GObject.handler_disconnect
     handler_is_connected = _gobject.GObject.handler_is_connected
-    handler_block = _gobject.GObject.handler_block
-    handler_unblock = _gobject.GObject.handler_unblock
     handler_block_by_func = _gobject.GObject.handler_block_by_func
     handler_unblock_by_func = _gobject.GObject.handler_unblock_by_func
     emit = _gobject.GObject.emit
@@ -343,6 +361,39 @@ class Object(GObjectModule.Object):
     weak_ref = _gobject.GObject.weak_ref
     __copy__ = _gobject.GObject.__copy__
     __deepcopy__ = _gobject.GObject.__deepcopy__
+
+    def handler_block(self, handler_id):
+        """Blocks the signal handler from being invoked until handler_unblock() is called.
+
+        Returns a context manager which optionally can be used to
+        automatically unblock the handler:
+
+        >>> with obj.handler_block(id):
+        >>>    pass
+        """
+
+        # Note Object.handler_block is a static method specific to pygobject and not
+        # found in introspection. We need to continue using the static method
+        # until we figure out a technique to call the global signal_handler_block.
+        # But this requires a gpointer to the Object which we currently don't have
+        # access to in python.
+        _gobject.GObject.handler_block(self, handler_id)
+        return _HandlerBlockManager(self, handler_id)
+
+    def freeze_notify(self):
+        """Freezes the object's property-changed notification queue.
+
+        This will freeze the object so that "notify" signals are blocked until
+        the thaw_notify() method is called.
+
+        Returns a context manager which optionally can be used to
+        automatically thaw notifications:
+
+        >>> with obj.freeze_notify():
+        >>>     pass
+        """
+        super(Object, self).freeze_notify()
+        return _FreezeNotifyManager(self)
 
 
 Object = override(Object)
