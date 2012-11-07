@@ -1,5 +1,5 @@
 -*- mode: m4 -*-
-AC_PREREQ(2.52)
+AC_PREREQ([2.69])
 
 # The version of python used is determined by the executable pointed to by the
 # --with-python switch, or if that's not set, by the PYTHON environment
@@ -28,8 +28,7 @@ m4_define(py3cairo_required_version, 1.10.0)
 m4_define(glib_required_version, 2.34.2)
 m4_define(gio_required_version, 2.34.2)
 
-AC_INIT(pygobject, pygobject_version,
-        [http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
+AC_INIT([pygobject],[pygobject_version],[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([gi/gimodule.c])
@@ -86,7 +85,7 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 dnl when using libtool 2.x create libtool early, because it's used in configure
 m4_ifdef([LT_OUTPUT], [LT_OUTPUT])
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
 AM_PROG_CC_STDC
 AM_PROG_CC_C_O
@@ -95,7 +94,7 @@ AM_PROG_CC_C_O
 # we will fallback to reading $PYTHON if --with-python is not given, and
 # python.m4 will get the expected input
 AC_ARG_WITH(python,
-  AC_HELP_STRING([--with-python=PATH], [Path to Python interpreter; searches $PATH if only a program name is given; if not given, searches for a few standard names such as "python3" or "python2"]),
+  AS_HELP_STRING([--with-python=PATH],[Path to Python interpreter; searches $PATH if only a program name is given; if not given, searches for a few standard names such as "python3" or "python2"]),
   [PYTHON="$withval"], [])
 if test x"$PYTHON" = xyes; then
 	AC_MSG_ERROR([--with-python option requires a path or program argument])
@@ -128,10 +127,8 @@ fi
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-Wall -Werror $PYTHON_INCLUDES"
-AC_TRY_COMPILE([#include <Python.h>],
-  [PySignal_SetWakeupFd(0);],
-  setwakeupfd_ok=yes,
-  setwakeupfd_ok=no)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <Python.h>]], [[PySignal_SetWakeupFd(0);]])],
+                  [setwakeupfd_ok=yes],[setwakeupfd_ok=no])
 AC_MSG_RESULT($setwakeupfd_ok)
 if test "x$setwakeupfd_ok" != xno; then
   AC_DEFINE(HAVE_PYSIGNAL_SETWAKEUPFD, 1,
@@ -143,7 +140,7 @@ PLATFORM=`$PYTHON -c "import sys; from distutils import util; sys.stdout.write(u
 AC_SUBST(PLATFORM)
 
 AC_ARG_ENABLE(thread,
-  AC_HELP_STRING([--disable-thread], [Disable pygobject threading support]),,
+  AS_HELP_STRING([--disable-thread],[Disable pygobject threading support]),,
   enable_thread=yes)
 
 AM_CHECK_PYMOD(thread,,,enable_thread=check_for_py3_module)
@@ -181,7 +178,7 @@ AS_AC_EXPAND(DATADIR, $datadir)
 dnl libffi
 AC_MSG_CHECKING(for ffi)
 AC_ARG_WITH(ffi,
-  AC_HELP_STRING([--without-ffi], [Disable libffi support]),
+  AS_HELP_STRING([--without-ffi],[Disable libffi support]),
   with_libffi=$withval,
   with_libffi=auto)
 if test x"$with_libffi" = xno ; then
@@ -204,7 +201,7 @@ dnl gio
 PKG_CHECK_MODULES(GIO, gio-2.0 >= gio_required_version)
 
 AC_ARG_ENABLE(cairo,
-    AC_HELP_STRING([--enable-cairo], [Enable Cairo bindings using introspection information]),
+    AS_HELP_STRING([--enable-cairo],[Enable Cairo bindings using introspection information]),
     enable_cairo=$enableval,
     enable_cairo=yes)
 
