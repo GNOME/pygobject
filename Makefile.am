@@ -144,3 +144,5 @@ check.nemiver:
 
 check.valgrind:
 	cd tests && $(MAKE) check.valgrind
+
+@GNOME_CODE_COVERAGE_RULES@

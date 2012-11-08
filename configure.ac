@@ -249,6 +249,11 @@ if test "x$GCC" = "xyes"; then
 
 fi
 
+# enable code coverage support
+GNOME_CODE_COVERAGE
+CFLAGS="$CFLAGS $CODE_COVERAGE_CFLAGS"
+LDFLAGS="$LDFLAGS $CODE_COVERAGE_CFLAGS"
+
 AC_CONFIG_FILES(
   Makefile
   pygobject-3.0.pc
@@ -270,5 +275,6 @@ AC_MSG_RESULT([
 	libffi support:			$have_libffi
 	cairo support:			$enable_cairo
 	thread support:			$enable_thread
+	code coverage support:          $enable_code_coverage
 ])
 

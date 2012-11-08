@@ -60,6 +60,7 @@ Makefile.in
 /py-compile
 /pygobject-3.0-uninstalled.pc
 /pygobject-3.0.pc
+/pygobject-*-coverage*
 /so_locations
 /stamp-h1
 /tags

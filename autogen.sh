@@ -16,4 +16,4 @@ fi
 autoreconf --force --install --verbose || exit $?
 
 cd "$olddir"
-test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
+test -n "$NOCONFIGURE" || "$srcdir/configure" --enable-code-coverage "$@"
