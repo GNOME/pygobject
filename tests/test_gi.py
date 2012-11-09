@@ -1014,26 +1014,18 @@ class TestGBytes(unittest.TestCase):
 
 
 class TestGByteArray(unittest.TestCase):
-    # FIXME: g_byte_array_new() not introspectable
-    def disabled_test_create(self):
+    def test_new(self):
         ba = GLib.ByteArray.new()
-        self.assertEqual(0, ba.len)
+        self.assertEqual(b'', ba)
 
-    # FIXME: g_byte_array_new_take() wrongly annotated
-    def disabled_test_new_take(self):
         ba = GLib.ByteArray.new_take(b'\x01\x02\xFF')
-        self.assertEqual(3, ba.len)
+        self.assertEqual(b'\x01\x02\xFF', ba)
 
     def test_bytearray_full_return(self):
         self.assertEqual(b'\x001\xFF3', GIMarshallingTests.bytearray_full_return())
 
-    # FIXME: ByteArray gets mangled, length comes out as 0
-    def disabled_test_bytearray_none_in(self):
-        ba = GIMarshallingTests.bytearray_full_return()
-        GIMarshallingTests.bytearray_none_in(ba)
-
     # FIXME: we do not currently support marshalling GByteArrays
-    def disabled_test_bytearray_none_in_from_bytes(self):
+    def disabled_test_bytearray_none_in(self):
         GIMarshallingTests.bytearray_none_in(b'\x00\x31\xFF\x33')
 
 
