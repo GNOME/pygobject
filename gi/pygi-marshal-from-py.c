@@ -930,6 +930,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PYGLIB_PyBytes_Check (py_arg)) {
         memcpy(array_->data, PYGLIB_PyBytes_AsString (py_arg), length);
+        array_->len = length;
         if (sequence_cache->is_zero_terminated) {
             /* If array_ has been created with zero_termination, space for the
              * terminator is properly allocated, so we're not off-by-one here. */
