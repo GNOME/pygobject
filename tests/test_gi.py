@@ -1022,8 +1022,7 @@ class TestGByteArray(unittest.TestCase):
     def test_bytearray_full_return(self):
         self.assertEqual(b'\x001\xFF3', GIMarshallingTests.bytearray_full_return())
 
-    # FIXME: we do not currently support marshalling GByteArrays
-    def disabled_test_bytearray_none_in(self):
+    def test_bytearray_none_in(self):
         GIMarshallingTests.bytearray_none_in(b'\x00\x31\xFF\x33')
 
 
