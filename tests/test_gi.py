@@ -973,24 +973,44 @@ class TestGPtrArray(unittest.TestCase):
 
 
 class TestGBytes(unittest.TestCase):
-    @unittest.expectedFailure
     def test_gbytes_create(self):
         b = GLib.Bytes.new(b'\x00\x01\xFF')
         self.assertEqual(3, b.get_size())
-        # FIXME: gets garbage, missing annotation?
-        self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
+        self.assertEqual(b'\x00\x01\xFF', b.get_data())
+        # FIXME: crashes at cleanup, double-free
+        #self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
+
+    def test_gbytes_create_take(self):
+        b = GLib.Bytes.new_take(b'\x00\x01\xFF')
+        self.assertEqual(3, b.get_size())
+        self.assertEqual(b'\x00\x01\xFF', b.get_data())
+        # FIXME: crashes at cleanup, double-free
+        #self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
 
     def test_gbytes_full_return(self):
         b = GIMarshallingTests.gbytes_full_return()
         self.assertEqual(4, b.get_size())
-        # FIXME: g_bytes_get_data() is not introspectable
-        #self.assertEqual(b'\x00\x31\xFFx33', b.get_data())
+        self.assertEqual(b'\x00\x31\xFF\x33', b.get_data())
 
         self.assertEqual(b'\x00\x31\xFF\x33', b.unref_to_array())
 
     def test_gbytes_none_in(self):
         b = GIMarshallingTests.gbytes_full_return()
         GIMarshallingTests.gbytes_none_in(b)
+
+    def test_compare(self):
+        a1 = GLib.Bytes.new(b'\x00\x01\xFF')
+        a2 = GLib.Bytes.new(b'\x00\x01\xFF')
+        b = GLib.Bytes.new(b'\x00\x01\xFE')
+
+        self.assertTrue(a1.equal(a2))
+        self.assertTrue(a2.equal(a1))
+        self.assertFalse(a1.equal(b))
+        self.assertFalse(b.equal(a2))
+
+        self.assertEqual(0, a1.compare(a2))
+        self.assertEqual(1, a1.compare(b))
+        self.assertEqual(-1, b.compare(a1))
 
 
 class TestGByteArray(unittest.TestCase):
