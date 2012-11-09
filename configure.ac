@@ -1,5 +1,5 @@
 -*- mode: m4 -*-
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 
 # The version of python used is determined by the executable pointed to by the
 # --with-python switch, or if that's not set, by the PYTHON environment
