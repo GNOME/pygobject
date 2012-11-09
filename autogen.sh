@@ -13,7 +13,13 @@ if test -z $AUTORECONF; then
         exit 1
 fi
 
+if type lcov >/dev/null 2>&1; then
+    EXTRA_ARGS="--enable-code-coverage"
+else
+    echo "lcov not installed, not enabling code coverage"
+fi
+
 autoreconf --force --install --verbose || exit $?
 
 cd "$olddir"
-test -n "$NOCONFIGURE" || "$srcdir/configure" --enable-code-coverage "$@"
+test -n "$NOCONFIGURE" || "$srcdir/configure" $EXTRA_ARGS "$@"
