@@ -569,6 +569,22 @@ class TestSize(unittest.TestCase):
         self.assertEqual(0, GIMarshallingTests.size_inout(Number(self.MAX)))
 
 
+class TestTimet(unittest.TestCase):
+
+    def test_time_t_return(self):
+        self.assertEqual(1234567890, GIMarshallingTests.time_t_return())
+
+    def test_time_t_in(self):
+        GIMarshallingTests.time_t_in(1234567890)
+        self.assertRaises(TypeError, GIMarshallingTests.time_t_in, "hello")
+
+    def test_time_t_out(self):
+        self.assertEqual(1234567890, GIMarshallingTests.time_t_out())
+
+    def test_time_t_inout(self):
+        self.assertEqual(0, GIMarshallingTests.time_t_inout(1234567890))
+
+
 class TestFloat(unittest.TestCase):
 
     MAX = GObject.G_MAXFLOAT
@@ -699,8 +715,18 @@ class TestArray(unittest.TestCase):
     def test_array_return(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_return())
 
+    def test_array_return_etc(self):
+        self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
+
+    @unittest.expectedFailure
     def test_array_in(self):
         GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
+        GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
+        # FIXME: This does not currently work
+        GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
+
+    def test_array_in_len_before(self):
+        GIMarshallingTests.array_in_len_before(Sequence([-1, 0, 1, 2]))
 
     def test_array_in_len_zero_terminated(self):
         GIMarshallingTests.array_in_len_zero_terminated(Sequence([-1, 0, 1, 2]))
@@ -709,11 +735,21 @@ class TestArray(unittest.TestCase):
         GIMarshallingTests.array_uint8_in(Sequence([97, 98, 99, 100]))
         GIMarshallingTests.array_uint8_in(_bytes("abcd"))
 
+    def test_array_string_in(self):
+        GIMarshallingTests.array_string_in(['foo', 'bar'])
+
     def test_array_out(self):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.array_out())
 
+    def test_array_out_etc(self):
+        self.assertEqual(([-5, 0, 1, 9], 4), GIMarshallingTests.array_out_etc(-5, 9))
+
     def test_array_inout(self):
         self.assertEqual([-2, -1, 0, 1, 2], GIMarshallingTests.array_inout(Sequence([-1, 0, 1, 2])))
+
+    def test_array_inout_etc(self):
+        self.assertEqual(([-5, -1, 0, 1, 9], 4),
+                         GIMarshallingTests.array_inout_etc(-5, Sequence([-1, 0, 1, 2]), 9))
 
     def test_method_array_in(self):
         object_ = GIMarshallingTests.Object()
@@ -745,6 +781,29 @@ class TestArray(unittest.TestCase):
         struct3.long_ = 3
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
+
+    def test_array_boxed_struct_take_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_take_in([struct1, struct2, struct3])
+
+        self.assertEqual(1, struct1.long_)
+
+    @unittest.expectedFailure
+    def test_array_boxed_struct_return(self):
+        (struct1, struct2, struct3) = GIMarshallingTests.array_zero_terminated_return_struct()
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct1))
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct2))
+        self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct3))
+        # FIXME: gets bogus values
+        self.assertEqual(42, struct1.long_)
+        self.assertEqual(43, struct2.long_)
+        self.assertEqual(44, struct3.long_)
 
     def test_array_simple_struct_in(self):
         struct1 = GIMarshallingTests.SimpleStruct()
@@ -785,6 +844,12 @@ class TestArray(unittest.TestCase):
 
     def test_array_zero_terminated_inout(self):
         self.assertEqual(['-1', '0', '1', '2'], GIMarshallingTests.array_zero_terminated_inout(['0', '1', '2']))
+
+    def test_init_function(self):
+        self.assertEqual((True, []), GIMarshallingTests.init_function([]))
+        self.assertEqual((True, []), GIMarshallingTests.init_function(['hello']))
+        self.assertEqual((True, ['hello']),
+                         GIMarshallingTests.init_function(['hello', 'world']))
 
 
 class TestGStrv(unittest.TestCase):
@@ -905,6 +970,51 @@ class TestGPtrArray(unittest.TestCase):
 
     def test_gptrarray_utf8_full_inout(self):
         self.assertEqual(['-2', '-1', '0', '1'], GIMarshallingTests.gptrarray_utf8_full_inout(['0', '1', '2']))
+
+
+class TestGBytes(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_gbytes_create(self):
+        b = GLib.Bytes.new(b'\x00\x01\xFF')
+        self.assertEqual(3, b.get_size())
+        # FIXME: gets garbage, missing annotation?
+        self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
+
+    def test_gbytes_full_return(self):
+        b = GIMarshallingTests.gbytes_full_return()
+        self.assertEqual(4, b.get_size())
+        # FIXME: g_bytes_get_data() is not introspectable
+        #self.assertEqual(b'\x00\x31\xFFx33', b.get_data())
+
+        self.assertEqual(b'\x00\x31\xFF\x33', b.unref_to_array())
+
+    def test_gbytes_none_in(self):
+        b = GIMarshallingTests.gbytes_full_return()
+        GIMarshallingTests.gbytes_none_in(b)
+
+
+class TestGByteArray(unittest.TestCase):
+    # FIXME: g_byte_array_new() not introspectable
+    def disabled_test_create(self):
+        ba = GLib.ByteArray.new()
+        self.assertEqual(0, ba.len)
+
+    # FIXME: g_byte_array_new_take() wrongly annotated
+    def disabled_test_new_take(self):
+        ba = GLib.ByteArray.new_take(b'\x01\x02\xFF')
+        self.assertEqual(3, ba.len)
+
+    def test_bytearray_full_return(self):
+        self.assertEqual(b'\x001\xFF3', GIMarshallingTests.bytearray_full_return())
+
+    # FIXME: ByteArray gets mangled, length comes out as 0
+    def disabled_test_bytearray_none_in(self):
+        ba = GIMarshallingTests.bytearray_full_return()
+        GIMarshallingTests.bytearray_none_in(ba)
+
+    # FIXME: we do not currently support marshalling GByteArrays
+    def disabled_test_bytearray_none_in_from_bytes(self):
+        GIMarshallingTests.bytearray_none_in(b'\x00\x31\xFF\x33')
 
 
 class TestGList(unittest.TestCase):
@@ -1070,6 +1180,23 @@ class TestGValue(unittest.TestCase):
         value.set_int64(GObject.G_MAXINT64)
         GIMarshallingTests.gvalue_int64_in(value)
 
+    def test_gvalue_in_with_type(self):
+        value = GObject.Value()
+        value.init(GObject.TYPE_STRING)
+        value.set_string('foo')
+        GIMarshallingTests.gvalue_in_with_type(value, GObject.TYPE_STRING)
+
+        value = GObject.Value()
+        value.init(GIMarshallingTests.Flags.__gtype__)
+        value.set_flags(GIMarshallingTests.Flags.VALUE1)
+        GIMarshallingTests.gvalue_in_with_type(value, GObject.TYPE_FLAGS)
+
+    def test_gvalue_in_enum(self):
+        value = GObject.Value()
+        value.init(GIMarshallingTests.Enum.__gtype__)
+        value.set_enum(GIMarshallingTests.Enum.VALUE3)
+        GIMarshallingTests.gvalue_in_enum(value)
+
     def test_gvalue_out(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out())
 
@@ -1093,6 +1220,11 @@ class TestGValue(unittest.TestCase):
     def test_gvalue_flat_array_out(self):
         values = GIMarshallingTests.return_gvalue_flat_array()
         self.assertEqual(values, [42, '42', True])
+
+    # FIXME: crashes
+    def disabled_test_gvalue_flat_array_round_trip(self):
+        self.assertEqual([42, '42', True],
+                         GIMarshallingTests.gvalue_flat_array_round_trip(42, '42', True))
 
 
 class TestGClosure(unittest.TestCase):
@@ -1163,6 +1295,11 @@ class TestEnum(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.enum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.enum_in, 'GIMarshallingTests.Enum.VALUE3')
 
+    def test_enum_return(self):
+        enum = GIMarshallingTests.enum_returnv()
+        self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
+        self.assertEqual(enum, GIMarshallingTests.Enum.VALUE3)
+
     def test_enum_out(self):
         enum = GIMarshallingTests.enum_out()
         self.assertTrue(isinstance(enum, GIMarshallingTests.Enum))
@@ -1209,6 +1346,11 @@ class TestGEnum(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
 
+    def test_genum_return(self):
+        genum = GIMarshallingTests.genum_returnv()
+        self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
+        self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE3)
+
     def test_genum_out(self):
         genum = GIMarshallingTests.genum_out()
         self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
@@ -1250,6 +1392,11 @@ class TestGFlags(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.flags_in, 1 << 1)
         self.assertRaises(TypeError, GIMarshallingTests.flags_in, 'GIMarshallingTests.Flags.VALUE2')
 
+    def test_flags_return(self):
+        flags = GIMarshallingTests.flags_returnv()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
+        self.assertEqual(flags, GIMarshallingTests.Flags.VALUE2)
+
     def test_flags_out(self):
         flags = GIMarshallingTests.flags_out()
         self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
@@ -1289,6 +1436,11 @@ class TestNoTypeFlags(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 1 << 1)
         self.assertRaises(TypeError, GIMarshallingTests.no_type_flags_in, 'GIMarshallingTests.NoTypeFlags.VALUE2')
+
+    def test_flags_return(self):
+        flags = GIMarshallingTests.no_type_flags_returnv()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
+        self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE2)
 
     def test_flags_out(self):
         flags = GIMarshallingTests.no_type_flags_out()
