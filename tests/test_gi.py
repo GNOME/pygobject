@@ -718,11 +718,9 @@ class TestArray(unittest.TestCase):
     def test_array_return_etc(self):
         self.assertEqual(([5, 0, 1, 9], 14), GIMarshallingTests.array_return_etc(5, 9))
 
-    @unittest.expectedFailure
     def test_array_in(self):
         GIMarshallingTests.array_in(Sequence([-1, 0, 1, 2]))
         GIMarshallingTests.array_in_guint64_len(Sequence([-1, 0, 1, 2]))
-        # FIXME: This does not currently work
         GIMarshallingTests.array_in_guint8_len(Sequence([-1, 0, 1, 2]))
 
     def test_array_in_len_before(self):
