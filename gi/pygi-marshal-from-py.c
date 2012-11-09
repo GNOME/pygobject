@@ -40,11 +40,39 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
     switch (type_tag) {
     case GI_TYPE_TAG_VOID:
     case GI_TYPE_TAG_BOOLEAN:
-    case GI_TYPE_TAG_INT8:
-    case GI_TYPE_TAG_UINT8:
-    case GI_TYPE_TAG_INT16:
-    case GI_TYPE_TAG_UINT16:
         goto unhandled_type;
+
+    case GI_TYPE_TAG_INT8:
+        if (size_in >= G_MININT8 && size_in <= G_MAXINT8) {
+            arg_out->v_int8 = size_in;
+            return TRUE;
+        } else {
+            goto overflow;
+        }
+
+    case GI_TYPE_TAG_UINT8:
+        if (size_in >= 0 && size_in <= G_MAXUINT8) {
+            arg_out->v_uint8 = size_in;
+            return TRUE;
+        } else {
+            goto overflow;
+        }
+
+    case GI_TYPE_TAG_INT16:
+        if (size_in >= G_MININT16 && size_in <= G_MAXINT16) {
+            arg_out->v_int16 = size_in;
+            return TRUE;
+        } else {
+            goto overflow;
+        }
+
+    case GI_TYPE_TAG_UINT16:
+        if (size_in >= 0 && size_in <= G_MAXUINT16) {
+            arg_out->v_uint16 = size_in;
+            return TRUE;
+        } else {
+            goto overflow;
+        }
 
         /* Ranges assume two's complement */
     case GI_TYPE_TAG_INT32:
