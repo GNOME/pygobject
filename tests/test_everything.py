@@ -220,6 +220,10 @@ class TestEverything(unittest.TestCase):
                          GObject.G_MINDOUBLE)
         self.assertRaises(ValueError, Everything.test_double, GObject.G_MAXDOUBLE * 2)
 
+        (two, three) = Everything.test_multi_double_args(2.5)
+        self.assertAlmostEqual(two, 5.0)
+        self.assertAlmostEqual(three, 7.5)
+
     def test_value(self):
         self.assertEqual(Everything.test_int_value_arg(GObject.G_MAXINT), GObject.G_MAXINT)
         self.assertEqual(Everything.test_value_return(GObject.G_MAXINT), GObject.G_MAXINT)
@@ -262,6 +266,34 @@ class TestEverything(unittest.TestCase):
         Everything.test_utf8_const_in(const_str)
         self.assertEqual(Everything.test_utf8_inout(const_str), noconst_str)
 
+        self.assertEqual(Everything.test_filename_return(), ['åäö', '/etc/fstab'])
+
+        # returns g_utf8_strlen() in out argument
+        self.assertEqual(Everything.test_int_out_utf8(''), 0)
+        self.assertEqual(Everything.test_int_out_utf8('hello world'), 11)
+        self.assertEqual(Everything.test_int_out_utf8('åäö'), 3)
+
+        self.assertEqual(Everything.test_utf8_out_out(), ('first', 'second'))
+        self.assertEqual(Everything.test_utf8_out_nonconst_return(), ('first', 'second'))
+
+    def test_enum(self):
+        self.assertEqual(Everything.test_enum_param(Everything.TestEnum.VALUE1), 'value1')
+        self.assertEqual(Everything.test_enum_param(Everything.TestEnum.VALUE3), 'value3')
+        self.assertRaises(TypeError, Everything.test_enum_param, 'hello')
+
+    # FIXME: ValueError: invalid enum value: 2147483648
+    @unittest.expectedFailure
+    def test_enum_unsigned(self):
+        self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE1), 'value1')
+        self.assertEqual(Everything.test_unsigned_enum_param(Everything.TestEnumUnsigned.VALUE3), 'value3')
+        self.assertRaises(TypeError, Everything.test_unsigned_enum_param, 'hello')
+
+    def test_flags(self):
+        result = Everything.global_get_flags_out()
+        # assert that it's not an int
+        self.assertEqual(type(result), Everything.TestFlags)
+        self.assertEqual(result, Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3)
+
     def test_floating(self):
         e = Everything.TestFloating()
         self.assertEqual(e.__grefcount__, 1)
@@ -300,6 +332,9 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(struct_b.nested_a.some_int8, struct_b_clone.nested_a.some_int8)
         self.assertEqual(struct_b.nested_a.some_double, struct_b_clone.nested_a.some_double)
         self.assertEqual(struct_b.nested_a.some_enum, struct_b_clone.nested_a.some_enum)
+
+        struct_a = Everything.test_struct_a_parse('ignored')
+        self.assertEqual(struct_a.some_int, 23)
 
     def test_wrong_type_of_arguments(self):
         try:
@@ -353,6 +388,33 @@ class TestEverything(unittest.TestCase):
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))
 
+    def test_array(self):
+        self.assertEqual(Everything.test_array_int_in([]), 0)
+        self.assertEqual(Everything.test_array_int_in([1, 5, -2]), 4)
+        self.assertEqual(Everything.test_array_int_out(), [0, 1, 2, 3, 4])
+        self.assertEqual(Everything.test_array_int_full_out(), [0, 1, 2, 3, 4])
+        self.assertEqual(Everything.test_array_int_none_out(), [1, 2, 3, 4, 5])
+        self.assertEqual(Everything.test_array_int_inout([1, 5, 42, -8]), [6, 43, -7])
+
+        self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
+        self.assertEqual(Everything.test_array_gint8_in([1, 3, 5, -50]), -41)
+        self.assertEqual(Everything.test_array_gint16_in([256, 257, -1000, 10000]), 9513)
+        self.assertEqual(Everything.test_array_gint32_in([30000, 1, -2]), 29999)
+        self.assertEqual(Everything.test_array_gint64_in([2 ** 33, 2 ** 34]), 2 ** 33 + 2 ** 34)
+
+        self.assertEqual(Everything.test_array_gtype_in(
+            [GObject.TYPE_STRING, GObject.TYPE_UINT64, GObject.TYPE_VARIANT]),
+            '[gchararray,guint64,GVariant,]')
+
+    def test_array_fixed_size(self):
+        # fixed length of 5
+        self.assertEqual(Everything.test_array_fixed_size_int_in([1, 2, -10, 5, 3]), 1)
+        self.assertRaises(ValueError, Everything.test_array_fixed_size_int_in, [1, 2, 3, 4])
+        self.assertRaises(ValueError, Everything.test_array_fixed_size_int_in, [1, 2, 3, 4, 5, 6])
+
+        self.assertEqual(Everything.test_array_fixed_size_int_out(), [0, 1, 2, 3, 4])
+        self.assertEqual(Everything.test_array_fixed_size_int_return(), [0, 1, 2, 3, 4])
+
     def test_ptrarray(self):
         # transfer container
         result = Everything.test_garray_container_return()
@@ -364,7 +426,43 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(result, ['regress'])
         result = None
 
+    def test_strv(self):
+        self.assertEqual(Everything.test_strv_out(), ['thanks', 'for', 'all', 'the', 'fish'])
+        self.assertEqual(Everything.test_strv_out_c(), ['thanks', 'for', 'all', 'the', 'fish'])
+        self.assertEqual(Everything.test_strv_out_container(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_strv_outarg(), ['1', '2', '3'])
+
+        self.assertEqual(Everything.test_strv_in_gvalue(), ['one', 'two', 'three'])
+
+        Everything.test_strv_in(['1', '2', '3'])
+
+    def test_glist(self):
+        self.assertEqual(Everything.test_glist_nothing_return(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_glist_nothing_return2(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_glist_container_return(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_glist_everything_return(), ['1', '2', '3'])
+
+        Everything.test_glist_nothing_in(['1', '2', '3'])
+        Everything.test_glist_nothing_in2(['1', '2', '3'])
+
+    def test_gslist(self):
+        self.assertEqual(Everything.test_gslist_nothing_return(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_gslist_nothing_return2(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_gslist_container_return(), ['1', '2', '3'])
+        self.assertEqual(Everything.test_gslist_everything_return(), ['1', '2', '3'])
+
+        Everything.test_gslist_nothing_in(['1', '2', '3'])
+        Everything.test_gslist_nothing_in2(['1', '2', '3'])
+
     def test_hash_return(self):
+        expected = {'foo': 'bar', 'baz': 'bat', 'qux': 'quux'}
+
+        self.assertEqual(Everything.test_ghash_null_return(), None)
+        self.assertEqual(Everything.test_ghash_nothing_return(), expected)
+        self.assertEqual(Everything.test_ghash_nothing_return(), expected)
+        self.assertEqual(Everything.test_ghash_container_return(), expected)
+        self.assertEqual(Everything.test_ghash_everything_return(), expected)
+
         result = Everything.test_ghash_gvalue_return()
         self.assertEqual(result['integer'], 12)
         self.assertEqual(result['boolean'], True)
@@ -374,12 +472,22 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(result['enum'], Everything.TestEnum.VALUE2)
         result = None
 
+    # FIXME: CRITICAL **: Unsupported type ghash
+    def disabled_test_hash_return_nested(self):
+        self.assertEqual(Everything.test_ghash_nested_everything_return(), {})
+        self.assertEqual(Everything.test_ghash_nested_everything_return2(), {})
+
     def test_hash_in(self):
         # specifying a simple string array for "strings" does not work due to
         # https://bugzilla.gnome.org/show_bug.cgi?id=666636
         # workaround by explicitly building a GStrv object
         class GStrv(list):
             __gtype__ = GObject.TYPE_STRV
+
+        expected = {'foo': 'bar', 'baz': 'bat', 'qux': 'quux'}
+
+        Everything.test_ghash_nothing_in(expected)
+        Everything.test_ghash_nothing_in2(expected)
 
         data = {'integer': 12,
                 'boolean': True,
@@ -555,11 +663,35 @@ class TestCallbacks(unittest.TestCase):
 
         def callback():
             TestCallbacks.called += 1
-            return 0
+            return TestCallbacks.called
 
         refcount = sys.getrefcount(callback)
-        Everything.test_multi_callback(callback)
+        result = Everything.test_multi_callback(callback)
+        # first callback should give 1, second 2, and the function sums them up
+        self.assertEqual(result, 3)
         self.assertEqual(TestCallbacks.called, 2)
+        self.assertEqual(sys.getrefcount(callback), refcount)
+
+    # FIXME: TypeError: callback() takes 2 positional arguments but 4 were given
+    # does not remove the array length arguments
+    @unittest.expectedFailure
+    def test_callback_scope_call_array(self):
+        # This tests a callback that gets called multiple times from a
+        # single scope call in python with array arguments
+        TestCallbacks.callargs = []
+
+        # works with:
+        #def callback(one, one_length, two, two_length):
+        def callback(one, two):
+            TestCallbacks.callargs.append((one, two))
+            return len(TestCallbacks.callargs)
+
+        refcount = sys.getrefcount(callback)
+        result = Everything.test_array_callback(callback)
+        # first callback should give 1, second 2, and the function sums them up
+        self.assertEqual(result, 3)
+        self.assertEqual(TestCallbacks.callargs,
+                         [([-1, 0, 1, 2], ['one', 'two', 'three'])] * 2)
         self.assertEqual(sys.getrefcount(callback), refcount)
 
     def test_callback_userdata(self):
@@ -837,7 +969,27 @@ class TestProperties(unittest.TestCase):
         self.assertTrue(isinstance(object_.props.boxed, Everything.TestBoxed))
         self.assertEqual(object_.props.boxed.some_int8, 42)
 
+    def test_boxed_alternative_constructor(self):
+        boxed = Everything.TestBoxed.new_alternative_constructor1(5)
+        self.assertEqual(boxed.some_int8, 5)
+
+        boxed = Everything.TestBoxed.new_alternative_constructor2(5, 3)
+        self.assertEqual(boxed.some_int8, 8)
+
+        boxed = Everything.TestBoxed.new_alternative_constructor3("-3")
+        self.assertEqual(boxed.some_int8, -3)
+
     def test_boxed_equality(self):
+        boxed42 = Everything.TestBoxed.new_alternative_constructor1(42)
+        boxed5 = Everything.TestBoxed.new_alternative_constructor1(5)
+        boxed42_2 = Everything.TestBoxed.new_alternative_constructor2(41, 1)
+
+        self.assertFalse(boxed42.equals(boxed5))
+        self.assertTrue(boxed42.equals(boxed42_2))
+        self.assertTrue(boxed42_2.equals(boxed42))
+        self.assertTrue(boxed42.equals(boxed42))
+
+    def test_boxed_c_equality(self):
         boxed = Everything.TestBoxedC()
         # TestBoxedC uses refcounting, so we know that
         # the pointer is the same when copied
