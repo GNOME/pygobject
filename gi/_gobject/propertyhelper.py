@@ -162,6 +162,10 @@ class Property(object):
         if not isinstance(blurb, _basestring):
             raise TypeError("blurb must be a string")
         self.blurb = blurb
+        # Always clobber __doc__ with blurb even if blurb is empty because
+        # we don't want the lengthy Property class documentation showing up
+        # on instances.
+        self.__doc__ = blurb
 
         if flags < 0 or flags > 32:
             raise TypeError("invalid flag value: %r" % (flags,))
@@ -234,10 +238,10 @@ class Property(object):
 
     def getter(self, fget):
         """Set the getter function to fget. For use as a decorator."""
-        if self.__doc__ is None:
-            self.__doc__ = fget.__doc__
-        if not self.blurb and fget.__doc__:
+        if fget.__doc__:
+            # Always clobber docstring and blurb with the getter docstring.
             self.blurb = fget.__doc__
+            self.__doc__ = fget.__doc__
         self.fget = fget
         return self
 

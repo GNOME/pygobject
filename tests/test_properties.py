@@ -719,14 +719,20 @@ class TestProperty(unittest.TestCase):
         del t
         self.assertEqual(sys.getrefcount(o), rc)
 
-    def test_doc_string_as_blurb(self):
+    def test_doc_strings(self):
         class C(GObject.GObject):
+            foo_blurbed = GObject.Property(type=int, blurb='foo_blurbed doc string')
+
             @GObject.Property
-            def blurbed(self):
-                """blurbed doc string"""
+            def foo_getter(self):
+                """foo_getter doc string"""
                 return 0
 
-        self.assertEqual(C.blurbed.blurb, 'blurbed doc string')
+        self.assertEqual(C.foo_blurbed.blurb, 'foo_blurbed doc string')
+        self.assertEqual(C.foo_blurbed.__doc__, 'foo_blurbed doc string')
+
+        self.assertEqual(C.foo_getter.blurb, 'foo_getter doc string')
+        self.assertEqual(C.foo_getter.__doc__, 'foo_getter doc string')
 
     def test_python_to_glib_type_mapping(self):
         tester = GObject.Property()
