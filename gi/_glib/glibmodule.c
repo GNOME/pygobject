@@ -351,9 +351,15 @@ static void
 child_watch_dnotify(gpointer data)
 {
     struct _PyGChildData *child_data = (struct _PyGChildData *) data;
+    PyGILState_STATE gil;
+
+    gil = pyglib_gil_state_ensure();
+
     Py_DECREF(child_data->func);
     Py_XDECREF(child_data->data);
     g_slice_free(struct _PyGChildData, child_data);
+
+    pyglib_gil_state_release(gil);
 }
 
 
