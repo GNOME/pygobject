@@ -1231,7 +1231,6 @@ class TestGValue(unittest.TestCase):
         values = GIMarshallingTests.return_gvalue_flat_array()
         self.assertEqual(values, [42, '42', True])
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688137
     def test_gvalue_gobject_ref_counts(self):
         # Tests a GObject held by a GValue
         obj = GObject.Object()
@@ -1269,7 +1268,6 @@ class TestGValue(unittest.TestCase):
         gc.collect()
         self.assertEqual(ref(), None)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688137
     def test_gvalue_boxed_ref_counts(self):
         # Tests a boxed type wrapping a python object pointer (TYPE_PYOBJECT)
         # held by a GValue

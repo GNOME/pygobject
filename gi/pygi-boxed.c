@@ -165,6 +165,17 @@ _pygi_boxed_new (PyTypeObject *type,
     return (PyObject *) self;
 }
 
+static PyObject *
+_pygi_boxed_get_free_on_dealloc(PyGIBoxed *self, void *closure)
+{
+  return PyBool_FromLong( ((PyGBoxed *)self)->free_on_dealloc );
+}
+
+static PyGetSetDef pygi_boxed_getsets[] = {
+    { "_free_on_dealloc", (getter)_pygi_boxed_get_free_on_dealloc, (setter)0 },
+    { NULL, 0, 0 }
+};
+
 void
 _pygi_boxed_register_types (PyObject *m)
 {
@@ -174,6 +185,7 @@ _pygi_boxed_register_types (PyObject *m)
     PyGIBoxed_Type.tp_init = (initproc) _boxed_init;
     PyGIBoxed_Type.tp_dealloc = (destructor) _boxed_dealloc;
     PyGIBoxed_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+    PyGIBoxed_Type.tp_getset = pygi_boxed_getsets;
 
     if (PyType_Ready (&PyGIBoxed_Type))
         return;

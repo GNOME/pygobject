@@ -204,6 +204,15 @@ __all__ += ['add_emission_hook', 'features', 'list_properties',
             'signal_new', 'threads_init', 'type_register']
 
 
+class Value(GObjectModule.Value):
+    def __del__(self):
+        if self._free_on_dealloc:
+            self.unset()
+
+Value = override(Value)
+__all__.append('Value')
+
+
 def type_from_name(name):
     type_ = GObjectModule.type_from_name(name)
     if type_ == TYPE_INVALID:
