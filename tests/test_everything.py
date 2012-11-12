@@ -256,7 +256,9 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(timeout.get_int32(), 10)
 
     def test_string(self):
-        const_str = b'const \xe2\x99\xa5 utf8'.decode('UTF-8')
+        const_str = b'const \xe2\x99\xa5 utf8'
+        if sys.version_info >= (3, 0):
+            const_str = const_str.decode('UTF-8')
         noconst_str = 'non' + const_str
 
         self.assertEqual(Everything.test_utf8_const_return(), const_str)
@@ -396,7 +398,8 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_array_int_none_out(), [1, 2, 3, 4, 5])
         self.assertEqual(Everything.test_array_int_inout([1, 5, 42, -8]), [6, 43, -7])
 
-        self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
+        if sys.version_info >= (3, 0):
+            self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
         self.assertEqual(Everything.test_array_gint8_in([1, 3, 5, -50]), -41)
         self.assertEqual(Everything.test_array_gint16_in([256, 257, -1000, 10000]), 9513)
         self.assertEqual(Everything.test_array_gint32_in([30000, 1, -2]), 29999)
