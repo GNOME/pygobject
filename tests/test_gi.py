@@ -11,6 +11,7 @@ import os
 import locale
 import subprocess
 import gc
+import weakref
 from io import StringIO, BytesIO
 
 import gi
@@ -1229,6 +1230,85 @@ class TestGValue(unittest.TestCase):
     def test_gvalue_flat_array_out(self):
         values = GIMarshallingTests.return_gvalue_flat_array()
         self.assertEqual(values, [42, '42', True])
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688137
+    def test_gvalue_gobject_ref_counts(self):
+        # Tests a GObject held by a GValue
+        obj = GObject.Object()
+        ref = weakref.ref(obj)
+        grefcount = obj.__grefcount__
+
+        value = GObject.Value()
+        value.init(GObject.TYPE_OBJECT)
+
+        # TYPE_OBJECT will inc ref count as it should
+        value.set_object(obj)
+        self.assertEqual(obj.__grefcount__, grefcount + 1)
+
+        # multiple set_object should not inc ref count
+        value.set_object(obj)
+        self.assertEqual(obj.__grefcount__, grefcount + 1)
+
+        # get_object will re-use the same wrapper as obj
+        res = value.get_object()
+        self.assertEqual(obj, res)
+        self.assertEqual(obj.__grefcount__, grefcount + 1)
+
+        # multiple get_object should not inc ref count
+        res = value.get_object()
+        self.assertEqual(obj.__grefcount__, grefcount + 1)
+
+        # deletion of the result and value holder should bring the
+        # refcount back to where we started
+        del res
+        del value
+        gc.collect()
+        self.assertEqual(obj.__grefcount__, grefcount)
+
+        del obj
+        gc.collect()
+        self.assertEqual(ref(), None)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688137
+    def test_gvalue_boxed_ref_counts(self):
+        # Tests a boxed type wrapping a python object pointer (TYPE_PYOBJECT)
+        # held by a GValue
+        class Obj(object):
+            pass
+
+        obj = Obj()
+        ref = weakref.ref(obj)
+        refcount = sys.getrefcount(obj)
+
+        value = GObject.Value()
+        value.init(GObject.TYPE_PYOBJECT)
+
+        # boxed TYPE_PYOBJECT will inc ref count as it should
+        value.set_boxed(obj)
+        self.assertEqual(sys.getrefcount(obj), refcount + 1)
+
+        # multiple set_boxed should not inc ref count
+        value.set_boxed(obj)
+        self.assertEqual(sys.getrefcount(obj), refcount + 1)
+
+        res = value.get_boxed()
+        self.assertEqual(obj, res)
+        self.assertEqual(sys.getrefcount(obj), refcount + 2)
+
+        # multiple get_boxed should not inc ref count
+        res = value.get_boxed()
+        self.assertEqual(sys.getrefcount(obj), refcount + 2)
+
+        # deletion of the result and value holder should bring the
+        # refcount back to where we started
+        del res
+        del value
+        gc.collect()
+        self.assertEqual(sys.getrefcount(obj), refcount)
+
+        del obj
+        gc.collect()
+        self.assertEqual(ref(), None)
 
     # FIXME: crashes
     def disabled_test_gvalue_flat_array_round_trip(self):
