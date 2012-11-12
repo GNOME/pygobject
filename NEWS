@@ -1,3 +1,14 @@
+3.4.2   12-Nov-2012
+        - Fix marshalling of GByteArrays (Martin Pitt)
+        - Fix marshalling of ssize_t to smaller ints (Martin Pitt)
+        - Fix crash with GLib.child_watch_add (Daniel Narvaez) (#688067)
+        - Fix various bugs in GLib.IOChannel (Martin Pitt)
+        - Work around wrong 64 bit constants in GLib Gir (Martin Pitt)
+          (#685022)
+        - Fix OverflowError in source_remove() (Martin Pitt) (#684526)
+        - Fix Signal decorator to not use base class gsignals dict
+          (Simon Feltman) (#686496)
+
 3.4.1.1 17-Oct-2012
         - Bump g-i dependency to >= 1.34.1.1 (Paolo Borelli)
         - Fix leaked vfunc return values (Simon Feltman) (#686140)
