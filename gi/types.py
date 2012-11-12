@@ -88,7 +88,7 @@ def get_callable_info_doc_string(info):
     in_args_str = ', '.join(in_args_strs)
 
     if out_args:
-        out_args_str = ', '.join(arg.get_name() + ':' + arg.get_pytype_hint() \
+        out_args_str = ', '.join(arg.get_name() + ':' + arg.get_pytype_hint()
                                  for arg in out_args)
         return '%s(%s) -> %s' % (info.get_name(), in_args_str, out_args_str)
     else:
