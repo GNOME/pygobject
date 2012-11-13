@@ -122,6 +122,7 @@ RUN_TESTS_ENV_VARS= \
 	GI_TYPELIB_PATH=$(builddir):$$GI_TYPELIB_PATH \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	MALLOC_PERTURB_=85 \
+	MALLOC_CHECK_=3 \
 	TESTS_BUILDDIR=$(builddir)
 
 check-local: $(LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled

@@ -384,6 +384,9 @@ pygi_set_property_value_real (PyGObject *instance,
             break;
         case GI_TYPE_TAG_ARRAY:
         {
+            /* This is assumes GI_TYPE_TAG_ARRAY is always a GStrv
+             * https://bugzilla.gnome.org/show_bug.cgi?id=688232
+             */
             GArray *arg_items = (GArray*) arg.v_pointer;
             gchar** strings;
             int i;
@@ -391,12 +394,13 @@ pygi_set_property_value_real (PyGObject *instance,
             if (arg_items == NULL)
                 goto out;
 
-            strings = g_new0 (char*, arg_items->len);
+            strings = g_new0 (char*, arg_items->len + 1);
             for (i = 0; i < arg_items->len; ++i) {
                 strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
             }
-            g_array_free (arg_items, TRUE);
+            strings[arg_items->len] = NULL;
             g_value_set_boxed (&value, strings);
+            g_array_free (arg_items, TRUE);
             break;
         }
         default:
