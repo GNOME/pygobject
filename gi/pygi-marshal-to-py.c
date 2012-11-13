@@ -439,7 +439,10 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                                 memcpy (_struct, array_->data + i * item_size,
                                         item_size);
                                 item_arg.v_pointer = _struct;
-                            } else
+                            } else if (item_arg_cache->is_pointer)
+                                /* this is the case for GAtom* arrays */
+                                item_arg.v_pointer = g_array_index (array_, gpointer, i);
+                            else
                                 item_arg.v_pointer = array_->data + i * item_size;
                             break;
                         default:
