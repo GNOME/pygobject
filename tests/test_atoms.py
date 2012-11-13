@@ -13,6 +13,18 @@ class TestGdkAtom(unittest.TestCase):
         atom = Gdk.Atom.intern('my_string', False)
         self.assertEqual(atom.name(), 'my_string')
 
+    def test_str(self):
+        atom = Gdk.Atom.intern('my_string', False)
+        self.assertEqual(str(atom), 'my_string')
+
+        self.assertEqual(str(Gdk.SELECTION_CLIPBOARD), 'CLIPBOARD')
+
+    def test_repr(self):
+        atom = Gdk.Atom.intern('my_string', False)
+        self.assertEqual(repr(atom), 'Gdk.Atom<my_string>')
+
+        self.assertEqual(repr(Gdk.SELECTION_CLIPBOARD), 'Gdk.Atom<CLIPBOARD>')
+
     def test_in_single(self):
         a_selection = Gdk.Atom.intern('test_clipboard', False)
         clipboard = Gtk.Clipboard.get(a_selection)
