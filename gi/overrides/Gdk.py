@@ -345,6 +345,27 @@ def color_parse(color):
         return None
     return color
 
+
+# Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
+# hack some individual methods
+def _gdk_atom_str(atom):
+    n = atom.name()
+    if n:
+        return n
+    return Gdk.Atom.__str__(n)
+
+
+def _gdk_atom_repr(atom):
+    n = atom.name()
+    if n:
+        return 'Gdk.Atom<%s>' % n
+    return Gdk.Atom.__str__(n)
+
+
+Gdk.Atom.__str__ = _gdk_atom_str
+Gdk.Atom.__repr__ = _gdk_atom_repr
+
+
 # constants
 if Gdk._version >= '3.0':
     SELECTION_PRIMARY = Gdk.atom_intern('PRIMARY', True)
