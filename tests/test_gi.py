@@ -976,22 +976,16 @@ class TestGBytes(unittest.TestCase):
         b = GLib.Bytes.new(b'\x00\x01\xFF')
         self.assertEqual(3, b.get_size())
         self.assertEqual(b'\x00\x01\xFF', b.get_data())
-        # FIXME: crashes at cleanup, double-free
-        #self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
 
     def test_gbytes_create_take(self):
         b = GLib.Bytes.new_take(b'\x00\x01\xFF')
         self.assertEqual(3, b.get_size())
         self.assertEqual(b'\x00\x01\xFF', b.get_data())
-        # FIXME: crashes at cleanup, double-free
-        #self.assertEqual(b'\x00\x01\xFF', b.unref_to_array())
 
     def test_gbytes_full_return(self):
         b = GIMarshallingTests.gbytes_full_return()
         self.assertEqual(4, b.get_size())
         self.assertEqual(b'\x00\x31\xFF\x33', b.get_data())
-
-        self.assertEqual(b'\x00\x31\xFF\x33', b.unref_to_array())
 
     def test_gbytes_none_in(self):
         b = GIMarshallingTests.gbytes_full_return()
