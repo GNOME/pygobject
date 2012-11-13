@@ -352,14 +352,16 @@ def _gdk_atom_str(atom):
     n = atom.name()
     if n:
         return n
-    return Gdk.Atom.__str__(n)
+    # fall back to atom index
+    return 'Gdk.Atom<%i>' % hash(atom)
 
 
 def _gdk_atom_repr(atom):
     n = atom.name()
     if n:
         return 'Gdk.Atom<%s>' % n
-    return Gdk.Atom.__str__(n)
+    # fall back to atom index
+    return 'Gdk.Atom<%i>' % hash(atom)
 
 
 Gdk.Atom.__str__ = _gdk_atom_str
