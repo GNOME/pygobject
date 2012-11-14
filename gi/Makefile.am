@@ -58,8 +58,6 @@ _gi_la_SOURCES = \
 	pygi-closure.h \
 	pygi-ccallback.c \
 	pygi-ccallback.h \
-	pygi-callbacks.c \
-	pygi-callbacks.h \
 	pygi.h \
 	pygi-private.h \
 	pygi-property.c \

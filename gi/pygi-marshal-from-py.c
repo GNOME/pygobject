@@ -1343,6 +1343,50 @@ static void
 _pygi_destroy_notify_dummy (gpointer data) {
 }
 
+static PyGICClosure *global_destroy_notify;
+
+static void
+_pygi_destroy_notify_callback_closure (ffi_cif *cif,
+                                       void *result,
+                                       void **args,
+                                       void *data)
+{
+    PyGICClosure *info = * (void**) (args[0]);
+
+    g_assert (info);
+
+    _pygi_invoke_closure_free (info);
+}
+
+/* _pygi_destroy_notify_create:
+ *
+ * Method used in the occasion when a method has a GDestroyNotify
+ * argument with user data.
+ */
+static PyGICClosure*
+_pygi_destroy_notify_create (void)
+{
+    if (!global_destroy_notify) {
+
+        PyGICClosure *destroy_notify = g_slice_new0 (PyGICClosure);
+
+        g_assert (destroy_notify);
+
+        GIBaseInfo* glib_destroy_notify = g_irepository_find_by_name (NULL, "GLib", "DestroyNotify");
+        g_assert (glib_destroy_notify != NULL);
+        g_assert (g_base_info_get_type (glib_destroy_notify) == GI_INFO_TYPE_CALLBACK);
+
+        destroy_notify->closure = g_callable_info_prepare_closure ( (GICallableInfo*) glib_destroy_notify,
+                                                                    &destroy_notify->cif,
+                                                                    _pygi_destroy_notify_callback_closure,
+                                                                    NULL);
+
+        global_destroy_notify = destroy_notify;
+    }
+
+    return global_destroy_notify;
+}
+
 gboolean
 _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,

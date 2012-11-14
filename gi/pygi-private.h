@@ -27,7 +27,6 @@
 #include "pygi-foreign.h"
 #include "pygi-closure.h"
 #include "pygi-ccallback.h"
-#include "pygi-callbacks.h"
 #include "pygi-property.h"
 #include "pygi-signal-closure.h"
 #include "pygi-invoke.h"
