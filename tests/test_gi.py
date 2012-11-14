@@ -688,6 +688,36 @@ class TestUtf8(unittest.TestCase):
         self.assertEqual("", GIMarshallingTests.utf8_full_inout(CONSTANT_UTF8))
 
 
+class TestFilename(unittest.TestCase):
+    def setUp(self):
+        self.workdir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.workdir)
+
+    def test_filename_in(self):
+        fname = os.path.join(self.workdir, 'testäø.txt')
+        self.assertRaises(GLib.GError, GLib.file_get_contents, fname)
+
+        with open(fname.encode('UTF-8'), 'wb') as f:
+            f.write(b'hello world!\n\x01\x02')
+
+        (result, contents) = GLib.file_get_contents(fname)
+        self.assertEqual(result, True)
+        self.assertEqual(contents, b'hello world!\n\x01\x02')
+
+    def test_filename_out(self):
+        self.assertRaises(GLib.GError, GLib.Dir.make_tmp, 'test')
+
+        dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
+        self.assertTrue('/testäø.' in dirname, dirname)
+        self.assertTrue(os.path.isdir(dirname.encode('UTF-8')))
+        os.rmdir(dirname.encode('UTF-8'))
+
+    def test_filename_type_error(self):
+        self.assertRaises(TypeError, GLib.file_get_contents, 23)
+
+
 class TestArray(unittest.TestCase):
 
     def test_array_fixed_int_return(self):
