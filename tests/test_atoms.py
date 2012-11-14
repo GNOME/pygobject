@@ -48,6 +48,25 @@ class TestGdkAtom(unittest.TestCase):
         self.assertTrue(Gtk.targets_include_image([a_jpeg], False))
         self.assertTrue(Gtk.targets_include_image([a_jpeg, a_plain], False))
 
+    def test_out_array(self):
+        a_selection = Gdk.Atom.intern('my_clipboard', False)
+        clipboard = Gtk.Clipboard.get(a_selection)
+
+        # empty
+        (res, targets) = clipboard.wait_for_targets()
+        self.assertEqual(res, False)
+        self.assertEqual(targets, [])
+
+        # text
+        clipboard.set_text('hello', 5)
+        (res, targets) = clipboard.wait_for_targets()
+        self.assertEqual(res, True)
+        self.assertNotEqual(targets, [])
+        self.assertEqual(type(targets[0]), Gdk.Atom)
+        names = [t.name() for t in targets]
+        self.assertFalse(None in names, names)
+        self.assertTrue('TEXT' in names, names)
+
     def test_out_glist(self):
         display = Gdk.Display.get_default()
         dm = display.get_device_manager()
