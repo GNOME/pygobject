@@ -1293,7 +1293,12 @@ array_success:
                     } else if (g_type_is_a (type, G_TYPE_POINTER) || 
                                g_type_is_a (type, G_TYPE_VARIANT) || 
                                type == G_TYPE_NONE) {
-			g_warn_if_fail (g_type_is_a (type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
+                        g_warn_if_fail (g_type_is_a (type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
+
+                        if (g_type_is_a (type, G_TYPE_VARIANT) && pyg_type_from_object (object) != G_TYPE_VARIANT) {
+                            PyErr_SetString (PyExc_TypeError, "expected GLib.Variant");
+                            break;
+                        }
                         arg.v_pointer = pyg_pointer_get (object, void);
                     } else {
                         PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name (type));

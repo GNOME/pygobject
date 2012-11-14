@@ -2601,9 +2601,8 @@ class TestPropertiesObject(unittest.TestCase):
         self.assertEqual(obj.props.some_variant.get_type_string(), 'b')
         self.assertEqual(obj.props.some_variant.get_boolean(), True)
 
-        # FIXME:
-        #self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', 'foo')
-        #self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', None)
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', 'foo')
+        self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', 23)
 
         self.assertEqual(obj.props.some_variant.get_type_string(), 'b')
         self.assertEqual(obj.props.some_variant.get_boolean(), True)
