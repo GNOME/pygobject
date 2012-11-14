@@ -25,8 +25,8 @@
 #include <Python.h>
 
 #if PY_VERSION_HEX < 0x03000000
-static Pycairo_CAPI_t *Pycairo_CAPI;
 #include <pycairo.h>
+static Pycairo_CAPI_t *Pycairo_CAPI;
 #else
 #include <pycairo/py3cairo.h>
 #endif
