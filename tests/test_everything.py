@@ -914,6 +914,22 @@ class TestClosures(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_closure_variant, callback, 'foo')
         self.assertFalse(self.called)
 
+    def test_variant_wrong_return_type(self):
+        def callback(variant):
+            return 'no_variant'
+
+        # reset last error
+        sys.last_type = None
+
+        # this does not directly raise an exception (see
+        # https://bugzilla.gnome.org/show_bug.cgi?id=616279)
+        result = Everything.test_closure_variant(callback, GLib.Variant('i', 42))
+        # ... but the result shouldn't be a string
+        self.assertEqual(result, None)
+        # and the error should be shown
+        self.assertEqual(sys.last_type, TypeError)
+        self.assertTrue('return value' in str(sys.last_value), sys.last_value)
+
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestProperties(unittest.TestCase):
