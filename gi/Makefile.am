@@ -42,8 +42,6 @@ _gi_la_SOURCES = \
 	pygi-info.h \
 	pygi-foreign.c \
 	pygi-foreign.h \
-	pygi-foreign-gvariant.c \
-	pygi-foreign-gvariant.h \
 	pygi-struct.c \
 	pygi-struct.h \
 	pygi-source.c \

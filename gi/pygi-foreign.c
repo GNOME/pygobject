@@ -26,8 +26,8 @@
 #  include <config.h>
 #endif
 
+#include "pygobject.h"
 #include "pygi-foreign.h"
-#include "pygi-foreign-gvariant.h"
 
 #include <girepository.h>
 
@@ -45,12 +45,6 @@ static void
 init_foreign_structs ()
 {
     foreign_structs = g_ptr_array_new ();
-
-    pygi_register_foreign_struct ("GLib",
-                                  "Variant",
-                                  g_variant_to_arg,
-                                  g_variant_from_arg,
-                                  g_variant_release_foreign);
 }
 
 static PyGIForeignStruct *
