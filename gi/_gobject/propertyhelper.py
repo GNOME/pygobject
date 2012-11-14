@@ -29,7 +29,7 @@ from .constants import \
     TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, TYPE_FLAGS, \
     TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
     TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
-    TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV
+    TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV, TYPE_VARIANT
 from ._gobject import \
     G_MAXFLOAT, G_MAXDOUBLE, \
     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
@@ -264,7 +264,7 @@ class Property(object):
                        TYPE_ULONG, TYPE_INT64, TYPE_UINT64,
                        TYPE_FLOAT, TYPE_DOUBLE, TYPE_POINTER,
                        TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, TYPE_STRING,
-                       TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV):
+                       TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV, TYPE_VARIANT):
             return type_
         else:
             raise TypeError("Unsupported type: %r" % (type_,))
@@ -302,6 +302,10 @@ class Property(object):
             for val in default:
                 if type(val) not in (str, bytes):
                     raise TypeError("Strv value %s must contain only strings" % str(default))
+        elif _gobject.type_is_a(ptype, TYPE_VARIANT) and default is not None:
+            if not hasattr(default, '__gtype__') or not _gobject.type_is_a(default, TYPE_VARIANT):
+                raise TypeError("variant value %s must be an instance of %r" %
+                                (default, ptype))
 
     def _get_minimum(self):
         return self._min_value_lookup.get(self.type, None)
@@ -337,7 +341,8 @@ class Property(object):
                      TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE):
             args = self.minimum, self.maximum, self.default
         elif (ptype == TYPE_STRING or ptype == TYPE_BOOLEAN or
-              ptype.is_a(TYPE_ENUM) or ptype.is_a(TYPE_FLAGS)):
+              ptype.is_a(TYPE_ENUM) or ptype.is_a(TYPE_FLAGS) or
+              ptype.is_a(TYPE_VARIANT)):
             args = (self.default,)
         elif ptype in (TYPE_PYOBJECT, TYPE_GTYPE):
             args = ()

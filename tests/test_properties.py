@@ -13,7 +13,7 @@ from gi.repository.GObject import \
     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV, \
     TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, TYPE_BOOLEAN, TYPE_FLOAT, \
     TYPE_DOUBLE, TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
-    TYPE_STRING, TYPE_PYOBJECT
+    TYPE_STRING, TYPE_PYOBJECT, TYPE_VARIANT
 
 from gi.repository.GObject import \
     G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG
@@ -61,6 +61,12 @@ class PropertyObject(GObject.GObject):
     strings = GObject.Property(
         type=TYPE_STRV, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
+    variant = GObject.Property(
+        type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
+    variant_def = GObject.Property(
+        type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
+        default=GLib.Variant('i', 42))
 
 class PropertyInheritanceObject(Regress.TestObj):
     # override property from the base class, with a different type
@@ -112,19 +118,24 @@ class TestPropertyObject(unittest.TestCase):
 
     def test_iteration(self):
         for obj in (PropertyObject.props, PropertyObject().props):
+            names = []
             for pspec in obj:
                 gtype = GType(pspec)
                 self.assertEqual(gtype.parent.name, 'GParam')
-                self.assertTrue(pspec.name in ['normal',
-                                               'construct',
-                                               'construct-only',
-                                               'uint64',
-                                               'enum',
-                                               'flags',
-                                               'gtype',
-                                               'strings',
-                                               'boxed'])
-            self.assertEqual(len(obj), 9)
+                names.append(pspec.name)
+
+            names.sort()
+            self.assertEqual(names, ['boxed',
+                                     'construct',
+                                     'construct-only',
+                                     'enum',
+                                     'flags',
+                                     'gtype',
+                                     'normal',
+                                     'strings',
+                                     'uint64',
+                                     'variant',
+                                     'variant-def'])
 
     def test_normal(self):
         obj = new(PropertyObject, normal="123")
@@ -329,6 +340,54 @@ class TestPropertyObject(unittest.TestCase):
                           default='foo')
         self.assertRaises(TypeError, GObject.Property, type=TYPE_STRV,
                           default=['hello', 1])
+
+    def test_variant(self):
+        obj = new(PropertyObject)
+
+        self.assertEqual(obj.props.variant, None)
+        self.assertEqual(obj.variant, None)
+
+        obj.variant = GLib.Variant('s', 'hello')
+        self.assertEqual(obj.variant.print_(True), "'hello'")
+
+        obj.variant = GLib.Variant('b', True)
+        self.assertEqual(obj.variant.print_(True), "true")
+
+        obj.props.variant = GLib.Variant('y', 2)
+        self.assertEqual(obj.variant.print_(True), "byte 0x02")
+
+        obj.variant = None
+        self.assertEqual(obj.variant, None)
+
+        # set in constructor
+        obj = new(PropertyObject, variant=GLib.Variant('u', 5))
+        self.assertEqual(obj.props.variant.print_(True), 'uint32 5')
+
+        GObject.Property(type=TYPE_VARIANT, default=GLib.Variant('i', 1))
+
+        # incompatible types
+        self.assertRaises(TypeError, setattr, obj, 'variant', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'variant', 42)
+
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_VARIANT,
+                          default='foo')
+        self.assertRaises(TypeError, GObject.Property, type=TYPE_VARIANT,
+                          default=object())
+
+
+    def test_variant_default(self):
+        obj = new(PropertyObject)
+
+        self.assertEqual(obj.props.variant_def.print_(True), '42')
+        self.assertEqual(obj.variant_def.print_(True), '42')
+
+        obj.props.variant_def = GLib.Variant('y', 2)
+        self.assertEqual(obj.variant_def.print_(True), "byte 0x02")
+
+        # set in constructor
+        obj = new(PropertyObject, variant_def=GLib.Variant('u', 5))
+        self.assertEqual(obj.props.variant_def.print_(True), 'uint32 5')
+
 
     def test_range(self):
         # kiwi code

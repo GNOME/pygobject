@@ -639,6 +639,19 @@ create_property (const gchar  *prop_name,
 	    return NULL;
 	pspec = g_param_spec_object (prop_name, nick, blurb, prop_type, flags);
 	break;
+    case G_TYPE_VARIANT:
+	{
+	    PyObject *pydefault;
+            GVariant *default_value = NULL;
+
+	    if (!PyArg_ParseTuple(args, "O", &pydefault))
+		return NULL;
+            if (pydefault != Py_None)
+                default_value = pyg_boxed_get (pydefault, GVariant);
+            Py_DECREF(pydefault);
+	    pspec = g_param_spec_variant (prop_name, nick, blurb, G_VARIANT_TYPE_ANY, default_value, flags);
+	}
+	break;
     default:
 	/* unhandled pspec type ... */
 	break;
