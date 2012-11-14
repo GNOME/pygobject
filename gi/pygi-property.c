@@ -196,6 +196,8 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
                         arg.v_pointer = g_value_get_boxed (&value);
                     } else if (g_type_is_a (type, G_TYPE_POINTER)) {
                         arg.v_pointer = g_value_get_pointer (&value);
+                    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
+                        arg.v_pointer = g_value_get_variant (&value);
                     } else {
                         PyErr_Format (PyExc_NotImplementedError,
                                       "Retrieving properties of type '%s' is not implemented",
@@ -314,12 +316,14 @@ pygi_set_property_value_real (PyGObject *instance,
                 case GI_INFO_TYPE_UNION:
                     if (g_type_is_a (type, G_TYPE_BOXED)) {
                         g_value_set_boxed (&value, arg.v_pointer);
+                    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
+                        g_value_set_variant (&value, arg.v_pointer);
                     } else {
                         PyErr_Format (PyExc_NotImplementedError,
                                       "Setting properties of type '%s' is not implemented",
                                       g_type_name (type));
                     }
-                    break;
+                    goto out;
                 default:
                     PyErr_Format (PyExc_NotImplementedError,
                                   "Setting properties of type '%s' is not implemented",

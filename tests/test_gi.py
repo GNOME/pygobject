@@ -2587,6 +2587,27 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(obj.props.some_boxed_struct.long_, 1)
 
+    def test_variant(self):
+        self.assertEqual(self.obj.props.some_variant, None)
+
+        self.obj.props.some_variant = GLib.Variant('o', '/myobj')
+        self.assertEqual(self.obj.props.some_variant.get_type_string(), 'o')
+        self.assertEqual(self.obj.props.some_variant.print_(False), "'/myobj'")
+
+        self.obj.props.some_variant = None
+        self.assertEqual(self.obj.props.some_variant, None)
+
+        obj = GIMarshallingTests.PropertiesObject(some_variant=GLib.Variant('b', True))
+        self.assertEqual(obj.props.some_variant.get_type_string(), 'b')
+        self.assertEqual(obj.props.some_variant.get_boolean(), True)
+
+        # FIXME:
+        #self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', 'foo')
+        #self.assertRaises(TypeError, setattr, self.obj.props, 'some_variant', None)
+
+        self.assertEqual(obj.props.some_variant.get_type_string(), 'b')
+        self.assertEqual(obj.props.some_variant.get_boolean(), True)
+
 
 class TestKeywords(unittest.TestCase):
     def test_method(self):
