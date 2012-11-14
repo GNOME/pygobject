@@ -68,6 +68,7 @@ class PropertyObject(GObject.GObject):
         type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
         default=GLib.Variant('i', 42))
 
+
 class PropertyInheritanceObject(Regress.TestObj):
     # override property from the base class, with a different type
     string = GObject.Property(type=int)
@@ -374,7 +375,6 @@ class TestPropertyObject(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=TYPE_VARIANT,
                           default=object())
 
-
     def test_variant_default(self):
         obj = new(PropertyObject)
 
@@ -387,7 +387,6 @@ class TestPropertyObject(unittest.TestCase):
         # set in constructor
         obj = new(PropertyObject, variant_def=GLib.Variant('u', 5))
         self.assertEqual(obj.props.variant_def.print_(True), 'uint32 5')
-
 
     def test_range(self):
         # kiwi code
