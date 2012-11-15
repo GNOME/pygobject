@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = examples gi tests
+SUBDIRS = examples gi tests pygtkcompat
 
 PLATFORM_VERSION = 3.0
 

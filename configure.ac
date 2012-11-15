@@ -265,6 +265,7 @@ AC_CONFIG_FILES(
   gi/_gobject/Makefile
   examples/Makefile
   tests/Makefile
+  pygtkcompat/Makefile
   PKG-INFO)
 AC_OUTPUT
 

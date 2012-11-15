@@ -12,10 +12,10 @@ try:
     from gi.repository import Gtk
     (Atk, Gtk, Pango)  # pyflakes
 
-    import gi.pygtkcompat
+    import pygtkcompat
 
-    gi.pygtkcompat.enable()
-    gi.pygtkcompat.enable_gtk(version='3.0')
+    pygtkcompat.enable()
+    pygtkcompat.enable_gtk(version='3.0')
 
     import atk
     import pango
