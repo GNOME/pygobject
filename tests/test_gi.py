@@ -1012,11 +1012,15 @@ class TestGBytes(unittest.TestCase):
         self.assertEqual(3, b.get_size())
         self.assertEqual(b'\x00\x01\xFF', b.get_data())
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gbytes_full_return'),
+                         'too old gobject-introspection')
     def test_gbytes_full_return(self):
         b = GIMarshallingTests.gbytes_full_return()
         self.assertEqual(4, b.get_size())
         self.assertEqual(b'\x00\x31\xFF\x33', b.get_data())
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gbytes_full_return'),
+                         'too old gobject-introspection')
     def test_gbytes_none_in(self):
         b = GIMarshallingTests.gbytes_full_return()
         GIMarshallingTests.gbytes_none_in(b)
@@ -2617,6 +2621,8 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(obj.props.some_boxed_struct.long_, 1)
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject, 'some_variant'),
+                         'too old gobject-introspection')
     def test_variant(self):
         self.assertEqual(self.obj.props.some_variant, None)
 
