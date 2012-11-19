@@ -12,6 +12,8 @@ import warnings
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
+from compathelper import _unicode
+
 
 class IOChannel(unittest.TestCase):
     def setUp(self):
@@ -40,11 +42,11 @@ second line
         ch = GLib.IOChannel(filename=self.testutf8)
         self.assertEqual(ch.get_encoding(), 'UTF-8')
         self.assertTrue(ch.get_close_on_unref())
-        self.assertEqual(ch.readline(), 'hello ♥ world\n')
+        self.assertEqual(_unicode(ch.readline()), 'hello ♥ world\n')
         self.assertEqual(ch.get_buffer_condition(), GLib.IOCondition.IN)
         self.assertEqual(ch.readline(), 'second line\n')
         self.assertEqual(ch.readline(), '\n')
-        self.assertEqual(ch.readline(), 'À demain!')
+        self.assertEqual(_unicode(ch.readline()), 'À demain!')
         self.assertEqual(ch.get_buffer_condition(), 0)
         self.assertEqual(ch.readline(), '')
         ch.close()
@@ -53,10 +55,10 @@ second line
         ch = GLib.IOChannel(filename=self.testlatin1, mode='r')
         ch.set_encoding('latin1')
         self.assertEqual(ch.get_encoding(), 'latin1')
-        self.assertEqual(ch.readline(), 'hellø world\n')
+        self.assertEqual(_unicode(ch.readline()), 'hellø world\n')
         self.assertEqual(ch.readline(), 'second line\n')
         self.assertEqual(ch.readline(), '\n')
-        self.assertEqual(ch.readline(), 'À demain!')
+        self.assertEqual(_unicode(ch.readline()), 'À demain!')
         ch.close()
 
     def test_file_iter(self):
@@ -65,7 +67,7 @@ second line
         for item in ch:
             items.append(item)
         self.assertEqual(len(items), 4)
-        self.assertEqual(items[0], 'hello ♥ world\n')
+        self.assertEqual(_unicode(items[0]), 'hello ♥ world\n')
         ch.close()
 
     def test_file_readlines(self):
@@ -75,8 +77,8 @@ second line
         # empty one
         self.assertGreaterEqual(len(lines), 4)
         self.assertLessEqual(len(lines), 5)
-        self.assertEqual(lines[0], 'hello ♥ world\n')
-        self.assertEqual(lines[3], 'À demain!')
+        self.assertEqual(_unicode(lines[0]), 'hello ♥ world\n')
+        self.assertEqual(_unicode(lines[3]), 'À demain!')
         if len(lines) == 4:
             self.assertEqual(lines[4], '')
 

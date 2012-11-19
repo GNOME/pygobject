@@ -19,7 +19,7 @@ from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
 
-from compathelper import _bytes
+from compathelper import _bytes, _unicode
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
@@ -696,7 +696,7 @@ class TestFilename(unittest.TestCase):
         shutil.rmtree(self.workdir)
 
     def test_filename_in(self):
-        fname = os.path.join(self.workdir, 'testäø.txt')
+        fname = os.path.join(self.workdir, _unicode('testäø.txt'))
         self.assertRaises(GLib.GError, GLib.file_get_contents, fname)
 
         with open(fname.encode('UTF-8'), 'wb') as f:
@@ -711,8 +711,8 @@ class TestFilename(unittest.TestCase):
 
         dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
         self.assertTrue('/testäø.' in dirname, dirname)
-        self.assertTrue(os.path.isdir(dirname.encode('UTF-8')))
-        os.rmdir(dirname.encode('UTF-8'))
+        self.assertTrue(os.path.isdir(dirname))
+        os.rmdir(dirname)
 
     def test_filename_type_error(self):
         self.assertRaises(TypeError, GLib.file_get_contents, 23)
