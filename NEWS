@@ -1,3 +1,50 @@
+3.7.2   19-Nov-2012
+	- [API change] Drop almost all static GLib bindings and replace them
+	  with proper introspection. This gets rid of several cases where the
+	  PyGObject API was not matching the real GLib API, makes the full GLib
+	  API available through introspection, and makes the code smaller,
+	  easier to maintain. For backwards compatibility, overrides are
+	  provided to emulate the old static binding API, but this will throw a
+	  PyGIDeprecationWarning for the cases that diverge from the official
+	  API (in particular, GLib.io_add_watch() and GLib.child_watch_add()
+	  being called without a priority argument). (Martin Pitt, Simon Feltman)
+	- [API change] Deprecate calling GLib API through the GObject
+	  namespace. This has always been a misnomer with introspection, and
+	  will be removed in a later version; for now this throws a
+	  PyGIDeprecationWarning.
+        - [API change] Do not bind gobject_get_data() and gobject_set_data().
+	  These have been deprecated for a cycle, now dropped entirely.
+	  (Steve Frécinaux) (#641944)
+	- [API change] Deprecate void pointer fields as general PyObject
+	  storage. (Simon Feltman) (#683599)
+        - Add support for GVariant properties (Martin Pitt)
+        - Add type checking to GVariant argument assignment (Martin Pitt)
+        - Fix marshalling of arrays of struct pointers to Python (Carlos Garnacho) (#678620)
+        - Fix Gdk.Atom to have a proper str() and repr() (Martin Pitt) (#678620)
+        - Make sure g_value_set_boxed does not cause a buffer overrun with GStrvs (Simon Feltman) (#688232)
+        - Fix leaks with GValues holding boxed and object types (Simon Feltman) (#688137)
+        - Add doc strings showing method signatures for gi methods (Simon Feltman) (#681967)
+        - Set Property instance doc string and blurb to getter doc string (Simon Feltman) (#688025)
+        - Add GObject.G_MINSSIZE (Martin Pitt)
+        - Fix marshalling of GByteArrays (Martin Pitt)
+        - Fix marshalling of ssize_t to smaller ints (Martin Pitt)
+	- Add support for lcov code coverage, and add a lot of missing
+	  GIMarshallingTests and g-i Regress tests. (Martin Pitt)
+        - pygi-convert: remove deprecated GLib → GObject conversions (Jose Rostagno)
+        - Add support for overriding GObject.Object (Simon Feltman) (#672727)
+        - Add --with-python configure option (Martin Pitt)
+	- Do not prefer unversioned "python" when configuring, as some distros
+	  have "python" as Python 3. Use Python 3 by default if available. Add
+	  --with-python configure option as an alternative to setting $PYTHON,
+	  whic is more discoverable. (Martin Pitt)
+        - Fix property lookup in class hierarchy (Daniel Drake) (#686942)
+        - Move property and signal creation into _class_init() (Martin Pitt) (#686149)
+        - Fix duplicate symbols error on OSX (John Ralls)
+        - [API add] Add get_introspection_module for getting un-overridden modules (Simon Feltman) (#686828)
+        - Work around wrong 64 bit constants in GLib Gir (Martin Pitt) (#685022)
+        - Mark GLib.Source.get_current_time() as deprecated (Martin Pitt)
+        - Fix OverflowError in source_remove() (Martin Pitt) (#684526)
+
 3.7.1   22-Oct-2012
         - Bump version to 3.7.1; let's follow the real GNOME versioning from
           now on (Martin Pitt)
