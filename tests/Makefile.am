@@ -125,6 +125,8 @@ RUN_TESTS_ENV_VARS= \
 	MALLOC_CHECK_=3 \
 	TESTS_BUILDDIR=$(builddir)
 
+# pygtkcompat tests need to be run in a separate process as they
+# clobber global name space
 check-local: $(LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
 	@echo "  CHECK  Pyflakes"
 	@if type pyflakes >/dev/null 2>&1; then pyflakes $(top_srcdir); else echo "skipped, pyflakes not installed"; fi
@@ -134,6 +136,7 @@ check-local: $(LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
 	fi
 	export `$(DBUS_LAUNCH)` && \
 	$(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; \
+	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; \
 	kill $$DBUS_SESSION_BUS_PID; \
 	exit $$rc
 
