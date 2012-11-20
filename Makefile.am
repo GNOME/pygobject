@@ -12,6 +12,7 @@ EXTRA_DIST = \
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO \
 	PKG-INFO.in \
+	pygi-convert.sh \
 	m4/as-ac-expand.m4 \
 	m4/jhflags.m4 \
 	m4/python.m4
