@@ -1916,6 +1916,15 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_int8_out(self):
             return 42
 
+        def do_method_int8_arg_and_out_caller(self, arg):
+            return arg + 1
+
+        def do_method_int8_arg_and_out_callee(self, arg):
+            return arg + 1
+
+        def do_method_str_arg_out_ret(self, arg):
+            return (arg.upper(), len(arg))
+
         def do_method_with_default_implementation(self, int8):
             GIMarshallingTests.Object.do_method_with_default_implementation(self, int8)
             self.props.int += int8
@@ -1970,6 +1979,10 @@ class TestPythonGObject(unittest.TestCase):
         object_.method_int8_in(84)
         self.assertEqual(object_.val, 84)
         self.assertEqual(object_.method_int8_out(), 42)
+
+        self.assertEqual(object_.method_int8_arg_and_out_caller(42), 43)
+        self.assertEqual(object_.method_int8_arg_and_out_callee(42), 43)
+        self.assertEqual(object_.method_str_arg_out_ret('hello'), ('HELLO', 5))
 
         object_.method_with_default_implementation(42)
         self.assertEqual(object_.props.int, 84)
