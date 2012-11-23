@@ -93,14 +93,14 @@ class Property(object):
         TYPE_DOUBLE: -G_MAXDOUBLE,
         TYPE_INT: G_MININT,
         TYPE_LONG: G_MINLONG,
-        TYPE_INT64: -2 ** 62 - 1,
+        TYPE_INT64: -2 ** 63,
     }
 
     _max_value_lookup = {
         TYPE_UINT: G_MAXUINT,
         TYPE_ULONG: G_MAXULONG,
-        TYPE_INT64: 2 ** 62 - 1,
-        TYPE_UINT64: 2 ** 63 - 1,
+        TYPE_INT64: 2 ** 63 - 1,
+        TYPE_UINT64: 2 ** 64 - 1,
         TYPE_FLOAT: G_MAXFLOAT,
         TYPE_DOUBLE: G_MAXDOUBLE,
         TYPE_INT: G_MAXINT,

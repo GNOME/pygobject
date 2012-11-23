@@ -16,7 +16,8 @@ from gi.repository.GObject import \
     TYPE_STRING, TYPE_PYOBJECT, TYPE_VARIANT
 
 from gi.repository.GObject import \
-    G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG
+    G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG, \
+    G_MAXUINT64, G_MAXINT64, G_MININT64
 
 from gi.repository import Gio
 from gi.repository import GLib
@@ -584,17 +585,13 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.prop_name, 10)
 
     def test_range(self):
-        maxint64 = 2 ** 62 - 1
-        minint64 = -2 ** 62 - 1
-        maxuint64 = 2 ** 63 - 1
-
         types_ = [
             (TYPE_INT, G_MININT, G_MAXINT),
             (TYPE_UINT, 0, G_MAXUINT),
             (TYPE_LONG, G_MINLONG, G_MAXLONG),
             (TYPE_ULONG, 0, G_MAXULONG),
-            (TYPE_INT64, minint64, maxint64),
-            (TYPE_UINT64, 0, maxuint64),
+            (TYPE_INT64, G_MININT64, G_MAXINT64),
+            (TYPE_UINT64, 0, G_MAXUINT64),
             ]
 
         for gtype, min, max in types_:
