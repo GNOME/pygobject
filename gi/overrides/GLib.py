@@ -837,6 +837,16 @@ def filename_from_utf8(utf8string, len=-1):
 __all__.append('filename_from_utf8')
 
 
+# backwards compatible API for renamed function
+if not hasattr(GLib, 'unix_signal_add_full'):
+    def add_full_compat(*args):
+        warnings.warn('GLib.unix_signal_add_full() was renamed to GLib.unix_signal_add()',
+                      PyGIDeprecationWarning)
+        return GLib.unix_signal_add(*args)
+
+    GLib.unix_signal_add_full = add_full_compat
+
+
 # obsolete constants for backwards compatibility
 glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
 __all__.append('glib_version')
