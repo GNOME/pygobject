@@ -831,11 +831,15 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     case G_TYPE_UINT:
 	{
 	    if (PYGLIB_PyLong_Check(obj)) {
-		glong val;
+		guint val;
 
-		val = PYGLIB_PyLong_AsLong(obj);
-		if (val >= 0 && val <= G_MAXUINT)
-		    g_value_set_uint(value, (guint)val);
+                /* check that number is not negative */
+                if (PyLong_AsLongLong(obj) < 0)
+                    return -1;
+
+		val = PyLong_AsUnsignedLong(obj);
+		if (val <= G_MAXUINT)
+		    g_value_set_uint(value, val);
 		else
 		    return -1;
 	    } else {
