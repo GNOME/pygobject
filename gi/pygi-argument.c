@@ -1146,7 +1146,11 @@ _pygi_argument_from_object (PyObject   *object,
             is_zero_terminated = g_type_info_is_zero_terminated (type_info);
             item_type_info = g_type_info_get_param_type (type_info, 0);
 
-            item_size = _pygi_g_type_info_size (item_type_info);
+            /* we handle arrays that are really strings specially, see below */
+            if (g_type_info_get_tag (item_type_info) == GI_TYPE_TAG_UINT8)
+               item_size = 1;
+            else
+               item_size = sizeof (GIArgument);
 
             array = g_array_sized_new (is_zero_terminated, FALSE, item_size, length);
             if (array == NULL) {
