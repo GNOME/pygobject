@@ -1981,9 +1981,11 @@ class TestPythonGObject(unittest.TestCase):
         self.assertEqual(object_.val, 84)
         self.assertEqual(object_.method_int8_out(), 42)
 
-        self.assertEqual(object_.method_int8_arg_and_out_caller(42), 43)
-        self.assertEqual(object_.method_int8_arg_and_out_callee(42), 43)
-        self.assertEqual(object_.method_str_arg_out_ret('hello'), ('HELLO', 5))
+        # can be dropped when bumping g-i dependencies to >= 1.35.2
+        if hasattr(object_, 'method_int8_arg_and_out_caller'):
+            self.assertEqual(object_.method_int8_arg_and_out_caller(42), 43)
+            self.assertEqual(object_.method_int8_arg_and_out_callee(42), 43)
+            self.assertEqual(object_.method_str_arg_out_ret('hello'), ('HELLO', 5))
 
         object_.method_with_default_implementation(42)
         self.assertEqual(object_.props.int, 84)
