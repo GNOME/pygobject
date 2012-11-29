@@ -2315,8 +2315,16 @@ class TestOverrides(unittest.TestCase):
         self.assertTrue(isinstance(object_, GIMarshallingTests.OverridesObject))
 
     def test_module_name(self):
+        # overridden types
         self.assertEqual(GIMarshallingTests.OverridesStruct.__module__, 'gi.overrides.GIMarshallingTests')
-        self.assertEqual(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
+        self.assertEqual(GIMarshallingTests.OverridesObject.__module__, 'gi.overrides.GIMarshallingTests')
+        self.assertEqual(GObject.Object.__module__, 'gi.overrides.GObject')
+
+        # not overridden
+        self.assertEqual(GIMarshallingTests.SubObject.__module__, 'gi.repository.GIMarshallingTests')
+        # FIXME: does not work with TEST_NAMES='test_thread test_gi.TestOverrides',
+        # it is importlib._bootstrap then
+        #self.assertEqual(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
 
 
 class TestDir(unittest.TestCase):
