@@ -648,7 +648,6 @@ create_property (const gchar  *prop_name,
 		return NULL;
             if (pydefault != Py_None)
                 default_value = pyg_boxed_get (pydefault, GVariant);
-            Py_DECREF(pydefault);
 	    pspec = g_param_spec_variant (prop_name, nick, blurb, G_VARIANT_TYPE_ANY, default_value, flags);
 	}
 	break;
