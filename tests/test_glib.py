@@ -36,8 +36,10 @@ class TestGLib(unittest.TestCase):
         self.assertEqual(GLib.get_application_name(), 'moo')
 
     def test_xdg_dirs(self):
-        self.assertTrue(os.path.isdir(GLib.get_user_data_dir()))
-        self.assertTrue(os.path.isdir(GLib.get_user_special_dir(GLib.USER_DIRECTORY_DESKTOP)))
+        d = GLib.get_user_data_dir()
+        self.assertTrue('/' in d, d)
+        d = GLib.get_user_special_dir(GLib.USER_DIRECTORY_DESKTOP)
+        self.assertTrue('/' in d, d)
         # also works with backwards compatible enum names
         self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
                          GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
@@ -45,7 +47,7 @@ class TestGLib(unittest.TestCase):
         for d in GLib.get_system_config_dirs():
             self.assertTrue('/' in d, d)
         for d in GLib.get_system_data_dirs():
-            self.assertTrue('/' in d, d)
+            self.assertTrue(isinstance(d, str), d)
 
     def test_main_depth(self):
         self.assertEqual(GLib.main_depth(), 0)
