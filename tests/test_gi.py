@@ -711,6 +711,7 @@ class TestFilename(unittest.TestCase):
 
         dirname = GLib.Dir.make_tmp('testäø.XXXXXX')
         self.assertTrue('/testäø.' in dirname, dirname)
+        dirname = _bytes(dirname)
         self.assertTrue(os.path.isdir(dirname))
         os.rmdir(dirname)
 
