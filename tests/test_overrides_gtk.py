@@ -292,9 +292,15 @@ class TestGtk(unittest.TestCase):
         self.assertEqual('color selection dialog test', dialog.get_title())
 
         # Gtk.FileChooserDialog
-        dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
-                                       buttons=('test-button1', 1),
-                                       action=Gtk.FileChooserAction.SAVE)
+        # might cause a GVFS warning, do not break on this
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
+                                           buttons=('test-button1', 1),
+                                           action=Gtk.FileChooserAction.SAVE)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
