@@ -173,6 +173,9 @@ https://my.org/q?x=1&y=2
 
         def cb(file, condition):
             call_data.append((file, condition, file.readline()))
+            if len(call_data) == 2:
+                # avoid having to wait for the full timeout
+                ml.quit()
             return True
 
         # io_add_watch() takes an IOChannel, calling with a Python file is deprecated
@@ -182,7 +185,7 @@ https://my.org/q?x=1&y=2
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
 
         ml = GLib.MainLoop()
-        GLib.timeout_add(400, ml.quit)
+        GLib.timeout_add(2000, ml.quit)
         ml.run()
 
         cmd.wait()
