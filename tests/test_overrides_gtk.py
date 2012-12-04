@@ -1344,6 +1344,17 @@ class TestTreeModel(unittest.TestCase):
         model.row_inserted('3', Gtk.TreeIter())
         self.assertEqual(tree_paths[-1], '3')
 
+    def test_tree_model_filter(self):
+        model = Gtk.ListStore(int, str, float)
+        model.append([1, "one", -0.1])
+        model.append([2, "two", -0.2])
+
+        filtered = Gtk.TreeModelFilter(child_model=model)
+
+        self.assertEqual(filtered[0][1], 'one')
+        filtered[0][1] = 'ONE'
+        self.assertEqual(filtered[0][1], 'ONE')
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeView(unittest.TestCase):

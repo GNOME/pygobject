@@ -1544,6 +1544,11 @@ class TreeModelFilter(Gtk.TreeModelFilter):
     def set_visible_func(self, func, data=None):
         super(TreeModelFilter, self).set_visible_func(func, data)
 
+    def set_value(self, iter, column, value):
+        # Delegate to child model
+        iter = self.convert_iter_to_child_iter(iter)
+        self.get_model().set_value(iter, column, value)
+
 TreeModelFilter = override(TreeModelFilter)
 __all__.append('TreeModelFilter')
 
