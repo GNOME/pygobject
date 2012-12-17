@@ -1361,6 +1361,42 @@ class TestGClosure(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.gclosure_in, None)
 
 
+class TestCallbacks(unittest.TestCase):
+    def test_return_value_only(self):
+        def cb():
+            return 5
+        self.assertEqual(GIMarshallingTests.callback_return_value_only(cb), 5)
+
+    @unittest.expectedFailure
+    def test_one_out_arg(self):
+        def cb():
+            return 5.5
+        self.assertAlmostEqual(GIMarshallingTests.callback_one_out_parameter(cb), 5.5)
+
+    @unittest.expectedFailure
+    def test_multiple_out_args(self):
+        def cb():
+            return (5.5, 42.0)
+        res = GIMarshallingTests.callback_multiple_out_parameters(cb)
+        self.assertAlmostEqual(res[0], 5.5)
+        self.assertAlmostEqual(res[1], 42.0)
+
+    @unittest.expectedFailure
+    def test_return_and_one_out_arg(self):
+        def cb():
+            return (5, 42.0)
+        res = GIMarshallingTests.callback_return_value_and_one_out_parameter(cb)
+        self.assertEqual(res[0], 5)
+        self.assertAlmostEqual(res[1], 42.0)
+
+    @unittest.expectedFailure
+    def test_return_and_multiple_out_arg(self):
+        def cb():
+            return (5, 42, -1000)
+        self.assertEqual(GIMarshallingTests.callback_return_value_and_multiple_out_parameters(cb),
+                         (5, 42, -1000))
+
+
 class TestPointer(unittest.TestCase):
     def test_pointer_in_return(self):
         self.assertEqual(GIMarshallingTests.pointer_in_return(42), 42)
