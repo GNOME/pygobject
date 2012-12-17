@@ -88,6 +88,7 @@ EXTRA_DIST = \
 	test_gobject.py \
 	test_gtype.py \
 	test_interface.py \
+	test_internal_api.py \
 	test_iochannel.py \
 	test_mainloop.py \
 	test_option.py \
