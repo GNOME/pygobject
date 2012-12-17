@@ -1,3 +1,22 @@
+3.7.3   17-Dec-2012
+	- Add support for caller-allocated GArray out arguments (Martin Pitt)
+	  (#690041)
+	- [API add] Re-support calling GLib.io_add_watch with an fd or Python
+	  file (Martin Pitt)
+        - pygtkcompat: Work around IndexError on large flags (Martin Pitt)
+        - Fix pyg_value_from_pyobject() range check for uint (Martin Pitt)
+        - Fix tests to work with g-i 1.34.2 (Martin Pitt)
+	- Fix wrong refcount for GVariant property defaults (Martin Pitt)
+	  (#689267)
+        - Fix array arguments on 32 bit architectures (Martin Pitt)
+        - Add backwards compatible API for GLib.unix_signal_add_full()
+	  (Martin Pitt)
+	- Drop MININT64/MAXUINT64 workaround, current g-i gets this right now
+	  (Martin Pitt)
+        - Fix maximum and minimum ranges of TYPE_(U)INT64 properties
+	  (Simonas Kazlauskas) (#688949)
+        - Ship pygi-convert.sh in tarballs (Martin Pitt) (#688697)
+
 3.7.2   19-Nov-2012
 	- [API change] Drop almost all static GLib bindings and replace them
 	  with proper introspection. This gets rid of several cases where the
