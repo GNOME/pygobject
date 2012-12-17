@@ -490,8 +490,12 @@ class MainLoop(GLib.MainLoop):
             loop.quit()
             loop._quit_by_sigint = True
 
-        self._signal_source = GLib.unix_signal_add_full(
-            GLib.PRIORITY_DEFAULT, signal.SIGINT, _handler, self)
+        # compatibility shim, keep around until we depend on glib 2.36
+        if hasattr(GLib, 'unix_signal_add'):
+            fn = GLib.unix_signal_add
+        else:
+            fn = GLib.unix_signal_add_full
+        self._signal_source = fn(GLib.PRIORITY_DEFAULT, signal.SIGINT, _handler, self)
 
     def __del__(self):
         GLib.source_remove(self._signal_source)
