@@ -361,33 +361,38 @@ static gboolean _caller_alloc (PyGIInvokeState *state,
                                gssize arg_count,
                                gssize out_count)
 {
-    PyGIInterfaceCache *iface_cache;
+    if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
+        PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    g_assert (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE);
+        state->out_args[out_count].v_pointer = NULL;
+        state->args[arg_count] = &state->out_args[out_count];
+        if (iface_cache->g_type == G_TYPE_BOXED) {
+            state->args[arg_count]->v_pointer =
+                _pygi_boxed_alloc (iface_cache->interface_info, NULL);
+        } else if (iface_cache->g_type == G_TYPE_VALUE) {
+            state->args[arg_count]->v_pointer = g_slice_new0 (GValue);
+        } else if (iface_cache->is_foreign) {
+            PyObject *foreign_struct =
+                pygi_struct_foreign_convert_from_g_argument (
+                    iface_cache->interface_info,
+                    NULL);
 
-    iface_cache = (PyGIInterfaceCache *)arg_cache;
+                pygi_struct_foreign_convert_to_g_argument (foreign_struct,
+                                                           iface_cache->interface_info,
+                                                           GI_TRANSFER_EVERYTHING,
+                                                           state->args[arg_count]);
+        } else {
+                gssize size = g_struct_info_get_size(
+                    (GIStructInfo *)iface_cache->interface_info);
+                state->args[arg_count]->v_pointer = g_malloc0 (size);
+        }
+    } else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY) {
+        PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
 
-    state->out_args[out_count].v_pointer = NULL;
-    state->args[arg_count] = &state->out_args[out_count];
-    if (iface_cache->g_type == G_TYPE_BOXED) {
-        state->args[arg_count]->v_pointer =
-            _pygi_boxed_alloc (iface_cache->interface_info, NULL);
-    } else if (iface_cache->g_type == G_TYPE_VALUE) {
-        state->args[arg_count]->v_pointer = g_slice_new0 (GValue);
-    } else if (iface_cache->is_foreign) {
-        PyObject *foreign_struct =
-            pygi_struct_foreign_convert_from_g_argument (
-                iface_cache->interface_info,
-                NULL);
-
-            pygi_struct_foreign_convert_to_g_argument (foreign_struct,
-                                                       iface_cache->interface_info,
-                                                       GI_TRANSFER_EVERYTHING,
-                                                       state->args[arg_count]);
+        state->out_args[out_count].v_pointer = g_array_new (TRUE, TRUE, seq_cache->item_size);
+        state->args[arg_count] = &state->out_args[out_count];
     } else {
-            gssize size = g_struct_info_get_size(
-                (GIStructInfo *)iface_cache->interface_info);
-            state->args[arg_count]->v_pointer = g_malloc0 (size);
+        return FALSE;
     }
 
     if (state->args[arg_count]->v_pointer == NULL)

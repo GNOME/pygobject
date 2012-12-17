@@ -1370,7 +1370,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         type_info = g_arg_info_get_type (arg_info);
         type_tag = g_type_info_get_tag (type_info);
 
-        if (type_tag == GI_TYPE_TAG_INTERFACE)
+        if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
             is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
 
         /* must be an child arg filled in by its owner

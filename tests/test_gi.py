@@ -959,8 +959,9 @@ class TestGArray(unittest.TestCase):
     def test_garray_utf8_full_out(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_out())
 
-    # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=690041
-    def disabled_test_garray_utf8_full_out_caller_allocated(self):
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'garray_utf8_full_out_caller_allocated'),
+                         'too old gobject-introspection')
+    def test_garray_utf8_full_out_caller_allocated(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_out_caller_allocated())
 
     def test_garray_utf8_none_inout(self):
