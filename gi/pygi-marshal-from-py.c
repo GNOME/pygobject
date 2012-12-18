@@ -1009,6 +1009,12 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             if (from_py_cleanup)
                                 from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
                         }
+                    } else if (is_boxed && !item_iface_cache->arg_cache.is_pointer) {
+                        /* The array elements are not expected to be pointers, but the
+                         * elements obtained are boxed pointers themselves, so insert
+                         * the pointed to data.
+                         */
+                        g_array_insert_vals (array_, i, item.v_pointer, 1);
                     } else {
                         g_array_insert_val (array_, i, item);
                     }

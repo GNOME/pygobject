@@ -812,6 +812,18 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'array_struct_value_in'),
+                         'too old gobject-introspection')
+    def test_array_boxed_struct_value_in(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+        struct3 = GIMarshallingTests.BoxedStruct()
+        struct3.long_ = 3
+
+        GIMarshallingTests.array_struct_value_in([struct1, struct2, struct3])
+
     def test_array_boxed_struct_take_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
