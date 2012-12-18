@@ -530,7 +530,6 @@ _wrap_test_gerror_exception(PyObject *self, PyObject *args)
         return NULL;
     }	    
 
-    Py_DECREF(py_method);
     Py_DECREF(py_args);
     Py_DECREF(py_ret);
 
