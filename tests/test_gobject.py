@@ -491,19 +491,27 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.target.int_prop, 1)
 
     def test_transform_bidirectional(self):
+        test_data = object()
+
         def transform_to(binding, value, user_data=None):
-            self.assertEqual(user_data, 'test-data')
+            self.assertEqual(user_data, test_data)
             return value * 2
 
         def transform_from(binding, value, user_data=None):
-            self.assertEqual(user_data, 'test-data')
-            return value / 2
+            self.assertEqual(user_data, test_data)
+            return value // 2
+
+        test_data_ref_count = sys.getrefcount(test_data)
+        transform_to_ref_count = sys.getrefcount(transform_to)
+        transform_from_ref_count = sys.getrefcount(transform_from)
 
         # bidirectional bindings
         binding = self.source.bind_property('int_prop', self.target, 'int_prop',
                                             GObject.BindingFlags.BIDIRECTIONAL,
-                                            transform_to, transform_from, 'test-data')
+                                            transform_to, transform_from, test_data)
         binding = binding  # PyFlakes
+        binding_ref_count = sys.getrefcount(binding())
+        binding_gref_count = binding().__grefcount__
 
         self.source.int_prop = 1
         self.assertEqual(self.source.int_prop, 1)
@@ -512,6 +520,30 @@ class TestPropertyBindings(unittest.TestCase):
         self.target.props.int_prop = 4
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 4)
+
+        self.assertEqual(sys.getrefcount(binding()), binding_ref_count)
+        self.assertEqual(binding().__grefcount__, binding_gref_count)
+
+        # test_data ref count increases by 2, once for each callback.
+        self.assertEqual(sys.getrefcount(test_data), test_data_ref_count + 2)
+        self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count + 1)
+        self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count + 1)
+
+        # Unbind should clear out the binding and its transforms
+        binding.unbind()
+        self.assertEqual(binding(), None)
+        del binding
+        gc.collect()
+
+        # Setting source or target should not change the other.
+        self.target.int_prop = 3
+        self.source.int_prop = 5
+        self.assertEqual(self.target.int_prop, 3)
+        self.assertEqual(self.source.int_prop, 5)
+
+        self.assertEqual(sys.getrefcount(test_data), test_data_ref_count)
+        self.assertEqual(sys.getrefcount(transform_to), transform_to_ref_count)
+        self.assertEqual(sys.getrefcount(transform_from), transform_from_ref_count)
 
     def test_explicit_unbind_clears_connection(self):
         self.assertEqual(self.source.int_prop, 0)
