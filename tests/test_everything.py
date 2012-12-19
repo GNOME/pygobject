@@ -1195,6 +1195,28 @@ class TestSignals(unittest.TestCase):
         obj.emit_sig_with_uint64()
         self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
 
+    def test_intarray_ret(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return [i, i + 1]
+
+        obj.callback_i = None
+
+        try:
+            obj.connect('sig-with-intarray-ret', callback)
+        except TypeError as e:
+            # compat with g-i 1.34.x
+            if 'unknown signal' in str(e):
+                return
+            raise
+
+        rv = obj.emit('sig-with-intarray-ret', 42)
+        self.assertEqual(obj.callback_i, 42)
+        self.assertEqual(type(rv), GLib.Array)
+        self.assertEqual(rv.len, 2)
+
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 @unittest.skipUnless(Gtk, 'Gtk not available')

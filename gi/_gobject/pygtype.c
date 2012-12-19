@@ -727,6 +727,63 @@ pyg_value_array_from_pyobject(GValue *value,
     return 0;
 }
 
+static int
+pyg_array_from_pyobject(GValue *value,
+		        PyObject *obj)
+{
+    int len;
+    GArray *array;
+    int i;
+
+    len = PySequence_Length(obj);
+    if (len == -1) {
+	PyErr_Clear();
+	return -1;
+    }
+
+    array = g_array_new(FALSE, TRUE, sizeof(GValue));
+
+    for (i = 0; i < len; ++i) {
+	PyObject *item = PySequence_GetItem(obj, i);
+	GType type;
+	GValue item_value = { 0, };
+	int status;
+
+	if (! item) {
+	    PyErr_Clear();
+	    g_array_free(array, FALSE);
+	    return -1;
+	}
+
+	if (item == Py_None)
+	    type = G_TYPE_POINTER; /* store None as NULL */
+	else {
+	    type = pyg_type_from_object((PyObject*)Py_TYPE(item));
+	    if (! type) {
+		PyErr_Clear();
+		g_array_free(array, FALSE);
+		Py_DECREF(item);
+		return -1;
+	    }
+	}
+
+	g_value_init(&item_value, type);
+	status = pyg_value_from_pyobject(&item_value, item);
+	Py_DECREF(item);
+
+	if (status == -1) {
+	    g_array_free(array, FALSE);
+	    g_value_unset(&item_value);
+	    return -1;
+	}
+
+	g_array_append_val(array, item_value);
+    }
+
+    g_value_take_boxed(value, array);
+    return 0;
+}
+
 /**
  * pyg_value_from_pyobject:
  * @value: the GValue object to store the converted value in.
@@ -959,6 +1016,9 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
         else if (PySequence_Check(obj) &&
 		   G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
 	    return pyg_value_array_from_pyobject(value, obj, NULL);
+        else if (PySequence_Check(obj) &&
+		   G_VALUE_HOLDS(value, G_TYPE_ARRAY))
+	    return pyg_array_from_pyobject(value, obj);
 	else if (PYGLIB_PyUnicode_Check(obj) &&
                  G_VALUE_HOLDS(value, G_TYPE_GSTRING)) {
             GString *string;
