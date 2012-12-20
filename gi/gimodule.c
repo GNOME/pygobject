@@ -110,7 +110,6 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
     g_enum_values[n_values].value_name = NULL;
 
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    type_name = g_strdup (type_name);
     g_type = g_enum_register_static (type_name, g_enum_values);
 
     return pyg_enum_add (NULL, g_type_name (g_type), NULL, g_type);
@@ -198,7 +197,6 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
     g_flags_values[n_values].value_name = NULL;
 
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    type_name = g_strdup (type_name);
     g_type = g_flags_register_static (type_name, g_flags_values);
 
     return pyg_flags_add (NULL, g_type_name (g_type), NULL, g_type);
