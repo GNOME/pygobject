@@ -294,7 +294,7 @@ class UIManager(Gtk.UIManager):
         if not isinstance(buffer, _basestring):
             raise TypeError('buffer must be a string')
 
-        length = len(buffer)
+        length = len(buffer.encode('UTF-8'))
 
         return Gtk.UIManager.add_ui_from_string(self, buffer, length)
 

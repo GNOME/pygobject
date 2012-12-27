@@ -1,4 +1,5 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
+# coding: UTF-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
@@ -113,6 +114,12 @@ class TestGtk(unittest.TestCase):
         groups = ui.get_action_groups()
         self.assertEqual(ag, groups[-2])
         self.assertEqual(ag2, groups[-1])
+
+    def test_uimanager_nonascii(self):
+        ui = Gtk.UIManager()
+        ui.add_ui_from_string(b'<ui><menubar name="menub\xc3\xa6r1" /></ui>'.decode('UTF-8'))
+        mi = ui.get_widget("/menubær1")
+        self.assertEqual(type(mi), Gtk.MenuBar)
 
     def test_builder(self):
         self.assertEqual(Gtk.Builder, gi.overrides.Gtk.Builder)
