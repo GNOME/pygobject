@@ -1054,8 +1054,8 @@ class TestGBytes(unittest.TestCase):
         self.assertFalse(b.equal(a2))
 
         self.assertEqual(0, a1.compare(a2))
-        self.assertEqual(1, a1.compare(b))
-        self.assertEqual(-1, b.compare(a1))
+        self.assertLess(0, a1.compare(b))
+        self.assertGreater(0, b.compare(a1))
 
 
 class TestGByteArray(unittest.TestCase):
