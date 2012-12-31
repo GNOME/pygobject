@@ -62,7 +62,9 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
     gint n_values;
     GEnumValue *g_enum_values;
     int i;
+    const gchar *namespace;
     const gchar *type_name;
+    gchar *full_name;
     GType g_type;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
@@ -79,6 +81,10 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
 
     info = (GIEnumInfo *)py_info->info;
     n_values = g_enum_info_get_n_values (info);
+
+    /* The new memory is zero filled which fulfills the registration
+     * function requirement that the last item is zeroed out as a terminator.
+     */
     g_enum_values = g_new0 (GEnumValue, n_values + 1);
 
     for (i = 0; i < n_values; i++) {
@@ -105,13 +111,36 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
 
-    g_enum_values[n_values].value = 0;
-    g_enum_values[n_values].value_nick = NULL;
-    g_enum_values[n_values].value_name = NULL;
-
+    namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    g_type = g_enum_register_static (type_name, g_enum_values);
+    full_name = g_strconcat (namespace, type_name, NULL);
 
+    /* If enum registration fails, free all the memory allocated
+     * for the values array. This needs to leak when successful
+     * as GObject keeps a reference to the data as specified in the docs.
+     */
+    g_type = g_enum_register_static (full_name, g_enum_values);
+    if (g_type == G_TYPE_INVALID) {
+        for (i = 0; i < n_values; i++) {
+            GEnumValue *enum_value = &g_enum_values[i];
+
+            /* Only free value_name if it is different from value_nick to avoid
+             * a double free. The pointer might have been is re-used in the case
+             * c_identifier was NULL in the above loop.
+             */
+            if (enum_value->value_name != enum_value->value_nick)
+                g_free ((gchar *) enum_value->value_name);
+            g_free ((gchar *) enum_value->value_nick);
+        }
+
+        g_free (g_enum_values);
+        g_free (full_name);
+
+        PyErr_Format (PyExc_RuntimeError, "Unable to register enum '%s'", full_name);
+        return NULL;
+    }
+
+    g_free (full_name);
     return pyg_enum_add (NULL, g_type_name (g_type), NULL, g_type);
 }
 
@@ -149,7 +178,9 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
     gint n_values;
     GFlagsValue *g_flags_values;
     int i;
+    const gchar *namespace;
     const gchar *type_name;
+    gchar *full_name;
     GType g_type;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
@@ -166,6 +197,10 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
 
     info = (GIEnumInfo *)py_info->info;
     n_values = g_enum_info_get_n_values (info);
+
+    /* The new memory is zero filled which fulfills the registration
+     * function requirement that the last item is zeroed out as a terminator.
+     */
     g_flags_values = g_new0 (GFlagsValue, n_values + 1);
 
     for (i = 0; i < n_values; i++) {
@@ -192,13 +227,36 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
 
-    g_flags_values[n_values].value = 0;
-    g_flags_values[n_values].value_nick = NULL;
-    g_flags_values[n_values].value_name = NULL;
-
+    namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    g_type = g_flags_register_static (type_name, g_flags_values);
+    full_name = g_strconcat (namespace, type_name, NULL);
 
+    /* If enum registration fails, free all the memory allocated
+     * for the values array. This needs to leak when successful
+     * as GObject keeps a reference to the data as specified in the docs.
+     */
+    g_type = g_flags_register_static (full_name, g_flags_values);
+    if (g_type == G_TYPE_INVALID) {
+        for (i = 0; i < n_values; i++) {
+            GFlagsValue *flags_value = &g_flags_values[i];
+
+            /* Only free value_name if it is different from value_nick to avoid
+             * a double free. The pointer might have been is re-used in the case
+             * c_identifier was NULL in the above loop.
+             */
+            if (flags_value->value_name != flags_value->value_nick)
+                g_free ((gchar *) flags_value->value_name);
+            g_free ((gchar *) flags_value->value_nick);
+        }
+
+        g_free (g_flags_values);
+        g_free (full_name);
+
+        PyErr_Format (PyExc_RuntimeError, "Unable to register flags '%s'", full_name);
+        return NULL;
+    }
+
+    g_free (full_name);
     return pyg_flags_add (NULL, g_type_name (g_type), NULL, g_type);
 }
 

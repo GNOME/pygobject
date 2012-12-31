@@ -216,9 +216,9 @@ pyg_enum_add (PyObject *   module,
     int i;
 
     g_return_val_if_fail(typename != NULL, NULL);
-    if (!g_type_is_a(gtype, G_TYPE_ENUM)) {
-        g_warning("Trying to register gtype '%s' as enum when in fact it is of type '%s'",
-                  g_type_name(gtype), g_type_name(G_TYPE_FUNDAMENTAL(gtype)));
+    if (!g_type_is_a (gtype, G_TYPE_ENUM)) {
+        PyErr_Format (PyExc_TypeError, "Trying to register gtype '%s' as enum when in fact it is of type '%s'",
+                      g_type_name (gtype), g_type_name (G_TYPE_FUNDAMENTAL (gtype)));
         return NULL;
     }
 

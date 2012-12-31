@@ -1489,6 +1489,26 @@ class TestEnum(unittest.TestCase):
         self.assertTrue(hasattr(GIMarshallingTests.Enum, "VALUE1"))
         self.assertRaises(AttributeError, getattr, GIMarshallingTests.SecondEnum, "VALUE1")
 
+    def test_enum_gtype_name_is_namespaced(self):
+        self.assertEqual(GIMarshallingTests.Enum.__gtype__.name,
+                         'GIMarshallingTestsEnum')
+
+    def test_enum_double_registration_error(self):
+        # a warning is printed for double registration and pygobject will
+        # also raise a RuntimeError.
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            self.assertRaises(RuntimeError,
+                              gi._gi.enum_register_new_gtype_and_add,
+                              GIMarshallingTests.Enum.__info__)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
+
+    def test_enum_add_type_error(self):
+        self.assertRaises(TypeError,
+                          gi._gi.enum_add,
+                          GIMarshallingTests.NoTypeFlags.__gtype__)
+
 
 class TestGEnum(unittest.TestCase):
 
@@ -1620,6 +1640,21 @@ class TestNoTypeFlags(unittest.TestCase):
         flags = GIMarshallingTests.no_type_flags_inout(GIMarshallingTests.NoTypeFlags.VALUE2)
         self.assertTrue(isinstance(flags, GIMarshallingTests.NoTypeFlags))
         self.assertEqual(flags, GIMarshallingTests.NoTypeFlags.VALUE1)
+
+    def test_flags_gtype_name_is_namespaced(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
+                         'GIMarshallingTestsNoTypeFlags')
+
+    def test_flags_double_registration_error(self):
+        # a warning is printed for double registration and pygobject will
+        # also raise a RuntimeError.
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            self.assertRaises(RuntimeError,
+                              gi._gi.flags_register_new_gtype_and_add,
+                              GIMarshallingTests.NoTypeFlags.__info__)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
 
 class TestStructure(unittest.TestCase):
