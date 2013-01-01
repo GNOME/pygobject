@@ -1317,6 +1317,33 @@ class TestTreeModel(unittest.TestCase):
         store.set_value(row, 0, None)
         self.assertSequenceEqual(store[0][:], [None])
 
+    def test_signal_emission_tree_path_coerce(self):
+        class Model(GObject.Object, Gtk.TreeModel):
+            pass
+
+        model = Model()
+        tree_paths = []
+
+        def on_any_signal(model, path, *args):
+            tree_paths.append(path.to_string())
+
+        model.connect('row-changed', on_any_signal)
+        model.connect('row-deleted', on_any_signal)
+        model.connect('row-has-child-toggled', on_any_signal)
+        model.connect('row-inserted', on_any_signal)
+
+        model.row_changed('0', Gtk.TreeIter())
+        self.assertEqual(tree_paths[-1], '0')
+
+        model.row_deleted('1')
+        self.assertEqual(tree_paths[-1], '1')
+
+        model.row_has_child_toggled('2', Gtk.TreeIter())
+        self.assertEqual(tree_paths[-1], '2')
+
+        model.row_inserted('3', Gtk.TreeIter())
+        self.assertEqual(tree_paths[-1], '3')
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeView(unittest.TestCase):

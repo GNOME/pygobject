@@ -780,6 +780,12 @@ class TreeModel(Gtk.TreeModel):
                 raise IndexError("could not find tree path '%s'" % key)
             return aiter
 
+    def _coerce_path(self, path):
+        if isinstance(path, Gtk.TreePath):
+            return path
+        else:
+            return TreePath(path)
+
     def __getitem__(self, key):
         aiter = self._getiter(key)
         return TreeModelRow(self, aiter)
@@ -796,9 +802,7 @@ class TreeModel(Gtk.TreeModel):
         return TreeModelRowIter(self, self.get_iter_first())
 
     def get_iter(self, path):
-        if not isinstance(path, Gtk.TreePath):
-            path = TreePath(path)
-
+        path = self._coerce_path(path)
         success, aiter = super(TreeModel, self).get_iter(path)
         if not success:
             raise ValueError("invalid tree path '%s'" % path)
@@ -895,6 +899,27 @@ class TreeModel(Gtk.TreeModel):
 
     def filter_new(self, root=None):
         return super(TreeModel, self).filter_new(root)
+
+    #
+    # Signals supporting python iterables as tree paths
+    #
+    def row_changed(self, path, iter):
+        return super(TreeModel, self).row_changed(self._coerce_path(path), iter)
+
+    def row_inserted(self, path, iter):
+        return super(TreeModel, self).row_inserted(self._coerce_path(path), iter)
+
+    def row_has_child_toggled(self, path, iter):
+        return super(TreeModel, self).row_has_child_toggled(self._coerce_path(path),
+                                                            iter)
+
+    def row_deleted(self, path):
+        return super(TreeModel, self).row_deleted(self._coerce_path(path))
+
+    def rows_reordered(self, path, iter, new_order):
+        return super(TreeModel, self).rows_reordered(self._coerce_path(path),
+                                                     iter, new_order)
+
 
 TreeModel = override(TreeModel)
 __all__.append('TreeModel')
