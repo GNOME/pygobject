@@ -42,7 +42,7 @@ AC_SUBST(PYGOBJECT_MINOR_VERSION, pygobject_minor_version)
 AC_DEFINE(PYGOBJECT_MICRO_VERSION, pygobject_micro_version, [pygobject micro version])
 AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 AM_INIT_AUTOMAKE([1.11.1 foreign no-dist-gzip dist-xz])
 
@@ -80,7 +80,6 @@ LT_INIT([dlopen win32-dll disable-static])
 
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
-AM_PROG_CC_STDC
 AM_PROG_CC_C_O
 
 # option to specify python interpreter to use; this just sets $PYTHON, so that
