@@ -119,3 +119,67 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(len(empty), 0)
         self.assertEqual(bool(empty), True)
         self.assertEqual(empty.keys(), [])
+
+
+class TestGFile(unittest.TestCase):
+    def setUp(self):
+        self.file, self.io_stream = Gio.File.new_tmp('TestGFile.XXXXXX')
+
+    def tearDown(self):
+        try:
+            self.file.delete(None)
+            # test_delete and test_delete_async already remove it
+        except GLib.GError:
+            pass
+
+    def test_replace_contents(self):
+        content = b''.join(bytes(chr(i), 'utf-8') for i in range(128))
+        succ, etag = self.file.replace_contents(content, None, False,
+                                                Gio.FileCreateFlags.NONE, None)
+        new_succ, new_content, new_etag = self.file.load_contents(None)
+
+        self.assertTrue(succ)
+        self.assertTrue(new_succ)
+        self.assertEqual(etag, new_etag)
+        self.assertEqual(content, new_content)
+
+    # https://bugzilla.gnome.org/show_bug.cgi?id=690525
+    def disabled_test_replace_contents_async(self):
+        content = b''.join(bytes(chr(i), 'utf-8') for i in range(128))
+
+        def callback(f, result, d):
+            # Quit so in case of failed assertations loop doesn't keep running.
+            main_loop.quit()
+            succ, etag = self.file.replace_contents_finish(result)
+            new_succ, new_content, new_etag = self.file.load_contents(None)
+            d['succ'], d['etag'] = self.file.replace_contents_finish(result)
+            load = self.file.load_contents(None)
+            d['new_succ'], d['new_content'], d['new_etag'] = load
+
+        data = {}
+        self.file.replace_contents_async(content, None, False,
+                                         Gio.FileCreateFlags.NONE, None,
+                                         callback, data)
+        main_loop = GLib.MainLoop()
+        main_loop.run()
+        self.assertTrue(data['succ'])
+        self.assertTrue(data['new_succ'])
+        self.assertEqual(data['etag'], data['new_etag'])
+        self.assertEqual(content, data['new_content'])
+
+    def test_tmp_exists(self):
+        # A simple test to check if Gio.File.new_tmp is working correctly.
+        self.assertTrue(self.file.query_exists(None))
+
+    def test_delete(self):
+        self.file.delete(None)
+        self.assertFalse(self.file.query_exists(None))
+
+    def test_delete_async(self):
+        def callback(f, result, data):
+            main_loop.quit()
+
+        self.file.delete_async(0, None, callback, None)
+        main_loop = GLib.MainLoop()
+        main_loop.run()
+        self.assertFalse(self.file.query_exists(None))
