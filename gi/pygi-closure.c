@@ -154,8 +154,8 @@ static GIArgument *
 _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
 {
     gint num_args, i;
-    GIArgInfo *arg_info;
-    GITypeInfo *arg_type;
+    GIArgInfo arg_info;
+    GITypeInfo arg_type;
     GITypeTag tag;
     GIDirection direction;
     GIArgument *g_args;
@@ -164,10 +164,10 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
     g_args = g_new0 (GIArgument, num_args);
 
     for (i = 0; i < num_args; i++) {
-        arg_info = g_callable_info_get_arg (callable_info, i);
-        arg_type = g_arg_info_get_type (arg_info);
-        tag = g_type_info_get_tag (arg_type);
-        direction = g_arg_info_get_direction (arg_info);
+        g_callable_info_load_arg (callable_info, i, &arg_info);
+        g_arg_info_load_type (&arg_info, &arg_type);
+        tag = g_type_info_get_tag (&arg_type);
+        direction = g_arg_info_get_direction (&arg_info);
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             g_args[i].v_pointer = * (gpointer *) args[i];
@@ -214,7 +214,7 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                     GIBaseInfo *interface;
                     GIInfoType interface_type;
 
-                    interface = g_type_info_get_interface (arg_type);
+                    interface = g_type_info_get_interface (&arg_type);
                     interface_type = g_base_info_get_type (interface);
 
                     if (interface_type == GI_INFO_TYPE_OBJECT ||
@@ -249,8 +249,6 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                     g_args[i].v_pointer = 0;
             }
         }
-        g_base_info_unref ( (GIBaseInfo *) arg_info);
-        g_base_info_unref ( (GIBaseInfo *) arg_type);
     }
     return g_args;
 }
@@ -283,19 +281,21 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
         if (i == user_data_arg || i == destroy_notify_arg)
             continue;
 
-        GIArgInfo *arg_info = g_callable_info_get_arg (callable_info, i);
-        GIDirection direction = g_arg_info_get_direction (arg_info);
+        GIArgInfo arg_info;
+        g_callable_info_load_arg (callable_info, i, &arg_info);
+        GIDirection direction = g_arg_info_get_direction (&arg_info);
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
-            GITypeInfo *arg_type = g_arg_info_get_type (arg_info);
-            GITypeTag arg_tag = g_type_info_get_tag (arg_type);
-            GITransfer transfer = g_arg_info_get_ownership_transfer (arg_info);
+            GITypeInfo arg_type;
+            g_arg_info_load_type (&arg_info, &arg_type);
+            GITypeTag arg_tag = g_type_info_get_tag (&arg_type);
+            GITransfer transfer = g_arg_info_get_ownership_transfer (&arg_info);
             PyObject *value;
             GIArgument *arg;
             gboolean free_array = FALSE;
 
             if (direction == GI_DIRECTION_IN && arg_tag == GI_TYPE_TAG_VOID &&
-                    g_type_info_is_pointer (arg_type)) {
+                    g_type_info_is_pointer (&arg_type)) {
 
                 if (user_data == NULL) {
                     Py_INCREF (Py_None);
@@ -310,7 +310,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                 GIBaseInfo *info;
                 GIInfoType info_type;
 
-                info = g_type_info_get_interface (arg_type);
+                info = g_type_info_get_interface (&arg_type);
                 info_type = g_base_info_get_type (info);
 
                 arg = (GIArgument*) &g_args[i];
@@ -318,10 +318,10 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                 if (info_type == GI_INFO_TYPE_CALLBACK) {
                     gpointer user_data = NULL;
                     GDestroyNotify destroy_notify = NULL;
-                    GIScopeType scope = g_arg_info_get_scope(arg_info);
+                    GIScopeType scope = g_arg_info_get_scope(&arg_info);
 
-                    user_data_arg = g_arg_info_get_closure(arg_info);
-                    destroy_notify_arg = g_arg_info_get_destroy(arg_info);
+                    user_data_arg = g_arg_info_get_closure(&arg_info);
+                    destroy_notify_arg = g_arg_info_get_destroy(&arg_info);
 
                     if (user_data_arg != -1)
                         user_data = g_args[user_data_arg].v_pointer;
@@ -335,39 +335,31 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                                                 (GIFunctionInfo *) info,
                                                 destroy_notify);
                 } else
-                    value = _pygi_argument_to_object (arg, arg_type, transfer);
+                    value = _pygi_argument_to_object (arg, &arg_type, transfer);
 
                 g_base_info_unref (info);
-                if (value == NULL) {
-                    g_base_info_unref (arg_type);
-                    g_base_info_unref (arg_info);
+                if (value == NULL)
                     goto error;
-                }
             } else {
                 if (direction == GI_DIRECTION_IN)
                     arg = (GIArgument*) &g_args[i];
                 else
                     arg = (GIArgument*) g_args[i].v_pointer;
                 
-                if (g_type_info_get_tag (arg_type) == GI_TYPE_TAG_ARRAY)
+                if (g_type_info_get_tag (&arg_type) == GI_TYPE_TAG_ARRAY)
                     arg->v_pointer = _pygi_argument_to_array (arg, (GIArgument **) args, 
-                                                              callable_info, arg_type, &free_array);
+                                                              callable_info, &arg_type, &free_array);
 
-                value = _pygi_argument_to_object (arg, arg_type, transfer);
+                value = _pygi_argument_to_object (arg, &arg_type, transfer);
                 
                 if (free_array)
                     g_array_free (arg->v_pointer, FALSE);
                 
-                if (value == NULL) {
-                    g_base_info_unref (arg_type);
-                    g_base_info_unref (arg_info);
+                if (value == NULL)
                     goto error;
-                }
             }
             PyTuple_SET_ITEM (*py_args, n_in_args, value);
             n_in_args++;
-
-            g_base_info_unref (arg_type);
         }
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
@@ -375,7 +367,6 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
             n_out_args++;
         }
 
-        g_base_info_unref (arg_info);
     }
 
     if (_PyTuple_Resize (py_args, n_in_args) == -1)
@@ -399,37 +390,38 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
                                  void *resp)
 {
     int n_args, i, i_py_retval, i_out_args;
-    GITypeInfo *return_type_info;
+    GITypeInfo return_type_info;
     GITypeTag return_type_tag;
 
     i_py_retval = 0;
-    return_type_info = g_callable_info_get_return_type (callable_info);
-    return_type_tag = g_type_info_get_tag (return_type_info);
+    g_callable_info_load_return_type (callable_info, &return_type_info);
+    return_type_tag = g_type_info_get_tag (&return_type_info);
     if (return_type_tag != GI_TYPE_TAG_VOID) {
         GITransfer transfer = g_callable_info_get_caller_owns (callable_info);
         if (PyTuple_Check (py_retval)) {
             PyObject *item = PyTuple_GET_ITEM (py_retval, 0);
             _pygi_closure_assign_pyobj_to_retval (resp, item,
-                return_type_info, transfer);
+                &return_type_info, transfer);
         } else {
             _pygi_closure_assign_pyobj_to_retval (resp, py_retval,
-                return_type_info, transfer);
+                &return_type_info, transfer);
         }
         i_py_retval++;
     }
-    g_base_info_unref (return_type_info);
 
     i_out_args = 0;
     n_args = g_callable_info_get_n_args (callable_info);
     for (i = 1; i < n_args; i++) {
-        GIArgInfo *arg_info = g_callable_info_get_arg (callable_info, i);
-        GITypeInfo *type_info = g_arg_info_get_type (arg_info);
-        GIDirection direction = g_arg_info_get_direction (arg_info);
+        GIArgInfo arg_info;
+        g_callable_info_load_arg (callable_info, i, &arg_info);
+        GITypeInfo type_info;
+        g_arg_info_load_type (&arg_info, &type_info);
+        GIDirection direction = g_arg_info_get_direction (&arg_info);
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
-            GITransfer transfer = g_arg_info_get_ownership_transfer (arg_info);
+            GITransfer transfer = g_arg_info_get_ownership_transfer (&arg_info);
 
-            if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ERROR) {
+            if (g_type_info_get_tag (&type_info) == GI_TYPE_TAG_ERROR) {
                 /* TODO: check if an exception has been set and convert it to a GError */
                 out_args[i_out_args].v_pointer = NULL;
                 i_out_args++;
@@ -439,10 +431,10 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
             if (PyTuple_Check (py_retval)) {
                 PyObject *item = PyTuple_GET_ITEM (py_retval, i_py_retval);
                 _pygi_closure_assign_pyobj_to_out_argument (
-                    out_args[i_out_args].v_pointer, item, type_info, transfer);
+                    out_args[i_out_args].v_pointer, item, &type_info, transfer);
             } else if (i_py_retval == 0) {
                 _pygi_closure_assign_pyobj_to_out_argument (
-                    out_args[i_out_args].v_pointer, py_retval, type_info,
+                    out_args[i_out_args].v_pointer, py_retval, &type_info,
                     transfer);
             } else
                 g_assert_not_reached();
@@ -450,8 +442,6 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
             i_out_args++;
             i_py_retval++;
         }
-        g_base_info_unref (type_info);
-        g_base_info_unref (arg_info);
     }
 }
 

@@ -811,22 +811,18 @@ _pygi_argument_to_array (GIArgument  *arg,
                         return g_array;
                     }
                     gint length_arg_pos;
-                    GIArgInfo *length_arg_info;
-                    GITypeInfo *length_type_info;
+                    GIArgInfo length_arg_info;
+                    GITypeInfo length_type_info;
 
                     length_arg_pos = g_type_info_get_array_length (type_info);
                     g_assert (length_arg_pos >= 0);
                     g_assert (callable_info);
-                    length_arg_info = g_callable_info_get_arg (callable_info, length_arg_pos);
-                    length_type_info = g_arg_info_get_type (length_arg_info);
-                    g_base_info_unref ( (GIBaseInfo *) length_arg_info);
+                    g_callable_info_load_arg (callable_info, length_arg_pos, &length_arg_info);
+                    g_arg_info_load_type (&length_arg_info, &length_type_info);
                     if (!gi_argument_to_gssize (args[length_arg_pos],
-                                                g_type_info_get_tag (length_type_info),
-                                                &length)) {
-                        g_base_info_unref ( (GIBaseInfo *) length_type_info);
+                                                g_type_info_get_tag (&length_type_info),
+                                                &length))
                         return NULL;
-                    }
-                    g_base_info_unref ( (GIBaseInfo *) length_type_info);
                 }
             }
 
