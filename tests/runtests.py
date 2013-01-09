@@ -59,6 +59,7 @@ os.environ['G_DEBUG'] = 'fatal-warnings fatal-criticals'
 # first.
 os.environ['GSETTINGS_BACKEND'] = 'memory'
 os.environ['GSETTINGS_SCHEMA_DIR'] = tests_builddir
+os.environ['G_FILENAME_ENCODING'] = 'UTF-8'
 
 # Load tests.
 if 'TEST_NAMES' in os.environ:
