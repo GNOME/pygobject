@@ -541,6 +541,24 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.value, 'blah')
         self.assertEqual(o.props.value, 'blah')
 
+    def test_decorator_private_setter(self):
+        class C(GObject.GObject):
+            _value = 'value'
+
+            @GObject.Property
+            def value(self):
+                return self._value
+
+            @value.setter
+            def _set_value(self, value):
+                self._value = value
+
+        o = C()
+        self.assertEqual(o.value, 'value')
+        o.value = 'blah'
+        self.assertEqual(o.value, 'blah')
+        self.assertEqual(o.props.value, 'blah')
+
     def test_decorator_with_call(self):
         class C(GObject.GObject):
             _value = 1
