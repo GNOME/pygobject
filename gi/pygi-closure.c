@@ -411,7 +411,7 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
 
     i_out_args = 0;
     n_args = g_callable_info_get_n_args (callable_info);
-    for (i = 1; i < n_args; i++) {
+    for (i = 0; i < n_args; i++) {
         GIArgInfo arg_info;
         g_callable_info_load_arg (callable_info, i, &arg_info);
         GITypeInfo type_info;

@@ -1377,13 +1377,11 @@ class TestCallbacks(unittest.TestCase):
             return 5
         self.assertEqual(GIMarshallingTests.callback_return_value_only(cb), 5)
 
-    @unittest.expectedFailure
     def test_one_out_arg(self):
         def cb():
             return 5.5
         self.assertAlmostEqual(GIMarshallingTests.callback_one_out_parameter(cb), 5.5)
 
-    @unittest.expectedFailure
     def test_multiple_out_args(self):
         def cb():
             return (5.5, 42.0)
@@ -1391,7 +1389,6 @@ class TestCallbacks(unittest.TestCase):
         self.assertAlmostEqual(res[0], 5.5)
         self.assertAlmostEqual(res[1], 42.0)
 
-    @unittest.expectedFailure
     def test_return_and_one_out_arg(self):
         def cb():
             return (5, 42.0)
@@ -1399,7 +1396,6 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(res[0], 5)
         self.assertAlmostEqual(res[1], 42.0)
 
-    @unittest.expectedFailure
     def test_return_and_multiple_out_arg(self):
         def cb():
             return (5, 42, -1000)
