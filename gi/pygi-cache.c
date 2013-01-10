@@ -480,6 +480,7 @@ _arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
             child_cache = _arg_cache_alloc ();
         } else if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD ||
                    child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE) {
+            arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
             return TRUE;
         }
 
