@@ -133,10 +133,10 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
             g_free ((gchar *) enum_value->value_nick);
         }
 
+        PyErr_Format (PyExc_RuntimeError, "Unable to register enum '%s'", full_name);
+
         g_free (g_enum_values);
         g_free (full_name);
-
-        PyErr_Format (PyExc_RuntimeError, "Unable to register enum '%s'", full_name);
         return NULL;
     }
 
@@ -249,10 +249,10 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
             g_free ((gchar *) flags_value->value_nick);
         }
 
+        PyErr_Format (PyExc_RuntimeError, "Unable to register flags '%s'", full_name);
+
         g_free (g_flags_values);
         g_free (full_name);
-
-        PyErr_Format (PyExc_RuntimeError, "Unable to register flags '%s'", full_name);
         return NULL;
     }
 
