@@ -84,6 +84,7 @@ EXTRA_DIST = \
 	test-unknown.h \
 	te_ST@nouppera \
 	org.gnome.test.gschema.xml \
+	test_gio.py \
 	test_glib.py \
 	test_gobject.py \
 	test_gtype.py \
@@ -101,7 +102,6 @@ EXTRA_DIST = \
 	test_gi.py \
 	test_gdbus.py \
 	test_overrides.py \
-	test_overrides_gio.py \
 	test_overrides_glib.py \
 	test_overrides_pango.py \
 	test_overrides_gdk.py \
