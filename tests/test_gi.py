@@ -836,13 +836,11 @@ class TestArray(unittest.TestCase):
 
         self.assertEqual(1, struct1.long_)
 
-    @unittest.expectedFailure
     def test_array_boxed_struct_return(self):
         (struct1, struct2, struct3) = GIMarshallingTests.array_zero_terminated_return_struct()
         self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct1))
         self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct2))
         self.assertEqual(GIMarshallingTests.BoxedStruct, type(struct3))
-        # FIXME: gets bogus values
         self.assertEqual(42, struct1.long_)
         self.assertEqual(43, struct2.long_)
         self.assertEqual(44, struct3.long_)

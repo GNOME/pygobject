@@ -434,13 +434,14 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                                 item_arg.v_pointer = g_variant_ref_sink (g_array_index (array_, gpointer, i));
                               else
                                 item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && !item_arg_cache->is_pointer) {
+                                /* array elements are structs */
                                 gpointer *_struct = g_malloc (item_size);
                                 memcpy (_struct, array_->data + i * item_size,
                                         item_size);
                                 item_arg.v_pointer = _struct;
                             } else if (item_arg_cache->is_pointer)
-                                /* this is the case for GAtom* arrays */
+                                /* array elements are pointers to values */
                                 item_arg.v_pointer = g_array_index (array_, gpointer, i);
                             else
                                 item_arg.v_pointer = array_->data + i * item_size;
