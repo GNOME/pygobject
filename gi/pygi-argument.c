@@ -410,7 +410,8 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
             /* No check; every Python object has a truth value. */
             break;
         case GI_TYPE_TAG_UINT8:
-            /* UINT8 types can be characters */
+        case GI_TYPE_TAG_INT8:
+            /* (U)INT8 types can be characters */
             if (PYGLIB_PyBytes_Check(object)) {
                 if (PYGLIB_PyBytes_Size(object) != 1) {
                     PyErr_Format (PyExc_TypeError, "Must be a single character");
@@ -420,7 +421,6 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
 
                 break;
             }
-        case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:

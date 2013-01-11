@@ -262,22 +262,30 @@ _pygi_marshal_from_py_int8 (PyGIInvokeState   *state,
     PyObject *py_long;
     long long_;
 
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+    if (PYGLIB_PyBytes_Check (py_arg)) {
+
+        if (PYGLIB_PyBytes_Size (py_arg) != 1) {
+            PyErr_Format (PyExc_TypeError, "Must be a single character");
+            return FALSE;
+        }
+
+        long_ = (char)(PYGLIB_PyBytes_AsString (py_arg)[0]);
+    } else if (PyNumber_Check (py_arg)) {
+        py_long = PYGLIB_PyNumber_Long (py_arg);
+        if (!py_long)
+            return FALSE;
+
+        long_ = PYGLIB_PyLong_AsLong (py_long);
+        Py_DECREF (py_long);
+
+        if (PyErr_Occurred ()) {
+            PyErr_Clear ();
+            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -128, 127);
+            return FALSE;
+        }
+    } else {
+        PyErr_Format (PyExc_TypeError, "Must be number or single byte string, not %s",
                       py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-    long_ = PYGLIB_PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -128, 127);
         return FALSE;
     }
 
