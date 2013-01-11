@@ -675,17 +675,14 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(TestCallbacks.called, 2)
         self.assertEqual(sys.getrefcount(callback), refcount)
 
-    # FIXME: TypeError: callback() takes 2 positional arguments but 4 were given
-    # does not remove the array length arguments
-    @unittest.expectedFailure
     def test_callback_scope_call_array(self):
         # This tests a callback that gets called multiple times from a
         # single scope call in python with array arguments
         TestCallbacks.callargs = []
 
-        # works with:
-        #def callback(one, one_length, two, two_length):
-        def callback(one, two):
+        # FIXME: would be cleaner without the explicit length args:
+        # def callback(one, two):
+        def callback(one, one_length, two, two_length):
             TestCallbacks.callargs.append((one, two))
             return len(TestCallbacks.callargs)
 
