@@ -823,12 +823,20 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	}
 	break;
     case G_TYPE_CHAR:
+	if (PYGLIB_PyLong_Check(obj)) {
+	    glong val;
+	    val = PYGLIB_PyLong_AsLong(obj);
+	    if (val >= -128 && val <= 127)
+		g_value_set_schar(value, (gchar) val);
+	    else
+		return -1;
+	}
 #if PY_VERSION_HEX < 0x03000000
-	if (PyString_Check(obj)) {
+	else if (PyString_Check(obj)) {
 	    g_value_set_schar(value, PyString_AsString(obj)[0]);
-	} else
+	}
 #endif
-	if (PyUnicode_Check(obj)) {
+	else if (PyUnicode_Check(obj)) {
 	    tmp = PyUnicode_AsUTF8String(obj);
 	    g_value_set_schar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
 	    Py_DECREF(tmp);
@@ -843,7 +851,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	    glong val;
 	    val = PYGLIB_PyLong_AsLong(obj);
 	    if (val >= 0 && val <= 255)
-	      g_value_set_uchar(value, (guchar)PYGLIB_PyLong_AsLong (obj));
+	      g_value_set_uchar(value, (guchar) val);
 	    else
 	      return -1;
 #if PY_VERSION_HEX < 0x03000000
