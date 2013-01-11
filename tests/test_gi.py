@@ -2569,18 +2569,10 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boolean=True)
         self.assertEqual(obj.props.some_boolean, True)
 
-    @unittest.expectedFailure
     def test_char(self):
-        # gobject-introspection thinks it has a guint8 type tag, which is
-        # wrong; this will raise an assertion critical which we need to ignore
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_WARNING | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
-            self.assertEqual(self.obj.props.some_char, 0)
-            self.obj.props.some_char = GObject.G_MAXINT8
-            self.assertEqual(self.obj.props.some_char, GObject.G_MAXINT8)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
+        self.assertEqual(self.obj.props.some_char, 0)
+        self.obj.props.some_char = GObject.G_MAXINT8
+        self.assertEqual(self.obj.props.some_char, GObject.G_MAXINT8)
 
         obj = GIMarshallingTests.PropertiesObject(some_char=-42)
         self.assertEqual(obj.props.some_char, -42)
