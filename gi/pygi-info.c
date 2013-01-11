@@ -1510,7 +1510,8 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
 
         g_base_info_unref (info);
     } else if (g_type_info_is_pointer (field_type_info)
-            && g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID) {
+            && (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID
+                || g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_UTF8)) {
 
         value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
         if (PyErr_Occurred()) {

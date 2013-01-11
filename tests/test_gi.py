@@ -1752,6 +1752,7 @@ class TestStructure(unittest.TestCase):
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
 
         self.assertEqual(0, struct.long_)
+        self.assertEqual(None, struct.string_)
         self.assertEqual([], struct.g_strv)
 
         del struct
@@ -1759,14 +1760,20 @@ class TestStructure(unittest.TestCase):
     def test_boxed_struct_new(self):
         struct = GIMarshallingTests.BoxedStruct.new()
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
+        self.assertEqual(struct.long_, 0)
+        self.assertEqual(struct.string_, None)
 
         del struct
 
     def test_boxed_struct_copy(self):
         struct = GIMarshallingTests.BoxedStruct()
+        struct.long_ = 42
+        struct.string_ = 'hello'
 
         new_struct = struct.copy()
         self.assertTrue(isinstance(new_struct, GIMarshallingTests.BoxedStruct))
+        self.assertEqual(new_struct.long_, 42)
+        self.assertEqual(new_struct.string_, 'hello')
 
         del new_struct
         del struct
@@ -1776,6 +1783,7 @@ class TestStructure(unittest.TestCase):
 
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
         self.assertEqual(42, struct.long_)
+        self.assertEqual('hello', struct.string_)
         self.assertEqual(['0', '1', '2'], struct.g_strv)
 
         del struct
@@ -1807,6 +1815,14 @@ class TestStructure(unittest.TestCase):
 
         del in_struct
         del out_struct
+
+    def test_struct_field_assignment(self):
+        struct = GIMarshallingTests.BoxedStruct()
+
+        struct.long_ = 42
+        struct.string_ = 'hello'
+        self.assertEqual(struct.long_, 42)
+        self.assertEqual(struct.string_, 'hello')
 
     def test_union(self):
         union = GIMarshallingTests.Union()
