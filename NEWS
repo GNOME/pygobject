@@ -1,3 +1,41 @@
+3.7.4   14-Jan-2013
+        - Allow setting values through GtkTreeModelFilter (Simonas Kazlauskas)
+          (#689624)
+        - Support GParamSpec signal arguments from Python (Martin Pitt)
+          (#683099)
+        - pygobject_emit(): Fix cleanup on error (Martin Pitt)
+        - Add signal emission methods to TreeModel which coerce the path
+          argument (Simon Feltman) (#682933)
+        - Add override for GValue (Bastian Winkler) (#677473)
+        - Mark caller-allocated boxed structures as having a slice allocated
+          (Mike Gorse) (#699501)
+        - pygi-property: Support boxed GSList/GList types (Olivier Crête)
+          (#684059)
+        - tests: Add missing backwards compat methods for Python 2.6
+          (Martin Pitt) (#691646)
+        - Allow setting TreeModel values to None (Simon Feltman) (#684094)
+        - Set clean-up handler for marshalled arrays (Mike Gorse) (#691509)
+        - Support setting string fields in structs (Vadim Rutkovsky) (#678401)
+        - Permit plain integers for "gchar" values (Martin Pitt)
+        - Allow single byte values for int8 types (Martin Pitt) (#691524)
+        - Fix invalid memory access handling errors when registering an enum
+          type (Mike Gorse)
+        - Fix (out) arguments in callbacks (Martin Pitt)
+        - Fix C to Python marshalling of struct pointer arrays (Martin Pitt)
+        - Don't let Property.setter() method names define property names
+          (Martin Pitt) (#688971)
+        - Use g-i stack allocation API (Martin Pitt) (#615982)
+        - pyg_value_from_pyobject: support GArray (Ray Strode) (#690514)
+        - Fix obsolete automake macros (Marko Lindqvist) (#691101)
+        - Change dynamic enum and flag gtype creation to use namespaced naming
+          (Simon Feltman) (#690455)
+        - Fix Gtk.UIManager.add_ui_from_string() override for non-ASCII chars
+          (Jonathan Ballet) (#690329)
+        - Don't dup strings before passing them to type registration functions
+          (Mike Gorse) (#690532)
+        - Fix marshalling of arrays of boxed struct values (Carlos Garnacho)
+          (#656312)
+
 3.7.3   17-Dec-2012
 	- Add support for caller-allocated GArray out arguments (Martin Pitt)
 	  (#690041)
