@@ -2497,6 +2497,15 @@ class TestGErrorReturn(unittest.TestCase):
 
 
 class TestParamSpec(unittest.TestCase):
+    # https://bugzilla.gnome.org/show_bug.cgi?id=682355
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'param_spec_in_bool'),
+                         'too old gobject-introspection')
+    @unittest.expectedFailure
+    def test_param_spec_in_bool(self):
+        ps = GObject.param_spec_boolean('mybool', 'test-bool', 'boolblurb',
+                                        True, GObject.ParamFlags.READABLE)
+        GIMarshallingTests.param_spec_in_bool(ps)
+
     def test_param_spec_return(self):
         obj = GIMarshallingTests.param_spec_return()
         self.assertEqual(obj.name, 'test-param')
