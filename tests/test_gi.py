@@ -1735,6 +1735,8 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
+                         'too old gobject-introspection')
     def test_boxed_struct(self):
         self.assertTrue(issubclass(GIMarshallingTests.BoxedStruct, GObject.GBoxed))
 
@@ -1747,6 +1749,8 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
+                         'too old gobject-introspection')
     def test_boxed_struct_new(self):
         struct = GIMarshallingTests.BoxedStruct.new()
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
@@ -1755,6 +1759,8 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
+                         'too old gobject-introspection')
     def test_boxed_struct_copy(self):
         struct = GIMarshallingTests.BoxedStruct()
         struct.long_ = 42
@@ -1768,6 +1774,8 @@ class TestStructure(unittest.TestCase):
         del new_struct
         del struct
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
+                         'too old gobject-introspection')
     def test_boxed_struct_return(self):
         struct = GIMarshallingTests.boxed_struct_returnv()
 
