@@ -1872,7 +1872,7 @@ pygobject_handler_unblock(PyGObject *self, PyObject *args)
 static PyObject *
 pygobject_emit(PyGObject *self, PyObject *args)
 {
-    guint signal_id, i;
+    guint signal_id, i, j;
     Py_ssize_t len;
     GQuark detail;
     PyObject *first, *py_ret, *repr = NULL;
@@ -1929,11 +1929,11 @@ pygobject_emit(PyGObject *self, PyObject *args)
 	    g_snprintf(buf, sizeof(buf),
 		       "could not convert type %s to %s required for parameter %d",
 		       Py_TYPE(item)->tp_name,
-		g_type_name(G_VALUE_TYPE(&params[i+1])), i);
+                       G_VALUE_TYPE_NAME(&params[i+1]), i);
 	    PyErr_SetString(PyExc_TypeError, buf);
 
-	    for (i = 0; i < query.n_params + 1; i++)
-		g_value_unset(&params[i]);
+	    for (j = 0; j <= i; j++)
+		g_value_unset(&params[j]);
 
 	    g_free(params);
 	    return NULL;
