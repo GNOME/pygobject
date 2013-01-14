@@ -133,7 +133,7 @@ class TestGFile(unittest.TestCase):
             pass
 
     def test_replace_contents(self):
-        content = b''.join(bytes(chr(i), 'utf-8') for i in range(128))
+        content = b'hello\0world\x7F!'
         succ, etag = self.file.replace_contents(content, None, False,
                                                 Gio.FileCreateFlags.NONE, None)
         new_succ, new_content, new_etag = self.file.load_contents(None)
