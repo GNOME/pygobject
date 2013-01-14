@@ -37,15 +37,13 @@ class TestTypeModuleLevelFunctions(unittest.TestCase):
         self.assertRaises(TypeError, GObject.type_is_a, 1, 2)
 
     def test_type_children(self):
-        self.assertSequenceEqual(GObject.type_children(CustomBase),
-                                 [CustomChild.__gtype__])
+        self.assertEqual(GObject.type_children(CustomBase), [CustomChild.__gtype__])
         self.assertEqual(len(GObject.type_children(CustomChild)), 0)
 
     def test_type_interfaces(self):
         self.assertEqual(len(GObject.type_interfaces(CustomBase)), 0)
         self.assertEqual(len(GObject.type_interfaces(CustomChild)), 1)
-        self.assertSequenceEqual(GObject.type_interfaces(CustomChild),
-                                 [GIMarshallingTests.Interface.__gtype__])
+        self.assertEqual(GObject.type_interfaces(CustomChild), [GIMarshallingTests.Interface.__gtype__])
 
     def test_type_parent(self):
         self.assertEqual(GObject.type_parent(CustomChild), CustomBase.__gtype__)

@@ -794,11 +794,9 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
         my_signal_expected_query_result = [my_signal_id, 'my-signal', C.__gtype__,
                                            1, GObject.TYPE_NONE, (GObject.TYPE_INT,)]
         # signal_query(name, type)
-        self.assertSequenceEqual(GObject.signal_query('my-signal', C),
-                                 my_signal_expected_query_result)
+        self.assertEqual(list(GObject.signal_query('my-signal', C)), my_signal_expected_query_result)
         # signal_query(signal_id)
-        self.assertSequenceEqual(GObject.signal_query(my_signal_id),
-                                 my_signal_expected_query_result)
+        self.assertEqual(list(GObject.signal_query(my_signal_id)), my_signal_expected_query_result)
         # invalid query returns None instead of raising
         self.assertEqual(GObject.signal_query(0), None)
         self.assertEqual(GObject.signal_query('NOT_A_SIGNAL', C),
