@@ -402,6 +402,15 @@ test_gvalue_ret_callback (GObject *object, GType type)
   return ret;
 }
 
+static GParamSpec *
+test_paramspec_in_callback (GObject *object, GParamSpec *p)
+{
+  g_return_val_if_fail (G_IS_OBJECT (object), NULL);
+  g_return_val_if_fail (G_IS_PARAM_SPEC (p), NULL);
+
+  return p;
+}
+
 static void
 connectcallbacks (GObject *object)
 {
@@ -459,6 +468,10 @@ connectcallbacks (GObject *object)
   g_signal_connect (G_OBJECT (object),
                     "test_gvalue_ret",
                     G_CALLBACK (test_gvalue_ret_callback), 
+                    NULL);
+  g_signal_connect (G_OBJECT (object),
+                    "test_paramspec_in",
+                    G_CALLBACK (test_paramspec_in_callback), 
                     NULL);
 }
 

@@ -1048,7 +1048,11 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     }
     case G_TYPE_PARAM:
-	if (PyGParamSpec_Check(obj))
+        /* we need to support both the wrapped _gobject.GParamSpec and the GI
+         * GObject.ParamSpec */
+        if (G_IS_PARAM_SPEC (pygobject_get (obj)))
+	    g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
+        else if (PyGParamSpec_Check(obj))
 	    g_value_set_param(value, PYGLIB_CPointer_GetPointer(obj, NULL));
 	else
 	    return -1;

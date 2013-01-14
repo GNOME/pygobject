@@ -362,6 +362,7 @@ class CM(GObject.GObject):
         test_string=(GObject.SignalFlags.RUN_LAST, str, (str,)),
         test_object=(GObject.SignalFlags.RUN_LAST, object, (object,)),
         test_paramspec=(GObject.SignalFlags.RUN_LAST, GObject.ParamSpec, ()),
+        test_paramspec_in=(GObject.SignalFlags.RUN_LAST, GObject.ParamSpec, (GObject.ParamSpec, )),
         test_gvalue=(GObject.SignalFlags.RUN_LAST, GObject.Value, (GObject.Value,)),
         test_gvalue_ret=(GObject.SignalFlags.RUN_LAST, GObject.Value, (GObject.TYPE_GTYPE,)),
     )
@@ -417,6 +418,17 @@ class _TestCMarshaller:
         rv = self.obj.emit("test-paramspec")
         self.assertEqual(rv.name, "test-param")
         self.assertEqual(rv.nick, "test")
+
+    @unittest.skipUnless(hasattr(GObject, 'param_spec_boolean'),
+                         'too old gobject-introspection')
+    def test_paramspec_in(self):
+        rv = GObject.param_spec_boolean('mybool', 'test-bool', 'do something',
+                                        True, GObject.ParamFlags.READABLE)
+
+        rv2 = self.obj.emit("test-paramspec-in", rv)
+        self.assertEqual(type(rv), type(rv2))
+        self.assertEqual(rv2.name, "mybool")
+        self.assertEqual(rv2.nick, "test-bool")
 
     def test_C_paramspec(self):
         self.notify_called = False
