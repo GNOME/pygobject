@@ -4,6 +4,7 @@
 # Copyright (C) 2012 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
 # Copyright (C) 2012 Simon Feltman <sfeltman@src.gnome.org>
+# Copyright (C) 2012 Bastian Winkler <buz@netbuz.org>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -205,9 +206,133 @@ __all__ += ['add_emission_hook', 'features', 'list_properties',
 
 
 class Value(GObjectModule.Value):
+    def __new__(cls, *args, **kwargs):
+        return GObjectModule.Value.__new__(cls)
+
+    def __init__(self, value_type=None, py_value=None):
+        GObjectModule.Value.__init__(self)
+        if value_type is not None:
+            self.init(value_type)
+            if py_value is not None:
+                self.set_value(py_value)
+
     def __del__(self):
-        if self._free_on_dealloc:
+        if self._free_on_dealloc and self.g_type != TYPE_INVALID:
             self.unset()
+
+    def set_value(self, py_value):
+        if self.g_type == _gobject.TYPE_INVALID:
+            raise TypeError("GObject.Value needs to be initialized first")
+        elif self.g_type == TYPE_BOOLEAN:
+            self.set_boolean(py_value)
+        elif self.g_type == TYPE_CHAR:
+            self.set_char(py_value)
+        elif self.g_type == TYPE_UCHAR:
+            self.set_uchar(py_value)
+        elif self.g_type == TYPE_INT:
+            self.set_int(py_value)
+        elif self.g_type == TYPE_UINT:
+            self.set_uint(py_value)
+        elif self.g_type == TYPE_LONG:
+            self.set_long(py_value)
+        elif self.g_type == TYPE_ULONG:
+            self.set_ulong(py_value)
+        elif self.g_type == TYPE_INT64:
+            self.set_int64(py_value)
+        elif self.g_type == TYPE_UINT64:
+            self.set_uint64(py_value)
+        elif self.g_type == TYPE_FLOAT:
+            self.set_float(py_value)
+        elif self.g_type == TYPE_DOUBLE:
+            self.set_double(py_value)
+        elif self.g_type == TYPE_STRING:
+            if isinstance(py_value, str):
+                py_value = str(py_value)
+            elif sys.version_info < (3, 0):
+                if isinstance(py_value, unicode):
+                    py_value = py_value.encode('UTF-8')
+                else:
+                    raise ValueError("Expected string or unicode but got %s%s" %
+                                     (py_value, type(py_value)))
+            else:
+                raise ValueError("Expected string but got %s%s" %
+                                 (py_value, type(py_value)))
+            self.set_string(py_value)
+        elif self.g_type == TYPE_PARAM:
+            self.set_param(py_value)
+        elif self.g_type.is_a(TYPE_ENUM):
+            self.set_enum(py_value)
+        elif self.g_type.is_a(TYPE_FLAGS):
+            self.set_flags(py_value)
+        elif self.g_type.is_a(TYPE_BOXED):
+            self.set_boxed(py_value)
+        elif self.g_type == TYPE_POINTER:
+            self.set_pointer(py_value)
+        elif self.g_type.is_a(TYPE_OBJECT):
+            self.set_object(py_value)
+        elif self.g_type == TYPE_UNICHAR:
+            self.set_uint(int(py_value))
+        # elif self.g_type == TYPE_OVERRIDE:
+        #     pass
+        elif self.g_type == TYPE_GTYPE:
+            self.set_gtype(py_value)
+        elif self.g_type == TYPE_VARIANT:
+            self.set_variant(py_value)
+        elif self.g_type == TYPE_PYOBJECT:
+            self.set_boxed(py_value)
+        else:
+            raise TypeError("Unknown value type %s" % self.g_type)
+
+    def get_value(self):
+        if self.g_type == TYPE_BOOLEAN:
+            return self.get_boolean()
+        elif self.g_type == TYPE_CHAR:
+            return self.get_char()
+        elif self.g_type == TYPE_UCHAR:
+            return self.get_uchar()
+        elif self.g_type == TYPE_INT:
+            return self.get_int()
+        elif self.g_type == TYPE_UINT:
+            return self.get_uint()
+        elif self.g_type == TYPE_LONG:
+            return self.get_long()
+        elif self.g_type == TYPE_ULONG:
+            return self.get_ulong()
+        elif self.g_type == TYPE_INT64:
+            return self.get_int64()
+        elif self.g_type == TYPE_UINT64:
+            return self.get_uint64()
+        elif self.g_type == TYPE_FLOAT:
+            return self.get_float()
+        elif self.g_type == TYPE_DOUBLE:
+            return self.get_double()
+        elif self.g_type == TYPE_STRING:
+            return self.get_string()
+        elif self.g_type == TYPE_PARAM:
+            return self.get_param()
+        elif self.g_type.is_a(TYPE_ENUM):
+            return self.get_enum()
+        elif self.g_type.is_a(TYPE_FLAGS):
+            return self.get_flags()
+        elif self.g_type.is_a(TYPE_BOXED):
+            return self.get_boxed()
+        elif self.g_type == TYPE_POINTER:
+            return self.get_pointer()
+        elif self.g_type.is_a(TYPE_OBJECT):
+            return self.get_object()
+        elif self.g_type == TYPE_UNICHAR:
+            return self.get_uint()
+        elif self.g_type == TYPE_GTYPE:
+            return self.get_gtype()
+        elif self.g_type == TYPE_VARIANT:
+            return self.get_variant()
+        elif self.g_type == TYPE_PYOBJECT:
+            pass
+        else:
+            return None
+
+    def __repr__(self):
+        return '<Value (%s) %s>' % (self.g_type.name, self.get_value())
 
 Value = override(Value)
 __all__.append('Value')

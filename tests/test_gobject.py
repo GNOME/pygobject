@@ -5,7 +5,7 @@ import gc
 import unittest
 import warnings
 
-from gi.repository import GObject
+from gi.repository import GObject, GLib
 from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
 from gi._gobject import _gobject
@@ -594,6 +594,51 @@ class TestPropertyBindings(unittest.TestCase):
         gc.collect()
         self.assertEqual(ref(), None)
         self.assertEqual(binding(), None)
+
+
+class TestGValue(unittest.TestCase):
+    def test_no_type(self):
+        value = GObject.Value()
+        self.assertEqual(value.g_type, GObject.TYPE_INVALID)
+        self.assertRaises(TypeError, value.set_value, 23)
+        self.assertEqual(value.get_value(), None)
+
+    def test_int(self):
+        value = GObject.Value(GObject.TYPE_UINT)
+        self.assertEqual(value.g_type, GObject.TYPE_UINT)
+        value.set_value(23)
+        self.assertEqual(value.get_value(), 23)
+        value.set_value(42.0)
+        self.assertEqual(value.get_value(), 42)
+
+    def test_string(self):
+        value = GObject.Value(str, 'foo_bar')
+        self.assertEqual(value.g_type, GObject.TYPE_STRING)
+        self.assertEqual(value.get_value(), 'foo_bar')
+
+    def test_float(self):
+        # python float is G_TYPE_DOUBLE
+        value = GObject.Value(float, 23.4)
+        self.assertEqual(value.g_type, GObject.TYPE_DOUBLE)
+
+        value = GObject.Value(GObject.TYPE_FLOAT, 23.4)
+        self.assertEqual(value.g_type, GObject.TYPE_FLOAT)
+        self.assertRaises(TypeError, value.set_value, 'string')
+
+    def test_enum(self):
+        value = GObject.Value(GLib.FileError, GLib.FileError.FAILED)
+        self.assertEqual(value.get_value(), GLib.FileError.FAILED)
+
+    def test_flags(self):
+        value = GObject.Value(GLib.IOFlags, GLib.IOFlags.IS_READABLE)
+        self.assertEqual(value.get_value(), GLib.IOFlags.IS_READABLE)
+
+    def test_object(self):
+        class TestObject(GObject.Object):
+            pass
+        obj = TestObject()
+        value = GObject.Value(GObject.TYPE_OBJECT, obj)
+        self.assertEqual(value.get_value(), obj)
 
 if __name__ == '__main__':
     unittest.main()
