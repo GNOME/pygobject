@@ -872,11 +872,16 @@ class TreeModel(Gtk.TreeModel):
             self.set_value(treeiter, column, value)
 
     def _convert_value(self, column, value):
-        if value is None:
-            return None
-
         # we may need to convert to a basic type
         type_ = self.get_column_type(column)
+
+        # Allow None to be used as an initialized but empty value.
+        # https://bugzilla.gnome.org/show_bug.cgi?id=684094
+        if value is None:
+            value_container = GObject.Value()
+            value_container.init(type_)
+            return value_container
+
         if type_ == GObject.TYPE_STRING:
             if isinstance(value, str):
                 value = str(value)

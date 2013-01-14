@@ -1309,6 +1309,14 @@ class TestTreeModel(unittest.TestCase):
 
         self.assertRaises(ValueError, set_row3)
 
+    def test_tree_model_set_value_to_none(self):
+        # Tests allowing the usage of None to set an empty value on a model.
+        store = Gtk.ListStore(str)
+        row = store.append(['test'])
+        self.assertSequenceEqual(store[0][:], ['test'])
+        store.set_value(row, 0, None)
+        self.assertSequenceEqual(store[0][:], [None])
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeView(unittest.TestCase):
