@@ -436,9 +436,7 @@ class _TestCMarshaller:
         self.assertEqual(rv, 42)
 
         # explicit float
-        v = GObject.Value()
-        v.init(GObject.TYPE_FLOAT)
-        v.set_float(1.234)
+        v = GObject.Value(GObject.TYPE_FLOAT, 1.234)
         rv = self.obj.emit("test-gvalue", v)
         self.assertAlmostEqual(rv, 1.234, 4)
 
@@ -447,9 +445,7 @@ class _TestCMarshaller:
         self.assertAlmostEqual(rv, 1.234, 4)
 
         # explicit int64
-        v = GObject.Value()
-        v.init(GObject.TYPE_INT64)
-        v.set_int64(GObject.G_MAXINT64)
+        v = GObject.Value(GObject.TYPE_INT64, GObject.G_MAXINT64)
         rv = self.obj.emit("test-gvalue", v)
         self.assertEqual(rv, GObject.G_MAXINT64)
 
@@ -459,9 +455,7 @@ class _TestCMarshaller:
         #self.assertEqual(rv, GObject.G_MAXINT64)
 
         # explicit uint64
-        v = GObject.Value()
-        v.init(GObject.TYPE_UINT64)
-        v.set_uint64(GObject.G_MAXUINT64)
+        v = GObject.Value(GObject.TYPE_UINT64, GObject.G_MAXUINT64)
         rv = self.obj.emit("test-gvalue", v)
         self.assertEqual(rv, GObject.G_MAXUINT64)
 

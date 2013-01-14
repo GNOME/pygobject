@@ -1307,7 +1307,7 @@ class TestTreeModel(unittest.TestCase):
         def set_row3():
             model[0][:2] = ("0", 0)
 
-        self.assertRaises(ValueError, set_row3)
+        self.assertRaises(TypeError, set_row3)
 
     def test_tree_model_set_value_to_none(self):
         # Tests allowing the usage of None to set an empty value on a model.

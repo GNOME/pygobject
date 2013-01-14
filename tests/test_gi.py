@@ -1223,32 +1223,24 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_in(self):
         GIMarshallingTests.gvalue_in(42)
-        value = GObject.Value()
-        value.init(GObject.TYPE_INT)
-        value.set_int(42)
+        value = GObject.Value(GObject.TYPE_INT, 42)
         GIMarshallingTests.gvalue_in(value)
 
     def test_gvalue_int64_in(self):
-        value = GObject.Value()
-        value.init(GObject.TYPE_INT64)
-        value.set_int64(GObject.G_MAXINT64)
+        value = GObject.Value(GObject.TYPE_INT64, GObject.G_MAXINT64)
         GIMarshallingTests.gvalue_int64_in(value)
 
     def test_gvalue_in_with_type(self):
-        value = GObject.Value()
-        value.init(GObject.TYPE_STRING)
-        value.set_string('foo')
+        value = GObject.Value(GObject.TYPE_STRING, 'foo')
         GIMarshallingTests.gvalue_in_with_type(value, GObject.TYPE_STRING)
 
-        value = GObject.Value()
-        value.init(GIMarshallingTests.Flags.__gtype__)
-        value.set_flags(GIMarshallingTests.Flags.VALUE1)
+        value = GObject.Value(GIMarshallingTests.Flags.__gtype__,
+                              GIMarshallingTests.Flags.VALUE1)
         GIMarshallingTests.gvalue_in_with_type(value, GObject.TYPE_FLAGS)
 
     def test_gvalue_in_enum(self):
-        value = GObject.Value()
-        value.init(GIMarshallingTests.Enum.__gtype__)
-        value.set_enum(GIMarshallingTests.Enum.VALUE3)
+        value = GObject.Value(GIMarshallingTests.Enum.__gtype__,
+                              GIMarshallingTests.Enum.VALUE3)
         GIMarshallingTests.gvalue_in_enum(value)
 
     def test_gvalue_out(self):
@@ -1262,9 +1254,7 @@ class TestGValue(unittest.TestCase):
 
     def test_gvalue_inout(self):
         self.assertEqual('42', GIMarshallingTests.gvalue_inout(42))
-        value = GObject.Value()
-        value.init(GObject.TYPE_INT)
-        value.set_int(42)
+        value = GObject.Value(int, 42)
         self.assertEqual('42', GIMarshallingTests.gvalue_inout(value))
 
     def test_gvalue_flat_array_in(self):
