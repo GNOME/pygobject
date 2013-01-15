@@ -226,15 +226,11 @@ INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspecti
 AC_SUBST(INTROSPECTION_SCANNER)
 AC_SUBST(INTROSPECTION_COMPILER)
 
-dnl add required cflags ...
+# compiler warnings, errors, required cflags, and code coverage support
+GNOME_COMPILE_WARNINGS([maximum])
+GNOME_CODE_COVERAGE
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])
-  #JH_ADD_CFLAG([-Werror=missing-prototypes])
-  JH_ADD_CFLAG([-Werror=implicit-function-declaration])
-  JH_ADD_CFLAG([-Werror=pointer-arith])
-  JH_ADD_CFLAG([-Werror=format-security])
-  JH_ADD_CFLAG([-Werror=missing-include-dirs])
-  JH_ADD_CFLAG([-Werror=format])
   JH_ADD_CFLAG([-Werror=unused-variable])
   JH_ADD_CFLAG([-fno-strict-aliasing])
 
@@ -248,9 +244,7 @@ if test "x$GCC" = "xyes"; then
 
 fi
 
-# enable code coverage support
-GNOME_CODE_COVERAGE
-CFLAGS="$CFLAGS $CODE_COVERAGE_CFLAGS"
+CFLAGS="$CFLAGS $WARN_CFLAGS $CODE_COVERAGE_CFLAGS"
 LDFLAGS="$LDFLAGS $CODE_COVERAGE_CFLAGS"
 
 AC_CONFIG_FILES(
