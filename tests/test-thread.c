@@ -43,8 +43,7 @@ other_thread_cb (TestThread *self)
 static void
 test_thread_emit_signal (TestThread *self)
 {
-  self->thread = g_thread_create ((GThreadFunc)other_thread_cb,
-				  self, TRUE, NULL);
+  self->thread = g_thread_new ("t", (GThreadFunc)other_thread_cb, self);
 }
 
 static void test_thread_init (TestThread *self) {}
