@@ -232,7 +232,7 @@ pyg_source_set_callback(PyGObject *self_module, PyObject *args)
  * GSourceFuncs which call back to Python.
  */
 PyObject*
-pyg_source_new ()
+pyg_source_new (void)
 {
     PyGRealSource *source = NULL;
     PyObject      *py_type;

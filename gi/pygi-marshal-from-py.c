@@ -32,7 +32,7 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-marshal-from-py.h"
 
-gboolean
+static gboolean
 gi_argument_from_py_ssize_t (GIArgument   *arg_out,
                              Py_ssize_t    size_in,
                              GITypeTag     type_tag)                             
@@ -134,7 +134,7 @@ gi_argument_from_py_ssize_t (GIArgument   *arg_out,
     return FALSE;
 }
 
-gboolean
+static gboolean
 gi_argument_from_c_long (GIArgument *arg_out,
                          long        c_long_in,
                          GITypeTag   type_tag)

@@ -24,7 +24,7 @@
 #ifndef __PYGI_SOURCE_H__
 #define __PYGI_SOURCE_H__
 
-PyObject *pyg_source_new ();
+PyObject *pyg_source_new (void);
 PyObject *pyg_source_set_callback (PyGObject *self, PyObject *args);
 
 #endif /* __PYGI_SOURCE_H__ */

@@ -146,6 +146,7 @@ static int _pyglib_init_##modname(PyObject *module)
 #endif
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
+DL_EXPORT(void) init##symbol(void); \
 DL_EXPORT(void) init##symbol(void)			\
 {                                                       \
     PyObject *module;                                   \
@@ -184,6 +185,7 @@ PyTypeObject symbol = {                                 \
     NULL,                                               \
     NULL                                                \
 };                                                      \
+PyMODINIT_FUNC PyInit_##symbol(void);                   \
 PyMODINIT_FUNC PyInit_##symbol(void)                    \
 {                                                       \
     PyObject *module;                                   \
