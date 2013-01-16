@@ -1407,9 +1407,11 @@ class TestTreeView(unittest.TestCase):
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
         try:
-            # causes the widget to get realized and cellN.props.text receive a
-            # value, otherwise it will be None.
-            tree.get_preferred_size()
+            # We must realize the TreeView for cell.props.text to receive a value
+            dialog = Gtk.Dialog()
+            dialog.get_action_area().add(tree)
+            dialog.show_all()
+            dialog.hide()
         finally:
             GLib.log_set_always_fatal(old_mask)
 
@@ -1444,9 +1446,11 @@ class TestTreeView(unittest.TestCase):
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
         try:
-            # This will make cell.props.text receive a value, otherwise it
-            # will be None.
-            treeview.get_preferred_size()
+            # We must realize the TreeView for cell.props.text to receive a value
+            dialog = Gtk.Dialog()
+            dialog.get_action_area().add(treeview)
+            dialog.show_all()
+            dialog.hide()
         finally:
             GLib.log_set_always_fatal(old_mask)
 
