@@ -23,7 +23,7 @@ if sys.version_info[:2] == (2, 6):
             sys.stderr.write('[expected failure] ')
         return lambda obj: obj
 
-    unittest.skipIf = skipUnless
+    unittest.skipIf = skipIf
 
     def assertGreater(self, a, b, msg=None):
         if not a > b:
