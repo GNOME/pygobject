@@ -24,20 +24,29 @@
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState    *state,
                            PyGIArgCache       *cache,
-                           gpointer            data)
+                           gpointer            data,
+                           gboolean            was_processed)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)cache;
 
     if (iface_cache->g_type == G_TYPE_BOXED) {
         gsize size;
+        if (was_processed)
+            return; /* will be cleaned up at deallocation */
         size = g_struct_info_get_size (iface_cache->interface_info);
         g_slice_free1 (size, data);
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
+        if (was_processed)
+            g_value_unset (data);
         g_slice_free (GValue, data);
     } else if (iface_cache->is_foreign) {
+        if (was_processed)
+            return; /* will be cleaned up at deallocation */
         pygi_struct_foreign_release ((GIBaseInfo *)iface_cache->interface_info,
                                      data);
     } else {
+        if (was_processed)
+            return; /* will be cleaned up at deallocation */
         g_free (data);
     }
 }
@@ -121,6 +130,12 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
                           arg_cache,
                           data,
                           TRUE);
+        else if (arg_cache->is_caller_allocates && data != NULL) {
+            _cleanup_caller_allocates (state,
+                                       arg_cache,
+                                       data,
+                                       TRUE);
+        }
 
         cache_item = cache_item->next;
     }
@@ -151,7 +166,8 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
         } else if (arg_cache->is_caller_allocates && data != NULL) {
             _cleanup_caller_allocates (state,
                                        arg_cache,
-                                       data);
+                                       data,
+                                       FALSE);
         }
     }
 }
