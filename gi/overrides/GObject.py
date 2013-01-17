@@ -130,13 +130,15 @@ TYPE_GTYPE = GObjectModule.type_from_name('GType')
 TYPE_STRV = GObjectModule.type_from_name('GStrv')
 TYPE_VARIANT = GObjectModule.type_from_name('GVariant')
 TYPE_GSTRING = GObjectModule.type_from_name('GString')
+TYPE_VALUE = GObjectModule.Value.__gtype__
 TYPE_UNICHAR = TYPE_UINT
 __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
             'TYPE_UCHAR', 'TYPE_BOOLEAN', 'TYPE_INT', 'TYPE_UINT', 'TYPE_LONG',
             'TYPE_ULONG', 'TYPE_INT64', 'TYPE_UINT64', 'TYPE_ENUM', 'TYPE_FLAGS',
             'TYPE_FLOAT', 'TYPE_DOUBLE', 'TYPE_STRING', 'TYPE_POINTER',
             'TYPE_BOXED', 'TYPE_PARAM', 'TYPE_OBJECT', 'TYPE_PYOBJECT',
-            'TYPE_GTYPE', 'TYPE_STRV', 'TYPE_VARIANT', 'TYPE_GSTRING', 'TYPE_UNICHAR']
+            'TYPE_GTYPE', 'TYPE_STRV', 'TYPE_VARIANT', 'TYPE_GSTRING',
+            'TYPE_UNICHAR', 'TYPE_VALUE']
 
 
 # Deprecated, use GLib directly

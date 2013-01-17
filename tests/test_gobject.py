@@ -597,6 +597,10 @@ class TestPropertyBindings(unittest.TestCase):
 
 
 class TestGValue(unittest.TestCase):
+    def test_type_constant(self):
+        self.assertEqual(GObject.TYPE_VALUE, GObject.Value.__gtype__)
+        self.assertEqual(GObject.type_name(GObject.TYPE_VALUE), 'GValue')
+
     def test_no_type(self):
         value = GObject.Value()
         self.assertEqual(value.g_type, GObject.TYPE_INVALID)
