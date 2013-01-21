@@ -951,7 +951,7 @@ pygobject_lookup_class(GType gtype)
 /**
  * pygobject_new_full:
  * @obj: a GObject instance.
- * @sink: whether to sink any floating reference found on the GObject. DEPRECATED.
+ * @sink: whether to sink any floating reference found on the GObject.
  * @g_class: the GObjectClass
  *
  * This function gets a reference to a wrapper for the given GObject
@@ -1002,7 +1002,10 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self->obj = obj;
         /* if we are creating a wrapper around a newly created object, it can have
            a floating ref (e.g. for methods like Gtk.Button.new()). Bug 640868 */
-	g_object_ref_sink(obj);
+        if (sink)
+	    g_object_ref_sink(obj);
+        else
+	    g_object_ref(obj);
 	pygobject_register_wrapper((PyObject *)self);
 	PyObject_GC_Track((PyObject *)self);
     }

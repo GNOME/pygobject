@@ -1034,7 +1034,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
            * now */
         PyGILState_STATE state;
         state = pyglib_gil_state_ensure();
-        wrapper = pygobject_new_full(object, FALSE, g_class);
+        wrapper = pygobject_new_full(object, TRUE, g_class);
 
         /* float the wrapper ref here because we are going to orphan it
          * so we don't destroy the wrapper. The next call to pygobject_new_full
@@ -1477,7 +1477,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 
     if (obj) {
         pygobject_sink (obj);
-	self = (PyGObject *) pygobject_new_full((GObject *)obj, FALSE, NULL);
+	self = (PyGObject *) pygobject_new_full((GObject *)obj, TRUE, NULL);
         g_object_unref(obj);
     } else
         self = NULL;
@@ -2050,6 +2050,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_register_wrapper,
   pygobject_lookup_class,
   pygobject_new,
+  pygobject_new_full,
 
   pyg_closure_new,
   pygobject_watch_closure,

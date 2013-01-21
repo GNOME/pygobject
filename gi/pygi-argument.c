@@ -1867,16 +1867,13 @@ _pygi_argument_to_object (GIArgument  *arg,
                       break;
                     }
 
-                    /* since we will unref the object when the
-                     * wrapper is destroyed and we don't want
-                     * GTK removing the object while the
-                     * wrapper is live, we take a gobject reference
-                     * when one is not transfered to us
+                    /* Only sink incoming objects if the transfer everything.
+                     * See: https://bugzilla.gnome.org/show_bug.cgi?id=675726
                      */
-                    if (transfer == GI_TRANSFER_NOTHING)
-                        g_object_ref (G_OBJECT(arg->v_pointer));
+                    object = pygobject_new_full (arg->v_pointer,
+                                                 /*sink=*/ transfer == GI_TRANSFER_EVERYTHING,
+                                                 /*type=*/ NULL);
 
-                    object = pygobject_new (arg->v_pointer);
                     break;
                 default:
                     g_assert_not_reached();

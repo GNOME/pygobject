@@ -92,6 +92,7 @@ struct _PyGObject_Functions {
     void (* register_wrapper)(PyObject *self);
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
+    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, GType type);
 
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
@@ -202,6 +203,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_register_wrapper  (_PyGObject_API->register_wrapper)
 #define pygobject_lookup_class      (_PyGObject_API->lookup_class)
 #define pygobject_new               (_PyGObject_API->newgobj)
+#define pygobject_new_full          (_PyGObject_API->newgobj_full)
 #define pyg_closure_new             (_PyGObject_API->closure_new)
 #define pygobject_watch_closure     (_PyGObject_API->object_watch_closure)
 #define pyg_closure_set_exception_handler (_PyGObject_API->closure_set_exception_handler)

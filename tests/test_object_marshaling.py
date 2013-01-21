@@ -95,7 +95,6 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         Object = GObject.Object
         ObjectRef = weakref.ref
 
-    @unittest.expectedFailure  # bug 675726
     def test_vfunc_self_arg_ref_count(self):
         # Check to make sure vfunc "self" arguments don't leak.
         vfuncs = self.VFuncs()
@@ -162,7 +161,6 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
-    @unittest.expectedFailure  # bug 675726
     def test_vfunc_in_object_transfer_none(self):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
@@ -252,7 +250,6 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         gc.collect()
         self.assertTrue(vfuncs.object_ref() is None)
 
-    @unittest.expectedFailure  # bug 675726, should maintain floating ref
     def test_vfunc_in_object_transfer_none_with_floating(self):
         vfuncs = self.VFuncs()
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
@@ -377,7 +374,7 @@ class TestVFuncsWithHeldObjectArg(unittest.TestCase):
 
         gc.collect()
 
-        # Ref count inside vfunc from the perpsective of Python
+        # Ref count inside vfunc from the perspective of Python
         self.assertEqual(vfuncs.in_object_grefcount, 2)  # initial + python wrapper
         self.assertFalse(vfuncs.in_object_is_floating)
 
@@ -400,7 +397,7 @@ class TestVFuncsWithHeldObjectArg(unittest.TestCase):
 
         gc.collect()
 
-        # Ref count inside vfunc from the perpsective of Python
+        # Ref count inside vfunc from the perspective of Python
         self.assertEqual(vfuncs.in_object_grefcount, 1)  # python wrapper takes ownership of the gobject
         self.assertFalse(vfuncs.in_object_is_floating)
 
@@ -502,7 +499,7 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         ref_count, is_floating = vfuncs.get_ref_info_for_vfunc_in_object_transfer_none(self.VFuncs.Object)
         gc.collect()
 
-        # Ref count inside vfunc from the perpsective of Python
+        # Ref count inside vfunc from the perspective of Python
         self.assertTrue(vfuncs.in_object_is_floating)
         self.assertEqual(vfuncs.in_object_grefcount, 2)  # python wrapper sinks and owns the gobject
 
@@ -538,3 +535,70 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         del vfuncs.object_ref
         gc.collect()
         self.assertTrue(held_object_ref() is None)
+
+
+class TestPropertyHoldingObject(unittest.TestCase):
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
+    def test_props_getter_holding_object_ref_count(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        holder.set_property('some-object', held)
+        self.assertEqual(holder.__grefcount__, 1)
+
+        initial_ref_count = held.__grefcount__
+        holder.props.some_object
+        gc.collect()
+        self.assertEqual(held.__grefcount__, initial_ref_count)
+
+    def test_get_property_holding_object_ref_count(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        holder.set_property('some-object', held)
+        self.assertEqual(holder.__grefcount__, 1)
+
+        initial_ref_count = held.__grefcount__
+        holder.get_property('some-object')
+        gc.collect()
+        self.assertEqual(held.__grefcount__, initial_ref_count)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
+    def test_props_setter_holding_object_ref_count(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        # Setting property should only increase ref count by 1
+        holder.props.some_object = held
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 2)
+
+        # Clearing should pull it back down
+        holder.props.some_object = None
+        self.assertEqual(held.__grefcount__, 1)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
+    def test_set_property_holding_object_ref_count(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        # Setting property should only increase ref count by 1
+        holder.set_property('some-object', held)
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 2)
+
+        # Clearing should pull it back down
+        holder.set_property('some-object', None)
+        self.assertEqual(held.__grefcount__, 1)
