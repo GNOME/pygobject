@@ -9,6 +9,7 @@ CLEANFILES = \
 	`find "$(builddir)" -type f -name "*.pyc" -print`
 
 EXTRA_DIST = \
+	autogen.sh \
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO \
 	PKG-INFO.in \
