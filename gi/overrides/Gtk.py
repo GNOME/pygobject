@@ -401,6 +401,9 @@ __all__.append('Builder')
 
 class Window(Gtk.Window):
     def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwds):
+        if not initialized:
+            raise RuntimeError("Gtk couldn't be initialized")
+
         # type is a construct-only property; if it is already set (e. g. by
         # GtkBuilder), do not try to set it again and just ignore it
         try:
@@ -1579,5 +1582,3 @@ def stock_lookup(*args):
 
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
-if not initialized:
-    raise RuntimeError("Gtk couldn't be initialized")

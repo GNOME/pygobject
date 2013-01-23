@@ -421,5 +421,3 @@ if Gdk._version >= '3.0':
 import sys
 
 initialized, argv = Gdk.init_check(sys.argv)
-if not initialized:
-    raise RuntimeError("Gdk couldn't be initialized")
