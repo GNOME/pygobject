@@ -624,10 +624,24 @@ class TestGValue(unittest.TestCase):
         # python float is G_TYPE_DOUBLE
         value = GObject.Value(float, 23.4)
         self.assertEqual(value.g_type, GObject.TYPE_DOUBLE)
+        value.set_value(1e50)
+        self.assertAlmostEqual(value.get_value(), 1e50)
 
         value = GObject.Value(GObject.TYPE_FLOAT, 23.4)
         self.assertEqual(value.g_type, GObject.TYPE_FLOAT)
         self.assertRaises(TypeError, value.set_value, 'string')
+        self.assertRaises(ValueError, value.set_value, 1e50)
+
+    def test_float_inf_nan(self):
+        nan = float('nan')
+        for type_ in [GObject.TYPE_FLOAT, GObject.TYPE_DOUBLE]:
+            for x in [float('inf'), float('-inf'), nan]:
+                value = GObject.Value(type_, x)
+                # assertEqual() is False for (nan, nan)
+                if x is nan:
+                    self.assertEqual(str(value.get_value()), 'nan')
+                else:
+                    self.assertEqual(value.get_value(), x)
 
     def test_enum(self):
         value = GObject.Value(GLib.FileError, GLib.FileError.FAILED)

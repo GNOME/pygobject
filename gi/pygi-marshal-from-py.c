@@ -659,6 +659,23 @@ _pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
     return TRUE;
 }
 
+static gboolean
+check_valid_double (double x, double min, double max)
+{
+    char buf[100];
+
+    if ((x < min || x > max) && x != INFINITY && x != -INFINITY && x != NAN) {
+        if (PyErr_Occurred())
+            PyErr_Clear ();
+
+        /* we need this as PyErr_Format() does not support float types */
+        snprintf (buf, sizeof (buf), "%g not in range %g to %g", x, min, max);
+        PyErr_SetString (PyExc_ValueError, buf);
+        return FALSE;
+    }
+    return TRUE;
+}
+
 gboolean
 _pygi_marshal_from_py_float (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
@@ -682,16 +699,8 @@ _pygi_marshal_from_py_float (PyGIInvokeState   *state,
     double_ = PyFloat_AsDouble (py_float);
     Py_DECREF (py_float);
 
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXFLOAT, G_MAXFLOAT);
+    if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXFLOAT, G_MAXFLOAT))
         return FALSE;
-    }
-
-    if (double_ < -G_MAXFLOAT || double_ > G_MAXFLOAT) {
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXFLOAT, G_MAXFLOAT);
-        return FALSE;
-    }
 
     arg->v_float = double_;
 
@@ -721,16 +730,8 @@ _pygi_marshal_from_py_double (PyGIInvokeState   *state,
     double_ = PyFloat_AsDouble (py_float);
     Py_DECREF (py_float);
 
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXDOUBLE, G_MAXDOUBLE);
+    if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXDOUBLE, G_MAXDOUBLE))
         return FALSE;
-    }
-
-    if (double_ < -G_MAXDOUBLE || double_ > G_MAXDOUBLE) {
-        PyErr_Format (PyExc_ValueError, "%f not in range %f to %f", double_, -G_MAXDOUBLE, G_MAXDOUBLE);
-        return FALSE;
-    }
 
     arg->v_double = double_;
 
