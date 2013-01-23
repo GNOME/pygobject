@@ -72,7 +72,7 @@ class Demo(GObject.GObject):
         packagename = os.path.dirname(relpath).replace(os.sep, '.')
         modulename = os.path.basename(relpath)[0:-3]
 
-        package = __import__(packagename, globals(), locals(), [modulename], -1)
+        package = __import__(packagename, globals(), locals(), [modulename], 0)
         module = getattr(package, modulename)
 
         try:
