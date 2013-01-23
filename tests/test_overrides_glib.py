@@ -463,6 +463,19 @@ class TestGVariant(unittest.TestCase):
         assert_equals_bool('v', GLib.Variant('i', 1))
 
     def test_repr(self):
+        # with C constructor
+        v = GLib.Variant.new_uint32(42)
+        self.assertEqual(repr(v), "GLib.Variant('u', 42)")
+
+        # with override constructor
+        v = GLib.Variant('(is)', (1, 'somestring'))
+        self.assertEqual(repr(v), "GLib.Variant('(is)', (1, 'somestring'))")
+
+    def test_str(self):
+        # with C constructor
+        v = GLib.Variant.new_uint32(42)
+        self.assertEqual(str(v), 'uint32 42')
+
+        # with override constructor
         v = GLib.Variant('(is)', (1, 'somestring'))
         self.assertEqual(str(v), "(1, 'somestring')")
-        self.assertEqual(repr(v), "GLib.Variant('(is)', (1, 'somestring'))")

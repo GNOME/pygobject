@@ -220,7 +220,11 @@ class Variant(GLib.Variant):
         return self.print_(True)
 
     def __repr__(self):
-        return "GLib.Variant('%s', %s)" % (self.format_string, self.print_(True))
+        if hasattr(self, 'format_string'):
+            f = self.format_string
+        else:
+            f = self.get_type_string()
+        return "GLib.Variant('%s', %s)" % (f, self.print_(False))
 
     def __eq__(self, other):
         try:
