@@ -88,8 +88,6 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
     return res;
 }
 
-static PyMethodDef _PyGIBaseInfo_methods[];
-
 PYGLIB_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
 static PyObject *
@@ -406,11 +404,14 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
 {
     GIArgInfo *arg_info = (GIArgInfo*)self->info;
     GITypeInfo type_info;
+    GITypeTag type_tag;
+    PyObject *py_type;
+
     g_arg_info_load_type(arg_info, &type_info);
-    GITypeTag type_tag = g_type_info_get_tag(&type_info);
+    type_tag = g_type_info_get_tag(&type_info);
 
     /* First attempt getting a python type object. */
-    PyObject *py_type = _pygi_get_py_type_hint(type_tag);
+    py_type = _pygi_get_py_type_hint(type_tag);
     if (py_type != Py_None && PyObject_HasAttrString(py_type, "__name__")) {
 	PyObject *name = PyObject_GetAttrString(py_type, "__name__");
 	Py_DecRef(py_type);
@@ -422,8 +423,9 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
 	    gchar *name = g_strdup_printf("%s.%s",
 		    g_base_info_get_namespace(iface),
 		    g_base_info_get_name (iface));
+        PyObject *py_string;
 	    g_base_info_unref(iface);
-	    PyObject *py_string = PYGLIB_PyUnicode_FromString(name);
+	    py_string = PYGLIB_PyUnicode_FromString(name);
 	    g_free(name);
 	    return py_string;
 	}
@@ -908,11 +910,11 @@ pygi_g_struct_info_is_simple (GIStructInfo *struct_info)
     for (i = 0; i < n_field_infos && is_simple; i++) {
         GIFieldInfo *field_info;
         GITypeInfo *field_type_info;
+        GITypeTag field_type_tag;
 
         field_info = g_struct_info_get_field (struct_info, i);
         field_type_info = g_field_info_get_type (field_info);
 
-        GITypeTag field_type_tag;
 
         field_type_tag = g_type_info_get_tag (field_type_info);
 
@@ -1512,13 +1514,13 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     } else if (g_type_info_is_pointer (field_type_info)
             && (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_VOID
                 || g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_UTF8)) {
-
+        int offset;
         value = _pygi_argument_from_object (py_value, field_type_info, GI_TRANSFER_NOTHING);
         if (PyErr_Occurred()) {
             goto out;
         }
 
-        int offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
+        offset = g_field_info_get_offset ((GIFieldInfo *) self->info);
         G_STRUCT_MEMBER (gpointer, pointer, offset) = (gpointer)value.v_pointer;
 
         retval = Py_None;

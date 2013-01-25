@@ -27,8 +27,6 @@
 
 PyObject *PyGIRepositoryError;
 
-static PyMethodDef _PyGIRepository_methods[];
-
 PYGLIB_DEFINE_TYPE("gi.Repository", PyGIRepository_Type, PyGIRepository);
 
 static PyObject *
