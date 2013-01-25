@@ -21,6 +21,7 @@
 
 import signal
 import warnings
+import sys
 
 from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
@@ -493,16 +494,17 @@ class MainLoop(GLib.MainLoop):
         def _handler(loop):
             loop.quit()
             loop._quit_by_sigint = True
-
-        # compatibility shim, keep around until we depend on glib 2.36
-        if hasattr(GLib, 'unix_signal_add'):
-            fn = GLib.unix_signal_add
-        else:
-            fn = GLib.unix_signal_add_full
-        self._signal_source = fn(GLib.PRIORITY_DEFAULT, signal.SIGINT, _handler, self)
+        if sys.platform != 'win32':
+            # compatibility shim, keep around until we depend on glib 2.36
+            if hasattr(GLib, 'unix_signal_add'):
+                fn = GLib.unix_signal_add
+            else:
+                fn = GLib.unix_signal_add_full
+            self._signal_source = fn(GLib.PRIORITY_DEFAULT, signal.SIGINT, _handler, self)
 
     def __del__(self):
-        GLib.source_remove(self._signal_source)
+        if hasattr(self, '_signal_source'):
+            GLib.source_remove(self._signal_source)
 
     def run(self):
         super(MainLoop, self).run()
