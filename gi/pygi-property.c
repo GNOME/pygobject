@@ -104,6 +104,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
     PyObject *py_value = NULL;
     GITypeInfo *type_info = NULL;
     GITransfer transfer;
+    GITypeTag type_tag;
 
     /* The owner_type of the pspec gives us the exact type that introduced the
      * property, even if it is a parent class of the instance in question. */
@@ -118,7 +119,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
     type_info = g_property_info_get_type (property_info);
     transfer = g_property_info_get_ownership_transfer (property_info);
 
-    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
             arg.v_boolean = g_value_get_boolean (&value);

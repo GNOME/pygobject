@@ -477,10 +477,11 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
 #else
                 {
                     PyObject *lower_pybytes_obj = PyUnicode_AsUTF8String (lower_str);
+                    PyObject *upper_pybytes_obj;
                     if (!lower_pybytes_obj)
                         goto utf8_fail;
 
-                    PyObject *upper_pybytes_obj = PyUnicode_AsUTF8String (upper_str);                    
+                    upper_pybytes_obj = PyUnicode_AsUTF8String (upper_str);
                     if (!upper_pybytes_obj) {
                         Py_DECREF(lower_pybytes_obj);
                         goto utf8_fail;
@@ -803,6 +804,10 @@ _pygi_argument_to_array (GIArgument  *arg,
             } else {
                 length = g_type_info_get_array_fixed_size (type_info);
                 if (length < 0) {
+                    gint length_arg_pos;
+                    GIArgInfo length_arg_info;
+                    GITypeInfo length_type_info;
+
                     if (G_UNLIKELY (args == NULL)) {
                         g_critical ("Unable to determine array length for %p",
                                     arg->v_pointer);
@@ -810,9 +815,6 @@ _pygi_argument_to_array (GIArgument  *arg,
                         *out_free_array = TRUE;
                         return g_array;
                     }
-                    gint length_arg_pos;
-                    GIArgInfo length_arg_info;
-                    GITypeInfo length_type_info;
 
                     length_arg_pos = g_type_info_get_array_length (type_info);
                     g_assert (length_arg_pos >= 0);

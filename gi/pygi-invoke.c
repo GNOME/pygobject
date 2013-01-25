@@ -501,6 +501,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
         c_arg = state->args[i];
         if (arg_cache->from_py_marshaller != NULL) {
+            gboolean success;
             if (!arg_cache->allow_none && py_arg == Py_None) {
                 PyErr_Format (PyExc_TypeError,
                               "Argument %zd does not allow None as a value",
@@ -511,7 +512,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                                                                    i - 1);
                  return FALSE;
             }
-            gboolean success = arg_cache->from_py_marshaller (state,
+            success = arg_cache->from_py_marshaller (state,
                                                               cache,
                                                               arg_cache,
                                                               py_arg,

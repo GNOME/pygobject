@@ -277,22 +277,28 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
     g_args = _pygi_closure_convert_ffi_arguments (callable_info, args);
 
     for (i = 0; i < n_args; i++) {
+        GIArgInfo arg_info;
+        GIDirection direction;
+
         /* Special case callbacks and skip over userdata and Destroy Notify */
         if (i == user_data_arg || i == destroy_notify_arg)
             continue;
 
-        GIArgInfo arg_info;
         g_callable_info_load_arg (callable_info, i, &arg_info);
-        GIDirection direction = g_arg_info_get_direction (&arg_info);
+        direction = g_arg_info_get_direction (&arg_info);
 
         if (direction == GI_DIRECTION_IN || direction == GI_DIRECTION_INOUT) {
             GITypeInfo arg_type;
-            g_arg_info_load_type (&arg_info, &arg_type);
-            GITypeTag arg_tag = g_type_info_get_tag (&arg_type);
-            GITransfer transfer = g_arg_info_get_ownership_transfer (&arg_info);
+            GITypeTag arg_tag;
+            GITransfer transfer;
             PyObject *value;
             GIArgument *arg;
-            gboolean free_array = FALSE;
+            gboolean free_array;
+
+            g_arg_info_load_type (&arg_info, &arg_type);
+            arg_tag = g_type_info_get_tag (&arg_type);
+            transfer = g_arg_info_get_ownership_transfer (&arg_info);
+            free_array = FALSE;
 
             if (direction == GI_DIRECTION_IN && arg_tag == GI_TYPE_TAG_VOID &&
                     g_type_info_is_pointer (&arg_type)) {
@@ -413,10 +419,11 @@ _pygi_closure_set_out_arguments (GICallableInfo *callable_info,
     n_args = g_callable_info_get_n_args (callable_info);
     for (i = 0; i < n_args; i++) {
         GIArgInfo arg_info;
-        g_callable_info_load_arg (callable_info, i, &arg_info);
         GITypeInfo type_info;
+        GIDirection direction;
+        g_callable_info_load_arg (callable_info, i, &arg_info);
         g_arg_info_load_type (&arg_info, &type_info);
-        GIDirection direction = g_arg_info_get_direction (&arg_info);
+        direction = g_arg_info_get_direction (&arg_info);
 
         if (direction == GI_DIRECTION_OUT || direction == GI_DIRECTION_INOUT) {
             GITransfer transfer = g_arg_info_get_ownership_transfer (&arg_info);

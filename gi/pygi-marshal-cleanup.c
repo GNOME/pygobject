@@ -108,6 +108,7 @@ void
 pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
                                                  PyGICallableCache *cache)
 {
+    GSList *cache_item;
     /* clean up the return if available */
     if (cache->return_cache != NULL) {
         PyGIMarshalCleanupFunc cleanup_func = cache->return_cache->to_py_cleanup;
@@ -119,7 +120,7 @@ pygi_marshal_cleanup_args_to_py_marshal_success (PyGIInvokeState   *state,
     }
 
     /* Now clean up args */
-    GSList *cache_item = cache->to_py_args;
+    cache_item = cache->to_py_args;
     while (cache_item) {
         PyGIArgCache *arg_cache = (PyGIArgCache *) cache_item->data;
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->to_py_cleanup;
