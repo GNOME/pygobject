@@ -30,7 +30,7 @@ static PyTypeObject *_PyGTypeWrapper_Type;
 
 #define PyGTypeWrapper_Type (*_PyGTypeWrapper_Type)
 
-__attribute__ ( (unused))
+G_GNUC_UNUSED
 static int
 _pygobject_import (void)
 {
