@@ -111,9 +111,12 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
 
+    /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
+     * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
+     */
     namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    full_name = g_strconcat (namespace, type_name, NULL);
+    full_name = g_strconcat ("Py", namespace, type_name, NULL);
 
     /* If enum registration fails, free all the memory allocated
      * for the values array. This needs to leak when successful
@@ -227,9 +230,12 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
         g_base_info_unref ((GIBaseInfo *) value_info);
     }
 
+    /* Obfuscate the full_name by prefixing it with "Py" to avoid conflicts
+     * with real GTypes. See: https://bugzilla.gnome.org/show_bug.cgi?id=692515
+     */
     namespace = g_base_info_get_namespace ((GIBaseInfo *) info);
     type_name = g_base_info_get_name ((GIBaseInfo *) info);
-    full_name = g_strconcat (namespace, type_name, NULL);
+    full_name = g_strconcat ("Py", namespace, type_name, NULL);
 
     /* If enum registration fails, free all the memory allocated
      * for the values array. This needs to leak when successful

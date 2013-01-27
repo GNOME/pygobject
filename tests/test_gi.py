@@ -1475,7 +1475,7 @@ class TestEnum(unittest.TestCase):
 
     def test_enum_gtype_name_is_namespaced(self):
         self.assertEqual(GIMarshallingTests.Enum.__gtype__.name,
-                         'GIMarshallingTestsEnum')
+                         'PyGIMarshallingTestsEnum')
 
     def test_enum_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
@@ -1627,7 +1627,7 @@ class TestNoTypeFlags(unittest.TestCase):
 
     def test_flags_gtype_name_is_namespaced(self):
         self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
-                         'GIMarshallingTestsNoTypeFlags')
+                         'PyGIMarshallingTestsNoTypeFlags')
 
     def test_flags_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
