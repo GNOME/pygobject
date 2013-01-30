@@ -460,18 +460,23 @@ class Object(GObjectModule.Object):
     # they work as gi methods.
     bind_property_full = _unsupported_method
     compat_control = _unsupported_method
-    force_floating = _unsupported_method
     interface_find_property = _unsupported_method
     interface_install_property = _unsupported_method
     interface_list_properties = _unsupported_method
-    is_floating = _unsupported_method
     notify_by_pspec = _unsupported_method
-    ref = _unsupported_method
-    ref_count = _unsupported_method
-    ref_sink = _unsupported_method
     run_dispose = _unsupported_method
-    unref = _unsupported_method
     watch_closure = _unsupported_method
+
+    # Make all reference management methods private but still accessible.
+    _ref = GObjectModule.Object.ref
+    _ref_sink = GObjectModule.Object.ref_sink
+    _unref = GObjectModule.Object.unref
+    _force_floating = GObjectModule.Object.force_floating
+
+    ref = _unsupported_method
+    ref_sink = _unsupported_method
+    unref = _unsupported_method
+    force_floating = _unsupported_method
 
     # The following methods are static APIs which need to leap frog the
     # gi methods until we verify the gi methods can replace them.
