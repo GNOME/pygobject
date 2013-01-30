@@ -476,10 +476,13 @@ _pygi_g_type_info_check_object (GITypeInfo *type_info,
                               PyString_AS_STRING (upper_str));
 #else
                 {
-                    PyObject *lower_pybytes_obj = PyUnicode_AsUTF8String (lower_str);
+                    PyObject *lower_pybytes_obj;
                     PyObject *upper_pybytes_obj;
-                    if (!lower_pybytes_obj)
+
+                    lower_pybytes_obj = PyUnicode_AsUTF8String (lower_str);
+                    if (!lower_pybytes_obj) {
                         goto utf8_fail;
+                    }
 
                     upper_pybytes_obj = PyUnicode_AsUTF8String (upper_str);
                     if (!upper_pybytes_obj) {
