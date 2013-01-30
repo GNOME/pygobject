@@ -218,7 +218,6 @@ class TestEverything(unittest.TestCase):
                          GObject.G_MAXDOUBLE)
         self.assertEqual(Everything.test_double(GObject.G_MINDOUBLE),
                          GObject.G_MINDOUBLE)
-        self.assertRaises(ValueError, Everything.test_double, GObject.G_MAXDOUBLE * 2)
 
         (two, three) = Everything.test_multi_double_args(2.5)
         self.assertAlmostEqual(two, 5.0)
