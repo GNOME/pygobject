@@ -235,7 +235,11 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    arg->v_pointer = py_arg;
+    if (PYGLIB_CPointer_Check(py_arg)) {
+        arg->v_pointer = PYGLIB_CPointer_GetPointer (py_arg, NULL);
+    } else {
+        arg->v_pointer = py_arg;
+    }
 
     return TRUE;
 }

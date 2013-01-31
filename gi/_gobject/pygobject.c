@@ -2272,10 +2272,16 @@ static PyObject *
 pygobject_get_refcount(PyGObject *self, void *closure)
 {
     if (self->obj == NULL) {
-	PyErr_Format(PyExc_TypeError, "GObject instance is not yet created");
-	return NULL;
+        PyErr_Format(PyExc_TypeError, "GObject instance is not yet created");
+        return NULL;
     }
     return PYGLIB_PyLong_FromLong(self->obj->ref_count);
+}
+
+static PyObject *
+pygobject_get_pointer(PyGObject *self, void *closure)
+{
+    return PYGLIB_CPointer_WrapPointer (self->obj, NULL);
 }
 
 static int
@@ -2296,6 +2302,7 @@ pygobject_setattro(PyObject *self, PyObject *name, PyObject *value)
 static PyGetSetDef pygobject_getsets[] = {
     { "__dict__", (getter)pygobject_get_dict, (setter)0 },
     { "__grefcount__", (getter)pygobject_get_refcount, (setter)0, },
+    { "__gpointer__", (getter)pygobject_get_pointer, (setter)0, },
     { NULL, 0, 0 }
 };
 
