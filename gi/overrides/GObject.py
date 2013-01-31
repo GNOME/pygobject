@@ -22,12 +22,14 @@
 # USA
 
 import sys
+import warnings
 from collections import namedtuple
 
 import gi.overrides
 import gi.module
 from gi.overrides import override
 from gi.repository import GLib
+from gi import PyGIDeprecationWarning
 
 from gi._gobject import _gobject
 from gi._gobject import propertyhelper
@@ -424,7 +426,7 @@ class _HandlerBlockManager(object):
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
-        _gobject.GObject.handler_unblock(self.obj, self.handler_id)
+        self.obj.handler_unblock(self.handler_id)
 
 
 class _FreezeNotifyManager(object):
@@ -489,15 +491,10 @@ class Object(GObjectModule.Object):
     connect_after = _gobject.GObject.connect_after
     connect_object = _gobject.GObject.connect_object
     connect_object_after = _gobject.GObject.connect_object_after
-    disconnect = _gobject.GObject.disconnect
     disconnect_by_func = _gobject.GObject.disconnect_by_func
-    handler_disconnect = _gobject.GObject.handler_disconnect
-    handler_is_connected = _gobject.GObject.handler_is_connected
     handler_block_by_func = _gobject.GObject.handler_block_by_func
     handler_unblock_by_func = _gobject.GObject.handler_unblock_by_func
     emit = _gobject.GObject.emit
-    emit_stop_by_name = _gobject.GObject.emit_stop_by_name
-    stop_emission = _gobject.GObject.stop_emission
     chain = _gobject.GObject.chain
     weak_ref = _gobject.GObject.weak_ref
     __copy__ = _gobject.GObject.__copy__
@@ -512,14 +509,11 @@ class Object(GObjectModule.Object):
         >>> with obj.handler_block(id):
         >>>    pass
         """
-
-        # Note Object.handler_block is a static method specific to pygobject and not
-        # found in introspection. We need to continue using the static method
-        # until we figure out a technique to call the global signal_handler_block.
-        # But this requires a gpointer to the Object which we currently don't have
-        # access to in python.
-        _gobject.GObject.handler_block(self, handler_id)
+        GObjectModule.signal_handler_block(self.__gpointer__, handler_id)
         return _HandlerBlockManager(self, handler_id)
+
+    def handler_unblock(self, handler_id):
+        GObjectModule.signal_handler_unblock(self.__gpointer__, handler_id)
 
     def freeze_notify(self):
         """Freezes the object's property-changed notification queue.
@@ -535,6 +529,30 @@ class Object(GObjectModule.Object):
         """
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)
+
+    def handler_disconnect(self, handler_id):
+        GObjectModule.signal_handler_disconnect(self.__gpointer__, handler_id)
+
+    def handler_is_connected(self, handler_id):
+        return bool(GObjectModule.signal_handler_is_connected(self.__gpointer__, handler_id))
+
+    def stop_emission_by_name(self, detailed_signal):
+        GObjectModule.signal_stop_emission_by_name(self.__gpointer__, detailed_signal)
+
+    #
+    # Aliases
+    #
+    disconnect = handler_disconnect
+
+    #
+    # Deprecated Methods
+    #
+    def stop_emission(self, detailed_signal):
+        """Deprecated, please use stop_emission_by_name."""
+        warnings.warn(self.stop_emission.__doc__, PyGIDeprecationWarning, stacklevel=2)
+        return self.stop_emission_by_name(detailed_signal)
+
+    emit_stop_by_name = stop_emission
 
 
 Object = override(Object)

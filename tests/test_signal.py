@@ -261,25 +261,28 @@ class TestClosures(unittest.TestCase):
     def setUp(self):
         self.count = 0
         self.emission_stopped = False
-        self.emission_error = None
+        self.emission_error = False
 
     def _callback(self, e):
         self.count += 1
 
     def _callback_stop_emission(self, obj, prop, stop_it):
         if stop_it:
-            obj.stop_emission('notify::prop')
+            obj.stop_emission_by_name('notify::prop')
             self.emission_stopped = True
         else:
             self.count += 1
 
     def _callback_invalid_stop_emission_name(self, obj, prop):
-        # Note we log the error and test it later because it occurs within
-        # a closure which don't bubble through the binding layer.
+        # We expect a GLib warning but there currently is no way to test that
+        # This can at least make sure we don't crash
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL |
+                                             GLib.LogLevelFlags.LEVEL_ERROR)
         try:
-            obj.stop_emission('notasignal::baddetail')
-        except TypeError as exc:
-            self.emission_error = exc
+            obj.stop_emission_by_name('notasignal::baddetail')
+        finally:
+            GLib.log_set_always_fatal(old_mask)
+            self.emission_error = True
 
     def test_disconnect_by_func(self):
         e = E()
@@ -315,7 +318,7 @@ class TestClosures(unittest.TestCase):
 
         e.connect('notify::prop', self._callback_invalid_stop_emission_name)
         e.set_property('prop', 1234)
-        self.assertTrue(isinstance(self.emission_error, TypeError))
+        self.assertTrue(self.emission_error)
 
     def test_handler_block(self):
         e = E()

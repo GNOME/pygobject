@@ -1833,62 +1833,6 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
-pygobject_disconnect(PyGObject *self, PyObject *args)
-{
-    gulong handler_id;
-
-    if (!PyArg_ParseTuple(args, "k:GObject.disconnect", &handler_id))
-	return NULL;
-    
-    CHECK_GOBJECT(self);
-    
-    g_signal_handler_disconnect(self->obj, handler_id);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-pygobject_handler_is_connected(PyGObject *self, PyObject *args)
-{
-    gulong handler_id;
-
-    if (!PyArg_ParseTuple(args, "k:GObject.handler_is_connected", &handler_id))
-	return NULL;
-
-    
-    CHECK_GOBJECT(self);
-    
-    return PyBool_FromLong(g_signal_handler_is_connected(self->obj, handler_id));
-}
-
-static PyObject *
-pygobject_handler_block(PyGObject *self, PyObject *args)
-{
-    gulong handler_id;
-
-    if (!PyArg_ParseTuple(args, "k:GObject.handler_block", &handler_id))
-	return NULL;
-
-    CHECK_GOBJECT(self);
-
-    g_signal_handler_block(self->obj, handler_id);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-pygobject_handler_unblock(PyGObject *self, PyObject *args)
-{
-    gulong handler_id;
-
-    if (!PyArg_ParseTuple(args, "k:GObject.handler_unblock", &handler_id))
-	return NULL;
-    g_signal_handler_unblock(self->obj, handler_id);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
 pygobject_emit(PyGObject *self, PyObject *args)
 {
     guint signal_id, i, j;
@@ -1977,33 +1921,6 @@ pygobject_emit(PyGObject *self, PyObject *args)
     }
 
     return py_ret;
-}
-
-static PyObject *
-pygobject_stop_emission(PyGObject *self, PyObject *args)
-{
-    gchar *signal;
-    guint signal_id;
-    GQuark detail;
-    PyObject *repr = NULL;
-
-    if (!PyArg_ParseTuple(args, "s:GObject.stop_emission", &signal))
-	return NULL;
-    
-    CHECK_GOBJECT(self);
-    
-    if (!g_signal_parse_name(signal, G_OBJECT_TYPE(self->obj),
-			     &signal_id, &detail, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
-		     signal);
-	Py_DECREF(repr);
-	return NULL;
-    }
-    g_signal_stop_emission(self->obj, signal_id, detail);
-    Py_INCREF(Py_None);
-    return Py_None;
 }
 
 static PyObject *
@@ -2238,17 +2155,10 @@ static PyMethodDef pygobject_methods[] = {
     { "connect_after", (PyCFunction)pygobject_connect_after, METH_VARARGS },
     { "connect_object", (PyCFunction)pygobject_connect_object, METH_VARARGS },
     { "connect_object_after", (PyCFunction)pygobject_connect_object_after, METH_VARARGS },
-    { "disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
     { "disconnect_by_func", (PyCFunction)pygobject_disconnect_by_func, METH_VARARGS },
-    { "handler_disconnect", (PyCFunction)pygobject_disconnect, METH_VARARGS },
-    { "handler_is_connected", (PyCFunction)pygobject_handler_is_connected, METH_VARARGS },
-    { "handler_block", (PyCFunction)pygobject_handler_block, METH_VARARGS },
-    { "handler_unblock", (PyCFunction)pygobject_handler_unblock,METH_VARARGS },
     { "handler_block_by_func", (PyCFunction)pygobject_handler_block_by_func, METH_VARARGS },
     { "handler_unblock_by_func", (PyCFunction)pygobject_handler_unblock_by_func, METH_VARARGS },
     { "emit", (PyCFunction)pygobject_emit, METH_VARARGS },
-    { "stop_emission", (PyCFunction)pygobject_stop_emission, METH_VARARGS },
-    { "emit_stop_by_name", (PyCFunction)pygobject_stop_emission,METH_VARARGS },
     { "chain", (PyCFunction)pygobject_chain_from_overridden,METH_VARARGS },
     { "weak_ref", (PyCFunction)pygobject_weak_ref, METH_VARARGS },
     { "__copy__", (PyCFunction)pygobject_copy, METH_NOARGS },
