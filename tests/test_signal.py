@@ -165,6 +165,9 @@ class E(GObject.GObject):
     __gsignals__ = {'signal': (GObject.SignalFlags.RUN_FIRST, None,
                                ())}
 
+    # Property used to test detailed signal
+    prop = GObject.Property(type=int, default=0)
+
     def __init__(self):
         GObject.GObject.__init__(self)
         self.status = 0
@@ -257,16 +260,62 @@ class TestEmissionHook(unittest.TestCase):
 class TestClosures(unittest.TestCase):
     def setUp(self):
         self.count = 0
+        self.emission_stopped = False
+        self.emission_error = None
 
     def _callback(self, e):
         self.count += 1
 
-    def test_disconnect(self):
+    def _callback_stop_emission(self, obj, prop, stop_it):
+        if stop_it:
+            obj.stop_emission('notify::prop')
+            self.emission_stopped = True
+        else:
+            self.count += 1
+
+    def _callback_invalid_stop_emission_name(self, obj, prop):
+        # Note we log the error and test it later because it occurs within
+        # a closure which don't bubble through the binding layer.
+        try:
+            obj.stop_emission('notasignal::baddetail')
+        except TypeError as exc:
+            self.emission_error = exc
+
+    def test_disconnect_by_func(self):
         e = E()
         e.connect('signal', self._callback)
         e.disconnect_by_func(self._callback)
         e.emit('signal')
         self.assertEqual(self.count, 0)
+
+    def test_disconnect(self):
+        e = E()
+        handler_id = e.connect('signal', self._callback)
+        self.assertTrue(e.handler_is_connected(handler_id))
+        e.disconnect(handler_id)
+        e.emit('signal')
+        self.assertEqual(self.count, 0)
+        self.assertFalse(e.handler_is_connected(handler_id))
+
+    def test_stop_emission_by_name(self):
+        e = E()
+
+        # Sandwich a callback that stops emission in between a callback that increments
+        e.connect('notify::prop', self._callback_stop_emission, False)
+        e.connect('notify::prop', self._callback_stop_emission, True)
+        e.connect('notify::prop', self._callback_stop_emission, False)
+
+        e.set_property('prop', 1234)
+        self.assertEqual(e.get_property('prop'), 1234)
+        self.assertEqual(self.count, 1)
+        self.assertTrue(self.emission_stopped)
+
+    def test_stop_emission_by_name_error(self):
+        e = E()
+
+        e.connect('notify::prop', self._callback_invalid_stop_emission_name)
+        e.set_property('prop', 1234)
+        self.assertTrue(isinstance(self.emission_error, TypeError))
 
     def test_handler_block(self):
         e = E()
