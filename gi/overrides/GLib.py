@@ -292,6 +292,11 @@ class Variant(GLib.Variant):
         if self.get_type_string().startswith('v'):
             return self.get_variant().unpack()
 
+        # maybe
+        if self.get_type_string().startswith('m'):
+            m = self.get_maybe()
+            return m.unpack() if m else None
+
         raise NotImplementedError('unsupported GVariant type ' + self.get_type_string())
 
     @classmethod

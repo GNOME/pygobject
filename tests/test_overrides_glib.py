@@ -272,6 +272,14 @@ class TestGVariant(unittest.TestCase):
         res = GLib.Variant('a{si}', {'key1': 1, 'key2': 2}).unpack()
         self.assertEqual(res, {'key1': 1, 'key2': 2})
 
+        # maybe
+        v = GLib.Variant.new_maybe(GLib.VariantType.new('i'), GLib.Variant('i', 1))
+        res = v.unpack()
+        self.assertEqual(res, 1)
+        v = GLib.Variant.new_maybe(GLib.VariantType.new('i'), None)
+        res = v.unpack()
+        self.assertEqual(res, None)
+
     def test_iteration(self):
         # array index access
         vb = GLib.VariantBuilder.new(gi._gi.variant_type_from_string('ai'))
