@@ -92,7 +92,7 @@ struct _PyGObject_Functions {
     void (* register_wrapper)(PyObject *self);
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
-    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, GType type);
+    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, gpointer g_class);
 
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
