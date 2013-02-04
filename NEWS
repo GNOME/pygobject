@@ -1,3 +1,27 @@
+3.7.5   04-Feb-2013
+	- Move various signal methods from static bindings to GI
+	  (Simon Feltman) (#692918)
+	- GLib overrides: Support unpacking 'maybe' variants (Paolo Borelli)
+	  (#693032)
+	- Fix ref count leak when creating pygobject wrappers for input args
+	  (Mike Gorse) (#675726)
+	- Prefix names of typeless enums and flags for GType registration
+	  (Simon Feltman) (#692515)
+	- Fix compilation with non-C99 compilers such as Visual C++
+	  (Chun-wei Fan) (#692856)
+        - gi/overrides/Glib.py: Fix running on Windows/non-Unix (Chun-wei Fan)
+	- Do not immediately initialize Gdk and Gtk on import (Martin Pitt)
+	  (#692300)
+        - Accept ±inf and NaN as float and double values (Martin Pitt) (#692381)
+        - Fix repr() of GLib.Variant (Martin Pitt)
+        - Fix gtk-demo for Python 3 (Martin Pitt)
+        - Define GObject.TYPE_VALUE gtype constant (Martin Pitt)
+	- gobject: Go through introspection on property setting (Olivier Crête)
+	  (#684062)
+	- Clean up caller-allocated GValues and their memory (Mike Gorse)
+	  (#691820)
+        - Use GNOME_COMPILE_WARNINGS from gnome-common (Martin Pitt)
+
 3.7.4   14-Jan-2013
         - Allow setting values through GtkTreeModelFilter (Simonas Kazlauskas)
           (#689624)
