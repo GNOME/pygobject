@@ -2050,7 +2050,6 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pygobject_register_wrapper,
   pygobject_lookup_class,
   pygobject_new,
-  pygobject_new_full,
 
   pyg_closure_new,
   pygobject_watch_closure,
@@ -2118,7 +2117,9 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_gerror_exception_check,
 
   pyglib_option_group_new,
-  pyg_type_from_object_strict
+  pyg_type_from_object_strict,
+
+  pygobject_new_full
 };
 
 /* for addon libraries ... */

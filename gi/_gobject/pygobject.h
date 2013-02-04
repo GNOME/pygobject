@@ -92,7 +92,6 @@ struct _PyGObject_Functions {
     void (* register_wrapper)(PyObject *self);
     PyTypeObject *(* lookup_class)(GType type);
     PyObject *(* newgobj)(GObject *obj);
-    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, gpointer g_class);
 
     GClosure *(* closure_new)(PyObject *callback, PyObject *extra_args,
 			      PyObject *swap_data);
@@ -189,6 +188,7 @@ struct _PyGObject_Functions {
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
     GType (* type_from_object_strict) (PyObject *obj, gboolean strict);    
+    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, gpointer g_class);
 };
 
 #ifndef _INSIDE_PYGOBJECT_
