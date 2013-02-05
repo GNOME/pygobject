@@ -1,3 +1,6 @@
+3.7.5.1 05-Feb-2013
+        - Fix ABI break with pygobject.h from 3.7.5 (Simon Feltman) (#675726)
+
 3.7.5   04-Feb-2013
 	- Move various signal methods from static bindings to GI
 	  (Simon Feltman) (#692918)
