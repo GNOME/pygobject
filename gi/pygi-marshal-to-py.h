@@ -139,6 +139,11 @@ PyObject *_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
                                                 PyGIArgCache      *arg_cache,
                                                 GIArgument        *arg);
 
+/* Simplified marshalers shared between vfunc/closure and direct function calls. */
+
+PyObject *pygi_marshal_to_py_object (GIArgument *arg,
+                                     GITransfer transfer);
+
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_TO_PY_H__ */

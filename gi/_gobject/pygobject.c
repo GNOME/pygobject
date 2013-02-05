@@ -951,7 +951,7 @@ pygobject_lookup_class(GType gtype)
 /**
  * pygobject_new_full:
  * @obj: a GObject instance.
- * @sink: whether to sink any floating reference found on the GObject.
+ * @steal: whether to steal a ref from the GObject or add (sink) a new one.
  * @g_class: the GObjectClass
  *
  * This function gets a reference to a wrapper for the given GObject
@@ -962,19 +962,30 @@ pygobject_lookup_class(GType gtype)
  * Returns: a reference to the wrapper for the GObject.
  */
 PyObject *
-pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
+pygobject_new_full(GObject *obj, gboolean steal, gpointer g_class)
 {
     PyGObject *self;
 
     if (obj == NULL) {
-	Py_INCREF(Py_None);
-	return Py_None;
+        Py_RETURN_NONE;
     }
 
-    /* we already have a wrapper for this object -- return it. */
+    /* If the GObject already has a PyObject wrapper stashed in its qdata, re-use it.
+     */
     self = (PyGObject *)g_object_get_qdata(obj, pygobject_wrapper_key);
     if (self != NULL) {
-	pygobject_ref_sink(self);
+        /* Note the use of "pygobject_ref_sink" here only deals with PyObject
+         * wrapper ref counts and has nothing to do with GObject.
+         */
+        pygobject_ref_sink(self);
+
+        /* If steal is true, we also want to decref the incoming GObjects which
+         * already have a Python wrapper because the wrapper is already holding a
+         * strong reference.
+         */
+        if (steal)
+            g_object_unref (obj);
+
     } else {
 	/* create wrapper */
         PyGObjectData *inst_data = pyg_object_peek_inst_data(obj);
@@ -1000,13 +1011,15 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 	self->weakreflist = NULL;
 	self->private_flags.flags = 0;
 	self->obj = obj;
-        /* if we are creating a wrapper around a newly created object, it can have
-           a floating ref (e.g. for methods like Gtk.Button.new()). Bug 640868 */
-        if (sink)
-	    g_object_ref_sink(obj);
-        else
-	    g_object_ref(obj);
-	pygobject_register_wrapper((PyObject *)self);
+
+        /* If we are not stealing a ref or the object is floating,
+         * add a regular ref or sink the object. */
+        if (g_object_is_floating (obj))
+            self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
+        if (!steal || self->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING)
+            g_object_ref_sink (obj);
+
+        pygobject_register_wrapper((PyObject *)self);
 	PyObject_GC_Track((PyObject *)self);
     }
 
@@ -1017,7 +1030,9 @@ pygobject_new_full(GObject *obj, gboolean sink, gpointer g_class)
 PyObject *
 pygobject_new(GObject *obj)
 {
-    return pygobject_new_full(obj, TRUE, NULL);
+    return pygobject_new_full(obj,
+                              /*steal=*/FALSE,
+                              NULL);
 }
 
 static void
@@ -2343,7 +2358,7 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
         return NULL;
 
     if (self->obj)
-        return pygobject_new_full(self->obj, FALSE, NULL);
+        return pygobject_new(self->obj);
     else {
         Py_INCREF(Py_None);
         return Py_None;

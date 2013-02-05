@@ -24,7 +24,8 @@ struct _PyGClosure {
 
 typedef enum {
     PYGOBJECT_USING_TOGGLE_REF = 1 << 0,
-    PYGOBJECT_IS_FLOATING_REF = 1 << 1
+    PYGOBJECT_IS_FLOATING_REF = 1 << 1,
+    PYGOBJECT_GOBJECT_WAS_FLOATING = 1 << 2,
 } PyGObjectFlags;
 
   /* closures is just an alias for what is found in the
@@ -187,8 +188,9 @@ struct _PyGObject_Functions {
 				      gpointer data);
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
-    GType (* type_from_object_strict) (PyObject *obj, gboolean strict);    
-    PyObject *(* newgobj_full)(GObject *obj, gboolean sink, gpointer g_class);
+    GType (* type_from_object_strict) (PyObject *obj, gboolean strict);
+
+    PyObject *(* newgobj_full)(GObject *obj, gboolean steal, gpointer g_class);
 };
 
 #ifndef _INSIDE_PYGOBJECT_

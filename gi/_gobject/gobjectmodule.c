@@ -996,7 +996,11 @@ pygobject_constructv(PyGObject  *self,
         pygobject_init_wrapper_set((PyObject *) self);
         obj = g_object_newv(pyg_type_from_object((PyObject *) self),
                             n_parameters, parameters);
+
+        if (g_object_is_floating (obj))
+            self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
         pygobject_sink (obj);
+
         pygobject_init_wrapper_set(NULL);
         if (self->obj == NULL) {
             self->obj = obj;
@@ -1034,7 +1038,9 @@ pygobject__g_instance_init(GTypeInstance   *instance,
            * now */
         PyGILState_STATE state;
         state = pyglib_gil_state_ensure();
-        wrapper = pygobject_new_full(object, TRUE, g_class);
+        wrapper = pygobject_new_full(object,
+                                     /*steal=*/ FALSE,
+                                     g_class);
 
         /* float the wrapper ref here because we are going to orphan it
          * so we don't destroy the wrapper. The next call to pygobject_new_full
@@ -1477,7 +1483,7 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
 
     if (obj) {
         pygobject_sink (obj);
-	self = (PyGObject *) pygobject_new_full((GObject *)obj, TRUE, NULL);
+	self = (PyGObject *) pygobject_new((GObject *)obj);
         g_object_unref(obj);
     } else
         self = NULL;

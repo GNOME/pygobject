@@ -31,6 +31,10 @@
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
+#include "pygi-marshal-from-py.h"
+#include "pygi-marshal-to-py.h"
+
+
 static gboolean
 gi_argument_to_gssize (GIArgument *arg_in,
                        GITypeTag  type_tag,
@@ -1329,17 +1333,10 @@ array_success:
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    if (object == Py_None) {
-                        arg.v_pointer = NULL;
-                        break;
-                    }
-
-                    arg.v_pointer = pygobject_get (object);
-                    if (transfer == GI_TRANSFER_EVERYTHING) {
-                        g_object_ref (arg.v_pointer);
-                    }
-
+                    /* An error within this call will result in a NULL arg */
+                    pygi_marshal_from_py_object (object, &arg, transfer);
                     break;
+
                 default:
                     g_assert_not_reached();
             }
@@ -1856,23 +1853,26 @@ _pygi_argument_to_object (GIArgument  *arg,
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    if (arg->v_pointer == NULL) {
-                        object = Py_None;
-                        Py_INCREF (object);
-                        break;
-                    }
-
-                    if (G_IS_PARAM_SPEC (arg->v_pointer)) {
-                      object = pyg_param_spec_new (arg->v_pointer);
-                      break;
-                    }
-
-                    /* Only sink incoming objects if the transfer everything.
-                     * See: https://bugzilla.gnome.org/show_bug.cgi?id=675726
+                    /* HACK:
+                     * The following hack is to work around GTK+ sending signals which
+                     * contain floating widgets in them. This assumes control of how
+                     * references are added by the PyGObject wrapper and avoids the sink
+                     * behavior by explicitly passing GI_TRANSFER_EVERYTHING as the transfer
+                     * mode and then re-forcing the object as floating afterwards.
+                     *
+                     * This can be deleted once the following ticket is fixed:
+                     * https://bugzilla.gnome.org/show_bug.cgi?id=693400
                      */
-                    object = pygobject_new_full (arg->v_pointer,
-                                                 /*sink=*/ transfer == GI_TRANSFER_EVERYTHING,
-                                                 /*type=*/ NULL);
+                    if (arg->v_pointer &&
+                            !G_IS_PARAM_SPEC (arg->v_pointer) &&
+                            transfer == GI_TRANSFER_NOTHING &&
+                            g_object_is_floating (arg->v_pointer)) {
+                        g_object_ref (arg->v_pointer);
+                        object = pygi_marshal_to_py_object (arg, GI_TRANSFER_EVERYTHING);
+                        g_object_force_floating (arg->v_pointer);
+                    } else {
+                        object = pygi_marshal_to_py_object (arg, transfer);
+                    }
 
                     break;
                 default:

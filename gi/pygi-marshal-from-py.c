@@ -1760,11 +1760,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    arg->v_pointer = pygobject_get(py_arg);
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_ref (arg->v_pointer);
-
-    return TRUE;
+    return pygi_marshal_from_py_object (py_arg, arg, arg_cache->transfer);
 }
 
 gboolean
@@ -1854,4 +1850,59 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
    }
 
    return TRUE;
+}
+
+gboolean
+pygi_marshal_from_py_object (PyObject *pyobj,  /*in*/
+                             GIArgument *arg,  /*out*/
+                             GITransfer transfer) {
+    GObject *gobj;
+
+    if (pyobj == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
+    gobj = pygobject_get (pyobj);
+    if (transfer == GI_TRANSFER_EVERYTHING) {
+        /* An easy case of adding a new ref that the caller will take ownership of.
+         * Pythons existing ref to the GObject will be managed normally with the wrapper.
+         */
+        g_object_ref (gobj);
+
+    } else if (pyobj->ob_refcnt == 1 && gobj->ref_count == 1) {
+        /* If both object ref counts are only 1 at this point (the reference held
+         * in a return tuple), we assume the GObject will be free'd before reaching
+         * its target and become invalid. So instead of getting invalid object errors
+         * we add a new GObject ref.
+         */
+        g_object_ref (gobj);
+
+        if (((PyGObject *)pyobj)->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING) {
+            /* HACK:
+             * We want to re-float instances that were floating and the Python
+             * wrapper assumed ownership. With the additional caveat that there
+             * are not any strong references beyond the return tuple.
+             * This should be removed once the following ticket is fixed:
+             * https://bugzilla.gnome.org/show_bug.cgi?id=693393
+             */
+            g_object_force_floating (gobj);
+
+        } else {
+            PyObject *repr = PyObject_Repr (pyobj);
+            gchar *msg = g_strdup_printf ("Expecting to marshal a borrowed reference for %s, "
+                                          "but nothing in Python is holding a reference to this object. "
+                                          "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
+                                          PYGLIB_PyUnicode_AsString(repr));
+            Py_DECREF (repr);
+            if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
+                g_free (msg);
+                return FALSE;
+            }
+            g_free (msg);
+        }
+    }
+
+    arg->v_pointer = gobj;
+    return TRUE;
 }
