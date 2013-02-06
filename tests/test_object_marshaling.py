@@ -23,7 +23,7 @@ class StrongRef(object):
 
 
 class VFuncsBase(GIMarshallingTests.Object):
-    # Class which generically implements the vfuncs used for refernce counting tests
+    # Class which generically implements the vfuncs used for reference counting tests
     # in a way that can be easily sub-classed and modified.
 
     #: Object type used by this class for testing
@@ -50,7 +50,7 @@ class VFuncsBase(GIMarshallingTests.Object):
         self.object_ref = self.ObjectRef(obj)
         return obj
 
-    def do_vfunc_return_object_tansfer_full(self):
+    def do_vfunc_return_object_transfer_full(self):
         # Return an object and hand off the reference to the caller.
         obj = self.Object()
         self.object_ref = self.ObjectRef(obj)
@@ -63,21 +63,21 @@ class VFuncsBase(GIMarshallingTests.Object):
         self.object_ref = self.ObjectRef(obj)
         return obj
 
-    def do_vfunc_out_object_tansfer_full(self):
-        # Same as do_vfunc_return_object_tansfer_full but the pygi
+    def do_vfunc_out_object_transfer_full(self):
+        # Same as do_vfunc_return_object_transfer_full but the pygi
         # internals convert the return here into an out arg.
         obj = self.Object()
         self.object_ref = self.ObjectRef(obj)
         return obj
 
-    def do_vfunc_in_object_tansfer_none(self, obj):
+    def do_vfunc_in_object_transfer_none(self, obj):
         # 'obj' will have a python wrapper as well as still held
         # by the caller.
         self.object_ref = self.ObjectRef(obj)
         self.in_object_grefcount = obj.__grefcount__
         self.in_object_is_floating = obj.is_floating()
 
-    def do_vfunc_in_object_tansfer_full(self, obj):
+    def do_vfunc_in_object_transfer_full(self, obj):
         # 'obj' will now be owned by the Python GObject wrapper.
         # When obj goes out of scope and is collected, the GObject
         # should also be fully released.
