@@ -53,24 +53,19 @@ _pygi_boxed_alloc (GIBaseInfo *info, gsize *size_out)
 {
     gsize size;
 
-    /* FIXME: Remove when bgo#622711 is fixed */
-    if (g_registered_type_info_get_g_type (info) == G_TYPE_VALUE) {
-        size = sizeof (GValue);
-    } else {
-        switch (g_base_info_get_type (info)) {
-            case GI_INFO_TYPE_UNION:
-                size = g_union_info_get_size ( (GIUnionInfo *) info);
-                break;
-            case GI_INFO_TYPE_BOXED:
-            case GI_INFO_TYPE_STRUCT:
-                size = g_struct_info_get_size ( (GIStructInfo *) info);
-                break;
-            default:
-                PyErr_Format (PyExc_TypeError,
-                              "info should be Boxed or Union, not '%d'",
-                              g_base_info_get_type (info));
-                return NULL;
-        }
+    switch (g_base_info_get_type (info)) {
+        case GI_INFO_TYPE_UNION:
+            size = g_union_info_get_size ( (GIUnionInfo *) info);
+            break;
+        case GI_INFO_TYPE_BOXED:
+        case GI_INFO_TYPE_STRUCT:
+            size = g_struct_info_get_size ( (GIStructInfo *) info);
+            break;
+        default:
+            PyErr_Format (PyExc_TypeError,
+                          "info should be Boxed or Union, not '%d'",
+                          g_base_info_get_type (info));
+            return NULL;
     }
 
     if( size_out != NULL)
