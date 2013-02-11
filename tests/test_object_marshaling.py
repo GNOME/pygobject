@@ -87,6 +87,9 @@ class VFuncsBase(GIMarshallingTests.Object):
         self.in_object_is_floating = obj.is_floating()
 
 
+@unittest.skipUnless(hasattr(VFuncsBase, 'get_ref_info_for_vfunc_return_object_transfer_none') and
+                     hasattr(VFuncsBase, 'get_ref_info_for_vfunc_out_object_transfer_none'),
+                     'too old gobject-introspection')
 class TestVFuncsWithObjectArg(unittest.TestCase):
     # Basic set of tests which work on non-floating objects which python does
     # not keep an additional reference of.
@@ -197,6 +200,9 @@ class TestVFuncsWithObjectArg(unittest.TestCase):
         self.assertTrue(vfuncs.object_ref() is None)
 
 
+@unittest.skipUnless(hasattr(VFuncsBase, 'get_ref_info_for_vfunc_return_object_transfer_none') and
+                     hasattr(VFuncsBase, 'get_ref_info_for_vfunc_out_object_transfer_none'),
+                     'too old gobject-introspection')
 class TestVFuncsWithFloatingArg(unittest.TestCase):
     # All tests here work with a floating object by using InitiallyUnowned as the argument
 
@@ -284,6 +290,9 @@ class TestVFuncsWithFloatingArg(unittest.TestCase):
         self.assertTrue(vfuncs.object_ref() is None)
 
 
+@unittest.skipUnless(hasattr(VFuncsBase, 'get_ref_info_for_vfunc_return_object_transfer_none') and
+                     hasattr(VFuncsBase, 'get_ref_info_for_vfunc_out_object_transfer_none'),
+                     'too old gobject-introspection')
 class TestVFuncsWithHeldObjectArg(unittest.TestCase):
     # Same tests as TestVFuncsWithObjectArg except we hold
     # onto the python object reference in all cases.
@@ -413,6 +422,9 @@ class TestVFuncsWithHeldObjectArg(unittest.TestCase):
         self.assertTrue(held_object_ref() is None)
 
 
+@unittest.skipUnless(hasattr(VFuncsBase, 'get_ref_info_for_vfunc_return_object_transfer_none') and
+                     hasattr(VFuncsBase, 'get_ref_info_for_vfunc_out_object_transfer_none'),
+                     'too old gobject-introspection')
 class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
     # Tests for a floating object which we hold a reference to the python wrapper
     # on the VFuncs test class.
@@ -552,6 +564,8 @@ class TestPropertyHoldingObject(unittest.TestCase):
         gc.collect()
         self.assertEqual(held.__grefcount__, initial_ref_count)
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject.props, 'some_object'),
+                         'too old gobject-introspection')
     def test_get_property_holding_object_ref_count(self):
         holder = GIMarshallingTests.PropertiesObject()
         held = GObject.Object()
