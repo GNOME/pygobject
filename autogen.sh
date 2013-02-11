@@ -1,17 +1,17 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
+set -e
+srcdir=`dirname $0`
+test -z "$srcdir" && srcdir=.
 
-test -n "$srcdir" || srcdir=`dirname "$0"`
-test -n "$srcdir" || srcdir=.
+PKG_NAME="pygobject"
 
-olddir=`pwd`
-cd "$srcdir"
-
-AUTORECONF=`which autoreconf`
-if test -z $AUTORECONF; then
-        echo "*** No autoreconf found, please install it ***"
-        exit 1
-fi
+(test -f $srcdir/configure.ac \
+  && test -f $srcdir/$PKG_NAME.doap) || {
+    echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
+    echo " top-level $PKG_NAME directory"
+    exit 1
+}
 
 if type lcov >/dev/null 2>&1; then
     EXTRA_ARGS="--enable-code-coverage"
@@ -19,7 +19,11 @@ else
     echo "lcov not installed, not enabling code coverage"
 fi
 
-autoreconf --force --install --verbose || exit $?
 
-cd "$olddir"
-test -n "$NOCONFIGURE" || "$srcdir/configure" $EXTRA_ARGS "$@"
+which gnome-autogen.sh || {
+    echo "You need to install gnome-common."
+    exit 1
+}
+
+gnome-autogen.sh "$EXTRA_ARGS" "$@"
+
