@@ -2,6 +2,7 @@
 # coding: UTF-8
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import contextlib
 import unittest
 
 from compathelper import _unicode, _bytes
@@ -15,6 +16,38 @@ try:
     Gtk  # pyflakes
 except ImportError:
     Gtk = None
+
+
+@contextlib.contextmanager
+def realized(widget):
+    """Makes sure the widget is realized.
+
+    view = Gtk.TreeView()
+    with realized(view):
+        do_something(view)
+    """
+
+    if isinstance(widget, Gtk.Window):
+        toplevel = widget
+    else:
+        toplevel = widget.get_parent_window()
+
+    if toplevel is None:
+        window = Gtk.Window()
+        window.add(widget)
+
+    widget.realize()
+    while Gtk.events_pending():
+        Gtk.main_iteration()
+    assert widget.get_realized()
+    yield widget
+
+    if toplevel is None:
+        window.remove(widget)
+        window.destroy()
+
+    while Gtk.events_pending():
+        Gtk.main_iteration()
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -1363,19 +1396,13 @@ class TestTreeView(unittest.TestCase):
         store.append((0, "foo"))
         store.append((1, "bar"))
         view = Gtk.TreeView()
-        # FIXME: We can't easily call get_cursor() to make sure this works as
-        # expected as we need to realize and focus the column; the following
-        # will raise a Gtk-CRITICAL which we ignore for now
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_WARNING | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+
+        with realized(view):
             view.set_cursor(store[1].path)
             view.set_cursor(str(store[1].path))
 
             view.get_cell_area(store[1].path)
             view.get_cell_area(str(store[1].path))
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
@@ -1403,28 +1430,21 @@ class TestTreeView(unittest.TestCase):
         # unconnected
         tree.insert_column_with_attributes(-1, 'Head4', cell4)
 
-        # might cause a Pango warning, do not break on this
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
-            # We must realize the TreeView for cell.props.text to receive a value
-            dialog = Gtk.Dialog()
-            dialog.get_action_area().add(tree)
-            dialog.show_all()
-            dialog.hide()
-        finally:
-            GLib.log_set_always_fatal(old_mask)
+        with realized(tree):
+            tree.set_cursor(model[0].path)
+            while Gtk.events_pending():
+                Gtk.main_iteration()
 
-        self.assertEqual(tree.get_column(0).get_title(), 'Head1')
-        self.assertEqual(tree.get_column(1).get_title(), 'Head2')
-        self.assertEqual(tree.get_column(2).get_title(), 'Head3')
-        self.assertEqual(tree.get_column(3).get_title(), 'Head4')
+            self.assertEqual(tree.get_column(0).get_title(), 'Head1')
+            self.assertEqual(tree.get_column(1).get_title(), 'Head2')
+            self.assertEqual(tree.get_column(2).get_title(), 'Head3')
+            self.assertEqual(tree.get_column(3).get_title(), 'Head4')
 
-        # cursor should be at the first row
-        self.assertEqual(cell1.props.text, 'cell11')
-        self.assertEqual(cell2.props.text, 'cell12')
-        self.assertEqual(cell3.props.text, 'cell13')
-        self.assertEqual(cell4.props.text, None)
+            # cursor should be at the first row
+            self.assertEqual(cell1.props.text, 'cell11')
+            self.assertEqual(cell2.props.text, 'cell12')
+            self.assertEqual(cell3.props.text, 'cell13')
+            self.assertEqual(cell4.props.text, None)
 
     def test_tree_view_column_set_attributes(self):
         store = Gtk.ListStore(int, str)
@@ -1442,19 +1462,8 @@ class TestTreeView(unittest.TestCase):
         column.pack_start(cell, expand=True)
         column.set_attributes(cell, text=1)
 
-        # might cause a Pango warning, do not break on this
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
-            # We must realize the TreeView for cell.props.text to receive a value
-            dialog = Gtk.Dialog()
-            dialog.get_action_area().add(treeview)
-            dialog.show_all()
-            dialog.hide()
-        finally:
-            GLib.log_set_always_fatal(old_mask)
-
-        self.assertTrue(cell.props.text in directors)
+        with realized(treeview):
+            self.assertTrue(cell.props.text in directors)
 
     def test_tree_selection(self):
         store = Gtk.ListStore(int, str)
