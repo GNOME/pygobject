@@ -893,7 +893,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                              GIArgument        *arg)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
-    int i;
+    int i = 0;
     Py_ssize_t length;
     gssize item_size;
     gboolean is_ptr_array;
