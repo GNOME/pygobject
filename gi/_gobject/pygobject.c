@@ -1453,14 +1453,17 @@ pygobject_set_properties(PyGObject *self, PyObject *args, PyObject *kwargs)
 	    goto exit;
 	}
 
-	ret = pygi_set_property_value (self, pspec, value);
-	if (ret == 0)
-	    goto exit;
-	else if (PyErr_Occurred())
-            goto exit;
+        ret = pygi_set_property_value (self, pspec, value);
+        if (ret != 0) {
+            /* Non-zero return code means that either an error occured ...*/
+            if (PyErr_Occurred())
+                goto exit;
 
-	if (!set_property_from_pspec(G_OBJECT(self->obj), pspec, value))
-	    goto exit;
+            /* ... or the property couldn't be found , so let's try the default
+             * call. */
+            if (!set_property_from_pspec(G_OBJECT(self->obj), pspec, value))
+                goto exit;
+        }
     }
 
     result = Py_None;

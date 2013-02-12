@@ -2785,6 +2785,12 @@ class TestPropertiesObject(unittest.TestCase):
         self.assertEqual(obj.props.some_variant.get_type_string(), 'b')
         self.assertEqual(obj.props.some_variant.get_boolean(), True)
 
+    def test_setting_several_properties(self):
+        obj = GIMarshallingTests.PropertiesObject()
+        obj.set_properties(some_uchar=54, some_int=42)
+        self.assertEqual(42, obj.props.some_int)
+        self.assertEqual(54, obj.props.some_uchar)
+
 
 class TestKeywords(unittest.TestCase):
     def test_method(self):
