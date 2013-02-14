@@ -228,7 +228,15 @@ AC_SUBST(INTROSPECTION_COMPILER)
 
 # compiler warnings, errors, required cflags, and code coverage support
 GNOME_COMPILE_WARNINGS([maximum])
-GNOME_CODE_COVERAGE
+AC_MSG_CHECKING(for Gnome code coverage support)
+m4_ifdef([GNOME_CODE_COVERAGE],
+         [AC_MSG_RESULT(yes)
+          GNOME_CODE_COVERAGE],
+         [AC_MSG_RESULT(no)
+          GNOME_CODE_COVERAGE_RULES=''
+          AC_SUBST([GNOME_CODE_COVERAGE_RULES])
+          enable_code_coverage="no"])
+
 if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Wall])
   JH_ADD_CFLAG([-Werror=unused-variable])
