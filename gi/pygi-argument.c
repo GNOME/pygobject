@@ -1252,19 +1252,7 @@ array_success:
                                                      FALSE /*is_allocated*/);
 
                     } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
-                        GClosure *closure;
-
-                        if (pyg_type_from_object_strict (object, FALSE) == G_TYPE_CLOSURE) {
-                            closure = (GClosure *)pyg_boxed_get (object, void);
-                        } else {
-                            closure = pyg_closure_new (object, NULL, NULL);
-                            if (closure == NULL) {
-                                PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
-                                break;
-                            }
-                        }
-
-                        arg.v_pointer = closure;
+                        pygi_marshal_from_py_gclosure (object, &arg);
                     } else if (g_struct_info_is_foreign (info)) {
                         pygi_struct_foreign_convert_to_g_argument (object, info, transfer, &arg);
                     } else if (g_type_is_a (type, G_TYPE_BOXED)) {

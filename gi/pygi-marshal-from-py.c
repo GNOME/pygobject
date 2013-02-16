@@ -1629,28 +1629,7 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
      */
 
     if (iface_cache->g_type == G_TYPE_CLOSURE) {
-        GClosure *closure;
-        GType object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
-
-        if ( !(PyCallable_Check(py_arg) || 
-               g_type_is_a (object_gtype, G_TYPE_CLOSURE))) {
-            PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
-                          py_arg->ob_type->tp_name);
-            return FALSE;
-        }
-
-        if (g_type_is_a (object_gtype, G_TYPE_CLOSURE))
-            closure = (GClosure *)pyg_boxed_get (py_arg, void);
-        else
-            closure = pyg_closure_new (py_arg, NULL, NULL);
-
-        if (closure == NULL) {
-            PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
-            return FALSE;
-        }
-
-        arg->v_pointer = closure;
-        return TRUE;
+        return pygi_marshal_from_py_gclosure (py_arg, arg);
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         return pygi_marshal_from_py_gvalue(py_arg, arg,
                                            arg_cache->transfer,
@@ -1934,5 +1913,37 @@ pygi_marshal_from_py_gvalue (PyObject *py_arg,
     }
 
     arg->v_pointer = value;
+    return TRUE;
+}
+
+/* pygi_marshal_from_py_gclosure:
+ * py_arg: (in):
+ * arg: (out):
+ */
+gboolean
+pygi_marshal_from_py_gclosure(PyObject *py_arg,
+                              GIArgument *arg)
+{
+    GClosure *closure;
+    GType object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
+
+    if ( !(PyCallable_Check(py_arg) ||
+           g_type_is_a (object_gtype, G_TYPE_CLOSURE))) {
+        PyErr_Format (PyExc_TypeError, "Must be callable, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+
+    if (g_type_is_a (object_gtype, G_TYPE_CLOSURE))
+        closure = (GClosure *)pyg_boxed_get (py_arg, void);
+    else
+        closure = pyg_closure_new (py_arg, NULL, NULL);
+
+    if (closure == NULL) {
+        PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GClosure failed");
+        return FALSE;
+    }
+
+    arg->v_pointer = closure;
     return TRUE;
 }
