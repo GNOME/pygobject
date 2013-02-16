@@ -100,14 +100,14 @@ def wraps_callable_info(info):
     def update_func(func):
         func.__info__ = info
         func.__name__ = info.get_name()
-        func.__module__ = info.get_namespace()
+        func.__module__ = 'gi.repository.' + info.get_namespace()
         func.__doc__ = get_callable_info_doc_string(info)
         return func
     return update_func
 
 
 def Function(info):
-    """Warps GIFunctionInfo"""
+    """Wraps GIFunctionInfo"""
     @wraps_callable_info(info)
     def function(*args, **kwargs):
         return info.invoke(*args, **kwargs)
@@ -128,7 +128,7 @@ class NativeVFunc(object):
 
 
 def Constructor(info):
-    """Warps GIFunctionInfo with get_constructor() == True"""
+    """Wraps GIFunctionInfo with get_constructor() == True"""
     @wraps_callable_info(info)
     def constructor(cls, *args, **kwargs):
         cls_name = info.get_container().get_name()
