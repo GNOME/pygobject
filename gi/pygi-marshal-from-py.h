@@ -186,9 +186,9 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
 
-gboolean pygi_marshal_from_py_object (PyObject *pyobj,  /*in*/
-                                      GIArgument *arg,  /*out*/
-                                      GITransfer transfer);
+gboolean pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+                                       GIArgument *arg,  /*out*/
+                                       GITransfer transfer);
 
 G_END_DECLS
 

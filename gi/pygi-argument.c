@@ -1334,7 +1334,7 @@ array_success:
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     /* An error within this call will result in a NULL arg */
-                    pygi_marshal_from_py_object (object, &arg, transfer);
+                    pygi_marshal_from_py_gobject (object, &arg, transfer);
                     break;
 
                 default:

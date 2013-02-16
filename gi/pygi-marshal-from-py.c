@@ -1760,7 +1760,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    return pygi_marshal_from_py_object (py_arg, arg, arg_cache->transfer);
+    return pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
 }
 
 gboolean
@@ -1852,25 +1852,29 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
    return TRUE;
 }
 
+/* pygi_marshal_from_py_gobject:
+ * py_arg: (in):
+ * arg: (out):
+ */
 gboolean
-pygi_marshal_from_py_object (PyObject *pyobj,  /*in*/
-                             GIArgument *arg,  /*out*/
-                             GITransfer transfer) {
+pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+                              GIArgument *arg,  /*out*/
+                              GITransfer transfer) {
     GObject *gobj;
 
-    if (pyobj == Py_None) {
+    if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
     }
 
-    gobj = pygobject_get (pyobj);
+    gobj = pygobject_get (py_arg);
     if (transfer == GI_TRANSFER_EVERYTHING) {
         /* An easy case of adding a new ref that the caller will take ownership of.
          * Pythons existing ref to the GObject will be managed normally with the wrapper.
          */
         g_object_ref (gobj);
 
-    } else if (pyobj->ob_refcnt == 1 && gobj->ref_count == 1) {
+    } else if (py_arg->ob_refcnt == 1 && gobj->ref_count == 1) {
         /* If both object ref counts are only 1 at this point (the reference held
          * in a return tuple), we assume the GObject will be free'd before reaching
          * its target and become invalid. So instead of getting invalid object errors
@@ -1878,7 +1882,7 @@ pygi_marshal_from_py_object (PyObject *pyobj,  /*in*/
          */
         g_object_ref (gobj);
 
-        if (((PyGObject *)pyobj)->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING) {
+        if (((PyGObject *)py_arg)->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING) {
             /* HACK:
              * We want to re-float instances that were floating and the Python
              * wrapper assumed ownership. With the additional caveat that there
@@ -1889,7 +1893,7 @@ pygi_marshal_from_py_object (PyObject *pyobj,  /*in*/
             g_object_force_floating (gobj);
 
         } else {
-            PyObject *repr = PyObject_Repr (pyobj);
+            PyObject *repr = PyObject_Repr (py_arg);
             gchar *msg = g_strdup_printf ("Expecting to marshal a borrowed reference for %s, "
                                           "but nothing in Python is holding a reference to this object. "
                                           "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
