@@ -156,73 +156,6 @@ class TestGtk(unittest.TestCase):
         mi = ui.get_widget("/menubær1")
         self.assertEqual(type(mi), Gtk.MenuBar)
 
-    def test_builder(self):
-        self.assertEqual(Gtk.Builder, gi.overrides.Gtk.Builder)
-
-        class SignalTest(GObject.GObject):
-            __gtype_name__ = "GIOverrideSignalTest"
-            __gsignals__ = {
-                "test-signal": (GObject.SignalFlags.RUN_FIRST,
-                                None,
-                                []),
-            }
-
-        class SignalCheck:
-            def __init__(self):
-                self.sentinel = 0
-                self.after_sentinel = 0
-
-            def on_signal_1(self, *args):
-                self.sentinel += 1
-                self.after_sentinel += 1
-
-            def on_signal_3(self, *args):
-                self.sentinel += 3
-
-            def on_signal_after(self, *args):
-                if self.after_sentinel == 1:
-                    self.after_sentinel += 1
-
-        signal_checker = SignalCheck()
-        builder = Gtk.Builder()
-
-        # add object1 to the builder
-        builder.add_from_string("""
-<interface>
-  <object class="GIOverrideSignalTest" id="object1">
-      <signal name="test-signal" after="yes" handler="on_signal_after" />
-      <signal name="test-signal" handler="on_signal_1" />
-  </object>
-</interface>
-""")
-
-        # only add object3 to the builder
-        builder.add_objects_from_string("""
-<interface>
-  <object class="GIOverrideSignalTest" id="object2">
-      <signal name="test-signal" handler="on_signal_2" />
-  </object>
-  <object class="GIOverrideSignalTest" id="object3">
-      <signal name="test-signal" handler="on_signal_3" />
-  </object>
-  <object class="GIOverrideSignalTest" id="object4">
-      <signal name="test-signal" handler="on_signal_4" />
-  </object>
-</interface>
-""", ['object3'])
-
-        # hook up signals
-        builder.connect_signals(signal_checker)
-
-        # call their notify signals and check sentinel
-        objects = builder.get_objects()
-        self.assertEqual(len(objects), 2)
-        for obj in objects:
-            obj.emit('test-signal')
-
-        self.assertEqual(signal_checker.sentinel, 4)
-        self.assertEqual(signal_checker.after_sentinel, 2)
-
     def test_window(self):
         # standard Window
         w = Gtk.Window()
@@ -654,6 +587,135 @@ class TestGtk(unittest.TestCase):
         # overridden function ignores its arguments
         GLib.timeout_add(100, Gtk.main_quit, 'hello')
         Gtk.main()
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestBuilder(unittest.TestCase):
+    class SignalTest(GObject.GObject):
+        __gtype_name__ = "GIOverrideSignalTest"
+        __gsignals__ = {
+            "test-signal": (GObject.SignalFlags.RUN_FIRST,
+                            None,
+                            []),
+        }
+
+    def test_extract_handler_and_args_object(self):
+        class Obj():
+            pass
+
+        obj = Obj()
+        obj.foo = lambda: None
+
+        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        self.assertEqual(handler, obj.foo)
+        self.assertEqual(len(args), 0)
+
+    def test_extract_handler_and_args_dict(self):
+        obj = {'foo': lambda: None}
+
+        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        self.assertEqual(handler, obj['foo'])
+        self.assertEqual(len(args), 0)
+
+    def test_extract_handler_and_args_with_seq(self):
+        obj = {'foo': (lambda: None, 1, 2)}
+
+        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        self.assertEqual(handler, obj['foo'][0])
+        self.assertSequenceEqual(args, [1, 2])
+
+    def test_extract_handler_and_args_no_handler_error(self):
+        obj = dict(foo=lambda: None)
+        self.assertRaises(AttributeError,
+                          Gtk.Builder._extract_handler_and_args,
+                          obj, 'not_a_handler')
+
+    def test_builder_with_handler_and_args(self):
+        builder = Gtk.Builder()
+        builder.add_from_string("""
+            <interface>
+              <object class="GIOverrideSignalTest" id="object_sig_test">
+                  <signal name="test-signal" handler="on_signal1" />
+                  <signal name="test-signal" handler="on_signal2" after="yes" />
+              </object>
+            </interface>
+            """)
+
+        args_collector = []
+
+        def on_signal(*args):
+            args_collector.append(args)
+
+        builder.connect_signals({'on_signal1': (on_signal, 1, 2),
+                                 'on_signal2': on_signal})
+
+        objects = builder.get_objects()
+        self.assertEqual(len(objects), 1)
+        obj, = objects
+        obj.emit('test-signal')
+
+        self.assertEqual(len(args_collector), 2)
+        self.assertSequenceEqual(args_collector[0], (obj, 1, 2))
+        self.assertSequenceEqual(args_collector[1], (obj, ))
+
+    def test_builder(self):
+        self.assertEqual(Gtk.Builder, gi.overrides.Gtk.Builder)
+
+        class SignalCheck:
+            def __init__(self):
+                self.sentinel = 0
+                self.after_sentinel = 0
+
+            def on_signal_1(self, *args):
+                self.sentinel += 1
+                self.after_sentinel += 1
+
+            def on_signal_3(self, *args):
+                self.sentinel += 3
+
+            def on_signal_after(self, *args):
+                if self.after_sentinel == 1:
+                    self.after_sentinel += 1
+
+        signal_checker = SignalCheck()
+        builder = Gtk.Builder()
+
+        # add object1 to the builder
+        builder.add_from_string("""
+<interface>
+  <object class="GIOverrideSignalTest" id="object1">
+      <signal name="test-signal" after="yes" handler="on_signal_after" />
+      <signal name="test-signal" handler="on_signal_1" />
+  </object>
+</interface>
+""")
+
+        # only add object3 to the builder
+        builder.add_objects_from_string("""
+<interface>
+  <object class="GIOverrideSignalTest" id="object2">
+      <signal name="test-signal" handler="on_signal_2" />
+  </object>
+  <object class="GIOverrideSignalTest" id="object3">
+      <signal name="test-signal" handler="on_signal_3" />
+  </object>
+  <object class="GIOverrideSignalTest" id="object4">
+      <signal name="test-signal" handler="on_signal_4" />
+  </object>
+</interface>
+""", ['object3'])
+
+        # hook up signals
+        builder.connect_signals(signal_checker)
+
+        # call their notify signals and check sentinel
+        objects = builder.get_objects()
+        self.assertEqual(len(objects), 2)
+        for obj in objects:
+            obj.emit('test-signal')
+
+        self.assertEqual(signal_checker.sentinel, 4)
+        self.assertEqual(signal_checker.after_sentinel, 2)
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')

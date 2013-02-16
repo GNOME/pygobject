@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import collections
 import sys
 from gi.repository import GObject
 from ..overrides import override, strip_boolean_result
@@ -357,32 +358,52 @@ __all__.append('MenuItem')
 
 
 class Builder(Gtk.Builder):
+    @staticmethod
+    def _extract_handler_and_args(obj_or_map, handler_name):
+        handler = None
+        if isinstance(obj_or_map, collections.Mapping):
+            handler = obj_or_map.get(handler_name, None)
+        else:
+            handler = getattr(obj_or_map, handler_name, None)
+
+        if handler is None:
+            raise AttributeError('Handler %s not found' % handler_name)
+
+        args = ()
+        if isinstance(handler, collections.Sequence):
+            if len(handler) == 0:
+                raise TypeError("Handler %s tuple can not be empty" % handler)
+            args = handler[1:]
+            handler = handler[0]
+
+        elif not _callable(handler):
+            raise TypeError('Handler %s is not a method, function or tuple' % handler)
+
+        return handler, args
 
     def connect_signals(self, obj_or_map):
+        """Connect signals specified by this builder to a name, handler mapping.
+
+        Connect signal, name, and handler sets specified in the builder with
+        the given mapping "obj_or_map". The handler/value aspect of the mapping
+        can also contain a tuple in the form of (handler [,arg1 [,argN]])
+        allowing for extra arguments to be passed to the handler. For example:
+            builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
+        """
         def _full_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
-            handler = None
-            if isinstance(obj_or_map, dict):
-                handler = obj_or_map.get(handler_name, None)
-            else:
-                handler = getattr(obj_or_map, handler_name, None)
-
-            if handler is None:
-                raise AttributeError('Handler %s not found' % handler_name)
-
-            if not _callable(handler):
-                raise TypeError('Handler %s is not a method or function' % handler_name)
+            handler, args = self._extract_handler_and_args(obj_or_map, handler_name)
 
             after = flags & GObject.ConnectFlags.AFTER
             if connect_obj is not None:
                 if after:
-                    gobj.connect_object_after(signal_name, handler, connect_obj)
+                    gobj.connect_object_after(signal_name, handler, connect_obj, *args)
                 else:
-                    gobj.connect_object(signal_name, handler, connect_obj)
+                    gobj.connect_object(signal_name, handler, connect_obj, *args)
             else:
                 if after:
-                    gobj.connect_after(signal_name, handler)
+                    gobj.connect_after(signal_name, handler, *args)
                 else:
-                    gobj.connect(signal_name, handler)
+                    gobj.connect(signal_name, handler, *args)
 
         self.connect_signals_full(_full_callback, obj_or_map)
 
