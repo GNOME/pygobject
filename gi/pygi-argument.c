@@ -1239,41 +1239,18 @@ array_success:
 
                     /* Handle special cases first. */
                     if (g_type_is_a (type, G_TYPE_VALUE)) {
-                        GValue *value;
-                        GType object_type;
-                        gint retval;
-
-                        object_type = pyg_type_from_object_strict ( (PyObject *) object->ob_type, FALSE);
-                        if (object_type == G_TYPE_INVALID) {
-                            PyErr_SetString (PyExc_RuntimeError, "unable to retrieve object's GType");
-                            break;
-                        }
-
                         g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+                        /* This will currently leak the GValue that is allocated and
+                         * stashed in arg.v_pointer. Out argument marshaling for caller
+                         * allocated GValues already pass in memory for the GValue.
+                         * Further re-factoring is needed to fix this leak.
+                         * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
+                         */
+                        pygi_marshal_from_py_gvalue (object,
+                                                     &arg,
+                                                     transfer,
+                                                     FALSE /*is_allocated*/);
 
-                        value = g_slice_new0 (GValue);
-
-                        /* if already a gvalue, copy, else marshal into gvalue */
-                        if (object_type == G_TYPE_VALUE) {
-                            /* src GValue's lifecycle is handled by Python
-                             * so we have to copy it into the destination's
-                             * GValue which is freed during the cleanup of
-                             * invoke.
-                             */
-                            GValue *src = (GValue *)((PyGObject *) object)->obj;
-                            g_value_init (value, G_VALUE_TYPE (src));
-                            g_value_copy(src, value);
-                        } else {
-                            g_value_init (value, object_type);
-                            retval = pyg_value_from_pyobject (value, object);
-                            if (retval < 0) {
-                                g_slice_free (GValue, value);
-                                PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
-                                break;
-                            }
-                        }
-
-                        arg.v_pointer = value;
                     } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                         GClosure *closure;
 

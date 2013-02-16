@@ -190,6 +190,11 @@ gboolean pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/
                                        GITransfer transfer);
 
+gboolean pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
+                                      GIArgument *arg,  /*out*/
+                                      GITransfer transfer,
+                                      gboolean is_allocated);
+
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_from_py_PY__ */
