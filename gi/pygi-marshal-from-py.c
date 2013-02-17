@@ -768,11 +768,19 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
     Py_ssize_t size;
     gchar *string_;
 
+    if (py_arg == Py_None) {
+        arg->v_uint32 = 0;
+        return FALSE;
+    }
+
     if (PyUnicode_Check (py_arg)) {
        PyObject *py_bytes;
 
        size = PyUnicode_GET_SIZE (py_arg);
        py_bytes = PyUnicode_AsUTF8String (py_arg);
+       if (!py_bytes)
+           return FALSE;
+
        string_ = g_strdup(PYGLIB_PyBytes_AsString (py_bytes));
        Py_DECREF (py_bytes);
 
@@ -804,6 +812,7 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
 
     return TRUE;
 }
+
 gboolean
 _pygi_marshal_from_py_gtype (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,

@@ -1035,38 +1035,8 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_UNICHAR:
         {
-            gchar *string;
-
-            if (object == Py_None) {
-                arg.v_uint32 = 0;
-                break;
-            }
-
-#if PY_VERSION_HEX < 0x03000000
-            if (PyUnicode_Check(object)) {
-                 PyObject *pystr_obj = PyUnicode_AsUTF8String (object);
-
-                 if (!pystr_obj)
-                     break;
-
-                 string = g_strdup(PyString_AsString (pystr_obj));
-                 Py_DECREF(pystr_obj);
-            } else {
-                 string = g_strdup(PyString_AsString (object));
-            }
-#else
-            {
-                PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
-                if (!pybytes_obj)
-                    break;
-
-                string = g_strdup(PyBytes_AsString (pybytes_obj));
-                Py_DECREF (pybytes_obj);
-            }
-#endif
-
-            arg.v_uint32 = g_utf8_get_char (string);
-
+            _pygi_marshal_from_py_unichar (NULL, NULL, NULL,
+                                           object, &arg);
             break;
         }
         case GI_TYPE_TAG_UTF8:
