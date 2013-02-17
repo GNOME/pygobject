@@ -1047,34 +1047,8 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_FILENAME:
         {
-            GError *error = NULL;
-            gchar *string;
-
-#if PY_VERSION_HEX < 0x03000000
-            string = g_strdup(PyString_AsString (object));
-#else
-            {
-                PyObject *pybytes_obj = PyUnicode_AsUTF8String (object);
-                if (!pybytes_obj)
-                    break;
-
-                string = g_strdup(PyBytes_AsString (pybytes_obj));
-                Py_DECREF (pybytes_obj);
-            }
-#endif
-
-            if (string == NULL) {
-                break;
-            }
-
-            arg.v_string = g_filename_from_utf8 (string, -1, NULL, NULL, &error);
-            g_free(string);
-
-            if (arg.v_string == NULL) {
-                PyErr_SetString (PyExc_Exception, error->message);
-                /* TODO: Convert the error to an exception. */
-            }
-
+            _pygi_marshal_from_py_filename (NULL, NULL, NULL,
+                                            object, &arg);
             break;
         }
         case GI_TYPE_TAG_ARRAY:
