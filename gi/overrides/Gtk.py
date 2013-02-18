@@ -48,6 +48,22 @@ python module to use with Gtk 2.0"
     warnings.warn(warn_msg, RuntimeWarning)
 
 
+def _construct_target_list(targets):
+    """Create a list of TargetEntry items from a list of tuples in the form (target, flags, info)
+
+    The list can also contain existing TargetEntry items in which case the existing entry
+    is re-used in the return list.
+    """
+    target_entries = []
+    for entry in targets:
+        if not isinstance(entry, Gtk.TargetEntry):
+            entry = Gtk.TargetEntry.new(*entry)
+        target_entries.append(entry)
+    return target_entries
+
+__all__.append('_construct_target_list')
+
+
 class Widget(Gtk.Widget):
 
     def translate_coordinates(self, dest_widget, src_x, src_y):
@@ -58,6 +74,17 @@ class Widget(Gtk.Widget):
 
     def render_icon(self, stock_id, size, detail=None):
         return super(Widget, self).render_icon(stock_id, size, detail)
+
+    def drag_dest_set_target_list(self, target_list):
+        if not isinstance(target_list, Gtk.TargetList):
+            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+        super(Widget, self).drag_dest_set_target_list(target_list)
+
+    def drag_source_set_target_list(self, target_list):
+        if not isinstance(target_list, Gtk.TargetList):
+            target_list = Gtk.TargetList.new(_construct_target_list(target_list))
+        super(Widget, self).drag_source_set_target_list(target_list)
+
 
 Widget = override(Widget)
 __all__.append('Widget')
@@ -1306,23 +1333,14 @@ class TreeView(Gtk.TreeView, Container):
         if success:
             return (path, pos,)
 
-    def _construct_target_list(self, targets):
-        # FIXME: this should most likely be part of Widget or a global helper
-        #        function
-        target_entries = []
-        for t in targets:
-            entry = Gtk.TargetEntry.new(*t)
-            target_entries.append(entry)
-        return target_entries
-
     def enable_model_drag_source(self, start_button_mask, targets, actions):
-        target_entries = self._construct_target_list(targets)
+        target_entries = _construct_target_list(targets)
         super(TreeView, self).enable_model_drag_source(start_button_mask,
                                                        target_entries,
                                                        actions)
 
     def enable_model_drag_dest(self, targets, actions):
-        target_entries = self._construct_target_list(targets)
+        target_entries = _construct_target_list(targets)
         super(TreeView, self).enable_model_drag_dest(target_entries,
                                                      actions)
 

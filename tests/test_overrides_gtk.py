@@ -552,6 +552,38 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(hasattr(widget.drag_dest_set_proxy, '__call__'))
         self.assertTrue(hasattr(widget.drag_get_data, '__call__'))
 
+    def test_drag_target_list(self):
+        mixed_target_list = [Gtk.TargetEntry.new('test0', 0, 0),
+                             ('test1', 1, 1),
+                             Gtk.TargetEntry.new('test2', 2, 2),
+                             ('test3', 3, 3)]
+
+        def _test_target_list(targets):
+            for i, target in enumerate(targets):
+                self.assertTrue(isinstance(target, Gtk.TargetEntry))
+                self.assertEqual(target.target, 'test' + str(i))
+                self.assertEqual(target.flags, i)
+                self.assertEqual(target.info, i)
+
+        _test_target_list(Gtk._construct_target_list(mixed_target_list))
+
+        widget = Gtk.Button()
+        widget.drag_dest_set(Gtk.DestDefaults.DROP, None, Gdk.DragAction.COPY)
+        widget.drag_dest_set_target_list(mixed_target_list)
+        widget.drag_dest_get_target_list()
+
+        widget.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, None, Gdk.DragAction.MOVE)
+        widget.drag_source_set_target_list(mixed_target_list)
+        widget.drag_source_get_target_list()
+
+        treeview = Gtk.TreeView()
+        treeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
+                                          mixed_target_list,
+                                          Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+
+        treeview.enable_model_drag_dest(mixed_target_list,
+                                        Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+
     def test_scrollbar(self):
         # PyGTK compat
         adjustment = Gtk.Adjustment()
