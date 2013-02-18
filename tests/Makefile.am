@@ -92,6 +92,7 @@ EXTRA_DIST = \
 	test_internal_api.py \
 	test_iochannel.py \
 	test_mainloop.py \
+	test_object_marshaling.py \
 	test_option.py \
 	test_properties.py \
 	test_signal.py \
