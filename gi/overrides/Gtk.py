@@ -1160,7 +1160,7 @@ class TreePath(Gtk.TreePath):
     def __new__(cls, path=0):
         if isinstance(path, int):
             path = str(path)
-        elif isinstance(path, tuple):
+        elif not isinstance(path, _basestring):
             path = ":".join(str(val) for val in path)
 
         if len(path) == 0:
