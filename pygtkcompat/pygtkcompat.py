@@ -371,6 +371,8 @@ def enable_gtk(version='2.0'):
 
     # Widget
 
+    Gtk.Widget.window = property(fget=Gtk.Widget.get_window)
+
     Gtk.widget_get_default_direction = Gtk.Widget.get_default_direction
     orig_size_request = Gtk.Widget.size_request
 
@@ -404,6 +406,16 @@ def enable_gtk(version='2.0'):
         def __get__(self, instance, class_):
             return Styles(instance)
     Gtk.Widget.style = StyleDescriptor()
+
+    # TextView
+
+    orig_text_view_scroll_to_mark = Gtk.TextView.scroll_to_mark
+
+    def text_view_scroll_to_mark(self, mark, within_margin,
+                                 use_align=False, xalign=0.5, yalign=0.5):
+        return orig_text_view_scroll_to_mark(self, mark, within_margin,
+                                             use_align, xalign, yalign)
+    Gtk.TextView.scroll_to_mark = text_view_scroll_to_mark
 
     # Window
 
@@ -448,6 +460,8 @@ def enable_gtk(version='2.0'):
         return orig_set_geometry_hints(self, geometry_widget, geometry, geom_mask)
 
     Gtk.Window.set_geometry_hints = set_geometry_hints
+    Gtk.window_list_toplevels = Gtk.Window.list_toplevels
+    Gtk.window_set_default_icon_name = Gtk.Window.set_default_icon_name
 
     # gtk.unixprint
 
