@@ -120,7 +120,9 @@ class Foo(GObject.GObject):
         'my-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_INT,
                           (), my_accumulator, "accum data"),
         'my-other-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
-                                (), GObject.signal_accumulator_true_handled)
+                                (), GObject.signal_accumulator_true_handled),
+        'my-acc-first-wins': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
+                              (), GObject.signal_accumulator_first_wins)
         }
 
 
@@ -147,6 +149,16 @@ class TestAccumulator(unittest.TestCase):
         self.__true_val = None
         inst.emit("my-other-acc-signal")
         self.assertEqual(self.__true_val, 2)
+
+    def test_accumulator_first_wins(self):
+        # First signal hit will always win
+        inst = Foo()
+        inst.connect("my-acc-first-wins", self._true_handler3)
+        inst.connect("my-acc-first-wins", self._true_handler1)
+        inst.connect("my-acc-first-wins", self._true_handler2)
+        self.__true_val = None
+        inst.emit("my-acc-first-wins")
+        self.assertEqual(self.__true_val, 3)
 
     def _true_handler1(self, obj):
         self.__true_val = 1
@@ -257,11 +269,88 @@ class TestEmissionHook(unittest.TestCase):
         self.assertEqual(obj.status, 3)
 
 
+class TestMatching(unittest.TestCase):
+    class Object(GObject.Object):
+        status = 0
+        prop = GObject.Property(type=int, default=0)
+
+        @GObject.Signal()
+        def my_signal(self):
+            pass
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=692918
+    def test_signal_handler_block_matching(self):
+        def dummy(*args):
+            "Hack to work around: "
+
+        def foo(obj):
+            obj.status += 1
+
+        obj = self.Object()
+        handler_id = GObject.signal_connect_closure(obj, 'my-signal', foo, after=False)
+        handler_id
+
+        self.assertEqual(obj.status, 0)
+        obj.emit('my-signal')
+        self.assertEqual(obj.status, 1)
+
+        # Blocking by match criteria disables the foo callback
+        signal_id, detail = GObject.signal_parse_name('my-signal', obj, True)
+        count = GObject.signal_handlers_block_matched(obj,
+                                                      GObject.SignalMatchType.ID | GObject.SignalMatchType.CLOSURE,
+                                                      signal_id=signal_id, detail=detail,
+                                                      closure=foo, func=dummy, data=dummy)
+        self.assertEqual(count, 1)
+        obj.emit('my-signal')
+        self.assertEqual(obj.status, 1)
+
+        # Unblocking by the same match criteria allows callback to work again
+        count = GObject.signal_handlers_unblock_matched(obj,
+                                                        GObject.SignalMatchType.ID | GObject.SignalMatchType.CLOSURE,
+                                                        signal_id=signal_id, detail=detail,
+                                                        closure=foo, func=dummy, data=dummy)
+        self.assertEqual(count, 1)
+        obj.emit('my-signal')
+        self.assertEqual(obj.status, 2)
+
+        # Disconnecting by match criteria completely removes the handler
+        count = GObject.signal_handlers_disconnect_matched(obj,
+                                                           GObject.SignalMatchType.ID | GObject.SignalMatchType.CLOSURE,
+                                                           signal_id=signal_id, detail=detail,
+                                                           closure=foo, func=dummy, data=dummy)
+        self.assertEqual(count, 1)
+        obj.emit('my-signal')
+        self.assertEqual(obj.status, 2)
+
+    def test_signal_handler_find(self):
+        def dummy(*args):
+            "Hack to work around: "
+
+        def foo(obj):
+            obj.status += 1
+
+        obj = self.Object()
+        handler_id = GObject.signal_connect_closure(obj, 'my-signal', foo, after=False)
+
+        signal_id, detail = GObject.signal_parse_name('my-signal', obj, True)
+        found_id = GObject.signal_handler_find(obj,
+                                               GObject.SignalMatchType.ID,
+                                               signal_id=signal_id, detail=detail,
+                                               closure=None, func=dummy, data=dummy)
+        self.assertEqual(handler_id, found_id)
+
+
 class TestClosures(unittest.TestCase):
     def setUp(self):
         self.count = 0
         self.emission_stopped = False
         self.emission_error = False
+        self.handler_pending = False
+
+    def _callback_handler_pending(self, e):
+        signal_id, detail = GObject.signal_parse_name('signal', e, True)
+        self.handler_pending = GObject.signal_has_handler_pending(e, signal_id, detail,
+                                                                  may_be_blocked=False)
 
     def _callback(self, e):
         self.count += 1
@@ -329,8 +418,8 @@ class TestClosures(unittest.TestCase):
 
     def test_handler_unblock(self):
         e = E()
-        signal_id = e.connect('signal', self._callback)
-        e.handler_block(signal_id)
+        handler_id = e.connect('signal', self._callback)
+        e.handler_block(handler_id)
         e.handler_unblock_by_func(self._callback)
         e.emit('signal')
         self.assertEqual(self.count, 1)
@@ -368,6 +457,32 @@ class TestClosures(unittest.TestCase):
         c = C(self)
         data = c.emit("my_signal", "\01\00\02")
         self.assertEqual(data, "\02\00\01")
+
+    def test_handler_pending(self):
+        obj = F()
+        obj.connect('signal', self._callback_handler_pending)
+        obj.connect('signal', self._callback)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.handler_pending, False)
+
+        obj.emit('signal')
+        self.assertEqual(self.count, 1)
+        self.assertEqual(self.handler_pending, True)
+
+    def test_signal_handlers_destroy(self):
+        obj = F()
+        obj.connect('signal', self._callback)
+        obj.connect('signal', self._callback)
+        obj.connect('signal', self._callback)
+
+        obj.emit('signal')
+        self.assertEqual(self.count, 3)
+
+        # count should remain at 3 after all handlers are destroyed
+        GObject.signal_handlers_destroy(obj)
+        obj.emit('signal')
+        self.assertEqual(self.count, 3)
 
 
 class SigPropClass(GObject.GObject):

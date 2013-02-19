@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2012 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
-# Copyright (C) 2012 Simon Feltman <sfeltman@src.gnome.org>
+# Copyright (C) 2012-2013 Simon Feltman <sfeltman@src.gnome.org>
 # Copyright (C) 2012 Bastian Winkler <buz@netbuz.org>
 #
 # This library is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
 
 import sys
 import warnings
+import functools
 from collections import namedtuple
 
 import gi.overrides
@@ -193,20 +194,14 @@ __all__ += ['GBoxed', 'GEnum', 'GFlags', 'GInterface', 'GObject',
             'Warning']
 
 
-add_emission_hook = _gobject.add_emission_hook
 features = _gobject.features
 list_properties = _gobject.list_properties
 new = _gobject.new
 pygobject_version = _gobject.pygobject_version
-remove_emission_hook = _gobject.remove_emission_hook
-signal_accumulator_true_handled = _gobject.signal_accumulator_true_handled
-signal_new = _gobject.signal_new
 threads_init = _gobject.threads_init
 type_register = _gobject.type_register
-__all__ += ['add_emission_hook', 'features', 'list_properties',
-            'new', 'pygobject_version', 'remove_emission_hook',
-            'signal_accumulator_true_handled',
-            'signal_new', 'threads_init', 'type_register']
+__all__ += ['features', 'list_properties', 'new',
+            'pygobject_version', 'threads_init', 'type_register']
 
 
 class Value(GObjectModule.Value):
@@ -417,6 +412,20 @@ def signal_query(id_or_name, type_=None):
 __all__.append('signal_query')
 
 
+def _get_instance_for_signal(obj):
+    if isinstance(obj, GObjectModule.Object):
+        return obj.__gpointer__
+    else:
+        raise TypeError('Unsupported object "%s" for signal function' % obj)
+
+
+def _wrap_signal_func(func):
+    @functools.wraps(func)
+    def wrapper(obj, *args, **kwargs):
+        return func(_get_instance_for_signal(obj), *args, **kwargs)
+    return wrapper
+
+
 class _HandlerBlockManager(object):
     def __init__(self, obj, handler_id):
         self.obj = obj
@@ -426,7 +435,101 @@ class _HandlerBlockManager(object):
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.obj.handler_unblock(self.handler_id)
+        signal_handler_unblock(self.obj, self.handler_id)
+
+
+def signal_handler_block(obj, handler_id):
+    """Blocks the signal handler from being invoked until handler_unblock() is called.
+
+    Returns a context manager which optionally can be used to
+    automatically unblock the handler:
+
+    >>> with GObject.signal_handler_block(obj, id):
+    >>>    pass
+    """
+    GObjectModule.signal_handler_block(_get_instance_for_signal(obj), handler_id)
+    return _HandlerBlockManager(obj, handler_id)
+
+__all__.append('signal_handler_block')
+
+
+# The following functions wrap GI functions but coerce the first arg into
+# something compatible with gpointer
+
+signal_handler_unblock = _wrap_signal_func(GObjectModule.signal_handler_unblock)
+signal_handler_disconnect = _wrap_signal_func(GObjectModule.signal_handler_disconnect)
+signal_handler_is_connected = _wrap_signal_func(GObjectModule.signal_handler_is_connected)
+signal_stop_emission = _wrap_signal_func(GObjectModule.signal_stop_emission)
+signal_stop_emission_by_name = _wrap_signal_func(GObjectModule.signal_stop_emission_by_name)
+signal_has_handler_pending = _wrap_signal_func(GObjectModule.signal_has_handler_pending)
+signal_get_invocation_hint = _wrap_signal_func(GObjectModule.signal_get_invocation_hint)
+signal_connect_closure = _wrap_signal_func(GObjectModule.signal_connect_closure)
+signal_connect_closure_by_id = _wrap_signal_func(GObjectModule.signal_connect_closure_by_id)
+signal_handler_find = _wrap_signal_func(GObjectModule.signal_handler_find)
+signal_handlers_destroy = _wrap_signal_func(GObjectModule.signal_handlers_destroy)
+signal_handlers_block_matched = _wrap_signal_func(GObjectModule.signal_handlers_block_matched)
+signal_handlers_unblock_matched = _wrap_signal_func(GObjectModule.signal_handlers_unblock_matched)
+signal_handlers_disconnect_matched = _wrap_signal_func(GObjectModule.signal_handlers_disconnect_matched)
+
+__all__ += ['signal_handler_unblock',
+            'signal_handler_disconnect', 'signal_handler_is_connected',
+            'signal_stop_emission', 'signal_stop_emission_by_name',
+            'signal_has_handler_pending', 'signal_get_invocation_hint',
+            'signal_connect_closure', 'signal_connect_closure_by_id',
+            'signal_handler_find', 'signal_handlers_destroy',
+            'signal_handlers_block_matched', 'signal_handlers_unblock_matched',
+            'signal_handlers_disconnect_matched']
+
+
+def signal_parse_name(detailed_signal, itype, force_detail_quark):
+    """Parse a detailed signal name into (signal_id, detail).
+
+    :Raises ValueError:
+        If the given signal is unknown.
+
+    :Returns:
+        Tuple of (signal_id, detail)
+    """
+    res, signal_id, detail = GObjectModule.signal_parse_name(detailed_signal, itype,
+                                                             force_detail_quark)
+    if res:
+        return signal_id, detail
+    else:
+        raise ValueError('%s: unknown signal name: %s' % (itype, detailed_signal))
+
+__all__.append('signal_parse_name')
+
+
+def remove_emission_hook(obj, detailed_signal, hook_id):
+    signal_id, detail = signal_parse_name(detailed_signal, obj, True)
+    GObjectModule.signal_remove_emission_hook(signal_id, hook_id)
+
+__all__.append('remove_emission_hook')
+
+
+# GObject accumulators with pure Python implementations
+# These return a tuple of (continue_emission, accumulation_result)
+
+def signal_accumulator_first_wins(ihint, return_accu, handler_return, user_data=None):
+    # Stop emission but return the result of the last handler
+    return (False, handler_return)
+
+__all__.append('signal_accumulator_first_wins')
+
+
+def signal_accumulator_true_handled(ihint, return_accu, handler_return, user_data=None):
+    # Stop emission if the last handler returns True
+    return (not handler_return, handler_return)
+
+__all__.append('signal_accumulator_true_handled')
+
+
+# Statically bound signal functions which need to clobber GI (for now)
+
+add_emission_hook = _gobject.add_emission_hook
+signal_new = _gobject.signal_new
+
+__all__ += ['add_emission_hook', 'signal_new']
 
 
 class _FreezeNotifyManager(object):
@@ -500,21 +603,6 @@ class Object(GObjectModule.Object):
     __copy__ = _gobject.GObject.__copy__
     __deepcopy__ = _gobject.GObject.__deepcopy__
 
-    def handler_block(self, handler_id):
-        """Blocks the signal handler from being invoked until handler_unblock() is called.
-
-        Returns a context manager which optionally can be used to
-        automatically unblock the handler:
-
-        >>> with obj.handler_block(id):
-        >>>    pass
-        """
-        GObjectModule.signal_handler_block(self.__gpointer__, handler_id)
-        return _HandlerBlockManager(self, handler_id)
-
-    def handler_unblock(self, handler_id):
-        GObjectModule.signal_handler_unblock(self.__gpointer__, handler_id)
-
     def freeze_notify(self):
         """Freezes the object's property-changed notification queue.
 
@@ -530,27 +618,25 @@ class Object(GObjectModule.Object):
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)
 
-    def handler_disconnect(self, handler_id):
-        GObjectModule.signal_handler_disconnect(self.__gpointer__, handler_id)
-
-    def handler_is_connected(self, handler_id):
-        return bool(GObjectModule.signal_handler_is_connected(self.__gpointer__, handler_id))
-
-    def stop_emission_by_name(self, detailed_signal):
-        GObjectModule.signal_stop_emission_by_name(self.__gpointer__, detailed_signal)
-
     #
     # Aliases
     #
-    disconnect = handler_disconnect
+
+    disconnect = signal_handler_disconnect
+    handler_block = signal_handler_block
+    handler_unblock = signal_handler_unblock
+    handler_disconnect = signal_handler_disconnect
+    handler_is_connected = signal_handler_is_connected
+    stop_emission_by_name = signal_stop_emission_by_name
 
     #
     # Deprecated Methods
     #
+
     def stop_emission(self, detailed_signal):
         """Deprecated, please use stop_emission_by_name."""
         warnings.warn(self.stop_emission.__doc__, PyGIDeprecationWarning, stacklevel=2)
-        return self.stop_emission_by_name(detailed_signal)
+        return signal_stop_emission_by_name(self, detailed_signal)
 
     emit_stop_by_name = stop_emission
 

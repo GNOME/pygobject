@@ -37,7 +37,6 @@
 #include "pygpointer.h"
 #include "pygtype.h"
 
-static PyObject *_pyg_signal_accumulator_true_handled_func;
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
 
@@ -340,17 +339,13 @@ create_signal (GType instance_type, const gchar *signal_name, PyObject *tuple)
 	Py_DECREF(item);
     }
 
-    if (py_accum == _pyg_signal_accumulator_true_handled_func)
-        accumulator = g_signal_accumulator_true_handled;
-    else {
-        if (py_accum != NULL && py_accum != Py_None) {
-            accum_data = g_new(PyGSignalAccumulatorData, 1);
-            accum_data->callable = py_accum;
-            Py_INCREF(py_accum);
-            accum_data->user_data = py_accum_data;
-            Py_XINCREF(py_accum_data);
-            accumulator = _pyg_signal_accumulator;
-        }
+    if (py_accum != NULL && py_accum != Py_None) {
+        accum_data = g_new(PyGSignalAccumulatorData, 1);
+        accum_data->callable = py_accum;
+        Py_INCREF(py_accum);
+        accum_data->user_data = py_accum_data;
+        Py_XINCREF(py_accum_data);
+        accumulator = _pyg_signal_accumulator;
     }
 
     signal_id = g_signal_newv(signal_name, instance_type, signal_flags,
@@ -1671,38 +1666,6 @@ pyg_add_emission_hook(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
-pyg_remove_emission_hook(PyGObject *self, PyObject *args)
-{
-    PyObject *pygtype, *repr;
-    char *name;
-    guint signal_id;
-    gulong hook_id;
-    GType gtype;
-
-    if (!PyArg_ParseTuple(args, "Osk:gobject.remove_emission_hook",
-			  &pygtype, &name, &hook_id))
-	return NULL;
-
-    if ((gtype = pyg_type_from_object(pygtype)) == 0) {
-	return NULL;
-    }
-
-    if (!g_signal_parse_name(name, gtype, &signal_id, NULL, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-                 PYGLIB_PyUnicode_AsString(repr),
-                 name);
-	Py_DECREF(repr);
-	return NULL;
-    }
-
-    g_signal_remove_emission_hook(signal_id, hook_id);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
 pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
 {
     Py_INCREF(metaclass);
@@ -1733,8 +1696,6 @@ static PyMethodDef _gobject_functions[] = {
       (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
     { "add_emission_hook",
       (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
-    { "remove_emission_hook",
-      (PyCFunction)pyg_remove_emission_hook, METH_VARARGS },
     { "_install_metaclass",
       (PyCFunction)pyg__install_metaclass, METH_O },
 
@@ -2232,10 +2193,6 @@ PYGLIB_MODULE_START(_gobject, "_gobject")
     pygobject_pointer_register_types(d);
     pygobject_enum_register_types(d);
     pygobject_flags_register_types(d);
-
-      /* signal registration recognizes this special accumulator 'constant' */
-    _pyg_signal_accumulator_true_handled_func = \
-        PyDict_GetItemString(d, "signal_accumulator_true_handled");
 
     pygobject_api_functions.threads_enabled = pyglib_threads_enabled();
     _pyglib_notify_on_enabling_threads(pyg_note_threads_enabled);
