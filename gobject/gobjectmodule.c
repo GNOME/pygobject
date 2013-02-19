@@ -312,13 +312,6 @@ pyg_object_get_property (GObject *object, guint property_id,
     pyglib_gil_state_release(state);
 }
 
-static void
-pyg_object_class_init(GObjectClass *class, PyObject *py_class)
-{
-    class->set_property = pyg_object_set_property;
-    class->get_property = pyg_object_get_property;
-}
-
 typedef struct _PyGSignalAccumulatorData {
     PyObject *callable;
     PyObject *user_data;
@@ -484,15 +477,14 @@ override_signal(GType instance_type, const gchar *signal_name)
 }
 
 static PyObject *
-add_signals (GType instance_type, PyObject *signals)
+add_signals (GObjectClass *klass, PyObject *signals)
 {
     gboolean ret = TRUE;
-    GObjectClass *oclass;
     Py_ssize_t pos = 0;
     PyObject *key, *value, *overridden_signals = NULL;
+    GType instance_type = G_OBJECT_CLASS_TYPE (klass);
 
     overridden_signals = PyDict_New();
-    oclass = g_type_class_ref(instance_type);
     while (PyDict_Next(signals, &pos, &key, &value)) {
 	const gchar *signal_name;
         gchar *signal_name_canon, *c;
@@ -530,7 +522,6 @@ add_signals (GType instance_type, PyObject *signals)
 	if (!ret)
 	    break;
     }
-    g_type_class_unref(oclass);
     if (ret)
         return overridden_signals;
     else {
@@ -800,14 +791,12 @@ pyg_param_spec_from_object (PyObject *tuple)
 }
 
 static gboolean
-add_properties (GType instance_type, PyObject *properties)
+add_properties (GObjectClass *klass, PyObject *properties)
 {
     gboolean ret = TRUE;
-    GObjectClass *oclass;
     Py_ssize_t pos = 0;
     PyObject *key, *value;
 
-    oclass = g_type_class_ref(instance_type);
     while (PyDict_Next(properties, &pos, &key, &value)) {
 	const gchar *prop_name;
 	GType prop_type;
@@ -873,7 +862,7 @@ add_properties (GType instance_type, PyObject *properties)
 	Py_DECREF(slice);
 
 	if (pspec) {
-	    g_object_class_install_property(oclass, 1, pspec);
+	    g_object_class_install_property(klass, 1, pspec);
 	} else {
             PyObject *type, *value, *traceback;
 	    ret = FALSE;
@@ -883,7 +872,7 @@ add_properties (GType instance_type, PyObject *properties)
                 g_snprintf(msg, 256,
 			   "%s (while registering property '%s' for GType '%s')",
                PYGLIB_PyUnicode_AsString(value),
-			   prop_name, g_type_name(instance_type));
+			   prop_name, G_OBJECT_CLASS_NAME(klass));
                 Py_DECREF(value);
                 value = PYGLIB_PyUnicode_FromString(msg);
             }
@@ -892,8 +881,60 @@ add_properties (GType instance_type, PyObject *properties)
 	}
     }
 
-    g_type_class_unref(oclass);
     return ret;
+}
+
+static void
+pyg_object_class_init(GObjectClass *class, PyObject *py_class)
+{
+    PyObject *gproperties, *gsignals, *overridden_signals;
+    PyObject *class_dict = ((PyTypeObject*) py_class)->tp_dict;
+
+    class->set_property = pyg_object_set_property;
+    class->get_property = pyg_object_get_property;
+
+    /* install signals */
+    /* we look this up in the instance dictionary, so we don't
+     * accidentally get a parent type's __gsignals__ attribute. */
+    gsignals = PyDict_GetItemString(class_dict, "__gsignals__");
+    if (gsignals) {
+	if (!PyDict_Check(gsignals)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gsignals__ attribute not a dict!");
+	    return;
+	}
+	if (!(overridden_signals = add_signals(class, gsignals))) {
+	    return;
+	}
+        if (PyDict_SetItemString(class_dict, "__gsignals__",
+				 overridden_signals)) {
+            return;
+        }
+        Py_DECREF(overridden_signals);
+
+        PyDict_DelItemString(class_dict, "__gsignals__");
+    } else {
+	PyErr_Clear();
+    }
+
+    /* install properties */
+    /* we look this up in the instance dictionary, so we don't
+     * accidentally get a parent type's __gproperties__ attribute. */
+    gproperties = PyDict_GetItemString(class_dict, "__gproperties__");
+    if (gproperties) {
+	if (!PyDict_Check(gproperties)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "__gproperties__ attribute not a dict!");
+	    return;
+	}
+	if (!add_properties(class, gproperties)) {
+	    return;
+	}
+	PyDict_DelItemString(class_dict, "__gproperties__");
+	/* Borrowed reference. Py_DECREF(gproperties); */
+    } else {
+	PyErr_Clear();
+    }
 }
 
 static void
@@ -1068,7 +1109,7 @@ pygobject__g_instance_init(GTypeInstance   *instance,
  */
 static void
 pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
-                        PyObject *bases, gboolean new_interfaces,
+                        PyObject *bases,
                         GType *parent_interfaces, guint n_parent_interfaces)
 {
     int i;
@@ -1082,7 +1123,6 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
         guint k;
         PyObject *base = PyTuple_GET_ITEM(bases, i);
         GType itype;
-        gboolean is_new = TRUE;
         const GInterfaceInfo *iinfo;
         GInterfaceInfo iinfo_copy;
 
@@ -1097,16 +1137,6 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
 
         /* Happens for _implementations_ of an interface. */
         if (!G_TYPE_IS_INTERFACE(itype))
-            continue;
-
-        for (k = 0; k < n_parent_interfaces; ++k) {
-            if (parent_interfaces[k] == itype) {
-                is_new = FALSE;
-                break;
-            }
-        }
-
-        if ((new_interfaces && !is_new) || (!new_interfaces && is_new))
             continue;
 
         iinfo = pyg_lookup_interface_info(itype);
@@ -1129,7 +1159,7 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
 int
 pyg_type_register(PyTypeObject *class, const char *type_name)
 {
-    PyObject *gtype, *gsignals, *gproperties, *overridden_signals;
+    PyObject *gtype;
     GType parent_type, instance_type;
     GType *parent_interfaces;
     guint n_parent_interfaces;
@@ -1216,88 +1246,22 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     }
 
     /*
-     * Note: Interfaces to be implemented are searched twice.  First
-     * we register interfaces that are already implemented by a parent
-     * type.  The second time, the remaining interfaces are
-     * registered, i.e. the ones that are not implemented by a parent
-     * type.  In between these two loops, properties and signals are
-     * registered.  It has to be done this way, in two steps,
-     * otherwise glib will complain.  If registering all interfaces
-     * always before properties, you get an error like:
-     *
-     *    ../gobject:121: Warning: Object class
-     *    test_interface+MyObject doesn't implement property
-     *    'some-property' from interface 'TestInterface'
-     *
-     * If, on the other hand, you register interfaces after
-     * registering the properties, you get something like:
-     *
-     *     ../gobject:121: Warning: cannot add interface type
-     *    `TestInterface' to type `test_interface+MyUnknown', since
-     *    type `test_interface+MyUnknown' already conforms to
-     *    interface
-     *
-     * This looks like a GLib quirk, but no bug has been filed
-     * upstream.  However we have a unit test for this particular
-     * problem, which can be found in test_interfaces.py, class
-     * TestInterfaceImpl.
+     * Note, all interfaces need to be registered before the first
+     * g_type_class_ref(), see bug #686149.
      *
      * See also comment above pyg_type_add_interfaces().
      */
-    pyg_type_add_interfaces(class, instance_type, class->tp_bases, FALSE,
+    pyg_type_add_interfaces(class, instance_type, class->tp_bases,
                             parent_interfaces, n_parent_interfaces);
 
-    /* we look this up in the instance dictionary, so we don't
-     * accidentally get a parent type's __gsignals__ attribute. */
-    gsignals = PyDict_GetItemString(class->tp_dict, "__gsignals__");
-    if (gsignals) {
-	if (!PyDict_Check(gsignals)) {
-	    PyErr_SetString(PyExc_TypeError,
-			    "__gsignals__ attribute not a dict!");
-            g_free(parent_interfaces);
-	    return -1;
-	}
-	if (!(overridden_signals = add_signals(instance_type, gsignals))) {
-            g_free(parent_interfaces);
-	    return -1;
-	}
-        if (PyDict_SetItemString(class->tp_dict, "__gsignals__",
-				 overridden_signals)) {
-            g_free(parent_interfaces);
-            return -1;
-        }
-        Py_DECREF(overridden_signals);
-    } else {
-	PyErr_Clear();
-    }
-
-    /* we look this up in the instance dictionary, so we don't
-     * accidentally get a parent type's __gsignals__ attribute. */
-    gproperties = PyDict_GetItemString(class->tp_dict, "__gproperties__");
-    if (gproperties) {
-	if (!PyDict_Check(gproperties)) {
-	    PyErr_SetString(PyExc_TypeError,
-			    "__gproperties__ attribute not a dict!");
-            g_free(parent_interfaces);
-	    return -1;
-	}
-	if (!add_properties(instance_type, gproperties)) {
-            g_free(parent_interfaces);
-	    return -1;
-	}
-	PyDict_DelItemString(class->tp_dict, "__gproperties__");
-	/* Borrowed reference. Py_DECREF(gproperties); */
-    } else {
-	PyErr_Clear();
-    }
-
-    /* Register new interfaces, that are _not_ already defined by
-     * the parent type.  FIXME: See above.
-     */
-    pyg_type_add_interfaces(class, instance_type, class->tp_bases, TRUE,
-                            parent_interfaces, n_parent_interfaces);
 
     gclass = g_type_class_ref(instance_type);
+    if (PyErr_Occurred() != NULL) {
+        g_type_class_unref(gclass);
+        g_free(parent_interfaces);
+        return -1;
+    }
+
     if (pyg_run_class_init(instance_type, gclass, class)) {
         g_type_class_unref(gclass);
         g_free(parent_interfaces);
@@ -1306,9 +1270,8 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     g_type_class_unref(gclass);
     g_free(parent_interfaces);
 
-    if (gsignals)
-        PyDict_DelItemString(class->tp_dict, "__gsignals__");
-
+    if (PyErr_Occurred() != NULL)
+        return -1;
     return 0;
 }
 
