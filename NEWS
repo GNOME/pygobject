@@ -1,3 +1,20 @@
+3.7.90  19-Feb-2013
+	- overrides: Fix inconsistencies with drag and drop target list API
+	  (Simon Feltman) (#680640)
+	- pygtkcompat: Add pygtk compatible GenericTreeModel implementation
+	  (Simon Feltman) (#682933)
+	- overrides: Add support for iterables besides tuples for TreePath
+	  creation (Simon Feltman) (#682933)
+	- Prefix __module__ attribute of function objects with gi.repository
+	  (Niklas Koep) (#693839)
+	- configure.ac: only enable code coverage when available, to fix
+	  autogen.sh with older gnome-commons (Jonathan Ballet) (#693328)
+	- Correctly set properties on object with statically defined properties
+	  (Jonathan Ballet) (#693618)
+	- autogen.sh: Use gnome-autogen.sh (Martin Pitt) (#693328)
+	- Fix reference leaks with transient floating objects (Simon Feltman)
+	  (#687522)
+
 3.7.5.1 05-Feb-2013
         - Fix ABI break with pygobject.h from 3.7.5 (Simon Feltman) (#675726)
 
