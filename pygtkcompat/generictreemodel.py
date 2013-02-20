@@ -223,7 +223,7 @@ class GenericTreeModel(GObject.GObject, Gtk.TreeModel):
         """Internal method."""
         return self.on_get_n_columns()
 
-    @handle_exception((False, None))
+    @handle_exception(GObject.TYPE_INVALID)
     def do_get_column_type(self, index):
         """Internal method."""
         return self.on_get_column_type(index)
