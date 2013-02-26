@@ -12,6 +12,7 @@ import locale
 import subprocess
 import gc
 import weakref
+import warnings
 from io import StringIO, BytesIO
 
 import gi
@@ -2907,3 +2908,12 @@ class TestSignatureArgs(unittest.TestCase):
     def test_overridden_doc_is_not_clobbered(self):
         self.assertEqual(GIMarshallingTests.OverridesObject.method.__doc__,
                          'Overridden doc string.')
+
+
+class TestDeprecation(unittest.TestCase):
+    def test_method(self):
+        d = GLib.Date.new()
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            d.set_time(1)
+            self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
