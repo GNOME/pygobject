@@ -10,6 +10,7 @@ CLEANFILES = \
 
 EXTRA_DIST = \
 	autogen.sh \
+	pygobject.doap \
 	pygobject-$(PLATFORM_VERSION).pc.in \
 	PKG-INFO \
 	PKG-INFO.in \
