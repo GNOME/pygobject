@@ -32,6 +32,22 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-marshal-from-py.h"
 
+#ifdef _WIN32
+#ifdef _MSC_VER
+#include <math.h>
+
+#ifndef NAN
+static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
+#define NAN (*(const float *) __nan)
+#endif
+
+#ifndef INFINITY
+#define INFINITY HUGE_VAL
+#endif
+
+#endif
+#endif
+
 static gboolean
 gi_argument_from_py_ssize_t (GIArgument   *arg_out,
                              Py_ssize_t    size_in,
@@ -1388,10 +1404,11 @@ _pygi_destroy_notify_create (void)
     if (!global_destroy_notify) {
 
         PyGICClosure *destroy_notify = g_slice_new0 (PyGICClosure);
+        GIBaseInfo* glib_destroy_notify;
 
         g_assert (destroy_notify);
 
-        GIBaseInfo* glib_destroy_notify = g_irepository_find_by_name (NULL, "GLib", "DestroyNotify");
+        glib_destroy_notify = g_irepository_find_by_name (NULL, "GLib", "DestroyNotify");
         g_assert (glib_destroy_notify != NULL);
         g_assert (g_base_info_get_type (glib_destroy_notify) == GI_INFO_TYPE_CALLBACK);
 
