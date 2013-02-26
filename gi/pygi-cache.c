@@ -1467,13 +1467,13 @@ _pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
         gchar *warning;
         if (deprecated != NULL)
             warning = g_strdup_printf ("%s.%s is deprecated: %s",
-                                       g_base_info_get_namespace(callable_info), cache->name,
+                                       g_base_info_get_namespace (callable_info), cache->name,
                                        deprecated);
         else
             warning = g_strdup_printf ("%s.%s is deprecated",
-                                       g_base_info_get_namespace(callable_info), cache->name);
+                                       g_base_info_get_namespace (callable_info), cache->name);
         PyErr_WarnEx(PyExc_DeprecationWarning, warning, 0);
-        g_free (warning);;
+        g_free (warning);
     }
 
     if (type == GI_INFO_TYPE_FUNCTION) {
