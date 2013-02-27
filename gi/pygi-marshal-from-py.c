@@ -1015,14 +1015,10 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
                             g_value_copy ((GValue*) item.v_pointer, dest);
                         }
-
-                        if (from_py_cleanup) {
+                        /* we free the original copy already, the new one is a plain struct
+                         * in an array. _pygi_marshal_cleanup_from_py_array() does not free it again */
+                        if (from_py_cleanup)
                             from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
-                            /* we freed the original copy already, the new one is a 
-                             * struct in an array. _pygi_marshal_cleanup_from_py_array()
-                             * must not free it again */
-                            item_arg_cache->from_py_cleanup = NULL;
-                        }
                     } else if (!is_boxed) {
                         /* HACK: Gdk.Atom is merely an integer wrapped in a pointer,
                          * so we must not dereference it; just copy the pointer

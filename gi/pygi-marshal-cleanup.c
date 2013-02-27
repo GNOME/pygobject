@@ -368,8 +368,17 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
                 else if (sequence_cache->item_cache->is_pointer)
                     item = g_array_index (array_, gpointer, i);
                 /* case 3: C array or GArray with simple types or structs */
-                else
+                else {
                     item = array_->data + i * sequence_cache->item_size;
+                    /* special-case hack: GValue array items do not get slice
+                     * allocated in _pygi_marshal_from_py_array(), so we must
+                     * not try to deallocate it as a slice and thus
+                     * short-circuit cleanup_func. */
+                    if (cleanup_func == _pygi_marshal_cleanup_from_py_interface_struct_gvalue) {
+                        g_value_unset ((GValue*) item);
+                        continue;
+                    }
+                }
 
                 cleanup_func (state, sequence_cache->item_cache, item, TRUE);
             }
