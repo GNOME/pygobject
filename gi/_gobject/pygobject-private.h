@@ -158,8 +158,6 @@ PyObject *    pygobject_new_full         (GObject *obj, gboolean steal, gpointer
 void          pygobject_sink             (GObject *obj);
 PyTypeObject *pygobject_lookup_class     (GType gtype);
 void          pygobject_watch_closure    (PyObject *self, GClosure *closure);
-void          pygobject_register_sinkfunc(GType type,
-					  void (* sinkfunc)(GObject *object));
 int           pyg_type_register          (PyTypeObject *class,
 					  const gchar *type_name);
 
