@@ -103,7 +103,7 @@ struct _PyGObject_Functions {
     PyObject *(* type_wrapper_new)(GType type);
 
     gint (* enum_get_value)(GType enum_type, PyObject *obj, gint *val);
-    gint (* flags_get_value)(GType flag_type, PyObject *obj, gint *val);
+    gint (* flags_get_value)(GType flag_type, PyObject *obj, guint *val);
     void (* register_gtype_custom)(GType gtype,
 			    PyObject *(* from_func)(const GValue *value),
 			    int (* to_func)(GValue *value, PyObject *obj));
@@ -168,7 +168,7 @@ struct _PyGObject_Functions {
 			   const char *type_name_,
 			   const char *strip_prefix,
 			   GType gtype);
-    PyObject* (*flags_from_gtype)(GType gtype, int value);
+    PyObject* (*flags_from_gtype)(GType gtype, guint value);
 
     gboolean threads_enabled;
     int       (*enable_threads) (void);

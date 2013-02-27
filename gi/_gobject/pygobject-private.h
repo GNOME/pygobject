@@ -107,7 +107,7 @@ GType     pyg_type_from_object_strict (PyObject *obj, gboolean strict);
 GType     pyg_type_from_object (PyObject *obj);
 
 gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
-gint pyg_flags_get_value (GType flag_type, PyObject *obj, gint *val);
+gint pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val);
 int pyg_pyobj_to_unichar_conv (PyObject* py_obj, void* ptr);
 
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
@@ -181,7 +181,8 @@ const gchar * pyg_constant_strip_prefix(const gchar *name, const gchar *strip_pr
 
 /* pygflags */
 typedef struct {
-	PYGLIB_PyLongObject parent;
+    PYGLIB_PyLongObject parent;
+    int zero_pad; /* must always be 0 */
     GType gtype;
 } PyGFlags;
 
@@ -194,13 +195,14 @@ extern PyObject * pyg_flags_add        (PyObject *   module,
 					const char * strip_prefix,
 					GType        gtype);
 extern PyObject * pyg_flags_from_gtype (GType        gtype,
-					int          value);
+					guint        value);
 
 /* pygenum */
 #define PyGEnum_Check(x) (PyObject_IsInstance((PyObject *)x, (PyObject *)&PyGEnum_Type) && g_type_is_a(((PyGFlags*)x)->gtype, G_TYPE_ENUM))
 
 typedef struct {
-	PYGLIB_PyLongObject parent;
+    PYGLIB_PyLongObject parent;
+    int zero_pad; /* must always be 0 */
     GType gtype;
 } PyGEnum;
 

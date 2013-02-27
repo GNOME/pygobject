@@ -117,3 +117,18 @@ class TestGdk(unittest.TestCase):
 
         self.assertNotEqual(c, None)
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
+
+    def test_flags(self):
+        self.assertEqual(Gdk.ModifierType.META_MASK | 0, 0x10000000)
+        self.assertEqual(hex(Gdk.ModifierType.META_MASK), '0x10000000')
+        self.assertEqual(str(Gdk.ModifierType.META_MASK),
+                         '<flags GDK_META_MASK of type GdkModifierType>')
+
+        self.assertEqual(Gdk.ModifierType.RELEASE_MASK | 0, 0x40000000)
+        self.assertEqual(hex(Gdk.ModifierType.RELEASE_MASK), '0x40000000')
+        self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK),
+                         '<flags GDK_RELEASE_MASK of type GdkModifierType>')
+
+        self.assertEqual(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK, 0x50000000)
+        self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
+                         '<flags GDK_META_MASK | GDK_RELEASE_MASK of type GdkModifierType>')

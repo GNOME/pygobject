@@ -137,6 +137,11 @@ static int _pyglib_init_##modname(PyObject *module)
 #define PYGLIB_PyLong_AS_LONG PyInt_AS_LONG
 #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 
+/* Python 2.7 lacks a PyInt_FromUnsignedLong function; use signed longs, and
+ * rely on PyInt_AsUnsignedLong() to interpret them correctly */
+#define PYGLIB_PyLong_FromUnsignedLong PyInt_FromLong
+#define PYGLIB_PyLong_AsUnsignedLong(o) PyInt_AsUnsignedLongMask((PyObject*)(o))
+
 #define PYGLIB_PyNumber_Long PyNumber_Int
 
 #ifndef PyVarObject_HEAD_INIT
@@ -224,6 +229,9 @@ PyTypeObject symbol = {                                 \
 #define PYGLIB_PyLong_AS_LONG(o) PyLong_AS_LONG((PyObject*)(o))
 #define PYGLIB_PyLongObject PyLongObject
 #define PYGLIB_PyLong_Type PyLong_Type
+
+#define PYGLIB_PyLong_FromUnsignedLong PyLong_FromUnsignedLong
+#define PYGLIB_PyLong_AsUnsignedLong(o) PyLong_AsUnsignedLongMask((PyObject*)(o))
 
 #define PYGLIB_PyBytes_FromString PyBytes_FromString
 #define PYGLIB_PyBytes_FromStringAndSize PyBytes_FromStringAndSize

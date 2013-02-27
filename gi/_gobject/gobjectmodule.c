@@ -572,7 +572,7 @@ create_property (const gchar  *prop_name,
 		return NULL;
 
 	    if (pyg_flags_get_value(prop_type, pydefault,
-				    (gint *)&default_value))
+				    &default_value))
 		return NULL;
 
 	    pspec = g_param_spec_flags (prop_name, nick, blurb,

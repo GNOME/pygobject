@@ -538,7 +538,7 @@ pyg_enum_get_value(GType enum_type, PyObject *obj, gint *val)
  * Returns: 0 on success or -1 on failure
  */
 gint
-pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
+pyg_flags_get_value(GType flag_type, PyObject *obj, guint *val)
 {
     GFlagsClass *fclass = NULL;
     gint res = -1;
@@ -548,7 +548,7 @@ pyg_flags_get_value(GType flag_type, PyObject *obj, gint *val)
 	*val = 0;
 	res = 0;
     } else if (PYGLIB_PyLong_Check(obj)) {
-	*val = PYGLIB_PyLong_AsLong(obj);
+	*val = PYGLIB_PyLong_AsUnsignedLong(obj);
 	res = 0;
     } else if (PyLong_Check(obj)) {
         *val = PyLong_AsLongLong(obj);
@@ -944,7 +944,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 	break;
     case G_TYPE_FLAGS:
 	{
-	    gint val = 0;
+	    guint val = 0;
 	    if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
 		PyErr_Clear();
 		return -1;
