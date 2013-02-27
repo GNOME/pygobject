@@ -126,6 +126,7 @@ RUN_TESTS_ENV_VARS= \
 	XDG_DATA_DIRS=$$XDG_DATA_DIRS:/usr/share \
 	MALLOC_PERTURB_=85 \
 	MALLOC_CHECK_=3 \
+	G_SLICE=debug-blocks \
 	TESTS_BUILDDIR=$(builddir)
 
 # pygtkcompat tests need to be run in a separate process as they
@@ -150,4 +151,4 @@ check.nemiver:
 	EXEC_NAME="nemiver" $(MAKE) check
 
 check.valgrind:
-	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_SLICE=always-malloc G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="valgrind --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_DEBUG=gc-friendly $(MAKE) check
