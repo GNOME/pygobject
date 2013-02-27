@@ -120,6 +120,24 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(bool(empty), True)
         self.assertEqual(empty.keys(), [])
 
+    def test_change_event(self):
+        changed_log = []
+        change_event_log = []
+
+        def on_changed(settings, key):
+            changed_log.append((settings, key))
+
+        def on_change_event(settings, keys, n_keys):
+            change_event_log.append((settings, keys, n_keys))
+
+        self.settings.connect('changed', on_changed)
+        self.settings.connect('change-event', on_change_event)
+        self.settings['test-string'] = 'Moo'
+        self.assertEqual(changed_log, [(self.settings, 'test-string')])
+        self.assertEqual(change_event_log, [(self.settings,
+                                             [GLib.quark_from_static_string('test-string')],
+                                             1)])
+
 
 class TestGFile(unittest.TestCase):
     def setUp(self):

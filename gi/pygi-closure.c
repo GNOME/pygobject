@@ -353,7 +353,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                     arg = (GIArgument*) g_args[i].v_pointer;
                 
                 if (g_type_info_get_tag (&arg_type) == GI_TYPE_TAG_ARRAY)
-                    arg->v_pointer = _pygi_argument_to_array (arg, (GIArgument **) args, 
+                    arg->v_pointer = _pygi_argument_to_array (arg, (GIArgument **) args, NULL,
                                                               callable_info, &arg_type, &free_array);
 
                 value = _pygi_argument_to_object (arg, &arg_type, transfer);

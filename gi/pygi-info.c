@@ -1245,7 +1245,7 @@ _wrap_g_constant_info_get_value (PyGIBaseInfo *self)
     type_info = g_constant_info_get_type ( (GIConstantInfo *) self->info);
 
     if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-        value.v_pointer = _pygi_argument_to_array (&value, NULL, NULL,
+        value.v_pointer = _pygi_argument_to_array (&value, NULL, NULL, NULL,
                                                    type_info, &free_array);
     }
 
@@ -1378,7 +1378,7 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
     }
 
     if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_ARRAY) {
-        value.v_pointer = _pygi_argument_to_array (&value, NULL, NULL,
+        value.v_pointer = _pygi_argument_to_array (&value, NULL, NULL, NULL,
                                                    field_type_info, &free_array);
     }
 

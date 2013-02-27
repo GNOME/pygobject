@@ -50,6 +50,7 @@ gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
 GArray* _pygi_argument_to_array (GIArgument  *arg,
                                  GIArgument  *args[],
+                                 const GValue *args_values,
                                  GICallableInfo *callable_info,
                                  GITypeInfo  *type_info,
                                  gboolean    *out_free_array);

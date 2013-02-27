@@ -762,8 +762,12 @@ check_number_release:
  * _pygi_argument_to_array
  * @arg: The argument to convert
  * @args: Arguments to method invocation, possibly contaning the array length.
- *        Set to NULL if this is not for a method call
- * @callable_info: Info on the callable, if this a method call; otherwise NULL
+ *        Set to %NULL if this is not for a method call or @args_values is
+ *        specified.
+ * @args_values: GValue Arguments to method invocation, possibly contaning the
+ *               array length. Set to %NULL if this is not for a method call or
+ *               @args is specified.
+ * @callable_info: Info on the callable, if this a method call; otherwise %NULL
  * @type_info: The type info for @arg
  * @out_free_array: A return location for a gboolean that indicates whether
  *                  or not the wrapped GArray should be freed
@@ -781,6 +785,7 @@ check_number_release:
 GArray *
 _pygi_argument_to_array (GIArgument  *arg,
                          GIArgument  *args[],
+                         const GValue *args_values,
                          GICallableInfo *callable_info,                  
                          GITypeInfo  *type_info,
                          gboolean    *out_free_array)
@@ -815,7 +820,7 @@ _pygi_argument_to_array (GIArgument  *arg,
                     GIArgInfo length_arg_info;
                     GITypeInfo length_type_info;
 
-                    if (G_UNLIKELY (args == NULL)) {
+                    if (G_UNLIKELY (args == NULL && args_values == NULL)) {
                         g_critical ("Unable to determine array length for %p",
                                     arg->v_pointer);
                         g_array = g_array_new (is_zero_terminated, FALSE, item_size);
@@ -828,10 +833,21 @@ _pygi_argument_to_array (GIArgument  *arg,
                     g_assert (callable_info);
                     g_callable_info_load_arg (callable_info, length_arg_pos, &length_arg_info);
                     g_arg_info_load_type (&length_arg_info, &length_type_info);
-                    if (!gi_argument_to_gssize (args[length_arg_pos],
-                                                g_type_info_get_tag (&length_type_info),
-                                                &length))
-                        return NULL;
+
+                    if (args != NULL) {
+                        if (!gi_argument_to_gssize (args[length_arg_pos],
+                                                    g_type_info_get_tag (&length_type_info),
+                                                    &length))
+                            return NULL;
+                    } else {
+                        /* get it from args_values */
+                        GIArgument length_arg = _pygi_argument_from_g_value (&(args_values[length_arg_pos]),
+                                &length_type_info);
+                        if (!gi_argument_to_gssize (&length_arg,
+                                                    g_type_info_get_tag (&length_type_info),
+                                                    &length))
+                            return NULL;
+                    }
                 }
             }
 
@@ -2047,7 +2063,11 @@ _pygi_argument_from_g_value(const GValue *value,
             break;
         case GI_TYPE_TAG_ARRAY:
         case GI_TYPE_TAG_GHASH:
-            arg.v_pointer = g_value_get_boxed (value);
+            if (G_VALUE_HOLDS_BOXED (value))
+                arg.v_pointer = g_value_get_boxed (value);
+            else
+                /* e. g. GSettings::change-event */
+                arg.v_pointer = g_value_get_pointer (value);
             break;
         case GI_TYPE_TAG_INTERFACE:
         {
