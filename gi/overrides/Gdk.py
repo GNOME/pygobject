@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from ..overrides import override
+from ..overrides import override, strip_boolean_result
 from ..module import get_introspection_module
 
 import sys
@@ -251,19 +251,6 @@ gsuccess_mask_funcs = ['get_state',
                        'get_root_coords']
 
 
-def _gsuccess_mask(func):
-    def cull_success(*args):
-        result = func(*args)
-        success = result[0]
-        if not success:
-            return None
-        else:
-            if len(result) == 2:
-                return result[1]
-            else:
-                return result[1:]
-    return cull_success
-
 for event_class in event_member_classes:
     override_class = type(event_class, (getattr(Gdk, event_class),), {})
     # add the event methods
@@ -276,7 +263,7 @@ for event_class in event_member_classes:
 
         # use the _gsuccess_mask decorator if this method is whitelisted
         if name in gsuccess_mask_funcs:
-            event_method = _gsuccess_mask(event_method)
+            event_method = strip_boolean_result(event_method)
         setattr(override_class, name, event_method)
 
     setattr(module, event_class, override_class)
@@ -335,15 +322,7 @@ class Cursor(Gdk.Cursor):
 Cursor = override(Cursor)
 __all__.append('Cursor')
 
-_Gdk_color_parse = Gdk.color_parse
-
-
-@override(Gdk.color_parse)
-def color_parse(color):
-    success, color = _Gdk_color_parse(color)
-    if not success:
-        return None
-    return color
+Gdk.color_parse = strip_boolean_result(Gdk.color_parse)
 
 
 # Note, we cannot override the entire class as Gdk.Atom has no gtype, so just
