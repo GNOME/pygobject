@@ -220,31 +220,33 @@ class Value(GObjectModule.Value):
             self.unset()
 
     def set_value(self, py_value):
-        if self.g_type == _gobject.TYPE_INVALID:
+        gtype = self.g_type
+
+        if gtype == _gobject.TYPE_INVALID:
             raise TypeError("GObject.Value needs to be initialized first")
-        elif self.g_type == TYPE_BOOLEAN:
+        elif gtype == TYPE_BOOLEAN:
             self.set_boolean(py_value)
-        elif self.g_type == TYPE_CHAR:
+        elif gtype == TYPE_CHAR:
             self.set_char(py_value)
-        elif self.g_type == TYPE_UCHAR:
+        elif gtype == TYPE_UCHAR:
             self.set_uchar(py_value)
-        elif self.g_type == TYPE_INT:
+        elif gtype == TYPE_INT:
             self.set_int(py_value)
-        elif self.g_type == TYPE_UINT:
+        elif gtype == TYPE_UINT:
             self.set_uint(py_value)
-        elif self.g_type == TYPE_LONG:
+        elif gtype == TYPE_LONG:
             self.set_long(py_value)
-        elif self.g_type == TYPE_ULONG:
+        elif gtype == TYPE_ULONG:
             self.set_ulong(py_value)
-        elif self.g_type == TYPE_INT64:
+        elif gtype == TYPE_INT64:
             self.set_int64(py_value)
-        elif self.g_type == TYPE_UINT64:
+        elif gtype == TYPE_UINT64:
             self.set_uint64(py_value)
-        elif self.g_type == TYPE_FLOAT:
+        elif gtype == TYPE_FLOAT:
             self.set_float(py_value)
-        elif self.g_type == TYPE_DOUBLE:
+        elif gtype == TYPE_DOUBLE:
             self.set_double(py_value)
-        elif self.g_type == TYPE_STRING:
+        elif gtype == TYPE_STRING:
             if isinstance(py_value, str):
                 py_value = str(py_value)
             elif sys.version_info < (3, 0):
@@ -257,75 +259,77 @@ class Value(GObjectModule.Value):
                 raise ValueError("Expected string but got %s%s" %
                                  (py_value, type(py_value)))
             self.set_string(py_value)
-        elif self.g_type == TYPE_PARAM:
+        elif gtype == TYPE_PARAM:
             self.set_param(py_value)
-        elif self.g_type.is_a(TYPE_ENUM):
+        elif gtype.is_a(TYPE_ENUM):
             self.set_enum(py_value)
-        elif self.g_type.is_a(TYPE_FLAGS):
+        elif gtype.is_a(TYPE_FLAGS):
             self.set_flags(py_value)
-        elif self.g_type.is_a(TYPE_BOXED):
+        elif gtype.is_a(TYPE_BOXED):
             self.set_boxed(py_value)
-        elif self.g_type == TYPE_POINTER:
+        elif gtype == TYPE_POINTER:
             self.set_pointer(py_value)
-        elif self.g_type.is_a(TYPE_OBJECT):
+        elif gtype.is_a(TYPE_OBJECT):
             self.set_object(py_value)
-        elif self.g_type == TYPE_UNICHAR:
+        elif gtype == TYPE_UNICHAR:
             self.set_uint(int(py_value))
-        # elif self.g_type == TYPE_OVERRIDE:
+        # elif gtype == TYPE_OVERRIDE:
         #     pass
-        elif self.g_type == TYPE_GTYPE:
+        elif gtype == TYPE_GTYPE:
             self.set_gtype(py_value)
-        elif self.g_type == TYPE_VARIANT:
+        elif gtype == TYPE_VARIANT:
             self.set_variant(py_value)
-        elif self.g_type == TYPE_PYOBJECT:
+        elif gtype == TYPE_PYOBJECT:
             self.set_boxed(py_value)
         else:
-            raise TypeError("Unknown value type %s" % self.g_type)
+            raise TypeError("Unknown value type %s" % gtype)
 
     def get_value(self):
-        if self.g_type == TYPE_BOOLEAN:
+        gtype = self.g_type
+
+        if gtype == TYPE_BOOLEAN:
             return self.get_boolean()
-        elif self.g_type == TYPE_CHAR:
+        elif gtype == TYPE_CHAR:
             return self.get_char()
-        elif self.g_type == TYPE_UCHAR:
+        elif gtype == TYPE_UCHAR:
             return self.get_uchar()
-        elif self.g_type == TYPE_INT:
+        elif gtype == TYPE_INT:
             return self.get_int()
-        elif self.g_type == TYPE_UINT:
+        elif gtype == TYPE_UINT:
             return self.get_uint()
-        elif self.g_type == TYPE_LONG:
+        elif gtype == TYPE_LONG:
             return self.get_long()
-        elif self.g_type == TYPE_ULONG:
+        elif gtype == TYPE_ULONG:
             return self.get_ulong()
-        elif self.g_type == TYPE_INT64:
+        elif gtype == TYPE_INT64:
             return self.get_int64()
-        elif self.g_type == TYPE_UINT64:
+        elif gtype == TYPE_UINT64:
             return self.get_uint64()
-        elif self.g_type == TYPE_FLOAT:
+        elif gtype == TYPE_FLOAT:
             return self.get_float()
-        elif self.g_type == TYPE_DOUBLE:
+        elif gtype == TYPE_DOUBLE:
             return self.get_double()
-        elif self.g_type == TYPE_STRING:
+        elif gtype == TYPE_STRING:
             return self.get_string()
-        elif self.g_type == TYPE_PARAM:
+        elif gtype == TYPE_PARAM:
             return self.get_param()
-        elif self.g_type.is_a(TYPE_ENUM):
+        elif gtype.is_a(TYPE_ENUM):
             return self.get_enum()
-        elif self.g_type.is_a(TYPE_FLAGS):
+        elif gtype.is_a(TYPE_FLAGS):
             return self.get_flags()
-        elif self.g_type.is_a(TYPE_BOXED):
+        elif gtype.is_a(TYPE_BOXED):
             return self.get_boxed()
-        elif self.g_type == TYPE_POINTER:
+        elif gtype == TYPE_POINTER:
             return self.get_pointer()
-        elif self.g_type.is_a(TYPE_OBJECT):
+        elif gtype.is_a(TYPE_OBJECT):
             return self.get_object()
-        elif self.g_type == TYPE_UNICHAR:
+        elif gtype == TYPE_UNICHAR:
             return self.get_uint()
-        elif self.g_type == TYPE_GTYPE:
+        elif gtype == TYPE_GTYPE:
             return self.get_gtype()
-        elif self.g_type == TYPE_VARIANT:
+        elif gtype == TYPE_VARIANT:
             return self.get_variant()
-        elif self.g_type == TYPE_PYOBJECT:
+        elif gtype == TYPE_PYOBJECT:
             pass
         else:
             return None
