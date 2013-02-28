@@ -29,7 +29,7 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)cache;
 
-    if (iface_cache->g_type == G_TYPE_BOXED) {
+    if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
         gsize size;
         if (was_processed)
             return; /* will be cleaned up at deallocation */

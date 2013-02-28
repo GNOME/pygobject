@@ -366,7 +366,7 @@ static gboolean _caller_alloc (PyGIInvokeState *state,
 
         state->out_args[out_count].v_pointer = NULL;
         state->args[arg_count] = &state->out_args[out_count];
-        if (iface_cache->g_type == G_TYPE_BOXED) {
+        if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
             state->args[arg_count]->v_pointer =
                 _pygi_boxed_alloc (iface_cache->interface_info, NULL);
         } else if (iface_cache->g_type == G_TYPE_VALUE) {
