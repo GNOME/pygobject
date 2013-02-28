@@ -4,6 +4,8 @@
 
 import contextlib
 import unittest
+import time
+import sys
 
 from compathelper import _unicode, _bytes
 
@@ -1419,6 +1421,18 @@ class TestTreeModel(unittest.TestCase):
         self.assertEqual(filtered[0][1], 'one')
         filtered[0][1] = 'ONE'
         self.assertEqual(filtered[0][1], 'ONE')
+
+    def test_list_store_performance(self):
+        model = Gtk.ListStore(int, str)
+
+        iterations = 2000
+        start = time.clock()
+        i = iterations
+        while i > 0:
+            model.append([1, 'hello'])
+            i -= 1
+        end = time.clock()
+        sys.stderr.write('[%.0f µs/append] ' % ((end - start) * 1000000 / iterations))
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
