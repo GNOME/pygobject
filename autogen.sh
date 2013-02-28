@@ -25,5 +25,5 @@ which gnome-autogen.sh || {
     exit 1
 }
 
-gnome-autogen.sh "$EXTRA_ARGS" "$@"
+. gnome-autogen.sh "$EXTRA_ARGS" "$@"
 
