@@ -104,7 +104,7 @@ _boxed_new (PyTypeObject *type,
         goto out;
     }
 
-    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, TRUE);
+    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, TRUE, size);
     if (self == NULL) {
         g_slice_free1 (size, boxed);
         goto out;
@@ -133,7 +133,8 @@ PYGLIB_DEFINE_TYPE("gi.Boxed", PyGIBoxed_Type, PyGIBoxed);
 PyObject *
 _pygi_boxed_new (PyTypeObject *type,
                  gpointer      boxed,
-                 gboolean      free_on_dealloc)
+                 gboolean      free_on_dealloc,
+                 gsize         allocated_slice)
 {
     PyGIBoxed *self;
 
@@ -154,8 +155,13 @@ _pygi_boxed_new (PyTypeObject *type,
     ( (PyGBoxed *) self)->gtype = pyg_type_from_object ( (PyObject *) type);
     ( (PyGBoxed *) self)->boxed = boxed;
     ( (PyGBoxed *) self)->free_on_dealloc = free_on_dealloc;
-    self->size = 0;
-    self->slice_allocated = FALSE;
+    if (allocated_slice > 0) {
+        self->size = allocated_slice;
+        self->slice_allocated = TRUE;
+    } else {
+        self->size = 0;
+        self->slice_allocated = FALSE;
+    }
 
     return (PyObject *) self;
 }

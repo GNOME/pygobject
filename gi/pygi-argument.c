@@ -1752,7 +1752,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                         if (py_type == NULL)
                             break;
 
-                        object = _pygi_boxed_new ( (PyTypeObject *) py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING);
+                        object = _pygi_boxed_new ( (PyTypeObject *) py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING, 0);
 
                         Py_DECREF (py_type);
                     } else if (g_type_is_a (type, G_TYPE_POINTER)) {

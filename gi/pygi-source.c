@@ -240,7 +240,8 @@ pyg_source_new (void)
     source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
 
     py_type = _pygi_type_import_by_name ("GLib", "Source");
-    source->obj = _pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE);
+    /* g_source_new uses malloc, not slices */
+    source->obj = _pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
 
     return source->obj;
 }

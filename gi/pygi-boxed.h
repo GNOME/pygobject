@@ -30,7 +30,8 @@ extern PyTypeObject PyGIBoxed_Type;
 
 PyObject * _pygi_boxed_new (PyTypeObject *type,
                             gpointer      boxed,
-                            gboolean      free_on_dealloc);
+                            gboolean      free_on_dealloc,
+                            gsize         allocated_slice);
 
 void * _pygi_boxed_alloc (GIBaseInfo *info,
                           gsize *size);

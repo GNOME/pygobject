@@ -814,8 +814,10 @@ _pygi_marshal_to_py_interface_struct (PyGIInvokeState   *state,
         py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info,
                                                               arg->v_pointer);
     } else if (g_type_is_a (type, G_TYPE_BOXED)) {
-        py_obj = _pygi_boxed_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
-                                  arg_cache->transfer == GI_TRANSFER_EVERYTHING);
+        py_obj = _pygi_boxed_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer,
+                                  arg_cache->transfer == GI_TRANSFER_EVERYTHING || arg_cache->is_caller_allocates,
+                                  arg_cache->is_caller_allocates ?
+                                          g_struct_info_get_size(iface_cache->interface_info) : 0);
     } else if (g_type_is_a (type, G_TYPE_POINTER)) {
         if (iface_cache->py_type == NULL ||
                 !PyType_IsSubtype ( (PyTypeObject *)iface_cache->py_type, &PyGIStruct_Type)) {
