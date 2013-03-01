@@ -51,6 +51,7 @@ G_BEGIN_DECLS
             } \
         } \
         PyErr_Restore(py_error_type, py_error_value, py_error_traceback); \
+        Py_DECREF(py_error_prefix); \
     } \
 } G_STMT_END
 
