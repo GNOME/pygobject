@@ -640,6 +640,21 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(viewport.props.vadjustment, vadjustment)
         self.assertEqual(viewport.props.hadjustment, hadjustment)
 
+    def test_stock_lookup(self):
+        l = Gtk.stock_lookup('gtk-ok')
+        self.assertEqual(type(l), Gtk.StockItem)
+        self.assertEqual(l.stock_id, 'gtk-ok')
+        self.assertEqual(Gtk.stock_lookup('nosuchthing'), None)
+
+    def test_gtk_main(self):
+        # with no arguments
+        GLib.timeout_add(100, Gtk.main_quit)
+        Gtk.main()
+
+        # overridden function ignores its arguments
+        GLib.timeout_add(100, Gtk.main_quit, 'hello')
+        Gtk.main()
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeModel(unittest.TestCase):

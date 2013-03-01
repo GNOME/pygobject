@@ -132,3 +132,10 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK, 0x50000000)
         self.assertEqual(str(Gdk.ModifierType.RELEASE_MASK | Gdk.ModifierType.META_MASK),
                          '<flags GDK_META_MASK | GDK_RELEASE_MASK of type GdkModifierType>')
+
+    def test_color_parse(self):
+        c = Gdk.color_parse('#00FF80')
+        self.assertEqual(c.red, 0)
+        self.assertEqual(c.green, 65535)
+        self.assertEqual(c.blue, 32896)
+        self.assertEqual(Gdk.color_parse('bogus'), None)
