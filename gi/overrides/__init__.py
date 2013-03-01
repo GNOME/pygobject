@@ -1,4 +1,3 @@
-import types
 import warnings
 import functools
 
@@ -49,32 +48,13 @@ class _Registry(dict):
         self[override_class] = override_class
 
 
-class overridefunc(object):
-    '''decorator for overriding a function'''
-    def __init__(self, func):
-        if not hasattr(func, '__info__'):
-            raise TypeError("func must be an gi function")
-        from ..importer import modules
-        module_name = func.__module__.rsplit('.', 1)[-1]
-        self.module = modules[module_name]._introspection_module
-
-    def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        wrapper.__name__ = func.__name__
-        setattr(self.module, func.__name__, wrapper)
-        return wrapper
-
 registry = _Registry()
 
 
 def override(type_):
     '''Decorator for registering an override'''
-    if isinstance(type_, types.FunctionType):
-        return overridefunc(type_)
-    else:
-        registry.register(type_)
-        return type_
+    registry.register(type_)
+    return type_
 
 
 def deprecated(fn, replacement):
