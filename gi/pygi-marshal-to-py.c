@@ -434,7 +434,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                                 item_arg.v_pointer = g_variant_ref_sink (g_array_index (array_, gpointer, i));
                               else
                                 item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && !item_arg_cache->is_pointer) {
+                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && !item_arg_cache->is_pointer &&
+                                       !g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
                                 /* array elements are structs */
                                 gpointer *_struct = g_malloc (item_size);
                                 memcpy (_struct, array_->data + i * item_size,
