@@ -183,6 +183,37 @@ class TestSource(unittest.TestCase):
         GLib.Timeout(20)
         GLib.Idle()
 
+    def test_finalize(self):
+        self.dispatched = False
+        self.finalized = False
+
+        class S(GLib.Source):
+            def prepare(s):
+                return (True, 1)
+
+            def dispatch(s, callback, args):
+                self.dispatched = True
+                return False
+
+            def finalize(s):
+                self.finalized = True
+
+        source = S()
+        id = source.attach()
+        print('source id:', id)
+        self.assertFalse(self.finalized)
+        self.assertFalse(source.is_destroyed())
+
+        while source.get_context().iteration(False):
+            pass
+
+        source.destroy()
+        self.assertTrue(self.dispatched)
+        self.assertFalse(self.finalized)
+        self.assertTrue(source.is_destroyed())
+        del source
+        self.assertTrue(self.finalized)
+
 
 class TestUserData(unittest.TestCase):
     def test_idle_no_data(self):

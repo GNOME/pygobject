@@ -539,6 +539,10 @@ class Source(GLib.Source):
         setattr(source, '__pygi_custom_source', True)
         return source
 
+    def __del__(self):
+        if hasattr(self, '__pygi_custom_source'):
+            self.unref()
+
     # Backwards compatible API for optional arguments
     def attach(self, context=None):
         id = super(Source, self).attach(context)
