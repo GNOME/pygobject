@@ -322,7 +322,8 @@ class Cursor(Gdk.Cursor):
 Cursor = override(Cursor)
 __all__.append('Cursor')
 
-Gdk.color_parse = strip_boolean_result(Gdk.color_parse)
+color_parse = strip_boolean_result(Gdk.color_parse)
+__all__.append('color_parse')
 
 
 # Note, we cannot override the entire class as Gdk.Atom has no gtype, so just

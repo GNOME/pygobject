@@ -1495,7 +1495,8 @@ def main_quit(*args):
 
 __all__.append('main_quit')
 
-Gtk.stock_lookup = strip_boolean_result(Gtk.stock_lookup)
+stock_lookup = strip_boolean_result(Gtk.stock_lookup)
+__all__.append('stock_lookup')
 
 initialized, argv = Gtk.init_check(sys.argv)
 sys.argv = list(argv)
