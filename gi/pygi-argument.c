@@ -855,6 +855,7 @@ _pygi_argument_to_array (GIArgument  *arg,
 
             g_array = g_array_new (is_zero_terminated, FALSE, item_size);
 
+            g_free (g_array->data);
             g_array->data = arg->v_pointer;
             g_array->len = length;
             *out_free_array = TRUE;
