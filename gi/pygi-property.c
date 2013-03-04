@@ -95,6 +95,15 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
     return ret;
 }
 
+static inline gpointer
+g_value_get_or_dup_boxed (const GValue *value, GITransfer transfer)
+{
+    if (transfer == GI_TRANSFER_EVERYTHING)
+        return g_value_dup_boxed (value);
+    else
+        return g_value_get_boxed (value);
+}
+
 PyObject *
 pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
 {
@@ -194,7 +203,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
                 case GI_INFO_TYPE_UNION:
 
                     if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        arg.v_pointer = g_value_get_boxed (&value);
+                        arg.v_pointer = g_value_dup_boxed (&value);
                     } else if (g_type_is_a (type, G_TYPE_POINTER)) {
                         arg.v_pointer = g_value_get_pointer (&value);
                     } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
@@ -214,12 +223,12 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
             break;
         }
         case GI_TYPE_TAG_GHASH:
-            arg.v_pointer = g_value_get_boxed (&value);
+            arg.v_pointer = g_value_get_or_dup_boxed (&value, transfer);
             break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
             if (G_VALUE_HOLDS_BOXED(&value))
-                arg.v_pointer = g_value_get_boxed (&value);
+                arg.v_pointer = g_value_get_or_dup_boxed (&value, transfer);
             else
                 arg.v_pointer = g_value_get_pointer (&value);
             break;
@@ -229,7 +238,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
             GArray *arg_items;
             int i;
 
-            strings = g_value_get_boxed (&value);
+            strings = g_value_get_or_dup_boxed (&value, transfer);
             if (strings == NULL)
                 arg.v_pointer = NULL;
             else {
@@ -250,6 +259,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
     }
 
     py_value = _pygi_argument_to_object (&arg, type_info, transfer);
+    g_value_unset (&value);
 
 out:
     if (property_info != NULL)
@@ -410,7 +420,7 @@ pygi_set_property_value_real (PyGObject *instance,
                 strings[i] = g_array_index (arg_items, GIArgument, i).v_string;
             }
             strings[arg_items->len] = NULL;
-            g_value_set_boxed (&value, strings);
+            g_value_take_boxed (&value, strings);
             g_array_free (arg_items, TRUE);
             break;
         }
@@ -422,6 +432,7 @@ pygi_set_property_value_real (PyGObject *instance,
     }
 
     g_object_set_property (instance->obj, pspec->name, &value);
+    g_value_unset (&value);
 
     ret_value = 0;
 
