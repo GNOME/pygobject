@@ -1,3 +1,36 @@
+3.7.91  04-Mar-2013
+        - Fix many memory leaks (#675726, #693402, #691501, #510511, #691501,
+	  #672224, and several more which are detected by our test suite)
+	  (Martin Pitt)
+        - Dot not clobber original Gdk/Gtk functions with overrides
+	  (Martin Pitt) (#686835)
+	- Optimize GValue.get/set_value by setting GValue.g_type to a local
+	  (Simon Feltman) (#694857)
+        - Run tests with G_SLICE=debug_blocks (Martin Pitt) (#691501)
+	- Add override helper for stripping boolean returns (Martin Pitt)
+	  (#694431)
+	- Drop obsolete pygobject_register_sinkfunc() declaration (Martin Pitt)
+	  (#639849)
+	- Fix marshalling of C arrays with explicit length in signal arguments
+	  (Martin Pitt) (#662241)
+	- Fix signedness, overflow checking, and 32 bit overflow of GFlags
+	  (Martin Pitt) (#693121)
+	- gi/pygi-marshal-from-py.c: Fix build on Visual C++ (Chun-wei Fan)
+	  (#692856)
+	- Raise DeprecationWarning on deprecated callables (Martin Pitt)
+	  (#665084)
+	- pygtkcompat: Add Widget.window, scroll_to_mark, and window methods
+	  (Simon Feltman) (#694067)
+	- pygtkcompat: Add Gtk.Window.set_geometry_hints which accepts keyword
+	  arguments (Simon Feltman) (#694067)
+        - Ship pygobject.doap for autogen.sh (Martin Pitt) (#694591)
+	- Fix crashes in various GObject signal handler functions
+	  (Simon Feltman) (#633927)
+	- pygi-closure: Protect the GSList prepend with the GIL (Olivier Crête)
+	  (#684060)
+	- generictreemodel: Fix bad default return type for get_column_type
+	  (Simon Feltman)
+
 3.7.90  19-Feb-2013
 	- overrides: Fix inconsistencies with drag and drop target list API
 	  (Simon Feltman) (#680640)
