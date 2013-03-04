@@ -1104,6 +1104,10 @@ array_success:
     if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
         arg->v_pointer = array_->data;
         g_array_free (array_, FALSE);
+        /* remember the originally allocated array in args_data, as args and
+         * in_args get changed for (inout) arguments */
+        if (arg_cache->transfer == GI_TRANSFER_NOTHING)
+            state->args_data[arg_cache->c_arg_index] = arg->v_pointer;
     } else {
         arg->v_pointer = array_;
     }

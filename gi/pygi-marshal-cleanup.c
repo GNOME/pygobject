@@ -101,6 +101,12 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
                 arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON &&
                     state->args[i]->v_pointer != NULL)
             cleanup_func (state, arg_cache, state->args[i]->v_pointer, TRUE);
+
+        if (cleanup_func &&
+                arg_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL &&
+                    state->args_data[i] != NULL) {
+            cleanup_func (state, arg_cache, state->args_data[i], TRUE);
+        }
     }
 }
 
