@@ -434,8 +434,11 @@ pyg_flags_get_value_nicks(PyGFlags *self, void *closure)
 
   retval = PyList_New(0);
   for (i = 0; i < flags_class->n_values; i++)
-      if ((PYGLIB_PyLong_AsUnsignedLong(self) & flags_class->values[i].value) == flags_class->values[i].value)
-	  PyList_Append(retval, PYGLIB_PyUnicode_FromString(flags_class->values[i].value_nick));
+      if ((PYGLIB_PyLong_AsUnsignedLong(self) & flags_class->values[i].value) == flags_class->values[i].value) {
+	  PyObject *py_nick = PYGLIB_PyUnicode_FromString(flags_class->values[i].value_nick);
+	  PyList_Append(retval, py_nick);
+	  Py_DECREF (py_nick);
+      }
 
   g_type_class_unref(flags_class);
 
