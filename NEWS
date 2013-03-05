@@ -1,3 +1,6 @@
+3.7.91.1 05-Mar-2013
+        - Revert "Drop gi.overrides.overridefunc()" (Martin Pitt) (#695199)
+
 3.7.91  04-Mar-2013
         - Fix many memory leaks (#675726, #693402, #691501, #510511, #691501,
 	  #672224, and several more which are detected by our test suite)
