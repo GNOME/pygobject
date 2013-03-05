@@ -1489,11 +1489,12 @@ if Gtk._version != '2.0':
     Menu = override(Menu)
     __all__.append('Menu')
 
+_Gtk_main_quit = Gtk.main_quit
 
+
+@override(Gtk.main_quit)
 def main_quit(*args):
-    Gtk.main_quit()
-
-__all__.append('main_quit')
+    _Gtk_main_quit()
 
 stock_lookup = strip_boolean_result(Gtk.stock_lookup)
 __all__.append('stock_lookup')
