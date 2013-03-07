@@ -341,8 +341,14 @@ set_property_from_pspec(GObject *obj,
 
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     if (pyg_param_gvalue_from_pyobject(&value, pvalue, pspec) < 0) {
-	PyErr_SetString(PyExc_TypeError,
-			"could not convert argument to correct param type");
+        PyObject *pvalue_str = PyObject_Str(pvalue);
+	PyErr_Format(PyExc_TypeError,
+	             "could not convert '%s' to type '%s' when setting property '%s.%s'",
+	             PYGLIB_PyUnicode_AsString(pvalue_str),
+	             g_type_name(G_PARAM_SPEC_VALUE_TYPE(pspec)),
+	             G_OBJECT_TYPE_NAME(obj),
+	             pspec->name);
+	Py_DECREF(pvalue_str);
 	return FALSE;
     }
 
