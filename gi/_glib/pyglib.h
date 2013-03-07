@@ -33,15 +33,24 @@ typedef void (*PyGLibThreadBlockFunc) (void);
 
 void pyglib_init(void);
 void pyglib_init_internal(PyObject *api);
-PyGILState_STATE pyglib_gil_state_ensure(void);
-void pyglib_gil_state_release(PyGILState_STATE state);
-int pyglib_enable_threads(void);
+
+#ifdef DISABLE_THREADING
+#    define pyglib_gil_state_ensure()        PyGILState_LOCKED
+#    define pyglib_gil_state_release(state)  state
+#    define pyglib_begin_allow_threads       G_STMT_START {
+#    define pyglib_end_allow_threads         } G_STMT_END
+#else
+#    define pyglib_gil_state_ensure          PyGILState_Ensure
+#    define pyglib_gil_state_release         PyGILState_Release
+#    define pyglib_begin_allow_threads       Py_BEGIN_ALLOW_THREADS
+#    define pyglib_end_allow_threads         Py_END_ALLOW_THREADS
+#endif
+
 gboolean pyglib_error_check(GError **error);
 PyObject *pyglib_error_marshal (GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
 PyObject *pyglib_register_exception_for_domain(gchar *name,
 					       gint error_domain);
-gboolean pyglib_threads_enabled(void);
 void pyglib_set_thread_block_funcs(PyGLibThreadBlockFunc block_threads_func,
 				   PyGLibThreadBlockFunc unblock_threads_func);
 void pyglib_block_threads(void);
@@ -51,20 +60,9 @@ PyObject * pyglib_option_group_new(GOptionGroup *group);
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 
 /* Private: for gobject <-> glib interaction only. */
-void _pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback);
 PyObject* _pyglib_generic_ptr_richcompare(void* a, void *b, int op);
 PyObject* _pyglib_generic_long_richcompare(long a, long b, int op);
 
-#define pyglib_begin_allow_threads		\
-    G_STMT_START {                              \
-        PyThreadState *_save = NULL;            \
-        if (pyglib_threads_enabled())		\
-            _save = PyEval_SaveThread();
-
-#define pyglib_end_allow_threads                \
-        if (pyglib_threads_enabled())           \
-            PyEval_RestoreThread(_save);        \
-    } G_STMT_END
 
 #define PYGLIB_REGISTER_TYPE(d, type, name)	        \
     if (!type.tp_alloc)                                 \

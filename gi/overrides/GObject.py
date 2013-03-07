@@ -198,7 +198,7 @@ features = _gobject.features
 list_properties = _gobject.list_properties
 new = _gobject.new
 pygobject_version = _gobject.pygobject_version
-threads_init = _gobject.threads_init
+threads_init = GLib.threads_init
 type_register = _gobject.type_register
 __all__ += ['features', 'list_properties', 'new',
             'pygobject_version', 'threads_init', 'type_register']

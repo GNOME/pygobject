@@ -45,7 +45,13 @@ OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
 spawn_async = _glib.spawn_async
-threads_init = _glib.threads_init
+
+
+def threads_init():
+    warnings.warn('threads_init longer needs to be called. '
+                  'See: https://bugzilla.gnome.org/show_bug.cgi?id=686914',
+                  PyGIDeprecationWarning)
+
 
 __all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']

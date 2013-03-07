@@ -35,23 +35,7 @@
 
 /* ---------------- glib module functions -------------------- */
 
-static PyObject *
-pyglib_threads_init(PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    if (!pyglib_enable_threads())
-        return NULL;
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 static PyMethodDef _glib_functions[] = {
-    { "threads_init",
-      (PyCFunction) pyglib_threads_init, METH_NOARGS,
-      "threads_init()\n"
-      "Initialize GLib for use from multiple threads. If you also use GTK+\n"
-      "itself (i.e. GUI, not just PyGObject), use gtk.gdk.threads_init()\n"
-      "instead." },
     { "spawn_async",
       (PyCFunction)pyglib_spawn_async, METH_VARARGS|METH_KEYWORDS,
       "spawn_async(argv, envp=None, working_directory=None,\n"

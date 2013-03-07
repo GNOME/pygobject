@@ -1525,29 +1525,11 @@ pygobject_gil_state_release (int flag)
     pyglib_gil_state_release(flag);
 }
 
-static PyObject *
-pyg_threads_init (PyObject *unused, PyObject *args, PyObject *kwargs)
-{
-    if (!pyglib_enable_threads())
-        return NULL;
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
 /* Only for backwards compatibility */
 static int
 pygobject_enable_threads(void)
 {
-    if (!pyglib_enable_threads())
-	return -1;
     return 0;
-}
-
-static void
-pyg_note_threads_enabled(void)
-{
-    pygobject_api_functions.threads_enabled = TRUE;
 }
 
 static PyObject *
@@ -1690,8 +1672,6 @@ static PyMethodDef _gobject_functions[] = {
       pyg_object_class_list_properties, METH_VARARGS },
     { "new",
       (PyCFunction)pyg_object_new, METH_VARARGS|METH_KEYWORDS },
-    { "threads_init",
-      (PyCFunction)pyg_threads_init, METH_VARARGS|METH_KEYWORDS },
     { "signal_accumulator_true_handled",
       (PyCFunction)pyg_signal_accumulator_true_handled, METH_VARARGS },
     { "add_emission_hook",
@@ -2068,7 +2048,13 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyg_flags_add,
   pyg_flags_from_gtype,
 
-  FALSE, /* threads_enabled */
+  /* threads_enabled */
+#ifdef DISABLE_THREADING
+  FALSE,
+#else
+  TRUE,
+#endif
+
   pygobject_enable_threads,
   pygobject_gil_state_ensure,
   pygobject_gil_state_release,
@@ -2194,8 +2180,5 @@ PYGLIB_MODULE_START(_gobject, "_gobject")
     pygobject_pointer_register_types(d);
     pygobject_enum_register_types(d);
     pygobject_flags_register_types(d);
-
-    pygobject_api_functions.threads_enabled = pyglib_threads_enabled();
-    _pyglib_notify_on_enabling_threads(pyg_note_threads_enabled);
 }
 PYGLIB_MODULE_END

@@ -31,7 +31,6 @@
 #include "pygoptiongroup.h"
 
 static struct _PyGLib_Functions *_PyGLib_API;
-static int pyglib_thread_state_tls_key;
 static PyObject *exception_table = NULL;
 
 void
@@ -76,99 +75,6 @@ pyglib_init_internal(PyObject *api)
 {
     _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "gi._glib._PyGLib_API");
 }
-
-gboolean
-pyglib_threads_enabled(void)
-{
-    g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
-
-    return _PyGLib_API->threads_enabled;
-}
-
-PyGILState_STATE
-pyglib_gil_state_ensure(void)
-{
-    g_return_val_if_fail (_PyGLib_API != NULL, PyGILState_LOCKED);
-
-    if (!_PyGLib_API->threads_enabled)
-	return PyGILState_LOCKED;
-
-#ifdef DISABLE_THREADING
-    return PyGILState_LOCKED;
-#else
-    return PyGILState_Ensure();
-#endif
-}
-
-void
-pyglib_gil_state_release(PyGILState_STATE state)
-{
-    g_return_if_fail (_PyGLib_API != NULL);
-
-    if (!_PyGLib_API->threads_enabled)
-	return;
-
-#ifndef DISABLE_THREADING
-    PyGILState_Release(state);
-#endif
-}
-
-/**
- * pyglib_enable_threads:
- *
- * Returns: TRUE if threading is enabled, FALSE otherwise.
- *
- */
-#ifdef DISABLE_THREADING
-gboolean
-pyglib_enable_threads(void)
-{
-    PyErr_SetString(PyExc_RuntimeError,
-		    "pyglib threading disabled at compile time");
-    return FALSE;
-}
-
-void
-_pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
-{
-    /* Ignore, threads cannot be enabled. */
-}
-
-#else
-
-static GSList *thread_enabling_callbacks = NULL;
-
-/* Enable threading; note that the GIL must be held by the current
- * thread when this function is called
- */
-gboolean
-pyglib_enable_threads(void)
-{
-    GSList *callback;
-
-    g_return_val_if_fail (_PyGLib_API != NULL, FALSE);
-
-    if (_PyGLib_API->threads_enabled)
-	return TRUE;
-  
-    PyEval_InitThreads();
-    _PyGLib_API->threads_enabled = TRUE;
-    pyglib_thread_state_tls_key = PyThread_create_key();
-
-    for (callback = thread_enabling_callbacks; callback; callback = callback->next)
-	((PyGLibThreadsEnabledFunc) callback->data) ();
-
-    g_slist_free(thread_enabling_callbacks);
-    return TRUE;
-}
-
-void
-_pyglib_notify_on_enabling_threads(PyGLibThreadsEnabledFunc callback)
-{
-    if (callback && !pyglib_threads_enabled())
-	thread_enabling_callbacks = g_slist_append(thread_enabling_callbacks, callback);
-}
-#endif
 
 /**
  * pyglib_block_threads:
