@@ -1,5 +1,5 @@
 CLEANFILES =
-noinst_LTLIBRARIES = libgimarshallingtests.la
+check_LTLIBRARIES = libgimarshallingtests.la
 test_typelibs = GIMarshallingTests-1.0.typelib
 
 nodist_libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
@@ -23,7 +23,7 @@ GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 
 # regress.c needs cairo
 if ENABLE_CAIRO
-noinst_LTLIBRARIES += libregress.la
+check_LTLIBRARIES += libregress.la
 test_typelibs += Regress-1.0.typelib
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
@@ -52,7 +52,7 @@ gschemas.compiled: org.gnome.test.gschema.xml
 
 CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib gschemas.compiled
 
-noinst_LTLIBRARIES += testhelper.la
+check_LTLIBRARIES += testhelper.la
 
 testhelper_la_CFLAGS = -I$(top_srcdir)/gi/_gobject -I$(top_srcdir)/gi/_glib $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 testhelper_la_LDFLAGS = -module -avoid-version
@@ -72,7 +72,7 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 	test -L $@ || $(LN_S) .libs/$@ $@
 
 
-all: $(LTLIBRARIES:.la=.so)
+all: $(check_LTLIBRARIES:.la=.so)
 
 EXTRA_DIST = \
 	compathelper.py \
@@ -116,7 +116,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 clean-local:
-	rm -f $(LTLIBRARIES:.la=.so) file.txt~
+	rm -f $(check_LTLIBRARIES:.la=.so) file.txt~
 
 DBUS_LAUNCH=$(shell which dbus-launch)
 RUN_TESTS_ENV_VARS= \
@@ -131,7 +131,7 @@ RUN_TESTS_ENV_VARS= \
 
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
-check-local: $(LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
+check-local: $(check_LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
 	@echo "  CHECK  Pyflakes"
 	@if type pyflakes >/dev/null 2>&1; then pyflakes $(top_srcdir); else echo "skipped, pyflakes not installed"; fi
 	@if test -z "$$SKIP_PEP8"; then \
