@@ -547,8 +547,9 @@ class TestVFuncsWithHeldFloatingArg(unittest.TestCase):
         self.assertTrue(held_object_ref() is None)
 
 
+@unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject.props, 'some_object'),
+                     'too old gobject-introspection')
 class TestPropertyHoldingObject(unittest.TestCase):
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
     def test_props_getter_holding_object_ref_count(self):
         holder = GIMarshallingTests.PropertiesObject()
         held = GObject.Object()
@@ -564,8 +565,6 @@ class TestPropertyHoldingObject(unittest.TestCase):
         gc.collect()
         self.assertEqual(held.__grefcount__, initial_ref_count)
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject.props, 'some_object'),
-                         'too old gobject-introspection')
     def test_get_property_holding_object_ref_count(self):
         holder = GIMarshallingTests.PropertiesObject()
         held = GObject.Object()
@@ -581,7 +580,6 @@ class TestPropertyHoldingObject(unittest.TestCase):
         gc.collect()
         self.assertEqual(held.__grefcount__, initial_ref_count)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
     def test_props_setter_holding_object_ref_count(self):
         holder = GIMarshallingTests.PropertiesObject()
         held = GObject.Object()
@@ -598,7 +596,6 @@ class TestPropertyHoldingObject(unittest.TestCase):
         holder.props.some_object = None
         self.assertEqual(held.__grefcount__, 1)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=675726
     def test_set_property_holding_object_ref_count(self):
         holder = GIMarshallingTests.PropertiesObject()
         held = GObject.Object()
