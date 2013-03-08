@@ -611,3 +611,7 @@ class TestPropertyHoldingObject(unittest.TestCase):
         # Clearing should pull it back down
         holder.set_property('some-object', None)
         self.assertEqual(held.__grefcount__, 1)
+
+    def test_set_object_property_to_invalid_type(self):
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertRaises(TypeError, obj.set_property, 'some-object', 'not_an_object')

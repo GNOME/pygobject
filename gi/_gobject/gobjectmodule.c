@@ -2086,7 +2086,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   pyglib_option_group_new,
   pyg_type_from_object_strict,
 
-  pygobject_new_full
+  pygobject_new_full,
+  &PyGObject_Type
 };
 
 /* for addon libraries ... */

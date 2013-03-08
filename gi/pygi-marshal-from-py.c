@@ -1842,6 +1842,14 @@ pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
         return TRUE;
     }
 
+    if (!pygobject_check (py_arg, &PyGObject_Type)) {
+        PyObject *repr = PyObject_Repr (py_arg);
+        PyErr_Format(PyExc_TypeError, "expected GObject but got %s",
+                     PYGLIB_PyUnicode_AsString (repr));
+        Py_DECREF (repr);
+        return FALSE;
+    }
+
     gobj = pygobject_get (py_arg);
     if (transfer == GI_TRANSFER_EVERYTHING) {
         /* An easy case of adding a new ref that the caller will take ownership of.

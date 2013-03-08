@@ -191,6 +191,7 @@ struct _PyGObject_Functions {
     GType (* type_from_object_strict) (PyObject *obj, gboolean strict);
 
     PyObject *(* newgobj_full)(GObject *obj, gboolean steal, gpointer g_class);
+    PyTypeObject *object_type;
 };
 
 #ifndef _INSIDE_PYGOBJECT_
@@ -206,6 +207,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pygobject_lookup_class      (_PyGObject_API->lookup_class)
 #define pygobject_new               (_PyGObject_API->newgobj)
 #define pygobject_new_full          (_PyGObject_API->newgobj_full)
+#define PyGObject_Type              (*_PyGObject_API->object_type)
 #define pyg_closure_new             (_PyGObject_API->closure_new)
 #define pygobject_watch_closure     (_PyGObject_API->object_watch_closure)
 #define pyg_closure_set_exception_handler (_PyGObject_API->closure_set_exception_handler)
