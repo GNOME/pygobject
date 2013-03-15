@@ -589,7 +589,6 @@ class TestProperty(unittest.TestCase):
         self.assertRaises(TypeError, GObject.Property, type=bool)
         self.assertRaises(TypeError, GObject.Property, type=object, default=0)
         self.assertRaises(TypeError, GObject.Property, type=complex)
-        self.assertRaises(TypeError, GObject.Property, flags=-10)
 
     def test_defaults(self):
         GObject.Property(type=bool, default=True)

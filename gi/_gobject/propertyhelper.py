@@ -168,9 +168,6 @@ class Property(object):
         # we don't want the lengthy Property class documentation showing up
         # on instances.
         self.__doc__ = blurb
-
-        if flags < 0 or flags > 32:
-            raise TypeError("invalid flag value: %r" % (flags,))
         self.flags = flags
 
         # Call after setting blurb for potential __doc__ usage.
