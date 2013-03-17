@@ -83,7 +83,15 @@ def get_required_version(namespace):
     return _versions.get(namespace, None)
 
 
-# note, DeprecationWarning would be more suitable as a base, but this
-# unhelpfully isn't shown by default and thus useless
-class PyGIDeprecationWarning(RuntimeWarning):
+# Use RuntimeWarning as the base class of PyGIDeprecationWarning
+# for unstable (odd minor version) and use DeprecationWarning for
+# stable (even minor version). This is so PyGObject deprecations
+# behave the same as regular Python deprecations in stable releases.
+if version_info[1] % 2:
+    _DeprecationWarningBase = RuntimeWarning
+else:
+    _DeprecationWarningBase = DeprecationWarning
+
+
+class PyGIDeprecationWarning(_DeprecationWarningBase):
     pass
