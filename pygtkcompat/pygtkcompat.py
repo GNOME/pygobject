@@ -427,7 +427,7 @@ def enable_gtk(version='2.0'):
                            min_aspect=-1.0, max_aspect=-1.0):
 
         geometry = Gdk.Geometry()
-        geom_mask = Gdk.WindowHints()
+        geom_mask = Gdk.WindowHints(0)
 
         if min_width >= 0 or min_height >= 0:
             geometry.min_width = max(min_width, 0)
