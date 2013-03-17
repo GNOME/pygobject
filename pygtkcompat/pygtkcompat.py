@@ -100,7 +100,7 @@ def enable():
 _unset = object()
 
 
-def enable_gtk(version='2.0'):
+def enable_gtk(version='3.0'):
     # set the default encoding like PyGTK
     reload(sys)
     if sys.version_info < (3, 0):
@@ -189,6 +189,12 @@ def enable_gtk(version='2.0'):
 
     Gdk.screen_width = Gdk.Screen.width
     Gdk.screen_height = Gdk.Screen.height
+
+    orig_gdk_window_get_geometry = Gdk.Window.get_geometry
+
+    def gdk_window_get_geometry(window):
+        return orig_gdk_window_get_geometry(window) + (window.get_visual().get_best_depth(),)
+    Gdk.Window.get_geometry = gdk_window_get_geometry
 
     # gtk
     gi.require_version('Gtk', version)
