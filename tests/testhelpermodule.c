@@ -7,9 +7,6 @@
 
 #include <pyglib-python-compat.h>
 
-static PyTypeObject *_PyGObject_Type;
-#define PyGObject_Type (*_PyGObject_Type)
-
 static PyObject * _wrap_TestInterface__do_iface_method(PyObject *cls,
 						       PyObject *args,
 						       PyObject *kwargs);
@@ -618,16 +615,7 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 
   d = PyModule_GetDict(module);
 
-  if ((m = PyImport_ImportModule("gi._gobject._gobject")) != NULL) {
-    PyObject *moddict = PyModule_GetDict(m);
-    
-    _PyGObject_Type = (PyTypeObject *)PyDict_GetItemString(moddict, "GObject");
-    if (_PyGObject_Type == NULL) {
-      PyErr_SetString(PyExc_ImportError,
-		      "cannot import name GObject from gobject");
-      return PYGLIB_MODULE_ERROR_RETURN;
-    }
-  } else {
+  if ((m = PyImport_ImportModule("gi._gobject._gobject")) == NULL) {
     PyErr_SetString(PyExc_ImportError,
 		    "could not import gobject");
     return PYGLIB_MODULE_ERROR_RETURN;
