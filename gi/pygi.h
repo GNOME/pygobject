@@ -82,6 +82,7 @@ struct PyGI_API {
                                 GParamSpec *pspec,
                                 PyObject *value);
     GClosure * (*signal_closure_new) (PyGObject *instance,
+                                      GType g_type,
                                       const gchar *sig_name,
                                       PyObject *callback,
                                       PyObject *extra_args,
@@ -141,6 +142,7 @@ pygi_set_property_value (PyGObject *instance,
 
 static inline GClosure *
 pygi_signal_closure_new (PyGObject *instance,
+                         GType g_type,
                          const gchar *sig_name,
                          PyObject *callback,
                          PyObject *extra_args,
@@ -149,7 +151,7 @@ pygi_signal_closure_new (PyGObject *instance,
     if (_pygi_import() < 0) {
         return NULL;
     }
-    return PyGI_API->signal_closure_new(instance, sig_name, callback, extra_args, swap_data);
+    return PyGI_API->signal_closure_new(instance, g_type, sig_name, callback, extra_args, swap_data);
 }
 
 static inline PyObject *

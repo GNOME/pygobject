@@ -20,47 +20,28 @@
 
 #include "pygi-private.h"
 
-/* Copied from glib */
-static void
-canonicalize_key (gchar *key)
-{
-    gchar *p;
-
-    for (p = key; *p != 0; p++)
-    {
-        gchar c = *p;
-
-        if (c != '-' &&
-            (c < '0' || c > '9') &&
-            (c < 'A' || c > 'Z') &&
-            (c < 'a' || c > 'z'))
-                *p = '-';
-    }
-}
-
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type,
                                  const gchar *signal_name)
 {
     GIRepository *repository;
     GIBaseInfo *info;
-    GType parent;
+    GISignalInfo *signal_info = NULL;
 
     repository = g_irepository_get_default();
     info = g_irepository_find_by_gtype (repository, g_type);
-    if (info != NULL) {
-        GISignalInfo *signal_info;
-        signal_info = g_object_info_find_signal ((GIObjectInfo *) info, signal_name);
-        g_base_info_unref (info);
-        if (signal_info != NULL)
-            return signal_info;
-    }
+    if (info == NULL)
+        return NULL;
 
-    parent = g_type_parent (g_type);
-    if (parent > 0)
-        return _pygi_lookup_signal_from_g_type (parent, signal_name);
+    if (GI_IS_OBJECT_INFO (info))
+        signal_info = g_object_info_find_signal ((GIObjectInfo *) info,
+                                                 signal_name);
+    else if (GI_IS_INTERFACE_INFO (info))
+        signal_info = g_interface_info_find_signal ((GIInterfaceInfo *) info,
+                                                    signal_name);
 
-    return NULL;
+    g_base_info_unref (info);
+    return signal_info;
 }
 
 static void
@@ -192,26 +173,21 @@ pygi_signal_closure_marshal(GClosure *closure,
 
 GClosure *
 pygi_signal_closure_new_real (PyGObject *instance,
-                              const gchar *sig_name,
+                              GType g_type,
+                              const gchar *signal_name,
                               PyObject *callback,
                               PyObject *extra_args,
                               PyObject *swap_data)
 {
     GClosure *closure = NULL;
     PyGISignalClosure *pygi_closure = NULL;
-    GType g_type;
     GISignalInfo *signal_info = NULL;
-    char *signal_name = g_strdup (sig_name);
 
     g_return_val_if_fail(callback != NULL, NULL);
 
-    canonicalize_key(signal_name);
-
-    g_type = pyg_type_from_object ((PyObject *)instance);
     signal_info = _pygi_lookup_signal_from_g_type (g_type, signal_name);
-
     if (signal_info == NULL)
-        goto out;
+        return NULL;
 
     closure = g_closure_new_simple(sizeof(PyGISignalClosure), NULL);
     g_closure_add_invalidate_notifier(closure, NULL, pygi_signal_closure_invalidate);
@@ -237,9 +213,6 @@ pygi_signal_closure_new_real (PyGObject *instance,
         pygi_closure->pyg_closure.swap_data = swap_data;
         closure->derivative_flag = TRUE;
     }
-
-out:
-    g_free (signal_name);
 
     return closure;
 }

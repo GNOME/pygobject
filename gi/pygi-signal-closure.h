@@ -36,6 +36,7 @@ typedef struct _PyGISignalClosure
 } PyGISignalClosure;
 
 GClosure * pygi_signal_closure_new_real (PyGObject *instance,
+                                         GType g_type,
                                          const gchar *sig_name,
                                          PyObject *callback,
                                          PyObject *extra_args,
