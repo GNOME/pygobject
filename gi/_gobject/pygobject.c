@@ -299,15 +299,16 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
         return pyg_param_spec_new(pspec);
     }
 
-    /* See if the property's class is from the gi repository. If so,
-     * use gi to correctly read the property value. */
-    ret = pygi_get_property_value (self->pygobject, pspec);
-    if (ret != NULL) {
-        return ret;
+    if (!pyg_gtype_is_custom (pspec->owner_type)) {
+        /* The GType is not implemented at the Python level: see if we can
+         * read the property value via gi. */
+        ret = pygi_get_property_value (self->pygobject, pspec);
+        if (ret)
+            return ret;
     }
-    
-    /* If we reach here, it must be a property defined outside of gi.
-     * Just do a straightforward read. */
+
+    /* The GType is implemented in Python, or we failed to read it via gi:
+     * do a straightforward read. */
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
     pyg_begin_allow_threads;
     g_object_get_property(self->pygobject->obj, pspec->name, &value);
@@ -402,18 +403,18 @@ PyGProps_setattro(PyGProps *self, PyObject *attr, PyObject *pvalue)
     if (!pspec) {
 	return PyObject_GenericSetAttr((PyObject *)self, attr, pvalue);
     }
-
-    /* See if the property's class is from the gi repository. If so,
-     * use gi to correctly read the property value. */
-    ret = pygi_set_property_value (self->pygobject, pspec, pvalue);
-    if (ret == 0)
-        return 0;
-    else if (ret == -1)
-        if (PyErr_Occurred())
+    if (!pyg_gtype_is_custom (pspec->owner_type)) {
+        /* This GType is not implemented in Python: see if we can set the
+         * property via gi. */
+        ret = pygi_set_property_value (self->pygobject, pspec, pvalue);
+        if (ret == 0)
+            return 0;
+        else if (ret == -1 && PyErr_Occurred())
             return -1;
+    }
 
-    /* If we reach here, it must be a property defined outside of gi.
-     * Just do a straightforward set. */
+    /* This GType is implemented in Python, or we failed to set it via gi:
+     * do a straightforward set. */
     if (!set_property_from_pspec(obj, pspec, pvalue))
 	return -1;
 				  
