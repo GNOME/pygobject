@@ -72,9 +72,37 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
         case GI_TYPE_TAG_DOUBLE:
            *((gdouble *) retval) = arg.v_double;
            break;
-        default:
-           *((GIArgument *) retval) = arg;
+        case GI_TYPE_TAG_GTYPE:
+           *((ffi_arg *) retval) = arg.v_ulong;
            break;
+        case GI_TYPE_TAG_UNICHAR:
+            *((ffi_arg *) retval) = arg.v_uint32;
+            break;
+        case GI_TYPE_TAG_INTERFACE:
+            {
+                GIBaseInfo* interface_info;
+                GIInfoType interface_type;
+
+                interface_info = g_type_info_get_interface(type_info);
+                interface_type = g_base_info_get_type(interface_info);
+
+                switch (interface_type) {
+                case GI_INFO_TYPE_ENUM:
+                    *(ffi_sarg *) retval = arg.v_int;
+                    break;
+                case GI_INFO_TYPE_FLAGS:
+                    *(ffi_arg *) retval = arg.v_uint;
+                    break;
+                default:
+                    *(ffi_arg *) retval = (ffi_arg) arg.v_pointer;
+                    break;
+                }
+
+                g_base_info_unref (interface_info);
+            }
+        default:
+            *(ffi_arg *) retval = (ffi_arg) arg.v_pointer;
+            break;
       }
 }
 
@@ -123,6 +151,12 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
         case GI_TYPE_TAG_DOUBLE:
            *((gdouble *) out_arg) = arg.v_double;
            break;
+        case GI_TYPE_TAG_GTYPE:
+           *((gulong *) out_arg) = arg.v_ulong;
+           break;
+        case GI_TYPE_TAG_UNICHAR:
+            *((guint32 *) out_arg) = arg.v_uint32;
+            break;
         case GI_TYPE_TAG_INTERFACE:
         {
            GIBaseInfo *interface;
@@ -131,21 +165,34 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
            interface = g_type_info_get_interface (type_info);
            interface_type = g_base_info_get_type (interface);
 
-           if (!g_type_info_is_pointer (type_info) &&
-               interface_type == GI_INFO_TYPE_STRUCT) {
-               if (object == Py_None) {
-                   arg.v_pointer = NULL;
-               } else {
-                   gsize item_size = _pygi_g_type_info_size (type_info);
-                   memcpy (out_arg, arg.v_pointer, item_size);
+           switch (interface_type) {
+           case GI_INFO_TYPE_ENUM:
+               *(gint *) out_arg = arg.v_int;
+               break;
+           case GI_INFO_TYPE_FLAGS:
+               *(guint *) out_arg = arg.v_uint;
+               break;
+           case GI_INFO_TYPE_STRUCT:
+               if (!g_type_info_is_pointer (type_info)) {
+                   if (object != Py_None) {
+                       gsize item_size = _pygi_g_type_info_size (type_info);
+                       memcpy (out_arg, arg.v_pointer, item_size);
+                   }
+                   break;
                }
+
+           /* Fall through if pointer */
+           default:
+               *((gpointer *) out_arg) = arg.v_pointer;
                break;
            }
+
+           g_base_info_unref (interface);
+           break;
         }
 
-        /* Fall through */
         default:
-           *((GIArgument *) out_arg) = arg;
+           *((gpointer *) out_arg) = arg.v_pointer;
            break;
       }
 }

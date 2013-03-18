@@ -1497,6 +1497,25 @@ class TestEnum(unittest.TestCase):
                           GIMarshallingTests.NoTypeFlags.__gtype__)
 
 
+@unittest.skipUnless(hasattr(GIMarshallingTests.Object, 'vfunc_return_enum'),
+                     'GIMarshallingTests too old')
+class TestEnumVFuncResults(unittest.TestCase):
+    class EnumTester(GIMarshallingTests.Object):
+        def do_vfunc_return_enum(self):
+            return GIMarshallingTests.Enum.VALUE2
+
+        def do_vfunc_out_enum(self):
+            return GIMarshallingTests.Enum.VALUE3
+
+    def test_vfunc_return_enum(self):
+        tester = self.EnumTester()
+        self.assertEqual(tester.vfunc_return_enum(), GIMarshallingTests.Enum.VALUE2)
+
+    def test_vfunc_out_enum(self):
+        tester = self.EnumTester()
+        self.assertEqual(tester.vfunc_out_enum(), GIMarshallingTests.Enum.VALUE3)
+
+
 class TestGEnum(unittest.TestCase):
 
     def test_genum(self):
