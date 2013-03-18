@@ -336,8 +336,9 @@ pygi_set_property_value_real (PyGObject *instance,
                         PyErr_Format (PyExc_NotImplementedError,
                                       "Setting properties of type '%s' is not implemented",
                                       g_type_name (type));
+                        goto out;
                     }
-                    goto out;
+                    break;
                 default:
                     PyErr_Format (PyExc_NotImplementedError,
                                   "Setting properties of type '%s' is not implemented",
