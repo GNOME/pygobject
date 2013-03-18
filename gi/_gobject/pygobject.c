@@ -1639,8 +1639,9 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
 {
     guint sigid;
     GQuark detail = 0;
-    GClosure *closure;
+    GClosure *closure = NULL;
     gulong handlerid;
+    GSignalQuery query_info;
 
     if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
 			     &sigid, &detail, TRUE)) {
@@ -1652,9 +1653,19 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
 	return NULL;
     }
 
-    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
-    if (closure == NULL)
-        closure = pyg_closure_new(callback, extra_args, object);
+    g_signal_query (sigid, &query_info);
+    if (!pyg_gtype_is_custom (query_info.itype)) {
+        /* The signal is implemented by a non-Python class, probably
+         * something in the gi repository. */
+        closure = pygi_signal_closure_new (self, name, callback, extra_args,
+                                          object);
+    }
+
+    if (!closure) {
+        /* The signal is either implemented at the Python level, or it comes
+         * from a foreign class that we don't have introspection data for. */
+        closure = pyg_closure_new (callback, extra_args, object);
+    }
 
     pygobject_watch_closure((PyObject *)self, closure);
     handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
