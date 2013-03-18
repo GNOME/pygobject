@@ -1,3 +1,21 @@
+3.7.92  18-Mar-2013
+	- Fix stack smasher when marshaling enums as a vfunc return value
+	  (Simon Feltman) (#637832)
+	- Change base class of PyGIDeprecationWarning based on minor version
+	  (Simon Feltman) (#696011)
+	- autogen.sh: Source gnome-autogen to fix out of source builddir (Alban
+	  Browaeys) (#694889)
+        - pygtkcompat: Make gdk.Window.get_geometry return tuple of 5
+	  (Simon Feltman)
+        - pygtkcompat: Initialize hint to zero in set_geometry_hints
+	  (Simon Feltman)
+        - Remove incorrect bounds check with property helper flags
+	  (Simon Feltman)
+	- Fix crash when setting property of type object to an incorrect type
+	  (Simon Feltman) (#695420)
+	- Give more informative error when setting property to incorrect type
+	  (Simon Feltman) (#695420)
+
 3.7.91.1 05-Mar-2013
         - Revert "Drop gi.overrides.overridefunc()" (Martin Pitt) (#695199)
 
