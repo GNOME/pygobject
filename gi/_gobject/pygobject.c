@@ -45,6 +45,7 @@ static void pygobject_inherit_slots(PyTypeObject *type, PyObject *bases,
 static void pygobject_find_slot_for(PyTypeObject *type, PyObject *bases, int slot_offset,
 				    gboolean check_for_present);
 GType PY_TYPE_OBJECT = 0;
+GQuark pygobject_custom_key;
 GQuark pygobject_class_key;
 GQuark pygobject_class_init_key;
 GQuark pygobject_wrapper_key;
@@ -148,8 +149,6 @@ pygobject_get_inst_data(PyGObject *self)
     return inst_data;
 }
 
-
-GHashTable *custom_type_registration = NULL;
 
 PyTypeObject *PyGObject_MetaType = NULL;
 
@@ -934,10 +933,6 @@ pygobject_lookup_class(GType gtype)
     if (gtype == G_TYPE_INTERFACE)
 	return &PyGInterface_Type;
     
-    py_type = pyg_type_get_custom(g_type_name(gtype));
-    if (py_type)
-	return py_type;
-
     py_type = g_type_get_qdata(gtype, pygobject_class_key);
     if (py_type == NULL) {
 	py_type = g_type_get_qdata(gtype, pyginterface_type_key);
@@ -2447,6 +2442,7 @@ pygobject_object_register_types(PyObject *d)
 {
     PyObject *o, *descr;
 
+    pygobject_custom_key = g_quark_from_static_string("PyGObject::custom");
     pygobject_class_key = g_quark_from_static_string("PyGObject::class");
     pygobject_class_init_key = g_quark_from_static_string("PyGObject::class-init");
     pygobject_wrapper_key = g_quark_from_static_string("PyGObject::wrapper");

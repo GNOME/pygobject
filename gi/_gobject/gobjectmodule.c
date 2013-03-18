@@ -128,7 +128,7 @@ pyg_type_from_name (PyObject *self, PyObject *args)
 #endif
     if (!PyArg_ParseTuple(args, "s:gobject.type_from_name", &name))
 	return NULL;
-    type = _pyg_type_from_name(name);
+    type = g_type_from_name(name);
     if (type != 0)
 	return pyg_type_wrapper_new(type);
     repr = PyObject_Repr((PyObject*)self);
@@ -958,7 +958,7 @@ get_type_name_for_class(PyTypeObject *class)
 	for (i = 0; type_name[i] != '\0'; i++)
 	    if (type_name[i] == '.')
 		type_name[i] = '+';
-	if (_pyg_type_from_name(type_name) == 0)
+	if (g_type_from_name(type_name) == 0)
 	    break;              /* we now have a unique name */
 	++name_serial;
     }
@@ -1179,6 +1179,10 @@ pyg_type_register(PyTypeObject *class, const char *type_name)
     Py_INCREF(class);
     g_type_set_qdata(instance_type, g_quark_from_string("PyGObject::class"),
 		     class);
+
+    /* Mark this GType as a custom python type */
+    g_type_set_qdata(instance_type, pygobject_custom_key,
+                     GINT_TO_POINTER (1));
 
     /* set new value of __gtype__ on class */
     gtype = pyg_type_wrapper_new(instance_type);
@@ -2066,7 +2070,8 @@ struct _PyGObject_Functions pygobject_api_functions = {
   add_warning_redirection,
   disable_warning_redirections,
 
-  pyg_type_register_custom_callback,
+  NULL, /* previously type_register_custom */
+
   pyg_gerror_exception_check,
 
   pyglib_option_group_new,

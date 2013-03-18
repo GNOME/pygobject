@@ -268,7 +268,7 @@ _wrap_g_type_from_name(PyGTypeWrapper *_, PyObject *args)
     if (!PyArg_ParseTuple(args, "s:GType.from_name", &type_name))
 	return NULL;
 
-    type = _pyg_type_from_name(type_name);
+    type = g_type_from_name(type_name);
     if (type == 0) {
 	PyErr_SetString(PyExc_RuntimeError, "unknown type name");
 	return NULL;
@@ -401,7 +401,7 @@ pyg_type_from_object_strict(PyObject *obj, gboolean strict)
     if (PYGLIB_PyUnicode_Check(obj)) {
 	gchar *name = PYGLIB_PyUnicode_AsString(obj);
 
-	type = _pyg_type_from_name(name);
+	type = g_type_from_name(name);
 	if (type != 0) {
 	    return type;
 	}
@@ -1820,69 +1820,10 @@ pyg_param_gvalue_as_pyobject(const GValue* gvalue,
     }
 }
 
-/**
- * pyg_type_registration_callback
- * @gtypename: type name
- * @callback: function to run
- *
- */
-typedef struct {
-    PyGTypeRegistrationFunction callback;
-    gpointer data;
-} CustomTypeData;
-
-void
-pyg_type_register_custom_callback(const gchar *typename,
-				  PyGTypeRegistrationFunction callback,
-				  gpointer user_data)
+gboolean
+pyg_gtype_is_custom(GType gtype)
 {
-    CustomTypeData *data;
-
-    if (!custom_type_registration)
-	custom_type_registration = g_hash_table_new_full (g_str_hash, g_str_equal,
-							  g_free, g_free);
-
-    data = g_new (CustomTypeData, 1);
-    data->callback = callback;
-    data->data = user_data;
-
-    g_hash_table_insert(custom_type_registration,
-			g_strdup(typename),
-			data);
-}
-
-PyTypeObject *
-pyg_type_get_custom(const gchar *name)
-{
-    CustomTypeData *data;
-    PyTypeObject *retval;
-
-    if (!custom_type_registration)
-	return NULL;
-
-    data = g_hash_table_lookup(custom_type_registration, name);
-    if (!data)
-	return NULL;
-
-    retval = data->callback(name, data->data);
-
-    g_hash_table_remove(custom_type_registration, name);
-
-    return retval;
-}
-
-GType
-_pyg_type_from_name(const gchar *name)
-{
-    GType type;
-
-    type = g_type_from_name(name);
-    if (type == G_TYPE_INVALID) {
-	pyg_type_get_custom(name);
-	type = g_type_from_name(name);
-    }
-
-    return type;
+    return g_type_get_qdata (gtype, pygobject_custom_key) != NULL;
 }
 
 static PyObject *

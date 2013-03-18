@@ -81,6 +81,7 @@ extern GQuark pygobject_wrapper_key;
 extern GQuark pygpointer_class_key;
 extern GQuark pygobject_has_updated_constructor_key;
 extern GQuark pygobject_instance_data_key;
+extern GQuark pygobject_custom_key;
 
 void     pygobject_data_free  (PyGObjectData *data);
 void     pyg_destroy_notify   (gpointer     user_data);
@@ -214,12 +215,7 @@ extern PyObject * pyg_enum_from_gtype (GType        gtype,
 				       int          value);
 
 /* pygtype.c */
-extern GHashTable *custom_type_registration;
-void pyg_type_register_custom_callback(const gchar *type_name,
-				       PyGTypeRegistrationFunction callback,
-				       gpointer data);
-PyTypeObject * pyg_type_get_custom(const gchar *name);
-GType _pyg_type_from_name(const gchar *name);
+extern gboolean pyg_gtype_is_custom (GType gtype);
 
 /* pygobject.c */
 extern PyTypeObject PyGObjectWeakRef_Type;

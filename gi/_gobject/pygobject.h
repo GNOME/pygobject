@@ -183,9 +183,11 @@ struct _PyGObject_Functions {
     void      (*add_warning_redirection) (const char *domain,
                                           PyObject   *warning);
     void      (*disable_warning_redirections) (void);
-    void      (*type_register_custom)(const gchar *type_name,
-				      PyGTypeRegistrationFunction callback,
-				      gpointer data);
+
+    /* type_register_custom API now removed, but leave a pointer here to not
+     * break ABI. */
+    void      *_type_register_custom;
+
     gboolean  (*gerror_exception_check) (GError **error);
     PyObject* (*option_group_new) (GOptionGroup *group);
     GType (* type_from_object_strict) (PyObject *obj, gboolean strict);
@@ -252,7 +254,6 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_register_interface_info (_PyGObject_API->register_interface_info)
 #define pyg_add_warning_redirection   (_PyGObject_API->add_warning_redirection)
 #define pyg_disable_warning_redirections (_PyGObject_API->disable_warning_redirections)
-#define pyg_type_register_custom_callback (_PyGObject_API->type_register_custom)
 #define pyg_gerror_exception_check (_PyGObject_API->gerror_exception_check)
 #define pyg_option_group_new       (_PyGObject_API->option_group_new)
 
