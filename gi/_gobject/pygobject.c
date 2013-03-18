@@ -1635,14 +1635,39 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 }
 
 static PyObject *
-pygobject_connect(PyGObject *self, PyObject *args)
+connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra_args, PyObject *object, gboolean after)
 {
-    PyObject *first, *callback, *extra_args, *repr = NULL;
-    gchar *name;
-    guint sigid, len;
-    gulong handlerid;
+    guint sigid;
     GQuark detail = 0;
     GClosure *closure;
+    gulong handlerid;
+
+    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
+			     &sigid, &detail, TRUE)) {
+	PyObject *repr = PyObject_Repr((PyObject*)self);
+	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
+		     PYGLIB_PyUnicode_AsString(repr),
+		     name);
+	Py_DECREF(repr);
+	return NULL;
+    }
+
+    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
+    if (closure == NULL)
+        closure = pyg_closure_new(callback, extra_args, object);
+
+    pygobject_watch_closure((PyObject *)self, closure);
+    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
+					       closure, after);
+    return PyLong_FromUnsignedLong(handlerid);
+}
+
+static PyObject *
+pygobject_connect(PyGObject *self, PyObject *args)
+{
+    PyObject *first, *callback, *extra_args, *ret;
+    gchar *name;
+    guint len;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -1663,40 +1688,21 @@ pygobject_connect(PyGObject *self, PyObject *args)
     
     CHECK_GOBJECT(self);
     
-    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
-			     &sigid, &detail, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
-		     name);
-	Py_DECREF(repr);
-	return NULL;
-    }
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
 
-    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
-    if (closure == NULL)
-        closure = pyg_closure_new(callback, extra_args, NULL);
-
-    pygobject_watch_closure((PyObject *)self, closure);
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-					       closure, FALSE);
+    ret = connect_helper(self, name, callback, extra_args, NULL, FALSE);
     Py_DECREF(extra_args);
-    return PyLong_FromUnsignedLong(handlerid);
+    return ret;
 }
 
 static PyObject *
 pygobject_connect_after(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *repr = NULL;
+    PyObject *first, *callback, *extra_args, *ret;
     gchar *name;
-    guint sigid;
-    gulong handlerid;
     Py_ssize_t len;
-    GQuark detail;
-    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 2) {
@@ -1718,40 +1724,21 @@ pygobject_connect_after(PyGObject *self, PyObject *args)
     
     CHECK_GOBJECT(self);
     
-    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
-			     &sigid, &detail, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
-		     name);
-	Py_DECREF(repr);
-	return NULL;
-    }
     extra_args = PySequence_GetSlice(args, 2, len);
     if (extra_args == NULL)
 	return NULL;
 
-    closure = pygi_signal_closure_new(self, name, callback, extra_args, NULL);
-    if (closure == NULL)
-        closure = pyg_closure_new(callback, extra_args, NULL);
-
-    pygobject_watch_closure((PyObject *)self, closure);
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-					       closure, TRUE);
+    ret = connect_helper(self, name, callback, extra_args, NULL, TRUE);
     Py_DECREF(extra_args);
-    return PyLong_FromUnsignedLong(handlerid);
+    return ret;
 }
 
 static PyObject *
 pygobject_connect_object(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *object, *repr = NULL;
+    PyObject *first, *callback, *extra_args, *object, *ret;
     gchar *name;
-    guint sigid;
-    gulong handlerid;
     Py_ssize_t len;
-    GQuark detail;
-    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -1773,40 +1760,21 @@ pygobject_connect_object(PyGObject *self, PyObject *args)
     
     CHECK_GOBJECT(self);
     
-    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
-			     &sigid, &detail, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
-		     name);
-	Py_DECREF(repr);
-	return NULL;
-    }
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
 
-    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
-    if (closure == NULL)
-        closure = pyg_closure_new(callback, extra_args, object);
-
-    pygobject_watch_closure((PyObject *)self, closure);
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-					       closure, FALSE);
+    ret = connect_helper(self, name, callback, extra_args, object, FALSE);
     Py_DECREF(extra_args);
-    return PyLong_FromUnsignedLong(handlerid);
+    return ret;
 }
 
 static PyObject *
 pygobject_connect_object_after(PyGObject *self, PyObject *args)
 {
-    PyObject *first, *callback, *extra_args, *object, *repr = NULL;
+    PyObject *first, *callback, *extra_args, *object, *ret;
     gchar *name;
-    guint sigid;
-    gulong handlerid;
     Py_ssize_t len;
-    GQuark detail;
-    GClosure *closure;
 
     len = PyTuple_Size(args);
     if (len < 3) {
@@ -1828,28 +1796,13 @@ pygobject_connect_object_after(PyGObject *self, PyObject *args)
     
     CHECK_GOBJECT(self);
     
-    if (!g_signal_parse_name(name, G_OBJECT_TYPE(self->obj),
-			     &sigid, &detail, TRUE)) {
-	repr = PyObject_Repr((PyObject*)self);
-	PyErr_Format(PyExc_TypeError, "%s: unknown signal name: %s",
-		     PYGLIB_PyUnicode_AsString(repr),
-		     name);
-	Py_DECREF(repr);
-	return NULL;
-    }
     extra_args = PySequence_GetSlice(args, 3, len);
     if (extra_args == NULL)
 	return NULL;
 
-    closure = pygi_signal_closure_new(self, name, callback, extra_args, object);
-    if (closure == NULL)
-        closure = pyg_closure_new(callback, extra_args, object);
-
-    pygobject_watch_closure((PyObject *)self, closure);
-    handlerid = g_signal_connect_closure_by_id(self->obj, sigid, detail,
-					       closure, TRUE);
+    ret = connect_helper(self, name, callback, extra_args, object, TRUE);
     Py_DECREF(extra_args);
-    return PyLong_FromUnsignedLong(handlerid);
+    return ret;
 }
 
 static PyObject *

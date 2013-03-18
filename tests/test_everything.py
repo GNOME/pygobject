@@ -1139,6 +1139,39 @@ class TestSignals(unittest.TestCase):
         obj.emit_sig_with_obj()
         self.assertTrue(obj.called)
 
+    def test_connect_after(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_after('sig-with-obj', callback)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_connect_object(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_object('sig-with-obj', callback, obj)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_connect_object_after(self):
+        obj = Everything.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_object_after('sig-with-obj', callback, obj)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
     def test_int64_param_from_py(self):
         obj = Everything.TestObj()
 
