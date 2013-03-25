@@ -28,7 +28,6 @@ class TestGObjectAPI(unittest.TestCase):
         # The pytype wrapper should hold the outer most Object class from overrides.
         self.assertEqual(GObject.TYPE_OBJECT.pytype, GObject.Object)
 
-    @unittest.skipIf(sys.version_info[:2] < (2, 7), 'Python 2.7 is required')
     def test_gobject_unsupported_overrides(self):
         obj = GObject.Object()
 

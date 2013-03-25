@@ -12,7 +12,7 @@ AC_PREREQ([2.68])
 # You can also build against a full interpreter path, such as
 #   $ ./configure --with-python=~/my-patched-python/python
 
-m4_define(python_min_ver, 2.6)
+m4_define(python_min_ver, 2.7)
 m4_define(python3_min_ver, 3.1)
 
 dnl the pygobject version number

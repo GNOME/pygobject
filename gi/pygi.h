@@ -101,11 +101,7 @@ _pygi_import (void)
     if (PyGI_API != NULL) {
         return 1;
     }
-#if PY_VERSION_HEX >= 0x03000000
     PyGI_API = (struct PyGI_API*) PyCapsule_Import("gi._API", FALSE);
-#else
-    PyGI_API = (struct PyGI_API*) PyCObject_Import("gi", "_API");
-#endif
     if (PyGI_API == NULL) {
         return -1;
     }

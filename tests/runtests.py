@@ -7,50 +7,7 @@ import sys
 
 import unittest
 
-# provide missing unittest decorators and API for python 2.6; these decorators
-# do not actually work, just avoid the syntax failure
-if sys.version_info[:2] == (2, 6):
-    def skipUnless(condition, reason):
-        if not condition:
-            sys.stderr.write('[expected failure] ')
-        return lambda obj: obj
-
-    unittest.skipUnless = skipUnless
-    unittest.expectedFailure = lambda obj: obj
-
-    def skipIf(condition, reason):
-        if condition:
-            sys.stderr.write('[expected failure] ')
-        return lambda obj: obj
-
-    unittest.skipIf = skipIf
-
-    def assertGreater(self, a, b, msg=None):
-        if not a > b:
-            self.fail('%s not greater than %s' % (repr(a), repr(b)))
-
-    def assertGreaterEqual(self, a, b, msg=None):
-        if not a >= b:
-            self.fail('%s not greater than or equal to %s' % (repr(a), repr(b)))
-
-    def assertLess(self, a, b, msg=None):
-        if not a < b:
-            self.fail('%s not less than %s' % (repr(a), repr(b)))
-
-    def assertLessEqual(self, a, b, msg=None):
-        if not a <= b:
-            self.fail('%s not less than or equal to %s' % (repr(a), repr(b)))
-
-    def assertIsInstance(self, obj, cls, msg=None):
-        if not isinstance(obj, cls):
-            self.fail('%s is not an instance of %r' % (repr(obj), cls))
-
-    unittest.TestCase.assertGreaterEqual = assertGreaterEqual
-    unittest.TestCase.assertGreater = assertGreater
-    unittest.TestCase.assertLessEqual = assertLessEqual
-    unittest.TestCase.assertLess = assertLess
-    unittest.TestCase.assertIsInstance = assertIsInstance
-
+# this was renamed in Python 3, provide backwards compatible name
 if sys.version_info[:2] == (2, 7):
     unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 

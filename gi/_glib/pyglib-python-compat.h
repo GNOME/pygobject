@@ -33,17 +33,6 @@
         } while (0)
 #endif
 
-/* PyCObject superceded by PyCapsule on Python >= 2.7
- * However since this effects header files used by
- * static bindings we are only applying the change to
- * Python 3.x where we don't support the static bindings.
- * 3.2 removed PyCObject so we don't have any choice here.
- *
- * There is talk upstream of undeprecating PyCObject
- * (at least where the 2.x branch is concerned)
- * and there is no danger of it being remove from 2.7.
- **/
-#if PY_VERSION_HEX >= 0x03000000
 # define PYGLIB_CPointer_Check PyCapsule_CheckExact
 # define PYGLIB_CPointer_WrapPointer(ptr, typename) \
     PyCapsule_New(ptr, typename, NULL)
@@ -51,15 +40,6 @@
     PyCapsule_GetPointer(obj, typename)
 # define PYGLIB_CPointer_Import(module, symbol) \
     PyCapsule_Import(##module##.##symbol##, FALSE)
-#else
-# define PYGLIB_CPointer_Check PyCObject_Check
-# define PYGLIB_CPointer_WrapPointer(ptr, typename) \
-    PyCObject_FromVoidPtr(ptr, NULL)
-# define PYGLIB_CPointer_GetPointer(obj, typename) \
-  PyCObject_AsVoidPtr(obj)
-# define PYGLIB_CPointer_Import(module, symbol) \
-    PyCObject_Import(module, symbol)
-#endif
 
 #if PY_VERSION_HEX < 0x03000000
 
