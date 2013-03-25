@@ -813,8 +813,6 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'array_struct_value_in'),
-                         'too old gobject-introspection')
     def test_array_boxed_struct_value_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
@@ -970,8 +968,6 @@ class TestGArray(unittest.TestCase):
     def test_garray_utf8_full_out(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_out())
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'garray_utf8_full_out_caller_allocated'),
-                         'too old gobject-introspection')
     def test_garray_utf8_full_out_caller_allocated(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_full_out_caller_allocated())
 
@@ -1029,15 +1025,11 @@ class TestGBytes(unittest.TestCase):
         self.assertEqual(3, b.get_size())
         self.assertEqual(b'\x00\x01\xFF', b.get_data())
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gbytes_full_return'),
-                         'too old gobject-introspection')
     def test_gbytes_full_return(self):
         b = GIMarshallingTests.gbytes_full_return()
         self.assertEqual(4, b.get_size())
         self.assertEqual(b'\x00\x31\xFF\x33', b.get_data())
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gbytes_full_return'),
-                         'too old gobject-introspection')
     def test_gbytes_none_in(self):
         b = GIMarshallingTests.gbytes_full_return()
         GIMarshallingTests.gbytes_none_in(b)
@@ -1497,8 +1489,6 @@ class TestEnum(unittest.TestCase):
                           GIMarshallingTests.NoTypeFlags.__gtype__)
 
 
-@unittest.skipUnless(hasattr(GIMarshallingTests.Object, 'vfunc_return_enum'),
-                     'GIMarshallingTests too old')
 class TestEnumVFuncResults(unittest.TestCase):
     class EnumTester(GIMarshallingTests.Object):
         def do_vfunc_return_enum(self):
@@ -1757,8 +1747,6 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
-                         'too old gobject-introspection')
     def test_boxed_struct(self):
         self.assertTrue(issubclass(GIMarshallingTests.BoxedStruct, GObject.GBoxed))
 
@@ -1771,8 +1759,6 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
-                         'too old gobject-introspection')
     def test_boxed_struct_new(self):
         struct = GIMarshallingTests.BoxedStruct.new()
         self.assertTrue(isinstance(struct, GIMarshallingTests.BoxedStruct))
@@ -1781,8 +1767,6 @@ class TestStructure(unittest.TestCase):
 
         del struct
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
-                         'too old gobject-introspection')
     def test_boxed_struct_copy(self):
         struct = GIMarshallingTests.BoxedStruct()
         struct.long_ = 42
@@ -1796,8 +1780,6 @@ class TestStructure(unittest.TestCase):
         del new_struct
         del struct
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.BoxedStruct, 'string_'),
-                         'too old gobject-introspection')
     def test_boxed_struct_return(self):
         struct = GIMarshallingTests.boxed_struct_returnv()
 
@@ -2511,8 +2493,6 @@ class TestGError(unittest.TestCase):
 
 class TestParamSpec(unittest.TestCase):
     # https://bugzilla.gnome.org/show_bug.cgi?id=682355
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'param_spec_in_bool'),
-                         'too old gobject-introspection')
     @unittest.expectedFailure
     def test_param_spec_in_bool(self):
         ps = GObject.param_spec_boolean('mybool', 'test-bool', 'boolblurb',
@@ -2755,8 +2735,6 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boxed_struct=struct1)
         self.assertEqual(obj.props.some_boxed_struct.long_, 1)
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject, 'some_boxed_glist'),
-                         'too old gobject-introspection')
     def test_boxed_glist(self):
         self.assertEqual(self.obj.props.some_boxed_glist, [])
 
@@ -2776,8 +2754,6 @@ class TestPropertiesObject(unittest.TestCase):
         obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=l)
         self.assertEqual(obj.props.some_boxed_glist, l)
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests.PropertiesObject, 'some_variant'),
-                         'too old gobject-introspection')
     def test_variant(self):
         self.assertEqual(self.obj.props.some_variant, None)
 
