@@ -10,7 +10,8 @@ extension_cppflags = \
 
 extension_ldflags = \
 	-module \
-	-avoid-version
+	-avoid-version \
+	-shrext $(PYTHON_SO)
 
 if OS_WIN32
 # Windows requires Python modules to be explicitly linked to libpython.
@@ -20,8 +21,7 @@ extension_libadd = \
 	$(PYTHON_LIBS)
 
 extension_ldflags += \
-	-no-undefined \
-	-shrext ".pyd"
+	-no-undefined
 endif
 
 pygidir = $(pyexecdir)/gi
@@ -114,7 +114,7 @@ _gi_cairo_la_LDFLAGS = \
 # This is to ensure we have a symlink to the .so in the
 # build directory, which the Python interpreter can load
 # directly without having to know how to parse .la files.
-.la.so:
+%$(PYTHON_SO): %.la
 	$(LN_S) -f .libs/$@ $@
 
 # if we build in a separate tree, we need to symlink the *.py files from the
@@ -125,8 +125,8 @@ build_pylinks:
 	    [ -e $(builddir)/$$f ] || $(LN_S) $(srcdir)/$$f $(builddir)/$$f; \
 	done
 
-all-local: $(LTLIBRARIES:.la=.so) build_pylinks
+all-local: $(LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
 
-check-local: $(LTLIBRARIES:.la=.so) build_pylinks
+check-local: $(LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
 clean-local:
-	rm -f $(LTLIBRARIES:.la=.so)
+	rm -f $(LTLIBRARIES:.la=$(PYTHON_SO))

@@ -111,6 +111,9 @@ if test $build_py3k = true ; then
 			  [AC_MSG_ERROR(too old)])
 fi
 
+PYTHON_SO=`$PYTHON -c "import distutils.sysconfig, sys; sys.stdout.write(distutils.sysconfig.get_config_var('SO'));"`
+AC_SUBST(PYTHON_SO)
+
 AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
 if test "x$os_win32" = "xyes"; then
   AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))

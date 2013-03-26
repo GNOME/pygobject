@@ -6,7 +6,8 @@ extension_cppflags = \
 
 extension_ldflags = \
 	-module \
-	-avoid-version
+	-avoid-version \
+	-shrext $(PYTHON_SO)
 
 if OS_WIN32
 # Windows requires Python modules to be explicitly linked to libpython.
@@ -16,8 +17,7 @@ extension_libadd = \
 	$(PYTHON_LIBS)
 
 extension_ldflags += \
-	-no-undefined \
-	-shrext ".pyd"
+	-no-undefined
 endif
 
 
@@ -83,9 +83,9 @@ build_pylinks:
 	done
 
 
-all: $(pyglib_LTLIBRARIES:.la=.so) build_pylinks
-check-local: $(pyglib_LTLIBRARIES:.la=.so) build_pylinks
+all: $(pyglib_LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
+check-local: $(pyglib_LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
 clean-local:
-	rm -f $(pyglib_LTLIBRARIES:.la=.so)
-.la.so:
+	rm -f $(pyglib_LTLIBRARIES:.la=$(PYTHON_SO))
+%$(PYTHON_SO): %.la
 	$(LN_S) -f .libs/$@ $@
