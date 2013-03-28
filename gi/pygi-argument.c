@@ -999,32 +999,14 @@ _pygi_argument_from_object (PyObject   *object,
         }
         case GI_TYPE_TAG_FLOAT:
         {
-            PyObject *float_;
-
-            float_ = PyNumber_Float (object);
-            if (float_ == NULL) {
-                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
-                break;
-            }
-
-            arg.v_float = (float) PyFloat_AsDouble (float_);
-            Py_DECREF (float_);
-
+            _pygi_marshal_from_py_float (NULL, NULL, NULL,
+                                         object, &arg);
             break;
         }
         case GI_TYPE_TAG_DOUBLE:
         {
-            PyObject *float_;
-
-            float_ = PyNumber_Float (object);
-            if (float_ == NULL) {
-                PyErr_SetString (PyExc_TypeError, "expected float or int argument");
-                break;
-            }
-
-            arg.v_double = PyFloat_AsDouble (float_);
-            Py_DECREF (float_);
-
+            _pygi_marshal_from_py_double (NULL, NULL, NULL,
+                                          object, &arg);
             break;
         }
         case GI_TYPE_TAG_GTYPE:

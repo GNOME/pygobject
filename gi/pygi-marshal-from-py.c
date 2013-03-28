@@ -696,15 +696,10 @@ check_valid_double (double x, double min, double max)
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_float (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
-                             GIArgument        *arg)
+static gboolean
+_pygi_py_arg_to_double (PyObject *py_arg, double *double_)
 {
     PyObject *py_float;
-    double double_;
 
     if (!PyNumber_Check (py_arg)) {
         PyErr_Format (PyExc_TypeError, "Must be number, not %s",
@@ -716,14 +711,29 @@ _pygi_marshal_from_py_float (PyGIInvokeState   *state,
     if (!py_float)
         return FALSE;
 
-    double_ = PyFloat_AsDouble (py_float);
+    *double_ = PyFloat_AsDouble (py_float);
     Py_DECREF (py_float);
+
+
+    return TRUE;
+}
+
+gboolean
+_pygi_marshal_from_py_float (PyGIInvokeState   *state,
+                             PyGICallableCache *callable_cache,
+                             PyGIArgCache      *arg_cache,
+                             PyObject          *py_arg,
+                             GIArgument        *arg)
+{
+    double double_;
+
+    if (!_pygi_py_arg_to_double (py_arg, &double_))
+        return FALSE;
 
     if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXFLOAT, G_MAXFLOAT))
         return FALSE;
 
     arg->v_float = double_;
-
     return TRUE;
 }
 
@@ -734,27 +744,15 @@ _pygi_marshal_from_py_double (PyGIInvokeState   *state,
                               PyObject          *py_arg,
                               GIArgument        *arg)
 {
-    PyObject *py_float;
     double double_;
 
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
+    if (!_pygi_py_arg_to_double (py_arg, &double_))
         return FALSE;
-    }
-
-    py_float = PyNumber_Float (py_arg);
-    if (!py_float)
-        return FALSE;
-
-    double_ = PyFloat_AsDouble (py_float);
-    Py_DECREF (py_float);
 
     if (PyErr_Occurred () || !check_valid_double (double_, -G_MAXDOUBLE, G_MAXDOUBLE))
         return FALSE;
 
     arg->v_double = double_;
-
     return TRUE;
 }
 
