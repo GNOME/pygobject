@@ -1522,23 +1522,8 @@ _pygi_argument_to_object (GIArgument  *arg,
         }
         case GI_TYPE_TAG_UNICHAR:
         {
-            /* Preserve the bidirectional mapping between 0 and "" */
-            if (arg->v_uint32 == 0) {
-                object = PYGLIB_PyUnicode_FromString ("");
-            } else if (g_unichar_validate (arg->v_uint32)) {
-                gchar utf8[6];
-                gint bytes;
-
-                bytes = g_unichar_to_utf8 (arg->v_uint32, utf8);
-                object = PYGLIB_PyUnicode_FromStringAndSize ((char*)utf8, bytes);
-            } else {
-                /* TODO: Convert the error to an exception. */
-                PyErr_Format (PyExc_TypeError,
-                              "Invalid unicode codepoint %" G_GUINT32_FORMAT,
-                              arg->v_uint32);
-                object = Py_None;
-                Py_INCREF (object);
-            }
+            object = _pygi_marshal_to_py_unichar (NULL, NULL, NULL,
+                                                  arg);
             break;
         }
         case GI_TYPE_TAG_UTF8:
