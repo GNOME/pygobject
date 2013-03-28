@@ -293,9 +293,7 @@ _pygi_marshal_to_py_utf8 (PyGIInvokeState   *state,
 {
     PyObject *py_obj = NULL;
     if (arg->v_string == NULL) {
-        py_obj = Py_None;
-        Py_INCREF (py_obj);
-        return py_obj;
+        Py_RETURN_NONE;
      }
 
     py_obj = PYGLIB_PyUnicode_FromString (arg->v_string);

@@ -1527,14 +1527,11 @@ _pygi_argument_to_object (GIArgument  *arg,
             break;
         }
         case GI_TYPE_TAG_UTF8:
-            if (arg->v_string == NULL) {
-                object = Py_None;
-                Py_INCREF (object);
-                break;
-            }
-
-            object = PYGLIB_PyUnicode_FromString (arg->v_string);
+        {
+            object = _pygi_marshal_to_py_utf8 (NULL, NULL, NULL,
+                                               arg);
             break;
+        }
         case GI_TYPE_TAG_FILENAME:
         {
             GError *error = NULL;
