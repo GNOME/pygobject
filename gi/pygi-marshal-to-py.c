@@ -306,14 +306,12 @@ _pygi_marshal_to_py_filename (PyGIInvokeState   *state,
                               PyGIArgCache      *arg_cache,
                               GIArgument        *arg)
 {
-    gchar *string;
+    gchar *string = NULL;
     PyObject *py_obj = NULL;
     GError *error = NULL;
 
     if (arg->v_string == NULL) {
-        py_obj = Py_None;
-        Py_INCREF (py_obj);
-        return py_obj;
+        Py_RETURN_NONE;
     }
 
     string = g_filename_to_utf8 (arg->v_string, -1, NULL, NULL, &error);

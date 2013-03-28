@@ -1534,26 +1534,8 @@ _pygi_argument_to_object (GIArgument  *arg,
         }
         case GI_TYPE_TAG_FILENAME:
         {
-            GError *error = NULL;
-            gchar *string;
-
-            if (arg->v_string == NULL) {
-                object = Py_None;
-                Py_INCREF (object);
-                break;
-            }
-
-            string = g_filename_to_utf8 (arg->v_string, -1, NULL, NULL, &error);
-            if (string == NULL) {
-                PyErr_SetString (PyExc_Exception, error->message);
-                /* TODO: Convert the error to an exception. */
-                break;
-            }
-
-            object = PYGLIB_PyUnicode_FromString (string);
-
-            g_free (string);
-
+            object = _pygi_marshal_to_py_filename (NULL, NULL, NULL,
+                                                   arg);
             break;
         }
         case GI_TYPE_TAG_ARRAY:
