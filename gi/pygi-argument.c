@@ -1570,69 +1570,25 @@ _pygi_argument_to_object (GIArgument  *arg,
                 case GI_INFO_TYPE_STRUCT:
                 case GI_INFO_TYPE_UNION:
                 {
-                    GType type;
+                    PyObject *py_type;
+                    GType g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
 
-                    if (arg->v_pointer == NULL) {
-                        object = Py_None;
-                        Py_INCREF (object);
-                        break;
-                    }
-
-                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
-                    if (g_type_is_a (type, G_TYPE_VALUE)) {
-                        object = pyg_value_as_pyobject (arg->v_pointer, FALSE);
-                    } else if (g_struct_info_is_foreign (info)) {
-                        object = pygi_struct_foreign_convert_from_g_argument (info, arg->v_pointer);
-                    } else if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        PyObject *py_type;
-
-                        py_type = _pygi_type_get_from_g_type (type);
-                        if (py_type == NULL)
-                            break;
-
-                        object = _pygi_boxed_new ( (PyTypeObject *) py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING, 0);
-
-                        Py_DECREF (py_type);
-                    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
-                        PyObject *py_type;
-
-                        py_type = _pygi_type_get_from_g_type (type);
-
-                        if (py_type == NULL || !PyType_IsSubtype ( (PyTypeObject *) type, &PyGIStruct_Type)) {
-                            g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-                            object = pyg_pointer_new (type, arg->v_pointer);
-                        } else {
-                            object = _pygi_struct_new ( (PyTypeObject *) py_type, arg->v_pointer, transfer == GI_TRANSFER_EVERYTHING);
-                        }
-
-                        Py_XDECREF (py_type);
-		    } else if (type == G_TYPE_VARIANT) {
-                        PyObject *py_type;
-
-                        g_variant_ref_sink (arg->v_pointer);
+                    /* Special case variant and none to force loading from py module. */
+                    if (g_type == G_TYPE_VARIANT || g_type == G_TYPE_NONE) {
                         py_type = _pygi_type_import_by_gi_info (info);
-                        object = _pygi_struct_new ( (PyTypeObject *) py_type, arg->v_pointer,
-                                                    transfer == GI_TRANSFER_EVERYTHING);
-                    } else if (type == G_TYPE_NONE) {
-                        PyObject *py_type;
-
-                        py_type = _pygi_type_import_by_gi_info (info);
-                        if (py_type == NULL) {
-                            break;
-                        }
-
-                        /* Only structs created in invoke can be safely marked
-                         * GI_TRANSFER_EVERYTHING. Trust that invoke has
-                         * filtered correctly
-                         */
-                        object = _pygi_struct_new ( (PyTypeObject *) py_type, arg->v_pointer,
-                                                    transfer == GI_TRANSFER_EVERYTHING);
-
-                        Py_DECREF (py_type);
                     } else {
-                        PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name (type));
+                        py_type = _pygi_type_get_from_g_type (g_type);
                     }
 
+                    object = pygi_marshal_to_py_interface_struct (arg,
+                                                                  info, /*interface_info*/
+                                                                  g_type,
+                                                                  py_type,
+                                                                  transfer,
+                                                                  FALSE, /*is_allocated*/
+                                                                  g_struct_info_is_foreign (info));
+
+                    Py_XDECREF (py_type);
                     break;
                 }
                 case GI_INFO_TYPE_ENUM:

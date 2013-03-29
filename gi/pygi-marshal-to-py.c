@@ -795,51 +795,15 @@ _pygi_marshal_to_py_interface_struct (PyGIInvokeState   *state,
                                       PyGIArgCache      *arg_cache,
                                       GIArgument        *arg)
 {
-    PyObject *py_obj = NULL;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GType type = iface_cache->g_type;
 
-    if (arg->v_pointer == NULL) {
-        py_obj = Py_None;
-        Py_INCREF (py_obj);
-        return py_obj;
-    }
-
-    if (g_type_is_a (type, G_TYPE_VALUE)) {
-        py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
-    } else if (iface_cache->is_foreign) {
-        py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info,
-                                                              arg->v_pointer);
-    } else if (g_type_is_a (type, G_TYPE_BOXED)) {
-        py_obj = _pygi_boxed_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer,
-                                  arg_cache->transfer == GI_TRANSFER_EVERYTHING || arg_cache->is_caller_allocates,
-                                  arg_cache->is_caller_allocates ?
-                                          g_struct_info_get_size(iface_cache->interface_info) : 0);
-    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
-        if (iface_cache->py_type == NULL ||
-                !PyType_IsSubtype ( (PyTypeObject *)iface_cache->py_type, &PyGIStruct_Type)) {
-            g_warn_if_fail(arg_cache->transfer == GI_TRANSFER_NOTHING);
-            py_obj = pyg_pointer_new (type, arg->v_pointer);
-        } else {
-            py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
-                                       arg_cache->transfer == GI_TRANSFER_EVERYTHING);
-        }
-    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
-         g_variant_ref_sink (arg->v_pointer);
-         py_obj = _pygi_struct_new ( (PyTypeObject *)iface_cache->py_type, arg->v_pointer, 
-                                    FALSE);
-    } else if (type == G_TYPE_NONE && iface_cache->is_foreign) {
-        py_obj = pygi_struct_foreign_convert_from_g_argument (iface_cache->interface_info, arg->v_pointer);
-    } else if (type == G_TYPE_NONE) {
-        py_obj = _pygi_struct_new ( (PyTypeObject *) iface_cache->py_type, arg->v_pointer, 
-                                   arg_cache->transfer == GI_TRANSFER_EVERYTHING);
-    } else {
-        PyErr_Format (PyExc_NotImplementedError,
-                      "structure type '%s' is not supported yet",
-                      g_type_name (type));
-    }
-
-    return py_obj;
+    return pygi_marshal_to_py_interface_struct (arg,
+                                                iface_cache->interface_info,
+                                                iface_cache->g_type,
+                                                iface_cache->py_type,
+                                                arg_cache->transfer,
+                                                arg_cache->is_caller_allocates,
+                                                iface_cache->is_foreign);
 }
 
 PyObject *
@@ -910,4 +874,66 @@ pygi_marshal_to_py_object (GIArgument *arg, GITransfer transfer) {
     }
 
     return pyobj;
+}
+
+PyObject *
+pygi_marshal_to_py_interface_struct (GIArgument *arg,
+                                     GIInterfaceInfo *interface_info,
+                                     GType g_type,
+                                     PyObject *py_type,
+                                     GITransfer transfer,
+                                     gboolean is_allocated,
+                                     gboolean is_foreign)
+{
+    PyObject *py_obj = NULL;
+
+    if (arg->v_pointer == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    if (g_type_is_a (g_type, G_TYPE_VALUE)) {
+        py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
+    } else if (is_foreign) {
+        py_obj = pygi_struct_foreign_convert_from_g_argument (interface_info,
+                                                              arg->v_pointer);
+    } else if (g_type_is_a (g_type, G_TYPE_BOXED)) {
+        if (py_type) {
+            py_obj = _pygi_boxed_new ((PyTypeObject *) py_type,
+                                      arg->v_pointer,
+                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
+                                      is_allocated ?
+                                              g_struct_info_get_size(interface_info) : 0);
+        }
+    } else if (g_type_is_a (g_type, G_TYPE_POINTER)) {
+        if (py_type == NULL ||
+                !PyType_IsSubtype ((PyTypeObject *) py_type, &PyGIStruct_Type)) {
+            g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+            py_obj = pyg_pointer_new (g_type, arg->v_pointer);
+        } else {
+            py_obj = _pygi_struct_new ( (PyTypeObject *) py_type,
+                                       arg->v_pointer,
+                                       transfer == GI_TRANSFER_EVERYTHING);
+        }
+    } else if (g_type_is_a (g_type, G_TYPE_VARIANT)) {
+        /* Note we do not use transfer for the structs free_on_dealloc because
+         * GLib.Variant overrides __del__ to call "g_variant_unref". */
+        if (py_type) {
+            g_variant_ref_sink (arg->v_pointer);
+            py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
+                                       arg->v_pointer,
+                                       FALSE);
+        }
+    } else if (g_type == G_TYPE_NONE) {
+        if (py_type) {
+            py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
+                                       arg->v_pointer,
+                                       transfer == GI_TRANSFER_EVERYTHING);
+        }
+    } else {
+        PyErr_Format (PyExc_NotImplementedError,
+                      "structure type '%s' is not supported yet",
+                      g_type_name (g_type));
+    }
+
+    return py_obj;
 }

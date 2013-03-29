@@ -144,6 +144,14 @@ PyObject *_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
 PyObject *pygi_marshal_to_py_object (GIArgument *arg,
                                      GITransfer transfer);
 
+PyObject *pygi_marshal_to_py_interface_struct (GIArgument *arg,
+                                               GIInterfaceInfo *interface_info,
+                                               GType g_type,
+                                               PyObject *py_type,
+                                               GITransfer transfer,
+                                               gboolean is_allocated,
+                                               gboolean is_foreign);
+
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_TO_PY_H__ */
