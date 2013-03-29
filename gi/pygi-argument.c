@@ -1143,56 +1143,31 @@ array_success:
                 case GI_INFO_TYPE_STRUCT:
                 case GI_INFO_TYPE_UNION:
                 {
-                    GType type;
+                    GType g_type;
+                    PyObject *py_type;
 
-                    if (object == Py_None) {
-                        arg.v_pointer = NULL;
-                        break;
-                    }
+                    g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
 
-                    type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    /* Note for G_TYPE_VALUE g_type:
+                     * This will currently leak the GValue that is allocated and
+                     * stashed in arg.v_pointer. Out argument marshaling for caller
+                     * allocated GValues already pass in memory for the GValue.
+                     * Further re-factoring is needed to fix this leak.
+                     * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
+                     */
+                    pygi_marshal_from_py_interface_struct (object,
+                                                           &arg,
+                                                           NULL, /*arg_name*/
+                                                           info, /*interface_info*/
+                                                           type_info,
+                                                           g_type,
+                                                           py_type,
+                                                           transfer,
+                                                           FALSE, /*is_caller_allocates*/
+                                                           g_struct_info_is_foreign (info));
 
-                    /* Handle special cases first. */
-                    if (g_type_is_a (type, G_TYPE_VALUE)) {
-                        g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-                        /* This will currently leak the GValue that is allocated and
-                         * stashed in arg.v_pointer. Out argument marshaling for caller
-                         * allocated GValues already pass in memory for the GValue.
-                         * Further re-factoring is needed to fix this leak.
-                         * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
-                         */
-                        pygi_marshal_from_py_gvalue (object,
-                                                     &arg,
-                                                     transfer,
-                                                     FALSE /*is_allocated*/);
-
-                    } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
-                        pygi_marshal_from_py_gclosure (object, &arg);
-                    } else if (g_struct_info_is_foreign (info)) {
-                        pygi_struct_foreign_convert_to_g_argument (object, info, transfer, &arg);
-                    } else if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        if (pyg_boxed_check (object, type)) {
-                            arg.v_pointer = pyg_boxed_get (object, void);
-                            if (transfer == GI_TRANSFER_EVERYTHING) {
-                                arg.v_pointer = g_boxed_copy (type, arg.v_pointer);
-                            }
-                        } else {
-                            PyErr_Format (PyExc_TypeError, "wrong boxed type");
-                        }
-                    } else if (g_type_is_a (type, G_TYPE_POINTER) || 
-                               g_type_is_a (type, G_TYPE_VARIANT) || 
-                               type == G_TYPE_NONE) {
-                        g_warn_if_fail (g_type_is_a (type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
-
-                        if (g_type_is_a (type, G_TYPE_VARIANT) && pyg_type_from_object (object) != G_TYPE_VARIANT) {
-                            PyErr_SetString (PyExc_TypeError, "expected GLib.Variant");
-                            break;
-                        }
-                        arg.v_pointer = pyg_pointer_get (object, void);
-                    } else {
-                        PyErr_Format (PyExc_NotImplementedError, "structure type '%s' is not supported yet", g_type_name (type));
-                    }
-
+                    Py_DECREF (py_type);
                     break;
                 }
                 case GI_INFO_TYPE_ENUM:

@@ -198,6 +198,17 @@ gboolean pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
 gboolean pygi_marshal_from_py_gclosure(PyObject *py_arg, /*in*/
                                        GIArgument *arg); /*out*/
 
+gboolean pygi_marshal_from_py_interface_struct (PyObject *py_arg,
+                                                GIArgument *arg,
+                                                const gchar *arg_name,
+                                                GIBaseInfo *interface_info,
+                                                GITypeInfo *type_info,
+                                                GType g_type,
+                                                PyObject *py_type,
+                                                GITransfer transfer,
+                                                gboolean is_allocated,
+                                                gboolean is_foreign);
+
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_from_py_PY__ */

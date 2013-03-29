@@ -756,6 +756,7 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                _arg_cache_to_py_interface_union_setup (arg_cache, transfer);
 
             break;
+        case GI_INFO_TYPE_BOXED:
         case GI_INFO_TYPE_STRUCT:
             if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
                _arg_cache_from_py_interface_struct_setup (arg_cache,
@@ -775,17 +776,6 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
             if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
                _arg_cache_to_py_interface_object_setup (arg_cache, transfer);
 
-            break;
-        case GI_INFO_TYPE_BOXED:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-                _arg_cache_from_py_interface_struct_setup (arg_cache,
-                                                       iface_info,
-                                                       transfer);
-
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-                _arg_cache_to_py_interface_struct_setup (arg_cache,
-                                                      iface_info,
-                                                      transfer);
             break;
         case GI_INFO_TYPE_CALLBACK:
             {

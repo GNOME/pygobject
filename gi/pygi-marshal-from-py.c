@@ -194,19 +194,19 @@ gi_argument_from_c_long (GIArgument *arg_out,
  * expected C union
  */
 static gboolean
-_is_union_member (PyGIInterfaceCache *iface_cache, PyObject *py_arg) {
+_is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
     gint i;
     gint n_fields;
     GIUnionInfo *union_info;
     GIInfoType info_type;
     gboolean is_member = FALSE;
 
-    info_type = g_base_info_get_type (iface_cache->interface_info);
+    info_type = g_base_info_get_type (interface_info);
 
     if (info_type != GI_INFO_TYPE_UNION)
         return FALSE;
 
-    union_info = (GIUnionInfo *) iface_cache->interface_info;
+    union_info = (GIUnionInfo *) interface_info;
     n_fields = g_union_info_get_n_fields (union_info);
 
     for (i = 0; i < n_fields; i++) {
@@ -1643,65 +1643,16 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
-        return TRUE;
-    }
-
-    /* FIXME: handle this large if statement in the cache
-     *        and set the correct marshaller
-     */
-
-    if (iface_cache->g_type == G_TYPE_CLOSURE) {
-        return pygi_marshal_from_py_gclosure (py_arg, arg);
-    } else if (iface_cache->g_type == G_TYPE_VALUE) {
-        return pygi_marshal_from_py_gvalue(py_arg, arg,
-                                           arg_cache->transfer,
-                                           arg_cache->is_caller_allocates);
-    } else if (iface_cache->is_foreign) {
-        PyObject *success;
-        success = pygi_struct_foreign_convert_to_g_argument (py_arg,
-                                                             iface_cache->interface_info,
-                                                             arg_cache->transfer,
-                                                             arg);
-
-        return (success == Py_None);
-    } else if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
-        /* first check to see if this is a member of the expected union */
-        if (!_is_union_member (iface_cache, py_arg)) {
-            if (!PyErr_Occurred()) {
-                PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-
-                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
-                              arg_cache->arg_name ? arg_cache->arg_name : "self",
-                              iface_cache->type_name,
-                              module ? PYGLIB_PyUnicode_AsString(module) : "",
-                              module ? "." : "",
-                              py_arg->ob_type->tp_name);
-                if (module)
-                    Py_DECREF (module);
-            }
-
-            return FALSE;
-        }
-    }
-
-    if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
-        arg->v_pointer = pyg_boxed_get (py_arg, void);
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-            arg->v_pointer = g_boxed_copy (iface_cache->g_type, arg->v_pointer);
-        }
-    } else if (g_type_is_a (iface_cache->g_type, G_TYPE_POINTER) ||
-                   g_type_is_a (iface_cache->g_type, G_TYPE_VARIANT) ||
-                       iface_cache->g_type  == G_TYPE_NONE) {
-        arg->v_pointer = pyg_pointer_get (py_arg, void);
-    } else {
-        PyErr_Format (PyExc_NotImplementedError,
-                      "structure type '%s' is not supported yet",
-                      g_type_name(iface_cache->g_type));
-        return FALSE;
-    }
-    return TRUE;
+    return pygi_marshal_from_py_interface_struct (py_arg,
+                                                  arg,
+                                                  arg_cache->arg_name,
+                                                  iface_cache->interface_info,
+                                                  arg_cache->type_info,
+                                                  iface_cache->g_type,
+                                                  iface_cache->py_type,
+                                                  arg_cache->transfer,
+                                                  arg_cache->is_caller_allocates,
+                                                  iface_cache->is_foreign);
 }
 
 gboolean
@@ -1775,7 +1726,7 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
 
             if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
                 /* wait, we might be a member of a union so manually check */
-                if (!_is_union_member (iface_cache, py_arg)) {
+                if (!_is_union_member (iface_cache->interface_info, py_arg)) {
                     if (!PyErr_Occurred()) {
                         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
                         PyErr_Format (PyExc_TypeError,
@@ -1977,5 +1928,95 @@ pygi_marshal_from_py_gclosure(PyObject *py_arg,
     }
 
     arg->v_pointer = closure;
+    return TRUE;
+}
+
+gboolean
+pygi_marshal_from_py_interface_struct (PyObject *py_arg,
+                                       GIArgument *arg,
+                                       const gchar *arg_name,
+                                       GIBaseInfo *interface_info,
+                                       GITypeInfo *type_info,
+                                       GType g_type,
+                                       PyObject *py_type,
+                                       GITransfer transfer,
+                                       gboolean is_allocated,
+                                       gboolean is_foreign)
+{
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
+    /* FIXME: handle this large if statement in the cache
+     *        and set the correct marshaller
+     */
+
+    if (g_type_is_a (g_type, G_TYPE_CLOSURE)) {
+        return pygi_marshal_from_py_gclosure (py_arg, arg);
+    } else if (g_type_is_a (g_type, G_TYPE_VALUE)) {
+        return pygi_marshal_from_py_gvalue(py_arg,
+                                           arg,
+                                           transfer,
+                                           is_allocated);
+    } else if (is_foreign) {
+        PyObject *success;
+        success = pygi_struct_foreign_convert_to_g_argument (py_arg,
+                                                             interface_info,
+                                                             transfer,
+                                                             arg);
+
+        return (success == Py_None);
+    } else if (!PyObject_IsInstance (py_arg, py_type)) {
+        /* first check to see if this is a member of the expected union */
+        if (!_is_union_member (interface_info, py_arg)) {
+            if (!PyErr_Occurred()) {
+                gchar *type_name = _pygi_g_base_info_get_fullname (interface_info);
+                PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
+
+                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
+                              arg_name ? arg_name : "self",
+                              type_name,
+                              module ? PYGLIB_PyUnicode_AsString(module) : "",
+                              module ? "." : "",
+                              py_arg->ob_type->tp_name);
+                if (module)
+                    Py_DECREF (module);
+                g_free (type_name);
+            }
+
+            return FALSE;
+        }
+    }
+
+    if (g_type_is_a (g_type, G_TYPE_BOXED)) {
+        if (pyg_boxed_check (py_arg, g_type)) {
+            arg->v_pointer = pyg_boxed_get (py_arg, void);
+            if (transfer == GI_TRANSFER_EVERYTHING) {
+                arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);
+            }
+        } else {
+            PyErr_Format (PyExc_TypeError, "wrong boxed type");
+            return FALSE;
+        }
+
+    } else if (g_type_is_a (g_type, G_TYPE_POINTER) ||
+               g_type_is_a (g_type, G_TYPE_VARIANT) ||
+               g_type  == G_TYPE_NONE) {
+        g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
+
+        if (g_type_is_a (g_type, G_TYPE_VARIANT) &&
+                pyg_type_from_object (py_arg) != G_TYPE_VARIANT) {
+            PyErr_SetString (PyExc_TypeError, "expected GLib.Variant");
+            return FALSE;
+        }
+        arg->v_pointer = pyg_pointer_get (py_arg, void);
+
+    } else {
+        PyErr_Format (PyExc_NotImplementedError,
+                      "structure type '%s' is not supported yet",
+                      g_type_name(g_type));
+        return FALSE;
+    }
     return TRUE;
 }
