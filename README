@@ -44,8 +44,8 @@ You can subscribe to it through the web interface:
 Requirements
 ============
   * C compiler (GCC and MSVC supported)
-  * Python 2.6 or higher
-  * Glib/Gio 2.34.2 or higher
+  * Python 2.7 or higher
+  * Glib/Gio 2.35.9 or higher
   * libffi (optional)
 
 Copyright Information
