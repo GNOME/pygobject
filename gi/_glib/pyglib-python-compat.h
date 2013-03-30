@@ -21,18 +21,6 @@
 #ifndef __PYGLIB_PYTHON_COMPAT_H__
 #define __PYGLIB_PYTHON_COMPAT_H__
 
-/* Python 2.3 does not define Py_CLEAR */
-#ifndef Py_CLEAR
-#define Py_CLEAR(op)                \
-        do {                                \
-                if (op) {           \
-                        PyObject *tmp = (PyObject *)(op);   \
-                        (op) = NULL;        \
-                        Py_DECREF(tmp);     \
-                }               \
-        } while (0)
-#endif
-
 # define PYGLIB_CPointer_Check PyCapsule_CheckExact
 # define PYGLIB_CPointer_WrapPointer(ptr, typename) \
     PyCapsule_New(ptr, typename, NULL)
