@@ -129,12 +129,12 @@ static PyObject *
 pyg_flags_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "value", NULL };
-    guint value;
+    gulong value;
     PyObject *pytc, *values, *ret, *pyint;
     GType gtype;
     GFlagsClass *eclass;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "l", kwlist, &value))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "k", kwlist, &value))
 	return NULL;
 
     pytc = PyObject_GetAttrString((PyObject *)type, "__gtype__");
