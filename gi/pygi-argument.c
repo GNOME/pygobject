@@ -1828,7 +1828,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                     } else if (info_type == GI_INFO_TYPE_ENUM) {
                         object = pyg_enum_from_gtype (type, arg->v_int);
                     } else {
-                        object = pyg_flags_from_gtype (type, arg->v_int);
+                        object = pyg_flags_from_gtype (type, arg->v_uint);
                     }
 
                     break;
@@ -2082,10 +2082,10 @@ _pygi_argument_from_g_value(const GValue *value,
 
             switch (info_type) {
                 case GI_INFO_TYPE_FLAGS:
-                    arg.v_long = g_value_get_flags (value);
+                    arg.v_uint = g_value_get_flags (value);
                     break;
                 case GI_INFO_TYPE_ENUM:
-                    arg.v_long = g_value_get_enum (value);
+                    arg.v_int = g_value_get_enum (value);
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
