@@ -192,7 +192,7 @@ pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
 
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
-                    arg.v_int32 = g_value_get_enum (&value);
+                    arg.v_int = g_value_get_enum (&value);
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
@@ -319,7 +319,7 @@ pygi_set_property_value_real (PyGObject *instance,
 
             switch (info_type) {
                 case GI_INFO_TYPE_ENUM:
-                    g_value_set_enum (&value, arg.v_int32);
+                    g_value_set_enum (&value, arg.v_int);
                     break;
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
