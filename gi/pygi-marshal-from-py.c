@@ -773,7 +773,7 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
 
        size = PyUnicode_GET_SIZE (py_arg);
        py_bytes = PyUnicode_AsUTF8String (py_arg);
-       string_ = strdup(PYGLIB_PyBytes_AsString (py_bytes));
+       string_ = g_strdup(PYGLIB_PyBytes_AsString (py_bytes));
        Py_DECREF (py_bytes);
 
 #if PY_VERSION_HEX < 0x03000000
