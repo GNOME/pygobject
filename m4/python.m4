@@ -68,10 +68,10 @@ dnl a macro to check for ability to embed python
 dnl  AM_CHECK_PYTHON_LIBS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
 dnl function also defines PYTHON_LIBS
 AC_DEFUN([AM_CHECK_PYTHON_LIBS],
-[AC_REQUIRE([AM_CHECK_PYTHON_HEADERS])
+[AC_REQUIRE([AM_PATH_PYTHON])
 AC_MSG_CHECKING(for libraries required to embed python)
 dnl deduce PYTHON_LIBS
-py_exec_prefix=`$PYTHON -c "import sys; print(sys.exec_prefix)"`
+py_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`
 if test "x$PYTHON_LIBS" = x; then
 	PYTHON_LIBS="-L${py_prefix}/lib -lpython${PYTHON_VERSION}"
 fi
