@@ -120,13 +120,29 @@ _wrap_g_irepository_find_by_name (PyGIRepository *self,
     const char *name;
     GIBaseInfo *info;
     PyObject *py_info;
+    size_t len;
+    char *trimmed_name = NULL;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs,
                                       "ss:Repository.find_by_name", kwlist, &namespace_, &name)) {
         return NULL;
     }
 
+    /* If the given name ends with an underscore, it might be due to usage
+     * as an accessible replacement for something in GI with the same name
+     * as a Python keyword. Test for this and trim it out if necessary.
+     */
+    len = strlen (name);
+    if (len > 0 && name[len-1] == '_') {
+        trimmed_name = g_strndup (name, len-1);
+        if (_pygi_is_python_keyword (trimmed_name)) {
+            name = trimmed_name;
+        }
+    }
+
     info = g_irepository_find_by_name (self->repository, namespace_, name);
+    g_free (trimmed_name);
+
     if (info == NULL) {
         Py_RETURN_NONE;
     }
