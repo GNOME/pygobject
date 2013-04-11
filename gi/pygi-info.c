@@ -90,8 +90,8 @@ _base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
 
 PYGLIB_DEFINE_TYPE("gi.BaseInfo", PyGIBaseInfo_Type, PyGIBaseInfo);
 
-static PyObject *
-_wrap_g_base_info_get_name (PyGIBaseInfo *self)
+gboolean
+_pygi_is_python_keyword (const gchar *name)
 {
     /* It may be better to use keyword.iskeyword(); keep in sync with
      * python -c 'import keyword; print(keyword.kwlist)' */
@@ -115,18 +115,30 @@ _wrap_g_base_info_get_name (PyGIBaseInfo *self)
     #error Need keyword list for this major Python version
 #endif
 
-    const gchar *name, **i;
+    const gchar **i;
+
+    for (i = keywords; *i != NULL; ++i) {
+        if (strcmp (name, *i) == 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static PyObject *
+_wrap_g_base_info_get_name (PyGIBaseInfo *self)
+{
+    const gchar *name;
 
     name = g_base_info_get_name (self->info);
 
     /* escape keywords */
-    for (i = keywords; *i != NULL; ++i) {
-        if (strcmp (name, *i) == 0) {
-            gchar *escaped = g_strconcat (name, "_", NULL);
-            PyObject *obj = PYGLIB_PyUnicode_FromString (escaped);
-            g_free (escaped);
-            return obj;
-        }
+    if (_pygi_is_python_keyword (name)) {
+        gchar *escaped = g_strconcat (name, "_", NULL);
+        PyObject *obj = PYGLIB_PyUnicode_FromString (escaped);
+        g_free (escaped);
+        return obj;
     }
 
     return PYGLIB_PyUnicode_FromString (name);

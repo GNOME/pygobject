@@ -30,3 +30,8 @@ class TestPango(unittest.TestCase):
 
         layout.set_markup("Foobar")
         self.assertEqual(layout.get_text(), "Foobar")
+
+    def test_break_keyword_escape(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=697363
+        self.assertTrue(hasattr(Pango, 'break_'))
+        self.assertTrue(Pango.break_ is not None)
