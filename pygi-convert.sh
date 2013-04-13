@@ -345,6 +345,23 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Clutter.RELEASE_MASK/Clutter.ModifierType.RELEASE_MASK/g;" \
     -pe "s/Clutter.SHIFT_MASK/Clutter.ModifierType.SHIFT_MASK/g;" \
     -pe "s/Clutter.SUPER_MASK/Clutter.ModifierType.SUPER_MASK/g;" \
+\
+    -pe "s/import gst\n/from gi.repository import Gst\n/g;" \
+    -pe "s/(?<!\.)gst\./Gst\./g;" \
+    -pe "s/Gst.element_factory_find/Gst.ElementFactory.find/g;" \
+    -pe "s/Gst.element_factory_make/Gst.ElementFactory.make/g;" \
+    -pe "s/Gst.caps_from_string/Gst.Caps.from_string/g;" \
+    -pe "s/Gst.STATE_CHANGE_/Gst.StateChangeReturn./g;" \
+    -pe "s/Gst.STATE_/Gst.State./g;" \
+    -pe "s/Gst.MESSAGE_/Gst.MessageType./g;" \
+    -pe "s/Gst.FORMAT_/Gst.Format./g;" \
+    -pe "s/Gst.SEEK_FLAG_/Gst.SeekFlags./g;" \
+    -pe "s/Gst.SEEK_TYPE_/Gst.SeekType./g;" \
+    -pe "s/Gst.LEVEL_/Gst.DebugLevel./g;" \
+    -pe "s/Gst.URI_/Gst.URIType./g;" \
+    -pe "s/Gst.element_make_from_uri/Gst.Element.make_from_uri/g;" \
+    -pe "s/Gst.event_new_seek/Gst.Event.new_seek/g;" \
+    -pe "s/Gst.GhostPad\(/Gst.GhostPad.new\(/g;" \
     $f
 done
 
