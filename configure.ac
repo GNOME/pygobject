@@ -111,7 +111,10 @@ if test $build_py3k = true ; then
 			  [AC_MSG_ERROR(too old)])
 fi
 
-PYTHON_SO=`$PYTHON -c "import distutils.sysconfig, sys; sys.stdout.write(distutils.sysconfig.get_config_var('SO'));"`
+# - 'SO' for PyPy, CPython 2.7-3.2
+# - 'EXT_SUFFIX' for CPython3.3+ (http://bugs.python.org/issue16754)
+# - fallback to '.so'
+PYTHON_SO=`$PYTHON -c "import distutils.sysconfig, sys; get = distutils.sysconfig.get_config_var; sys.stdout.write(get('EXT_SUFFIX') or get('SO') or '.so');"`
 AC_SUBST(PYTHON_SO)
 
 AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
