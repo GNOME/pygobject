@@ -194,6 +194,8 @@ for f in $FILES_TO_CONVERT; do
 \
     -pe "s/import gio\n/from gi.repository import Gio\n/g;" \
     -pe "s/gio\./Gio\./g;" \
+    -pe "s/Gio\.File\(uri=/Gio\.File\.new_for_uri\(/g;" \
+    -pe "s/Gio\.File\(path=/Gio\.File\.new_for_path\(/g;" \
     -pe "s/Gio.FILE_COPY_/Gio.FileCopyFlags./g;" \
     -pe "s/Gio.FILE_CREATE_/Gio.FileCreateFlags./g;" \
     -pe "s/Gio.FILE_MONITOR_EVENT_/Gio.FileMonitorEvent./g;" \
