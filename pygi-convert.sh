@@ -47,6 +47,8 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.ORIENTATION_/Gtk.Orientation./g;" \
     -pe "s/Gtk.POLICY_/Gtk.PolicyType./g;" \
     -pe "s/Gtk.POS_/Gtk.PositionType./g;" \
+    -pe "s/Gtk.RECENT_FILTER_/Gtk.RecentFilterFlags./g;" \
+    -pe "s/Gtk.RECENT_SORT_/Gtk.RecentSortType./g;" \
     -pe "s/Gtk.RELIEF_/Gtk.ReliefStyle./g;" \
     -pe "s/Gtk.RESPONSE_/Gtk.ResponseType./g;" \
     -pe "s/Gtk.SELECTION_/Gtk.SelectionMode./g;" \
@@ -72,6 +74,7 @@ for f in $FILES_TO_CONVERT; do
     -pe "s/Gtk.accel_map_/Gtk.AccelMap./g;" \
     -pe "s/Gtk.settings_get_/Gtk.Settings.get_/g;" \
     -pe "s/Gtk.icon_theme_get_default/Gtk.IconTheme.get_default/g;" \
+    -pe "s/Gtk.recent_manager_get_default/Gtk.RecentManager.get_default/g;" \
     -pe "s/Gtk.image_new_from_stock/Gtk.Image.new_from_stock/g;" \
     -pe "s/Gtk.image_new_from_icon_name/Gtk.Image.new_from_icon_name/g;" \
     -pe "s/Gtk.window_set_default_icon_name/Gtk.Window.set_default_icon_name/g; " \
