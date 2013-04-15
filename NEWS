@@ -1,3 +1,11 @@
+3.8.1   15-Apr-2013
+	- pygi-convert.sh: Add GStreamer rules (Christoph Reiter) (#697951)
+        - pygi-convert: Add rule for TreeModelFlags (Jussi Kukkonen)
+	- Fix enum and flags marshaling type assumptions (Simon Feltman)
+        - Use g_strdup() consistently (Martin Pitt) (#696650)
+	- Fix stack corruption due to incorrect format for argument parser
+	  (Simon Feltman) (#696892)
+
 3.8.0   25-Mar-2013
 	- tests: Fix incorrect assumption when testing pyglib version
 	  (Simon Feltman)
