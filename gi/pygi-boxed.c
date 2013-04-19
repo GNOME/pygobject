@@ -32,10 +32,6 @@ _boxed_dealloc (PyGIBoxed *self)
 {
     GType g_type;
 
-    PyObject_GC_UnTrack ( (PyObject *) self);
-
-    PyObject_ClearWeakRefs ( (PyObject *) self);
-
     if ( ( (PyGBoxed *) self)->free_on_dealloc) {
         if (self->slice_allocated) {
             g_slice_free1 (self->size, ( (PyGBoxed *) self)->boxed);

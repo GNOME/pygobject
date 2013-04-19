@@ -32,23 +32,14 @@
 static void
 _base_info_dealloc (PyGIBaseInfo *self)
 {
-    PyObject_GC_UnTrack ( (PyObject *) self);
-
-    PyObject_ClearWeakRefs ( (PyObject *) self);
+    if (self->inst_weakreflist != NULL)
+        PyObject_ClearWeakRefs ( (PyObject *) self);
 
     g_base_info_unref (self->info);
 
     _pygi_callable_cache_free(self->cache);
 
     Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
-}
-
-static int
-_base_info_traverse (PyGIBaseInfo *self,
-                     visitproc     visit,
-                     void         *arg)
-{
-    return 0;
 }
 
 static PyObject *
@@ -256,6 +247,8 @@ _pygi_info_new (GIBaseInfo *info)
     }
 
     self->info = g_base_info_ref (info);
+    self->inst_weakreflist = NULL;
+    self->cache = NULL;
 
     return (PyObject *) self;
 }
@@ -1746,10 +1739,7 @@ _pygi_info_register_types (PyObject *m)
 
     PyGIBaseInfo_Type.tp_dealloc = (destructor) _base_info_dealloc;
     PyGIBaseInfo_Type.tp_repr = (reprfunc) _base_info_repr;
-    PyGIBaseInfo_Type.tp_flags = (Py_TPFLAGS_DEFAULT | 
-                                   Py_TPFLAGS_BASETYPE  | 
-                                   Py_TPFLAGS_HAVE_GC);
-    PyGIBaseInfo_Type.tp_traverse = (traverseproc) _base_info_traverse;
+    PyGIBaseInfo_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIBaseInfo_Type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist);
     PyGIBaseInfo_Type.tp_methods = _PyGIBaseInfo_methods; 
     PyGIBaseInfo_Type.tp_richcompare = (richcmpfunc)_base_info_richcompare;

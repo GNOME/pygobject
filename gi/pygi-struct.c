@@ -34,10 +34,6 @@ _struct_dealloc (PyGIStruct *self)
                            (PyObject *) self,
                            &PyGIStructInfo_Type);
 
-    PyObject_GC_UnTrack ( (PyObject *) self);
-
-    PyObject_ClearWeakRefs ( (PyObject *) self);
-
     if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
         pygi_struct_foreign_release (info, ( (PyGPointer *) self)->pointer);
     } else if (self->free_on_dealloc) {
