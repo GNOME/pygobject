@@ -2166,9 +2166,6 @@ PYGLIB_MODULE_START(_gobject, "_gobject")
 {
     PyObject *d;
 
-#if !defined(GLIB_VERSION_2_36)
-    g_type_init();
-#endif
     pyglib_init();
 
     d = PyModule_GetDict(module);
