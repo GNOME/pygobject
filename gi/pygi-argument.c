@@ -1529,18 +1529,9 @@ _pygi_argument_to_object (GIArgument  *arg,
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
         {
-            if (g_type_info_is_pointer (type_info) &&
-                    (arg->v_pointer != NULL)) {
+            if (g_type_info_is_pointer (type_info)) {
                 g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
                 object = PyLong_FromVoidPtr (arg->v_pointer);
-            } else {
-                /* None is used instead of zero for parity with ctypes.
-                 * This is helpful in case the values are being used for
-                 * actual memory addressing, in which case None will
-                 * raise as opposed to 0 which will crash.
-                 */
-                object = Py_None;
-                Py_INCREF (object);
             }
             break;
         }
