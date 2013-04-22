@@ -505,7 +505,8 @@ class TestEverything(unittest.TestCase):
         glist = GLib.List()
         raw = RawGList.from_wrapped(glist)
 
-        self.assertEqual(glist.data, None)
+        # Note that pointer fields use 0 for NULL in PyGObject and None in ctypes
+        self.assertEqual(glist.data, 0)
         self.assertEqual(raw.contents.data, None)
 
         glist.data = 123
@@ -513,7 +514,7 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(raw.contents.data, 123)
 
         glist.data = None
-        self.assertEqual(glist.data, None)
+        self.assertEqual(glist.data, 0)
         self.assertEqual(raw.contents.data, None)
 
         # Setting to anything other than an int should raise
