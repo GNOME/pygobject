@@ -431,11 +431,19 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
     } else {
 	Py_DecRef(py_type);
 	if (type_tag == GI_TYPE_TAG_INTERFACE) {
+	    const char *info_name;
+	    PyObject *py_string;
 	    GIBaseInfo *iface = g_type_info_get_interface(&type_info);
+
+	    info_name = g_base_info_get_name (iface);
+	    if (info_name == NULL) {
+	        g_base_info_unref (iface);
+	        return PYGLIB_PyUnicode_FromString(g_type_tag_to_string(type_tag));
+	    }
+
 	    gchar *name = g_strdup_printf("%s.%s",
 		    g_base_info_get_namespace(iface),
-		    g_base_info_get_name (iface));
-        PyObject *py_string;
+		    info_name);
 	    g_base_info_unref(iface);
 	    py_string = PYGLIB_PyUnicode_FromString(name);
 	    g_free(name);
