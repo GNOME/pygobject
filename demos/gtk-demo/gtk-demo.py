@@ -21,39 +21,21 @@
 
 
 import codecs
-import keyword
 import os
-import tokenize
 import sys
 
 from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk
+
+try:
+    from gi.repository import GtkSource
+    GtkSource  # PyFlakes
+except ImportError:
+    GtkSource = None
 
 
 DEMOROOTDIR = os.path.abspath(os.path.dirname(__file__))
 DEMOCODEDIR = os.path.join(DEMOROOTDIR, 'demos')
 sys.path.insert(0, DEMOROOTDIR)
-
-
-class InputStream(object):
-    """
-    Simple Wrapper for File-like objects. [c]StringIO doesn't provide
-    a readline function for use with generate_tokens.
-    Using a iterator-like interface doesn't succeed, because the readline
-    function isn't used in such a context. (see <python-lib>/tokenize.py)
-    """
-    def __init__(self, data):
-        self.__data = ['%s\n' % x for x in data.splitlines()]
-        self.__lcount = 0
-
-    def readline(self):
-        try:
-            line = self.__data[self.__lcount]
-            self.__lcount += 1
-        except IndexError:
-            line = ''
-            self.__lcount = 0
-
-        return line
 
 
 class Demo(GObject.GObject):
@@ -146,32 +128,14 @@ class GtkDemoWindow(Gtk.Window):
         notebook = Gtk.Notebook()
         hbox.pack_start(notebook, True, True, 0)
 
-        (text_widget, info_buffer) = self.create_text(False)
+        text_widget, info_buffer = self.create_text_view()
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Info'))
 
         self.info_buffer = info_buffer
         self.info_buffer.create_tag('title', font='Sans 18')
 
-        (text_widget, source_buffer) = self.create_text(True)
+        text_widget, self.source_buffer = self.create_source_view()
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Source'))
-
-        self.source_buffer = source_buffer
-        self.source_buffer.create_tag('bold',
-                                      weight=Pango.Weight.BOLD)
-        self.source_buffer.create_tag('italic',
-                                      style=Pango.Style.ITALIC)
-        self.source_buffer.create_tag('comment',
-                                      foreground='#c0c0c0')
-        self.source_buffer.create_tag('decorator',
-                                      foreground='#7d7d7d',
-                                      style=Pango.Style.ITALIC)
-        self.source_buffer.create_tag('keyword',
-                                      foreground='#0000ff')
-        self.source_buffer.create_tag('number',
-                                      foreground='#800000')
-        self.source_buffer.create_tag('string',
-                                      foreground='#00aa00',
-                                      style=Pango.Style.ITALIC)
 
         self.show_all()
 
@@ -242,7 +206,6 @@ class GtkDemoWindow(Gtk.Window):
         start = self.source_buffer.get_iter_at_offset(0)
         end = start.copy()
         self.source_buffer.insert(end, code)
-        self.fontify()
 
     def row_activated_cb(self, view, path, col, store):
         iter = store.get_iter(path)
@@ -295,13 +258,15 @@ class GtkDemoWindow(Gtk.Window):
 
         return box
 
-    def create_text(self, is_source):
+    def create_scrolled_window(self):
         scrolled_window = Gtk.ScrolledWindow(hadjustment=None,
                                              vadjustment=None)
         scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
                                    Gtk.PolicyType.AUTOMATIC)
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
+        return scrolled_window
 
+    def create_text_view(self):
         text_view = Gtk.TextView()
         buffer = Gtk.TextBuffer()
 
@@ -309,100 +274,53 @@ class GtkDemoWindow(Gtk.Window):
         text_view.set_editable(False)
         text_view.set_cursor_visible(False)
 
+        scrolled_window = self.create_scrolled_window()
         scrolled_window.add(text_view)
 
-        if is_source:
-            font_desc = Pango.FontDescription('monospace')
-            text_view.modify_font(font_desc)
-            text_view.set_wrap_mode(Gtk.WrapMode.NONE)
+        text_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        text_view.set_pixels_above_lines(2)
+        text_view.set_pixels_below_lines(2)
+
+        return scrolled_window, buffer
+
+    def create_source_view(self):
+        font_desc = Pango.FontDescription('monospace 11')
+
+        if GtkSource:
+            lang_mgr = GtkSource.LanguageManager()
+            lang = lang_mgr.get_language('python')
+
+            buffer = GtkSource.Buffer()
+            buffer.set_language(lang)
+            buffer.set_highlight_syntax(True)
+
+            view = GtkSource.View()
+            view.set_buffer(buffer)
+            view.set_show_line_numbers(True)
+
+            scrolled_window = self.create_scrolled_window()
+            scrolled_window.add(view)
+
         else:
-            text_view.set_wrap_mode(Gtk.WrapMode.WORD)
-            text_view.set_pixels_above_lines(2)
-            text_view.set_pixels_below_lines(2)
+            scrolled_window, buffer = self.create_text_view()
+            view = scrolled_window.get_child()
 
-        return(scrolled_window, buffer)
-
-    def fontify(self):
-        start_iter = self.source_buffer.get_iter_at_offset(0)
-        end_iter = self.source_buffer.get_iter_at_offset(0)
-        data = self.source_buffer.get_text(self.source_buffer.get_start_iter(),
-                                           self.source_buffer.get_end_iter(),
-                                           False)
-
-        if sys.version_info < (3, 0):
-            data = data.decode('utf-8')
-
-        builtin_constants = ['None', 'True', 'False']
-        is_decorator = False
-        is_func = False
-
-        def prepare_iters():
-            start_iter.set_line(srow - 1)
-            start_iter.set_line_offset(scol)
-            end_iter.set_line(erow - 1)
-            end_iter.set_line_offset(ecol)
-
-        for x in tokenize.generate_tokens(InputStream(data).readline):
-            # x has 5-tuples
-            tok_type, tok_str = x[0], x[1]
-            srow, scol = x[2]
-            erow, ecol = x[3]
-
-            if tok_type == tokenize.COMMENT:
-                prepare_iters()
-                self.source_buffer.apply_tag_by_name('comment', start_iter, end_iter)
-            elif tok_type == tokenize.NAME:
-                if tok_str in keyword.kwlist or tok_str in builtin_constants:
-                    prepare_iters()
-                    self.source_buffer.apply_tag_by_name('keyword', start_iter, end_iter)
-
-                    if tok_str == 'def' or tok_str == 'class':
-                        # Next token is going to be a function/method/class name
-                        is_func = True
-                        continue
-                elif tok_str == 'self':
-                    prepare_iters()
-                    self.source_buffer.apply_tag_by_name('italic', start_iter, end_iter)
-                else:
-                    if is_func:
-                        prepare_iters()
-                        self.source_buffer.apply_tag_by_name('bold', start_iter, end_iter)
-                    elif is_decorator:
-                        prepare_iters()
-                        self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
-            elif tok_type == tokenize.STRING:
-                prepare_iters()
-                self.source_buffer.apply_tag_by_name('string', start_iter, end_iter)
-            elif tok_type == tokenize.NUMBER:
-                prepare_iters()
-                self.source_buffer.apply_tag_by_name('number', start_iter, end_iter)
-            elif tok_type == tokenize.OP:
-                if tok_str == '@':
-                    prepare_iters()
-                    self.source_buffer.apply_tag_by_name('decorator', start_iter, end_iter)
-
-                    # next token is going to be the decorator name
-                    is_decorator = True
-                    continue
-
-            if is_func:
-                is_func = False
-
-            if is_decorator:
-                is_decorator = False
+        view.modify_font(font_desc)
+        view.set_wrap_mode(Gtk.WrapMode.NONE)
+        return scrolled_window, buffer
 
 
 def main():
     mainloop = GLib.MainLoop()
 
     demowindow = GtkDemoWindow()
-    demowindow.connect('delete-event', quit, mainloop)
+    demowindow.connect('destroy', quit, mainloop)
     demowindow.show()
 
     mainloop.run()
 
 
-def quit(widget, event, mainloop):
+def quit(widget, mainloop):
     mainloop.quit()
 
 
