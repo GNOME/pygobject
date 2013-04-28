@@ -115,7 +115,7 @@ class Editable(Gtk.Editable):
     def insert_text(self, text, position):
         return super(Editable, self).insert_text(text, -1, position)
 
-    get_selection_bounds = strip_boolean_result(Gtk.TextBuffer.get_selection_bounds, fail_ret=())
+    get_selection_bounds = strip_boolean_result(Gtk.Editable.get_selection_bounds, fail_ret=())
 
 
 Editable = override(Editable)
