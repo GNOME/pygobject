@@ -23,6 +23,7 @@
 import codecs
 import os
 import sys
+import textwrap
 
 from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk
 
@@ -179,7 +180,12 @@ class GtkDemoWindow(Gtk.Window):
         if demo is None:
             return
 
-        description = demo.module.description
+        # Split into paragraphs based on double newlines and use
+        # textwrap to strip out all other formatting whitespace
+        description = ''
+        for paragraph in demo.module.description.split('\n\n'):
+            description += '\n'.join(textwrap.wrap(paragraph, 99999))
+            description += '\n\n'  # Add paragraphs back in
 
         f = codecs.open(demo.filename, 'rU', 'utf-8')
         code = f.read()
