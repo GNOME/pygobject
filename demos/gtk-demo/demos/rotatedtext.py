@@ -21,8 +21,10 @@
 # USA
 
 title = "Rotated Text"
-description = """This demo shows how to use PangoCairo to draw rotated and transformed text.  The right pane shows a rotated GtkLabel widget.
-In both cases, a custom PangoCairo shape renderer is installed to draw a red heard using cairo drawing operations instead of the Unicode heart character.
+description = """This demo shows how to use PangoCairo to draw rotated and
+transformed text.  The right pane shows a rotated GtkLabel widget. In both
+cases, a custom PangoCairo shape renderer is installed to draw a red heard using
+cairo drawing operations instead of the Unicode heart character.
 """
 
 from gi.repository import Gtk, Pango, PangoCairo, Gdk

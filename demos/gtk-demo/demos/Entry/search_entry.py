@@ -20,9 +20,9 @@
 # USA
 
 title = "Search Entry"
-description = """
-GtkEntry allows to display icons and progress information. This demo shows how to use these features in a search entry.
- """
+description = """GtkEntry allows to display icons and progress information.
+This demo shows how to use these features in a search entry.
+"""
 
 from gi.repository import Gtk, GObject
 

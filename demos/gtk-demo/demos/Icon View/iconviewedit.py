@@ -20,8 +20,9 @@
 # USA
 
 title = "Editing and Drag-and-Drop"
-description = """
-The GtkIconView widget supports Editing and Drag-and-Drop. This example also demonstrates using the generic GtkCellLayout interface to set up cell renderers in an icon view.
+description = """The GtkIconView widget supports Editing and Drag-and-Drop.
+This example also demonstrates using the generic GtkCellLayout interface to set
+up cell renderers in an icon view.
 """
 
 from gi.repository import Gtk, Gdk, GdkPixbuf

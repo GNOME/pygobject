@@ -20,10 +20,10 @@
 # USA
 
 title = "Icon View Basics"
-description = """
-The GtkIconView widget is used to display and manipulate icons. It uses a GtkTreeModel for data storage, so the list store example might be helpful.
-We also use the Gio.File API to get the icons for each file type.
- """
+description = """The GtkIconView widget is used to display and manipulate
+icons. It uses a GtkTreeModel for data storage, so the list store example might
+be helpful. We also use the Gio.File API to get the icons for each file type.
+"""
 
 
 import os

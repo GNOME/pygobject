@@ -20,8 +20,10 @@
 # USA
 
 title = "Images"
-description = """GtkImage is used to display an image; the image can be in a number of formats. Typically, you load an image into a GdkPixbuf, then display the pixbuf.
-This demo code shows some of the more obscure cases, in the simple case a call to gtk_image_new_from_file() is all you need.
+description = """GtkImage is used to display an image; the image can be in a
+number of formats. Typically, you load an image into a GdkPixbuf, then display
+the pixbuf. This demo code shows some of the more obscure cases, in the simple
+case a call to gtk_image_new_from_file() is all you need.
 """
 
 import os

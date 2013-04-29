@@ -20,8 +20,8 @@
 # USA
 
 title = "Pickers"
-description = """
-These widgets are mainly intended for use in preference dialogs. They allow to select colors, fonts, files and directories.
+description = """These widgets are mainly intended for use in preference
+dialogs. They allow to select colors, fonts, files and directories.
 """
 
 from gi.repository import Gtk
