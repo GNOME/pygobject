@@ -1,3 +1,52 @@
+3.9.1   30-Apr-2013
+	- gtk-demo: Wrap description strings at 80 characters (Simon Feltman)
+	  (#698547)
+	- gtk-demo: Use textwrap to reformat description for Gtk.TextView
+	  (Simon Feltman) (#698547)
+	- gtk-demo: Use GtkSource.View for showing source code (Simon Feltman)
+	  (#698547)
+	- Use correct class for GtkEditable's get_selection_bounds() function
+	  (Mike Ruprecht) (#699096)
+	- Test results of g_base_info_get_name for NULL (Simon Feltman)
+	  (#698829)
+	- Add ObjectInfo.get_class_struct() (Johan Dahlin) (#685218)
+	- Change interpretation of NULL pointer field from None to 0
+	  (Simon Feltman) (#698366)
+	- Do not build tests until needed (Sobhan Mohammadpour) (#698444)
+	- pygi-convert: Support toolbar styles (Kai Willadsen) (#698477)
+	- pygi-convert: Support new-style constructors for Gio.File
+	  (Kai Willadsen) (#698477)
+	- pygi-convert: Add some support for recent manager constructs
+	  (Kai Willadsen) (#698477)
+	- pygi-convert: Don't transform arbitrary keysym imports
+	  (Kai Willadsen) (#698477)
+	- Remove Python keyword escapement in Repository.find_by_name
+	  (Simon Feltman) (#697363)
+	- Optimize signal lookup in gi repository (Daniel Drake) (#696143)
+	- Optimize connection of Python-implemented signals (Daniel Drake)
+	  (#696143)
+	- Consolidate signal connection code (Daniel Drake) (#696143)
+	- Fix setting of struct property values (Daniel Drake)
+	- Optimize property get/set when using GObject.props (Daniel Drake)
+	  (#696143)
+	- configure.ac: Fix PYTHON_SO with Python3.3 (Christoph Reiter)
+	  (#696646)
+	- Simplify registration of custom types (Daniel Drake) (#696143)
+	- pygi-convert.sh: Add GStreamer rules (Christoph Reiter) (#697951)
+	- pygi-convert: Add rule for TreeModelFlags (Jussi Kukkonen)
+	- Unify GI marshalling code (Simon Feltman) (#693405)
+	- Use distutils.sysconfig to retrieve the python include path.
+	  (Christoph Reiter) (#696648)
+	- Support PEP 3149 (ABI version tagged .so files) (Christoph Reiter)
+	  (#696646)
+	- Fix stack corruption due to incorrect format for argument parser
+	  (Simon Feltman) (#696892)
+	- Deprecate GLib and GObject threads_init (Simon Feltman) (#686914)
+	- Drop support for Python 2.6 (Martin Pitt)
+	- Remove static PollFD bindings (Martin Pitt) (#686795)
+	- Drop test skipping due to too old g-i (Martin Pitt)
+	- Bump glib and g-i dependencies (Martin Pitt)
+
 3.8.0   25-Mar-2013
 	- tests: Fix incorrect assumption when testing pyglib version
 	  (Simon Feltman)
