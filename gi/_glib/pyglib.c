@@ -77,47 +77,6 @@ pyglib_init_internal(PyObject *api)
 }
 
 /**
- * pyglib_block_threads:
- *
- */
-void
-pyglib_block_threads(void)
-{
-    g_return_if_fail (_PyGLib_API != NULL);
-
-    if (_PyGLib_API->block_threads != NULL)
-	(* _PyGLib_API->block_threads)();
-}
-
-/**
- * pyglib_unblock_threads:
- *
- */
-void
-pyglib_unblock_threads(void)
-{
-    g_return_if_fail (_PyGLib_API != NULL);
-    if (_PyGLib_API->unblock_threads != NULL)
-	(* _PyGLib_API->unblock_threads)();
-}
-
-/**
- * pyglib_set_thread_block_funcs:
- *
- * hooks to register handlers for getting GDK threads to cooperate
- * with python threading
- */
-void
-pyglib_set_thread_block_funcs (PyGLibThreadBlockFunc block_threads_func,
-			       PyGLibThreadBlockFunc unblock_threads_func)
-{
-    g_return_if_fail (_PyGLib_API != NULL);
-
-    _PyGLib_API->block_threads = block_threads_func;
-    _PyGLib_API->unblock_threads = unblock_threads_func;
-}
-
-/**
  * pyglib_error_marshal:
  * @error: a pointer to the GError.
  *

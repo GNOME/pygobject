@@ -48,24 +48,17 @@ static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 
 /**
  * pyg_set_thread_block_funcs:
- * @block_threads_func: a function to block Python threads.
- * @unblock_threads_func: a function to unblock Python threads.
- *
- * an interface to allow pygtk to add hooks to handle threading
- * similar to the old PyGTK 0.6.x releases.  May not work quite right
- * anymore.
+ * Deprecated, only available for ABI compatibility.
  */
 static void
-pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
-			    PyGThreadBlockFunc unblock_threads_func)
+_pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
+			     PyGThreadBlockFunc unblock_threads_func)
 {
-    g_return_if_fail(pygobject_api_functions.block_threads == NULL &&
-		     pygobject_api_functions.unblock_threads == NULL);
-
-    pygobject_api_functions.block_threads   = block_threads_func;
-    pygobject_api_functions.unblock_threads = unblock_threads_func;
-    pyglib_set_thread_block_funcs(block_threads_func,
-				  unblock_threads_func);
+    PyGILState_STATE state = pyglib_gil_state_ensure ();
+    PyErr_Warn (PyExc_DeprecationWarning,
+                "Using pyg_set_thread_block_funcs is not longer needed. "
+                "PyGObject always uses Py_BLOCK/UNBLOCK_THREADS.");
+    pyglib_gil_state_release (state);
 }
 
 /**
@@ -2031,7 +2024,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   pyg_error_check,
 
-  pyg_set_thread_block_funcs,
+  _pyg_set_thread_block_funcs,
   (PyGThreadBlockFunc)0, /* block_threads */
   (PyGThreadBlockFunc)0, /* unblock_threads */
 

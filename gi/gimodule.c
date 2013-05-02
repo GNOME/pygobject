@@ -534,6 +534,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
     gsize total_read = 0;
     GError* error = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
+    GIOChannel *iochannel = NULL;
 
     if (!PyArg_ParseTuple (args, "Oi:pyg_channel_read", &py_iochannel, &max_count)) {
         return NULL;
@@ -545,7 +546,9 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
 	
     if (max_count == 0)
         return PYGLIB_PyBytes_FromString("");
-    
+
+    iochannel = pyg_boxed_get (py_iochannel, GIOChannel);
+
     while (status == G_IO_STATUS_NORMAL
 	   && (max_count == -1 || total_read < max_count)) {
 	gsize single_read;
@@ -572,11 +575,11 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
        
         buf = PYGLIB_PyBytes_AsString(ret_obj) + total_read;
 
-        pyglib_unblock_threads();
-        status = g_io_channel_read_chars(pyg_boxed_get (py_iochannel, GIOChannel),
-                                         buf, buf_size, &single_read, &error);
-        pyglib_block_threads();
-	if (pyglib_error_check(&error))
+        pyglib_begin_allow_threads;
+        status = g_io_channel_read_chars (iochannel, buf, buf_size, &single_read, &error);
+        pyglib_end_allow_threads;
+
+        if (pyglib_error_check(&error))
 	    goto failure;
 	
 	total_read += single_read;
