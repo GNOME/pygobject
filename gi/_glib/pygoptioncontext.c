@@ -130,10 +130,10 @@ pyg_option_context_parse(PyGOptionContext *self,
 
     g_assert(argv_length <= G_MAXINT);
     argv_length_int = argv_length;
-    pyglib_begin_allow_threads;
+    Py_BEGIN_ALLOW_THREADS;
     result = g_option_context_parse(self->context, &argv_length_int, &argv_content,
                                     &error);
-    pyglib_end_allow_threads;
+    Py_END_ALLOW_THREADS;
     argv_length = argv_length_int;
 
     if (!result)

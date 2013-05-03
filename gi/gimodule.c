@@ -575,9 +575,9 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
        
         buf = PYGLIB_PyBytes_AsString(ret_obj) + total_read;
 
-        pyglib_begin_allow_threads;
+        Py_BEGIN_ALLOW_THREADS;
         status = g_io_channel_read_chars (iochannel, buf, buf_size, &single_read, &error);
-        pyglib_end_allow_threads;
+        Py_END_ALLOW_THREADS;
 
         if (pyglib_error_check(&error))
 	    goto failure;

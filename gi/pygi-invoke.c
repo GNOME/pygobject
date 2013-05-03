@@ -37,7 +37,7 @@ _invoke_callable (PyGIInvokeState *state,
 
     error = NULL;
 
-    pyg_begin_allow_threads;
+    Py_BEGIN_ALLOW_THREADS;
 
     /* FIXME: use this for now but we can streamline the calls */
     if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
@@ -68,7 +68,7 @@ _invoke_callable (PyGIInvokeState *state,
                                           cache->n_to_py_args,
                                          &state->return_arg,
                                          &error);
-    pyg_end_allow_threads;
+    Py_END_ALLOW_THREADS;
 
     if (!retval) {
         g_assert (error != NULL);

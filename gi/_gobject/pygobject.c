@@ -88,10 +88,9 @@ pygobject_data_free(PyGObjectData *data)
     if (Py_IsInitialized()) {
 	state = pyglib_gil_state_ensure();
 	Py_DECREF(data->type);
-	/* We cannot use pyg_begin_allow_threads here because this is inside
+	/* We cannot use Py_BEGIN_ALLOW_THREADS here because this is inside
 	 * a branch. */
-	if (pyg_threads_enabled)
-	    _save = PyEval_SaveThread();
+	Py_UNBLOCK_THREADS; /* Modifies _save */
     }
 
     tmp = closures = data->closures;
@@ -114,8 +113,7 @@ pygobject_data_free(PyGObjectData *data)
     g_free(data);
 
     if (Py_IsInitialized()) {
-	if (pyg_threads_enabled)
-	    PyEval_RestoreThread(_save);
+	Py_BLOCK_THREADS; /* Restores _save */
 	pyglib_gil_state_release(state);
     }
 }
@@ -309,10 +307,11 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 
     /* The GType is implemented in Python, or we failed to read it via gi:
      * do a straightforward read. */
+    Py_BEGIN_ALLOW_THREADS;
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    pyg_begin_allow_threads;
     g_object_get_property(self->pygobject->obj, pspec->name, &value);
-    pyg_end_allow_threads;
+    Py_END_ALLOW_THREADS;
+
     ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
     
@@ -352,12 +351,11 @@ set_property_from_pspec(GObject *obj,
 	return FALSE;
     }
 
-    pyg_begin_allow_threads;
+    Py_BEGIN_ALLOW_THREADS;
     g_object_set_property(obj, pspec->name, &value);
-    pyg_end_allow_threads;
-
     g_value_unset(&value);
-    
+    Py_END_ALLOW_THREADS;
+
     return TRUE;
 }
 
@@ -1183,9 +1181,9 @@ pygobject_clear(PyGObject *self)
             g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, self);
             self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
         } else {
-            pyg_begin_allow_threads;
+            Py_BEGIN_ALLOW_THREADS;
             g_object_unref(self->obj);
-            pyg_end_allow_threads;
+            Py_END_ALLOW_THREADS;
         }
         self->obj = NULL;
     }
@@ -1320,9 +1318,10 @@ pygobject_get_property(PyGObject *self, PyObject *args)
 	return NULL;
     }
     g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    pyg_begin_allow_threads;
+    Py_BEGIN_ALLOW_THREADS;
     g_object_get_property(self->obj, param_name, &value);
-    pyg_end_allow_threads;
+    Py_END_ALLOW_THREADS;
+
     ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
     g_value_unset(&value);
     return ret;
@@ -1372,9 +1371,9 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
         }
         g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
 
-        pyg_begin_allow_threads;
+        Py_BEGIN_ALLOW_THREADS;
         g_object_get_property(self->obj, property_name, &value);
-        pyg_end_allow_threads;
+        Py_END_ALLOW_THREADS;
 
         item = pyg_value_as_pyobject(&value, TRUE);
         PyTuple_SetItem(tuple, i, item);

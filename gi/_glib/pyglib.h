@@ -37,13 +37,9 @@ void pyglib_init_internal(PyObject *api);
 #ifdef DISABLE_THREADING
 #    define pyglib_gil_state_ensure()        PyGILState_LOCKED
 #    define pyglib_gil_state_release(state)  state
-#    define pyglib_begin_allow_threads       G_STMT_START {
-#    define pyglib_end_allow_threads         } G_STMT_END
 #else
 #    define pyglib_gil_state_ensure          PyGILState_Ensure
 #    define pyglib_gil_state_release         PyGILState_Release
-#    define pyglib_begin_allow_threads       Py_BEGIN_ALLOW_THREADS
-#    define pyglib_end_allow_threads         Py_END_ALLOW_THREADS
 #endif
 
 /* Deprecated, only available for API compatibility. */
