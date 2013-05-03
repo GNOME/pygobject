@@ -685,6 +685,25 @@ GObject = Object
 __all__ += ['Object', 'GObject']
 
 
+class Binding(GObjectModule.Binding):
+    def __call__(self):
+        warnings.warn('Using parentheses (binding()) to retrieve the Binding object is no '
+                      'longer needed because the binding is returned directly from "bind_property.',
+                      PyGIDeprecationWarning, stacklevel=2)
+        return self
+
+    def unbind(self):
+        if hasattr(self, '_unbound'):
+            raise ValueError('binding has already been cleared out')
+        else:
+            setattr(self, '_unbound', True)
+            super(Binding, self).unbind()
+
+
+Binding = override(Binding)
+__all__.append('Binding')
+
+
 Property = propertyhelper.Property
 Signal = signalhelper.Signal
 SignalOverride = signalhelper.SignalOverride

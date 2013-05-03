@@ -415,6 +415,8 @@ class TestContextManagers(unittest.TestCase):
         self.assertEqual(self.tracking, [2])
 
 
+@unittest.skipUnless(hasattr(GObject.Binding, 'unbind'),
+                     'Requires newer GLib which has g_binding_unbind')
 class TestPropertyBindings(unittest.TestCase):
     class TestObject(GObject.GObject):
         int_prop = GObject.Property(default=0, type=int)
@@ -509,8 +511,8 @@ class TestPropertyBindings(unittest.TestCase):
                                             GObject.BindingFlags.BIDIRECTIONAL,
                                             transform_to, transform_from, test_data)
         binding = binding  # PyFlakes
-        binding_ref_count = sys.getrefcount(binding())
-        binding_gref_count = binding().__grefcount__
+        binding_ref_count = sys.getrefcount(binding)
+        binding_gref_count = binding.__grefcount__
 
         self.source.int_prop = 1
         self.assertEqual(self.source.int_prop, 1)
@@ -520,8 +522,8 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 2)
         self.assertEqual(self.target.int_prop, 4)
 
-        self.assertEqual(sys.getrefcount(binding()), binding_ref_count)
-        self.assertEqual(binding().__grefcount__, binding_gref_count)
+        self.assertEqual(sys.getrefcount(binding), binding_ref_count)
+        self.assertEqual(binding.__grefcount__, binding_gref_count)
 
         # test_data ref count increases by 2, once for each callback.
         self.assertEqual(sys.getrefcount(test_data), test_data_ref_count + 2)
@@ -530,9 +532,6 @@ class TestPropertyBindings(unittest.TestCase):
 
         # Unbind should clear out the binding and its transforms
         binding.unbind()
-        self.assertEqual(binding(), None)
-        del binding
-        gc.collect()
 
         # Setting source or target should not change the other.
         self.target.int_prop = 3
@@ -554,8 +553,9 @@ class TestPropertyBindings(unittest.TestCase):
         self.assertEqual(self.source.int_prop, 1)
         self.assertEqual(self.target.int_prop, 1)
 
+        # unbind should clear out the bindings self reference
         binding.unbind()
-        self.assertEqual(binding(), None)
+        self.assertEqual(binding.__grefcount__, 1)
 
         self.source.int_prop = 10
         self.assertEqual(self.source.int_prop, 10)
@@ -572,7 +572,7 @@ class TestPropertyBindings(unittest.TestCase):
         # the act of binding and the ref incurred by using __call__ to generate
         # a wrapper from the weak binding ref within python.
         binding = self.source.bind_property('int_prop', self.target, 'int_prop')
-        self.assertEqual(binding().__grefcount__, 2)
+        self.assertEqual(binding.__grefcount__, 2)
 
         # Creating a binding does not inc refs on source and target (they are weak
         # on the binding object itself)
@@ -581,18 +581,25 @@ class TestPropertyBindings(unittest.TestCase):
 
         # Use GObject.get_property because the "props" accessor leaks.
         # Note property names are canonicalized.
-        self.assertEqual(binding().get_property('source'), self.source)
-        self.assertEqual(binding().get_property('source_property'), 'int-prop')
-        self.assertEqual(binding().get_property('target'), self.target)
-        self.assertEqual(binding().get_property('target_property'), 'int-prop')
-        self.assertEqual(binding().get_property('flags'), GObject.BindingFlags.DEFAULT)
+        self.assertEqual(binding.get_property('source'), self.source)
+        self.assertEqual(binding.get_property('source_property'), 'int-prop')
+        self.assertEqual(binding.get_property('target'), self.target)
+        self.assertEqual(binding.get_property('target_property'), 'int-prop')
+        self.assertEqual(binding.get_property('flags'), GObject.BindingFlags.DEFAULT)
 
-        # Delete reference to source or target and the binding should listen.
+        # Delete reference to source or target and the binding will remove its own
+        # "self reference".
         ref = self.source.weak_ref()
         del self.source
         gc.collect()
         self.assertEqual(ref(), None)
-        self.assertEqual(binding(), None)
+        self.assertEqual(binding.__grefcount__, 1)
+
+        # Finally clear out the last ref held by the python wrapper
+        ref = binding.weak_ref()
+        del binding
+        gc.collect()
+        self.assertEqual(ref(), None)
 
 
 class TestGValue(unittest.TestCase):

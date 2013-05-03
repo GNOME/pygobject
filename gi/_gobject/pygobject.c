@@ -38,7 +38,6 @@ static int  pygobject_clear(PyGObject *self);
 static PyObject * pyg_type_get_bases(GType gtype);
 static inline int pygobject_clear(PyGObject *self);
 static PyObject * pygobject_weak_ref_new(GObject *obj, PyObject *callback, PyObject *user_data);
-static PyObject * pygbinding_weak_ref_new(GObject *obj);
 static inline PyGObjectData * pyg_object_peek_inst_data(GObject *obj);
 static void pygobject_inherit_slots(PyTypeObject *type, PyObject *bases,
 				    gboolean check_for_present);
@@ -1637,7 +1636,7 @@ pygobject_bind_property(PyGObject *self, PyObject *args)
 		return NULL;
 	}
 
-	return pygbinding_weak_ref_new(G_OBJECT (binding));
+	return pygobject_new (G_OBJECT (binding));
 }
 
 static PyObject *
@@ -2341,54 +2340,6 @@ pygobject_weak_ref_call(PyGObjectWeakRef *self, PyObject *args, PyObject *kw)
     }
 }
 
-
-/* -------------- GBinding Weak Reference ----------------- */
-
-/**
- * BindingWeakRef
- *
- * The BindingWeakRef object is used to manage GBinding objects within python
- * created through GObject.bind_property. It is a sub-class PyGObjectWeakRef so
- * that we can maintain the same reference counting semantics between Python
- * and GObject Binding objects. This gives explicit direct control of the
- * binding lifetime by using the "unbind" method on the BindingWeakRef object
- * along with implicit management based on the lifetime of the source or
- * target objects.
- */
-
-PYGLIB_DEFINE_TYPE("gi._gobject.GBindingWeakRef", PyGBindingWeakRef_Type, PyGObjectWeakRef);
-
-static PyObject *
-pygbinding_weak_ref_new(GObject *obj)
-{
-	PyGObjectWeakRef *self;
-
-	self = PyObject_GC_New(PyGObjectWeakRef, &PyGBindingWeakRef_Type);
-	self->callback = NULL;
-	self->user_data = NULL;
-	self->obj = obj;
-	g_object_weak_ref(self->obj, (GWeakNotify) pygobject_weak_ref_notify, self);
-	return (PyObject *) self;
-}
-
-static PyObject *
-pygbinding_weak_ref_unbind(PyGObjectWeakRef *self, PyObject *args)
-{
-    if (!self->obj) {
-        PyErr_SetString(PyExc_ValueError, "weak binding ref already unreffed");
-        return NULL;
-    }
-    g_object_unref(self->obj);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyMethodDef pygbinding_weak_ref_methods[] = {
-    { "unbind", (PyCFunction)pygbinding_weak_ref_unbind, METH_NOARGS},
-    { NULL, NULL, 0}
-};
-
-
 static gpointer
 pyobject_copy(gpointer boxed)
 {
@@ -2494,12 +2445,4 @@ pygobject_object_register_types(PyObject *d)
     if (PyType_Ready(&PyGObjectWeakRef_Type) < 0)
         return;
     PyDict_SetItemString(d, "GObjectWeakRef", (PyObject *) &PyGObjectWeakRef_Type);
-
-    PyGBindingWeakRef_Type.tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC;
-    PyGBindingWeakRef_Type.tp_doc = "A GBinding weak reference";
-    PyGBindingWeakRef_Type.tp_methods = pygbinding_weak_ref_methods;
-    PyGBindingWeakRef_Type.tp_base = &PyGObjectWeakRef_Type;
-    if (PyType_Ready(&PyGBindingWeakRef_Type) < 0)
-        return;
-    PyDict_SetItemString(d, "GBindingWeakRef", (PyObject *) &PyGBindingWeakRef_Type);
 }
