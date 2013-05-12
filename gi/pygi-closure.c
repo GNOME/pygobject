@@ -99,6 +99,7 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
                 }
 
                 g_base_info_unref (interface_info);
+                break;
             }
         default:
             *(ffi_arg *) retval = (ffi_arg) arg.v_pointer;
