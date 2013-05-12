@@ -2074,6 +2074,9 @@ class TestPythonGObject(unittest.TestCase):
         def do_method_with_default_implementation(self, int8):
             self.val = int8
 
+        def do_vfunc_return_value_only(self):
+            return 2121
+
     class Interface3Impl(GObject.Object, GIMarshallingTests.Interface3):
         def __init__(self):
             GObject.Object.__init__(self)
@@ -2146,6 +2149,10 @@ class TestPythonGObject(unittest.TestCase):
         object_ = self.SubObject(int=81)
         object_.method_with_default_implementation(87)
         self.assertEqual(object_.val, 87)
+
+    def test_subobject_child_vfunc(self):
+        object_ = self.SubObject(int=1)
+        self.assertEqual(object_.vfunc_return_value_only(), 2121)
 
     def test_dynamic_module(self):
         from gi.module import DynamicModule
@@ -2287,6 +2294,22 @@ class TestInterfaces(unittest.TestCase):
         instance = TestInterfaceImplA()
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEqual(instance.val, 42)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=700092
+    def test_subclass_override(self):
+        class TestInterfaceImplD(TestInterfaces.TestInterfaceImpl):
+            val2 = None
+
+            def do_test_int8_in(self, int8):
+                self.val2 = int8
+
+        instance = TestInterfaceImplD()
+        self.assertEqual(instance.val, None)
+        self.assertEqual(instance.val2, None)
+
+        GIMarshallingTests.test_interface_test_int8_in(instance, 42)
+        self.assertEqual(instance.val, None)
+        self.assertEqual(instance.val2, 42)
 
     def test_mro(self):
         # there was a problem with Python bailing out because of
