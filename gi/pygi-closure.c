@@ -272,7 +272,7 @@ _pygi_closure_convert_ffi_arguments (GICallableInfo *callable_info, void **args)
                         break;
                     } else if (interface_type == GI_INFO_TYPE_ENUM ||
                                interface_type == GI_INFO_TYPE_FLAGS) {
-                        g_args[i].v_double = * (double *) args[i];
+                        g_args[i].v_uint = * (guint *) args[i];
                         g_base_info_unref (interface);
                         break;
                     } else if (interface_type == GI_INFO_TYPE_STRUCT ||
