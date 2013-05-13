@@ -2277,7 +2277,6 @@ class TestInterfaces(unittest.TestCase):
         GIMarshallingTests.test_interface_test_int8_in(instance, 42)
         self.assertEqual(instance.val, 42)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=700092
     def test_subclass_override(self):
         class TestInterfaceImplD(TestInterfaces.TestInterfaceImpl):
             val2 = None
