@@ -1,3 +1,19 @@
+3.8.2   13-May-2013
+        - Fix vfunc info search for classes with multiple inheritance
+	  (Simon Feltman) (#700092)
+        - Fix closure argument conversion for enum and flag in args
+	  (Simon Feltman)
+        - Fix marshaling Python to FFI return value for enum and flags
+	  (Simon Feltman)
+	- Use correct class for GtkEditable's get_selection_bounds() function
+	  (Mike Ruprecht) (#699096)
+	- Test results of g_base_info_get_name for NULL (Simon Feltman)
+	  (#698829)
+        - Change interpretation of NULL pointer field from None to 0
+	  (Simon Feltman) (#698366)
+        - Remove Python keyword escapement in Repository.find_by_name
+	  (Simon Feltman) (#697363)
+
 3.8.1   15-Apr-2013
 	- pygi-convert.sh: Add GStreamer rules (Christoph Reiter) (#697951)
         - pygi-convert: Add rule for TreeModelFlags (Jussi Kukkonen)
