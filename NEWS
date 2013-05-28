@@ -1,3 +1,18 @@
+3.9.2   28-May-2013
+	- examples/option.py: Port to GI and Python 3 (Martin Pitt)
+        - Fix vfunc info search for classes with multiple inheritance
+	  (Simon Feltman) (#700092)
+        - Fix closure argument conversion for enum and flag in args
+	  (Simon Feltman)
+        - Fix marshaling Python to FFI return value for enum and flags
+	  (Simon Feltman)
+	- Remove half implemented GC in PyGIBaseInfo, PyGIStruct, and PyGIBoxed
+	  (Simon Feltman) (#677091)
+	- Replace usage of pyg_begin_allow_threads with Py_BEGIN_ALLOW_THREADS
+	  (Simon Feltman) (#699440)
+	- Remove and deprecate API for setting of thread blocking functions
+	  (Simon Feltman) (#699440)
+
 3.9.1   30-Apr-2013
 	- gtk-demo: Wrap description strings at 80 characters (Simon Feltman)
 	  (#698547)
