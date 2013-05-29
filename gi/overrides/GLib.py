@@ -48,7 +48,7 @@ spawn_async = _glib.spawn_async
 
 
 def threads_init():
-    warnings.warn('threads_init longer needs to be called. '
+    warnings.warn('threads_init no longer needs to be called. '
                   'See: https://bugzilla.gnome.org/show_bug.cgi?id=686914',
                   PyGIDeprecationWarning)
 
