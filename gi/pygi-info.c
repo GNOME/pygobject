@@ -434,6 +434,7 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
 	    const char *info_name;
 	    PyObject *py_string;
 	    GIBaseInfo *iface = g_type_info_get_interface(&type_info);
+	    gchar *name;
 
 	    info_name = g_base_info_get_name (iface);
 	    if (info_name == NULL) {
@@ -441,7 +442,7 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
 	        return PYGLIB_PyUnicode_FromString(g_type_tag_to_string(type_tag));
 	    }
 
-	    gchar *name = g_strdup_printf("%s.%s",
+	    name = g_strdup_printf("%s.%s",
 		    g_base_info_get_namespace(iface),
 		    info_name);
 	    g_base_info_unref(iface);
