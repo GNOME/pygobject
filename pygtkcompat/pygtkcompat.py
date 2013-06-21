@@ -139,7 +139,10 @@ def enable_gtk(version='3.0'):
     Gdk.PixbufLoader = GdkPixbuf.PixbufLoader.new_with_type
     Gdk.pixbuf_new_from_data = GdkPixbuf.Pixbuf.new_from_data
     Gdk.pixbuf_new_from_file = GdkPixbuf.Pixbuf.new_from_file
-    Gdk.pixbuf_new_from_file_at_scale = GdkPixbuf.Pixbuf.new_from_file_at_scale
+    try:
+        Gdk.pixbuf_new_from_file_at_scale = GdkPixbuf.Pixbuf.new_from_file_at_scale
+    except AttributeError:
+        pass
     Gdk.pixbuf_new_from_file_at_size = GdkPixbuf.Pixbuf.new_from_file_at_size
     Gdk.pixbuf_new_from_inline = GdkPixbuf.Pixbuf.new_from_inline
     Gdk.pixbuf_new_from_stream = GdkPixbuf.Pixbuf.new_from_stream
@@ -349,7 +352,10 @@ def enable_gtk(version='3.0'):
     Gtk.image_new_from_file = Gtk.Image.new_from_file
     Gtk.settings_get_default = Gtk.Settings.get_default
     Gtk.window_set_default_icon = Gtk.Window.set_default_icon
-    Gtk.clipboard_get = Gtk.Clipboard.get
+    try:
+        Gtk.clipboard_get = Gtk.Clipboard.get
+    except AttributeError:
+        pass
 
     #AccelGroup
     Gtk.AccelGroup.connect_group = Gtk.AccelGroup.connect
