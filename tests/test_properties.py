@@ -69,6 +69,9 @@ class PropertyObject(GObject.GObject):
         type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
         default=GLib.Variant('i', 42))
 
+    interface = GObject.Property(
+        type=Gio.File, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+
 
 class PropertyInheritanceObject(Regress.TestObj):
     # override property from the base class, with a different type
@@ -133,6 +136,7 @@ class TestPropertyObject(unittest.TestCase):
                                      'enum',
                                      'flags',
                                      'gtype',
+                                     'interface',
                                      'normal',
                                      'strings',
                                      'uint64',
@@ -388,6 +392,17 @@ class TestPropertyObject(unittest.TestCase):
         # set in constructor
         obj = new(PropertyObject, variant_def=GLib.Variant('u', 5))
         self.assertEqual(obj.props.variant_def.print_(True), 'uint32 5')
+
+    def test_interface(self):
+        obj = new(PropertyObject)
+
+        file = Gio.File.new_for_path('/some/path')
+        obj.props.interface = file
+        self.assertEqual(obj.props.interface.get_path(), '/some/path')
+        self.assertEqual(obj.interface.get_path(), '/some/path')
+
+        self.assertRaises(TypeError, setattr, obj, 'interface', 'foo')
+        self.assertRaises(TypeError, setattr, obj, 'interface', object())
 
     def test_range(self):
         # kiwi code
@@ -827,6 +842,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(tester._type_from_python(GObject.GEnum), GObject.GEnum.__gtype__)
         self.assertEqual(tester._type_from_python(GObject.GFlags), GObject.GFlags.__gtype__)
         self.assertEqual(tester._type_from_python(GObject.GBoxed), GObject.GBoxed.__gtype__)
+        self.assertEqual(tester._type_from_python(GObject.GInterface), GObject.GInterface.__gtype__)
 
         for type_ in [TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                       TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,

@@ -261,7 +261,8 @@ class Property(object):
               issubclass(type_, (_gobject.GObject,
                                  _gobject.GEnum,
                                  _gobject.GFlags,
-                                 _gobject.GBoxed))):
+                                 _gobject.GBoxed,
+                                 _gobject.GInterface))):
             return type_.__gtype__
         elif type_ in (TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR,
                        TYPE_INT, TYPE_UINT, TYPE_BOOLEAN, TYPE_LONG,

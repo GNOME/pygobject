@@ -623,6 +623,7 @@ create_property (const gchar  *prop_name,
 	    pspec = g_param_spec_pointer (prop_name, nick, blurb, flags);
 	break;
     case G_TYPE_OBJECT:
+    case G_TYPE_INTERFACE:
 	if (!PyArg_ParseTuple(args, ""))
 	    return NULL;
 	pspec = g_param_spec_object (prop_name, nick, blurb, prop_type, flags);
