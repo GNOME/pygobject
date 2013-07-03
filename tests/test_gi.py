@@ -1219,6 +1219,13 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GObject.TYPE_INT, 42)
         GIMarshallingTests.gvalue_in(value)
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gvalue_in_with_modification'),
+                         'Newer version of gi needed.')
+    def test_gvalue_in_with_modification(self):
+        value = GObject.Value(GObject.TYPE_INT, 42)
+        GIMarshallingTests.gvalue_in_with_modification(value)
+        self.assertEqual(value.get_int(), 24)
+
     def test_gvalue_int64_in(self):
         value = GObject.Value(GObject.TYPE_INT64, GObject.G_MAXINT64)
         GIMarshallingTests.gvalue_int64_in(value)
