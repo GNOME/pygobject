@@ -2087,6 +2087,10 @@ class TestPythonGObject(unittest.TestCase):
             self.variants = variants
             self.n_variants = n_variants
 
+    class ErrorObject(GIMarshallingTests.Object):
+        def do_vfunc_return_value_only(self):
+            raise ValueError('Return value should be 0')
+
     def test_object(self):
         self.assertTrue(issubclass(self.Object, GIMarshallingTests.Object))
 
@@ -2245,6 +2249,10 @@ class TestPythonGObject(unittest.TestCase):
         _object.worked = False
         _object.call_vfunc_with_callback()
         self.assertTrue(_object.worked)
+
+    def test_exception_in_vfunc_return_value(self):
+        obj = self.ErrorObject()
+        self.assertEqual(obj.vfunc_return_value_only(), 0)
 
 
 class TestMultiOutputArgs(unittest.TestCase):

@@ -108,6 +108,19 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
 }
 
 static void
+_pygi_closure_clear_retval (GICallableInfo *callable_info, gpointer retval)
+{
+    GITypeInfo return_type_info;
+    GITypeTag return_type_tag;
+
+    g_callable_info_load_return_type (callable_info, &return_type_info);
+    return_type_tag = g_type_info_get_tag (&return_type_info);
+    if (return_type_tag != GI_TYPE_TAG_VOID) {
+        *((ffi_arg *) retval) = 0;
+    }
+}
+
+static void
 _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
                                             GITypeInfo *type_info,
                                             GITransfer transfer)
@@ -546,6 +559,7 @@ _pygi_closure_handle (ffi_cif *cif,
     Py_DECREF (py_args);
 
     if (retval == NULL) {
+        _pygi_closure_clear_retval (closure->info, result);
         PyErr_Print();
         goto end;
     }
