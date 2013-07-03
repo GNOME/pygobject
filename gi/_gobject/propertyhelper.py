@@ -48,14 +48,13 @@ class Property(object):
     Creates a new property which in conjunction with GObject subclass will
     create a property proxy:
 
-    >>> class MyObject(GObject.GObject):
-    >>> ... prop = GObject.Property(type=str)
+         class MyObject(GObject.GObject):
+         ... prop = GObject.Property(type=str)
 
-    >>> obj = MyObject()
-    >>> obj.prop = 'value'
+         obj = MyObject()
+         obj.prop = 'value'
 
-    >>> obj.prop
-    'value'
+         obj.prop  # now is 'value'
 
     The API is similar to the builtin property:
 

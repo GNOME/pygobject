@@ -448,8 +448,8 @@ def signal_handler_block(obj, handler_id):
     Returns a context manager which optionally can be used to
     automatically unblock the handler:
 
-    >>> with GObject.signal_handler_block(obj, id):
-    >>>    pass
+      with GObject.signal_handler_block(obj, id):
+         pass
     """
     GObjectModule.signal_handler_block(_get_instance_for_signal(obj), handler_id)
     return _HandlerBlockManager(obj, handler_id)
@@ -616,8 +616,8 @@ class Object(GObjectModule.Object):
         Returns a context manager which optionally can be used to
         automatically thaw notifications:
 
-        >>> with obj.freeze_notify():
-        >>>     pass
+          with obj.freeze_notify():
+              pass
         """
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)
