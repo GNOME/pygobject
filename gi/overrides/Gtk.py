@@ -473,7 +473,7 @@ class Dialog(Gtk.Dialog, Container):
         pairs - button text (or stock ID) and a response ID integer are passed
         individually. For example:
 
-        >>> dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+           dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
 
         will add "Open" and "Close" buttons to dialog.
         """
