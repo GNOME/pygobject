@@ -2106,8 +2106,8 @@ _pygi_argument_from_g_value(const GValue *value,
             arg.v_pointer = g_value_get_boxed (value);
             break;
         case GI_TYPE_TAG_VOID:
-            g_critical("Converting of type '%s' is not implemented", g_type_tag_to_string(type_tag));
-            g_assert_not_reached();
+            arg.v_pointer = g_value_get_pointer (value);
+            break;
     }
 
     return arg;
