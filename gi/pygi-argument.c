@@ -1164,7 +1164,7 @@ array_success:
                                                            g_type,
                                                            py_type,
                                                            transfer,
-                                                           FALSE, /*is_caller_allocates*/
+                                                           FALSE, /*copy_reference*/
                                                            g_struct_info_is_foreign (info));
 
                     Py_DECREF (py_type);
