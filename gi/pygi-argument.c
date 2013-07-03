@@ -1266,7 +1266,7 @@ array_success:
                         pygi_marshal_from_py_gvalue (object,
                                                      &arg,
                                                      transfer,
-                                                     FALSE /*is_allocated*/);
+                                                     FALSE /*copy_reference*/);
 
                     } else if (g_type_is_a (type, G_TYPE_CLOSURE)) {
                         pygi_marshal_from_py_gclosure (object, &arg);

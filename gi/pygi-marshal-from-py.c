@@ -1650,7 +1650,7 @@ _pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
     } else if (iface_cache->g_type == G_TYPE_VALUE) {
         return pygi_marshal_from_py_gvalue(py_arg, arg,
                                            arg_cache->transfer,
-                                           arg_cache->is_caller_allocates);
+                                           TRUE);
     } else if (iface_cache->is_foreign) {
         PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (py_arg,
@@ -1898,13 +1898,14 @@ pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
  * py_arg: (in):
  * arg: (out):
  * transfer:
- * is_allocated: TRUE if arg->v_pointer is an already allocated GValue
+ * copy_reference: TRUE if arg should use the pointer reference held by py_arg
+ *                 when it is already holding a GValue vs. copying the value.
  */
 gboolean
 pygi_marshal_from_py_gvalue (PyObject *py_arg,
                              GIArgument *arg,
                              GITransfer transfer,
-                             gboolean is_allocated) {
+                             gboolean copy_reference) {
     GValue *value;
     GType object_type;
 
@@ -1914,24 +1915,21 @@ pygi_marshal_from_py_gvalue (PyObject *py_arg,
         return FALSE;
     }
 
-    if (is_allocated)
-        value = (GValue *)arg->v_pointer;
-    else
-        value = g_slice_new0 (GValue);
-
     /* if already a gvalue, use that, else marshal into gvalue */
     if (object_type == G_TYPE_VALUE) {
         GValue *source_value = pyg_boxed_get (py_arg, GValue);
-        if (G_VALUE_TYPE (value) == G_TYPE_INVALID)
+        if (copy_reference) {
+            value = source_value;
+        } else {
+            value = g_slice_new0 (GValue);
             g_value_init (value, G_VALUE_TYPE (source_value));
-        g_value_copy (source_value, value);
+            g_value_copy (source_value, value);
+        }
     } else {
-        if (G_VALUE_TYPE (value) == G_TYPE_INVALID)
-            g_value_init (value, object_type);
-
+        value = g_slice_new0 (GValue);
+        g_value_init (value, object_type);
         if (pyg_value_from_pyobject (value, py_arg) < 0) {
-            if (!is_allocated)
-                g_slice_free (GValue, value);
+            g_slice_free (GValue, value);
             PyErr_SetString (PyExc_RuntimeError, "PyObject conversion to GValue failed");
             return FALSE;
         }
