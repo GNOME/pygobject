@@ -1,3 +1,19 @@
+3.8.3   05-Jul-2013
+	- Add marshalling of GI_TYPE_TAG_VOID held in a GValue to int.  While
+	  not particularly useful this allows some callbacks in WebKit to
+	  function without causing a segfault. (Simon Feltman) (#694233)
+	- pygtkcompat: Fix for missing methods on Windows (Martin Pitt)
+	  (#702787)
+	- gi/pygi-info.c: Avoid C99-style variable declaration (Chun-wei Fan)
+	  (#702786)
+	- Clear return value of closures to zero when an exception occures
+	  (Simon Feltman) (#702552)
+	- Re-add support for passing GValue's by reference (Simon Feltman)
+	  (#701058)
+	- Don't use doctest syntax in docstrings for examples, to fix test
+	  failures with pyflakes 0.7.x (Martin Pitt) (#701009)
+	- examples/option.py: Port to GI and Python 3 (Martin Pitt)
+
 3.8.2   13-May-2013
         - Fix vfunc info search for classes with multiple inheritance
 	  (Simon Feltman) (#700092)
