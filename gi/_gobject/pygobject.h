@@ -195,6 +195,7 @@ struct _PyGObject_Functions {
 
     PyObject *(* newgobj_full)(GObject *obj, gboolean steal, gpointer g_class);
     PyTypeObject *object_type;
+    int (* value_from_pyobject_with_error)(GValue *value, PyObject *obj);
 };
 
 
@@ -244,6 +245,7 @@ struct _PyGObject_Functions *_PyGObject_API;
 #define pyg_flags_get_value         (_PyGObject_API->flags_get_value)
 #define pyg_register_gtype_custom   (_PyGObject_API->register_gtype_custom)
 #define pyg_value_from_pyobject     (_PyGObject_API->value_from_pyobject)
+#define pyg_value_from_pyobject_with_error (_PyGObject_API->value_from_pyobject_with_error)
 #define pyg_value_as_pyobject       (_PyGObject_API->value_as_pyobject)
 #define pyg_register_interface      (_PyGObject_API->register_interface)
 #define PyGBoxed_Type               (*_PyGObject_API->boxed_type)

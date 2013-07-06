@@ -85,6 +85,7 @@ void      pyg_register_gtype_custom(GType gtype,
 			     fromvaluefunc from_func,
 			     tovaluefunc to_func);
 int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
+int       pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj);
 PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
 int       pyg_param_gvalue_from_pyobject(GValue* value,
                                          PyObject* py_obj,

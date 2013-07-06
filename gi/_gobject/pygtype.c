@@ -785,7 +785,7 @@ pyg_array_from_pyobject(GValue *value,
 }
 
 /**
- * pyg_value_from_pyobject:
+ * pyg_value_from_pyobject_with_error:
  * @value: the GValue object to store the converted value in.
  * @obj: the Python object to convert.
  *
@@ -797,7 +797,7 @@ pyg_array_from_pyobject(GValue *value,
  * Returns: 0 on success, -1 on error.
  */
 int
-pyg_value_from_pyobject(GValue *value, PyObject *obj)
+pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
 {
     PyObject *tmp;
     GType value_type = G_VALUE_TYPE(value);
@@ -810,15 +810,18 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
                 g_value_set_object(value, NULL);
             else {
                 if (!PyObject_TypeCheck(obj, &PyGObject_Type)) {
+                    PyErr_SetString(PyExc_TypeError, "GObject is required");
                     return -1;
                 }
                 if (!G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
                         value_type)) {
+                    PyErr_SetString(PyExc_TypeError, "Invalid GObject type for assignment");
                     return -1;
                 }
                 g_value_set_object(value, pygobject_get(obj));
             }
         } else {
+            PyErr_SetString(PyExc_TypeError, "Unsupported conversion");
             return -1;
         }
         break;
@@ -841,7 +844,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             g_value_set_schar(value, PYGLIB_PyBytes_AsString(tmp)[0]);
             Py_DECREF(tmp);
         } else {
-            PyErr_Clear();
+            PyErr_SetString(PyExc_TypeError, "Cannot convert to TYPE_CHAR");
             return -1;
         }
 
@@ -936,7 +939,6 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     {
         gint val = 0;
         if (pyg_enum_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
-            PyErr_Clear();
             return -1;
         }
         g_value_set_enum(value, val);
@@ -946,7 +948,6 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
     {
         guint val = 0;
         if (pyg_flags_get_value(G_VALUE_TYPE(value), obj, &val) < 0) {
-            PyErr_Clear();
             return -1;
         }
         g_value_set_flags(value, val);
@@ -970,6 +971,7 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
                     g_value_set_string(value, PYGLIB_PyBytes_AsString(tmp));
                     Py_DECREF(tmp);
                 } else {
+                    PyErr_SetString(PyExc_TypeError, "Expected string");
                     return -1;
                 }
             } else {
@@ -994,8 +996,10 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             g_value_set_pointer(value, PYGLIB_CPointer_GetPointer(obj, NULL));
         else if (G_VALUE_HOLDS_GTYPE (value))
             g_value_set_gtype (value, pyg_type_from_object (obj));
-        else
+        else {
+            PyErr_SetString(PyExc_TypeError, "Expected pointer");
             return -1;
+        }
         break;
     case G_TYPE_BOXED: {
         PyGTypeMarshal *bm;
@@ -1013,13 +1017,12 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 
             type = pyg_type_from_object((PyObject*)Py_TYPE(obj));
             if (G_UNLIKELY (! type)) {
-                PyErr_Clear();
                 return -1;
             }
             n_value = g_new0 (GValue, 1);
             g_value_init (n_value, type);
             g_value_take_boxed (value, n_value);
-            return pyg_value_from_pyobject (n_value, obj);
+            return pyg_value_from_pyobject_with_error (n_value, obj);
         }
         else if (PySequence_Check(obj) &&
                 G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
@@ -1043,8 +1046,10 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             return bm->tovalue(value, obj);
         else if (PYGLIB_CPointer_Check(obj))
             g_value_set_boxed(value, PYGLIB_CPointer_GetPointer(obj, NULL));
-        else
+        else {
+            PyErr_SetString(PyExc_TypeError, "Expected Boxed");
             return -1;
+        }
         break;
     }
     case G_TYPE_PARAM:
@@ -1054,8 +1059,10 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
         else if (PyGParamSpec_Check(obj))
             g_value_set_param(value, PYGLIB_CPointer_GetPointer(obj, NULL));
-        else
+        else {
+            PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
             return -1;
+        }
         break;
     case G_TYPE_OBJECT:
         if (obj == Py_None) {
@@ -1064,8 +1071,10 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
                 G_TYPE_CHECK_INSTANCE_TYPE(pygobject_get(obj),
                         G_VALUE_TYPE(value))) {
             g_value_set_object(value, pygobject_get(obj));
-        } else
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Expected GObject");
             return -1;
+        }
         break;
     case G_TYPE_VARIANT:
     {
@@ -1073,24 +1082,54 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
             g_value_set_variant(value, NULL);
         else if (pyg_type_from_object_strict(obj, FALSE) == G_TYPE_VARIANT)
             g_value_set_variant(value, pyg_boxed_get(obj, GVariant));
-        else
+        else {
+            PyErr_SetString(PyExc_TypeError, "Expected Variant");
             return -1;
+        }
         break;
     }
     default:
     {
         PyGTypeMarshal *bm;
-        if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL)
+        if ((bm = pyg_type_lookup(G_VALUE_TYPE(value))) != NULL) {
             return bm->tovalue(value, obj);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Unknown value type");
+            return -1;
+        }
         break;
     }
     }
+
+    /* If an error occurred, unset the GValue but don't clear the Python error. */
     if (PyErr_Occurred()) {
         g_value_unset(value);
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
+ * pyg_value_from_pyobject:
+ * @value: the GValue object to store the converted value in.
+ * @obj: the Python object to convert.
+ *
+ * Same basic function as pyg_value_from_pyobject_with_error but clears
+ * any Python errors before returning.
+ *
+ * Returns: 0 on success, -1 on error.
+ */
+int
+pyg_value_from_pyobject(GValue *value, PyObject *obj)
+{
+    int res = pyg_value_from_pyobject_with_error (value, obj);
+
+    if (PyErr_Occurred()) {
         PyErr_Clear();
         return -1;
     }
-    return 0;
+    return res;
 }
 
 /**
