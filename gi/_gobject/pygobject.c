@@ -2386,8 +2386,11 @@ static gpointer
 pyobject_copy(gpointer boxed)
 {
     PyObject *object = boxed;
+    PyGILState_STATE state;
 
+    state = pyglib_gil_state_ensure();
     Py_INCREF(object);
+    pyglib_gil_state_release(state);
     return object;
 }
 
