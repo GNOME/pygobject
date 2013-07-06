@@ -251,9 +251,24 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
-    if (PYGLIB_CPointer_Check(py_arg)) {
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+    } else if (PYGLIB_CPointer_Check(py_arg)) {
         arg->v_pointer = PYGLIB_CPointer_GetPointer (py_arg, NULL);
     } else {
+        /* NOTE: This will change to only allow integers and the deprecation
+         * warning will become a runtime exception. Using the following:
+         * arg->v_pointer = PyLong_AsVoidPtr (py_arg);
+         * See: https://bugzilla.gnome.org/show_bug.cgi?id=688081
+         */
+
+        if (!PYGLIB_PyLong_Check(py_arg) && !PyLong_Check(py_arg)) {
+            if (PyErr_WarnEx(PyGIDeprecationWarning,
+                             "Pointer arguments will be restricted to integers, capsules, and None. "
+                             "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599",
+                             1))
+                return FALSE;
+        }
         arg->v_pointer = py_arg;
     }
 
