@@ -24,7 +24,9 @@ from __future__ import absolute_import
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
-from ._gi import _API, Repository
+from ._gi import _API
+from ._gi import Repository
+from ._gi import PyGIDeprecationWarning
 
 # Force loading the GObject typelib so we have available the wrappers for
 # base classes such as GInitiallyUnowned
@@ -32,6 +34,7 @@ import gi._gobject
 gi  # pyflakes
 
 _API = _API  # pyflakes
+PyGIDeprecationWarning = PyGIDeprecationWarning
 
 import os
 
@@ -81,17 +84,3 @@ def require_version(namespace, version):
 
 def get_required_version(namespace):
     return _versions.get(namespace, None)
-
-
-# Use RuntimeWarning as the base class of PyGIDeprecationWarning
-# for unstable (odd minor version) and use DeprecationWarning for
-# stable (even minor version). This is so PyGObject deprecations
-# behave the same as regular Python deprecations in stable releases.
-if version_info[1] % 2:
-    _DeprecationWarningBase = RuntimeWarning
-else:
-    _DeprecationWarningBase = DeprecationWarning
-
-
-class PyGIDeprecationWarning(_DeprecationWarningBase):
-    pass

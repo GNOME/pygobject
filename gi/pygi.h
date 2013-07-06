@@ -32,6 +32,8 @@
 #include <girepository.h>
 #include "pygi-cache.h"
 
+extern PyObject *PyGIDeprecationWarning;
+
 typedef struct {
     PyObject_HEAD
     GIRepository *repository;

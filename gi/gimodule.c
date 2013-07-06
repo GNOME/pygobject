@@ -28,6 +28,8 @@
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
+PyObject *PyGIDeprecationWarning;
+
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
                     PyObject *args,
@@ -640,6 +642,22 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
     _pygi_argument_init();
+
+    /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
+     * for unstable (odd minor version) and use DeprecationWarning for
+     * stable (even minor version). This is so PyGObject deprecations
+     * behave the same as regular Python deprecations in stable releases.
+     */
+#if PYGOBJECT_MINOR_VERSION % 2
+    PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
+                                                PyExc_RuntimeWarning, NULL);
+#else
+    PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
+                                                PyExc_DeprecationWarning, NULL);
+#endif
+
+    Py_INCREF(PyGIDeprecationWarning);
+    PyModule_AddObject(module, "PyGIDeprecationWarning", PyGIDeprecationWarning);
 
     api = PYGLIB_CPointer_WrapPointer ( (void *) &CAPI, "gi._API");
     if (api == NULL) {
