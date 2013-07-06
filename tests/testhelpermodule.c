@@ -615,7 +615,7 @@ PYGLIB_MODULE_START(testhelper, "testhelper")
 
   d = PyModule_GetDict(module);
 
-  if ((m = PyImport_ImportModule("gi._gobject._gobject")) == NULL) {
+  if ((m = PyImport_ImportModule("gi.repository.GObject")) == NULL) {
     PyErr_SetString(PyExc_ImportError,
 		    "could not import gobject");
     return PYGLIB_MODULE_ERROR_RETURN;
