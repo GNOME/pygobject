@@ -219,6 +219,15 @@ class Value(GObjectModule.Value):
         if self._free_on_dealloc and self.g_type != TYPE_INVALID:
             self.unset()
 
+    def set_boxed(self, boxed):
+        # Workaround the introspection marshalers inability to know
+        # these methods should be marshaling boxed types. This is because
+        # the type information is stored on the GValue.
+        _gobject._gvalue_set(self, boxed)
+
+    def get_boxed(self):
+        return _gobject._gvalue_get(self)
+
     def set_value(self, py_value):
         gtype = self.g_type
 

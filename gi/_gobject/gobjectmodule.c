@@ -1658,6 +1658,40 @@ pyg__install_metaclass(PyObject *dummy, PyTypeObject *metaclass)
     return Py_None;
 }
 
+static PyObject *
+pyg__gvalue_get(PyObject *module, PyObject *pygvalue)
+{
+    if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
+        PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
+        return NULL;
+    }
+
+    return pyg_value_as_pyobject (pyg_boxed_get(pygvalue, GValue),
+                                  /*copy_boxed=*/ TRUE);
+}
+
+static PyObject *
+pyg__gvalue_set(PyObject *module, PyObject *args)
+{
+    PyObject *pygvalue;
+    PyObject *pyobject;
+
+    if (!PyArg_ParseTuple (args, "OO:_gobject._gvalue_set",
+                           &pygvalue, &pyobject))
+        return NULL;
+
+    if (!pyg_boxed_check (pygvalue, G_TYPE_VALUE)) {
+        PyErr_SetString (PyExc_TypeError, "Expected GValue argument.");
+        return NULL;
+    }
+
+    if (pyg_value_from_pyobject_with_error (pyg_boxed_get (pygvalue, GValue),
+                                            pyobject) == -1)
+        return NULL;
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef _gobject_functions[] = {
     { "type_name", pyg_type_name, METH_VARARGS },
     { "type_from_name", pyg_type_from_name, METH_VARARGS },
@@ -1676,6 +1710,10 @@ static PyMethodDef _gobject_functions[] = {
       (PyCFunction)pyg_add_emission_hook, METH_VARARGS },
     { "_install_metaclass",
       (PyCFunction)pyg__install_metaclass, METH_O },
+    { "_gvalue_get",
+      (PyCFunction)pyg__gvalue_get, METH_O },
+    { "_gvalue_set",
+      (PyCFunction)pyg__gvalue_set, METH_VARARGS },
 
     { NULL, NULL, 0 }
 };
