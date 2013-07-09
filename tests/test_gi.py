@@ -2152,7 +2152,7 @@ class TestPythonGObject(unittest.TestCase):
         self.assertTrue(isinstance(GObject, DynamicModule))
 
     def test_subobject_non_vfunc_do_method(self):
-        class PythonObjectWithNonVFuncDoMethod:
+        class PythonObjectWithNonVFuncDoMethod(object):
             def do_not_a_vfunc(self):
                 return 5
 
@@ -2416,9 +2416,17 @@ class TestMRO(unittest.TestCase):
         class Mixin:
             pass
 
-        # Dynamically create a new gi based class with an old
-        # style mixin.
-        type('GIWithOldStyleMixin', (GIMarshallingTests.Object, Mixin), {})
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+
+            # Dynamically create a new gi based class with an old
+            # style mixin.
+            type('GIWithOldStyleMixin', (GIMarshallingTests.Object, Mixin), {})
+
+            if sys.version_info < (3, 0):
+                self.assertTrue(issubclass(warn[0].category, RuntimeWarning))
+            else:
+                self.assertEqual(len(warn), 0)
 
 
 class TestInterfaceClash(unittest.TestCase):

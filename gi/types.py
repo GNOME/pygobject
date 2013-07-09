@@ -23,6 +23,7 @@
 from __future__ import absolute_import
 
 import sys
+import warnings
 
 from . import _gobject
 from ._gobject._gobject import GInterface
@@ -309,17 +310,40 @@ class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
 
 
 def mro(C):
-    """Compute the class precedence list (mro) according to C3
+    """Compute the class precedence list (mro) according to C3, with GObject
+    interface considerations.
+
+    We override Python's MRO calculation to account for the fact that
+    GObject classes are not affected by the diamond problem:
+    http://en.wikipedia.org/wiki/Diamond_problem
 
     Based on http://www.python.org/download/releases/2.3/mro/
-    Modified to consider that interfaces don't create the diamond problem
     """
     # TODO: If this turns out being too slow, consider using generators
     bases = []
     bases_of_subclasses = [[C]]
 
     if C.__bases__:
-        bases_of_subclasses += list(map(mro, C.__bases__)) + [list(C.__bases__)]
+        for base in C.__bases__:
+            # Python causes MRO's to be calculated starting with the lowest
+            # base class and working towards the descendant, storing the result
+            # in __mro__ at each point. Therefore at this point we know that
+            # we already have our base class MRO's available to us, there is
+            # no need for us to (re)calculate them.
+            if hasattr(base, '__mro__'):
+                bases_of_subclasses += [list(base.__mro__)]
+            else:
+                warnings.warn('Mixin class %s is an old style class, please '
+                              'update this to derive from "object".' % base,
+                              RuntimeWarning)
+                # For old-style classes (Python2 only), the MRO is not
+                # easily accessible. As we do need it here, we calculate
+                # it via recursion, according to the C3 algorithm. Using C3
+                # for old style classes deviates from Python's own behaviour,
+                # but visible effects here would be a corner case triggered by
+                # questionable design.
+                bases_of_subclasses += [mro(base)]
+        bases_of_subclasses += [list(C.__bases__)]
 
     while bases_of_subclasses:
         for subclass_bases in bases_of_subclasses:
