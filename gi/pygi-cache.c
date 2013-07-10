@@ -1387,6 +1387,7 @@ _args_cache_generate (GICallableInfo *callable_info,
 
             arg_cache->type_tag = g_type_info_get_tag (type_info);
 
+            g_base_info_unref (type_info);
             g_base_info_unref ( (GIBaseInfo *)arg_info);
             continue;
         }
