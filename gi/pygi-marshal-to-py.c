@@ -740,6 +740,7 @@ _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
     } else {
         py_obj = pyg_enum_from_gtype (iface_cache->g_type, c_long);
     }
+    g_base_info_unref (interface);
     return py_obj;
 }
 
@@ -759,9 +760,11 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
 
     if (!gi_argument_to_c_long(arg, &c_long,
                                g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+        g_base_info_unref (interface);
         return NULL;
     }
 
+    g_base_info_unref (interface);
     if (iface_cache->g_type == G_TYPE_NONE) {
         /* An enum with a GType of None is an enum without GType */
 

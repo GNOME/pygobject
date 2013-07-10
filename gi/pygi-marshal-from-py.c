@@ -1536,7 +1536,7 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
     long c_long;
     gint is_instance;
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    GIBaseInfo *interface;
+    GIBaseInfo *interface = NULL;
 
     is_instance = PyObject_IsInstance (py_arg, iface_cache->py_type);
 
@@ -1556,6 +1556,7 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
                                  c_long,
                                  g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
           g_assert_not_reached();
+          g_base_info_unref (interface);
           return FALSE;
     }
 
@@ -1581,9 +1582,12 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
             goto err;
     }
 
+    g_base_info_unref (interface);
     return TRUE;
 
 err:
+    if (interface)
+        g_base_info_unref (interface);
     PyErr_Format (PyExc_TypeError, "Expected a %s, but got %s",
                   iface_cache->type_name, py_arg->ob_type->tp_name);
     return FALSE;
@@ -1622,9 +1626,11 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
     g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_FLAGS);
     if (!gi_argument_from_c_long(arg, c_long,
                                  g_enum_info_get_storage_type ((GIEnumInfo *)interface))) {
+        g_base_info_unref (interface);
         return FALSE;
     }
 
+    g_base_info_unref (interface);
     return TRUE;
 
 err:
