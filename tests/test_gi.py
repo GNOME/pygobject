@@ -2307,22 +2307,6 @@ class TestInterfaces(unittest.TestCase):
         self.assertEqual(instance.val, None)
         self.assertEqual(instance.val2, 42)
 
-    def test_mro(self):
-        # there was a problem with Python bailing out because of
-        # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
-        # which shouldn't really be a problem.
-
-        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
-            pass
-
-        class TestInterfaceImpl2(GIMarshallingTests.Interface,
-                                 TestInterfaceImpl):
-            pass
-
-        class TestInterfaceImpl3(self.TestInterfaceImpl,
-                                 GIMarshallingTests.Interface2):
-            pass
-
     def test_type_mismatch(self):
         obj = GIMarshallingTests.Object()
 
@@ -2385,6 +2369,56 @@ class TestInterfaces(unittest.TestCase):
                 self.assertTrue('xpected Gio.Action' in str(e), e)
                 # should have actual type
                 self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+
+
+class TestMRO(unittest.TestCase):
+    def test_mro(self):
+        # check that our own MRO calculation matches what we would expect
+        # from Python's own C3 calculations
+        class A(object):
+            pass
+
+        class B(A):
+            pass
+
+        class C(A):
+            pass
+
+        class D(B, C):
+            pass
+
+        class E(D, GIMarshallingTests.Object):
+            pass
+
+        expected = (E, D, B, C, A, GIMarshallingTests.Object,
+                    GObject.Object, GObject.Object.__base__, gi._gobject.GObject,
+                    object)
+        self.assertEqual(expected, E.__mro__)
+
+    def test_interface_collision(self):
+        # there was a problem with Python bailing out because of
+        # http://en.wikipedia.org/wiki/Diamond_problem with interfaces,
+        # which shouldn't really be a problem.
+
+        class TestInterfaceImpl(GObject.GObject, GIMarshallingTests.Interface):
+            pass
+
+        class TestInterfaceImpl2(GIMarshallingTests.Interface,
+                                 TestInterfaceImpl):
+            pass
+
+        class TestInterfaceImpl3(TestInterfaceImpl,
+                                 GIMarshallingTests.Interface2):
+            pass
+
+    def test_old_style_mixin(self):
+        # Note: Old style classes don't exist in Python 3
+        class Mixin:
+            pass
+
+        # Dynamically create a new gi based class with an old
+        # style mixin.
+        type('GIWithOldStyleMixin', (GIMarshallingTests.Object, Mixin), {})
 
 
 class TestInterfaceClash(unittest.TestCase):
