@@ -31,7 +31,8 @@ pygi_PYTHON = \
 	types.py \
 	module.py \
 	importer.py \
-	pygtkcompat.py
+	pygtkcompat.py \
+	docstring.py
 
 pygi_LTLIBRARIES = _gi.la
 

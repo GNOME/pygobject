@@ -28,18 +28,15 @@ import warnings
 from . import _gobject
 from ._gobject._gobject import GInterface
 from ._gobject.constants import TYPE_INVALID
+from .docstring import generate_doc_string
 
 from ._gi import \
     InterfaceInfo, \
     ObjectInfo, \
     StructInfo, \
     VFuncInfo, \
-    FunctionInfo, \
     register_interface_info, \
-    hook_up_vfunc_implementation, \
-    DIRECTION_IN, \
-    DIRECTION_OUT, \
-    DIRECTION_INOUT
+    hook_up_vfunc_implementation
 
 
 StructInfo  # pyflakes
@@ -50,59 +47,13 @@ if (3, 0) <= sys.version_info < (3, 3):
         return hasattr(obj, '__call__')
 
 
-def split_function_info_args(info):
-    """Split a functions args into a tuple of two lists.
-
-    Note that args marked as DIRECTION_INOUT will be in both lists.
-
-    :Returns:
-        Tuple of (in_args, out_args)
-    """
-    in_args = []
-    out_args = []
-    for arg in info.get_arguments():
-        direction = arg.get_direction()
-        if direction in (DIRECTION_IN, DIRECTION_INOUT):
-            in_args.append(arg)
-        if direction in (DIRECTION_OUT, DIRECTION_INOUT):
-            out_args.append(arg)
-    return (in_args, out_args)
-
-
-def get_callable_info_doc_string(info):
-    """Build a signature string which can be used for documentation."""
-    in_args, out_args = split_function_info_args(info)
-    in_args_strs = []
-    if isinstance(info, VFuncInfo):
-        in_args_strs = ['self']
-    elif isinstance(info, FunctionInfo):
-        if info.is_method():
-            in_args_strs = ['self']
-        elif info.is_constructor():
-            in_args_strs = ['cls']
-
-    for arg in in_args:
-        argstr = arg.get_name() + ':' + arg.get_pytype_hint()
-        if arg.is_optional():
-            argstr += '=<optional>'
-        in_args_strs.append(argstr)
-    in_args_str = ', '.join(in_args_strs)
-
-    if out_args:
-        out_args_str = ', '.join(arg.get_name() + ':' + arg.get_pytype_hint()
-                                 for arg in out_args)
-        return '%s(%s) -> %s' % (info.get_name(), in_args_str, out_args_str)
-    else:
-        return '%s(%s)' % (info.get_name(), in_args_str)
-
-
 def wraps_callable_info(info):
     """Similar to functools.wraps but with specific GICallableInfo support."""
     def update_func(func):
         func.__info__ = info
         func.__name__ = info.get_name()
         func.__module__ = 'gi.repository.' + info.get_namespace()
-        func.__doc__ = get_callable_info_doc_string(info)
+        func.__doc__ = generate_doc_string(info)
         return func
     return update_func
 
