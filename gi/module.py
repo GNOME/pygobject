@@ -208,7 +208,6 @@ class IntrospectionModule(object):
                     self.__dict__[name] = type_
                     return type_
 
-            name = info.get_name()
             dict_ = {
                 '__info__': info,
                 '__module__': 'gi.repository.' + self._namespace,

@@ -95,13 +95,11 @@ class MetaClassHelper(object):
     def _setup_constructors(cls):
         for method_info in cls.__info__.get_methods():
             if method_info.is_constructor():
-                name = method_info.get_name()
-                constructor = classmethod(Constructor(method_info))
-                setattr(cls, name, constructor)
+                constructor = Constructor(method_info)
+                setattr(cls, constructor.__name__, classmethod(constructor))
 
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
-            name = method_info.get_name()
             function = Function(method_info)
             if method_info.is_method():
                 method = function
@@ -109,7 +107,7 @@ class MetaClassHelper(object):
                 continue
             else:
                 method = staticmethod(function)
-            setattr(cls, name, method)
+            setattr(cls, function.__name__, method)
 
     def _setup_fields(cls):
         for field_info in cls.__info__.get_fields():
