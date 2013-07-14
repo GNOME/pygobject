@@ -91,21 +91,16 @@ def Constructor(info):
 
 
 class MetaClassHelper(object):
-
-    def _setup_constructors(cls):
-        for method_info in cls.__info__.get_methods():
-            if method_info.is_constructor():
-                constructor = Constructor(method_info)
-                setattr(cls, constructor.__name__, classmethod(constructor))
-
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
-            function = Function(method_info)
             if method_info.is_method():
+                function = Function(method_info)
                 method = function
             elif method_info.is_constructor():
-                continue
+                function = Constructor(method_info)
+                method = classmethod(function)
             else:
+                function = Function(method_info)
                 method = staticmethod(function)
             setattr(cls, function.__name__, method)
 
@@ -250,7 +245,6 @@ class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
 
             if isinstance(cls.__info__, ObjectInfo):
                 cls._setup_fields()
-                cls._setup_constructors()
             elif isinstance(cls.__info__, InterfaceInfo):
                 register_interface_info(cls.__info__.get_g_type())
 
@@ -330,7 +324,6 @@ class StructMeta(type, MetaClassHelper):
 
         cls._setup_fields()
         cls._setup_methods()
-        cls._setup_constructors()
 
         for method_info in cls.__info__.get_methods():
             if method_info.is_constructor() and \
