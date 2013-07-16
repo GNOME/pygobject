@@ -2329,16 +2329,12 @@ class TestInterfaces(unittest.TestCase):
             Gio.FileEnumerator.next_file(obj, None)
             self.fail('call with wrong type argument unexpectedly succeeded')
         except TypeError as e:
-            if sys.version_info < (3, 0):
-                self.assertTrue('FileEnumerator' in str(e), e)
-                self.assertTrue('Object' in str(e), e)
-            else:
-                # should have argument name
-                self.assertTrue('self' in str(e), e)
-                # should have expected type
-                self.assertTrue('xpected Gio.FileEnumerator' in str(e), e)
-                # should have actual type
-                self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+            # should have argument name
+            self.assertTrue('self' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.FileEnumerator' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
 
         # wrong type for first argument: GObject
         var = GLib.Variant('s', 'mystring')
@@ -2359,16 +2355,12 @@ class TestInterfaces(unittest.TestCase):
             Gio.SimpleAction.activate(obj, obj)
             self.fail('call with wrong type argument unexpectedly succeeded')
         except TypeError as e:
-            if sys.version_info < (3, 0):
-                self.assertTrue('SimpleAction' in str(e), e)
-                self.assertTrue('Object' in str(e), e)
-            else:
-                # should have argument name
-                self.assertTrue('self' in str(e), e)
-                # should have expected type
-                self.assertTrue('xpected Gio.Action' in str(e), e)
-                # should have actual type
-                self.assertTrue('GIMarshallingTests.Object' in str(e), e)
+            # should have argument name
+            self.assertTrue('self' in str(e), e)
+            # should have expected type
+            self.assertTrue('xpected Gio.Action' in str(e), e)
+            # should have actual type
+            self.assertTrue('GIMarshallingTests.Object' in str(e), e)
 
 
 class TestMRO(unittest.TestCase):

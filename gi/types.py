@@ -57,15 +57,6 @@ def wraps_callable_info(info):
     return update_func
 
 
-def Function(info):
-    """Wraps GIFunctionInfo"""
-    @wraps_callable_info(info)
-    def function(*args, **kwargs):
-        return info.invoke(*args, **kwargs)
-
-    return function
-
-
 class NativeVFunc(object):
     """Wraps GINativeVFuncInfo"""
     def __init__(self, info):
@@ -78,30 +69,10 @@ class NativeVFunc(object):
         return native_vfunc
 
 
-def Constructor(info):
-    """Wraps GIFunctionInfo with get_constructor() == True"""
-    @wraps_callable_info(info)
-    def constructor(cls, *args, **kwargs):
-        cls_name = info.get_container().get_name()
-        if cls.__name__ != cls_name:
-            raise TypeError('%s constructor cannot be used to create instances of a subclass' % cls_name)
-        return info.invoke(cls, *args, **kwargs)
-    return constructor
-
-
 class MetaClassHelper(object):
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
-            if method_info.is_method():
-                function = Function(method_info)
-                method = function
-            elif method_info.is_constructor():
-                function = Constructor(method_info)
-                method = classmethod(function)
-            else:
-                function = Function(method_info)
-                method = staticmethod(function)
-            setattr(cls, function.__name__, method)
+            setattr(cls, method_info.__name__, method_info)
 
     def _setup_fields(cls):
         for field_info in cls.__info__.get_fields():
@@ -326,7 +297,7 @@ class StructMeta(type, MetaClassHelper):
 
         for method_info in cls.__info__.get_methods():
             if method_info.is_constructor() and \
-                    method_info.get_name() == 'new' and \
+                    method_info.__name__ == 'new' and \
                     not method_info.get_arguments():
-                cls.__new__ = staticmethod(Constructor(method_info))
+                cls.__new__ = staticmethod(method_info)
                 break

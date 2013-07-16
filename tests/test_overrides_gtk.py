@@ -484,8 +484,8 @@ class TestGtk(unittest.TestCase):
 
         # these methods cannot be called because they require a valid drag on
         # a real GdkWindow. So we only check that they exist and are callable.
-        self.assertTrue(hasattr(widget.drag_dest_set_proxy, '__call__'))
-        self.assertTrue(hasattr(widget.drag_get_data, '__call__'))
+        self.assertTrue(hasattr(widget, 'drag_dest_set_proxy'))
+        self.assertTrue(hasattr(widget, 'drag_get_data'))
 
     def test_drag_target_list(self):
         mixed_target_list = [Gtk.TargetEntry.new('test0', 0, 0),

@@ -357,7 +357,7 @@ out:
 
 
 /* CallableInfo */
-PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGIBaseInfo);
+PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
@@ -393,6 +393,164 @@ _wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
     }
 
     return infos;
+}
+
+
+/* _callable_info_call:
+ *
+ * Shared wrapper for invoke which can be bound (instance method or class constructor)
+ * or unbound (function or static method).
+ */
+static PyObject *
+_callable_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
+{
+    /* Insert the bound arg at the beginning of the invoke method args. */
+    if (self->py_bound_arg) {
+        int i;
+        PyObject *result;
+        Py_ssize_t argcount = PyTuple_Size (args);
+        PyObject *newargs = PyTuple_New (argcount + 1);
+        if (newargs == NULL)
+            return NULL;
+
+        Py_INCREF (self->py_bound_arg);
+        PyTuple_SET_ITEM (newargs, 0, self->py_bound_arg);
+
+        for (i = 0; i < argcount; i++) {
+            PyObject *v = PyTuple_GET_ITEM (args, i);
+            Py_XINCREF (v);
+            PyTuple_SET_ITEM (newargs, i+1, v);
+        }
+
+        /* Invoke with the original GI info struct this wrapper was based upon.
+         * This is necessary to maintain the same cache for all bound versions.
+         */
+        result = _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self->py_unbound_info,
+                                               newargs, kwargs);
+        Py_DECREF (newargs);
+        return result;
+
+    } else {
+        /* We should never have an unbound info when calling when calling invoke
+         * at this point because the descriptor implementation on sub-classes
+         * should return "self" not a copy when there is no bound arg.
+         */
+        g_assert (self->py_unbound_info == NULL);
+        return _wrap_g_callable_info_invoke ((PyGIBaseInfo *)self, args, kwargs);
+    }
+}
+
+
+/* _function_info_call:
+ *
+ * Specialization of _callable_info_call for GIFunctionInfo which
+ * handles constructor error conditions.
+ */
+static PyObject *
+_function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
+{
+    if (self->py_bound_arg) {
+        GIFunctionInfoFlags flags;
+
+        /* Ensure constructors are only called as class methods on the class
+         * implementing the constructor and not on sub-classes.
+         */
+        flags = g_function_info_get_flags ( (GIFunctionInfo*) self->base.info);
+        if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+            PyObject *py_str_name;
+            const gchar *str_name;
+            GIBaseInfo *container_info = g_base_info_get_container (self->base.info);
+            g_assert (container_info != NULL);
+
+            py_str_name = PyObject_GetAttrString (self->py_bound_arg, "__name__");
+            if (py_str_name == NULL)
+                return NULL;
+
+            if (PyUnicode_Check (py_str_name) ) {
+                PyObject *tmp = PyUnicode_AsUTF8String (py_str_name);
+                Py_DECREF (py_str_name);
+                py_str_name = tmp;
+            }
+
+#if PY_VERSION_HEX < 0x03000000
+            str_name = PyString_AsString (py_str_name);
+#else
+            str_name = PyBytes_AsString (py_str_name);
+#endif
+
+            if (strcmp (str_name, g_base_info_get_name (container_info))) {
+                PyErr_Format (PyExc_TypeError,
+                              "%s constructor cannot be used to create instances of "
+                              "a subclass %s",
+                              g_base_info_get_name (container_info),
+                              str_name);
+                Py_DECREF (py_str_name);
+                return NULL;
+            }
+            Py_DECREF (py_str_name);
+        }
+    }
+
+    return _callable_info_call (self, args, kwargs);
+}
+
+/* _new_bound_callable_info
+ *
+ * Utility function for sub-classes to create a bound version of themself.
+ */
+static PyGICallableInfo *
+_new_bound_callable_info (PyGICallableInfo *self, PyObject *bound_arg)
+{
+    PyGICallableInfo *new_self;
+
+    /* Return self if this is already bound or there is nothing passed to bind.  */
+    if (self->py_bound_arg != NULL || bound_arg == NULL || bound_arg == Py_None) {
+        Py_INCREF ((PyObject *)self);
+        return self;
+    }
+
+    new_self = (PyGICallableInfo *)_pygi_info_new (self->base.info);
+    if (new_self == NULL)
+        return NULL;
+
+    Py_INCREF ((PyObject *)self);
+    new_self->py_unbound_info = (struct PyGICallableInfo *)self;
+
+    Py_INCREF (bound_arg);
+    new_self->py_bound_arg = bound_arg;
+
+    return new_self;
+}
+
+/* _function_info_descr_get
+ *
+ * Descriptor protocol implementation for functions, methods, and constructors.
+ */
+static PyObject *
+_function_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type) {
+    GIFunctionInfoFlags flags;
+    PyObject *bound_arg = NULL;
+
+    flags = g_function_info_get_flags ( (GIFunctionInfo*) self->base.info);
+    if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+        if (type == NULL)
+            bound_arg = (PyObject *)(Py_TYPE(obj));
+        else
+            bound_arg = type;
+    } else if (flags & GI_FUNCTION_IS_METHOD) {
+        bound_arg = obj;
+    }
+
+    return (PyObject *)_new_bound_callable_info (self, bound_arg);
+}
+
+static void
+_callable_info_dealloc (PyGICallableInfo *self)
+{
+    Py_CLEAR (self->py_unbound_info);
+    Py_CLEAR (self->py_bound_arg);
+
+    PyGIBaseInfo_Type.tp_dealloc ((PyObject *) self);
 }
 
 static PyMethodDef _PyGICallableInfo_methods[] = {
@@ -543,7 +701,7 @@ static PyMethodDef _PyGITypeInfo_methods[] = {
 
 
 /* FunctionInfo */
-PYGLIB_DEFINE_TYPE ("gi.FunctionInfo", PyGIFunctionInfo_Type, PyGIBaseInfo);
+PYGLIB_DEFINE_TYPE ("gi.FunctionInfo", PyGIFunctionInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_g_function_info_is_constructor (PyGIBaseInfo *self)
@@ -728,7 +886,6 @@ static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "is_method", (PyCFunction) _wrap_g_function_info_is_method, METH_NOARGS },
     { NULL, NULL, 0 }
 };
-
 
 /* RegisteredTypeInfo */
 PYGLIB_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type, PyGIBaseInfo);
@@ -1667,7 +1824,7 @@ static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
 };
 
 /* GIVFuncInfo */
-PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGIBaseInfo);
+PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGICallableInfo);
 
 static PyObject *
 _wrap_g_vfunc_info_get_invoker (PyGIBaseInfo *self)
@@ -1835,14 +1992,20 @@ _pygi_info_register_types (PyObject *m)
     if (PyModule_AddObject(m, "DIRECTION_INOUT", PyLong_FromLong(GI_DIRECTION_INOUT)))
         return;
 
-    _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
-                         PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
+                         PyGIBaseInfo_Type);
+    PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
+    PyGICallableInfo_Type.tp_dealloc = (destructor) _callable_info_dealloc;
+
+    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
+                         PyGICallableInfo_Type);
+    PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
+    PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
+
+    _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallbackInfo_Type, CallbackInfo,
                          PyGIBaseInfo_Type);
-    _PyGI_REGISTER_TYPE (m, PyGIFunctionInfo_Type, FunctionInfo,
-                         PyGICallableInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIRegisteredTypeInfo_Type, RegisteredTypeInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIStructInfo_Type, StructInfo,

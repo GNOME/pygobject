@@ -57,8 +57,7 @@ from ._gi import \
     flags_register_new_gtype_and_add
 from .types import \
     GObjectMeta, \
-    StructMeta, \
-    Function
+    StructMeta
 
 from ._gobject._gobject import \
     GInterface, \
@@ -220,7 +219,7 @@ class IntrospectionModule(object):
                 g_type.pytype = wrapper
 
         elif isinstance(info, FunctionInfo):
-            wrapper = Function(info)
+            wrapper = info
         elif isinstance(info, ConstantInfo):
             wrapper = info.get_value()
         else:

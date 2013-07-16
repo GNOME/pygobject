@@ -3,6 +3,7 @@ import warnings
 import functools
 
 from gi import PyGIDeprecationWarning
+from gi._gi import CallableInfo
 from gi._gobject.constants import \
     TYPE_NONE, \
     TYPE_INVALID
@@ -33,7 +34,8 @@ class _Registry(dict):
             raise TypeError('Can not override a type %s, which is not in a gobject introspection typelib' % value.__name__)
 
         if not value.__module__.startswith('gi.overrides'):
-            raise KeyError('You have tried to modify the registry outside of the overrides module.  This is not allowed')
+            raise KeyError('You have tried to modify the registry outside of the overrides module. '
+                           'This is not allowed (%s, %s)' % (value, value.__module__))
 
         g_type = info.get_g_type()
         assert g_type != TYPE_NONE
@@ -52,8 +54,8 @@ class _Registry(dict):
 class overridefunc(object):
     '''decorator for overriding a function'''
     def __init__(self, func):
-        if not hasattr(func, '__info__'):
-            raise TypeError("func must be an gi function")
+        if not isinstance(func, CallableInfo):
+            raise TypeError("func must be a gi function, got %s" % func)
         from ..importer import modules
         module_name = func.__module__.rsplit('.', 1)[-1]
         self.module = modules[module_name]._introspection_module
@@ -70,7 +72,7 @@ registry = _Registry()
 
 def override(type_):
     '''Decorator for registering an override'''
-    if isinstance(type_, types.FunctionType):
+    if isinstance(type_, (types.FunctionType, CallableInfo)):
         return overridefunc(type_)
     else:
         registry.register(type_)

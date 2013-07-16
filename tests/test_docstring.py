@@ -21,14 +21,14 @@ class Test(unittest.TestCase):
                          old_func)
 
     def test_split_args_multi_out(self):
-        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.int_out_out.__info__)
+        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.int_out_out)
         self.assertEqual(len(in_args), 0)
         self.assertEqual(len(out_args), 2)
         self.assertEqual(out_args[0].get_pytype_hint(), 'int')
         self.assertEqual(out_args[1].get_pytype_hint(), 'int')
 
     def test_split_args_inout(self):
-        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.long_inout_max_min.__info__)
+        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.long_inout_max_min)
         self.assertEqual(len(in_args), 1)
         self.assertEqual(len(out_args), 1)
         self.assertEqual(in_args[0].get_name(), out_args[0].get_name())
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
 
     def test_split_args_none(self):
         obj = GIMarshallingTests.Object(int=33)
-        in_args, out_args = gi.docstring.split_function_info_args(obj.none_inout.__info__)
+        in_args, out_args = gi.docstring.split_function_info_args(obj.none_inout)
         self.assertEqual(len(in_args), 1)
         self.assertEqual(len(out_args), 1)
 
