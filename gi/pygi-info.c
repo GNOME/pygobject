@@ -27,6 +27,33 @@
 #include <pygobject.h>
 #include <pyglib-python-compat.h>
 
+
+/* _generate_doc_string
+ *
+ * C wrapper to call Python implemented "gi.docstring.generate_doc_string"
+ */
+static PyObject *
+_generate_doc_string(PyGIBaseInfo *self)
+{
+    static PyObject *_py_generate_doc_string = NULL;
+
+    if (_py_generate_doc_string == NULL) {
+        PyObject *mod = PyImport_ImportModule ("gi.docstring");
+        if (!mod)
+            return NULL;
+
+        _py_generate_doc_string = PyObject_GetAttrString (mod, "generate_doc_string");
+        if (_py_generate_doc_string == NULL) {
+            Py_DECREF (mod);
+            return NULL;
+        }
+        Py_DECREF (mod);
+    }
+
+    return PyObject_CallFunctionObjArgs (_py_generate_doc_string, self, NULL);
+}
+
+
 /* BaseInfo */
 
 static void
@@ -168,6 +195,55 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
     { "get_namespace", (PyCFunction) _wrap_g_base_info_get_namespace, METH_NOARGS },
     { "get_container", (PyCFunction) _wrap_g_base_info_get_container, METH_NOARGS },
     { NULL, NULL, 0 }
+};
+
+/* _base_info_getattro:
+ *
+ * The usage of __getattr__ is needed because the get/set method table
+ * does not work for __doc__.
+ */
+static PyObject *
+_base_info_getattro(PyGIBaseInfo *self, PyObject *name)
+{
+    PyObject *result;
+
+    static PyObject *docstr;
+    if (docstr == NULL) {
+        docstr= PYGLIB_PyUnicode_InternFromString("__doc__");
+        if (docstr == NULL)
+            return NULL;
+    }
+
+    Py_INCREF (name);
+    PYGLIB_PyUnicode_InternInPlace (&name);
+
+    if (name == docstr) {
+        result = _generate_doc_string (self);
+    } else {
+        result = PyObject_GenericGetAttr ((PyObject *)self, name);
+    }
+
+    Py_DECREF (name);
+    return result;
+}
+
+static PyObject *
+_base_info_attr_name(PyGIBaseInfo *self, void *closure)
+{
+    return _wrap_g_base_info_get_name (self);
+}
+
+static PyObject *
+_base_info_attr_module(PyGIBaseInfo *self, void *closure)
+{
+    return PYGLIB_PyUnicode_FromFormat ("gi.repository.%s",
+                                        g_base_info_get_namespace (self->info));
+}
+
+static PyGetSetDef _base_info_getsets[] = {
+        { "__name__", (getter)_base_info_attr_name, (setter)0, "Name", NULL},
+        { "__module__", (getter)_base_info_attr_module, (setter)0, "Module name", NULL},
+    { NULL, 0, 0 }
 };
 
 PyObject *
@@ -1742,12 +1818,13 @@ _pygi_info_register_types (PyObject *m)
     PyGIBaseInfo_Type.tp_repr = (reprfunc) _base_info_repr;
     PyGIBaseInfo_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIBaseInfo_Type.tp_weaklistoffset = offsetof(PyGIBaseInfo, inst_weakreflist);
-    PyGIBaseInfo_Type.tp_methods = _PyGIBaseInfo_methods; 
+    PyGIBaseInfo_Type.tp_methods = _PyGIBaseInfo_methods;
     PyGIBaseInfo_Type.tp_richcompare = (richcmpfunc)_base_info_richcompare;
+    PyGIBaseInfo_Type.tp_getset = _base_info_getsets;
+    PyGIBaseInfo_Type.tp_getattro = (getattrofunc) _base_info_getattro;
 
     if (PyType_Ready(&PyGIBaseInfo_Type))
-        return;   
- 
+        return;
     if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type))
         return;
 

@@ -87,6 +87,8 @@ static int _pyglib_init_##modname(PyObject *module)
 #define PYGLIB_PyUnicode_AS_STRING PyString_AS_STRING
 #define PYGLIB_PyUnicode_GET_SIZE PyString_GET_SIZE
 #define PYGLIB_PyUnicode_Type PyString_Type
+#define PYGLIB_PyUnicode_InternFromString PyString_InternFromString
+#define PYGLIB_PyUnicode_InternInPlace PyString_InternInPlace
 
 #define PYGLIB_PyBytes_FromString PyString_FromString
 #define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
@@ -191,6 +193,9 @@ PyTypeObject symbol = {                                 \
 #define PYGLIB_PyUnicode_GET_SIZE PyUnicode_GET_SIZE
 #define PYGLIB_PyUnicode_Resize PyUnicode_Resize
 #define PYGLIB_PyUnicode_Type PyUnicode_Type
+#define PYGLIB_PyUnicode_InternFromString PyUnicode_InternFromString
+#define PYGLIB_PyUnicode_InternInPlace PyUnicode_InternInPlace
+
 #define PYGLIB_PyLong_Check PyLong_Check
 #define PYGLIB_PyLong_FromLong PyLong_FromLong
 #define PYGLIB_PyLong_AsLong PyLong_AsLong

@@ -28,7 +28,6 @@ import warnings
 from . import _gobject
 from ._gobject._gobject import GInterface
 from ._gobject.constants import TYPE_INVALID
-from .docstring import generate_doc_string
 
 from ._gi import \
     InterfaceInfo, \
@@ -51,9 +50,9 @@ def wraps_callable_info(info):
     """Similar to functools.wraps but with specific GICallableInfo support."""
     def update_func(func):
         func.__info__ = info
-        func.__name__ = info.get_name()
-        func.__module__ = 'gi.repository.' + info.get_namespace()
-        func.__doc__ = generate_doc_string(info)
+        func.__name__ = info.__name__
+        func.__module__ = info.__module__
+        func.__doc__ = info.__doc__
         return func
     return update_func
 
