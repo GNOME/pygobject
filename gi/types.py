@@ -46,29 +46,6 @@ if (3, 0) <= sys.version_info < (3, 3):
         return hasattr(obj, '__call__')
 
 
-def wraps_callable_info(info):
-    """Similar to functools.wraps but with specific GICallableInfo support."""
-    def update_func(func):
-        func.__info__ = info
-        func.__name__ = info.__name__
-        func.__module__ = info.__module__
-        func.__doc__ = info.__doc__
-        return func
-    return update_func
-
-
-class NativeVFunc(object):
-    """Wraps GINativeVFuncInfo"""
-    def __init__(self, info):
-        self.__info__ = info
-
-    def __get__(self, instance, klass):
-        @wraps_callable_info(self.__info__)
-        def native_vfunc(*args, **kwargs):
-            return self.__info__.invoke(klass.__gtype__, *args, **kwargs)
-        return native_vfunc
-
-
 class MetaClassHelper(object):
     def _setup_methods(cls):
         for method_info in cls.__info__.get_methods():
@@ -97,9 +74,8 @@ class MetaClassHelper(object):
             vfunc_info = None
             for base in cls.__mro__:
                 method = getattr(base, vfunc_name, None)
-                if method is not None and hasattr(method, '__info__') and \
-                        isinstance(method.__info__, VFuncInfo):
-                    vfunc_info = method.__info__
+                if method is not None and isinstance(method, VFuncInfo):
+                    vfunc_info = method
                     break
 
             # If we did not find a matching method name in the bases, we might
@@ -146,9 +122,8 @@ class MetaClassHelper(object):
             return
 
         for vfunc_info in class_info.get_vfuncs():
-            name = 'do_%s' % vfunc_info.get_name()
-            value = NativeVFunc(vfunc_info)
-            setattr(cls, name, value)
+            name = 'do_%s' % vfunc_info.__name__
+            setattr(cls, name, vfunc_info)
 
 
 def find_vfunc_info_in_interface(bases, vfunc_name):

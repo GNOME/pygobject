@@ -544,6 +544,25 @@ _function_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type)
     return (PyObject *)_new_bound_callable_info (self, bound_arg);
 }
 
+/* _vfunc_info_descr_get
+ *
+ * Descriptor protocol implementation for virtual functions.
+ */
+static PyObject *
+_vfunc_info_descr_get (PyGICallableInfo *self, PyObject *obj, PyObject *type) {
+    PyObject *result;
+    PyObject *bound_arg = NULL;
+
+    bound_arg = PyObject_GetAttrString (type, "__gtype__");
+    if (bound_arg == NULL)
+        return NULL;
+
+    /* _new_bound_callable_info adds its own ref so free the one from GetAttrString */
+    result = (PyObject *)_new_bound_callable_info (self, bound_arg);
+    Py_DECREF (bound_arg);
+    return result;
+}
+
 static void
 _callable_info_dealloc (PyGICallableInfo *self)
 {
@@ -2002,6 +2021,10 @@ _pygi_info_register_types (PyObject *m)
     PyGIFunctionInfo_Type.tp_call = (ternaryfunc) _function_info_call;
     PyGIFunctionInfo_Type.tp_descr_get = (descrgetfunc) _function_info_descr_get;
 
+    _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
+                         PyGICallableInfo_Type);
+    PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
+
     _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallbackInfo_Type, CallbackInfo,
@@ -2022,8 +2045,6 @@ _pygi_info_register_types (PyObject *m)
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIFieldInfo_Type, FieldInfo,
                          PyGIBaseInfo_Type);
-    _PyGI_REGISTER_TYPE (m, PyGIVFuncInfo_Type, VFuncInfo,
-                         PyGICallableInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, UnionInfo,
                          PyGIRegisteredTypeInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIBoxedInfo_Type, BoxedInfo,
