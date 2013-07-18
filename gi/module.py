@@ -24,6 +24,7 @@ from __future__ import absolute_import
 
 import sys
 import types
+import importlib
 
 _have_py3 = (sys.version_info[0] >= 3)
 
@@ -90,7 +91,7 @@ def get_parent_for_object(object_info):
     namespace = parent_object_info.get_namespace()
     name = parent_object_info.get_name()
 
-    module = __import__('gi.repository.%s' % namespace, fromlist=[name])
+    module = importlib.import_module('gi.repository.' + namespace)
     return getattr(module, name)
 
 
@@ -100,7 +101,7 @@ def get_interfaces_for_object(object_info):
         namespace = interface_info.get_namespace()
         name = interface_info.get_name()
 
-        module = __import__('gi.repository.%s' % namespace, fromlist=[name])
+        module = importlib.import_module('gi.repository.' + namespace)
         interfaces.append(getattr(module, name))
     return interfaces
 
@@ -287,8 +288,7 @@ class DynamicModule(types.ModuleType):
     def _load(self):
         self._introspection_module = get_introspection_module(self._namespace)
         try:
-            overrides_modules = __import__('gi.overrides', fromlist=[self._namespace])
-            self._overrides_module = getattr(overrides_modules, self._namespace, None)
+            self._overrides_module = importlib.import_module('gi.overrides.' + self._namespace)
         except ImportError:
             self._overrides_module = None
 
