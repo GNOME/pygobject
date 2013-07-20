@@ -1392,99 +1392,61 @@ hash_table_release:
  * Returns: A PyObject representing @arg or NULL if it cannot convert
  *          the argument.
  */
-static PyObject *
+PyObject *
 _pygi_argument_to_object_basic_type (GIArgument  *arg,
                                      GITypeTag type_tag,
                                      GITransfer transfer)
 {
-    PyObject *object = NULL;
-
     switch (type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
-        {
-            object = PyBool_FromLong (arg->v_boolean);
-            break;
-        }
+            return PyBool_FromLong (arg->v_boolean);
+
         case GI_TYPE_TAG_INT8:
-        {
-            object = PYGLIB_PyLong_FromLong (arg->v_int8);
-            break;
-        }
+            return PYGLIB_PyLong_FromLong (arg->v_int8);
+
         case GI_TYPE_TAG_UINT8:
-        {
-            object = PYGLIB_PyLong_FromLong (arg->v_uint8);
-            break;
-        }
+            return PYGLIB_PyLong_FromLong (arg->v_uint8);
+
         case GI_TYPE_TAG_INT16:
-        {
-            object = PYGLIB_PyLong_FromLong (arg->v_int16);
-            break;
-        }
+            return PYGLIB_PyLong_FromLong (arg->v_int16);
+
         case GI_TYPE_TAG_UINT16:
-        {
-            object = PYGLIB_PyLong_FromLong (arg->v_uint16);
-            break;
-        }
+            return PYGLIB_PyLong_FromLong (arg->v_uint16);
+
         case GI_TYPE_TAG_INT32:
-        {
-            object = PYGLIB_PyLong_FromLong (arg->v_int32);
-            break;
-        }
+            return PYGLIB_PyLong_FromLong (arg->v_int32);
+
         case GI_TYPE_TAG_UINT32:
-        {
-            object = PyLong_FromLongLong (arg->v_uint32);
-            break;
-        }
+            return PyLong_FromLongLong (arg->v_uint32);
+
         case GI_TYPE_TAG_INT64:
-        {
-            object = PyLong_FromLongLong (arg->v_int64);
-            break;
-        }
+            return PyLong_FromLongLong (arg->v_int64);
+
         case GI_TYPE_TAG_UINT64:
-        {
-            object = PyLong_FromUnsignedLongLong (arg->v_uint64);
-            break;
-        }
+            return PyLong_FromUnsignedLongLong (arg->v_uint64);
+
         case GI_TYPE_TAG_FLOAT:
-        {
-            object = PyFloat_FromDouble (arg->v_float);
-            break;
-        }
+            return PyFloat_FromDouble (arg->v_float);
+
         case GI_TYPE_TAG_DOUBLE:
-        {
-            object = PyFloat_FromDouble (arg->v_double);
-            break;
-        }
+            return PyFloat_FromDouble (arg->v_double);
+
         case GI_TYPE_TAG_GTYPE:
-        {
-            object = pyg_type_wrapper_new ( (GType) arg->v_long);
-            break;
-        }
+            return pyg_type_wrapper_new ( (GType) arg->v_long);
+
         case GI_TYPE_TAG_UNICHAR:
-        {
-            object = _pygi_marshal_to_py_unichar (NULL, NULL, NULL,
-                                                  arg);
-            break;
-        }
+            return _pygi_marshal_to_py_unichar (NULL, NULL, NULL, arg);
+
         case GI_TYPE_TAG_UTF8:
-        {
-            object = _pygi_marshal_to_py_utf8 (NULL, NULL, NULL,
-                                               arg);
-            break;
-        }
+            return _pygi_marshal_to_py_utf8 (NULL, NULL, NULL, arg);
+
         case GI_TYPE_TAG_FILENAME:
-        {
-            object = _pygi_marshal_to_py_filename (NULL, NULL, NULL,
-                                                   arg);
-            break;
-        }
+            return _pygi_marshal_to_py_filename (NULL, NULL, NULL, arg);
+
         default:
-        {
-            object = NULL;
-            break;
-        }
+            return NULL;
     }
-    return object;
+    return NULL;
 }
 
 /**

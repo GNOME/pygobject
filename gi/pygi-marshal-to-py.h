@@ -22,51 +22,11 @@
 #ifndef __PYGI_MARSHAL_TO_PY_H__
 #define __PYGI_MARSHAL_TO_PY_H__
 
+PyObject *_pygi_marshal_to_py_basic_type (PyGIInvokeState   *state,
+                                          PyGICallableCache *callable_cache,
+                                          PyGIArgCache      *arg_cache,
+                                          GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_void      (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_boolean   (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_int8      (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_uint8     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_int16     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_uint16    (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_int32     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_uint32    (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_int64     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_uint64    (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_float     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_double    (PyGIInvokeState   *state,
                                          PyGICallableCache *callable_cache,
                                          PyGIArgCache      *arg_cache,
                                          GIArgument        *arg);

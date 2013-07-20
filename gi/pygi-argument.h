@@ -59,6 +59,10 @@ GIArgument _pygi_argument_from_object (PyObject   *object,
                                       GITypeInfo *type_info,
                                       GITransfer  transfer);
 
+PyObject *_pygi_argument_to_object_basic_type (GIArgument  *arg,
+                                               GITypeTag type_tag,
+                                               GITransfer transfer);
+
 PyObject* _pygi_argument_to_object (GIArgument  *arg,
                                     GITypeInfo *type_info,
                                     GITransfer  transfer);

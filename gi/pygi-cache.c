@@ -260,6 +260,12 @@ _arg_cache_alloc (void)
 }
 
 static void
+_arg_cache_to_py_basic_type_setup (PyGIArgCache *arg_cache)
+{
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
+}
+
+static void
 _arg_cache_from_py_void_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_void;
@@ -278,21 +284,9 @@ _arg_cache_from_py_boolean_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_boolean_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_boolean;
-}
-
-static void
 _arg_cache_from_py_int8_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_int8;
-}
-
-static void
-_arg_cache_to_py_int8_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_int8;
 }
 
 static void
@@ -302,21 +296,9 @@ _arg_cache_from_py_uint8_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_uint8_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_uint8;
-}
-
-static void
 _arg_cache_from_py_int16_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_int16;
-}
-
-static void
-_arg_cache_to_py_int16_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_int16;
 }
 
 static void
@@ -326,21 +308,9 @@ _arg_cache_from_py_uint16_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_uint16_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_uint16;
-}
-
-static void
 _arg_cache_from_py_int32_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_int32;
-}
-
-static void
-_arg_cache_to_py_int32_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_int32;
 }
 
 static void
@@ -350,21 +320,9 @@ _arg_cache_from_py_uint32_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_uint32_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_uint32;
-}
-
-static void
 _arg_cache_from_py_int64_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_int64;
-}
-
-static void
-_arg_cache_to_py_int64_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_int64;
 }
 
 static void
@@ -374,21 +332,9 @@ _arg_cache_from_py_uint64_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_uint64_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_uint64;
-}
-
-static void
 _arg_cache_from_py_float_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_float;
-}
-
-static void
-_arg_cache_to_py_float_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_float;
 }
 
 static void
@@ -398,33 +344,15 @@ _arg_cache_from_py_double_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_to_py_double_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_double;
-}
-
-static void
 _arg_cache_from_py_unichar_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_unichar;
 }
 
 static void
-_arg_cache_to_py_unichar_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_unichar;
-}
-
-static void
 _arg_cache_from_py_gtype_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_gtype;
-}
-
-static void
-_arg_cache_to_py_gtype_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_gtype;
 }
 
 static void
@@ -439,7 +367,7 @@ static void
 _arg_cache_to_py_utf8_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_utf8;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
 }
 
@@ -455,7 +383,7 @@ static void
 _arg_cache_to_py_filename_setup (PyGIArgCache *arg_cache,
                                  GITransfer transfer)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_filename;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
 }
 
@@ -878,7 +806,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_boolean_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_boolean_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_INT8:
@@ -890,7 +818,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_int8_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_int8_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UINT8:
@@ -902,7 +830,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_uint8_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_uint8_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_INT16:
@@ -914,7 +842,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_int16_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_int16_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UINT16:
@@ -926,7 +854,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_uint16_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_uint16_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
            break;
        case GI_TYPE_TAG_INT32:
            arg_cache = _arg_cache_alloc ();
@@ -937,7 +865,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_int32_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_int32_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UINT32:
@@ -949,7 +877,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_uint32_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_uint32_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_INT64:
@@ -961,7 +889,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_int64_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_int64_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UINT64:
@@ -973,7 +901,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_uint64_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_uint64_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_FLOAT:
@@ -985,7 +913,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_float_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_float_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_DOUBLE:
@@ -997,7 +925,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_double_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_double_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UNICHAR:
@@ -1009,7 +937,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_unichar_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_unichar_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_GTYPE:
@@ -1021,7 +949,7 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_from_py_gtype_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_gtype_setup (arg_cache);
+               _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
        case GI_TYPE_TAG_UTF8:
