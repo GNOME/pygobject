@@ -887,33 +887,28 @@ _pygi_argument_to_array (GIArgument  *arg,
     return g_array;
 }
 
-GIArgument
-_pygi_argument_from_object (PyObject   *object,
-                            GITypeInfo *type_info,
-                            GITransfer  transfer)
+static gboolean
+_pygi_argument_from_object_basic_type (PyObject   *object,   /* in */
+                                       GIArgument *arg,      /* out */
+                                       GITypeTag   type_tag,
+                                       GITransfer  transfer)
 {
-    GIArgument arg;
-    GITypeTag type_tag;
-
-    memset(&arg, 0, sizeof(GIArgument));
-    type_tag = g_type_info_get_tag (type_info);
-
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
             g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
             if (object == Py_None) {
-                arg.v_pointer = NULL;
+                arg->v_pointer = NULL;
             } else if (!PYGLIB_PyLong_Check(object)  && !PyLong_Check(object)) {
                 PyErr_SetString(PyExc_TypeError,
                     "Pointer assignment is restricted to integer values. "
                     "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
             } else {
-                arg.v_pointer = PyLong_AsVoidPtr (object);
+                arg->v_pointer = PyLong_AsVoidPtr (object);
             }
             break;
         case GI_TYPE_TAG_BOOLEAN:
         {
-            arg.v_boolean = PyObject_IsTrue (object);
+            arg->v_boolean = PyObject_IsTrue (object);
             break;
         }
         case GI_TYPE_TAG_INT8:
@@ -929,11 +924,11 @@ _pygi_argument_from_object (PyObject   *object,
             }
 
             if (type_tag == GI_TYPE_TAG_INT32)
-                arg.v_int32 = PYGLIB_PyLong_AsLong (int_);
+                arg->v_int32 = PYGLIB_PyLong_AsLong (int_);
             else if (type_tag == GI_TYPE_TAG_INT8)
-                arg.v_int8 = PYGLIB_PyLong_AsLong (int_);
+                arg->v_int8 = PYGLIB_PyLong_AsLong (int_);
             else if (type_tag == GI_TYPE_TAG_INT16)
-                arg.v_int16 = PYGLIB_PyLong_AsLong (int_);
+                arg->v_int16 = PYGLIB_PyLong_AsLong (int_);
 
             Py_DECREF (int_);
 
@@ -961,13 +956,13 @@ _pygi_argument_from_object (PyObject   *object,
             value = PyLong_AsUnsignedLongLong (number);
 
             if (type_tag == GI_TYPE_TAG_UINT32)
-                arg.v_uint32 = value;
+                arg->v_uint32 = value;
             else if (type_tag == GI_TYPE_TAG_UINT64)
-                arg.v_uint64 = value;
+                arg->v_uint64 = value;
             else if (type_tag == GI_TYPE_TAG_UINT8)
-                arg.v_uint8 = value;
+                arg->v_uint8 = value;
             else if (type_tag == GI_TYPE_TAG_UINT16)
-                arg.v_uint16 = value;
+                arg->v_uint16 = value;
 
             Py_DECREF (number);
 
@@ -991,7 +986,7 @@ _pygi_argument_from_object (PyObject   *object,
 #endif
             value = PyLong_AsLongLong (number);
 
-            arg.v_int64 = value;
+            arg->v_int64 = value;
 
             Py_DECREF (number);
 
@@ -1000,39 +995,61 @@ _pygi_argument_from_object (PyObject   *object,
         case GI_TYPE_TAG_FLOAT:
         {
             _pygi_marshal_from_py_float (NULL, NULL, NULL,
-                                         object, &arg);
+                                         object, arg);
             break;
         }
         case GI_TYPE_TAG_DOUBLE:
         {
             _pygi_marshal_from_py_double (NULL, NULL, NULL,
-                                          object, &arg);
+                                          object, arg);
             break;
         }
         case GI_TYPE_TAG_GTYPE:
         {
-            arg.v_long = pyg_type_from_object (object);
+            arg->v_long = pyg_type_from_object (object);
 
             break;
         }
         case GI_TYPE_TAG_UNICHAR:
         {
             _pygi_marshal_from_py_unichar (NULL, NULL, NULL,
-                                           object, &arg);
+                                           object, arg);
             break;
         }
         case GI_TYPE_TAG_UTF8:
         {
             _pygi_marshal_from_py_utf8 (NULL, NULL, NULL,
-                                        object, &arg);
+                                        object, arg);
             break;
         }
         case GI_TYPE_TAG_FILENAME:
         {
             _pygi_marshal_from_py_filename (NULL, NULL, NULL,
-                                            object, &arg);
+                                            object, arg);
             break;
         }
+        default:
+            return FALSE;
+    }
+    return TRUE;
+}
+
+GIArgument
+_pygi_argument_from_object (PyObject   *object,
+                            GITypeInfo *type_info,
+                            GITransfer  transfer)
+{
+    GIArgument arg;
+    GITypeTag type_tag;
+
+    memset(&arg, 0, sizeof(GIArgument));
+    type_tag = g_type_info_get_tag (type_info);
+
+    if (_pygi_argument_from_object_basic_type (object, &arg, type_tag, transfer)) {
+        return arg;
+    }
+
+    switch (type_tag) {
         case GI_TYPE_TAG_ARRAY:
         {
             Py_ssize_t length;
@@ -1373,6 +1390,8 @@ hash_table_release:
             PyErr_SetString (PyExc_NotImplementedError, "error marshalling is not supported yet");
             /* TODO */
             break;
+        default:
+            g_assert_not_reached ();
     }
 
     return arg;
