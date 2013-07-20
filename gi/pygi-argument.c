@@ -1379,35 +1379,27 @@ hash_table_release:
 }
 
 /**
- * _pygi_argument_to_object:
- * @arg: The argument to convert to an object. 
- * @type_info: Type info for @arg
- * @transfer:
+ * _pygi_argument_to_object_basic_type:
+ * @arg: The argument to convert to an object.
+ * @type_tag: Type tag for @arg
+ * @transfer: Transfer annotation
  *
- * If the argument is of type array, it must be encoded in a GArray, by calling
- * _pygi_argument_to_array(). This logic can not be folded into this method
- * as determining array lengths may require access to method call arguments.
- * 
- * Returns: A PyObject representing @arg
+ * Convert the given argument to a Python object. This function
+ * is restricted to simple types that only require the GITypeTag
+ * and GITransfer. For a more complete conversion routine, use:
+ * _pygi_argument_to_object.
+ *
+ * Returns: A PyObject representing @arg or NULL if it cannot convert
+ *          the argument.
  */
-PyObject *
-_pygi_argument_to_object (GIArgument  *arg,
-                          GITypeInfo *type_info,
-                          GITransfer transfer)
+static PyObject *
+_pygi_argument_to_object_basic_type (GIArgument  *arg,
+                                     GITypeTag type_tag,
+                                     GITransfer transfer)
 {
-    GITypeTag type_tag;
     PyObject *object = NULL;
 
-    type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
-        case GI_TYPE_TAG_VOID:
-        {
-            if (g_type_info_is_pointer (type_info)) {
-                g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
-                object = PyLong_FromVoidPtr (arg->v_pointer);
-            }
-            break;
-        }
         case GI_TYPE_TAG_BOOLEAN:
         {
             object = PyBool_FromLong (arg->v_boolean);
@@ -1484,6 +1476,49 @@ _pygi_argument_to_object (GIArgument  *arg,
         {
             object = _pygi_marshal_to_py_filename (NULL, NULL, NULL,
                                                    arg);
+            break;
+        }
+        default:
+        {
+            object = NULL;
+            break;
+        }
+    }
+    return object;
+}
+
+/**
+ * _pygi_argument_to_object:
+ * @arg: The argument to convert to an object.
+ * @type_info: Type info for @arg
+ * @transfer:
+ *
+ * If the argument is of type array, it must be encoded in a GArray, by calling
+ * _pygi_argument_to_array(). This logic can not be folded into this method
+ * as determining array lengths may require access to method call arguments.
+ *
+ * Returns: A PyObject representing @arg
+ */
+PyObject *
+_pygi_argument_to_object (GIArgument  *arg,
+                          GITypeInfo *type_info,
+                          GITransfer transfer)
+{
+    GITypeTag type_tag;
+    PyObject *object = NULL;
+
+    type_tag = g_type_info_get_tag (type_info);
+    object = _pygi_argument_to_object_basic_type (arg, type_tag, transfer);
+    if (object)
+        return object;
+
+    switch (type_tag) {
+        case GI_TYPE_TAG_VOID:
+        {
+            if (g_type_info_is_pointer (type_info)) {
+                g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+                object = PyLong_FromVoidPtr (arg->v_pointer);
+            }
             break;
         }
         case GI_TYPE_TAG_ARRAY:
@@ -1775,6 +1810,11 @@ _pygi_argument_to_object (GIArgument  *arg,
                 Py_INCREF (object);
                 break;
             }
+            break;
+        }
+        default:
+        {
+            g_assert_not_reached();
         }
     }
 
