@@ -275,155 +275,6 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
-                             GIArgument        *arg)
-{
-    PyObject *py_long;
-    gint64 long_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-#if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (py_long))
-        long_ = (gint64) PyInt_AS_LONG (py_long);
-    else
-#endif
-        long_ = (gint64) PyLong_AsLongLong (py_long);
-
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        /* OverflowError occured but range errors should be returned as ValueError */
-        char *long_str;
-        PyObject *py_str;
-
-        PyErr_Clear ();
-
-        py_str = PyObject_Str (py_long);
-
-        if (PyUnicode_Check (py_str)) {
-            PyObject *py_bytes = PyUnicode_AsUTF8String (py_str);
-            Py_DECREF (py_str);
-
-            if (py_bytes == NULL)
-                return FALSE;
-
-            long_str = g_strdup (PYGLIB_PyBytes_AsString (py_bytes));
-            if (long_str == NULL) {
-                PyErr_NoMemory ();
-                return FALSE;
-            }
-
-            Py_DECREF (py_bytes);
-        } else {
-            long_str = g_strdup (PYGLIB_PyBytes_AsString(py_str));
-            Py_DECREF (py_str);
-        }
-
-        PyErr_Format (PyExc_ValueError, "%s not in range %lld to %lld",
-                      long_str, (long long) G_MININT64, (long long) G_MAXINT64);
-
-        g_free (long_str);
-        return FALSE;
-    }
-
-    arg->v_int64 = long_;
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_uint64 (PyGIInvokeState   *state,
-                              PyGICallableCache *callable_cache,
-                              PyGIArgCache      *arg_cache,
-                              PyObject          *py_arg,
-                              GIArgument        *arg)
-{
-    PyObject *py_long;
-    guint64 ulong_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-#if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (py_long)) {
-        long long_ =  PyInt_AsLong (py_long);
-        if (long_ < 0 || long_ > G_MAXUINT64) {
-            PyErr_Format (PyExc_ValueError, "%" G_GUINT64_FORMAT " not in range %d to %" G_GUINT64_FORMAT,
-                          (gint64) long_, 0, G_MAXUINT64);
-            return FALSE;
-        }
-        ulong_ = (guint64) long_;
-    } else
-#endif
-        ulong_ = PyLong_AsUnsignedLongLong (py_long);
-
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        /* OverflowError occured but range errors should be returned as ValueError */
-        char *long_str;
-        PyObject *py_str;
-
-        PyErr_Clear ();
-
-        py_str = PyObject_Str (py_long);
-
-        if (PyUnicode_Check (py_str)) {
-            PyObject *py_bytes = PyUnicode_AsUTF8String (py_str);
-            Py_DECREF (py_str);
-
-            if (py_bytes == NULL)
-                return FALSE;
-
-            long_str = g_strdup (PYGLIB_PyBytes_AsString (py_bytes));
-            if (long_str == NULL) {
-                PyErr_NoMemory ();
-                return FALSE;
-            }
-
-            Py_DECREF (py_bytes);
-        } else {
-            long_str = g_strdup (PYGLIB_PyBytes_AsString (py_str));
-            Py_DECREF (py_str);
-        }
-
-        PyErr_Format (PyExc_ValueError, "%s not in range %d to %" G_GUINT64_FORMAT,
-                      long_str, 0, G_MAXUINT64);
-
-        g_free (long_str);
-        return FALSE;
-    }
-
-    if (ulong_ > G_MAXUINT64) {
-        PyErr_Format (PyExc_ValueError, "%" G_GUINT64_FORMAT " not in range %d to %" G_GUINT64_FORMAT, ulong_, 0, G_MAXUINT64);
-        return FALSE;
-    }
-
-    arg->v_uint64 = ulong_;
-
-    return TRUE;
-}
-
 static gboolean
 check_valid_double (double x, double min, double max)
 {
@@ -760,12 +611,52 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         }
 
         case GI_TYPE_TAG_INT64:
-            arg->v_int64 = PyLong_AsLongLong (number);
+        {
+            /* Rely on Python overflow error and convert to ValueError for 64 bit values */
+            gint64 value = PyLong_AsLongLong (number);
+            if (PyErr_Occurred()) {
+                if (PyErr_ExceptionMatches (PyExc_OverflowError)) {
+                    PyErr_Clear();
+#if PY_MAJOR_VERSION >= 3
+                    PyErr_Format (PyExc_ValueError, "%S not in range %lld to %lld",
+                                  number, PY_LLONG_MIN, PY_LLONG_MAX);
+#else
+                    /* Python 2.x does not support the %S format option and it is not
+                     * worth the trouble to support this manually.
+                     */
+                    PyErr_Format (PyExc_ValueError, "number not in range %lld to %lld",
+                                  PY_LLONG_MIN, PY_LLONG_MAX);
+#endif
+                }
+            } else {
+                arg->v_int64 = value;
+            }
             break;
+        }
 
         case GI_TYPE_TAG_UINT64:
-            arg->v_uint64 = PyLong_AsUnsignedLongLong (number);
+        {
+            /* Rely on Python overflow error and convert to ValueError for 64 bit values */
+            guint64 value = PyLong_AsUnsignedLongLong (number);
+            if (PyErr_Occurred()) {
+                if (PyErr_ExceptionMatches (PyExc_OverflowError)) {
+                    PyErr_Clear();
+#if PY_MAJOR_VERSION >= 3
+                    PyErr_Format (PyExc_ValueError, "%S not in range %ld to %llu",
+                                  number, (long)0, PY_ULLONG_MAX);
+#else
+                    /* Python 2.x does not support the %S format option and it is not
+                     * worth the trouble to support this manually.
+                     */
+                    PyErr_Format (PyExc_ValueError, "number not in range %ld to %llu",
+                                  (long)0, PY_ULLONG_MAX);
+#endif
+                }
+            } else {
+                arg->v_uint64 = value;
+            }
             break;
+        }
 
         default:
             g_assert_not_reached ();
