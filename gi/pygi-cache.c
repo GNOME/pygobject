@@ -268,7 +268,7 @@ _arg_cache_from_py_basic_type_setup (PyGIArgCache *arg_cache)
 static void
 _arg_cache_to_py_basic_type_setup (PyGIArgCache *arg_cache)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
 }
 
 static void
@@ -295,7 +295,7 @@ static void
 _arg_cache_to_py_utf8_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
 }
 

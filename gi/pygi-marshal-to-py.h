@@ -22,27 +22,14 @@
 #ifndef __PYGI_MARSHAL_TO_PY_H__
 #define __PYGI_MARSHAL_TO_PY_H__
 
-PyObject *_pygi_marshal_to_py_basic_type (PyGIInvokeState   *state,
-                                          PyGICallableCache *callable_cache,
-                                          PyGIArgCache      *arg_cache,
-                                          GIArgument        *arg);
+PyObject *_pygi_marshal_to_py_basic_type (GIArgument  *arg,
+                                          GITypeTag type_tag,
+                                          GITransfer transfer);
+PyObject *_pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
+                                                        PyGICallableCache *callable_cache,
+                                                        PyGIArgCache      *arg_cache,
+                                                        GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_void      (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_unichar   (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_gtype     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_utf8      (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_filename  (PyGIInvokeState   *state,
                                          PyGICallableCache *callable_cache,
                                          PyGIArgCache      *arg_cache,
                                          GIArgument        *arg);

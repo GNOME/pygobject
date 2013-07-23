@@ -1252,77 +1252,6 @@ hash_table_release:
 }
 
 /**
- * _pygi_argument_to_object_basic_type:
- * @arg: The argument to convert to an object.
- * @type_tag: Type tag for @arg
- * @transfer: Transfer annotation
- *
- * Convert the given argument to a Python object. This function
- * is restricted to simple types that only require the GITypeTag
- * and GITransfer. For a more complete conversion routine, use:
- * _pygi_argument_to_object.
- *
- * Returns: A PyObject representing @arg or NULL if it cannot convert
- *          the argument.
- */
-PyObject *
-_pygi_argument_to_object_basic_type (GIArgument  *arg,
-                                     GITypeTag type_tag,
-                                     GITransfer transfer)
-{
-    switch (type_tag) {
-        case GI_TYPE_TAG_BOOLEAN:
-            return PyBool_FromLong (arg->v_boolean);
-
-        case GI_TYPE_TAG_INT8:
-            return PYGLIB_PyLong_FromLong (arg->v_int8);
-
-        case GI_TYPE_TAG_UINT8:
-            return PYGLIB_PyLong_FromLong (arg->v_uint8);
-
-        case GI_TYPE_TAG_INT16:
-            return PYGLIB_PyLong_FromLong (arg->v_int16);
-
-        case GI_TYPE_TAG_UINT16:
-            return PYGLIB_PyLong_FromLong (arg->v_uint16);
-
-        case GI_TYPE_TAG_INT32:
-            return PYGLIB_PyLong_FromLong (arg->v_int32);
-
-        case GI_TYPE_TAG_UINT32:
-            return PyLong_FromLongLong (arg->v_uint32);
-
-        case GI_TYPE_TAG_INT64:
-            return PyLong_FromLongLong (arg->v_int64);
-
-        case GI_TYPE_TAG_UINT64:
-            return PyLong_FromUnsignedLongLong (arg->v_uint64);
-
-        case GI_TYPE_TAG_FLOAT:
-            return PyFloat_FromDouble (arg->v_float);
-
-        case GI_TYPE_TAG_DOUBLE:
-            return PyFloat_FromDouble (arg->v_double);
-
-        case GI_TYPE_TAG_GTYPE:
-            return pyg_type_wrapper_new ( (GType) arg->v_long);
-
-        case GI_TYPE_TAG_UNICHAR:
-            return _pygi_marshal_to_py_unichar (NULL, NULL, NULL, arg);
-
-        case GI_TYPE_TAG_UTF8:
-            return _pygi_marshal_to_py_utf8 (NULL, NULL, NULL, arg);
-
-        case GI_TYPE_TAG_FILENAME:
-            return _pygi_marshal_to_py_filename (NULL, NULL, NULL, arg);
-
-        default:
-            return NULL;
-    }
-    return NULL;
-}
-
-/**
  * _pygi_argument_to_object:
  * @arg: The argument to convert to an object.
  * @type_info: Type info for @arg
@@ -1343,7 +1272,7 @@ _pygi_argument_to_object (GIArgument  *arg,
     PyObject *object = NULL;
 
     type_tag = g_type_info_get_tag (type_info);
-    object = _pygi_argument_to_object_basic_type (arg, type_tag, transfer);
+    object = _pygi_marshal_to_py_basic_type (arg, type_tag, transfer);
     if (object)
         return object;
 
