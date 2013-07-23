@@ -314,11 +314,8 @@ _pygi_py_arg_to_double (PyObject *py_arg, double *double_)
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_float (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
+static gboolean
+_pygi_marshal_from_py_float (PyObject          *py_arg,
                              GIArgument        *arg)
 {
     double double_;
@@ -333,11 +330,8 @@ _pygi_marshal_from_py_float (PyGIInvokeState   *state,
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_double (PyGIInvokeState   *state,
-                              PyGICallableCache *callable_cache,
-                              PyGIArgCache      *arg_cache,
-                              PyObject          *py_arg,
+static gboolean
+_pygi_marshal_from_py_double (PyObject          *py_arg,
                               GIArgument        *arg)
 {
     double double_;
@@ -352,11 +346,8 @@ _pygi_marshal_from_py_double (PyGIInvokeState   *state,
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
-                               PyGICallableCache *callable_cache,
-                               PyGIArgCache      *arg_cache,
-                               PyObject          *py_arg,
+static gboolean
+_pygi_marshal_from_py_unichar (PyObject          *py_arg,
                                GIArgument        *arg)
 {
     Py_ssize_t size;
@@ -407,11 +398,8 @@ _pygi_marshal_from_py_unichar (PyGIInvokeState   *state,
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_gtype (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
+static gboolean
+_pygi_marshal_from_py_gtype (PyObject          *py_arg,
                              GIArgument        *arg)
 {
     long type_ = pyg_type_from_object (py_arg);
@@ -425,11 +413,9 @@ _pygi_marshal_from_py_gtype (PyGIInvokeState   *state,
     arg->v_long = type_;
     return TRUE;
 }
-gboolean
-_pygi_marshal_from_py_utf8 (PyGIInvokeState   *state,
-                            PyGICallableCache *callable_cache,
-                            PyGIArgCache      *arg_cache,
-                            PyObject          *py_arg,
+
+static gboolean
+_pygi_marshal_from_py_utf8 (PyObject          *py_arg,
                             GIArgument        *arg)
 {
     gchar *string_;
@@ -462,11 +448,8 @@ _pygi_marshal_from_py_utf8 (PyGIInvokeState   *state,
     return TRUE;
 }
 
-gboolean
-_pygi_marshal_from_py_filename (PyGIInvokeState   *state,
-                                PyGICallableCache *callable_cache,
-                                PyGIArgCache      *arg_cache,
-                                PyObject          *py_arg,
+static gboolean
+_pygi_marshal_from_py_filename (PyObject          *py_arg,
                                 GIArgument        *arg)
 {
     gchar *string_;
@@ -713,46 +696,27 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
             return _pygi_marshal_from_py_long (object, arg, type_tag, transfer);
 
         case GI_TYPE_TAG_BOOLEAN:
-        {
             arg->v_boolean = PyObject_IsTrue (object);
             break;
-        }
-        case GI_TYPE_TAG_FLOAT:
-        {
-            _pygi_marshal_from_py_float (NULL, NULL, NULL,
-                                         object, arg);
-            break;
-        }
-        case GI_TYPE_TAG_DOUBLE:
-        {
-            _pygi_marshal_from_py_double (NULL, NULL, NULL,
-                                          object, arg);
-            break;
-        }
-        case GI_TYPE_TAG_GTYPE:
-        {
-            arg->v_long = pyg_type_from_object (object);
 
-            break;
-        }
+        case GI_TYPE_TAG_FLOAT:
+            return _pygi_marshal_from_py_float (object, arg);
+
+        case GI_TYPE_TAG_DOUBLE:
+            return _pygi_marshal_from_py_double (object, arg);
+
+        case GI_TYPE_TAG_GTYPE:
+            return _pygi_marshal_from_py_gtype (object, arg);
+
         case GI_TYPE_TAG_UNICHAR:
-        {
-            _pygi_marshal_from_py_unichar (NULL, NULL, NULL,
-                                           object, arg);
-            break;
-        }
+            return _pygi_marshal_from_py_unichar (object, arg);
+
         case GI_TYPE_TAG_UTF8:
-        {
-            _pygi_marshal_from_py_utf8 (NULL, NULL, NULL,
-                                        object, arg);
-            break;
-        }
+            return _pygi_marshal_from_py_utf8 (object, arg);
+
         case GI_TYPE_TAG_FILENAME:
-        {
-            _pygi_marshal_from_py_filename (NULL, NULL, NULL,
-                                            object, arg);
-            break;
-        }
+            return _pygi_marshal_from_py_filename (object, arg);
+
         default:
             return FALSE;
     }

@@ -284,56 +284,16 @@ _arg_cache_to_py_void_setup (PyGIArgCache *arg_cache)
 }
 
 static void
-_arg_cache_from_py_float_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_float;
-}
-
-static void
-_arg_cache_from_py_double_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_double;
-}
-
-static void
-_arg_cache_from_py_unichar_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_unichar;
-}
-
-static void
-_arg_cache_from_py_gtype_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_gtype;
-}
-
-static void
 _arg_cache_from_py_utf8_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
 {
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_utf8;
+    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
     arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_utf8;
 }
 
 static void
 _arg_cache_to_py_utf8_setup (PyGIArgCache *arg_cache,
                                GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
-}
-
-static void
-_arg_cache_from_py_filename_setup (PyGIArgCache *arg_cache,
-                                 GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_filename;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_utf8;
-}
-
-static void
-_arg_cache_to_py_filename_setup (PyGIArgCache *arg_cache,
-                                 GITransfer transfer)
 {
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
@@ -758,6 +718,10 @@ _arg_cache_new (GITypeInfo *type_info,
        case GI_TYPE_TAG_UINT32:
        case GI_TYPE_TAG_INT64:
        case GI_TYPE_TAG_UINT64:
+       case GI_TYPE_TAG_FLOAT:
+       case GI_TYPE_TAG_DOUBLE:
+       case GI_TYPE_TAG_UNICHAR:
+       case GI_TYPE_TAG_GTYPE:
            arg_cache = _arg_cache_alloc ();
            if (arg_cache == NULL)
                break;
@@ -769,55 +733,8 @@ _arg_cache_new (GITypeInfo *type_info,
                _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
-       case GI_TYPE_TAG_FLOAT:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_float_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
-       case GI_TYPE_TAG_DOUBLE:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_double_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
-       case GI_TYPE_TAG_UNICHAR:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_unichar_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
-       case GI_TYPE_TAG_GTYPE:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_gtype_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
        case GI_TYPE_TAG_UTF8:
+       case GI_TYPE_TAG_FILENAME:
            arg_cache = _arg_cache_alloc ();
            if (arg_cache == NULL)
                break;
@@ -827,18 +744,6 @@ _arg_cache_new (GITypeInfo *type_info,
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
                _arg_cache_to_py_utf8_setup (arg_cache, transfer);
-
-           break;
-       case GI_TYPE_TAG_FILENAME:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_filename_setup (arg_cache, transfer);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_filename_setup (arg_cache, transfer);
 
            break;
        case GI_TYPE_TAG_ARRAY:
