@@ -276,168 +276,6 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
 }
 
 gboolean
-_pygi_marshal_from_py_int16 (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
-                             GIArgument        *arg)
-{
-    PyObject *py_long;
-    long long_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-    long_ = PYGLIB_PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -32768, 32767);
-        return FALSE;
-    }
-
-    if (long_ < -32768 || long_ > 32767) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -32768, 32767);
-        return FALSE;
-    }
-
-    arg->v_int16 = long_;
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_uint16 (PyGIInvokeState   *state,
-                              PyGICallableCache *callable_cache,
-                              PyGIArgCache      *arg_cache,
-                              PyObject          *py_arg,
-                              GIArgument        *arg)
-{
-    PyObject *py_long;
-    long long_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-    long_ = PYGLIB_PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
-        return FALSE;
-    }
-
-    if (long_ < 0 || long_ > 65535) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 65535);
-        return FALSE;
-    }
-
-    arg->v_uint16 = long_;
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_int32 (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
-                             GIArgument        *arg)
-{
-    PyObject *py_long;
-    long long_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-    long_ = PYGLIB_PyLong_AsLong (py_long);
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        PyErr_Clear();
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, G_MININT32, G_MAXINT32);
-        return FALSE;
-    }
-
-    if (long_ < G_MININT32 || long_ > G_MAXINT32) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, G_MININT32, G_MAXINT32);
-        return FALSE;
-    }
-
-    arg->v_int32 = long_;
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_uint32 (PyGIInvokeState   *state,
-                              PyGICallableCache *callable_cache,
-                              PyGIArgCache      *arg_cache,
-                              PyObject          *py_arg,
-                              GIArgument        *arg)
-{
-    PyObject *py_long;
-    long long long_;
-
-    if (!PyNumber_Check (py_arg)) {
-        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    py_long = PYGLIB_PyNumber_Long (py_arg);
-    if (!py_long)
-        return FALSE;
-
-#if PY_VERSION_HEX < 0x03000000
-    if (PyInt_Check (py_long))
-        long_ = PyInt_AsLong (py_long);
-    else
-#endif
-        long_ = PyLong_AsLongLong (py_long);
-
-    Py_DECREF (py_long);
-
-    if (PyErr_Occurred ()) {
-        PyErr_Clear ();
-        PyErr_Format (PyExc_ValueError, "%lld not in range %i to %u", long_, 0, G_MAXUINT32);
-        return FALSE;
-    }
-
-    if (long_ < 0 || long_ > G_MAXUINT32) {
-        PyErr_Format (PyExc_ValueError, "%lld not in range %i to %u", long_, 0, G_MAXUINT32);
-        return FALSE;
-    }
-
-    arg->v_uint32 = long_;
-
-    return TRUE;
-}
-
-gboolean
 _pygi_marshal_from_py_int64 (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache      *arg_cache,
@@ -823,6 +661,12 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
 {
     PyObject *number;
 
+    if (!PyNumber_Check (object)) {
+        PyErr_Format (PyExc_TypeError, "Must be number, not %s",
+                      object->ob_type->tp_name);
+        return FALSE;
+    }
+
 #if PY_MAJOR_VERSION < 3
     {
         PyObject *tmp = PyNumber_Int (object);
@@ -868,23 +712,55 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         }
 
         case GI_TYPE_TAG_INT16:
-            arg->v_int16 = PyLong_AsLong (number);
+        {
+            long long_value = PyLong_AsLong (number);
+            if (long_value < G_MININT16 || long_value > G_MAXINT16) {
+                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+                              long_value, (long)G_MININT16, (long)G_MAXINT16);
+            } else {
+                arg->v_int16 = long_value;
+            }
             break;
+        }
+
+        case GI_TYPE_TAG_UINT16:
+        {
+            long long_value = PyLong_AsLong (number);
+            if (long_value < 0 || long_value > G_MAXUINT16) {
+                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+                              long_value, (long)0, (long)G_MAXUINT16);
+            } else {
+                arg->v_uint16 = long_value;
+            }
+            break;
+        }
 
         case GI_TYPE_TAG_INT32:
-            arg->v_int32 = PyLong_AsLong (number);
+        {
+            long long_value = PyLong_AsLong (number);
+            if (long_value < G_MININT32 || long_value > G_MAXINT32) {
+                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+                              long_value, (long)G_MININT32, (long)G_MAXINT32);
+            } else {
+                arg->v_int32 = long_value;
+            }
             break;
+        }
+
+        case GI_TYPE_TAG_UINT32:
+        {
+            PY_LONG_LONG long_value = PyLong_AsLongLong (number);
+            if (long_value < 0 || long_value > G_MAXUINT32) {
+                PyErr_Format (PyExc_ValueError, "%lld not in range %ld to %lu",
+                              long_value, (long)0, (unsigned long)G_MAXUINT32);
+            } else {
+                arg->v_uint32 = long_value;
+            }
+            break;
+        }
 
         case GI_TYPE_TAG_INT64:
             arg->v_int64 = PyLong_AsLongLong (number);
-            break;
-
-        case GI_TYPE_TAG_UINT16:
-            arg->v_uint16 = PyLong_AsLong (number);
-            break;
-
-        case GI_TYPE_TAG_UINT32:
-            arg->v_uint32 = PyLong_AsUnsignedLong (number);
             break;
 
         case GI_TYPE_TAG_UINT64:

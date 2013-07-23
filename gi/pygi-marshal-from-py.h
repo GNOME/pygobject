@@ -38,26 +38,6 @@ gboolean _pygi_marshal_from_py_void        (PyGIInvokeState   *state,
                                             PyGIArgCache      *arg_cache,
                                             PyObject          *py_arg,
                                             GIArgument        *arg);
-gboolean _pygi_marshal_from_py_int16       (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
-gboolean _pygi_marshal_from_py_uint16      (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
-gboolean _pygi_marshal_from_py_int32       (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
-gboolean _pygi_marshal_from_py_uint32      (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
 gboolean _pygi_marshal_from_py_int64       (PyGIInvokeState   *state,
                                             PyGICallableCache *callable_cache,
                                             PyGIArgCache      *arg_cache,
