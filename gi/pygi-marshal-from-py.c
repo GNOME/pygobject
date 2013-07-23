@@ -276,114 +276,6 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
 }
 
 gboolean
-_pygi_marshal_from_py_boolean (PyGIInvokeState   *state,
-                               PyGICallableCache *callable_cache,
-                               PyGIArgCache      *arg_cache,
-                               PyObject          *py_arg,
-                               GIArgument        *arg)
-{
-    arg->v_boolean = PyObject_IsTrue (py_arg);
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_int8 (PyGIInvokeState   *state,
-                            PyGICallableCache *callable_cache,
-                            PyGIArgCache      *arg_cache,
-                            PyObject          *py_arg,
-                            GIArgument        *arg)
-{
-    PyObject *py_long;
-    long long_;
-
-    if (PYGLIB_PyBytes_Check (py_arg)) {
-
-        if (PYGLIB_PyBytes_Size (py_arg) != 1) {
-            PyErr_Format (PyExc_TypeError, "Must be a single character");
-            return FALSE;
-        }
-
-        long_ = (char)(PYGLIB_PyBytes_AsString (py_arg)[0]);
-    } else if (PyNumber_Check (py_arg)) {
-        py_long = PYGLIB_PyNumber_Long (py_arg);
-        if (!py_long)
-            return FALSE;
-
-        long_ = PYGLIB_PyLong_AsLong (py_long);
-        Py_DECREF (py_long);
-
-        if (PyErr_Occurred ()) {
-            PyErr_Clear ();
-            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -128, 127);
-            return FALSE;
-        }
-    } else {
-        PyErr_Format (PyExc_TypeError, "Must be number or single byte string, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    if (long_ < -128 || long_ > 127) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, -128, 127);
-        return FALSE;
-    }
-
-    arg->v_int8 = long_;
-
-    return TRUE;
-}
-
-gboolean
-_pygi_marshal_from_py_uint8 (PyGIInvokeState   *state,
-                             PyGICallableCache *callable_cache,
-                             PyGIArgCache      *arg_cache,
-                             PyObject          *py_arg,
-                             GIArgument        *arg)
-{
-    unsigned long long_;
-
-    if (PYGLIB_PyBytes_Check (py_arg)) {
-
-        if (PYGLIB_PyBytes_Size (py_arg) != 1) {
-            PyErr_Format (PyExc_TypeError, "Must be a single character");
-            return FALSE;
-        }
-
-        long_ = (unsigned char)(PYGLIB_PyBytes_AsString (py_arg)[0]);
-
-    } else if (PyNumber_Check (py_arg)) {
-        PyObject *py_long;
-        py_long = PYGLIB_PyNumber_Long (py_arg);
-        if (!py_long)
-            return FALSE;
-
-        long_ = PYGLIB_PyLong_AsLong (py_long);
-        Py_DECREF (py_long);
-
-        if (PyErr_Occurred ()) {
-            PyErr_Clear();
-
-            PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 255);
-            return FALSE;
-        }
-    } else {
-        PyErr_Format (PyExc_TypeError, "Must be number or single byte string, not %s",
-                      py_arg->ob_type->tp_name);
-        return FALSE;
-    }
-
-    if (long_ < 0 || long_ > 255) {
-        PyErr_Format (PyExc_ValueError, "%ld not in range %d to %d", long_, 0, 255);
-        return FALSE;
-    }
-
-    arg->v_uint8 = long_;
-
-    return TRUE;
-}
-
-gboolean
 _pygi_marshal_from_py_int16 (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache      *arg_cache,
@@ -952,8 +844,28 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
 
     switch (type_tag) {
         case GI_TYPE_TAG_INT8:
-            arg->v_int8 = PyLong_AsLong (number);
+        {
+            long long_value = PyLong_AsLong (number);
+            if (long_value < G_MININT8 || long_value > G_MAXINT8) {
+                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+                              long_value, (long)G_MININT8, (long)G_MAXINT8);
+            } else {
+                arg->v_int8 = long_value;
+            }
             break;
+        }
+
+        case GI_TYPE_TAG_UINT8:
+        {
+            long long_value = PyLong_AsLong (number);
+            if (long_value < 0 || long_value > G_MAXUINT8) {
+                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+                              long_value, (long)0, (long)G_MAXUINT8);
+            } else {
+                arg->v_uint8 = long_value;
+            }
+            break;
+        }
 
         case GI_TYPE_TAG_INT16:
             arg->v_int16 = PyLong_AsLong (number);
@@ -965,10 +877,6 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
 
         case GI_TYPE_TAG_INT64:
             arg->v_int64 = PyLong_AsLongLong (number);
-            break;
-
-        case GI_TYPE_TAG_UINT8:
-            arg->v_uint8 = PyLong_AsLong (number);
             break;
 
         case GI_TYPE_TAG_UINT16:
@@ -1088,6 +996,18 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
     return TRUE;
 }
 
+gboolean
+_pygi_marshal_from_py_basic_type_cache_adapter (PyGIInvokeState   *state,
+                                                PyGICallableCache *callable_cache,
+                                                PyGIArgCache      *arg_cache,
+                                                PyObject          *py_arg,
+                                                GIArgument        *arg)
+{
+    return _pygi_marshal_from_py_basic_type (py_arg,
+                                             arg,
+                                             arg_cache->type_tag,
+                                             arg_cache->transfer);
+}
 
 gboolean
 _pygi_marshal_from_py_array (PyGIInvokeState   *state,

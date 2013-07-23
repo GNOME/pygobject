@@ -38,21 +38,6 @@ gboolean _pygi_marshal_from_py_void        (PyGIInvokeState   *state,
                                             PyGIArgCache      *arg_cache,
                                             PyObject          *py_arg,
                                             GIArgument        *arg);
-gboolean _pygi_marshal_from_py_boolean     (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
-gboolean _pygi_marshal_from_py_int8        (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
-gboolean _pygi_marshal_from_py_uint8       (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg);
 gboolean _pygi_marshal_from_py_int16       (PyGIInvokeState   *state,
                                             PyGICallableCache *callable_cache,
                                             PyGIArgCache      *arg_cache,
@@ -189,6 +174,11 @@ gboolean _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
                                            GIArgument *arg,      /* out */
                                            GITypeTag   type_tag,
                                            GITransfer  transfer);
+gboolean _pygi_marshal_from_py_basic_type_cache_adapter  (PyGIInvokeState   *state,
+                                                          PyGICallableCache *callable_cache,
+                                                          PyGIArgCache      *arg_cache,
+                                                          PyObject          *py_arg,
+                                                          GIArgument        *arg);
 
 gboolean pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/

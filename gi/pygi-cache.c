@@ -260,6 +260,12 @@ _arg_cache_alloc (void)
 }
 
 static void
+_arg_cache_from_py_basic_type_setup (PyGIArgCache *arg_cache)
+{
+    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
+}
+
+static void
 _arg_cache_to_py_basic_type_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type;
@@ -275,24 +281,6 @@ static void
 _arg_cache_to_py_void_setup (PyGIArgCache *arg_cache)
 {
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_void;
-}
-
-static void
-_arg_cache_from_py_boolean_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_boolean;
-}
-
-static void
-_arg_cache_from_py_int8_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_int8;
-}
-
-static void
-_arg_cache_from_py_uint8_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_uint8;
 }
 
 static void
@@ -798,36 +786,14 @@ _arg_cache_new (GITypeInfo *type_info,
 
            break;
        case GI_TYPE_TAG_BOOLEAN:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_boolean_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
        case GI_TYPE_TAG_INT8:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_int8_setup (arg_cache);
-
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
        case GI_TYPE_TAG_UINT8:
            arg_cache = _arg_cache_alloc ();
            if (arg_cache == NULL)
                break;
 
            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
-               _arg_cache_from_py_uint8_setup (arg_cache);
+               _arg_cache_from_py_basic_type_setup (arg_cache);
 
            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
                _arg_cache_to_py_basic_type_setup (arg_cache);
