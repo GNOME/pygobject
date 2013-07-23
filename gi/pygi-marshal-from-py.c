@@ -923,6 +923,77 @@ _pygi_marshal_from_py_filename (PyGIInvokeState   *state,
     return TRUE;
 }
 
+static gboolean
+_pygi_marshal_from_py_long (PyObject   *object,   /* in */
+                            GIArgument *arg,      /* out */
+                            GITypeTag   type_tag,
+                            GITransfer  transfer)
+{
+    PyObject *number;
+
+#if PY_MAJOR_VERSION < 3
+    {
+        PyObject *tmp = PyNumber_Int (object);
+        if (tmp) {
+            number = PyNumber_Long (tmp);
+            Py_DECREF (tmp);
+        } else {
+            number = PyNumber_Long (object);
+        }
+    }
+#else
+    number = PyNumber_Long (object);
+#endif
+
+    if (number == NULL) {
+        PyErr_SetString (PyExc_TypeError, "expected int argument");
+        return FALSE;
+    }
+
+    switch (type_tag) {
+        case GI_TYPE_TAG_INT8:
+            arg->v_int8 = PyLong_AsLong (number);
+            break;
+
+        case GI_TYPE_TAG_INT16:
+            arg->v_int16 = PyLong_AsLong (number);
+            break;
+
+        case GI_TYPE_TAG_INT32:
+            arg->v_int32 = PyLong_AsLong (number);
+            break;
+
+        case GI_TYPE_TAG_INT64:
+            arg->v_int64 = PyLong_AsLongLong (number);
+            break;
+
+        case GI_TYPE_TAG_UINT8:
+            arg->v_uint8 = PyLong_AsLong (number);
+            break;
+
+        case GI_TYPE_TAG_UINT16:
+            arg->v_uint16 = PyLong_AsLong (number);
+            break;
+
+        case GI_TYPE_TAG_UINT32:
+            arg->v_uint32 = PyLong_AsUnsignedLong (number);
+            break;
+
+        case GI_TYPE_TAG_UINT64:
+            arg->v_uint64 = PyLong_AsUnsignedLongLong (number);
+            break;
+
+        default:
+            g_assert_not_reached ();
+    }
+
+    Py_DECREF (number);
+
+    if (PyErr_Occurred())
+        return FALSE;
+    return TRUE;
+}
+
 gboolean
 _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
                                   GIArgument *arg,      /* out */
@@ -942,90 +1013,19 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
                 arg->v_pointer = PyLong_AsVoidPtr (object);
             }
             break;
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+            return _pygi_marshal_from_py_long (object, arg, type_tag, transfer);
+
         case GI_TYPE_TAG_BOOLEAN:
         {
             arg->v_boolean = PyObject_IsTrue (object);
-            break;
-        }
-        case GI_TYPE_TAG_INT8:
-        case GI_TYPE_TAG_INT16:
-        case GI_TYPE_TAG_INT32:
-        {
-            PyObject *int_;
-
-            int_ = PYGLIB_PyNumber_Long (object);
-            if (int_ == NULL) {
-                PyErr_SetString (PyExc_TypeError, "expected int argument");
-                break;
-            }
-
-            if (type_tag == GI_TYPE_TAG_INT32)
-                arg->v_int32 = PYGLIB_PyLong_AsLong (int_);
-            else if (type_tag == GI_TYPE_TAG_INT8)
-                arg->v_int8 = PYGLIB_PyLong_AsLong (int_);
-            else if (type_tag == GI_TYPE_TAG_INT16)
-                arg->v_int16 = PYGLIB_PyLong_AsLong (int_);
-
-            Py_DECREF (int_);
-
-            break;
-        }
-        case GI_TYPE_TAG_UINT8:
-        case GI_TYPE_TAG_UINT16:
-        case GI_TYPE_TAG_UINT32:
-        case GI_TYPE_TAG_UINT64:
-        {
-            PyObject *number;
-            guint64 value;
-
-            number = PYGLIB_PyNumber_Long (object);
-            if (number == NULL) {
-                PyErr_SetString (PyExc_TypeError, "expected int argument");
-                break;
-            }
-
-#if PY_VERSION_HEX < 0x03000000
-            if (PyInt_Check (number)) {
-                value = PyInt_AS_LONG (number);
-            } else
-#endif
-            value = PyLong_AsUnsignedLongLong (number);
-
-            if (type_tag == GI_TYPE_TAG_UINT32)
-                arg->v_uint32 = value;
-            else if (type_tag == GI_TYPE_TAG_UINT64)
-                arg->v_uint64 = value;
-            else if (type_tag == GI_TYPE_TAG_UINT8)
-                arg->v_uint8 = value;
-            else if (type_tag == GI_TYPE_TAG_UINT16)
-                arg->v_uint16 = value;
-
-            Py_DECREF (number);
-
-            break;
-        }
-        case GI_TYPE_TAG_INT64:
-        {
-            PyObject *number;
-            gint64 value;
-
-            number = PYGLIB_PyNumber_Long (object);
-            if (number == NULL) {
-                PyErr_SetString (PyExc_TypeError, "expected int argument");
-                break;
-            }
-
-#if PY_VERSION_HEX < 0x03000000
-            if (PyInt_Check (number)) {
-                value = PyInt_AS_LONG (number);
-            } else
-#endif
-            value = PyLong_AsLongLong (number);
-
-            arg->v_int64 = value;
-
-            Py_DECREF (number);
-
             break;
         }
         case GI_TYPE_TAG_FLOAT:
@@ -1067,8 +1067,13 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
         default:
             return FALSE;
     }
+
+    if (PyErr_Occurred())
+        return FALSE;
+
     return TRUE;
 }
+
 
 gboolean
 _pygi_marshal_from_py_array (PyGIInvokeState   *state,

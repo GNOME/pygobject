@@ -898,7 +898,8 @@ _pygi_argument_from_object (PyObject   *object,
     memset(&arg, 0, sizeof(GIArgument));
     type_tag = g_type_info_get_tag (type_info);
 
-    if (_pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer)) {
+    if (_pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer) ||
+            PyErr_Occurred()) {
         return arg;
     }
 
