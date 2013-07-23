@@ -1015,6 +1015,20 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
             break;
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:
+            if (PYGLIB_PyBytes_Check (object)) {
+                if (PYGLIB_PyBytes_Size (object) != 1) {
+                    PyErr_Format (PyExc_TypeError, "Must be a single character");
+                    return FALSE;
+                }
+                if (type_tag == GI_TYPE_TAG_INT8) {
+                    arg->v_int8 = (gint8)(PYGLIB_PyBytes_AsString (object)[0]);
+                } else {
+                    arg->v_uint8 = (guint8)(PYGLIB_PyBytes_AsString (object)[0]);
+                }
+            } else {
+                return _pygi_marshal_from_py_long (object, arg, type_tag, transfer);
+            }
+            break;
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_INT32:
