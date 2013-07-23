@@ -185,6 +185,10 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
                                                    GIArgument        *arg);
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
+gboolean _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
+                                           GIArgument *arg,      /* out */
+                                           GITypeTag   type_tag,
+                                           GITransfer  transfer);
 
 gboolean pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/
