@@ -327,9 +327,6 @@ class TestMatching(unittest.TestCase):
         self.assertEqual(obj.status, 2)
 
     def test_signal_handler_find(self):
-        def dummy(*args):
-            "Hack to work around: "
-
         def foo(obj):
             obj.status += 1
 
@@ -340,7 +337,7 @@ class TestMatching(unittest.TestCase):
         found_id = GObject.signal_handler_find(obj,
                                                GObject.SignalMatchType.ID,
                                                signal_id=signal_id, detail=detail,
-                                               closure=None, func=dummy, data=dummy)
+                                               closure=None, func=0, data=0)
         self.assertEqual(handler_id, found_id)
 
 

@@ -117,20 +117,10 @@ _pygi_marshal_to_py_void (PyGIInvokeState   *state,
                           PyGIArgCache      *arg_cache,
                           GIArgument        *arg)
 {
-    PyObject *py_obj = NULL;
     if (arg_cache->is_pointer) {
-        /* NOTE: This will change to interpret pointers as integer values
-         * by using the following:
-         * py_obj = PyLong_FromVoidPtr (arg->v_pointer);
-         * See: https://bugzilla.gnome.org/show_bug.cgi?id=688081
-         */
-        py_obj = arg->v_pointer;
-    } else {
-        py_obj = Py_None;
+        return PyLong_FromVoidPtr (arg->v_pointer);
     }
-
-    Py_XINCREF (py_obj);
-    return py_obj;
+    Py_RETURN_NONE;
 }
 
 static PyObject *
