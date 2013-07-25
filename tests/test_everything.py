@@ -480,21 +480,30 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_ghash_nested_everything_return2(), {})
 
     def test_hash_in(self):
-        # specifying a simple string array for "strings" does not work due to
-        # https://bugzilla.gnome.org/show_bug.cgi?id=666636
-        # workaround by explicitly building a GStrv object
-        class GStrv(list):
-            __gtype__ = GObject.TYPE_STRV
-
         expected = {'foo': 'bar', 'baz': 'bat', 'qux': 'quux'}
 
         Everything.test_ghash_nothing_in(expected)
         Everything.test_ghash_nothing_in2(expected)
 
+    def test_hash_in_with_typed_strv(self):
+        class GStrv(list):
+            __gtype__ = GObject.TYPE_STRV
+
         data = {'integer': 12,
                 'boolean': True,
                 'string': 'some text',
                 'strings': GStrv(['first', 'second', 'third']),
+                'flags': Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3,
+                'enum': Everything.TestEnum.VALUE2,
+               }
+        Everything.test_ghash_gvalue_in(data)
+        data = None
+
+    def test_hash_in_with_gvalue_strv(self):
+        data = {'integer': 12,
+                'boolean': True,
+                'string': 'some text',
+                'strings': GObject.Value(GObject.TYPE_STRV, ['first', 'second', 'third']),
                 'flags': Everything.TestFlags.FLAG1 | Everything.TestFlags.FLAG3,
                 'enum': Everything.TestEnum.VALUE2,
                }
