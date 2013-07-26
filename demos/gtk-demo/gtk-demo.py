@@ -110,18 +110,20 @@ class DemoTreeStore(Gtk.TreeStore):
         return self._parent_nodes[name]
 
 
-class GtkDemoWindow(Gtk.Window):
+class GtkDemoApp(Gtk.Application):
     __gtype_name__ = 'GtkDemoWindow'
 
     def __init__(self):
-        super(GtkDemoWindow, self).__init__(type=Gtk.WindowType.TOPLEVEL)
+        Gtk.Application.__init__(self, application_id='org.gnome.pygobject.gtkdemo')
 
-        self.set_title('PyGI GTK+ Code Demos')
-        self.set_default_size(600, 400)
+    def on_activate(self, app):
+        self.window = Gtk.ApplicationWindow.new(self)
+        self.window.set_title('PyGObject GTK+ Code Demos')
+        self.window.set_default_size(600, 400)
         self.setup_default_icon()
 
         hbox = Gtk.HBox(homogeneous=False, spacing=0)
-        self.add(hbox)
+        self.window.add(hbox)
 
         tree = self.create_tree()
         hbox.pack_start(tree, False, False, 0)
@@ -138,7 +140,7 @@ class GtkDemoWindow(Gtk.Window):
         text_widget, self.source_buffer = self.create_source_view()
         notebook.append_page(text_widget, Gtk.Label.new_with_mnemonic('_Source'))
 
-        self.show_all()
+        self.window.show_all()
 
         self.selection_cb(self.tree_view.get_selection(),
                           self.tree_view.get_model())
@@ -219,8 +221,10 @@ class GtkDemoWindow(Gtk.Window):
 
         if demo is not None:
             store.set_value(iter, 2, Pango.Style.ITALIC)
-            demo.module.main(self)
-            store.set_value(iter, 2, Pango.Style.NORMAL)
+            try:
+                demo.module.main(self)
+            finally:
+                store.set_value(iter, 2, Pango.Style.NORMAL)
 
     def create_tree(self):
         tree_store = DemoTreeStore()
@@ -315,20 +319,16 @@ class GtkDemoWindow(Gtk.Window):
         view.set_wrap_mode(Gtk.WrapMode.NONE)
         return scrolled_window, buffer
 
-
-def main():
-    mainloop = GLib.MainLoop()
-
-    demowindow = GtkDemoWindow()
-    demowindow.connect('destroy', quit, mainloop)
-    demowindow.show()
-
-    mainloop.run()
+    def run(self, argv):
+        self.connect('activate', self.on_activate)
+        return super(GtkDemoApp, self).run(argv)
 
 
-def quit(widget, mainloop):
-    mainloop.quit()
+def main(argv):
+    """Entry point for demo manager"""
+    app = GtkDemoApp()
+    return app.run(argv)
 
 
 if __name__ == '__main__':
-    main()
+    SystemExit(main(sys.argv))

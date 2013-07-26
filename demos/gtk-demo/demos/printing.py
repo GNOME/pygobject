@@ -172,7 +172,7 @@ class PrintingApp:
 
 def main(demoapp=None):
     app = PrintingApp()
-    GLib.idle_add(app.run, demoapp)
+    GLib.idle_add(app.run, demoapp.window)
     Gtk.main()
 
 if __name__ == '__main__':
