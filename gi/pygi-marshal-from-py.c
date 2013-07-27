@@ -1648,12 +1648,38 @@ _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
 
     gobj = pygobject_get (py_arg);
     if (transfer == GI_TRANSFER_EVERYTHING) {
-        /* An easy case of adding a new ref that the caller will take ownership of.
-         * Pythons existing ref to the GObject will be managed normally with the wrapper.
+        /* For transfer everything, add a new ref that the callee will take ownership of.
+         * Pythons existing ref to the GObject will be managed with the PyGObject wrapper.
          */
         g_object_ref (gobj);
+    }
 
-    } else if (py_arg->ob_refcnt == 1 && gobj->ref_count == 1) {
+    arg->v_pointer = gobj;
+    return TRUE;
+}
+
+/* _pygi_marshal_from_py_gobject_out_arg:
+ * py_arg: (in):
+ * arg: (out):
+ *
+ * A specialization for marshaling Python GObjects used for out/return values
+ * from a Python implemented vfuncs, signals, or an assignment to a GObject property.
+ */
+gboolean
+_pygi_marshal_from_py_gobject_out_arg (PyObject *py_arg, /*in*/
+                                       GIArgument *arg,  /*out*/
+                                       GITransfer transfer) {
+    GObject *gobj;
+    if (!_pygi_marshal_from_py_gobject (py_arg, arg, transfer)) {
+        return FALSE;
+    }
+
+    /* HACK: At this point the basic marshaling of the GObject was successful
+     * but we add some special case hacks for vfunc returns due to buggy APIs:
+     * https://bugzilla.gnome.org/show_bug.cgi?id=693393
+     */
+    gobj = arg->v_pointer;
+    if (py_arg->ob_refcnt == 1 && gobj->ref_count == 1) {
         /* If both object ref counts are only 1 at this point (the reference held
          * in a return tuple), we assume the GObject will be free'd before reaching
          * its target and become invalid. So instead of getting invalid object errors
@@ -1662,12 +1688,10 @@ _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
         g_object_ref (gobj);
 
         if (((PyGObject *)py_arg)->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING) {
-            /* HACK:
+            /*
              * We want to re-float instances that were floating and the Python
              * wrapper assumed ownership. With the additional caveat that there
              * are not any strong references beyond the return tuple.
-             * This should be removed once the following ticket is fixed:
-             * https://bugzilla.gnome.org/show_bug.cgi?id=693393
              */
             g_object_force_floating (gobj);
 
@@ -1686,7 +1710,6 @@ _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
         }
     }
 
-    arg->v_pointer = gobj;
     return TRUE;
 }
 

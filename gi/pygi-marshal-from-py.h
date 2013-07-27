@@ -123,6 +123,9 @@ gboolean _pygi_marshal_from_py_basic_type_cache_adapter  (PyGIInvokeState   *sta
 gboolean _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
                                         GIArgument *arg,  /*out*/
                                         GITransfer transfer);
+gboolean _pygi_marshal_from_py_gobject_out_arg (PyObject *py_arg, /*in*/
+                                                GIArgument *arg,  /*out*/
+                                                GITransfer transfer);
 
 gboolean _pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/
