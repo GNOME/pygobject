@@ -446,14 +446,14 @@ static void
 _arg_cache_from_py_interface_union_setup (PyGIArgCache *arg_cache,
                                           GITransfer transfer)
 {
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct;
+    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct_cache_adapter;
 }
 
 static void
 _arg_cache_to_py_interface_union_setup (PyGIArgCache *arg_cache,
                                         GITransfer transfer)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct_cache_adapter;
 }
 
 static void
@@ -463,7 +463,7 @@ _arg_cache_from_py_interface_struct_setup (PyGIArgCache *arg_cache,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct;
+    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct_cache_adapter;
 
     if (iface_cache->g_type == G_TYPE_VALUE)
         arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_struct_gvalue;
@@ -478,7 +478,7 @@ _arg_cache_to_py_interface_struct_setup (PyGIArgCache *arg_cache,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct_cache_adapter;
 
     if (iface_cache->is_foreign)
         arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_struct_foreign;
@@ -496,7 +496,7 @@ static void
 _arg_cache_to_py_interface_object_setup (PyGIArgCache *arg_cache,
                                          GITransfer transfer)
 {
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_object;
+    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_object_cache_adapter;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_object;
 }
 

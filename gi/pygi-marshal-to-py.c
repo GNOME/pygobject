@@ -742,20 +742,20 @@ _pygi_marshal_to_py_interface_flags (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_to_py_interface_struct (PyGIInvokeState   *state,
-                                      PyGICallableCache *callable_cache,
-                                      PyGIArgCache      *arg_cache,
-                                      GIArgument        *arg)
+_pygi_marshal_to_py_interface_struct_cache_adapter (PyGIInvokeState   *state,
+                                                    PyGICallableCache *callable_cache,
+                                                    PyGIArgCache      *arg_cache,
+                                                    GIArgument        *arg)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    return pygi_marshal_to_py_interface_struct (arg,
-                                                iface_cache->interface_info,
-                                                iface_cache->g_type,
-                                                iface_cache->py_type,
-                                                arg_cache->transfer,
-                                                arg_cache->is_caller_allocates,
-                                                iface_cache->is_foreign);
+    return _pygi_marshal_to_py_interface_struct (arg,
+                                                 iface_cache->interface_info,
+                                                 iface_cache->g_type,
+                                                 iface_cache->py_type,
+                                                 arg_cache->transfer,
+                                                 arg_cache->is_caller_allocates,
+                                                 iface_cache->is_foreign);
 }
 
 PyObject *
@@ -785,12 +785,12 @@ _pygi_marshal_to_py_interface_boxed (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_to_py_interface_object (PyGIInvokeState   *state,
-                                      PyGICallableCache *callable_cache,
-                                      PyGIArgCache      *arg_cache,
-                                      GIArgument        *arg)
+_pygi_marshal_to_py_interface_object_cache_adapter (PyGIInvokeState   *state,
+                                                    PyGICallableCache *callable_cache,
+                                                    PyGIArgCache      *arg_cache,
+                                                    GIArgument        *arg)
 {
-    return pygi_marshal_to_py_object(arg, arg_cache->transfer);
+    return _pygi_marshal_to_py_object(arg, arg_cache->transfer);
 }
 
 PyObject *
@@ -807,7 +807,7 @@ _pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
 }
 
 PyObject *
-pygi_marshal_to_py_object (GIArgument *arg, GITransfer transfer) {
+_pygi_marshal_to_py_object (GIArgument *arg, GITransfer transfer) {
     PyObject *pyobj;
 
     if (arg->v_pointer == NULL) {
@@ -829,13 +829,13 @@ pygi_marshal_to_py_object (GIArgument *arg, GITransfer transfer) {
 }
 
 PyObject *
-pygi_marshal_to_py_interface_struct (GIArgument *arg,
-                                     GIInterfaceInfo *interface_info,
-                                     GType g_type,
-                                     PyObject *py_type,
-                                     GITransfer transfer,
-                                     gboolean is_allocated,
-                                     gboolean is_foreign)
+_pygi_marshal_to_py_interface_struct (GIArgument *arg,
+                                      GIInterfaceInfo *interface_info,
+                                      GType g_type,
+                                      PyObject *py_type,
+                                      GITransfer transfer,
+                                      gboolean is_allocated,
+                                      gboolean is_foreign)
 {
     PyObject *py_obj = NULL;
 

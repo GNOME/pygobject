@@ -78,11 +78,11 @@ gboolean _pygi_marshal_from_py_interface_flags    (PyGIInvokeState   *state,
                                                    PyGIArgCache      *arg_cache,
                                                    PyObject          *py_arg,
                                                    GIArgument        *arg);
-gboolean _pygi_marshal_from_py_interface_struct   (PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg);
+gboolean _pygi_marshal_from_py_interface_struct_cache_adapter   (PyGIInvokeState   *state,
+                                                                 PyGICallableCache *callable_cache,
+                                                                 PyGIArgCache      *arg_cache,
+                                                                 PyObject          *py_arg,
+                                                                 GIArgument        *arg);
 gboolean _pygi_marshal_from_py_interface_interface(PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,
@@ -120,26 +120,26 @@ gboolean _pygi_marshal_from_py_basic_type_cache_adapter  (PyGIInvokeState   *sta
                                                           PyObject          *py_arg,
                                                           GIArgument        *arg);
 
-gboolean pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+gboolean _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+                                        GIArgument *arg,  /*out*/
+                                        GITransfer transfer);
+
+gboolean _pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/
-                                       GITransfer transfer);
+                                       GITransfer transfer,
+                                       gboolean is_allocated);
 
-gboolean pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
-                                      GIArgument *arg,  /*out*/
-                                      GITransfer transfer,
-                                      gboolean is_allocated);
+gboolean _pygi_marshal_from_py_gclosure(PyObject *py_arg, /*in*/
+                                        GIArgument *arg); /*out*/
 
-gboolean pygi_marshal_from_py_gclosure(PyObject *py_arg, /*in*/
-                                       GIArgument *arg); /*out*/
-
-gboolean pygi_marshal_from_py_interface_struct (PyObject *py_arg,
-                                                GIArgument *arg,
-                                                const gchar *arg_name,
-                                                GIBaseInfo *interface_info,
-                                                GITypeInfo *type_info,
-                                                GType g_type,
-                                                PyObject *py_type,
-                                                GITransfer transfer,
+gboolean _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
+                                                 GIArgument *arg,
+                                                 const gchar *arg_name,
+                                                 GIBaseInfo *interface_info,
+                                                 GITypeInfo *type_info,
+                                                 GType g_type,
+                                                 PyObject *py_type,
+                                                 GITransfer transfer,
                                                 gboolean is_allocated,
                                                 gboolean is_foreign);
 

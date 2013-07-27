@@ -1473,24 +1473,24 @@ err:
 }
 
 gboolean
-_pygi_marshal_from_py_interface_struct (PyGIInvokeState   *state,
-                                        PyGICallableCache *callable_cache,
-                                        PyGIArgCache      *arg_cache,
-                                        PyObject          *py_arg,
-                                        GIArgument        *arg)
+_pygi_marshal_from_py_interface_struct_cache_adapter (PyGIInvokeState   *state,
+                                                      PyGICallableCache *callable_cache,
+                                                      PyGIArgCache      *arg_cache,
+                                                      PyObject          *py_arg,
+                                                      GIArgument        *arg)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    return pygi_marshal_from_py_interface_struct (py_arg,
-                                                  arg,
-                                                  arg_cache->arg_name,
-                                                  iface_cache->interface_info,
-                                                  arg_cache->type_info,
-                                                  iface_cache->g_type,
-                                                  iface_cache->py_type,
-                                                  arg_cache->transfer,
-                                                  TRUE, /*copy_reference*/
-                                                  iface_cache->is_foreign);
+    return _pygi_marshal_from_py_interface_struct (py_arg,
+                                                   arg,
+                                                   arg_cache->arg_name,
+                                                   iface_cache->interface_info,
+                                                   arg_cache->type_info,
+                                                   iface_cache->g_type,
+                                                   iface_cache->py_type,
+                                                   arg_cache->transfer,
+                                                   TRUE, /*copy_reference*/
+                                                   iface_cache->is_foreign);
 }
 
 gboolean
@@ -1531,7 +1531,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    return pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
+    return _pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
 }
 
 gboolean
@@ -1623,14 +1623,14 @@ gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
    return TRUE;
 }
 
-/* pygi_marshal_from_py_gobject:
+/* _pygi_marshal_from_py_gobject:
  * py_arg: (in):
  * arg: (out):
  */
 gboolean
-pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
-                              GIArgument *arg,  /*out*/
-                              GITransfer transfer) {
+_pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
+                               GIArgument *arg,  /*out*/
+                               GITransfer transfer) {
     GObject *gobj;
 
     if (py_arg == Py_None) {
@@ -1690,7 +1690,7 @@ pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
     return TRUE;
 }
 
-/* pygi_marshal_from_py_gvalue:
+/* _pygi_marshal_from_py_gvalue:
  * py_arg: (in):
  * arg: (out):
  * transfer:
@@ -1698,10 +1698,10 @@ pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
  *                 when it is already holding a GValue vs. copying the value.
  */
 gboolean
-pygi_marshal_from_py_gvalue (PyObject *py_arg,
-                             GIArgument *arg,
-                             GITransfer transfer,
-                             gboolean copy_reference) {
+_pygi_marshal_from_py_gvalue (PyObject *py_arg,
+                              GIArgument *arg,
+                              GITransfer transfer,
+                              gboolean copy_reference) {
     GValue *value;
     GType object_type;
 
@@ -1735,13 +1735,13 @@ pygi_marshal_from_py_gvalue (PyObject *py_arg,
     return TRUE;
 }
 
-/* pygi_marshal_from_py_gclosure:
+/* _pygi_marshal_from_py_gclosure:
  * py_arg: (in):
  * arg: (out):
  */
 gboolean
-pygi_marshal_from_py_gclosure(PyObject *py_arg,
-                              GIArgument *arg)
+_pygi_marshal_from_py_gclosure(PyObject *py_arg,
+                               GIArgument *arg)
 {
     GClosure *closure;
     GType object_gtype = pyg_type_from_object_strict (py_arg, FALSE);
@@ -1768,16 +1768,16 @@ pygi_marshal_from_py_gclosure(PyObject *py_arg,
 }
 
 gboolean
-pygi_marshal_from_py_interface_struct (PyObject *py_arg,
-                                       GIArgument *arg,
-                                       const gchar *arg_name,
-                                       GIBaseInfo *interface_info,
-                                       GITypeInfo *type_info,
-                                       GType g_type,
-                                       PyObject *py_type,
-                                       GITransfer transfer,
-                                       gboolean copy_reference,
-                                       gboolean is_foreign)
+_pygi_marshal_from_py_interface_struct (PyObject *py_arg,
+                                        GIArgument *arg,
+                                        const gchar *arg_name,
+                                        GIBaseInfo *interface_info,
+                                        GITypeInfo *type_info,
+                                        GType g_type,
+                                        PyObject *py_type,
+                                        GITransfer transfer,
+                                        gboolean copy_reference,
+                                        gboolean is_foreign)
 {
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
@@ -1789,12 +1789,12 @@ pygi_marshal_from_py_interface_struct (PyObject *py_arg,
      */
 
     if (g_type_is_a (g_type, G_TYPE_CLOSURE)) {
-        return pygi_marshal_from_py_gclosure (py_arg, arg);
+        return _pygi_marshal_from_py_gclosure (py_arg, arg);
     } else if (g_type_is_a (g_type, G_TYPE_VALUE)) {
-        return pygi_marshal_from_py_gvalue(py_arg,
-                                           arg,
-                                           transfer,
-                                           copy_reference);
+        return _pygi_marshal_from_py_gvalue(py_arg,
+                                            arg,
+                                            transfer,
+                                            copy_reference);
     } else if (is_foreign) {
         PyObject *success;
         success = pygi_struct_foreign_convert_to_g_argument (py_arg,

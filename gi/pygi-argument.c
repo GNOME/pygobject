@@ -1027,16 +1027,16 @@ array_success:
                      * Further re-factoring is needed to fix this leak.
                      * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
                      */
-                    pygi_marshal_from_py_interface_struct (object,
-                                                           &arg,
-                                                           NULL, /*arg_name*/
-                                                           info, /*interface_info*/
-                                                           type_info,
-                                                           g_type,
-                                                           py_type,
-                                                           transfer,
-                                                           FALSE, /*copy_reference*/
-                                                           g_struct_info_is_foreign (info));
+                    _pygi_marshal_from_py_interface_struct (object,
+                                                            &arg,
+                                                            NULL, /*arg_name*/
+                                                            info, /*interface_info*/
+                                                            type_info,
+                                                            g_type,
+                                                            py_type,
+                                                            transfer,
+                                                            FALSE, /*copy_reference*/
+                                                            g_struct_info_is_foreign (info));
 
                     Py_DECREF (py_type);
                     break;
@@ -1060,7 +1060,7 @@ array_success:
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     /* An error within this call will result in a NULL arg */
-                    pygi_marshal_from_py_gobject (object, &arg, transfer);
+                    _pygi_marshal_from_py_gobject (object, &arg, transfer);
                     break;
 
                 default:
@@ -1370,13 +1370,13 @@ _pygi_argument_to_object (GIArgument  *arg,
                         py_type = _pygi_type_get_from_g_type (g_type);
                     }
 
-                    object = pygi_marshal_to_py_interface_struct (arg,
-                                                                  info, /*interface_info*/
-                                                                  g_type,
-                                                                  py_type,
-                                                                  transfer,
-                                                                  FALSE, /*is_allocated*/
-                                                                  g_struct_info_is_foreign (info));
+                    object = _pygi_marshal_to_py_interface_struct (arg,
+                                                                   info, /*interface_info*/
+                                                                   g_type,
+                                                                   py_type,
+                                                                   transfer,
+                                                                   FALSE, /*is_allocated*/
+                                                                   g_struct_info_is_foreign (info));
 
                     Py_XDECREF (py_type);
                     break;
@@ -1433,10 +1433,10 @@ _pygi_argument_to_object (GIArgument  *arg,
                             transfer == GI_TRANSFER_NOTHING &&
                             g_object_is_floating (arg->v_pointer)) {
                         g_object_ref (arg->v_pointer);
-                        object = pygi_marshal_to_py_object (arg, GI_TRANSFER_EVERYTHING);
+                        object = _pygi_marshal_to_py_object (arg, GI_TRANSFER_EVERYTHING);
                         g_object_force_floating (arg->v_pointer);
                     } else {
-                        object = pygi_marshal_to_py_object (arg, transfer);
+                        object = _pygi_marshal_to_py_object (arg, transfer);
                     }
 
                     break;

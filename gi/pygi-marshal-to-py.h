@@ -65,10 +65,10 @@ PyObject *_pygi_marshal_to_py_interface_flags  (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
                                                 GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_interface_struct (PyGIInvokeState   *state,
-                                                PyGICallableCache *callable_cache,
-                                                PyGIArgCache      *arg_cache,
-                                                GIArgument        *arg);
+PyObject *_pygi_marshal_to_py_interface_struct_cache_adapter (PyGIInvokeState   *state,
+                                                              PyGICallableCache *callable_cache,
+                                                              PyGIArgCache      *arg_cache,
+                                                              GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_interface_interface(PyGIInvokeState   *state,
                                                   PyGICallableCache *callable_cache,
                                                   PyGIArgCache      *arg_cache,
@@ -77,10 +77,10 @@ PyObject *_pygi_marshal_to_py_interface_boxed  (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
                                                 GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_interface_object (PyGIInvokeState   *state,
-                                                PyGICallableCache *callable_cache,
-                                                PyGIArgCache      *arg_cache,
-                                                GIArgument        *arg);
+PyObject *_pygi_marshal_to_py_interface_object_cache_adapter (PyGIInvokeState   *state,
+                                                              PyGICallableCache *callable_cache,
+                                                              PyGIArgCache      *arg_cache,
+                                                              GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
@@ -88,16 +88,16 @@ PyObject *_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
 
-PyObject *pygi_marshal_to_py_object (GIArgument *arg,
-                                     GITransfer transfer);
+PyObject *_pygi_marshal_to_py_object (GIArgument *arg,
+                                      GITransfer transfer);
 
-PyObject *pygi_marshal_to_py_interface_struct (GIArgument *arg,
-                                               GIInterfaceInfo *interface_info,
-                                               GType g_type,
-                                               PyObject *py_type,
-                                               GITransfer transfer,
-                                               gboolean is_allocated,
-                                               gboolean is_foreign);
+PyObject *_pygi_marshal_to_py_interface_struct (GIArgument *arg,
+                                                GIInterfaceInfo *interface_info,
+                                                GType g_type,
+                                                PyObject *py_type,
+                                                GITransfer transfer,
+                                                gboolean is_allocated,
+                                                gboolean is_foreign);
 
 G_END_DECLS
 
