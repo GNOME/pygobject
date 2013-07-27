@@ -136,22 +136,14 @@ _check_for_unexpected_kwargs (const gchar *function_name,
 
 /**
  * _py_args_combine_and_check_length:
- * @function_name: the name of the function being called. Used for error messages.
- * @arg_name_list: a list of the string names for each argument. The length
- *                 of this list is the number of required arguments for the
- *                 function. If an argument has no name, NULL is put in its
- *                 position in the list.
- * @py_args: the tuple of positional arguments. A referece is stolen, and this
-             tuple will be either decreffed or returned as is.
+ * @cache: PyGICallableCache
+ * @py_args: the tuple of positional arguments.
  * @py_kwargs: the dict of keyword arguments to be merged with py_args.
- *             A reference is borrowed.
  *
- * Returns: The py_args and py_kwargs combined into one tuple.
+ * Returns: New value reference to the combined py_args and py_kwargs.
  */
 static PyObject *
-_py_args_combine_and_check_length (const gchar *function_name,
-                                   GSList      *arg_name_list,
-                                   GHashTable  *arg_name_hash,
+_py_args_combine_and_check_length (PyGICallableCache *cache,
                                    PyObject    *py_args,
                                    PyObject    *py_kwargs)
 {
@@ -159,6 +151,7 @@ _py_args_combine_and_check_length (const gchar *function_name,
     Py_ssize_t n_py_args, n_py_kwargs, i;
     guint n_expected_args;
     GSList *l;
+    const gchar *function_name = cache->name;
 
     n_py_args = PyTuple_GET_SIZE (py_args);
     if (py_kwargs == NULL)
@@ -166,8 +159,10 @@ _py_args_combine_and_check_length (const gchar *function_name,
     else
         n_py_kwargs = PyDict_Size (py_kwargs);
 
-    n_expected_args = g_slist_length (arg_name_list);
+    /* Fast path, we already have the exact number of args and not kwargs. */
+    n_expected_args = g_slist_length (cache->arg_name_list);
     if (n_py_kwargs == 0 && n_py_args == n_expected_args) {
+        Py_INCREF (py_args);
         return py_args;
     }
 
@@ -179,15 +174,12 @@ _py_args_combine_and_check_length (const gchar *function_name,
                       n_py_kwargs > 0 ? "non-keyword " : "",
                       n_expected_args == 1 ? "" : "s",
                       n_py_args);
-
-        Py_DECREF (py_args);
         return NULL;
     }
 
     if (n_py_kwargs > 0 && !_check_for_unexpected_kwargs (function_name,
-                                                          arg_name_hash,
+                                                          cache->arg_name_hash,
                                                           py_kwargs)) {
-        Py_DECREF (py_args);
         return NULL;
     }
 
@@ -201,9 +193,7 @@ _py_args_combine_and_check_length (const gchar *function_name,
         PyTuple_SET_ITEM (combined_py_args, i, item);
     }
 
-    Py_CLEAR(py_args);
-
-    for (i = 0, l = arg_name_list; i < n_expected_args && l; i++, l = l->next) {
+    for (i = 0, l = cache->arg_name_list; i < n_expected_args && l; i++, l = l->next) {
         PyObject *py_arg_item, *kw_arg_item = NULL;
         const gchar *arg_name = l->data;
 
@@ -250,6 +240,7 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
                                         PyObject *py_args,
                                         PyObject *kwargs)
 {
+    PyObject *combined_args = NULL;
     state->implementor_gtype = 0;
 
     /* TODO: We don't use the class parameter sent in by  the structure
@@ -292,17 +283,16 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
          * code more error prone and confusing so don't do that unless profiling shows
          * significant gain
          */
-        state->py_in_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
+        combined_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
     } else {
-        state->py_in_args = py_args;
-        Py_INCREF (state->py_in_args);
+        combined_args = py_args;
+        Py_INCREF (combined_args);
     }
 
-    state->py_in_args = _py_args_combine_and_check_length (cache->name,
-                                                           cache->arg_name_list,
-                                                           cache->arg_name_hash,
-                                                           state->py_in_args,
+    state->py_in_args = _py_args_combine_and_check_length (cache,
+                                                           combined_args,
                                                            kwargs);
+    Py_DECREF (combined_args);
 
     if (state->py_in_args == NULL) {
         return FALSE;
