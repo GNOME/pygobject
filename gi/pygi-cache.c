@@ -936,6 +936,23 @@ _arg_name_list_generate (PyGICallableCache *callable_cache)
     callable_cache->arg_name_list = g_slist_reverse (arg_name_list);
 }
 
+static PyGIDirection
+_pygi_get_direction (PyGICallableCache *callable_cache, GIDirection gi_direction)
+{
+    /* For vfuncs and callbacks our marshalling directions are reversed */
+    if (gi_direction == GI_DIRECTION_INOUT) {
+        return PYGI_DIRECTION_BIDIRECTIONAL;
+    } else if (gi_direction == GI_DIRECTION_IN) {
+        if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
+            return PYGI_DIRECTION_TO_PYTHON;
+        return PYGI_DIRECTION_FROM_PYTHON;
+    } else {
+        if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
+            return PYGI_DIRECTION_FROM_PYTHON;
+        return PYGI_DIRECTION_TO_PYTHON;
+    }
+}
+
 /* Generate the cache for the callable's arguments */
 static gboolean
 _args_cache_generate (GICallableInfo *callable_info,
@@ -948,11 +965,8 @@ _args_cache_generate (GICallableInfo *callable_info,
     PyGIArgCache *return_cache;
     PyGIDirection return_direction;
 
-    /* determine if we are marshalling the return to or from python */
-    if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
-        return_direction = PYGI_DIRECTION_FROM_PYTHON;
-    else
-        return_direction = PYGI_DIRECTION_TO_PYTHON;
+    /* Return arguments are always considered out */
+    return_direction = _pygi_get_direction (callable_cache, GI_DIRECTION_OUT);
 
     /* cache the return arg */
     return_info =
@@ -1014,7 +1028,6 @@ _args_cache_generate (GICallableInfo *callable_info,
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
-        GIDirection gi_direction;
         PyGIDirection direction;
         GITransfer transfer;
         GITypeTag type_tag;
@@ -1040,21 +1053,8 @@ _args_cache_generate (GICallableInfo *callable_info,
             continue;
         }
 
-        /* For vfuncs and callbacks our marshalling directions
-           are reversed */
-        gi_direction = g_arg_info_get_direction (arg_info);
-        if (gi_direction == GI_DIRECTION_INOUT) {
-            direction = PYGI_DIRECTION_BIDIRECTIONAL;
-        } else if (gi_direction == GI_DIRECTION_IN) {
-            direction = PYGI_DIRECTION_FROM_PYTHON;
-            if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
-                direction = PYGI_DIRECTION_TO_PYTHON;
-        } else {
-            direction = PYGI_DIRECTION_TO_PYTHON;
-            if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
-                direction = PYGI_DIRECTION_FROM_PYTHON;
-        }
-
+        direction = _pygi_get_direction (callable_cache,
+                                         g_arg_info_get_direction (arg_info));
         transfer = g_arg_info_get_ownership_transfer (arg_info);
         type_info = g_arg_info_get_type (arg_info);
         type_tag = g_type_info_get_tag (type_info);
