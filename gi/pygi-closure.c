@@ -518,15 +518,8 @@ _pygi_invoke_closure_clear_py_data(PyGICClosure *invoke_closure)
 {
     PyGILState_STATE state = PyGILState_Ensure();
 
-    if (invoke_closure->function != NULL) {
-        Py_DECREF (invoke_closure->function);
-        invoke_closure->function = NULL;
-    }
-
-    if (invoke_closure->user_data != NULL) {
-        Py_DECREF (invoke_closure->user_data);
-        invoke_closure->user_data = NULL;
-    }
+    Py_CLEAR (invoke_closure->function);
+    Py_CLEAR (invoke_closure->user_data);
 
     PyGILState_Release (state);
 }
