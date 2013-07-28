@@ -296,10 +296,10 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             }
         } else {
             GIArgument *len_arg = state->args[seq_cache->len_arg_index];
+            PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache,
+                                                                    seq_cache->len_arg_index);
 
-            if (!gi_argument_to_gsize (len_arg,
-                                       &len,
-                                       callable_cache->args_cache[seq_cache->len_arg_index]->type_tag)) {
+            if (!gi_argument_to_gsize (len_arg, &len, arg_cache->type_tag)) {
                 return NULL;
             }
         }

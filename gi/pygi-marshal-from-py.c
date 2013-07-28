@@ -887,7 +887,7 @@ array_success:
     if (sequence_cache->len_arg_index >= 0) {
         /* we have an child arg to handle */
         PyGIArgCache *child_cache =
-            callable_cache->args_cache[sequence_cache->len_arg_index];
+            _pygi_callable_cache_get_arg (callable_cache, sequence_cache->len_arg_index);
 
         if (child_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL) {
             gint *len_arg = (gint *)state->in_args[child_cache->c_arg_index].v_pointer;
@@ -1249,7 +1249,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     callback_cache = (PyGICallbackCache *)arg_cache;
 
     if (callback_cache->user_data_index > 0) {
-        user_data_cache = callable_cache->args_cache[callback_cache->user_data_index];
+        user_data_cache = _pygi_callable_cache_get_arg (callable_cache, callback_cache->user_data_index);
         if (user_data_cache->py_arg_index < state->n_py_in_args) {
             /* py_user_data is a borrowed reference. */
             py_user_data = PyTuple_GetItem (state->py_in_args, user_data_cache->py_arg_index);
@@ -1297,7 +1297,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
      * later on in _pygi_destroy_notify_callback_closure.
      */
     if (callback_cache->destroy_notify_index > 0) {
-        destroy_cache = callable_cache->args_cache[callback_cache->destroy_notify_index];
+        destroy_cache = _pygi_callable_cache_get_arg (callable_cache, callback_cache->destroy_notify_index);
     }
 
     if (destroy_cache) {

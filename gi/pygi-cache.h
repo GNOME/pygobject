@@ -172,7 +172,7 @@ struct _PyGICallableCache
     PyGIFunctionType function_type;
 
     PyGIArgCache *return_cache;
-    PyGIArgCache **args_cache;
+    GPtrArray *args_cache;
     GSList *to_py_args;
     GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
@@ -191,8 +191,6 @@ struct _PyGICallableCache
      */
     gssize n_to_py_child_args;
 
-    gssize n_args;
-
     /* Number of Python arguments expected for invoking the gi function. */
     gssize n_py_args;
 };
@@ -202,6 +200,18 @@ void _pygi_callable_cache_free	(PyGICallableCache *cache);
 
 PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info,
                                              gboolean is_ccallback);
+
+#define _pygi_callable_cache_args_len(cache) ((cache)->args_cache)->len
+
+inline static PyGIArgCache *
+_pygi_callable_cache_get_arg (PyGICallableCache *cache, guint index) {
+    return (PyGIArgCache *) g_ptr_array_index (cache->args_cache, index);
+}
+
+inline static void
+_pygi_callable_cache_set_arg (PyGICallableCache *cache, guint index, PyGIArgCache *arg_cache) {
+    cache->args_cache->pdata[index] = arg_cache;
+}
 
 G_END_DECLS
 

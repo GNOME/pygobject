@@ -93,8 +93,8 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
     gssize i;
 
     /* For in success, call cleanup for all GI_DIRECTION_IN values only. */
-    for (i = 0; i < cache->n_args; i++) {
-        PyGIArgCache *arg_cache = cache->args_cache[i];
+    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
+        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
 
         if (cleanup_func &&
@@ -157,8 +157,8 @@ pygi_marshal_cleanup_args_from_py_parameter_fail (PyGIInvokeState   *state,
 
     state->failed = TRUE;
 
-    for (i = 0; i < cache->n_args  && i <= failed_arg_index; i++) {
-        PyGIArgCache *arg_cache = cache->args_cache[i];
+    for (i = 0; i < _pygi_callable_cache_args_len (cache)  && i <= failed_arg_index; i++) {
+        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
         gpointer data = state->args[i]->v_pointer;
 

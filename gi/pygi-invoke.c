@@ -299,14 +299,14 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
     }
     state->n_py_in_args = PyTuple_Size (state->py_in_args);
 
-    state->args = g_slice_alloc0 (cache->n_args * sizeof (GIArgument *));
-    if (state->args == NULL && cache->n_args != 0) {
+    state->args = g_slice_alloc0 (_pygi_callable_cache_args_len (cache) * sizeof (GIArgument *));
+    if (state->args == NULL && _pygi_callable_cache_args_len (cache) != 0) {
         PyErr_NoMemory();
         return FALSE;
     }
 
-    state->args_data = g_slice_alloc0 (cache->n_args * sizeof (gpointer));
-    if (state->args_data == NULL && cache->n_args != 0) {
+    state->args_data = g_slice_alloc0 (_pygi_callable_cache_args_len (cache) * sizeof (gpointer));
+    if (state->args_data == NULL && _pygi_callable_cache_args_len (cache) != 0) {
         PyErr_NoMemory();
         return FALSE;
     }
@@ -337,8 +337,8 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 static inline void
 _invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
 {
-    g_slice_free1 (cache->n_args * sizeof(GIArgument *), state->args);
-    g_slice_free1 (cache->n_args * sizeof(gpointer), state->args_data);
+    g_slice_free1 (_pygi_callable_cache_args_len (cache) * sizeof(GIArgument *), state->args);
+    g_slice_free1 (_pygi_callable_cache_args_len (cache) * sizeof(gpointer), state->args_data);
     g_slice_free1 (cache->n_from_py_args * sizeof(GIArgument), state->in_args);
     g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_args);
     g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_values);
@@ -408,9 +408,9 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         return FALSE;
     }
 
-    for (i = 0; i < cache->n_args; i++) {
+    for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         GIArgument *c_arg;
-        PyGIArgCache *arg_cache = cache->args_cache[i];
+        PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         PyObject *py_arg = NULL;
 
         switch (arg_cache->direction) {

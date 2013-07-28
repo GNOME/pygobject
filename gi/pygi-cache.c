@@ -103,23 +103,17 @@ _callback_cache_free_func (PyGICallbackCache *cache)
 void
 _pygi_callable_cache_free (PyGICallableCache *cache)
 {
-    gssize i;
-
     if (cache == NULL)
         return;
 
     g_slist_free (cache->to_py_args);
     g_slist_free (cache->arg_name_list);
     g_hash_table_destroy (cache->arg_name_hash);
+    g_ptr_array_unref (cache->args_cache);
 
-    for (i = 0; i < cache->n_args; i++) {
-        PyGIArgCache *tmp = cache->args_cache[i];
-        _pygi_arg_cache_free (tmp);
-    }
     if (cache->return_cache != NULL)
         _pygi_arg_cache_free (cache->return_cache);
 
-    g_slice_free1 (cache->n_args * sizeof (PyGIArgCache *), cache->args_cache);
     g_slice_free (PyGICallableCache, cache);
 }
 
@@ -314,7 +308,7 @@ _arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
 
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *child_cache = 
-            callable_cache->args_cache[seq_cache->len_arg_index];
+            _pygi_callable_cache_get_arg (callable_cache, seq_cache->len_arg_index);
 
         if (child_cache == NULL) {
             child_cache = _arg_cache_alloc ();
@@ -333,7 +327,7 @@ _arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
         child_cache->to_py_marshaller = NULL;
         child_cache->from_py_marshaller = NULL;
 
-        callable_cache->args_cache[seq_cache->len_arg_index] = child_cache;
+        _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index, child_cache);
     }
 
     arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
@@ -356,7 +350,8 @@ _arg_cache_to_py_array_setup (PyGIArgCache *arg_cache,
     seq_cache->array_type = g_type_info_get_array_type (type_info);
 
     if (seq_cache->len_arg_index >= 0) {
-        PyGIArgCache *child_cache = callable_cache->args_cache[seq_cache->len_arg_index];
+        PyGIArgCache *child_cache = _pygi_callable_cache_get_arg (callable_cache,
+                                                                  seq_cache->len_arg_index);
         if (seq_cache->len_arg_index < arg_index)
              callable_cache->n_to_py_child_args++;
 
@@ -376,7 +371,7 @@ _arg_cache_to_py_array_setup (PyGIArgCache *arg_cache,
         child_cache->to_py_marshaller = NULL;
         child_cache->from_py_marshaller = NULL;
 
-        callable_cache->args_cache[seq_cache->len_arg_index] = child_cache;
+        _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index, child_cache);
     }
 
     return TRUE;
@@ -509,14 +504,16 @@ _arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
         PyGIArgCache *user_data_arg_cache = _arg_cache_alloc ();
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
-        callable_cache->args_cache[callback_cache->user_data_index] = user_data_arg_cache;
+        _pygi_callable_cache_set_arg (callable_cache, callback_cache->user_data_index,
+                                      user_data_arg_cache);
     }
 
     if (callback_cache->destroy_notify_index >= 0) {
         PyGIArgCache *destroy_arg_cache = _arg_cache_alloc ();
         destroy_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
         destroy_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
-        callable_cache->args_cache[callback_cache->destroy_notify_index] = destroy_arg_cache;
+        _pygi_callable_cache_set_arg (callable_cache, callback_cache->destroy_notify_index,
+                                      destroy_arg_cache);
     }
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
     arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
@@ -780,19 +777,19 @@ _arg_cache_new (GITypeInfo *type_info,
                 * need to update indexes if this happens
                 */ 
                if (seq_cache->len_arg_index > -1 &&
-                   callable_cache->args_cache[seq_cache->len_arg_index]->meta_type == PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE) {
+                   _pygi_callable_cache_get_arg (callable_cache,
+                                                 seq_cache->len_arg_index)->meta_type == PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE) {
                    gssize i;
-                   PyGIArgCache *child_cache =
-                       callable_cache->args_cache[seq_cache->len_arg_index];
-
+                   PyGIArgCache *child_cache = _pygi_callable_cache_get_arg (callable_cache,
+                                                                             seq_cache->len_arg_index);
                    child_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
                    py_arg_index -= 1;
                    callable_cache->n_py_args -= 1;
 
                    for (i = seq_cache->len_arg_index + 1; 
-                          i < callable_cache->n_args; 
+                          i < _pygi_callable_cache_args_len (callable_cache);
                             i++) {
-                       PyGIArgCache *update_cache = callable_cache->args_cache[i];
+                       PyGIArgCache *update_cache = _pygi_callable_cache_get_arg (callable_cache, i);
                        if (update_cache == NULL)
                            break;
 
@@ -914,10 +911,10 @@ _arg_name_list_generate (PyGICallableCache *callable_cache)
         g_hash_table_remove_all (callable_cache->arg_name_hash);
     }
 
-    for (i=0; i < callable_cache->n_args; i++) {
+    for (i=0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
         PyGIArgCache *arg_cache = NULL;
 
-        arg_cache = callable_cache->args_cache[i];
+        arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
 
         if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
             arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
@@ -1016,7 +1013,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         if (instance_cache == NULL)
             return FALSE;
 
-        callable_cache->args_cache[arg_index] = instance_cache;
+        _pygi_callable_cache_set_arg (callable_cache, arg_index, instance_cache);
 
         arg_index++;
         callable_cache->n_from_py_args++;
@@ -1024,7 +1021,7 @@ _args_cache_generate (GICallableInfo *callable_info,
     }
 
 
-    for (i=0; arg_index < callable_cache->n_args; arg_index++, i++) {
+    for (i=0; arg_index < _pygi_callable_cache_args_len (callable_cache); arg_index++, i++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         GITypeInfo *type_info;
@@ -1039,7 +1036,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         if (g_arg_info_get_closure (arg_info) == i) {
 
             arg_cache = _arg_cache_alloc ();
-            callable_cache->args_cache[arg_index] = arg_cache;
+            _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
 
             arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
             arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
@@ -1066,8 +1063,8 @@ _args_cache_generate (GICallableInfo *callable_info,
          * and continue
          * fill in it's c_arg_index, add to the in count
          */
-        if (callable_cache->args_cache[arg_index] != NULL) {
-            arg_cache = callable_cache->args_cache[arg_index];
+        arg_cache = _pygi_callable_cache_get_arg (callable_cache, arg_index);
+        if (arg_cache != NULL) {
             if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
                 arg_cache->py_arg_index = callable_cache->n_py_args;
                 callable_cache->n_py_args++;
@@ -1122,7 +1119,7 @@ _args_cache_generate (GICallableInfo *callable_info,
                 g_slist_append (callable_cache->to_py_args, arg_cache);
         }
 
-        callable_cache->args_cache[arg_index] = arg_cache;
+        _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
         g_base_info_unref( (GIBaseInfo *)type_info);
         g_base_info_unref( (GIBaseInfo *)arg_info);
 
@@ -1141,6 +1138,7 @@ arg_err:
 PyGICallableCache *
 _pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
 {
+    gint n_args;
     PyGICallableCache *cache;
     GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)callable_info);
 
@@ -1185,15 +1183,17 @@ _pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
         cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
     }
 
-    cache->n_args = g_callable_info_get_n_args (callable_info);
+    n_args = g_callable_info_get_n_args (callable_info);
 
     /* if we are a method or vfunc make sure the instance parameter is counted */
     if (cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
             cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
-        cache->n_args++;
+        n_args++;
 
-    if (cache->n_args > 0)
-        cache->args_cache = g_slice_alloc0 (cache->n_args * sizeof (PyGIArgCache *));
+    if (n_args >= 0) {
+        cache->args_cache = g_ptr_array_new_full (n_args, (GDestroyNotify) _pygi_arg_cache_free);
+        g_ptr_array_set_size (cache->args_cache, n_args);
+    }
 
     if (!_args_cache_generate (callable_info, cache))
         goto err;
