@@ -86,9 +86,23 @@ def _generate_callable_info_function_signature(info):
         elif info.is_constructor():
             in_args_strs = ['cls']
 
-    for arg in in_args:
-        argstr = arg.get_name() + ':' + arg.get_pytype_hint()
-        if arg.is_optional():
+    # Build a lists of indices prior to adding the docs because
+    # because it is possible the index retrieved comes before in
+    # argument being used.
+    ignore_indices = set([arg.get_destroy() for arg in in_args])
+    user_data_indices = set([arg.get_closure() for arg in in_args])
+
+    for i, arg in enumerate(in_args):
+        if i in ignore_indices:
+            continue
+        argstr = arg.get_name()
+        hint = arg.get_pytype_hint()
+        if hint not in ('void',):
+            argstr += ':' + hint
+        if arg.may_be_null() or i in user_data_indices:
+            # allow-none or user_data from a closure
+            argstr += '=None'
+        elif arg.is_optional():
             argstr += '=<optional>'
         in_args_strs.append(argstr)
     in_args_str = ', '.join(in_args_strs)

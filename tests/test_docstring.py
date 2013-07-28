@@ -2,6 +2,7 @@ import unittest
 
 import gi.docstring
 from gi.repository import GIMarshallingTests
+from gi.repository import Gio
 
 
 class Test(unittest.TestCase):
@@ -47,3 +48,12 @@ class Test(unittest.TestCase):
     def test_overridden_doc_is_not_clobbered(self):
         self.assertEqual(GIMarshallingTests.OverridesObject.method.__doc__,
                          'Overridden doc string.')
+
+    def test_allow_none_with_user_data_defaults(self):
+        g_file_copy_doc = 'copy(self, destination:Gio.File, ' \
+                          'flags:Gio.FileCopyFlags, ' \
+                          'cancellable:Gio.Cancellable=None, ' \
+                          'progress_callback:Gio.FileProgressCallback=None, ' \
+                          'progress_callback_data=None)'
+
+        self.assertEqual(Gio.File.copy.__doc__, g_file_copy_doc)
