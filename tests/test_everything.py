@@ -717,6 +717,22 @@ class TestCallbacks(unittest.TestCase):
 
         self.assertEqual(TestCallbacks.called, 100)
 
+    def test_callback_userdata_none_default_arg(self):
+        TestCallbacks.called = 0
+        userdata_list = []
+
+        def callback(userdata):
+            userdata_list.append(userdata)
+            TestCallbacks.called += 1
+            return TestCallbacks.called
+
+        for i in range(100):
+            val = Everything.test_callback_user_data(callback)
+            self.assertEqual(val, i + 1)
+
+        self.assertEqual(TestCallbacks.called, 100)
+        self.assertSequenceEqual(userdata_list, [None] * 100)
+
     def test_async_ready_callback(self):
         TestCallbacks.called = False
         TestCallbacks.main_loop = GLib.MainLoop()

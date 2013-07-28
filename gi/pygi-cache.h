@@ -105,6 +105,7 @@ struct _PyGIArgCache
     gboolean is_caller_allocates;
     gboolean is_skipped;
     gboolean allow_none;
+    gboolean has_default;
 
     PyGIDirection direction;
     GITransfer transfer;
@@ -121,6 +122,9 @@ struct _PyGIArgCache
 
     gssize c_arg_index;
     gssize py_arg_index;
+
+    /* Set when has_default is true. */
+    GIArgument default_value;
 };
 
 typedef struct _PyGISequenceCache
@@ -188,6 +192,10 @@ struct _PyGICallableCache
 
     /* Number of Python arguments expected for invoking the gi function. */
     gssize n_py_args;
+
+    /* Minimum number of args required to call the callable from Python.
+     * This count does not include args with defaults. */
+    gssize n_py_required_args;
 };
 
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);

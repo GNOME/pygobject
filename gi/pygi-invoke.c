@@ -120,7 +120,11 @@ _check_for_unexpected_kwargs (const gchar *function_name,
             }
         }
 
-        if (g_hash_table_lookup (arg_name_hash, PyBytes_AsString(key)) == NULL) {
+        /* Use extended lookup because it returns whether or not the key actually
+         * exists in the hash table. g_hash_table_lookup returns NULL for keys not
+         * found which maps to index 0 for our hash lookup.
+         */
+        if (!g_hash_table_lookup_extended (arg_name_hash, PyBytes_AsString(key), NULL, NULL)) {
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got an unexpected keyword argument '%.400s'",
                           function_name,
@@ -209,17 +213,27 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
             PyTuple_SET_ITEM (combined_py_args, i, kw_arg_item);
 
         } else if (kw_arg_item == NULL && py_arg_item == NULL) {
-            PyErr_Format (PyExc_TypeError,
-                          "%.200s() takes exactly %d %sargument%s (%zd given)",
-                          function_name,
-                          n_expected_args,
-                          n_py_kwargs > 0 ? "non-keyword " : "",
-                          n_expected_args == 1 ? "" : "s",
-                          n_py_args);
+            /* If the argument supports a default, use a place holder in the
+             * argument tuple, this will be checked later during marshaling.
+             */
+            int arg_cache_index = -1;
+            if (arg_name != NULL)
+                arg_cache_index = GPOINTER_TO_INT (g_hash_table_lookup (cache->arg_name_hash, arg_name));
+            if (arg_cache_index >= 0 && _pygi_callable_cache_get_arg (cache, arg_cache_index)->has_default) {
+                Py_INCREF (_PyGIDefaultArgPlaceholder);
+                PyTuple_SET_ITEM (combined_py_args, i, _PyGIDefaultArgPlaceholder);
+            } else {
+                PyErr_Format (PyExc_TypeError,
+                              "%.200s() takes exactly %d %sargument%s (%zd given)",
+                              function_name,
+                              n_expected_args,
+                              n_py_kwargs > 0 ? "non-keyword " : "",
+                              n_expected_args == 1 ? "" : "s",
+                              n_py_args);
 
-            Py_DECREF (combined_py_args);
-            return NULL;
-
+                Py_DECREF (combined_py_args);
+                return NULL;
+            }
         } else if (kw_arg_item != NULL && py_arg_item != NULL) {
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got multiple values for keyword argument '%.200s'",
@@ -490,7 +504,9 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
         }
 
         c_arg = state->args[i];
-        if (arg_cache->from_py_marshaller != NULL) {
+        if (py_arg == _PyGIDefaultArgPlaceholder) {
+            *c_arg = arg_cache->default_value;
+        } else if (arg_cache->from_py_marshaller != NULL) {
             gboolean success;
             if (!arg_cache->allow_none && py_arg == Py_None) {
                 PyErr_Format (PyExc_TypeError,

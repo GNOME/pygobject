@@ -523,6 +523,7 @@ _arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
         PyGIArgCache *user_data_arg_cache = _arg_cache_alloc ();
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
+        user_data_arg_cache->has_default = TRUE; /* always allow user data with a NULL default. */
         _pygi_callable_cache_set_arg (callable_cache, callback_cache->user_data_index,
                                       user_data_arg_cache);
     }
@@ -690,6 +691,26 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
     }
 
     return arg_cache;
+}
+
+/* _arg_info_default_value
+ * info:
+ * arg: (out): GIArgument to fill in with default value.
+ *
+ * This is currently a place holder API which only supports "allow-none" pointer args.
+ * Once defaults are part of the GI API, we can replace this with: g_arg_info_default_value
+ * https://bugzilla.gnome.org/show_bug.cgi?id=558620
+ *
+ * Returns: TRUE if the given argument supports a default value and was filled in.
+ */
+static gboolean
+_arg_info_default_value (GIArgInfo *info, GIArgument *arg)
+{
+    if (g_arg_info_may_be_null (info)) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 PyGIArgCache *
@@ -895,6 +916,11 @@ _arg_cache_new (GITypeInfo *type_info,
         arg_cache->type_info = type_info;
 
         if (arg_info != NULL) {
+            if (!arg_cache->has_default) {
+                /* It is possible has_default was set somewhere else */
+                arg_cache->has_default = _arg_info_default_value (arg_info,
+                                                                  &arg_cache->default_value);
+            }
             arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
             arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
 
@@ -906,40 +932,6 @@ _arg_cache_new (GITypeInfo *type_info,
     }
 
     return arg_cache;
-}
-
-static void
-_arg_name_list_generate (PyGICallableCache *callable_cache)
-{
-    GSList * arg_name_list = NULL;
-    int i;
-
-    if (callable_cache->arg_name_hash == NULL) {
-        callable_cache->arg_name_hash = g_hash_table_new (g_str_hash, g_str_equal);
-    } else {
-        g_hash_table_remove_all (callable_cache->arg_name_hash);
-    }
-
-    for (i=0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
-        PyGIArgCache *arg_cache = NULL;
-
-        arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
-
-        if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
-            arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
-                (arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON ||
-                 arg_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL)) {
-
-            gpointer arg_name = (gpointer)arg_cache->arg_name;
-
-            arg_name_list = g_slist_prepend (arg_name_list, arg_name);
-            if (arg_name != NULL) {
-                g_hash_table_insert (callable_cache->arg_name_hash, arg_name, arg_name);
-            }
-        }
-    }
-
-    callable_cache->arg_name_list = g_slist_reverse (arg_name_list);
 }
 
 static PyGIDirection
@@ -1041,7 +1033,6 @@ _args_cache_generate (GICallableInfo *callable_info,
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
 
             direction = PYGI_DIRECTION_FROM_PYTHON;
-            arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
             arg_cache->direction = direction;
             arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
             arg_cache->c_arg_index = i;
@@ -1117,11 +1108,51 @@ _args_cache_generate (GICallableInfo *callable_info,
             g_base_info_unref (type_info);
         }
 
+        /* Ensure arguments always have a name when available */
+        arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
+
         g_base_info_unref ( (GIBaseInfo *)arg_info);
 
     }
 
-    _arg_name_list_generate (callable_cache);
+    if (callable_cache->arg_name_hash == NULL) {
+        callable_cache->arg_name_hash = g_hash_table_new (g_str_hash, g_str_equal);
+    } else {
+        g_hash_table_remove_all (callable_cache->arg_name_hash);
+    }
+    callable_cache->n_py_required_args = 0;
+
+    /* Reverse loop through all the arguments to setup arg_name_list/hash
+     * and find the number of required arguments */
+    for (i=((gssize)_pygi_callable_cache_args_len (callable_cache))-1; i >= 0; i--) {
+        PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache, i);
+
+        if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD &&
+                arg_cache->meta_type != PYGI_META_ARG_TYPE_CLOSURE &&
+                arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
+
+            /* Setup arg_name_list and arg_name_hash */
+            gpointer arg_name = (gpointer)arg_cache->arg_name;
+            callable_cache->arg_name_list = g_slist_prepend (callable_cache->arg_name_list,
+                                                             arg_name);
+            if (arg_name != NULL) {
+                g_hash_table_insert (callable_cache->arg_name_hash,
+                                     arg_name,
+                                     GINT_TO_POINTER(i));
+            }
+
+            /* The first tail argument without a default will force all the preceding
+             * argument defaults off. This limits support of default args to the
+             * tail of an args list.
+             */
+            if (callable_cache->n_py_required_args > 0) {
+                arg_cache->has_default = FALSE;
+                callable_cache->n_py_required_args += 1;
+            } else if (!arg_cache->has_default) {
+                callable_cache->n_py_required_args += 1;
+            }
+        }
+    }
 
     return TRUE;
 }

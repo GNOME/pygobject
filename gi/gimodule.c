@@ -29,6 +29,7 @@
 #include <pyglib-python-compat.h>
 
 PyObject *PyGIDeprecationWarning;
+PyObject *_PyGIDefaultArgPlaceholder;
 
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
@@ -655,6 +656,11 @@ PYGLIB_MODULE_START(_gi, "_gi")
     PyGIDeprecationWarning = PyErr_NewException("gi.PyGIDeprecationWarning",
                                                 PyExc_DeprecationWarning, NULL);
 #endif
+
+    /* Place holder object used to fill in "from Python" argument lists
+     * for values not supplied by the caller but support a GI default.
+     */
+    _PyGIDefaultArgPlaceholder = PyObject_New(PyObject, &PyType_Type);
 
     Py_INCREF(PyGIDeprecationWarning);
     PyModule_AddObject(module, "PyGIDeprecationWarning", PyGIDeprecationWarning);

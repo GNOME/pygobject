@@ -2642,6 +2642,36 @@ class TestKeywordArgs(unittest.TestCase):
         GIMarshallingTests.int_three_in_three_out(1, c=4, **d)
         self.assertEqual(d, d2)
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests, 'int_one_in_utf8_two_in_one_allows_none'),
+                         'Requires newer GIMarshallingTests')
+    def test_allow_none_as_default(self):
+        GIMarshallingTests.int_two_in_utf8_two_in_with_allow_none(1, 2, '3', '4')
+        GIMarshallingTests.int_two_in_utf8_two_in_with_allow_none(1, 2, '3')
+        GIMarshallingTests.int_two_in_utf8_two_in_with_allow_none(1, 2)
+        GIMarshallingTests.int_two_in_utf8_two_in_with_allow_none(1, 2, d='4')
+
+        GIMarshallingTests.array_in_utf8_two_in_out_of_order('1', [-1, 0, 1, 2])
+        GIMarshallingTests.array_in_utf8_two_in_out_of_order('1', [-1, 0, 1, 2], '2')
+        self.assertRaises(TypeError,
+                          GIMarshallingTests.array_in_utf8_two_in_out_of_order,
+                          [-1, 0, 1, 2], a='1')
+        self.assertRaises(TypeError,
+                          GIMarshallingTests.array_in_utf8_two_in_out_of_order,
+                          [-1, 0, 1, 2])
+
+        GIMarshallingTests.array_in_utf8_two_in([-1, 0, 1, 2], '1', '2')
+        GIMarshallingTests.array_in_utf8_two_in([-1, 0, 1, 2], '1')
+        GIMarshallingTests.array_in_utf8_two_in([-1, 0, 1, 2])
+        GIMarshallingTests.array_in_utf8_two_in([-1, 0, 1, 2], b='2')
+
+        GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none(1, '2', '3')
+        self.assertRaises(TypeError,
+                          GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none,
+                          1, '3')
+        self.assertRaises(TypeError,
+                          GIMarshallingTests.int_one_in_utf8_two_in_one_allows_none,
+                          1, c='3')
+
 
 class TestPropertiesObject(unittest.TestCase):
 

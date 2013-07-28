@@ -33,6 +33,7 @@
 #include "pygi-cache.h"
 
 extern PyObject *PyGIDeprecationWarning;
+extern PyObject *_PyGIDefaultArgPlaceholder;
 
 typedef struct {
     PyObject_HEAD
