@@ -286,7 +286,7 @@ check_valid_double (double x, double min, double max)
 
         /* we need this as PyErr_Format() does not support float types */
         snprintf (buf, sizeof (buf), "%g not in range %g to %g", x, min, max);
-        PyErr_SetString (PyExc_ValueError, buf);
+        PyErr_SetString (PyExc_OverflowError, buf);
         return FALSE;
     }
     return TRUE;
@@ -524,8 +524,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_INT8:
         {
             long long_value = PyLong_AsLong (number);
-            if (long_value < G_MININT8 || long_value > G_MAXINT8) {
-                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < G_MININT8 || long_value > G_MAXINT8) {
+                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
                               long_value, (long)G_MININT8, (long)G_MAXINT8);
             } else {
                 arg->v_int8 = long_value;
@@ -536,8 +538,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_UINT8:
         {
             long long_value = PyLong_AsLong (number);
-            if (long_value < 0 || long_value > G_MAXUINT8) {
-                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < 0 || long_value > G_MAXUINT8) {
+                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
                               long_value, (long)0, (long)G_MAXUINT8);
             } else {
                 arg->v_uint8 = long_value;
@@ -548,8 +552,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_INT16:
         {
             long long_value = PyLong_AsLong (number);
-            if (long_value < G_MININT16 || long_value > G_MAXINT16) {
-                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < G_MININT16 || long_value > G_MAXINT16) {
+                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
                               long_value, (long)G_MININT16, (long)G_MAXINT16);
             } else {
                 arg->v_int16 = long_value;
@@ -560,8 +566,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_UINT16:
         {
             long long_value = PyLong_AsLong (number);
-            if (long_value < 0 || long_value > G_MAXUINT16) {
-                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < 0 || long_value > G_MAXUINT16) {
+                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
                               long_value, (long)0, (long)G_MAXUINT16);
             } else {
                 arg->v_uint16 = long_value;
@@ -572,8 +580,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_INT32:
         {
             long long_value = PyLong_AsLong (number);
-            if (long_value < G_MININT32 || long_value > G_MAXINT32) {
-                PyErr_Format (PyExc_ValueError, "%ld not in range %ld to %ld",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < G_MININT32 || long_value > G_MAXINT32) {
+                PyErr_Format (PyExc_OverflowError, "%ld not in range %ld to %ld",
                               long_value, (long)G_MININT32, (long)G_MAXINT32);
             } else {
                 arg->v_int32 = long_value;
@@ -584,8 +594,10 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_UINT32:
         {
             PY_LONG_LONG long_value = PyLong_AsLongLong (number);
-            if (long_value < 0 || long_value > G_MAXUINT32) {
-                PyErr_Format (PyExc_ValueError, "%lld not in range %ld to %lu",
+            if (PyErr_Occurred()) {
+                break;
+            } else if (long_value < 0 || long_value > G_MAXUINT32) {
+                PyErr_Format (PyExc_OverflowError, "%lld not in range %ld to %lu",
                               long_value, (long)0, (unsigned long)G_MAXUINT32);
             } else {
                 arg->v_uint32 = long_value;
@@ -596,48 +608,14 @@ _pygi_marshal_from_py_long (PyObject   *object,   /* in */
         case GI_TYPE_TAG_INT64:
         {
             /* Rely on Python overflow error and convert to ValueError for 64 bit values */
-            gint64 value = PyLong_AsLongLong (number);
-            if (PyErr_Occurred()) {
-                if (PyErr_ExceptionMatches (PyExc_OverflowError)) {
-                    PyErr_Clear();
-#if PY_MAJOR_VERSION >= 3
-                    PyErr_Format (PyExc_ValueError, "%S not in range %lld to %lld",
-                                  number, PY_LLONG_MIN, PY_LLONG_MAX);
-#else
-                    /* Python 2.x does not support the %S format option and it is not
-                     * worth the trouble to support this manually.
-                     */
-                    PyErr_Format (PyExc_ValueError, "number not in range %lld to %lld",
-                                  PY_LLONG_MIN, PY_LLONG_MAX);
-#endif
-                }
-            } else {
-                arg->v_int64 = value;
-            }
+            arg->v_int64 = PyLong_AsLongLong (number);
             break;
         }
 
         case GI_TYPE_TAG_UINT64:
         {
             /* Rely on Python overflow error and convert to ValueError for 64 bit values */
-            guint64 value = PyLong_AsUnsignedLongLong (number);
-            if (PyErr_Occurred()) {
-                if (PyErr_ExceptionMatches (PyExc_OverflowError)) {
-                    PyErr_Clear();
-#if PY_MAJOR_VERSION >= 3
-                    PyErr_Format (PyExc_ValueError, "%S not in range %ld to %llu",
-                                  number, (long)0, PY_ULLONG_MAX);
-#else
-                    /* Python 2.x does not support the %S format option and it is not
-                     * worth the trouble to support this manually.
-                     */
-                    PyErr_Format (PyExc_ValueError, "number not in range %ld to %llu",
-                                  (long)0, PY_ULLONG_MAX);
-#endif
-                }
-            } else {
-                arg->v_uint64 = value;
-            }
+            arg->v_uint64 = PyLong_AsUnsignedLongLong (number);
             break;
         }
 

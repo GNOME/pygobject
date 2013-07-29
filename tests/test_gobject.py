@@ -629,7 +629,7 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GObject.TYPE_FLOAT, 23.4)
         self.assertEqual(value.g_type, GObject.TYPE_FLOAT)
         self.assertRaises(TypeError, value.set_value, 'string')
-        self.assertRaises(ValueError, value.set_value, 1e50)
+        self.assertRaises(OverflowError, value.set_value, 1e50)
 
     def test_float_inf_nan(self):
         nan = float('nan')

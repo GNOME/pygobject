@@ -117,8 +117,8 @@ class TestInt8(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.int8_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.int8_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.int8_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.int8_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.int8_in_max, "self.MAX")
 
@@ -145,8 +145,8 @@ class TestUInt8(unittest.TestCase):
         GIMarshallingTests.uint8_in(CHAR_255)
 
         number.value += 1
-        self.assertRaises(ValueError, GIMarshallingTests.uint8_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.uint8_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.uint8_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.uint8_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.uint8_in, "self.MAX")
 
@@ -176,8 +176,8 @@ class TestInt16(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.int16_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.int16_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.int16_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.int16_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.int16_in_max, "self.MAX")
 
@@ -204,8 +204,8 @@ class TestUInt16(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.uint16_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.uint16_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.uint16_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.uint16_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.uint16_in, "self.MAX")
 
@@ -235,8 +235,8 @@ class TestInt32(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.int32_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.int32_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.int32_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.int32_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.int32_in_max, "self.MAX")
 
@@ -263,8 +263,8 @@ class TestUInt32(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.uint32_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.uint32_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.uint32_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.uint32_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.uint32_in, "self.MAX")
 
@@ -294,8 +294,8 @@ class TestInt64(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.int64_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.int64_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.int64_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.int64_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.int64_in_max, "self.MAX")
 
@@ -322,8 +322,8 @@ class TestUInt64(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.uint64_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.uint64_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.uint64_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.uint64_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.uint64_in, "self.MAX")
 
@@ -353,8 +353,8 @@ class TestShort(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.short_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.short_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.short_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.short_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.short_in_max, "self.MAX")
 
@@ -381,8 +381,8 @@ class TestUShort(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.ushort_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.ushort_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.ushort_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.ushort_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.ushort_in, "self.MAX")
 
@@ -412,8 +412,8 @@ class TestInt(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.int_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.int_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.int_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.int_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.int_in_max, "self.MAX")
 
@@ -441,8 +441,8 @@ class TestUInt(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.uint_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.uint_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.uint_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.uint_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.uint_in, "self.MAX")
 
@@ -472,8 +472,8 @@ class TestLong(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.long_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.long_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.long_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.long_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.long_in_max, "self.MAX")
 
@@ -500,8 +500,8 @@ class TestULong(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.ulong_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.ulong_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.ulong_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.ulong_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.ulong_in, "self.MAX")
 
@@ -531,8 +531,8 @@ class TestSSize(unittest.TestCase):
         max.value += 1
         min.value -= 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.ssize_in_max, max)
-        self.assertRaises(ValueError, GIMarshallingTests.ssize_in_min, min)
+        self.assertRaises(OverflowError, GIMarshallingTests.ssize_in_max, max)
+        self.assertRaises(OverflowError, GIMarshallingTests.ssize_in_min, min)
 
         self.assertRaises(TypeError, GIMarshallingTests.ssize_in_max, "self.MAX")
 
@@ -559,8 +559,8 @@ class TestSize(unittest.TestCase):
 
         number.value += 1
 
-        self.assertRaises(ValueError, GIMarshallingTests.size_in, number)
-        self.assertRaises(ValueError, GIMarshallingTests.size_in, Number(-1))
+        self.assertRaises(OverflowError, GIMarshallingTests.size_in, number)
+        self.assertRaises(OverflowError, GIMarshallingTests.size_in, Number(-1))
 
         self.assertRaises(TypeError, GIMarshallingTests.size_in, "self.MAX")
 
