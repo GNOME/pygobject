@@ -1455,12 +1455,12 @@ _pygi_marshal_from_py_interface_struct_cache_adapter (PyGIInvokeState   *state,
                                                    arg,
                                                    arg_cache->arg_name,
                                                    iface_cache->interface_info,
-                                                   arg_cache->type_info,
                                                    iface_cache->g_type,
                                                    iface_cache->py_type,
                                                    arg_cache->transfer,
                                                    TRUE, /*copy_reference*/
-                                                   iface_cache->is_foreign);
+                                                   iface_cache->is_foreign,
+                                                   arg_cache->is_pointer);
 }
 
 gboolean
@@ -1514,83 +1514,6 @@ _pygi_marshal_from_py_interface_union (PyGIInvokeState   *state,
     PyErr_Format(PyExc_NotImplementedError,
                  "Marshalling for this type is not implemented yet");
     return FALSE;
-}
-
-gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg)
-{
-    GIInfoType info_type;
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-
-    info_type = g_base_info_get_type (iface_cache->interface_info);
-    switch (info_type) {
-        case GI_INFO_TYPE_UNION:
-        case GI_INFO_TYPE_STRUCT:
-        {
-            GType type = iface_cache->g_type;
-
-            if (!PyObject_IsInstance (py_arg, iface_cache->py_type)) {
-                /* wait, we might be a member of a union so manually check */
-                if (!_is_union_member (iface_cache->interface_info, py_arg)) {
-                    if (!PyErr_Occurred()) {
-                        PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-                        PyErr_Format (PyExc_TypeError,
-                                      "argument %s: Expected a %s, but got %s%s%s",
-                                      arg_cache->arg_name ? arg_cache->arg_name : "self",
-                                      iface_cache->type_name,
-                                      module ? PYGLIB_PyUnicode_AsString(module) : "",
-                                      module ? "." : "",
-                                      py_arg->ob_type->tp_name);
-                        if (module)
-                            Py_DECREF (module);
-                    }
-                    return FALSE;
-                }
-            }
-
-            if (g_type_is_a (type, G_TYPE_BOXED)) {
-                arg->v_pointer = pyg_boxed_get (py_arg, void);
-            } else if (g_type_is_a (type, G_TYPE_POINTER) ||
-                           g_type_is_a (type, G_TYPE_VARIANT) ||
-                               type == G_TYPE_NONE) {
-                arg->v_pointer = pyg_pointer_get (py_arg, void);
-            } else {
-                 PyErr_Format (PyExc_TypeError, "unable to convert an instance of '%s'", g_type_name (type));
-                 return FALSE;
-            }
-
-            break;
-        }
-        case GI_INFO_TYPE_OBJECT:
-        case GI_INFO_TYPE_INTERFACE:
-            arg->v_pointer = pygobject_get (py_arg);
-            if (arg->v_pointer != NULL) {
-                GType obj_type = G_OBJECT_TYPE (( GObject *)arg->v_pointer);
-                GType expected_type = iface_cache->g_type;
-
-                if (!g_type_is_a (obj_type, expected_type)) {
-                    PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-                    PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
-                                  arg_cache->arg_name ? arg_cache->arg_name : "self",
-                                  iface_cache->type_name,
-                                  module ? PYGLIB_PyUnicode_AsString(module) : "",
-                                  module ? "." : "",
-                                  py_arg->ob_type->tp_name);
-                    if (module)
-                        Py_DECREF (module);
-                    return FALSE;
-                }
-            }
-            break;
-        default:
-            /* Other types don't have methods. */
-            g_assert_not_reached ();
-   }
-
-   return TRUE;
 }
 
 /* _pygi_marshal_from_py_gobject:
@@ -1765,12 +1688,12 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
                                         GIArgument *arg,
                                         const gchar *arg_name,
                                         GIBaseInfo *interface_info,
-                                        GITypeInfo *type_info,
                                         GType g_type,
                                         PyObject *py_type,
                                         GITransfer transfer,
                                         gboolean copy_reference,
-                                        gboolean is_foreign)
+                                        gboolean is_foreign,
+                                        gboolean is_pointer)
 {
     gboolean is_union = FALSE;
 
@@ -1826,7 +1749,7 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
     } else if (g_type_is_a (g_type, G_TYPE_POINTER) ||
                g_type_is_a (g_type, G_TYPE_VARIANT) ||
                g_type  == G_TYPE_NONE) {
-        g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT) || !g_type_info_is_pointer (type_info) || transfer == GI_TRANSFER_NOTHING);
+        g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT) || !is_pointer || transfer == GI_TRANSFER_NOTHING);
 
         if (g_type_is_a (g_type, G_TYPE_VARIANT) &&
                 pyg_type_from_object (py_arg) != G_TYPE_VARIANT) {

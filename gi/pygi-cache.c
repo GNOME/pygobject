@@ -42,6 +42,7 @@ PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                                              PyGIDirection direction,
                                              gssize c_arg_index,
                                              gssize py_arg_index);
+
 /* cleanup */
 static void
 _pygi_arg_cache_free (PyGIArgCache *cache)
@@ -990,10 +991,6 @@ _args_cache_generate (GICallableInfo *callable_info,
             callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
         GIInterfaceInfo *interface_info;
         PyGIArgCache *instance_cache;
-        PyGIDirection instance_direction;
-
-        instance_direction = PYGI_DIRECTION_FROM_PYTHON;
-
 
         interface_info = g_base_info_get_container ( (GIBaseInfo *)callable_info);
 
@@ -1002,16 +999,18 @@ _args_cache_generate (GICallableInfo *callable_info,
                                           callable_cache,
                                           NULL,
                                           GI_TRANSFER_NOTHING,
-                                          instance_direction,
+                                          PYGI_DIRECTION_FROM_PYTHON,
                                           arg_index,
                                           0);
 
-        /* FIXME: marshal interfaces from_py */
-        instance_cache->from_py_marshaller = _pygi_marshal_from_py_interface_instance;
         g_base_info_unref ( (GIBaseInfo *)interface_info);
 
         if (instance_cache == NULL)
             return FALSE;
+
+        /* Because we are not supplied a GITypeInfo for instance arguments,
+         * assume some defaults. */
+        instance_cache->is_pointer = TRUE;
 
         _pygi_callable_cache_set_arg (callable_cache, arg_index, instance_cache);
 
@@ -1111,9 +1110,6 @@ _args_cache_generate (GICallableInfo *callable_info,
 
         if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
             callable_cache->n_to_py_args++;
-
-            if (arg_cache == NULL)
-                goto arg_err;
 
             callable_cache->to_py_args =
                 g_slist_append (callable_cache->to_py_args, arg_cache);

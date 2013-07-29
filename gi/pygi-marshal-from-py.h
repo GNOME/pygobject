@@ -83,11 +83,6 @@ gboolean _pygi_marshal_from_py_interface_struct_cache_adapter   (PyGIInvokeState
                                                                  PyGIArgCache      *arg_cache,
                                                                  PyObject          *py_arg,
                                                                  GIArgument        *arg);
-gboolean _pygi_marshal_from_py_interface_interface(PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg);
 gboolean _pygi_marshal_from_py_interface_boxed    (PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,
@@ -99,11 +94,6 @@ gboolean _pygi_marshal_from_py_interface_object   (PyGIInvokeState   *state,
                                                    PyObject          *py_arg,
                                                    GIArgument        *arg);
 gboolean _pygi_marshal_from_py_interface_union    (PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg);
-gboolean _pygi_marshal_from_py_interface_instance (PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,
                                                    PyObject          *py_arg,
@@ -139,12 +129,12 @@ gboolean _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
                                                  GIArgument *arg,
                                                  const gchar *arg_name,
                                                  GIBaseInfo *interface_info,
-                                                 GITypeInfo *type_info,
                                                  GType g_type,
                                                  PyObject *py_type,
                                                  GITransfer transfer,
-                                                gboolean is_allocated,
-                                                gboolean is_foreign);
+                                                 gboolean is_allocated,
+                                                 gboolean is_foreign,
+                                                 gboolean is_pointer);
 
 G_END_DECLS
 

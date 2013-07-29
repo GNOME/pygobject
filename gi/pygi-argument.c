@@ -1031,12 +1031,12 @@ array_success:
                                                             &arg,
                                                             NULL, /*arg_name*/
                                                             info, /*interface_info*/
-                                                            type_info,
                                                             g_type,
                                                             py_type,
                                                             transfer,
                                                             FALSE, /*copy_reference*/
-                                                            g_struct_info_is_foreign (info));
+                                                            g_struct_info_is_foreign (info),
+                                                            g_type_info_is_pointer (type_info));
 
                     Py_DECREF (py_type);
                     break;
