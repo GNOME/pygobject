@@ -1,3 +1,44 @@
+3.9.3   29-Jul-2013
+        - Ensure exceptions set in closure out argument marshaling are printed
+          (Simon Feltman) (#705064)
+        - Always raise OverflowError for marshaling integers from Python
+          (not ValueError or OverflowError) (Simon Feltman) (#705057)
+        - Cleanup invoke args and kwargs combiner code (Simon Feltman) (#640812)
+        - gtk-demo: Change demo to use Gtk.Application (Simon Feltman) (#698547)
+        - Add callable and descriptor protocols to PyGICallableInfo
+          (Simon Feltman) (#704037)
+        - Unify basic type argument marshaling for methods, closures, and
+          properties (Simon Feltman) (#693405)
+        - Override GValue.set/get_boxed with static C marshaler
+          (Simon Feltman) (#688081, #693405)
+        - Add deprecation warning for marshaling arbitrary objects as pointers
+          (Simon Feltman) (#688081)
+        - Replace usage of __import__ with importlib.import_module
+          (Simon Feltman) (#682320)
+        - Always unref the GiTypeInfo when generating an argument cache
+          (Mike Gorse) (#703973)
+        - Unref interface info when fetching enums or flags
+          (Mike Gorse) (#703960)
+        - Speed up MRO calculation (Daniel Drake) (#703829)
+        - Add GIL safety to pyobject_copy for copying boxed PyObjects
+          (Simon Feltman) (#688081)
+        - Add marshaling of GI_TYPE_TAG_VOID held in a GValue to int
+          (Simon Feltman) (#694233)
+        - GTK overrides: Make connect_signals handle tuple
+          (Cole Robinson) (#693994)
+        - Re-add support for passing GValue's by reference
+          (Simon Feltman) (#701058)
+        - Clear return value of closures to zero when an exception occurs
+          (Simon Feltman) (#702552)
+        - Don't use doctest syntax in docstrings for examples
+          (Martin Pitt) (#701009)
+        - Add support for properties of type GInterface
+          (Garrett Regier) (#703456)
+        - pygtkcompat: Fix for missing methods on Windows
+          (Martin Pitt) (#702787)
+        - gi/pygi-info.c: Avoid C99-style variable declaration
+          (Chun-wei Fan) (#702786)
+
 3.9.2   28-May-2013
 	- examples/option.py: Port to GI and Python 3 (Martin Pitt)
         - Fix vfunc info search for classes with multiple inheritance
