@@ -587,31 +587,31 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
 
     switch (info_type) {
         case GI_INFO_TYPE_UNION:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_union_setup (arg_cache, transfer);
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_interface_union_setup (arg_cache, transfer);
 
             break;
         case GI_INFO_TYPE_BOXED:
         case GI_INFO_TYPE_STRUCT:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_struct_setup (arg_cache,
                                                           iface_info,
                                                           transfer);
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_interface_struct_setup (arg_cache,
                                                         iface_info,
                                                         transfer);
             break;
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_object_setup (arg_cache, transfer);
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_interface_object_setup (arg_cache, transfer);
 
             break;
@@ -619,7 +619,7 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
             {
                 PyGICallbackCache *callback_cache;
 
-                if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+                if (direction & PYGI_DIRECTION_TO_PYTHON) {
                     _arg_cache_to_py_interface_callback_setup ();
                     return NULL;
                 }
@@ -633,24 +633,24 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                 if (arg_cache == NULL)
                     return NULL;
 
-                if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+                if (direction & PYGI_DIRECTION_FROM_PYTHON)
                     _arg_cache_from_py_interface_callback_setup (arg_cache, callable_cache);
 
                 break;
             }
         case GI_INFO_TYPE_ENUM:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_enum_setup (arg_cache, transfer);
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_interface_enum_setup (arg_cache, transfer);
 
             break;
         case GI_INFO_TYPE_FLAGS:
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_flags_setup (arg_cache, transfer);
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+            if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_interface_flags_setup (arg_cache, transfer);
 
             break;
@@ -700,10 +700,10 @@ _arg_cache_new (GITypeInfo *type_info,
            if (arg_cache == NULL)
                break;
 
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_void_setup (arg_cache);
 
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_void_setup (arg_cache);
 
            break;
@@ -724,10 +724,10 @@ _arg_cache_new (GITypeInfo *type_info,
            if (arg_cache == NULL)
                break;
 
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_basic_type_setup (arg_cache);
 
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_basic_type_setup (arg_cache);
 
            break;
@@ -737,10 +737,10 @@ _arg_cache_new (GITypeInfo *type_info,
            if (arg_cache == NULL)
                break;
 
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_utf8_setup (arg_cache, transfer);
 
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_utf8_setup (arg_cache, transfer);
 
            break;
@@ -756,7 +756,7 @@ _arg_cache_new (GITypeInfo *type_info,
                if (arg_cache == NULL)
                    break;
 
-               if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_FROM_PYTHON)
                    _arg_cache_from_py_array_setup (arg_cache,
                                                    callable_cache,
                                                    type_info,
@@ -764,7 +764,7 @@ _arg_cache_new (GITypeInfo *type_info,
                                                    direction,
                                                    c_arg_index);
 
-               if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_TO_PYTHON)
                    _arg_cache_to_py_array_setup (arg_cache,
                                                  callable_cache,
                                                  type_info,
@@ -812,10 +812,10 @@ _arg_cache_new (GITypeInfo *type_info,
                if (arg_cache == NULL)
                    break;
 
-               if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_FROM_PYTHON)
                    _arg_cache_from_py_glist_setup (arg_cache, transfer);
 
-               if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_TO_PYTHON)
                    _arg_cache_to_py_glist_setup (arg_cache, transfer);
 
 
@@ -833,10 +833,10 @@ _arg_cache_new (GITypeInfo *type_info,
                if (arg_cache == NULL)
                    break;
 
-               if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_FROM_PYTHON)
                    _arg_cache_from_py_gslist_setup (arg_cache, transfer);
 
-               if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+               if (direction & PYGI_DIRECTION_TO_PYTHON)
                    _arg_cache_to_py_gslist_setup (arg_cache, transfer);
 
                break;
@@ -850,10 +850,10 @@ _arg_cache_new (GITypeInfo *type_info,
            if (arg_cache == NULL)
                    break;
 
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_ghash_setup (arg_cache);
 
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+           if (direction & PYGI_DIRECTION_TO_PYTHON) {
                _arg_cache_to_py_ghash_setup (arg_cache);
            }
 
@@ -877,10 +877,10 @@ _arg_cache_new (GITypeInfo *type_info,
            if (arg_cache == NULL)
                break;
 
-           if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_gerror_setup (arg_cache);
 
-           if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL)
+           if (direction & PYGI_DIRECTION_TO_PYTHON)
                _arg_cache_to_py_gerror_setup (arg_cache);
 
            break;
@@ -1069,12 +1069,12 @@ _args_cache_generate (GICallableInfo *callable_info,
                 callable_cache->n_py_args++;
             }
 
-            if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+            if (direction & PYGI_DIRECTION_FROM_PYTHON) {
                 arg_cache->c_arg_index = callable_cache->n_from_py_args;
                 callable_cache->n_from_py_args++;
             }
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+            if (direction & PYGI_DIRECTION_TO_PYTHON) {
                 callable_cache->n_to_py_args++;
                 callable_cache->n_to_py_child_args++;
             }
@@ -1086,7 +1086,7 @@ _args_cache_generate (GICallableInfo *callable_info,
             continue;
         }
 
-        if (direction == PYGI_DIRECTION_FROM_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+        if (direction & PYGI_DIRECTION_FROM_PYTHON) {
             py_arg_index = callable_cache->n_py_args;
             callable_cache->n_from_py_args++;
             callable_cache->n_py_args++;
@@ -1108,7 +1108,7 @@ _args_cache_generate (GICallableInfo *callable_info,
         arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
         arg_cache->is_caller_allocates = is_caller_allocates;
 
-        if (direction == PYGI_DIRECTION_TO_PYTHON || direction == PYGI_DIRECTION_BIDIRECTIONAL) {
+        if (direction & PYGI_DIRECTION_TO_PYTHON) {
             callable_cache->n_to_py_args++;
 
             callable_cache->to_py_args =
