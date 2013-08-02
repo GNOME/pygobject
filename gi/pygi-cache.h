@@ -177,12 +177,23 @@ struct _PyGICallableCache
     GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
 
-    /* counts */
+    /* Number of in args passed to g_function_info_invoke.
+     * This is used for the length of PyGIInvokeState.in_args */
     gssize n_from_py_args;
+
+    /* Number of out args passed to g_function_info_invoke.
+     * This is used for the length of PyGIInvokeState.out_values */
     gssize n_to_py_args;
+
+    /* Number of out args for g_function_info_invoke that will be skipped
+     * when marshaling to Python due to them being implicitly available
+     * (list/array length).
+     */
     gssize n_to_py_child_args;
 
     gssize n_args;
+
+    /* Number of Python arguments expected for invoking the gi function. */
     gssize n_py_args;
 };
 
