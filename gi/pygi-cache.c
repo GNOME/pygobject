@@ -1044,86 +1044,82 @@ _args_cache_generate (GICallableInfo *callable_info,
 
             callable_cache->n_from_py_args++;
 
-            g_base_info_unref ( (GIBaseInfo *)arg_info);
+        } else {
 
-            continue;
-        }
+            direction = _pygi_get_direction (callable_cache,
+                                             g_arg_info_get_direction (arg_info));
+            transfer = g_arg_info_get_ownership_transfer (arg_info);
+            type_info = g_arg_info_get_type (arg_info);
+            type_tag = g_type_info_get_tag (type_info);
 
-        direction = _pygi_get_direction (callable_cache,
-                                         g_arg_info_get_direction (arg_info));
-        transfer = g_arg_info_get_ownership_transfer (arg_info);
-        type_info = g_arg_info_get_type (arg_info);
-        type_tag = g_type_info_get_tag (type_info);
+            if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
+                is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
 
-        if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
-            is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+            /* must be an child arg filled in by its owner
+             * and continue
+             * fill in it's c_arg_index, add to the in count
+             */
+            arg_cache = _pygi_callable_cache_get_arg (callable_cache, arg_index);
+            if (arg_cache != NULL) {
+                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
+                    arg_cache->py_arg_index = callable_cache->n_py_args;
+                    callable_cache->n_py_args++;
+                }
 
-        /* must be an child arg filled in by its owner
-         * and continue
-         * fill in it's c_arg_index, add to the in count
-         */
-        arg_cache = _pygi_callable_cache_get_arg (callable_cache, arg_index);
-        if (arg_cache != NULL) {
-            if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
-                arg_cache->py_arg_index = callable_cache->n_py_args;
-                callable_cache->n_py_args++;
+                if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+                    arg_cache->c_arg_index = callable_cache->n_from_py_args;
+                    callable_cache->n_from_py_args++;
+                }
+
+                if (direction & PYGI_DIRECTION_TO_PYTHON) {
+                    callable_cache->n_to_py_args++;
+                    callable_cache->n_to_py_child_args++;
+                }
+
+                arg_cache->type_tag = g_type_info_get_tag (type_info);
+
+            } else {
+
+                if (direction & PYGI_DIRECTION_FROM_PYTHON) {
+                    py_arg_index = callable_cache->n_py_args;
+                    callable_cache->n_from_py_args++;
+                    callable_cache->n_py_args++;
+                }
+
+                arg_cache =
+                    _arg_cache_new (type_info,
+                                    callable_cache,
+                                    arg_info,
+                                    transfer,
+                                    direction,
+                                    arg_index,
+                                    py_arg_index);
+
+                if (arg_cache == NULL) {
+                    g_base_info_unref( (GIBaseInfo *)type_info);
+                    g_base_info_unref( (GIBaseInfo *)arg_info);
+                    return FALSE;
+                }
+
+                arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
+                arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
+                arg_cache->is_caller_allocates = is_caller_allocates;
+
+                if (direction & PYGI_DIRECTION_TO_PYTHON) {
+                    callable_cache->n_to_py_args++;
+
+                    callable_cache->to_py_args =
+                        g_slist_append (callable_cache->to_py_args, arg_cache);
+                }
+
+                _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
             }
-
-            if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-                arg_cache->c_arg_index = callable_cache->n_from_py_args;
-                callable_cache->n_from_py_args++;
-            }
-
-            if (direction & PYGI_DIRECTION_TO_PYTHON) {
-                callable_cache->n_to_py_args++;
-                callable_cache->n_to_py_child_args++;
-            }
-
-            arg_cache->type_tag = g_type_info_get_tag (type_info);
 
             g_base_info_unref (type_info);
-            g_base_info_unref ( (GIBaseInfo *)arg_info);
-            continue;
         }
 
-        if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-            py_arg_index = callable_cache->n_py_args;
-            callable_cache->n_from_py_args++;
-            callable_cache->n_py_args++;
-        }
+        g_base_info_unref ( (GIBaseInfo *)arg_info);
 
-        arg_cache =
-            _arg_cache_new (type_info,
-                            callable_cache,
-                            arg_info,
-                            transfer,
-                            direction,
-                            arg_index,
-                            py_arg_index);
-
-        if (arg_cache == NULL)
-            goto arg_err;
-
-        arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
-        arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
-        arg_cache->is_caller_allocates = is_caller_allocates;
-
-        if (direction & PYGI_DIRECTION_TO_PYTHON) {
-            callable_cache->n_to_py_args++;
-
-            callable_cache->to_py_args =
-                g_slist_append (callable_cache->to_py_args, arg_cache);
-        }
-
-        _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
-        g_base_info_unref( (GIBaseInfo *)type_info);
-        g_base_info_unref( (GIBaseInfo *)arg_info);
-
-        continue;
-arg_err:
-        g_base_info_unref( (GIBaseInfo *)type_info);
-        g_base_info_unref( (GIBaseInfo *)arg_info);
-        return FALSE;
     }
 
     _arg_name_list_generate (callable_cache);
