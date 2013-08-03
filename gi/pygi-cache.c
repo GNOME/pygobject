@@ -1023,12 +1023,7 @@ _args_cache_generate (GICallableInfo *callable_info,
     for (i=0; arg_index < _pygi_callable_cache_args_len (callable_cache); arg_index++, i++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
-        GITypeInfo *type_info;
         PyGIDirection direction;
-        GITransfer transfer;
-        GITypeTag type_tag;
-        gboolean is_caller_allocates = FALSE;
-        gssize py_arg_index = -1;
 
         arg_info = g_callable_info_get_arg (callable_info, i);
 
@@ -1037,23 +1032,20 @@ _args_cache_generate (GICallableInfo *callable_info,
             arg_cache = _arg_cache_alloc ();
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
 
+            direction = PYGI_DIRECTION_FROM_PYTHON;
             arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
-            arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
+            arg_cache->direction = direction;
             arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
             arg_cache->c_arg_index = i;
 
             callable_cache->n_from_py_args++;
 
         } else {
+            GITypeInfo *type_info;
 
             direction = _pygi_get_direction (callable_cache,
                                              g_arg_info_get_direction (arg_info));
-            transfer = g_arg_info_get_ownership_transfer (arg_info);
             type_info = g_arg_info_get_type (arg_info);
-            type_tag = g_type_info_get_tag (type_info);
-
-            if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
-                is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
 
             /* must be an child arg filled in by its owner
              * and continue
@@ -1079,6 +1071,17 @@ _args_cache_generate (GICallableInfo *callable_info,
                 arg_cache->type_tag = g_type_info_get_tag (type_info);
 
             } else {
+                GITypeTag type_tag;
+                GITransfer transfer;
+                gssize py_arg_index = -1;
+                gboolean is_caller_allocates = FALSE;
+
+                type_tag = g_type_info_get_tag (type_info);
+                transfer = g_arg_info_get_ownership_transfer (arg_info);
+
+                if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
+                    is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+
 
                 if (direction & PYGI_DIRECTION_FROM_PYTHON) {
                     py_arg_index = callable_cache->n_py_args;
