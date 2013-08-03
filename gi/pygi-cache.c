@@ -695,7 +695,7 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
 PyGIArgCache *
 _arg_cache_new (GITypeInfo *type_info,
                 PyGICallableCache *callable_cache,
-                GIArgInfo *arg_info,
+                GIArgInfo *arg_info,     /* may be null */
                 GITransfer transfer,
                 PyGIDirection direction,
                 gssize c_arg_index,
@@ -893,6 +893,16 @@ _arg_cache_new (GITypeInfo *type_info,
         arg_cache->is_pointer = g_type_info_is_pointer (type_info);
         g_base_info_ref ( (GIBaseInfo *) type_info);
         arg_cache->type_info = type_info;
+
+        if (arg_info != NULL) {
+            arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
+            arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
+
+            if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
+                arg_cache->is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
+            else
+                arg_cache->is_caller_allocates = FALSE;
+        }
     }
 
     return arg_cache;
@@ -1068,17 +1078,9 @@ _args_cache_generate (GICallableInfo *callable_info,
                 arg_cache->type_tag = g_type_info_get_tag (type_info);
 
             } else {
-                GITypeTag type_tag;
                 GITransfer transfer;
                 gssize py_arg_index = -1;
-                gboolean is_caller_allocates = FALSE;
-
-                type_tag = g_type_info_get_tag (type_info);
                 transfer = g_arg_info_get_ownership_transfer (arg_info);
-
-                if (type_tag == GI_TYPE_TAG_INTERFACE || type_tag == GI_TYPE_TAG_ARRAY)
-                    is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
-
 
                 if (direction & PYGI_DIRECTION_FROM_PYTHON) {
                     py_arg_index = callable_cache->n_py_args;
@@ -1101,9 +1103,6 @@ _args_cache_generate (GICallableInfo *callable_info,
                     return FALSE;
                 }
 
-                arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
-                arg_cache->allow_none = g_arg_info_may_be_null(arg_info);
-                arg_cache->is_caller_allocates = is_caller_allocates;
 
                 if (direction & PYGI_DIRECTION_TO_PYTHON) {
                     callable_cache->n_to_py_args++;
