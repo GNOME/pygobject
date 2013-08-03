@@ -56,10 +56,6 @@ typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
  *  - PYGI_META_ARG_TYPE_CHILD - Children without python argument are
  *    ignored by the marshallers and handled directly by their parents
  *    marshaller.
- *  - PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE -Sometimes children arguments
- *    come before the parent.  In these cases they need to be flagged
- *    so that the argument list counts must be updated for the cache to
- *    be valid
  *  - Children with pyargs (PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) are processed
  *    the same as other child args but also have an index into the 
  *    python parameters passed to the invoker
@@ -67,7 +63,6 @@ typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
 typedef enum {
     PYGI_META_ARG_TYPE_PARENT,
     PYGI_META_ARG_TYPE_CHILD,
-    PYGI_META_ARG_TYPE_CHILD_NEEDS_UPDATE,
     PYGI_META_ARG_TYPE_CHILD_WITH_PYARG,
     PYGI_META_ARG_TYPE_CLOSURE,
 } PyGIMetaArgType;
