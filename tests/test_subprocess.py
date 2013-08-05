@@ -107,6 +107,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(stdin, None)
         self.assertEqual(stdout, None)
         self.assertEqual(stderr, None)
+        self.assertNotEqual(pid, 0)
         pid.close()
         id = GLib.child_watch_add(GLib.PRIORITY_HIGH, pid, cb, 12345)
         self.assertEqual(self.loop.get_context().find_source_by_id(id).priority,

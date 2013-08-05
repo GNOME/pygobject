@@ -262,5 +262,6 @@ pyglib_spawn_register_types(PyObject *d)
     PyGPid_Type.tp_methods = pyg_pid_methods;
     PyGPid_Type.tp_init = pyg_pid_tp_init;
     PyGPid_Type.tp_free = (freefunc)pyg_pid_free;
+    PyGPid_Type.tp_new = PYGLIB_PyLong_Type.tp_new;
     PYGLIB_REGISTER_TYPE(d, PyGPid_Type, "Pid");
 }
