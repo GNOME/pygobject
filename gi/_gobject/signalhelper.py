@@ -110,7 +110,7 @@ class Signal(str):
         return str.__new__(cls, name)
 
     def __init__(self, name='', func=None, flags=_gobject.SIGNAL_RUN_FIRST,
-                 return_type=None, arg_types=None, doc=''):
+                 return_type=None, arg_types=None, doc='', accumulator=None, accu_data=None):
         """
         @param  name: name of signal or closure method when used as direct decorator.
         @type   name: string or callable
@@ -124,6 +124,11 @@ class Signal(str):
         @type   arg_types: None
         @param  doc: documentation of signal object
         @type   doc: string
+        @param  accumulator: accumulator method with the signature:
+                func(ihint, return_accu, handler_return, accu_data) -> boolean
+        @type   accumulator: function
+        @param  accu_data: user data passed to the accumulator
+        @type   accu_data: object
         """
         if func and not name:
             name = func.__name__
@@ -145,6 +150,8 @@ class Signal(str):
         self.return_type = return_type
         self.arg_types = arg_types
         self.__doc__ = doc
+        self.accumulator = accumulator
+        self.accu_data = accu_data
 
     def __get__(self, instance, owner=None):
         """Returns a BoundSignal when accessed on an object instance."""
@@ -170,7 +177,7 @@ class Signal(str):
             # Return a new value of this type since it is based on an immutable string.
             return type(self)(name=name, func=obj, flags=self.flags,
                               return_type=self.return_type, arg_types=self.arg_types,
-                              doc=self.__doc__)
+                              doc=self.__doc__, accumulator=self.accumulator, accu_data=self.accu_data)
 
     def copy(self, newName=None):
         """Returns a renamed copy of the Signal."""
@@ -178,11 +185,11 @@ class Signal(str):
             newName = self.name
         return type(self)(name=newName, func=self.func, flags=self.flags,
                           return_type=self.return_type, arg_types=self.arg_types,
-                          doc=self.__doc__)
+                          doc=self.__doc__, accumulator=self.accumulator, accu_data=self.accu_data)
 
     def get_signal_args(self):
-        """Returns a tuple of: (flags, return_type, arg_types)"""
-        return (self.flags, self.return_type, self.arg_types)
+        """Returns a tuple of: (flags, return_type, arg_types, accumulator, accu_data)"""
+        return (self.flags, self.return_type, self.arg_types, self.accumulator, self.accu_data)
 
 
 class SignalOverride(Signal):

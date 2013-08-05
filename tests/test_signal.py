@@ -116,48 +116,52 @@ def my_accumulator(ihint, return_accu, handler_return, user_data):
 
 
 class Foo(GObject.GObject):
-    __gsignals__ = {
-        'my-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_INT,
-                          (), my_accumulator, "accum data"),
-        'my-other-acc-signal': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
-                                (), GObject.signal_accumulator_true_handled),
-        'my-acc-first-wins': (GObject.SignalFlags.RUN_LAST, GObject.TYPE_BOOLEAN,
-                              (), GObject.signal_accumulator_first_wins)
-        }
+    my_acc_signal = GObject.Signal(return_type=GObject.TYPE_INT,
+                                   flags=GObject.SignalFlags.RUN_LAST,
+                                   accumulator=my_accumulator,
+                                   accu_data="accum data")
+
+    my_other_acc_signal = GObject.Signal(return_type=GObject.TYPE_BOOLEAN,
+                                         flags=GObject.SignalFlags.RUN_LAST,
+                                         accumulator=GObject.signal_accumulator_true_handled)
+
+    my_acc_first_wins = GObject.Signal(return_type=GObject.TYPE_BOOLEAN,
+                                       flags=GObject.SignalFlags.RUN_LAST,
+                                       accumulator=GObject.signal_accumulator_first_wins)
 
 
 class TestAccumulator(unittest.TestCase):
 
     def test_accumulator(self):
         inst = Foo()
-        inst.connect("my-acc-signal", lambda obj: 1)
-        inst.connect("my-acc-signal", lambda obj: 2)
+        inst.my_acc_signal.connect(lambda obj: 1)
+        inst.my_acc_signal.connect(lambda obj: 2)
         ## the value returned in the following handler will not be
         ## considered, because at this point the accumulator already
         ## reached its limit.
-        inst.connect("my-acc-signal", lambda obj: 3)
-        retval = inst.emit("my-acc-signal")
+        inst.my_acc_signal.connect(lambda obj: 3)
+        retval = inst.my_acc_signal.emit()
         self.assertEqual(retval, 3)
 
     def test_accumulator_true_handled(self):
         inst = Foo()
-        inst.connect("my-other-acc-signal", self._true_handler1)
-        inst.connect("my-other-acc-signal", self._true_handler2)
+        inst.my_other_acc_signal.connect(self._true_handler1)
+        inst.my_other_acc_signal.connect(self._true_handler2)
         ## the following handler will not be called because handler2
         ## returns True, so it should stop the emission.
-        inst.connect("my-other-acc-signal", self._true_handler3)
+        inst.my_other_acc_signal.connect(self._true_handler3)
         self.__true_val = None
-        inst.emit("my-other-acc-signal")
+        inst.my_other_acc_signal.emit()
         self.assertEqual(self.__true_val, 2)
 
     def test_accumulator_first_wins(self):
         # First signal hit will always win
         inst = Foo()
-        inst.connect("my-acc-first-wins", self._true_handler3)
-        inst.connect("my-acc-first-wins", self._true_handler1)
-        inst.connect("my-acc-first-wins", self._true_handler2)
+        inst.my_acc_first_wins.connect(self._true_handler3)
+        inst.my_acc_first_wins.connect(self._true_handler1)
+        inst.my_acc_first_wins.connect(self._true_handler2)
         self.__true_val = None
-        inst.emit("my-acc-first-wins")
+        inst.my_acc_first_wins.emit()
         self.assertEqual(self.__true_val, 3)
 
     def _true_handler1(self, obj):
@@ -717,11 +721,11 @@ class TestSignalDecorator(unittest.TestCase):
 
     def test_get_signal_args(self):
         self.assertEqual(self.Decorated.pushed.get_signal_args(),
-                         (GObject.SignalFlags.RUN_FIRST, None, tuple()))
+                         (GObject.SignalFlags.RUN_FIRST, None, tuple(), None, None))
         self.assertEqual(self.Decorated.pulled.get_signal_args(),
-                         (GObject.SignalFlags.RUN_LAST, None, tuple()))
+                         (GObject.SignalFlags.RUN_LAST, None, tuple(), None, None))
         self.assertEqual(self.Decorated.stomped.get_signal_args(),
-                         (GObject.SignalFlags.RUN_FIRST, None, (int,)))
+                         (GObject.SignalFlags.RUN_FIRST, None, (int,), None, None))
 
     def test_closures_called(self):
         decorated = self.Decorated()
@@ -917,7 +921,7 @@ class TestPython3Signals(unittest.TestCase):
                          (str, (int, float)))
 
         self.assertEqual(self.AnnotatedClass.sig2_with_return.get_signal_args(),
-                         (GObject.SignalFlags.RUN_LAST, str, (int, float)))
+                         (GObject.SignalFlags.RUN_LAST, str, (int, float), None, None))
         self.assertEqual(self.AnnotatedClass.sig2_with_return.arg_types,
                          (int, float))
         self.assertEqual(self.AnnotatedClass.sig2_with_return.return_type,
