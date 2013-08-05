@@ -900,28 +900,33 @@ class AnnotatedSignalClass(GObject.GObject):
 """
 
 
+@unittest.skipUnless(sys.version_info >= (3, 0),
+                     'Argument annotations require Python 3')
 class TestPython3Signals(unittest.TestCase):
     AnnotatedClass = None
 
     def setUp(self):
-        if sys.version_info >= (3, 0):
-            exec(annotated_class_code, globals(), globals())
-            self.assertTrue('AnnotatedSignalClass' in globals())
-            self.AnnotatedClass = globals()['AnnotatedSignalClass']
+        exec(annotated_class_code, globals(), globals())
+        self.assertTrue('AnnotatedSignalClass' in globals())
+        self.AnnotatedClass = globals()['AnnotatedSignalClass']
 
     def test_annotations(self):
-        if self.AnnotatedClass:
-            self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig1.func),
-                             (None, (int, float)))
-            self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig2_with_return.func),
-                             (str, (int, float)))
+        self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig1.func),
+                         (None, (int, float)))
+        self.assertEqual(signalhelper.get_signal_annotations(self.AnnotatedClass.sig2_with_return.func),
+                         (str, (int, float)))
 
-            self.assertEqual(self.AnnotatedClass.sig2_with_return.get_signal_args(),
-                             (GObject.SignalFlags.RUN_LAST, str, (int, float)))
-            self.assertEqual(self.AnnotatedClass.sig2_with_return.arg_types,
-                             (int, float))
-            self.assertEqual(self.AnnotatedClass.sig2_with_return.return_type,
-                             str)
+        self.assertEqual(self.AnnotatedClass.sig2_with_return.get_signal_args(),
+                         (GObject.SignalFlags.RUN_LAST, str, (int, float)))
+        self.assertEqual(self.AnnotatedClass.sig2_with_return.arg_types,
+                         (int, float))
+        self.assertEqual(self.AnnotatedClass.sig2_with_return.return_type,
+                         str)
+
+    def test_emit_return(self):
+        obj = self.AnnotatedClass()
+        self.assertEqual(obj.sig2_with_return.emit(1, 2.0),
+                         'test')
 
 
 class TestSignalModuleLevelFunctions(unittest.TestCase):

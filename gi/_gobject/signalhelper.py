@@ -102,7 +102,7 @@ class Signal(str):
         def emit(self, *args, **kargs):
             """Same as GObject.GObject.emit except there is no need to specify
             the signal name."""
-            self.gobj.emit(str(self), *args, **kargs)
+            return self.gobj.emit(str(self), *args, **kargs)
 
     def __new__(cls, name='', *args, **kargs):
         if callable(name):
