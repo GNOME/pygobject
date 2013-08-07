@@ -165,12 +165,12 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 
     /* Fast path, we already have the exact number of args and not kwargs. */
     n_expected_args = g_slist_length (cache->arg_name_list);
-    if (n_py_kwargs == 0 && n_py_args == n_expected_args) {
+    if (n_py_kwargs == 0 && n_py_args == n_expected_args && cache->user_data_varargs_index < 0) {
         Py_INCREF (py_args);
         return py_args;
     }
 
-    if (n_expected_args < n_py_args) {
+    if (cache->user_data_varargs_index < 0 && n_expected_args < n_py_args) {
         PyErr_Format (PyExc_TypeError,
                       "%.200s() takes exactly %d %sargument%s (%zd given)",
                       function_name,
@@ -178,6 +178,13 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
                       n_py_kwargs > 0 ? "non-keyword " : "",
                       n_expected_args == 1 ? "" : "s",
                       n_py_args);
+        return NULL;
+    }
+
+    if (cache->user_data_varargs_index >= 0 && n_py_kwargs > 0 && n_expected_args < n_py_args) {
+        PyErr_Format (PyExc_TypeError,
+                      "%.200s() cannot use variable user data arguments with keyword arguments",
+                      function_name);
         return NULL;
     }
 
@@ -191,35 +198,59 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
      * when they are combined into a single tuple */
     combined_py_args = PyTuple_New (n_expected_args);
 
-    for (i = 0; i < n_py_args; i++) {
-        PyObject *item = PyTuple_GET_ITEM (py_args, i);
-        Py_INCREF (item);
-        PyTuple_SET_ITEM (combined_py_args, i, item);
-    }
-
     for (i = 0, l = cache->arg_name_list; i < n_expected_args && l; i++, l = l->next) {
-        PyObject *py_arg_item, *kw_arg_item = NULL;
+        PyObject *py_arg_item = NULL;
+        PyObject *kw_arg_item = NULL;
         const gchar *arg_name = l->data;
+        int arg_cache_index = -1;
+        gboolean is_varargs_user_data = FALSE;
+
+        if (arg_name != NULL)
+            arg_cache_index = GPOINTER_TO_INT (g_hash_table_lookup (cache->arg_name_hash, arg_name));
+
+        is_varargs_user_data = cache->user_data_varargs_index >= 0 &&
+                                arg_cache_index == cache->user_data_varargs_index;
 
         if (n_py_kwargs > 0 && arg_name != NULL) {
             /* NULL means this argument has no keyword name */
             /* ex. the first argument to a method or constructor */
             kw_arg_item = PyDict_GetItemString (py_kwargs, arg_name);
         }
-        py_arg_item = PyTuple_GET_ITEM (combined_py_args, i);
 
-        if (kw_arg_item != NULL && py_arg_item == NULL) {
-            Py_INCREF (kw_arg_item);
-            PyTuple_SET_ITEM (combined_py_args, i, kw_arg_item);
+        /* use a bounded retrieval of the original input */
+        if (i < n_py_args)
+            py_arg_item = PyTuple_GET_ITEM (py_args, i);
+
+        if (kw_arg_item == NULL && py_arg_item != NULL) {
+            if (is_varargs_user_data) {
+                /* For tail end user_data varargs, pull a slice off and we are done. */
+                PyObject *user_data = PyTuple_GetSlice (py_args, i, PY_SSIZE_T_MAX);
+                PyTuple_SET_ITEM (combined_py_args, i, user_data);
+                return combined_py_args;
+            } else {
+                Py_INCREF (py_arg_item);
+                PyTuple_SET_ITEM (combined_py_args, i, py_arg_item);
+            }
+        } else if (kw_arg_item != NULL && py_arg_item == NULL) {
+            if (is_varargs_user_data) {
+                /* Special case where user_data is passed as a keyword argument (user_data=foo)
+                 * Wrap the value in a tuple to represent variable args for marshaling later on.
+                 */
+                PyObject *user_data = Py_BuildValue("(O)", kw_arg_item, NULL);
+                PyTuple_SET_ITEM (combined_py_args, i, user_data);
+            } else {
+                Py_INCREF (kw_arg_item);
+                PyTuple_SET_ITEM (combined_py_args, i, kw_arg_item);
+            }
 
         } else if (kw_arg_item == NULL && py_arg_item == NULL) {
-            /* If the argument supports a default, use a place holder in the
-             * argument tuple, this will be checked later during marshaling.
-             */
-            int arg_cache_index = -1;
-            if (arg_name != NULL)
-                arg_cache_index = GPOINTER_TO_INT (g_hash_table_lookup (cache->arg_name_hash, arg_name));
-            if (arg_cache_index >= 0 && _pygi_callable_cache_get_arg (cache, arg_cache_index)->has_default) {
+            if (is_varargs_user_data) {
+                /* For varargs user_data, pass an empty tuple when nothing is given. */
+                PyTuple_SET_ITEM (combined_py_args, i, PyTuple_New (0));
+            } else if (arg_cache_index >= 0 && _pygi_callable_cache_get_arg (cache, arg_cache_index)->has_default) {
+                /* If the argument supports a default, use a place holder in the
+                 * argument tuple, this will be checked later during marshaling.
+                 */
                 Py_INCREF (_PyGIDefaultArgPlaceholder);
                 PyTuple_SET_ITEM (combined_py_args, i, _PyGIDefaultArgPlaceholder);
             } else {

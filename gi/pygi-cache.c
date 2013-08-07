@@ -1121,6 +1121,9 @@ _args_cache_generate (GICallableInfo *callable_info,
         g_hash_table_remove_all (callable_cache->arg_name_hash);
     }
     callable_cache->n_py_required_args = 0;
+    callable_cache->user_data_varargs_index = -1;
+
+    gssize last_explicit_arg_index = -1;
 
     /* Reverse loop through all the arguments to setup arg_name_list/hash
      * and find the number of required arguments */
@@ -1150,6 +1153,17 @@ _args_cache_generate (GICallableInfo *callable_info,
                 callable_cache->n_py_required_args += 1;
             } else if (!arg_cache->has_default) {
                 callable_cache->n_py_required_args += 1;
+            }
+
+            if (last_explicit_arg_index == -1) {
+                last_explicit_arg_index = i;
+
+                /* If the last "from python" argument in the args list is a child
+                 * with pyarg (currently only callback user_data). Set it to eat
+                 * variable args in the callable cache.
+                 */
+                if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG)
+                    callable_cache->user_data_varargs_index = i;
             }
         }
     }

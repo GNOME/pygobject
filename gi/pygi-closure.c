@@ -368,23 +368,34 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
             if (direction == GI_DIRECTION_IN && arg_tag == GI_TYPE_TAG_VOID &&
                     g_type_info_is_pointer (&arg_type)) {
 
-                if (user_data == _PyGIDefaultArgPlaceholder) {
-                    /* When user data is a place holder, skip handing anything to the callback.
-                     * This happens when the callback connect function accepts user data
-                     * but nothing was passed in.
-                     */
-                    continue;
-                } else if (user_data == NULL) {
-                    /* user data can be NULL for connect functions which don't accept
-                     * user data but we still need to pass None to the callbacks for
-                     * compatibility of setups prior to _PyGIDefaultArgPlaceholder.
-                     * For example: Regress.test_async_ready_callback
+                if (user_data == NULL) {
+                    /* user_data can be NULL for connect functions which don't accept
+                     * user_data or as the default for user_data in the middle of function
+                     * arguments.
                      */
                     Py_INCREF (Py_None);
                     value = Py_None;
                 } else {
-                    value = user_data;
-                    Py_INCREF (value);
+                    /* Extend the callbacks args with user_data as variable args. */
+                    int j, user_data_len;
+                    PyObject *py_user_data = user_data;
+
+                    if (!PyTuple_Check (py_user_data)) {
+                        PyErr_SetString (PyExc_TypeError, "expected tuple for callback user_data");
+                        goto error;
+                    }
+
+                    user_data_len = PyTuple_Size (py_user_data);
+                    _PyTuple_Resize (py_args, n_args + user_data_len - 1);
+                    for (j = 0; j < user_data_len; j++, n_in_args++) {
+                        value = PyTuple_GetItem (py_user_data, j);
+                        Py_INCREF (value);
+                        PyTuple_SET_ITEM (*py_args, n_in_args, value);
+                    }
+                    /* We can assume user_data args are never going to be inout,
+                     * so just continue here.
+                     */
+                    continue;
                 }
             } else if (direction == GI_DIRECTION_IN &&
                        arg_tag == GI_TYPE_TAG_INTERFACE) {

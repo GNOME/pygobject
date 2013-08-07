@@ -1262,6 +1262,11 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
             py_user_data = PyTuple_GetItem (state->py_in_args, user_data_cache->py_arg_index);
             if (!py_user_data)
                 return FALSE;
+            /* NULL out user_data if it was not supplied and the default arg placeholder
+             * was used instead.
+             */
+            if (py_user_data == _PyGIDefaultArgPlaceholder)
+                py_user_data = NULL;
         }
     }
 

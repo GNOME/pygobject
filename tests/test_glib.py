@@ -165,6 +165,27 @@ https://my.org/q?x=1&y=2
         self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', 'moo'),
                                      (r, GLib.IOCondition.IN, b'b', 'moo')])
 
+    def test_io_add_watch_with_multiple_data(self):
+        (r, w) = os.pipe()
+        call_data = []
+
+        def cb(fd, condition, *user_data):
+            call_data.append((fd, condition, os.read(fd, 1), user_data))
+            return True
+
+        # io_add_watch() takes an IOChannel, calling with an fd is deprecated
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            GLib.io_add_watch(r, GLib.IOCondition.IN, cb, 'moo', 'foo')
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+
+        ml = GLib.MainLoop()
+        GLib.timeout_add(10, lambda: os.write(w, b'a') and False)
+        GLib.timeout_add(100, ml.quit)
+        ml.run()
+
+        self.assertEqual(call_data, [(r, GLib.IOCondition.IN, b'a', ('moo', 'foo'))])
+
     def test_io_add_watch_pyfile(self):
         call_data = []
 

@@ -23,7 +23,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(res[0], GLib.PRIORITY_DEFAULT)
         self.assertEqual(res[1], pid)
         self.assertTrue(callable(cb))
-        self.assertEqual(res[3], None)
+        self.assertSequenceEqual(res[3], [])
 
     def test_deprecated_child_watch_data_priority(self):
         cb = lambda pid, status: None
@@ -37,7 +37,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(res[0], GLib.PRIORITY_HIGH)
         self.assertEqual(res[1], pid)
         self.assertEqual(res[2], cb)
-        self.assertEqual(res[3], 12345)
+        self.assertSequenceEqual(res[3], [12345])
 
     def test_deprecated_child_watch_data_priority_kwargs(self):
         cb = lambda pid, status: None
@@ -51,7 +51,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(res[0], GLib.PRIORITY_HIGH)
         self.assertEqual(res[1], pid)
         self.assertEqual(res[2], cb)
-        self.assertEqual(res[3], 12345)
+        self.assertSequenceEqual(res[3], [12345])
 
     @unittest.expectedFailure  # using keyword args is fully supported by PyGObject machinery
     def test_child_watch_all_kwargs(self):
@@ -63,7 +63,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(res[0], GLib.PRIORITY_HIGH)
         self.assertEqual(res[1], pid)
         self.assertEqual(res[2], cb)
-        self.assertEqual(res[3], 12345)
+        self.assertSequenceEqual(res[3], [12345])
 
     def test_child_watch_no_data(self):
         def cb(pid, status):

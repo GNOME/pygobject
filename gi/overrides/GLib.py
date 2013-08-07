@@ -617,47 +617,24 @@ class Timeout(Source):
 __all__.append('Timeout')
 
 
-def user_data_varargs_shim(callback, user_data, cb_num_args=0):
-    '''Adjust callback and user_data varargs for PyGTK backwards compatibility
-
-    GLib only accepts exactly one user_data argument, but older pygtk
-    traditionally accepted zero or more for some specific functions. For "one
-    argument", use the actual user-supplied callback for efficiency; for all
-    others, rewire it to accept zero or more than one.
-
-    Return the adjusted callback and the real user data to pass to GLib.
-    '''
-    if len(user_data) == 1:
-        return (callback, user_data[0])
-
-    if cb_num_args == 0:
-        return (lambda data: callback(*data), user_data)
-    if cb_num_args == 2:
-        return (lambda a1, a2, data: callback(a1, a2, *data), user_data)
-    raise NotImplementedError('%i number of callback arguments not supported' % cb_num_args)
-
-
 # backwards compatible API
 def idle_add(function, *user_data, **kwargs):
-    (fn, data) = user_data_varargs_shim(function, user_data)
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT_IDLE)
-    return GLib.idle_add(priority, fn, data)
+    return GLib.idle_add(priority, function, *user_data)
 
 __all__.append('idle_add')
 
 
 def timeout_add(interval, function, *user_data, **kwargs):
-    (fn, data) = user_data_varargs_shim(function, user_data)
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-    return GLib.timeout_add(priority, interval, fn, data)
+    return GLib.timeout_add(priority, interval, function, *user_data)
 
 __all__.append('timeout_add')
 
 
 def timeout_add_seconds(interval, function, *user_data, **kwargs):
-    (fn, data) = user_data_varargs_shim(function, user_data)
     priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
-    return GLib.timeout_add_seconds(priority, interval, fn, data)
+    return GLib.timeout_add_seconds(priority, interval, function, *user_data)
 
 __all__.append('timeout_add_seconds')
 
@@ -674,8 +651,6 @@ __all__.append('timeout_add_seconds')
 # - calling with a Python file object as first argument (we keep this one as
 #   it's really convenient and does not change the number of arguments)
 # - calling without a priority as second argument
-# and the usual "call without or multiple user_data", in which case the
-# callback gets the same user data arguments.
 def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **kwargs):
     if not isinstance(priority_, int) or isinstance(priority_, GLib.IOCondition):
         warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
@@ -700,19 +675,17 @@ def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **k
         callback = cb_and_user_data[0]
         user_data = cb_and_user_data[1:]
 
-    (func, user_data) = user_data_varargs_shim(callback, user_data, 2)
-
     # backwards compatibility: Allow calling with fd
     if isinstance(channel, int):
-        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
         real_channel = GLib.IOChannel.unix_new(channel)
     elif hasattr(channel, 'fileno'):
         # backwards compatibility: Allow calling with Python file
-        func_fdtransform = lambda _, cond, data: func(channel, cond, data)
+        func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
         real_channel = GLib.IOChannel.unix_new(channel.fileno())
     else:
         assert isinstance(channel, GLib.IOChannel)
-        func_fdtransform = func
+        func_fdtransform = callback
         real_channel = channel
 
     return real_channel, priority_, condition, func_fdtransform, user_data
@@ -723,7 +696,7 @@ __all__.append('_io_add_watch_get_args')
 def io_add_watch(*args, **kwargs):
     """io_add_watch(channel, priority, condition, func, *user_data) -> event_source_id"""
     channel, priority, condition, func, user_data = _io_add_watch_get_args(*args, **kwargs)
-    return GLib.io_add_watch(channel, priority, condition, func, user_data)
+    return GLib.io_add_watch(channel, priority, condition, func, *user_data)
 
 __all__.append('io_add_watch')
 
@@ -828,7 +801,7 @@ __all__.append('PollFD')
 # We need to support this until we are okay with breaking API in a way which is
 # not backwards compatible.
 def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs):
-    _unspecified = object()
+    user_data = []
 
     if callable(pid_or_callback):
         warnings.warn('Calling child_watch_add without priority as first argument is deprecated',
@@ -836,35 +809,33 @@ def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs)
         pid = priority_or_pid
         callback = pid_or_callback
         if len(args) == 0:
-            user_data = kwargs.get('data', _unspecified)
             priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
         elif len(args) == 1:
-            user_data = args[0]
+            user_data = args
             priority = kwargs.get('priority', GLib.PRIORITY_DEFAULT)
         elif len(args) == 2:
-            user_data = args[0]
+            user_data = [args[0]]
             priority = args[1]
         else:
             raise TypeError('expected at most 4 positional arguments')
     else:
         priority = priority_or_pid
         pid = pid_or_callback
-        if len(args) == 0 or not callable(args[0]):
-            raise TypeError('expected callback as third argument')
-        callback = args[0]
-        if len(args) == 1:
-            user_data = kwargs.get('data', _unspecified)
+        if 'function' in kwargs:
+            callback = kwargs['function']
+            user_data = args
+        elif len(args) > 0 and callable(args[0]):
+            callback = args[0]
+            user_data = args[1:]
         else:
-            user_data = args[1]
+            raise TypeError('expected callback as third argument')
 
-    if user_data is _unspecified:
-        # we have to call the callback without the user_data argument
-        func = lambda pid, status, data: callback(pid, status)
-        user_data = None
-    else:
-        func = callback
+    if 'data' in kwargs:
+        if user_data:
+            raise TypeError('got multiple values for "data" argument')
+        user_data = [kwargs['data']]
 
-    return priority, pid, func, user_data
+    return priority, pid, callback, user_data
 
 # we need this to be accessible for unit testing
 __all__.append('_child_watch_add_get_args')
@@ -873,7 +844,7 @@ __all__.append('_child_watch_add_get_args')
 def child_watch_add(*args, **kwargs):
     """child_watch_add(priority, pid, function, *data)"""
     priority, pid, function, data = _child_watch_add_get_args(*args, **kwargs)
-    return GLib.child_watch_add(priority, pid, function, data)
+    return GLib.child_watch_add(priority, pid, function, *data)
 
 __all__.append('child_watch_add')
 
