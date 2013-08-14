@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from ..overrides import override
+from ..overrides import override, deprecated_init
 from ..module import get_introspection_module
 
 from gi.repository import GLib
@@ -63,8 +63,8 @@ __all__.append('MenuItem')
 class Settings(Gio.Settings):
     '''Provide dictionary-like access to GLib.Settings.'''
 
-    def __init__(self, schema, path=None, backend=None, **kwargs):
-        Gio.Settings.__init__(self, schema=schema, backend=backend, path=path, **kwargs)
+    __init__ = deprecated_init(Gio.Settings.__init__,
+                               arg_names=('schema', 'path', 'backend'))
 
     def __contains__(self, key):
         return key in self.list_keys()

@@ -16,6 +16,8 @@ import warnings
 from io import StringIO, BytesIO
 
 import gi
+import gi.overrides
+from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
@@ -3000,3 +3002,76 @@ class TestDeprecation(unittest.TestCase):
             warnings.simplefilter('always')
             d.set_time(1)
             self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
+
+    def test_deprecated_init_no_keywords(self):
+        def init(self, **kwargs):
+            self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
+
+        fn = gi.overrides.deprecated_init(init, arg_names=('a', 'b', 'c'))
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            fn(self, 1, 2, 3)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*keywords.*a, b, c.*')
+
+    def test_deprecated_init_no_keywords_out_of_order(self):
+        def init(self, **kwargs):
+            self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
+
+        fn = gi.overrides.deprecated_init(init, arg_names=('b', 'a', 'c'))
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            fn(self, 2, 1, 3)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*keywords.*b, a, c.*')
+
+    def test_deprecated_init_ignored_keyword(self):
+        def init(self, **kwargs):
+            self.assertDictEqual(kwargs, {'a': 1, 'c': 3})
+
+        fn = gi.overrides.deprecated_init(init,
+                                          arg_names=('a', 'b', 'c'),
+                                          ignore=('b',))
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            fn(self, 1, 2, 3)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*keywords.*a, b, c.*')
+
+    def test_deprecated_init_with_aliases(self):
+        def init(self, **kwargs):
+            self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
+
+        fn = gi.overrides.deprecated_init(init,
+                                          arg_names=('a', 'b', 'c'),
+                                          deprecated_aliases={'b': 'bb', 'c': 'cc'})
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+
+            fn(self, a=1, bb=2, cc=3)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*keyword.*"bb, cc".*deprecated.*"b, c" respectively')
+
+    def test_deprecated_init_with_defaults(self):
+        def init(self, **kwargs):
+            self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
+
+        fn = gi.overrides.deprecated_init(init,
+                                          arg_names=('a', 'b', 'c'),
+                                          deprecated_defaults={'b': 2, 'c': 3})
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            fn(self, a=1)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*relying on deprecated non-standard defaults.*'
+                                     'explicitly use: b=2, c=3')

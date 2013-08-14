@@ -6,6 +6,7 @@ import contextlib
 import unittest
 import time
 import sys
+import warnings
 
 from compathelper import _unicode, _bytes
 
@@ -16,8 +17,10 @@ from gi.repository import GLib, GObject
 try:
     from gi.repository import GdkPixbuf, Gdk, Gtk
     Gtk  # pyflakes
+    PyGTKDeprecationWarning = Gtk.PyGTKDeprecationWarning
 except ImportError:
     Gtk = None
+    PyGTKDeprecationWarning = None
 
 
 @contextlib.contextmanager
@@ -73,7 +76,6 @@ class TestGtk(unittest.TestCase):
 
     def test_actions(self):
         self.assertEqual(Gtk.Action, gi.overrides.Gtk.Action)
-        self.assertRaises(TypeError, Gtk.Action)
         action = Gtk.Action(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
@@ -81,7 +83,6 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(action.get_stock_id(), Gtk.STOCK_COPY)
 
         self.assertEqual(Gtk.RadioAction, gi.overrides.Gtk.RadioAction)
-        self.assertRaises(TypeError, Gtk.RadioAction)
         action = Gtk.RadioAction(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY, value=1)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
@@ -91,7 +92,6 @@ class TestGtk(unittest.TestCase):
 
     def test_actiongroup(self):
         self.assertEqual(Gtk.ActionGroup, gi.overrides.Gtk.ActionGroup)
-        self.assertRaises(TypeError, Gtk.ActionGroup)
 
         action_group = Gtk.ActionGroup(name='TestActionGroup')
         callback_data = "callback data"
@@ -165,10 +165,6 @@ class TestGtk(unittest.TestCase):
         w = Gtk.Window(type=Gtk.WindowType.POPUP)
         self.assertEqual(w.get_property('type'), Gtk.WindowType.POPUP)
 
-        # pygtk compatible positional argument
-        w = Gtk.Window(Gtk.WindowType.POPUP)
-        self.assertEqual(w.get_property('type'), Gtk.WindowType.POPUP)
-
         class TestWindow(Gtk.Window):
             __gtype_name__ = "TestWindow"
 
@@ -194,8 +190,6 @@ class TestGtk(unittest.TestCase):
 
     def test_dialog_classes(self):
         self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
-        self.assertEqual(Gtk.AboutDialog, gi.overrides.Gtk.AboutDialog)
-        self.assertEqual(Gtk.MessageDialog, gi.overrides.Gtk.MessageDialog)
         self.assertEqual(Gtk.ColorSelectionDialog, gi.overrides.Gtk.ColorSelectionDialog)
         self.assertEqual(Gtk.FileChooserDialog, gi.overrides.Gtk.FileChooserDialog)
         self.assertEqual(Gtk.FontSelectionDialog, gi.overrides.Gtk.FontSelectionDialog)
@@ -208,9 +202,65 @@ class TestGtk(unittest.TestCase):
         self.assertEqual('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
 
+    def test_dialog_deprecations(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            dialog = Gtk.Dialog(title='Foo', flags=Gtk.DialogFlags.MODAL)
+            self.assertTrue(dialog.get_modal())
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*flags.*modal.*')
+
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            dialog = Gtk.Dialog(title='Foo', flags=Gtk.DialogFlags.DESTROY_WITH_PARENT)
+            self.assertTrue(dialog.get_destroy_with_parent())
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*flags.*destroy_with_parent.*')
+
+    def test_dialog_deprecation_stacklevels(self):
+        # Test warning levels are setup to give the correct filename for
+        # deprecations in different classes in the inheritance hierarchy.
+
+        # Base class
+        self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gtk.Dialog(flags=Gtk.DialogFlags.MODAL)
+            self.assertEqual(len(warn), 1)
+            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+
+        # Validate overridden base with overridden sub-class.
+        self.assertEqual(Gtk.MessageDialog, gi.overrides.Gtk.MessageDialog)
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gtk.MessageDialog(flags=Gtk.DialogFlags.MODAL)
+            self.assertEqual(len(warn), 1)
+            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+
+        # Validate overridden base with non-overridden sub-class.
+        self.assertEqual(Gtk.AboutDialog, gi.repository.Gtk.AboutDialog)
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            Gtk.AboutDialog(flags=Gtk.DialogFlags.MODAL)
+            self.assertEqual(len(warn), 1)
+            self.assertRegexpMatches(warn[0].filename, '.*test_overrides_gtk.*')
+
     def test_dialog_add_buttons(self):
-        dialog = Gtk.Dialog(title='Foo', modal=True,
-                            buttons=('test-button1', 1))
+        # The overloaded "buttons" keyword gives a warning when attempting
+        # to use it for adding buttons as was available in PyGTK.
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            dialog = Gtk.Dialog(title='Foo', modal=True,
+                                buttons=('test-button1', 1))
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGTKDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*ButtonsType.*add_buttons.*')
+
         dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         button = dialog.get_widget_for_response(1)
         self.assertEqual('test-button1', button.get_label())
@@ -261,21 +311,13 @@ class TestGtk(unittest.TestCase):
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
         try:
             dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
-                                           buttons=('test-button1', 1),
                                            action=Gtk.FileChooserAction.SAVE)
         finally:
             GLib.log_set_always_fatal(old_mask)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
-
-        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEqual('file chooser dialog test', dialog.get_title())
-        button = dialog.get_widget_for_response(1)
-        self.assertEqual('test-button1', button.get_label())
-        button = dialog.get_widget_for_response(2)
-        self.assertEqual('test-button2', button.get_label())
-        button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
-        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
+
         action = dialog.get_property('action')
         self.assertEqual(Gtk.FileChooserAction.SAVE, action)
 
@@ -300,19 +342,10 @@ class TestGtk(unittest.TestCase):
     def test_recent_chooser_dialog(self):
         test_manager = Gtk.RecentManager()
         dialog = Gtk.RecentChooserDialog(title='recent chooser dialog test',
-                                         buttons=('test-button1', 1),
-                                         manager=test_manager)
+                                         recent_manager=test_manager)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
-
-        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.assertEqual('recent chooser dialog test', dialog.get_title())
-        button = dialog.get_widget_for_response(1)
-        self.assertEqual('test-button1', button.get_label())
-        button = dialog.get_widget_for_response(2)
-        self.assertEqual('test-button2', button.get_label())
-        button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
-        self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
 
     class TestClass(GObject.GObject):
         __gtype_name__ = "GIOverrideTreeAPITest"
@@ -347,7 +380,6 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(button.get_use_underline())
 
         # test Gtk.LinkButton
-        self.assertRaises(TypeError, Gtk.LinkButton)
         button = Gtk.LinkButton(uri='http://www.Gtk.org', label='Gtk')
         self.assertTrue(isinstance(button, Gtk.Button))
         self.assertTrue(isinstance(button, Gtk.Container))
@@ -761,7 +793,6 @@ class TestBuilder(unittest.TestCase):
 class TestTreeModel(unittest.TestCase):
     def test_tree_model_sort(self):
         self.assertEqual(Gtk.TreeModelSort, gi.overrides.Gtk.TreeModelSort)
-        self.assertRaises(TypeError, Gtk.TreeModelSort)
         model = Gtk.TreeStore(int, bool)
         model_sort = Gtk.TreeModelSort(model=model)
         self.assertEqual(model_sort.get_model(), model)
