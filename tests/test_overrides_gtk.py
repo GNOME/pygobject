@@ -74,7 +74,7 @@ class TestGtk(unittest.TestCase):
     def test_actions(self):
         self.assertEqual(Gtk.Action, gi.overrides.Gtk.Action)
         self.assertRaises(TypeError, Gtk.Action)
-        action = Gtk.Action("test", "Test", "Test Action", Gtk.STOCK_COPY)
+        action = Gtk.Action(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
         self.assertEqual(action.get_tooltip(), "Test Action")
@@ -82,7 +82,7 @@ class TestGtk(unittest.TestCase):
 
         self.assertEqual(Gtk.RadioAction, gi.overrides.Gtk.RadioAction)
         self.assertRaises(TypeError, Gtk.RadioAction)
-        action = Gtk.RadioAction("test", "Test", "Test Action", Gtk.STOCK_COPY, 1)
+        action = Gtk.RadioAction(name="test", label="Test", tooltip="Test Action", stock_id=Gtk.STOCK_COPY, value=1)
         self.assertEqual(action.get_name(), "test")
         self.assertEqual(action.get_label(), "Test")
         self.assertEqual(action.get_tooltip(), "Test Action")
@@ -192,7 +192,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(builder.get_object('testpop').get_property('type'),
                          Gtk.WindowType.POPUP)
 
-    def test_dialogs(self):
+    def test_dialog_classes(self):
         self.assertEqual(Gtk.Dialog, gi.overrides.Gtk.Dialog)
         self.assertEqual(Gtk.AboutDialog, gi.overrides.Gtk.AboutDialog)
         self.assertEqual(Gtk.MessageDialog, gi.overrides.Gtk.MessageDialog)
@@ -201,17 +201,17 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(Gtk.FontSelectionDialog, gi.overrides.Gtk.FontSelectionDialog)
         self.assertEqual(Gtk.RecentChooserDialog, gi.overrides.Gtk.RecentChooserDialog)
 
-        # Gtk.Dialog
-        dialog = Gtk.Dialog(title='Foo',
-                            flags=Gtk.DialogFlags.MODAL,
-                            buttons=('test-button1', 1))
+    def test_dialog_base(self):
+        dialog = Gtk.Dialog(title='Foo', modal=True)
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
-
-        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
-
         self.assertEqual('Foo', dialog.get_title())
         self.assertTrue(dialog.get_modal())
+
+    def test_dialog_add_buttons(self):
+        dialog = Gtk.Dialog(title='Foo', modal=True,
+                            buttons=('test-button1', 1))
+        dialog.add_buttons('test-button2', 2, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         button = dialog.get_widget_for_response(1)
         self.assertEqual('test-button1', button.get_label())
         button = dialog.get_widget_for_response(2)
@@ -219,16 +219,20 @@ class TestGtk(unittest.TestCase):
         button = dialog.get_widget_for_response(Gtk.ResponseType.CLOSE)
         self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
 
-        # Gtk.AboutDialog
+    def test_about_dialog(self):
         dialog = Gtk.AboutDialog()
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
-        # Gtk.MessageDialog
+        # AboutDialog is not sub-classed in overrides, make sure
+        # the mro still injects the base class "add_buttons" override.
+        self.assertTrue(hasattr(dialog, 'add_buttons'))
+
+    def test_message_dialog(self):
         dialog = Gtk.MessageDialog(title='message dialog test',
-                                   flags=Gtk.DialogFlags.MODAL,
+                                   modal=True,
                                    buttons=Gtk.ButtonsType.OK,
-                                   message_format='dude!')
+                                   text='dude!')
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
 
@@ -245,13 +249,13 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(dialog.get_property('secondary-text'), '2nd markup')
         self.assertTrue(dialog.get_property('secondary-use-markup'))
 
-        # Gtk.ColorSelectionDialog
-        dialog = Gtk.ColorSelectionDialog("color selection dialog test")
+    def test_color_selection_dialog(self):
+        dialog = Gtk.ColorSelectionDialog(title="color selection dialog test")
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
         self.assertEqual('color selection dialog test', dialog.get_title())
 
-        # Gtk.FileChooserDialog
+    def test_file_chooser_dialog(self):
         # might cause a GVFS warning, do not break on this
         old_mask = GLib.log_set_always_fatal(
             GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
@@ -275,13 +279,25 @@ class TestGtk(unittest.TestCase):
         action = dialog.get_property('action')
         self.assertEqual(Gtk.FileChooserAction.SAVE, action)
 
-        # Gtk.FontSelectionDialog
-        dialog = Gtk.ColorSelectionDialog("font selection dialog test")
+    def test_file_chooser_dialog_default_action(self):
+        # might cause a GVFS warning, do not break on this
+        old_mask = GLib.log_set_always_fatal(
+            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            dialog = Gtk.FileChooserDialog(title='file chooser dialog test')
+        finally:
+            GLib.log_set_always_fatal(old_mask)
+
+        action = dialog.get_property('action')
+        self.assertEqual(Gtk.FileChooserAction.OPEN, action)
+
+    def test_font_selection_dialog(self):
+        dialog = Gtk.FontSelectionDialog(title="font selection dialog test")
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
         self.assertEqual('font selection dialog test', dialog.get_title())
 
-        # Gtk.RecentChooserDialog
+    def test_recent_chooser_dialog(self):
         test_manager = Gtk.RecentManager()
         dialog = Gtk.RecentChooserDialog(title='recent chooser dialog test',
                                          buttons=('test-button1', 1),
@@ -319,7 +335,7 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Button))
         self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
-        button = Gtk.Button(stock=Gtk.STOCK_CLOSE)
+        button = Gtk.Button.new_from_stock(Gtk.STOCK_CLOSE)
         self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
@@ -332,7 +348,7 @@ class TestGtk(unittest.TestCase):
 
         # test Gtk.LinkButton
         self.assertRaises(TypeError, Gtk.LinkButton)
-        button = Gtk.LinkButton('http://www.Gtk.org', 'Gtk')
+        button = Gtk.LinkButton(uri='http://www.Gtk.org', label='Gtk')
         self.assertTrue(isinstance(button, Gtk.Button))
         self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
@@ -392,24 +408,20 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(adjustment.get_page_size(), page_size)
 
     def test_adjustment(self):
-        adjustment = Gtk.Adjustment(1, 0, 6, 4, 5, 3)
-        self.adjustment_check(adjustment, 1, 0, 6, 4, 5, 3)
+        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6, step_increment=4, page_increment=5, page_size=3)
+        self.adjustment_check(adjustment, value=1, lower=0, upper=6, step_increment=4, page_increment=5, page_size=3)
 
-        adjustment = Gtk.Adjustment(1, 0, 6, 4, 5)
-        self.adjustment_check(adjustment, 1, 0, 6, 4, 5)
+        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6, step_increment=4, page_increment=5)
+        self.adjustment_check(adjustment, value=1, lower=0, upper=6, step_increment=4, page_increment=5)
 
-        adjustment = Gtk.Adjustment(1, 0, 6, 4)
-        self.adjustment_check(adjustment, 1, 0, 6, 4)
+        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6, step_increment=4)
+        self.adjustment_check(adjustment, value=1, lower=0, upper=6, step_increment=4)
 
-        adjustment = Gtk.Adjustment(1, 0, 6)
-        self.adjustment_check(adjustment, 1, 0, 6)
+        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6)
+        self.adjustment_check(adjustment, value=1, lower=0, upper=6)
 
         adjustment = Gtk.Adjustment()
         self.adjustment_check(adjustment)
-
-        adjustment = Gtk.Adjustment(value=1, lower=0, upper=6,
-                                    step_increment=4, page_increment=5, page_size=3)
-        self.adjustment_check(adjustment, 1, 0, 6, 4, 5, 3)
 
     def test_table(self):
         table = Gtk.Table()
@@ -418,17 +430,11 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(table, Gtk.Widget))
         self.assertEqual(table.get_size(), (1, 1))
         self.assertEqual(table.get_homogeneous(), False)
-        table = Gtk.Table(2, 3)
+
+        table = Gtk.Table(n_rows=2, n_columns=3)
         self.assertEqual(table.get_size(), (2, 3))
         self.assertEqual(table.get_homogeneous(), False)
-        table = Gtk.Table(2, 3, True)
-        self.assertEqual(table.get_size(), (2, 3))
-        self.assertEqual(table.get_homogeneous(), True)
 
-        # Test PyGTK interface
-        table = Gtk.Table(rows=3, columns=2)
-        self.assertEqual(table.get_size(), (3, 2))
-        # Test using the actual property names
         table = Gtk.Table(n_rows=2, n_columns=3, homogeneous=True)
         self.assertEqual(table.get_size(), (2, 3))
         self.assertEqual(table.get_homogeneous(), True)
@@ -522,7 +528,6 @@ class TestGtk(unittest.TestCase):
                                         Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
 
     def test_scrollbar(self):
-        # PyGTK compat
         adjustment = Gtk.Adjustment()
 
         hscrollbar = Gtk.HScrollbar()
@@ -530,8 +535,8 @@ class TestGtk(unittest.TestCase):
         self.assertNotEqual(hscrollbar.props.adjustment, adjustment)
         self.assertNotEqual(vscrollbar.props.adjustment, adjustment)
 
-        hscrollbar = Gtk.HScrollbar(adjustment)
-        vscrollbar = Gtk.VScrollbar(adjustment)
+        hscrollbar = Gtk.HScrollbar(adjustment=adjustment)
+        vscrollbar = Gtk.VScrollbar(adjustment=adjustment)
         self.assertEqual(hscrollbar.props.adjustment, adjustment)
         self.assertEqual(vscrollbar.props.adjustment, adjustment)
 
@@ -541,7 +546,7 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(iconview.props.model, None)
 
         model = Gtk.ListStore(str)
-        iconview = Gtk.IconView(model)
+        iconview = Gtk.IconView(model=model)
         self.assertEqual(iconview.props.model, model)
 
     def test_toolbutton(self):
@@ -549,7 +554,7 @@ class TestGtk(unittest.TestCase):
         button = Gtk.ToolButton()
         self.assertEqual(button.props.stock_id, None)
 
-        button = Gtk.ToolButton('gtk-new')
+        button = Gtk.ToolButton(stock_id='gtk-new')
         self.assertEqual(button.props.stock_id, 'gtk-new')
 
         icon = Gtk.Image.new_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.SMALL_TOOLBAR)
@@ -559,13 +564,11 @@ class TestGtk(unittest.TestCase):
         self.assertEqual(button.props.icon_widget, icon)
 
     def test_iconset(self):
-        # PyGTK compat
         Gtk.IconSet()
         pixbuf = GdkPixbuf.Pixbuf()
-        Gtk.IconSet(pixbuf)
+        Gtk.IconSet.new_from_pixbuf(pixbuf)
 
     def test_viewport(self):
-        # PyGTK compat
         vadjustment = Gtk.Adjustment()
         hadjustment = Gtk.Adjustment()
 
@@ -760,7 +763,7 @@ class TestTreeModel(unittest.TestCase):
         self.assertEqual(Gtk.TreeModelSort, gi.overrides.Gtk.TreeModelSort)
         self.assertRaises(TypeError, Gtk.TreeModelSort)
         model = Gtk.TreeStore(int, bool)
-        model_sort = Gtk.TreeModelSort(model)
+        model_sort = Gtk.TreeModelSort(model=model)
         self.assertEqual(model_sort.get_model(), model)
 
     def test_tree_store(self):
@@ -1580,7 +1583,7 @@ class TestTreeView(unittest.TestCase):
         model.append(['cell13', 'cell11', 'cell12'])
         model.append(['cell23', 'cell21', 'cell22'])
 
-        tree = Gtk.TreeView(model)
+        tree = Gtk.TreeView(model=model)
         cell1 = Gtk.CellRendererText()
         cell2 = Gtk.CellRendererText()
         cell3 = Gtk.CellRendererText()
