@@ -33,10 +33,11 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
                                       GITransfer transfer)
 {
     GIArgument arg = _pygi_argument_from_object (object, type_info, transfer);
+    GITypeTag type_tag;
     if (PyErr_Occurred ())
         return;
 
-    GITypeTag type_tag = g_type_info_get_tag (type_info);
+    type_tag = g_type_info_get_tag (type_info);
 
     if (retval == NULL)
         return;
