@@ -980,28 +980,21 @@ pygobject_constructv(PyGObject  *self,
                      guint       n_parameters,
                      GParameter *parameters)
 {
-    if (self->obj == NULL) {
-        GObject *obj;
-        pygobject_init_wrapper_set((PyObject *) self);
-        obj = g_object_newv(pyg_type_from_object((PyObject *) self),
-                            n_parameters, parameters);
+    GObject *obj;
 
-        if (g_object_is_floating (obj))
-            self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
-        pygobject_sink (obj);
+    g_assert (self->obj == NULL);
+    pygobject_init_wrapper_set((PyObject *) self);
+    obj = g_object_newv(pyg_type_from_object((PyObject *) self),
+                        n_parameters, parameters);
 
-        pygobject_init_wrapper_set(NULL);
-        if (self->obj == NULL) {
-            self->obj = obj;
-            pygobject_register_wrapper((PyObject *) self);
-        }
-    } else {
-        int i;
-        for (i = 0; i < n_parameters; ++i)
-            g_object_set_property(self->obj,
-				  parameters[i].name,
-				  &parameters[i].value);
-    }
+    if (g_object_is_floating (obj))
+        self->private_flags.flags |= PYGOBJECT_GOBJECT_WAS_FLOATING;
+    pygobject_sink (obj);
+
+    pygobject_init_wrapper_set(NULL);
+    self->obj = obj;
+    pygobject_register_wrapper((PyObject *) self);
+
     return 0;
 }
 

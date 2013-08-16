@@ -52,11 +52,6 @@ class Layout(Pango.Layout):
     def __new__(cls, context):
         return Pango.Layout.new(context)
 
-    def __init__(self, context, **kwds):
-        # simply discard 'context', since it was set by
-        # __new__ and it is not a PangoLayout property
-        super(Layout, self).__init__(**kwds)
-
     def set_markup(self, text, length=-1):
         super(Layout, self).set_markup(text, length)
 

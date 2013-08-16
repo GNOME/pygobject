@@ -1265,7 +1265,19 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     GParameter *params = NULL;
     GObjectClass *class;
 
-    if (!PyArg_ParseTuple(args, ":GObject.__init__", &object_type))
+    /* Only do GObject creation and property setting if the GObject hasn't
+     * already been created. The case where self->obj already exists can occur
+     * when C constructors are called directly (Gtk.Button.new_with_label)
+     * and we are simply wrapping the result with a PyGObject.
+     * In these cases we want to ignore any keyword arguments passed along
+     * to __init__ and simply return.
+     *
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=705810
+     */
+    if (self->obj != NULL)
+        return 0;
+
+    if (!PyArg_ParseTuple(args, ":GObject.__init__", NULL))
 	return -1;
 
     object_type = pyg_type_from_object((PyObject *)self);
@@ -1289,7 +1301,7 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     if (pygobject_constructv(self, n_params, params))
 	PyErr_SetString(PyExc_RuntimeError, "could not create object");
-	   
+
  cleanup:
     for (i = 0; i < n_params; i++) {
 	g_free((gchar *) params[i].name);

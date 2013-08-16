@@ -205,9 +205,6 @@ __all__ += ['features', 'list_properties', 'new',
 
 
 class Value(GObjectModule.Value):
-    def __new__(cls, *args, **kwargs):
-        return GObjectModule.Value.__new__(cls)
-
     def __init__(self, value_type=None, py_value=None):
         GObjectModule.Value.__init__(self)
         if value_type is not None:

@@ -75,16 +75,10 @@ _boxed_new (PyTypeObject *type,
             PyObject     *args,
             PyObject     *kwargs)
 {
-    static char *kwlist[] = { NULL };
-
     GIBaseInfo *info;
     gsize size = 0;
     gpointer boxed;
     PyGIBoxed *self = NULL;
-
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "", kwlist)) {
-        return NULL;
-    }
 
     info = _pygi_object_get_gi_info ( (PyObject *) type, &PyGIBaseInfo_Type);
     if (info == NULL) {
