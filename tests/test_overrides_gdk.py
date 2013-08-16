@@ -2,8 +2,10 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
+import warnings
 
 import gi.overrides
+from gi import PyGIDeprecationWarning
 
 try:
     from gi.repository import Gdk, GdkPixbuf, Gtk
@@ -111,11 +113,18 @@ class TestGdk(unittest.TestCase):
                                            5,
                                            10)
 
-        c = Gdk.Cursor(display,
-                       test_pixbuf,
-                       y=0, x=0)
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            c = Gdk.Cursor(display,
+                           test_pixbuf,
+                           y=0, x=0)
+            self.assertNotEqual(c, None)
 
-        self.assertNotEqual(c, None)
+            self.assertEqual(len(warn), 1)
+            self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(str(warn[0].message),
+                                     '.*new_from_pixbuf.*')
+
         self.assertRaises(ValueError, Gdk.Cursor, 1, 2, 3)
 
     def test_flags(self):
