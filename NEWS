@@ -1,3 +1,12 @@
+3.9.90  19-Aug-2013
+	- Create GLib.Pid in the same way on python 2 and 3 (Benjamin Berg)
+	  (#705451)
+	- Use PyLong_Type.tp_new for GLib.Pid (Benjamin Berg) (#705451)
+	- Add accumulator and accu_data arguments to GObject.Signal decorator
+	  (Simon Feltman) (#705533)
+	- Pass return values through the GObject.Signal.emit wrapper
+	  (Simon Feltman) (#705530)
+
 3.9.5   29-Jul-2013
         - Ensure exceptions set in closure out argument marshaling are printed
           (Simon Feltman) (#705064)
