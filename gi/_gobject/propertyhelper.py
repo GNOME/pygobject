@@ -185,16 +185,16 @@ class Property(object):
         if minimum is not None:
             if minimum < self._get_minimum():
                 raise TypeError(
-                    "Minimum for type %s cannot be lower than %d" % (
-                    self.type, self._get_minimum()))
+                    "Minimum for type %s cannot be lower than %d" %
+                    (self.type, self._get_minimum()))
         else:
             minimum = self._get_minimum()
         self.minimum = minimum
         if maximum is not None:
             if maximum > self._get_maximum():
                 raise TypeError(
-                    "Maximum for type %s cannot be higher than %d" % (
-                    self.type, self._get_maximum()))
+                    "Maximum for type %s cannot be higher than %d" %
+                    (self.type, self._get_maximum()))
         else:
             maximum = self._get_maximum()
         self.maximum = maximum
@@ -393,8 +393,8 @@ def install_properties(cls):
                 raise TypeError(
                     "GObject subclass %r defines do_get/set_property"
                     " and it also uses a property with a custom setter"
-                    " or getter. This is not allowed" % (
-                    cls.__name__,))
+                    " or getter. This is not allowed" %
+                    (cls.__name__,))
 
     def obj_get_property(self, pspec):
         name = pspec.name.replace('-', '_')
