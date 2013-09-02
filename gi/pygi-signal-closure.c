@@ -155,7 +155,7 @@ pygi_signal_closure_marshal(GClosure *closure,
         goto out;
     }
 
-    if (return_value && pyg_value_from_pyobject(return_value, ret) != 0) {
+    if (G_IS_VALUE(return_value) && pyg_value_from_pyobject(return_value, ret) != 0) {
         PyErr_SetString(PyExc_TypeError,
                         "can't convert return value to desired type");
 

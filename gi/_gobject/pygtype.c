@@ -1362,7 +1362,7 @@ pyg_closure_marshal(GClosure *closure,
 	goto out;
     }
 
-    if (return_value && pyg_value_from_pyobject(return_value, ret) != 0) {
+    if (G_IS_VALUE(return_value) && pyg_value_from_pyobject(return_value, ret) != 0) {
 	/* If we already have an exception set, use that, otherwise set a
 	 * generic one */
 	if (!PyErr_Occurred())
@@ -1543,7 +1543,7 @@ pyg_signal_class_closure_marshal(GClosure *closure,
     }
     Py_DECREF(method);
     Py_DECREF(params);
-    if (return_value)
+    if (G_IS_VALUE(return_value))
 	pyg_value_from_pyobject(return_value, ret);
     Py_DECREF(ret);
     pyglib_gil_state_release(state);
