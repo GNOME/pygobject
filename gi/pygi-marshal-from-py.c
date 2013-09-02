@@ -1827,7 +1827,13 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
     }
 
     if (g_type_is_a (g_type, G_TYPE_BOXED)) {
-        if (pyg_boxed_check (py_arg, g_type)) {
+        /* Use pyg_type_from_object to pull the stashed __gtype__ attribute
+         * off of the input argument instead of checking PyGBoxed.gtype
+         * with pyg_boxed_check. This is needed to work around type discrepancies
+         * in cases with aliased (typedef) types. e.g. GtkAllocation, GdkRectangle.
+         * See: https://bugzilla.gnomethere are .org/show_bug.cgi?id=707140
+         */
+        if (g_type_is_a (pyg_type_from_object (py_arg), g_type)) {
             arg->v_pointer = pyg_boxed_get (py_arg, void);
             if (transfer == GI_TRANSFER_EVERYTHING) {
                 arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);

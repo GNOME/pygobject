@@ -590,6 +590,40 @@ class TestGtk(unittest.TestCase):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+class TestSignals(unittest.TestCase):
+    class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
+        __gsignals__ = {'size-allocate': 'override'}
+
+        def __init__(self):
+            Gtk.ScrolledWindow.__init__(self)
+            self._alloc_called = False
+            self._alloc_value = None
+            self._alloc_error = None
+
+        def do_size_allocate(self, alloc):
+            self._alloc_called = True
+            self._alloc_value = alloc
+
+            try:
+                Gtk.ScrolledWindow.do_size_allocate(self, alloc)
+            except Exception as e:
+                self._alloc_error = e
+
+    def test_class_closure_override_with_aliased_type(self):
+        win = self.WindowWithSizeAllocOverride()
+        rect = Gdk.Rectangle()
+        rect.width = 100
+        rect.height = 100
+
+        with realized(win):
+            win.show()
+            win.size_allocate(rect)
+            self.assertTrue(win._alloc_called)
+            self.assertIsInstance(win._alloc_value, Gdk.Rectangle)
+            self.assertTrue(win._alloc_error is None, win._alloc_error)
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestBuilder(unittest.TestCase):
     class SignalTest(GObject.GObject):
         __gtype_name__ = "GIOverrideSignalTest"
