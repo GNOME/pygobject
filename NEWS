@@ -1,3 +1,13 @@
+3.9.91  02-Sep-2013
+	- Fix GObject signal methods to work with new annotations
+	  (Simon Feltman) (#707280)
+	- Fix build on C89 Compilers (Chun-wei Fan) (#707264)
+	- Change boxed type checking in marshaling to use __gtype__ attribute
+	  (Simon Feltman) (#707140)
+	- Use G_IS_VALUE for checking return values in closure marshaling
+	  (Simon Feltman) (#707170)
+	- Fix PEP-8 errors in propertyhelper.py (Yanko Kaneti) (#706319)
+
 3.9.90  19-Aug-2013
 	- Create GLib.Pid in the same way on python 2 and 3 (Benjamin Berg)
 	  (#705451)
