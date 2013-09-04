@@ -64,6 +64,7 @@ class overridefunc(object):
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
         wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
         setattr(self.module, func.__name__, wrapper)
         return wrapper
 
