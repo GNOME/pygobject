@@ -1780,6 +1780,8 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
                                         gboolean copy_reference,
                                         gboolean is_foreign)
 {
+    gboolean is_union = FALSE;
+
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
@@ -1806,41 +1808,27 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
         return (success == Py_None);
     } else if (!PyObject_IsInstance (py_arg, py_type)) {
         /* first check to see if this is a member of the expected union */
-        if (!_is_union_member (interface_info, py_arg)) {
-            if (!PyErr_Occurred()) {
-                gchar *type_name = _pygi_g_base_info_get_fullname (interface_info);
-                PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-
-                PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
-                              arg_name ? arg_name : "self",
-                              type_name,
-                              module ? PYGLIB_PyUnicode_AsString(module) : "",
-                              module ? "." : "",
-                              py_arg->ob_type->tp_name);
-                if (module)
-                    Py_DECREF (module);
-                g_free (type_name);
-            }
-
-            return FALSE;
+        is_union = _is_union_member (interface_info, py_arg);
+        if (!is_union) {
+            goto type_error;
         }
     }
 
     if (g_type_is_a (g_type, G_TYPE_BOXED)) {
-        /* Use pyg_type_from_object to pull the stashed __gtype__ attribute
-         * off of the input argument instead of checking PyGBoxed.gtype
-         * with pyg_boxed_check. This is needed to work around type discrepancies
-         * in cases with aliased (typedef) types. e.g. GtkAllocation, GdkRectangle.
+        /* Additionally use pyg_type_from_object to pull the stashed __gtype__
+         * attribute off of the input argument for type checking. This is needed
+         * to work around type discrepancies in cases with aliased (typedef) types.
+         * e.g. GtkAllocation, GdkRectangle.
          * See: https://bugzilla.gnomethere are .org/show_bug.cgi?id=707140
          */
-        if (g_type_is_a (pyg_type_from_object (py_arg), g_type)) {
+        if (is_union || pyg_boxed_check (py_arg, g_type) ||
+                g_type_is_a (pyg_type_from_object (py_arg), g_type)) {
             arg->v_pointer = pyg_boxed_get (py_arg, void);
             if (transfer == GI_TRANSFER_EVERYTHING) {
                 arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);
             }
         } else {
-            PyErr_Format (PyExc_TypeError, "wrong boxed type");
-            return FALSE;
+            goto type_error;
         }
 
     } else if (g_type_is_a (g_type, G_TYPE_POINTER) ||
@@ -1862,4 +1850,21 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
         return FALSE;
     }
     return TRUE;
+
+type_error:
+    {
+        gchar *type_name = _pygi_g_base_info_get_fullname (interface_info);
+        PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
+
+        PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
+                      arg_name ? arg_name : "self",
+                      type_name,
+                      module ? PYGLIB_PyUnicode_AsString(module) : "",
+                      module ? "." : "",
+                      py_arg->ob_type->tp_name);
+        if (module)
+            Py_DECREF (module);
+        g_free (type_name);
+        return FALSE;
+    }
 }
