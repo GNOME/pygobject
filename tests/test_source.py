@@ -214,6 +214,17 @@ class TestSource(unittest.TestCase):
         del source
         self.assertTrue(self.finalized)
 
+    def test_extra_init_args(self):
+        class SourceWithInitArgs(GLib.Source):
+            def __init__(self, arg, kwarg=None):
+                super(SourceWithInitArgs, self).__init__()
+                self.arg = arg
+                self.kwarg = kwarg
+
+        source = SourceWithInitArgs(1, kwarg=2)
+        self.assertEqual(source.arg, 1)
+        self.assertEqual(source.kwarg, 2)
+
 
 class TestUserData(unittest.TestCase):
     def test_idle_no_data(self):

@@ -536,7 +536,7 @@ __all__.append('MainContext')
 
 
 class Source(GLib.Source):
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         # use our custom pyg_source_new() here as g_source_new() is not
         # bindable
         source = source_new()
