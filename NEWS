@@ -1,3 +1,10 @@
+3.9.92  16-Sep-2013
+        - Fix union argument regression when marshaling from python
+	  (Simon Feltman) (#703873)
+	- Fix GLib.Source sub-classing with initializer args (Simon Feltman)
+	  (#707904)
+	- Copy __doc__ when wrapping function (Vratislav Podzimek)
+
 3.9.91  02-Sep-2013
 	- Fix GObject signal methods to work with new annotations
 	  (Simon Feltman) (#707280)
