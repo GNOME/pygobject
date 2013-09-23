@@ -1,3 +1,6 @@
+3.10.0  23-Sep-2013
+        - Fix test_gi.TestProjectVersion.test_version_str() (Martin Pitt)
+
 3.9.92  16-Sep-2013
         - Fix union argument regression when marshaling from python
 	  (Simon Feltman) (#703873)
