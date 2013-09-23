@@ -2914,7 +2914,7 @@ class TestModule(unittest.TestCase):
 
 class TestProjectVersion(unittest.TestCase):
     def test_version_str(self):
-        self.assertGreaterEqual(gi.__version__, "3.3.5")
+        self.assertGreater(gi.__version__, "3.")
 
     def test_version_info(self):
         self.assertEqual(len(gi.version_info), 3)
