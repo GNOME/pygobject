@@ -53,6 +53,23 @@ _generate_doc_string(PyGIBaseInfo *self)
     return PyObject_CallFunctionObjArgs (_py_generate_doc_string, self, NULL);
 }
 
+static PyObject *
+_get_child_info (PyGIBaseInfo *self,
+                 GIBaseInfo* (*get_child_info)(GIBaseInfo*))
+{
+    GIBaseInfo *info;
+    PyObject *py_info;
+
+    info = get_child_info ((GIBaseInfo*)self->info);
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    py_info = _pygi_info_new (info);
+    g_base_info_unref (info);
+    return py_info;
+}
+
 
 /* _make_infos_tuple
  *
@@ -222,6 +239,9 @@ _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_base_info_get_container (PyGIBaseInfo *self)
 {
+    /* Note: don't use _get_child_info because g_base_info_get_container
+     * is marked as [transfer none] and therefore returns a borrowed ref.
+     */
     GIBaseInfo *info;
 
     info = g_base_info_get_container (self->info);
@@ -1108,20 +1128,7 @@ PYGLIB_DEFINE_TYPE ("ObjectInfo", PyGIObjectInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_g_object_info_get_parent (PyGIBaseInfo *self)
 {
-    GIBaseInfo *info;
-    PyObject *py_info;
-
-    info = (GIBaseInfo *) g_object_info_get_parent ( (GIObjectInfo*) self->info);
-
-    if (info == NULL) {
-        Py_RETURN_NONE;
-    }
-
-    py_info = _pygi_info_new (info);
-
-    g_base_info_unref (info);
-
-    return py_info;
+    return _get_child_info (self, g_object_info_get_parent);
 }
 
 static PyObject *
@@ -1164,15 +1171,7 @@ _wrap_g_object_info_get_abstract (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_object_info_get_class_struct (PyGIBaseInfo *self)
 {
-    GIBaseInfo *info;
-
-    info = g_object_info_get_class_struct ((GIObjectInfo*)self->info);
-
-    if (info == NULL) {
-        Py_RETURN_NONE;
-    }
-
-    return _pygi_info_new (info);
+    return _get_child_info (self, g_object_info_get_class_struct);
 }
 
 static PyMethodDef _PyGIObjectInfo_methods[] = {
@@ -1557,16 +1556,7 @@ PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGICallableInfo);
 static PyObject *
 _wrap_g_vfunc_info_get_invoker (PyGIBaseInfo *self)
 {
-    PyObject *result = Py_None;
-    GIBaseInfo *info;
-
-    info = (GIBaseInfo *) g_vfunc_info_get_invoker ( (GIVFuncInfo *) self->info );
-    if (info)
-        result = _pygi_info_new(info);
-    else
-        Py_INCREF(Py_None);
-
-    return result;
+    return _get_child_info (self, g_vfunc_info_get_invoker);
 }
 
 static PyMethodDef _PyGIVFuncInfo_methods[] = {
