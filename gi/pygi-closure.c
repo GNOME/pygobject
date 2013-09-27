@@ -368,7 +368,18 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
             if (direction == GI_DIRECTION_IN && arg_tag == GI_TYPE_TAG_VOID &&
                     g_type_info_is_pointer (&arg_type)) {
 
-                if (user_data == NULL) {
+                if (user_data == _PyGIDefaultArgPlaceholder) {
+                    /* When user data is a place holder, skip handing anything to the callback.
+                     * This happens when the callback connect function accepts user data
+                     * but nothing was passed in.
+                     */
+                    continue;
+                } else if (user_data == NULL) {
+                    /* user data can be NULL for connect functions which don't accept
+                     * user data but we still need to pass None to the callbacks for
+                     * compatibility of setups prior to _PyGIDefaultArgPlaceholder.
+                     * For example: Regress.test_async_ready_callback
+                     */
                     Py_INCREF (Py_None);
                     value = Py_None;
                 } else {
@@ -631,10 +642,10 @@ _pygi_make_native_closure (GICallableInfo* info,
     closure = g_slice_new0 (PyGICClosure);
     closure->info = (GICallableInfo *) g_base_info_ref ( (GIBaseInfo *) info);
     closure->function = py_function;
-    closure->user_data = py_user_data ? py_user_data : Py_None;
+    closure->user_data = py_user_data;
 
     Py_INCREF (py_function);
-    Py_INCREF (closure->user_data);
+    Py_XINCREF (closure->user_data);
 
     fficlosure =
         g_callable_info_prepare_closure (info, &closure->cif, _pygi_closure_handle,
