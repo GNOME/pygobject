@@ -662,15 +662,21 @@ def timeout_add_seconds(interval, function, *user_data, **kwargs):
 __all__.append('timeout_add_seconds')
 
 
-# The real GLib API is io_add_watch(IOChannel, priority, condition, callback,
-# user_data). This needs to take into account several historical APIs:
+# The GI GLib API uses g_io_add_watch_full renamed to g_io_add_watch with
+# a signature of (channel, priority, condition, func, user_data).
+# Prior to PyGObject 3.8, this function was statically bound with an API closer to the
+# non-full version with a signature of: (fd, condition, func, *user_data)
+# We need to support this until we are okay with breaking API in a way which is
+# not backwards compatible.
+#
+# This needs to take into account several historical APIs:
 # - calling with an fd as first argument
 # - calling with a Python file object as first argument (we keep this one as
 #   it's really convenient and does not change the number of arguments)
 # - calling without a priority as second argument
 # and the usual "call without or multiple user_data", in which case the
 # callback gets the same user data arguments.
-def io_add_watch(channel, priority_, condition, *cb_and_user_data, **kwargs):
+def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **kwargs):
     if not isinstance(priority_, int) or isinstance(priority_, GLib.IOCondition):
         warnings.warn('Calling io_add_watch without priority as second argument is deprecated',
                       PyGIDeprecationWarning)
@@ -709,8 +715,15 @@ def io_add_watch(channel, priority_, condition, *cb_and_user_data, **kwargs):
         func_fdtransform = func
         real_channel = channel
 
-    return GLib.io_add_watch(real_channel, priority_, condition,
-                             func_fdtransform, user_data)
+    return real_channel, priority_, condition, func_fdtransform, user_data
+
+__all__.append('_io_add_watch_get_args')
+
+
+def io_add_watch(*args, **kwargs):
+    """io_add_watch(channel, priority, condition, func, *user_data) -> event_source_id"""
+    channel, priority, condition, func, user_data = _io_add_watch_get_args(*args, **kwargs)
+    return GLib.io_add_watch(channel, priority, condition, func, user_data)
 
 __all__.append('io_add_watch')
 
