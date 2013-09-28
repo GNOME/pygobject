@@ -808,13 +808,13 @@ PollFD = override(PollFD)
 __all__.append('PollFD')
 
 
-# The real GLib API is child_watch_add(priority, pid, callback, data).
-# The old static bindings had the following API which we still need to support
-# for a while:
-#   child_watch_add(pid, callback, data=None, priority=GLib.PRIORITY_DEFAULT)
-# and the usual "call without user_data", in which case the callback does not
-# get an user_data either.
-def child_watch_add(priority_or_pid, pid_or_callback, *args, **kwargs):
+# The GI GLib API uses g_child_watch_add_full renamed to g_child_watch_add with
+# a signature of (priority, pid, callback, data).
+# Prior to PyGObject 3.8, this function was statically bound with an API closer to the
+# non-full version with a signature of: (pid, callback, data=None, priority=GLib.PRIORITY_DEFAULT)
+# We need to support this until we are okay with breaking API in a way which is
+# not backwards compatible.
+def _child_watch_add_get_args(priority_or_pid, pid_or_callback, *args, **kwargs):
     _unspecified = object()
 
     if callable(pid_or_callback):
@@ -851,7 +851,16 @@ def child_watch_add(priority_or_pid, pid_or_callback, *args, **kwargs):
     else:
         func = callback
 
-    return GLib.child_watch_add(priority, pid, func, user_data)
+    return priority, pid, func, user_data
+
+# we need this to be accessible for unit testing
+__all__.append('_child_watch_add_get_args')
+
+
+def child_watch_add(*args, **kwargs):
+    """child_watch_add(priority, pid, function, *data)"""
+    priority, pid, function, data = _child_watch_add_get_args(*args, **kwargs)
+    return GLib.child_watch_add(priority, pid, function, data)
 
 __all__.append('child_watch_add')
 

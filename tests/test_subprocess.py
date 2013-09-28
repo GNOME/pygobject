@@ -12,68 +12,58 @@ from gi import PyGIDeprecationWarning
 class TestProcess(unittest.TestCase):
 
     def test_deprecated_child_watch_no_data(self):
-        def cb(pid, status):
-            self.status = status
-            self.loop.quit()
-
-        self.status = None
-        self.loop = GLib.MainLoop()
-        argv = [sys.executable, '-c', 'import sys']
-        pid, stdin, stdout, stderr = GLib.spawn_async(
-            argv, flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD)
-        pid.close()
+        cb = lambda pid, status: None
+        pid = object()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            GLib.child_watch_add(pid, cb)
+            res = GLib._child_watch_add_get_args(pid, cb)
             self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
-        self.loop.run()
-        self.assertEqual(self.status, 0)
+
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], GLib.PRIORITY_DEFAULT)
+        self.assertEqual(res[1], pid)
+        self.assertTrue(callable(cb))
+        self.assertEqual(res[3], None)
 
     def test_deprecated_child_watch_data_priority(self):
-        def cb(pid, status, data):
-            self.data = data
-            self.status = status
-            self.loop.quit()
-
-        self.status = None
-        self.data = None
-        self.loop = GLib.MainLoop()
-        argv = [sys.executable, '-c', 'import sys']
-        pid, stdin, stdout, stderr = GLib.spawn_async(
-            argv, flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD)
-        pid.close()
+        cb = lambda pid, status: None
+        pid = object()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            id = GLib.child_watch_add(pid, cb, 12345, GLib.PRIORITY_HIGH)
+            res = GLib._child_watch_add_get_args(pid, cb, 12345, GLib.PRIORITY_HIGH)
             self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
-        self.assertEqual(self.loop.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
-        self.loop.run()
-        self.assertEqual(self.data, 12345)
-        self.assertEqual(self.status, 0)
+
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], GLib.PRIORITY_HIGH)
+        self.assertEqual(res[1], pid)
+        self.assertEqual(res[2], cb)
+        self.assertEqual(res[3], 12345)
 
     def test_deprecated_child_watch_data_priority_kwargs(self):
-        def cb(pid, status, data):
-            self.data = data
-            self.status = status
-            self.loop.quit()
-
-        self.status = None
-        self.data = None
-        self.loop = GLib.MainLoop()
-        argv = [sys.executable, '-c', 'import sys']
-        pid, stdin, stdout, stderr = GLib.spawn_async(
-            argv, flags=GLib.SpawnFlags.DO_NOT_REAP_CHILD)
-        pid.close()
+        cb = lambda pid, status: None
+        pid = object()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
-            id = GLib.child_watch_add(pid, cb, priority=GLib.PRIORITY_HIGH, data=12345)
+            res = GLib._child_watch_add_get_args(pid, cb, priority=GLib.PRIORITY_HIGH, data=12345)
             self.assertTrue(issubclass(w[0].category, PyGIDeprecationWarning))
-        self.assertEqual(self.loop.get_context().find_source_by_id(id).priority,
-                         GLib.PRIORITY_HIGH)
-        self.loop.run()
-        self.assertEqual(self.data, 12345)
-        self.assertEqual(self.status, 0)
+
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], GLib.PRIORITY_HIGH)
+        self.assertEqual(res[1], pid)
+        self.assertEqual(res[2], cb)
+        self.assertEqual(res[3], 12345)
+
+    @unittest.expectedFailure  # using keyword args is fully supported by PyGObject machinery
+    def test_child_watch_all_kwargs(self):
+        cb = lambda pid, status: None
+        pid = object()
+
+        res = GLib._child_watch_add_get_args(priority=GLib.PRIORITY_HIGH, pid=pid, function=cb, data=12345)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(res[0], GLib.PRIORITY_HIGH)
+        self.assertEqual(res[1], pid)
+        self.assertEqual(res[2], cb)
+        self.assertEqual(res[3], 12345)
 
     def test_child_watch_no_data(self):
         def cb(pid, status):
