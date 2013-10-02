@@ -592,15 +592,22 @@ pygobject_register_class(PyObject *dict, const gchar *type_name,
 static void
 pyg_toggle_notify (gpointer data, GObject *object, gboolean is_last_ref)
 {
-    PyGObject *self = (PyGObject*) data;
+    PyGObject *self;
     PyGILState_STATE state;
 
     state = pyglib_gil_state_ensure();
 
-    if (is_last_ref)
-	Py_DECREF(self);
-    else
-        Py_INCREF(self);
+    /* Avoid thread safety problems by using qdata for wrapper retrieval
+     * instead of the user data argument.
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=709223
+     */
+    self = (PyGObject *)g_object_get_qdata (object, pygobject_wrapper_key);
+    if (self) {
+        if (is_last_ref)
+            Py_DECREF(self);
+        else
+            Py_INCREF(self);
+    }
 
     pyglib_gil_state_release(state);
 }
@@ -621,7 +628,7 @@ pygobject_switch_to_toggle_ref(PyGObject *self)
       /* Note that add_toggle_ref will never immediately call back into 
          pyg_toggle_notify */
     Py_INCREF((PyObject *) self);
-    g_object_add_toggle_ref(self->obj, pyg_toggle_notify, self);
+    g_object_add_toggle_ref(self->obj, pyg_toggle_notify, NULL);
     g_object_unref(self->obj);
 }
 
@@ -1178,7 +1185,7 @@ pygobject_clear(PyGObject *self)
     if (self->obj) {
         g_object_set_qdata_full(self->obj, pygobject_wrapper_key, NULL, NULL);
         if (self->inst_dict) {
-            g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, self);
+            g_object_remove_toggle_ref(self->obj, pyg_toggle_notify, NULL);
             self->private_flags.flags &= ~PYGOBJECT_USING_TOGGLE_REF;
         } else {
             Py_BEGIN_ALLOW_THREADS;
