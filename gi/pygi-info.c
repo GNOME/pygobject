@@ -54,6 +54,17 @@ _generate_doc_string(PyGIBaseInfo *self)
 }
 
 static PyObject *
+_get_info_string (PyGIBaseInfo *self,
+                  const gchar* (*get_info_string)(GIBaseInfo*))
+{
+    const gchar *value = get_info_string ((GIBaseInfo*)self->info);
+    if (value == NULL) {
+        Py_RETURN_NONE;
+    }
+    return PYGLIB_PyUnicode_FromString (value);
+}
+
+static PyObject *
 _get_child_info (PyGIBaseInfo *self,
                  GIBaseInfo* (*get_child_info)(GIBaseInfo*))
 {
@@ -227,13 +238,13 @@ _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_base_info_get_name_unescaped (PyGIBaseInfo *self)
 {
-    return PYGLIB_PyUnicode_FromString (g_base_info_get_name (self->info));
+    return _get_info_string (self, g_base_info_get_name);
 }
 
 static PyObject *
 _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 {
-    return PYGLIB_PyUnicode_FromString (g_base_info_get_namespace (self->info));
+    return _get_info_string (self, g_base_info_get_namespace);
 }
 
 static PyObject *
