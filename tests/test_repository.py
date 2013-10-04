@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
 
         arg = args[0]
         self.assertEqual(arg.get_container(), func_info)
-        self.assertEqual(arg.get_direction(), GIRepository.DIRECTION_OUT)
+        self.assertEqual(arg.get_direction(), GIRepository.Direction.OUT)
         self.assertEqual(arg.get_name(), 'structs')
         self.assertEqual(arg.get_namespace(), 'GIMarshallingTests')
         self.assertEqual(arg.get_pytype_hint(), 'list')
@@ -193,6 +193,17 @@ class Test(unittest.TestCase):
                               info)
         finally:
             GLib.log_set_always_fatal(old_mask)
+
+    def test_enums(self):
+        self.assertTrue(hasattr(GIRepository, 'Direction'))
+        self.assertTrue(hasattr(GIRepository, 'Transfer'))
+        self.assertTrue(hasattr(GIRepository, 'ArrayType'))
+        self.assertTrue(hasattr(GIRepository, 'ScopeType'))
+        self.assertTrue(hasattr(GIRepository, 'VFuncInfoFlags'))
+        self.assertTrue(hasattr(GIRepository, 'FieldInfoFlags'))
+        self.assertTrue(hasattr(GIRepository, 'FunctionInfoFlags'))
+        self.assertTrue(hasattr(GIRepository, 'TypeTag'))
+        self.assertTrue(hasattr(GIRepository, 'InfoType'))
 
 
 if __name__ == '__main__':

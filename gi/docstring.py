@@ -23,9 +23,7 @@
 from ._gi import \
     VFuncInfo, \
     FunctionInfo, \
-    DIRECTION_IN, \
-    DIRECTION_OUT, \
-    DIRECTION_INOUT
+    Direction
 
 
 #: Module storage for currently registered doc string generator function.
@@ -60,7 +58,7 @@ def generate_doc_string(info):
 def split_function_info_args(info):
     """Split a functions args into a tuple of two lists.
 
-    Note that args marked as DIRECTION_INOUT will be in both lists.
+    Note that args marked as Direction.INOUT will be in both lists.
 
     :Returns:
         Tuple of (in_args, out_args)
@@ -69,9 +67,9 @@ def split_function_info_args(info):
     out_args = []
     for arg in info.get_arguments():
         direction = arg.get_direction()
-        if direction in (DIRECTION_IN, DIRECTION_INOUT):
+        if direction in (Direction.IN, Direction.INOUT):
             in_args.append(arg)
-        if direction in (DIRECTION_OUT, DIRECTION_INOUT):
+        if direction in (Direction.OUT, Direction.INOUT):
             out_args.append(arg)
     return (in_args, out_args)
 

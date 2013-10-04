@@ -1685,13 +1685,6 @@ _pygi_info_register_types (PyObject *m)
     if (PyModule_AddObject(m, "BaseInfo", (PyObject *)&PyGIBaseInfo_Type))
         return;
 
-    if (PyModule_AddObject(m, "DIRECTION_IN", PyLong_FromLong(GI_DIRECTION_IN)))
-        return;
-    if (PyModule_AddObject(m, "DIRECTION_OUT", PyLong_FromLong(GI_DIRECTION_OUT)))
-        return;
-    if (PyModule_AddObject(m, "DIRECTION_INOUT", PyLong_FromLong(GI_DIRECTION_INOUT)))
-        return;
-
     _PyGI_REGISTER_TYPE (m, PyGICallableInfo_Type, CallableInfo,
                          PyGIBaseInfo_Type);
     PyGICallableInfo_Type.tp_call = (ternaryfunc) _callable_info_call;
@@ -1742,6 +1735,147 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGITypeInfo_Type, TypeInfo,
                          PyGIBaseInfo_Type);
 
-
 #undef _PyGI_REGISTER_TYPE
+
+#define _PyGI_ENUM_BEGIN(name) \
+        { \
+            const char *__enum_name = #name; \
+            PyObject *__enum_value = NULL; \
+            PyObject *__new_enum_cls = NULL; \
+            PyObject *__enum_instance_dict = PyDict_New(); \
+            PyObject *__module_name = PyObject_GetAttrString (m, "__name__"); \
+            PyDict_SetItemString (__enum_instance_dict, "__module__", __module_name); \
+            Py_DECREF (__module_name);
+
+#define _PyGI_ENUM_ADD_VALUE(prefix, name) \
+            __enum_value = PYGLIB_PyLong_FromLong (prefix##_##name); \
+            if (PyDict_SetItemString(__enum_instance_dict, #name, __enum_value)) { \
+                Py_DECREF (__enum_instance_dict); \
+                Py_DECREF (__enum_value); \
+                return; \
+            } \
+            Py_DECREF (__enum_value);
+
+#define _PyGI_ENUM_END \
+            __new_enum_cls = PyObject_CallFunction ((PyObject *)&PyType_Type, "s(O)O", \
+                                                    __enum_name, (PyObject *)&PyType_Type, \
+                                                    __enum_instance_dict); \
+            Py_DECREF (__enum_instance_dict); \
+            PyModule_AddObject (m, __enum_name, __new_enum_cls); /* steals ref */ \
+        }
+
+
+    /* GIDirection */
+    _PyGI_ENUM_BEGIN (Direction)
+        _PyGI_ENUM_ADD_VALUE (GI_DIRECTION, IN)
+        _PyGI_ENUM_ADD_VALUE (GI_DIRECTION, OUT)
+        _PyGI_ENUM_ADD_VALUE (GI_DIRECTION, INOUT)
+    _PyGI_ENUM_END
+
+
+    /* GITransfer */
+    _PyGI_ENUM_BEGIN (Transfer)
+        _PyGI_ENUM_ADD_VALUE (GI_TRANSFER, NOTHING)
+        _PyGI_ENUM_ADD_VALUE (GI_TRANSFER, CONTAINER)
+        _PyGI_ENUM_ADD_VALUE (GI_TRANSFER, EVERYTHING)
+    _PyGI_ENUM_END
+
+    /* GIArrayType */
+    _PyGI_ENUM_BEGIN (ArrayType)
+        _PyGI_ENUM_ADD_VALUE (GI_ARRAY_TYPE, C)
+        _PyGI_ENUM_ADD_VALUE (GI_ARRAY_TYPE, ARRAY)
+        _PyGI_ENUM_ADD_VALUE (GI_ARRAY_TYPE, PTR_ARRAY)
+        _PyGI_ENUM_ADD_VALUE (GI_ARRAY_TYPE, BYTE_ARRAY)
+    _PyGI_ENUM_END
+
+    /* GIScopeType */
+    _PyGI_ENUM_BEGIN (ScopeType)
+        _PyGI_ENUM_ADD_VALUE (GI_SCOPE_TYPE, INVALID)
+        _PyGI_ENUM_ADD_VALUE (GI_SCOPE_TYPE, CALL)
+        _PyGI_ENUM_ADD_VALUE (GI_SCOPE_TYPE, ASYNC)
+        _PyGI_ENUM_ADD_VALUE (GI_SCOPE_TYPE, NOTIFIED)
+    _PyGI_ENUM_END
+
+    /* GIVFuncInfoFlags */
+    _PyGI_ENUM_BEGIN (VFuncInfoFlags)
+        _PyGI_ENUM_ADD_VALUE (GI_VFUNC_MUST, CHAIN_UP)
+        _PyGI_ENUM_ADD_VALUE (GI_VFUNC_MUST, OVERRIDE)
+        _PyGI_ENUM_ADD_VALUE (GI_VFUNC_MUST, NOT_OVERRIDE)
+    _PyGI_ENUM_END
+
+    /* GIFieldInfoFlags */
+    _PyGI_ENUM_BEGIN (FieldInfoFlags)
+        _PyGI_ENUM_ADD_VALUE (GI_FIELD, IS_READABLE)
+        _PyGI_ENUM_ADD_VALUE (GI_FIELD, IS_WRITABLE)
+    _PyGI_ENUM_END
+
+    /* GIFunctionInfoFlags */
+    _PyGI_ENUM_BEGIN (FunctionInfoFlags)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_METHOD)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_CONSTRUCTOR)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_GETTER)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, IS_SETTER)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, WRAPS_VFUNC)
+        _PyGI_ENUM_ADD_VALUE (GI_FUNCTION, THROWS)
+    _PyGI_ENUM_END
+
+    /* GITypeTag */
+    _PyGI_ENUM_BEGIN (TypeTag)
+        /* Basic types */
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, VOID)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, BOOLEAN)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, INT8)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UINT8)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, INT16)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UINT16)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, INT32)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UINT32)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, INT64)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UINT64)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, FLOAT)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, DOUBLE)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, GTYPE)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UTF8)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, FILENAME)
+
+        /* Non-basic types; compare with G_TYPE_TAG_IS_BASIC */
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, ARRAY)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, INTERFACE)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, GLIST)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, GSLIST)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, GHASH)
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, ERROR)
+
+        /* Another basic type */
+        _PyGI_ENUM_ADD_VALUE (GI_TYPE_TAG, UNICHAR)
+    _PyGI_ENUM_END
+
+    /* GIInfoType */
+    _PyGI_ENUM_BEGIN (InfoType)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, INVALID)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, FUNCTION)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, CALLBACK)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, STRUCT)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, BOXED)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, ENUM)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, FLAGS)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, OBJECT)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, INTERFACE)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, CONSTANT)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, INVALID_0)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, UNION)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, VALUE)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, SIGNAL)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, VFUNC)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, PROPERTY)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, FIELD)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, ARG)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, TYPE)
+        _PyGI_ENUM_ADD_VALUE (GI_INFO_TYPE, UNRESOLVED)
+    _PyGI_ENUM_END
+
+#undef _PyGI_ENUM_BEGIN
+#undef _PyGI_ENUM_ADD_VALUE
+#undef _PyGI_ENUM_END
+
 }
