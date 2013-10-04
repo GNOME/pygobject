@@ -29,16 +29,17 @@ _cleanup_caller_allocates (PyGIInvokeState    *state,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)cache;
 
-    if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
+    /* check GValue first because GValue is also a boxed sub-type */
+    if (g_type_is_a (iface_cache->g_type, G_TYPE_VALUE)) {
+        if (was_processed)
+            g_value_unset (data);
+        g_slice_free (GValue, data);
+    } else if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
         gsize size;
         if (was_processed)
             return; /* will be cleaned up at deallocation */
         size = g_struct_info_get_size (iface_cache->interface_info);
         g_slice_free1 (size, data);
-    } else if (iface_cache->g_type == G_TYPE_VALUE) {
-        if (was_processed)
-            g_value_unset (data);
-        g_slice_free (GValue, data);
     } else if (iface_cache->is_foreign) {
         if (was_processed)
             return; /* will be cleaned up at deallocation */
