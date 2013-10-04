@@ -129,6 +129,20 @@ _make_infos_tuple (PyGIBaseInfo *self,
 
 /* BaseInfo */
 
+/* We need to be careful about calling g_base_info_get_name because
+ * calling it with a GI_INFO_TYPE_TYPE will crash.
+ * See: https://bugzilla.gnome.org/show_bug.cgi?id=709456
+ */
+static const char *
+_safe_base_info_get_name (GIBaseInfo *info)
+{
+    if (g_base_info_get_type (info) == GI_INFO_TYPE_TYPE) {
+        return "type_type_instance";
+    } else {
+        return g_base_info_get_name (info);
+    }
+}
+
 static void
 _base_info_dealloc (PyGIBaseInfo *self)
 {
@@ -145,9 +159,10 @@ _base_info_dealloc (PyGIBaseInfo *self)
 static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
+
     return PYGLIB_PyUnicode_FromFormat ("<%s object (%s) at 0x%p>",
-                                        Py_TYPE( (PyObject *) self)->tp_name, 
-                                        g_base_info_get_name (self->info), 
+                                        Py_TYPE( (PyObject *) self)->tp_name,
+                                        _safe_base_info_get_name (self->info),
                                         (void *) self);
 }
 
@@ -237,7 +252,7 @@ _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
     const gchar *name;
 
-    name = g_base_info_get_name (self->info);
+    name = _safe_base_info_get_name (self->info);
 
     /* escape keywords */
     if (_pygi_is_python_keyword (name)) {
@@ -253,7 +268,7 @@ _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 static PyObject *
 _wrap_g_base_info_get_name_unescaped (PyGIBaseInfo *self)
 {
-    return _get_info_string (self, g_base_info_get_name);
+    return _get_info_string (self, _safe_base_info_get_name);
 }
 
 static PyObject *
@@ -540,11 +555,11 @@ _function_info_call (PyGICallableInfo *self, PyObject *args, PyObject *kwargs)
             str_name = PyBytes_AsString (py_str_name);
 #endif
 
-            if (strcmp (str_name, g_base_info_get_name (container_info))) {
+            if (strcmp (str_name, _safe_base_info_get_name (container_info))) {
                 PyErr_Format (PyExc_TypeError,
                               "%s constructor cannot be used to create instances of "
                               "a subclass %s",
-                              g_base_info_get_name (container_info),
+                              _safe_base_info_get_name (container_info),
                               str_name);
                 Py_DECREF (py_str_name);
                 return NULL;
@@ -744,7 +759,7 @@ _g_arg_get_pytype_hint (PyGIBaseInfo *self)
 	    GIBaseInfo *iface = g_type_info_get_interface(&type_info);
 	    gchar *name;
 
-	    info_name = g_base_info_get_name (iface);
+	    info_name = _safe_base_info_get_name (iface);
 	    if (info_name == NULL) {
 	        g_base_info_unref (iface);
 	        return PYGLIB_PyUnicode_FromString(g_type_tag_to_string(type_tag));
@@ -1625,12 +1640,12 @@ _pygi_g_base_info_get_fullname (GIBaseInfo *info)
     if (container_info != NULL) {
         fullname = g_strdup_printf ("%s.%s.%s",
                                     g_base_info_get_namespace (container_info),
-                                    g_base_info_get_name (container_info),
-                                    g_base_info_get_name (info));
+                                    _safe_base_info_get_name (container_info),
+                                    _safe_base_info_get_name (info));
     } else {
         fullname = g_strdup_printf ("%s.%s",
                                     g_base_info_get_namespace (info),
-                                    g_base_info_get_name (info));
+                                    _safe_base_info_get_name (info));
     }
 
     if (fullname == NULL) {
