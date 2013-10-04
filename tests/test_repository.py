@@ -78,6 +78,7 @@ class Test(unittest.TestCase):
         info2 = repo.find_by_name('GIMarshallingTests', 'Object')
         self.assertFalse(info is info2)
         self.assertEqual(info, info2)
+        self.assertTrue(info.equal(info2))
 
     def test_object_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')

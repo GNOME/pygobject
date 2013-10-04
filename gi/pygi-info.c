@@ -152,25 +152,40 @@ _base_info_repr (PyGIBaseInfo *self)
 }
 
 static PyObject *
-_base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
+_wrap_g_base_info_equal (PyGIBaseInfo *self, PyObject *other)
 {
-    PyObject *res;
     GIBaseInfo *other_info;
 
-    if (!PyObject_TypeCheck(other, &PyGIBaseInfo_Type)) {
-        Py_INCREF(Py_NotImplemented);
+    if (!PyObject_TypeCheck (other, &PyGIBaseInfo_Type)) {
+        Py_INCREF (Py_NotImplemented);
         return Py_NotImplemented;
     }
 
     other_info = ((PyGIBaseInfo *)other)->info;
+    if (g_base_info_equal (self->info, other_info)) {
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
+}
+
+static PyObject *
+_base_info_richcompare (PyGIBaseInfo *self, PyObject *other, int op)
+{
+    PyObject *res;
 
     switch (op) {
         case Py_EQ:
-            res = g_base_info_equal (self->info, other_info) ? Py_True : Py_False;
-            break;
+            return _wrap_g_base_info_equal (self, other);
         case Py_NE:
-            res = g_base_info_equal (self->info, other_info) ? Py_False : Py_True;
-            break;
+            res = _wrap_g_base_info_equal (self, other);
+            if (res == Py_True) {
+                Py_DECREF (res);
+                Py_RETURN_FALSE;
+            } else {
+                Py_DECREF (res);
+                Py_RETURN_TRUE;
+            }
         default:
             res = Py_NotImplemented;
             break;
@@ -270,6 +285,7 @@ static PyMethodDef _PyGIBaseInfo_methods[] = {
     { "get_name_unescaped", (PyCFunction) _wrap_g_base_info_get_name_unescaped, METH_NOARGS },
     { "get_namespace", (PyCFunction) _wrap_g_base_info_get_namespace, METH_NOARGS },
     { "get_container", (PyCFunction) _wrap_g_base_info_get_container, METH_NOARGS },
+    { "equal", (PyCFunction) _wrap_g_base_info_equal, METH_O },
     { NULL, NULL, 0 }
 };
 
