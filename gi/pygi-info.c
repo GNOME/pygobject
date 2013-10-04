@@ -600,7 +600,7 @@ static PyMethodDef _PyGIErrorDomainInfo_methods[] = {
 };
 
 /* SignalInfo */
-PYGLIB_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGIBaseInfo);
+PYGLIB_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGICallableInfo);
 
 static PyMethodDef _PyGISignalInfo_methods[] = {
     { NULL, NULL, 0 }
@@ -2025,6 +2025,9 @@ _pygi_info_register_types (PyObject *m)
                          PyGICallableInfo_Type);
     PyGIVFuncInfo_Type.tp_descr_get = (descrgetfunc) _vfunc_info_descr_get;
 
+    _PyGI_REGISTER_TYPE (m, PyGISignalInfo_Type, SignalInfo,
+                         PyGICallableInfo_Type);
+
     _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallbackInfo_Type, CallbackInfo,
@@ -2050,8 +2053,6 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGIBoxedInfo_Type, BoxedInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIErrorDomainInfo_Type, ErrorDomainInfo,
-                         PyGIBaseInfo_Type);
-    _PyGI_REGISTER_TYPE (m, PyGISignalInfo_Type, SignalInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIPropertyInfo_Type, PropertyInfo,
                          PyGIBaseInfo_Type);
