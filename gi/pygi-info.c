@@ -620,7 +620,7 @@ PYGLIB_DEFINE_TYPE ("gi.ArgInfo", PyGIArgInfo_Type, PyGIBaseInfo);
 static PyObject *
 _wrap_g_arg_info_get_direction (PyGIBaseInfo *self)
 {
-    return PyLong_FromLong (
+    return PYGLIB_PyLong_FromLong (
 	    g_arg_info_get_direction ((GIArgInfo*)self->info) );
 }
 
