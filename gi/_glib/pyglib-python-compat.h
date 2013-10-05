@@ -198,6 +198,7 @@ PyTypeObject symbol = {                                 \
 
 #define PYGLIB_PyLong_Check PyLong_Check
 #define PYGLIB_PyLong_FromLong PyLong_FromLong
+#define PYGLIB_PyLong_FromSize_t PyLong_FromSize_t
 #define PYGLIB_PyLong_AsLong PyLong_AsLong
 #define PYGLIB_PyLong_AS_LONG(o) PyLong_AS_LONG((PyObject*)(o))
 #define PYGLIB_PyLongObject PyLongObject

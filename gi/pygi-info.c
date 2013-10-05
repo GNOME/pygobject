@@ -2,6 +2,7 @@
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
  * Copyright (C) 2005-2009 Johan Dahlin <johan@gnome.org>
+ * Copyright (C) 2013 Simon Feltman <sfeltman@gnome.org>
  *
  *   pygi-info.c: GI.*Info wrappers.
  *
@@ -72,6 +73,31 @@ _get_child_info (PyGIBaseInfo *self,
     PyObject *py_info;
 
     info = get_child_info ((GIBaseInfo*)self->info);
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    py_info = _pygi_info_new (info);
+    g_base_info_unref (info);
+    return py_info;
+}
+
+
+static PyObject *
+_get_child_info_by_name (PyGIBaseInfo *self, PyObject *py_name,
+                         GIBaseInfo* (*get_child_info_by_name)(GIBaseInfo*, const gchar*))
+{
+    GIBaseInfo *info;
+    PyObject *py_info;
+    char *name;
+
+    if (!PYGLIB_PyUnicode_Check (py_name)) {
+        PyErr_SetString (PyExc_TypeError, "expected string name");
+        return NULL;
+    }
+
+    name = PYGLIB_PyUnicode_AsString (py_name);
+    info = get_child_info_by_name ((GIObjectInfo*)self->info, name);
     if (info == NULL) {
         Py_RETURN_NONE;
     }
@@ -248,6 +274,12 @@ _pygi_is_python_keyword (const gchar *name)
 }
 
 static PyObject *
+_wrap_g_base_info_get_type (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_base_info_get_type (self->info));
+}
+
+static PyObject *
 _wrap_g_base_info_get_name (PyGIBaseInfo *self)
 {
     const gchar *name;
@@ -278,6 +310,34 @@ _wrap_g_base_info_get_namespace (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_base_info_is_deprecated (PyGIBaseInfo *self)
+{
+    if (g_base_info_is_deprecated (self->info))
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+
+static PyObject *
+_wrap_g_base_info_get_attribute (PyGIBaseInfo *self, PyObject *arg)
+{
+    char *name;
+    const char *value;
+
+    if (!PYGLIB_PyUnicode_Check (arg)) {
+        PyErr_SetString (PyExc_TypeError, "expected string name");
+        return NULL;
+    }
+
+    name = PYGLIB_PyUnicode_AsString (arg);
+    value = g_base_info_get_attribute (self->info, name);
+    if (value == NULL) {
+        Py_RETURN_NONE;
+    }
+    return PYGLIB_PyUnicode_FromString (value);
+}
+
+static PyObject *
 _wrap_g_base_info_get_container (PyGIBaseInfo *self)
 {
     /* Note: don't use _get_child_info because g_base_info_get_container
@@ -296,9 +356,12 @@ _wrap_g_base_info_get_container (PyGIBaseInfo *self)
 
 
 static PyMethodDef _PyGIBaseInfo_methods[] = {
+    { "get_type", (PyCFunction) _wrap_g_base_info_get_type, METH_NOARGS },
     { "get_name", (PyCFunction) _wrap_g_base_info_get_name, METH_NOARGS },
     { "get_name_unescaped", (PyCFunction) _wrap_g_base_info_get_name_unescaped, METH_NOARGS },
     { "get_namespace", (PyCFunction) _wrap_g_base_info_get_namespace, METH_NOARGS },
+    { "is_deprecated", (PyCFunction) _wrap_g_base_info_is_deprecated, METH_NOARGS },
+    { "get_attribute", (PyCFunction) _wrap_g_base_info_get_attribute, METH_O },
     { "get_container", (PyCFunction) _wrap_g_base_info_get_container, METH_NOARGS },
     { "equal", (PyCFunction) _wrap_g_base_info_equal, METH_O },
     { NULL, NULL, 0 }
@@ -465,13 +528,6 @@ out:
 
 /* CallableInfo */
 PYGLIB_DEFINE_TYPE ("gi.CallableInfo", PyGICallableInfo_Type, PyGICallableInfo);
-
-static PyObject *
-_wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
-{
-    return _make_infos_tuple (self, g_callable_info_get_n_args, g_callable_info_get_arg);
-}
-
 
 /* _callable_info_call:
  *
@@ -649,9 +705,61 @@ _callable_info_dealloc (PyGICallableInfo *self)
     PyGIBaseInfo_Type.tp_dealloc ((PyObject *) self);
 }
 
+static PyObject *
+_wrap_g_callable_info_get_arguments (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_callable_info_get_n_args, g_callable_info_get_arg);
+}
+
+static PyObject *
+_wrap_g_callable_info_get_return_type (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_callable_info_get_return_type);
+}
+
+static PyObject *
+_wrap_g_callable_info_get_caller_owns (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_callable_info_get_caller_owns (self->info) );
+}
+
+static PyObject *
+_wrap_g_callable_info_may_return_null (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (
+            g_callable_info_may_return_null (self->info) );
+}
+
+static PyObject *
+_wrap_g_callable_info_get_return_attribute (PyGIBaseInfo *self, PyObject *py_name)
+{
+    gchar *name;
+    const gchar *attr;
+
+    if (!PYGLIB_PyUnicode_Check (py_name)) {
+        PyErr_SetString (PyExc_TypeError, "expected string name");
+        return NULL;
+    }
+
+    name = PYGLIB_PyUnicode_AsString (py_name);
+    attr = g_callable_info_get_return_attribute (self->info, name);
+    if (attr) {
+        return PYGLIB_PyUnicode_FromString (
+                g_callable_info_get_return_attribute (self->info, name));
+    } else {
+        PyErr_Format(PyExc_AttributeError, "return attribute %s not found", name);
+        return NULL;
+    }
+}
+
 static PyMethodDef _PyGICallableInfo_methods[] = {
     { "invoke", (PyCFunction) _wrap_g_callable_info_invoke, METH_VARARGS | METH_KEYWORDS },
     { "get_arguments", (PyCFunction) _wrap_g_callable_info_get_arguments, METH_NOARGS },
+    { "get_return_type", (PyCFunction) _wrap_g_callable_info_get_return_type, METH_NOARGS },
+    { "get_caller_owns", (PyCFunction) _wrap_g_callable_info_get_caller_owns, METH_NOARGS },
+    { "may_return_null", (PyCFunction) _wrap_g_callable_info_may_return_null, METH_NOARGS },
+    { "get_return_attribute", (PyCFunction) _wrap_g_callable_info_get_return_attribute, METH_O },
     { NULL, NULL, 0 }
 };
 
@@ -679,14 +787,60 @@ static PyMethodDef _PyGIErrorDomainInfo_methods[] = {
 /* SignalInfo */
 PYGLIB_DEFINE_TYPE ("gi.SignalInfo", PyGISignalInfo_Type, PyGICallableInfo);
 
+static PyObject *
+_wrap_g_signal_info_get_flags (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_signal_info_get_flags ((GISignalInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_signal_info_get_class_closure (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_signal_info_get_class_closure);
+}
+
+static PyObject *
+_wrap_g_signal_info_true_stops_emit (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (
+            g_signal_info_true_stops_emit ((GISignalInfo *)self->info) );
+}
+
 static PyMethodDef _PyGISignalInfo_methods[] = {
+    { "get_flags", (PyCFunction) _wrap_g_signal_info_get_flags, METH_NOARGS },
+    { "get_class_closure", (PyCFunction) _wrap_g_signal_info_get_class_closure, METH_NOARGS },
+    { "true_stops_emit", (PyCFunction) _wrap_g_signal_info_true_stops_emit, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
 /* PropertyInfo */
 PYGLIB_DEFINE_TYPE ("gi.PropertyInfo", PyGIPropertyInfo_Type, PyGIBaseInfo);
 
+static PyObject *
+_wrap_g_property_info_get_flags (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_property_info_get_flags ((GIPropertyInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_property_info_get_type (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_property_info_get_type);
+}
+
+static PyObject *
+_wrap_g_property_info_get_ownership_transfer (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_property_info_get_ownership_transfer ((GIPropertyInfo *)self->info) );
+}
+
 static PyMethodDef _PyGIPropertyInfo_methods[] = {
+    { "get_flags", (PyCFunction) _wrap_g_property_info_get_flags, METH_NOARGS },
+    { "get_type", (PyCFunction) _wrap_g_property_info_get_type, METH_NOARGS },
+    { "get_ownership_transfer", (PyCFunction) _wrap_g_property_info_get_ownership_transfer, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -727,6 +881,40 @@ _wrap_g_arg_info_may_be_null (PyGIBaseInfo *self)
 {
     return PyBool_FromLong (
 	    g_arg_info_may_be_null ((GIArgInfo*)self->info) );
+}
+
+static PyObject *
+_wrap_g_arg_info_get_ownership_transfer (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_arg_info_get_ownership_transfer ((GIArgInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_arg_info_get_scope (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_arg_info_get_scope ((GIArgInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_arg_info_get_closure (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_arg_info_get_closure ((GIArgInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_arg_info_get_destroy (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (
+            g_arg_info_get_destroy ((GIArgInfo *)self->info) );
+}
+
+static PyObject *
+_wrap_g_arg_info_get_type (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_arg_info_get_type);
 }
 
 /* _g_arg_get_pytype_hint
@@ -783,6 +971,11 @@ static PyMethodDef _PyGIArgInfo_methods[] = {
     { "is_return_value", (PyCFunction) _wrap_g_arg_info_is_return_value, METH_NOARGS },
     { "is_optional", (PyCFunction) _wrap_g_arg_info_is_optional, METH_NOARGS },
     { "may_be_null", (PyCFunction) _wrap_g_arg_info_may_be_null, METH_NOARGS },
+    { "get_ownership_transfer", (PyCFunction) _wrap_g_arg_info_get_ownership_transfer, METH_NOARGS },
+    { "get_scope", (PyCFunction) _wrap_g_arg_info_get_scope, METH_NOARGS },
+    { "get_closure", (PyCFunction) _wrap_g_arg_info_get_closure, METH_NOARGS },
+    { "get_destroy", (PyCFunction) _wrap_g_arg_info_get_destroy, METH_NOARGS },
+    { "get_type", (PyCFunction) _wrap_g_arg_info_get_type, METH_NOARGS },
     { "get_pytype_hint", (PyCFunction) _g_arg_get_pytype_hint, METH_NOARGS },
     { NULL, NULL, 0 }
 };
@@ -791,7 +984,88 @@ static PyMethodDef _PyGIArgInfo_methods[] = {
 /* TypeInfo */
 PYGLIB_DEFINE_TYPE ("gi.TypeInfo", PyGITypeInfo_Type, PyGIBaseInfo);
 
+static PyObject *
+_wrap_g_type_info_is_pointer (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_type_info_is_pointer (self->info));
+}
+
+static PyObject *
+_wrap_g_type_info_get_tag (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_type_info_get_tag (self->info));
+}
+
+static PyObject *
+_wrap_g_type_info_get_tag_as_string (PyGIBaseInfo *self)
+{
+    GITypeTag tag = g_type_info_get_tag (self->info);
+    return PYGLIB_PyUnicode_FromString (g_type_tag_to_string(tag));
+}
+
+static PyObject *
+_wrap_g_type_info_get_param_type (PyGIBaseInfo *self, PyObject *py_n)
+{
+    GIBaseInfo *info;
+    PyObject *py_info;
+    gint n;
+
+    if (!PYGLIB_PyLong_Check (py_n)) {
+        PyErr_SetString(PyExc_TypeError, "expected integer value");
+        return NULL;
+    }
+
+    n = PYGLIB_PyLong_AsLong (py_n);
+    info = (GIBaseInfo *) g_type_info_get_param_type ( (GITypeInfo *) self->info, n);
+    if (info == NULL) {
+        Py_RETURN_NONE;
+    }
+
+    py_info = _pygi_info_new (info);
+    g_base_info_unref (info);
+    return py_info;
+}
+
+static PyObject *
+_wrap_g_type_info_get_interface (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_type_info_get_interface);
+}
+
+static PyObject *
+_wrap_g_type_info_get_array_length (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_type_info_get_array_length (self->info));
+}
+
+static PyObject *
+_wrap_g_type_info_get_array_fixed_size (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_type_info_get_array_fixed_size (self->info));
+}
+
+static PyObject *
+_wrap_g_type_info_is_zero_terminated (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_type_info_is_zero_terminated (self->info));
+}
+
+static PyObject *
+_wrap_g_type_info_get_array_type (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_type_info_get_array_type (self->info));
+}
+
 static PyMethodDef _PyGITypeInfo_methods[] = {
+    { "is_pointer", (PyCFunction) _wrap_g_type_info_is_pointer, METH_NOARGS },
+    { "get_tag", (PyCFunction) _wrap_g_type_info_get_tag, METH_NOARGS },
+    { "get_tag_as_string", (PyCFunction) _wrap_g_type_info_get_tag_as_string, METH_NOARGS },
+    { "get_param_type", (PyCFunction) _wrap_g_type_info_get_param_type, METH_O },
+    { "get_interface", (PyCFunction) _wrap_g_type_info_get_interface, METH_NOARGS },
+    { "get_array_length", (PyCFunction) _wrap_g_type_info_get_array_length, METH_NOARGS },
+    { "get_array_fixed_size", (PyCFunction) _wrap_g_type_info_get_array_fixed_size, METH_NOARGS },
+    { "is_zero_terminated", (PyCFunction) _wrap_g_type_info_is_zero_terminated, METH_NOARGS },
+    { "get_array_type", (PyCFunction) _wrap_g_type_info_get_array_type, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -977,14 +1251,54 @@ _pygi_g_type_info_size (GITypeInfo *type_info)
     return size;
 }
 
+static PyObject *
+_wrap_g_function_info_get_symbol (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_function_info_get_symbol);
+}
+
+static PyObject *
+_wrap_g_function_info_get_flags (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_function_info_get_flags (self->info));
+}
+
+static PyObject *
+_wrap_g_function_info_get_property (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_function_info_get_property);
+}
+
+static PyObject *
+_wrap_g_function_info_get_vfunc (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_function_info_get_vfunc);
+}
+
 static PyMethodDef _PyGIFunctionInfo_methods[] = {
     { "is_constructor", (PyCFunction) _wrap_g_function_info_is_constructor, METH_NOARGS },
     { "is_method", (PyCFunction) _wrap_g_function_info_is_method, METH_NOARGS },
+    { "get_symbol", (PyCFunction) _wrap_g_function_info_get_symbol, METH_NOARGS },
+    { "get_flags", (PyCFunction) _wrap_g_function_info_get_flags, METH_NOARGS },
+    { "get_property", (PyCFunction) _wrap_g_function_info_get_property, METH_NOARGS },
+    { "get_vfunc", (PyCFunction) _wrap_g_function_info_get_vfunc, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
 /* RegisteredTypeInfo */
 PYGLIB_DEFINE_TYPE ("gi.RegisteredTypeInfo", PyGIRegisteredTypeInfo_Type, PyGIBaseInfo);
+
+static PyObject *
+_wrap_g_registered_type_info_get_type_name (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_registered_type_info_get_type_name);
+}
+
+static PyObject *
+_wrap_g_registered_type_info_get_type_init (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_registered_type_info_get_type_init);
+}
 
 static PyObject *
 _wrap_g_registered_type_info_get_g_type (PyGIBaseInfo *self)
@@ -997,6 +1311,8 @@ _wrap_g_registered_type_info_get_g_type (PyGIBaseInfo *self)
 }
 
 static PyMethodDef _PyGIRegisteredTypeInfo_methods[] = {
+    { "get_type_name", (PyCFunction) _wrap_g_registered_type_info_get_type_name, METH_NOARGS },
+    { "get_type_init", (PyCFunction) _wrap_g_registered_type_info_get_type_init, METH_NOARGS },
     { "get_g_type", (PyCFunction) _wrap_g_registered_type_info_get_g_type, METH_NOARGS },
     { NULL, NULL, 0 }
 };
@@ -1017,9 +1333,37 @@ _wrap_g_struct_info_get_methods (PyGIBaseInfo *self)
     return _make_infos_tuple (self, g_struct_info_get_n_methods, g_struct_info_get_method);
 }
 
+static PyObject *
+_wrap_g_struct_info_get_size (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromSize_t (g_struct_info_get_size (self->info));
+}
+
+static PyObject *
+_wrap_g_struct_info_get_alignment (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromSize_t (g_struct_info_get_alignment (self->info));
+}
+
+static PyObject *
+_wrap_g_struct_info_is_gtype_struct (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_struct_info_is_gtype_struct (self->info));
+}
+
+static PyObject *
+_wrap_g_struct_info_is_foreign (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_struct_info_is_foreign (self->info));
+}
+
 static PyMethodDef _PyGIStructInfo_methods[] = {
     { "get_fields", (PyCFunction) _wrap_g_struct_info_get_fields, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_struct_info_get_methods, METH_NOARGS },
+    { "get_size", (PyCFunction) _wrap_g_struct_info_get_size, METH_NOARGS },
+    { "get_alignment", (PyCFunction) _wrap_g_struct_info_get_alignment, METH_NOARGS },
+    { "is_gtype_struct", (PyCFunction) _wrap_g_struct_info_is_gtype_struct, METH_NOARGS },
+    { "is_foreign", (PyCFunction) _wrap_g_struct_info_is_foreign, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1157,9 +1501,23 @@ _wrap_g_enum_info_is_flags (PyGIBaseInfo *self)
     }
 }
 
+static PyObject *
+_wrap_g_enum_info_get_methods (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_enum_info_get_n_methods, g_enum_info_get_method);
+}
+
+static PyObject *
+_wrap_g_enum_info_get_storage_type (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_enum_info_get_storage_type ((GIBaseInfo *) self->info));
+}
+
 static PyMethodDef _PyGIEnumInfo_methods[] = {
     { "get_values", (PyCFunction) _wrap_g_enum_info_get_values, METH_NOARGS },
     { "is_flags", (PyCFunction) _wrap_g_enum_info_is_flags, METH_NOARGS },
+    { "get_methods", (PyCFunction) _wrap_g_enum_info_get_methods, METH_NOARGS },
+    { "get_storage_type", (PyCFunction) _wrap_g_enum_info_get_storage_type, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1180,9 +1538,27 @@ _wrap_g_object_info_get_methods (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_object_info_find_method (PyGIBaseInfo *self, PyObject *py_name)
+{
+    return _get_child_info_by_name (self, py_name, g_object_info_find_method);
+}
+
+static PyObject *
 _wrap_g_object_info_get_fields (PyGIBaseInfo *self)
 {
     return _make_infos_tuple (self, g_object_info_get_n_fields, g_object_info_get_field);
+}
+
+static PyObject *
+_wrap_g_object_info_get_properties (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_object_info_get_n_properties, g_object_info_get_property);
+}
+
+static PyObject *
+_wrap_g_object_info_get_signals (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_object_info_get_n_signals, g_object_info_get_signal);
 }
 
 static PyObject *
@@ -1211,20 +1587,79 @@ _wrap_g_object_info_get_abstract (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_object_info_get_type_name (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_type_name);
+}
+
+static PyObject *
+_wrap_g_object_info_get_type_init (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_type_init);
+}
+
+static PyObject *
+_wrap_g_object_info_get_fundamental (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_object_info_get_fundamental ( (GIObjectInfo*) self->info));
+}
+
+static PyObject *
 _wrap_g_object_info_get_class_struct (PyGIBaseInfo *self)
 {
     return _get_child_info (self, g_object_info_get_class_struct);
 }
 
+static PyObject *
+_wrap_g_object_info_find_vfunc (PyGIBaseInfo *self, PyObject *py_name)
+{
+    return _get_child_info_by_name (self, py_name, g_object_info_find_vfunc);
+}
+
+static PyObject *
+_wrap_g_object_info_get_unref_function (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_unref_function);
+}
+
+static PyObject *
+_wrap_g_object_info_get_ref_function (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_ref_function);
+}
+
+static PyObject *
+_wrap_g_object_info_get_set_value_function (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_set_value_function);
+}
+
+static PyObject *
+_wrap_g_object_info_get_get_value_function (PyGIBaseInfo *self)
+{
+    return _get_info_string (self, g_object_info_get_get_value_function);
+}
+
 static PyMethodDef _PyGIObjectInfo_methods[] = {
     { "get_parent", (PyCFunction) _wrap_g_object_info_get_parent, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_object_info_get_methods, METH_NOARGS },
+    { "find_method", (PyCFunction) _wrap_g_object_info_find_method, METH_O },
     { "get_fields", (PyCFunction) _wrap_g_object_info_get_fields, METH_NOARGS },
+    { "get_properties", (PyCFunction) _wrap_g_object_info_get_properties, METH_NOARGS },
+    { "get_signals", (PyCFunction) _wrap_g_object_info_get_signals, METH_NOARGS },
     { "get_interfaces", (PyCFunction) _wrap_g_object_info_get_interfaces, METH_NOARGS },
     { "get_constants", (PyCFunction) _wrap_g_object_info_get_constants, METH_NOARGS },
     { "get_vfuncs", (PyCFunction) _wrap_g_object_info_get_vfuncs, METH_NOARGS },
+    { "find_vfunc", (PyCFunction) _wrap_g_object_info_find_vfunc, METH_O },
     { "get_abstract", (PyCFunction) _wrap_g_object_info_get_abstract, METH_NOARGS },
+    { "get_type_name", (PyCFunction) _wrap_g_object_info_get_type_name, METH_NOARGS },
+    { "get_type_init", (PyCFunction) _wrap_g_object_info_get_type_init, METH_NOARGS },
+    { "get_fundamental", (PyCFunction) _wrap_g_object_info_get_fundamental, METH_NOARGS },
     { "get_class_struct", (PyCFunction) _wrap_g_object_info_get_class_struct, METH_NOARGS },
+    { "get_unref_function", (PyCFunction) _wrap_g_object_info_get_unref_function, METH_NOARGS },
+    { "get_ref_function", (PyCFunction) _wrap_g_object_info_get_ref_function, METH_NOARGS },
+    { "get_set_value_function", (PyCFunction) _wrap_g_object_info_get_set_value_function, METH_NOARGS },
+    { "get_get_value_function", (PyCFunction) _wrap_g_object_info_get_get_value_function, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1239,6 +1674,12 @@ _wrap_g_interface_info_get_methods (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_interface_info_find_method (PyGIBaseInfo *self, PyObject *py_name)
+{
+    return _get_child_info_by_name (self, py_name, g_interface_info_find_method);
+}
+
+static PyObject *
 _wrap_g_interface_info_get_constants (PyGIBaseInfo *self)
 {
     return _make_infos_tuple (self, g_interface_info_get_n_constants, g_interface_info_get_constant);
@@ -1250,10 +1691,53 @@ _wrap_g_interface_info_get_vfuncs (PyGIBaseInfo *self)
     return _make_infos_tuple (self, g_interface_info_get_n_vfuncs, g_interface_info_get_vfunc);
 }
 
+static PyObject *
+_wrap_g_interface_info_find_vfunc (PyGIBaseInfo *self, PyObject *py_name)
+{
+    return _get_child_info_by_name (self, py_name, g_interface_info_find_vfunc);
+}
+
+static PyObject *
+_wrap_g_interface_info_get_prerequisites (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_interface_info_get_n_prerequisites, g_interface_info_get_prerequisite);
+}
+
+static PyObject *
+_wrap_g_interface_info_get_properties (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_interface_info_get_n_properties, g_interface_info_get_property);
+}
+
+static PyObject *
+_wrap_g_interface_info_get_iface_struct (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_interface_info_get_iface_struct);
+}
+
+static PyObject *
+_wrap_g_interface_info_get_signals (PyGIBaseInfo *self)
+{
+    return _make_infos_tuple (self, g_interface_info_get_n_signals, g_interface_info_get_signal);
+}
+
+static PyObject *
+_wrap_g_interface_info_find_signal (PyGIBaseInfo *self, PyObject *py_name)
+{
+    return _get_child_info_by_name (self, py_name, g_interface_info_find_signal);
+}
+
 static PyMethodDef _PyGIInterfaceInfo_methods[] = {
+    { "get_prerequisites", (PyCFunction) _wrap_g_interface_info_get_prerequisites, METH_NOARGS },
+    { "get_properties", (PyCFunction) _wrap_g_interface_info_get_properties, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_interface_info_get_methods, METH_NOARGS },
-    { "get_constants", (PyCFunction) _wrap_g_interface_info_get_constants, METH_NOARGS },
+    { "find_method", (PyCFunction) _wrap_g_interface_info_find_method, METH_O },
+    { "get_signals", (PyCFunction) _wrap_g_interface_info_get_signals, METH_NOARGS },
+    { "find_signal", (PyCFunction) _wrap_g_interface_info_find_signal, METH_O },
     { "get_vfuncs", (PyCFunction) _wrap_g_interface_info_get_vfuncs, METH_NOARGS },
+    { "get_constants", (PyCFunction) _wrap_g_interface_info_get_constants, METH_NOARGS },
+    { "get_iface_struct", (PyCFunction) _wrap_g_interface_info_get_iface_struct, METH_NOARGS },
+    { "find_vfunc", (PyCFunction) _wrap_g_interface_info_find_vfunc, METH_O },
     { NULL, NULL, 0 }
 };
 
@@ -1578,9 +2062,37 @@ out:
     return retval;
 }
 
+static PyObject *
+_wrap_g_field_info_get_flags (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_field_info_get_flags (self->info));
+}
+
+static PyObject *
+_wrap_g_field_info_get_size (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_field_info_get_size (self->info));
+}
+
+static PyObject *
+_wrap_g_field_info_get_offset (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_field_info_get_offset (self->info));
+}
+
+static PyObject *
+_wrap_g_field_info_get_type (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_field_info_get_type);
+}
+
 static PyMethodDef _PyGIFieldInfo_methods[] = {
     { "get_value", (PyCFunction) _wrap_g_field_info_get_value, METH_VARARGS },
     { "set_value", (PyCFunction) _wrap_g_field_info_set_value, METH_VARARGS },
+    { "get_flags", (PyCFunction) _wrap_g_field_info_get_flags, METH_VARARGS },
+    { "get_size", (PyCFunction) _wrap_g_field_info_get_size, METH_VARARGS },
+    { "get_offset", (PyCFunction) _wrap_g_field_info_get_offset, METH_VARARGS },
+    { "get_type", (PyCFunction) _wrap_g_field_info_get_type, METH_VARARGS },
     { NULL, NULL, 0 }
 };
 
@@ -1596,12 +2108,33 @@ static PyMethodDef _PyGIUnresolvedInfo_methods[] = {
 PYGLIB_DEFINE_TYPE ("gi.VFuncInfo", PyGIVFuncInfo_Type, PyGICallableInfo);
 
 static PyObject *
+_wrap_g_vfunc_info_get_flags (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_vfunc_info_get_flags ((GIVFuncInfo *) self->info));
+}
+
+static PyObject *
+_wrap_g_vfunc_info_get_offset (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromLong (g_vfunc_info_get_offset ((GIVFuncInfo *) self->info));
+}
+
+static PyObject *
+_wrap_g_vfunc_info_get_signal (PyGIBaseInfo *self)
+{
+    return _get_child_info (self, g_vfunc_info_get_signal);
+}
+
+static PyObject *
 _wrap_g_vfunc_info_get_invoker (PyGIBaseInfo *self)
 {
     return _get_child_info (self, g_vfunc_info_get_invoker);
 }
 
 static PyMethodDef _PyGIVFuncInfo_methods[] = {
+    { "get_flags", (PyCFunction) _wrap_g_vfunc_info_get_flags, METH_NOARGS },
+    { "get_offset", (PyCFunction) _wrap_g_vfunc_info_get_offset, METH_NOARGS },
+    { "get_signal", (PyCFunction) _wrap_g_vfunc_info_get_signal, METH_NOARGS },
     { "get_invoker", (PyCFunction) _wrap_g_vfunc_info_get_invoker, METH_NOARGS },
     { NULL, NULL, 0 }
 };
@@ -1654,6 +2187,7 @@ _pygi_g_base_info_get_fullname (GIBaseInfo *info)
 
     return fullname;
 }
+
 
 void
 _pygi_info_register_types (PyObject *m)
