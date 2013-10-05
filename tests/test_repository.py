@@ -26,6 +26,8 @@ import collections
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject
+from gi.repository import GLib
+from gi.repository import GIMarshallingTests
 
 try:
     import cairo
@@ -164,6 +166,32 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(vfunc, GIRepository.VFuncInfo))
         self.assertEqual(vfunc.get_name(), 'vfunc_return_value_only')
         self.assertEqual(vfunc.get_invoker(), invoker)
+
+    def test_flags_double_registration_error(self):
+        # a warning is printed for double registration and pygobject will
+        # also raise a RuntimeError.
+        GIMarshallingTests.NoTypeFlags  # cause flags registration
+        info = repo.find_by_name('GIMarshallingTests', 'NoTypeFlags')
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            self.assertRaises(RuntimeError,
+                              GIRepository.flags_register_new_gtype_and_add,
+                              info)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
+
+    def test_enum_double_registration_error(self):
+        # a warning is printed for double registration and pygobject will
+        # also raise a RuntimeError.
+        GIMarshallingTests.Enum  # cause enum registration
+        info = repo.find_by_name('GIMarshallingTests', 'Enum')
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            self.assertRaises(RuntimeError,
+                              GIRepository.enum_register_new_gtype_and_add,
+                              info)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
 
 if __name__ == '__main__':

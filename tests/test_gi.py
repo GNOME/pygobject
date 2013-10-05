@@ -1479,17 +1479,6 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.Enum.__gtype__.name,
                          'PyGIMarshallingTestsEnum')
 
-    def test_enum_double_registration_error(self):
-        # a warning is printed for double registration and pygobject will
-        # also raise a RuntimeError.
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
-            self.assertRaises(RuntimeError,
-                              gi._gi.enum_register_new_gtype_and_add,
-                              GIMarshallingTests.Enum.__info__)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
-
     def test_enum_add_type_error(self):
         self.assertRaises(TypeError,
                           gi._gi.enum_add,
@@ -1647,17 +1636,6 @@ class TestNoTypeFlags(unittest.TestCase):
     def test_flags_gtype_name_is_namespaced(self):
         self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
                          'PyGIMarshallingTestsNoTypeFlags')
-
-    def test_flags_double_registration_error(self):
-        # a warning is printed for double registration and pygobject will
-        # also raise a RuntimeError.
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
-            self.assertRaises(RuntimeError,
-                              gi._gi.flags_register_new_gtype_and_add,
-                              GIMarshallingTests.NoTypeFlags.__info__)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
 
 class TestStructure(unittest.TestCase):
@@ -2955,22 +2933,6 @@ class TestProjectVersion(unittest.TestCase):
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
         gi.check_version((3, 3, 5))
         gi.check_version("3.3.5")
-
-
-class TestObjectInfo(unittest.TestCase):
-    def test_get_abstract_with_abstract(self):
-        repo = gi.gi.Repository.get_default()
-        info = repo.find_by_name('GObject', 'TypeModule')
-        self.assertTrue(info.get_abstract())
-
-    def test_get_abstract_with_concrete(self):
-        repo = gi.gi.Repository.get_default()
-        info = repo.find_by_name('GObject', 'Object')
-        self.assertFalse(info.get_abstract())
-
-    def test_get_class_struct(self):
-        self.assertEqual(GObject.Object.__info__.get_class_struct(),
-                         GObject.ObjectClass.__info__)
 
 
 class TestDeprecation(unittest.TestCase):
