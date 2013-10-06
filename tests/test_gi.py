@@ -813,6 +813,15 @@ class TestArray(unittest.TestCase):
 
         GIMarshallingTests.array_struct_in([struct1, struct2, struct3])
 
+    def test_array_boxed_struct_in_item_marshal_failure(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+
+        self.assertRaises(TypeError, GIMarshallingTests.array_struct_in,
+                          [struct1, struct2, 'not_a_struct'])
+
     def test_array_boxed_struct_value_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
         struct1.long_ = 1
@@ -822,6 +831,15 @@ class TestArray(unittest.TestCase):
         struct3.long_ = 3
 
         GIMarshallingTests.array_struct_value_in([struct1, struct2, struct3])
+
+    def test_array_boxed_struct_value_in_item_marshal_failure(self):
+        struct1 = GIMarshallingTests.BoxedStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.BoxedStruct()
+        struct2.long_ = 2
+
+        self.assertRaises(TypeError, GIMarshallingTests.array_struct_value_in,
+                          [struct1, struct2, 'not_a_struct'])
 
     def test_array_boxed_struct_take_in(self):
         struct1 = GIMarshallingTests.BoxedStruct()
@@ -853,6 +871,15 @@ class TestArray(unittest.TestCase):
         struct3.long_ = 3
 
         GIMarshallingTests.array_simple_struct_in([struct1, struct2, struct3])
+
+    def test_array_simple_struct_in_item_marshal_failure(self):
+        struct1 = GIMarshallingTests.SimpleStruct()
+        struct1.long_ = 1
+        struct2 = GIMarshallingTests.SimpleStruct()
+        struct2.long_ = 2
+
+        self.assertRaises(TypeError, GIMarshallingTests.array_simple_struct_in,
+                          [struct1, struct2, 'not_a_struct'])
 
     def test_array_multi_array_key_value_in(self):
         GIMarshallingTests.multi_array_key_value_in(["one", "two", "three"],
@@ -1260,6 +1287,11 @@ class TestGValue(unittest.TestCase):
     def test_gvalue_flat_array_in(self):
         # the function already asserts the correct values
         GIMarshallingTests.gvalue_flat_array([42, "42", True])
+
+    def test_gvalue_flat_array_in_item_marshal_failure(self):
+        # Tests the failure to marshal 2^256 to a GValue mid-way through the array marshaling.
+        self.assertRaises(RuntimeError, GIMarshallingTests.gvalue_flat_array,
+                          [42, 2 ** 256, True])
 
     def test_gvalue_flat_array_out(self):
         values = GIMarshallingTests.return_gvalue_flat_array()
