@@ -65,3 +65,4 @@ Makefile.in
 /stamp-h1
 /tags
 /xmldocs.make
+/tmp/*
