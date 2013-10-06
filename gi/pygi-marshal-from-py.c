@@ -788,9 +788,12 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                                   callable_cache,
                                   sequence_cache->item_cache,
                                   py_item,
-                                 &item))
+                                 &item)) {
+            Py_DECREF (py_item);
             goto err;
+        }
 
+        Py_DECREF (py_item);
         /* FIXME: it is much more efficent to have seperate marshaller
          *        for ptr arrays than doing the evaluation
          *        and casting each loop iteration
@@ -827,7 +830,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                         /* we free the original copy already, the new one is a plain struct
                          * in an array. _pygi_marshal_cleanup_from_py_array() does not free it again */
                         if (from_py_cleanup)
-                            from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                            from_py_cleanup (state, item_arg_cache, py_item, item.v_pointer, TRUE);
                     } else if (!is_boxed) {
                         /* HACK: Gdk.Atom is merely an integer wrapped in a pointer,
                          * so we must not dereference it; just copy the pointer
@@ -841,7 +844,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             memcpy (array_->data + (i * item_size), item.v_pointer, item_size);
 
                             if (from_py_cleanup)
-                                from_py_cleanup (state, item_arg_cache, item.v_pointer, TRUE);
+                                from_py_cleanup (state, item_arg_cache, py_item, item.v_pointer, TRUE);
                         }
                     } else if (is_boxed && !item_iface_cache->arg_cache.is_pointer) {
                         /* The array elements are not expected to be pointers, but the
@@ -860,6 +863,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         } else {
             g_array_insert_val (array_, i, item);
         }
+
         continue;
 err:
         if (sequence_cache->item_cache->from_py_cleanup != NULL) {
@@ -868,10 +872,13 @@ err:
                 sequence_cache->item_cache->from_py_cleanup;
 
             for(j = 0; j < i; j++) {
+                PyObject *py_item = PySequence_GetItem (py_arg, j);
                 cleanup_func (state,
                               sequence_cache->item_cache,
+                              py_item,
                               g_array_index (array_, gpointer, j),
                               TRUE);
+                Py_DECREF (py_item);
             }
         }
 
@@ -975,6 +982,7 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
                                  &item))
             goto err;
 
+        Py_DECREF (py_item);
         list_ = g_list_prepend (list_, _pygi_arg_to_hash_pointer (&item, sequence_cache->item_cache->type_tag));
         continue;
 err:
@@ -983,6 +991,7 @@ err:
             PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
         */
+        Py_DECREF (py_item);
         g_list_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
@@ -1042,6 +1051,7 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
                             &item))
             goto err;
 
+        Py_DECREF (py_item);
         list_ = g_slist_prepend (list_, _pygi_arg_to_hash_pointer (&item, sequence_cache->item_cache->type_tag));
         continue;
 err:
@@ -1051,6 +1061,7 @@ err:
         }
         */
 
+        Py_DECREF (py_item);
         g_slist_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
@@ -1757,6 +1768,9 @@ _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
             return FALSE;
         }
         arg->v_pointer = pyg_pointer_get (py_arg, void);
+        if (transfer == GI_TRANSFER_EVERYTHING) {
+            g_variant_ref ((GVariant *)arg->v_pointer);
+        }
 
     } else {
         PyErr_Format (PyExc_NotImplementedError,

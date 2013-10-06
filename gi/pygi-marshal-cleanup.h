@@ -42,58 +42,72 @@ void pygi_marshal_cleanup_args_to_py_parameter_fail  (PyGIInvokeState   *state,
 
 void _pygi_marshal_cleanup_from_py_utf8                      (PyGIInvokeState *state,
                                                               PyGIArgCache    *arg_cache,
+                                                              PyObject        *py_arg,
                                                               gpointer         data,
                                                               gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_utf8                        (PyGIInvokeState *state,
                                                               PyGIArgCache    *arg_cache,
+                                                              PyObject        *dummy,
                                                               gpointer         data,
                                                               gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_interface_struct_gvalue   (PyGIInvokeState *state,
                                                               PyGIArgCache    *arg_cache,
+                                                              PyObject        *py_arg,
                                                               gpointer         data,
                                                               gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_interface_struct_foreign  (PyGIInvokeState *state,
                                                               PyGIArgCache    *arg_cache,
+                                                              PyObject        *py_arg,
                                                               gpointer         data,
                                                               gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_interface_struct_foreign (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_interface_object       (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *py_arg,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_interface_object         (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_interface_callback     (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *py_arg,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_array                  (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *py_arg,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_array                    (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_glist                  (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *py_arg,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_glist                    (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_ghash                  (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *py_arg,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 void _pygi_marshal_cleanup_to_py_ghash                    (PyGIInvokeState *state,
                                                            PyGIArgCache    *arg_cache,
+                                                           PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
 G_END_DECLS

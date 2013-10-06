@@ -45,6 +45,7 @@ typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState   *state,
 
 typedef void (*PyGIMarshalCleanupFunc) (PyGIInvokeState *state,
                                         PyGIArgCache    *arg_cache,
+                                        PyObject        *py_arg, /* always NULL for to_py cleanup */
                                         gpointer         data,
                                         gboolean         was_processed);
 

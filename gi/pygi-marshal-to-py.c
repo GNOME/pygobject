@@ -425,6 +425,7 @@ err:
             for (j = processed_items; j < array_->len; j++) {
                 cleanup_func (state,
                               seq_cache->item_cache,
+                              NULL,
                               g_array_index (array_, gpointer, j),
                               FALSE);
             }

@@ -579,6 +579,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
                 if (to_py_cleanup != NULL)
                     to_py_cleanup ( state,
                                     cache->return_cache,
+                                    NULL,
                                    &state->return_arg,
                                     FALSE);
             }
