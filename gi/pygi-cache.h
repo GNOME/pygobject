@@ -36,7 +36,8 @@ typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState   *state,
                                            PyGICallableCache *callable_cache,
                                            PyGIArgCache      *arg_cache,
                                            PyObject          *py_arg,
-                                           GIArgument        *arg);
+                                           GIArgument        *arg,
+                                           gpointer          *cleanup_data);
 
 typedef PyObject *(*PyGIMarshalToPyFunc) (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,

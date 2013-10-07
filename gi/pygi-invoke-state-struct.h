@@ -18,9 +18,10 @@ typedef struct _PyGIInvokeState
     GIArgument **args;
     GIArgument *in_args;
 
-    /* Generic array allocated to the same length as args
-     * for use as extra per-arg state data. */
-    gpointer *args_data;
+    /* Array of pointers allocated to the same length as args which holds from_py
+     * marshaler cleanup data.
+     */
+    gpointer *args_cleanup_data;
 
     /* Out args and out values
      * In order to pass a parameter and get something back out in C

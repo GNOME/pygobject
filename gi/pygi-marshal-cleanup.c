@@ -94,23 +94,23 @@ pygi_marshal_cleanup_args_from_py_marshal_success (PyGIInvokeState   *state,
 {
     gssize i;
 
-    /* For in success, call cleanup for all GI_DIRECTION_IN values only. */
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (cache, i);
         PyGIMarshalCleanupFunc cleanup_func = arg_cache->from_py_cleanup;
         PyObject *py_arg = PyTuple_GET_ITEM (state->py_in_args,
                                              arg_cache->py_arg_index);
+        gpointer cleanup_data = state->args_cleanup_data[i];
 
-        if (cleanup_func &&
-                arg_cache->direction == PYGI_DIRECTION_FROM_PYTHON &&
-                    state->args[i]->v_pointer != NULL)
-            cleanup_func (state, arg_cache, py_arg, state->args[i]->v_pointer, TRUE);
-
-        if (cleanup_func &&
-                arg_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL &&
-                    state->args_data[i] != NULL) {
-            cleanup_func (state, arg_cache, py_arg, state->args_data[i], TRUE);
-            state->args_data[i] = NULL;
+        /* Only cleanup using args_cleanup_data when available.
+         * It is the responsibility of the various "from_py" marshalers to return
+         * cleanup_data which is then passed into their respective cleanup function.
+         * PyGIInvokeState.args_cleanup_data stores this data (via _invoke_marshal_in_args)
+         * for the duration of the invoke up until this point.
+         */
+        if (cleanup_func && cleanup_data != NULL &&
+                arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
+            cleanup_func (state, arg_cache, py_arg, cleanup_data, TRUE);
+            state->args_cleanup_data[i] = NULL;
         }
     }
 }
@@ -213,9 +213,8 @@ _pygi_marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
                                     gpointer         data,
                                     gboolean         was_processed)
 {
-    /* We strdup strings so always free if we have processed this
-       parameter for input */
-    if (was_processed)
+    /* We strdup strings so free unless ownership is transferred to C. */
+    if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
         g_free (data);
 }
 
@@ -270,8 +269,7 @@ _pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     if (was_processed && callback_cache->scope == GI_SCOPE_TYPE_CALL) {
-        _pygi_invoke_closure_free (state->args_data[arg_cache->c_arg_index]);
-        state->args_data[arg_cache->c_arg_index] = NULL;
+        _pygi_invoke_closure_free (data);
     }
 }
 
@@ -366,15 +364,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         GPtrArray *ptr_array_ = NULL;
         PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
 
-        /* If this isn't a garray create one to help process variable sized
-           array elements */
-        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
-            array_ = _wrap_c_array (state, sequence_cache, data);
-            
-            if (array_ == NULL)
-                return;
-            
-        } else if (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        if (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
             ptr_array_ = (GPtrArray *) data;
         } else {
             array_ = (GArray *) data;
@@ -418,6 +408,9 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
 
         /* Only free the array when we didn't transfer ownership */
         if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+            /* always free the GArray wrapper created in from_py marshaling and
+             * passed back as cleanup_data
+             */
             g_array_free (array_, arg_cache->transfer == GI_TRANSFER_NOTHING);
         } else if (state->failed ||
                    arg_cache->transfer == GI_TRANSFER_NOTHING) {

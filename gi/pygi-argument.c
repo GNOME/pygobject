@@ -894,11 +894,13 @@ _pygi_argument_from_object (PyObject   *object,
 {
     GIArgument arg;
     GITypeTag type_tag;
+    gpointer cleanup_data = NULL;
 
     memset(&arg, 0, sizeof(GIArgument));
     type_tag = g_type_info_get_tag (type_info);
 
-    if (_pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer) ||
+    /* Ignores cleanup data for now. */
+    if (_pygi_marshal_from_py_basic_type (object, &arg, type_tag, transfer, &cleanup_data) ||
             PyErr_Occurred()) {
         return arg;
     }

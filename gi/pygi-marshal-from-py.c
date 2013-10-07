@@ -247,7 +247,8 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
                             PyGICallableCache *callable_cache,
                             PyGIArgCache      *arg_cache,
                             PyObject          *py_arg,
-                            GIArgument        *arg)
+                            GIArgument        *arg,
+                            gpointer          *cleanup_data)
 {
     g_warn_if_fail (arg_cache->transfer == GI_TRANSFER_NOTHING);
 
@@ -264,6 +265,7 @@ _pygi_marshal_from_py_void (PyGIInvokeState   *state,
         return FALSE;
     }
 
+    *cleanup_data = arg->v_pointer;
     return TRUE;
 }
 
@@ -408,7 +410,8 @@ _pygi_marshal_from_py_gtype (PyObject          *py_arg,
 
 static gboolean
 _pygi_marshal_from_py_utf8 (PyObject          *py_arg,
-                            GIArgument        *arg)
+                            GIArgument        *arg,
+                            gpointer          *cleanup_data)
 {
     gchar *string_;
 
@@ -437,12 +440,14 @@ _pygi_marshal_from_py_utf8 (PyObject          *py_arg,
     }
 
     arg->v_string = string_;
+    *cleanup_data = arg->v_string;
     return TRUE;
 }
 
 static gboolean
 _pygi_marshal_from_py_filename (PyObject          *py_arg,
-                                GIArgument        *arg)
+                                GIArgument        *arg,
+                                gpointer          *cleanup_data)
 {
     gchar *string_;
     GError *error = NULL;
@@ -476,6 +481,7 @@ _pygi_marshal_from_py_filename (PyObject          *py_arg,
         return FALSE;
     }
 
+    *cleanup_data = arg->v_string;
     return TRUE;
 }
 
@@ -626,7 +632,8 @@ gboolean
 _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
                                   GIArgument *arg,      /* out */
                                   GITypeTag   type_tag,
-                                  GITransfer  transfer)
+                                  GITransfer  transfer,
+                                  gpointer   *cleanup_data /* out */)
 {
     switch (type_tag) {
         case GI_TYPE_TAG_VOID:
@@ -639,6 +646,7 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
                     "See: https://bugzilla.gnome.org/show_bug.cgi?id=683599");
             } else {
                 arg->v_pointer = PyLong_AsVoidPtr (object);
+                *cleanup_data = arg->v_pointer;
             }
             break;
         case GI_TYPE_TAG_INT8:
@@ -682,10 +690,10 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
             return _pygi_marshal_from_py_unichar (object, arg);
 
         case GI_TYPE_TAG_UTF8:
-            return _pygi_marshal_from_py_utf8 (object, arg);
+            return _pygi_marshal_from_py_utf8 (object, arg, cleanup_data);
 
         case GI_TYPE_TAG_FILENAME:
-            return _pygi_marshal_from_py_filename (object, arg);
+            return _pygi_marshal_from_py_filename (object, arg, cleanup_data);
 
         default:
             return FALSE;
@@ -702,12 +710,14 @@ _pygi_marshal_from_py_basic_type_cache_adapter (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
                                                 PyObject          *py_arg,
-                                                GIArgument        *arg)
+                                                GIArgument        *arg,
+                                                gpointer          *cleanup_data)
 {
     return _pygi_marshal_from_py_basic_type (py_arg,
                                              arg,
                                              arg_cache->type_tag,
-                                             arg_cache->transfer);
+                                             arg_cache->transfer,
+                                             cleanup_data);
 }
 
 gboolean
@@ -715,7 +725,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache      *arg_cache,
                              PyObject          *py_arg,
-                             GIArgument        *arg)
+                             GIArgument        *arg,
+                             gpointer          *cleanup_data)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
     int i = 0;
@@ -781,6 +792,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0, success_count = 0; i < length; i++) {
         GIArgument item = {0};
+        gpointer item_cleanup_data = NULL;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL)
             goto err;
@@ -789,12 +801,27 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                                   callable_cache,
                                   sequence_cache->item_cache,
                                   py_item,
-                                 &item)) {
+                                 &item,
+                                 &item_cleanup_data)) {
             Py_DECREF (py_item);
             goto err;
         }
-
         Py_DECREF (py_item);
+
+        if (item_cleanup_data != NULL && item_cleanup_data != item.v_pointer) {
+            /* We only support one level of data discrepancy between an items
+             * data and its cleanup data. This is because we only track a single
+             * extra cleanup data pointer per-argument and cannot track the entire
+             * array of items differing data and cleanup_data.
+             * For example, this would fail if trying to marshal an array of
+             * callback closures marked with SCOPE call type where the cleanup data
+             * is different from the items v_pointer, likewise an array of arrays.
+             */
+            PyErr_SetString(PyExc_RuntimeError, "Cannot cleanup item data for array due to "
+                                                "the items data its cleanup data being different.");
+            goto err;
+        }
+
         /* FIXME: it is much more efficent to have seperate marshaller
          *        for ptr arrays than doing the evaluation
          *        and casting each loop iteration
@@ -826,6 +853,8 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                             g_value_init (dest, G_VALUE_TYPE ((GValue*) item.v_pointer));
                             g_value_copy ((GValue*) item.v_pointer, dest);
                         }
+                        /* Manually increment the length because we are manually setting the memory. */
+                        array_->len++;
 
                     } else {
                         /* Handles flat arrays of boxed or struct types. */
@@ -837,7 +866,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
                      * due to "item" being a temporarily marshaled value done on the stack.
                      */
                     if (from_py_cleanup)
-                        from_py_cleanup (state, item_arg_cache, py_item, item.v_pointer, TRUE);
+                        from_py_cleanup (state, item_arg_cache, py_item, item_cleanup_data, TRUE);
 
                     break;
                 }
@@ -910,19 +939,16 @@ array_success:
 
     if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
         arg->v_pointer = array_->data;
-        g_array_free (array_, FALSE);
     } else {
         arg->v_pointer = array_;
     }
 
-    /* Store the allocated array in the arguments extra data for bi-directional
-     * marshaling cleanup. This is needed because arg->v_pointer will be
-     * clobbered by the caller and we would have no way to clean it up later.
-     * TODO: This should go in the outer layer and apply generically at some point.
+    /* In all cases give the array object back as cleanup data.
+     * In the case of GI_ARRAY_C, we give the data directly as the argument
+     * but keep the array_ wrapper as cleanup data so we don't have to find
+     * it's length again.
      */
-    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
-        state->args_data[arg_cache->c_arg_index] = arg->v_pointer;
-    }
+    *cleanup_data = array_;
 
     return TRUE;
 }
@@ -932,7 +958,8 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache      *arg_cache,
                              PyObject          *py_arg,
-                             GIArgument        *arg)
+                             GIArgument        *arg,
+                             gpointer          *cleanup_data)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
     int i;
@@ -966,7 +993,8 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {
-        GIArgument item;
+        GIArgument item = {0};
+        gpointer item_cleanup_data = NULL;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL)
             goto err;
@@ -975,7 +1003,8 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
                                   callable_cache,
                                   sequence_cache->item_cache,
                                   py_item,
-                                 &item))
+                                 &item,
+                                 &item_cleanup_data))
             goto err;
 
         Py_DECREF (py_item);
@@ -994,6 +1023,7 @@ err:
     }
 
     arg->v_pointer = g_list_reverse (list_);
+    *cleanup_data = arg->v_pointer;
     return TRUE;
 }
 
@@ -1002,7 +1032,8 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
                               PyGICallableCache *callable_cache,
                               PyGIArgCache      *arg_cache,
                               PyObject          *py_arg,
-                              GIArgument        *arg)
+                              GIArgument        *arg,
+                              gpointer          *cleanup_data)
 {
     PyGIMarshalFromPyFunc from_py_marshaller;
     int i;
@@ -1035,7 +1066,8 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {
-        GIArgument item;
+        GIArgument item = {0};
+        gpointer item_cleanup_data = NULL;
         PyObject *py_item = PySequence_GetItem (py_arg, i);
         if (py_item == NULL)
             goto err;
@@ -1044,7 +1076,8 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
                              callable_cache,
                              sequence_cache->item_cache,
                              py_item,
-                            &item))
+                            &item,
+                            &item_cleanup_data))
             goto err;
 
         Py_DECREF (py_item);
@@ -1064,6 +1097,7 @@ err:
     }
 
     arg->v_pointer = g_slist_reverse (list_);
+    *cleanup_data = arg->v_pointer;
     return TRUE;
 }
 
@@ -1072,7 +1106,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
                              PyGICallableCache *callable_cache,
                              PyGIArgCache      *arg_cache,
                              PyObject          *py_arg,
-                             GIArgument        *arg)
+                             GIArgument        *arg,
+                             gpointer          *cleanup_data)
 {
     PyGIMarshalFromPyFunc key_from_py_marshaller;
     PyGIMarshalFromPyFunc value_from_py_marshaller;
@@ -1135,6 +1170,8 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
 
     for (i = 0; i < length; i++) {
         GIArgument key, value;
+        gpointer key_cleanup_data = NULL;
+        gpointer value_cleanup_data = NULL;
         PyObject *py_key = PyList_GET_ITEM (py_keys, i);
         PyObject *py_value = PyList_GET_ITEM (py_values, i);
         if (py_key == NULL || py_value == NULL)
@@ -1144,14 +1181,16 @@ _pygi_marshal_from_py_ghash (PyGIInvokeState   *state,
                                       callable_cache,
                                       hash_cache->key_cache,
                                       py_key,
-                                     &key))
+                                     &key,
+                                     &key_cleanup_data))
             goto err;
 
         if (!value_from_py_marshaller ( state,
                                         callable_cache,
                                         hash_cache->value_cache,
                                         py_value,
-                                       &value))
+                                       &value,
+                                       &value_cleanup_data))
             goto err;
 
         g_hash_table_insert (hash_,
@@ -1170,6 +1209,7 @@ err:
     }
 
     arg->v_pointer = hash_;
+    *cleanup_data = arg->v_pointer;
     return TRUE;
 }
 
@@ -1178,7 +1218,8 @@ _pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
                               PyGICallableCache *callable_cache,
                               PyGIArgCache      *arg_cache,
                               PyObject          *py_arg,
-                              GIArgument        *arg)
+                              GIArgument        *arg,
+                              gpointer          *cleanup_data)
 {
     PyErr_Format (PyExc_NotImplementedError,
                   "Marshalling for GErrors is not implemented");
@@ -1244,7 +1285,8 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,
                                           PyGIArgCache      *arg_cache,
                                           PyObject          *py_arg,
-                                          GIArgument        *arg)
+                                          GIArgument        *arg,
+                                          gpointer          *cleanup_data)
 {
     GICallableInfo *callable_info;
     PyGICClosure *closure;
@@ -1331,10 +1373,8 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         }
     }
 
-    /* Store the PyGIClosure as extra args data so _pygi_marshal_cleanup_from_py_interface_callback
-     * can clean it up later for GI_SCOPE_TYPE_CALL based closures.
-     */
-    state->args_data[arg_cache->c_arg_index] = closure;
+    /* Use the PyGIClosure as data passed to cleanup for GI_SCOPE_TYPE_CALL. */
+    *cleanup_data = closure;
 
     return TRUE;
 }
@@ -1344,7 +1384,8 @@ _pygi_marshal_from_py_interface_enum (PyGIInvokeState   *state,
                                       PyGICallableCache *callable_cache,
                                       PyGIArgCache      *arg_cache,
                                       PyObject          *py_arg,
-                                      GIArgument        *arg)
+                                      GIArgument        *arg,
+                                      gpointer          *cleanup_data)
 {
     PyObject *py_long;
     long c_long;
@@ -1412,7 +1453,8 @@ _pygi_marshal_from_py_interface_flags (PyGIInvokeState   *state,
                                        PyGICallableCache *callable_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,
-                                       GIArgument        *arg)
+                                       GIArgument        *arg,
+                                       gpointer          *cleanup_data)
 {
     PyObject *py_long;
     long c_long;
@@ -1459,20 +1501,27 @@ _pygi_marshal_from_py_interface_struct_cache_adapter (PyGIInvokeState   *state,
                                                       PyGICallableCache *callable_cache,
                                                       PyGIArgCache      *arg_cache,
                                                       PyObject          *py_arg,
-                                                      GIArgument        *arg)
+                                                      GIArgument        *arg,
+                                                      gpointer          *cleanup_data)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-    return _pygi_marshal_from_py_interface_struct (py_arg,
-                                                   arg,
-                                                   arg_cache->arg_name,
-                                                   iface_cache->interface_info,
-                                                   iface_cache->g_type,
-                                                   iface_cache->py_type,
-                                                   arg_cache->transfer,
-                                                   TRUE, /*copy_reference*/
-                                                   iface_cache->is_foreign,
-                                                   arg_cache->is_pointer);
+    gboolean res =  _pygi_marshal_from_py_interface_struct (py_arg,
+                                                            arg,
+                                                            arg_cache->arg_name,
+                                                            iface_cache->interface_info,
+                                                            iface_cache->g_type,
+                                                            iface_cache->py_type,
+                                                            arg_cache->transfer,
+                                                            TRUE, /*copy_reference*/
+                                                            iface_cache->is_foreign,
+                                                            arg_cache->is_pointer);
+
+    /* Assume struct marshaling is always a pointer and assign cleanup_data
+     * here rather than passing it further down the chain.
+     */
+    *cleanup_data = arg->v_pointer;
+    return res;
 }
 
 gboolean
@@ -1480,7 +1529,8 @@ _pygi_marshal_from_py_interface_boxed (PyGIInvokeState   *state,
                                        PyGICallableCache *callable_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,
-                                       GIArgument        *arg)
+                                       GIArgument        *arg,
+                                       gpointer          *cleanup_data)
 {
     PyErr_Format (PyExc_NotImplementedError,
                   "Marshalling for this type is not implemented yet");
@@ -1492,8 +1542,11 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
                                         PyGICallableCache *callable_cache,
                                         PyGIArgCache      *arg_cache,
                                         PyObject          *py_arg,
-                                        GIArgument        *arg)
+                                        GIArgument        *arg,
+                                        gpointer          *cleanup_data)
 {
+    gboolean res = FALSE;
+
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
@@ -1513,7 +1566,9 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
         return FALSE;
     }
 
-    return _pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
+    res = _pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
+    *cleanup_data = arg->v_pointer;
+    return res;
 }
 
 gboolean
@@ -1521,7 +1576,8 @@ _pygi_marshal_from_py_interface_union (PyGIInvokeState   *state,
                                        PyGICallableCache *callable_cache,
                                        PyGIArgCache      *arg_cache,
                                        PyObject          *py_arg,
-                                       GIArgument        *arg)
+                                       GIArgument        *arg,
+                                       gpointer          *cleanup_data)
 {
     PyErr_Format(PyExc_NotImplementedError,
                  "Marshalling for this type is not implemented yet");
