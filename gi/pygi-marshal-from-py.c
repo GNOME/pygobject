@@ -911,12 +911,17 @@ array_success:
     if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
         arg->v_pointer = array_->data;
         g_array_free (array_, FALSE);
-        /* remember the originally allocated array in args_data, as args and
-         * in_args get changed for (inout) arguments */
-        if (arg_cache->transfer == GI_TRANSFER_NOTHING)
-            state->args_data[arg_cache->c_arg_index] = arg->v_pointer;
     } else {
         arg->v_pointer = array_;
+    }
+
+    /* Store the allocated array in the arguments extra data for bi-directional
+     * marshaling cleanup. This is needed because arg->v_pointer will be
+     * clobbered by the caller and we would have no way to clean it up later.
+     * TODO: This should go in the outer layer and apply generically at some point.
+     */
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        state->args_data[arg_cache->c_arg_index] = arg->v_pointer;
     }
 
     return TRUE;

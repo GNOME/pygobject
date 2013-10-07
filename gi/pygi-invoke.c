@@ -523,6 +523,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                                                               arg_cache,
                                                               py_arg,
                                                               c_arg);
+
             if (!success) {
                 pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                   cache,
