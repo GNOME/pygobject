@@ -351,36 +351,35 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
             item_size = g_array_get_element_size (array_);
 
             for (i = 0; i < array_->len; i++) {
-                GIArgument item_arg;
+                GIArgument item_arg = {0};
                 PyObject *py_item;
 
+                /* If we are receiving an array of pointers, simply assign the pointer
+                 * and move on, letting the per-item marshaler deal with the
+                 * various transfer modes and ref counts (e.g. g_variant_ref_sink).
+                 */
                 if (seq_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
+
+                } else if (item_arg_cache->is_pointer) {
+                    item_arg.v_pointer = g_array_index (array_, gpointer, i);
+
                 } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
                     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
-                    gboolean is_gvariant = iface_cache->g_type == G_TYPE_VARIANT;
 
                     // FIXME: This probably doesn't work with boxed types or gvalues. See fx. _pygi_marshal_from_py_array()
                     switch (g_base_info_get_type (iface_cache->interface_info)) {
                         case GI_INFO_TYPE_STRUCT:
-                            if (is_gvariant) {
-                              g_assert (item_size == sizeof (gpointer));
-                              if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-                                item_arg.v_pointer = g_variant_ref_sink (g_array_index (array_, gpointer, i));
-                              else
-                                item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                            } else if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && !item_arg_cache->is_pointer &&
+                            if (arg_cache->transfer == GI_TRANSFER_EVERYTHING &&
                                        !g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
                                 /* array elements are structs */
                                 gpointer *_struct = g_malloc (item_size);
                                 memcpy (_struct, array_->data + i * item_size,
                                         item_size);
                                 item_arg.v_pointer = _struct;
-                            } else if (item_arg_cache->is_pointer)
-                                /* array elements are pointers to values */
-                                item_arg.v_pointer = g_array_index (array_, gpointer, i);
-                            else
+                            } else {
                                 item_arg.v_pointer = array_->data + i * item_size;
+                            }
                             break;
                         default:
                             item_arg.v_pointer = g_array_index (array_, gpointer, i);
@@ -858,10 +857,13 @@ _pygi_marshal_to_py_interface_struct (GIArgument *arg,
                                        transfer == GI_TRANSFER_EVERYTHING);
         }
     } else if (g_type_is_a (g_type, G_TYPE_VARIANT)) {
-        /* Note we do not use transfer for the structs free_on_dealloc because
-         * GLib.Variant overrides __del__ to call "g_variant_unref". */
+        /* Note: sink the variant (add a ref) only if we are not transfered ownership.
+         * GLib.Variant overrides __del__ which will then call "g_variant_unref" for
+         * cleanup in either case. */
         if (py_type) {
-            g_variant_ref_sink (arg->v_pointer);
+            if (transfer == GI_TRANSFER_NOTHING) {
+                g_variant_ref_sink (arg->v_pointer);
+            }
             py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
                                        arg->v_pointer,
                                        FALSE);
