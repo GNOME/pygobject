@@ -412,12 +412,11 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
              * passed back as cleanup_data
              */
             g_array_free (array_, arg_cache->transfer == GI_TRANSFER_NOTHING);
-        } else if (state->failed ||
-                   arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        } else {
             if (array_ != NULL)
-                g_array_free (array_, TRUE);
+                g_array_unref (array_);
             else
-                g_ptr_array_free (ptr_array_, TRUE);
+                g_ptr_array_unref (ptr_array_);
         }
     }
 }
@@ -502,19 +501,12 @@ _pygi_marshal_cleanup_from_py_glist  (PyGIInvokeState *state,
             }
         }
 
-        if (state->failed ||
-               arg_cache->transfer == GI_TRANSFER_NOTHING ||
-                  arg_cache->transfer == GI_TRANSFER_CONTAINER) {
-            switch (arg_cache->type_tag) {
-                case GI_TYPE_TAG_GLIST:
-                    g_list_free ( (GList *)list_);
-                    break;
-                case GI_TYPE_TAG_GSLIST:
-                    g_slist_free (list_);
-                    break;
-                default:
-                    g_assert_not_reached();
-            }
+        if (arg_cache->type_tag == GI_TYPE_TAG_GLIST) {
+            g_list_free ( (GList *)list_);
+        } else if (arg_cache->type_tag == GI_TYPE_TAG_GSLIST) {
+            g_slist_free (list_);
+        } else {
+            g_assert_not_reached();
         }
     }
 }
@@ -527,7 +519,6 @@ _pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
                                    gboolean         was_processed)
 {
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
-
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING ||
             arg_cache->transfer == GI_TRANSFER_CONTAINER) {
         GSList *list_ = (GSList *)data;
@@ -547,17 +538,12 @@ _pygi_marshal_cleanup_to_py_glist (PyGIInvokeState *state,
             }
         }
 
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
-            switch (arg_cache->type_tag) {
-                case GI_TYPE_TAG_GLIST:
-                    g_list_free ( (GList *)list_);
-                    break;
-                case GI_TYPE_TAG_GSLIST:
-                    g_slist_free (list_);
-                    break;
-                default:
-                    g_assert_not_reached();
-            }
+        if (arg_cache->type_tag == GI_TYPE_TAG_GLIST) {
+            g_list_free ( (GList *)list_);
+        } else if (arg_cache->type_tag == GI_TYPE_TAG_GSLIST) {
+            g_slist_free (list_);
+        } else {
+            g_assert_not_reached();
         }
     }
 }
@@ -607,11 +593,7 @@ _pygi_marshal_cleanup_from_py_ghash  (PyGIInvokeState *state,
             }
         }
 
-        if (state->failed ||
-               arg_cache->transfer == GI_TRANSFER_NOTHING ||
-                  arg_cache->transfer == GI_TRANSFER_CONTAINER)
-            g_hash_table_destroy (hash_);
-
+        g_hash_table_unref (hash_);
     }
 }
 
@@ -626,6 +608,6 @@ _pygi_marshal_cleanup_to_py_ghash (PyGIInvokeState *state,
         return;
 
     /* assume hashtable has boxed key and value */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_hash_table_destroy ( (GHashTable *)data);
+    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING || arg_cache->transfer == GI_TRANSFER_CONTAINER)
+        g_hash_table_unref ( (GHashTable *)data);
 }

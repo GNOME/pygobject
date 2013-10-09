@@ -764,7 +764,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     item_size = sequence_cache->item_size;
     is_ptr_array = (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
     if (is_ptr_array) {
-        array_ = (GArray *)g_ptr_array_new ();
+        array_ = (GArray *)g_ptr_array_sized_new (length);
     } else {
         array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
                                     TRUE,
@@ -938,17 +938,35 @@ array_success:
     }
 
     if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+        /* In the case of GI_ARRAY_C, we give the data directly as the argument
+         * but keep the array_ wrapper as cleanup data so we don't have to find
+         * it's length again.
+         */
         arg->v_pointer = array_->data;
+
+        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+            g_array_free (array_, FALSE);
+            *cleanup_data = NULL;
+        } else {
+            *cleanup_data = array_;
+        }
     } else {
         arg->v_pointer = array_;
-    }
 
-    /* In all cases give the array object back as cleanup data.
-     * In the case of GI_ARRAY_C, we give the data directly as the argument
-     * but keep the array_ wrapper as cleanup data so we don't have to find
-     * it's length again.
-     */
-    *cleanup_data = array_;
+        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+            /* Free everything in cleanup. */
+            *cleanup_data = array_;
+        } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+            /* Make a shallow copy so we can free the elements later in cleanup
+             * because it is possible invoke will free the list before our cleanup. */
+            *cleanup_data = is_ptr_array ?
+                    (gpointer)g_ptr_array_ref ((GPtrArray *)array_) :
+                    (gpointer)g_array_ref (array_);
+        } else { /* GI_TRANSFER_EVERYTHING */
+            /* No cleanup, everything is given to the callee. */
+            *cleanup_data = NULL;
+        }
+    }
 
     return TRUE;
 }
@@ -1023,7 +1041,18 @@ err:
     }
 
     arg->v_pointer = g_list_reverse (list_);
-    *cleanup_data = arg->v_pointer;
+
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        /* Free everything in cleanup. */
+        *cleanup_data = arg->v_pointer;
+    } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        /* Make a shallow copy so we can free the elements later in cleanup
+         * because it is possible invoke will free the list before our cleanup. */
+        *cleanup_data = g_list_copy (arg->v_pointer);
+    } else { /* GI_TRANSFER_EVERYTHING */
+        /* No cleanup, everything is given to the callee. */
+        *cleanup_data = NULL;
+    }
     return TRUE;
 }
 
@@ -1097,7 +1126,19 @@ err:
     }
 
     arg->v_pointer = g_slist_reverse (list_);
-    *cleanup_data = arg->v_pointer;
+
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        /* Free everything in cleanup. */
+        *cleanup_data = arg->v_pointer;
+    } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        /* Make a shallow copy so we can free the elements later in cleanup
+         * because it is possible invoke will free the list before our cleanup. */
+        *cleanup_data = g_slist_copy (arg->v_pointer);
+    } else { /* GI_TRANSFER_EVERYTHING */
+        /* No cleanup, everything is given to the callee. */
+        *cleanup_data = NULL;
+    }
+
     return TRUE;
 }
 
@@ -1209,7 +1250,21 @@ err:
     }
 
     arg->v_pointer = hash_;
-    *cleanup_data = arg->v_pointer;
+
+    if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        /* Free everything in cleanup. */
+        *cleanup_data = arg->v_pointer;
+    } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        /* Make a shallow copy so we can free the elements later in cleanup
+         * because it is possible invoke will free the list before our cleanup. */
+        *cleanup_data = g_hash_table_ref (arg->v_pointer);
+    } else { /* GI_TRANSFER_EVERYTHING */
+        /* No cleanup, everything is given to the callee.
+         * Note that the keys and values will leak for transfer everything because
+         * we do not use g_hash_table_new_full and set key/value_destroy_func. */
+        *cleanup_data = NULL;
+    }
+
     return TRUE;
 }
 
