@@ -1996,7 +1996,11 @@ class TestGObject(unittest.TestCase):
 
         GIMarshallingTests.Object.none_inout(GIMarshallingTests.SubObject(int=42))
 
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=709796
     def test_object_full_inout(self):
+        # Using gimarshallingtests.c from GI versions > 1.38.0 will show this
+        # test as an "unexpected success" due to reference leak fixes in that file.
+        # TODO: remove the expectedFailure once PyGI relies on GI > 1.38.0.
         object_ = GIMarshallingTests.Object(int=42)
         new_object = GIMarshallingTests.Object.full_inout(object_)
 
@@ -2004,7 +2008,7 @@ class TestGObject(unittest.TestCase):
 
         self.assertFalse(object_ is new_object)
 
-        self.assertEqual(object_.__grefcount__, 2)
+        self.assertEqual(object_.__grefcount__, 1)
         self.assertEqual(new_object.__grefcount__, 1)
 
 # FIXME: Doesn't actually return the same object.
