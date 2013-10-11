@@ -464,6 +464,7 @@ class TestGtk(unittest.TestCase):
         widget.drag_dest_get_track_motion()
         widget.drag_dest_set_track_motion(True)
         widget.drag_dest_get_target_list()
+        widget.drag_dest_set_target_list(None)
         widget.drag_dest_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
         widget.drag_dest_unset()
 
@@ -479,6 +480,7 @@ class TestGtk(unittest.TestCase):
         widget.drag_source_set_icon_pixbuf(GdkPixbuf.Pixbuf())
         widget.drag_source_set_icon_stock("")
         widget.drag_source_get_target_list()
+        widget.drag_source_set_target_list(None)
         widget.drag_source_set_target_list(Gtk.TargetList.new([Gtk.TargetEntry.new('test', 0, 0)]))
         widget.drag_source_unset()
 
