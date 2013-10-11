@@ -203,6 +203,21 @@ struct _PyGICallableCache
     gssize n_py_required_args;
 };
 
+gboolean
+pygi_arg_base_setup (PyGIArgCache *arg_cache,
+                     GITypeInfo   *type_info,
+                     GIArgInfo    *arg_info,  /* may be NULL for return arguments */
+                     GITransfer    transfer,
+                     PyGIDirection direction);
+
+gboolean
+pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
+                          GITypeInfo         *type_info,
+                          GIArgInfo          *arg_info,  /* may be NULL for return arguments */
+                          GITransfer          transfer,
+                          PyGIDirection       direction,
+                          GIInterfaceInfo    *iface_info);
+
 void _pygi_arg_cache_clear	(PyGIArgCache *cache);
 void _pygi_callable_cache_free	(PyGICallableCache *cache);
 
