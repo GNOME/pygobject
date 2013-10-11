@@ -73,12 +73,12 @@ class Widget(Gtk.Widget):
         return super(Widget, self).render_icon(stock_id, size, detail)
 
     def drag_dest_set_target_list(self, target_list):
-        if not isinstance(target_list, Gtk.TargetList):
+        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
             target_list = Gtk.TargetList.new(_construct_target_list(target_list))
         super(Widget, self).drag_dest_set_target_list(target_list)
 
     def drag_source_set_target_list(self, target_list):
-        if not isinstance(target_list, Gtk.TargetList):
+        if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
             target_list = Gtk.TargetList.new(_construct_target_list(target_list))
         super(Widget, self).drag_source_set_target_list(target_list)
 
