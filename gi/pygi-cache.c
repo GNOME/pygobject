@@ -30,6 +30,7 @@
 #include "pygi-hashtable.h"
 #include "pygi-basictype.h"
 #include "pygi-list.h"
+#include "pygi-array.h"
 
 
 PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
@@ -161,15 +162,6 @@ _sequence_cache_free_func (PyGISequenceCache *cache)
 }
 
 static void
-_array_cache_free_func (PyGIArgGArray *cache)
-{
-    if (cache != NULL) {
-        _pygi_arg_cache_free (((PyGISequenceCache *)cache)->item_cache);
-        g_slice_free (PyGIArgGArray, cache);
-    }
-}
-
-static void
 _callback_cache_free_func (PyGICallbackCache *cache)
 {
     if (cache != NULL) {
@@ -255,80 +247,6 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
     return TRUE;
 }
 
-static gboolean
-pygi_arg_garray_setup (PyGIArgGArray      *sc,
-                       GITypeInfo         *type_info,
-                       GIArgInfo          *arg_info,    /* may be NULL for return arguments */
-                       GITransfer          transfer,
-                       PyGIDirection       direction,
-                       gssize              child_offset)
-{
-    GITypeInfo *item_type_info;
-
-    if (!pygi_arg_sequence_setup ((PyGISequenceCache *)sc,
-                                  type_info,
-                                  arg_info,
-                                  transfer,
-                                  direction)) {
-        return FALSE;
-    }
-
-    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
-    sc->is_zero_terminated = g_type_info_is_zero_terminated (type_info);
-    sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
-    sc->len_arg_index = g_type_info_get_array_length (type_info);
-    if (sc->len_arg_index >= 0)
-        sc->len_arg_index += child_offset;
-
-    item_type_info = g_type_info_get_param_type (type_info, 0);
-    sc->item_size = _pygi_g_type_info_size (item_type_info);
-    g_base_info_unref ( (GIBaseInfo *)item_type_info);
-
-    return TRUE;
-}
-
-static PyGISequenceCache *
-pygi_arg_sequence_new (GITypeInfo *type_info,
-                       GIArgInfo *arg_info,
-                       GITransfer transfer,
-                       PyGIDirection direction)
-{
-    PyGISequenceCache *sc = g_slice_new0 (PyGISequenceCache);
-    if (sc == NULL)
-        return NULL;
-
-    if (!pygi_arg_sequence_setup (sc, type_info, arg_info, transfer, direction)) {
-        _pygi_arg_cache_free ( (PyGIArgCache *)sc);
-        return NULL;
-    }
-
-    return sc;
-}
-
-static PyGIArgGArray *
-_arg_array_cache_new (GITypeInfo *type_info,
-                      GIArgInfo *arg_info,
-                      GITransfer transfer,
-                      PyGIDirection direction,
-                      gssize child_offset)
-{
-    PyGIArgGArray *array_cache = g_slice_new0 (PyGIArgGArray);
-    if (array_cache == NULL)
-        return NULL;
-
-    if (!pygi_arg_garray_setup (array_cache,
-                                type_info,
-                                arg_info,
-                                transfer,
-                                direction,
-                                child_offset)) {
-        _pygi_arg_cache_free ( (PyGIArgCache *)array_cache);
-        return NULL;
-    }
-
-    return array_cache;
-}
-
 static PyGICallbackCache *
 _callback_cache_new (GIArgInfo *arg_info,
                      GIInterfaceInfo *iface_info,
@@ -355,109 +273,6 @@ PyGIArgCache *
 _arg_cache_alloc (void)
 {
     return g_slice_new0 (PyGIArgCache);
-}
-
-
-static PyGIArgCache*
-_arg_cache_array_len_arg_setup (PyGIArgCache *arg_cache,
-                                PyGICallableCache *callable_cache,
-                                PyGIDirection direction,
-                                gssize arg_index,
-                                gssize *py_arg_index)
-{
-    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
-    if (seq_cache->len_arg_index >= 0) {
-        PyGIArgCache *child_cache = NULL;
-
-        child_cache = _pygi_callable_cache_get_arg (callable_cache,
-                                                    seq_cache->len_arg_index);
-        if (child_cache == NULL) {
-            child_cache = _arg_cache_alloc ();
-        } else {
-            /* If the "length" arg cache already exists (the length comes before
-             * the array in the argument list), remove it from the to_py_args list
-             * because it does not belong in "to python" return tuple. The length
-             * will implicitly be a part of the returned Python list.
-             */
-            if (direction & PYGI_DIRECTION_TO_PYTHON) {
-                callable_cache->to_py_args =
-                    g_slist_remove (callable_cache->to_py_args, child_cache);
-            }
-
-            /* This is a case where the arg cache already exists and has been
-             * setup by another array argument sharing the same length argument.
-             * See: gi_marshalling_tests_multi_array_key_value_in
-             */
-            if (child_cache->meta_type == PYGI_META_ARG_TYPE_CHILD)
-                return child_cache;
-        }
-
-        /* There is a length argument for this array, so increment the number
-         * of "to python" child arguments when applicable.
-         */
-        if (direction & PYGI_DIRECTION_TO_PYTHON)
-             callable_cache->n_to_py_child_args++;
-
-        child_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
-        child_cache->direction = direction;
-        child_cache->to_py_marshaller = NULL;
-        child_cache->from_py_marshaller = NULL;
-
-        /* ugly edge case code:
-         *
-         * When the length comes before the array parameter we need to update
-         * indexes of arguments after the index argument.
-         */
-        if (seq_cache->len_arg_index < arg_index && direction & PYGI_DIRECTION_FROM_PYTHON) {
-            gssize i;
-            (*py_arg_index) -= 1;
-            callable_cache->n_py_args -= 1;
-
-            for (i = seq_cache->len_arg_index + 1;
-                   i < _pygi_callable_cache_args_len (callable_cache); i++) {
-                PyGIArgCache *update_cache = _pygi_callable_cache_get_arg (callable_cache, i);
-                if (update_cache == NULL)
-                    break;
-
-                update_cache->py_arg_index -= 1;
-            }
-        }
-
-        _pygi_callable_cache_set_arg (callable_cache, seq_cache->len_arg_index, child_cache);
-        return child_cache;
-    }
-
-    return NULL;
-}
-
-static gboolean
-_arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
-                                PyGICallableCache *callable_cache,
-                                GITypeInfo *type_info,
-                                GITransfer transfer,
-                                PyGIDirection direction,
-                                gssize arg_index)
-{
-    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
-    seq_cache->array_type = g_type_info_get_array_type (type_info);
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_array;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
-    return TRUE;
-}
-
-static gboolean
-_arg_cache_to_py_array_setup (PyGIArgCache *arg_cache,
-                              PyGICallableCache *callable_cache,
-                              GITypeInfo *type_info,
-                              GITransfer transfer,
-                              PyGIDirection direction,
-                              gssize arg_index)
-{
-    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
-    seq_cache->array_type = g_type_info_get_array_type (type_info);
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_array;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_array;
-    return TRUE;
 }
 
 static void
@@ -717,15 +532,9 @@ _arg_cache_new (GITypeInfo *type_info,
                 PyGICallableCache *callable_cache)
 {
     PyGIArgCache *arg_cache = NULL;
-    gssize child_offset = 0;
     GITypeTag type_tag;
 
     type_tag = g_type_info_get_tag (type_info);
-
-    if (callable_cache != NULL)
-        child_offset =
-            (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-                callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
 
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
@@ -755,38 +564,19 @@ _arg_cache_new (GITypeInfo *type_info,
 
        case GI_TYPE_TAG_ARRAY:
            {
-               PyGIArgGArray *seq_cache =
-                   _arg_array_cache_new (type_info,
-                                         arg_info,
-                                         transfer,
-                                         direction,
-                                         child_offset);
-
-               arg_cache = (PyGIArgCache *)seq_cache;
+               arg_cache = pygi_arg_garray_new_from_info (type_info,
+                                                          arg_info,
+                                                          transfer,
+                                                          direction);
                if (arg_cache == NULL)
-                   break;
+                   return NULL;
 
-               if (direction & PYGI_DIRECTION_FROM_PYTHON)
-                   _arg_cache_from_py_array_setup (arg_cache,
-                                                   callable_cache,
-                                                   type_info,
-                                                   transfer,
-                                                   direction,
-                                                   c_arg_index);
-
-               if (direction & PYGI_DIRECTION_TO_PYTHON)
-                   _arg_cache_to_py_array_setup (arg_cache,
-                                                 callable_cache,
-                                                 type_info,
-                                                 transfer,
-                                                 direction,
-                                                 c_arg_index);
-
-               _arg_cache_array_len_arg_setup (arg_cache,
-                                               callable_cache,
-                                               direction,
-                                               c_arg_index,
-                                               &py_arg_index);
+               pygi_arg_garray_len_arg_setup (arg_cache,
+                                              type_info,
+                                              callable_cache,
+                                              direction,
+                                              c_arg_index,
+                                              &py_arg_index);
 
                arg_cache->py_arg_index = py_arg_index;
                arg_cache->c_arg_index = c_arg_index;
