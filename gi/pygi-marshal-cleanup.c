@@ -207,32 +207,6 @@ pygi_marshal_cleanup_args_to_py_parameter_fail (PyGIInvokeState   *state,
 }
 
 void
-_pygi_marshal_cleanup_from_py_utf8 (PyGIInvokeState *state,
-                                    PyGIArgCache    *arg_cache,
-                                    PyObject        *py_arg,
-                                    gpointer         data,
-                                    gboolean         was_processed)
-{
-    /* We strdup strings so free unless ownership is transferred to C. */
-    if (was_processed && arg_cache->transfer == GI_TRANSFER_NOTHING)
-        g_free (data);
-}
-
-void
-_pygi_marshal_cleanup_to_py_utf8 (PyGIInvokeState *state,
-                                  PyGIArgCache    *arg_cache,
-                                  PyObject        *dummy,
-                                  gpointer         data,
-                                  gboolean         was_processed)
-{
-    /* Python copies the string so we need to free it
-       if the interface is transfering ownership, 
-       whether or not it has been processed yet */
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_free (data);
-}
-
-void
 _pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
                                                 PyGIArgCache    *arg_cache,
                                                 PyObject        *py_arg,

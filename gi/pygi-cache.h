@@ -211,6 +211,7 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           PyGIDirection       direction,
                           GIInterfaceInfo    *iface_info);
 
+PyGIArgCache * _arg_cache_alloc (void);
 PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,
                                GIArgInfo *arg_info,
                                GITransfer transfer,

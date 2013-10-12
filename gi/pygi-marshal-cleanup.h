@@ -40,16 +40,6 @@ void pygi_marshal_cleanup_args_to_py_parameter_fail  (PyGIInvokeState   *state,
                                                       PyGICallableCache *cache,
                                                       gssize failed_to_py_arg_index);
 
-void _pygi_marshal_cleanup_from_py_utf8                      (PyGIInvokeState *state,
-                                                              PyGIArgCache    *arg_cache,
-                                                              PyObject        *py_arg,
-                                                              gpointer         data,
-                                                              gboolean         was_processed);
-void _pygi_marshal_cleanup_to_py_utf8                        (PyGIInvokeState *state,
-                                                              PyGIArgCache    *arg_cache,
-                                                              PyObject        *dummy,
-                                                              gpointer         data,
-                                                              gboolean         was_processed);
 void _pygi_marshal_cleanup_from_py_interface_struct_gvalue   (PyGIInvokeState *state,
                                                               PyGIArgCache    *arg_cache,
                                                               PyObject        *py_arg,

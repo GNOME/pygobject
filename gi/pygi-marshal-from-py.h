@@ -33,12 +33,6 @@ G_BEGIN_DECLS
 gboolean _pygi_marshal_from_py_ssize_t     (PyGIArgCache      *arg_cache,
                                             Py_ssize_t         size,
                                             GIArgument        *arg);
-gboolean _pygi_marshal_from_py_void        (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg,
-                                            gpointer          *cleanup_data);
 gboolean _pygi_marshal_from_py_array       (PyGIInvokeState   *state,
                                             PyGICallableCache *callable_cache,
                                             PyGIArgCache      *arg_cache,
@@ -107,18 +101,6 @@ gboolean _pygi_marshal_from_py_interface_union    (PyGIInvokeState   *state,
                                                    gpointer          *cleanup_data);
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
-gboolean _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
-                                           GIArgument *arg,      /* out */
-                                           GITypeTag   type_tag,
-                                           GITransfer  transfer,
-                                           gpointer   *cleanup_data);
-gboolean _pygi_marshal_from_py_basic_type_cache_adapter  (PyGIInvokeState   *state,
-                                                          PyGICallableCache *callable_cache,
-                                                          PyGIArgCache      *arg_cache,
-                                                          PyObject          *py_arg,
-                                                          GIArgument        *arg,
-                                                          gpointer          *cleanup_data);
-
 gboolean _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
                                         GIArgument *arg,  /*out*/
                                         GITransfer transfer);

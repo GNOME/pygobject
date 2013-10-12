@@ -33,6 +33,7 @@
 
 #include "pygi-marshal-from-py.h"
 #include "pygi-marshal-to-py.h"
+#include "pygi-basictype.h"
 
 
 static gboolean

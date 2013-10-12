@@ -28,6 +28,7 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-type.h"
 #include "pygi-hashtable.h"
+#include "pygi-basictype.h"
 
 
 PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
@@ -269,51 +270,12 @@ _callback_cache_new (GIArgInfo *arg_info,
    return cc;
 }
 
-static PyGIArgCache *
+PyGIArgCache *
 _arg_cache_alloc (void)
 {
     return g_slice_new0 (PyGIArgCache);
 }
 
-static void
-_arg_cache_from_py_basic_type_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
-}
-
-static void
-_arg_cache_to_py_basic_type_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
-}
-
-static void
-_arg_cache_from_py_void_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_void;
-}
-
-static void
-_arg_cache_to_py_void_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_void;
-}
-
-static void
-_arg_cache_from_py_utf8_setup (PyGIArgCache *arg_cache,
-                               GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_utf8;
-}
-
-static void
-_arg_cache_to_py_utf8_setup (PyGIArgCache *arg_cache,
-                               GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_utf8;
-}
 
 static PyGIArgCache*
 _arg_cache_array_len_arg_setup (PyGIArgCache *arg_cache,
@@ -718,17 +680,6 @@ _arg_cache_new (GITypeInfo *type_info,
 
     switch (type_tag) {
        case GI_TYPE_TAG_VOID:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_void_setup (arg_cache);
-
-           if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_void_setup (arg_cache);
-
-           break;
        case GI_TYPE_TAG_BOOLEAN:
        case GI_TYPE_TAG_INT8:
        case GI_TYPE_TAG_UINT8:
@@ -742,30 +693,17 @@ _arg_cache_new (GITypeInfo *type_info,
        case GI_TYPE_TAG_DOUBLE:
        case GI_TYPE_TAG_UNICHAR:
        case GI_TYPE_TAG_GTYPE:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_basic_type_setup (arg_cache);
-
-           if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_basic_type_setup (arg_cache);
-
-           break;
        case GI_TYPE_TAG_UTF8:
        case GI_TYPE_TAG_FILENAME:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
+           arg_cache = pygi_arg_basic_type_new_from_info (type_info, arg_info, transfer, direction);
+           if (arg_cache) {
+               arg_cache->py_arg_index = py_arg_index;
+               arg_cache->c_arg_index = c_arg_index;
+               return arg_cache;
+           } else {
+               return NULL;
+           }
 
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_utf8_setup (arg_cache, transfer);
-
-           if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_utf8_setup (arg_cache, transfer);
-
-           break;
        case GI_TYPE_TAG_ARRAY:
            {
                PyGISequenceCache *seq_cache =
