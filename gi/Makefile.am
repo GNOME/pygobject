@@ -102,7 +102,9 @@ _gi_la_SOURCES = \
 	pygi-marshal-to-py.c \
 	pygi-marshal-to-py.h \
 	pygi-marshal-cleanup.c \
-	pygi-marshal-cleanup.h
+	pygi-marshal-cleanup.h \
+	pygi-hashtable.c \
+	pygi-hashtable.h
 _gi_la_CFLAGS = \
 	$(extension_cppflags) \
 	$(GLIB_CFLAGS) \

@@ -150,13 +150,6 @@ typedef struct _PyGIInterfaceCache
     gchar *type_name;
 } PyGIInterfaceCache;
 
-typedef struct _PyGIHashCache
-{
-    PyGIArgCache arg_cache;
-    PyGIArgCache *key_cache;
-    PyGIArgCache *value_cache;
-} PyGIHashCache;
-
 typedef struct _PyGICallbackCache
 {
     PyGIArgCache arg_cache;
@@ -218,8 +211,18 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           PyGIDirection       direction,
                           GIInterfaceInfo    *iface_info);
 
-void _pygi_arg_cache_clear	(PyGIArgCache *cache);
-void _pygi_callable_cache_free	(PyGICallableCache *cache);
+PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,
+                               GIArgInfo *arg_info,
+                               GITransfer transfer,
+                               PyGIDirection direction,
+                               /* will be removed */
+                               gssize c_arg_index,
+                               gssize py_arg_index,
+                               PyGICallableCache *callable_cache);
+
+void _pygi_arg_cache_free       (PyGIArgCache *cache);
+void _pygi_arg_cache_clear      (PyGIArgCache *cache);
+void _pygi_callable_cache_free  (PyGICallableCache *cache);
 
 PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info,
                                              gboolean is_ccallback);

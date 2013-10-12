@@ -57,12 +57,6 @@ gboolean _pygi_marshal_from_py_gslist      (PyGIInvokeState   *state,
                                             PyObject          *py_arg,
                                             GIArgument        *arg,
                                             gpointer          *cleanup_data);
-gboolean _pygi_marshal_from_py_ghash       (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg,
-                                            gpointer          *cleanup_data);
 gboolean _pygi_marshal_from_py_gerror      (PyGIInvokeState   *state,
                                             PyGICallableCache *callable_cache,
                                             PyGIArgCache      *arg_cache,

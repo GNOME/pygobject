@@ -19,22 +19,16 @@
  * USA
  */
 
+#include <girepository.h>
+
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-marshal-to-py.h"
 #include "pygi-marshal-from-py.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-type.h"
-#include <girepository.h>
+#include "pygi-hashtable.h"
 
-PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,
-                               GIArgInfo *arg_info,
-                               GITransfer transfer,
-                               PyGIDirection direction,
-                               /* will be removed */
-                               gssize c_arg_index,
-                               gssize py_arg_index,
-                               PyGICallableCache *callable_cache);
 
 PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                                              GITypeInfo *type_info,
@@ -127,7 +121,7 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
 
 
 /* cleanup */
-static void
+void
 _pygi_arg_cache_free (PyGIArgCache *cache)
 {
     if (cache == NULL)
@@ -154,15 +148,6 @@ _interface_cache_free_func (PyGIInterfaceCache *cache)
     }
 }
 
-static void
-_hash_cache_free_func (PyGIHashCache *cache)
-{
-    if (cache != NULL) {
-        _pygi_arg_cache_free (cache->key_cache);
-        _pygi_arg_cache_free (cache->value_cache);
-        g_slice_free (PyGIHashCache, cache);
-    }
-}
 
 static void
 _sequence_cache_free_func (PyGISequenceCache *cache)
@@ -260,53 +245,6 @@ _sequence_cache_new (GITypeInfo *type_info,
     g_base_info_unref ( (GIBaseInfo *)item_type_info);
 
     return sc;
-}
-static PyGIHashCache *
-_hash_cache_new (GITypeInfo *type_info,
-                 GIDirection direction,
-                 GITransfer transfer)
-{
-    PyGIHashCache *hc;
-    GITypeInfo *key_type_info;
-    GITypeInfo *value_type_info;
-    GITransfer item_transfer;
-
-    hc = g_slice_new0 (PyGIHashCache);
-    ( (PyGIArgCache *)hc)->destroy_notify = (GDestroyNotify)_hash_cache_free_func;
-    key_type_info = g_type_info_get_param_type (type_info, 0);
-    value_type_info = g_type_info_get_param_type (type_info, 1);
-
-    item_transfer =
-        transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
-
-    hc->key_cache = _arg_cache_new (key_type_info,
-                                    NULL,
-                                    item_transfer,
-                                    direction,
-                                    0, 0,
-                                    NULL);
-
-    if (hc->key_cache == NULL) {
-        _pygi_arg_cache_free ( (PyGIArgCache *)hc);
-        return NULL;
-    }
-
-    hc->value_cache = _arg_cache_new (value_type_info,
-                                      NULL,
-                                      item_transfer,
-                                      direction,
-                                      0, 0,
-                                      NULL);
-
-    if (hc->value_cache == NULL) {
-        _pygi_arg_cache_free ( (PyGIArgCache *)hc);
-        return NULL;
-    }
-
-    g_base_info_unref( (GIBaseInfo *)key_type_info);
-    g_base_info_unref( (GIBaseInfo *)value_type_info);
-
-    return hc;
 }
 
 static PyGICallbackCache *
@@ -509,20 +447,6 @@ _arg_cache_to_py_gslist_setup (PyGIArgCache *arg_cache,
 {
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_gslist;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_glist;
-}
-
-static void
-_arg_cache_from_py_ghash_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_ghash;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_ghash;
-}
-
-static void
-_arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_ghash;
-    arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_ghash;
 }
 
 static void
@@ -920,22 +844,11 @@ _arg_cache_new (GITypeInfo *type_info,
                break;
             }
        case GI_TYPE_TAG_GHASH:
-           arg_cache =
-               (PyGIArgCache *)_hash_cache_new (type_info,
-                                                direction,
-                                                transfer);
+           arg_cache = pygi_arg_hash_table_new_from_info (type_info, arg_info, transfer, direction);
+           arg_cache->py_arg_index = py_arg_index;
+           arg_cache->c_arg_index = c_arg_index;
+           return arg_cache;
 
-           if (arg_cache == NULL)
-                   break;
-
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_ghash_setup (arg_cache);
-
-           if (direction & PYGI_DIRECTION_TO_PYTHON) {
-               _arg_cache_to_py_ghash_setup (arg_cache);
-           }
-
-           break;
        case GI_TYPE_TAG_INTERFACE:
            {
                GIInterfaceInfo *interface_info = g_type_info_get_interface (type_info);
