@@ -155,15 +155,6 @@ typedef struct _PyGIInterfaceCache
     gchar *type_name;
 } PyGIInterfaceCache;
 
-typedef struct _PyGICallbackCache
-{
-    PyGIArgCache arg_cache;
-    gssize user_data_index;
-    gssize destroy_notify_index;
-    GIScopeType scope;
-    GIInterfaceInfo *interface_info;
-} PyGICallbackCache;
-
 struct _PyGICallableCache
 {
     const gchar *name;

@@ -12,9 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- * USA
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __PYGI_CLOSURE_H__
@@ -23,6 +21,8 @@
 #include <Python.h>
 #include <girffi.h>
 #include <ffi.h>
+
+#include "pygi-cache.h"
 
 G_BEGIN_DECLS
 
@@ -51,6 +51,13 @@ PyGICClosure* _pygi_make_native_closure (GICallableInfo* info,
                                          GIScopeType scope,
                                          PyObject *function,
                                          gpointer user_data);
+
+PyGIArgCache *pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
+                                                GIArgInfo         *arg_info,   /* may be null */
+                                                GITransfer         transfer,
+                                                PyGIDirection      direction,
+                                                GIInterfaceInfo   *iface_info,
+                                                PyGICallableCache *callable_cache);
 
 G_END_DECLS
 

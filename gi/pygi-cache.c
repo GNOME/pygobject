@@ -31,6 +31,7 @@
 #include "pygi-basictype.h"
 #include "pygi-list.h"
 #include "pygi-array.h"
+#include "pygi-closure.h"
 #include "pygi-error.h"
 
 
@@ -162,17 +163,6 @@ _sequence_cache_free_func (PyGISequenceCache *cache)
     }
 }
 
-static void
-_callback_cache_free_func (PyGICallbackCache *cache)
-{
-    if (cache != NULL) {
-        if (cache->interface_info != NULL)
-            g_base_info_unref ( (GIBaseInfo *)cache->interface_info);
-
-        g_slice_free (PyGICallbackCache, cache);
-    }
-}
-
 void
 _pygi_callable_cache_free (PyGICallableCache *cache)
 {
@@ -248,28 +238,6 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
     return TRUE;
 }
 
-static PyGICallbackCache *
-_callback_cache_new (GIArgInfo *arg_info,
-                     GIInterfaceInfo *iface_info,
-                     gssize child_offset)
-{
-   PyGICallbackCache *cc;
-
-   cc = g_slice_new0 (PyGICallbackCache);
-   ( (PyGIArgCache *)cc)->destroy_notify = (GDestroyNotify)_callback_cache_free_func;
-
-   cc->user_data_index = g_arg_info_get_closure (arg_info);
-   if (cc->user_data_index != -1)
-       cc->user_data_index += child_offset;
-   cc->destroy_notify_index = g_arg_info_get_destroy (arg_info);
-   if (cc->destroy_notify_index != -1)
-       cc->destroy_notify_index += child_offset;
-   cc->scope = g_arg_info_get_scope (arg_info);
-   g_base_info_ref( (GIBaseInfo *)iface_info);
-   cc->interface_info = iface_info;
-   return cc;
-}
-
 PyGIArgCache *
 _arg_cache_alloc (void)
 {
@@ -335,38 +303,6 @@ _arg_cache_to_py_interface_object_setup (PyGIArgCache *arg_cache,
 }
 
 static void
-_arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
-                                             PyGICallableCache *callable_cache)
-{
-    PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
-    if (callback_cache->user_data_index >= 0) {
-        PyGIArgCache *user_data_arg_cache = _arg_cache_alloc ();
-        user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
-        user_data_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
-        user_data_arg_cache->has_default = TRUE; /* always allow user data with a NULL default. */
-        _pygi_callable_cache_set_arg (callable_cache, callback_cache->user_data_index,
-                                      user_data_arg_cache);
-    }
-
-    if (callback_cache->destroy_notify_index >= 0) {
-        PyGIArgCache *destroy_arg_cache = _arg_cache_alloc ();
-        destroy_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
-        destroy_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
-        _pygi_callable_cache_set_arg (callable_cache, callback_cache->destroy_notify_index,
-                                      destroy_arg_cache);
-    }
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_callback;
-    arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_callback;
-}
-
-static void
-_arg_cache_to_py_interface_callback_setup (void)
-{
-    PyErr_Format(PyExc_NotImplementedError,
-                 "Callback returns are not supported");
-}
-
-static void
 _arg_cache_from_py_interface_enum_setup (PyGIArgCache *arg_cache,
                                          GITransfer transfer)
 {
@@ -404,45 +340,22 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                               PyGICallableCache *callable_cache)
 {
     PyGIArgCache *arg_cache = NULL;
-    gssize child_offset = 0;
     GIInfoType info_type;
-
-    if (callable_cache != NULL)
-        child_offset =
-            (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-                 callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
 
     info_type = g_base_info_get_type ( (GIBaseInfo *)iface_info);
 
-    /* Callbacks are special cased */
-    if (info_type == GI_INFO_TYPE_CALLBACK) {
-        PyGICallbackCache *callback_cache;
-
-        if (direction & PYGI_DIRECTION_TO_PYTHON) {
-            _arg_cache_to_py_interface_callback_setup ();
-            return NULL;
+    switch (info_type) {
+        case GI_INFO_TYPE_CALLBACK:
+        {
+            return pygi_arg_callback_new_from_info (type_info,
+                                                    arg_info,
+                                                    transfer,
+                                                    direction,
+                                                    iface_info,
+                                                    callable_cache);
         }
-
-        callback_cache =
-            _callback_cache_new (arg_info,
-                                 iface_info,
-                                 child_offset);
-
-        arg_cache = (PyGIArgCache *)callback_cache;
-        if (arg_cache == NULL)
-            return NULL;
-
-        pygi_arg_base_setup (arg_cache,
-                             type_info,
-                             arg_info,
-                             transfer,
-                             direction);
-
-        if (direction & PYGI_DIRECTION_FROM_PYTHON)
-            _arg_cache_from_py_interface_callback_setup (arg_cache, callable_cache);
-
-        return arg_cache;
-
+        default:
+            ;  /* pass through to old model of setup */
     }
 
     arg_cache = (PyGIArgCache *)_interface_cache_new (iface_info);

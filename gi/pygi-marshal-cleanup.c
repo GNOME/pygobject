@@ -233,20 +233,6 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
         g_object_unref (G_OBJECT(data));
 }
 
-
-void
-_pygi_marshal_cleanup_from_py_interface_callback (PyGIInvokeState *state,
-                                                  PyGIArgCache    *arg_cache,
-                                                  PyObject        *py_arg,
-                                                  gpointer         data,
-                                                  gboolean         was_processed)
-{
-    PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
-    if (was_processed && callback_cache->scope == GI_SCOPE_TYPE_CALL) {
-        _pygi_invoke_closure_free (data);
-    }
-}
-
 void 
 _pygi_marshal_cleanup_from_py_interface_struct_gvalue (PyGIInvokeState *state,
                                                        PyGIArgCache    *arg_cache,

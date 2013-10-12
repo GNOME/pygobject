@@ -65,11 +65,6 @@ void _pygi_marshal_cleanup_to_py_interface_object         (PyGIInvokeState *stat
                                                            PyObject        *dummy,
                                                            gpointer         data,
                                                            gboolean         was_processed);
-void _pygi_marshal_cleanup_from_py_interface_callback     (PyGIInvokeState *state,
-                                                           PyGIArgCache    *arg_cache,
-                                                           PyObject        *py_arg,
-                                                           gpointer         data,
-                                                           gboolean         was_processed);
 G_END_DECLS
 
 #endif /* __PYGI_MARSHAL_CLEANUP_H__ */

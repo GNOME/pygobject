@@ -75,19 +75,6 @@ gi_argument_to_c_long (GIArgument *arg_in,
 }
 
 PyObject *
-_pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
-                                        PyGICallableCache *callable_cache,
-                                        PyGIArgCache      *arg_cache,
-                                        GIArgument        *arg)
-{
-    PyObject *py_obj = NULL;
-
-    PyErr_Format (PyExc_NotImplementedError,
-                  "Marshalling a callback to PyObject is not supported");
-    return py_obj;
-}
-
-PyObject *
 _pygi_marshal_to_py_interface_enum (PyGIInvokeState   *state,
                                     PyGICallableCache *callable_cache,
                                     PyGIArgCache      *arg_cache,
