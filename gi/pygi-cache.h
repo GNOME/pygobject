@@ -214,6 +214,13 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
                          GITransfer          transfer,
                          PyGIDirection       direction);
 
+PyGIArgCache *
+pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
+                                  GIArgInfo          *arg_info,     /* may be NULL for return arguments */
+                                  GITransfer          transfer,
+                                  PyGIDirection       direction,
+                                  GIInterfaceInfo    *iface_info);
+
 PyGIArgCache * _arg_cache_alloc (void);
 PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,
                                GIArgInfo *arg_info,

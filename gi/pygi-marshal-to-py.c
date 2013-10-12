@@ -194,15 +194,6 @@ _pygi_marshal_to_py_interface_boxed (PyGIInvokeState   *state,
 }
 
 PyObject *
-_pygi_marshal_to_py_interface_object_cache_adapter (PyGIInvokeState   *state,
-                                                    PyGICallableCache *callable_cache,
-                                                    PyGIArgCache      *arg_cache,
-                                                    GIArgument        *arg)
-{
-    return _pygi_marshal_to_py_object(arg, arg_cache->transfer);
-}
-
-PyObject *
 _pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
                                       PyGICallableCache *callable_cache,
                                       PyGIArgCache      *arg_cache,
@@ -213,28 +204,6 @@ _pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
     PyErr_Format (PyExc_NotImplementedError,
                   "Marshalling for this type is not implemented yet");
     return py_obj;
-}
-
-PyObject *
-_pygi_marshal_to_py_object (GIArgument *arg, GITransfer transfer) {
-    PyObject *pyobj;
-
-    if (arg->v_pointer == NULL) {
-        pyobj = Py_None;
-        Py_INCREF (pyobj);
-
-    } else if (G_IS_PARAM_SPEC(arg->v_pointer)) {
-        pyobj = pyg_param_spec_new (arg->v_pointer);
-        if (transfer == GI_TRANSFER_EVERYTHING)
-            g_param_spec_unref (arg->v_pointer);
-
-    } else {
-         pyobj = pygobject_new_full (arg->v_pointer,
-                                     /*steal=*/ transfer == GI_TRANSFER_EVERYTHING,
-                                     /*type=*/  NULL);
-    }
-
-    return pyobj;
 }
 
 PyObject *

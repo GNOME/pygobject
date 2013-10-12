@@ -299,40 +299,6 @@ _pygi_marshal_from_py_interface_boxed (PyGIInvokeState   *state,
 }
 
 gboolean
-_pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
-                                        PyGICallableCache *callable_cache,
-                                        PyGIArgCache      *arg_cache,
-                                        PyObject          *py_arg,
-                                        GIArgument        *arg,
-                                        gpointer          *cleanup_data)
-{
-    gboolean res = FALSE;
-
-    if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
-        return TRUE;
-    }
-
-    if (!PyObject_IsInstance (py_arg, ( (PyGIInterfaceCache *)arg_cache)->py_type)) {
-        PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
-
-        PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
-                      arg_cache->arg_name ? arg_cache->arg_name : "self",
-                      ( (PyGIInterfaceCache *)arg_cache)->type_name,
-                      module ? PYGLIB_PyUnicode_AsString(module) : "",
-                      module ? "." : "",
-                      py_arg->ob_type->tp_name);
-        if (module)
-            Py_DECREF (module);
-        return FALSE;
-    }
-
-    res = _pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
-    *cleanup_data = arg->v_pointer;
-    return res;
-}
-
-gboolean
 _pygi_marshal_from_py_interface_union (PyGIInvokeState   *state,
                                        PyGICallableCache *callable_cache,
                                        PyGIArgCache      *arg_cache,
@@ -345,95 +311,6 @@ _pygi_marshal_from_py_interface_union (PyGIInvokeState   *state,
     return FALSE;
 }
 
-/* _pygi_marshal_from_py_gobject:
- * py_arg: (in):
- * arg: (out):
- */
-gboolean
-_pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
-                               GIArgument *arg,  /*out*/
-                               GITransfer transfer) {
-    GObject *gobj;
-
-    if (py_arg == Py_None) {
-        arg->v_pointer = NULL;
-        return TRUE;
-    }
-
-    if (!pygobject_check (py_arg, &PyGObject_Type)) {
-        PyObject *repr = PyObject_Repr (py_arg);
-        PyErr_Format(PyExc_TypeError, "expected GObject but got %s",
-                     PYGLIB_PyUnicode_AsString (repr));
-        Py_DECREF (repr);
-        return FALSE;
-    }
-
-    gobj = pygobject_get (py_arg);
-    if (transfer == GI_TRANSFER_EVERYTHING) {
-        /* For transfer everything, add a new ref that the callee will take ownership of.
-         * Pythons existing ref to the GObject will be managed with the PyGObject wrapper.
-         */
-        g_object_ref (gobj);
-    }
-
-    arg->v_pointer = gobj;
-    return TRUE;
-}
-
-/* _pygi_marshal_from_py_gobject_out_arg:
- * py_arg: (in):
- * arg: (out):
- *
- * A specialization for marshaling Python GObjects used for out/return values
- * from a Python implemented vfuncs, signals, or an assignment to a GObject property.
- */
-gboolean
-_pygi_marshal_from_py_gobject_out_arg (PyObject *py_arg, /*in*/
-                                       GIArgument *arg,  /*out*/
-                                       GITransfer transfer) {
-    GObject *gobj;
-    if (!_pygi_marshal_from_py_gobject (py_arg, arg, transfer)) {
-        return FALSE;
-    }
-
-    /* HACK: At this point the basic marshaling of the GObject was successful
-     * but we add some special case hacks for vfunc returns due to buggy APIs:
-     * https://bugzilla.gnome.org/show_bug.cgi?id=693393
-     */
-    gobj = arg->v_pointer;
-    if (py_arg->ob_refcnt == 1 && gobj->ref_count == 1) {
-        /* If both object ref counts are only 1 at this point (the reference held
-         * in a return tuple), we assume the GObject will be free'd before reaching
-         * its target and become invalid. So instead of getting invalid object errors
-         * we add a new GObject ref.
-         */
-        g_object_ref (gobj);
-
-        if (((PyGObject *)py_arg)->private_flags.flags & PYGOBJECT_GOBJECT_WAS_FLOATING) {
-            /*
-             * We want to re-float instances that were floating and the Python
-             * wrapper assumed ownership. With the additional caveat that there
-             * are not any strong references beyond the return tuple.
-             */
-            g_object_force_floating (gobj);
-
-        } else {
-            PyObject *repr = PyObject_Repr (py_arg);
-            gchar *msg = g_strdup_printf ("Expecting to marshal a borrowed reference for %s, "
-                                          "but nothing in Python is holding a reference to this object. "
-                                          "See: https://bugzilla.gnome.org/show_bug.cgi?id=687522",
-                                          PYGLIB_PyUnicode_AsString(repr));
-            Py_DECREF (repr);
-            if (PyErr_WarnEx (PyExc_RuntimeWarning, msg, 2)) {
-                g_free (msg);
-                return FALSE;
-            }
-            g_free (msg);
-        }
-    }
-
-    return TRUE;
-}
 
 /* _pygi_marshal_from_py_gvalue:
  * py_arg: (in):

@@ -57,12 +57,6 @@ gboolean _pygi_marshal_from_py_interface_boxed    (PyGIInvokeState   *state,
                                                    PyObject          *py_arg,
                                                    GIArgument        *arg,
                                                    gpointer          *cleanup_data);
-gboolean _pygi_marshal_from_py_interface_object   (PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg,
-                                                   gpointer          *cleanup_data);
 gboolean _pygi_marshal_from_py_interface_union    (PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,
@@ -71,12 +65,6 @@ gboolean _pygi_marshal_from_py_interface_union    (PyGIInvokeState   *state,
                                                    gpointer          *cleanup_data);
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
-gboolean _pygi_marshal_from_py_gobject (PyObject *py_arg, /*in*/
-                                        GIArgument *arg,  /*out*/
-                                        GITransfer transfer);
-gboolean _pygi_marshal_from_py_gobject_out_arg (PyObject *py_arg, /*in*/
-                                                GIArgument *arg,  /*out*/
-                                                GITransfer transfer);
 
 gboolean _pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
                                        GIArgument *arg,  /*out*/

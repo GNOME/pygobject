@@ -206,33 +206,6 @@ pygi_marshal_cleanup_args_to_py_parameter_fail (PyGIInvokeState   *state,
     state->failed = TRUE;
 }
 
-void
-_pygi_marshal_cleanup_from_py_interface_object (PyGIInvokeState *state,
-                                                PyGIArgCache    *arg_cache,
-                                                PyObject        *py_arg,
-                                                gpointer         data,
-                                                gboolean         was_processed)
-{
-    /* If we processed the parameter but fail before invoking the method,
-       we need to remove the ref we added */
-    if (was_processed && state->failed && data != NULL &&
-            arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_unref (G_OBJECT(data));
-}
-
-void
-_pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
-                                              PyGIArgCache    *arg_cache,
-                                              PyObject        *dummy,
-                                              gpointer         data,
-                                              gboolean         was_processed)
-{
-    /* If we error out and the object is not marshalled into a PyGObject
-       we must take care of removing the ref */
-    if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-        g_object_unref (G_OBJECT(data));
-}
-
 void 
 _pygi_marshal_cleanup_from_py_interface_struct_gvalue (PyGIInvokeState *state,
                                                        PyGIArgCache    *arg_cache,

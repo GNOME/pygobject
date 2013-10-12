@@ -34,6 +34,7 @@
 #include "pygi-marshal-from-py.h"
 #include "pygi-marshal-to-py.h"
 #include "pygi-basictype.h"
+#include "pygi-object.h"
 
 
 static gboolean
@@ -1063,7 +1064,7 @@ array_success:
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
                     /* An error within this call will result in a NULL arg */
-                    _pygi_marshal_from_py_gobject_out_arg (object, &arg, transfer);
+                    pygi_arg_gobject_out_arg_from_py (object, &arg, transfer);
                     break;
 
                 default:
@@ -1436,10 +1437,10 @@ _pygi_argument_to_object (GIArgument  *arg,
                             transfer == GI_TRANSFER_NOTHING &&
                             g_object_is_floating (arg->v_pointer)) {
                         g_object_ref (arg->v_pointer);
-                        object = _pygi_marshal_to_py_object (arg, GI_TRANSFER_EVERYTHING);
+                        object = pygi_arg_gobject_to_py (arg, GI_TRANSFER_EVERYTHING);
                         g_object_force_floating (arg->v_pointer);
                     } else {
-                        object = _pygi_marshal_to_py_object (arg, transfer);
+                        object = pygi_arg_gobject_to_py (arg, transfer);
                     }
 
                     break;

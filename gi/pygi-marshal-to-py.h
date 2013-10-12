@@ -42,20 +42,12 @@ PyObject *_pygi_marshal_to_py_interface_boxed  (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
                                                 GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_interface_object_cache_adapter (PyGIInvokeState   *state,
-                                                              PyGICallableCache *callable_cache,
-                                                              PyGIArgCache      *arg_cache,
-                                                              GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_interface_union  (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
                                                 GIArgument        *arg);
 
 /* Simplified marshalers shared between vfunc/closure and direct function calls. */
-
-PyObject *_pygi_marshal_to_py_object (GIArgument *arg,
-                                      GITransfer transfer);
-
 PyObject *_pygi_marshal_to_py_interface_struct (GIArgument *arg,
                                                 GIInterfaceInfo *interface_info,
                                                 GType g_type,
