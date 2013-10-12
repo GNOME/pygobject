@@ -258,6 +258,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     gboolean is_ptr_array;
     GArray *array_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
 
     if (py_arg == Py_None) {
@@ -275,20 +276,20 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     if (length < 0)
         return FALSE;
 
-    if (sequence_cache->fixed_size >= 0 &&
-        sequence_cache->fixed_size != length) {
+    if (array_cache->fixed_size >= 0 &&
+            array_cache->fixed_size != length) {
         PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
-                      sequence_cache->fixed_size, length);
+                      array_cache->fixed_size, length);
 
         return FALSE;
     }
 
-    item_size = sequence_cache->item_size;
-    is_ptr_array = (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
+    item_size = array_cache->item_size;
+    is_ptr_array = (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY);
     if (is_ptr_array) {
         array_ = (GArray *)g_ptr_array_sized_new (length);
     } else {
-        array_ = g_array_sized_new (sequence_cache->is_zero_terminated,
+        array_ = g_array_sized_new (array_cache->is_zero_terminated,
                                     TRUE,
                                     item_size,
                                     length);
@@ -303,7 +304,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
         PYGLIB_PyBytes_Check (py_arg)) {
         memcpy(array_->data, PYGLIB_PyBytes_AsString (py_arg), length);
         array_->len = length;
-        if (sequence_cache->is_zero_terminated) {
+        if (array_cache->is_zero_terminated) {
             /* If array_ has been created with zero_termination, space for the
              * terminator is properly allocated, so we're not off-by-one here. */
             array_->data[length] = '\0';
@@ -433,10 +434,10 @@ err:
     }
 
 array_success:
-    if (sequence_cache->len_arg_index >= 0) {
+    if (array_cache->len_arg_index >= 0) {
         /* we have an child arg to handle */
         PyGIArgCache *child_cache =
-            _pygi_callable_cache_get_arg (callable_cache, sequence_cache->len_arg_index);
+            _pygi_callable_cache_get_arg (callable_cache, array_cache->len_arg_index);
 
         if (child_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL) {
             gint *len_arg = (gint *)state->in_args[child_cache->c_arg_index].v_pointer;
@@ -459,7 +460,7 @@ array_success:
         }
     }
 
-    if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
         /* In the case of GI_ARRAY_C, we give the data directly as the argument
          * but keep the array_ wrapper as cleanup data so we don't have to find
          * it's length again.
@@ -522,14 +523,6 @@ _pygi_marshal_from_py_glist (PyGIInvokeState   *state,
     length = PySequence_Length (py_arg);
     if (length < 0)
         return FALSE;
-
-    if (sequence_cache->fixed_size >= 0 &&
-        sequence_cache->fixed_size != length) {
-        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
-                      sequence_cache->fixed_size, length);
-
-        return FALSE;
-    }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {
@@ -606,14 +599,6 @@ _pygi_marshal_from_py_gslist (PyGIInvokeState   *state,
     length = PySequence_Length (py_arg);
     if (length < 0)
         return FALSE;
-
-    if (sequence_cache->fixed_size >= 0 &&
-        sequence_cache->fixed_size != length) {
-        PyErr_Format (PyExc_ValueError, "Must contain %zd items, not %zd",
-                      sequence_cache->fixed_size, length);
-
-        return FALSE;
-    }
 
     from_py_marshaller = sequence_cache->item_cache->from_py_marshaller;
     for (i = 0; i < length; i++) {

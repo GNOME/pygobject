@@ -297,24 +297,24 @@ _pygi_marshal_cleanup_to_py_interface_struct_foreign (PyGIInvokeState *state,
 
 static GArray*
 _wrap_c_array (PyGIInvokeState   *state,
-               PyGISequenceCache *sequence_cache,
+               PyGIArgGArray     *array_cache,
                gpointer           data)
 {
     GArray *array_;
     gsize   len = 0;
   
-    if (sequence_cache->fixed_size >= 0) {
-        len = sequence_cache->fixed_size;
-    } else if (sequence_cache->is_zero_terminated) {
+    if (array_cache->fixed_size >= 0) {
+        len = array_cache->fixed_size;
+    } else if (array_cache->is_zero_terminated) {
         len = g_strv_length ((gchar **)data);
-    } else if (sequence_cache->len_arg_index >= 0) {
-        GIArgument *len_arg = state->args[sequence_cache->len_arg_index];
+    } else if (array_cache->len_arg_index >= 0) {
+        GIArgument *len_arg = state->args[array_cache->len_arg_index];
         len = len_arg->v_long;
     }
 
     array_ = g_array_new (FALSE,
                           FALSE,
-                          sequence_cache->item_size);
+                          array_cache->item_size);
 
     if (array_ == NULL)
         return NULL;
@@ -337,8 +337,9 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         GArray *array_ = NULL;
         GPtrArray *ptr_array_ = NULL;
         PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+        PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
-        if (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
             ptr_array_ = (GPtrArray *) data;
         } else {
             array_ = (GArray *) data;
@@ -363,7 +364,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
                     item = g_array_index (array_, gpointer, i);
                 /* case 3: C array or GArray with simple types or structs */
                 else {
-                    item = array_->data + i * sequence_cache->item_size;
+                    item = array_->data + i * array_cache->item_size;
                     /* special-case hack: GValue array items do not get slice
                      * allocated in _pygi_marshal_from_py_array(), so we must
                      * not try to deallocate it as a slice and thus
@@ -381,7 +382,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
         }
 
         /* Only free the array when we didn't transfer ownership */
-        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
+        if (array_cache->array_type == GI_ARRAY_TYPE_C) {
             /* always free the GArray wrapper created in from_py marshaling and
              * passed back as cleanup_data
              */
@@ -407,16 +408,17 @@ _pygi_marshal_cleanup_to_py_array (PyGIInvokeState *state,
         GArray *array_ = NULL;
         GPtrArray *ptr_array_ = NULL;
         PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
+        PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
         /* If this isn't a garray create one to help process variable sized
            array elements */
-        if (sequence_cache->array_type == GI_ARRAY_TYPE_C) {
-            array_ = _wrap_c_array (state, sequence_cache, data);
+        if (array_cache->array_type == GI_ARRAY_TYPE_C) {
+            array_ = _wrap_c_array (state, array_cache, data);
             
             if (array_ == NULL)
                 return;
 
-        } else if (sequence_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+        } else if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
             ptr_array_ = (GPtrArray *) data;
         } else {
             array_ = (GArray *) data;

@@ -422,9 +422,9 @@ static gboolean _caller_alloc (PyGIInvokeState *state,
                 state->args[arg_count]->v_pointer = g_malloc0 (size);
         }
     } else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY) {
-        PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+        PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
-        state->out_args[out_count].v_pointer = g_array_new (TRUE, TRUE, seq_cache->item_size);
+        state->out_args[out_count].v_pointer = g_array_new (TRUE, TRUE, array_cache->item_size);
         state->args[arg_count] = &state->out_args[out_count];
     } else {
         return FALSE;

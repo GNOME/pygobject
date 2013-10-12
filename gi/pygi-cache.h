@@ -132,13 +132,18 @@ struct _PyGIArgCache
 typedef struct _PyGISequenceCache
 {
     PyGIArgCache arg_cache;
+    PyGIArgCache *item_cache;
+} PyGISequenceCache;
+
+typedef struct _PyGIArgGArray
+{
+    PyGISequenceCache seq_cache;
     gssize fixed_size;
     gssize len_arg_index;
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;
-    PyGIArgCache *item_cache;
-} PyGISequenceCache;
+} PyGIArgGArray;
 
 typedef struct _PyGIInterfaceCache
 {
@@ -210,6 +215,13 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GITransfer          transfer,
                           PyGIDirection       direction,
                           GIInterfaceInfo    *iface_info);
+
+gboolean
+pygi_arg_sequence_setup (PyGISequenceCache  *sc,
+                         GITypeInfo         *type_info,
+                         GIArgInfo          *arg_info,    /* may be NULL for return arguments */
+                         GITransfer          transfer,
+                         PyGIDirection       direction);
 
 PyGIArgCache * _arg_cache_alloc (void);
 PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,

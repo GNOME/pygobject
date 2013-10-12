@@ -121,18 +121,19 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
     GArray *array_;
     PyObject *py_obj = NULL;
     PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
     gsize processed_items = 0;
 
      /* GArrays make it easier to iterate over arrays
       * with different element sizes but requires that
       * we allocate a GArray if the argument was a C array
       */
-    if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
         gsize len;
-        if (seq_cache->fixed_size >= 0) {
+        if (array_cache->fixed_size >= 0) {
             g_assert(arg->v_pointer != NULL);
-            len = seq_cache->fixed_size;
-        } else if (seq_cache->is_zero_terminated) {
+            len = array_cache->fixed_size;
+        } else if (array_cache->is_zero_terminated) {
             if (arg->v_pointer == NULL) {
                 len = 0;
             } else if (seq_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8) {
@@ -141,9 +142,9 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 len = g_strv_length ((gchar **)arg->v_pointer);
             }
         } else {
-            GIArgument *len_arg = state->args[seq_cache->len_arg_index];
+            GIArgument *len_arg = state->args[array_cache->len_arg_index];
             PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache,
-                                                                    seq_cache->len_arg_index);
+                                                                    array_cache->len_arg_index);
 
             if (!gi_argument_to_gsize (len_arg, &len, arg_cache->type_tag)) {
                 return NULL;
@@ -152,7 +153,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
 
         array_ = g_array_new (FALSE,
                               FALSE,
-                              seq_cache->item_size);
+                              array_cache->item_size);
         if (array_ == NULL) {
             PyErr_NoMemory ();
 
@@ -204,7 +205,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                  * and move on, letting the per-item marshaler deal with the
                  * various transfer modes and ref counts (e.g. g_variant_ref_sink).
                  */
-                if (seq_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
+                if (array_cache->array_type == GI_ARRAY_TYPE_PTR_ARRAY) {
                     item_arg.v_pointer = g_ptr_array_index ( ( GPtrArray *)array_, i);
 
                 } else if (item_arg_cache->is_pointer) {
@@ -243,7 +244,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 if (py_item == NULL) {
                     Py_CLEAR (py_obj);
 
-                    if (seq_cache->array_type == GI_ARRAY_TYPE_C)
+                    if (array_cache->array_type == GI_ARRAY_TYPE_C)
                         g_array_unref (array_);
 
                     goto err;
@@ -254,13 +255,13 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
         }
     }
 
-    if (seq_cache->array_type == GI_ARRAY_TYPE_C)
+    if (array_cache->array_type == GI_ARRAY_TYPE_C)
         g_array_free (array_, FALSE);
 
     return py_obj;
 
 err:
-    if (seq_cache->array_type == GI_ARRAY_TYPE_C) {
+    if (array_cache->array_type == GI_ARRAY_TYPE_C) {
         g_array_free (array_, arg_cache->transfer == GI_TRANSFER_EVERYTHING);
     } else {
         /* clean up unprocessed items */

@@ -160,6 +160,15 @@ _sequence_cache_free_func (PyGISequenceCache *cache)
 }
 
 static void
+_array_cache_free_func (PyGIArgGArray *cache)
+{
+    if (cache != NULL) {
+        _pygi_arg_cache_free (((PyGISequenceCache *)cache)->item_cache);
+        g_slice_free (PyGIArgGArray, cache);
+    }
+}
+
+static void
 _callback_cache_free_func (PyGICallbackCache *cache)
 {
     if (cache != NULL) {
@@ -206,27 +215,26 @@ _interface_cache_new (GIInterfaceInfo *iface_info)
     return ic;
 }
 
-static PyGISequenceCache *
-_sequence_cache_new (GITypeInfo *type_info,
-                     GIDirection direction,
-                     GITransfer transfer,
-                     gssize child_offset)
+gboolean
+pygi_arg_sequence_setup (PyGISequenceCache  *sc,
+                         GITypeInfo         *type_info,
+                         GIArgInfo          *arg_info,    /* may be NULL for return arguments */
+                         GITransfer          transfer,
+                         PyGIDirection       direction)
 {
-    PyGISequenceCache *sc;
     GITypeInfo *item_type_info;
     GITransfer item_transfer;
 
-    sc = g_slice_new0 (PyGISequenceCache);
-    ( (PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
+    if (!pygi_arg_base_setup ((PyGIArgCache *)sc,
+                              type_info,
+                              arg_info,
+                              transfer,
+                              direction)) {
+        return FALSE;
+    }
 
-    sc->is_zero_terminated = g_type_info_is_zero_terminated (type_info);
-    sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
-    sc->len_arg_index = g_type_info_get_array_length (type_info);
-    if (sc->len_arg_index >= 0)
-        sc->len_arg_index += child_offset;
-
+    sc->arg_cache.destroy_notify = (GDestroyNotify)_sequence_cache_free_func;
     item_type_info = g_type_info_get_param_type (type_info, 0);
-
     item_transfer =
         transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
@@ -237,15 +245,87 @@ _sequence_cache_new (GITypeInfo *type_info,
                                      0, 0,
                                      NULL);
 
+    g_base_info_unref ( (GIBaseInfo *)item_type_info);
+
     if (sc->item_cache == NULL) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static gboolean
+pygi_arg_garray_setup (PyGIArgGArray      *sc,
+                       GITypeInfo         *type_info,
+                       GIArgInfo          *arg_info,    /* may be NULL for return arguments */
+                       GITransfer          transfer,
+                       PyGIDirection       direction,
+                       gssize              child_offset)
+{
+    GITypeInfo *item_type_info;
+
+    if (!pygi_arg_sequence_setup ((PyGISequenceCache *)sc,
+                                  type_info,
+                                  arg_info,
+                                  transfer,
+                                  direction)) {
+        return FALSE;
+    }
+
+    ((PyGIArgCache *)sc)->destroy_notify = (GDestroyNotify)_array_cache_free_func;
+    sc->is_zero_terminated = g_type_info_is_zero_terminated (type_info);
+    sc->fixed_size = g_type_info_get_array_fixed_size (type_info);
+    sc->len_arg_index = g_type_info_get_array_length (type_info);
+    if (sc->len_arg_index >= 0)
+        sc->len_arg_index += child_offset;
+
+    item_type_info = g_type_info_get_param_type (type_info, 0);
+    sc->item_size = _pygi_g_type_info_size (item_type_info);
+    g_base_info_unref ( (GIBaseInfo *)item_type_info);
+
+    return TRUE;
+}
+
+static PyGISequenceCache *
+pygi_arg_sequence_new (GITypeInfo *type_info,
+                       GIArgInfo *arg_info,
+                       GITransfer transfer,
+                       PyGIDirection direction)
+{
+    PyGISequenceCache *sc = g_slice_new0 (PyGISequenceCache);
+    if (sc == NULL)
+        return NULL;
+
+    if (!pygi_arg_sequence_setup (sc, type_info, arg_info, transfer, direction)) {
         _pygi_arg_cache_free ( (PyGIArgCache *)sc);
         return NULL;
     }
 
-    sc->item_size = _pygi_g_type_info_size (item_type_info);
-    g_base_info_unref ( (GIBaseInfo *)item_type_info);
-
     return sc;
+}
+
+static PyGIArgGArray *
+_arg_array_cache_new (GITypeInfo *type_info,
+                      GIArgInfo *arg_info,
+                      GITransfer transfer,
+                      PyGIDirection direction,
+                      gssize child_offset)
+{
+    PyGIArgGArray *array_cache = g_slice_new0 (PyGIArgGArray);
+    if (array_cache == NULL)
+        return NULL;
+
+    if (!pygi_arg_garray_setup (array_cache,
+                                type_info,
+                                arg_info,
+                                transfer,
+                                direction,
+                                child_offset)) {
+        _pygi_arg_cache_free ( (PyGIArgCache *)array_cache);
+        return NULL;
+    }
+
+    return array_cache;
 }
 
 static PyGICallbackCache *
@@ -284,7 +364,7 @@ _arg_cache_array_len_arg_setup (PyGIArgCache *arg_cache,
                                 gssize arg_index,
                                 gssize *py_arg_index)
 {
-    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
     if (seq_cache->len_arg_index >= 0) {
         PyGIArgCache *child_cache = NULL;
 
@@ -357,7 +437,7 @@ _arg_cache_from_py_array_setup (PyGIArgCache *arg_cache,
                                 PyGIDirection direction,
                                 gssize arg_index)
 {
-    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
     seq_cache->array_type = g_type_info_get_array_type (type_info);
     arg_cache->from_py_marshaller = _pygi_marshal_from_py_array;
     arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_array;
@@ -372,7 +452,7 @@ _arg_cache_to_py_array_setup (PyGIArgCache *arg_cache,
                               PyGIDirection direction,
                               gssize arg_index)
 {
-    PyGISequenceCache *seq_cache = (PyGISequenceCache *)arg_cache;
+    PyGIArgGArray *seq_cache = (PyGIArgGArray *)arg_cache;
     seq_cache->array_type = g_type_info_get_array_type (type_info);
     arg_cache->to_py_marshaller = _pygi_marshal_to_py_array;
     arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_array;
@@ -706,11 +786,12 @@ _arg_cache_new (GITypeInfo *type_info,
 
        case GI_TYPE_TAG_ARRAY:
            {
-               PyGISequenceCache *seq_cache =
-                   _sequence_cache_new (type_info,
-                                        direction,
-                                        transfer,
-                                        child_offset);
+               PyGIArgGArray *seq_cache =
+                   _arg_array_cache_new (type_info,
+                                         arg_info,
+                                         transfer,
+                                         direction,
+                                         child_offset);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -738,15 +819,17 @@ _arg_cache_new (GITypeInfo *type_info,
                                                c_arg_index,
                                                &py_arg_index);
 
-               break;
+               arg_cache->py_arg_index = py_arg_index;
+               arg_cache->c_arg_index = c_arg_index;
+               return arg_cache;
            }
        case GI_TYPE_TAG_GLIST:
            {
                PyGISequenceCache *seq_cache =
-                   _sequence_cache_new (type_info,
-                                        direction,
-                                        transfer,
-                                        child_offset);
+                   pygi_arg_sequence_new (type_info,
+                                          arg_info,
+                                          transfer,
+                                          direction);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -758,16 +841,17 @@ _arg_cache_new (GITypeInfo *type_info,
                if (direction & PYGI_DIRECTION_TO_PYTHON)
                    _arg_cache_to_py_glist_setup (arg_cache, transfer);
 
-
-               break;
+               arg_cache->py_arg_index = py_arg_index;
+               arg_cache->c_arg_index = c_arg_index;
+               return arg_cache;
            }
        case GI_TYPE_TAG_GSLIST:
            {
                PyGISequenceCache *seq_cache =
-                   _sequence_cache_new (type_info,
-                                        direction,
-                                        transfer,
-                                        child_offset);
+                   pygi_arg_sequence_new (type_info,
+                                          arg_info,
+                                          transfer,
+                                          direction);
 
                arg_cache = (PyGIArgCache *)seq_cache;
                if (arg_cache == NULL)
@@ -779,7 +863,9 @@ _arg_cache_new (GITypeInfo *type_info,
                if (direction & PYGI_DIRECTION_TO_PYTHON)
                    _arg_cache_to_py_gslist_setup (arg_cache, transfer);
 
-               break;
+               arg_cache->py_arg_index = py_arg_index;
+               arg_cache->c_arg_index = c_arg_index;
+               return arg_cache;
             }
        case GI_TYPE_TAG_GHASH:
            arg_cache = pygi_arg_hash_table_new_from_info (type_info, arg_info, transfer, direction);
