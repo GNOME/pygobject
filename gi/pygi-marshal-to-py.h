@@ -26,14 +26,6 @@ PyObject *_pygi_marshal_to_py_array     (PyGIInvokeState   *state,
                                          PyGICallableCache *callable_cache,
                                          PyGIArgCache      *arg_cache,
                                          GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_glist     (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
-PyObject *_pygi_marshal_to_py_gslist    (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_gerror    (PyGIInvokeState   *state,
                                          PyGICallableCache *callable_cache,
                                          PyGIArgCache      *arg_cache,
