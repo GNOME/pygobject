@@ -31,6 +31,7 @@
 #include "pygi-basictype.h"
 #include "pygi-list.h"
 #include "pygi-array.h"
+#include "pygi-error.h"
 
 
 PyGIArgCache * _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
@@ -273,20 +274,6 @@ PyGIArgCache *
 _arg_cache_alloc (void)
 {
     return g_slice_new0 (PyGIArgCache);
-}
-
-static void
-_arg_cache_from_py_gerror_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_gerror;
-    arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
-}
-
-static void
-_arg_cache_to_py_gerror_setup (PyGIArgCache *arg_cache)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_gerror;
-    arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
 }
 
 static void
@@ -553,14 +540,11 @@ _arg_cache_new (GITypeInfo *type_info,
        case GI_TYPE_TAG_GTYPE:
        case GI_TYPE_TAG_UTF8:
        case GI_TYPE_TAG_FILENAME:
-           arg_cache = pygi_arg_basic_type_new_from_info (type_info, arg_info, transfer, direction);
-           if (arg_cache) {
-               arg_cache->py_arg_index = py_arg_index;
-               arg_cache->c_arg_index = c_arg_index;
-               return arg_cache;
-           } else {
-               return NULL;
-           }
+           arg_cache = pygi_arg_basic_type_new_from_info (type_info,
+                                                          arg_info,
+                                                          transfer,
+                                                          direction);
+           break;
 
        case GI_TYPE_TAG_ARRAY:
            {
@@ -577,42 +561,29 @@ _arg_cache_new (GITypeInfo *type_info,
                                               direction,
                                               c_arg_index,
                                               &py_arg_index);
-
-               arg_cache->py_arg_index = py_arg_index;
-               arg_cache->c_arg_index = c_arg_index;
-               return arg_cache;
            }
+           break;
+
        case GI_TYPE_TAG_GLIST:
-           {
-               arg_cache = pygi_arg_glist_new_from_info (type_info,
-                                                         arg_info,
-                                                         transfer,
-                                                         direction);
-               if (arg_cache == NULL)
-                   return NULL;
+           arg_cache = pygi_arg_glist_new_from_info (type_info,
+                                                     arg_info,
+                                                     transfer,
+                                                     direction);
+           break;
 
-               arg_cache->py_arg_index = py_arg_index;
-               arg_cache->c_arg_index = c_arg_index;
-               return arg_cache;
-           }
        case GI_TYPE_TAG_GSLIST:
-           {
-               arg_cache = pygi_arg_gslist_new_from_info (type_info,
+           arg_cache = pygi_arg_gslist_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction);
+           break;
+
+       case GI_TYPE_TAG_GHASH:
+           arg_cache = pygi_arg_hash_table_new_from_info (type_info,
                                                           arg_info,
                                                           transfer,
                                                           direction);
-               if (arg_cache == NULL)
-                   return NULL;
-
-               arg_cache->py_arg_index = py_arg_index;
-               arg_cache->c_arg_index = c_arg_index;
-               return arg_cache;
-            }
-       case GI_TYPE_TAG_GHASH:
-           arg_cache = pygi_arg_hash_table_new_from_info (type_info, arg_info, transfer, direction);
-           arg_cache->py_arg_index = py_arg_index;
-           arg_cache->c_arg_index = c_arg_index;
-           return arg_cache;
+           break;
 
        case GI_TYPE_TAG_INTERFACE:
            {
@@ -625,26 +596,18 @@ _arg_cache_new (GITypeInfo *type_info,
                                                          callable_cache);
 
                g_base_info_unref ( (GIBaseInfo *)interface_info);
-               arg_cache->py_arg_index = py_arg_index;
-               arg_cache->c_arg_index = c_arg_index;
-               return arg_cache;
            }
+           break;
+
        case GI_TYPE_TAG_ERROR:
-           arg_cache = _arg_cache_alloc ();
-           if (arg_cache == NULL)
-               break;
-
-           if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_gerror_setup (arg_cache);
-
-           if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_gerror_setup (arg_cache);
-
+           arg_cache = pygi_arg_gerror_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction);
            break;
     }
 
     if (arg_cache != NULL) {
-        pygi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction);
         arg_cache->py_arg_index = py_arg_index;
         arg_cache->c_arg_index = c_arg_index;
     }

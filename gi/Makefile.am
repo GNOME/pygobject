@@ -109,6 +109,8 @@ _gi_la_SOURCES = \
 	pygi-list.h \
 	pygi-array.c \
 	pygi-array.h \
+	pygi-error.c \
+	pygi-error.h \
 	pygi-hashtable.c \
 	pygi-hashtable.h
 _gi_la_CFLAGS = \

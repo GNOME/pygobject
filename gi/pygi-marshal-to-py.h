@@ -22,10 +22,6 @@
 #ifndef __PYGI_MARSHAL_TO_PY_H__
 #define __PYGI_MARSHAL_TO_PY_H__
 
-PyObject *_pygi_marshal_to_py_gerror    (PyGIInvokeState   *state,
-                                         PyGICallableCache *callable_cache,
-                                         PyGIArgCache      *arg_cache,
-                                         GIArgument        *arg);
 PyObject *_pygi_marshal_to_py_interface_callback(PyGIInvokeState   *state,
                                                  PyGICallableCache *callable_cache,
                                                  PyGIArgCache      *arg_cache,

@@ -33,12 +33,6 @@ G_BEGIN_DECLS
 gboolean _pygi_marshal_from_py_ssize_t     (PyGIArgCache      *arg_cache,
                                             Py_ssize_t         size,
                                             GIArgument        *arg);
-gboolean _pygi_marshal_from_py_gerror      (PyGIInvokeState   *state,
-                                            PyGICallableCache *callable_cache,
-                                            PyGIArgCache      *arg_cache,
-                                            PyObject          *py_arg,
-                                            GIArgument        *arg,
-                                            gpointer          *cleanup_data);
 gboolean _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,

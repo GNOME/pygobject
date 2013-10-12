@@ -140,19 +140,6 @@ _is_union_member (GIInterfaceInfo *interface_info, PyObject *py_arg) {
     return is_member;
 }
 
-gboolean
-_pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
-                              PyGICallableCache *callable_cache,
-                              PyGIArgCache      *arg_cache,
-                              PyObject          *py_arg,
-                              GIArgument        *arg,
-                              gpointer          *cleanup_data)
-{
-    PyErr_Format (PyExc_NotImplementedError,
-                  "Marshalling for GErrors is not implemented");
-    return FALSE;
-}
-
 /* _pygi_destroy_notify_dummy:
  *
  * Dummy method used in the occasion when a method has a GDestroyNotify

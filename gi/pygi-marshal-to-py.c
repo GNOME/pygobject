@@ -75,28 +75,6 @@ gi_argument_to_c_long (GIArgument *arg_in,
 }
 
 PyObject *
-_pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
-                            PyGICallableCache *callable_cache,
-                            PyGIArgCache      *arg_cache,
-                            GIArgument        *arg)
-{
-    GError *error = arg->v_pointer;
-    PyObject *py_obj = NULL;
-
-    py_obj = pyglib_error_marshal(&error);
-
-    if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
-        g_error_free (error);
-    }
-
-    if (py_obj != NULL) {
-        return py_obj;
-    } else {
-        Py_RETURN_NONE;
-    }
-}
-
-PyObject *
 _pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
                                         PyGICallableCache *callable_cache,
                                         PyGIArgCache      *arg_cache,
