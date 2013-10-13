@@ -97,10 +97,6 @@ _gi_la_SOURCES = \
 	pygi-invoke-state-struct.h \
 	pygi-cache.h \
 	pygi-cache.c \
-	pygi-marshal-from-py.c \
-	pygi-marshal-from-py.h \
-	pygi-marshal-to-py.c \
-	pygi-marshal-to-py.h \
 	pygi-marshal-cleanup.c \
 	pygi-marshal-cleanup.h \
 	pygi-basictype.c \
@@ -113,6 +109,8 @@ _gi_la_SOURCES = \
 	pygi-error.h \
 	pygi-object.c \
 	pygi-object.h \
+	pygi-enum-marshal.c \
+	pygi-enum-marshal.h \
 	pygi-struct-marshal.c \
 	pygi-struct-marshal.h \
 	pygi-hashtable.c \

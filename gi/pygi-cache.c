@@ -24,8 +24,6 @@
 
 #include "pygi-info.h"
 #include "pygi-cache.h"
-#include "pygi-marshal-to-py.h"
-#include "pygi-marshal-from-py.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-type.h"
 #include "pygi-hashtable.h"
@@ -36,6 +34,7 @@
 #include "pygi-error.h"
 #include "pygi-object.h"
 #include "pygi-struct-marshal.h"
+#include "pygi-enum-marshal.h"
 
 
 /* _arg_info_default_value
@@ -252,35 +251,6 @@ _arg_cache_alloc (void)
     return g_slice_new0 (PyGIArgCache);
 }
 
-static void
-_arg_cache_from_py_interface_enum_setup (PyGIArgCache *arg_cache,
-                                         GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_enum;
-}
-
-static void
-_arg_cache_to_py_interface_enum_setup (PyGIArgCache *arg_cache,
-                                       GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_enum;
-}
-
-static void
-_arg_cache_from_py_interface_flags_setup (PyGIArgCache *arg_cache,
-                                          GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_flags;
-}
-
-static void
-_arg_cache_to_py_interface_flags_setup (PyGIArgCache *arg_cache,
-                                        GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_flags;
-}
-
-
 static PyGIArgCache *
 _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                               GITypeInfo        *type_info,
@@ -289,21 +259,18 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                               PyGIDirection      direction,
                               PyGICallableCache *callable_cache)
 {
-    PyGIArgCache *arg_cache = NULL;
     GIInfoType info_type;
 
     info_type = g_base_info_get_type ( (GIBaseInfo *)iface_info);
 
     switch (info_type) {
         case GI_INFO_TYPE_CALLBACK:
-        {
             return pygi_arg_callback_new_from_info (type_info,
                                                     arg_info,
                                                     transfer,
                                                     direction,
                                                     iface_info,
                                                     callable_cache);
-        }
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
             return pygi_arg_gobject_new_from_info (type_info,
@@ -319,40 +286,23 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                                                   transfer,
                                                   direction,
                                                   iface_info);
-        default:
-            ;  /* pass through to old model of setup */
-    }
-
-    arg_cache = pygi_arg_interface_new_from_info (type_info,
-                                                  arg_info,
-                                                  transfer,
-                                                  direction,
-                                                  iface_info);
-    if (arg_cache == NULL)
-        return NULL;
-
-    switch (info_type) {
         case GI_INFO_TYPE_ENUM:
-            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_interface_enum_setup (arg_cache, transfer);
-
-            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_interface_enum_setup (arg_cache, transfer);
-
-            break;
+            return pygi_arg_enum_new_from_info (type_info,
+                                                arg_info,
+                                                transfer,
+                                                direction,
+                                                iface_info);
         case GI_INFO_TYPE_FLAGS:
-            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_interface_flags_setup (arg_cache, transfer);
-
-            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_interface_flags_setup (arg_cache, transfer);
-
-            break;
+            return pygi_arg_flags_new_from_info (type_info,
+                                                 arg_info,
+                                                 transfer,
+                                                 direction,
+                                                 iface_info);
         default:
             g_assert_not_reached ();
     }
 
-    return arg_cache;
+    return NULL;
 }
 
 PyGIArgCache *
