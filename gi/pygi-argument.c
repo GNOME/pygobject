@@ -35,6 +35,7 @@
 #include "pygi-marshal-to-py.h"
 #include "pygi-basictype.h"
 #include "pygi-object.h"
+#include "pygi-struct-marshal.h"
 
 
 static gboolean

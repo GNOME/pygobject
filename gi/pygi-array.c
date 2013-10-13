@@ -26,6 +26,9 @@
 #include "pygi-private.h"
 #include "pygi-marshal-cleanup.h"
 
+/* Needed for _pygi_marshal_cleanup_from_py_interface_struct_gvalue hack */
+#include "pygi-struct-marshal.h"
+
 /*
  * GArray to Python
  */

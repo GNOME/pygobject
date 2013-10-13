@@ -45,45 +45,12 @@ gboolean _pygi_marshal_from_py_interface_flags    (PyGIInvokeState   *state,
                                                    PyObject          *py_arg,
                                                    GIArgument        *arg,
                                                    gpointer          *cleanup_data);
-gboolean _pygi_marshal_from_py_interface_struct_cache_adapter   (PyGIInvokeState   *state,
-                                                                 PyGICallableCache *callable_cache,
-                                                                 PyGIArgCache      *arg_cache,
-                                                                 PyObject          *py_arg,
-                                                                 GIArgument        *arg,
-                                                                 gpointer          *cleanup_data);
-gboolean _pygi_marshal_from_py_interface_boxed    (PyGIInvokeState   *state,
-                                                   PyGICallableCache *callable_cache,
-                                                   PyGIArgCache      *arg_cache,
-                                                   PyObject          *py_arg,
-                                                   GIArgument        *arg,
-                                                   gpointer          *cleanup_data);
 gboolean _pygi_marshal_from_py_interface_union    (PyGIInvokeState   *state,
                                                    PyGICallableCache *callable_cache,
                                                    PyGIArgCache      *arg_cache,
                                                    PyObject          *py_arg,
                                                    GIArgument        *arg,
                                                    gpointer          *cleanup_data);
-
-/* Simplified marshalers shared between vfunc/closure and direct function calls. */
-
-gboolean _pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
-                                       GIArgument *arg,  /*out*/
-                                       GITransfer transfer,
-                                       gboolean is_allocated);
-
-gboolean _pygi_marshal_from_py_gclosure(PyObject *py_arg, /*in*/
-                                        GIArgument *arg); /*out*/
-
-gboolean _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
-                                                 GIArgument *arg,
-                                                 const gchar *arg_name,
-                                                 GIBaseInfo *interface_info,
-                                                 GType g_type,
-                                                 PyObject *py_type,
-                                                 GITransfer transfer,
-                                                 gboolean is_allocated,
-                                                 gboolean is_foreign,
-                                                 gboolean is_pointer);
 
 G_END_DECLS
 

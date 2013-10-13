@@ -113,6 +113,8 @@ _gi_la_SOURCES = \
 	pygi-error.h \
 	pygi-object.c \
 	pygi-object.h \
+	pygi-struct-marshal.c \
+	pygi-struct-marshal.h \
 	pygi-hashtable.c \
 	pygi-hashtable.h
 _gi_la_CFLAGS = \

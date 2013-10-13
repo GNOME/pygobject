@@ -2,6 +2,7 @@
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
  * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>
+ * Copyright (C) 2013 Simon Feltman <sfeltman@gnome.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,6 +35,7 @@
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-object.h"
+#include "pygi-struct-marshal.h"
 
 
 /* _arg_info_default_value
@@ -251,48 +253,6 @@ _arg_cache_alloc (void)
 }
 
 static void
-_arg_cache_from_py_interface_union_setup (PyGIArgCache *arg_cache,
-                                          GITransfer transfer)
-{
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct_cache_adapter;
-}
-
-static void
-_arg_cache_to_py_interface_union_setup (PyGIArgCache *arg_cache,
-                                        GITransfer transfer)
-{
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct_cache_adapter;
-}
-
-static void
-_arg_cache_from_py_interface_struct_setup (PyGIArgCache *arg_cache,
-                                           GIInterfaceInfo *iface_info,
-                                           GITransfer transfer)
-{
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
-    arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_struct_cache_adapter;
-
-    if (iface_cache->g_type == G_TYPE_VALUE)
-        arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_struct_gvalue;
-    else if (iface_cache->is_foreign)
-        arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_struct_foreign;
-}
-
-static void
-_arg_cache_to_py_interface_struct_setup (PyGIArgCache *arg_cache,
-                                         GIInterfaceInfo *iface_info,
-                                         GITransfer transfer)
-{
-    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
-    arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_struct_cache_adapter;
-
-    if (iface_cache->is_foreign)
-        arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_struct_foreign;
-}
-
-static void
 _arg_cache_from_py_interface_enum_setup (PyGIArgCache *arg_cache,
                                          GITransfer transfer)
 {
@@ -351,6 +311,14 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                                                    transfer,
                                                    direction,
                                                    iface_info);
+        case GI_INFO_TYPE_BOXED:
+        case GI_INFO_TYPE_STRUCT:
+        case GI_INFO_TYPE_UNION:
+            return pygi_arg_struct_new_from_info (type_info,
+                                                  arg_info,
+                                                  transfer,
+                                                  direction,
+                                                  iface_info);
         default:
             ;  /* pass through to old model of setup */
     }
@@ -364,26 +332,6 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
         return NULL;
 
     switch (info_type) {
-        case GI_INFO_TYPE_UNION:
-            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_interface_union_setup (arg_cache, transfer);
-
-            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_interface_union_setup (arg_cache, transfer);
-
-            break;
-        case GI_INFO_TYPE_BOXED:
-        case GI_INFO_TYPE_STRUCT:
-            if (direction & PYGI_DIRECTION_FROM_PYTHON)
-               _arg_cache_from_py_interface_struct_setup (arg_cache,
-                                                          iface_info,
-                                                          transfer);
-
-            if (direction & PYGI_DIRECTION_TO_PYTHON)
-               _arg_cache_to_py_interface_struct_setup (arg_cache,
-                                                        iface_info,
-                                                        transfer);
-            break;
         case GI_INFO_TYPE_ENUM:
             if (direction & PYGI_DIRECTION_FROM_PYTHON)
                _arg_cache_from_py_interface_enum_setup (arg_cache, transfer);

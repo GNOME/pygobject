@@ -2,6 +2,7 @@
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
  * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>
+ * Copyright (C) 2013 Simon Feltman <sfeltman@gnome.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
