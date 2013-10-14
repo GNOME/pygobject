@@ -1,3 +1,11 @@
+3.10.1  14-Oct-2013
+	- Fix TypeError when setting drag target_list to None (Nuno Araujo)
+	  (#709926)
+	- Use qdata for wrapper retrieval in toggle reference notifications
+	  (Simon Feltman) (#709223)
+        - Fix memory leak for caller allocated GValue out arguments
+	  (Simon Feltman) (#709397)
+
 3.10.0  23-Sep-2013
         - Fix test_gi.TestProjectVersion.test_version_str() (Martin Pitt)
 
