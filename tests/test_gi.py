@@ -1246,8 +1246,6 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GObject.TYPE_INT, 42)
         GIMarshallingTests.gvalue_in(value)
 
-    @unittest.skipUnless(hasattr(GIMarshallingTests, 'gvalue_in_with_modification'),
-                         'Newer version of gi needed.')
     def test_gvalue_in_with_modification(self):
         value = GObject.Value(GObject.TYPE_INT, 42)
         GIMarshallingTests.gvalue_in_with_modification(value)

@@ -46,7 +46,8 @@ Requirements
 ============
   * C compiler (GCC and MSVC supported)
   * Python 2.7 or higher
-  * Glib/Gio 2.35.9 or higher
+  * Glib/Gio 2.38.0 or higher
+  * gobject-introspection 1.38.0 or higher
   * libffi (optional)
 
 Copyright Information
