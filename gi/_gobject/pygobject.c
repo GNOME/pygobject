@@ -241,13 +241,12 @@ build_parameter_list(GObjectClass *class)
 	g_free(name);
     }
 
-    g_type_class_unref(class);
-
     if (props)
         g_free(props);
     
     return props_list;
 }
+
 
 static PyObject*
 PyGProps_getattro(PyGProps *self, PyObject *attr)
@@ -265,12 +264,6 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
     }
 
     class = g_type_class_ref(self->gtype);
-    
-    if (!strcmp(attr_name, "__members__")) {
-        ret = build_parameter_list(class);
-        g_type_class_unref(class);
-	return ret;
-    }
 
     /* g_object_class_find_property recurses through the class hierarchy,
      * so the resulting pspec tells us the owner_type that owns the property
@@ -439,6 +432,25 @@ pygobject_props_get_iter(PyGProps *self)
     g_type_class_unref(class);
     return (PyObject *) iter;
 }
+
+static PyObject*
+pygobject_props_dir(PyGProps *self)
+{
+    PyObject *ret;
+    GObjectClass *class;
+
+    class = g_type_class_ref (self->gtype);
+    ret = build_parameter_list (class);
+    g_type_class_unref (class);
+
+    return ret;
+}
+
+static PyMethodDef pygobject_props_methods[] = {
+    { "__dir__", (PyCFunction)pygobject_props_dir, METH_NOARGS},
+    { NULL, NULL, 0}
+};
+
 
 static Py_ssize_t
 PyGProps_length(PyGProps *self)
@@ -2413,6 +2425,7 @@ pygobject_object_register_types(PyObject *d)
 	"Python attributes.";
     PyGProps_Type.tp_traverse = (traverseproc)pygobject_props_traverse;
     PyGProps_Type.tp_iter = (getiterfunc)pygobject_props_get_iter;
+    PyGProps_Type.tp_methods = pygobject_props_methods;
     if (PyType_Ready(&PyGProps_Type) < 0)
         return;
 

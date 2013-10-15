@@ -2893,6 +2893,20 @@ class TestPropertiesObject(unittest.TestCase):
         self.assertEqual(42, obj.props.some_int)
         self.assertEqual(54, obj.props.some_uchar)
 
+    def test_props_accessor_dir(self):
+        # Test class
+        props = dir(GIMarshallingTests.PropertiesObject.props)
+        self.assertTrue('some_float' in props)
+        self.assertTrue('some_double' in props)
+        self.assertTrue('some_variant' in props)
+
+        # Test instance
+        obj = GIMarshallingTests.PropertiesObject()
+        props = dir(obj.props)
+        self.assertTrue('some_float' in props)
+        self.assertTrue('some_double' in props)
+        self.assertTrue('some_variant' in props)
+
 
 class TestKeywords(unittest.TestCase):
     def test_method(self):
