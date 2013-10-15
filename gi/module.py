@@ -60,8 +60,7 @@ from .types import \
     StructMeta
 
 from ._gobject._gobject import \
-    GInterface, \
-    GObject
+    GInterface
 
 from ._gobject.constants import \
     TYPE_NONE, \
@@ -81,10 +80,16 @@ def get_parent_for_object(object_info):
     parent_object_info = object_info.get_parent()
 
     if not parent_object_info:
-        # Special case GObject.Object as being derived from the static GObject.
-        if object_info.get_namespace() == 'GObject' and object_info.get_name() == 'Object':
-            return GObject
+        # If we reach the end of the introspection info class hierarchy, look
+        # for an existing wrapper on the GType and use it as a base for the
+        # new introspection wrapper. This allows static C wrappers already
+        # registered with the GType to be used as the introspection base
+        # (_gobject.GObject for example)
+        gtype = object_info.get_g_type()
+        if gtype and gtype.pytype:
+            return gtype.pytype
 
+        # Otherwise use builtins.object as the base
         return object
 
     namespace = parent_object_info.get_namespace()
