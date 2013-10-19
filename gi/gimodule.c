@@ -599,6 +599,12 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
 }
 
+static PyObject *
+_pygi_threads_init (PyObject *self, PyObject *dummy)
+{
+    PyEval_InitThreads ();
+    Py_RETURN_NONE;
+}
 
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
@@ -613,6 +619,10 @@ static PyMethodDef _gi_functions[] = {
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
+    { "threads_init", (PyCFunction) _pygi_threads_init, METH_NOARGS,
+                      "Initialize Python threading support. This only needs to be called "
+                      "when using GI repositories with non-Python threads which may interact "
+                      "with Python callbacks (GStreamer)."},
     { NULL, NULL, 0 }
 };
 
