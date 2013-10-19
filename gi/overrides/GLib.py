@@ -23,6 +23,7 @@ import signal
 import warnings
 import sys
 
+import gi
 from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
@@ -48,10 +49,12 @@ spawn_async = _glib.spawn_async
 
 
 def threads_init():
-    warnings.warn('threads_init no longer needs to be called. '
-                  'See: https://bugzilla.gnome.org/show_bug.cgi?id=686914',
-                  PyGIDeprecationWarning)
-
+    gi.threads_init()
+    warnings.warn('Since version 3.10, threads_init is no longer needed when mixing Python '
+                  'threads with GI. If you are using GI repositories with non-Python threads '
+                  'which may interact with Python callbacks (GStreamer), use: gi.threads_init() '
+                  'to get rid of this message. See: https://wiki.gnome.org/PyGObject/Threading',
+                  PyGIDeprecationWarning, stacklevel=2)
 
 __all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']
