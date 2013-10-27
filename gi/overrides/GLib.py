@@ -507,6 +507,10 @@ class MainLoop(GLib.MainLoop):
         def _handler(loop):
             loop.quit()
             loop._quit_by_sigint = True
+            # We handle signal deletion in __del__, return True so GLib
+            # doesn't do the deletion for us.
+            return True
+
         if sys.platform != 'win32':
             # compatibility shim, keep around until we depend on glib 2.36
             if hasattr(GLib, 'unix_signal_add'):
