@@ -128,13 +128,19 @@ class TestSource(unittest.TestCase):
     def test_remove(self):
         s = GLib.idle_add(dir)
         self.assertEqual(GLib.source_remove(s), True)
-        # s is now removed, should fail now
-        self.assertEqual(GLib.source_remove(s), False)
 
-        # accepts large source IDs (they are unsigned)
-        self.assertEqual(GLib.source_remove(GObject.G_MAXINT32), False)
-        self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
-        self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
+        # Removing sources not found cause critical
+        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
+        try:
+            # s is now removed, should fail now
+            self.assertEqual(GLib.source_remove(s), False)
+
+            # accepts large source IDs (they are unsigned)
+            self.assertEqual(GLib.source_remove(GObject.G_MAXINT32), False)
+            self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
+            self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
+        finally:
+            GLib.log_set_always_fatal(old_mask)
 
     def test_recurse_property(self):
         s = GLib.Idle()
