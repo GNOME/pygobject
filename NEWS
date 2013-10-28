@@ -1,3 +1,30 @@
+3.11.1  28-Oct-2013
+        - Fix toggleref safety problems by always enabling the GIL
+	  (Simon Feltman) (#709223)
+	- Add consistent GLib.MainLoop SIGINT cleanup (Simon Feltman) (#710978)
+        - docs: Add a keyword value of None for allow-none annotations
+	  (Simon Feltman) (#640812)
+	- Remove overrides for supporting pre-3.10 GObject signal functions
+	  (Simon Feltman)
+	- Add threads_init back as a requirement for non-Python threaded repos
+	  (Simon Feltman) (#710447)
+	- Add dir method to GObject props accessor (Simon Feltman) (#705754)
+        - Remove PyGObjectWeakRef now that g_binding_unbind exists
+	  (Simon Feltman) (#699571)
+        - Fix lots of memory leaks leaks (Simon Feltman) (#693402, #709397)
+        - Add support for variable user data arguments (Simon Feltman) (#640812)
+        - Bump glib and g-i dependencies to latest stable. (Martin Pitt)
+	- Fix TypeError when setting drag target_list to None (Nuno Araujo)
+	  (#709926)
+	- Use qdata for wrapper retrieval in toggle reference notifications
+	  (Simon Feltman) (#709223)
+        - Expose all GI enum and flags types (Simon Feltman) (#709008)
+        - Add support for default arguments annotated with allow-none
+	  (Simon Feltman) (#640812)
+	- Refactor argument cache handling (Simon Feltman) (#640812)
+        - Remove support for allowing PyObjects as void pointers
+	  (Simon Feltman) (#688081)
+
 3.10.0  23-Sep-2013
         - Fix test_gi.TestProjectVersion.test_version_str() (Martin Pitt)
 
