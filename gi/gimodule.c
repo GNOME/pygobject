@@ -599,13 +599,6 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
 }
 
-static PyObject *
-_pygi_threads_init (PyObject *self, PyObject *dummy)
-{
-    PyEval_InitThreads ();
-    Py_RETURN_NONE;
-}
-
 static PyMethodDef _gi_functions[] = {
     { "enum_add", (PyCFunction) _wrap_pyg_enum_add, METH_VARARGS | METH_KEYWORDS },
     { "enum_register_new_gtype_and_add", (PyCFunction) _wrap_pyg_enum_register_new_gtype_and_add, METH_VARARGS | METH_KEYWORDS },
@@ -619,10 +612,6 @@ static PyMethodDef _gi_functions[] = {
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
-    { "threads_init", (PyCFunction) _pygi_threads_init, METH_NOARGS,
-                      "Initialize Python threading support. This only needs to be called "
-                      "when using GI repositories with non-Python threads which may interact "
-                      "with Python callbacks (GStreamer)."},
     { NULL, NULL, 0 }
 };
 
@@ -637,6 +626,13 @@ static struct PyGI_API CAPI = {
 PYGLIB_MODULE_START(_gi, "_gi")
 {
     PyObject *api;
+
+    /* Always enable Python threads since we cannot predict which GI repositories
+     * might accept Python callbacks run within non-Python threads or might trigger
+     * toggle ref notifications.
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=709223
+     */
+    PyEval_InitThreads ();
 
     if (pygobject_init (-1, -1, -1) == NULL) {
         return PYGLIB_MODULE_ERROR_RETURN;

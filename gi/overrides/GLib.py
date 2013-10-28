@@ -25,7 +25,7 @@ import sys
 
 from ..module import get_introspection_module
 from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
-                   source_set_callback, io_channel_read, threads_init)
+                   source_set_callback, io_channel_read)
 from ..overrides import override, deprecated
 from gi import PyGIDeprecationWarning, version_info
 
@@ -45,6 +45,12 @@ OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
 spawn_async = _glib.spawn_async
+
+
+def threads_init():
+    warnings.warn('Since version 3.10, calling threads_init is no longer needed. '
+                  'See: https://wiki.gnome.org/PyGObject/Threading',
+                  PyGIDeprecationWarning, stacklevel=2)
 
 __all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']
