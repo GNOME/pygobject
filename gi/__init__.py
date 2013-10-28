@@ -27,7 +27,6 @@ __path__ = extend_path(__path__, __name__)
 from ._gi import _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning
-from ._gi import threads_init
 
 # Force loading the GObject typelib so we have available the wrappers for
 # base classes such as GInitiallyUnowned
@@ -36,7 +35,6 @@ gi  # pyflakes
 
 _API = _API  # pyflakes
 PyGIDeprecationWarning = PyGIDeprecationWarning
-threads_init
 
 import os
 
