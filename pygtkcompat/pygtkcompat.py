@@ -90,8 +90,8 @@ def enable():
     # gobject
     from gi.repository import GObject
     sys.modules['gobject'] = GObject
-    from gi._gobject import propertyhelper
-    sys.modules['gobject.propertyhelper'] = propertyhelper
+    from gi import _propertyhelper
+    sys.modules['gobject.propertyhelper'] = _propertyhelper
 
     # gio
     from gi.repository import Gio

@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2006-2007 Johan Dahlin
 #
-#   gobject/constants.py: GObject type constants
+#   gi/_constants.py: GObject type constants
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 # USA
 
-import gi._gi
-_gobject = gi._gi._gobject
+from ._gi import _gobject
 
 TYPE_INVALID = _gobject.TYPE_INVALID
 TYPE_NONE = _gobject.type_from_name('void')

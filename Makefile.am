@@ -58,7 +58,10 @@ nobase_pyexec_PYTHON = \
 	gi/module.py \
 	gi/importer.py \
 	gi/pygtkcompat.py \
-	gi/docstring.py
+	gi/docstring.py \
+	gi/_constants.py \
+	gi/_propertyhelper.py \
+	gi/_signalhelper.py
 
 # if we build in a separate tree, we need to symlink the *.py files from the
 # source tree; Python does not accept the extensions and modules in different

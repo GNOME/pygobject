@@ -3,7 +3,7 @@ import warnings
 
 from gi import PyGIDeprecationWarning
 from gi._gi import CallableInfo
-from gi._gobject.constants import \
+from gi._constants import \
     TYPE_NONE, \
     TYPE_INVALID
 

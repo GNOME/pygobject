@@ -5,7 +5,7 @@ import unittest
 import sys
 
 from gi.repository import GObject, GLib
-from gi._gobject import signalhelper
+from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
 

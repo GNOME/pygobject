@@ -31,9 +31,10 @@ from gi.overrides import override
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
-from gi._gobject import _gobject
-from gi._gobject import propertyhelper
-from gi._gobject import signalhelper
+from gi import _propertyhelper as propertyhelper
+from gi import _signalhelper as signalhelper
+
+_gobject = gi._gi._gobject
 
 GObjectModule = gi.module.get_introspection_module('GObject')
 

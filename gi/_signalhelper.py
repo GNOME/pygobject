@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2012 Simon Feltman
 #
-#   gobject/signalhelper.py: GObject signal binding decorator object
+#   gi/_signalhelper.py: GObject signal binding decorator object
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,7 @@
 import sys
 import inspect
 
-import gi._gi
-_gobject = gi._gi._gobject
+from ._gi import _gobject
 
 # Callable went away in python 3.0 and came back in 3.2.
 # Use versioning to figure out when to define it, otherwise we have to deal with

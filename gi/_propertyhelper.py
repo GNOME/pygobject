@@ -2,7 +2,7 @@
 # pygobject - Python bindings for the GObject library
 # Copyright (C) 2007 Johan Dahlin
 #
-#   gobject/propertyhelper.py: GObject property wrapper/helper
+#   gi/_propertyhelper.py: GObject property wrapper/helper
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@ import sys
 import gi._gi
 _gobject = gi._gi._gobject
 
-from .constants import \
+from ._constants import \
     TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
     TYPE_BOOLEAN, TYPE_INT, TYPE_UINT, TYPE_LONG, \
     TYPE_ULONG, TYPE_INT64, TYPE_UINT64, TYPE_ENUM, TYPE_FLAGS, \

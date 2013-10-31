@@ -2406,7 +2406,7 @@ class TestMRO(unittest.TestCase):
             pass
 
         expected = (E, D, B, C, A, GIMarshallingTests.Object,
-                    GObject.Object, GObject.Object.__base__, gi._gobject.GObject,
+                    GObject.Object, GObject.Object.__base__, gi._gi._gobject.GObject,
                     object)
         self.assertEqual(expected, E.__mro__)
 

@@ -24,24 +24,27 @@ from __future__ import absolute_import
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
+import sys
+import os
+
+# we can't have pygobject 2 loaded at the same time we load the internal _gobject
+if 'gobject' in sys.modules:
+    raise ImportError('When using gi.repository you must not import static '
+                      'modules like "gobject". Please change all occurrences '
+                      'of "import gobject" to "from gi.repository import GObject".')
+
+from ._gi import _gobject
 from ._gi import _API
 from ._gi import Repository
 from ._gi import PyGIDeprecationWarning
 
-# Force loading the GObject typelib so we have available the wrappers for
-# base classes such as GInitiallyUnowned
-import gi._gobject
-gi  # pyflakes
-
 _API = _API  # pyflakes
 PyGIDeprecationWarning = PyGIDeprecationWarning
-
-import os
 
 _versions = {}
 _overridesdir = os.path.join(os.path.dirname(__file__), 'overrides')
 
-version_info = gi._gobject.pygobject_version[:]
+version_info = _gobject.pygobject_version[:]
 __version__ = "{0}.{1}.{2}".format(*version_info)
 
 

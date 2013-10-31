@@ -8,7 +8,9 @@ import warnings
 from gi.repository import GObject, GLib
 from gi import PyGIDeprecationWarning
 from gi.module import get_introspection_module
-from gi._gobject import _gobject
+
+import gi
+_gobject = gi._gi._gobject
 
 import testhelper
 

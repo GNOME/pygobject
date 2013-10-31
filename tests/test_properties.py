@@ -23,7 +23,7 @@ from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import Regress
 from gi.repository import GIMarshallingTests
-from gi._gobject import propertyhelper
+from gi import _propertyhelper as propertyhelper
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
