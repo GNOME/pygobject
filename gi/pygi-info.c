@@ -24,8 +24,8 @@
 
 #include "pygi-private.h"
 #include "pygi-cache.h"
+#include "pygobject-private.h"
 
-#include <pygobject.h>
 #include <pyglib-python-compat.h>
 
 

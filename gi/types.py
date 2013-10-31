@@ -26,7 +26,6 @@ import sys
 import warnings
 
 from . import _gobject
-from ._gobject._gobject import GInterface
 from ._gobject.constants import TYPE_INVALID
 from .docstring import generate_doc_string
 
@@ -38,6 +37,8 @@ from ._gi import \
     register_interface_info, \
     hook_up_vfunc_implementation
 
+import gi._gi
+GInterface = gi._gi._gobject.GInterface
 
 StructInfo  # pyflakes
 

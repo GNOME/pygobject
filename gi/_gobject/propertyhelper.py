@@ -21,7 +21,8 @@
 
 import sys
 
-from . import _gobject
+import gi._gi
+_gobject = gi._gi._gobject
 
 from .constants import \
     TYPE_NONE, TYPE_INTERFACE, TYPE_CHAR, TYPE_UCHAR, \
@@ -30,10 +31,15 @@ from .constants import \
     TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, \
     TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
     TYPE_PYOBJECT, TYPE_GTYPE, TYPE_STRV, TYPE_VARIANT
-from ._gobject import \
-    G_MAXFLOAT, G_MAXDOUBLE, \
-    G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, \
-    G_MAXULONG
+
+G_MAXFLOAT = _gobject.G_MAXFLOAT
+G_MAXDOUBLE = _gobject.G_MAXDOUBLE
+G_MININT = _gobject.G_MININT
+G_MAXINT = _gobject.G_MAXINT
+G_MAXUINT = _gobject.G_MAXUINT
+G_MINLONG = _gobject.G_MINLONG
+G_MAXLONG = _gobject.G_MAXLONG
+G_MAXULONG = _gobject.G_MAXULONG
 
 if sys.version_info >= (3, 0):
     _basestring = str

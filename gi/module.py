@@ -59,8 +59,8 @@ from .types import \
     GObjectMeta, \
     StructMeta
 
-from ._gobject._gobject import \
-    GInterface
+import gi._gi
+GInterface = gi._gi._gobject.GInterface
 
 from ._gobject.constants import \
     TYPE_NONE, \

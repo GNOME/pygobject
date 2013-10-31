@@ -26,7 +26,7 @@
 #  include <config.h>
 #endif
 
-#include "pygobject.h"
+#include "pygobject-private.h"
 #include "pygi-foreign.h"
 
 #include <girepository.h>

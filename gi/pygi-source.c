@@ -23,8 +23,7 @@
  * IN THE SOFTWARE.
  */
 
-#define NO_IMPORT
-#include "pygobject.h"
+#include "pygobject-private.h"
 
 #include "pygi-private.h"
 #include "pyglib.h"

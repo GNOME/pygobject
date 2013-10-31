@@ -22,8 +22,8 @@
  */
 
 #include "pygi-private.h"
+#include "pygobject-private.h"
 
-#include <pygobject.h>
 #include <girepository.h>
 #include <pyglib-python-compat.h>
 

@@ -22,12 +22,13 @@
  */
 
 #include "pygi-private.h"
+#include "pygobject-private.h"
+#include "pygparamspec.h"
 
 #include <string.h>
 #include <time.h>
 
 #include <pyglib.h>
-#include <pygobject.h>
 #include <pyglib-python-compat.h>
 
 #include "pygi-cache.h"

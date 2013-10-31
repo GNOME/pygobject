@@ -22,7 +22,8 @@
 import sys
 import inspect
 
-from . import _gobject
+import gi._gi
+_gobject = gi._gi._gobject
 
 # Callable went away in python 3.0 and came back in 3.2.
 # Use versioning to figure out when to define it, otherwise we have to deal with

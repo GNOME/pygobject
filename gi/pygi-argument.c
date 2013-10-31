@@ -22,12 +22,12 @@
  */
 
 #include "pygi-private.h"
+#include "pygobject-private.h"
 
 #include <string.h>
 #include <time.h>
 
 #include <datetime.h>
-#include <pygobject.h>
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
@@ -1981,6 +1981,5 @@ void
 _pygi_argument_init (void)
 {
     PyDateTime_IMPORT;
-    _pygobject_import();
 }
 

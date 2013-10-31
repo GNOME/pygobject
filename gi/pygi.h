@@ -26,8 +26,7 @@
 #  include <config.h>
 #endif
 
-#define NO_IMPORT_PYGOBJECT
-#include <pygobject.h>
+#include <pygobject-private.h>
 
 #include <girepository.h>
 #include "pygi-cache.h"

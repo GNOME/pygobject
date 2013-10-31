@@ -19,7 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 # USA
 
-from . import _gobject
+import gi._gi
+_gobject = gi._gi._gobject
 
 TYPE_INVALID = _gobject.TYPE_INVALID
 TYPE_NONE = _gobject.type_from_name('void')

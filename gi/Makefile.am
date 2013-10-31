@@ -24,11 +24,32 @@ extension_ldflags += \
 	-no-undefined
 endif
 
+pkgincludedir = $(includedir)/pygobject-$(PLATFORM_VERSION)
+pkginclude_HEADERS = pygobject.h
+
 pygidir = $(pyexecdir)/gi
 
 pygi_LTLIBRARIES = _gi.la
 
 _gi_la_SOURCES = \
+	gobjectmodule.c \
+	pygboxed.c \
+	pygboxed.h \
+	pygenum.c \
+	pygenum.h \
+	pygflags.c \
+	pygflags.h \
+	pyginterface.c \
+	pyginterface.h \
+	pygobject.c \
+	pygobject.h \
+	pygobject-private.h \
+	pygparamspec.c \
+	pygparamspec.h \
+	pygpointer.c \
+	pygpointer.h \
+	pygtype.c \
+	pygtype.h \
 	pygi-repository.c \
 	pygi-repository.h \
 	pygi-info.c \
@@ -69,13 +90,16 @@ _gi_la_SOURCES = \
 	pygi-marshal-cleanup.c \
 	pygi-marshal-cleanup.h
 _gi_la_CFLAGS = \
+	$(extension_cppflags) \
+	-I$(top_srcdir)/gi/_glib \
+	$(GLIB_CFLAGS) \
 	$(GI_CFLAGS)
 _gi_la_CPPFLAGS = \
 	$(extension_cppflags) \
-	-I$(top_srcdir)/gi/_glib \
-	-I$(top_srcdir)/gi/_gobject
+	-I$(top_srcdir)/gi/_glib
 _gi_la_LIBADD = \
 	$(extension_libadd) \
+	$(GLIB_LIBS) \
 	$(GI_LIBS) \
 	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
 _gi_la_LDFLAGS = \
@@ -93,8 +117,7 @@ _gi_cairo_la_CFLAGS = \
 	$(PYCAIRO_CFLAGS)
 _gi_cairo_la_CPPFLAGS = \
 	$(extension_cppflags) \
-	-I$(top_srcdir)/gi/_glib \
-	-I$(top_srcdir)/gi/_gobject
+	-I$(top_srcdir)/gi/_glib
 _gi_cairo_la_LIBADD = \
 	$(extension_libadd) \
 	$(GI_LIBS) \

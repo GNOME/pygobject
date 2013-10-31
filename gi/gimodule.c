@@ -21,11 +21,12 @@
  * USA
  */
 
+#include "pygobject-private.h"
+#include "pyginterface.h"
 #include "pygi-private.h"
 #include "pygi.h"
 #include "pyglib.h"
 
-#include <pygobject.h>
 #include <pyglib-python-compat.h>
 
 PyObject *PyGIDeprecationWarning;
@@ -627,6 +628,7 @@ static struct PyGI_API CAPI = {
 PYGLIB_MODULE_START(_gi, "_gi")
 {
     PyObject *api;
+    PyObject *_gobject_module;
 
     /* Always enable Python threads since we cannot predict which GI repositories
      * might accept Python callbacks run within non-Python threads or might trigger
@@ -635,13 +637,12 @@ PYGLIB_MODULE_START(_gi, "_gi")
      */
     PyEval_InitThreads ();
 
-    if (pygobject_init (-1, -1, -1) == NULL) {
+    _gobject_module = pyglib__gobject_module_create ();
+    if (_gobject_module == NULL) {
         return PYGLIB_MODULE_ERROR_RETURN;
     }
-
-    if (_pygobject_import() < 0) {
-        return PYGLIB_MODULE_ERROR_RETURN;
-    }
+    PyModule_AddObject (module, "_gobject", _gobject_module);
+    PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
     _pygi_repository_register_types (module);
     _pygi_info_register_types (module);

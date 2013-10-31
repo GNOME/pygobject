@@ -29,46 +29,6 @@
 # define PYGLIB_CPointer_Import(module, symbol) \
     PyCapsule_Import(##module##.##symbol##, FALSE)
 
-#if PY_VERSION_HEX < 0x03000000
-
-#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
-static int _pyglib_init_##modname(PyObject *module); \
-void init##modname(void) \
-{ \
-    PyObject *module = Py_InitModule(fullpkgname, functions); \
-    _pyglib_init_##modname(module); \
-} \
-static int _pyglib_init_##modname(PyObject *module)
-
-#else
-
-#define PYGLIB_INIT_FUNCTION(modname, fullpkgname, functions) \
-static struct PyModuleDef _##modname##module = {     \
-    PyModuleDef_HEAD_INIT,                              \
-    fullpkgname,                                        \
-    NULL,                                               \
-    -1,                                                 \
-    functions,                                          \
-    NULL,                                               \
-    NULL,                                               \
-    NULL,                                               \
-    NULL                                                \
-};                                                      \
-static int _pyglib_init_##modname(PyObject *module); \
-PyObject *PyInit_##modname(void) \
-{ \
-    PyObject *module = PyModule_Create(&_##modname##module);  \
-    if (module == NULL) \
-	return NULL; \
-    if (_pyglib_init_##modname(module) != 0 ) {\
-	Py_DECREF(module); \
-	return NULL; \
-    } \
-    return module; \
-} \
-static int _pyglib_init_##modname(PyObject *module)
-
-#endif
 
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
@@ -121,12 +81,18 @@ static int _pyglib_init_##modname(PyObject *module)
 #endif
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
-DL_EXPORT(void) init##symbol(void); \
-DL_EXPORT(void) init##symbol(void)			\
+PyObject * pyglib_##symbol##_module_create(void);       \
+DL_EXPORT(void) init##symbol(void);                     \
+DL_EXPORT(void) init##symbol(void) {                    \
+    pyglib_##symbol##_module_create();                  \
+};                                                      \
+PyObject * pyglib_##symbol##_module_create(void)        \
 {                                                       \
     PyObject *module;                                   \
     module = Py_InitModule(modname, symbol##_functions);
-#define PYGLIB_MODULE_END }
+
+#define PYGLIB_MODULE_END return module; }
+
 #define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyObject_HEAD_INIT(NULL)                            \
@@ -135,6 +101,7 @@ PyTypeObject symbol = {                                 \
     sizeof(csymbol),                                    \
     0,                                                  \
 };
+
 #define PYGLIB_REGISTER_TYPE(d, type, name)	        \
     if (!type.tp_alloc)                                 \
 	type.tp_alloc = PyType_GenericAlloc;            \
@@ -160,18 +127,25 @@ PyTypeObject symbol = {                                 \
     NULL,                                               \
     NULL                                                \
 };                                                      \
+PyObject * pyglib_##symbol##_module_create(void);       \
 PyMODINIT_FUNC PyInit_##symbol(void);                   \
-PyMODINIT_FUNC PyInit_##symbol(void)                    \
+PyMODINIT_FUNC PyInit_##symbol(void) {                  \
+    return pyglib_##symbol##_module_create();           \
+};                                                      \
+PyObject * pyglib_##symbol##_module_create(void)        \
 {                                                       \
     PyObject *module;                                   \
     module = PyModule_Create(&_##symbol##module);
+
 #define PYGLIB_MODULE_END return module; }
+
 #define PYGLIB_DEFINE_TYPE(typename, symbol, csymbol)	\
 PyTypeObject symbol = {                                 \
     PyVarObject_HEAD_INIT(NULL, 0)                      \
     typename,                                           \
     sizeof(csymbol)                                     \
 };
+
 #define PYGLIB_REGISTER_TYPE(d, type, name)	            \
     if (!type.tp_alloc)                                 \
 	    type.tp_alloc = PyType_GenericAlloc;            \

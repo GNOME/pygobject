@@ -23,6 +23,8 @@
 #ifndef __PYGOBJECT_PARAMSPEC_H__ 
 #define __PYGOBJECT_PARAMSPEC_H__
 
+#include <glib-object.h>
+
 extern PyTypeObject PyGParamSpec_Type;
 PyObject * pyg_param_spec_new (GParamSpec *pspec);
 

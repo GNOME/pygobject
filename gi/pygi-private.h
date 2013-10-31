@@ -16,7 +16,7 @@
 
 #include "pygi.h"
 
-#include "pygobject-external.h"
+#include "pygobject-private.h"
 
 #include "pygi-repository.h"
 #include "pygi-info.h"

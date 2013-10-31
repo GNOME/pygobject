@@ -27,7 +27,9 @@ import sys
 if 'gobject' in sys.modules:
     raise ImportError('When using gi.repository you must not import static modules like "gobject". Please change all occurrences of "import gobject" to "from gi.repository import GObject".')
 
-from . import _gobject
+import gi._gi
+_gobject = gi._gi._gobject
+
 from . import propertyhelper
 from . import signalhelper
 

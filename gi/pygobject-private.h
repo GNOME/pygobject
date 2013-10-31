@@ -199,6 +199,7 @@ gboolean        pygobject_prepare_construct_properties  (GObjectClass *class,
                                                          PyObject *kwargs,
                                                          guint *n_params,
                                                          GParameter **params);
+/* Defined by PYGLIB_MODULE_START */
+extern PyObject *pyglib__gobject_module_create (void);
 
-
-#endif
+#endif /*_PYGOBJECT_PRIVATE_H_*/
