@@ -1367,13 +1367,6 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         }
     }
 
-    if (py_arg == Py_None && !(py_user_data == Py_None || py_user_data == NULL)) {
-        PyErr_Format (PyExc_TypeError,
-                      "When passing None for a callback userdata must also be None");
-
-        return FALSE;
-    }
-
     if (py_arg == Py_None) {
         return TRUE;
     }

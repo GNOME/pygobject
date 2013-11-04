@@ -1565,10 +1565,13 @@ class TestTreeView(unittest.TestCase):
 
     def test_tree_view_column(self):
         cell = Gtk.CellRendererText()
-        Gtk.TreeViewColumn(title='This is just a test',
-                           cell_renderer=cell,
-                           text=0,
-                           style=2)
+        col = Gtk.TreeViewColumn(title='This is just a test',
+                                 cell_renderer=cell,
+                                 text=0,
+                                 style=2)
+
+        # Regression test for: https://bugzilla.gnome.org/show_bug.cgi?id=711173
+        col.set_cell_data_func(cell, None, None)
 
     def test_tree_view_add_column_with_attributes(self):
         model = Gtk.ListStore(str, str, str)
