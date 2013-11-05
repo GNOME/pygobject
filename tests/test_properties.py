@@ -481,6 +481,15 @@ class TestPropertyObject(unittest.TestCase):
         self.assertEqual(normal, "foo")
         self.assertEqual(uint64, 7)
 
+    def test_positional_args(self):
+        # GObject constructor must only allow keyword args
+        self.assertRaises(TypeError, new, PropertyObject, None)
+        self.assertRaises(TypeError, new, PropertyObject, "hello", 2)
+
+    def test_unknown_constructor_property(self):
+        # GObject constructor must refuse unknown properties
+        self.assertRaises(TypeError, new, PropertyObject, unknown_prop=1)
+
 
 class TestProperty(unittest.TestCase):
     def test_simple(self):
