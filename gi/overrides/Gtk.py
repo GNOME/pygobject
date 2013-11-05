@@ -330,6 +330,10 @@ __all__.append('ComboBox')
 
 class Box(Gtk.Box):
     def __init__(self, homogeneous=False, spacing=0, **kwds):
+        if not isinstance(homogeneous, bool):
+            raise TypeError('homogeneous argument must be of type bool')
+        if not isinstance(spacing, int):
+            raise TypeError('spacing argument must be of type int')
         super(Box, self).__init__(**kwds)
         self.set_homogeneous(homogeneous)
         self.set_spacing(spacing)
@@ -435,6 +439,9 @@ class Window(Gtk.Window):
     def __init__(self, type=Gtk.WindowType.TOPLEVEL, **kwds):
         if not initialized:
             raise RuntimeError("Gtk couldn't be initialized")
+
+        if not isinstance(type, Gtk.WindowType):
+            raise TypeError('type argument must be of type Gtk.WindowType')
 
         # type is a construct-only property; if it is already set (e. g. by
         # GtkBuilder), do not try to set it again and just ignore it

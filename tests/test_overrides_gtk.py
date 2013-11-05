@@ -590,6 +590,24 @@ class TestGtk(unittest.TestCase):
         GLib.timeout_add(100, Gtk.main_quit, 'hello')
         Gtk.main()
 
+    def test_gobject_ctor_positional_args(self):
+        # GObject constructor must only allow keyword args, except for the ones
+        # which have overrides
+
+        # overridden, but no custom constructor
+        self.assertRaises(TypeError, Gtk.Widget, 1)
+        self.assertRaises(TypeError, Gtk.Container, 1)
+
+        # no overrides at all
+        self.assertRaises(TypeError, Gtk.FileChooserWidget,
+                          Gtk.FileChooserAction.SELECT_FOLDER)
+        self.assertRaises(TypeError, Gtk.Assistant, 1)
+
+    def test_gobject_ctor_unknown_property(self):
+        # GObject constructor must refuse unknown properties
+        self.assertRaises(TypeError, Gtk.Widget, unknown_prop=1)
+        self.assertRaises(TypeError, Gtk.Button, unknown_prop='a')
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestSignals(unittest.TestCase):
