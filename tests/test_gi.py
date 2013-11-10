@@ -2907,6 +2907,16 @@ class TestPropertiesObject(unittest.TestCase):
         self.assertTrue('some_double' in props)
         self.assertTrue('some_variant' in props)
 
+    def test_param_spec_dir(self):
+        attrs = dir(GIMarshallingTests.PropertiesObject.props.some_float)
+        self.assertTrue('name' in attrs)
+        self.assertTrue('nick' in attrs)
+        self.assertTrue('blurb' in attrs)
+        self.assertTrue('flags' in attrs)
+        self.assertTrue('default_value' in attrs)
+        self.assertTrue('minimum' in attrs)
+        self.assertTrue('maximum' in attrs)
+
 
 class TestKeywords(unittest.TestCase):
     def test_method(self):
