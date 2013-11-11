@@ -1,3 +1,7 @@
+3.10.2  11-Nov-2013
+        - Fix thread safety problems by always enabling the GIL
+	  (Simon Feltman) (#709223, #710447)
+
 3.10.1  14-Oct-2013
 	- Fix TypeError when setting drag target_list to None (Nuno Araujo)
 	  (#709926)
