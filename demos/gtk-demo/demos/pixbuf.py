@@ -26,7 +26,7 @@ scaling. It also shows off how to use GtkDrawingArea to do a simple animation.
 Look at the Image demo for additional pixbuf usage examples.
 """
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 import os
 import math
 
