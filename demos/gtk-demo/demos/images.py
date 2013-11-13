@@ -282,7 +282,7 @@ class ImagesApp:
 
     def cleanup_cb(self, widget):
         if self.load_timeout:
-            GObject.source_remove(self.load_timeout)
+            GLib.source_remove(self.load_timeout)
 
         if self.pixbuf_loader:
             try:

@@ -323,8 +323,8 @@ def main(demoapp=None):
     window.set_title('Application Window')
     window.set_icon_name('gtk-open')
     window.connect_after('destroy', _quit)
-    table = Gtk.Table(rows=1,
-                      columns=5,
+    table = Gtk.Table(n_rows=1,
+                      n_columns=5,
                       homogeneous=False)
     window.add(table)
 

@@ -29,7 +29,7 @@ How the options are displayed is controlled by cell renderers.
  """
 
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, GObject
 
 
 (PIXBUF_COL,
@@ -167,34 +167,12 @@ class ComboboxApp:
 
         entry = Gtk.Entry()
 
-        # FIXME: a bug in PyGObject does not allow us to access dynamic
-        #        methods on GObject.Object, so bind properties the hard way
-        # GObject.Object.bind_property(combo, 'active-id',
-        #                             entry, 'text',
-        #                             GObject.BindingFlags.BIDIRECTIONAL)
-        self.combo_notify_id = \
-            combo.connect('notify::active-id',
-                          self.combo_active_id_changed, entry)
-        self.entry_notify_id = \
-            entry.connect('notify::text',
-                          self.entry_text_changed, combo)
+        combo.bind_property('active-id',
+                            entry, 'text',
+                            GObject.BindingFlags.BIDIRECTIONAL)
 
         box.add(entry)
         self.window.show_all()
-
-    def combo_active_id_changed(self, combo, pspec, entry):
-        entry.disconnect(self.entry_notify_id)
-        entry.set_text(combo.get_property('active-id'))
-        self.entry_notify_id = \
-            entry.connect('notify::text',
-                          self.entry_text_changed, combo)
-
-    def entry_text_changed(self, entry, pspec, combo):
-        combo.disconnect(self.combo_notify_id)
-        combo.set_property('active-id', entry.get_text())
-        self.combo_notify_id = \
-            combo.connect('notify::active-id',
-                          self.combo_active_id_changed, entry)
 
     def strip_underscore(self, s):
         return s.replace('_', '')

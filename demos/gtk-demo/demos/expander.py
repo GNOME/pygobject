@@ -30,9 +30,8 @@ from gi.repository import Gtk
 
 class ExpanderApp:
     def __init__(self):
-        self.window = Gtk.Dialog("GtkExpander",
-                                 None, 0,
-                                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE))
+        self.window = Gtk.Dialog(title="GtkExpander")
+        self.window.add_buttons(Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE)
         self.window.set_resizable(False)
         self.window.connect('response', lambda window, x: window.destroy())
         self.window.connect('destroy', Gtk.main_quit)
@@ -42,13 +41,13 @@ class ExpanderApp:
         content_area.pack_start(vbox, True, True, 0)
         vbox.set_border_width(5)
 
-        label = Gtk.Label('Expander demo. Click on the triangle for details.')
+        label = Gtk.Label(label='Expander demo. Click on the triangle for details.')
         vbox.pack_start(label, True, True, 0)
 
         expander = Gtk.Expander(label='Details')
         vbox.pack_start(expander, False, False, 0)
 
-        label = Gtk.Label('Details can be shown or hidden')
+        label = Gtk.Label(label='Details can be shown or hidden')
         expander.add(label)
 
         self.window.show_all()

@@ -27,7 +27,7 @@ it. See the Stock Browser demo for a more advanced example.
 """
 
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, GLib
 
 
 class Bug:
@@ -73,7 +73,7 @@ class ListStoreApp:
         vbox = Gtk.VBox(spacing=8)
         self.window.add(vbox)
 
-        label = Gtk.Label('This is the bug list (note: not based on real data, it would be nice to have a nice ODBC interface to bugzilla or so, though).')
+        label = Gtk.Label(label='This is the bug list (note: not based on real data, it would be nice to have a nice ODBC interface to bugzilla or so, though).')
         vbox.pack_start(label, False, False, 0)
 
         sw = Gtk.ScrolledWindow()
@@ -94,11 +94,11 @@ class ListStoreApp:
         self.window.show_all()
 
         self.window.connect('delete-event', self.window_closed)
-        self.timeout = GObject.timeout_add(80, self.spinner_timeout)
+        self.timeout = GLib.timeout_add(80, self.spinner_timeout)
 
     def window_closed(self, window, event):
         if self.timeout != 0:
-            GObject.source_remove(self.timeout)
+            GLib.source_remove(self.timeout)
 
     def spinner_timeout(self):
         if self.model is None:

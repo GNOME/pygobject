@@ -73,11 +73,11 @@ class MenusApp:
         box2.set_border_width(10)
         box1.pack_start(box2, False, True, 0)
 
-        button = Gtk.Button('Flip')
+        button = Gtk.Button(label='Flip')
         button.connect('clicked', self.change_orientation, menubar)
         box2.pack_start(button, True, True, 0)
 
-        button = Gtk.Button('Close')
+        button = Gtk.Button(label='Close')
         button.connect('clicked', lambda x: self.window.destroy())
         box2.pack_start(button, True, True, 0)
         button.set_can_default(True)

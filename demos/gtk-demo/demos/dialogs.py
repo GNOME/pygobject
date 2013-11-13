@@ -88,12 +88,12 @@ class DialogsApp:
         self.window.show_all()
 
     def _interactive_dialog_clicked(self, button):
-        dialog = Gtk.Dialog('Interactive Dialog',
-                            self.window,
-                            Gtk.DialogFlags.MODAL |
-                            Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                            (Gtk.STOCK_OK, Gtk.ResponseType.OK,
-                             "_Non-stock Button", Gtk.ResponseType.CANCEL))
+        dialog = Gtk.Dialog(title='Interactive Dialog',
+                            transient_for=self.window,
+                            modal=True,
+                            destroy_with_parent=True)
+        dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                           "_Non-stock Button", Gtk.ResponseType.CANCEL)
 
         content_area = dialog.get_content_area()
         hbox = Gtk.HBox(spacing=8)
@@ -105,7 +105,7 @@ class DialogsApp:
 
         hbox.pack_start(stock, False, False, 0)
 
-        table = Gtk.Table(2, 2, False)
+        table = Gtk.Table(n_rows=2, n_columns=2, homogeneous=False)
         table.set_row_spacings(4)
         table.set_col_spacings(4)
         hbox.pack_start(table, True, True, 0)
@@ -134,12 +134,12 @@ class DialogsApp:
         dialog.destroy()
 
     def _message_dialog_clicked(self, button):
-        dialog = Gtk.MessageDialog(self.window,
-                                   Gtk.DialogFlags.MODAL |
-                                   Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                                   Gtk.MessageType.INFO,
-                                   Gtk.ButtonsType.OK,
-                                   "This message box has been popped up the following\nnumber of times:")
+        dialog = Gtk.MessageDialog(transient_for=self.window,
+                                   modal=True,
+                                   destroy_with_parent=True,
+                                   message_type=Gtk.MessageType.INFO,
+                                   buttons=Gtk.ButtonsType.OK,
+                                   text="This message box has been popped up the following\nnumber of times:")
         dialog.format_secondary_text('%d' % self.dialog_counter)
         dialog.run()
 

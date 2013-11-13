@@ -35,7 +35,7 @@ class LinksApp:
         self.window.set_border_width(12)
         self.window.connect('destroy', Gtk.main_quit)
 
-        label = Gtk.Label("""Some <a href="http://en.wikipedia.org/wiki/Text"
+        label = Gtk.Label(label="""Some <a href="http://en.wikipedia.org/wiki/Text"
 title="plain text">text</a> may be marked up
 as hyperlinks, which can be clicked
 or activated via <a href="keynav">keynav</a>""")
@@ -53,10 +53,10 @@ or activated via <a href="keynav">keynav</a>""")
             markup = """The term <i>keynav</i> is a shorthand for
 keyboard navigation and refers to the process of using
 a program (exclusively) via keyboard input."""
-            dialog = Gtk.MessageDialog(parent,
-                                       Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                                       Gtk.MessageType.INFO,
-                                       Gtk.ButtonsType.OK,
+            dialog = Gtk.MessageDialog(transient_for=parent,
+                                       destroy_with_parent=True,
+                                       message_type=Gtk.MessageType.INFO,
+                                       buttons=Gtk.ButtonsType.OK,
                                        text=markup,
                                        use_markup=True)
             dialog.present()

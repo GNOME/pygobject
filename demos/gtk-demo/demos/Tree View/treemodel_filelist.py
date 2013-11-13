@@ -177,7 +177,7 @@ class GenericTreeModelExample:
 
     def __init__(self):
         # Create a new window
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = gtk.Window(type=gtk.WINDOW_TOPLEVEL)
 
         self.window.set_size_request(300, 200)
 

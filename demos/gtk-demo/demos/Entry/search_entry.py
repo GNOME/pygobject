@@ -34,8 +34,8 @@ class SearchboxApp:
     def __init__(self, demoapp):
         self.demoapp = demoapp
 
-        self.window = Gtk.Dialog('Search Entry',
-                                 buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE))
+        self.window = Gtk.Dialog(title='Search Entry')
+        self.window.add_buttons(Gtk.STOCK_CLOSE, Gtk.ResponseType.NONE)
 
         self.window.connect('response', lambda x, y: self.window.destroy())
         self.window.connect('destroy', Gtk.main_quit)
@@ -65,12 +65,12 @@ class SearchboxApp:
         notebook.set_show_border(False)
         hbox.pack_start(notebook, False, False, 0)
 
-        find_button = Gtk.Button('Find')
+        find_button = Gtk.Button(label='Find')
         find_button.connect('clicked', self.start_search, entry)
         notebook.append_page(find_button, None)
         find_button.show()
 
-        cancel_button = Gtk.Button('Cancel')
+        cancel_button = Gtk.Button(label='Cancel')
         cancel_button.connect('clicked', self.stop_search, entry)
         notebook.append_page(cancel_button, None)
         cancel_button.show()

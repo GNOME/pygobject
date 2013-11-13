@@ -81,7 +81,7 @@ class PixbufApp:
         self.da = Gtk.DrawingArea()
         self.da.connect('draw', self.draw_cb)
         self.window.add(self.da)
-        self.timeout_id = GObject.timeout_add(self.FRAME_DELAY, self.timeout_cb)
+        self.timeout_id = GLib.timeout_add(self.FRAME_DELAY, self.timeout_cb)
         self.window.show_all()
 
     def load_pixbufs(self):
@@ -171,7 +171,7 @@ class PixbufApp:
         return True
 
     def cleanup_cb(self, widget):
-        GObject.source_remove(self.timeout_id)
+        GLib.source_remove(self.timeout_id)
         Gtk.main_quit()
 
 

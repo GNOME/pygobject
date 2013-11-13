@@ -40,13 +40,13 @@ class InfobarApp:
         bar = Gtk.InfoBar()
         vbox.pack_start(bar, False, False, 0)
         bar.set_message_type(Gtk.MessageType.INFO)
-        label = Gtk.Label('This is an info bar with message type Gtk.MessageType.INFO')
+        label = Gtk.Label(label='This is an info bar with message type Gtk.MessageType.INFO')
         bar.get_content_area().pack_start(label, False, False, 0)
 
         bar = Gtk.InfoBar()
         vbox.pack_start(bar, False, False, 0)
         bar.set_message_type(Gtk.MessageType.WARNING)
-        label = Gtk.Label('This is an info bar with message type Gtk.MessageType.WARNING')
+        label = Gtk.Label(label='This is an info bar with message type Gtk.MessageType.WARNING')
         bar.get_content_area().pack_start(label, False, False, 0)
 
         bar = Gtk.InfoBar()
@@ -54,19 +54,19 @@ class InfobarApp:
         bar.connect('response', self.on_bar_response)
         vbox.pack_start(bar, False, False, 0)
         bar.set_message_type(Gtk.MessageType.QUESTION)
-        label = Gtk.Label('This is an info bar with message type Gtk.MessageType.QUESTION')
+        label = Gtk.Label(label='This is an info bar with message type Gtk.MessageType.QUESTION')
         bar.get_content_area().pack_start(label, False, False, 0)
 
         bar = Gtk.InfoBar()
         vbox.pack_start(bar, False, False, 0)
         bar.set_message_type(Gtk.MessageType.ERROR)
-        label = Gtk.Label('This is an info bar with message type Gtk.MessageType.ERROR')
+        label = Gtk.Label(label='This is an info bar with message type Gtk.MessageType.ERROR')
         bar.get_content_area().pack_start(label, False, False, 0)
 
         bar = Gtk.InfoBar()
         vbox.pack_start(bar, False, False, 0)
         bar.set_message_type(Gtk.MessageType.OTHER)
-        label = Gtk.Label('This is an info bar with message type Gtk.MessageType.OTHER')
+        label = Gtk.Label(label='This is an info bar with message type Gtk.MessageType.OTHER')
         bar.get_content_area().pack_start(label, False, False, 0)
 
         frame = Gtk.Frame(label="Info bars")
@@ -77,17 +77,18 @@ class InfobarApp:
         frame.add(vbox2)
 
         # Standard message dialog
-        label = Gtk.Label('An example of different info bars')
+        label = Gtk.Label(label='An example of different info bars')
         vbox2.pack_start(label, False, False, 0)
 
         self.window.show_all()
 
     def on_bar_response(self, info_bar, response_id):
-        dialog = Gtk.MessageDialog(self.window,
-                                   Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                                   Gtk.MessageType.INFO,
-                                   Gtk.ButtonsType.OK,
-                                   'You clicked on an info bar')
+        dialog = Gtk.MessageDialog(transient_for=self.window,
+                                   modal=True,
+                                   destroy_with_parent=True,
+                                   message_type=Gtk.MessageType.INFO,
+                                   buttons=Gtk.ButtonsType.OK,
+                                   text='You clicked on an info bar')
         dialog.format_secondary_text('Your response has id %d' % response_id)
         dialog.run()
         dialog.destroy()

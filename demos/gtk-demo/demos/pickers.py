@@ -33,25 +33,25 @@ class PickersApp:
         self.window.connect('destroy', Gtk.main_quit)
         self.window.set_border_width(10)
 
-        table = Gtk.Table(4, 2, False)
+        table = Gtk.Table(n_rows=4, n_columns=2, homogeneous=False)
         table.set_col_spacing(0, 10)
         table.set_row_spacings(3)
         self.window.add(table)
         table.set_border_width(10)
 
-        label = Gtk.Label('Color:')
+        label = Gtk.Label(label='Color:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.ColorButton()
         table.attach_defaults(label, 0, 1, 0, 1)
         table.attach_defaults(picker, 1, 2, 0, 1)
 
-        label = Gtk.Label('Font:')
+        label = Gtk.Label(label='Font:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FontButton()
         table.attach_defaults(label, 0, 1, 1, 2)
         table.attach_defaults(picker, 1, 2, 1, 2)
 
-        label = Gtk.Label('File:')
+        label = Gtk.Label(label='File:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FileChooserButton.new('Pick a File',
                                            Gtk.FileChooserAction.OPEN)

@@ -75,7 +75,7 @@ class RotatedTextApp:
 
         da.connect('draw', self.rotated_text_draw)
 
-        label = Gtk.Label(UTF8_TEXT)
+        label = Gtk.Label(label=UTF8_TEXT)
         box.add(label)
         label.set_angle(45)
 
