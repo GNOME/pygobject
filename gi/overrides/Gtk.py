@@ -909,8 +909,9 @@ __all__.append('TreeModelSort')
 
 
 class ListStore(Gtk.ListStore, TreeModel, TreeSortable):
-    def __new__(self, *column_types):
-        return Gtk.ListStore.new(column_types)
+    def __init__(self, *column_types):
+        Gtk.ListStore.__init__(self)
+        self.set_column_types(column_types)
 
     def _do_insert(self, position, row):
         if row is not None:
@@ -1157,8 +1158,9 @@ __all__.append('TreePath')
 
 
 class TreeStore(Gtk.TreeStore, TreeModel, TreeSortable):
-    def __new__(self, *column_types):
-        return Gtk.TreeStore.new(column_types)
+    def __init__(self, *column_types):
+        Gtk.TreeStore.__init__(self)
+        self.set_column_types(column_types)
 
     def _do_insert(self, parent, position, row):
         if row is not None:
