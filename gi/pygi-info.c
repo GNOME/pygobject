@@ -437,10 +437,8 @@ _pygi_info_new (GIBaseInfo *info)
             type = &PyGICallbackInfo_Type;
             break;
         case GI_INFO_TYPE_STRUCT:
-            type = &PyGIStructInfo_Type;
-            break;
         case GI_INFO_TYPE_BOXED:
-            type = &PyGIBoxedInfo_Type;
+            type = &PyGIStructInfo_Type;
             break;
         case GI_INFO_TYPE_ENUM:
         case GI_INFO_TYPE_FLAGS:
@@ -767,13 +765,6 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
 PYGLIB_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGIBaseInfo);
 
 static PyMethodDef _PyGICallbackInfo_methods[] = {
-    { NULL, NULL, 0 }
-};
-
-/* BoxedInfo */
-PYGLIB_DEFINE_TYPE ("gi.BoxedInfo", PyGIBoxedInfo_Type, PyGIBaseInfo);
-
-static PyMethodDef _PyGIBoxedInfo_methods[] = {
     { NULL, NULL, 0 }
 };
 
@@ -2258,8 +2249,6 @@ _pygi_info_register_types (PyObject *m)
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIUnionInfo_Type, UnionInfo,
                          PyGIRegisteredTypeInfo_Type);
-    _PyGI_REGISTER_TYPE (m, PyGIBoxedInfo_Type, BoxedInfo,
-                         PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIErrorDomainInfo_Type, ErrorDomainInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIPropertyInfo_Type, PropertyInfo,
