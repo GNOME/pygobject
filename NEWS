@@ -1,3 +1,7 @@
+3.11.3  16-Dec-2013
+        - Replace usage of PyGIBoxed_Type with PyGIStruct_Type
+          (Simon Feltman) (#581525)
+
 3.11.2  17-Nov-2013
         - gkt-demo: Change main info/source notebook into a GtkStack (Simon Feltman)
         - Add deprecation warnings and cleanup class initializer overrides (Simon Feltman) (#705810)
