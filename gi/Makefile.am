@@ -26,14 +26,6 @@ endif
 
 pygidir = $(pyexecdir)/gi
 
-pygi_PYTHON = \
-	__init__.py \
-	types.py \
-	module.py \
-	importer.py \
-	pygtkcompat.py \
-	docstring.py
-
 pygi_LTLIBRARIES = _gi.la
 
 _gi_la_SOURCES = \
@@ -118,16 +110,8 @@ _gi_cairo_la_LDFLAGS = \
 %$(PYTHON_SO): %.la
 	$(LN_S) -f .libs/$@ $@
 
-# if we build in a separate tree, we need to symlink the *.py files from the
-# source tree; Python does not accept the extensions and modules in different
-# paths
-build_pylinks:
-	for f in $(pygi_PYTHON); do \
-	    [ -e $(builddir)/$$f ] || $(LN_S) $(srcdir)/$$f $(builddir)/$$f; \
-	done
+all-local: $(LTLIBRARIES:.la=$(PYTHON_SO))
 
-all-local: $(LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
-
-check-local: $(LTLIBRARIES:.la=$(PYTHON_SO)) build_pylinks
+check-local: $(LTLIBRARIES:.la=$(PYTHON_SO))
 clean-local:
 	rm -f $(LTLIBRARIES:.la=$(PYTHON_SO))

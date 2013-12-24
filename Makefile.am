@@ -1,6 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = 1.7
 
+# Part of the gi subdirectory is handled with non-recursive make to avoid
+# py-compile getting confused between gi/types.py and Python's standard
+# types module.
 SUBDIRS = examples gi tests pygtkcompat
 
 PLATFORM_VERSION = 3.0
@@ -48,6 +51,27 @@ MAINTAINERCLEANFILES = \
 
 BUILT_EXTRA_DIST = 		\
 	ChangeLog
+
+nobase_pyexec_PYTHON = \
+	gi/__init__.py \
+	gi/types.py \
+	gi/module.py \
+	gi/importer.py \
+	gi/pygtkcompat.py \
+	gi/docstring.py
+
+# if we build in a separate tree, we need to symlink the *.py files from the
+# source tree; Python does not accept the extensions and modules in different
+# paths
+build_pylinks:
+	for f in $(nobase_pyexec_PYTHON); do \
+		[ -e $(builddir)/$$f ] || \
+			$(LN_S) $(abs_srcdir)/$$f $(builddir)/$$f; \
+	done
+
+all-local: build_pylinks
+
+check-local: build_pylinks
 
 # pkg-config files
 pkgconfigdir = $(libdir)/pkgconfig
