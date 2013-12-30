@@ -13,6 +13,7 @@
 *.typelib
 .deps
 .libs
+.idea
 gschemas.compiled
 pygobject-*.tar.xz
 Makefile

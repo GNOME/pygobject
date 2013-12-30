@@ -25,7 +25,7 @@ import os
 import sys
 import textwrap
 
-from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk
+from gi.repository import GLib, GObject, Pango, GdkPixbuf, Gtk, Gio
 
 try:
     from gi.repository import GtkSource
@@ -115,6 +115,20 @@ class GtkDemoApp(Gtk.Application):
 
     def __init__(self):
         Gtk.Application.__init__(self, application_id='org.gnome.pygobject.gtkdemo')
+
+        # Use a GResource to hold the CSS files. Resource bundles are created by
+        # the glib-compile-resources program shipped with Glib which takes an xml
+        # file that describes the bundle, and a set of files that the xml
+        # references. These are combined into a binary resource bundle.
+        base_path = os.path.abspath(os.path.dirname(__file__))
+        resource_path = os.path.join(base_path, 'demos/data/demo.gresource')
+        resource = Gio.Resource.load(resource_path)
+
+        # FIXME: method register() should be without the underscore
+        # FIXME: see https://bugzilla.gnome.org/show_bug.cgi?id=684319
+        # Once the resource has been globally registered it can be used
+        # throughout the application.
+        resource._register()
 
     def on_activate(self, app):
         self.window = Gtk.ApplicationWindow.new(self)
