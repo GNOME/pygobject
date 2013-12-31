@@ -32,7 +32,13 @@ from gi.repository import Gtk, Gdk, Pango, Gio, GLib
 class CSSBasicsApp:
     def __init__(self, demoapp):
         self.demoapp = demoapp
+        #: Store the last successful parsing of the css so we can revert
+        #: this in case of an error.
         self.last_good_text = ''
+        #: Set when we receive a parsing-error callback. This is needed
+        #: to handle logic after a parsing-error callback which does not raise
+        #: an exception with provider.load_from_data()
+        self.last_error_code = 0
 
         self.window = Gtk.Window()
         self.window.set_title('CSS Basics')
@@ -86,12 +92,14 @@ class CSSBasicsApp:
         end = buffer.get_iter_at_line_index(section.get_end_line(),
                                             section.get_end_position())
 
-        if error:
-            tag_name = "error"
-            self.infolabel.set_text(error.message)
-            self.infobar.show_all()
-        else:
+        if error.code == Gtk.CssProviderError.DEPRECATED:
             tag_name = "warning"
+        else:
+            tag_name = "error"
+        self.last_error_code = error.code
+
+        self.infolabel.set_text(error.message)
+        self.infobar.show_all()
 
         buffer.apply_tag_by_name(tag_name, start, end)
 
@@ -106,10 +114,17 @@ class CSSBasicsApp:
         try:
             provider.load_from_data(text)
         except GLib.GError as e:
-            if e.domain == 'gtk-css-provider-error-quark':
-                provider.load_from_data(self.last_good_text)
-            else:
+            if e.domain != 'gtk-css-provider-error-quark':
                 raise e
+
+        # If the parsing-error callback is ever run (even in the case of warnings)
+        # load the last good css text that ran without any warnings. Otherwise
+        # we may have a discrepancy in "last_good_text" vs the current buffer
+        # causing section.get_start_position() to give back an invalid position
+        # for the editor buffer.
+        if self.last_error_code:
+            provider.load_from_data(self.last_good_text)
+            self.last_error_code = 0
         else:
             self.last_good_text = text
             self.infobar.hide()
