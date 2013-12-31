@@ -31,6 +31,7 @@ from gi.repository import Gtk, Gdk, Pango, Gio, GLib
 class CSSMultiplebgsApp:
     def __init__(self, demoapp):
         self.demoapp = demoapp
+        self.last_good_text = ''
 
         self.window = Gtk.Window()
         self.window.set_title('CSS Multiplebgs')
@@ -42,7 +43,16 @@ class CSSMultiplebgsApp:
         overlay.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK |
                            Gdk.EventMask.LEAVE_NOTIFY_MASK |
                            Gdk.EventMask.POINTER_MOTION_MASK)
-        self.window.add(overlay)
+
+        self.infobar = Gtk.InfoBar()
+        self.infolabel = Gtk.Label()
+        self.infobar.get_content_area().pack_start(self.infolabel, False, False, 0)
+        self.infobar.set_message_type(Gtk.MessageType.WARNING)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.pack_start(overlay, expand=True, fill=True, padding=0)
+        box.pack_start(self.infobar, expand=False, fill=True, padding=0)
+        self.window.add(box)
 
         canvas = Gtk.DrawingArea()
         canvas.set_name("canvas")
@@ -87,6 +97,7 @@ class CSSMultiplebgsApp:
 
         self.apply_css(self.window, provider)
         self.window.show_all()
+        self.infobar.hide()
 
     def drawing_area_draw(self, widget, cairo_t):
         context = widget.get_style_context()
@@ -113,11 +124,10 @@ class CSSMultiplebgsApp:
         end = buffer.get_iter_at_line_index(section.get_end_line(),
                                             section.get_end_position())
 
-        # FIXME: this should return a GLib.GError instead it returns
-        # FIXME: a GLib.Error object
-        # FIXME: see https://bugzilla.gnome.org/show_bug.cgi?id=712519
         if error:
             tag_name = "error"
+            self.infolabel.set_text(error.message)
+            self.infobar.show_all()
         else:
             tag_name = "warning"
 
@@ -128,14 +138,19 @@ class CSSMultiplebgsApp:
         end = buffer.get_end_iter()
         buffer.remove_all_tags(start, end)
 
-        text = buffer.get_text(start, end, False)
+        text = buffer.get_text(start, end, False).encode('utf-8')
 
         # Ignore CSS errors as they are shown by highlighting
         try:
-            provider.load_from_data(text.encode('utf-8'))
+            provider.load_from_data(text)
         except GLib.GError as e:
-            if e.domain != 'gtk-css-provider-error-quark':
+            if e.domain == 'gtk-css-provider-error-quark':
+                provider.load_from_data(self.last_good_text)
+            else:
                 raise e
+        else:
+            self.last_good_text = text
+            self.infobar.hide()
 
         Gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
 
