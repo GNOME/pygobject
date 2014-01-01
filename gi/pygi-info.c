@@ -730,6 +730,12 @@ _wrap_g_callable_info_may_return_null (PyGIBaseInfo *self)
 }
 
 static PyObject *
+_wrap_g_callable_info_skip_return (PyGIBaseInfo *self)
+{
+    return PyBool_FromLong (g_callable_info_skip_return (self->info));
+}
+
+static PyObject *
 _wrap_g_callable_info_get_return_attribute (PyGIBaseInfo *self, PyObject *py_name)
 {
     gchar *name;
@@ -757,6 +763,7 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
     { "get_return_type", (PyCFunction) _wrap_g_callable_info_get_return_type, METH_NOARGS },
     { "get_caller_owns", (PyCFunction) _wrap_g_callable_info_get_caller_owns, METH_NOARGS },
     { "may_return_null", (PyCFunction) _wrap_g_callable_info_may_return_null, METH_NOARGS },
+    { "skip_return", (PyCFunction) _wrap_g_callable_info_skip_return, METH_NOARGS },
     { "get_return_attribute", (PyCFunction) _wrap_g_callable_info_get_return_attribute, METH_O },
     { NULL, NULL, 0 }
 };

@@ -63,3 +63,9 @@ class Test(unittest.TestCase):
     def test_array_length_arg(self):
         self.assertEqual(GIMarshallingTests.array_in.__doc__,
                          'array_in(ints:list)')
+
+    def test_init_function(self):
+        # This tests implicit array length args along with skipping a
+        # boolean return
+        self.assertEqual(GIMarshallingTests.init_function.__doc__,
+                         'init_function(argv:list=None) -> argv:list')

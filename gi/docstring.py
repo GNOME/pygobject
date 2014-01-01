@@ -130,6 +130,8 @@ def _generate_callable_info_function_signature(info):
         elif info.is_constructor():
             in_args_strs = ['cls']
 
+    hint_blacklist = ('void',)
+
     # Build a lists of indices prior to adding the docs because
     # because it is possible the index retrieved comes before in
     # argument being used.
@@ -145,7 +147,7 @@ def _generate_callable_info_function_signature(info):
             continue
         argstr = arg.get_name()
         hint = _get_pytype_hint(arg.get_type())
-        if hint not in ('void',):
+        if hint not in hint_blacklist:
             argstr += ':' + hint
         if arg.may_be_null() or i in user_data_indices:
             # allow-none or user_data from a closure
@@ -155,10 +157,24 @@ def _generate_callable_info_function_signature(info):
         in_args_strs.append(argstr)
     in_args_str = ', '.join(in_args_strs)
 
-    if out_args:
-        out_args_str = ', '.join(arg.get_name() + ':' + _get_pytype_hint(arg.get_type())
-                                 for arg in out_args)
-        return '%s(%s) -> %s' % (info.get_name(), in_args_str, out_args_str)
+    out_args_strs = []
+    return_hint = _get_pytype_hint(info.get_return_type())
+    if not info.skip_return and return_hint and return_hint not in hint_blacklist:
+        if info.may_return_null():
+            argstr += ' or None'
+        out_args_strs.append(return_hint)
+
+    for i, arg in enumerate(out_args):
+        if i in ignore_indices:
+            continue
+        argstr = arg.get_name()
+        hint = _get_pytype_hint(arg.get_type())
+        if hint not in hint_blacklist:
+            argstr += ':' + hint
+        out_args_strs.append(argstr)
+
+    if out_args_strs:
+        return '%s(%s) -> %s' % (info.get_name(), in_args_str, ', '.join(out_args_strs))
     else:
         return '%s(%s)' % (info.get_name(), in_args_str)
 
