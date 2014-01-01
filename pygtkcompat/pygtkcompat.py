@@ -486,18 +486,12 @@ def enable_gtk(version='3.0'):
 
     # gtk.keysyms
 
-    class Keysyms(object):
-        pass
-    keysyms = Keysyms()
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=RuntimeWarning)
+        from gi.overrides import keysyms
+
     sys.modules['gtk.keysyms'] = keysyms
     Gtk.keysyms = keysyms
-    for name in dir(Gdk):
-        if name.startswith('KEY_'):
-            target = name[4:]
-            if target[0] in '0123456789':
-                target = '_' + target
-            value = getattr(Gdk, name)
-            setattr(keysyms, target, value)
 
     from . import generictreemodel
     Gtk.GenericTreeModel = generictreemodel.GenericTreeModel
