@@ -1,6 +1,5 @@
 import types
 import warnings
-import functools
 
 from gi import PyGIDeprecationWarning
 from gi._gi import CallableInfo
@@ -13,6 +12,14 @@ from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
 registry = None
+
+
+def wraps(wrapped):
+    def assign(wrapper):
+        wrapper.__name__ = wrapped.__name__
+        wrapper.__module__ = wrapped.__module__
+        return wrapper
+    return assign
 
 
 class _Registry(dict):
@@ -61,12 +68,8 @@ class overridefunc(object):
         self.module = modules[module_name]._introspection_module
 
     def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        wrapper.__name__ = func.__name__
-        wrapper.__doc__ = func.__doc__
-        setattr(self.module, func.__name__, wrapper)
-        return wrapper
+        setattr(self.module, func.__name__, func)
+        return func
 
 registry = _Registry()
 
@@ -82,7 +85,7 @@ def override(type_):
 
 def deprecated(fn, replacement):
     '''Decorator for marking methods and classes as deprecated'''
-    @functools.wraps(fn)
+    @wraps(fn)
     def wrapped(*args, **kwargs):
         warnings.warn('%s is deprecated; use %s instead' % (fn.__name__, replacement),
                       PyGIDeprecationWarning, stacklevel=2)
@@ -185,7 +188,7 @@ def strip_boolean_result(method, exc_type=None, exc_str=None, fail_ret=None):
     several out arguments. Translate such a method to return the out arguments
     on success and None on failure.
     '''
-    @functools.wraps(method)
+    @wraps(method)
     def wrapped(*args, **kwargs):
         ret = method(*args, **kwargs)
         if ret[0]:

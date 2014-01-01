@@ -23,7 +23,6 @@
 
 import sys
 import warnings
-import functools
 from collections import namedtuple
 
 import gi.overrides
@@ -515,7 +514,7 @@ def _signalmethod(func):
     # Function wrapper for signal functions used as instance methods.
     # This is needed when the signal functions come directly from GI.
     # (they are not already wrapped)
-    @functools.wraps(func)
+    @gi.overrides.wraps(func)
     def meth(*args, **kwargs):
         return func(*args, **kwargs)
     return meth
