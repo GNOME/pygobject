@@ -57,3 +57,7 @@ class Test(unittest.TestCase):
                           'progress_callback_data=None)'
 
         self.assertEqual(Gio.File.copy.__doc__, g_file_copy_doc)
+
+    def test_array_length_arg(self):
+        self.assertEqual(GIMarshallingTests.array_in.__doc__,
+                         'array_in(ints:list)')

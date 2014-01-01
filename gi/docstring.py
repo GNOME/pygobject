@@ -89,8 +89,12 @@ def _generate_callable_info_function_signature(info):
     # Build a lists of indices prior to adding the docs because
     # because it is possible the index retrieved comes before in
     # argument being used.
-    ignore_indices = set([arg.get_destroy() for arg in in_args])
-    user_data_indices = set([arg.get_closure() for arg in in_args])
+    ignore_indices = set()
+    user_data_indices = set()
+    for arg in in_args:
+        ignore_indices.add(arg.get_destroy())
+        ignore_indices.add(arg.get_type().get_array_length())
+        user_data_indices.add(arg.get_closure())
 
     for i, arg in enumerate(in_args):
         if i in ignore_indices:
