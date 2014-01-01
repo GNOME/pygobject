@@ -908,54 +908,6 @@ _wrap_g_arg_info_get_type (PyGIBaseInfo *self)
     return _get_child_info (self, g_arg_info_get_type);
 }
 
-/* _g_arg_get_pytype_hint
- *
- * Returns new value reference to a string hinting at the python type
- * which can be used for the given gi argument info.
- */
-static PyObject *
-_g_arg_get_pytype_hint (PyGIBaseInfo *self)
-{
-    GIArgInfo *arg_info = (GIArgInfo*)self->info;
-    GITypeInfo type_info;
-    GITypeTag type_tag;
-    PyObject *py_type;
-
-    g_arg_info_load_type(arg_info, &type_info);
-    type_tag = g_type_info_get_tag(&type_info);
-
-    /* First attempt getting a python type object. */
-    py_type = _pygi_get_py_type_hint(type_tag);
-    if (py_type != Py_None && PyObject_HasAttrString(py_type, "__name__")) {
-	PyObject *name = PyObject_GetAttrString(py_type, "__name__");
-	Py_DecRef(py_type);
-	return name;
-    } else {
-	Py_DecRef(py_type);
-	if (type_tag == GI_TYPE_TAG_INTERFACE) {
-	    const char *info_name;
-	    PyObject *py_string;
-	    GIBaseInfo *iface = g_type_info_get_interface(&type_info);
-	    gchar *name;
-
-	    info_name = _safe_base_info_get_name (iface);
-	    if (info_name == NULL) {
-	        g_base_info_unref (iface);
-	        return PYGLIB_PyUnicode_FromString(g_type_tag_to_string(type_tag));
-	    }
-
-	    name = g_strdup_printf("%s.%s",
-		    g_base_info_get_namespace(iface),
-		    info_name);
-	    g_base_info_unref(iface);
-	    py_string = PYGLIB_PyUnicode_FromString(name);
-	    g_free(name);
-	    return py_string;
-	}
-	return PYGLIB_PyUnicode_FromString(g_type_tag_to_string(type_tag));
-    }
-}
-
 static PyMethodDef _PyGIArgInfo_methods[] = {
     { "get_direction", (PyCFunction) _wrap_g_arg_info_get_direction, METH_NOARGS },
     { "is_caller_allocates", (PyCFunction) _wrap_g_arg_info_is_caller_allocates, METH_NOARGS },
@@ -967,7 +919,6 @@ static PyMethodDef _PyGIArgInfo_methods[] = {
     { "get_closure", (PyCFunction) _wrap_g_arg_info_get_closure, METH_NOARGS },
     { "get_destroy", (PyCFunction) _wrap_g_arg_info_get_destroy, METH_NOARGS },
     { "get_type", (PyCFunction) _wrap_g_arg_info_get_type, METH_NOARGS },
-    { "get_pytype_hint", (PyCFunction) _g_arg_get_pytype_hint, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

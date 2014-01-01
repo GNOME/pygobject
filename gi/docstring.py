@@ -23,7 +23,8 @@
 from ._gi import \
     VFuncInfo, \
     FunctionInfo, \
-    Direction
+    Direction, \
+    TypeTag
 
 
 #: Module storage for currently registered doc string generator function.
@@ -74,6 +75,49 @@ def split_function_info_args(info):
     return (in_args, out_args)
 
 
+_type_tag_to_py_type = {TypeTag.BOOLEAN: bool,
+                        TypeTag.INT8: int,
+                        TypeTag.UINT8: int,
+                        TypeTag.INT16: int,
+                        TypeTag.UINT16: int,
+                        TypeTag.INT32: int,
+                        TypeTag.UINT32: int,
+                        TypeTag.INT64: int,
+                        TypeTag.UINT64: int,
+                        TypeTag.FLOAT: float,
+                        TypeTag.DOUBLE: float,
+                        TypeTag.GLIST: list,
+                        TypeTag.GSLIST: list,
+                        TypeTag.ARRAY: list,
+                        TypeTag.GHASH: dict,
+                        TypeTag.UTF8: str,
+                        TypeTag.FILENAME: str,
+                        TypeTag.UNICHAR: str,
+                        TypeTag.INTERFACE: None,
+                        TypeTag.GTYPE: None,
+                        TypeTag.ERROR: None,
+                        TypeTag.VOID: None,
+                        }
+
+
+def _get_pytype_hint(gi_type):
+    type_tag = gi_type.get_tag()
+    py_type = _type_tag_to_py_type.get(type_tag, None)
+
+    if py_type and hasattr(py_type, '__name__'):
+        return py_type.__name__
+    elif type_tag == TypeTag.INTERFACE:
+        iface = gi_type.get_interface()
+
+        info_name = iface.get_name()
+        if not info_name:
+            return gi_type.get_tag_as_string()
+
+        return '%s.%s' % (iface.get_namespace(), info_name)
+
+    return gi_type.get_tag_as_string()
+
+
 def _generate_callable_info_function_signature(info):
     """Default doc string generator"""
     in_args, out_args = split_function_info_args(info)
@@ -100,7 +144,7 @@ def _generate_callable_info_function_signature(info):
         if i in ignore_indices:
             continue
         argstr = arg.get_name()
-        hint = arg.get_pytype_hint()
+        hint = _get_pytype_hint(arg.get_type())
         if hint not in ('void',):
             argstr += ':' + hint
         if arg.may_be_null() or i in user_data_indices:
@@ -112,7 +156,7 @@ def _generate_callable_info_function_signature(info):
     in_args_str = ', '.join(in_args_strs)
 
     if out_args:
-        out_args_str = ', '.join(arg.get_name() + ':' + arg.get_pytype_hint()
+        out_args_str = ', '.join(arg.get_name() + ':' + _get_pytype_hint(arg.get_type())
                                  for arg in out_args)
         return '%s(%s) -> %s' % (info.get_name(), in_args_str, out_args_str)
     else:

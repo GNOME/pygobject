@@ -61,7 +61,6 @@ class Test(unittest.TestCase):
         self.assertEqual(arg.get_direction(), GIRepository.Direction.OUT)
         self.assertEqual(arg.get_name(), 'structs')
         self.assertEqual(arg.get_namespace(), 'GIMarshallingTests')
-        self.assertEqual(arg.get_pytype_hint(), 'list')
         self.assertFalse(arg.is_caller_allocates())
         self.assertFalse(arg.is_optional())
         self.assertFalse(arg.is_return_value())
