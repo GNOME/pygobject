@@ -186,10 +186,9 @@ static PyObject *
 _base_info_repr (PyGIBaseInfo *self)
 {
 
-    return PYGLIB_PyUnicode_FromFormat ("<%s object (%s) at 0x%p>",
+    return PYGLIB_PyUnicode_FromFormat ("%s(%s)",
                                         Py_TYPE( (PyObject *) self)->tp_name,
-                                        _safe_base_info_get_name (self->info),
-                                        (void *) self);
+                                        _safe_base_info_get_name (self->info));
 }
 
 static PyObject *
