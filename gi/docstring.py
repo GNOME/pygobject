@@ -23,6 +23,9 @@
 from ._gi import \
     VFuncInfo, \
     FunctionInfo, \
+    CallableInfo, \
+    ObjectInfo, \
+    StructInfo, \
     Direction, \
     TypeTag
 
@@ -118,8 +121,7 @@ def _get_pytype_hint(gi_type):
     return gi_type.get_tag_as_string()
 
 
-def _generate_callable_info_function_signature(info):
-    """Default doc string generator"""
+def _generate_callable_info_doc(info):
     in_args, out_args = split_function_info_args(info)
     in_args_strs = []
     if isinstance(info, VFuncInfo):
@@ -127,8 +129,6 @@ def _generate_callable_info_function_signature(info):
     elif isinstance(info, FunctionInfo):
         if info.is_method():
             in_args_strs = ['self']
-        elif info.is_constructor():
-            in_args_strs = ['cls']
 
     hint_blacklist = ('void',)
 
@@ -174,9 +174,31 @@ def _generate_callable_info_function_signature(info):
         out_args_strs.append(argstr)
 
     if out_args_strs:
-        return '%s(%s) -> %s' % (info.get_name(), in_args_str, ', '.join(out_args_strs))
+        return '%s(%s) -> %s' % (info.__name__, in_args_str, ', '.join(out_args_strs))
     else:
-        return '%s(%s)' % (info.get_name(), in_args_str)
+        return '%s(%s)' % (info.__name__, in_args_str)
 
 
-set_doc_string_generator(_generate_callable_info_function_signature)
+def _generate_class_info_doc(info):
+    doc = ''
+    constructors = [method for method in info.get_methods() if method.is_constructor()]
+    if constructors:
+        doc += '\n:Constructors:\n'  # start with \n to avoid auto indent of other lines
+
+        for method_info in constructors:
+            doc += '    ' + _generate_callable_info_doc(method_info) + '\n'
+
+    return doc
+
+
+def _generate_doc_dispatch(info):
+    if isinstance(info, (ObjectInfo, StructInfo)):
+        return _generate_class_info_doc(info)
+
+    elif isinstance(info, CallableInfo):
+        return _generate_callable_info_doc(info)
+
+    return ''
+
+
+set_doc_string_generator(_generate_doc_dispatch)

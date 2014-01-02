@@ -69,3 +69,11 @@ class Test(unittest.TestCase):
         # boolean return
         self.assertEqual(GIMarshallingTests.init_function.__doc__,
                          'init_function(argv:list=None) -> argv:list')
+
+    def tests_class_doc_constructors(self):
+        doc = GIMarshallingTests.Object.__doc__
+        self.assertTrue('new(int_:int)' in doc)
+
+    def tests_struct_doc_constructors(self):
+        doc = GIMarshallingTests.BoxedStruct.__doc__
+        self.assertTrue('new()' in doc)

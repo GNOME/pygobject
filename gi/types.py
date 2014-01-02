@@ -28,6 +28,7 @@ import warnings
 from . import _gobject
 from ._gobject._gobject import GInterface
 from ._gobject.constants import TYPE_INVALID
+from .docstring import generate_doc_string
 
 from ._gi import \
     InterfaceInfo, \
@@ -196,6 +197,10 @@ class GObjectMeta(_gobject.GObjectMeta, MetaClassHelper):
     def mro(cls):
         return mro(cls)
 
+    @property
+    def __doc__(cls):
+        return generate_doc_string(cls.__info__)
+
 
 def mro(C):
     """Compute the class precedence list (mro) according to C3, with GObject
@@ -276,3 +281,7 @@ class StructMeta(type, MetaClassHelper):
                     not method_info.get_arguments():
                 cls.__new__ = staticmethod(method_info)
                 break
+
+    @property
+    def __doc__(cls):
+        return generate_doc_string(cls.__info__)
