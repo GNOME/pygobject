@@ -225,3 +225,7 @@ https://my.org/q?x=1&y=2
         self.assertGreaterEqual(major, 3)
         self.assertGreaterEqual(minor, 0)
         self.assertGreaterEqual(micro, 0)
+
+    def test_timezone_constructor_error(self):
+        self.assertRaisesRegexp(TypeError, '.*constructor.*help\(GLib.TimeZone\).*',
+                                GLib.TimeZone)

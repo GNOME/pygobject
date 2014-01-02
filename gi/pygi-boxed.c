@@ -47,7 +47,8 @@ _boxed_dealloc (PyGIBoxed *self)
 void *
 _pygi_boxed_alloc (GIBaseInfo *info, gsize *size_out)
 {
-    gsize size;
+    gpointer boxed = NULL;
+    gsize size = 0;
 
     switch (g_base_info_get_type (info)) {
         case GI_INFO_TYPE_UNION:
@@ -64,10 +65,21 @@ _pygi_boxed_alloc (GIBaseInfo *info, gsize *size_out)
             return NULL;
     }
 
+    if (size == 0) {
+        PyErr_Format (PyExc_TypeError,
+            "boxed cannot be created directly; try using a constructor, see: help(%s.%s)",
+            g_base_info_get_namespace (info),
+            g_base_info_get_name (info));
+        return NULL;
+    }
+
     if( size_out != NULL)
         *size_out = size;
 
-    return g_slice_alloc0 (size);
+    boxed = g_slice_alloc0 (size);
+    if (boxed == NULL)
+        PyErr_NoMemory();
+    return boxed;
 }
 
 static PyObject *
@@ -90,7 +102,6 @@ _boxed_new (PyTypeObject *type,
 
     boxed = _pygi_boxed_alloc (info, &size);
     if (boxed == NULL) {
-        PyErr_NoMemory();
         goto out;
     }
 

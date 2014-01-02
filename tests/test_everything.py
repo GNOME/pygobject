@@ -540,7 +540,6 @@ class TestEverything(unittest.TestCase):
             (e_type, e_value, e_tb) = sys.exc_info()
             self.assertEqual(e_type, TypeError)
             self.assertTrue('TestBoxedPrivate' in str(e_value), str(e_value))
-            self.assertTrue('override' in str(e_value), str(e_value))
             self.assertTrue('constructor' in str(e_value), str(e_value))
             tb = ''.join(traceback.format_exception(e_type, e_value, e_tb))
             self.assertTrue('tests/test_everything.py", line' in tb, tb)
