@@ -5,6 +5,14 @@ from gi.docstring import _get_pytype_hint
 from gi.repository import GIMarshallingTests
 from gi.repository import Gio
 
+try:
+    import cairo
+    cairo = cairo
+    has_cairo = True
+    from gi.repository import Regress
+except ImportError:
+    has_cairo = False
+
 
 class Test(unittest.TestCase):
     def test_api(self):
@@ -70,10 +78,16 @@ class Test(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.init_function.__doc__,
                          'init_function(argv:list=None) -> argv:list')
 
-    def tests_class_doc_constructors(self):
+    def test_class_doc_constructors(self):
         doc = GIMarshallingTests.Object.__doc__
         self.assertTrue('new(int_:int)' in doc)
 
-    def tests_struct_doc_constructors(self):
+    def test_struct_doc_constructors(self):
         doc = GIMarshallingTests.BoxedStruct.__doc__
         self.assertTrue('new()' in doc)
+        self.assertTrue('BoxedStruct()' in doc)
+
+    @unittest.skipUnless(has_cairo, 'built without cairo support')
+    def test_private_struct_constructors(self):
+        doc = Regress.TestBoxedPrivate.__doc__
+        self.assertTrue('TestBoxedPrivate()' not in doc)

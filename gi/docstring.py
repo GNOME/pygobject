@@ -181,7 +181,14 @@ def _generate_callable_info_doc(info):
 
 def _generate_class_info_doc(info):
     doc = '\n:Constructors:\n'  # start with \n to avoid auto indent of other lines
-    doc += '    ' + info.get_name() + '(**properties)\n'
+
+    if isinstance(info, StructInfo):
+        # Don't show default constructor for disguised (0 length) structs
+        if info.get_size() > 0:
+            doc += '    ' + info.get_name() + '()\n'
+    else:
+        doc += '    ' + info.get_name() + '(**properties)\n'
+
     for method_info in info.get_methods():
         if method_info.is_constructor():
             doc += '    ' + _generate_callable_info_doc(method_info) + '\n'
