@@ -180,12 +180,10 @@ def _generate_callable_info_doc(info):
 
 
 def _generate_class_info_doc(info):
-    doc = ''
-    constructors = [method for method in info.get_methods() if method.is_constructor()]
-    if constructors:
-        doc += '\n:Constructors:\n'  # start with \n to avoid auto indent of other lines
-
-        for method_info in constructors:
+    doc = '\n:Constructors:\n'  # start with \n to avoid auto indent of other lines
+    doc += '    ' + info.get_name() + '(**properties)\n'
+    for method_info in info.get_methods():
+        if method_info.is_constructor():
             doc += '    ' + _generate_callable_info_doc(method_info) + '\n'
 
     return doc
