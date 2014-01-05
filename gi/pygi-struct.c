@@ -27,12 +27,39 @@
 #include <girepository.h>
 #include <pyglib-python-compat.h>
 
+
+static GIBaseInfo *
+_struct_get_info (PyObject *self)
+{
+    PyObject *py_info;
+    GIBaseInfo *info = NULL;
+
+    py_info = PyObject_GetAttrString (self, "__info__");
+    if (py_info == NULL) {
+        return NULL;
+    }
+    if (!PyObject_TypeCheck (py_info, &PyGIStructInfo_Type) &&
+            !PyObject_TypeCheck (py_info, &PyGIUnionInfo_Type)) {
+        PyErr_Format (PyExc_TypeError, "attribute '__info__' must be %s or %s, not %s",
+                      PyGIStructInfo_Type.tp_name,
+                      PyGIUnionInfo_Type.tp_name,
+                      Py_TYPE(py_info)->tp_name);
+        goto out;
+    }
+
+    info = ( (PyGIBaseInfo *) py_info)->info;
+    g_base_info_ref (info);
+
+out:
+    Py_DECREF (py_info);
+
+    return info;
+}
+
 static void
 _struct_dealloc (PyGIStruct *self)
 {
-    GIBaseInfo *info = _pygi_object_get_gi_info (
-                           (PyObject *) self,
-                           &PyGIStructInfo_Type);
+    GIBaseInfo *info = _struct_get_info ( (PyObject *) self );
 
     if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
         pygi_struct_foreign_release (info, ( (PyGPointer *) self)->pointer);
@@ -40,7 +67,9 @@ _struct_dealloc (PyGIStruct *self)
         g_free ( ( (PyGPointer *) self)->pointer);
     }
 
-    g_base_info_unref (info);
+    if (info != NULL) {
+        g_base_info_unref (info);
+    }
 
     Py_TYPE( (PyGPointer *) self )->tp_free ( (PyObject *) self);
 }
@@ -61,7 +90,7 @@ _struct_new (PyTypeObject *type,
         return NULL;
     }
 
-    info = _pygi_object_get_gi_info ( (PyObject *) type, &PyGIStructInfo_Type);
+    info = _struct_get_info ( (PyObject *) type );
     if (info == NULL) {
         if (PyErr_ExceptionMatches (PyExc_AttributeError)) {
             PyErr_Format (PyExc_TypeError, "missing introspection information");

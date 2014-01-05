@@ -28,6 +28,7 @@ from gi.module import repository as repo
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import GIMarshallingTests
+from gi.repository import GIRepository as IntrospectedRepository
 
 try:
     import cairo
@@ -337,6 +338,18 @@ class Test(unittest.TestCase):
         self.assertTrue(hasattr(GIRepository, 'FunctionInfoFlags'))
         self.assertTrue(hasattr(GIRepository, 'TypeTag'))
         self.assertTrue(hasattr(GIRepository, 'InfoType'))
+
+    def test_introspected_argument_info(self):
+        self.assertTrue(isinstance(IntrospectedRepository.Argument.__info__,
+                                   GIRepository.UnionInfo))
+
+        arg = IntrospectedRepository.Argument()
+        self.assertTrue(isinstance(arg.__info__, GIRepository.UnionInfo))
+
+        old_info = IntrospectedRepository.Argument.__info__
+        IntrospectedRepository.Argument.__info__ = 'not an info'
+        self.assertRaises(TypeError, IntrospectedRepository.Argument)
+        IntrospectedRepository.Argument.__info__ = old_info
 
 
 if __name__ == '__main__':
