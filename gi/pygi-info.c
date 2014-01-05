@@ -509,7 +509,7 @@ _pygi_object_get_gi_info (PyObject     *object,
     }
     if (!PyObject_TypeCheck (py_info, type)) {
         PyErr_Format (PyExc_TypeError, "attribute '__info__' must be %s, not %s",
-                      type->tp_name, Py_TYPE(&py_info)->tp_name);
+                      type->tp_name, Py_TYPE(py_info)->tp_name);
         goto out;
     }
 
