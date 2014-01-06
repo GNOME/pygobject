@@ -89,25 +89,6 @@ AC_TRY_LINK_FUNC(Py_Initialize, dnl
 
 ])
 
-# JD_PYTHON_CHECK_VERSION(PROG, VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
-# ---------------------------------------------------------------------------
-# Run ACTION-IF-TRUE if the Python interpreter PROG has version >= VERSION.
-# Run ACTION-IF-FALSE otherwise.
-# This test uses sys.hexversion instead of the string equivalent.
-# This is similar to AM_PYTHON_CHECK_VERSION, but without python 1.5.x support
-# and with python 3.0 support.
-AC_DEFUN([JD_PYTHON_CHECK_VERSION],
- [prog="import sys
-# split strings by '.' and convert to numeric.  Append some zeros
-# because we need at least 4 digits for the hex conversion.
-# map returns an iterator in Python 3.0 and a list in 2.x
-minver = list(map(int, '$2'.split('.'))) + [[0, 0, 0]]
-minverhex = 0
-# xrange is not present in Python 3.0 and range returns an iterator
-for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[[i]]
-sys.exit(sys.hexversion < minverhex)"
-  AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
-
 # Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
 # Free Software Foundation, Inc.
 #
@@ -156,7 +137,7 @@ AC_DEFUN([JD_PATH_PYTHON],
     if test -n "$PYTHON"; then
       # If the user set $PYTHON, use it and don't search something else.
       AC_MSG_CHECKING([whether $PYTHON version >= $1])
-      JD_PYTHON_CHECK_VERSION([$PYTHON], [$1],
+      AM_PYTHON_CHECK_VERSION([$PYTHON], [$1],
 			      [AC_MSG_RESULT(yes)],
 			      [AC_MSG_ERROR(too old)])
       am_display_PYTHON=$PYTHON
@@ -167,7 +148,7 @@ AC_DEFUN([JD_PATH_PYTHON],
 	[am_cv_pathless_PYTHON],[
 	for am_cv_pathless_PYTHON in _AM_PYTHON_INTERPRETER_LIST none; do
 	  test "$am_cv_pathless_PYTHON" = none && break
-	  JD_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$1], [break])
+	  AM_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$1], [break])
 	done])
       # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
       if test "$am_cv_pathless_PYTHON" = none; then

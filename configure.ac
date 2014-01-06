@@ -99,14 +99,14 @@ fi
 JD_PATH_PYTHON(python_min_ver)
 
 # check if we are building for python 3
-JD_PYTHON_CHECK_VERSION([$PYTHON], [3.0],
+AM_PYTHON_CHECK_VERSION([$PYTHON], [3.0],
 			 build_py3k=true,
 			 build_py3k=false)
 
 # if building for python 3 make sure we have the minimum version supported
 if test $build_py3k = true ; then
   AC_MSG_CHECKING([for $PYTHON >=] python3_min_ver)
-  JD_PYTHON_CHECK_VERSION([$PYTHON], python3_min_ver,
+  AM_PYTHON_CHECK_VERSION([$PYTHON], python3_min_ver,
 			  [AC_MSG_RESULT(yes)],
 			  [AC_MSG_ERROR(too old)])
 fi
