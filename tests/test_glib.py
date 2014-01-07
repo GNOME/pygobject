@@ -229,3 +229,10 @@ https://my.org/q?x=1&y=2
     def test_timezone_constructor_error(self):
         self.assertRaisesRegexp(TypeError, '.*constructor.*help\(GLib.TimeZone\).*',
                                 GLib.TimeZone)
+
+    def test_source_attach_implicit_context(self):
+        context = GLib.MainContext.default()
+        source = GLib.Idle()
+        source_id = source.attach()
+        self.assertEqual(context, source.get_context())
+        self.assertTrue(GLib.Source.remove(source_id))

@@ -551,11 +551,6 @@ class Source(GLib.Source):
         if hasattr(self, '__pygi_custom_source'):
             self.unref()
 
-    # Backwards compatible API for optional arguments
-    def attach(self, context=None):
-        id = super(Source, self).attach(context)
-        return id
-
     def set_callback(self, fn, user_data=None):
         if hasattr(self, '__pygi_custom_source'):
             # use our custom pyg_source_set_callback() if for a GSource object
