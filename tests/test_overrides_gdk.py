@@ -148,3 +148,12 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(c.green, 65535)
         self.assertEqual(c.blue, 32896)
         self.assertEqual(Gdk.color_parse('bogus'), None)
+
+    def test_color_representations(self):
+        # __repr__ should generate a string which is parsable when possible
+        # http://docs.python.org/2/reference/datamodel.html#object.__repr__
+        color = Gdk.Color(red=65535, green=32896, blue=1)
+        self.assertEqual(eval(repr(color)), color)
+
+        rgba = Gdk.RGBA(red=1.0, green=0.8, blue=0.6, alpha=0.4)
+        self.assertEqual(eval(repr(rgba)), rgba)

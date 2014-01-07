@@ -44,7 +44,7 @@ class Color(Gdk.Color):
         return self.equal(other)
 
     def __repr__(self):
-        return '<Gdk.Color(red=%d, green=%d, blue=%d)>' % (self.red, self.green, self.blue)
+        return 'Gdk.Color(red=%d, green=%d, blue=%d)' % (self.red, self.green, self.blue)
 
     red_float = property(fget=lambda self: self.red / float(self.MAX_VALUE),
                          fset=lambda self, v: setattr(self, 'red', int(v * self.MAX_VALUE)))
@@ -84,7 +84,7 @@ if Gdk._version == '3.0':
             return self.equal(other)
 
         def __repr__(self):
-            return '<Gdk.Color(red=%f, green=%f, blue=%f, alpha=%f)>' % (self.red, self.green, self.blue, self.alpha)
+            return 'Gdk.RGBA(red=%f, green=%f, blue=%f, alpha=%f)' % (self.red, self.green, self.blue, self.alpha)
 
         def __iter__(self):
             """Iterator which allows easy conversion to tuple and list types."""
@@ -121,7 +121,7 @@ if Gdk._version == '2.0':
             self.height = height
 
         def __repr__(self):
-            return '<Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)>' % (self.x, self.y, self.height, self.width)
+            return 'Gdk.Rectangle(x=%d, y=%d, width=%d, height=%d)' % (self.x, self.y, self.height, self.width)
 
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
@@ -332,9 +332,9 @@ def _gdk_atom_str(atom):
 def _gdk_atom_repr(atom):
     n = atom.name()
     if n:
-        return 'Gdk.Atom<%s>' % n
+        return 'Gdk.Atom.intern("%s", False)' % n
     # fall back to atom index
-    return 'Gdk.Atom<%i>' % hash(atom)
+    return '<Gdk.Atom(%i)>' % hash(atom)
 
 
 Gdk.Atom.__str__ = _gdk_atom_str

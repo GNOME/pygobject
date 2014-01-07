@@ -20,10 +20,13 @@ class TestGdkAtom(unittest.TestCase):
         self.assertEqual(str(Gdk.SELECTION_CLIPBOARD), 'CLIPBOARD')
 
     def test_repr(self):
+        # __repr__ should generate a string which is parsable when possible
+        # http://docs.python.org/2/reference/datamodel.html#object.__repr__
         atom = Gdk.Atom.intern('my_string', False)
-        self.assertEqual(repr(atom), 'Gdk.Atom<my_string>')
+        self.assertEqual(repr(atom), 'Gdk.Atom.intern("my_string", False)')
+        self.assertEqual(eval(repr(atom)), atom)
 
-        self.assertEqual(repr(Gdk.SELECTION_CLIPBOARD), 'Gdk.Atom<CLIPBOARD>')
+        self.assertEqual(repr(Gdk.SELECTION_CLIPBOARD), 'Gdk.Atom.intern("CLIPBOARD", False)')
 
     def test_in_single(self):
         a_selection = Gdk.Atom.intern('test_clipboard', False)
