@@ -59,25 +59,6 @@ def generate_doc_string(info):
     return _generate_doc_string_func(info)
 
 
-def split_function_info_args(info):
-    """Split a functions args into a tuple of two lists.
-
-    Note that args marked as Direction.INOUT will be in both lists.
-
-    :Returns:
-        Tuple of (in_args, out_args)
-    """
-    in_args = []
-    out_args = []
-    for arg in info.get_arguments():
-        direction = arg.get_direction()
-        if direction in (Direction.IN, Direction.INOUT):
-            in_args.append(arg)
-        if direction in (Direction.OUT, Direction.INOUT):
-            out_args.append(arg)
-    return (in_args, out_args)
-
-
 _type_tag_to_py_type = {TypeTag.BOOLEAN: bool,
                         TypeTag.INT8: int,
                         TypeTag.UINT8: int,
@@ -122,7 +103,6 @@ def _get_pytype_hint(gi_type):
 
 
 def _generate_callable_info_doc(info):
-    in_args, out_args = split_function_info_args(info)
     in_args_strs = []
     if isinstance(info, VFuncInfo):
         in_args_strs = ['self']
@@ -130,19 +110,22 @@ def _generate_callable_info_doc(info):
         if info.is_method():
             in_args_strs = ['self']
 
+    args = info.get_arguments()
     hint_blacklist = ('void',)
 
-    # Build a lists of indices prior to adding the docs because
-    # because it is possible the index retrieved comes before in
-    # argument being used.
+    # Build lists of indices prior to adding the docs because it is possible
+    # the index retrieved comes before input arguments being used.
     ignore_indices = set()
     user_data_indices = set()
-    for arg in in_args:
+    for arg in args:
         ignore_indices.add(arg.get_destroy())
         ignore_indices.add(arg.get_type().get_array_length())
         user_data_indices.add(arg.get_closure())
 
-    for i, arg in enumerate(in_args):
+    # Build input argument strings
+    for i, arg in enumerate(args):
+        if arg.get_direction() == Direction.OUT:
+            continue  # skip exclusively output args
         if i in ignore_indices:
             continue
         argstr = arg.get_name()
@@ -157,6 +140,7 @@ def _generate_callable_info_doc(info):
         in_args_strs.append(argstr)
     in_args_str = ', '.join(in_args_strs)
 
+    # Build return + output argument strings
     out_args_strs = []
     return_hint = _get_pytype_hint(info.get_return_type())
     if not info.skip_return and return_hint and return_hint not in hint_blacklist:
@@ -164,7 +148,9 @@ def _generate_callable_info_doc(info):
             argstr += ' or None'
         out_args_strs.append(return_hint)
 
-    for i, arg in enumerate(out_args):
+    for i, arg in enumerate(args):
+        if arg.get_direction() == Direction.IN:
+            continue  # skip exclusively input args
         if i in ignore_indices:
             continue
         argstr = arg.get_name()

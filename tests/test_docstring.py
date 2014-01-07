@@ -1,7 +1,6 @@
 import unittest
 
 import gi.docstring
-from gi.docstring import _get_pytype_hint
 from gi.repository import GIMarshallingTests
 from gi.repository import Gio
 
@@ -10,6 +9,7 @@ try:
     cairo = cairo
     has_cairo = True
     from gi.repository import Regress
+    from gi.repository import Gtk
 except ImportError:
     has_cairo = False
 
@@ -29,27 +29,6 @@ class Test(unittest.TestCase):
         gi.docstring.set_doc_string_generator(old_func)
         self.assertEqual(gi.docstring.get_doc_string_generator(),
                          old_func)
-
-    def test_split_args_multi_out(self):
-        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.int_out_out)
-        self.assertEqual(len(in_args), 0)
-        self.assertEqual(len(out_args), 2)
-        self.assertEqual(_get_pytype_hint(out_args[0].get_type()), 'int')
-        self.assertEqual(_get_pytype_hint(out_args[1].get_type()), 'int')
-
-    def test_split_args_inout(self):
-        in_args, out_args = gi.docstring.split_function_info_args(GIMarshallingTests.long_inout_max_min)
-        self.assertEqual(len(in_args), 1)
-        self.assertEqual(len(out_args), 1)
-        self.assertEqual(in_args[0].get_name(), out_args[0].get_name())
-        self.assertEqual(_get_pytype_hint(in_args[0].get_type()),
-                         _get_pytype_hint(out_args[0].get_type()))
-
-    def test_split_args_none(self):
-        obj = GIMarshallingTests.Object(int=33)
-        in_args, out_args = gi.docstring.split_function_info_args(obj.none_inout)
-        self.assertEqual(len(in_args), 1)
-        self.assertEqual(len(out_args), 1)
 
     def test_final_signature_with_full_inout(self):
         self.assertEqual(GIMarshallingTests.Object.full_inout.__doc__,
@@ -91,3 +70,17 @@ class Test(unittest.TestCase):
     def test_private_struct_constructors(self):
         doc = Regress.TestBoxedPrivate.__doc__
         self.assertTrue('TestBoxedPrivate()' not in doc)
+
+    def test_array_inout_etc(self):
+        self.assertEqual(GIMarshallingTests.array_inout_etc.__doc__,
+                         'array_inout_etc(first:int, ints:list, last:int) -> ints:list, sum:int')
+
+    def test_array_out_etc(self):
+        self.assertEqual(GIMarshallingTests.array_out_etc.__doc__,
+                         'array_out_etc(first:int, last:int) -> ints:list, sum:int')
+
+    @unittest.skipUnless(has_cairo, 'built without cairo support')
+    def test_shared_array_length_with_prior_out_arg(self):
+        # Test the 'iter' out argument does not effect length argument skipping.
+        self.assertEqual(Gtk.ListStore.insert_with_valuesv.__doc__,
+                         'insert_with_valuesv(self, position:int, columns:list, values:list) -> iter:Gtk.TreeIter')
