@@ -5,9 +5,12 @@ import unittest
 
 try:
     from gi.repository import Pango
+    from gi.repository import PangoCairo
     Pango
+    PangoCairo
 except ImportError:
     Pango = None
+    PangoCairo = None
 
 
 @unittest.skipUnless(Pango, 'Pango not available')
@@ -35,3 +38,12 @@ class TestPango(unittest.TestCase):
         # https://bugzilla.gnome.org/show_bug.cgi?id=697363
         self.assertTrue(hasattr(Pango, 'break_'))
         self.assertTrue(Pango.break_ is not None)
+
+    def test_context_get_metrics(self):
+        # Test default "language" argument
+        font_map = PangoCairo.font_map_get_default()
+        context = font_map.create_context()
+        desc = Pango.FontDescription('monospace')
+        metrics1 = context.get_metrics(desc)
+        metrics2 = context.get_metrics(desc, context.get_language())
+        self.assertEqual(metrics1.get_ascent(), metrics2.get_ascent())
