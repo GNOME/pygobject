@@ -625,6 +625,11 @@ class TestGtk(unittest.TestCase):
         GLib.timeout_add(100, Gtk.main_quit, 'hello')
         Gtk.main()
 
+    def test_widget_render_icon(self):
+        button = Gtk.Button(label='OK')
+        pixbuf = button.render_icon(Gtk.STOCK_OK, Gtk.IconSize.BUTTON)
+        self.assertTrue(pixbuf is not None)
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestSignals(unittest.TestCase):
@@ -1580,6 +1585,12 @@ class TestTreeModel(unittest.TestCase):
             i -= 1
         end = time.clock()
         sys.stderr.write('[%.0f µs/append] ' % ((end - start) * 1000000 / iterations))
+
+    def test_filter_new_default(self):
+        # Test filter_new accepts implicit default of None
+        model = Gtk.ListStore(int)
+        filt = model.filter_new()
+        self.assertTrue(filt is not None)
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')

@@ -76,9 +76,6 @@ class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
 
-    def render_icon(self, stock_id, size, detail=None):
-        return super(Widget, self).render_icon(stock_id, size, detail)
-
     def drag_dest_set_target_list(self, target_list):
         if (target_list is not None) and (not isinstance(target_list, Gtk.TargetList)):
             target_list = Gtk.TargetList.new(_construct_target_list(target_list))
@@ -713,18 +710,8 @@ __all__.append('TextBuffer')
 
 
 class TextIter(Gtk.TextIter):
-
     forward_search = strip_boolean_result(Gtk.TextIter.forward_search)
     backward_search = strip_boolean_result(Gtk.TextIter.backward_search)
-
-    def begins_tag(self, tag=None):
-        return super(TextIter, self).begins_tag(tag)
-
-    def ends_tag(self, tag=None):
-        return super(TextIter, self).ends_tag(tag)
-
-    def toggles_tag(self, tag=None):
-        return super(TextIter, self).toggles_tag(tag)
 
 TextIter = override(TextIter)
 __all__.append('TextIter')
@@ -856,9 +843,6 @@ class TreeModel(Gtk.TreeModel):
             values.append(self.get_value(treeiter, col))
 
         return tuple(values)
-
-    def filter_new(self, root=None):
-        return super(TreeModel, self).filter_new(root)
 
     #
     # Signals supporting python iterables as tree paths
