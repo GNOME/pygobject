@@ -1555,6 +1555,7 @@ class TestGEnum(unittest.TestCase):
     def test_genum_in(self):
         GIMarshallingTests.genum_in(GIMarshallingTests.GEnum.VALUE3)
         GIMarshallingTests.genum_in(42)
+        GIMarshallingTests.GEnum.in_(42)
 
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 43)
         self.assertRaises(TypeError, GIMarshallingTests.genum_in, 'GIMarshallingTests.GEnum.VALUE3')
@@ -1566,6 +1567,7 @@ class TestGEnum(unittest.TestCase):
 
     def test_genum_out(self):
         genum = GIMarshallingTests.genum_out()
+        genum = GIMarshallingTests.GEnum.out()
         self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
         self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE3)
 
@@ -1598,15 +1600,22 @@ class TestGFlags(unittest.TestCase):
 
     def test_flags_in(self):
         GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2)
+        GIMarshallingTests.Flags.in_(GIMarshallingTests.Flags.VALUE2)
         # result of __or__() operation should still be valid instance, not an int.
         GIMarshallingTests.flags_in(GIMarshallingTests.Flags.VALUE2 | GIMarshallingTests.Flags.VALUE2)
         GIMarshallingTests.flags_in_zero(Number(0))
+        GIMarshallingTests.Flags.in_zero(Number(0))
 
         self.assertRaises(TypeError, GIMarshallingTests.flags_in, 1 << 1)
         self.assertRaises(TypeError, GIMarshallingTests.flags_in, 'GIMarshallingTests.Flags.VALUE2')
 
     def test_flags_return(self):
         flags = GIMarshallingTests.flags_returnv()
+        self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
+        self.assertEqual(flags, GIMarshallingTests.Flags.VALUE2)
+
+    def test_flags_return_method(self):
+        flags = GIMarshallingTests.Flags.returnv()
         self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
         self.assertEqual(flags, GIMarshallingTests.Flags.VALUE2)
 

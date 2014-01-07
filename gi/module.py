@@ -163,6 +163,8 @@ class IntrospectionModule(object):
                 for value_info in info.get_values():
                     value_name = value_info.get_name_unescaped().translate(ascii_upper_trans)
                     setattr(wrapper, value_name, wrapper(value_info.get_value()))
+                for method_info in info.get_methods():
+                    setattr(wrapper, method_info.__name__, method_info)
 
             if g_type != TYPE_NONE:
                 g_type.pytype = wrapper
