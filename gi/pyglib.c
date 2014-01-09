@@ -30,51 +30,7 @@
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 
-static struct _PyGLib_Functions *_PyGLib_API;
 static PyObject *exception_table = NULL;
-
-void
-pyglib_init(void)
-{
-    PyObject *glib, *cobject;
-    
-    glib = PyImport_ImportModule("gi._glib");
-    if (!glib) {
-	if (PyErr_Occurred()) {
-	    PyObject *type, *value, *traceback;
-	    PyObject *py_orig_exc;
-	    PyErr_Fetch(&type, &value, &traceback);
-	    py_orig_exc = PyObject_Repr(value);
-	    Py_XDECREF(type);
-	    Py_XDECREF(value);
-	    Py_XDECREF(traceback);
-	    PyErr_Format(PyExc_ImportError,
-			 "could not import gi._glib (error was: %s)",
-			 PYGLIB_PyUnicode_AsString(py_orig_exc));
-	    Py_DECREF(py_orig_exc);
-        } else {
-	    PyErr_SetString(PyExc_ImportError,
-			    "could not import gi._glib (no error given)");
-	}
-	return;
-    }
-    
-    cobject = PyObject_GetAttrString(glib, "_PyGLib_API");
-    if (cobject && PYGLIB_CPointer_Check(cobject))
-	_PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(cobject, "gi._glib._PyGLib_API");
-    else {
-	PyErr_SetString(PyExc_ImportError,
-			"could not import gi._glib (could not find _PyGLib_API object)");
-	Py_DECREF(glib);
-	return;
-    }
-}
-
-void
-pyglib_init_internal(PyObject *api)
-{
-    _PyGLib_API = (struct _PyGLib_Functions *) PYGLIB_CPointer_GetPointer(api, "gi._glib._PyGLib_API");
-}
 
 /**
  * pyglib_error_marshal:
@@ -100,7 +56,7 @@ pyglib_error_marshal (GError **error)
 
     state = pyglib_gil_state_ensure();
 
-    exc_type = _PyGLib_API->gerror_exception;
+    exc_type = PyGError;
     if (exception_table != NULL)
     {
 	PyObject *item;
@@ -159,7 +115,7 @@ pyglib_error_check(GError **error)
     state = pyglib_gil_state_ensure();
 
     exc_instance = pyglib_error_marshal (error);
-    PyErr_SetObject(_PyGLib_API->gerror_exception, exc_instance);
+    PyErr_SetObject(PyGError, exc_instance);
     Py_DECREF(exc_instance);
     g_clear_error(error);
     
@@ -197,7 +153,7 @@ pyglib_gerror_exception_check(GError **error)
     }
     if (!value ||
 	!PyErr_GivenExceptionMatches(type,
-				     (PyObject *) _PyGLib_API->gerror_exception)) {
+				     (PyObject *) PyGError)) {
         PyErr_Restore(type, value, traceback);
         PyErr_Print();
         return -2;
@@ -262,7 +218,7 @@ pyglib_register_exception_for_domain(gchar *name,
 {
     PyObject *exception;
 
-    exception = PyErr_NewException(name, _PyGLib_API->gerror_exception, NULL);
+    exception = PyErr_NewException(name, PyGError, NULL);
 
     if (exception_table == NULL)
 	exception_table = PyDict_New();
@@ -309,33 +265,6 @@ pyglib_option_group_transfer_group(PyObject *obj)
     return self->group;
 }
 
-/**
- * pyglib_option_group_new:
- * @group: a GOptionGroup
- *
- * The returned GOptionGroup can't be used to set any hooks, translation domains
- * or add entries. It's only intend is, to use for GOptionContext.add_group().
- *
- * Returns: the GOptionGroup wrapper.
- */
-PyObject * 
-pyglib_option_group_new (GOptionGroup *group)
-{
-    return _PyGLib_API->option_group_new(group);
-}
-
-/**
- * pyglib_option_context_new:
- * @context: a GOptionContext
- *
- * Returns: A new GOptionContext wrapper.
- */
-PyObject * 
-pyglib_option_context_new (GOptionContext *context)
-{
-    return _PyGLib_API->option_context_new(context);
-}
-
 
 /****** Private *****/
 
@@ -351,8 +280,6 @@ _pyglib_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
     PyGILState_STATE state;
-
-    g_return_if_fail (_PyGLib_API != NULL);
 
     state = pyglib_gil_state_ensure();
     Py_DECREF(obj);

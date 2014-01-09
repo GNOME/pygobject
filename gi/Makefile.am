@@ -50,6 +50,18 @@ _gi_la_SOURCES = \
 	pygpointer.h \
 	pygtype.c \
 	pygtype.h \
+	glibmodule.c \
+	pygoptioncontext.c \
+	pygoptioncontext.h \
+	pygoptiongroup.c \
+	pygoptiongroup.h \
+	pygspawn.c \
+	pygspawn.h \
+	pyglib.c \
+	pyglib.h \
+	pyglib-private.h \
+	pyglib-python-compat.h \
+	gimodule.c \
 	pygi-repository.c \
 	pygi-repository.h \
 	pygi-info.c \
@@ -77,7 +89,6 @@ _gi_la_SOURCES = \
 	pygi-signal-closure.c \
 	pygi-signal-closure.h \
 	pygobject-external.h \
-	gimodule.c \
 	pygi-invoke.c \
 	pygi-invoke.h \
 	pygi-invoke-state-struct.h \
@@ -100,8 +111,7 @@ _gi_la_CPPFLAGS = \
 _gi_la_LIBADD = \
 	$(extension_libadd) \
 	$(GLIB_LIBS) \
-	$(GI_LIBS) \
-	$(top_builddir)/gi/_glib/libpyglib-gi-2.0-@PYTHON_BASENAME@.la
+	$(GI_LIBS)
 _gi_la_LDFLAGS = \
 	$(extension_ldflags) \
 	-export-symbols-regex "init_gi|PyInit__gi"

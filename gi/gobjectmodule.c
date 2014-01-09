@@ -36,6 +36,7 @@
 #include "pygparamspec.h"
 #include "pygpointer.h"
 #include "pygtype.h"
+#include "pygoptiongroup.h"
 
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
@@ -2099,7 +2100,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   pyg_gerror_exception_check,
 
-  pyglib_option_group_new,
+  pyg_option_group_new,
   pyg_type_from_object_strict,
 
   pygobject_new_full,
@@ -2192,8 +2193,6 @@ pygobject_register_warnings(PyObject *d)
 PYGLIB_MODULE_START(_gobject, "_gobject")
 {
     PyObject *d;
-
-    pyglib_init();
 
     d = PyModule_GetDict(module);
     pygobject_register_api(d);

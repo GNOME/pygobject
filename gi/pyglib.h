@@ -31,9 +31,6 @@ G_BEGIN_DECLS
 typedef void (*PyGLibThreadsEnabledFunc) (void);
 typedef void (*PyGLibThreadBlockFunc) (void);
 
-void pyglib_init(void);
-void pyglib_init_internal(PyObject *api);
-
 #ifdef DISABLE_THREADING
 #    define pyglib_gil_state_ensure()        PyGILState_LOCKED
 #    define pyglib_gil_state_release(state)  state
@@ -42,18 +39,11 @@ void pyglib_init_internal(PyObject *api);
 #    define pyglib_gil_state_release         PyGILState_Release
 #endif
 
-/* Deprecated, only available for API compatibility. */
-#define pyg_set_thread_block_funcs(a, b)
-#define pyglib_block_threads()
-#define pyglib_unblock_threads()
-
 gboolean pyglib_error_check(GError **error);
 PyObject *pyglib_error_marshal (GError **error);
 gboolean pyglib_gerror_exception_check(GError **error);
 PyObject *pyglib_register_exception_for_domain(gchar *name,
 					       gint error_domain);
-PyObject * pyglib_option_context_new(GOptionContext *context);
-PyObject * pyglib_option_group_new(GOptionGroup *group);
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 
 /* Private: for gobject <-> glib interaction only. */

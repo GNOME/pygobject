@@ -39,7 +39,7 @@ __all__.append('option')
 
 
 # Types and functions still needed from static bindings
-from gi._glib import _glib
+from gi._gi import _glib
 GError = _glib.GError
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup

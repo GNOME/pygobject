@@ -33,6 +33,8 @@
 #include "pygoptiongroup.h"
 #include "pygspawn.h"
 
+PyObject *PyGError = NULL;
+
 /* ---------------- glib module functions -------------------- */
 
 static PyMethodDef _glib_functions[] = {
@@ -47,54 +49,26 @@ static PyMethodDef _glib_functions[] = {
     { NULL, NULL, 0 }
 };
 
-/* ----------------- glib module initialisation -------------- */
-
-static struct _PyGLib_Functions pyglib_api = {
-    FALSE, /* threads_enabled */
-    NULL,  /* gerror_exception */
-    NULL,  /* block_threads */
-    NULL,  /* unblock_threads */
-    NULL,  /* pyg_main_context_new */
-    pyg_option_context_new,
-    pyg_option_group_new,
-};
-
-static void
-pyglib_register_api(PyObject *d)
-{
-    PyObject *o;
-
-    /* for addon libraries ... */
-    PyDict_SetItemString(d, "_PyGLib_API",
-			 o=PYGLIB_CPointer_WrapPointer(&pyglib_api,"gi._glib._PyGLib_API"));
-    Py_DECREF(o);
-    
-    pyglib_init_internal(o);
-}
-
 static void
 pyglib_register_error(PyObject *d)
 {
     PyObject *dict;
-    PyObject *gerror_class;
     dict = PyDict_New();
     /* This is a hack to work around the deprecation warning of
      * BaseException.message in Python 2.6+.
      * GError has also an "message" attribute.
      */
     PyDict_SetItemString(dict, "message", Py_None);
-    gerror_class = PyErr_NewException("gi._glib.GError", PyExc_RuntimeError, dict);
+    PyGError = PyErr_NewException("gi._glib.GError", PyExc_RuntimeError, dict);
     Py_DECREF(dict);
 
-    PyDict_SetItemString(d, "GError", gerror_class);
-    pyglib_api.gerror_exception = gerror_class;
+    PyDict_SetItemString(d, "GError", PyGError);
 }
 
 PYGLIB_MODULE_START(_glib, "_glib")
 {
     PyObject *d = PyModule_GetDict(module);
 
-    pyglib_register_api(d);
     pyglib_register_error(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);

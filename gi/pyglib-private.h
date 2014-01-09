@@ -25,22 +25,16 @@
 #include <Python.h>
 #include <glib.h>
 
+#include <pyglib.h>
 #include <pyglib-python-compat.h>
 
 G_BEGIN_DECLS
 
-struct _PyGLib_Functions {
-    gboolean threads_enabled;
-    PyObject *gerror_exception;
-    PyGLibThreadBlockFunc block_threads;
-    PyGLibThreadBlockFunc unblock_threads;
-    PyObject* (*main_context_new)(GMainContext *context);
-    PyObject* (*option_context_new)(GOptionContext *context);
-    PyObject* (*option_group_new)(GOptionGroup *group);
-};
-
 gboolean _pyglib_handler_marshal(gpointer user_data);
 void _pyglib_destroy_notify(gpointer user_data);
+
+extern PyObject *PyGError;
+extern PyObject *pyglib__glib_module_create (void);
 
 G_END_DECLS
 

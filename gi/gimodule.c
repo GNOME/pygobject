@@ -21,6 +21,7 @@
  * USA
  */
 
+#include "pyglib-private.h"
 #include "pygobject-private.h"
 #include "pyginterface.h"
 #include "pygi-private.h"
@@ -628,6 +629,7 @@ static struct PyGI_API CAPI = {
 PYGLIB_MODULE_START(_gi, "_gi")
 {
     PyObject *api;
+    PyObject *_glib_module;
     PyObject *_gobject_module;
 
     /* Always enable Python threads since we cannot predict which GI repositories
@@ -636,6 +638,13 @@ PYGLIB_MODULE_START(_gi, "_gi")
      * See: https://bugzilla.gnome.org/show_bug.cgi?id=709223
      */
     PyEval_InitThreads ();
+
+    _glib_module = pyglib__glib_module_create ();
+    if (_glib_module == NULL) {
+        return PYGLIB_MODULE_ERROR_RETURN;
+    }
+    PyModule_AddObject (module, "_glib", _glib_module);
+    PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
     _gobject_module = pyglib__gobject_module_create ();
     if (_gobject_module == NULL) {
