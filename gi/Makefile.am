@@ -1,7 +1,6 @@
 SUBDIRS = \
 	repository \
 	overrides \
-        _glib \
 	_gobject
 
 extension_cppflags = \

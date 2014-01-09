@@ -33,7 +33,7 @@ import sys
 import optparse
 from optparse import OptParseError, OptionError, OptionValueError, \
     BadOptionError, OptionConflictError
-from ..module import get_introspection_module
+from .module import get_introspection_module
 
 if sys.version_info >= (3, 0):
     _basestring = str

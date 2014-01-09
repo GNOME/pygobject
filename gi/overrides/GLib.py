@@ -33,7 +33,7 @@ GLib = get_introspection_module('GLib')
 
 __all__ = []
 
-from gi._glib import option
+from gi import _option as option
 option  # pyflakes
 __all__.append('option')
 

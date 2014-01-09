@@ -41,7 +41,7 @@ GObjectModule = gi.module.get_introspection_module('GObject')
 __all__ = []
 
 
-from gi._glib import option
+from gi import _option as option
 sys.modules['gi._gobject.option'] = option
 
 
