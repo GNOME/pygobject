@@ -109,6 +109,8 @@ _gi_la_SOURCES = \
 	pygi-error.h \
 	pygi-object.c \
 	pygi-object.h \
+	pygi-value.c \
+	pygi-value.h \
 	pygi-enum-marshal.c \
 	pygi-enum-marshal.h \
 	pygi-struct-marshal.c \

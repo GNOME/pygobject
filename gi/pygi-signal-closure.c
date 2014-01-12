@@ -19,6 +19,7 @@
  */
 
 #include "pygi-private.h"
+#include "pygi-value.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type,
