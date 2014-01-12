@@ -23,6 +23,23 @@
 #ifndef __PYGOBJECT_TYPE_H__ 
 #define __PYGOBJECT_TYPE_H__
 
+#include <glib-object.h>
+#include <Python.h>
+
+typedef PyObject *(* fromvaluefunc)(const GValue *value);
+typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
+
+typedef struct {
+    fromvaluefunc fromvalue;
+    tovaluefunc tovalue;
+} PyGTypeMarshal;
+
+PyGTypeMarshal *pyg_type_lookup(GType type);
+
+void pyg_register_gtype_custom(GType gtype,
+                               fromvaluefunc from_func,
+                               tovaluefunc to_func);
+
 void pygobject_type_register_types(PyObject *d);
 
 #endif /* __PYGOBJECT_TYPE_H__ */

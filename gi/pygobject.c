@@ -30,7 +30,7 @@
 #include "pygparamspec.h"
 
 #include "pygi.h"
-
+#include "pygi-value.h"
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);

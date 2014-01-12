@@ -78,22 +78,6 @@ gint pyg_enum_get_value  (GType enum_type, PyObject *obj, gint *val);
 gint pyg_flags_get_value (GType flag_type, PyObject *obj, guint *val);
 int pyg_pyobj_to_unichar_conv (PyObject* py_obj, void* ptr);
 
-typedef PyObject *(* fromvaluefunc)(const GValue *value);
-typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
-
-void      pyg_register_gtype_custom(GType gtype,
-			     fromvaluefunc from_func,
-			     tovaluefunc to_func);
-int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
-int       pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj);
-PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
-int       pyg_param_gvalue_from_pyobject(GValue* value,
-                                         PyObject* py_obj,
-                                         const GParamSpec* pspec);
-PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
-                                       gboolean copy_boxed,
-                                       const GParamSpec* pspec);
-
 GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
 void	  pyg_closure_set_exception_handler(GClosure *closure,
 					    PyClosureExceptionHandler handler);

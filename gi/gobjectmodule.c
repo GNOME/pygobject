@@ -38,6 +38,8 @@
 #include "pygtype.h"
 #include "pygoptiongroup.h"
 
+#include "pygi-value.h"
+
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
 

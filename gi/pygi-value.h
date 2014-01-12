@@ -20,12 +20,24 @@
 
 #include <glib-object.h>
 #include <girepository.h>
+#include <Python.h>
 
 G_BEGIN_DECLS
 
 GIArgument _pygi_argument_from_g_value(const GValue *value,
                                        GITypeInfo *type_info);
 
+int       pyg_value_from_pyobject(GValue *value, PyObject *obj);
+int       pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj);
+PyObject *pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed);
+int       pyg_param_gvalue_from_pyobject(GValue* value,
+                                         PyObject* py_obj,
+                                         const GParamSpec* pspec);
+PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
+                                       gboolean copy_boxed,
+                                       const GParamSpec* pspec);
+PyObject *pyg_strv_from_gvalue(const GValue *value);
+int       pyg_strv_to_gvalue(GValue *value, PyObject *obj);
 
 G_END_DECLS
 

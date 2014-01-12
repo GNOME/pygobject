@@ -24,6 +24,7 @@
 
 #include "pygi-struct-marshal.h"
 #include "pygi-private.h"
+#include "pygi-value.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the
