@@ -153,12 +153,12 @@ check.nemiver:
 	EXEC_NAME="nemiver" $(MAKE) check
 
 check.valgrind:
-	EXEC_NAME="G_SLICE=always-malloc valgrind --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc valgrind --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
 
 check.valgrindlog:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc valgrind --log-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.log --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc valgrind --log-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.log --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
 
 check.valgrindxml:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc valgrind --xml=yes --xml-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.xml --leak-check=full --show-possibly-lost=no --suppressions=python.supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc valgrind --xml=yes --xml-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.xml --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
