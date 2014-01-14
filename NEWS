@@ -1,3 +1,19 @@
+3.11.4  13-Jan-2014
+        - overrides: Fix __repr__ for various Gdk structs (Simon Feltman)
+        - Add enum and flags member methods (Simon Feltman) (#693099)
+        - python.m4: g/c JD_PYTHON_CHECK_VERSION (Patrick Welche) (#721662)
+        - Support union creation with PyGIStruct (Simon Feltman)
+        - docs: List constructors in object and struct doc strings
+          (Simon Feltman) (#708060)
+        - docs: Fix array length argument skipping with preceding out arguments
+        - docs: Add return values and skip implicit out arguments in functions
+          (Simon Feltman) (#697356)
+        - docs: Skip implicit array length args when building function doc
+          strings (Simon Feltman) (#697356)
+        - gtk-demo: Add CSS demos (Gian Mario Tagliaretti) (#719722)
+        - build: Avoid clash between gi/types.py and stdlib
+          (Colin Watson) (#721025)
+
 3.11.3  16-Dec-2013
         - Replace usage of PyGIBoxed_Type with PyGIStruct_Type
           (Simon Feltman) (#581525)
