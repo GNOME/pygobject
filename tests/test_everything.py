@@ -1186,7 +1186,7 @@ class TestTortureProfile(unittest.TestCase):
         sys.stdout.write("\ttorture test 4 (10000 iterations): ")
 
         def callback(userdata):
-            pass
+            return 0
 
         userdata = [1, 2, 3, 4]
         start_time = time.clock()
