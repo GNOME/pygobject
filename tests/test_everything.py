@@ -761,6 +761,54 @@ class TestCallbacks(unittest.TestCase):
         self.assertEqual(TestCallbacks.called, 10)
         self.assertSequenceEqual(collected_user_data, [1, 2] * 10)
 
+    def test_callback_user_data_middle_none(self):
+        cb_info = {}
+
+        def callback(userdata):
+            cb_info['called'] = True
+            cb_info['userdata'] = userdata
+            return 1
+
+        (y, z, q) = Everything.test_torture_signature_2(
+            42, callback, None, 'some string', 3)
+        self.assertEqual(y, 42)
+        self.assertEqual(z, 84)
+        self.assertEqual(q, 14)
+        self.assertTrue(cb_info['called'])
+        self.assertEqual(cb_info['userdata'], None)
+
+    def test_callback_user_data_middle_single(self):
+        cb_info = {}
+
+        def callback(userdata):
+            cb_info['called'] = True
+            cb_info['userdata'] = userdata
+            return 1
+
+        (y, z, q) = Everything.test_torture_signature_2(
+            42, callback, 'User Data', 'some string', 3)
+        self.assertEqual(y, 42)
+        self.assertEqual(z, 84)
+        self.assertEqual(q, 14)
+        self.assertTrue(cb_info['called'])
+        self.assertEqual(cb_info['userdata'], 'User Data')
+
+    def test_callback_user_data_middle_tuple(self):
+        cb_info = {}
+
+        def callback(userdata):
+            cb_info['called'] = True
+            cb_info['userdata'] = userdata
+            return 1
+
+        (y, z, q) = Everything.test_torture_signature_2(
+            42, callback, (-5, 'User Data'), 'some string', 3)
+        self.assertEqual(y, 42)
+        self.assertEqual(z, 84)
+        self.assertEqual(q, 14)
+        self.assertTrue(cb_info['called'])
+        self.assertEqual(cb_info['userdata'], (-5, 'User Data'))
+
     def test_async_ready_callback(self):
         TestCallbacks.called = False
         TestCallbacks.main_loop = GLib.MainLoop()
