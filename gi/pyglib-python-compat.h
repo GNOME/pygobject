@@ -30,9 +30,10 @@
     PyCapsule_Import(##module##.##symbol##, FALSE)
 
 
+#define PYGLIB_MODULE_ERROR_RETURN NULL
+
 /* Compilation on Python 2.x */
 #if PY_VERSION_HEX < 0x03000000
-#define PYGLIB_MODULE_ERROR_RETURN
 
 #define RO READONLY
 
@@ -112,8 +113,6 @@ PyTypeObject symbol = {                                 \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
 #else
-
-#define PYGLIB_MODULE_ERROR_RETURN 0
 
 #define PYGLIB_MODULE_START(symbol, modname)	        \
     static struct PyModuleDef _##symbol##module = {     \
