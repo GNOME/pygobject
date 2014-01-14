@@ -1,3 +1,5 @@
+PLATFORM_VERSION = 3.0
+
 SUBDIRS = \
 	repository \
 	overrides \
