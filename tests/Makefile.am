@@ -134,12 +134,6 @@ RUN_TESTS_ENV_VARS= \
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
 check-local: $(check_LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
-	@echo "  CHECK  Pyflakes"
-	@if type pyflakes >/dev/null 2>&1; then pyflakes $(top_srcdir); else echo "skipped, pyflakes not installed"; fi
-	@if test -z "$$SKIP_PEP8"; then \
-		echo "  CHECK  PEP8"; \
-		if type pep8 >/dev/null 2>&1; then pep8 --ignore=E501,E123,E124 --repeat --show-source $(top_srcdir); else echo "skipped, pep8 not installed"; fi; \
-	fi
 	export `$(DBUS_LAUNCH)` && \
 	$(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
 	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
