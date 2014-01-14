@@ -1362,8 +1362,19 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
             /* NULL out user_data if it was not supplied and the default arg placeholder
              * was used instead.
              */
-            if (py_user_data == _PyGIDefaultArgPlaceholder)
+            if (py_user_data == _PyGIDefaultArgPlaceholder) {
                 py_user_data = NULL;
+            } else if (callable_cache->user_data_varargs_index < 0) {
+                /* For non-variable length user data, place the user data in a
+                 * single item tuple which is concatenated to the callbacks arguments.
+                 * This allows callback input arg marshaling to always expect a
+                 * tuple for user data. Note the
+                 */
+                py_user_data = Py_BuildValue("(O)", py_user_data, NULL);
+            } else {
+                /* increment the ref borrowed from PyTuple_GetItem above */
+                Py_INCREF (py_user_data);
+            }
         }
     }
 
@@ -1383,6 +1394,9 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
 
     closure = _pygi_make_native_closure (callable_info, callback_cache->scope, py_arg, py_user_data);
     arg->v_pointer = closure->closure;
+
+    /* always decref the user data as _pygi_make_native_closure adds its own ref */
+    Py_XDECREF (py_user_data);
 
     /* The PyGICClosure instance is used as user data passed into the C function.
      * The return trip to python will marshal this back and pull the python user data out.
