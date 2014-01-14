@@ -101,12 +101,10 @@ _gi_la_SOURCES = \
 	pygi-marshal-cleanup.h
 _gi_la_CFLAGS = \
 	$(extension_cppflags) \
-	-I$(top_srcdir)/gi/_glib \
 	$(GLIB_CFLAGS) \
 	$(GI_CFLAGS)
 _gi_la_CPPFLAGS = \
-	$(extension_cppflags) \
-	-I$(top_srcdir)/gi/_glib
+	$(extension_cppflags)
 _gi_la_LIBADD = \
 	$(extension_libadd) \
 	$(GLIB_LIBS) \
@@ -125,8 +123,7 @@ _gi_cairo_la_CFLAGS = \
 	$(GI_CFLAGS) \
 	$(PYCAIRO_CFLAGS)
 _gi_cairo_la_CPPFLAGS = \
-	$(extension_cppflags) \
-	-I$(top_srcdir)/gi/_glib
+	$(extension_cppflags)
 _gi_cairo_la_LIBADD = \
 	$(extension_libadd) \
 	$(GI_LIBS) \
