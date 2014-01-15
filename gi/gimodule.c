@@ -643,12 +643,23 @@ PYGLIB_MODULE_START(_gi, "_gi")
     if (_glib_module == NULL) {
         return PYGLIB_MODULE_ERROR_RETURN;
     }
+    /* In Python 2.x, pyglib_..._module_create returns a borrowed reference and
+     * PyModule_AddObject steals a reference. Ensure we don't share a reference
+     * between sys.modules and gi._gi._glib by incrementing the ref count here.
+     * Note that we don't add this to the PYGLIB_MODULE_START macro because that
+     * would cause a leak for the main module gi._gi */
+    if (PY_MAJOR_VERSION < 3) {
+        Py_INCREF (_glib_module);
+    }
     PyModule_AddObject (module, "_glib", _glib_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
     _gobject_module = pyglib__gobject_module_create ();
     if (_gobject_module == NULL) {
         return PYGLIB_MODULE_ERROR_RETURN;
+    }
+    if (PY_MAJOR_VERSION < 3) {
+        Py_INCREF (_gobject_module);
     }
     PyModule_AddObject (module, "_gobject", _gobject_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
