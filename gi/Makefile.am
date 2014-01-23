@@ -26,7 +26,9 @@ extension_ldflags += \
 endif
 
 pkgincludedir = $(includedir)/pygobject-$(PLATFORM_VERSION)
+if WITH_COMMON
 pkginclude_HEADERS = pygobject.h
+endif
 
 pygidir = $(pyexecdir)/gi
 

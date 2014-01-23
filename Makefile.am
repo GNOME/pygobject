@@ -80,9 +80,11 @@ all-local: build_pylinks
 
 check-local: build_pylinks
 
+if WITH_COMMON
 # pkg-config files
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = pygobject-$(PLATFORM_VERSION).pc
+endif
 
 # python
 pyexec_LTLIBRARIES =

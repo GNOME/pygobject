@@ -226,6 +226,13 @@ if test "$enable_cairo" != no; then
 fi
 AM_CONDITIONAL(ENABLE_CAIRO, test "$enable_cairo" = "yes")
 
+AC_ARG_WITH(common,
+    AS_HELP_STRING([--without-common],
+        [For package maintainers: do not install Python version independent files]),
+    with_common=$enableval,
+    with_common=yes)
+AM_CONDITIONAL(WITH_COMMON, test "$with_common" = "yes")
+
 INTROSPECTION_SCANNER=`$PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0`
 INTROSPECTION_COMPILER=`$PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0`
 
