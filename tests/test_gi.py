@@ -2266,6 +2266,17 @@ class TestPythonGObject(unittest.TestCase):
         obj = self.ErrorObject()
         self.assertEqual(obj.vfunc_return_value_only(), 0)
 
+    def test_callback_owned_box(self):
+        def callback(box, data):
+            self.box = box
+
+        def nop_callback(box, data):
+            pass
+
+        GIMarshallingTests.callback_owned_boxed(callback, None)
+        GIMarshallingTests.callback_owned_boxed(nop_callback, None)
+        self.assertEqual(self.box.long_, 1)
+
 
 class TestMultiOutputArgs(unittest.TestCase):
 
