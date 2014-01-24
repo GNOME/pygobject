@@ -173,7 +173,7 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
     return None
 
 
-class GObjectMeta(type):
+class _GObjectMetaBase(type):
     "Metaclass for automatically registering GObject classes"
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
@@ -193,19 +193,19 @@ class GObjectMeta(type):
 
         _gobject.type_register(cls, namespace.get('__gtype_name__'))
 
-_gobject._install_metaclass(GObjectMeta)
+_gobject._install_metaclass(_GObjectMetaBase)
 
 
-class GIObjectMeta(GObjectMeta, MetaClassHelper):
+class GObjectMeta(_GObjectMetaBase, MetaClassHelper):
 
     def __init__(cls, name, bases, dict_):
-        super(GIObjectMeta, cls).__init__(name, bases, dict_)
+        super(GObjectMeta, cls).__init__(name, bases, dict_)
         is_gi_defined = False
         if cls.__module__ == 'gi.repository.' + cls.__info__.get_namespace():
             is_gi_defined = True
 
         is_python_defined = False
-        if not is_gi_defined and cls.__module__ != GIObjectMeta.__module__:
+        if not is_gi_defined and cls.__module__ != GObjectMeta.__module__:
             is_python_defined = True
 
         if is_python_defined:

@@ -57,7 +57,7 @@ from ._gi import \
     flags_register_new_gtype_and_add, \
     _gobject
 from .types import \
-    GIObjectMeta, \
+    GObjectMeta, \
     StructMeta
 
 GInterface = _gobject.GInterface
@@ -183,13 +183,13 @@ class IntrospectionModule(object):
                 interfaces = tuple(interface for interface in get_interfaces_for_object(info)
                                    if not issubclass(parent, interface))
                 bases = (parent,) + interfaces
-                metaclass = GIObjectMeta
+                metaclass = GObjectMeta
             elif isinstance(info, CallbackInfo):
                 bases = (CCallback,)
-                metaclass = GIObjectMeta
+                metaclass = GObjectMeta
             elif isinstance(info, InterfaceInfo):
                 bases = (GInterface,)
-                metaclass = GIObjectMeta
+                metaclass = GObjectMeta
             elif isinstance(info, (StructInfo, UnionInfo)):
                 if g_type.is_a(TYPE_BOXED):
                     bases = (Boxed,)
