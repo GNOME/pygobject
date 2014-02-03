@@ -177,7 +177,7 @@ _base_info_dealloc (PyGIBaseInfo *self)
 
     g_base_info_unref (self->info);
 
-    _pygi_callable_cache_free(self->cache);
+    pygi_callable_cache_free(self->cache);
 
     Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
 }

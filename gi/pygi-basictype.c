@@ -806,7 +806,7 @@ pygi_arg_basic_type_new_from_info (GITypeInfo   *type_info,
                                    PyGIDirection direction)
 {
     gboolean res = FALSE;
-    PyGIArgCache *arg_cache = _arg_cache_alloc ();
+    PyGIArgCache *arg_cache = pygi_arg_cache_alloc ();
     if (arg_cache == NULL)
         return NULL;
 
@@ -818,7 +818,7 @@ pygi_arg_basic_type_new_from_info (GITypeInfo   *type_info,
     if (res) {
         return arg_cache;
     } else {
-        _pygi_arg_cache_free (arg_cache);
+        pygi_arg_cache_free (arg_cache);
         return NULL;
     }
 }

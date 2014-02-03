@@ -194,11 +194,11 @@ struct _PyGICallableCache
 };
 
 gboolean
-pygi_arg_base_setup (PyGIArgCache *arg_cache,
-                     GITypeInfo   *type_info,
-                     GIArgInfo    *arg_info,  /* may be NULL for return arguments */
-                     GITransfer    transfer,
-                     PyGIDirection direction);
+pygi_arg_base_setup      (PyGIArgCache *arg_cache,
+                          GITypeInfo   *type_info,
+                          GIArgInfo    *arg_info,  /* may be NULL for return arguments */
+                          GITransfer    transfer,
+                          PyGIDirection direction);
 
 gboolean
 pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
@@ -209,11 +209,11 @@ pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GIInterfaceInfo    *iface_info);
 
 gboolean
-pygi_arg_sequence_setup (PyGISequenceCache  *sc,
-                         GITypeInfo         *type_info,
-                         GIArgInfo          *arg_info,    /* may be NULL for return arguments */
-                         GITransfer          transfer,
-                         PyGIDirection       direction);
+pygi_arg_sequence_setup  (PyGISequenceCache  *sc,
+                          GITypeInfo         *type_info,
+                          GIArgInfo          *arg_info,    /* may be NULL for return arguments */
+                          GITransfer          transfer,
+                          PyGIDirection       direction);
 
 PyGIArgCache *
 pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
@@ -222,22 +222,28 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
                                   PyGIDirection       direction,
                                   GIInterfaceInfo    *iface_info);
 
-PyGIArgCache * _arg_cache_alloc (void);
-PyGIArgCache * _arg_cache_new (GITypeInfo *type_info,
-                               GIArgInfo *arg_info,
-                               GITransfer transfer,
-                               PyGIDirection direction,
-                               /* will be removed */
-                               gssize c_arg_index,
-                               gssize py_arg_index,
-                               PyGICallableCache *callable_cache);
+PyGIArgCache *
+pygi_arg_cache_alloc     (void);
 
-void _pygi_arg_cache_free       (PyGIArgCache *cache);
-void _pygi_arg_cache_clear      (PyGIArgCache *cache);
-void _pygi_callable_cache_free  (PyGICallableCache *cache);
+PyGIArgCache *
+pygi_arg_cache_new       (GITypeInfo *type_info,
+                          GIArgInfo *arg_info,
+                          GITransfer transfer,
+                          PyGIDirection direction,
+                          /* will be removed */
+                          gssize c_arg_index,
+                          gssize py_arg_index,
+                          PyGICallableCache *callable_cache);
 
-PyGICallableCache *_pygi_callable_cache_new (GICallableInfo *callable_info,
-                                             gboolean is_ccallback);
+void
+pygi_arg_cache_free      (PyGIArgCache *cache);
+
+void
+pygi_callable_cache_free (PyGICallableCache *cache);
+
+PyGICallableCache *
+pygi_callable_cache_new  (GICallableInfo *callable_info,
+                          gboolean is_ccallback);
 
 #define _pygi_callable_cache_args_len(cache) ((cache)->args_cache)->len
 

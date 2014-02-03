@@ -94,7 +94,7 @@ pygi_arg_base_setup (PyGIArgCache *arg_cache,
 }
 
 void
-_pygi_arg_cache_free (PyGIArgCache *cache)
+pygi_arg_cache_free (PyGIArgCache *cache)
 {
     if (cache == NULL)
         return;
@@ -108,7 +108,7 @@ _pygi_arg_cache_free (PyGIArgCache *cache)
 }
 
 void
-_pygi_callable_cache_free (PyGICallableCache *cache)
+pygi_callable_cache_free (PyGICallableCache *cache)
 {
     if (cache == NULL)
         return;
@@ -119,7 +119,7 @@ _pygi_callable_cache_free (PyGICallableCache *cache)
     g_ptr_array_unref (cache->args_cache);
 
     if (cache->return_cache != NULL)
-        _pygi_arg_cache_free (cache->return_cache);
+        pygi_arg_cache_free (cache->return_cache);
 
     g_slice_free (PyGICallableCache, cache);
 }
@@ -188,7 +188,7 @@ pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
                                    transfer,
                                    direction,
                                    iface_info)) {
-        _pygi_arg_cache_free ((PyGIArgCache *)ic);
+        pygi_arg_cache_free ((PyGIArgCache *)ic);
         return NULL;
     }
 
@@ -201,7 +201,7 @@ static void
 _sequence_cache_free_func (PyGISequenceCache *cache)
 {
     if (cache != NULL) {
-        _pygi_arg_cache_free (cache->item_cache);
+        pygi_arg_cache_free (cache->item_cache);
         g_slice_free (PyGISequenceCache, cache);
     }
 }
@@ -229,12 +229,12 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
     item_transfer =
         transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
-    sc->item_cache = _arg_cache_new (item_type_info,
-                                     NULL,
-                                     item_transfer,
-                                     direction,
-                                     0, 0,
-                                     NULL);
+    sc->item_cache = pygi_arg_cache_new (item_type_info,
+                                         NULL,
+                                         item_transfer,
+                                         direction,
+                                         0, 0,
+                                         NULL);
 
     g_base_info_unref ( (GIBaseInfo *)item_type_info);
 
@@ -246,7 +246,7 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
 }
 
 PyGIArgCache *
-_arg_cache_alloc (void)
+pygi_arg_cache_alloc (void)
 {
     return g_slice_new0 (PyGIArgCache);
 }
@@ -306,13 +306,13 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
 }
 
 PyGIArgCache *
-_arg_cache_new (GITypeInfo *type_info,
-                GIArgInfo *arg_info,     /* may be null */
-                GITransfer transfer,
-                PyGIDirection direction,
-                gssize c_arg_index,
-                gssize py_arg_index,
-                PyGICallableCache *callable_cache)
+pygi_arg_cache_new (GITypeInfo *type_info,
+                    GIArgInfo *arg_info,     /* may be null */
+                    GITransfer transfer,
+                    PyGIDirection direction,
+                    gssize c_arg_index,
+                    gssize py_arg_index,
+                    PyGICallableCache *callable_cache)
 {
     PyGIArgCache *arg_cache = NULL;
     GITypeTag type_tag;
@@ -449,13 +449,13 @@ _args_cache_generate (GICallableInfo *callable_info,
     return_transfer =
         g_callable_info_get_caller_owns (callable_info);
     return_cache =
-        _arg_cache_new (return_info,
-                        NULL,
-                        return_transfer,
-                        return_direction,
-                        -1,
-                        -1,
-                        callable_cache);
+        pygi_arg_cache_new (return_info,
+                            NULL,
+                            return_transfer,
+                            return_direction,
+                            -1,
+                            -1,
+                            callable_cache);
     if (return_cache == NULL)
         return FALSE;
 
@@ -507,7 +507,7 @@ _args_cache_generate (GICallableInfo *callable_info,
 
         if (g_arg_info_get_closure (arg_info) == i) {
 
-            arg_cache = _arg_cache_alloc ();
+            arg_cache = pygi_arg_cache_alloc ();
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
 
             direction = PYGI_DIRECTION_FROM_PYTHON;
@@ -558,13 +558,13 @@ _args_cache_generate (GICallableInfo *callable_info,
                 }
 
                 arg_cache =
-                    _arg_cache_new (type_info,
-                                    arg_info,
-                                    transfer,
-                                    direction,
-                                    arg_index,
-                                    py_arg_index,
-                                    callable_cache);
+                    pygi_arg_cache_new (type_info,
+                                        arg_info,
+                                        transfer,
+                                        direction,
+                                        arg_index,
+                                        py_arg_index,
+                                        callable_cache);
 
                 if (arg_cache == NULL) {
                     g_base_info_unref( (GIBaseInfo *)type_info);
@@ -650,7 +650,7 @@ _args_cache_generate (GICallableInfo *callable_info,
 }
 
 PyGICallableCache *
-_pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
+pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
 {
     gint n_args;
     PyGICallableCache *cache;
@@ -705,7 +705,7 @@ _pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
         n_args++;
 
     if (n_args >= 0) {
-        cache->args_cache = g_ptr_array_new_full (n_args, (GDestroyNotify) _pygi_arg_cache_free);
+        cache->args_cache = g_ptr_array_new_full (n_args, (GDestroyNotify) pygi_arg_cache_free);
         g_ptr_array_set_size (cache->args_cache, n_args);
     }
 
@@ -714,6 +714,6 @@ _pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
 
     return cache;
 err:
-    _pygi_callable_cache_free (cache);
+    pygi_callable_cache_free (cache);
     return NULL;
 }

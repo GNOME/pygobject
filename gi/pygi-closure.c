@@ -882,7 +882,7 @@ _arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
 {
     PyGICallbackCache *callback_cache = (PyGICallbackCache *)arg_cache;
     if (callback_cache->user_data_index >= 0) {
-        PyGIArgCache *user_data_arg_cache = _arg_cache_alloc ();
+        PyGIArgCache *user_data_arg_cache = pygi_arg_cache_alloc ();
         user_data_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD_WITH_PYARG;
         user_data_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
         user_data_arg_cache->has_default = TRUE; /* always allow user data with a NULL default. */
@@ -891,7 +891,7 @@ _arg_cache_from_py_interface_callback_setup (PyGIArgCache *arg_cache,
     }
 
     if (callback_cache->destroy_notify_index >= 0) {
-        PyGIArgCache *destroy_arg_cache = _arg_cache_alloc ();
+        PyGIArgCache *destroy_arg_cache = pygi_arg_cache_alloc ();
         destroy_arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
         destroy_arg_cache->direction = PYGI_DIRECTION_FROM_PYTHON;
         _pygi_callable_cache_set_arg (callable_cache, callback_cache->destroy_notify_index,
@@ -973,7 +973,7 @@ pygi_arg_callback_new_from_info  (GITypeInfo        *type_info,
     if (res) {
         return (PyGIArgCache *)callback_cache;
     } else {
-        _pygi_arg_cache_free ((PyGIArgCache *)callback_cache);
+        pygi_arg_cache_free ((PyGIArgCache *)callback_cache);
         return NULL;
     }
 }

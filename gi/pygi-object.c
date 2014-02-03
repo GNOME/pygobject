@@ -267,7 +267,7 @@ pygi_arg_gobject_new_from_info (GITypeInfo      *type_info,
     if (res) {
         return cache;
     } else {
-        _pygi_arg_cache_free (cache);
+        pygi_arg_cache_free (cache);
         return NULL;
     }
 }

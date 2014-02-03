@@ -460,7 +460,7 @@ pygi_arg_glist_new_from_info (GITypeInfo   *type_info,
     if (res) {
         return arg_cache;
     } else {
-        _pygi_arg_cache_free (arg_cache);
+        pygi_arg_cache_free (arg_cache);
         return NULL;
     }
 }

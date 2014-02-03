@@ -754,7 +754,7 @@ static void
 _array_cache_free_func (PyGIArgGArray *cache)
 {
     if (cache != NULL) {
-        _pygi_arg_cache_free (((PyGISequenceCache *)cache)->item_cache);
+        pygi_arg_cache_free (((PyGISequenceCache *)cache)->item_cache);
         g_slice_free (PyGIArgGArray, cache);
     }
 }
@@ -787,7 +787,7 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
         child_cache = _pygi_callable_cache_get_arg (callable_cache,
                                                     seq_cache->len_arg_index);
         if (child_cache == NULL) {
-            child_cache = _arg_cache_alloc ();
+            child_cache = pygi_arg_cache_alloc ();
         } else {
             /* If the "length" arg cache already exists (the length comes before
              * the array in the argument list), remove it from the to_py_args list
@@ -901,7 +901,7 @@ pygi_arg_garray_new_from_info (GITypeInfo *type_info,
                                 arg_info,
                                 transfer,
                                 direction)) {
-        _pygi_arg_cache_free ( (PyGIArgCache *)array_cache);
+        pygi_arg_cache_free ( (PyGIArgCache *)array_cache);
         return NULL;
     }
 

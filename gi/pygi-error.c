@@ -91,7 +91,7 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
     gboolean res = FALSE;
     PyGIArgCache *arg_cache = NULL;
 
-    arg_cache = _arg_cache_alloc ();
+    arg_cache = pygi_arg_cache_alloc ();
     if (arg_cache == NULL)
         return NULL;
 
@@ -103,7 +103,7 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
     if (res) {
         return arg_cache;
     } else {
-        _pygi_arg_cache_free (arg_cache);
+        pygi_arg_cache_free (arg_cache);
         return NULL;
     }
 }

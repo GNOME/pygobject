@@ -34,8 +34,8 @@ static void
 _hash_cache_free_func (PyGIHashCache *cache)
 {
     if (cache != NULL) {
-        _pygi_arg_cache_free (cache->key_cache);
-        _pygi_arg_cache_free (cache->value_cache);
+        pygi_arg_cache_free (cache->key_cache);
+        pygi_arg_cache_free (cache->value_cache);
         g_slice_free (PyGIHashCache, cache);
     }
 }
@@ -350,23 +350,23 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc,
     item_transfer =
         transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
 
-    hc->key_cache = _arg_cache_new (key_type_info,
-                                    NULL,
-                                    item_transfer,
-                                    direction,
-                                    0, 0,
-                                    NULL);
+    hc->key_cache = pygi_arg_cache_new (key_type_info,
+                                        NULL,
+                                        item_transfer,
+                                        direction,
+                                        0, 0,
+                                        NULL);
 
     if (hc->key_cache == NULL) {
         return FALSE;
     }
 
-    hc->value_cache = _arg_cache_new (value_type_info,
-                                      NULL,
-                                      item_transfer,
-                                      direction,
-                                      0, 0,
-                                      NULL);
+    hc->value_cache = pygi_arg_cache_new (value_type_info,
+                                          NULL,
+                                          item_transfer,
+                                          direction,
+                                          0, 0,
+                                          NULL);
 
     if (hc->value_cache == NULL) {
         return FALSE;
@@ -407,7 +407,7 @@ pygi_arg_hash_table_new_from_info (GITypeInfo   *type_info,
     if (res) {
         return (PyGIArgCache *)hc;
     } else {
-        _pygi_arg_cache_free ((PyGIArgCache *)hc);
+        pygi_arg_cache_free ((PyGIArgCache *)hc);
         return NULL;
     }
 }

@@ -720,7 +720,7 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
                               PyObject *kwargs)
 {
     if (self->cache == NULL) {
-        self->cache = _pygi_callable_cache_new (self->info, FALSE);
+        self->cache = pygi_callable_cache_new (self->info, FALSE);
         if (self->cache == NULL)
             return NULL;
     }
