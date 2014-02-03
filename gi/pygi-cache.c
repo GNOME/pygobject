@@ -57,6 +57,17 @@ _arg_info_default_value (GIArgInfo *info, GIArgument *arg)
     return FALSE;
 }
 
+/* pygi_arg_base_setup:
+ * arg_cache: argument cache to initialize
+ * type_info: source for type related attributes to cache
+ * arg_info: (allow-none): source for argument related attributes to cache
+ * transfer: transfer mode to store in the argument cache
+ * direction: marshaling direction to store in the cache
+ *
+ * Initializer for PyGIArgCache
+ *
+ * Returns: TRUE on success and FALSE on failure
+ */
 gboolean
 pygi_arg_base_setup (PyGIArgCache *arg_cache,
                      GITypeInfo   *type_info,
@@ -140,6 +151,18 @@ _interface_cache_free_func (PyGIInterfaceCache *cache)
     }
 }
 
+/* pygi_arg_interface_setup:
+ * arg_cache: argument cache to initialize
+ * type_info: source for type related attributes to cache
+ * arg_info: (allow-none): source for argument related attributes to cache
+ * transfer: transfer mode to store in the argument cache
+ * direction: marshaling direction to store in the cache
+ * iface_info: interface info to cache
+ *
+ * Initializer for PyGIInterfaceCache
+ *
+ * Returns: TRUE on success and FALSE on failure
+ */
 gboolean
 pygi_arg_interface_setup (PyGIInterfaceCache *iface_cache,
                           GITypeInfo         *type_info,
@@ -206,6 +229,19 @@ _sequence_cache_free_func (PyGISequenceCache *cache)
     }
 }
 
+/* pygi_arg_sequence_setup:
+ * sc: sequence cache to initialize
+ * type_info: source for type related attributes to cache
+ * arg_info: (allow-none): source for argument related attributes to cache
+ * transfer: transfer mode to store in the argument cache
+ * direction: marshaling direction to store in the cache
+ * iface_info: interface info to cache
+ *
+ * Initializer for PyGISequenceCache used for holding list and array argument
+ * caches.
+ *
+ * Returns: TRUE on success and FALSE on failure
+ */
 gboolean
 pygi_arg_sequence_setup (PyGISequenceCache  *sc,
                          GITypeInfo         *type_info,
