@@ -1,3 +1,19 @@
+3.11.5  03-Feb-2014
+        - cache refactoring: Move all cache marshalers into files based on type
+          (Simon Feltman) (#709700)
+        - tests: Add test for an owned boxed struct passed in a callback
+          (Mike Gorse) (#722899)
+        - build: Add --without-common configure option for package maintainers
+          (Patrick Welche) (#721646)
+        - demo: Add TreeModel interface implementation demonstration
+          (Simon Feltman)
+        - build: Set PLATFORM_VERSION again to 3.0 (Colin Walters)
+        - tests: Run PyFlakes and PEP8 only on SUBDIRS (Simon Feltman)
+        - Merge static PyGLib and PyGObject modules into PyGI
+          (Simon Feltman) (#712197)
+        - Add test for callback user data arguments with following arguments
+          (Martin Pitt) (#722104)
+
 3.11.4  13-Jan-2014
         - overrides: Fix __repr__ for various Gdk structs (Simon Feltman)
         - Add enum and flags member methods (Simon Feltman) (#693099)
