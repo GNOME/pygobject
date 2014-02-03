@@ -22,3 +22,4 @@
 # Needed for compatibility with "pygobject.h"
 import gi._gi
 _PyGObject_API = gi._gi._gobject._PyGObject_API
+pygobject_version = gi._gi._gobject.pygobject_version
