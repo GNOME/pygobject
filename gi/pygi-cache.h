@@ -25,6 +25,7 @@
 
 #include <Python.h>
 #include <girepository.h>
+#include <girffi.h>
 
 #include "pygi-invoke-state-struct.h"
 
@@ -167,13 +168,10 @@ struct _PyGICallableCache
     GSList *to_py_args;
     GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
+    gboolean throws;
 
     /* Index of user_data arg that can eat variable args passed to a callable. */
     gssize user_data_varargs_index;
-
-    /* Number of in args passed to g_function_info_invoke.
-     * This is used for the length of PyGIInvokeState.in_args */
-    gssize n_from_py_args;
 
     /* Number of out args passed to g_function_info_invoke.
      * This is used for the length of PyGIInvokeState.out_values */
@@ -191,6 +189,9 @@ struct _PyGICallableCache
     /* Minimum number of args required to call the callable from Python.
      * This count does not include args with defaults. */
     gssize n_py_required_args;
+
+    /* An invoker with ffi_cif already setup */
+    GIFunctionInvoker invoker;
 };
 
 gboolean
@@ -243,6 +244,7 @@ pygi_callable_cache_free (PyGICallableCache *cache);
 
 PyGICallableCache *
 pygi_callable_cache_new  (GICallableInfo *callable_info,
+                          GCallback function_ptr,
                           gboolean is_ccallback);
 
 #define _pygi_callable_cache_args_len(cache) ((cache)->args_cache)->len

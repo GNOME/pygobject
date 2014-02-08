@@ -800,7 +800,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
      * The return trip to python will marshal this back and pull the python user data out.
      */
     if (user_data_cache != NULL) {
-        state->in_args[user_data_cache->c_arg_index].v_pointer = closure;
+        state->arg_values[user_data_cache->c_arg_index].v_pointer = closure;
     }
 
     /* Setup a GDestroyNotify callback if this method supports it along with
@@ -817,7 +817,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
     if (destroy_cache) {
         if (user_data_cache != NULL) {
             PyGICClosure *destroy_notify = _pygi_destroy_notify_create ();
-            state->in_args[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
+            state->arg_values[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
         } else {
             gchar *msg = g_strdup_printf("Callables passed to %s will leak references because "
                                          "the method does not support a user_data argument. "
@@ -829,7 +829,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                 return FALSE;
             }
             g_free(msg);
-            state->in_args[destroy_cache->c_arg_index].v_pointer = _pygi_destroy_notify_dummy;
+            state->arg_values[destroy_cache->c_arg_index].v_pointer = _pygi_destroy_notify_dummy;
         }
     }
 

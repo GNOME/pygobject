@@ -32,7 +32,7 @@ G_BEGIN_DECLS
 
 PyObject *pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
                                      PyObject *kwargs, PyGICallableCache *cache,
-                                     GCallback function_ptr, gpointer user_data);
+                                     gpointer user_data);
 PyObject *_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
                                         PyObject *kwargs);
 

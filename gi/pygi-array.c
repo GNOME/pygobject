@@ -370,24 +370,10 @@ array_success:
         PyGIArgCache *child_cache =
             _pygi_callable_cache_get_arg (callable_cache, array_cache->len_arg_index);
 
-        if (child_cache->direction == PYGI_DIRECTION_BIDIRECTIONAL) {
-            gint *len_arg = (gint *)state->in_args[child_cache->c_arg_index].v_pointer;
-            /* if we are not setup yet just set the in arg */
-            if (len_arg == NULL) {
-                if (!gi_argument_from_py_ssize_t (&state->in_args[child_cache->c_arg_index],
-                                                  length,
-                                                  child_cache->type_tag)) {
-                    goto err;
-                }
-            } else {
-                *len_arg = length;
-            }
-        } else {
-            if (!gi_argument_from_py_ssize_t (&state->in_args[child_cache->c_arg_index],
-                                              length,
-                                              child_cache->type_tag)) {
-                goto err;
-            }
+        if (!gi_argument_from_py_ssize_t (&state->arg_values[child_cache->c_arg_index],
+                                          length,
+                                          child_cache->type_tag)) {
+            goto err;
         }
     }
 
@@ -528,7 +514,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 len = g_strv_length ((gchar **)arg->v_pointer);
             }
         } else {
-            GIArgument *len_arg = state->args[array_cache->len_arg_index];
+            GIArgument *len_arg = &state->arg_values[array_cache->len_arg_index];
             PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache,
                                                                     array_cache->len_arg_index);
 
@@ -684,7 +670,7 @@ _wrap_c_array (PyGIInvokeState   *state,
     } else if (array_cache->is_zero_terminated) {
         len = g_strv_length ((gchar **)data);
     } else if (array_cache->len_arg_index >= 0) {
-        GIArgument *len_arg = state->args[array_cache->len_arg_index];
+        GIArgument *len_arg = &state->arg_values[array_cache->len_arg_index];
         len = len_arg->v_long;
     }
 

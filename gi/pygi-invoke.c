@@ -29,61 +29,24 @@
 static inline gboolean
 _invoke_callable (PyGIInvokeState *state,
                   PyGICallableCache *cache,
-                  GICallableInfo *callable_info,
-                  GCallback function_ptr)
+                  GICallableInfo *callable_info)
 {
-    GError *error;
-    gint retval;
-
-    error = NULL;
+    GIFFIReturnValue ffi_return_value = {0};
 
     Py_BEGIN_ALLOW_THREADS;
 
-    /* FIXME: use this for now but we can streamline the calls */
-    if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
-        retval = g_vfunc_info_invoke ( callable_info,
-                                       state->implementor_gtype,
-                                       state->in_args,
-                                       cache->n_from_py_args,
-                                       state->out_args,
-                                       cache->n_to_py_args,
-                                      &state->return_arg,
-                                      &error);
-    else if (g_base_info_get_type (callable_info) == GI_INFO_TYPE_CALLBACK)
-        retval = g_callable_info_invoke (callable_info,
-                                         function_ptr,
-                                         state->in_args,
-                                         cache->n_from_py_args,
-                                         state->out_args,
-                                         cache->n_to_py_args,
-                                         &state->return_arg,
-                                         FALSE,
-                                         FALSE,
-                                         &error);
-    else
-        retval = g_function_info_invoke ( callable_info,
-                                          state->in_args,
-                                          cache->n_from_py_args,
-                                          state->out_args,
-                                          cache->n_to_py_args,
-                                         &state->return_arg,
-                                         &error);
+        ffi_call (&cache->invoker.cif,
+                  state->function_ptr,
+                  (void *)&ffi_return_value,
+                  (void **)state->args);
+
     Py_END_ALLOW_THREADS;
 
-    if (!retval) {
-        g_assert (error != NULL);
-        pyglib_error_check (&error);
-
-        /* It is unclear if the error occured before or after the C
-         * function was invoked so for now assume success
-         * We eventually should marshal directly to FFI so we no longer
-         * have to use the reference implementation
-         */
-        pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
-
-        return FALSE;
-    }
-
+    /* If the callable throws, the address of state->error will be bound into
+     * the state->args as the last value. When the callee sets an error using
+     * the state->args passed, it will have the side effect of setting
+     * state->error allowing for easy checking here.
+     */
     if (state->error != NULL) {
         if (pyglib_error_check (&(state->error))) {
             /* even though we errored out, the call itself was successful,
@@ -91,6 +54,12 @@ _invoke_callable (PyGIInvokeState *state,
             pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
             return FALSE;
         }
+    }
+
+    if (cache->return_cache) {
+        gi_type_info_extract_ffi_return_value (cache->return_cache->type_info,
+                                               &ffi_return_value,
+                                               &state->return_arg);
     }
 
     return TRUE;
@@ -280,13 +249,24 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 }
 
 static inline gboolean
-_invoke_state_init_from_callable_cache (PyGIInvokeState *state,
+_invoke_state_init_from_callable_cache (GIBaseInfo *info,
+                                        PyGIInvokeState *state,
                                         PyGICallableCache *cache,
                                         PyObject *py_args,
                                         PyObject *kwargs)
 {
     PyObject *combined_args = NULL;
     state->implementor_gtype = 0;
+    state->n_args = _pygi_callable_cache_args_len (cache);
+
+    if (cache->throws) {
+        state->n_args++;
+    }
+
+    /* Copy the function pointer to the state for the normal case. For vfuncs,
+     * this will be filled out based on the implementor_gtype calculated below.
+     */
+    state->function_ptr = cache->invoker.native_address;
 
     /* TODO: We don't use the class parameter sent in by  the structure
      * so we remove it from the py_args tuple but we can keep it 
@@ -308,6 +288,8 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
         }
     } else if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
         PyObject *py_gtype;
+        GError *error = NULL;
+
         py_gtype = PyTuple_GetItem (py_args, 0);
         if (py_gtype == NULL) {
             PyErr_SetString (PyExc_TypeError,
@@ -319,6 +301,18 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 
         if (state->implementor_gtype == 0)
             return FALSE;
+
+        /* vfunc addresses are pulled into the state at call time and cannot be
+         * cached because the call site can specify a different portion of the
+         * class hierarchy. e.g. Object.do_func vs. SubObject.do_func might
+         * retrieve a different vfunc address but GI gives us the same vfunc info.
+         */
+        state->function_ptr = g_vfunc_info_get_address ((GIVFuncInfo *)info,
+                                                        state->implementor_gtype,
+                                                        &error);
+        if (pyglib_error_check (&error)) {
+            return FALSE;
+        }
     }
 
     if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR ||
@@ -344,37 +338,38 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
     }
     state->n_py_in_args = PyTuple_Size (state->py_in_args);
 
-    state->args = g_slice_alloc0 (_pygi_callable_cache_args_len (cache) * sizeof (GIArgument *));
-    if (state->args == NULL && _pygi_callable_cache_args_len (cache) != 0) {
+    state->args = g_slice_alloc0 (state->n_args * sizeof (GIArgument *));
+    if (state->args == NULL && state->n_args != 0) {
         PyErr_NoMemory();
         return FALSE;
     }
 
-    state->args_cleanup_data = g_slice_alloc0 (_pygi_callable_cache_args_len (cache) * sizeof (gpointer));
-    if (state->args_cleanup_data == NULL && _pygi_callable_cache_args_len (cache) != 0) {
+    state->args_cleanup_data = g_slice_alloc0 (state->n_args * sizeof (gpointer));
+    if (state->args_cleanup_data == NULL && state->n_args != 0) {
         PyErr_NoMemory();
         return FALSE;
     }
 
-    state->in_args = g_slice_alloc0 (cache->n_from_py_args * sizeof(GIArgument));
-    if (state->in_args == NULL && cache->n_from_py_args != 0) {
+    state->arg_values = g_slice_alloc0 (state->n_args * sizeof(GIArgument));
+    if (state->arg_values == NULL && state->n_args != 0) {
         PyErr_NoMemory ();
         return FALSE;
     }
 
-    state->out_values = g_slice_alloc0 (cache->n_to_py_args * sizeof(GIArgument));
-    if (state->out_values == NULL && cache->n_to_py_args != 0) {
-        PyErr_NoMemory ();
-        return FALSE;
-    }
-
-    state->out_args = g_slice_alloc0 (cache->n_to_py_args * sizeof(GIArgument));
-    if (state->out_args == NULL && cache->n_to_py_args != 0) {
+    state->arg_pointers = g_slice_alloc0 (state->n_args * sizeof(GIArgument));
+    if (state->arg_pointers == NULL && state->n_args != 0) {
         PyErr_NoMemory ();
         return FALSE;
     }
 
     state->error = NULL;
+
+    if (cache->throws) {
+        gssize error_index = state->n_args - 1;
+        /* The ffi argument for GError needs to be a triple pointer. */
+        state->arg_pointers[error_index].v_pointer = &state->error;
+        state->args[error_index] = &(state->arg_pointers[error_index]);
+    }
 
     return TRUE;
 }
@@ -382,30 +377,26 @@ _invoke_state_init_from_callable_cache (PyGIInvokeState *state,
 static inline void
 _invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
 {
-    g_slice_free1 (_pygi_callable_cache_args_len (cache) * sizeof(GIArgument *), state->args);
-    g_slice_free1 (_pygi_callable_cache_args_len (cache) * sizeof(gpointer), state->args_cleanup_data);
-    g_slice_free1 (cache->n_from_py_args * sizeof(GIArgument), state->in_args);
-    g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_args);
-    g_slice_free1 (cache->n_to_py_args * sizeof(GIArgument), state->out_values);
+    g_slice_free1 (state->n_args * sizeof(GIArgument *), state->args);
+    g_slice_free1 (state->n_args * sizeof(gpointer), state->args_cleanup_data);
+    g_slice_free1 (state->n_args * sizeof(GIArgument), state->arg_values);
+    g_slice_free1 (state->n_args * sizeof(GIArgument), state->arg_pointers);
 
     Py_XDECREF (state->py_in_args);
 }
 
-static gboolean _caller_alloc (PyGIInvokeState *state,
-                               PyGIArgCache *arg_cache,
-                               gssize arg_count,
-                               gssize out_count)
+static gboolean
+_caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
 {
     if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
         PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
-        state->out_args[out_count].v_pointer = NULL;
-        state->args[arg_count] = &state->out_args[out_count];
+        arg->v_pointer = NULL;
         if (g_type_is_a (iface_cache->g_type, G_TYPE_BOXED)) {
-            state->args[arg_count]->v_pointer =
+            arg->v_pointer =
                 _pygi_boxed_alloc (iface_cache->interface_info, NULL);
         } else if (iface_cache->g_type == G_TYPE_VALUE) {
-            state->args[arg_count]->v_pointer = g_slice_new0 (GValue);
+            arg->v_pointer = g_slice_new0 (GValue);
         } else if (iface_cache->is_foreign) {
             PyObject *foreign_struct =
                 pygi_struct_foreign_convert_from_g_argument (
@@ -415,34 +406,59 @@ static gboolean _caller_alloc (PyGIInvokeState *state,
                 pygi_struct_foreign_convert_to_g_argument (foreign_struct,
                                                            iface_cache->interface_info,
                                                            GI_TRANSFER_EVERYTHING,
-                                                           state->args[arg_count]);
+                                                           arg);
         } else {
                 gssize size = g_struct_info_get_size(
                     (GIStructInfo *)iface_cache->interface_info);
-                state->args[arg_count]->v_pointer = g_malloc0 (size);
+                arg->v_pointer = g_malloc0 (size);
         }
     } else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY) {
         PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
 
-        state->out_args[out_count].v_pointer = g_array_new (TRUE, TRUE, array_cache->item_size);
-        state->args[arg_count] = &state->out_args[out_count];
+        arg->v_pointer = g_array_new (TRUE, TRUE, array_cache->item_size);
     } else {
         return FALSE;
     }
 
-    if (state->args[arg_count]->v_pointer == NULL)
+    if (arg->v_pointer == NULL)
         return FALSE;
 
 
     return TRUE;
 }
 
+/* _invoke_marshal_in_args:
+ *
+ * Fills out the state struct argument lists. arg_values will always hold
+ * actual values marshaled either to or from Python and C. arg_pointers will
+ * hold pointers (via v_pointer) to auxilary value storage. This will normally
+ * point to values stored in arg_values. In the case of caller allocated
+ * out args, arg_pointers[x].v_pointer will point to newly allocated memory.
+ * arg_pointers inserts a level of pointer indirection between arg_values
+ * and the argument list ffi receives when dealing with non-caller allocated
+ * out arguments.
+ *
+ * For example:
+ * [[
+ *  void callee (int *i, int j) { *i = 50 - j; }
+ *  void caller () {
+ *    int i = 0;
+ *    callee (&i, 8);
+ *  }
+ *
+ *  args[0] == &arg_pointers[0];
+ *  arg_pointers[0].v_pointer == &arg_values[0];
+ *  arg_values[0].v_int == 42;
+ *
+ *  args[1] == &arg_values[1];
+ *  arg_values[1].v_int == 8;
+ * ]]
+ *
+ */
 static inline gboolean
 _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 {
-    gssize i, in_count, out_count;
-    in_count = 0;
-    out_count = 0;
+    gssize i;
 
     if (state->n_py_in_args > cache->n_py_args) {
         PyErr_Format (PyExc_TypeError,
@@ -454,14 +470,14 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
     }
 
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
-        GIArgument *c_arg;
+        GIArgument *c_arg = &state->arg_values[i];
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
         PyObject *py_arg = NULL;
 
         switch (arg_cache->direction) {
             case PYGI_DIRECTION_FROM_PYTHON:
-                state->args[i] = &(state->in_args[in_count]);
-                in_count++;
+                /* The ffi argument points directly at memory in arg_values. */
+                state->args[i] = c_arg;
 
                 if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CLOSURE) {
                     state->args[i]->v_pointer = state->user_data;
@@ -491,13 +507,6 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
                 break;
             case PYGI_DIRECTION_BIDIRECTIONAL:
-                /* this will be filled in if it is an child value */
-                if (state->in_args[in_count].v_pointer != NULL)
-                    state->out_values[out_count] = state->in_args[in_count];
-
-                state->in_args[in_count].v_pointer = &state->out_values[out_count];
-                in_count++;
-
                 if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
                     if (arg_cache->py_arg_index >= state->n_py_in_args) {
                         PyErr_Format (PyExc_TypeError,
@@ -515,9 +524,27 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                         PyTuple_GET_ITEM (state->py_in_args,
                                           arg_cache->py_arg_index);
                 }
+                /* Fall through */
+
             case PYGI_DIRECTION_TO_PYTHON:
+                /* arg_pointers always stores a pointer to the data to be marshaled "to python"
+                 * even in cases where arg_pointers is not being used as indirection between
+                 * ffi and arg_values. This gives a guarantee that out argument marshaling
+                 * (_invoke_marshal_out_args) can always rely on arg_pointers pointing to
+                 * the correct chunk of memory to marshal.
+                 */
+                state->arg_pointers[i].v_pointer = c_arg;
+
                 if (arg_cache->is_caller_allocates) {
-                    if (!_caller_alloc (state, arg_cache, i, out_count)) {
+                    /* In the case of caller allocated out args, we don't use
+                     * an extra level of indirection and state->args will point
+                     * directly at the data to be marshaled. However, as noted
+                     * above, arg_pointers will also point to this caller allocated
+                     * chunk of memory used by out argument marshaling.
+                     */
+                    state->args[i] = c_arg;
+
+                    if (!_caller_alloc (arg_cache, c_arg)) {
                         PyErr_Format (PyExc_TypeError,
                                       "Could not caller allocate argument %zd of callable %s",
                                       i, cache->name);
@@ -527,14 +554,14 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                         return FALSE;
                     }
                 } else {
-                    state->out_args[out_count].v_pointer = &state->out_values[out_count];
-                    state->args[i] = &state->out_values[out_count];
+                    /* Non-caller allocated out args will use arg_pointers as an
+                     * extra level of indirection */
+                    state->args[i] = &state->arg_pointers[i];
                 }
-                out_count++;
+
                 break;
         }
 
-        c_arg = state->args[i];
         if (py_arg == _PyGIDefaultArgPlaceholder) {
             *c_arg = arg_cache->default_value;
         } else if (arg_cache->from_py_marshaller != NULL) {
@@ -642,7 +669,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
         py_out = arg_cache->to_py_marshaller (state,
                                               cache,
                                               arg_cache,
-                                              state->args[arg_cache->c_arg_index]);
+                                              state->arg_pointers[arg_cache->c_arg_index].v_pointer);
         if (py_out == NULL) {
             pygi_marshal_cleanup_args_to_py_parameter_fail (state,
                                                             cache,
@@ -665,7 +692,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
             PyObject *py_obj = arg_cache->to_py_marshaller (state,
                                                             cache,
                                                             arg_cache,
-                                                            state->args[arg_cache->c_arg_index]);
+                                                            state->arg_pointers[arg_cache->c_arg_index].v_pointer);
 
             if (py_obj == NULL) {
                 if (has_return)
@@ -688,12 +715,12 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 PyObject *
 pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
                            PyObject *kwargs, PyGICallableCache *cache,
-                           GCallback function_ptr, gpointer user_data)
+                           gpointer user_data)
 {
     PyGIInvokeState state = { 0, };
     PyObject *ret = NULL;
 
-    if (!_invoke_state_init_from_callable_cache (&state, cache, py_args, kwargs))
+    if (!_invoke_state_init_from_callable_cache (info, &state, cache, py_args, kwargs))
         goto err;
 
     if (cache->function_type == PYGI_FUNCTION_TYPE_CCALLBACK)
@@ -702,7 +729,7 @@ pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
     if (!_invoke_marshal_in_args (&state, cache))
         goto err;
 
-    if (!_invoke_callable (&state, cache, info, function_ptr))
+    if (!_invoke_callable (&state, cache, info))
         goto err;
 
     ret = _invoke_marshal_out_args (&state, cache);
@@ -720,10 +747,10 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
                               PyObject *kwargs)
 {
     if (self->cache == NULL) {
-        self->cache = pygi_callable_cache_new (self->info, FALSE);
+        self->cache = pygi_callable_cache_new (self->info, NULL, FALSE);
         if (self->cache == NULL)
             return NULL;
     }
 
-    return pygi_callable_info_invoke (self->info, py_args, kwargs, self->cache, NULL, NULL);
+    return pygi_callable_info_invoke (self->info, py_args, kwargs, self->cache, NULL);
 }

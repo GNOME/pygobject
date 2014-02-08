@@ -34,7 +34,7 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
     PyObject *result;
 
     if (self->cache == NULL) {
-        self->cache = pygi_callable_cache_new (self->info, TRUE);
+        self->cache = pygi_callable_cache_new (self->info, self->callback, TRUE);
         if (self->cache == NULL)
             return NULL;
     }
@@ -43,7 +43,6 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
                                          args,
                                          kwargs,
                                          self->cache,
-                                         self->callback,
                                          self->user_data);
     return result;
 }

@@ -22,6 +22,7 @@
 
 #include <girepository.h>
 
+#include "pyglib.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-marshal-cleanup.h"
@@ -132,6 +133,7 @@ pygi_callable_cache_free (PyGICallableCache *cache)
     if (cache->return_cache != NULL)
         pygi_arg_cache_free (cache->return_cache);
 
+    g_function_invoker_destroy (&cache->invoker);
     g_slice_free (PyGICallableCache, cache);
 }
 
@@ -530,7 +532,6 @@ _args_cache_generate (GICallableInfo *callable_info,
         _pygi_callable_cache_set_arg (callable_cache, arg_index, instance_cache);
 
         arg_index++;
-        callable_cache->n_from_py_args++;
         callable_cache->n_py_args++;
     }
 
@@ -552,8 +553,6 @@ _args_cache_generate (GICallableInfo *callable_info,
             arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
             arg_cache->c_arg_index = i;
 
-            callable_cache->n_from_py_args++;
-
         } else {
             GITypeInfo *type_info;
 
@@ -567,14 +566,13 @@ _args_cache_generate (GICallableInfo *callable_info,
              */
             arg_cache = _pygi_callable_cache_get_arg (callable_cache, arg_index);
             if (arg_cache != NULL) {
+                /* ensure c_arg_index always aligns with callable_cache->args_cache
+                 * and all of the various PyGIInvokeState arrays. */
+                arg_cache->c_arg_index = arg_index;
+
                 if (arg_cache->meta_type == PYGI_META_ARG_TYPE_CHILD_WITH_PYARG) {
                     arg_cache->py_arg_index = callable_cache->n_py_args;
                     callable_cache->n_py_args++;
-                }
-
-                if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-                    arg_cache->c_arg_index = callable_cache->n_from_py_args;
-                    callable_cache->n_from_py_args++;
                 }
 
                 if (direction & PYGI_DIRECTION_TO_PYTHON) {
@@ -590,7 +588,6 @@ _args_cache_generate (GICallableInfo *callable_info,
 
                 if (direction & PYGI_DIRECTION_FROM_PYTHON) {
                     py_arg_index = callable_cache->n_py_args;
-                    callable_cache->n_from_py_args++;
                     callable_cache->n_py_args++;
                 }
 
@@ -686,8 +683,47 @@ _args_cache_generate (GICallableInfo *callable_info,
     return TRUE;
 }
 
+static gboolean
+_setup_invoker (GICallableInfo *callable_info,
+                GIInfoType info_type,
+                GIFunctionInvoker *invoker,
+                GCallback function_ptr)
+{
+    GError *error = NULL;
+
+    if (info_type == GI_INFO_TYPE_FUNCTION) {
+        if (g_function_info_prep_invoker ((GIFunctionInfo *)callable_info,
+                                          invoker,
+                                          &error)) {
+            return TRUE;
+        }
+        if (!pyglib_error_check (&error)) {
+            PyErr_Format (PyExc_RuntimeError,
+                          "unknown error creating invoker for %s",
+                          g_base_info_get_name ((GIBaseInfo *)callable_info));
+        }
+        return FALSE;
+
+    } else {
+        if (!g_function_invoker_new_for_address (function_ptr,
+                                                 (GIFunctionInfo *)callable_info,
+                                                 invoker,
+                                                 &error)) {
+            if (!pyglib_error_check (&error)) {
+                PyErr_Format (PyExc_RuntimeError,
+                              "unknown error creating invoker for %s",
+                              g_base_info_get_name ((GIBaseInfo *)callable_info));
+            }
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 PyGICallableCache *
-pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
+pygi_callable_cache_new (GICallableInfo *callable_info,
+                         GCallback function_ptr,
+                         gboolean is_ccallback)
 {
     gint n_args;
     PyGICallableCache *cache;
@@ -699,6 +735,7 @@ pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
         return NULL;
 
     cache->name = g_base_info_get_name ((GIBaseInfo *)callable_info);
+    cache->throws = g_callable_info_can_throw_gerror ((GIBaseInfo *)callable_info);
 
     if (g_base_info_is_deprecated (callable_info)) {
         const gchar *deprecated = g_base_info_get_attribute (callable_info, "deprecated");
@@ -748,6 +785,10 @@ pygi_callable_cache_new (GICallableInfo *callable_info, gboolean is_ccallback)
 
     if (!_args_cache_generate (callable_info, cache))
         goto err;
+
+    if (!_setup_invoker (callable_info, type, &cache->invoker, function_ptr)) {
+        goto err;
+    }
 
     return cache;
 err:
