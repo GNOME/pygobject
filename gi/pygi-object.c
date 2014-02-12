@@ -129,13 +129,17 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
                                         gpointer          *cleanup_data)
 {
     gboolean res = FALSE;
+    GObject *gobj = NULL;
+    PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
     }
 
-    if (!PyObject_IsInstance (py_arg, ( (PyGIInterfaceCache *)arg_cache)->py_type)) {
+    gobj = pygobject_get (py_arg);
+    if (!PyObject_IsInstance (py_arg, iface_cache->py_type) &&
+            !g_type_is_a (G_OBJECT_TYPE (gobj), iface_cache->g_type)) {
         PyObject *module = PyObject_GetAttrString(py_arg, "__module__");
 
         PyErr_Format (PyExc_TypeError, "argument %s: Expected %s, but got %s%s%s",
