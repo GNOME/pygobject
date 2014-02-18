@@ -1,3 +1,7 @@
+3.11.90 17-Feb-2014
+        - Use GObject type checking for instance arguments (Simon Feltman) (#724009)
+        - configure.ac: post release version bump to 3.11.90 (Simon Feltman)
+
 3.11.5  03-Feb-2014
         - cache refactoring: Move all cache marshalers into files based on type
           (Simon Feltman) (#709700)
