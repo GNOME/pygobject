@@ -6,11 +6,12 @@ Making a release
 3. Run make distcheck, fix any issues and commit.
 4. Upload tarball: scp pygobject-3.X.Y.tar.gz master.gnome.org:
 5. Install tarball: ssh master.gnome.org 'ftpadmin install pygobject-3.X.Y.tar.gz'
-6. Tag with: git tag -s 3.X.Y -m "release 3.X.Y"
-7. Push tag with: git push origin 3.X.Y
-8. Commit post-release version bump to configure.ac
-9. Send release announcements to gnome-announce-list@gnome.org; pygtk@daa.com.au; python-hackers-list@gnome.org; python-announce-list@python.org
-10. blog about it (include the HTMLized NEWS that "make release-news" prints)
+6. Commit NEWS as "release 3.X.Y" and push
+7. Tag with: git tag -s 3.X.Y -m "release 3.X.Y"
+8. Push tag with: git push origin 3.X.Y
+9. Commit post-release version bump to configure.ac
+10. Send release announcements to gnome-announce-list@gnome.org; pygtk@daa.com.au; python-hackers-list@gnome.org; python-announce-list@python.org
+11. blog about it (include the HTMLized NEWS that "make release-news" prints)
 
 Based on http://live.gnome.org/MaintainersCorner/Releasing
 
