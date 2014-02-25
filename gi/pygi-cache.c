@@ -475,6 +475,7 @@ _args_cache_generate (GICallableInfo *callable_info,
     GITransfer return_transfer;
     PyGIArgCache *return_cache;
     PyGIDirection return_direction;
+	gssize last_explicit_arg_index;
 
     /* Return arguments are always considered out */
     return_direction = _pygi_get_direction (callable_cache, GI_DIRECTION_OUT);
@@ -637,7 +638,7 @@ _args_cache_generate (GICallableInfo *callable_info,
     callable_cache->n_py_required_args = 0;
     callable_cache->user_data_varargs_index = -1;
 
-    gssize last_explicit_arg_index = -1;
+    last_explicit_arg_index = -1;
 
     /* Reverse loop through all the arguments to setup arg_name_list/hash
      * and find the number of required arguments */

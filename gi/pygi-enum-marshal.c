@@ -25,22 +25,6 @@
 #include "pygi-enum-marshal.h"
 #include "pygi-private.h"
 
-#ifdef _WIN32
-#ifdef _MSC_VER
-#include <math.h>
-
-#ifndef NAN
-static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
-#define NAN (*(const float *) __nan)
-#endif
-
-#ifndef INFINITY
-#define INFINITY HUGE_VAL
-#endif
-
-#endif
-#endif
-
 static gboolean
 gi_argument_from_c_long (GIArgument *arg_out,
                          long        c_long_in,
