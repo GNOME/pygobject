@@ -302,7 +302,7 @@ pygi_set_property_value_real (PyGObject *instance,
 
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
 
-    // FIXME: Lots of types still unhandled
+    /* FIXME: Lots of types still unhandled */
     type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
         case GI_TYPE_TAG_INTERFACE:

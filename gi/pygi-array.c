@@ -600,7 +600,8 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 } else if (item_arg_cache->type_tag == GI_TYPE_TAG_INTERFACE) {
                     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *) item_arg_cache;
 
-                    // FIXME: This probably doesn't work with boxed types or gvalues. See fx. _pygi_marshal_from_py_array()
+                    /* FIXME: This probably doesn't work with boxed types or gvalues.
+                     * See fx. _pygi_marshal_from_py_array() */
                     switch (g_base_info_get_type (iface_cache->interface_info)) {
                         case GI_INFO_TYPE_STRUCT:
                             if (arg_cache->transfer == GI_TRANSFER_EVERYTHING &&

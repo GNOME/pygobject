@@ -274,7 +274,7 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
 static void
 initialize_interface (GTypeInterface *iface, PyTypeObject *pytype)
 {
-    // pygobject prints a warning if interface_init is NULL
+    /* pygobject prints a warning if interface_init is NULL */
 }
 
 static PyObject *

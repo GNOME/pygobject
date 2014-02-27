@@ -946,7 +946,7 @@ gclosure_from_pyfunc(PyGObject *object, PyObject *func)
             PyGClosure *pyclosure = l->data;
             int res = PyObject_RichCompareBool(pyclosure->callback, func, Py_EQ);
             if (res == -1) {
-                PyErr_Clear(); // Is there anything else to do?
+                PyErr_Clear(); /* Is there anything else to do? */
             } else if (res) {
                 return (GClosure*)pyclosure;
             }
