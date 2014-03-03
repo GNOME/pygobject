@@ -633,26 +633,26 @@ class TestGtk(unittest.TestCase):
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestSignals(unittest.TestCase):
-    class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
-        __gsignals__ = {'size-allocate': 'override'}
-
-        def __init__(self):
-            Gtk.ScrolledWindow.__init__(self)
-            self._alloc_called = False
-            self._alloc_value = None
-            self._alloc_error = None
-
-        def do_size_allocate(self, alloc):
-            self._alloc_called = True
-            self._alloc_value = alloc
-
-            try:
-                Gtk.ScrolledWindow.do_size_allocate(self, alloc)
-            except Exception as e:
-                self._alloc_error = e
-
     def test_class_closure_override_with_aliased_type(self):
-        win = self.WindowWithSizeAllocOverride()
+        class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
+            __gsignals__ = {'size-allocate': 'override'}
+
+            def __init__(self):
+                Gtk.ScrolledWindow.__init__(self)
+                self._alloc_called = False
+                self._alloc_value = None
+                self._alloc_error = None
+
+            def do_size_allocate(self, alloc):
+                self._alloc_called = True
+                self._alloc_value = alloc
+
+                try:
+                    Gtk.ScrolledWindow.do_size_allocate(self, alloc)
+                except Exception as e:
+                    self._alloc_error = e
+
+        win = WindowWithSizeAllocOverride()
         rect = Gdk.Rectangle()
         rect.width = 100
         rect.height = 100
