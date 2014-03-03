@@ -934,7 +934,7 @@ get_type_name_for_class(PyTypeObject *class)
     while (name_serial < 1000)
     {
 	g_free(type_name);
-	snprintf(name_serial_str, 16, "-v%i", name_serial);
+	g_snprintf(name_serial_str, 16, "-v%i", name_serial);
 	module = PyObject_GetAttrString((PyObject *)class, "__module__");
 	if (module && PYGLIB_PyUnicode_Check(module)) {
 	    type_name = g_strconcat(PYGLIB_PyUnicode_AsString(module), ".",
