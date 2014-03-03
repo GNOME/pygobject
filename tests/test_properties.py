@@ -21,9 +21,14 @@ from gi.repository.GObject import \
 
 from gi.repository import Gio
 from gi.repository import GLib
-from gi.repository import Regress
 from gi.repository import GIMarshallingTests
 from gi import _propertyhelper as propertyhelper
+
+try:
+    from gi.repository import Regress
+    has_regress = True
+except ImportError:
+    has_regress = False
 
 if sys.version_info < (3, 0):
     TEST_UTF8 = "\xe2\x99\xa5"
@@ -73,19 +78,20 @@ class PropertyObject(GObject.GObject):
         type=Gio.File, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
 
 
-class PropertyInheritanceObject(Regress.TestObj):
-    # override property from the base class, with a different type
-    string = GObject.Property(type=int)
+if has_regress:
+    class PropertyInheritanceObject(Regress.TestObj):
+        # override property from the base class, with a different type
+        string = GObject.Property(type=int)
 
-    # a property entirely defined at the Python level
-    python_prop = GObject.Property(type=str)
+        # a property entirely defined at the Python level
+        python_prop = GObject.Property(type=str)
+
+    class PropertySubClassObject(PropertyInheritanceObject):
+        # override property from the base class, with a different type
+        python_prop = GObject.Property(type=int)
 
 
-class PropertySubClassObject(PropertyInheritanceObject):
-    # override property from the base class, with a different type
-    python_prop = GObject.Property(type=int)
-
-
+@unittest.skipUnless(has_regress, 'Missing Regress typelib')
 class TestPropertyInheritanceObject(unittest.TestCase):
     def test_override_gi_property(self):
         self.assertNotEqual(Regress.TestObj.props.string.value_type,
@@ -728,6 +734,7 @@ class TestProperty(unittest.TestCase):
         b.prop1 = 20
         self.assertEqual(b.prop1, 20)
 
+    @unittest.skipUnless(has_regress, 'Missing regress typelib')
     def test_property_subclass_c(self):
         class A(Regress.TestSubObj):
             prop1 = GObject.Property(type=int)
