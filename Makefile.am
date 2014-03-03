@@ -130,7 +130,7 @@ release-news:
 
 	@echo -e "\n\n\nFor blogging, you can copy&paste this HTML formatted news:"
 	@echo "-------------- 8< -------------"
-	@last=`head -n1 NEWS | cut -f1 -d' '`; \
+	@last=`head -n1 $(top_srcdir)/NEWS | cut -f1 -d' '`; \
         echo "<ul>"; \
 	for commit in `git rev-list $$last..`; do \
 	   data=`git log --format="format:%s%n%an%n%b" $$commit^..$$commit`; \
