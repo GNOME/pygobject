@@ -28,9 +28,15 @@ import unittest
 
 # pygobject
 from gi.repository import GObject
-from gi.repository import Gtk
-from pygtkcompat.generictreemodel import GenericTreeModel
-from pygtkcompat.generictreemodel import _get_user_data_as_pyobject
+
+try:
+    from gi.repository import Gtk
+    from pygtkcompat.generictreemodel import GenericTreeModel
+    from pygtkcompat.generictreemodel import _get_user_data_as_pyobject
+    has_gtk = True
+except ImportError:
+    GenericTreeModel = object
+    has_gtk = False
 
 
 class Node(object):
@@ -127,6 +133,7 @@ class TesterModel(GenericTreeModel):
             return child.parent()
 
 
+@unittest.skipUnless(has_gtk, 'Gtk not available')
 class TestReferences(unittest.TestCase):
     def setUp(self):
         pass
@@ -279,6 +286,7 @@ class TestReferences(unittest.TestCase):
             self.assertEqual(ref(), None)
 
 
+@unittest.skipUnless(has_gtk, 'Gtk not available')
 class TestIteration(unittest.TestCase):
     def test_iter_next_root(self):
         model = TesterModel()
@@ -306,6 +314,7 @@ class ErrorModel(GenericTreeModel):
     pass
 
 
+@unittest.skipUnless(has_gtk, 'Gtk not available')
 class ExceptHook(object):
     """
     Temporarily installs an exception hook in a context which
@@ -337,6 +346,7 @@ class ExceptHook(object):
             assert issubclass(got, expected), error_message
 
 
+@unittest.skipUnless(has_gtk, 'Gtk not available')
 class TestReturnsAfterError(unittest.TestCase):
     def setUp(self):
         self.model = ErrorModel()
