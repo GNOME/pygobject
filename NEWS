@@ -1,3 +1,10 @@
+3.11.91 03-Mar-2014
+        - Use ffi_call directly instead of g_callable_info_invoke
+          (Simon Feltman) (#723642)
+        - configure.ac: Use -std=c90 and error on declaration-after-statement
+          (Simon Feltman)
+        - Fix Build on Visual Studio (Chun-wei Fan) (#725122)
+
 3.11.90 17-Feb-2014
         - Use GObject type checking for instance arguments (Simon Feltman) (#724009)
         - configure.ac: post release version bump to 3.11.90 (Simon Feltman)
