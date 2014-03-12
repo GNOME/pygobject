@@ -35,6 +35,7 @@ PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
                                                      GITransfer          transfer,
                                                      GIArgument         *arg);
 PyObject *pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+                                                       GITransfer       transfer,
                                                        GIArgument      *arg);
 PyObject *pygi_struct_foreign_release (GITypeInfo *type_info,
                                        gpointer struct_);

@@ -401,6 +401,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
             PyObject *foreign_struct =
                 pygi_struct_foreign_convert_from_g_argument (
                     iface_cache->interface_info,
+                    GI_TRANSFER_NOTHING,
                     NULL);
 
                 pygi_struct_foreign_convert_to_g_argument (foreign_struct,

@@ -56,11 +56,14 @@ cairo_context_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_context_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+cairo_context_from_arg (GIInterfaceInfo *interface_info,
+                        GITransfer       transfer,
+                        gpointer         data)
 {
     cairo_t *context = (cairo_t*) data;
 
-    cairo_reference (context);
+    if (transfer == GI_TRANSFER_NOTHING)
+        cairo_reference (context);
 
     return PycairoContext_FromContext (context, &PycairoContext_Type, NULL);
 }
@@ -95,11 +98,14 @@ cairo_surface_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_surface_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+cairo_surface_from_arg (GIInterfaceInfo *interface_info,
+                        GITransfer       transfer,
+                        gpointer         data)
 {
     cairo_surface_t *surface = (cairo_surface_t*) data;
 
-    cairo_surface_reference (surface);
+    if (transfer == GI_TRANSFER_NOTHING)
+        cairo_surface_reference (surface);
 
     return PycairoSurface_FromSurface (surface, NULL);
 }
@@ -134,9 +140,16 @@ cairo_path_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_path_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+cairo_path_from_arg (GIInterfaceInfo *interface_info,
+                     GITransfer       transfer,
+                     gpointer         data)
 {
     cairo_path_t *path = (cairo_path_t*) data;
+
+    if (transfer == GI_TRANSFER_NOTHING) {
+        PyErr_SetString(PyExc_TypeError, "Unsupported annotation (transfer none) for cairo.Path return");
+        return NULL;
+    }
 
     return PycairoPath_FromPath (path);
 }
@@ -170,11 +183,16 @@ cairo_font_options_to_arg (PyObject        *value,
 }
 
 static PyObject *
-cairo_font_options_from_arg (GIInterfaceInfo *interface_info, gpointer data)
+cairo_font_options_from_arg (GIInterfaceInfo *interface_info,
+                             GITransfer       transfer,
+                             gpointer         data)
 {
     cairo_font_options_t *font_options = (cairo_font_options_t*) data;
 
-    return PycairoFontOptions_FromFontOptions (cairo_font_options_copy (font_options));
+    if (transfer == GI_TRANSFER_NOTHING)
+        font_options = cairo_font_options_copy (font_options);
+
+    return PycairoFontOptions_FromFontOptions (font_options);
 }
 
 static PyObject *

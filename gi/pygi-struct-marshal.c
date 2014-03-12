@@ -352,6 +352,7 @@ _pygi_marshal_to_py_interface_struct (GIArgument *arg,
         py_obj = pyg_value_as_pyobject (arg->v_pointer, FALSE);
     } else if (is_foreign) {
         py_obj = pygi_struct_foreign_convert_from_g_argument (interface_info,
+                                                              transfer,
                                                               arg->v_pointer);
     } else if (g_type_is_a (g_type, G_TYPE_BOXED)) {
         if (py_type) {

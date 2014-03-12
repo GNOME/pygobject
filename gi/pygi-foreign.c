@@ -123,6 +123,7 @@ pygi_struct_foreign_convert_to_g_argument (PyObject        *value,
 
 PyObject *
 pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
+                                             GITransfer       transfer,
                                              GIArgument      *arg)
 {
     GIBaseInfo *base_info = (GIBaseInfo *) interface_info;
@@ -131,7 +132,7 @@ pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interface_info,
     if (foreign_struct == NULL)
         return NULL;
 
-    return foreign_struct->from_func (interface_info, arg);
+    return foreign_struct->from_func (interface_info, transfer, arg);
 }
 
 PyObject *
