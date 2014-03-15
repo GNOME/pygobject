@@ -3037,7 +3037,7 @@ class TestDeprecation(unittest.TestCase):
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
             self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keywords.*a, b, c.*')
+                                     '.*keyword.*a, b, c.*')
 
     def test_deprecated_init_no_keywords_out_of_order(self):
         def init(self, **kwargs):
@@ -3050,7 +3050,7 @@ class TestDeprecation(unittest.TestCase):
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
             self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keywords.*b, a, c.*')
+                                     '.*keyword.*b, a, c.*')
 
     def test_deprecated_init_ignored_keyword(self):
         def init(self, **kwargs):
@@ -3065,7 +3065,7 @@ class TestDeprecation(unittest.TestCase):
             self.assertEqual(len(warn), 1)
             self.assertTrue(issubclass(warn[0].category, PyGIDeprecationWarning))
             self.assertRegexpMatches(str(warn[0].message),
-                                     '.*keywords.*a, b, c.*')
+                                     '.*keyword.*a, b, c.*')
 
     def test_deprecated_init_with_aliases(self):
         def init(self, **kwargs):

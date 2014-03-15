@@ -134,7 +134,7 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
         # Print warnings for calls with positional arguments.
         if args:
             warnings.warn('Using positional arguments with the GObject constructor has been deprecated. '
-                          'Please specify keywords for %s or use a class specific constructor. '
+                          'Please specify keyword(s) for "%s" or use a class specific constructor. '
                           'See: https://wiki.gnome.org/PyGObject/InitializerDeprecations' %
                           ', '.join(arg_names[:len(args)]),
                           category, stacklevel=stacklevel)
