@@ -174,7 +174,7 @@ def find_vfunc_conflict_in_bases(vfunc, bases):
 
 
 class _GObjectMetaBase(type):
-    "Metaclass for automatically registering GObject classes"
+    """Metaclass for automatically registering GObject classes."""
     def __init__(cls, name, bases, dict_):
         type.__init__(cls, name, bases, dict_)
         propertyhelper.install_properties(cls)

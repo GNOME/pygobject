@@ -48,34 +48,59 @@ else:
 
 
 class Property(object):
-    """
-    Creates a new property which in conjunction with GObject subclass will
-    create a property proxy:
+    """Creates a new Property which when used in conjunction with
+    GObject subclass will create a Python property accessor for the
+    GObject ParamSpec.
 
-         class MyObject(GObject.GObject):
-         ... prop = GObject.Property(type=str)
+    :param callable getter:
+        getter to get the value of the property
+    :param callable setter:
+        setter to set the value of the property
+    :param type type:
+        type of property
+    :param default:
+        default value, must match the property type.
+    :param str nick:
+        short description
+    :param str blurb:
+        long description
+    :param GObject.ParamFlags flags:
+        parameter flags
+    :keyword minimum:
+        minimum allowed value (int, float, long only)
+    :keyword maximum:
+        maximum allowed value (int, float, long only)
+
+    .. code-block:: python
+
+         class MyObject(GObject.Object):
+             prop = GObject.Property(type=str)
 
          obj = MyObject()
          obj.prop = 'value'
 
          obj.prop  # now is 'value'
 
-    The API is similar to the builtin property:
+    The API is similar to the builtin :py:func:`property`:
 
-    class AnotherObject(GObject.GObject):
-        @GObject.Property
-        def prop(self):
-            '''Read only property.'''
-            return ...
+    .. code-block:: python
 
-        @GObject.Property(type=int)
-        def propInt(self):
-            '''Read-write integer property.'''
-            return ...
+        class AnotherObject(GObject.Object):
+            value = 0
 
-        @propInt.setter
-        def propInt(self, value):
-            ...
+            @GObject.Property
+            def prop(self):
+                'Read only property.'
+                return 1
+
+            @GObject.Property(type=int)
+            def propInt(self):
+                'Read-write integer property.'
+                return self.value
+
+            @propInt.setter
+            def propInt(self, value):
+                self.value = value
     """
     _type_from_pytype_lookup = {
         # Put long_ first in case long_ and int are the same so int clobbers long_
@@ -129,29 +154,6 @@ class Property(object):
     def __init__(self, getter=None, setter=None, type=None, default=None,
                  nick='', blurb='', flags=_gobject.PARAM_READWRITE,
                  minimum=None, maximum=None):
-        """
-        @param  getter: getter to get the value of the property
-        @type   getter: callable
-        @param  setter: setter to set the value of the property
-        @type   setter: callable
-        @param    type: type of property
-        @type     type: type
-        @param default: default value
-        @param    nick: short description
-        @type     nick: string
-        @param   blurb: long description
-        @type    blurb: string
-        @param flags:    parameter flags, one of:
-        - gobject.PARAM_READABLE
-        - gobject.PARAM_READWRITE
-        - gobject.PARAM_WRITABLE
-        - gobject.PARAM_CONSTRUCT
-        - gobject.PARAM_CONSTRUCT_ONLY
-        - gobject.PARAM_LAX_VALIDATION
-        @keyword minimum:  minimum allowed value (int, float, long only)
-        @keyword maximum:  maximum allowed value (int, float, long only)
-        """
-
         self.name = None
 
         if type is None:

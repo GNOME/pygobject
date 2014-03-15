@@ -394,6 +394,9 @@ class Builder(Gtk.Builder):
         the given mapping "obj_or_map". The handler/value aspect of the mapping
         can also contain a tuple in the form of (handler [,arg1 [,argN]])
         allowing for extra arguments to be passed to the handler. For example:
+
+        .. code-block:: python
+
             builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
         """
         def _full_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
@@ -510,7 +513,9 @@ class Dialog(Gtk.Dialog, Container):
         pairs - button text (or stock ID) and a response ID integer are passed
         individually. For example:
 
-           dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
+        .. code-block:: python
+
+            dialog.add_buttons(Gtk.STOCK_OPEN, 42, "Close", Gtk.ResponseType.CLOSE)
 
         will add "Open" and "Close" buttons to dialog.
         """
@@ -635,24 +640,27 @@ class TextBuffer(Gtk.TextBuffer):
         return table
 
     def create_tag(self, tag_name=None, **properties):
-        """
-        @tag_name: name of the new tag, or None
-        @properties: keyword list of properties and their values
+        """Creates a tag and adds it to the tag table of the TextBuffer.
 
-        Creates a tag and adds it to the tag table of the TextBuffer.
-        Equivalent to creating a Gtk.TextTag and then adding the
+        :param str tag_name:
+            Name of the new tag, or None
+        :param **properties:
+            Keyword list of properties and their values
+
+        This is equivalent to creating a Gtk.TextTag and then adding the
         tag to the buffer's tag table. The returned tag is owned by
         the buffer's tag table.
 
-        If @tag_name is None, the tag is anonymous.
+        If ``tag_name`` is None, the tag is anonymous.
 
-        If @tag_name is not None, a tag called @tag_name must not already
+        If ``tag_name`` is not None, a tag called ``tag_name`` must not already
         exist in the tag table for this buffer.
 
         Properties are passed as a keyword list of names and values (e.g.
-        foreground = 'DodgerBlue', weight = Pango.Weight.BOLD)
+        foreground='DodgerBlue', weight=Pango.Weight.BOLD)
 
-        Return value: a new tag
+        :returns:
+            A new tag.
         """
 
         tag = Gtk.TextTag(name=tag_name, **properties)

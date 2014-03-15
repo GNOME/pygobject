@@ -68,17 +68,20 @@ class Option(optparse.Option):
         filename   The supplied arguments are read as filename, GOption
                    parses this type in with the GLib filename encoding.
 
-    Attributes:
-        optional_arg  This does not need a arguement, but it can be supplied.
-        hidden        The help list does not show this option
-        in_main       This option apears in the main group, this should only
-                      be used for backwards compatibility.
+    :ivar optional_arg:
+        This does not need a arguement, but it can be supplied.
+    :ivar hidden:
+        The help list does not show this option
+    :ivar in_main:
+        This option apears in the main group, this should only
+        be used for backwards compatibility.
 
     Use Option.REMAINING as option name to get all positional arguments.
 
-    NOTE: Every argument to an option is passed as utf-8 coded string, the only
-          exception are options which use the 'filename' type, its arguments
-          are passed as strings in the GLib filename encoding.
+    .. NOTE::
+        Every argument to an option is passed as utf-8 coded string, the only
+        exception are options which use the 'filename' type, its arguments
+        are passed as strings in the GLib filename encoding.
 
     For further help, see optparse.Option.
     """
@@ -142,19 +145,24 @@ class Option(optparse.Option):
 class OptionGroup(optparse.OptionGroup):
     """A group of command line options.
 
-    Arguements:
-       name:             The groups name, used to create the
-                         --help-{name} option
-       description:      Shown as title of the groups help view
-       help_description: Shown as help to the --help-{name} option
-       option_list:      The options used in this group, must be option.Option()
-       defaults:         A dicitionary of default values
-       translation_domain: Sets the translation domain for gettext().
+    :param str name:
+        The groups name, used to create the --help-{name} option
+    :param str description:
+        Shown as title of the groups help view
+    :param str help_description:
+        Shown as help to the --help-{name} option
+    :param list option_list:
+        The options used in this group, must be option.Option()
+    :param dict defaults:
+        A dicitionary of default values
+    :param translation_domain:
+           Sets the translation domain for gettext().
 
-    NOTE: This OptionGroup does not exactly map the optparse.OptionGroup
-          interface. There is no parser object to supply, but it is possible
-          to set default values and option_lists. Also the default values and
-          values are not shared with the OptionParser.
+    .. NOTE::
+        This OptionGroup does not exactly map the optparse.OptionGroup
+        interface. There is no parser object to supply, but it is possible
+        to set default values and option_lists. Also the default values and
+        values are not shared with the OptionParser.
 
     To pass a OptionGroup into a function which expects a GOptionGroup (e.g.
     gnome_program_init() ). OptionGroup.get_option_group() can be used.
@@ -234,15 +242,16 @@ class OptionGroup(optparse.OptionGroup):
 class OptionParser(optparse.OptionParser):
     """Command line parser with GOption support.
 
-    NOTE: The OptionParser interface is not the exactly the same as the
-          optparse.OptionParser interface. Especially the usage parameter
-          is only used to show the metavar of the arguements.
+    :param bool help_enabled:
+        The --help, --help-all and --help-{group} options are enabled (default).
+    :param bool ignore_unknown_options:
+        Do not throw a exception when a option is not knwon, the option
+        will be in the result list.
 
-    Attribues:
-        help_enabled:           The --help, --help-all and --help-{group}
-                                options are enabled (default).
-        ignore_unknown_options: Do not throw a exception when a option is not
-                                knwon, the option will be in the result list.
+    .. NOTE::
+        The OptionParser interface is not the exactly the same as the
+        optparse.OptionParser interface. Especially the usage parameter
+        is only used to show the metavar of the arguements.
 
     OptionParser.add_option_group() does not only accept OptionGroup instances
     but also glib.OptionGroup, which is returned by gtk_get_option_group().

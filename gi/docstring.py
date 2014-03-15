@@ -37,21 +37,26 @@ _generate_doc_string_func = None
 def set_doc_string_generator(func):
     """Set doc string generator function
 
-    :Parameters:
-        func : callable
-            Function which takes a GIInfoStruct and returns
-            documentation for it.
+    :param callable func:
+        Callable which takes a GIInfoStruct and returns documentation for it.
     """
     global _generate_doc_string_func
     _generate_doc_string_func = func
 
 
 def get_doc_string_generator():
+    """Returns the currently registered doc string generator."""
     return _generate_doc_string_func
 
 
 def generate_doc_string(info):
-    """Generator a doc string given a GIInfoStruct
+    """Generate a doc string given a GIInfoStruct.
+
+    :param gi.types.BaseInfo info:
+        GI info instance to generate documentation for.
+    :returns:
+        Generated documentation as a string.
+    :rtype: str
 
     This passes the info struct to the currently registered doc string
     generator and returns the result.
@@ -166,7 +171,7 @@ def _generate_callable_info_doc(info):
 
 
 def _generate_class_info_doc(info):
-    doc = '\n:Constructors:\n'  # start with \n to avoid auto indent of other lines
+    doc = '\n:Constructors:\n\n::\n\n'  # start with \n to avoid auto indent of other lines
 
     if isinstance(info, StructInfo):
         # Don't show default constructor for disguised (0 length) structs

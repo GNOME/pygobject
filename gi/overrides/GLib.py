@@ -76,7 +76,7 @@ class _VariantCreator(object):
     }
 
     def _create(self, format, args):
-        '''Create a GVariant object from given format and argument list.
+        """Create a GVariant object from given format and argument list.
 
         This method recursively calls itself for complex structures (arrays,
         dictionaries, boxed).
@@ -88,7 +88,7 @@ class _VariantCreator(object):
         If args is None, then this won't actually consume any arguments, and
         just parse the format string and generate empty GVariant structures.
         This is required for creating empty dictionaries or arrays.
-        '''
+        """
         # leaves (simple types)
         constructor = self._LEAF_CONSTRUCTORS.get(format[0])
         if constructor:
@@ -112,7 +112,7 @@ class _VariantCreator(object):
         raise NotImplementedError('cannot handle GVariant type ' + format)
 
     def _create_tuple(self, format, args):
-        '''Handle the case where the outermost type of format is a tuple.'''
+        """Handle the case where the outermost type of format is a tuple."""
 
         format = format[1:]  # eat the '('
         if args is None:
@@ -146,7 +146,7 @@ class _VariantCreator(object):
             return (builder.end(), rest_format, args)
 
     def _create_dict(self, format, args):
-        '''Handle the case where the outermost type of format is a dict.'''
+        """Handle the case where the outermost type of format is a dict."""
 
         builder = None
         if args is None or not args[0]:
@@ -179,7 +179,7 @@ class _VariantCreator(object):
         return (builder.end(), rest_format, args)
 
     def _create_array(self, format, args):
-        '''Handle the case where the outermost type of format is an array.'''
+        """Handle the case where the outermost type of format is an array."""
 
         builder = None
         if args is None or not args[0]:
@@ -200,7 +200,7 @@ class _VariantCreator(object):
 
 class Variant(GLib.Variant):
     def __new__(cls, format_string, value):
-        '''Create a GVariant from a native Python object.
+        """Create a GVariant from a native Python object.
 
         format_string is a standard GVariant type signature, value is a Python
         object whose structure has to match the signature.
@@ -210,7 +210,7 @@ class Variant(GLib.Variant):
           GLib.Variant('(is)', (1, 'hello'))
           GLib.Variant('(asa{sv})', ([], {'foo': GLib.Variant('b', True),
                                           'bar': GLib.Variant('i', 2)}))
-        '''
+        """
         creator = _VariantCreator()
         (v, rest_format, _) = creator._create(format_string, [value])
         if rest_format:
@@ -250,7 +250,7 @@ class Variant(GLib.Variant):
         return hash((self.get_type_string(), self.unpack()))
 
     def unpack(self):
-        '''Decompose a GVariant into a native Python object.'''
+        """Decompose a GVariant into a native Python object."""
 
         LEAF_ACCESSORS = {
             'b': self.get_boolean,
@@ -305,14 +305,14 @@ class Variant(GLib.Variant):
 
     @classmethod
     def split_signature(klass, signature):
-        '''Return a list of the element signatures of the topmost signature tuple.
+        """Return a list of the element signatures of the topmost signature tuple.
 
         If the signature is not a tuple, it returns one element with the entire
         signature. If the signature is an empty tuple, the result is [].
 
         This is useful for e. g. iterating over method parameters which are
         passed as a single Variant.
-        '''
+        """
         if signature == '()':
             return []
 

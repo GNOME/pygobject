@@ -32,33 +32,54 @@ if (3, 0) <= sys.version_info < (3, 2):
 
 
 class Signal(str):
-    """
-    Object which gives a nice API for creating and binding signals.
+    """Object which gives a nice API for creating and binding signals.
 
-    Example:
-    class Spam(GObject.GObject):
-        velocity = 0
+    :param name:
+        Name of signal or callable closure when used as a decorator.
+    :type name: str or callable
+    :param callable func:
+        Callable closure method.
+    :param GObject.SignalFlags flags:
+        Flags specifying when to run closure.
+    :param type return_type:
+        Return type of the Signal.
+    :param list arg_types:
+        List of argument types specifying the signals function signature
+    :param str doc:
+        Documentation of signal object.
+    :param callable accumulator:
+        Accumulator method with the signature:
+        func(ihint, return_accu, handler_return, accu_data) -> boolean
+    :param object accu_data:
+        User data passed to the accumulator.
 
-        @GObject.Signal
-        def pushed(self):
-            self.velocity += 1
+    :Example:
 
-        @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
-        def pulled(self):
-            self.velocity -= 1
+    .. code-block:: python
 
-        stomped = GObject.Signal('stomped', arg_types=(int,))
+        class Spam(GObject.Object):
+            velocity = 0
 
-        @GObject.Signal
-        def annotated_signal(self, a:int, b:str):
-            "Python3 annotation support for parameter types.
+            @GObject.Signal
+            def pushed(self):
+                self.velocity += 1
 
-    def on_pushed(obj):
-        print(obj)
+            @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST)
+            def pulled(self):
+                self.velocity -= 1
 
-    spam = Spam()
-    spam.pushed.connect(on_pushed)
-    spam.pushed.emit()
+            stomped = GObject.Signal('stomped', arg_types=(int,))
+
+            @GObject.Signal
+            def annotated_signal(self, a:int, b:str):
+                "Python3 annotation support for parameter types.
+
+        def on_pushed(obj):
+            print(obj)
+
+        spam = Spam()
+        spam.pushed.connect(on_pushed)
+        spam.pushed.emit()
     """
     class BoundSignal(str):
         """
@@ -81,12 +102,12 @@ class Signal(str):
             return self.signal.func(self.gobj, *args, **kargs)
 
         def connect(self, callback, *args, **kargs):
-            """Same as GObject.GObject.connect except there is no need to specify
+            """Same as GObject.Object.connect except there is no need to specify
             the signal name."""
             return self.gobj.connect(self, callback, *args, **kargs)
 
         def connect_detailed(self, callback, detail, *args, **kargs):
-            """Same as GObject.GObject.connect except there is no need to specify
+            """Same as GObject.Object.connect except there is no need to specify
             the signal name. In addition concats "::<detail>" to the signal name
             when connecting; for use with notifications like "notify" when a property
             changes.
@@ -94,11 +115,11 @@ class Signal(str):
             return self.gobj.connect(self + '::' + detail, callback, *args, **kargs)
 
         def disconnect(self, handler_id):
-            """Same as GObject.GObject.disconnect."""
+            """Same as GObject.Object.disconnect."""
             self.instance.disconnect(handler_id)
 
         def emit(self, *args, **kargs):
-            """Same as GObject.GObject.emit except there is no need to specify
+            """Same as GObject.Object.emit except there is no need to specify
             the signal name."""
             return self.gobj.emit(str(self), *args, **kargs)
 
@@ -109,25 +130,6 @@ class Signal(str):
 
     def __init__(self, name='', func=None, flags=_gobject.SIGNAL_RUN_FIRST,
                  return_type=None, arg_types=None, doc='', accumulator=None, accu_data=None):
-        """
-        @param  name: name of signal or closure method when used as direct decorator.
-        @type   name: string or callable
-        @param  func: closure method.
-        @type   func: callable
-        @param  flags: flags specifying when to run closure
-        @type   flags: GObject.SignalFlags
-        @param  return_type: return type
-        @type   return_type: type
-        @param  arg_types: list of argument types specifying the signals function signature
-        @type   arg_types: None
-        @param  doc: documentation of signal object
-        @type   doc: string
-        @param  accumulator: accumulator method with the signature:
-                func(ihint, return_accu, handler_return, accu_data) -> boolean
-        @type   accumulator: function
-        @param  accu_data: user data passed to the accumulator
-        @type   accu_data: object
-        """
         if func and not name:
             name = func.__name__
         elif callable(name):
@@ -191,14 +193,17 @@ class Signal(str):
 
 
 class SignalOverride(Signal):
-    """Specialized sub-class of signal which can be used as a decorator for overriding
+    """Specialized sub-class of Signal which can be used as a decorator for overriding
     existing signals on GObjects.
 
-    Example:
-    class MyWidget(Gtk.Widget):
-        @GObject.SignalOverride
-        def configure_event(self):
-            pass
+    :Example:
+
+    .. code-block:: python
+
+        class MyWidget(Gtk.Widget):
+            @GObject.SignalOverride
+            def configure_event(self):
+                pass
     """
     def get_signal_args(self):
         """Returns the string 'override'."""

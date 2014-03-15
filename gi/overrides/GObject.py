@@ -435,13 +435,21 @@ class _HandlerBlockManager(object):
 
 
 def signal_handler_block(obj, handler_id):
-    """Blocks the signal handler from being invoked until handler_unblock() is called.
+    """Blocks the signal handler from being invoked until
+    handler_unblock() is called.
 
-    Returns a context manager which optionally can be used to
-    automatically unblock the handler:
+    :param GObject.Object obj:
+        Object instance to block handlers for.
+    :param int handler_id:
+        Id of signal to block.
+    :returns:
+        A context manager which optionally can be used to
+        automatically unblock the handler:
 
-      with GObject.signal_handler_block(obj, id):
-         pass
+    .. code-block:: python
+
+        with GObject.signal_handler_block(obj, id):
+            pass
     """
     GObjectModule.signal_handler_block(obj, handler_id)
     return _HandlerBlockManager(obj, handler_id)
@@ -452,11 +460,13 @@ __all__.append('signal_handler_block')
 def signal_parse_name(detailed_signal, itype, force_detail_quark):
     """Parse a detailed signal name into (signal_id, detail).
 
-    :Raises ValueError:
-        If the given signal is unknown.
-
-    :Returns:
+    :param str detailed_signal:
+        Signal name which can include detail.
+        For example: "notify:prop_name"
+    :returns:
         Tuple of (signal_id, detail)
+    :raises ValueError:
+        If the given signal is unknown.
     """
     res, signal_id, detail = GObjectModule.signal_parse_name(detailed_signal, itype,
                                                              force_detail_quark)
@@ -584,14 +594,17 @@ class Object(GObjectModule.Object):
     def freeze_notify(self):
         """Freezes the object's property-changed notification queue.
 
+        :returns:
+            A context manager which optionally can be used to
+            automatically thaw notifications.
+
         This will freeze the object so that "notify" signals are blocked until
         the thaw_notify() method is called.
 
-        Returns a context manager which optionally can be used to
-        automatically thaw notifications:
+        .. code-block:: python
 
-          with obj.freeze_notify():
-              pass
+            with obj.freeze_notify():
+                pass
         """
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)

@@ -42,8 +42,9 @@ static PyMethodDef _glib_functions[] = {
       "            flags=0, child_setup=None, user_data=None,\n"
       "            standard_input=None, standard_output=None,\n"
       "            standard_error=None) -> (pid, stdin, stdout, stderr)\n"
+      "\n"
       "Execute a child program asynchronously within a glib.MainLoop()\n"
-      "See the reference manual for a complete reference." },
+      "See the reference manual for a complete reference.\n" },
     { NULL, NULL, 0 }
 };
 

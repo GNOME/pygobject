@@ -24,14 +24,14 @@ def wraps(wrapped):
 
 class _Registry(dict):
     def __setitem__(self, key, value):
-        '''We do checks here to make sure only submodules of the override
+        """We do checks here to make sure only submodules of the override
         module are added.  Key and value should be the same object and come
         from the gi.override module.
 
         We add the override to the dict as "override_module.name".  For instance
         if we were overriding Gtk.Button you would retrive it as such:
         registry['Gtk.Button']
-        '''
+        """
         if not key == value:
             raise KeyError('You have tried to modify the registry.  This should only be done by the override decorator')
 
@@ -59,7 +59,7 @@ class _Registry(dict):
 
 
 class overridefunc(object):
-    '''decorator for overriding a function'''
+    """decorator for overriding a function"""
     def __init__(self, func):
         if not isinstance(func, CallableInfo):
             raise TypeError("func must be a gi function, got %s" % func)
@@ -75,7 +75,7 @@ registry = _Registry()
 
 
 def override(type_):
-    '''Decorator for registering an override'''
+    """Decorator for registering an override"""
     if isinstance(type_, (types.FunctionType, CallableInfo)):
         return overridefunc(type_)
     else:
@@ -84,7 +84,7 @@ def override(type_):
 
 
 def deprecated(fn, replacement):
-    '''Decorator for marking methods and classes as deprecated'''
+    """Decorator for marking methods and classes as deprecated"""
     @wraps(fn)
     def wrapped(*args, **kwargs):
         warnings.warn('%s is deprecated; use %s instead' % (fn.__name__, replacement),
@@ -97,40 +97,36 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
                     deprecated_aliases={}, deprecated_defaults={},
                     category=PyGIDeprecationWarning,
                     stacklevel=2):
-    '''Wrapper for deprecating GObject based __init__ methods which specify defaults
-    already available or non-standard defaults.
+    """Wrapper for deprecating GObject based __init__ methods which specify
+    defaults already available or non-standard defaults.
 
-    :Parameters:
-        super_init_func : callable
-            Initializer to wrap.
-        arg_names : list
-            Ordered argument name list.
-        ignore : list
-            List of argument names to ignore when calling the wrapped function.
-            This is useful for function which take a non-standard keyword that
-            is munged elsewhere.
-        deprecated_aliases : dict
-            Dictionary mapping a keyword alias to the actual g_object_newv
-            keyword.
-        deprecated_defaults : dict
-            Dictionary of non-standard defaults that will be used when the
-            keyword is not explicitly passed.
-        category : Exception
-            Exception category of the error.
-        stacklevel : int
-            Stack level for the deprecation passed on to warnings.warn
-
-    :Returns:
-        Wrapped version of super_init_func which gives a deprecation
+    :param callable super_init_func:
+        Initializer to wrap.
+    :param list arg_names:
+        Ordered argument name list.
+    :param list ignore:
+        List of argument names to ignore when calling the wrapped function.
+        This is useful for function which take a non-standard keyword that is munged elsewhere.
+    :param dict deprecated_aliases:
+        Dictionary mapping a keyword alias to the actual g_object_newv keyword.
+    :param dict deprecated_defaults:
+        Dictionary of non-standard defaults that will be used when the
+        keyword is not explicitly passed.
+    :param Exception category:
+        Exception category of the error.
+    :param int stacklevel:
+        Stack level for the deprecation passed on to warnings.warn
+    :returns: Wrapped version of ``super_init_func`` which gives a deprecation
         warning when non-keyword args or aliases are used.
-    '''
+    :rtype: callable
+    """
     # We use a list of argument names to maintain order of the arguments
     # being deprecated. This allows calls with positional arguments to
     # continue working but with a deprecation message.
     def new_init(self, *args, **kwargs):
-        '''Initializer for a GObject based classes with support for property
+        """Initializer for a GObject based classes with support for property
         sets through the use of explicit keyword arguments.
-        '''
+        """
         # Print warnings for calls with positional arguments.
         if args:
             warnings.warn('Using positional arguments with the GObject constructor has been deprecated. '
@@ -182,12 +178,12 @@ def deprecated_init(super_init_func, arg_names, ignore=tuple(),
 
 
 def strip_boolean_result(method, exc_type=None, exc_str=None, fail_ret=None):
-    '''Translate method's return value for stripping off success flag.
+    """Translate method's return value for stripping off success flag.
 
     There are a lot of methods which return a "success" boolean and have
     several out arguments. Translate such a method to return the out arguments
     on success and None on failure.
-    '''
+    """
     @wraps(method)
     def wrapped(*args, **kwargs):
         ret = method(*args, **kwargs)
