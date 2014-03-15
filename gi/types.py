@@ -197,7 +197,7 @@ _gobject._install_metaclass(_GObjectMetaBase)
 
 
 class GObjectMeta(_GObjectMetaBase, MetaClassHelper):
-
+    """Meta class used for GI GObject based types."""
     def __init__(cls, name, bases, dict_):
         super(GObjectMeta, cls).__init__(name, bases, dict_)
         is_gi_defined = False
@@ -225,6 +225,8 @@ class GObjectMeta(_GObjectMetaBase, MetaClassHelper):
 
     @property
     def __doc__(cls):
+        if cls == GObjectMeta:
+            return ''
         return generate_doc_string(cls.__info__)
 
 
@@ -289,6 +291,7 @@ def mro(C):
 
 
 class StructMeta(type, MetaClassHelper):
+    """Meta class used for GI Struct based types."""
 
     def __init__(cls, name, bases, dict_):
         super(StructMeta, cls).__init__(name, bases, dict_)
@@ -310,4 +313,6 @@ class StructMeta(type, MetaClassHelper):
 
     @property
     def __doc__(cls):
+        if cls == StructMeta:
+            return ''
         return generate_doc_string(cls.__info__)
