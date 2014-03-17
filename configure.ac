@@ -174,23 +174,9 @@ AC_SUBST([PYTHON_BASENAME])
 AS_AC_EXPAND(DATADIR, $datadir)
 
 dnl libffi
-AC_MSG_CHECKING(for ffi)
-AC_ARG_WITH(ffi,
-  AS_HELP_STRING([--without-ffi],[Disable libffi support]),
-  with_libffi=$withval,
-  with_libffi=auto)
-if test x"$with_libffi" = xno ; then
-  have_libffi=false
-else
-  PKG_CHECK_MODULES(FFI, libffi >= 3.0, have_libffi=yes, have_libffi=no)
-fi
-if test x"$with_libffi" = xyes && test x"$have_libffi" = xno ; then
-  AC_MSG_ERROR([ffi requested, but not found])
-fi
-if test x"$have_libffi" = xyes; then
-  LIBFFI_PC=libffi
-fi
-AM_CONDITIONAL(HAVE_LIBFFI, test "$have_libffi" = "yes")
+PKG_CHECK_MODULES(FFI, libffi >= 3.0)
+LIBFFI_PC=libffi
+
 AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 AC_SUBST(LIBFFI_PC)
@@ -287,7 +273,6 @@ AC_MSG_RESULT([
 	pygobject $VERSION
 
 	Using python interpreter:	$PYTHON
-	libffi support:			$have_libffi
 	cairo support:			$enable_cairo
 	thread support:			$enable_thread
 	code coverage support:          $enable_code_coverage
