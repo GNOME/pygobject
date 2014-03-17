@@ -1,3 +1,9 @@
+3.11.92 17-Mar-2014
+        - configure.ac: Remove option to build without libffi (Simon Feltman)
+        - docs: Standardize Python doc strings (Simon Feltman)
+        - Fix reference leaks with (transfer full) foreign struct returns
+          (Owen W. Taylor) (#726206)
+
 3.11.91 03-Mar-2014
         - Use ffi_call directly instead of g_callable_info_invoke
           (Simon Feltman) (#723642)
