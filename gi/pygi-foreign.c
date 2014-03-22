@@ -151,11 +151,11 @@ pygi_struct_foreign_release (GIBaseInfo *base_info,
 }
 
 void
-pygi_register_foreign_struct_real (const char* namespace_,
-                                   const char* name,
-                                   PyGIArgOverrideToGIArgumentFunc to_func,
-                                   PyGIArgOverrideFromGIArgumentFunc from_func,
-                                   PyGIArgOverrideReleaseFunc release_func)
+pygi_register_foreign_struct (const char* namespace_,
+                              const char* name,
+                              PyGIArgOverrideToGIArgumentFunc to_func,
+                              PyGIArgOverrideFromGIArgumentFunc from_func,
+                              PyGIArgOverrideReleaseFunc release_func)
 {
     PyGIForeignStruct *new_struct = g_slice_new (PyGIForeignStruct);
     new_struct->namespace = namespace_;

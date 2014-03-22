@@ -105,7 +105,7 @@ g_value_get_or_dup_boxed (const GValue *value, GITransfer transfer)
 }
 
 PyObject *
-pygi_get_property_value_real (PyGObject *instance, GParamSpec *pspec)
+pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 {
     GIPropertyInfo *property_info = NULL;
     GValue value = { 0, };
@@ -271,9 +271,9 @@ out:
 }
 
 gint
-pygi_set_property_value_real (PyGObject *instance,
-                              GParamSpec *pspec,
-                              PyObject *py_value)
+pygi_set_property_value (PyGObject *instance,
+                         GParamSpec *pspec,
+                         PyObject *py_value)
 {
     GIPropertyInfo *property_info = NULL;
     GITypeInfo *type_info = NULL;

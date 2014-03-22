@@ -31,9 +31,11 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
 #include <pycairo/py3cairo.h>
 #endif
 
-
-#include "pygi-foreign.h"
-
+/* Limit includes from PyGI to APIs which do not have link dependencies
+ * (pygobject.h and pygi-foreign-api.h) since _gi_cairo is built as a separate
+ * shared library that interacts with PyGI through a PyCapsule API at runtime.
+ */
+#include <pygi-foreign-api.h>
 #include <pyglib-python-compat.h>
 
 static PyObject *

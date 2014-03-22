@@ -171,12 +171,12 @@ pygi_signal_closure_marshal(GClosure *closure,
 }
 
 GClosure *
-pygi_signal_closure_new_real (PyGObject *instance,
-                              GType g_type,
-                              const gchar *signal_name,
-                              PyObject *callback,
-                              PyObject *extra_args,
-                              PyObject *swap_data)
+pygi_signal_closure_new (PyGObject *instance,
+                         GType g_type,
+                         const gchar *signal_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data)
 {
     GClosure *closure = NULL;
     PyGISignalClosure *pygi_closure = NULL;

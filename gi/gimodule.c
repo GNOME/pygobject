@@ -620,11 +620,7 @@ static PyMethodDef _gi_functions[] = {
 };
 
 static struct PyGI_API CAPI = {
-  pygi_type_import_by_g_type_real,
-  pygi_get_property_value_real,
-  pygi_set_property_value_real,
-  pygi_signal_closure_new_real,
-  pygi_register_foreign_struct_real,
+  pygi_register_foreign_struct,
 };
 
 PYGLIB_MODULE_START(_gi, "_gi")

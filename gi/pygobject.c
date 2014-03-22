@@ -29,6 +29,9 @@
 
 #include "pygi.h"
 #include "pygi-value.h"
+#include "pygi-type.h"
+#include "pygi-property.h"
+#include "pygi-signal-closure.h"
 
 static void pygobject_dealloc(PyGObject *self);
 static int  pygobject_traverse(PyGObject *self, visitproc visit, void *arg);

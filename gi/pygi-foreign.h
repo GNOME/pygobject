@@ -26,9 +26,7 @@
 #define __PYGI_FOREIGN_H__
 
 #include <Python.h>
-#include <girepository.h>
-
-#include "pygi.h"
+#include "pygi-foreign-api.h"
 
 PyObject *pygi_struct_foreign_convert_to_g_argument (PyObject           *value,
                                                      GIInterfaceInfo    *interface_info,
@@ -40,10 +38,10 @@ PyObject *pygi_struct_foreign_convert_from_g_argument (GIInterfaceInfo *interfac
 PyObject *pygi_struct_foreign_release (GITypeInfo *type_info,
                                        gpointer struct_);
 
-void pygi_register_foreign_struct_real (const char* namespace_,
-                                        const char* name,
-                                        PyGIArgOverrideToGIArgumentFunc to_func,
-                                        PyGIArgOverrideFromGIArgumentFunc from_func,
-                                        PyGIArgOverrideReleaseFunc release_func);
+void pygi_register_foreign_struct (const char* namespace_,
+                                   const char* name,
+                                   PyGIArgOverrideToGIArgumentFunc to_func,
+                                   PyGIArgOverrideFromGIArgumentFunc from_func,
+                                   PyGIArgOverrideReleaseFunc release_func);
 
 #endif /* __PYGI_FOREIGN_H__ */

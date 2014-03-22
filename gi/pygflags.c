@@ -28,6 +28,7 @@
 #include "pygflags.h"
 
 #include "pygi.h"
+#include "pygi-type.h"
 
 GQuark pygflags_class_key;
 

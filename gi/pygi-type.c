@@ -50,7 +50,7 @@ _pygi_type_import_by_name (const char *namespace_,
 }
 
 PyObject *
-pygi_type_import_by_g_type_real (GType g_type)
+pygi_type_import_by_g_type (GType g_type)
 {
     GIRepository *repository;
     GIBaseInfo *info;
@@ -89,7 +89,7 @@ _pygi_type_get_from_g_type (GType g_type)
 
     py_type = PyObject_GetAttrString (py_g_type, "pytype");
     if (py_type == Py_None) {
-        py_type = pygi_type_import_by_g_type_real (g_type);
+        py_type = pygi_type_import_by_g_type (g_type);
     }
 
     Py_DECREF (py_g_type);

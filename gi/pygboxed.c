@@ -27,6 +27,7 @@
 #include "pygboxed.h"
 
 #include "pygi.h"
+#include "pygi-type.h"
 
 GQuark pygboxed_type_key;
 GQuark pygboxed_marshal_key;

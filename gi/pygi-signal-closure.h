@@ -24,7 +24,7 @@
 #ifndef __PYGI_SIGNAL_CLOSURE_H__
 #define __PYGI_SIGNAL_CLOSURE_H__
 
-#include "pygi.h"
+#include "pygobject.h"
 
 G_BEGIN_DECLS
 
@@ -35,12 +35,13 @@ typedef struct _PyGISignalClosure
     GISignalInfo *signal_info;
 } PyGISignalClosure;
 
-GClosure * pygi_signal_closure_new_real (PyGObject *instance,
-                                         GType g_type,
-                                         const gchar *sig_name,
-                                         PyObject *callback,
-                                         PyObject *extra_args,
-                                         PyObject *swap_data);
+GClosure *
+pygi_signal_closure_new (PyGObject *instance,
+                         GType g_type,
+                         const gchar *sig_name,
+                         PyObject *callback,
+                         PyObject *extra_args,
+                         PyObject *swap_data);
 
 G_END_DECLS
 

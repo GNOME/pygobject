@@ -27,6 +27,7 @@
 #include "pygpointer.h"
 
 #include "pygi.h"
+#include "pygi-type.h"
 
 
 GQuark pygpointer_class_key;
