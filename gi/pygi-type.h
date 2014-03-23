@@ -21,6 +21,7 @@
 #define __PYGI_TYPE_H__
 
 #include <Python.h>
+#include <girepository.h>
 
 G_BEGIN_DECLS
 

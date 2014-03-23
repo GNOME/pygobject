@@ -140,12 +140,14 @@ _gi_cairo_la_SOURCES = \
 	pygi-foreign-cairo.c
 _gi_cairo_la_CFLAGS = \
 	$(GI_CFLAGS) \
+	$(CAIRO_CFLAGS) \
 	$(PYCAIRO_CFLAGS)
 _gi_cairo_la_CPPFLAGS = \
 	$(extension_cppflags)
 _gi_cairo_la_LIBADD = \
 	$(extension_libadd) \
 	$(GI_LIBS) \
+	$(CAIRO_LIBS) \
 	$(PYCAIRO_LIBS)
 _gi_cairo_la_LDFLAGS = \
 	$(extension_ldflags) \

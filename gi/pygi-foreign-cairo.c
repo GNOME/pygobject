@@ -31,12 +31,18 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
 #include <pycairo/py3cairo.h>
 #endif
 
+#include <cairo-gobject.h>
+
 /* Limit includes from PyGI to APIs which do not have link dependencies
  * (pygobject.h and pygi-foreign-api.h) since _gi_cairo is built as a separate
  * shared library that interacts with PyGI through a PyCapsule API at runtime.
  */
 #include <pygi-foreign-api.h>
 #include <pyglib-python-compat.h>
+
+/*
+ * cairo_t marshaling
+ */
 
 static PyObject *
 cairo_context_to_arg (PyObject        *value,
@@ -70,6 +76,7 @@ cairo_context_from_arg (GIInterfaceInfo *interface_info,
     return PycairoContext_FromContext (context, &PycairoContext_Type, NULL);
 }
 
+
 static PyObject *
 cairo_context_release (GIBaseInfo *base_info,
                        gpointer    struct_)
@@ -78,6 +85,36 @@ cairo_context_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+static int
+cairo_context_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_t *cr = PycairoContext_GET (obj);
+    if (!cr) {
+        return -1;
+    }
+
+    /* PycairoContext_GET returns a borrowed reference, use set_boxed
+     * to add new ref to the context which will be managed by the GValue. */
+    g_value_set_boxed (value, cr);
+    return 0;
+}
+
+static PyObject *
+cairo_context_from_gvalue (const GValue *value)
+{
+    /* PycairoContext_FromContext steals a ref, so we dup it out of the GValue. */
+    cairo_t *cr = g_value_dup_boxed (value);
+    if (!cr) {
+        return NULL;
+    }
+
+    return PycairoContext_FromContext (cr, &PycairoContext_Type, NULL);
+}
+
+
+/*
+ * cairo_surface_t marshaling
+ */
 
 static PyObject *
 cairo_surface_to_arg (PyObject        *value,
@@ -120,6 +157,36 @@ cairo_surface_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+static int
+cairo_surface_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_surface_t *surface = ((PycairoSurface*) obj)->surface;
+    if (!surface) {
+        return -1;
+    }
+
+    /* surface is a borrowed reference, use set_boxed
+     * to add new ref to the context which will be managed by the GValue. */
+    g_value_set_boxed (value, surface);
+    return 0;
+}
+
+static PyObject *
+cairo_surface_from_gvalue (const GValue *value)
+{
+    /* PycairoSurface_FromSurface steals a ref, so we dup it out of the GValue. */
+    cairo_surface_t *surface = g_value_dup_boxed (value);
+    if (!surface) {
+        return NULL;
+    }
+
+    return PycairoSurface_FromSurface (surface, NULL);
+}
+
+
+/*
+ * cairo_path_t marshaling
+ */
 
 static PyObject *
 cairo_path_to_arg (PyObject        *value,
@@ -164,6 +231,39 @@ cairo_path_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+
+/*
+ * cairo_font_face_t marshaling
+ */
+
+static int
+cairo_font_face_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_font_face_t *font_face = ((PycairoFontFace*) obj)->font_face;
+    if (!font_face) {
+        return -1;
+    }
+
+    g_value_set_boxed (value, font_face);
+    return 0;
+}
+
+static PyObject *
+cairo_font_face_from_gvalue (const GValue *value)
+{
+    cairo_font_face_t *font_face = g_value_dup_boxed (value);
+    if (!font_face) {
+        return NULL;
+    }
+
+    return PycairoFontFace_FromFontFace (font_face);
+}
+
+
+/*
+ * cairo_font_options_t marshaling
+ */
+
 static PyObject *
 cairo_font_options_to_arg (PyObject        *value,
                            GIInterfaceInfo *interface_info,
@@ -205,6 +305,69 @@ cairo_font_options_release (GIBaseInfo *base_info,
     Py_RETURN_NONE;
 }
 
+
+/*
+ * scaled_font_t marshaling
+ */
+
+static int
+cairo_scaled_font_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_scaled_font_t *scaled_font = ((PycairoScaledFont*) obj)->scaled_font;
+    if (!scaled_font) {
+        return -1;
+    }
+
+    /* scaled_font is a borrowed reference, use set_boxed
+     * to add new ref to the context which will be managed by the GValue. */
+    g_value_set_boxed (value, scaled_font);
+    return 0;
+}
+
+static PyObject *
+cairo_scaled_font_from_gvalue (const GValue *value)
+{
+    /* PycairoScaledFont_FromScaledFont steals a ref, so we dup it out of the GValue. */
+    cairo_scaled_font_t *scaled_font = g_value_dup_boxed (value);
+    if (!scaled_font) {
+        return NULL;
+    }
+
+    return PycairoScaledFont_FromScaledFont (scaled_font);
+}
+
+
+/*
+ * cairo_pattern_t marshaling
+ */
+
+static int
+cairo_pattern_to_gvalue (GValue *value, PyObject *obj)
+{
+    cairo_pattern_t *pattern = ((PycairoPattern*) obj)->pattern;
+    if (!pattern) {
+        return -1;
+    }
+
+    /* pattern is a borrowed reference, use set_boxed
+     * to add new ref to the context which will be managed by the GValue. */
+    g_value_set_boxed (value, pattern);
+    return 0;
+}
+
+static PyObject *
+cairo_pattern_from_gvalue (const GValue *value)
+{
+    /* PycairoPattern_FromPattern steals a ref, so we dup it out of the GValue. */
+    cairo_pattern_t *pattern = g_value_dup_boxed (value);
+    if (!pattern) {
+        return NULL;
+    }
+
+    return PycairoPattern_FromPattern (pattern, NULL);
+}
+
+
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 {
@@ -216,6 +379,8 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
 
     if (Pycairo_CAPI == NULL)
         return PYGLIB_MODULE_ERROR_RETURN;
+
+    pygobject_init (3, 13, 2);
 
     pygi_register_foreign_struct ("cairo",
                                   "Context",
@@ -240,5 +405,26 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_font_options_to_arg,
                                   cairo_font_options_from_arg,
                                   cairo_font_options_release);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_CONTEXT,
+                               cairo_context_from_gvalue,
+                               cairo_context_to_gvalue);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_SURFACE,
+                               cairo_surface_from_gvalue,
+                               cairo_surface_to_gvalue);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_FONT_FACE,
+                               cairo_font_face_from_gvalue,
+                               cairo_font_face_to_gvalue);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_SCALED_FONT,
+                               cairo_scaled_font_from_gvalue,
+                               cairo_scaled_font_to_gvalue);
+
+    pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_PATTERN,
+                               cairo_pattern_from_gvalue,
+                               cairo_pattern_to_gvalue);
+
 }
 PYGLIB_MODULE_END;
