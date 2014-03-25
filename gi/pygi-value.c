@@ -147,6 +147,11 @@ _pygi_argument_from_g_value(const GValue *value,
 }
 
 
+/* Ignore g_value_array deprecations. Although they are deprecated,
+ * we still need to support the marshaling of them in PyGObject.
+ */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
 static int
 pyg_value_array_from_pyobject(GValue *value,
                               PyObject *obj,
@@ -212,6 +217,8 @@ pyg_value_array_from_pyobject(GValue *value,
     g_value_take_boxed(value, value_array);
     return 0;
 }
+
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 static int
 pyg_array_from_pyobject(GValue *value,
@@ -489,6 +496,11 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
         break;
     case G_TYPE_BOXED: {
         PyGTypeMarshal *bm;
+        gboolean holds_value_array;
+
+        G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        holds_value_array = G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY);
+        G_GNUC_END_IGNORE_DEPRECATIONS
 
         if (obj == Py_None)
             g_value_set_boxed(value, NULL);
@@ -510,9 +522,9 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
             g_value_take_boxed (value, n_value);
             return pyg_value_from_pyobject_with_error (n_value, obj);
         }
-        else if (PySequence_Check(obj) &&
-                G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY))
+        else if (PySequence_Check(obj) && holds_value_array)
             return pyg_value_array_from_pyobject(value, obj, NULL);
+
         else if (PySequence_Check(obj) &&
                 G_VALUE_HOLDS(value, G_TYPE_ARRAY))
             return pyg_array_from_pyobject(value, obj);
@@ -718,6 +730,11 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
                     g_value_get_pointer(value));
     case G_TYPE_BOXED: {
         PyGTypeMarshal *bm;
+        gboolean holds_value_array;
+
+        G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+        holds_value_array = G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY);
+        G_GNUC_END_IGNORE_DEPRECATIONS
 
         if (G_VALUE_HOLDS(value, PY_TYPE_OBJECT)) {
             PyObject *ret = (PyObject *)g_value_dup_boxed(value);
@@ -729,7 +746,7 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
         } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE)) {
             GValue *n_value = g_value_get_boxed (value);
             return pyg_value_as_pyobject(n_value, copy_boxed);
-        } else if (G_VALUE_HOLDS(value, G_TYPE_VALUE_ARRAY)) {
+        } else if (holds_value_array) {
             GValueArray *array = (GValueArray *) g_value_get_boxed(value);
             PyObject *ret = PyList_New(array->n_values);
             int i;
