@@ -102,7 +102,7 @@ EXTRA_DIST = \
 	test_everything.py \
 	test_gi.py \
 	test_gdbus.py \
-	test_overrides.py \
+	test_import_machinery.py \
 	test_overrides_glib.py \
 	test_overrides_pango.py \
 	test_overrides_gdk.py \
