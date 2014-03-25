@@ -21,7 +21,6 @@
 # USA
 
 from __future__ import absolute_import
-import logging
 import sys
 
 from ._gi import Repository
@@ -47,11 +46,11 @@ class DynamicImporter(object):
         if path != self.path:
             return
 
-        if not repository.enumerate_versions(namespace):
-            logging.error('Could not find any typelib for %s', namespace)
-            return None
-        else:
+        if repository.enumerate_versions(namespace):
             return self
+        else:
+            raise ImportError('cannot import name %s, '
+                              'introspection typelib not found' % namespace)
 
     def load_module(self, fullname):
         if fullname in sys.modules:

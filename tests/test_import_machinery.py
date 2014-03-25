@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import sys
 import unittest
 
 import gi.overrides
@@ -56,3 +57,20 @@ class TestModule(unittest.TestCase):
 
         # Restore the previous cache
         gi.module._introspection_modules = old_modules
+
+
+class TestImporter(unittest.TestCase):
+    def test_invalid_repository_module_name(self):
+        with self.assertRaises(ImportError) as context:
+            from gi.repository import InvalidGObjectRepositoryModuleName
+            InvalidGObjectRepositoryModuleName  # pyflakes
+
+        exception_string = str(context.exception)
+
+        self.assertTrue('InvalidGObjectRepositoryModuleName' in exception_string)
+
+        # The message of the custom exception in gi/importer.py is eaten in Python 2.7
+        if sys.version_info.major < 3:
+            self.assertTrue('introspection typelib' not in exception_string)
+        else:
+            self.assertTrue('introspection typelib' in exception_string)
