@@ -30,7 +30,7 @@ m4_define(gio_required_version, 2.38.0)
 
 AC_INIT([pygobject],[pygobject_version],
 	[http://bugzilla.gnome.org/enter_bug.cgi?product=pygobject],
-	[pygobject],[https://live.gnome.org/PyGObject/])
+	[pygobject],[https://wiki.gnome.org/Projects/PyGObject/])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I .")
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([gi/gimodule.c])
