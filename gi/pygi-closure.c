@@ -712,20 +712,21 @@ static PyGICClosure*
 _pygi_destroy_notify_create (void)
 {
     if (!global_destroy_notify) {
-
-        PyGICClosure *destroy_notify = g_slice_new0 (PyGICClosure);
-        GIBaseInfo* glib_destroy_notify;
-
-        g_assert (destroy_notify);
+        GIBaseInfo *glib_destroy_notify;
+        PyGICClosure *destroy_notify;
 
         glib_destroy_notify = g_irepository_find_by_name (NULL, "GLib", "DestroyNotify");
         g_assert (glib_destroy_notify != NULL);
         g_assert (g_base_info_get_type (glib_destroy_notify) == GI_INFO_TYPE_CALLBACK);
 
+        destroy_notify = g_slice_new0 (PyGICClosure);
+
         destroy_notify->closure = g_callable_info_prepare_closure ( (GICallableInfo*) glib_destroy_notify,
                                                                     &destroy_notify->cif,
                                                                     _pygi_destroy_notify_callback_closure,
                                                                     NULL);
+
+        g_base_info_unref (glib_destroy_notify);
 
         global_destroy_notify = destroy_notify;
     }
