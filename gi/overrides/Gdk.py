@@ -202,6 +202,13 @@ class Event(Gdk.Event):
         else:
             raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
 
+    def __setattr__(self, name, value):
+        real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
+        if real_event:
+            setattr(getattr(self, real_event), name, value)
+        else:
+            Gdk.Event.__setattr__(self, name, value)
+
     def __repr__(self):
         base_repr = Gdk.Event.__repr__(self).strip("><")
         return "<%s type=%r>" % (base_repr, self.type)

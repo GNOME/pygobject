@@ -66,14 +66,21 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(event.type, Gdk.EventType.CONFIGURE)
         self.assertEqual(event.send_event, 0)
 
-        event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
-        event.x_root, event.y_root = 0, 5
-        self.assertEqual(event.x_root, 0)
-        self.assertEqual(event.y_root, 5)
-
         event = Gdk.Event()
         event.type = Gdk.EventType.SCROLL
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
+
+    def test_event_setattr(self):
+        event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
+        event.x_root, event.y_root = 0, 5
+        self.assertEqual(event.dnd.x_root, 0)
+        self.assertEqual(event.dnd.y_root, 5)
+        self.assertEqual(event.x_root, 0)
+        self.assertEqual(event.y_root, 5)
+
+        # this used to work, keep it that way
+        self.assertFalse(hasattr(event, "foo_bar"))
+        event.foo_bar = 42
 
     def test_event_repr(self):
         event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
