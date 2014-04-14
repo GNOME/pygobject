@@ -75,6 +75,10 @@ class TestGdk(unittest.TestCase):
         event.type = Gdk.EventType.SCROLL
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
+    def test_event_repr(self):
+        event = Gdk.Event.new(Gdk.EventType.CONFIGURE)
+        self.assertTrue("CONFIGURE" in repr(event))
+
     def test_event_structures(self):
         def button_press_cb(button, event):
             self.assertTrue(isinstance(event, Gdk.EventButton))

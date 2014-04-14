@@ -202,6 +202,10 @@ class Event(Gdk.Event):
         else:
             raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
 
+    def __repr__(self):
+        base_repr = Gdk.Event.__repr__(self).strip("><")
+        return "<%s type=%r>" % (base_repr, self.type)
+
 Event = override(Event)
 __all__.append('Event')
 
