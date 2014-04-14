@@ -1852,6 +1852,10 @@ class TestStructure(unittest.TestCase):
         self.assertEqual(struct.long_, 42)
         self.assertEqual(struct.string_, 'hello')
 
+    def test_union_init(self):
+        self.assertRaises(TypeError, GIMarshallingTests.Union, 42)
+        self.assertRaises(TypeError, GIMarshallingTests.Union, f=42)
+
     def test_union(self):
         union = GIMarshallingTests.Union()
 

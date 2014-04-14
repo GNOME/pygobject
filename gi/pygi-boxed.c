@@ -123,6 +123,12 @@ _boxed_init (PyObject *self,
              PyObject *args,
              PyObject *kwargs)
 {
+    static char *kwlist[] = { NULL };
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "", kwlist)) {
+        return -1;
+    }
+
     /* Don't call PyGBoxed's init, which raises an exception. */
     return 0;
 }

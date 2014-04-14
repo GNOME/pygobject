@@ -34,6 +34,9 @@ class FontDescription(Pango.FontDescription):
         else:
             return Pango.FontDescription.__new__(cls)
 
+    def __init__(self, *args, **kwargs):
+        return super(FontDescription, self).__init__()
+
 FontDescription = override(FontDescription)
 __all__.append('FontDescription')
 

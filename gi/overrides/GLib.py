@@ -547,6 +547,9 @@ class Source(GLib.Source):
         setattr(source, '__pygi_custom_source', True)
         return source
 
+    def __init__(self, *args, **kwargs):
+        return super(Source, self).__init__()
+
     def __del__(self):
         if hasattr(self, '__pygi_custom_source'):
             self.unref()
@@ -709,6 +712,9 @@ class IOChannel(GLib.IOChannel):
         if hwnd is not None:
             return GLib.IOChannel.win32_new_fd(hwnd)
         raise TypeError('either a valid file descriptor, file name, or window handle must be supplied')
+
+    def __init__(self, *args, **kwargs):
+        return super(IOChannel, self).__init__()
 
     def read(self, max_count=-1):
         return io_channel_read(self, max_count)

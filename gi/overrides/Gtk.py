@@ -1115,6 +1115,9 @@ class TreePath(Gtk.TreePath):
         except TypeError:
             raise TypeError("could not parse subscript '%s' as a tree path" % path)
 
+    def __init__(self, *args, **kwargs):
+        super(TreePath, self).__init__()
+
     def __str__(self):
         return self.to_string()
 
@@ -1465,6 +1468,9 @@ class IconSet(Gtk.IconSet):
         else:
             iconset = Gtk.IconSet.__new__(cls)
         return iconset
+
+    def __init__(self, *args, **kwargs):
+        return super(IconSet, self).__init__()
 
 IconSet = override(IconSet)
 __all__.append('IconSet')
