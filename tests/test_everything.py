@@ -15,7 +15,6 @@ try:
 except ImportError:
     has_cairo = False
 
-#import gi
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio

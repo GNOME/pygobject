@@ -71,7 +71,7 @@ class TestOption(unittest.TestCase):
     def test_parse_args_double_dash(self):
         options, args = self.parser.parse_args(
             ["test_option.py", "--", "-xxx"])
-        #self.assertEqual(args, ["-xxx"])
+        # self.assertEqual(args, ["-xxx"])
 
     def test_parse_args_group(self):
         group = self._create_group()

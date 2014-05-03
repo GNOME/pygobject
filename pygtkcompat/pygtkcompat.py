@@ -359,10 +359,10 @@ def enable_gtk(version='3.0'):
     except AttributeError:
         pass
 
-    #AccelGroup
+    # AccelGroup
     Gtk.AccelGroup.connect_group = Gtk.AccelGroup.connect
 
-    #StatusIcon
+    # StatusIcon
     Gtk.status_icon_position_menu = Gtk.StatusIcon.position_menu
     Gtk.StatusIcon.set_tooltip = Gtk.StatusIcon.set_tooltip_text
 
