@@ -1122,13 +1122,13 @@ class TreePath(Gtk.TreePath):
         return self.to_string()
 
     def __lt__(self, other):
-        return not other is None and self.compare(other) < 0
+        return other is not None and self.compare(other) < 0
 
     def __le__(self, other):
-        return not other is None and self.compare(other) <= 0
+        return other is not None and self.compare(other) <= 0
 
     def __eq__(self, other):
-        return not other is None and self.compare(other) == 0
+        return other is not None and self.compare(other) == 0
 
     def __ne__(self, other):
         return other is None or self.compare(other) != 0

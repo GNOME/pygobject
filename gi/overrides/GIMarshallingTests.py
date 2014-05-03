@@ -53,13 +53,13 @@ class OverridesObject(GIMarshallingTests.OverridesObject):
     def __init__(self, long_):
         GIMarshallingTests.OverridesObject.__init__(self)
         # FIXME: doesn't work yet
-        #self.long_ = long_
+        # self.long_ = long_
 
     @classmethod
     def new(cls, long_):
         self = GIMarshallingTests.OverridesObject.new()
         # FIXME: doesn't work yet
-        #self.long_ = long_
+        # self.long_ = long_
         return self
 
     def method(self):

@@ -61,9 +61,8 @@ class Sequence(object):
 
 class TestConstant(unittest.TestCase):
 
-# Blocked by https://bugzilla.gnome.org/show_bug.cgi?id=595773
-#    def test_constant_utf8(self):
-#        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.CONSTANT_UTF8)
+    def test_constant_utf8(self):
+        self.assertEqual(CONSTANT_UTF8, GIMarshallingTests.CONSTANT_UTF8)
 
     def test_constant_number(self):
         self.assertEqual(CONSTANT_NUMBER, GIMarshallingTests.CONSTANT_NUMBER)
@@ -2524,9 +2523,7 @@ class TestOverrides(unittest.TestCase):
 
         # not overridden
         self.assertEqual(GIMarshallingTests.SubObject.__module__, 'gi.repository.GIMarshallingTests')
-        # FIXME: does not work with TEST_NAMES='test_thread test_gi.TestOverrides',
-        # it is importlib._bootstrap then
-        #self.assertEqual(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
+        self.assertEqual(GObject.InitiallyUnowned.__module__, 'gi.repository.GObject')
 
 
 class TestDir(unittest.TestCase):

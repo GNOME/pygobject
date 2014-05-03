@@ -82,14 +82,14 @@ class Settings(Gio.Settings):
 
     def __getitem__(self, key):
         # get_value() aborts the program on an unknown key
-        if not key in self:
+        if key not in self:
             raise KeyError('unknown key: %r' % (key,))
 
         return self.get_value(key).unpack()
 
     def __setitem__(self, key, value):
         # set_value() aborts the program on an unknown key
-        if not key in self:
+        if key not in self:
             raise KeyError('unknown key: %r' % (key,))
 
         # determine type string of this key

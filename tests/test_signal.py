@@ -136,9 +136,9 @@ class TestAccumulator(unittest.TestCase):
         inst = Foo()
         inst.my_acc_signal.connect(lambda obj: 1)
         inst.my_acc_signal.connect(lambda obj: 2)
-        ## the value returned in the following handler will not be
-        ## considered, because at this point the accumulator already
-        ## reached its limit.
+        # the value returned in the following handler will not be
+        # considered, because at this point the accumulator already
+        # reached its limit.
         inst.my_acc_signal.connect(lambda obj: 3)
         retval = inst.my_acc_signal.emit()
         self.assertEqual(retval, 3)
@@ -147,8 +147,8 @@ class TestAccumulator(unittest.TestCase):
         inst = Foo()
         inst.my_other_acc_signal.connect(self._true_handler1)
         inst.my_other_acc_signal.connect(self._true_handler2)
-        ## the following handler will not be called because handler2
-        ## returns True, so it should stop the emission.
+        # the following handler will not be called because handler2
+        # returns True, so it should stop the emission.
         inst.my_other_acc_signal.connect(self._true_handler3)
         self.__true_val = None
         inst.my_other_acc_signal.emit()
@@ -629,20 +629,20 @@ class _TestCMarshaller:
         rv = self.obj.emit("test-gvalue", v)
         self.assertEqual(rv, GObject.G_MAXINT64)
 
-        # implicit int64
-        # does not work, see https://bugzilla.gnome.org/show_bug.cgi?id=683775
-        #rv = self.obj.emit("test-gvalue", GObject.G_MAXINT64)
-        #self.assertEqual(rv, GObject.G_MAXINT64)
-
         # explicit uint64
         v = GObject.Value(GObject.TYPE_UINT64, GObject.G_MAXUINT64)
         rv = self.obj.emit("test-gvalue", v)
         self.assertEqual(rv, GObject.G_MAXUINT64)
 
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=705291
+    def test_gvalue_implicit_int64(self):
+        # implicit int64
+        rv = self.obj.emit("test-gvalue", GObject.G_MAXINT64)
+        self.assertEqual(rv, GObject.G_MAXINT64)
+
         # implicit uint64
-        # does not work, see https://bugzilla.gnome.org/show_bug.cgi?id=683775
-        #rv = self.obj.emit("test-gvalue", GObject.G_MAXUINT64)
-        #self.assertEqual(rv, GObject.G_MAXUINT64)
+        rv = self.obj.emit("test-gvalue", GObject.G_MAXUINT64)
+        self.assertEqual(rv, GObject.G_MAXUINT64)
 
     def test_gvalue_ret(self):
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT),
@@ -705,7 +705,6 @@ class TestSignalDecorator(unittest.TestCase):
         @GObject.SignalOverride
         def notify(self, *args, **kargs):
             self.overridden_closure_called = True
-            #GObject.GObject.notify(self, *args, **kargs)
 
         def on_notify(self, obj, prop):
             self.notify_called = True
@@ -763,7 +762,6 @@ class TestSignalDecorator(unittest.TestCase):
         obj = self.DecoratedOverride()
         obj.connect("notify", obj.on_notify)
         self.assertEqual(obj.value, 0)
-        #obj.notify.emit()
         obj.value = 1
         self.assertEqual(obj.value, 1)
         self.assertTrue(obj.overridden_closure_called)

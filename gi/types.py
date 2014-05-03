@@ -182,7 +182,7 @@ class _GObjectMetaBase(type):
         cls._type_register(cls.__dict__)
 
     def _type_register(cls, namespace):
-        ## don't register the class if already registered
+        # don't register the class if already registered
         if '__gtype__' in namespace:
             return
 

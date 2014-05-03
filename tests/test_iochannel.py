@@ -108,7 +108,7 @@ second line
 
         ch.seek(2, 2)  # SEEK_END
         # FIXME: does not work currently
-        #self.assertEqual(ch.read(2), b'n!')
+        # self.assertEqual(ch.read(2), b'n!')
 
         # invalid whence value
         self.assertRaises(ValueError, ch.seek, 0, 3)
