@@ -754,6 +754,15 @@ _wrap_g_callable_info_get_return_attribute (PyGIBaseInfo *self, PyObject *py_nam
     }
 }
 
+static PyObject *
+_wrap_g_callable_info_can_throw_gerror (PyGIBaseInfo *self)
+{
+    if (g_callable_info_can_throw_gerror (self->info))
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+
 static PyMethodDef _PyGICallableInfo_methods[] = {
     { "invoke", (PyCFunction) _wrap_g_callable_info_invoke, METH_VARARGS | METH_KEYWORDS },
     { "get_arguments", (PyCFunction) _wrap_g_callable_info_get_arguments, METH_NOARGS },
@@ -762,6 +771,7 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
     { "may_return_null", (PyCFunction) _wrap_g_callable_info_may_return_null, METH_NOARGS },
     { "skip_return", (PyCFunction) _wrap_g_callable_info_skip_return, METH_NOARGS },
     { "get_return_attribute", (PyCFunction) _wrap_g_callable_info_get_return_attribute, METH_O },
+    { "can_throw_gerror", (PyCFunction) _wrap_g_callable_info_can_throw_gerror, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 

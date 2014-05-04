@@ -309,6 +309,22 @@ class Test(unittest.TestCase):
         self.assertEqual(vfunc.get_offset(), 0xFFFF)  # unknown offset
         self.assertEqual(vfunc.get_signal(), None)
 
+    def test_callable_can_throw_gerror(self):
+        info = repo.find_by_name('GIMarshallingTests', 'Object')
+        invoker = find_child_info(info, 'get_methods', 'vfunc_meth_with_error')
+        vfunc = find_child_info(info, 'get_vfuncs', 'vfunc_meth_with_err')
+
+        self.assertTrue(invoker.can_throw_gerror())
+        self.assertTrue(vfunc.can_throw_gerror())
+
+        # Test that args do not include the GError**
+        self.assertEqual(len(invoker.get_arguments()), 1)
+        self.assertEqual(len(vfunc.get_arguments()), 1)
+
+        # Sanity check method that does not throw.
+        invoker_no_throws = find_child_info(info, 'get_methods', 'method_int8_in')
+        self.assertFalse(invoker_no_throws.can_throw_gerror())
+
     def test_flags_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
         # also raise a RuntimeError.
