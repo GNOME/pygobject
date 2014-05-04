@@ -27,6 +27,7 @@
 #include "pygi-private.h"
 #include "pygi.h"
 #include "pyglib.h"
+#include "pygi-error.h"
 
 #include <pyglib-python-compat.h>
 
@@ -584,7 +585,7 @@ pyg_channel_read(PyObject* self, PyObject *args, PyObject *kwargs)
         status = g_io_channel_read_chars (iochannel, buf, buf_size, &single_read, &error);
         Py_END_ALLOW_THREADS;
 
-        if (pyglib_error_check(&error))
+        if (pygi_error_check (&error))
 	    goto failure;
 	
 	total_read += single_read;
@@ -664,6 +665,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
     PyModule_AddObject (module, "_gobject", _gobject_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
+    pygi_error_register_types (module);
     _pygi_repository_register_types (module);
     _pygi_info_register_types (module);
     _pygi_struct_register_types (module);

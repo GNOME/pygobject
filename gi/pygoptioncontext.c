@@ -25,6 +25,7 @@
 #include <pyglib.h>
 #include "pyglib-private.h"
 #include "pygoptioncontext.h"
+#include "pygi-error.h"
 
 PYGLIB_DEFINE_TYPE("gi._glib.OptionContext", PyGOptionContext_Type, PyGOptionContext)
 
@@ -138,7 +139,7 @@ pyg_option_context_parse(PyGOptionContext *self,
     {
         g_strfreev(argv_content);
         g_strfreev(original);
-        pyglib_error_check(&error);
+        pygi_error_check(&error);
         return NULL;
     }
 

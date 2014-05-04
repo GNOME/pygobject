@@ -23,6 +23,7 @@
 #include <pyglib.h>
 #include "pygi-invoke.h"
 #include "pygi-marshal-cleanup.h"
+#include "pygi-error.h"
 
 static inline gboolean
 _invoke_callable (PyGIInvokeState *state,
@@ -46,7 +47,7 @@ _invoke_callable (PyGIInvokeState *state,
      * state->error allowing for easy checking here.
      */
     if (state->error != NULL) {
-        if (pyglib_error_check (&(state->error))) {
+        if (pygi_error_check (&(state->error))) {
             /* even though we errored out, the call itself was successful,
                so we assume the call processed all of the parameters */
             pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
@@ -308,7 +309,7 @@ _invoke_state_init_from_callable_cache (GIBaseInfo *info,
         state->function_ptr = g_vfunc_info_get_address ((GIVFuncInfo *)info,
                                                         state->implementor_gtype,
                                                         &error);
-        if (pyglib_error_check (&error)) {
+        if (pygi_error_check (&error)) {
             return FALSE;
         }
     }

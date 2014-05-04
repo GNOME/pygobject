@@ -25,6 +25,7 @@
 #include <pyglib.h>
 #include "pyglib-private.h"
 #include "pygoptiongroup.h"
+#include "pygi-error.h"
 
 PYGLIB_DEFINE_TYPE("gi._glib.OptionGroup", PyGOptionGroup_Type, PyGOptionGroup)
 
@@ -148,7 +149,7 @@ arg_func(const gchar *option_name,
         Py_DECREF(ret);
         no_error = TRUE;
     } else
-	no_error = pyglib_gerror_exception_check(error) != -1;
+	no_error = pygi_gerror_exception_check(error) != -1;
 
     pyglib_gil_state_release(state);
     return no_error;

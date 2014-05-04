@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 gboolean _pyglib_handler_marshal(gpointer user_data);
 void _pyglib_destroy_notify(gpointer user_data);
 
-extern PyObject *PyGError;
 extern PyObject *pyglib__glib_module_create (void);
 
 G_END_DECLS

@@ -26,6 +26,7 @@
 #include "pyglib-private.h"
 
 #include "pygspawn.h"
+#include "pygi-error.h"
 
 struct _PyGChildSetupData {
     PyObject *func;
@@ -214,7 +215,7 @@ pyglib_spawn_async(PyObject *object, PyObject *args, PyObject *kwargs)
             Py_XDECREF(callback_data->data);
             g_slice_free(struct _PyGChildSetupData, callback_data);
         }
-        pyglib_error_check(&error);
+        pygi_error_check(&error);
         return NULL;
     }
     g_free(argv);

@@ -1,6 +1,8 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
+ * Copyright (C) 1998-2003  James Henstridge
+ *               2004-2008  Johan Dahlin
  * Copyright (C) 2011 John (J5) Palmieri <johnp@redhat.com>
  * Copyright (C) 2014 Simon Feltman <sfeltman@gnome.org>
  *
@@ -22,6 +24,207 @@
 #include "pygi-private.h"
 #include "pygi-error.h"
 
+
+static PyObject *PyGError = NULL;
+static PyObject *exception_table = NULL;
+
+/**
+ * pygi_error_marshal:
+ * @error: a pointer to the GError.
+ *
+ * Checks to see if @error has been set.  If @error has been set, then a
+ * GLib.GError Python exception object is returned (but not raised).
+ *
+ * Returns: a GLib.GError Python exception object, or NULL.
+ */
+PyObject *
+pygi_error_marshal (GError **error)
+{
+    PyGILState_STATE state;
+    PyObject *exc_type;
+    PyObject *exc_instance;
+    PyObject *d;
+
+    g_return_val_if_fail(error != NULL, NULL);
+
+    if (*error == NULL)
+        return NULL;
+
+    state = pyglib_gil_state_ensure();
+
+    exc_type = PyGError;
+    if (exception_table != NULL)
+    {
+        PyObject *item;
+        item = PyDict_GetItem(exception_table, PYGLIB_PyLong_FromLong((*error)->domain));
+        if (item != NULL)
+            exc_type = item;
+    }
+
+    exc_instance = PyObject_CallFunction(exc_type, "z", (*error)->message);
+
+    if ((*error)->domain) {
+        PyObject_SetAttrString(exc_instance, "domain",
+                               d=PYGLIB_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
+        Py_DECREF(d);
+    }
+    else
+        PyObject_SetAttrString(exc_instance, "domain", Py_None);
+
+    PyObject_SetAttrString(exc_instance, "code",
+                           d=PYGLIB_PyLong_FromLong((*error)->code));
+    Py_DECREF(d);
+
+    if ((*error)->message) {
+        PyObject_SetAttrString(exc_instance, "message",
+                               d=PYGLIB_PyUnicode_FromString((*error)->message));
+        Py_DECREF(d);
+    } else {
+        PyObject_SetAttrString(exc_instance, "message", Py_None);
+    }
+
+    pyglib_gil_state_release(state);
+
+    return exc_instance;
+}
+
+/**
+ * pygi_error_check:
+ * @error: a pointer to the GError.
+ *
+ * Checks to see if the GError has been set.  If the error has been
+ * set, then the glib.GError Python exception will be raised, and
+ * the GError cleared.
+ *
+ * Returns: True if an error was set.
+ */
+gboolean
+pygi_error_check (GError **error)
+{
+    PyGILState_STATE state;
+    PyObject *exc_instance;
+
+    g_return_val_if_fail(error != NULL, FALSE);
+    if (*error == NULL)
+        return FALSE;
+
+    state = pyglib_gil_state_ensure();
+
+    exc_instance = pygi_error_marshal (error);
+    PyErr_SetObject(PyGError, exc_instance);
+    Py_DECREF(exc_instance);
+    g_clear_error(error);
+
+    pyglib_gil_state_release(state);
+
+    return TRUE;
+}
+
+/**
+ * pygi_gerror_exception_check:
+ * @error: a standard GLib GError ** output parameter
+ *
+ * Checks to see if a GError exception has been raised, and if so
+ * translates the python exception to a standard GLib GError.  If the
+ * raised exception is not a GError then PyErr_Print() is called.
+ *
+ * Returns: 0 if no exception has been raised, -1 if it is a
+ * valid glib.GError, -2 otherwise.
+ */
+gboolean
+pygi_gerror_exception_check (GError **error)
+{
+    PyObject *type, *value, *traceback;
+    PyObject *py_message, *py_domain, *py_code;
+    const char *bad_gerror_message;
+
+    PyErr_Fetch(&type, &value, &traceback);
+    if (type == NULL)
+        return 0;
+    PyErr_NormalizeException(&type, &value, &traceback);
+    if (value == NULL) {
+        PyErr_Restore(type, value, traceback);
+        PyErr_Print();
+        return -2;
+    }
+    if (!value ||
+        !PyErr_GivenExceptionMatches(type,
+                                     (PyObject *) PyGError)) {
+        PyErr_Restore(type, value, traceback);
+        PyErr_Print();
+        return -2;
+    }
+    Py_DECREF(type);
+    Py_XDECREF(traceback);
+
+    py_message = PyObject_GetAttrString(value, "message");
+    if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
+        bad_gerror_message = "gi._glib.GError instances must have a 'message' string attribute";
+        Py_XDECREF(py_message);
+        goto bad_gerror;
+    }
+
+    py_domain = PyObject_GetAttrString(value, "domain");
+    if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
+        bad_gerror_message = "gi._glib.GError instances must have a 'domain' string attribute";
+        Py_DECREF(py_message);
+        Py_XDECREF(py_domain);
+        goto bad_gerror;
+    }
+
+    py_code = PyObject_GetAttrString(value, "code");
+    if (!py_code || !PYGLIB_PyLong_Check(py_code)) {
+        bad_gerror_message = "gi._glib.GError instances must have a 'code' int attribute";
+        Py_DECREF(py_message);
+        Py_DECREF(py_domain);
+        Py_XDECREF(py_code);
+        goto bad_gerror;
+    }
+
+    g_set_error(error, g_quark_from_string(PYGLIB_PyUnicode_AsString(py_domain)),
+                PYGLIB_PyLong_AsLong(py_code), "%s", PYGLIB_PyUnicode_AsString(py_message));
+
+    Py_DECREF(py_message);
+    Py_DECREF(py_code);
+    Py_DECREF(py_domain);
+    return -1;
+
+bad_gerror:
+    Py_DECREF(value);
+    g_set_error(error, g_quark_from_static_string("pyglib"), 0, "%s", bad_gerror_message);
+    PyErr_SetString(PyExc_ValueError, bad_gerror_message);
+    PyErr_Print();
+    return -2;
+}
+
+/**
+ * pygi_register_exception_for_domain:
+ * @name: name of the exception
+ * @error_domain: error domain
+ *
+ * Registers a new glib.GError exception subclass called #name for
+ * a specific #domain. This exception will be raised when a GError
+ * of the same domain is passed in to pygi_error_check().
+ *
+ * Returns: the new exception
+ */
+PyObject *
+pygi_register_exception_for_domain (gchar *name,
+                                    gint error_domain)
+{
+    PyObject *exception;
+
+    exception = PyErr_NewException(name, PyGError, NULL);
+
+    if (exception_table == NULL)
+        exception_table = PyDict_New();
+
+    PyDict_SetItem(exception_table,
+                   PYGLIB_PyLong_FromLong(error_domain),
+                   exception);
+
+    return exception;
+}
 
 static gboolean
 _pygi_marshal_from_py_gerror (PyGIInvokeState   *state,
@@ -45,7 +248,7 @@ _pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
     GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;
 
-    py_obj = pyglib_error_marshal(&error);
+    py_obj = pygi_error_marshal (&error);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
         g_error_free (error);
@@ -107,3 +310,20 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
         return NULL;
     }
 }
+
+void
+pygi_error_register_types (PyObject *module)
+{
+    PyObject *dict;
+    dict = PyDict_New();
+    /* This is a hack to work around the deprecation warning of
+     * BaseException.message in Python 2.6+.
+     * GError has also an "message" attribute.
+     */
+    PyDict_SetItemString(dict, "message", Py_None);
+    PyGError = PyErr_NewException("GLib.GError", PyExc_RuntimeError, dict);
+    Py_DECREF(dict);
+
+    PyModule_AddObject (module, "GError", PyGError);
+}
+

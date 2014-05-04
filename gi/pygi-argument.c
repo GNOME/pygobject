@@ -33,7 +33,7 @@
 #include "pygi-basictype.h"
 #include "pygi-object.h"
 #include "pygi-struct-marshal.h"
-
+#include "pygi-error.h"
 
 static gboolean
 gi_argument_to_gssize (GIArgument *arg_in,
@@ -1558,12 +1558,12 @@ _pygi_argument_to_object (GIArgument  *arg,
             GError *error = (GError *) arg->v_pointer;
             if (error != NULL && transfer == GI_TRANSFER_NOTHING) {
                 /* If we have not been transferred the ownership we must copy
-                 * the error, because pyglib_error_check() is going to free it.
+                 * the error, because pygi_error_check() is going to free it.
                  */
                 error = g_error_copy (error);
             }
 
-            if (pyglib_error_check (&error)) {
+            if (pygi_error_check (&error)) {
                 PyObject *err_type;
                 PyObject *err_value;
                 PyObject *err_trace;

@@ -1,6 +1,8 @@
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  *
+ * Copyright (C) 1998-2003  James Henstridge
+ *               2004-2008  Johan Dahlin
  * Copyright (C) 2014 Simon Feltman <sfeltman@gnome.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -25,10 +27,21 @@
 
 G_BEGIN_DECLS
 
-PyGIArgCache *pygi_arg_gerror_new_from_info  (GITypeInfo    *type_info,
-                                              GIArgInfo     *arg_info,   /* may be null */
-                                              GITransfer     transfer,
-                                              PyGIDirection  direction);
+gboolean      pygi_error_check              (GError **error);
+
+PyObject*     pygi_error_marshal            (GError **error);
+
+gboolean      pygi_gerror_exception_check   (GError **error);
+
+PyObject*     pygi_register_exception_for_domain (gchar *name,
+                                                  gint   error_domain);
+
+PyGIArgCache* pygi_arg_gerror_new_from_info (GITypeInfo    *type_info,
+                                             GIArgInfo     *arg_info,   /* may be null */
+                                             GITransfer     transfer,
+                                             PyGIDirection  direction);
+
+void          pygi_error_register_types     (PyObject *module);
 
 G_END_DECLS
 

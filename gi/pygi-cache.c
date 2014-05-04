@@ -695,7 +695,7 @@ _setup_invoker (GICallableInfo *callable_info,
                                           &error)) {
             return TRUE;
         }
-        if (!pyglib_error_check (&error)) {
+        if (!pygi_error_check (&error)) {
             PyErr_Format (PyExc_RuntimeError,
                           "unknown error creating invoker for %s",
                           g_base_info_get_name ((GIBaseInfo *)callable_info));
@@ -707,7 +707,7 @@ _setup_invoker (GICallableInfo *callable_info,
                                                  (GIFunctionInfo *)callable_info,
                                                  invoker,
                                                  &error)) {
-            if (!pyglib_error_check (&error)) {
+            if (!pygi_error_check (&error)) {
                 PyErr_Format (PyExc_RuntimeError,
                               "unknown error creating invoker for %s",
                               g_base_info_get_name ((GIBaseInfo *)callable_info));

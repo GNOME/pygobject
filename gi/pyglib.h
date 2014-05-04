@@ -37,11 +37,6 @@ typedef void (*PyGLibThreadBlockFunc) (void);
 #    define pyglib_gil_state_release         PyGILState_Release
 #endif
 
-gboolean pyglib_error_check(GError **error);
-PyObject *pyglib_error_marshal (GError **error);
-gboolean pyglib_gerror_exception_check(GError **error);
-PyObject *pyglib_register_exception_for_domain(gchar *name,
-					       gint error_domain);
 GOptionGroup * pyglib_option_group_transfer_group(PyObject *self);
 
 /* Private: for gobject <-> glib interaction only. */

@@ -31,8 +31,6 @@
 #include "pygoptiongroup.h"
 #include "pygspawn.h"
 
-PyObject *PyGError = NULL;
-
 /* ---------------- glib module functions -------------------- */
 
 static PyMethodDef _glib_functions[] = {
@@ -48,27 +46,10 @@ static PyMethodDef _glib_functions[] = {
     { NULL, NULL, 0 }
 };
 
-static void
-pyglib_register_error(PyObject *d)
-{
-    PyObject *dict;
-    dict = PyDict_New();
-    /* This is a hack to work around the deprecation warning of
-     * BaseException.message in Python 2.6+.
-     * GError has also an "message" attribute.
-     */
-    PyDict_SetItemString(dict, "message", Py_None);
-    PyGError = PyErr_NewException("gi._glib.GError", PyExc_RuntimeError, dict);
-    Py_DECREF(dict);
-
-    PyDict_SetItemString(d, "GError", PyGError);
-}
-
 PYGLIB_MODULE_START(_glib, "_glib")
 {
     PyObject *d = PyModule_GetDict(module);
 
-    pyglib_register_error(d);
     pyglib_spawn_register_types(d);
     pyglib_option_context_register_types(d);
     pyglib_option_group_register_types(d);

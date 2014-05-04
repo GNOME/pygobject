@@ -40,7 +40,7 @@ else:
     _basestring = basestring
     _bytes = str
 
-from gi._gi import _glib
+from gi._gi import _glib, GError
 GLib = get_introspection_module('GLib')
 
 OPTION_CONTEXT_ERROR_QUARK = GLib.quark_to_string(GLib.option_error_quark())
@@ -202,7 +202,7 @@ class OptionGroup(optparse.OptionGroup):
                 opt.process(option_name, option_value, self.values, parser)
             except OptionValueError:
                 error = sys.exc_info()[1]
-                gerror = _glib.GError(str(error))
+                gerror = GError(str(error))
                 gerror.domain = OPTION_CONTEXT_ERROR_QUARK
                 gerror.code = GLib.OptionError.BAD_VALUE
                 gerror.message = str(error)
@@ -347,7 +347,7 @@ class OptionParser(optparse.OptionParser):
         try:
             options, args = optparse.OptionParser.parse_args(
                 self, args, values)
-        except _glib.GError:
+        except GError:
             error = sys.exc_info()[1]
             if error.domain != OPTION_CONTEXT_ERROR_QUARK:
                 raise

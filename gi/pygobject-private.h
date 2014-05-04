@@ -53,7 +53,6 @@ extern GQuark pygobject_custom_key;
 void     pygobject_data_free  (PyGObjectData *data);
 void     pyg_destroy_notify   (gpointer     user_data);
 gboolean pyg_handler_marshal  (gpointer     user_data);
-gboolean pyg_error_check      (GError     **error);
 int      pygobject_constructv (PyGObject   *self,
                                guint        n_parameters,
                                GParameter  *parameters);
@@ -61,8 +60,6 @@ int      pygobject_constructv (PyGObject   *self,
 PyObject *pyg_integer_richcompare(PyObject *v,
                                   PyObject *w,
                                   int op);
-
-gboolean pyg_gerror_exception_check(GError **error);
 
 void pygobject_ref_float(PyGObject *self);
 void pygobject_ref_sink(PyGObject *self);

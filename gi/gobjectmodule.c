@@ -37,6 +37,7 @@
 #include "pygoptiongroup.h"
 
 #include "pygi-value.h"
+#include "pygi-error.h"
 
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
@@ -1834,55 +1835,6 @@ pyg_flags_add_constants(PyObject *module, GType flags_type,
 }
 
 /**
- * pyg_error_check:
- * @error: a pointer to the GError.
- *
- * Checks to see if the GError has been set.  If the error has been
- * set, then the gobject.GError Python exception will be raised, and
- * the GError cleared.
- *
- * Returns: True if an error was set.
- *
- * Deprecated: Since 2.16, use pyglib_error_check instead.
- */
-gboolean
-pyg_error_check(GError **error)
-{
-#if 0
-    if (PyErr_Warn(PyExc_DeprecationWarning,
-		   "pyg_error_check is deprecated, use "
-		   "pyglib_error_check instead"))
-        return NULL;
-#endif
-    return pyglib_error_check(error);
-}
-
-/**
- * pyg_gerror_exception_check:
- * @error: a standard GLib GError ** output parameter
- *
- * Checks to see if a GError exception has been raised, and if so
- * translates the python exception to a standard GLib GError.  If the
- * raised exception is not a GError then PyErr_Print() is called.
- *
- * Returns: 0 if no exception has been raised, -1 if it is a
- * valid gobject.GError, -2 otherwise.
- *
- * Deprecated: Since 2.16, use pyglib_gerror_exception_check instead.
- */
-gboolean
-pyg_gerror_exception_check(GError **error)
-{
-#if 0
-    if (PyErr_Warn(PyExc_DeprecationWarning,
-		   "pyg_gerror_exception_check is deprecated, use "
-		   "pyglib_gerror_exception_check instead"))
-        return NULL;
-#endif
-    return pyglib_gerror_exception_check(error);
-}
-
-/**
  * pyg_parse_constructor_args: helper function for PyGObject constructors
  * @obj_type: GType of the GObject, for parameter introspection
  * @arg_names: %NULL-terminated array of constructor argument names
@@ -2055,7 +2007,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   pyg_constant_strip_prefix,
 
-  pyg_error_check,
+  pygi_error_check,
 
   _pyg_set_thread_block_funcs,
   (PyGThreadBlockFunc)0, /* block_threads */
@@ -2098,7 +2050,7 @@ struct _PyGObject_Functions pygobject_api_functions = {
 
   NULL, /* previously type_register_custom */
 
-  pyg_gerror_exception_check,
+  pygi_gerror_exception_check,
 
   pyg_option_group_new,
   pyg_type_from_object_strict,
