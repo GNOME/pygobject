@@ -766,7 +766,7 @@ static PyMethodDef _PyGICallableInfo_methods[] = {
 };
 
 /* CallbackInfo */
-PYGLIB_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGIBaseInfo);
+PYGLIB_DEFINE_TYPE ("gi.CallbackInfo", PyGICallbackInfo_Type, PyGICallableInfo);
 
 static PyMethodDef _PyGICallbackInfo_methods[] = {
     { NULL, NULL, 0 }
@@ -2185,7 +2185,7 @@ _pygi_info_register_types (PyObject *m)
     _PyGI_REGISTER_TYPE (m, PyGIUnresolvedInfo_Type, UnresolvedInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGICallbackInfo_Type, CallbackInfo,
-                         PyGIBaseInfo_Type);
+                         PyGICallableInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIRegisteredTypeInfo_Type, RegisteredTypeInfo,
                          PyGIBaseInfo_Type);
     _PyGI_REGISTER_TYPE (m, PyGIStructInfo_Type, StructInfo,

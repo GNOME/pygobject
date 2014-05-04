@@ -100,6 +100,13 @@ class Test(unittest.TestCase):
         self.assertFalse(info.get_fundamental())
         self.assertEqual(info.get_parent(), repo.find_by_name('GObject', 'Object'))
 
+    def test_callable_inheritance(self):
+        self.assertTrue(issubclass(GIRepository.CallableInfo, GIRepository.BaseInfo))
+        self.assertTrue(issubclass(GIRepository.CallbackInfo, GIRepository.CallableInfo))
+        self.assertTrue(issubclass(GIRepository.FunctionInfo, GIRepository.CallableInfo))
+        self.assertTrue(issubclass(GIRepository.VFuncInfo, GIRepository.CallableInfo))
+        self.assertTrue(issubclass(GIRepository.SignalInfo, GIRepository.CallableInfo))
+
     def test_registered_type_info(self):
         info = repo.find_by_name('GIMarshallingTests', 'Object')
         # Call these from the class because GIObjectInfo overrides them
