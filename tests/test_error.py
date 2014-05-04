@@ -5,6 +5,7 @@
 #
 # Copyright (C) 2012 Will Thompson
 # Copyright (C) 2013 Martin Pitt
+# Copyright (C) 2014 Simon Feltman <sfeltman@gnome.org>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -26,6 +27,42 @@ import unittest
 
 from gi.repository import GLib
 from gi.repository import GIMarshallingTests
+
+
+class TestType(unittest.TestCase):
+    def test_attributes(self):
+        e = GLib.GError('test message', 'mydomain', 42)
+        self.assertEqual(e.message, 'test message')
+        self.assertEqual(e.domain, 'mydomain')
+        self.assertEqual(e.code, 42)
+
+    def test_new_literal(self):
+        mydomain = GLib.quark_from_string('mydomain')
+        e = GLib.GError.new_literal(mydomain, 'test message', 42)
+        self.assertEqual(e.message, 'test message')
+        self.assertEqual(e.domain, 'mydomain')
+        self.assertEqual(e.code, 42)
+
+    def test_matches(self):
+        mydomain = GLib.quark_from_string('mydomain')
+        notmydomain = GLib.quark_from_string('notmydomain')
+        e = GLib.GError('test message', 'mydomain', 42)
+        self.assertTrue(e.matches(mydomain, 42))
+        self.assertFalse(e.matches(notmydomain, 42))
+        self.assertFalse(e.matches(mydomain, 40))
+
+    def test_str(self):
+        e = GLib.GError('test message', 'mydomain', 42)
+        self.assertEqual(str(e),
+                         'mydomain: test message (42)')
+
+    def test_repr(self):
+        e = GLib.GError('test message', 'mydomain', 42)
+        self.assertEqual(repr(e),
+                         "GLib.GError('test message', 'mydomain', 42)")
+
+    def test_inheritance(self):
+        self.assertTrue(issubclass(GLib.GError, RuntimeError))
 
 
 class TestMarshalling(unittest.TestCase):

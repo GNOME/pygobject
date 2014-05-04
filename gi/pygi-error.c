@@ -314,16 +314,12 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
 void
 pygi_error_register_types (PyObject *module)
 {
-    PyObject *dict;
-    dict = PyDict_New();
-    /* This is a hack to work around the deprecation warning of
-     * BaseException.message in Python 2.6+.
-     * GError has also an "message" attribute.
-     */
-    PyDict_SetItemString(dict, "message", Py_None);
-    PyGError = PyErr_NewException("GLib.GError", PyExc_RuntimeError, dict);
-    Py_DECREF(dict);
+    PyObject *error_module = PyImport_ImportModule ("gi._error");
+    if (!error_module) {
+        return;
+    }
 
-    PyModule_AddObject (module, "GError", PyGError);
+    /* Stash a reference to the Python implemented gi._error.GError. */
+    PyGError = PyObject_GetAttrString (error_module, "GError");
 }
 

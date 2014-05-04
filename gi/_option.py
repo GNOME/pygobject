@@ -40,7 +40,8 @@ else:
     _basestring = basestring
     _bytes = str
 
-from gi._gi import _glib, GError
+from gi._gi import _glib
+from gi._error import GError
 GLib = get_introspection_module('GLib')
 
 OPTION_CONTEXT_ERROR_QUARK = GLib.quark_to_string(GLib.option_error_quark())

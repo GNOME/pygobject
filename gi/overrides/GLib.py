@@ -39,7 +39,9 @@ __all__.append('option')
 
 
 # Types and functions still needed from static bindings
-from gi._gi import _glib, GError
+from gi._gi import _glib
+from gi._error import GError
+
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
@@ -50,6 +52,27 @@ def threads_init():
     warnings.warn('Since version 3.11, calling threads_init is no longer needed. '
                   'See: https://wiki.gnome.org/PyGObject/Threading',
                   PyGIDeprecationWarning, stacklevel=2)
+
+
+def gerror_matches(self, domain, code):
+    # Handle cases where self.domain was set to an integer for compatibility
+    # with the introspected GLib.Error.
+    if isinstance(self.domain, str):
+        self_domain_quark = GLib.quark_from_string(self.domain)
+    else:
+        self_domain_quark = self.domain
+    return (self_domain_quark, self.code) == (domain, code)
+
+
+def gerror_new_literal(domain, message, code):
+    domain_quark = GLib.quark_to_string(domain)
+    return GError(message, domain_quark, code)
+
+
+# Monkey patch methods that rely on GLib introspection to be loaded at runtime.
+GError.matches = gerror_matches
+GError.new_literal = staticmethod(gerror_new_literal)
+
 
 __all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']
