@@ -43,7 +43,7 @@ pygi_error_marshal (GError **error)
     PyGILState_STATE state;
     PyObject *exc_type;
     PyObject *exc_instance;
-    PyObject *d;
+    const char *domain = NULL;
 
     g_return_val_if_fail(error != NULL, NULL);
 
@@ -61,27 +61,14 @@ pygi_error_marshal (GError **error)
             exc_type = item;
     }
 
-    exc_instance = PyObject_CallFunction(exc_type, "z", (*error)->message);
-
     if ((*error)->domain) {
-        PyObject_SetAttrString(exc_instance, "domain",
-                               d=PYGLIB_PyUnicode_FromString(g_quark_to_string((*error)->domain)));
-        Py_DECREF(d);
+        domain = g_quark_to_string ((*error)->domain);
     }
-    else
-        PyObject_SetAttrString(exc_instance, "domain", Py_None);
 
-    PyObject_SetAttrString(exc_instance, "code",
-                           d=PYGLIB_PyLong_FromLong((*error)->code));
-    Py_DECREF(d);
-
-    if ((*error)->message) {
-        PyObject_SetAttrString(exc_instance, "message",
-                               d=PYGLIB_PyUnicode_FromString((*error)->message));
-        Py_DECREF(d);
-    } else {
-        PyObject_SetAttrString(exc_instance, "message", Py_None);
-    }
+    exc_instance = PyObject_CallFunction (exc_type, "ssi",
+                                          (*error)->message,
+                                          domain,
+                                          (*error)->code);
 
     pyglib_gil_state_release(state);
 
