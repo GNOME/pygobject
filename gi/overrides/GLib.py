@@ -42,6 +42,7 @@ __all__.append('option')
 from gi._gi import _glib
 from gi._error import GError
 
+Error = GError
 OptionContext = _glib.OptionContext
 OptionGroup = _glib.OptionGroup
 Pid = _glib.Pid
@@ -70,11 +71,13 @@ def gerror_new_literal(domain, message, code):
 
 
 # Monkey patch methods that rely on GLib introspection to be loaded at runtime.
-GError.matches = gerror_matches
-GError.new_literal = staticmethod(gerror_new_literal)
+Error.__name__ = 'Error'
+Error.__module__ = 'GLib'
+Error.matches = gerror_matches
+Error.new_literal = staticmethod(gerror_new_literal)
 
 
-__all__ += ['GError', 'OptionContext', 'OptionGroup', 'Pid',
+__all__ += ['GError', 'Error', 'OptionContext', 'OptionGroup', 'Pid',
             'spawn_async', 'threads_init']
 
 

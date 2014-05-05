@@ -38,7 +38,8 @@ class GError(RuntimeError):
         return "%s: %s (%d)" % (self.domain, self.message, self.code)
 
     def __repr__(self):
-        return "GLib.GError('%s', '%s', %d)" % (self.message, self.domain, self.code)
+        return "%s.%s('%s', '%s', %d)" % (GError.__module__, GError.__name__,
+                                          self.message, self.domain, self.code)
 
     def copy(self):
         return GError(self.message, self.domain, self.code)

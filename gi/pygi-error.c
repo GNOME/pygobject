@@ -146,14 +146,14 @@ pygi_gerror_exception_check (GError **error)
 
     py_message = PyObject_GetAttrString(value, "message");
     if (!py_message || !PYGLIB_PyUnicode_Check(py_message)) {
-        bad_gerror_message = "gi._glib.GError instances must have a 'message' string attribute";
+        bad_gerror_message = "GLib.Error instances must have a 'message' string attribute";
         Py_XDECREF(py_message);
         goto bad_gerror;
     }
 
     py_domain = PyObject_GetAttrString(value, "domain");
     if (!py_domain || !PYGLIB_PyUnicode_Check(py_domain)) {
-        bad_gerror_message = "gi._glib.GError instances must have a 'domain' string attribute";
+        bad_gerror_message = "GLib.Error instances must have a 'domain' string attribute";
         Py_DECREF(py_message);
         Py_XDECREF(py_domain);
         goto bad_gerror;
@@ -161,7 +161,7 @@ pygi_gerror_exception_check (GError **error)
 
     py_code = PyObject_GetAttrString(value, "code");
     if (!py_code || !PYGLIB_PyLong_Check(py_code)) {
-        bad_gerror_message = "gi._glib.GError instances must have a 'code' int attribute";
+        bad_gerror_message = "GLib.Error instances must have a 'code' int attribute";
         Py_DECREF(py_message);
         Py_DECREF(py_domain);
         Py_XDECREF(py_code);
@@ -178,7 +178,7 @@ pygi_gerror_exception_check (GError **error)
 
 bad_gerror:
     Py_DECREF(value);
-    g_set_error(error, g_quark_from_static_string("pyglib"), 0, "%s", bad_gerror_message);
+    g_set_error(error, g_quark_from_static_string("pygi"), 0, "%s", bad_gerror_message);
     PyErr_SetString(PyExc_ValueError, bad_gerror_message);
     PyErr_Print();
     return -2;
@@ -189,7 +189,7 @@ bad_gerror:
  * @name: name of the exception
  * @error_domain: error domain
  *
- * Registers a new glib.GError exception subclass called #name for
+ * Registers a new GLib.Error exception subclass called #name for
  * a specific #domain. This exception will be raised when a GError
  * of the same domain is passed in to pygi_error_check().
  *

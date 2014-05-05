@@ -31,14 +31,14 @@ from gi.repository import GIMarshallingTests
 
 class TestType(unittest.TestCase):
     def test_attributes(self):
-        e = GLib.GError('test message', 'mydomain', 42)
+        e = GLib.Error('test message', 'mydomain', 42)
         self.assertEqual(e.message, 'test message')
         self.assertEqual(e.domain, 'mydomain')
         self.assertEqual(e.code, 42)
 
     def test_new_literal(self):
         mydomain = GLib.quark_from_string('mydomain')
-        e = GLib.GError.new_literal(mydomain, 'test message', 42)
+        e = GLib.Error.new_literal(mydomain, 'test message', 42)
         self.assertEqual(e.message, 'test message')
         self.assertEqual(e.domain, 'mydomain')
         self.assertEqual(e.code, 42)
@@ -46,23 +46,23 @@ class TestType(unittest.TestCase):
     def test_matches(self):
         mydomain = GLib.quark_from_string('mydomain')
         notmydomain = GLib.quark_from_string('notmydomain')
-        e = GLib.GError('test message', 'mydomain', 42)
+        e = GLib.Error('test message', 'mydomain', 42)
         self.assertTrue(e.matches(mydomain, 42))
         self.assertFalse(e.matches(notmydomain, 42))
         self.assertFalse(e.matches(mydomain, 40))
 
     def test_str(self):
-        e = GLib.GError('test message', 'mydomain', 42)
+        e = GLib.Error('test message', 'mydomain', 42)
         self.assertEqual(str(e),
                          'mydomain: test message (42)')
 
     def test_repr(self):
-        e = GLib.GError('test message', 'mydomain', 42)
+        e = GLib.Error('test message', 'mydomain', 42)
         self.assertEqual(repr(e),
-                         "GLib.GError('test message', 'mydomain', 42)")
+                         "GLib.Error('test message', 'mydomain', 42)")
 
     def test_inheritance(self):
-        self.assertTrue(issubclass(GLib.GError, RuntimeError))
+        self.assertTrue(issubclass(GLib.Error, RuntimeError))
 
 
 class TestMarshalling(unittest.TestCase):
@@ -72,13 +72,13 @@ class TestMarshalling(unittest.TestCase):
         # set, invoke would attempt to free the C array as if it were a GArray.
         # This crash is only for C arrays. It does not happen for C functions which
         # take in GArrays. See https://bugzilla.gnome.org/show_bug.cgi?id=642708
-        self.assertRaises(GLib.GError, GIMarshallingTests.gerror_array_in, [1, 2, 3])
+        self.assertRaises(GLib.Error, GIMarshallingTests.gerror_array_in, [1, 2, 3])
 
     def test_out(self):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
         error, debug = GIMarshallingTests.gerror_out()
 
-        self.assertIsInstance(error, GLib.GError)
+        self.assertIsInstance(error, GLib.Error)
         self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
         self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
@@ -88,7 +88,7 @@ class TestMarshalling(unittest.TestCase):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
         error, debug = GIMarshallingTests.gerror_out_transfer_none()
 
-        self.assertIsInstance(error, GLib.GError)
+        self.assertIsInstance(error, GLib.Error)
         self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
         self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
@@ -98,13 +98,13 @@ class TestMarshalling(unittest.TestCase):
         # See https://bugzilla.gnome.org/show_bug.cgi?id=666098
         error = GIMarshallingTests.gerror_return()
 
-        self.assertIsInstance(error, GLib.GError)
+        self.assertIsInstance(error, GLib.Error)
         self.assertEqual(error.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
         self.assertEqual(error.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
     def test_exception(self):
-        self.assertRaises(GLib.GError, GIMarshallingTests.gerror)
+        self.assertRaises(GLib.Error, GIMarshallingTests.gerror)
         try:
             GIMarshallingTests.gerror()
         except Exception:
