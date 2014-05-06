@@ -70,10 +70,6 @@ pygi_struct_foreign_lookup (GIBaseInfo *base_info)
     const gchar *namespace = g_base_info_get_namespace (base_info);
     const gchar *name = g_base_info_get_name (base_info);
 
-    if (foreign_structs == NULL) {
-        init_foreign_structs ();
-    }
-
     result = do_lookup (namespace, name);
 
     if (result == NULL) {
@@ -165,4 +161,12 @@ pygi_register_foreign_struct (const char* namespace_,
     new_struct->release_func = release_func;
 
     g_ptr_array_add (foreign_structs, new_struct);
+}
+
+void
+pygi_foreign_init (void)
+{
+    if (foreign_structs == NULL) {
+        init_foreign_structs ();
+    }
 }

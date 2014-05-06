@@ -661,13 +661,14 @@ PYGLIB_MODULE_START(_gi, "_gi")
     PyModule_AddObject (module, "_gobject", _gobject_module);
     PyModule_AddStringConstant(module, "__package__", "gi._gi");
 
+    pygi_foreign_init ();
     pygi_error_register_types (module);
     _pygi_repository_register_types (module);
     _pygi_info_register_types (module);
     _pygi_struct_register_types (module);
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
-    _pygi_argument_init();
+    _pygi_argument_init ();
 
     /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
      * for unstable (odd minor version) and use DeprecationWarning for
