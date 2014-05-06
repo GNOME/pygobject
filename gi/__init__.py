@@ -26,6 +26,7 @@ __path__ = extend_path(__path__, __name__)
 
 import sys
 import os
+import importlib
 
 # we can't have pygobject 2 loaded at the same time we load the internal _gobject
 if 'gobject' in sys.modules:
@@ -33,6 +34,7 @@ if 'gobject' in sys.modules:
                       'modules like "gobject". Please change all occurrences '
                       'of "import gobject" to "from gi.repository import GObject".')
 
+from . import _gi
 from ._gi import _gobject
 from ._gi import _API
 from ._gi import Repository
@@ -87,3 +89,29 @@ def require_version(namespace, version):
 
 def get_required_version(namespace):
     return _versions.get(namespace, None)
+
+
+def require_foreign(namespace, symbol=None):
+    """Ensure the given foreign marshaling module is available and loaded.
+
+    :param str namespace:
+        Introspection namespace of the foreign module (e.g. "cairo")
+    :param symbol:
+        Optional symbol typename to ensure a converter exists.
+    :type symbol: str or None
+    :raises: ImportError
+
+    :Example:
+
+    .. code-block:: python
+
+        import gi
+        import cairo
+        gi.require_foreign('cairo')
+
+    """
+    try:
+        _gi.require_foreign(namespace, symbol)
+    except Exception as e:
+        raise ImportError(str(e))
+    importlib.import_module('gi.repository', namespace)

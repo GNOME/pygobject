@@ -44,6 +44,10 @@ void pygi_register_foreign_struct (const char* namespace_,
                                    PyGIArgOverrideFromGIArgumentFunc from_func,
                                    PyGIArgOverrideReleaseFunc release_func);
 
+PyObject *pygi_require_foreign    (PyObject *self,
+                                   PyObject *args,
+                                   PyObject *kwargs);
+
 void pygi_foreign_init (void);
 
 #endif /* __PYGI_FOREIGN_H__ */

@@ -4,6 +4,8 @@
 
 import unittest
 
+import gi
+
 try:
     import cairo
     from gi.repository import Regress
@@ -52,6 +54,13 @@ class Test(unittest.TestCase):
         self.assertEqual(surface.get_format(), cairo.FORMAT_ARGB32)
         self.assertEqual(surface.get_width(), 10)
         self.assertEqual(surface.get_height(), 10)
+
+    def test_require_foreign(self):
+        self.assertEqual(gi.require_foreign('cairo'), None)
+        self.assertEqual(gi.require_foreign('cairo', 'Context'), None)
+        self.assertRaises(ImportError, gi.require_foreign, 'invalid_module')
+        self.assertRaises(ImportError, gi.require_foreign, 'invalid_module', 'invalid_symbol')
+        self.assertRaises(ImportError, gi.require_foreign, 'cairo', 'invalid_symbol')
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')

@@ -28,6 +28,7 @@
 #include "pygi.h"
 #include "pyglib.h"
 #include "pygi-error.h"
+#include "pygi-foreign.h"
 
 #include <pyglib-python-compat.h>
 
@@ -616,6 +617,7 @@ static PyMethodDef _gi_functions[] = {
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
     { "io_channel_read", (PyCFunction) pyg_channel_read, METH_VARARGS },
+    { "require_foreign", (PyCFunction) pygi_require_foreign, METH_VARARGS | METH_KEYWORDS },
     { NULL, NULL, 0 }
 };
 
