@@ -10,6 +10,7 @@ import sys
 
 try:
     import cairo
+    cairo  # Pyflakes
     has_cairo = True
     from gi.repository import Regress as Everything
 except ImportError:
@@ -45,39 +46,6 @@ class RawGList(ctypes.Structure):
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
 class TestEverything(unittest.TestCase):
-
-    def test_cairo_context(self):
-        context = Everything.test_cairo_context_full_return()
-        self.assertTrue(isinstance(context, cairo.Context))
-
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
-        context = cairo.Context(surface)
-        Everything.test_cairo_context_none_in(context)
-
-    def test_cairo_surface(self):
-        surface = Everything.test_cairo_surface_none_return()
-        self.assertTrue(isinstance(surface, cairo.ImageSurface))
-        self.assertTrue(isinstance(surface, cairo.Surface))
-        self.assertEqual(surface.get_format(), cairo.FORMAT_ARGB32)
-        self.assertEqual(surface.get_width(), 10)
-        self.assertEqual(surface.get_height(), 10)
-
-        surface = Everything.test_cairo_surface_full_return()
-        self.assertTrue(isinstance(surface, cairo.ImageSurface))
-        self.assertTrue(isinstance(surface, cairo.Surface))
-        self.assertEqual(surface.get_format(), cairo.FORMAT_ARGB32)
-        self.assertEqual(surface.get_width(), 10)
-        self.assertEqual(surface.get_height(), 10)
-
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
-        Everything.test_cairo_surface_none_in(surface)
-
-        surface = Everything.test_cairo_surface_full_out()
-        self.assertTrue(isinstance(surface, cairo.ImageSurface))
-        self.assertTrue(isinstance(surface, cairo.Surface))
-        self.assertEqual(surface.get_format(), cairo.FORMAT_ARGB32)
-        self.assertEqual(surface.get_width(), 10)
-        self.assertEqual(surface.get_height(), 10)
 
     def test_bool(self):
         self.assertEqual(Everything.test_boolean(False), False)
@@ -1346,12 +1314,3 @@ class TestSignals(unittest.TestCase):
         self.assertEqual(obj.callback_i, 42)
         self.assertEqual(type(rv), GLib.Array)
         self.assertEqual(rv.len, 2)
-
-
-@unittest.skipUnless(has_cairo, 'built without cairo support')
-@unittest.skipUnless(Gtk, 'Gtk not available')
-class TestPango(unittest.TestCase):
-    def test_cairo_font_options(self):
-        screen = Gtk.Window().get_screen()
-        font_opts = screen.get_font_options()
-        self.assertEqual(type(font_opts.get_subpixel_order()), int)

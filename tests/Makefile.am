@@ -84,6 +84,7 @@ EXTRA_DIST = \
 	test-unknown.h \
 	te_ST@nouppera \
 	org.gnome.test.gschema.xml \
+	test_cairo.py \
 	test_error.py \
 	test_gio.py \
 	test_glib.py \
