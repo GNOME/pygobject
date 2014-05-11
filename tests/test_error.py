@@ -22,7 +22,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import sys
 import unittest
 
 from gi.repository import GLib
@@ -104,14 +103,13 @@ class TestMarshalling(unittest.TestCase):
         self.assertEqual(error.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
     def test_exception(self):
-        self.assertRaises(GLib.Error, GIMarshallingTests.gerror)
-        try:
+        with self.assertRaises(GLib.Error) as context:
             GIMarshallingTests.gerror()
-        except Exception:
-            etype, e = sys.exc_info()[:2]
-            self.assertEqual(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
-            self.assertEqual(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
-            self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+
+        e = context.exception
+        self.assertEqual(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
+        self.assertEqual(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
+        self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
 
 
 if __name__ == '__main__':
