@@ -68,9 +68,7 @@ class DemoTreeStore(Gtk.TreeStore):
     __gtype_name__ = 'GtkDemoTreeStore'
 
     def __init__(self, *args):
-        #TODO: super does not seem to work here?
-        #super(Gtk.TreeStore, self).__init__(str, Demo, Pango.Style)
-        Gtk.TreeStore.__init__(self, str, Demo, Pango.Style)
+        super(DemoTreeStore, self).__init__(str, Demo, Pango.Style)
 
         self._parent_nodes = {}
 
@@ -114,7 +112,7 @@ class GtkDemoApp(Gtk.Application):
     __gtype_name__ = 'GtkDemoWindow'
 
     def __init__(self):
-        Gtk.Application.__init__(self, application_id='org.gnome.pygobject.gtkdemo')
+        super(GtkDemoApp, self).__init__(application_id='org.gnome.pygobject.gtkdemo')
 
         # Use a GResource to hold the CSS files. Resource bundles are created by
         # the glib-compile-resources program shipped with Glib which takes an xml
