@@ -34,9 +34,9 @@ static PyObject*
 pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other) && Py_TYPE(self) == &PyGParamSpec_Type)
-        return _pyglib_generic_ptr_richcompare(((PyGParamSpec*)self)->pspec,
-                                               ((PyGParamSpec*)other)->pspec,
-                                               op);
+        return _pyglib_generic_ptr_richcompare (pyg_param_spec_get (self),
+                                                pyg_param_spec_get (other),
+                                                op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
@@ -46,7 +46,7 @@ pyg_param_spec_richcompare(PyObject *self, PyObject *other, int op)
 static long
 pyg_param_spec_hash(PyGParamSpec *self)
 {
-    return (long)self->pspec;
+    return (long)pyg_param_spec_get (self);
 }
 
 static PyObject *
@@ -55,15 +55,15 @@ pyg_param_spec_repr(PyGParamSpec *self)
     char buf[80];
 
     g_snprintf(buf, sizeof(buf), "<%s '%s'>",
-	       G_PARAM_SPEC_TYPE_NAME(self->pspec),
-	       g_param_spec_get_name(self->pspec));
+	       G_PARAM_SPEC_TYPE_NAME (pyg_param_spec_get (self)),
+	       g_param_spec_get_name (pyg_param_spec_get (self)));
     return PYGLIB_PyUnicode_FromString(buf);
 }
 
 static void
 pyg_param_spec_dealloc(PyGParamSpec *self)
 {
-    g_param_spec_unref(self->pspec);
+    g_param_spec_unref (pyg_param_spec_get (self));
     PyObject_DEL(self);
 }
 
@@ -112,8 +112,8 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 {
     GParamSpec *pspec;
 
-    pspec = self->pspec;
-    
+    pspec = pyg_param_spec_get (self);
+
     /* common attributes */
     if (!strcmp(attr, "__gtype__")) {
 	return pyg_type_wrapper_new(G_PARAM_SPEC_TYPE(pspec));
@@ -281,7 +281,7 @@ pyg_param_spec_getattr(PyGParamSpec *self, const gchar *attr)
 static PyObject *
 pyg_param_spec_dir(PyGParamSpec *self, PyObject *dummy)
 {
-    GParamSpec *pspec = self->pspec;
+    GParamSpec *pspec = pyg_param_spec_get (self);
 
     if (G_IS_PARAM_SPEC_CHAR(pspec)) {
         return Py_BuildValue("[sssssssssss]", "__doc__", "__gtype__",
@@ -393,7 +393,7 @@ pyg_param_spec_new(GParamSpec *pspec)
     if (self == NULL)
 	return NULL;
 
-    self->pspec = g_param_spec_ref(pspec);
+    pyg_param_spec_set (self, g_param_spec_ref (pspec));
     return (PyObject *)self;
 }
 

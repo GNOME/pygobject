@@ -80,8 +80,13 @@ typedef struct {
     GParamSpec *pspec;
 } PyGParamSpec;
 
-#define PyGParamSpec_Get(v) (((PyGParamSpec *)v)->pspec)
-#define PyGParamSpec_Check(v) (PyObject_TypeCheck(v, &PyGParamSpec_Type))
+#define pyg_param_spec_get(v)    (((PyGParamSpec *)v)->pspec)
+#define pyg_param_spec_set(v,p)  (((PyGParamSpec *)v)->pspec = (GParamSpec*)p)
+#define pyg_param_spec_check(v)  (PyObject_TypeCheck(v, &PyGParamSpec_Type))
+
+/* Deprecated in favor of lower case with underscore macros above. */
+#define PyGParamSpec_Get    pyg_param_spec_get
+#define PyGParamSpec_Check  pyg_param_spec_check
 
 typedef int (*PyGClassInitFunc) (gpointer gclass, PyTypeObject *pyclass);
 typedef PyTypeObject * (*PyGTypeRegistrationFunction) (const gchar *name,

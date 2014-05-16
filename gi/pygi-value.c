@@ -555,7 +555,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
          * GObject.ParamSpec */
         if (G_IS_PARAM_SPEC (pygobject_get (obj)))
             g_value_set_param(value, G_PARAM_SPEC (pygobject_get (obj)));
-        else if (PyGParamSpec_Check(obj))
+        else if (pyg_param_spec_check (obj))
             g_value_set_param(value, PYGLIB_CPointer_GetPointer(obj, NULL));
         else {
             PyErr_SetString(PyExc_TypeError, "Expected ParamSpec");
