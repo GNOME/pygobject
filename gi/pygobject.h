@@ -57,6 +57,8 @@ typedef struct {
 } PyGBoxed;
 
 #define pyg_boxed_get(v,t)      ((t *)((PyGBoxed *)(v))->boxed)
+#define pyg_boxed_get_ptr(v)    (((PyGBoxed *)(v))->boxed)
+#define pyg_boxed_set_ptr(v,p)  (((PyGBoxed *)(v))->boxed = (gpointer)p)
 #define pyg_boxed_check(v,typecode) (PyObject_TypeCheck(v, &PyGBoxed_Type) && ((PyGBoxed *)(v))->gtype == typecode)
 
 typedef struct {

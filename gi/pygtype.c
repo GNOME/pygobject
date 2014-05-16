@@ -890,7 +890,8 @@ pyg_signal_class_closure_marshal(GClosure *closure,
 	    && item->ob_refcnt != 1) {
 	    PyGBoxed* boxed_item = (PyGBoxed*)item;
 	    if (!boxed_item->free_on_dealloc) {
-		boxed_item->boxed = g_boxed_copy(boxed_item->gtype, boxed_item->boxed);
+		gpointer boxed_ptr = pyg_boxed_get_ptr (boxed_item);
+		pyg_boxed_set_ptr (boxed_item, g_boxed_copy (boxed_item->gtype, boxed_ptr));
 		boxed_item->free_on_dealloc = TRUE;
 	    }
 	}
