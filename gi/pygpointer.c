@@ -44,9 +44,9 @@ static PyObject*
 pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
 {
     if (Py_TYPE(self) == Py_TYPE(other))
-        return _pyglib_generic_ptr_richcompare(((PyGPointer*)self)->pointer,
-                                               ((PyGPointer*)other)->pointer,
-                                               op);
+        return _pyglib_generic_ptr_richcompare (pyg_pointer_get_ptr (self),
+                                                pyg_pointer_get_ptr (other),
+                                                op);
     else {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
@@ -56,7 +56,7 @@ pyg_pointer_richcompare(PyObject *self, PyObject *other, int op)
 static long
 pyg_pointer_hash(PyGPointer *self)
 {
-    return (long)self->pointer;
+    return (long)pyg_pointer_get_ptr (self);
 }
 
 static PyObject *
@@ -65,7 +65,7 @@ pyg_pointer_repr(PyGPointer *self)
     gchar buf[128];
 
     g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
-	       (long)self->pointer);
+	       (long)pyg_pointer_get_ptr (self));
     return PYGLIB_PyUnicode_FromString(buf);
 }
 
@@ -77,7 +77,7 @@ pyg_pointer_init(PyGPointer *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTuple(args, ":GPointer.__init__"))
 	return -1;
 
-    self->pointer = NULL;
+    pyg_pointer_set_ptr (self, NULL);
     self->gtype = 0;
 
     g_snprintf(buf, sizeof(buf), "%s can not be constructed",
@@ -175,7 +175,7 @@ pyg_pointer_new(GType pointer_type, gpointer pointer)
     if (self == NULL)
 	return NULL;
 
-    self->pointer = pointer;
+    pyg_pointer_set_ptr (self, pointer);
     self->gtype = pointer_type;
 
     return (PyObject *)self;

@@ -496,7 +496,7 @@ _wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
             return NULL;
         }
 
-        values[i] = (GVariant *) ( (PyGPointer *) value)->pointer;
+        values[i] = pyg_pointer_get (value, GVariant);
     }
 
     variant = g_variant_new_tuple (values, PyTuple_Size (py_values));

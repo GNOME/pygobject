@@ -60,9 +60,9 @@ _struct_dealloc (PyGIStruct *self)
     GIBaseInfo *info = _struct_get_info ( (PyObject *) self );
 
     if (info != NULL && g_struct_info_is_foreign ( (GIStructInfo *) info)) {
-        pygi_struct_foreign_release (info, ( (PyGPointer *) self)->pointer);
+        pygi_struct_foreign_release (info, pyg_pointer_get_ptr (self));
     } else if (self->free_on_dealloc) {
-        g_free ( ( (PyGPointer *) self)->pointer);
+        g_free (pyg_pointer_get_ptr (self));
     }
 
     if (info != NULL) {
@@ -152,8 +152,8 @@ _pygi_struct_new (PyTypeObject *type,
 
     g_type = pyg_type_from_object ( (PyObject *) type);
 
+    pyg_pointer_set_ptr (self, pointer);
     ( (PyGPointer *) self)->gtype = g_type;
-    ( (PyGPointer *) self)->pointer = pointer;
     self->free_on_dealloc = free_on_dealloc;
 
     return (PyObject *) self;

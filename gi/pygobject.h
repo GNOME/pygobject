@@ -68,6 +68,8 @@ typedef struct {
 } PyGPointer;
 
 #define pyg_pointer_get(v,t)      ((t *)((PyGPointer *)(v))->pointer)
+#define pyg_pointer_get_ptr(v)    (((PyGPointer *)(v))->pointer)
+#define pyg_pointer_set_ptr(v,p)  (((PyGPointer *)(v))->pointer = (gpointer)p)
 #define pyg_pointer_check(v,typecode) (PyObject_TypeCheck(v, &PyGPointer_Type) && ((PyGPointer *)(v))->gtype == typecode)
 
 typedef void (*PyGFatalExceptionFunc) (void);
