@@ -454,7 +454,7 @@ _pygi_marshal_cleanup_from_py_array (PyGIInvokeState *state,
                      * allocated in _pygi_marshal_from_py_array(), so we must
                      * not try to deallocate it as a slice and thus
                      * short-circuit cleanup_func. */
-                    if (cleanup_func == _pygi_marshal_cleanup_from_py_interface_struct_gvalue) {
+                    if (cleanup_func == pygi_arg_gvalue_from_py_cleanup) {
                         g_value_unset ((GValue*) item);
                         continue;
                     }

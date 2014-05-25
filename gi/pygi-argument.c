@@ -1029,16 +1029,16 @@ array_success:
                      * Further re-factoring is needed to fix this leak.
                      * See: https://bugzilla.gnome.org/show_bug.cgi?id=693405
                      */
-                    _pygi_marshal_from_py_interface_struct (object,
-                                                            &arg,
-                                                            NULL, /*arg_name*/
-                                                            info, /*interface_info*/
-                                                            g_type,
-                                                            py_type,
-                                                            transfer,
-                                                            FALSE, /*copy_reference*/
-                                                            g_struct_info_is_foreign (info),
-                                                            g_type_info_is_pointer (type_info));
+                    pygi_arg_struct_from_py_marshal (object,
+                                                     &arg,
+                                                     NULL, /*arg_name*/
+                                                     info, /*interface_info*/
+                                                     g_type,
+                                                     py_type,
+                                                     transfer,
+                                                     FALSE, /*copy_reference*/
+                                                     g_struct_info_is_foreign (info),
+                                                     g_type_info_is_pointer (type_info));
 
                     Py_DECREF (py_type);
                     break;
@@ -1372,13 +1372,13 @@ _pygi_argument_to_object (GIArgument  *arg,
                         py_type = _pygi_type_get_from_g_type (g_type);
                     }
 
-                    object = _pygi_marshal_to_py_interface_struct (arg,
-                                                                   info, /*interface_info*/
-                                                                   g_type,
-                                                                   py_type,
-                                                                   transfer,
-                                                                   FALSE, /*is_allocated*/
-                                                                   g_struct_info_is_foreign (info));
+                    object = pygi_arg_struct_to_py_marshal (arg,
+                                                            info, /*interface_info*/
+                                                            g_type,
+                                                            py_type,
+                                                            transfer,
+                                                            FALSE, /*is_allocated*/
+                                                            g_struct_info_is_foreign (info));
 
                     Py_XDECREF (py_type);
                     break;

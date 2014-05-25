@@ -33,40 +33,40 @@ PyGIArgCache *pygi_arg_struct_new_from_info  (GITypeInfo      *type_info,
                                               GIInterfaceInfo *iface_info);
 
 
-gboolean _pygi_marshal_from_py_gvalue (PyObject *py_arg, /*in*/
-                                       GIArgument *arg,  /*out*/
-                                       GITransfer transfer,
-                                       gboolean is_allocated);
+gboolean pygi_arg_gvalue_from_py_marshal     (PyObject        *py_arg, /*in*/
+                                              GIArgument      *arg,    /*out*/
+                                              GITransfer       transfer,
+                                              gboolean         is_allocated);
 
 
-gboolean _pygi_marshal_from_py_gclosure(PyObject *py_arg, /*in*/
-                                        GIArgument *arg); /*out*/
+gboolean pygi_arg_gclosure_from_py_marshal   (PyObject        *py_arg, /*in*/
+                                              GIArgument      *arg);   /*out*/
 
-gboolean _pygi_marshal_from_py_interface_struct (PyObject *py_arg,
-                                                 GIArgument *arg,
-                                                 const gchar *arg_name,
-                                                 GIBaseInfo *interface_info,
-                                                 GType g_type,
-                                                 PyObject *py_type,
-                                                 GITransfer transfer,
-                                                 gboolean is_allocated,
-                                                 gboolean is_foreign,
-                                                 gboolean is_pointer);
+gboolean pygi_arg_struct_from_py_marshal     (PyObject        *py_arg,
+                                              GIArgument      *arg,
+                                              const gchar     *arg_name,
+                                              GIBaseInfo      *interface_info,
+                                              GType            g_type,
+                                              PyObject        *py_type,
+                                              GITransfer       transfer,
+                                              gboolean         is_allocated,
+                                              gboolean         is_foreign,
+                                              gboolean         is_pointer);
 
-PyObject *_pygi_marshal_to_py_interface_struct (GIArgument *arg,
-                                                GIInterfaceInfo *interface_info,
-                                                GType g_type,
-                                                PyObject *py_type,
-                                                GITransfer transfer,
-                                                gboolean is_allocated,
-                                                gboolean is_foreign);
+PyObject *pygi_arg_struct_to_py_marshal      (GIArgument      *arg,
+                                              GIInterfaceInfo *interface_info,
+                                              GType            g_type,
+                                              PyObject        *py_type,
+                                              GITransfer       transfer,
+                                              gboolean         is_allocated,
+                                              gboolean         is_foreign);
 
 /* Needed for hack in pygi-arg-garray.c */
-void _pygi_marshal_cleanup_from_py_interface_struct_gvalue   (PyGIInvokeState *state,
-                                                              PyGIArgCache    *arg_cache,
-                                                              PyObject        *py_arg,
-                                                              gpointer         data,
-                                                              gboolean         was_processed);
+void pygi_arg_gvalue_from_py_cleanup         (PyGIInvokeState *state,
+                                              PyGIArgCache    *arg_cache,
+                                              PyObject        *py_arg,
+                                              gpointer         data,
+                                              gboolean         was_processed);
 
 G_END_DECLS
 
