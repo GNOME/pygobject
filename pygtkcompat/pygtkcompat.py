@@ -38,8 +38,10 @@ import warnings
 try:
     # Python 3
     from collections import UserList
-    from imp import reload
     UserList  # pyflakes
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        from imp import reload
 except ImportError:
     # Python 2 ships that in a different module
     from UserList import UserList
