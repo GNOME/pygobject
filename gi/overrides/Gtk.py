@@ -86,6 +86,17 @@ class Widget(Gtk.Widget):
             target_list = Gtk.TargetList.new(_construct_target_list(target_list))
         super(Widget, self).drag_source_set_target_list(target_list)
 
+    def style_get_property(self, property_name, value=None):
+        if value is None:
+            prop = self.find_style_property(property_name)
+            if prop is None:
+                raise ValueError('Class "%s" does not contain style property "%s"' %
+                                 (self, property_name))
+            value = GObject.Value(prop.value_type)
+
+        Gtk.Widget.style_get_property(self, property_name, value)
+        return value.get_value()
+
 
 Widget = override(Widget)
 __all__.append('Widget')

@@ -632,6 +632,35 @@ class TestGtk(unittest.TestCase):
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
+class TestWidget(unittest.TestCase):
+    def test_style_get_property_gvalue(self):
+        button = Gtk.Button()
+        value = GObject.Value(int, -42)
+        button.style_get_property('focus-padding', value)
+        # Test only that the style property changed since we can't actuall
+        # set it.
+        self.assertNotEqual(value.get_int(), -42)
+
+    def test_style_get_property_return_with_explicit_gvalue(self):
+        button = Gtk.Button()
+        value = GObject.Value(int, -42)
+        result = button.style_get_property('focus-padding', value)
+        self.assertIsInstance(result, int)
+        self.assertNotEqual(result, -42)
+
+    def test_style_get_property_return_with_implicit_gvalue(self):
+        button = Gtk.Button()
+        result = button.style_get_property('focus-padding')
+        self.assertIsInstance(result, int)
+        self.assertNotEqual(result, -42)
+
+    def test_style_get_property_error(self):
+        button = Gtk.Button()
+        with self.assertRaises(ValueError):
+            button.style_get_property('not-a-valid-style-property')
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
 class TestSignals(unittest.TestCase):
     def test_class_closure_override_with_aliased_type(self):
         class WindowWithSizeAllocOverride(Gtk.ScrolledWindow):
