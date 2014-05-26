@@ -1872,3 +1872,19 @@ class TestContainer(unittest.TestCase):
         box.pack_start(child, expand=False, fill=True, padding=42)
         with self.assertRaises(ValueError):
             box.child_get_property(child, 'not-a-valid-child-property')
+
+    def test_child_get_and_set(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=True, fill=True, padding=42)
+
+        expand, fill, padding = box.child_get(child, 'expand', 'fill', 'padding')
+        self.assertEqual(expand, True)
+        self.assertEqual(fill, True)
+        self.assertEqual(padding, 42)
+
+        box.child_set(child, expand=False, fill=False, padding=21, pack_type=1)
+        expand, fill, padding, pack_type = box.child_get(child, 'expand', 'fill', 'padding', 'pack-type')
+        self.assertEqual(expand, False)
+        self.assertEqual(fill, False)
+        self.assertEqual(padding, 21)

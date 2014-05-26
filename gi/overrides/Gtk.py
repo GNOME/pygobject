@@ -132,6 +132,16 @@ class Container(Gtk.Container, Widget):
         Gtk.Container.child_get_property(self, child, property_name, value)
         return value.get_value()
 
+    def child_get(self, child, *prop_names):
+        """Returns a list of child property values for the given names."""
+        return [self.child_get_property(child, name) for name in prop_names]
+
+    def child_set(self, child, **kwargs):
+        """Set a child properties on the given child to key/value pairs."""
+        for name, value in kwargs.items():
+            name = name.replace('_', '-')
+            self.child_set_property(child, name, value)
+
 
 Container = override(Container)
 __all__.append('Container')
