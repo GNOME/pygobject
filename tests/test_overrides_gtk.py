@@ -1796,3 +1796,50 @@ class TestTextBuffer(unittest.TestCase):
                                         None)
         self.assertEqual(start.get_offset(), 6)
         self.assertEqual(end.get_offset(), 11)
+
+
+@unittest.skipUnless(Gtk, 'Gtk not available')
+class TestContainer(unittest.TestCase):
+    def test_child_set_property(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=False, fill=True, padding=0)
+
+        box.child_set_property(child, 'padding', 42)
+
+        value = GObject.Value(int)
+        box.child_get_property(child, 'padding', value)
+        self.assertEqual(value.get_int(), 42)
+
+    def test_child_get_property_gvalue(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=False, fill=True, padding=42)
+
+        value = GObject.Value(int)
+        box.child_get_property(child, 'padding', value)
+        self.assertEqual(value.get_int(), 42)
+
+    def test_child_get_property_return_with_explicit_gvalue(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=False, fill=True, padding=42)
+
+        value = GObject.Value(int)
+        result = box.child_get_property(child, 'padding', value)
+        self.assertEqual(result, 42)
+
+    def test_child_get_property_return_with_implicit_gvalue(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=False, fill=True, padding=42)
+
+        result = box.child_get_property(child, 'padding')
+        self.assertEqual(result, 42)
+
+    def test_child_get_property_error(self):
+        box = Gtk.Box()
+        child = Gtk.Button()
+        box.pack_start(child, expand=False, fill=True, padding=42)
+        with self.assertRaises(ValueError):
+            box.child_get_property(child, 'not-a-valid-child-property')

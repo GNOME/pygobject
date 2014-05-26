@@ -110,6 +110,17 @@ class Container(Gtk.Container, Widget):
 
     get_focus_chain = strip_boolean_result(Gtk.Container.get_focus_chain)
 
+    def child_get_property(self, child, property_name, value=None):
+        if value is None:
+            prop = self.find_child_property(property_name)
+            if prop is None:
+                raise ValueError('Class "%s" does not contain child property "%s"' %
+                                 (self, property_name))
+            value = GObject.Value(prop.value_type)
+
+        Gtk.Container.child_get_property(self, child, property_name, value)
+        return value.get_value()
+
 
 Container = override(Container)
 __all__.append('Container')
