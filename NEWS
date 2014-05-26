@@ -1,3 +1,24 @@
+3.13.2  26-May-2014
+        - Python 3.4 make check fixes (Simon Feltman) (#730411)
+        - overrides: Add Gtk.Container.child_get/set overrides (Simon Feltman)
+          (#685076)
+        - overrides: Make value argument to Widget.style_get_property optional
+          (Simon Feltman) (#685076)
+        - overrides: Make value argument to Container.child_get_property optional
+          (Simon Feltman) (#685076)
+        - Add GTypeClass methods as Python GObject class methods
+          (Johan Dahlin) (#685218)
+        - Add marshalling coercion for Python classes and instances to GTypeClass
+          (Simon Feltman) (#685218)
+        - Replace direct parent class call by super() (Andrew Grigorev) (#729970)
+        - Add cairo marshaling support for non-introspected signals
+          (Simon Feltman) (#694604)
+        - [New API] Add gi.require_foreign (Simon Feltman) (#707735)
+        - Initialize the foreign API at PyGI load time (Simon Feltman) (#694604)
+        - Move pygi foreign API into pygi-foreign-api.h (Simon Feltman) (#694604)
+        - Unify GLib.GError and GLib.Error (Simon Feltman) (#712519)
+        - PEP8 fixes (Simon Feltman)
+
 3.13.1  28-Apr-2014
         - Raise TypeError if arguments are passed to Boxed.__init__
           (Christoph Reiter) (#727810)
