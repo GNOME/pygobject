@@ -431,6 +431,39 @@ arg_foreign_to_py_cleanup (PyGIInvokeState *state,
     }
 }
 
+static gboolean
+arg_type_class_from_py_marshal (PyGIInvokeState   *state,
+                                PyGICallableCache *callable_cache,
+                                PyGIArgCache      *arg_cache,
+                                PyObject          *py_arg,
+                                GIArgument        *arg,
+                                gpointer          *cleanup_data)
+{
+    GType gtype = pyg_type_from_object (py_arg);
+
+    if (G_TYPE_IS_CLASSED (gtype)) {
+        arg->v_pointer = g_type_class_ref (gtype);
+        *cleanup_data = arg->v_pointer;
+        return TRUE;
+    } else {
+        PyErr_Format (PyExc_TypeError,
+                      "Unable to retrieve a GObject type class from \"%s\".",
+                      Py_TYPE(py_arg)->tp_name);
+        return FALSE;
+    }
+}
+
+static void
+arg_type_class_from_py_cleanup (PyGIInvokeState *state,
+                                PyGIArgCache    *arg_cache,
+                                PyObject        *py_arg,
+                                gpointer         data,
+                                gboolean         was_processed)
+{
+    if (was_processed) {
+        g_type_class_unref (data);
+    }
+}
 
 static void
 arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
@@ -439,12 +472,23 @@ arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
     iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
-    arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
 
-    if (iface_cache->g_type == G_TYPE_VALUE)
-        arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
-    else if (iface_cache->is_foreign)
-        arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
+    if (g_struct_info_is_gtype_struct ((GIStructInfo*)iface_info)) {
+        arg_cache->from_py_marshaller = arg_type_class_from_py_marshal;
+        /* Since we always add a ref in the marshalling, only unref the
+         * GTypeClass when we don't transfer ownership. */
+        if (transfer == GI_TRANSFER_NOTHING) {
+            arg_cache->from_py_cleanup = arg_type_class_from_py_cleanup;
+        }
+
+    } else {
+        arg_cache->from_py_marshaller = arg_struct_from_py_marshal_adapter;
+
+        if (iface_cache->g_type == G_TYPE_VALUE)
+            arg_cache->from_py_cleanup = pygi_arg_gvalue_from_py_cleanup;
+        else if (iface_cache->is_foreign)
+            arg_cache->from_py_cleanup = arg_foreign_from_py_cleanup;
+    }
 }
 
 static void

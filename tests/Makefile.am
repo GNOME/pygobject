@@ -101,6 +101,7 @@ EXTRA_DIST = \
 	test_source.py \
 	test_subprocess.py \
 	test_thread.py \
+	test_typeclass.py \
 	test_everything.py \
 	test_gi.py \
 	test_gdbus.py \
