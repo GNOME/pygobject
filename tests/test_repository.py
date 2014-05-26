@@ -220,7 +220,6 @@ class Test(unittest.TestCase):
         self.assertEqual(func_info.get_return_type().get_tag(), GIRepository.TypeTag.VOID)
         self.assertRaises(AttributeError, func_info.get_return_attribute, '_not_an_attr')
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=709462
     @unittest.skipUnless(has_cairo, 'Regress needs cairo')
     def test_signal_info(self):
         repo.require('Regress')
@@ -238,7 +237,6 @@ class Test(unittest.TestCase):
         self.assertFalse(sig_info.true_stops_emit())
         self.assertEqual(sig_info.get_flags(), sig_flags)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=709462
     @unittest.skipUnless(has_cairo, 'Regress needs cairo')
     def test_notify_signal_info_with_obj(self):
         repo.require('Regress')
