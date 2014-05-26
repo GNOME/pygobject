@@ -1,3 +1,7 @@
+3.12.2  26-May-2014
+        - PEP8 fixes (Simon Feltman)
+        - Python 3.4 make check fixes (Simon Feltman) (#730411)
+
 3.12.1  14-Apr-2014
         - Fix crash with type checking invalid GObject arguments
           (Simon Feltman) (#727604)
