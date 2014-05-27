@@ -9,6 +9,14 @@ from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
 
+try:
+    import cairo
+    cairo  # PyFlakes
+    from gi.repository import Regress
+    has_cairo = True
+except ImportError:
+    has_cairo = False
+
 
 class C(GObject.GObject):
     __gsignals__ = {'my_signal': (GObject.SignalFlags.RUN_FIRST, None,
@@ -974,6 +982,129 @@ class TestSignalModuleLevelFunctions(unittest.TestCase):
         self.assertEqual(GObject.signal_query(0), None)
         self.assertEqual(GObject.signal_query('NOT_A_SIGNAL', C),
                          None)
+
+
+@unittest.skipUnless(has_cairo, 'built without cairo support')
+class TestIntrospectedSignals(unittest.TestCase):
+    def test_object_param_signal(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, obj_param):
+            self.assertEqual(obj_param.props.int, 3)
+            self.assertGreater(obj_param.__grefcount__, 1)
+            obj.called = True
+
+        obj.called = False
+        obj.connect('sig-with-obj', callback)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_connect_after(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_after('sig-with-obj', callback)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_connect_object(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_object('sig-with-obj', callback, obj)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_connect_object_after(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, obj_param):
+            obj.called = True
+
+        obj.called = False
+        obj.connect_object_after('sig-with-obj', callback, obj)
+        obj.emit_sig_with_obj()
+        self.assertTrue(obj.called)
+
+    def test_int64_param_from_py(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-int64-prop', callback)
+        rv = obj.emit('sig-with-int64-prop', GObject.G_MAXINT64)
+        self.assertEqual(rv, GObject.G_MAXINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    def test_uint64_param_from_py(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+        obj.connect('sig-with-uint64-prop', callback)
+        rv = obj.emit('sig-with-uint64-prop', GObject.G_MAXUINT64)
+        self.assertEqual(rv, GObject.G_MAXUINT64)
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
+    def test_int64_param_from_c(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-int64-prop', callback)
+        obj.emit_sig_with_int64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+
+    def test_uint64_param_from_c(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return i
+
+        obj.callback_i = None
+
+        obj.connect('sig-with-uint64-prop', callback)
+        obj.emit_sig_with_uint64()
+        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+
+    def test_intarray_ret(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, i):
+            obj.callback_i = i
+            return [i, i + 1]
+
+        obj.callback_i = None
+
+        try:
+            obj.connect('sig-with-intarray-ret', callback)
+        except TypeError as e:
+            # compat with g-i 1.34.x
+            if 'unknown signal' in str(e):
+                return
+            raise
+
+        rv = obj.emit('sig-with-intarray-ret', 42)
+        self.assertEqual(obj.callback_i, 42)
+        self.assertEqual(type(rv), GLib.Array)
+        self.assertEqual(rv.len, 2)
 
 
 if __name__ == '__main__':
