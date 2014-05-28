@@ -711,28 +711,28 @@ class TestBuilder(unittest.TestCase):
         obj = Obj()
         obj.foo = lambda: None
 
-        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        handler, args = Gtk._extract_handler_and_args(obj, 'foo')
         self.assertEqual(handler, obj.foo)
         self.assertEqual(len(args), 0)
 
     def test_extract_handler_and_args_dict(self):
         obj = {'foo': lambda: None}
 
-        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        handler, args = Gtk._extract_handler_and_args(obj, 'foo')
         self.assertEqual(handler, obj['foo'])
         self.assertEqual(len(args), 0)
 
     def test_extract_handler_and_args_with_seq(self):
         obj = {'foo': (lambda: None, 1, 2)}
 
-        handler, args = Gtk.Builder._extract_handler_and_args(obj, 'foo')
+        handler, args = Gtk._extract_handler_and_args(obj, 'foo')
         self.assertEqual(handler, obj['foo'][0])
         self.assertSequenceEqual(args, [1, 2])
 
     def test_extract_handler_and_args_no_handler_error(self):
         obj = dict(foo=lambda: None)
         self.assertRaises(AttributeError,
-                          Gtk.Builder._extract_handler_and_args,
+                          Gtk._extract_handler_and_args,
                           obj, 'not_a_handler')
 
     def test_builder_with_handler_and_args(self):

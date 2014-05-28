@@ -72,6 +72,49 @@ def _construct_target_list(targets):
 __all__.append('_construct_target_list')
 
 
+def _extract_handler_and_args(obj_or_map, handler_name):
+    handler = None
+    if isinstance(obj_or_map, collections.Mapping):
+        handler = obj_or_map.get(handler_name, None)
+    else:
+        handler = getattr(obj_or_map, handler_name, None)
+
+    if handler is None:
+        raise AttributeError('Handler %s not found' % handler_name)
+
+    args = ()
+    if isinstance(handler, collections.Sequence):
+        if len(handler) == 0:
+            raise TypeError("Handler %s tuple can not be empty" % handler)
+        args = handler[1:]
+        handler = handler[0]
+
+    elif not _callable(handler):
+        raise TypeError('Handler %s is not a method, function or tuple' % handler)
+
+    return handler, args
+
+
+# Exposed for unit-testing.
+__all__.append('_extract_handler_and_args')
+
+
+def _builder_connect_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
+    handler, args = _extract_handler_and_args(obj_or_map, handler_name)
+
+    after = flags & GObject.ConnectFlags.AFTER
+    if connect_obj is not None:
+        if after:
+            gobj.connect_object_after(signal_name, handler, connect_obj, *args)
+        else:
+            gobj.connect_object(signal_name, handler, connect_obj, *args)
+    else:
+        if after:
+            gobj.connect_after(signal_name, handler, *args)
+        else:
+            gobj.connect(signal_name, handler, *args)
+
+
 class Widget(Gtk.Widget):
 
     translate_coordinates = strip_boolean_result(Gtk.Widget.translate_coordinates)
@@ -396,29 +439,6 @@ __all__.append('MenuItem')
 
 
 class Builder(Gtk.Builder):
-    @staticmethod
-    def _extract_handler_and_args(obj_or_map, handler_name):
-        handler = None
-        if isinstance(obj_or_map, collections.Mapping):
-            handler = obj_or_map.get(handler_name, None)
-        else:
-            handler = getattr(obj_or_map, handler_name, None)
-
-        if handler is None:
-            raise AttributeError('Handler %s not found' % handler_name)
-
-        args = ()
-        if isinstance(handler, collections.Sequence):
-            if len(handler) == 0:
-                raise TypeError("Handler %s tuple can not be empty" % handler)
-            args = handler[1:]
-            handler = handler[0]
-
-        elif not _callable(handler):
-            raise TypeError('Handler %s is not a method, function or tuple' % handler)
-
-        return handler, args
-
     def connect_signals(self, obj_or_map):
         """Connect signals specified by this builder to a name, handler mapping.
 
@@ -431,22 +451,7 @@ class Builder(Gtk.Builder):
 
             builder.connect_signals({'on_clicked': (on_clicked, arg1, arg2)})
         """
-        def _full_callback(builder, gobj, signal_name, handler_name, connect_obj, flags, obj_or_map):
-            handler, args = self._extract_handler_and_args(obj_or_map, handler_name)
-
-            after = flags & GObject.ConnectFlags.AFTER
-            if connect_obj is not None:
-                if after:
-                    gobj.connect_object_after(signal_name, handler, connect_obj, *args)
-                else:
-                    gobj.connect_object(signal_name, handler, connect_obj, *args)
-            else:
-                if after:
-                    gobj.connect_after(signal_name, handler, *args)
-                else:
-                    gobj.connect(signal_name, handler, *args)
-
-        self.connect_signals_full(_full_callback, obj_or_map)
+        self.connect_signals_full(_builder_connect_callback, obj_or_map)
 
     def add_from_string(self, buffer):
         if not isinstance(buffer, _basestring):
