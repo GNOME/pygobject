@@ -34,7 +34,7 @@ class CSSAccordionApp:
         window.set_title('CSS Accordion')
         window.set_default_size(600, 300)
         window.set_border_width(10)
-        window.connect('destroy', lambda w: Gtk.main_quit())
+        window.connect('destroy', Gtk.main_quit)
 
         hbox = Gtk.Box(homogeneous=False, spacing=2,
                        orientation=Gtk.Orientation.HORIZONTAL)
@@ -42,23 +42,8 @@ class CSSAccordionApp:
         hbox.set_valign(Gtk.Align.CENTER)
         window.add(hbox)
 
-        child = Gtk.Button(label="This")
-        hbox.add(child)
-
-        child = Gtk.Button(label="Is")
-        hbox.add(child)
-
-        child = Gtk.Button(label="A")
-        hbox.add(child)
-
-        child = Gtk.Button(label="CSS")
-        hbox.add(child)
-
-        child = Gtk.Button(label="Accordion")
-        hbox.add(child)
-
-        child = Gtk.Button(label=":-)")
-        hbox.add(child)
+        for label in ('This', 'Is', 'A', 'CSS', 'Accordion', ':-)'):
+            hbox.add(Gtk.Button(label=label))
 
         bytes = Gio.resources_lookup_data("/css_accordion/css_accordion.css", 0)
 
