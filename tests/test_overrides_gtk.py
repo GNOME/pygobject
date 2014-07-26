@@ -55,6 +55,15 @@ def realized(widget):
         Gtk.main_iteration()
 
 
+@contextlib.contextmanager
+def ignore_glib_warnings():
+    """Temporarily change GLib logging to not bail on warnings."""
+    old_mask = GLib.log_set_always_fatal(
+        GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
+    yield
+    GLib.log_set_always_fatal(old_mask)
+
+
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestGtk(unittest.TestCase):
     def test_container(self):
@@ -307,13 +316,10 @@ class TestGtk(unittest.TestCase):
 
     def test_file_chooser_dialog(self):
         # might cause a GVFS warning, do not break on this
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with ignore_glib_warnings():
             dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
                                            action=Gtk.FileChooserAction.SAVE)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
+
         self.assertTrue(isinstance(dialog, Gtk.Dialog))
         self.assertTrue(isinstance(dialog, Gtk.Window))
         self.assertEqual('file chooser dialog test', dialog.get_title())
@@ -323,12 +329,8 @@ class TestGtk(unittest.TestCase):
 
     def test_file_chooser_dialog_default_action(self):
         # might cause a GVFS warning, do not break on this
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with ignore_glib_warnings():
             dialog = Gtk.FileChooserDialog(title='file chooser dialog test')
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
         action = dialog.get_property('action')
         self.assertEqual(Gtk.FileChooserAction.OPEN, action)
@@ -368,7 +370,11 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Button))
         self.assertTrue(isinstance(button, Gtk.Container))
         self.assertTrue(isinstance(button, Gtk.Widget))
-        button = Gtk.Button.new_from_stock(Gtk.STOCK_CLOSE)
+
+        # Using stock items causes hard warning in devel versions of GTK+.
+        with ignore_glib_warnings():
+            button = Gtk.Button.new_from_stock(Gtk.STOCK_CLOSE)
+
         self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
         self.assertTrue(button.get_use_stock())
         self.assertTrue(button.get_use_underline())
@@ -583,14 +589,16 @@ class TestGtk(unittest.TestCase):
 
     def test_toolbutton(self):
         # PyGTK compat
-        button = Gtk.ToolButton()
-        self.assertEqual(button.props.stock_id, None)
 
-        button = Gtk.ToolButton(stock_id='gtk-new')
-        self.assertEqual(button.props.stock_id, 'gtk-new')
+        # Using stock items causes hard warning in devel versions of GTK+.
+        with ignore_glib_warnings():
+            button = Gtk.ToolButton()
+            self.assertEqual(button.props.stock_id, None)
+
+            button = Gtk.ToolButton(stock_id='gtk-new')
+            self.assertEqual(button.props.stock_id, 'gtk-new')
 
         icon = Gtk.Image.new_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.SMALL_TOOLBAR)
-
         button = Gtk.ToolButton(label='mylabel', icon_widget=icon)
         self.assertEqual(button.props.label, 'mylabel')
         self.assertEqual(button.props.icon_widget, icon)
