@@ -2,6 +2,7 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
+import contextlib
 
 from gi.repository import GLib
 
@@ -24,6 +25,15 @@ try:
     import gtk.gdk
 except ImportError:
     Gtk = None
+
+
+@contextlib.contextmanager
+def ignore_glib_warnings():
+    """Temporarily change GLib logging to not bail on warnings."""
+    old_mask = GLib.log_set_always_fatal(
+        GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
+    yield
+    GLib.log_set_always_fatal(old_mask)
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -69,7 +79,10 @@ class TestGTKCompat(unittest.TestCase):
                                    gtk.gdk.Color))
 
     def test_alignment(self):
-        a = gtk.Alignment()
+        # Creation of pygtk.Alignment causes hard warnings, ignore this in testing.
+        with ignore_glib_warnings():
+            a = gtk.Alignment()
+
         self.assertEqual(a.props.xalign, 0.0)
         self.assertEqual(a.props.yalign, 0.0)
         self.assertEqual(a.props.xscale, 0.0)
