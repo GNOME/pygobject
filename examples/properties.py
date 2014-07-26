@@ -15,18 +15,18 @@ class MyObject(GObject.GObject):
 
 GObject.type_register(MyObject)
 
-print "MyObject properties: ", list(MyObject.props)
+print("MyObject properties: ", list(MyObject.props))
 
 obj = MyObject()
 
-print "obj.foo ==", obj.foo
+print("obj.foo ==", obj.foo)
 
 obj.foo = 'spam'
-print "obj.foo = spam"
+print("obj.foo = spam")
 
-print "obj.foo == ", obj.foo
+print("obj.foo == ", obj.foo)
 
-print "obj.boolprop == ", obj.boolprop
+print("obj.boolprop == ", obj.boolprop)
 
-print obj.readonly
+print(obj.readonly)
 obj.readonly = 'does-not-work'

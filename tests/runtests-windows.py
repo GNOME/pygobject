@@ -44,8 +44,8 @@ if __name__ == '__main__':
     for name in gettestnames():
         try:
             suite.addTest(loader.loadTestsFromName(name))
-        except Exception, e:
-            print 'Could not load %s: %s' % (name, e)
+        except Exception as e:
+            print('Could not load %s: %s' % (name, e))
 
     testRunner = unittest.TextTestRunner()
     testRunner.verbosity = 2
