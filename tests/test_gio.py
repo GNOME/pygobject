@@ -40,7 +40,7 @@ class TestGio(unittest.TestCase):
 
 class TestGSettings(unittest.TestCase):
     def setUp(self):
-        self.settings = Gio.Settings(schema='org.gnome.test')
+        self.settings = Gio.Settings.new('org.gnome.test')
         # we change the values in the tests, so set them to predictable start
         # value
         self.settings.reset('test-string')
@@ -78,7 +78,7 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(self.settings.get_property('path'), '/tests/')
 
         # optional constructor arguments
-        with_path = Gio.Settings(schema='org.gnome.nopathtest', path='/mypath/')
+        with_path = Gio.Settings.new_with_path('org.gnome.nopathtest', '/mypath/')
         self.assertEqual(with_path.get_property('path'), '/mypath/')
         self.assertEqual(with_path['np-int'], 42)
 
@@ -115,7 +115,7 @@ class TestGSettings(unittest.TestCase):
         self.assertRaises(KeyError, self.settings.__setitem__, 'unknown', 'moo')
 
     def test_empty(self):
-        empty = Gio.Settings(schema='org.gnome.empty', path='/tests/')
+        empty = Gio.Settings.new_with_path('org.gnome.empty', '/tests/')
         self.assertEqual(len(empty), 0)
         self.assertEqual(bool(empty), True)
         self.assertEqual(empty.keys(), [])
