@@ -95,15 +95,6 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
     return ret;
 }
 
-static inline gpointer
-g_value_get_or_dup_boxed (const GValue *value, GITransfer transfer)
-{
-    if (transfer == GI_TRANSFER_EVERYTHING)
-        return g_value_dup_boxed (value);
-    else
-        return g_value_get_boxed (value);
-}
-
 PyObject *
 pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 {
@@ -112,7 +103,6 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     GIArgument arg = { 0, };
     PyObject *py_value = NULL;
     GITypeInfo *type_info = NULL;
-    GITransfer transfer;
     GITypeTag type_tag;
 
     /* The owner_type of the pspec gives us the exact type that introduced the
@@ -126,7 +116,6 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     g_object_get_property (instance->obj, pspec->name, &value);
 
     type_info = g_property_info_get_type (property_info);
-    transfer = g_property_info_get_ownership_transfer (property_info);
 
     type_tag = g_type_info_get_tag (type_info);
     switch (type_tag) {
@@ -176,7 +165,8 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            arg.v_string = g_value_dup_string (&value);
+            /* This will be copied in _pygi_argument_to_object */
+            arg.v_string = (char *)g_value_get_string (&value);
             break;
         case GI_TYPE_TAG_INTERFACE:
         {
@@ -203,7 +193,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
                 case GI_INFO_TYPE_UNION:
 
                     if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        arg.v_pointer = g_value_dup_boxed (&value);
+                        arg.v_pointer = g_value_get_boxed (&value);
                     } else if (g_type_is_a (type, G_TYPE_POINTER)) {
                         arg.v_pointer = g_value_get_pointer (&value);
                     } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
@@ -223,12 +213,12 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             break;
         }
         case GI_TYPE_TAG_GHASH:
-            arg.v_pointer = g_value_get_or_dup_boxed (&value, transfer);
+            arg.v_pointer = g_value_get_boxed (&value);
             break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
             if (G_VALUE_HOLDS_BOXED(&value))
-                arg.v_pointer = g_value_get_or_dup_boxed (&value, transfer);
+                arg.v_pointer = g_value_get_boxed (&value);
             else
                 arg.v_pointer = g_value_get_pointer (&value);
             break;
@@ -238,7 +228,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             GArray *arg_items;
             int i;
 
-            strings = g_value_get_or_dup_boxed (&value, transfer);
+            strings = g_value_get_boxed (&value);
             if (strings == NULL)
                 arg.v_pointer = NULL;
             else {
@@ -258,7 +248,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
             goto out;
     }
 
-    py_value = _pygi_argument_to_object (&arg, type_info, transfer);
+    py_value = _pygi_argument_to_object (&arg, type_info, GI_TRANSFER_NOTHING);
     g_value_unset (&value);
 
 out:
