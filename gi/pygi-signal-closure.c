@@ -109,14 +109,12 @@ pygi_signal_closure_marshal(GClosure *closure,
         } else if (i < sig_info_highest_arg) {
             GIArgInfo arg_info;
             GITypeInfo type_info;
-            GITransfer transfer;
             GIArgument arg = { 0, };
             PyObject *item = NULL;
             gboolean free_array = FALSE;
 
             g_callable_info_load_arg(signal_info, i - 1, &arg_info);
             g_arg_info_load_type(&arg_info, &type_info);
-            transfer = g_arg_info_get_ownership_transfer(&arg_info);
 
             arg = _pygi_argument_from_g_value(&param_values[i], &type_info);
             
@@ -130,7 +128,7 @@ pygi_signal_closure_marshal(GClosure *closure,
                                                          &free_array);
             }
             
-            item = _pygi_argument_to_object (&arg, &type_info, transfer);
+            item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_NOTHING);
             
             if (free_array) {
                 g_array_free (arg.v_pointer, FALSE);

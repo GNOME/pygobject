@@ -80,7 +80,9 @@ _pygi_argument_from_g_value(const GValue *value,
             break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
-            arg.v_string = g_value_dup_string (value);
+            /* Callers are responsible for ensuring the GValue stays alive
+             * long enough for the string to be copied. */
+            arg.v_string = (char *)g_value_get_string (value);
             break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
