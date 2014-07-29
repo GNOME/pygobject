@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import gc
 import sys
 import struct
 import types
@@ -1184,6 +1185,41 @@ class CPropertiesTestBase(object):
         # test parent property which needs introspection
         self.set_prop(a, 'list', ("str1", "str2"))
         self.assertEqual(self.get_prop(a, 'list'), ["str1", "str2"])
+
+    def test_held_object_ref_count_getter(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        self.set_prop(holder, 'some-object', held)
+        self.assertEqual(holder.__grefcount__, 1)
+
+        initial_ref_count = held.__grefcount__
+        self.get_prop(holder, 'some-object')
+        gc.collect()
+        self.assertEqual(held.__grefcount__, initial_ref_count)
+
+    def test_held_object_ref_count_setter(self):
+        holder = GIMarshallingTests.PropertiesObject()
+        held = GObject.Object()
+
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 1)
+
+        # Setting property should only increase ref count by 1
+        self.set_prop(holder, 'some-object', held)
+        self.assertEqual(holder.__grefcount__, 1)
+        self.assertEqual(held.__grefcount__, 2)
+
+        # Clearing should pull it back down
+        self.set_prop(holder, 'some-object', None)
+        self.assertEqual(held.__grefcount__, 1)
+
+    def test_set_object_property_to_invalid_type(self):
+        obj = GIMarshallingTests.PropertiesObject()
+        self.assertRaises(TypeError, self.set_prop, obj, 'some-object', 'not_an_object')
 
 
 class TestCPropsAccessor(CPropertiesTestBase, unittest.TestCase):
