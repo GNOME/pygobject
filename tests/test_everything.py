@@ -997,51 +997,7 @@ class TestClosures(unittest.TestCase):
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')
-class TestProperties(unittest.TestCase):
-
-    def test_basic(self):
-        object_ = Everything.TestObj()
-
-        self.assertEqual(object_.props.int, 0)
-        object_.props.int = 42
-        self.assertTrue(isinstance(object_.props.int, int))
-        self.assertEqual(object_.props.int, 42)
-
-        self.assertEqual(object_.props.float, 0.0)
-        object_.props.float = 42.42
-        self.assertTrue(isinstance(object_.props.float, float))
-        self.assertAlmostEqual(object_.props.float, 42.42, places=5)
-
-        self.assertEqual(object_.props.double, 0.0)
-        object_.props.double = 42.42
-        self.assertTrue(isinstance(object_.props.double, float))
-        self.assertAlmostEqual(object_.props.double, 42.42, places=5)
-
-        self.assertEqual(object_.props.string, None)
-        object_.props.string = 'mec'
-        self.assertTrue(isinstance(object_.props.string, str))
-        self.assertEqual(object_.props.string, 'mec')
-
-        self.assertEqual(object_.props.gtype, GObject.TYPE_INVALID)
-        object_.props.gtype = int
-        self.assertEqual(object_.props.gtype, GObject.TYPE_INT)
-
-    def test_hash_table(self):
-        object_ = Everything.TestObj()
-        self.assertEqual(object_.props.hash_table, None)
-
-        object_.props.hash_table = {'mec': 56}
-        self.assertTrue(isinstance(object_.props.hash_table, dict))
-        self.assertEqual(list(object_.props.hash_table.items())[0], ('mec', 56))
-
-    def test_list(self):
-        object_ = Everything.TestObj()
-        self.assertEqual(object_.props.list, [])
-
-        object_.props.list = ['1', '2', '3']
-        self.assertTrue(isinstance(object_.props.list, list))
-        self.assertEqual(object_.props.list, ['1', '2', '3'])
-
+class TestBoxed(unittest.TestCase):
     def test_boxed(self):
         object_ = Everything.TestObj()
         self.assertEqual(object_.props.boxed, None)
@@ -1080,29 +1036,6 @@ class TestProperties(unittest.TestCase):
         copy = boxed.copy()
         self.assertEqual(boxed, copy)
         self.assertNotEqual(id(boxed), id(copy))
-
-    def test_gtype(self):
-        object_ = Everything.TestObj()
-        self.assertEqual(object_.props.gtype, GObject.TYPE_INVALID)
-        object_.props.gtype = int
-        self.assertEqual(object_.props.gtype, GObject.TYPE_INT)
-
-        object_ = Everything.TestObj(gtype=int)
-        self.assertEqual(object_.props.gtype, GObject.TYPE_INT)
-        object_.props.gtype = str
-        self.assertEqual(object_.props.gtype, GObject.TYPE_STRING)
-
-    def test_parent_class(self):
-        class A(Everything.TestObj):
-            prop1 = GObject.Property(type=int)
-
-        a = A()
-        a.props.int = 20
-        self.assertEqual(a.props.int, 20)
-
-        # test parent property which needs introspection
-        a.props.list = ("str1", "str2")
-        self.assertEqual(a.props.list, ["str1", "str2"])
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')

@@ -1109,6 +1109,15 @@ class CPropertiesTestBase(object):
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-boxed-glist', 'foo')
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-boxed-glist', ['a'])
 
+    @unittest.skipUnless(has_regress, 'built without cairo support')
+    def test_annotated_glist(self):
+        obj = Regress.TestObj()
+        self.assertEqual(self.get_prop(obj, 'list'), [])
+
+        self.set_prop(obj, 'list', ['1', '2', '3'])
+        self.assertTrue(isinstance(self.get_prop(obj, 'list'), list))
+        self.assertEqual(self.get_prop(obj, 'list'), ['1', '2', '3'])
+
     @unittest.expectedFailure
     def test_boxed_glist_ctor(self):
         l = [GObject.G_MININT, 42, GObject.G_MAXINT]
@@ -1140,6 +1149,41 @@ class CPropertiesTestBase(object):
         obj.set_properties(some_uchar=54, some_int=42)
         self.assertEqual(42, self.get_prop(obj, 'some-int'))
         self.assertEqual(54, self.get_prop(obj, 'some-uchar'))
+
+    @unittest.skipUnless(has_regress, 'built without cairo support')
+    def test_gtype(self):
+        obj = Regress.TestObj()
+        self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_INVALID)
+        self.set_prop(obj, 'gtype', int)
+        self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_INT)
+
+        obj = Regress.TestObj(gtype=int)
+        self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_INT)
+        self.set_prop(obj, 'gtype', str)
+        self.assertEqual(self.get_prop(obj, 'gtype'), GObject.TYPE_STRING)
+
+    @unittest.skipUnless(has_regress, 'built without cairo support')
+    def test_hash_table(self):
+        obj = Regress.TestObj()
+        self.assertEqual(self.get_prop(obj, 'hash-table'), None)
+
+        self.set_prop(obj, 'hash-table', {'mec': 56})
+        self.assertTrue(isinstance(self.get_prop(obj, 'hash-table'), dict))
+        self.assertEqual(list(self.get_prop(obj, 'hash-table').items())[0],
+                         ('mec', 56))
+
+    @unittest.skipUnless(has_regress, 'built without cairo support')
+    def test_parent_class(self):
+        class A(Regress.TestObj):
+            prop1 = GObject.Property(type=int)
+
+        a = A()
+        self.set_prop(a, 'int', 20)
+        self.assertEqual(self.get_prop(a, 'int'), 20)
+
+        # test parent property which needs introspection
+        self.set_prop(a, 'list', ("str1", "str2"))
+        self.assertEqual(self.get_prop(a, 'list'), ["str1", "str2"])
 
 
 class TestCPropsAccessor(CPropertiesTestBase, unittest.TestCase):
@@ -1189,6 +1233,11 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
         CPropertiesTestBase.test_boxed_glist(self)
 
     @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
+    def test_annotated_glist(self):
+        # get_property() returns None
+        CPropertiesTestBase.test_annotated_glist(self)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
     def test_char(self):
         # get_property() returns a single element string which cannot represent
         # tested values for G_TYPE_CHAR
@@ -1205,6 +1254,16 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
         # get_property() returns a single element string which cannot represent
         # tested values for G_TYPE_UCHAR
         CPropertiesTestBase.test_setting_several_properties(self)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
+    def test_parent_class(self):
+        # get_property() returns gpointer instead of a list
+        CPropertiesTestBase.test_annotated_glist(self)
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
+    def test_hash_table(self):
+        # get_property() returns gpointer instead of a dict
+        CPropertiesTestBase.test_hash_table(self)
 
 
 if __name__ == '__main__':
