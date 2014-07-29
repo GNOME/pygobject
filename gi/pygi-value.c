@@ -39,6 +39,8 @@ _pygi_argument_from_g_value(const GValue *value,
             arg.v_boolean = g_value_get_boolean (value);
             break;
         case GI_TYPE_TAG_INT8:
+            arg.v_int8 = g_value_get_schar (value);
+            break;
         case GI_TYPE_TAG_INT16:
         case GI_TYPE_TAG_INT32:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_LONG))
@@ -53,6 +55,8 @@ _pygi_argument_from_g_value(const GValue *value,
 		arg.v_int64 = g_value_get_int64 (value);
             break;
         case GI_TYPE_TAG_UINT8:
+            arg.v_uint8 = g_value_get_uchar (value);
+            break;
         case GI_TYPE_TAG_UINT16:
         case GI_TYPE_TAG_UINT32:
 	    if (g_type_is_a (G_VALUE_TYPE (value), G_TYPE_ULONG))
@@ -86,8 +90,6 @@ _pygi_argument_from_g_value(const GValue *value,
             break;
         case GI_TYPE_TAG_GLIST:
         case GI_TYPE_TAG_GSLIST:
-            arg.v_pointer = g_value_get_pointer (value);
-            break;
         case GI_TYPE_TAG_ARRAY:
         case GI_TYPE_TAG_GHASH:
             if (G_VALUE_HOLDS_BOXED (value))
@@ -100,8 +102,10 @@ _pygi_argument_from_g_value(const GValue *value,
         {
             GIBaseInfo *info;
             GIInfoType info_type;
+            GType type;
 
             info = g_type_info_get_interface (type_info);
+            type = g_registered_type_info_get_g_type (info);
             info_type = g_base_info_get_type (info);
 
             g_base_info_unref (info);
@@ -123,17 +127,23 @@ _pygi_argument_from_g_value(const GValue *value,
                 case GI_INFO_TYPE_BOXED:
                 case GI_INFO_TYPE_STRUCT:
                 case GI_INFO_TYPE_UNION:
-                    if (G_VALUE_HOLDS(value, G_TYPE_BOXED)) {
+                    if (g_type_is_a (type, G_TYPE_BOXED)) {
                         arg.v_pointer = g_value_get_boxed (value);
-                    } else if (G_VALUE_HOLDS(value, G_TYPE_VARIANT)) {
+                    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
                         arg.v_pointer = g_value_get_variant (value);
-                    } else {
+                    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
                         arg.v_pointer = g_value_get_pointer (value);
+                    } else {
+                        PyErr_Format (PyExc_NotImplementedError,
+                                      "Converting GValue's of type '%s' is not implemented.",
+                                      g_type_name (type));
                     }
                     break;
                 default:
-                    g_warning("Converting of type '%s' is not implemented", g_info_type_to_string(info_type));
-                    g_assert_not_reached();
+                    PyErr_Format (PyExc_NotImplementedError,
+                                  "Converting GValue's of type '%s' is not implemented.",
+                                  g_info_type_to_string (info_type));
+                    break;
             }
             break;
         }

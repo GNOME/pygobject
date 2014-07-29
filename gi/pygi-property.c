@@ -22,6 +22,7 @@
  */
 
 #include "pygi-private.h"
+#include "pygi-value.h"
 
 #include <girepository.h>
 
@@ -103,7 +104,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     GIArgument arg = { 0, };
     PyObject *py_value = NULL;
     GITypeInfo *type_info = NULL;
-    GITypeTag type_tag;
+    gboolean free_array = FALSE;
 
     /* The owner_type of the pspec gives us the exact type that introduced the
      * property, even if it is a parent class of the instance in question. */
@@ -116,139 +117,20 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     g_object_get_property (instance->obj, pspec->name, &value);
 
     type_info = g_property_info_get_type (property_info);
+    arg = _pygi_argument_from_g_value (&value, type_info);
 
-    type_tag = g_type_info_get_tag (type_info);
-    switch (type_tag) {
-        case GI_TYPE_TAG_BOOLEAN:
-            arg.v_boolean = g_value_get_boolean (&value);
-            break;
-        case GI_TYPE_TAG_INT8:
-            arg.v_int8 = g_value_get_schar (&value);
-            break;
-        case GI_TYPE_TAG_INT16:
-        case GI_TYPE_TAG_INT32:
-            if (G_VALUE_HOLDS_LONG (&value))
-                arg.v_long = g_value_get_long (&value);
-            else
-                arg.v_int = g_value_get_int (&value);
-            break;
-        case GI_TYPE_TAG_INT64:
-            if (G_VALUE_HOLDS_LONG (&value))
-                arg.v_long = g_value_get_long (&value);
-            else
-                arg.v_int64 = g_value_get_int64 (&value);
-            break;
-        case GI_TYPE_TAG_UINT8:
-            arg.v_uint8 = g_value_get_uchar (&value);
-            break;
-        case GI_TYPE_TAG_UINT16:
-        case GI_TYPE_TAG_UINT32:
-            if (G_VALUE_HOLDS_ULONG (&value))
-                arg.v_ulong = g_value_get_ulong (&value);
-            else
-                arg.v_uint = g_value_get_uint (&value);
-            break;
-        case GI_TYPE_TAG_UINT64:
-            if (G_VALUE_HOLDS_ULONG (&value))
-                arg.v_ulong = g_value_get_ulong (&value);
-            else
-                arg.v_uint64 = g_value_get_uint64 (&value);
-            break;
-        case GI_TYPE_TAG_FLOAT:
-            arg.v_float = g_value_get_float (&value);
-            break;
-        case GI_TYPE_TAG_DOUBLE:
-            arg.v_double = g_value_get_double (&value);
-            break;
-        case GI_TYPE_TAG_GTYPE:
-            arg.v_size = g_value_get_gtype (&value);
-            break;
-        case GI_TYPE_TAG_UTF8:
-        case GI_TYPE_TAG_FILENAME:
-            /* This will be copied in _pygi_argument_to_object */
-            arg.v_string = (char *)g_value_get_string (&value);
-            break;
-        case GI_TYPE_TAG_INTERFACE:
-        {
-            GIBaseInfo *info;
-            GIInfoType info_type;
-            GType type;
-
-            info = g_type_info_get_interface (type_info);
-            type = g_registered_type_info_get_g_type (info);
-            info_type = g_base_info_get_type (info);
-
-            g_base_info_unref (info);
-
-            switch (info_type) {
-                case GI_INFO_TYPE_ENUM:
-                    arg.v_int = g_value_get_enum (&value);
-                    break;
-                case GI_INFO_TYPE_INTERFACE:
-                case GI_INFO_TYPE_OBJECT:
-                    arg.v_pointer = g_value_get_object (&value);
-                    break;
-                case GI_INFO_TYPE_BOXED:
-                case GI_INFO_TYPE_STRUCT:
-                case GI_INFO_TYPE_UNION:
-
-                    if (g_type_is_a (type, G_TYPE_BOXED)) {
-                        arg.v_pointer = g_value_get_boxed (&value);
-                    } else if (g_type_is_a (type, G_TYPE_POINTER)) {
-                        arg.v_pointer = g_value_get_pointer (&value);
-                    } else if (g_type_is_a (type, G_TYPE_VARIANT)) {
-                        arg.v_pointer = g_value_get_variant (&value);
-                    } else {
-                        PyErr_Format (PyExc_NotImplementedError,
-                                      "Retrieving properties of type '%s' is not implemented",
-                                      g_type_name (type));
-                    }
-                    break;
-                default:
-                    PyErr_Format (PyExc_NotImplementedError,
-                                  "Retrieving properties of type '%s' is not implemented",
-                                  g_type_name (type));
-                    goto out;
-            }
-            break;
-        }
-        case GI_TYPE_TAG_GHASH:
-            arg.v_pointer = g_value_get_boxed (&value);
-            break;
-        case GI_TYPE_TAG_GLIST:
-        case GI_TYPE_TAG_GSLIST:
-            if (G_VALUE_HOLDS_BOXED(&value))
-                arg.v_pointer = g_value_get_boxed (&value);
-            else
-                arg.v_pointer = g_value_get_pointer (&value);
-            break;
-        case GI_TYPE_TAG_ARRAY:
-        {
-            gchar** strings;
-            GArray *arg_items;
-            int i;
-
-            strings = g_value_get_boxed (&value);
-            if (strings == NULL)
-                arg.v_pointer = NULL;
-            else {
-                arg_items = g_array_sized_new (TRUE, TRUE, sizeof (GIArgument), g_strv_length (strings));
-                g_array_set_size (arg_items, g_strv_length (strings));
-                for (i = 0; strings[i] != NULL; ++i) {
-                    g_array_index (arg_items, GIArgument, i).v_string = strings[i];
-                }
-                arg.v_pointer = arg_items;
-            }
-            break;
-        }
-        default:
-            PyErr_Format (PyExc_NotImplementedError,
-                          "Retrieving properties of type %s is not implemented",
-                          g_type_tag_to_string (g_type_info_get_tag (type_info)));
-            goto out;
+    /* Arrays are special cased, see note in _pygi_argument_to_array. */
+    if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
+        arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
+                                                 type_info, &free_array);
     }
 
     py_value = _pygi_argument_to_object (&arg, type_info, GI_TRANSFER_NOTHING);
+
+    if (free_array) {
+        g_array_free (arg.v_pointer, FALSE);
+    }
+
     g_value_unset (&value);
 
 out:
