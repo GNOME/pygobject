@@ -497,7 +497,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                      */
                     pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                       cache,
-                                                                      i - 1);
+                                                                      i);
                     return FALSE;
                 }
 
@@ -516,7 +516,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                                        state->n_py_in_args);
                         pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                           cache,
-                                                                          i - 1);
+                                                                          i);
                         return FALSE;
                     }
 
@@ -550,7 +550,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
                                       i, cache->name);
                         pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                           cache,
-                                                                          i - 1);
+                                                                          i);
                         return FALSE;
                     }
                 } else {
@@ -575,7 +575,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
                  pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                    cache,
-                                                                   i - 1);
+                                                                   i);
                  return FALSE;
             }
             success = arg_cache->from_py_marshaller (state,
@@ -589,7 +589,7 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
             if (!success) {
                 pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                   cache,
-                                                                  i - 1);
+                                                                  i);
                 return FALSE;
             }
 
