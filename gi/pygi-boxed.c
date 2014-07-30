@@ -28,18 +28,26 @@
 static void
 _boxed_dealloc (PyGIBoxed *self)
 {
-    GType g_type;
+    Py_TYPE (self)->tp_free ((PyObject *)self);
+}
 
-    if ( ( (PyGBoxed *) self)->free_on_dealloc) {
+static PyObject *
+boxed_del (PyGIBoxed *self)
+{
+    GType g_type;
+    gpointer boxed = pyg_boxed_get_ptr (self);
+
+    if ( ( (PyGBoxed *) self)->free_on_dealloc && boxed != NULL) {
         if (self->slice_allocated) {
-            g_slice_free1 (self->size, pyg_boxed_get_ptr (self));
+            g_slice_free1 (self->size, boxed);
         } else {
             g_type = pyg_type_from_object ( (PyObject *) self);
-            g_boxed_free (g_type, pyg_boxed_get_ptr (self));
+            g_boxed_free (g_type, boxed);
         }
     }
+    pyg_boxed_set_ptr (self, NULL);
 
-    Py_TYPE (self)->tp_free ((PyObject *)self);
+    Py_RETURN_NONE;
 }
 
 void *
@@ -103,7 +111,7 @@ _boxed_new (PyTypeObject *type,
         goto out;
     }
 
-    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, TRUE, size);
+    self = (PyGIBoxed *) _pygi_boxed_new (type, boxed, FALSE, size);
     if (self == NULL) {
         g_slice_free1 (size, boxed);
         goto out;
@@ -136,30 +144,48 @@ _boxed_init (PyObject *self,
 PYGLIB_DEFINE_TYPE("gi.Boxed", PyGIBoxed_Type, PyGIBoxed);
 
 PyObject *
-_pygi_boxed_new (PyTypeObject *type,
+_pygi_boxed_new (PyTypeObject *pytype,
                  gpointer      boxed,
-                 gboolean      free_on_dealloc,
+                 gboolean      copy_boxed,
                  gsize         allocated_slice)
 {
     PyGIBoxed *self;
+    GType gtype;
 
     if (!boxed) {
         Py_RETURN_NONE;
     }
 
-    if (!PyType_IsSubtype (type, &PyGIBoxed_Type)) {
+    if (!PyType_IsSubtype (pytype, &PyGIBoxed_Type)) {
         PyErr_SetString (PyExc_TypeError, "must be a subtype of gi.Boxed");
         return NULL;
     }
 
-    self = (PyGIBoxed *) type->tp_alloc (type, 0);
+    gtype = pyg_type_from_object ((PyObject *)pytype);
+
+    /* Boxed objects with slice allocation means they come from caller allocated
+     * out arguments. In this case copy_boxed does not make sense because we
+     * already own the slice allocated memory and we should be receiving full
+     * ownership transfer. */
+    if (copy_boxed) {
+        g_assert (allocated_slice == 0);
+        boxed = g_boxed_copy (gtype, boxed);
+    }
+
+    self = (PyGIBoxed *) pytype->tp_alloc (pytype, 0);
     if (self == NULL) {
         return NULL;
     }
 
-    ( (PyGBoxed *) self)->gtype = pyg_type_from_object ( (PyObject *) type);
-    ( (PyGBoxed *) self)->free_on_dealloc = free_on_dealloc;
+    /* We always free on dealloc because we always own the memory due to:
+     *   1) copy_boxed == TRUE
+     *   2) allocated_slice > 0
+     *   3) otherwise the mode is assumed "transfer everything".
+     */
+    ((PyGBoxed *)self)->free_on_dealloc = TRUE;
+    ((PyGBoxed *)self)->gtype = gtype;
     pyg_boxed_set_ptr (self, boxed);
+
     if (allocated_slice > 0) {
         self->size = allocated_slice;
         self->slice_allocated = TRUE;
@@ -182,6 +208,11 @@ static PyGetSetDef pygi_boxed_getsets[] = {
     { NULL, 0, 0 }
 };
 
+static PyMethodDef boxed_methods[] = {
+    { "__del__", (PyCFunction)boxed_del, METH_NOARGS },
+    { NULL, NULL, 0 }
+};
+
 void
 _pygi_boxed_register_types (PyObject *m)
 {
@@ -192,6 +223,7 @@ _pygi_boxed_register_types (PyObject *m)
     PyGIBoxed_Type.tp_dealloc = (destructor) _boxed_dealloc;
     PyGIBoxed_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
     PyGIBoxed_Type.tp_getset = pygi_boxed_getsets;
+    PyGIBoxed_Type.tp_methods = boxed_methods;
 
     if (PyType_Ready (&PyGIBoxed_Type))
         return;

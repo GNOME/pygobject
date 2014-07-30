@@ -1,5 +1,6 @@
 # -*- Mode: Python -*-
 
+import gc
 import unittest
 import warnings
 
@@ -123,6 +124,7 @@ class TestSource(unittest.TestCase):
             return s
 
         s = f()
+        gc.collect()
         self.assertTrue(s.is_destroyed())
 
     def test_remove(self):
@@ -205,8 +207,9 @@ class TestSource(unittest.TestCase):
                 self.finalized = True
 
         source = S()
-        id = source.attach()
-        print('source id:', id)
+        self.assertEqual(source.ref_count, 1)
+        source.attach()
+        self.assertEqual(source.ref_count, 2)
         self.assertFalse(self.finalized)
         self.assertFalse(source.is_destroyed())
 
@@ -214,6 +217,7 @@ class TestSource(unittest.TestCase):
             pass
 
         source.destroy()
+        self.assertEqual(source.ref_count, 1)
         self.assertTrue(self.dispatched)
         self.assertFalse(self.finalized)
         self.assertTrue(source.is_destroyed())

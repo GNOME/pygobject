@@ -239,8 +239,10 @@ pyg_source_new (void)
     source = (PyGRealSource*) g_source_new (&pyg_source_funcs, sizeof (PyGRealSource));
 
     py_type = _pygi_type_import_by_name ("GLib", "Source");
-    /* g_source_new uses malloc, not slices */
-    source->obj = _pygi_boxed_new ( (PyTypeObject *) py_type, source, FALSE, 0);
+    /* Full ownership transfer of the source, this will be free'd with g_boxed_free. */
+    source->obj = _pygi_boxed_new ( (PyTypeObject *) py_type, source,
+                                    FALSE, /* copy_boxed */
+                                    0);    /* slice_allocated */
 
     return source->obj;
 }

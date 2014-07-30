@@ -26,9 +26,9 @@ G_BEGIN_DECLS
 
 extern PyTypeObject PyGIBoxed_Type;
 
-PyObject * _pygi_boxed_new (PyTypeObject *type,
+PyObject * _pygi_boxed_new (PyTypeObject *pytype,
                             gpointer      boxed,
-                            gboolean      free_on_dealloc,
+                            gboolean      copy_boxed,
                             gsize         allocated_slice);
 
 void * _pygi_boxed_alloc (GIBaseInfo *info,

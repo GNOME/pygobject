@@ -575,10 +575,6 @@ class Source(GLib.Source):
     def __init__(self, *args, **kwargs):
         return super(Source, self).__init__()
 
-    def __del__(self):
-        if hasattr(self, '__pygi_custom_source'):
-            self.unref()
-
     def set_callback(self, fn, user_data=None):
         if hasattr(self, '__pygi_custom_source'):
             # use our custom pyg_source_set_callback() if for a GSource object
