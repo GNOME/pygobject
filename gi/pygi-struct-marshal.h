@@ -38,10 +38,6 @@ gboolean pygi_arg_gvalue_from_py_marshal     (PyObject        *py_arg, /*in*/
                                               GITransfer       transfer,
                                               gboolean         is_allocated);
 
-
-gboolean pygi_arg_gclosure_from_py_marshal   (PyObject        *py_arg, /*in*/
-                                              GIArgument      *arg);   /*out*/
-
 gboolean pygi_arg_struct_from_py_marshal     (PyObject        *py_arg,
                                               GIArgument      *arg,
                                               const gchar     *arg_name,
