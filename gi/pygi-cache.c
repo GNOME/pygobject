@@ -769,12 +769,12 @@ pygi_callable_cache_new (GICallableInfo *callable_info,
         cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
     }
 
-    n_args = g_callable_info_get_n_args (callable_info);
-
     /* if we are a method or vfunc make sure the instance parameter is counted */
     if (cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
             cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
-        n_args++;
+        cache->args_offset = 1;
+
+    n_args = cache->args_offset + g_callable_info_get_n_args (callable_info);
 
     if (n_args >= 0) {
         cache->args_cache = g_ptr_array_new_full (n_args, (GDestroyNotify) pygi_arg_cache_free);

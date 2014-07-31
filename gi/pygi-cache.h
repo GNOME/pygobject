@@ -171,6 +171,9 @@ struct _PyGICallableCache
     /* Index of user_data arg that can eat variable args passed to a callable. */
     gssize user_data_varargs_index;
 
+    /* Number of args already added */
+    gssize args_offset;
+
     /* Number of out args passed to g_function_info_invoke.
      * This is used for the length of PyGIInvokeState.out_values */
     gssize n_to_py_args;

@@ -761,10 +761,8 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
         seq_cache->len_arg_index = g_type_info_get_array_length (type_info);
 
         /* offset by self arg for methods and vfuncs */
-        if (seq_cache->len_arg_index >= 0 && callable_cache != NULL &&
-                (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-                 callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)) {
-            seq_cache->len_arg_index += 1;
+        if (seq_cache->len_arg_index >= 0 && callable_cache != NULL) {
+            seq_cache->len_arg_index += callable_cache->args_offset;
         }
     }
 

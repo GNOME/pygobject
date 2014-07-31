@@ -927,9 +927,7 @@ pygi_arg_callback_setup_from_info (PyGICallbackCache  *arg_cache,
     }
 
     if (callable_cache != NULL)
-        child_offset =
-            (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-                 callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) ? 1: 0;
+        child_offset = callable_cache->args_offset;
 
     ( (PyGIArgCache *)arg_cache)->destroy_notify = (GDestroyNotify)_callback_cache_free_func;
 
