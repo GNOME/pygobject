@@ -15,7 +15,7 @@ Like the GObject library itself PyGObject is licensed under the GNU LGPL, so is 
 
 PyGObject now dynamically accesses any GObject libraries that uses GObject Introspection. It replaces the need for separate modules such as PyGTK, GIO and python-gnome to build a full GNOME 3.0 application. Once new functionality is added to gobject library it is instantly available as a Python API without the need for intermediate Python glue.
   </description>
-  <homepage rdf:resource="http://live.gnome.org/PyGObject" />
+  <homepage rdf:resource="https://wiki.gnome.org/Projects/PyGObject" />
   <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/python-hackers-list" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#core" />
   <download-page rdf:resource="http://download.gnome.org/sources/pygobject/" />
@@ -60,7 +60,7 @@ PyGObject now dynamically accesses any GObject libraries that uses GObject Intro
   <maintainer>
     <foaf:Person>
       <foaf:name>Simon Feltman</foaf:name>
-      <foaf:mbox rdf:resource="mailto:s.feltman@gmail.com" />
+      <foaf:mbox rdf:resource="mailto:sfeltman@src.gnome.org" />
       <gnome:userid>sfeltman</gnome:userid>
     </foaf:Person>
   </maintainer>
