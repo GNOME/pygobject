@@ -12,8 +12,6 @@ typedef struct _PyGIInvokeState
     PyObject *py_in_args;
     gssize n_py_in_args;
 
-    GType implementor_gtype;
-
     /* Number of arguments the ffi wrapped C function takes. Used as the exact
      * count for argument related arrays held in this struct.
      */

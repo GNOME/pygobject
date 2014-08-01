@@ -75,7 +75,7 @@ typedef struct {
     gpointer user_data;
     GIScopeType scope;
     GDestroyNotify destroy_notify_func;
-    PyGICallableCache *cache;
+    PyGICCallbackCache *cache;
 } PyGICCallback;
 
 

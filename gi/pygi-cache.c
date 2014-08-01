@@ -117,25 +117,6 @@ pygi_arg_cache_free (PyGIArgCache *cache)
         g_slice_free (PyGIArgCache, cache);
 }
 
-void
-pygi_callable_cache_free (PyGICallableCache *cache)
-{
-    if (cache == NULL)
-        return;
-
-    g_slist_free (cache->to_py_args);
-    g_slist_free (cache->arg_name_list);
-    g_hash_table_destroy (cache->arg_name_hash);
-    g_ptr_array_unref (cache->args_cache);
-
-    if (cache->return_cache != NULL)
-        pygi_arg_cache_free (cache->return_cache);
-
-    g_function_invoker_destroy (&cache->invoker);
-    g_slice_free (PyGICallableCache, cache);
-}
-
-
 /* PyGIInterfaceCache */
 
 static void
@@ -447,6 +428,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
     return arg_cache;
 }
 
+/* PyGICallableCache */
+
 static PyGIDirection
 _pygi_get_direction (PyGICallableCache *callable_cache, GIDirection gi_direction)
 {
@@ -454,11 +437,11 @@ _pygi_get_direction (PyGICallableCache *callable_cache, GIDirection gi_direction
     if (gi_direction == GI_DIRECTION_INOUT) {
         return PYGI_DIRECTION_BIDIRECTIONAL;
     } else if (gi_direction == GI_DIRECTION_IN) {
-        if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
+        if (callable_cache->calling_context != PYGI_CALLING_CONTEXT_IS_FROM_PY)
             return PYGI_DIRECTION_TO_PYTHON;
         return PYGI_DIRECTION_FROM_PYTHON;
     } else {
-        if (callable_cache->function_type == PYGI_FUNCTION_TYPE_CALLBACK)
+        if (callable_cache->calling_context != PYGI_CALLING_CONTEXT_IS_FROM_PY)
             return PYGI_DIRECTION_FROM_PYTHON;
         return PYGI_DIRECTION_TO_PYTHON;
     }
@@ -466,11 +449,11 @@ _pygi_get_direction (PyGICallableCache *callable_cache, GIDirection gi_direction
 
 /* Generate the cache for the callable's arguments */
 static gboolean
-_args_cache_generate (GICallableInfo *callable_info,
-                      PyGICallableCache *callable_cache)
+_callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
+                                          GICallableInfo *callable_info)
 {
-    gssize arg_index = 0;
     gssize i;
+    gssize arg_index;
     GITypeInfo *return_info;
     GITransfer return_transfer;
     PyGIArgCache *return_cache;
@@ -500,41 +483,9 @@ _args_cache_generate (GICallableInfo *callable_info,
     callable_cache->return_cache = return_cache;
     g_base_info_unref (return_info);
 
-    /* first arg is the instance */
-    if (callable_cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-            callable_cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
-        GIInterfaceInfo *interface_info;
-        PyGIArgCache *instance_cache;
-
-        interface_info = g_base_info_get_container ( (GIBaseInfo *)callable_info);
-
-        instance_cache =
-            _arg_cache_new_for_interface (interface_info,
-                                          NULL,
-                                          NULL,
-                                          GI_TRANSFER_NOTHING,
-                                          PYGI_DIRECTION_FROM_PYTHON,
-                                          callable_cache);
-
-        g_base_info_unref ( (GIBaseInfo *)interface_info);
-
-        if (instance_cache == NULL)
-            return FALSE;
-
-        /* Because we are not supplied a GITypeInfo for instance arguments,
-         * assume some defaults. */
-        instance_cache->is_pointer = TRUE;
-        instance_cache->py_arg_index = 0;
-        instance_cache->c_arg_index = 0;
-
-        _pygi_callable_cache_set_arg (callable_cache, arg_index, instance_cache);
-
-        arg_index++;
-        callable_cache->n_py_args++;
-    }
-
-
-    for (i=0; arg_index < _pygi_callable_cache_args_len (callable_cache); arg_index++, i++) {
+    for (i = 0, arg_index = callable_cache->args_offset;
+         arg_index < _pygi_callable_cache_args_len (callable_cache);
+         i++, arg_index++) {
         PyGIArgCache *arg_cache = NULL;
         GIArgInfo *arg_info;
         PyGIDirection direction;
@@ -681,59 +632,32 @@ _args_cache_generate (GICallableInfo *callable_info,
     return TRUE;
 }
 
-static gboolean
-_setup_invoker (GICallableInfo *callable_info,
-                GIInfoType info_type,
-                GIFunctionInvoker *invoker,
-                GCallback function_ptr)
+static void
+_callable_cache_deinit_real (PyGICallableCache *cache)
 {
-    GError *error = NULL;
+    g_slist_free (cache->to_py_args);
+    g_slist_free (cache->arg_name_list);
+    g_hash_table_destroy (cache->arg_name_hash);
+    g_ptr_array_unref (cache->args_cache);
 
-    if (info_type == GI_INFO_TYPE_FUNCTION) {
-        if (g_function_info_prep_invoker ((GIFunctionInfo *)callable_info,
-                                          invoker,
-                                          &error)) {
-            return TRUE;
-        }
-        if (!pygi_error_check (&error)) {
-            PyErr_Format (PyExc_RuntimeError,
-                          "unknown error creating invoker for %s",
-                          g_base_info_get_name ((GIBaseInfo *)callable_info));
-        }
-        return FALSE;
-
-    } else {
-        if (!g_function_invoker_new_for_address (function_ptr,
-                                                 (GIFunctionInfo *)callable_info,
-                                                 invoker,
-                                                 &error)) {
-            if (!pygi_error_check (&error)) {
-                PyErr_Format (PyExc_RuntimeError,
-                              "unknown error creating invoker for %s",
-                              g_base_info_get_name ((GIBaseInfo *)callable_info));
-            }
-            return FALSE;
-        }
-    }
-    return TRUE;
+    if (cache->return_cache != NULL)
+        pygi_arg_cache_free (cache->return_cache);
 }
 
-PyGICallableCache *
-pygi_callable_cache_new (GICallableInfo *callable_info,
-                         GCallback function_ptr,
-                         gboolean is_ccallback)
+static gboolean
+_callable_cache_init (PyGICallableCache *cache,
+                      GICallableInfo *callable_info)
 {
     gint n_args;
-    PyGICallableCache *cache;
-    GIInfoType type = g_base_info_get_type ( (GIBaseInfo *)callable_info);
 
-    cache = g_slice_new0 (PyGICallableCache);
+    if (cache->deinit == NULL)
+        cache->deinit = _callable_cache_deinit_real;
 
-    if (cache == NULL)
-        return NULL;
+    if (cache->generate_args_cache == NULL)
+        cache->generate_args_cache = _callable_cache_generate_args_cache_real;
 
-    cache->name = g_base_info_get_name ((GIBaseInfo *)callable_info);
-    cache->throws = g_callable_info_can_throw_gerror ((GIBaseInfo *)callable_info);
+    cache->name = g_base_info_get_name ((GIBaseInfo *) callable_info);
+    cache->throws = g_callable_info_can_throw_gerror ((GIBaseInfo *) callable_info);
 
     if (g_base_info_is_deprecated (callable_info)) {
         const gchar *deprecated = g_base_info_get_attribute (callable_info, "deprecated");
@@ -745,34 +669,9 @@ pygi_callable_cache_new (GICallableInfo *callable_info,
         else
             warning = g_strdup_printf ("%s.%s is deprecated",
                                        g_base_info_get_namespace (callable_info), cache->name);
-        PyErr_WarnEx(PyExc_DeprecationWarning, warning, 0);
+        PyErr_WarnEx (PyExc_DeprecationWarning, warning, 0);
         g_free (warning);
     }
-
-    if (type == GI_INFO_TYPE_FUNCTION) {
-        GIFunctionInfoFlags flags;
-
-        flags = g_function_info_get_flags ( (GIFunctionInfo *)callable_info);
-
-        if (flags & GI_FUNCTION_IS_CONSTRUCTOR)
-            cache->function_type = PYGI_FUNCTION_TYPE_CONSTRUCTOR;
-        else if (flags & GI_FUNCTION_IS_METHOD)
-            cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
-    } else if (type == GI_INFO_TYPE_VFUNC) {
-        cache->function_type = PYGI_FUNCTION_TYPE_VFUNC;
-    } else if (type == GI_INFO_TYPE_CALLBACK) {
-        if (is_ccallback)
-            cache->function_type = PYGI_FUNCTION_TYPE_CCALLBACK;
-        else
-            cache->function_type = PYGI_FUNCTION_TYPE_CALLBACK;
-    } else {
-        cache->function_type = PYGI_FUNCTION_TYPE_METHOD;
-    }
-
-    /* if we are a method or vfunc make sure the instance parameter is counted */
-    if (cache->function_type == PYGI_FUNCTION_TYPE_METHOD ||
-            cache->function_type == PYGI_FUNCTION_TYPE_VFUNC)
-        cache->args_offset = 1;
 
     n_args = cache->args_offset + g_callable_info_get_n_args (callable_info);
 
@@ -781,15 +680,362 @@ pygi_callable_cache_new (GICallableInfo *callable_info,
         g_ptr_array_set_size (cache->args_cache, n_args);
     }
 
-    if (!_args_cache_generate (callable_info, cache))
-        goto err;
-
-    if (!_setup_invoker (callable_info, type, &cache->invoker, function_ptr)) {
-        goto err;
+    if (!cache->generate_args_cache (cache, callable_info)) {
+        _callable_cache_deinit_real (cache);
+        return FALSE;
     }
 
-    return cache;
-err:
-    pygi_callable_cache_free (cache);
+    return TRUE;
+}
+
+void
+pygi_callable_cache_free (PyGICallableCache *cache)
+{
+    cache->deinit (cache);
+    g_free (cache);
+}
+
+/* PyGIFunctionCache */
+
+static PyObject *
+_function_cache_invoke_real (PyGIFunctionCache *function_cache,
+                             PyGIInvokeState *state,
+                             PyObject *py_args,
+                             PyObject *py_kwargs)
+{
+    return pygi_invoke_c_callable (function_cache, state,
+                                   py_args, py_kwargs);
+}
+
+static void
+_function_cache_deinit_real (PyGICallableCache *callable_cache)
+{
+    g_function_invoker_destroy (&((PyGIFunctionCache *) callable_cache)->invoker);
+
+    _callable_cache_deinit_real (callable_cache);
+}
+
+static gboolean
+_function_cache_init (PyGIFunctionCache *function_cache,
+                      GICallableInfo *callable_info)
+{
+    PyGICallableCache *callable_cache = (PyGICallableCache *) function_cache;
+    GIFunctionInvoker *invoker = &function_cache->invoker;
+    GError *error = NULL;
+
+    callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_PY;
+
+    if (callable_cache->deinit == NULL)
+        callable_cache->deinit = _function_cache_deinit_real;
+
+    if (function_cache->invoke == NULL)
+        function_cache->invoke = _function_cache_invoke_real;
+
+    if (!_callable_cache_init (callable_cache, callable_info))
+        return FALSE;
+
+    /* Set by PyGICCallbackCache and PyGIVFuncCache */
+    if (invoker->native_address == NULL) {
+        if (g_function_info_prep_invoker ((GIFunctionInfo *) callable_info,
+                                          invoker,
+                                          &error)) {
+            return TRUE;
+        }
+    } else {
+        if (g_function_invoker_new_for_address (invoker->native_address,
+                                                (GIFunctionInfo *) callable_info,
+                                                invoker,
+                                                &error)) {
+            return TRUE;
+        }
+    }
+
+    if (!pygi_error_check (&error)) {
+        PyErr_Format (PyExc_RuntimeError,
+                      "unknown error creating invoker for %s",
+                      g_base_info_get_name ((GIBaseInfo *) callable_info));
+    }
+
+    _callable_cache_deinit_real (callable_cache);
+    return FALSE;
+}
+
+PyGIFunctionCache *
+pygi_function_cache_new (GICallableInfo *info)
+{
+    PyGIFunctionCache *function_cache;
+
+    function_cache = g_new0 (PyGIFunctionCache, 1);
+
+    if (!_function_cache_init (function_cache, info)) {
+        g_free (function_cache);
+        return NULL;
+    }
+
+    return function_cache;
+}
+
+PyObject *
+pygi_function_cache_invoke (PyGIFunctionCache *function_cache,
+                            PyObject *py_args,
+                            PyObject *py_kwargs)
+{
+    PyGIInvokeState state = { 0, };
+
+    return function_cache->invoke (function_cache, &state,
+                                   py_args, py_kwargs);
+}
+
+/* PyGICCallbackCache */
+
+PyGIFunctionCache *
+pygi_ccallback_cache_new (GICallableInfo *info,
+                          GCallback function_ptr)
+{
+    PyGICCallbackCache *ccallback_cache;
+    PyGIFunctionCache *function_cache;
+
+    ccallback_cache = g_new0 (PyGICCallbackCache, 1);
+    function_cache = (PyGIFunctionCache *) ccallback_cache;
+
+    function_cache->invoker.native_address = function_ptr;
+
+    if (!_function_cache_init (function_cache, info)) {
+        g_free (ccallback_cache);
+        return NULL;
+     }
+
+    return function_cache;
+}
+
+PyObject *
+pygi_ccallback_cache_invoke (PyGICCallbackCache *ccallback_cache,
+                             PyObject *py_args,
+                             PyObject *py_kwargs,
+                             gpointer user_data)
+{
+    PyGIFunctionCache *function_cache = (PyGIFunctionCache *) ccallback_cache;
+    PyGIInvokeState state = { 0, };
+
+    state.user_data = user_data;
+
+    return function_cache->invoke (function_cache, &state,
+                                   py_args, py_kwargs);
+}
+
+/* PyGIConstructorCache */
+
+static PyObject *
+_constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
+                                PyGIInvokeState *state,
+                                PyObject *py_args,
+                                PyObject *py_kwargs)
+{
+    PyGICallableCache *cache = (PyGICallableCache *) function_cache;
+    PyObject *constructor_class;
+    PyObject *ret;
+
+    constructor_class = PyTuple_GetItem (py_args, 0);
+    if (constructor_class == NULL) {
+        PyErr_Clear ();
+        PyErr_Format (PyExc_TypeError,
+                      "Constructors require the class to be passed in as an argument, "
+                      "No arguments passed to the %s constructor.",
+                      ((PyGICallableCache *) function_cache)->name);
+
+        return FALSE;
+    }
+
+    py_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
+    ret = _function_cache_invoke_real (function_cache, state,
+                                       py_args, py_kwargs);
+    Py_DECREF (py_args);
+
+    if (cache->return_cache == NULL || cache->return_cache->is_skipped)
+        return ret;
+
+    if (ret != NULL && ret != Py_None) {
+        if (!PyTuple_Check (ret))
+            return ret;
+
+        if (PyTuple_GET_ITEM (ret, 0) != Py_None)
+            return ret;
+    }
+
+    PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
+
+    Py_XDECREF (ret);
     return NULL;
+}
+
+PyGIFunctionCache *
+pygi_constructor_cache_new (GICallableInfo *info)
+{
+    PyGIConstructorCache *constructor_cache;
+    PyGIFunctionCache *function_cache;
+
+    constructor_cache = g_new0 (PyGIConstructorCache, 1);
+    function_cache = (PyGIFunctionCache *) constructor_cache;
+
+    function_cache->invoke = _constructor_cache_invoke_real;
+
+    if (!_function_cache_init (function_cache, info)) {
+        g_free (constructor_cache);
+        return NULL;
+    }
+
+    return function_cache;
+}
+
+/* PyGIFunctionWithInstanceCache */
+
+static gboolean
+_function_with_instance_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
+                                                        GICallableInfo *callable_info)
+{
+    GIInterfaceInfo *interface_info;
+    PyGIArgCache *instance_cache;
+
+    interface_info = g_base_info_get_container ((GIBaseInfo *) callable_info);
+
+    instance_cache =
+        _arg_cache_new_for_interface (interface_info,
+                                      NULL,
+                                      NULL,
+                                      GI_TRANSFER_NOTHING,
+                                      PYGI_DIRECTION_FROM_PYTHON,
+                                      callable_cache);
+
+    g_base_info_unref ((GIBaseInfo *) interface_info);
+
+    if (instance_cache == NULL)
+        return FALSE;
+
+    /* Because we are not supplied a GITypeInfo for instance arguments,
+     * assume some defaults. */
+    instance_cache->is_pointer = TRUE;
+    instance_cache->py_arg_index = 0;
+    instance_cache->c_arg_index = 0;
+
+    _pygi_callable_cache_set_arg (callable_cache, 0, instance_cache);
+
+    callable_cache->n_py_args++;
+
+    return _callable_cache_generate_args_cache_real (callable_cache,
+                                                     callable_info);
+}
+
+static gboolean
+_function_with_instance_cache_init (PyGIFunctionWithInstanceCache *fwi_cache,
+                                    GICallableInfo *info)
+{
+    PyGICallableCache *callable_cache = (PyGICallableCache *) fwi_cache;
+
+    callable_cache->args_offset += 1;
+    callable_cache->generate_args_cache = _function_with_instance_cache_generate_args_cache_real;
+
+    return _function_cache_init ((PyGIFunctionCache *) fwi_cache, info);
+}
+
+/* PyGIMethodCache */
+
+PyGIFunctionCache *
+pygi_method_cache_new (GICallableInfo *info)
+{
+    PyGIMethodCache *method_cache;
+    PyGIFunctionWithInstanceCache *fwi_cache;
+
+    method_cache = g_new0 (PyGIMethodCache, 1);
+    fwi_cache = (PyGIFunctionWithInstanceCache *) method_cache;
+
+    if (!_function_with_instance_cache_init (fwi_cache, info)) {
+        g_free (method_cache);
+        return NULL;
+    }
+
+    return (PyGIFunctionCache *) method_cache;
+}
+
+/* PyGIVFuncCache */
+
+static PyObject *
+_vfunc_cache_invoke_real (PyGIFunctionCache *function_cache,
+                          PyGIInvokeState *state,
+                          PyObject *py_args,
+                          PyObject *py_kwargs)
+{
+    PyGIVFuncCache *vfunc_cache = (PyGIVFuncCache *) function_cache;
+    PyObject *py_gtype;
+    GType implementor_gtype;
+    GError *error = NULL;
+    PyObject *ret;
+
+    py_gtype = PyTuple_GetItem (py_args, 0);
+    if (py_gtype == NULL) {
+        PyErr_SetString (PyExc_TypeError,
+                         "need the GType of the implementor class");
+        return FALSE;
+    }
+
+    implementor_gtype = pyg_type_from_object (py_gtype);
+    if (implementor_gtype == G_TYPE_INVALID)
+        return FALSE;
+
+    /* vfunc addresses are pulled into the state at call time and cannot be
+     * cached because the call site can specify a different portion of the
+     * class hierarchy. e.g. Object.do_func vs. SubObject.do_func might
+     * retrieve a different vfunc address but GI gives us the same vfunc info.
+     */
+    state->function_ptr = g_vfunc_info_get_address ((GIVFuncInfo *) vfunc_cache->info,
+                                                    implementor_gtype,
+                                                    &error);
+    if (pygi_error_check (&error)) {
+        return FALSE;
+    }
+
+    py_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
+    ret = _function_cache_invoke_real (function_cache, state,
+                                       py_args, py_kwargs);
+    Py_DECREF (py_args);
+
+    return ret;
+}
+
+static void
+_vfunc_cache_deinit_real (PyGICallableCache *callable_cache)
+{
+    g_base_info_unref (((PyGIVFuncCache *) callable_cache)->info);
+
+    _function_cache_deinit_real (callable_cache);
+}
+
+PyGIFunctionCache *
+pygi_vfunc_cache_new (GICallableInfo *info)
+{
+    PyGIVFuncCache *vfunc_cache;
+    PyGIFunctionCache *function_cache;
+    PyGIFunctionWithInstanceCache *fwi_cache;
+
+    vfunc_cache = g_new0 (PyGIVFuncCache, 1);
+    function_cache = (PyGIFunctionCache *) vfunc_cache;
+    fwi_cache = (PyGIFunctionWithInstanceCache *) vfunc_cache;
+
+    ((PyGICallableCache *) vfunc_cache)->deinit = _vfunc_cache_deinit_real;
+
+    /* This must be non-NULL for _function_cache_init() to create the
+     * invoker, the real address will be set in _vfunc_cache_invoke_real().
+     */
+    function_cache->invoker.native_address = (gpointer) 0xdeadbeef;
+
+    function_cache->invoke = _vfunc_cache_invoke_real;
+
+    if (!_function_with_instance_cache_init (fwi_cache, info)) {
+        g_free (vfunc_cache);
+        return NULL;
+    }
+
+    /* Required by _vfunc_cache_invoke_real() */
+    vfunc_cache->info = g_base_info_ref ((GIBaseInfo *) info);
+
+    return function_cache;
 }

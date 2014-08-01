@@ -25,45 +25,6 @@
 #include "pygi-marshal-cleanup.h"
 #include "pygi-error.h"
 
-static inline gboolean
-_invoke_callable (PyGIInvokeState *state,
-                  PyGICallableCache *cache,
-                  GICallableInfo *callable_info)
-{
-    GIFFIReturnValue ffi_return_value = {0};
-
-    Py_BEGIN_ALLOW_THREADS;
-
-        ffi_call (&cache->invoker.cif,
-                  state->function_ptr,
-                  (void *)&ffi_return_value,
-                  (void **)state->args);
-
-    Py_END_ALLOW_THREADS;
-
-    /* If the callable throws, the address of state->error will be bound into
-     * the state->args as the last value. When the callee sets an error using
-     * the state->args passed, it will have the side effect of setting
-     * state->error allowing for easy checking here.
-     */
-    if (state->error != NULL) {
-        if (pygi_error_check (&(state->error))) {
-            /* even though we errored out, the call itself was successful,
-               so we assume the call processed all of the parameters */
-            pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
-            return FALSE;
-        }
-    }
-
-    if (cache->return_cache) {
-        gi_type_info_extract_ffi_return_value (cache->return_cache->type_info,
-                                               &ffi_return_value,
-                                               &state->return_arg);
-    }
-
-    return TRUE;
-}
-
 static gboolean
 _check_for_unexpected_kwargs (const gchar *function_name,
                               GHashTable  *arg_name_hash,
@@ -247,15 +208,14 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     return combined_py_args;
 }
 
-static inline gboolean
-_invoke_state_init_from_callable_cache (GIBaseInfo *info,
-                                        PyGIInvokeState *state,
-                                        PyGICallableCache *cache,
-                                        PyObject *py_args,
-                                        PyObject *kwargs)
+static gboolean
+_invoke_state_init_from_cache (PyGIInvokeState *state,
+                               PyGIFunctionCache *function_cache,
+                               PyObject *py_args,
+                               PyObject *kwargs)
 {
-    PyObject *combined_args = NULL;
-    state->implementor_gtype = 0;
+    PyGICallableCache *cache = (PyGICallableCache *) function_cache;
+
     state->n_args = _pygi_callable_cache_args_len (cache);
 
     if (cache->throws) {
@@ -263,74 +223,14 @@ _invoke_state_init_from_callable_cache (GIBaseInfo *info,
     }
 
     /* Copy the function pointer to the state for the normal case. For vfuncs,
-     * this will be filled out based on the implementor_gtype calculated below.
+     * this has already been filled out based on the implementor's GType.
      */
-    state->function_ptr = cache->invoker.native_address;
-
-    /* TODO: We don't use the class parameter sent in by  the structure
-     * so we remove it from the py_args tuple but we can keep it 
-     * around if we want to call actual gobject constructors
-     * in the future instead of calling g_object_new
-     */
-    if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
-        PyObject *constructor_class;
-        constructor_class = PyTuple_GetItem (py_args, 0);
-
-        if (constructor_class == NULL) {
-            PyErr_Clear ();
-            PyErr_Format (PyExc_TypeError,
-                          "Constructors require the class to be passed in as an argument, "
-                          "No arguments passed to the %s constructor.",
-                          cache->name);
-
-            return FALSE;
-        }
-    } else if (cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
-        PyObject *py_gtype;
-        GError *error = NULL;
-
-        py_gtype = PyTuple_GetItem (py_args, 0);
-        if (py_gtype == NULL) {
-            PyErr_SetString (PyExc_TypeError,
-                             "need the GType of the implementor class");
-            return FALSE;
-        }
-
-        state->implementor_gtype = pyg_type_from_object (py_gtype);
-
-        if (state->implementor_gtype == 0)
-            return FALSE;
-
-        /* vfunc addresses are pulled into the state at call time and cannot be
-         * cached because the call site can specify a different portion of the
-         * class hierarchy. e.g. Object.do_func vs. SubObject.do_func might
-         * retrieve a different vfunc address but GI gives us the same vfunc info.
-         */
-        state->function_ptr = g_vfunc_info_get_address ((GIVFuncInfo *)info,
-                                                        state->implementor_gtype,
-                                                        &error);
-        if (pygi_error_check (&error)) {
-            return FALSE;
-        }
-    }
-
-    if  (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR ||
-            cache->function_type == PYGI_FUNCTION_TYPE_VFUNC) {
-
-        /* we could optimize this by using offsets instead of modifying the tuple but it makes the
-         * code more error prone and confusing so don't do that unless profiling shows
-         * significant gain
-         */
-        combined_args = PyTuple_GetSlice (py_args, 1, PyTuple_Size (py_args));
-    } else {
-        combined_args = py_args;
-        Py_INCREF (combined_args);
-    }
+    if (state->function_ptr == NULL)
+        state->function_ptr = function_cache->invoker.native_address;
 
     state->py_in_args = _py_args_combine_and_check_length (cache,
-                                                           combined_args,
+                                                           py_args,
                                                            kwargs);
-    Py_DECREF (combined_args);
 
     if (state->py_in_args == NULL) {
         return FALSE;
@@ -373,8 +273,8 @@ _invoke_state_init_from_callable_cache (GIBaseInfo *info,
     return TRUE;
 }
 
-static inline void
-_invoke_state_clear (PyGIInvokeState *state, PyGICallableCache *cache)
+static void
+_invoke_state_clear (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
 {
     g_slice_free1 (state->n_args * sizeof(GIArgument *), state->args);
     g_slice_free1 (state->n_args * sizeof(gpointer), state->args_cleanup_data);
@@ -427,7 +327,7 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
     return TRUE;
 }
 
-/* _invoke_marshal_in_args:
+/* pygi_invoke_marshal_in_args:
  *
  * Fills out the state struct argument lists. arg_values will always hold
  * actual values marshaled either to or from Python and C. arg_pointers will
@@ -455,9 +355,10 @@ _caller_alloc (PyGIArgCache *arg_cache, GIArgument *arg)
  * ]]
  *
  */
-static inline gboolean
-_invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
+static gboolean
+_invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
 {
+    PyGICallableCache *cache = (PyGICallableCache *) function_cache;
     gssize i;
 
     if (state->n_py_in_args > cache->n_py_args) {
@@ -600,9 +501,10 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGICallableCache *cache)
     return TRUE;
 }
 
-static inline PyObject *
-_invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
+static PyObject *
+_invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
 {
+    PyGICallableCache *cache = (PyGICallableCache *) function_cache;
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
     gssize total_out_args = cache->n_to_py_args;
@@ -610,15 +512,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 
     if (cache->return_cache) {
         if (!cache->return_cache->is_skipped) {
-            if (cache->function_type == PYGI_FUNCTION_TYPE_CONSTRUCTOR) {
-                if (state->return_arg.v_pointer == NULL) {
-                    PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
-                    pygi_marshal_cleanup_args_return_fail (state,
-                                                       cache);
-                    return NULL;
-                }
-            }
-
             py_return = cache->return_cache->to_py_marshaller ( state,
                                                                 cache,
                                                                 cache->return_cache,
@@ -697,7 +590,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
             if (py_obj == NULL) {
                 if (has_return)
                     py_arg_index--;
- 
+
                 pygi_marshal_cleanup_args_to_py_parameter_fail (state,
                                                                 cache,
                                                                 py_arg_index);
@@ -713,33 +606,69 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGICallableCache *cache)
 }
 
 PyObject *
+pygi_invoke_c_callable (PyGIFunctionCache *function_cache,
+                        PyGIInvokeState *state,
+                        PyObject *py_args,
+                        PyObject *py_kwargs)
+{
+    PyGICallableCache *cache = (PyGICallableCache *) function_cache;
+    GIFFIReturnValue ffi_return_value = {0};
+    PyObject *ret = NULL;
+
+    if (!_invoke_state_init_from_cache (state, function_cache,
+                                        py_args, py_kwargs))
+         goto err;
+
+    if (!_invoke_marshal_in_args (state, function_cache))
+         goto err;
+
+    Py_BEGIN_ALLOW_THREADS;
+
+        ffi_call (&function_cache->invoker.cif,
+                  state->function_ptr,
+                  (void *) &ffi_return_value,
+                  (void **) state->args);
+
+    Py_END_ALLOW_THREADS;
+
+    /* If the callable throws, the address of state->error will be bound into
+     * the state->args as the last value. When the callee sets an error using
+     * the state->args passed, it will have the side effect of setting
+     * state->error allowing for easy checking here.
+     */
+    if (state->error != NULL) {
+        if (pygi_error_check (&state->error)) {
+            /* even though we errored out, the call itself was successful,
+               so we assume the call processed all of the parameters */
+            pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
+            goto err;
+        }
+    }
+
+    if (cache->return_cache) {
+        gi_type_info_extract_ffi_return_value (cache->return_cache->type_info,
+                                               &ffi_return_value,
+                                               &state->return_arg);
+    }
+
+    ret = _invoke_marshal_out_args (state, function_cache);
+    pygi_marshal_cleanup_args_from_py_marshal_success (state, cache);
+
+    if (ret != NULL)
+        pygi_marshal_cleanup_args_to_py_marshal_success (state, cache);
+
+err:
+    _invoke_state_clear (state, function_cache);
+    return ret;
+}
+
+PyObject *
 pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
                            PyObject *kwargs, PyGICallableCache *cache,
                            gpointer user_data)
 {
-    PyGIInvokeState state = { 0, };
-    PyObject *ret = NULL;
-
-    if (!_invoke_state_init_from_callable_cache (info, &state, cache, py_args, kwargs))
-        goto err;
-
-    if (cache->function_type == PYGI_FUNCTION_TYPE_CCALLBACK)
-        state.user_data = user_data;
-
-    if (!_invoke_marshal_in_args (&state, cache))
-        goto err;
-
-    if (!_invoke_callable (&state, cache, info))
-        goto err;
-
-    ret = _invoke_marshal_out_args (&state, cache);
-    pygi_marshal_cleanup_args_from_py_marshal_success (&state, cache);
-
-    if (ret)
-        pygi_marshal_cleanup_args_to_py_marshal_success (&state, cache);
-err:
-    _invoke_state_clear (&state, cache);
-    return ret;
+    return pygi_function_cache_invoke ((PyGIFunctionCache *) cache,
+                                       py_args, kwargs);
 }
 
 PyObject *
@@ -747,7 +676,30 @@ _wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
                               PyObject *kwargs)
 {
     if (self->cache == NULL) {
-        self->cache = pygi_callable_cache_new (self->info, NULL, FALSE);
+        PyGIFunctionCache *function_cache;
+        GIInfoType type = g_base_info_get_type (self->info);
+
+        if (type == GI_INFO_TYPE_FUNCTION) {
+            GIFunctionInfoFlags flags;
+
+            flags = g_function_info_get_flags ( (GIFunctionInfo *)self->info);
+
+            if (flags & GI_FUNCTION_IS_CONSTRUCTOR) {
+                function_cache = pygi_constructor_cache_new (self->info);
+            } else if (flags & GI_FUNCTION_IS_METHOD) {
+                function_cache = pygi_method_cache_new (self->info);
+            } else {
+                function_cache = pygi_function_cache_new (self->info);
+            }
+        } else if (type == GI_INFO_TYPE_VFUNC) {
+            function_cache = pygi_vfunc_cache_new (self->info);
+        } else if (type == GI_INFO_TYPE_CALLBACK) {
+            g_error ("Cannot invoke callback types");
+        } else {
+            function_cache = pygi_method_cache_new (self->info);
+        }
+
+        self->cache = (PyGICallableCache *)function_cache;
         if (self->cache == NULL)
             return NULL;
     }

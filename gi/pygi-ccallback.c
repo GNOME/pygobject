@@ -32,16 +32,16 @@ _ccallback_call(PyGICCallback *self, PyObject *args, PyObject *kwargs)
     PyObject *result;
 
     if (self->cache == NULL) {
-        self->cache = pygi_callable_cache_new (self->info, self->callback, TRUE);
+        self->cache = (PyGICCallbackCache *)pygi_ccallback_cache_new (self->info,
+                                                                      self->callback);
         if (self->cache == NULL)
             return NULL;
     }
 
-    result = pygi_callable_info_invoke( (GIBaseInfo *) self->info,
-                                         args,
-                                         kwargs,
-                                         self->cache,
-                                         self->user_data);
+    result = pygi_ccallback_cache_invoke (self->cache,
+                                          args,
+                                          kwargs,
+                                          self->user_data);
     return result;
 }
 
@@ -78,6 +78,10 @@ static void
 _ccallback_dealloc (PyGICCallback *self)
 {
     g_base_info_unref ( (GIBaseInfo *)self->info);
+
+    if (self->cache != NULL) {
+        pygi_callable_cache_free ( (PyGICallableCache *)self->cache);
+    }
 }
 
 void

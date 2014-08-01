@@ -26,8 +26,12 @@
 
 #include "pygi-private.h"
 #include "pygi-invoke-state-struct.h"
+
 G_BEGIN_DECLS
 
+PyObject *pygi_invoke_c_callable    (PyGIFunctionCache *function_cache,
+                                     PyGIInvokeState *state,
+                                     PyObject *py_args, PyObject *py_kwargs);
 PyObject *pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
                                      PyObject *kwargs, PyGICallableCache *cache,
                                      gpointer user_data);
