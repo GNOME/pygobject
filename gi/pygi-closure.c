@@ -431,7 +431,7 @@ _pygi_closure_convert_arguments (GICallableInfo *callable_info, void **args,
                         user_data = g_args[user_data_arg].v_pointer;
 
                     if (destroy_notify_arg != -1)
-                        user_data = (GDestroyNotify) g_args[destroy_notify_arg].v_pointer;
+                        destroy_notify = (GDestroyNotify) g_args[destroy_notify_arg].v_pointer;
 
                     value = _pygi_ccallback_new(arg->v_pointer,
                                                 user_data,
