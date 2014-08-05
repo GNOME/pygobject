@@ -266,7 +266,7 @@ pygi_arg_gerror_setup_from_info (PyGIArgCache  *arg_cache,
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
         arg_cache->to_py_marshaller = _pygi_marshal_to_py_gerror;
-        arg_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
+        arg_cache->meta_type = PYGI_META_ARG_TYPE_PARENT;
     }
 
     return TRUE;
