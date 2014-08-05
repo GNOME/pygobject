@@ -38,6 +38,7 @@ typedef PyGIFunctionCache PyGICCallbackCache;
 typedef PyGIFunctionCache PyGIConstructorCache;
 typedef PyGIFunctionCache PyGIFunctionWithInstanceCache;
 typedef PyGIFunctionCache PyGIMethodCache;
+typedef PyGICallableCache PyGIClosureCache;
 
 typedef gboolean (*PyGIMarshalFromPyFunc) (PyGIInvokeState   *state,
                                            PyGICallableCache *callable_cache,
@@ -289,6 +290,9 @@ pygi_method_cache_new       (GICallableInfo *info);
 
 PyGIFunctionCache *
 pygi_vfunc_cache_new        (GICallableInfo *info);
+
+PyGIClosureCache *
+pygi_closure_cache_new      (GICallableInfo *info);
 
 #define _pygi_callable_cache_args_len(cache) ((cache)->args_cache)->len
 

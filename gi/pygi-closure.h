@@ -40,6 +40,8 @@ typedef struct _PyGICClosure
     GIScopeType scope;
 
     PyObject* user_data;
+
+    PyGIClosureCache *cache;
 } PyGICClosure;
 
 void _pygi_closure_handle (ffi_cif *cif, void *result, void

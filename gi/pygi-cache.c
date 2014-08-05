@@ -497,10 +497,11 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             arg_cache = pygi_arg_cache_alloc ();
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
 
-            direction = PYGI_DIRECTION_FROM_PYTHON;
+            direction = _pygi_get_direction (callable_cache, GI_DIRECTION_IN);
             arg_cache->direction = direction;
             arg_cache->meta_type = PYGI_META_ARG_TYPE_CLOSURE;
             arg_cache->c_arg_index = i;
+            arg_cache->is_pointer = TRUE;
 
         } else {
             GITypeInfo *type_info;
@@ -533,6 +534,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
             } else {
                 GITransfer transfer;
                 gssize py_arg_index = -1;
+
                 transfer = g_arg_info_get_ownership_transfer (arg_info);
 
                 if (direction & PYGI_DIRECTION_FROM_PYTHON) {
@@ -566,7 +568,12 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                 _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
             }
 
-            g_base_info_unref (type_info);
+            /* TODO: Remove once pygi-closure.c doesn't need the type info */
+            if (arg_cache->type_info == NULL) {
+                arg_cache->type_info = type_info;
+            } else {
+                g_base_info_unref (type_info);
+            }
         }
 
         /* Ensure arguments always have a name when available */
@@ -1039,3 +1046,25 @@ pygi_vfunc_cache_new (GICallableInfo *info)
 
     return function_cache;
 }
+
+/* PyGIClosureCache */
+
+PyGIClosureCache *
+pygi_closure_cache_new (GICallableInfo *info)
+{
+    PyGIClosureCache *closure_cache;
+    PyGICallableCache *callable_cache;
+
+    closure_cache = g_new0 (PyGIClosureCache, 1);
+    callable_cache = (PyGICallableCache *) closure_cache;
+
+    callable_cache->calling_context = PYGI_CALLING_CONTEXT_IS_FROM_C;
+
+    if (!_callable_cache_init (callable_cache, info)) {
+        g_free (closure_cache);
+        return NULL;
+    }
+
+    return closure_cache;
+}
+
