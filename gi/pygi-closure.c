@@ -39,58 +39,52 @@ static PyGICClosure *global_destroy_notify;
 static GSList* async_free_list;
 
 static void
-_pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
+_pygi_closure_assign_pyobj_to_retval (gpointer retval,
+                                      GIArgument *arg,
                                       PyGIArgCache *arg_cache)
 {
-    GIArgument arg = _pygi_argument_from_object (object,
-                                                 arg_cache->type_info,
-                                                 arg_cache->transfer);
-
-    if (PyErr_Occurred ())
-        return;
-
-    if (retval == NULL)
+    if (PyErr_Occurred () || retval == NULL)
         return;
 
     switch (arg_cache->type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
-           *((ffi_sarg *) retval) = arg.v_boolean;
+           *((ffi_sarg *) retval) = arg->v_boolean;
            break;
         case GI_TYPE_TAG_INT8:
-           *((ffi_sarg *) retval) = arg.v_int8;
+           *((ffi_sarg *) retval) = arg->v_int8;
            break;
         case GI_TYPE_TAG_UINT8:
-           *((ffi_arg *) retval) = arg.v_uint8;
+           *((ffi_arg *) retval) = arg->v_uint8;
            break;
         case GI_TYPE_TAG_INT16:
-           *((ffi_sarg *) retval) = arg.v_int16;
+           *((ffi_sarg *) retval) = arg->v_int16;
            break;
         case GI_TYPE_TAG_UINT16:
-           *((ffi_arg *) retval) = arg.v_uint16;
+           *((ffi_arg *) retval) = arg->v_uint16;
            break;
         case GI_TYPE_TAG_INT32:
-           *((ffi_sarg *) retval) = arg.v_int32;
+           *((ffi_sarg *) retval) = arg->v_int32;
            break;
         case GI_TYPE_TAG_UINT32:
-           *((ffi_arg *) retval) = arg.v_uint32;
+           *((ffi_arg *) retval) = arg->v_uint32;
            break;
         case GI_TYPE_TAG_INT64:
-           *((ffi_sarg *) retval) = arg.v_int64;
+           *((ffi_sarg *) retval) = arg->v_int64;
            break;
         case GI_TYPE_TAG_UINT64:
-           *((ffi_arg *) retval) = arg.v_uint64;
+           *((ffi_arg *) retval) = arg->v_uint64;
            break;
         case GI_TYPE_TAG_FLOAT:
-           *((gfloat *) retval) = arg.v_float;
+           *((gfloat *) retval) = arg->v_float;
            break;
         case GI_TYPE_TAG_DOUBLE:
-           *((gdouble *) retval) = arg.v_double;
+           *((gdouble *) retval) = arg->v_double;
            break;
         case GI_TYPE_TAG_GTYPE:
-           *((ffi_arg *) retval) = arg.v_ulong;
+           *((ffi_arg *) retval) = arg->v_ulong;
            break;
         case GI_TYPE_TAG_UNICHAR:
-            *((ffi_arg *) retval) = arg.v_uint32;
+            *((ffi_arg *) retval) = arg->v_uint32;
             break;
         case GI_TYPE_TAG_INTERFACE:
             {
@@ -100,20 +94,20 @@ _pygi_closure_assign_pyobj_to_retval (gpointer retval, PyObject *object,
 
                 switch (g_base_info_get_type (interface_info)) {
                 case GI_INFO_TYPE_ENUM:
-                    *(ffi_sarg *) retval = arg.v_int;
+                    *(ffi_sarg *) retval = arg->v_int;
                     break;
                 case GI_INFO_TYPE_FLAGS:
-                    *(ffi_arg *) retval = arg.v_uint;
+                    *(ffi_arg *) retval = arg->v_uint;
                     break;
                 default:
-                    *(ffi_arg *) retval = (ffi_arg) arg.v_pointer;
+                    *(ffi_arg *) retval = (ffi_arg) arg->v_pointer;
                     break;
                 }
 
                 break;
             }
         default:
-            *(ffi_arg *) retval = (ffi_arg) arg.v_pointer;
+            *(ffi_arg *) retval = (ffi_arg) arg->v_pointer;
             break;
       }
 }
@@ -127,55 +121,52 @@ _pygi_closure_clear_retval (PyGICallableCache *cache, gpointer retval)
 }
 
 static void
-_pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
+_pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
+                                            GIArgument *arg,
                                             PyGIArgCache *arg_cache)
 {
-    GIArgument arg = _pygi_argument_from_object (object,
-                                                 arg_cache->type_info,
-                                                 arg_cache->transfer);
-
     if (out_arg == NULL)
         return;
 
     switch (arg_cache->type_tag) {
         case GI_TYPE_TAG_BOOLEAN:
-           *((gboolean *) out_arg) = arg.v_boolean;
+           *((gboolean *) out_arg) = arg->v_boolean;
            break;
         case GI_TYPE_TAG_INT8:
-           *((gint8 *) out_arg) = arg.v_int8;
+           *((gint8 *) out_arg) = arg->v_int8;
            break;
         case GI_TYPE_TAG_UINT8:
-           *((guint8 *) out_arg) = arg.v_uint8;
+           *((guint8 *) out_arg) = arg->v_uint8;
            break;
         case GI_TYPE_TAG_INT16:
-           *((gint16 *) out_arg) = arg.v_int16;
+           *((gint16 *) out_arg) = arg->v_int16;
            break;
         case GI_TYPE_TAG_UINT16:
-           *((guint16 *) out_arg) = arg.v_uint16;
+           *((guint16 *) out_arg) = arg->v_uint16;
            break;
         case GI_TYPE_TAG_INT32:
-           *((gint32 *) out_arg) = arg.v_int32;
+           *((gint32 *) out_arg) = arg->v_int32;
            break;
         case GI_TYPE_TAG_UINT32:
-           *((guint32 *) out_arg) = arg.v_uint32;
+           *((guint32 *) out_arg) = arg->v_uint32;
            break;
         case GI_TYPE_TAG_INT64:
-           *((gint64 *) out_arg) = arg.v_int64;
+           *((gint64 *) out_arg) = arg->v_int64;
            break;
         case GI_TYPE_TAG_UINT64:
-           *((glong *) out_arg) = arg.v_uint64;
+           *((glong *) out_arg) = arg->v_uint64;
            break;
         case GI_TYPE_TAG_FLOAT:
-           *((gfloat *) out_arg) = arg.v_float;
+           *((gfloat *) out_arg) = arg->v_float;
            break;
         case GI_TYPE_TAG_DOUBLE:
-           *((gdouble *) out_arg) = arg.v_double;
+           *((gdouble *) out_arg) = arg->v_double;
            break;
         case GI_TYPE_TAG_GTYPE:
-           *((gulong *) out_arg) = arg.v_ulong;
+           *((gulong *) out_arg) = arg->v_ulong;
            break;
         case GI_TYPE_TAG_UNICHAR:
-            *((guint32 *) out_arg) = arg.v_uint32;
+            *((guint32 *) out_arg) = arg->v_uint32;
             break;
         case GI_TYPE_TAG_INTERFACE:
         {
@@ -185,30 +176,30 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg, PyObject *object,
 
            switch (g_base_info_get_type (interface_info)) {
            case GI_INFO_TYPE_ENUM:
-               *(gint *) out_arg = arg.v_int;
+               *(gint *) out_arg = arg->v_int;
                break;
            case GI_INFO_TYPE_FLAGS:
-               *(guint *) out_arg = arg.v_uint;
+               *(guint *) out_arg = arg->v_uint;
                break;
            case GI_INFO_TYPE_STRUCT:
                if (!arg_cache->is_pointer) {
-                   if (object != Py_None) {
+                   if (arg->v_pointer != NULL) {
                        gsize item_size = _pygi_g_type_info_size (arg_cache->type_info);
-                       memcpy (out_arg, arg.v_pointer, item_size);
+                       memcpy (out_arg, arg->v_pointer, item_size);
                    }
                    break;
                }
 
            /* Fall through if pointer */
            default:
-               *((gpointer *) out_arg) = arg.v_pointer;
+               *((gpointer *) out_arg) = arg->v_pointer;
                break;
            }
            break;
         }
 
         default:
-           *((gpointer *) out_arg) = arg.v_pointer;
+           *((gpointer *) out_arg) = arg->v_pointer;
            break;
       }
 }
@@ -477,6 +468,7 @@ _pygi_closure_set_out_arguments (PyGICallableCache *cache,
     gssize i;
     gssize i_py_retval = 0;
     gssize i_out_args = 0;
+    GIArgument arg;
 
     n_args = _pygi_callable_cache_args_len (cache);
 
@@ -487,7 +479,10 @@ _pygi_closure_set_out_arguments (PyGICallableCache *cache,
             item = PyTuple_GET_ITEM (py_retval, 0);
         }
 
-        _pygi_closure_assign_pyobj_to_retval (resp, item,
+        arg = _pygi_argument_from_object (item,
+                                          cache->return_cache->type_info,
+                                          cache->return_cache->transfer);
+        _pygi_closure_assign_pyobj_to_retval (resp, &arg,
                                               cache->return_cache);
         i_py_retval++;
     }
@@ -511,8 +506,11 @@ _pygi_closure_set_out_arguments (PyGICallableCache *cache,
                 g_assert_not_reached ();
             }
 
+            arg = _pygi_argument_from_object (item,
+                                              arg_cache->type_info,
+                                              arg_cache->transfer);
             _pygi_closure_assign_pyobj_to_out_argument (out_args[i_out_args].v_pointer,
-                                                        item, arg_cache);
+                                                        &arg, arg_cache);
 
             i_out_args++;
             i_py_retval++;
