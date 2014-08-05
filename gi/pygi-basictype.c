@@ -26,7 +26,6 @@
 #include "pygi-private.h"
 
 #ifdef G_OS_WIN32
-#ifdef _MSC_VER
 #include <math.h>
 
 #ifndef NAN
@@ -38,7 +37,6 @@ static const unsigned long __nan[2] = {0xffffffff, 0x7fffffff};
 #define INFINITY HUGE_VAL
 #endif
 
-#endif
 #endif
 
 
