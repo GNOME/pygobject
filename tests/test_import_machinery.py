@@ -58,6 +58,30 @@ class TestModule(unittest.TestCase):
         # Restore the previous cache
         gi.module._introspection_modules = old_modules
 
+    def test_static_binding_protection(self):
+        # Importing old static bindings once gi has been imported should not
+        # crash but instead give back a dummy module which produces RuntimeErrors
+        # on access.
+        with self.assertRaises(RuntimeError):
+            import gobject
+            gobject.anything
+
+        with self.assertRaises(RuntimeError):
+            import glib
+            glib.anything
+
+        with self.assertRaises(RuntimeError):
+            import gio
+            gio.anything
+
+        with self.assertRaises(RuntimeError):
+            import gtk
+            gtk.anything
+
+        with self.assertRaises(RuntimeError):
+            import gtk.gdk
+            gtk.gdk.anything
+
 
 class TestImporter(unittest.TestCase):
     def test_invalid_repository_module_name(self):
