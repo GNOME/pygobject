@@ -25,10 +25,11 @@
 
 G_BEGIN_DECLS
 
-PyGIArgCache *pygi_arg_glist_new_from_info  (GITypeInfo    *type_info,
-                                             GIArgInfo     *arg_info,   /* may be null */
-                                             GITransfer     transfer,
-                                             PyGIDirection  direction);
+PyGIArgCache *pygi_arg_glist_new_from_info  (GITypeInfo        *type_info,
+                                             GIArgInfo         *arg_info,   /* may be null */
+                                             GITransfer         transfer,
+                                             PyGIDirection      direction,
+                                             PyGICallableCache *callable_cache);
 
 /* Internally dispatches GList and GSList */
 #define pygi_arg_gslist_new_from_info  pygi_arg_glist_new_from_info

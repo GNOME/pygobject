@@ -330,11 +330,12 @@ _arg_cache_to_py_ghash_setup (PyGIArgCache *arg_cache)
 }
 
 static gboolean
-pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc,
-                                     GITypeInfo    *type_info,
-                                     GIArgInfo     *arg_info,
-                                     GITransfer     transfer,
-                                     PyGIDirection  direction)
+pygi_arg_hash_table_setup_from_info (PyGIHashCache      *hc,
+                                     GITypeInfo         *type_info,
+                                     GIArgInfo          *arg_info,
+                                     GITransfer          transfer,
+                                     PyGIDirection       direction,
+                                     PyGICallableCache  *callable_cache)
 {
     GITypeInfo *key_type_info;
     GITypeInfo *value_type_info;
@@ -354,8 +355,8 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc,
                                         NULL,
                                         item_transfer,
                                         direction,
-                                        0, 0,
-                                        NULL);
+                                        callable_cache,
+                                        0, 0);
 
     if (hc->key_cache == NULL) {
         return FALSE;
@@ -365,8 +366,8 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc,
                                           NULL,
                                           item_transfer,
                                           direction,
-                                          0, 0,
-                                          NULL);
+                                          callable_cache,
+                                          0, 0);
 
     if (hc->value_cache == NULL) {
         return FALSE;
@@ -387,10 +388,11 @@ pygi_arg_hash_table_setup_from_info (PyGIHashCache *hc,
 }
 
 PyGIArgCache *
-pygi_arg_hash_table_new_from_info (GITypeInfo   *type_info,
-                                   GIArgInfo    *arg_info,
-                                   GITransfer    transfer,
-                                   PyGIDirection direction)
+pygi_arg_hash_table_new_from_info (GITypeInfo         *type_info,
+                                   GIArgInfo          *arg_info,
+                                   GITransfer          transfer,
+                                   PyGIDirection       direction,
+                                   PyGICallableCache  *callable_cache)
 {
     gboolean res = FALSE;
     PyGIHashCache *hc = NULL;
@@ -403,7 +405,8 @@ pygi_arg_hash_table_new_from_info (GITypeInfo   *type_info,
                                                type_info,
                                                arg_info,
                                                transfer,
-                                               direction);
+                                               direction,
+                                               callable_cache);
     if (res) {
         return (PyGIArgCache *)hc;
     } else {

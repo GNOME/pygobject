@@ -831,11 +831,12 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
 }
 
 static gboolean
-pygi_arg_garray_setup (PyGIArgGArray      *sc,
-                       GITypeInfo         *type_info,
-                       GIArgInfo          *arg_info,    /* may be NULL for return arguments */
-                       GITransfer          transfer,
-                       PyGIDirection       direction)
+pygi_arg_garray_setup (PyGIArgGArray     *sc,
+                       GITypeInfo        *type_info,
+                       GIArgInfo         *arg_info,    /* may be NULL for return arguments */
+                       GITransfer         transfer,
+                       PyGIDirection      direction,
+                       PyGICallableCache *callable_cache)
 {
     GITypeInfo *item_type_info;
     PyGIArgCache *arg_cache = (PyGIArgCache *)sc;
@@ -844,7 +845,8 @@ pygi_arg_garray_setup (PyGIArgGArray      *sc,
                                   type_info,
                                   arg_info,
                                   transfer,
-                                  direction)) {
+                                  direction,
+                                  callable_cache)) {
         return FALSE;
     }
 
@@ -875,7 +877,8 @@ PyGIArgCache *
 pygi_arg_garray_new_from_info (GITypeInfo *type_info,
                                GIArgInfo *arg_info,
                                GITransfer transfer,
-                               PyGIDirection direction)
+                               PyGIDirection direction,
+                               PyGICallableCache *callable_cache)
 {
     PyGIArgGArray *array_cache = g_slice_new0 (PyGIArgGArray);
     if (array_cache == NULL)
@@ -885,7 +888,8 @@ pygi_arg_garray_new_from_info (GITypeInfo *type_info,
                                 type_info,
                                 arg_info,
                                 transfer,
-                                direction)) {
+                                direction,
+                                callable_cache)) {
         pygi_arg_cache_free ( (PyGIArgCache *)array_cache);
         return NULL;
     }

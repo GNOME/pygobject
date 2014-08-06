@@ -228,7 +228,8 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
                          GITypeInfo         *type_info,
                          GIArgInfo          *arg_info,    /* may be NULL for return arguments */
                          GITransfer          transfer,
-                         PyGIDirection       direction)
+                         PyGIDirection       direction,
+                         PyGICallableCache  *callable_cache)
 {
     GITypeInfo *item_type_info;
     GITransfer item_transfer;
@@ -250,8 +251,8 @@ pygi_arg_sequence_setup (PyGISequenceCache  *sc,
                                          NULL,
                                          item_transfer,
                                          direction,
-                                         0, 0,
-                                         NULL);
+                                         callable_cache,
+                                         0, 0);
 
     g_base_info_unref ( (GIBaseInfo *)item_type_info);
 
@@ -294,7 +295,8 @@ _arg_cache_new_for_interface (GIInterfaceInfo   *iface_info,
                                                    arg_info,
                                                    transfer,
                                                    direction,
-                                                   iface_info);
+                                                   iface_info,
+                                                   callable_cache);
         case GI_INFO_TYPE_BOXED:
         case GI_INFO_TYPE_STRUCT:
         case GI_INFO_TYPE_UNION:
@@ -327,9 +329,9 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                     GIArgInfo *arg_info,     /* may be null */
                     GITransfer transfer,
                     PyGIDirection direction,
+                    PyGICallableCache *callable_cache,
                     gssize c_arg_index,
-                    gssize py_arg_index,
-                    PyGICallableCache *callable_cache)
+                    gssize py_arg_index)
 {
     PyGIArgCache *arg_cache = NULL;
     GITypeTag type_tag;
@@ -364,7 +366,8 @@ pygi_arg_cache_new (GITypeInfo *type_info,
                arg_cache = pygi_arg_garray_new_from_info (type_info,
                                                           arg_info,
                                                           transfer,
-                                                          direction);
+                                                          direction,
+                                                          callable_cache);
                if (arg_cache == NULL)
                    return NULL;
 
@@ -381,21 +384,24 @@ pygi_arg_cache_new (GITypeInfo *type_info,
            arg_cache = pygi_arg_glist_new_from_info (type_info,
                                                      arg_info,
                                                      transfer,
-                                                     direction);
+                                                     direction,
+                                                     callable_cache);
            break;
 
        case GI_TYPE_TAG_GSLIST:
            arg_cache = pygi_arg_gslist_new_from_info (type_info,
                                                       arg_info,
                                                       transfer,
-                                                      direction);
+                                                      direction,
+                                                      callable_cache);
            break;
 
        case GI_TYPE_TAG_GHASH:
            arg_cache = pygi_arg_hash_table_new_from_info (type_info,
                                                           arg_info,
                                                           transfer,
-                                                          direction);
+                                                          direction,
+                                                          callable_cache);
            break;
 
        case GI_TYPE_TAG_INTERFACE:
@@ -473,9 +479,9 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                             NULL,
                             return_transfer,
                             return_direction,
+                            callable_cache,
                             -1,
-                            -1,
-                            callable_cache);
+                            -1);
     if (return_cache == NULL)
         return FALSE;
 
@@ -547,9 +553,9 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                                         arg_info,
                                         transfer,
                                         direction,
+                                        callable_cache,
                                         arg_index,
-                                        py_arg_index,
-                                        callable_cache);
+                                        py_arg_index);
 
                 if (arg_cache == NULL) {
                     g_base_info_unref( (GIBaseInfo *)type_info);

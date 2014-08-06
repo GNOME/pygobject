@@ -223,11 +223,12 @@ _pygi_marshal_cleanup_to_py_interface_object (PyGIInvokeState *state,
 }
 
 static gboolean
-pygi_arg_gobject_setup_from_info (PyGIArgCache  *arg_cache,
-                                  GITypeInfo    *type_info,
-                                  GIArgInfo     *arg_info,
-                                  GITransfer     transfer,
-                                  PyGIDirection  direction)
+pygi_arg_gobject_setup_from_info (PyGIArgCache      *arg_cache,
+                                  GITypeInfo        *type_info,
+                                  GIArgInfo         *arg_info,
+                                  GITransfer         transfer,
+                                  PyGIDirection      direction,
+                                  PyGICallableCache *callable_cache)
 {
     /* NOTE: usage of pygi_arg_interface_new_from_info already calls
      * pygi_arg_interface_setup so no need to do it here.
@@ -247,11 +248,12 @@ pygi_arg_gobject_setup_from_info (PyGIArgCache  *arg_cache,
 }
 
 PyGIArgCache *
-pygi_arg_gobject_new_from_info (GITypeInfo      *type_info,
-                                GIArgInfo       *arg_info,
-                                GITransfer       transfer,
-                                PyGIDirection    direction,
-                                GIInterfaceInfo *iface_info)
+pygi_arg_gobject_new_from_info (GITypeInfo        *type_info,
+                                GIArgInfo         *arg_info,
+                                GITransfer         transfer,
+                                PyGIDirection      direction,
+                                GIInterfaceInfo   *iface_info,
+                                PyGICallableCache *callable_cache)
 {
     gboolean res = FALSE;
     PyGIArgCache *cache = NULL;
@@ -268,7 +270,8 @@ pygi_arg_gobject_new_from_info (GITypeInfo      *type_info,
                                             type_info,
                                             arg_info,
                                             transfer,
-                                            direction);
+                                            direction,
+                                            callable_cache);
     if (res) {
         return cache;
     } else {

@@ -25,10 +25,11 @@
 
 G_BEGIN_DECLS
 
-PyGIArgCache *pygi_arg_garray_new_from_info  (GITypeInfo    *type_info,
-                                              GIArgInfo     *arg_info,   /* may be null */
-                                              GITransfer     transfer,
-                                              PyGIDirection  direction);
+PyGIArgCache *pygi_arg_garray_new_from_info  (GITypeInfo        *type_info,
+                                              GIArgInfo         *arg_info,   /* may be null */
+                                              GITransfer         transfer,
+                                              PyGIDirection      direction,
+                                              PyGICallableCache *callable_cache);
 
 PyGIArgCache *pygi_arg_garray_len_arg_setup  (PyGIArgCache      *arg_cache,
                                               GITypeInfo        *type_info,

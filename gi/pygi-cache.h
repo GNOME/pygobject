@@ -236,7 +236,8 @@ pygi_arg_sequence_setup  (PyGISequenceCache  *sc,
                           GITypeInfo         *type_info,
                           GIArgInfo          *arg_info,    /* may be NULL for return arguments */
                           GITransfer          transfer,
-                          PyGIDirection       direction);
+                          PyGIDirection       direction,
+                          PyGICallableCache  *callable_cache);
 
 PyGIArgCache *
 pygi_arg_interface_new_from_info (GITypeInfo         *type_info,
@@ -253,10 +254,10 @@ pygi_arg_cache_new       (GITypeInfo *type_info,
                           GIArgInfo *arg_info,
                           GITransfer transfer,
                           PyGIDirection direction,
+                          PyGICallableCache *callable_cache,
                           /* will be removed */
                           gssize c_arg_index,
-                          gssize py_arg_index,
-                          PyGICallableCache *callable_cache);
+                          gssize py_arg_index);
 
 void
 pygi_arg_cache_free      (PyGIArgCache *cache);
