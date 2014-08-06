@@ -30,6 +30,10 @@
  * GObject from Python
  */
 
+typedef gboolean (*PyGIObjectMarshalFromPyFunc) (PyObject *py_arg,
+                                                 GIArgument *arg,
+                                                 GITransfer transfer);
+
 /* _pygi_marshal_from_py_gobject:
  * py_arg: (in):
  * arg: (out):
@@ -121,12 +125,13 @@ pygi_arg_gobject_out_arg_from_py (PyObject *py_arg, /*in*/
 }
 
 static gboolean
-_pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
-                                        PyGICallableCache *callable_cache,
-                                        PyGIArgCache      *arg_cache,
-                                        PyObject          *py_arg,
-                                        GIArgument        *arg,
-                                        gpointer          *cleanup_data)
+_pygi_marshal_from_py_interface_object (PyGIInvokeState             *state,
+                                        PyGICallableCache           *callable_cache,
+                                        PyGIArgCache                *arg_cache,
+                                        PyObject                    *py_arg,
+                                        GIArgument                  *arg,
+                                        gpointer                    *cleanup_data,
+                                        PyGIObjectMarshalFromPyFunc  func)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
 
@@ -140,7 +145,7 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
              g_type_is_a (G_OBJECT_TYPE (pygobject_get (py_arg)), iface_cache->g_type))) {
 
         gboolean res;
-        res = _pygi_marshal_from_py_gobject (py_arg, arg, arg_cache->transfer);
+        res = func (py_arg, arg, arg_cache->transfer);
         *cleanup_data = arg->v_pointer;
         return res;
 
@@ -157,6 +162,40 @@ _pygi_marshal_from_py_interface_object (PyGIInvokeState   *state,
             Py_DECREF (module);
         return FALSE;
     }
+}
+
+static gboolean
+_pygi_marshal_from_py_called_from_c_interface_object (PyGIInvokeState   *state,
+                                                      PyGICallableCache *callable_cache,
+                                                      PyGIArgCache      *arg_cache,
+                                                      PyObject          *py_arg,
+                                                      GIArgument        *arg,
+                                                      gpointer          *cleanup_data)
+{
+    return _pygi_marshal_from_py_interface_object (state,
+                                                   callable_cache,
+                                                   arg_cache,
+                                                   py_arg,
+                                                   arg,
+                                                   cleanup_data,
+                                                   pygi_arg_gobject_out_arg_from_py);
+}
+
+static gboolean
+_pygi_marshal_from_py_called_from_py_interface_object (PyGIInvokeState   *state,
+                                                       PyGICallableCache *callable_cache,
+                                                       PyGIArgCache      *arg_cache,
+                                                       PyObject          *py_arg,
+                                                       GIArgument        *arg,
+                                                       gpointer          *cleanup_data)
+{
+    return _pygi_marshal_from_py_interface_object (state,
+                                                   callable_cache,
+                                                   arg_cache,
+                                                   py_arg,
+                                                   arg,
+                                                   cleanup_data,
+                                                   _pygi_marshal_from_py_gobject);
 }
 
 static void
@@ -231,12 +270,21 @@ pygi_arg_gobject_to_py_called_from_c (GIArgument *arg,
 }
 
 static PyObject *
-_pygi_marshal_to_py_interface_object_cache_adapter (PyGIInvokeState   *state,
-                                                    PyGICallableCache *callable_cache,
-                                                    PyGIArgCache      *arg_cache,
-                                                    GIArgument        *arg)
+_pygi_marshal_to_py_called_from_c_interface_object_cache_adapter (PyGIInvokeState   *state,
+                                                                  PyGICallableCache *callable_cache,
+                                                                  PyGIArgCache      *arg_cache,
+                                                                  GIArgument        *arg)
 {
-    return pygi_arg_gobject_to_py(arg, arg_cache->transfer);
+    return pygi_arg_gobject_to_py_called_from_c (arg, arg_cache->transfer);
+}
+
+static PyObject *
+_pygi_marshal_to_py_called_from_py_interface_object_cache_adapter (PyGIInvokeState   *state,
+                                                                   PyGICallableCache *callable_cache,
+                                                                   PyGIArgCache      *arg_cache,
+                                                                   GIArgument        *arg)
+{
+    return pygi_arg_gobject_to_py (arg, arg_cache->transfer);
 }
 
 static void
@@ -265,12 +313,22 @@ pygi_arg_gobject_setup_from_info (PyGIArgCache      *arg_cache,
      */
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
-        arg_cache->from_py_marshaller = _pygi_marshal_from_py_interface_object;
+        if (callable_cache->calling_context == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+            arg_cache->from_py_marshaller = _pygi_marshal_from_py_called_from_c_interface_object;
+        } else {
+            arg_cache->from_py_marshaller = _pygi_marshal_from_py_called_from_py_interface_object;
+        }
+
         arg_cache->from_py_cleanup = _pygi_marshal_cleanup_from_py_interface_object;
     }
 
     if (direction & PYGI_DIRECTION_TO_PYTHON) {
-        arg_cache->to_py_marshaller = _pygi_marshal_to_py_interface_object_cache_adapter;
+        if (callable_cache->calling_context == PYGI_CALLING_CONTEXT_IS_FROM_C) {
+            arg_cache->to_py_marshaller = _pygi_marshal_to_py_called_from_c_interface_object_cache_adapter;
+        } else {
+            arg_cache->to_py_marshaller = _pygi_marshal_to_py_called_from_py_interface_object_cache_adapter;
+        }
+
         arg_cache->to_py_cleanup = _pygi_marshal_cleanup_to_py_interface_object;
     }
 
