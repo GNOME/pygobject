@@ -68,11 +68,11 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(testhelper_la_LDFLAGS) $(testhelper_la_OBJECTS) $(testhelper_la_LIBADD) $(LIBS)
 
 
-.la.so:
+.la.$(OS_EXT):
 	test -L $@ || $(LN_S) .libs/$@ $@
 
 
-all: $(check_LTLIBRARIES:.la=.so)
+all: $(check_LTLIBRARIES:.la=.$(OS_EXT))
 
 EXTRA_DIST = \
 	compathelper.py \
@@ -121,7 +121,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 clean-local:
-	rm -f $(check_LTLIBRARIES:.la=.so) file.txt~
+	rm -f $(check_LTLIBRARIES:.la=.$(OS_EXT)) file.txt~
 
 DBUS_LAUNCH=$(shell which dbus-launch)
 RUN_TESTS_ENV_VARS= \
@@ -136,7 +136,7 @@ RUN_TESTS_ENV_VARS= \
 
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
-check-local: $(check_LTLIBRARIES:.la=.so) $(test_typelibs) gschemas.compiled
+check-local: $(check_LTLIBRARIES:.la=.$(OS_EXT)) $(test_typelibs) gschemas.compiled
 	export `$(DBUS_LAUNCH)` && \
 	$(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
 	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \

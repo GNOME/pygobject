@@ -55,13 +55,21 @@ AC_MSG_CHECKING([for some Win32 platform])
 case "$host" in
   *-*-mingw*|*-*-cygwin*)
     platform_win32=yes
+    OS_EXT=dll
+    ;;
+  *-*-darwin*)
+    OS_EXT=dylib
     ;;
   *)
     platform_win32=no
+    OS_EXT=so
     ;;
 esac
 AC_MSG_RESULT([$platform_win32])
 AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
+
+AC_SUBST(OS_EXT)
+AC_DEFINE_UNQUOTED(OS_EXT, "$OS_EXT", [Define shared library extension])
 
 AC_MSG_CHECKING([for native Win32])
 case "$host" in
