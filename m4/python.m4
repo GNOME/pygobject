@@ -73,7 +73,12 @@ AC_MSG_CHECKING(for libraries required to embed python)
 dnl deduce PYTHON_LIBS
 py_prefix=`$PYTHON -c "import sys; sys.stdout.write(sys.prefix)"`
 if test "x$PYTHON_LIBS" = x; then
-	PYTHON_LIBS="-L${py_prefix}/lib -lpython${PYTHON_VERSION}"
+  PYTHON_CONFIG=`which $PYTHON`-config
+  if test -x "$PYTHON_CONFIG"; then
+    PYTHON_LIBS=`$PYTHON_CONFIG --ldflags 2>/dev/null`
+  else
+    PYTHON_LIBS="-L${py_prefix}/lib -lpython${PYTHON_VERSION}"
+  fi
 fi
 if test "x$PYTHON_LIB_LOC" = x; then
 	PYTHON_LIB_LOC="${py_prefix}/lib"
