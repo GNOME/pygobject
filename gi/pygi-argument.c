@@ -1420,26 +1420,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                 }
                 case GI_INFO_TYPE_INTERFACE:
                 case GI_INFO_TYPE_OBJECT:
-                    /* HACK:
-                     * The following hack is to work around GTK+ sending signals which
-                     * contain floating widgets in them. This assumes control of how
-                     * references are added by the PyGObject wrapper and avoids the sink
-                     * behavior by explicitly passing GI_TRANSFER_EVERYTHING as the transfer
-                     * mode and then re-forcing the object as floating afterwards.
-                     *
-                     * This can be deleted once the following ticket is fixed:
-                     * https://bugzilla.gnome.org/show_bug.cgi?id=693400
-                     */
-                    if (arg->v_pointer &&
-                            !G_IS_PARAM_SPEC (arg->v_pointer) &&
-                            transfer == GI_TRANSFER_NOTHING &&
-                            g_object_is_floating (arg->v_pointer)) {
-                        g_object_ref (arg->v_pointer);
-                        object = pygi_arg_gobject_to_py (arg, GI_TRANSFER_EVERYTHING);
-                        g_object_force_floating (arg->v_pointer);
-                    } else {
-                        object = pygi_arg_gobject_to_py (arg, transfer);
-                    }
+                    object = pygi_arg_gobject_to_py_called_from_c (arg, transfer);
 
                     break;
                 default:
