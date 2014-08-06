@@ -574,12 +574,7 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
                 _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
             }
 
-            /* TODO: Remove once pygi-closure.c doesn't need the type info */
-            if (arg_cache->type_info == NULL) {
-                arg_cache->type_info = type_info;
-            } else {
-                g_base_info_unref (type_info);
-            }
+            g_base_info_unref (type_info);
         }
 
         /* Ensure arguments always have a name when available */
@@ -1058,6 +1053,7 @@ pygi_vfunc_cache_new (GICallableInfo *info)
 PyGIClosureCache *
 pygi_closure_cache_new (GICallableInfo *info)
 {
+    gssize i;
     PyGIClosureCache *closure_cache;
     PyGICallableCache *callable_cache;
 
@@ -1069,6 +1065,28 @@ pygi_closure_cache_new (GICallableInfo *info)
     if (!_callable_cache_init (callable_cache, info)) {
         g_free (closure_cache);
         return NULL;
+    }
+
+    /* For backwards compatibility closures include the array's length.
+     *
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=652115
+     */
+    for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
+        PyGIArgCache *arg_cache;
+        PyGIArgGArray *garray_cache;
+        PyGIArgCache *len_arg_cache;
+
+        arg_cache = g_ptr_array_index (callable_cache->args_cache, i);
+        if (arg_cache->type_tag != GI_TYPE_TAG_ARRAY)
+            continue;
+
+        garray_cache = (PyGIArgGArray *) arg_cache;
+        if (garray_cache->len_arg_index == -1)
+            continue;
+
+        len_arg_cache = g_ptr_array_index (callable_cache->args_cache,
+                                           garray_cache->len_arg_index);
+        len_arg_cache->meta_type = PYGI_META_ARG_TYPE_PARENT;
     }
 
     return closure_cache;

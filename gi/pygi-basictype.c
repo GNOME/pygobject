@@ -507,7 +507,7 @@ _pygi_marshal_from_py_basic_type (PyObject   *object,   /* in */
     return TRUE;
 }
 
-static gboolean
+gboolean
 _pygi_marshal_from_py_basic_type_cache_adapter (PyGIInvokeState   *state,
                                                 PyGICallableCache *callable_cache,
                                                 PyGIArgCache      *arg_cache,
@@ -705,7 +705,7 @@ _pygi_marshal_to_py_basic_type (GIArgument  *arg,
     return NULL;
 }
 
-static PyObject *
+PyObject *
 _pygi_marshal_to_py_basic_type_cache_adapter (PyGIInvokeState   *state,
                                               PyGICallableCache *callable_cache,
                                               PyGIArgCache      *arg_cache,

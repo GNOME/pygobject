@@ -465,7 +465,8 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
 
         if (py_arg == _PyGIDefaultArgPlaceholder) {
             *c_arg = arg_cache->default_value;
-        } else if (arg_cache->from_py_marshaller != NULL) {
+        } else if (arg_cache->from_py_marshaller != NULL &&
+                   arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
             gboolean success;
             gpointer cleanup_data = NULL;
 

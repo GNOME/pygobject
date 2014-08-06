@@ -25,6 +25,7 @@
 #include "pygi-array.h"
 #include "pygi-private.h"
 #include "pygi-marshal-cleanup.h"
+#include "pygi-basictype.h"
 
 /* Needed for _pygi_marshal_cleanup_from_py_interface_struct_gvalue hack */
 #include "pygi-struct-marshal.h"
@@ -800,8 +801,8 @@ pygi_arg_garray_len_arg_setup (PyGIArgCache *arg_cache,
 
         child_cache->meta_type = PYGI_META_ARG_TYPE_CHILD;
         child_cache->direction = direction;
-        child_cache->to_py_marshaller = NULL;
-        child_cache->from_py_marshaller = NULL;
+        child_cache->to_py_marshaller = _pygi_marshal_to_py_basic_type_cache_adapter;
+        child_cache->from_py_marshaller = _pygi_marshal_from_py_basic_type_cache_adapter;
 
         /* ugly edge case code:
          *
