@@ -127,7 +127,8 @@ _gi_la_CPPFLAGS = \
 _gi_la_LIBADD = \
 	$(extension_libadd) \
 	$(GLIB_LIBS) \
-	$(GI_LIBS)
+	$(GI_LIBS) \
+	$(FFI_LIBS)
 _gi_la_LDFLAGS = \
 	$(extension_ldflags) \
 	-export-symbols-regex "init_gi|PyInit__gi"
