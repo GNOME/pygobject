@@ -669,6 +669,25 @@ class TestCallbacks(unittest.TestCase):
                          [([-1, 0, 1, 2], ['one', 'two', 'three'])] * 2)
         self.assertEqual(sys.getrefcount(callback), refcount)
 
+    @unittest.skipUnless(hasattr(Everything, 'test_array_inout_callback'),
+                         'Requires newer version of GI')
+    def test_callback_scope_call_array_inout(self):
+        # This tests a callback that gets called multiple times from a
+        # single scope call in python with inout array arguments
+        TestCallbacks.callargs = []
+
+        def callback(ints, ints_length):
+            TestCallbacks.callargs.append(ints)
+            return ints[1:], len(ints[1:])
+
+        refcount = sys.getrefcount(callback)
+        result = Everything.test_array_inout_callback(callback)
+        self.assertEqual(TestCallbacks.callargs,
+                         [[-2, -1, 0, 1, 2], [-1, 0, 1, 2]])
+        # first callback should give 4, second 3
+        self.assertEqual(result, 3)
+        self.assertEqual(sys.getrefcount(callback), refcount)
+
     def test_callback_userdata(self):
         TestCallbacks.called = 0
 
