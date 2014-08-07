@@ -859,10 +859,10 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
                                        py_args, py_kwargs);
     Py_DECREF (py_args);
 
-    if (cache->return_cache == NULL || cache->return_cache->is_skipped)
+    if (ret == NULL || cache->return_cache->is_skipped)
         return ret;
 
-    if (ret != NULL && ret != Py_None) {
+    if (ret != Py_None) {
         if (!PyTuple_Check (ret))
             return ret;
 
@@ -872,7 +872,7 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
 
     PyErr_SetString (PyExc_TypeError, "constructor returned NULL");
 
-    Py_XDECREF (ret);
+    Py_DECREF (ret);
     return NULL;
 }
 

@@ -2111,6 +2111,12 @@ class TestPythonGObject(unittest.TestCase):
         object_ = self.Object(int=42)
         self.assertTrue(isinstance(object_, self.Object))
 
+    @unittest.skipUnless(hasattr(GIMarshallingTests.Object, 'new_fail'),
+                         'Requires newer version of GI')
+    def test_object_fail(self):
+        with self.assertRaises(GLib.Error):
+            GIMarshallingTests.Object.new_fail(int_=42)
+
     def test_object_method(self):
         self.Object(int=0).method()
 
