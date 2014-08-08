@@ -582,8 +582,8 @@ _pygi_closure_handle (ffi_cif *cif,
         goto end;
     }
 
+    pygi_marshal_cleanup_args_to_py_marshal_success (&state, closure->cache);
     success = _pygi_closure_set_out_arguments (&state, closure->cache, retval, result);
-    /*pygi_marshal_cleanup_args_to_py_marshal_success (&state, closure->cache);*/
 
     if (!success) {
         pygi_marshal_cleanup_args_from_py_marshal_success (&state, closure->cache);
