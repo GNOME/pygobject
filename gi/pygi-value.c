@@ -643,26 +643,19 @@ pyg_value_from_pyobject(GValue *value, PyObject *obj)
 }
 
 /**
- * pyg_value_as_pyobject:
+ * pygi_value_to_py_basic_type:
  * @value: the GValue object.
- * @copy_boxed: true if boxed values should be copied.
  *
  * This function creates/returns a Python wrapper object that
- * represents the GValue passed as an argument.
+ * represents the GValue passed as an argument limited to supporting basic types
+ * like ints, bools, and strings.
  *
  * Returns: a PyObject representing the value.
  */
 PyObject *
-pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
+pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
 {
-    gchar buf[128];
-
-    switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE(value))) {
-    case G_TYPE_INTERFACE:
-        if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
-            return pygobject_new(g_value_get_object(value));
-        else
-            break;
+    switch (fundamental) {
     case G_TYPE_CHAR: {
         gint8 val = g_value_get_schar(value);
         return PYGLIB_PyUnicode_FromStringAndSize((char *)&val, 1);
@@ -734,6 +727,31 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
         Py_INCREF(Py_None);
         return Py_None;
     }
+    default:
+        return NULL;
+    }
+}
+
+/**
+ * pygi_value_to_py_structured_type:
+ * @value: the GValue object.
+ * @copy_boxed: true if boxed values should be copied.
+ *
+ * This function creates/returns a Python wrapper object that
+ * represents the GValue passed as an argument.
+ *
+ * Returns: a PyObject representing the value.
+ */
+PyObject *
+pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboolean copy_boxed)
+{
+    switch (fundamental) {
+    case G_TYPE_INTERFACE:
+        if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
+            return pygobject_new(g_value_get_object(value));
+        else
+            break;
+
     case G_TYPE_POINTER:
         if (G_VALUE_HOLDS_GTYPE (value))
             return pyg_type_wrapper_new (g_value_get_gtype (value));
@@ -804,6 +822,38 @@ pyg_value_as_pyobject(const GValue *value, gboolean copy_boxed)
         break;
     }
     }
+
+    return NULL;
+}
+
+
+/**
+ * pyg_value_as_pyobject:
+ * @value: the GValue object.
+ * @copy_boxed: true if boxed values should be copied.
+ *
+ * This function creates/returns a Python wrapper object that
+ * represents the GValue passed as an argument.
+ *
+ * Returns: a PyObject representing the value.
+ */
+PyObject *
+pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
+{
+    gchar buf[128];
+    PyObject *pyobj;
+    GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
+
+    pyobj = pygi_value_to_py_basic_type (value, fundamental);
+    if (pyobj) {
+        return pyobj;
+    }
+
+    pyobj = pygi_value_to_py_structured_type (value, fundamental, copy_boxed);
+    if (pyobj) {
+        return pyobj;
+    }
+
     g_snprintf(buf, sizeof(buf), "unknown type %s",
                g_type_name(G_VALUE_TYPE(value)));
     PyErr_SetString(PyExc_TypeError, buf);

@@ -39,6 +39,12 @@ PyObject *pyg_param_gvalue_as_pyobject(const GValue* gvalue,
 PyObject *pyg_strv_from_gvalue(const GValue *value);
 int       pyg_strv_to_gvalue(GValue *value, PyObject *obj);
 
+PyObject *pygi_value_to_py_basic_type      (const GValue *value,
+                                            GType fundamental);
+PyObject *pygi_value_to_py_structured_type (const GValue *value,
+                                            GType fundamental,
+                                            gboolean copy_boxed);
+
 G_END_DECLS
 
 #endif /* __PYGI_VALUE_H__ */
