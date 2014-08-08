@@ -178,7 +178,7 @@ _base_info_dealloc (PyGIBaseInfo *self)
     if (self->cache != NULL)
         pygi_callable_cache_free ( (PyGICallableCache *) self->cache);
 
-    Py_TYPE( (PyObject *) self)->tp_free ( (PyObject *) self);
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
 static PyObject *

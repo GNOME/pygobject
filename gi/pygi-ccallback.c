@@ -83,7 +83,7 @@ _ccallback_dealloc (PyGICCallback *self)
         pygi_callable_cache_free ( (PyGICallableCache *)self->cache);
     }
 
-    Py_TYPE ((PyGObject *)self)->tp_free ((PyObject *)self);
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
 void

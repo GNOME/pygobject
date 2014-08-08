@@ -69,7 +69,7 @@ _struct_dealloc (PyGIStruct *self)
         g_base_info_unref (info);
     }
 
-    Py_TYPE( (PyGPointer *) self )->tp_free ( (PyObject *) self);
+    Py_TYPE (self)->tp_free ((PyObject *)self);
 }
 
 static PyObject *
