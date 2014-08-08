@@ -1106,7 +1106,7 @@ class TestIntrospectedSignals(unittest.TestCase):
         self.assertEqual(type(rv), GLib.Array)
         self.assertEqual(rv.len, 2)
 
-    @unittest.skip  # https://bugzilla.gnome.org/show_bug.cgi?id=669496
+    @unittest.skip('https://bugzilla.gnome.org/show_bug.cgi?id=669496')
     def test_array_parm(self):
         obj = Regress.TestObj()
 
