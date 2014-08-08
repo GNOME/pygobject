@@ -201,3 +201,68 @@ class TestGFile(unittest.TestCase):
         main_loop = GLib.MainLoop()
         main_loop.run()
         self.assertFalse(self.file.query_exists(None))
+
+
+class TestGApplication(unittest.TestCase):
+    def test_command_line(self):
+        class App(Gio.Application):
+            args = None
+
+            def __init__(self):
+                super(App, self).__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+
+            def do_command_line(self, cmdline):
+                self.args = cmdline.get_arguments()
+                return 42
+
+        app = App()
+        res = app.run(['spam', 'eggs'])
+
+        self.assertEqual(res, 42)
+        self.assertSequenceEqual(app.args, ['spam', 'eggs'])
+
+    def test_local_command_line(self):
+        class App(Gio.Application):
+            local_args = None
+
+            def __init__(self):
+                super(App, self).__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+
+            def do_local_command_line(self, args):
+                self.local_args = args[:]  # copy
+                args.remove('eggs')
+
+                # True skips do_command_line being called.
+                return True, args, 42
+
+        app = App()
+        res = app.run(['spam', 'eggs'])
+
+        self.assertEqual(res, 42)
+        self.assertSequenceEqual(app.local_args, ['spam', 'eggs'])
+
+    def test_local_and_remote_command_line(self):
+        class App(Gio.Application):
+            args = None
+            local_args = None
+
+            def __init__(self):
+                super(App, self).__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+
+            def do_command_line(self, cmdline):
+                self.args = cmdline.get_arguments()
+                return 42
+
+            def do_local_command_line(self, args):
+                self.local_args = args[:]  # copy
+                args.remove('eggs')
+
+                # False causes do_command_line to be called with args.
+                return False, args, 0
+
+        app = App()
+        res = app.run(['spam', 'eggs'])
+
+        self.assertEqual(res, 42)
+        self.assertSequenceEqual(app.args, ['spam'])
+        self.assertSequenceEqual(app.local_args, ['spam', 'eggs'])
