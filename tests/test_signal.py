@@ -1106,6 +1106,18 @@ class TestIntrospectedSignals(unittest.TestCase):
         self.assertEqual(type(rv), GLib.Array)
         self.assertEqual(rv.len, 2)
 
+    @unittest.skip  # https://bugzilla.gnome.org/show_bug.cgi?id=669496
+    def test_array_parm(self):
+        obj = Regress.TestObj()
+
+        def callback(obj, arr):
+            obj.callback_arr = arr
+
+        obj.connect('sig-with-array-prop', callback)
+        obj.callback_arr = None
+        self.assertEqual(obj.emit('sig-with-array-prop', [1, 2, GObject.G_MAXUINT]), None)
+        self.assertEqual(obj.callback_arr, [1, 2, GObject.G_MAXUINT])
+
 
 if __name__ == '__main__':
     unittest.main()
