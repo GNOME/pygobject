@@ -23,6 +23,7 @@
 
 #include "pygi-private.h"
 #include "pygi-value.h"
+#include "pygparamspec.h"
 
 #include <girepository.h>
 
@@ -97,6 +98,26 @@ _pygi_lookup_property_from_g_type (GType g_type, const gchar *attr_name)
 }
 
 PyObject *
+pygi_call_do_get_property (PyObject *instance, GParamSpec *pspec)
+{
+    PyObject *py_pspec;
+    PyObject *retval;
+
+    py_pspec = pyg_param_spec_new (pspec);
+    retval = PyObject_CallMethod (instance, "do_get_property", "O", py_pspec);
+    if (retval == NULL) {
+        PyErr_Print();
+    }
+
+    Py_DECREF (py_pspec);
+    if (retval) {
+        return retval;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyObject *
 pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 {
     GIPropertyInfo *property_info = NULL;
@@ -110,6 +131,12 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
         return NULL;
     }
 
+    /* Fast path which calls the Python getter implementation directly.
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=723872 */
+    if (pyg_gtype_is_custom (pspec->owner_type)) {
+        return pygi_call_do_get_property ((PyObject *)instance, pspec);
+    }
+
     Py_BEGIN_ALLOW_THREADS;
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (instance->obj, pspec->name, &value);
@@ -120,14 +147,6 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     /* Fast path basic types which don't need GI type info. */
     py_value = pygi_value_to_py_basic_type (&value, fundamental);
     if (py_value) {
-        goto out;
-    }
-
-    /* Fast path which checks if this is a Python implemented Property.
-     * TODO: Make it even faster by calling the Python getter implementation
-     * directly. See: https://bugzilla.gnome.org/show_bug.cgi?id=723872 */
-    if (pyg_gtype_is_custom (pspec->owner_type)) {
-        py_value = pyg_param_gvalue_as_pyobject (&value, TRUE, pspec);
         goto out;
     }
 

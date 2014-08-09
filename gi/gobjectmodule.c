@@ -38,6 +38,7 @@
 
 #include "pygi-value.h"
 #include "pygi-error.h"
+#include "pygi-property.h"
 
 static GHashTable *log_handlers = NULL;
 static gboolean log_handlers_disabled = FALSE;
@@ -194,7 +195,6 @@ pyg_object_get_property (GObject *object, guint property_id,
 			 GValue *value, GParamSpec *pspec)
 {
     PyObject *object_wrapper, *retval;
-    PyObject *py_pspec;
     PyGILState_STATE state;
 
     state = pyglib_gil_state_ensure();
@@ -206,14 +206,11 @@ pyg_object_get_property (GObject *object, guint property_id,
 	return;
     }
 
-    py_pspec = pyg_param_spec_new(pspec);
-    retval = PyObject_CallMethod(object_wrapper, "do_get_property",
-				 "O", py_pspec);
-    if (retval == NULL || pyg_value_from_pyobject(value, retval) < 0) {
-	PyErr_Print();
+    retval = pygi_call_do_get_property (object_wrapper, pspec);
+    if (retval && pyg_value_from_pyobject (value, retval) < 0) {
+        PyErr_Print();
     }
     Py_DECREF(object_wrapper);
-    Py_DECREF(py_pspec);
     Py_XDECREF(retval);
 
     pyglib_gil_state_release(state);
