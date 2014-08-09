@@ -33,6 +33,10 @@ PyObject *
 pygi_get_property_value (PyGObject *instance,
                          GParamSpec *pspec);
 
+PyObject *
+pygi_get_property_value_by_name (PyGObject *self,
+                                 gchar *param_name);
+
 gint
 pygi_set_property_value (PyGObject *instance,
                          GParamSpec *pspec,

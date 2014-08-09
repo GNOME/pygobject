@@ -1280,44 +1280,6 @@ class TestCGetPropertyMethod(CPropertiesTestBase, unittest.TestCase):
     def set_prop(self, obj, name, value):
         obj.set_property(name, value)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_boxed_glist(self):
-        # get_property() returns None or a GIMarshallingTestsBoxedGList
-        CPropertiesTestBase.test_boxed_glist(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_annotated_glist(self):
-        # get_property() returns None
-        CPropertiesTestBase.test_annotated_glist(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_char(self):
-        # get_property() returns a single element string which cannot represent
-        # tested values for G_TYPE_CHAR
-        CPropertiesTestBase.test_char(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_uchar(self):
-        # get_property() returns a single element string which cannot represent
-        # tested values for G_TYPE_UCHAR
-        CPropertiesTestBase.test_uchar(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_setting_several_properties(self):
-        # get_property() returns a single element string which cannot represent
-        # tested values for G_TYPE_UCHAR
-        CPropertiesTestBase.test_setting_several_properties(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_parent_class(self):
-        # get_property() returns gpointer instead of a list
-        CPropertiesTestBase.test_annotated_glist(self)
-
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=733893
-    def test_hash_table(self):
-        # get_property() returns gpointer instead of a dict
-        CPropertiesTestBase.test_hash_table(self)
-
 
 if __name__ == '__main__':
     unittest.main()

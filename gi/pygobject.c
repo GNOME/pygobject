@@ -248,15 +248,12 @@ build_parameter_list(GObjectClass *class)
     return props_list;
 }
 
-
 static PyObject*
 PyGProps_getattro(PyGProps *self, PyObject *attr)
 {
     char *attr_name, *property_name;
     GObjectClass *class;
     GParamSpec *pspec;
-    GValue value = { 0, };
-    PyObject *ret;
 
     attr_name = PYGLIB_PyUnicode_AsString(attr);
     if (!attr_name) {
@@ -279,36 +276,12 @@ PyGProps_getattro(PyGProps *self, PyObject *attr)
 	return PyObject_GenericGetAttr((PyObject *)self, attr);
     }
 
-    if (!(pspec->flags & G_PARAM_READABLE)) {
-	PyErr_Format(PyExc_TypeError,
-		     "property '%s' is not readable", attr_name);
-	return NULL;
-    }
-
     if (!self->pygobject) {
         /* If we're doing it without an instance, return a GParamSpec */
         return pyg_param_spec_new(pspec);
     }
 
-    if (!pyg_gtype_is_custom (pspec->owner_type)) {
-        /* The GType is not implemented at the Python level: see if we can
-         * read the property value via gi. */
-        ret = pygi_get_property_value (self->pygobject, pspec);
-        if (ret)
-            return ret;
-    }
-
-    /* The GType is implemented in Python, or we failed to read it via gi:
-     * do a straightforward read. */
-    Py_BEGIN_ALLOW_THREADS;
-    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    g_object_get_property(self->pygobject->obj, pspec->name, &value);
-    Py_END_ALLOW_THREADS;
-
-    ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
-    g_value_unset(&value);
-    
-    return ret;
+    return pygi_get_property_value (self->pygobject, pspec);
 }
 
 static gboolean
@@ -1323,45 +1296,22 @@ pygobject_init(PyGObject *self, PyObject *args, PyObject *kwargs)
     }
 
 static PyObject *
-pygobject_get_property(PyGObject *self, PyObject *args)
+pygobject_get_property (PyGObject *self, PyObject *args)
 {
     gchar *param_name;
-    GParamSpec *pspec;
-    GValue value = { 0, };
-    PyObject *ret;
 
-    if (!PyArg_ParseTuple(args, "s:GObject.get_property", &param_name))
-	return NULL;
+    if (!PyArg_ParseTuple (args, "s:GObject.get_property", &param_name)) {
+        return NULL;
+    }
 
     CHECK_GOBJECT(self);
-    
-    pspec = g_object_class_find_property(G_OBJECT_GET_CLASS(self->obj),
-					 param_name);
-    if (!pspec) {
-	PyErr_Format(PyExc_TypeError,
-		     "object of type `%s' does not have property `%s'",
-		     g_type_name(G_OBJECT_TYPE(self->obj)), param_name);
-	return NULL;
-    }
-    if (!(pspec->flags & G_PARAM_READABLE)) {
-	PyErr_Format(PyExc_TypeError, "property %s is not readable",
-		     param_name);
-	return NULL;
-    }
-    g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-    Py_BEGIN_ALLOW_THREADS;
-    g_object_get_property(self->obj, param_name, &value);
-    Py_END_ALLOW_THREADS;
 
-    ret = pyg_param_gvalue_as_pyobject(&value, TRUE, pspec);
-    g_value_unset(&value);
-    return ret;
+    return pygi_get_property_value_by_name (self, param_name);
 }
 
 static PyObject *
 pygobject_get_properties(PyGObject *self, PyObject *args)
 {
-    GObjectClass *class;
     int len, i;
     PyObject *tuple;
 
@@ -1371,48 +1321,27 @@ pygobject_get_properties(PyGObject *self, PyObject *args)
     }
 
     tuple = PyTuple_New(len);
-    class = G_OBJECT_GET_CLASS(self->obj);
     for (i = 0; i < len; i++) {
         PyObject *py_property = PyTuple_GetItem(args, i);
         gchar *property_name;
-        GParamSpec *pspec;
-        GValue value = { 0 };
         PyObject *item;
 
         if (!PYGLIB_PyUnicode_Check(py_property)) {
             PyErr_SetString(PyExc_TypeError,
                             "Expected string argument for property.");
-            return NULL;
+            goto fail;
         }
 
         property_name = PYGLIB_PyUnicode_AsString(py_property);
-
-        pspec = g_object_class_find_property(class,
-					 property_name);
-        if (!pspec) {
-	    PyErr_Format(PyExc_TypeError,
-		         "object of type `%s' does not have property `%s'",
-		         g_type_name(G_OBJECT_TYPE(self->obj)), property_name);
-    	return NULL;
-        }
-        if (!(pspec->flags & G_PARAM_READABLE)) {
-	    PyErr_Format(PyExc_TypeError, "property %s is not readable",
-		        property_name);
-	    return NULL;
-        }
-        g_value_init(&value, G_PARAM_SPEC_VALUE_TYPE(pspec));
-
-        Py_BEGIN_ALLOW_THREADS;
-        g_object_get_property(self->obj, property_name, &value);
-        Py_END_ALLOW_THREADS;
-
-        item = pyg_value_as_pyobject(&value, TRUE);
-        PyTuple_SetItem(tuple, i, item);
-
-        g_value_unset(&value);
+        item = pygi_get_property_value_by_name (self, property_name);
+        PyTuple_SetItem (tuple, i, item);
     }
 
     return tuple;
+
+fail:
+    Py_DECREF (tuple);
+    return NULL;
 }
 
 static PyObject *

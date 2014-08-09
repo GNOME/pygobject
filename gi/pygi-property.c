@@ -101,45 +101,80 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
 {
     GIPropertyInfo *property_info = NULL;
     GValue value = { 0, };
-    GIArgument arg = { 0, };
     PyObject *py_value = NULL;
-    GITypeInfo *type_info = NULL;
-    gboolean free_array = FALSE;
 
-    /* The owner_type of the pspec gives us the exact type that introduced the
-     * property, even if it is a parent class of the instance in question. */
-    property_info = _pygi_lookup_property_from_g_type (pspec->owner_type, pspec->name);
+    if (!(pspec->flags & G_PARAM_READABLE)) {
+        PyErr_Format(PyExc_TypeError, "property %s is not readable",
+                     g_param_spec_get_name (pspec));
+        return NULL;
+    }
 
-    if (property_info == NULL)
-        goto out;
-
+    Py_BEGIN_ALLOW_THREADS;
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (instance->obj, pspec->name, &value);
+    Py_END_ALLOW_THREADS;
 
-    type_info = g_property_info_get_type (property_info);
-    arg = _pygi_argument_from_g_value (&value, type_info);
-
-    /* Arrays are special cased, see note in _pygi_argument_to_array. */
-    if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
-        arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
-                                                 type_info, &free_array);
+    /* Fast path which checks if this is a Python implemented Property.
+     * TODO: Make it even faster by calling the Python getter implementation
+     * directly. See: https://bugzilla.gnome.org/show_bug.cgi?id=723872 */
+    if (pyg_gtype_is_custom (pspec->owner_type)) {
+        py_value = pyg_param_gvalue_as_pyobject (&value, TRUE, pspec);
+        goto out;
     }
 
-    py_value = _pygi_argument_to_object (&arg, type_info, GI_TRANSFER_NOTHING);
+    /* Attempt to marshal through GI.
+     * The owner_type of the pspec gives us the exact type that introduced the
+     * property, even if it is a parent class of the instance in question. */
+    property_info = _pygi_lookup_property_from_g_type (pspec->owner_type, pspec->name);
+    if (property_info) {
+        GITypeInfo *type_info = NULL;
+        gboolean free_array = FALSE;
+        GIArgument arg = { 0, };
 
-    if (free_array) {
-        g_array_free (arg.v_pointer, FALSE);
+        type_info = g_property_info_get_type (property_info);
+        arg = _pygi_argument_from_g_value (&value, type_info);
+
+        /* Arrays are special cased, see note in _pygi_argument_to_array. */
+        if (g_type_info_get_tag (type_info) == GI_TYPE_TAG_ARRAY) {
+            arg.v_pointer = _pygi_argument_to_array (&arg, NULL, NULL, NULL,
+                                                     type_info, &free_array);
+        }
+
+        py_value = _pygi_argument_to_object (&arg, type_info, GI_TRANSFER_NOTHING);
+
+        if (free_array) {
+            g_array_free (arg.v_pointer, FALSE);
+        }
+
+        g_base_info_unref (type_info);
+        g_base_info_unref (property_info);
     }
 
-    g_value_unset (&value);
+    /* Fallback to GValue marshalling. */
+    if (py_value == NULL) {
+        py_value = pyg_param_gvalue_as_pyobject (&value, TRUE, pspec);
+    }
 
 out:
-    if (property_info != NULL)
-        g_base_info_unref (property_info);
-    if (type_info != NULL)
-        g_base_info_unref (type_info);
-
+    g_value_unset (&value);
     return py_value;
+}
+
+PyObject *
+pygi_get_property_value_by_name (PyGObject *self, gchar *param_name)
+{
+    GParamSpec *pspec;
+
+    pspec = g_object_class_find_property (G_OBJECT_GET_CLASS(self->obj),
+                                          param_name);
+    if (!pspec) {
+        PyErr_Format (PyExc_TypeError,
+                      "object of type `%s' does not have property `%s'",
+                      g_type_name (G_OBJECT_TYPE (self->obj)), param_name);
+        return NULL;
+    }
+
+    return pygi_get_property_value (self, pspec);
 }
 
 gint
