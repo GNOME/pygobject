@@ -102,6 +102,7 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     GIPropertyInfo *property_info = NULL;
     GValue value = { 0, };
     PyObject *py_value = NULL;
+    GType fundamental;
 
     if (!(pspec->flags & G_PARAM_READABLE)) {
         PyErr_Format(PyExc_TypeError, "property %s is not readable",
@@ -112,7 +113,15 @@ pygi_get_property_value (PyGObject *instance, GParamSpec *pspec)
     Py_BEGIN_ALLOW_THREADS;
     g_value_init (&value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     g_object_get_property (instance->obj, pspec->name, &value);
+    fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (&value));
     Py_END_ALLOW_THREADS;
+
+
+    /* Fast path basic types which don't need GI type info. */
+    py_value = pygi_value_to_py_basic_type (&value, fundamental);
+    if (py_value) {
+        goto out;
+    }
 
     /* Fast path which checks if this is a Python implemented Property.
      * TODO: Make it even faster by calling the Python getter implementation

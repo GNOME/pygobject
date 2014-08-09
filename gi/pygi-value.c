@@ -656,14 +656,12 @@ PyObject *
 pygi_value_to_py_basic_type (const GValue *value, GType fundamental)
 {
     switch (fundamental) {
-    case G_TYPE_CHAR: {
-        gint8 val = g_value_get_schar(value);
-        return PYGLIB_PyUnicode_FromStringAndSize((char *)&val, 1);
-    }
-    case G_TYPE_UCHAR: {
-        guint8 val = g_value_get_uchar(value);
-        return PYGLIB_PyBytes_FromStringAndSize((char *)&val, 1);
-    }
+    case G_TYPE_CHAR:
+        return PYGLIB_PyLong_FromLong (g_value_get_schar (value));
+
+    case G_TYPE_UCHAR:
+        return PYGLIB_PyLong_FromLong (g_value_get_uchar (value));
+
     case G_TYPE_BOOLEAN: {
         return PyBool_FromLong(g_value_get_boolean(value));
     }
@@ -843,6 +841,18 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
     gchar buf[128];
     PyObject *pyobj;
     GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
+
+    /* HACK: special case char and uchar to return PyBytes intstead of integers
+     * in the general case. Property access will skip this by calling
+     * pygi_value_to_py_basic_type() directly.
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=733893 */
+    if (fundamental == G_TYPE_CHAR) {
+        gint8 val = g_value_get_schar(value);
+        return PYGLIB_PyUnicode_FromStringAndSize ((char *)&val, 1);
+    } else if (fundamental == G_TYPE_UCHAR) {
+        guint8 val = g_value_get_uchar(value);
+        return PYGLIB_PyBytes_FromStringAndSize ((char *)&val, 1);
+    }
 
     pyobj = pygi_value_to_py_basic_type (value, fundamental);
     if (pyobj) {
