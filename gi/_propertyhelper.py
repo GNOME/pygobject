@@ -18,6 +18,7 @@
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import traceback
 
 import gi._gi
 _gobject = gi._gi._gobject
@@ -217,7 +218,19 @@ class Property(object):
             return self
 
         self._exc = None
-        value = instance.get_property(self.name)
+
+        # Simply return the result of fget directly, no need to go through GObject.
+        # See: https://bugzilla.gnome.org/show_bug.cgi?id=723872
+        # We catch and print any exception occurring within the fget for compatibility
+        # prior to the fast path addition from bug 723872, this should eventually
+        # be removed and exceptions raised directly to the caller as in:
+        # https://bugzilla.gnome.org/show_bug.cgi?id=575652
+        try:
+            value = self.fget(instance)
+        except Exception:
+            traceback.print_exc()
+            value = None
+
         if self._exc:
             exc = self._exc
             self._exc = None
@@ -404,9 +417,7 @@ def install_properties(cls):
 
     def obj_get_property(self, pspec):
         name = pspec.name.replace('-', '_')
-        prop = getattr(cls, name, None)
-        if prop:
-            return prop.fget(self)
+        return getattr(self, name, None)
     cls.do_get_property = obj_get_property
 
     def obj_set_property(self, pspec, value):
