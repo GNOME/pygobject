@@ -529,6 +529,23 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(o.prop, 'value')
         self.assertRaises(TypeError, setattr, o, 'prop', 'xxx')
 
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=575652
+    def test_getter_exception(self):
+        class C(GObject.Object):
+            @GObject.Property(type=int)
+            def prop(self):
+                raise ValueError('something bad happend')
+
+        o = C()
+        with self.assertRaisesRegex(ValueError, 'something bad happend'):
+            o.prop
+
+        with self.assertRaisesRegex(ValueError, 'something bad happend'):
+            o.get_property('prop')
+
+        with self.assertRaisesRegex(ValueError, 'something bad happend'):
+            o.props.prop
+
     def test_custom_setter(self):
         class C(GObject.GObject):
             def set_prop(self, value):
