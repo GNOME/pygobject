@@ -59,7 +59,7 @@ class _DummyStaticModule(types.ModuleType):
     __path__ = None
 
     def __getattr__(self, name):
-        raise RuntimeError(_static_binding_error)
+        raise AttributeError(_static_binding_error)
 
 
 sys.modules['glib'] = _DummyStaticModule('glib', _static_binding_error)
