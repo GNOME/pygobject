@@ -1683,6 +1683,15 @@ connect_helper(PyGObject *self, gchar *name, PyObject *callback, PyObject *extra
 	return NULL;
     }
 
+    if (object && !PyObject_TypeCheck (object, &PyGObject_Type)) {
+        if (PyErr_WarnEx (PyGIDeprecationWarning,
+                          "Using non GObject arguments for connect_object() is deprecated, use: "
+                          "connect_data(signal, callback, data, connect_flags=GObject.ConnectFlags.SWAPPED)",
+                          1)) {
+            return NULL;
+        }
+    }
+
     g_signal_query (sigid, &query_info);
     if (!pyg_gtype_is_custom (query_info.itype)) {
         /* The signal is implemented by a non-Python class, probably
