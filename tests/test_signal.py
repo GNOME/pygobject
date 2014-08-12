@@ -850,6 +850,115 @@ class TestSignalConnectors(unittest.TestCase):
         self.assertEqual(self.value, 3)
 
 
+class _ConnectDataTestBase(object):
+    # Notes:
+    #  - self.Object is overridden in sub-classes.
+    #  - Numeric suffixes indicate the number of user data args passed in.
+    Object = None
+
+    def run_connect_test(self, emit_args, user_data, flags=0):
+        obj = self.Object()
+        callback_args = []
+
+        def callback(*args):
+            callback_args.append(args)
+            return 0
+
+        obj.connect_data('sig-with-int64-prop', callback, connect_flags=flags, *user_data)
+        obj.emit('sig-with-int64-prop', *emit_args)
+        self.assertEqual(len(callback_args), 1)
+        return callback_args[0]
+
+    def test_0(self):
+        obj, value = self.run_connect_test([GObject.G_MAXINT64], user_data=[])
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+
+    def test_1(self):
+        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+                                                 user_data=['mydata'])
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(data, 'mydata')
+
+    def test_after_0(self):
+        obj, value = self.run_connect_test([GObject.G_MAXINT64],
+                                           user_data=[],
+                                           flags=GObject.ConnectFlags.AFTER)
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+
+    def test_after_1(self):
+        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+                                                 user_data=['mydata'],
+                                                 flags=GObject.ConnectFlags.AFTER)
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(data, 'mydata')
+
+    def test_swaped_0(self):
+        # Swapped only works with a single user data argument.
+        with self.assertRaises(ValueError):
+            self.run_connect_test([GObject.G_MAXINT64],
+                                  user_data=[],
+                                  flags=GObject.ConnectFlags.SWAPPED)
+
+    def test_swaped_1(self):
+        # Notice obj and data are reversed in the return.
+        data, value, obj = self.run_connect_test([GObject.G_MAXINT64],
+                                                 user_data=['mydata'],
+                                                 flags=GObject.ConnectFlags.SWAPPED)
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(data, 'mydata')
+
+    def test_swaped_2(self):
+        # Swapped only works with a single user data argument.
+        with self.assertRaises(ValueError):
+            self.run_connect_test([GObject.G_MAXINT64],
+                                  user_data=[1, 2],
+                                  flags=GObject.ConnectFlags.SWAPPED)
+
+    def test_after_and_swapped_0(self):
+        # Swapped only works with a single user data argument.
+        with self.assertRaises(ValueError):
+            self.run_connect_test([GObject.G_MAXINT64],
+                                  user_data=[],
+                                  flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
+
+    def test_after_and_swapped_1(self):
+        # Notice obj and data are reversed in the return.
+        data, value, obj = self.run_connect_test([GObject.G_MAXINT64],
+                                                 user_data=['mydata'],
+                                                 flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
+        self.assertIsInstance(obj, self.Object)
+        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(data, 'mydata')
+
+    def test_after_and_swapped_2(self):
+        # Swapped only works with a single user data argument.
+        with self.assertRaises(ValueError):
+            self.run_connect_test([GObject.G_MAXINT64],
+                                  user_data=[],
+                                  flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
+
+
+class TestConnectDataNonIntrospected(unittest.TestCase, _ConnectDataTestBase):
+    # This tests connect_data with non-introspected signals
+    # (created in Python in this case).
+    class Object(GObject.Object):
+        test = GObject.Signal()
+        sig_with_int64_prop = GObject.Signal(return_type=GObject.TYPE_INT64,
+                                             arg_types=[GObject.TYPE_INT64],
+                                             flags=GObject.SignalFlags.RUN_LAST)
+
+
+@unittest.skipUnless(has_cairo, 'built without cairo support')
+class TestConnectDataIntrospected(unittest.TestCase, _ConnectDataTestBase):
+    # This tests connect_data with introspected signals brought in from Regress.
+    Object = Regress.TestObj
+
+
 class TestInstallSignals(unittest.TestCase):
     # These tests only test how signalhelper.install_signals works
     # with the __gsignals__ dict and therefore does not need to use

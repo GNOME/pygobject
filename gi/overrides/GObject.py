@@ -609,6 +609,43 @@ class Object(GObjectModule.Object):
         super(Object, self).freeze_notify()
         return _FreezeNotifyManager(self)
 
+    def connect_data(self, detailed_signal, handler, *data, **kwargs):
+        """Connect a callback to the given signal with optional user data.
+
+        :param str detailed_signal:
+            A detailed signal to connect to.
+        :param callable handler:
+            Callback handler to connect to the signal.
+        :param *data:
+            Variable data which is passed through to the signal handler.
+        :param GObject.ConnectFlags connect_flags:
+            Flags used for connection options.
+        :returns:
+            A signal id which can be used with disconnect.
+        """
+        flags = kwargs.get('connect_flags', 0)
+        if flags & GObjectModule.ConnectFlags.AFTER:
+            connect_func = _gobject.GObject.connect_after
+        else:
+            connect_func = _gobject.GObject.connect
+
+        if flags & GObjectModule.ConnectFlags.SWAPPED:
+            if len(data) != 1:
+                raise ValueError('Using GObject.ConnectFlags.SWAPPED requires exactly '
+                                 'one argument for user data, got: %s' % [data])
+
+            def new_handler(obj, *args):
+                # Swap obj with the last element in args which will be the user
+                # data passed to the connect function.
+                args = list(args)
+                swap = args.pop()
+                args = args + [obj]
+                return handler(swap, *args)
+        else:
+            new_handler = handler
+
+        return connect_func(self, detailed_signal, new_handler, *data)
+
     #
     # Aliases
     #
