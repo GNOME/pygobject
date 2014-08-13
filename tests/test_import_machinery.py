@@ -62,23 +62,23 @@ class TestModule(unittest.TestCase):
         # Importing old static bindings once gi has been imported should not
         # crash but instead give back a dummy module which produces RuntimeErrors
         # on access.
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AttributeError):
             import gobject
             gobject.anything
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AttributeError):
             import glib
             glib.anything
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AttributeError):
             import gio
             gio.anything
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AttributeError):
             import gtk
             gtk.anything
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AttributeError):
             import gtk.gdk
             gtk.gdk.anything
 
