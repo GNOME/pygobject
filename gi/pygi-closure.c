@@ -31,8 +31,6 @@ typedef struct _PyGICallbackCache
     GIInterfaceInfo *interface_info;
 } PyGICallbackCache;
 
-static PyGICClosure *global_destroy_notify;
-
 /* This maintains a list of closures which can be free'd whenever
    as they have been called.  We will free them on the next
    library function call.
@@ -686,50 +684,6 @@ static void
 _pygi_destroy_notify_dummy (gpointer data) {
 }
 
-static void
-_pygi_destroy_notify_callback_closure (ffi_cif *cif,
-                                       void *result,
-                                       void **args,
-                                       void *data)
-{
-    PyGICClosure *info = * (void**) (args[0]);
-
-    g_assert (info);
-
-    _pygi_invoke_closure_free (info);
-}
-
-/* _pygi_destroy_notify_create:
- *
- * Method used in the occasion when a method has a GDestroyNotify
- * argument with user data.
- */
-static PyGICClosure*
-_pygi_destroy_notify_create (void)
-{
-    if (!global_destroy_notify) {
-        GIBaseInfo *glib_destroy_notify;
-        PyGICClosure *destroy_notify;
-
-        glib_destroy_notify = g_irepository_find_by_name (NULL, "GLib", "DestroyNotify");
-        g_assert (glib_destroy_notify != NULL);
-        g_assert (g_base_info_get_type (glib_destroy_notify) == GI_INFO_TYPE_CALLBACK);
-
-        destroy_notify = g_slice_new0 (PyGICClosure);
-
-        destroy_notify->closure = g_callable_info_prepare_closure ( (GICallableInfo*) glib_destroy_notify,
-                                                                    &destroy_notify->cif,
-                                                                    _pygi_destroy_notify_callback_closure,
-                                                                    NULL);
-
-        g_base_info_unref (glib_destroy_notify);
-
-        global_destroy_notify = destroy_notify;
-    }
-
-    return global_destroy_notify;
-}
-
 static gboolean
 _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                                           PyGICallableCache *callable_cache,
@@ -813,8 +767,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
 
     if (destroy_cache) {
         if (user_data_cache != NULL) {
-            PyGICClosure *destroy_notify = _pygi_destroy_notify_create ();
-            state->arg_values[destroy_cache->c_arg_index].v_pointer = destroy_notify->closure;
+            state->arg_values[destroy_cache->c_arg_index].v_pointer = _pygi_invoke_closure_free;
         } else {
             gchar *msg = g_strdup_printf("Callables passed to %s will leak references because "
                                          "the method does not support a user_data argument. "
