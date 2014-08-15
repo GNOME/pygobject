@@ -1,3 +1,25 @@
+3.13.4  14-Aug-2014
+        - Marshaling cache refactor and cache usage in vfuncs
+          (Garrett Regier) (#727004)
+        - Fix array argument out and inout marshaling from vfuncs
+          (Garrett Regier) (#702508)
+        - Cleanup input args when marshaling in closures
+          (Garrett Regier) (#727004)
+        - Add deprecation warning for connect_object() with non-GObject argument
+          (Simon Feltman) (#688064)
+        - Add Python implementation of Object.connect_data()
+          (Simon Feltman) (#701843)
+        - Add GClosure marshaling cleanup (Simon Feltman) (#695128)
+        - Fix GCallback Python wrapper leak (Simon Feltman) (#695130)
+        - tests: Add failing test for marshaling an array of GValues through
+          signals (Martin Pitt) (#669496)
+        - Add protection against attempts at importing static bindings
+          (Simon Feltman) (#709183)
+        - Update and deprecate gi.overrides.keysyms (Simon Feltman) (#721295)
+        - Generate .dll libraries on windows (Ignacio Casal Quinteiro) (#734288)
+        - Windows build fixes (Alexey Pavlov)
+          (#734284, #734289, #734286, #734287)
+
 3.13.3  23-Jun-2014
         - demos: Cleanup CSS accordion demo to use a loop for adding buttons
           (Simon Feltman)
