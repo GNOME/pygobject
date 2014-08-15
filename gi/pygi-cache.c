@@ -914,8 +914,6 @@ _function_with_instance_cache_generate_args_cache_real (PyGICallableCache *calla
                                       PYGI_DIRECTION_FROM_PYTHON,
                                       callable_cache);
 
-    g_base_info_unref ((GIBaseInfo *) interface_info);
-
     if (instance_cache == NULL)
         return FALSE;
 
