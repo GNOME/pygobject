@@ -1,8 +1,10 @@
 import unittest
 
 import gi.docstring
+
 from gi.repository import GIMarshallingTests
 from gi.repository import Gio
+from gi.repository import GObject
 
 try:
     import cairo
@@ -84,3 +86,40 @@ class Test(unittest.TestCase):
         # Test the 'iter' out argument does not effect length argument skipping.
         self.assertEqual(Gtk.ListStore.insert_with_valuesv.__doc__,
                          'insert_with_valuesv(self, position:int, columns:list, values:list) -> iter:Gtk.TreeIter')
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=731452
+    def test_sub_class_doc(self):
+        class A(GObject.Object):
+            """first doc"""
+            pass
+
+        class B(A):
+            """second doc"""
+            pass
+
+        self.assertEqual(A.__doc__, "first doc")
+        self.assertEqual(B.__doc__, "second doc")
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=731452
+    def test_sub_class_no_doc(self):
+        class A(GObject.Object):
+            pass
+
+        class B(A):
+            """sub-class doc"""
+
+        self.assertEqual(A.__doc__, None)
+        self.assertEqual(B.__doc__, "sub-class doc")
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=734926
+    def test_sub_class_doc_setattr(self):
+        class A(GObject.Object):
+            pass
+
+        class B(A):
+            pass
+
+        A.__doc__ = 'custom doc'
+
+        self.assertEqual(A.__doc__, "custom doc")
+        self.assertEqual(B.__doc__, "custom doc")
