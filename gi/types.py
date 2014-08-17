@@ -238,9 +238,19 @@ class GObjectMeta(_GObjectMetaBase, MetaClassHelper):
 
     @property
     def __doc__(cls):
+        """Meta class property which shows up on any class using this meta-class."""
         if cls == GObjectMeta:
             return ''
-        return generate_doc_string(cls.__info__)
+
+        doc = cls.__dict__.get('__doc__', None)
+        if doc is not None:
+            return doc
+
+        # For repository classes, dynamically generate a doc string if it wasn't overridden.
+        if cls.__module__.startswith(('gi.repository.', 'gi.overrides')):
+            return generate_doc_string(cls.__info__)
+
+        return None
 
 
 def mro(C):

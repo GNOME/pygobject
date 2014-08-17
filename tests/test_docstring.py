@@ -87,7 +87,6 @@ class Test(unittest.TestCase):
         self.assertEqual(Gtk.ListStore.insert_with_valuesv.__doc__,
                          'insert_with_valuesv(self, position:int, columns:list, values:list) -> iter:Gtk.TreeIter')
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=731452
     def test_sub_class_doc(self):
         class A(GObject.Object):
             """first doc"""
@@ -100,7 +99,6 @@ class Test(unittest.TestCase):
         self.assertEqual(A.__doc__, "first doc")
         self.assertEqual(B.__doc__, "second doc")
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=731452
     def test_sub_class_no_doc(self):
         class A(GObject.Object):
             pass
