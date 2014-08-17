@@ -819,8 +819,9 @@ _pygi_argument_to_array (GIArgument  *arg,
                     gint length_arg_pos;
                     GIArgInfo length_arg_info;
                     GITypeInfo length_type_info;
+                    GIArgument length_arg;
 
-                    if (G_UNLIKELY (args == NULL && args_values == NULL)) {
+                    if (G_UNLIKELY (args_values == NULL)) {
                         g_critical ("Unable to determine array length for %p",
                                     arg->v_pointer);
                         g_array = g_array_new (is_zero_terminated, FALSE, item_size);
@@ -834,20 +835,13 @@ _pygi_argument_to_array (GIArgument  *arg,
                     g_callable_info_load_arg (callable_info, length_arg_pos, &length_arg_info);
                     g_arg_info_load_type (&length_arg_info, &length_type_info);
 
-                    if (args != NULL) {
-                        if (!gi_argument_to_gssize (args[length_arg_pos],
-                                                    g_type_info_get_tag (&length_type_info),
-                                                    &length))
-                            return NULL;
-                    } else {
-                        /* get it from args_values */
-                        GIArgument length_arg = _pygi_argument_from_g_value (&(args_values[length_arg_pos]),
-                                &length_type_info);
-                        if (!gi_argument_to_gssize (&length_arg,
-                                                    g_type_info_get_tag (&length_type_info),
-                                                    &length))
-                            return NULL;
-                    }
+
+                    length_arg = _pygi_argument_from_g_value (&(args_values[length_arg_pos]),
+                                                              &length_type_info);
+                    if (!gi_argument_to_gssize (&length_arg,
+                                                g_type_info_get_tag (&length_type_info),
+                                                &length))
+                        return NULL;
                 }
             }
 
