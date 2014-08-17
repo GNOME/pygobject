@@ -3,6 +3,7 @@
 import gc
 import unittest
 import sys
+import weakref
 
 from gi.repository import GObject, GLib
 from gi import _signalhelper as signalhelper
@@ -1321,6 +1322,138 @@ class TestConnectPyObjectIntrospected(unittest.TestCase, _ConnectObjectTestBase)
 
     # Object passed for swapping is pure Python
     SwapObject = object
+
+
+class _RefCountTestBase(object):
+    # NOTE: ref counts are always one more than expected because the getrefcount()
+    # function adds a ref for the input argument.
+
+    # Sub-classes set this
+    Object = None
+
+    class PyData(object):
+        pass
+
+    def test_callback_ref_count_del(self):
+        def callback(obj, value):
+            return value // 2
+
+        callback_ref = weakref.ref(callback)
+        self.assertEqual(sys.getrefcount(callback), 2)
+
+        obj = self.Object()
+        obj.connect('sig-with-int64-prop', callback)
+        self.assertEqual(sys.getrefcount(callback), 3)
+
+        del callback
+        self.assertEqual(sys.getrefcount(callback_ref()), 2)
+
+        res = obj.emit('sig-with-int64-prop', 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(callback_ref), 2)
+
+        del obj
+        self.assertIsNone(callback_ref())
+
+    def test_callback_ref_count_disconnect(self):
+        def callback(obj, value):
+            return value // 2
+
+        callback_ref = weakref.ref(callback)
+        self.assertEqual(sys.getrefcount(callback), 2)
+
+        obj = self.Object()
+        handler_id = obj.connect('sig-with-int64-prop', callback)
+        self.assertEqual(sys.getrefcount(callback), 3)
+
+        del callback
+        self.assertEqual(sys.getrefcount(callback_ref()), 2)
+
+        res = obj.emit('sig-with-int64-prop', 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(callback_ref), 2)
+
+        obj.disconnect(handler_id)
+        self.assertIsNone(callback_ref())
+
+    def test_callback_ref_count_disconnect_by_func(self):
+        def callback(obj, value):
+            return value // 2
+
+        callback_ref = weakref.ref(callback)
+        self.assertEqual(sys.getrefcount(callback), 2)
+
+        obj = self.Object()
+        obj.connect('sig-with-int64-prop', callback)
+        self.assertEqual(sys.getrefcount(callback), 3)
+
+        del callback
+        self.assertEqual(sys.getrefcount(callback_ref()), 2)
+
+        res = obj.emit('sig-with-int64-prop', 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(callback_ref), 2)
+
+        obj.disconnect_by_func(callback_ref())
+        self.assertIsNone(callback_ref())
+
+    def test_user_data_ref_count(self):
+        def callback(obj, value, data):
+            return value // 2
+
+        data = self.PyData()
+        data_ref = weakref.ref(data)
+        self.assertEqual(sys.getrefcount(data), 2)
+
+        obj = self.Object()
+        obj.connect('sig-with-int64-prop', callback, data)
+        self.assertEqual(sys.getrefcount(data), 3)
+
+        del data
+        self.assertEqual(sys.getrefcount(data_ref()), 2)
+
+        res = obj.emit('sig-with-int64-prop', 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(data_ref()), 2)
+
+        del obj
+        self.assertIsNone(data_ref())
+
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=688064
+    def test_object_ref_count(self):
+        # connect_object() should only weakly reference the object passed in
+        # and auto-disconnect the signal when the object is destroyed.
+        def callback(data, value):
+            return value // 2
+
+        data = GObject.Object()
+        data_ref = weakref.ref(data)
+        self.assertEqual(sys.getrefcount(data), 2)
+
+        obj = self.Object()
+        handler_id = obj.connect_object('sig-with-int64-prop', callback, data)
+        self.assertEqual(sys.getrefcount(data), 2)
+
+        res = obj.emit('sig-with-int64-prop', 42)
+        self.assertEqual(res, 21)
+        self.assertEqual(sys.getrefcount(data), 2)
+
+        del data
+
+        self.assertIsNone(data_ref())
+        self.assertFalse(obj.handler_is_connected(handler_id))
+
+
+class TestRefCountsNonIntrospected(unittest.TestCase, _RefCountTestBase):
+    class Object(GObject.Object):
+        sig_with_int64_prop = GObject.Signal(return_type=GObject.TYPE_INT64,
+                                             arg_types=[GObject.TYPE_INT64],
+                                             flags=GObject.SignalFlags.RUN_LAST)
+
+
+@unittest.skipUnless(has_cairo, 'built without cairo support')
+class TestRefCountsIntrospected(unittest.TestCase, _RefCountTestBase):
+    Object = Regress.TestObj
 
 
 if __name__ == '__main__':
