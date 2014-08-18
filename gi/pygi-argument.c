@@ -35,10 +35,10 @@
 #include "pygi-struct-marshal.h"
 #include "pygi-error.h"
 
-static gboolean
-gi_argument_to_gssize (GIArgument *arg_in,
-                       GITypeTag  type_tag,
-                       gssize *gssize_out)
+gboolean
+pygi_argument_to_gssize (GIArgument *arg_in,
+                         GITypeTag  type_tag,
+                         gssize *gssize_out)
 {
     switch (type_tag) {
       case GI_TYPE_TAG_INT8:
@@ -786,9 +786,9 @@ _pygi_argument_array_length_marshal (gsize length_arg_index,
 
     length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
                                               &length_type_info);
-    if (!gi_argument_to_gssize (&length_arg,
-                                g_type_info_get_tag (&length_type_info),
-                                &array_len)) {
+    if (!pygi_argument_to_gssize (&length_arg,
+                                  g_type_info_get_tag (&length_type_info),
+                                  &array_len)) {
         return -1;
     }
 
