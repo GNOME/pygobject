@@ -58,7 +58,7 @@ class PickersApp:
         table.attach_defaults(label, 0, 1, 2, 3)
         table.attach_defaults(picker, 1, 2, 2, 3)
 
-        label = Gtk.Label('Folder:')
+        label = Gtk.Label(label='Folder:')
         label.set_alignment(0.0, 0.5)
         picker = Gtk.FileChooserButton.new('Pick a Folder',
                                            Gtk.FileChooserAction.SELECT_FOLDER)
