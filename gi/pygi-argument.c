@@ -758,16 +758,49 @@ check_number_release:
     return retval;
 }
 
+
+/**
+ * _pygi_argument_array_length_marshal:
+ * @length_arg_index: Index of length argument in the callables args list.
+ * @user_data1: (type Array(GValue)): Array of GValue arguments to retrieve length
+ * @user_data2: (type GICallableInfo): Callable info to get the argument from.
+ *
+ * Generic marshalling policy for array length arguments in callables.
+ *
+ * Returns: The length of the array or -1 on failure.
+ */
+gssize
+_pygi_argument_array_length_marshal (gsize length_arg_index,
+                                     void *user_data1,
+                                     void *user_data2)
+{
+    GIArgInfo length_arg_info;
+    GITypeInfo length_type_info;
+    GIArgument length_arg;
+    gssize array_len = -1;
+    GValue *values = (GValue *)user_data1;
+    GICallableInfo *callable_info = (GICallableInfo *)user_data2;
+
+    g_callable_info_load_arg (callable_info, length_arg_index, &length_arg_info);
+    g_arg_info_load_type (&length_arg_info, &length_type_info);
+
+    length_arg = _pygi_argument_from_g_value (&(values[length_arg_index]),
+                                              &length_type_info);
+    if (!gi_argument_to_gssize (&length_arg,
+                                g_type_info_get_tag (&length_type_info),
+                                &array_len)) {
+        return -1;
+    }
+
+    return array_len;
+}
+
 /**
  * _pygi_argument_to_array
  * @arg: The argument to convert
- * @args: Arguments to method invocation, possibly contaning the array length.
- *        Set to %NULL if this is not for a method call or @args_values is
- *        specified.
- * @args_values: GValue Arguments to method invocation, possibly contaning the
- *               array length. Set to %NULL if this is not for a method call or
- *               @args is specified.
- * @callable_info: Info on the callable, if this a method call; otherwise %NULL
+ * @array_length_policy: Closure for marshalling the array length argument when needed.
+ * @user_data1: Generic user data passed to the array_length_policy.
+ * @user_data2: Generic user data passed to the array_length_policy.
  * @type_info: The type info for @arg
  * @out_free_array: A return location for a gboolean that indicates whether
  *                  or not the wrapped GArray should be freed
@@ -784,9 +817,9 @@ check_number_release:
  */
 GArray *
 _pygi_argument_to_array (GIArgument  *arg,
-                         GIArgument  *args[],
-                         const GValue *args_values,
-                         GICallableInfo *callable_info,                  
+                         PyGIArgArrayLengthPolicy array_length_policy,
+                         void        *user_data1,
+                         void        *user_data2,
                          GITypeInfo  *type_info,
                          gboolean    *out_free_array)
 {
@@ -817,11 +850,8 @@ _pygi_argument_to_array (GIArgument  *arg,
                 length = g_type_info_get_array_fixed_size (type_info);
                 if (length < 0) {
                     gint length_arg_pos;
-                    GIArgInfo length_arg_info;
-                    GITypeInfo length_type_info;
-                    GIArgument length_arg;
 
-                    if (G_UNLIKELY (args_values == NULL)) {
+                    if (G_UNLIKELY (array_length_policy == NULL)) {
                         g_critical ("Unable to determine array length for %p",
                                     arg->v_pointer);
                         g_array = g_array_new (is_zero_terminated, FALSE, item_size);
@@ -831,17 +861,11 @@ _pygi_argument_to_array (GIArgument  *arg,
 
                     length_arg_pos = g_type_info_get_array_length (type_info);
                     g_assert (length_arg_pos >= 0);
-                    g_assert (callable_info);
-                    g_callable_info_load_arg (callable_info, length_arg_pos, &length_arg_info);
-                    g_arg_info_load_type (&length_arg_info, &length_type_info);
 
-
-                    length_arg = _pygi_argument_from_g_value (&(args_values[length_arg_pos]),
-                                                              &length_type_info);
-                    if (!gi_argument_to_gssize (&length_arg,
-                                                g_type_info_get_tag (&length_type_info),
-                                                &length))
+                    length = array_length_policy (length_arg_pos, user_data1, user_data2);
+                    if (length < 0) {
                         return NULL;
+                    }
                 }
             }
 

@@ -122,8 +122,12 @@ pygi_signal_closure_marshal(GClosure *closure,
             
             if (g_type_info_get_tag (&type_info) == GI_TYPE_TAG_ARRAY) {
                 /* Skip the self argument of param_values */
-                arg.v_pointer = _pygi_argument_to_array (&arg, NULL, param_values + 1, signal_info,
-                                                         &type_info, &free_array);
+                arg.v_pointer = _pygi_argument_to_array (&arg,
+                                                         _pygi_argument_array_length_marshal,
+                                                         (void *)(param_values + 1),
+                                                         signal_info,
+                                                         &type_info,
+                                                         &free_array);
             }
             
             item = _pygi_argument_to_object (&arg, &type_info, transfer);

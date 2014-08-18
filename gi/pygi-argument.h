@@ -28,6 +28,14 @@ G_BEGIN_DECLS
 
 
 /* Private */
+typedef gssize (*PyGIArgArrayLengthPolicy) (gsize item_index,
+                                            void *user_data1,
+                                            void *user_data2);
+
+gssize _pygi_argument_array_length_marshal (gsize length_arg_index,
+                                            void *user_data1,
+                                            void *user_data2);
+
 gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
                                     GITypeTag         type_tag);
 
@@ -47,9 +55,9 @@ gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
 
 
 GArray* _pygi_argument_to_array (GIArgument  *arg,
-                                 GIArgument  *args[],
-                                 const GValue *args_values,
-                                 GICallableInfo *callable_info,
+                                 PyGIArgArrayLengthPolicy array_length_policy,
+                                 void        *user_data1,
+                                 void        *user_data2,
                                  GITypeInfo  *type_info,
                                  gboolean    *out_free_array);
 
