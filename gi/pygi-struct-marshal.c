@@ -414,7 +414,7 @@ pygi_arg_struct_to_py_marshal (GIArgument *arg,
         if (py_type) {
             py_obj = _pygi_struct_new ((PyTypeObject *) py_type,
                                        arg->v_pointer,
-                                       transfer == GI_TRANSFER_EVERYTHING);
+                                       transfer == GI_TRANSFER_EVERYTHING || is_allocated);
         }
     } else {
         PyErr_Format (PyExc_NotImplementedError,
