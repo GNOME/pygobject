@@ -393,31 +393,34 @@ def signal_lookup(name, type_):
 __all__.append('signal_lookup')
 
 
-def signal_query(id_or_name, type_=None):
-    SignalQuery = namedtuple('SignalQuery',
-                             ['signal_id',
-                              'signal_name',
-                              'itype',
-                              'signal_flags',
-                              'return_type',
-                              # n_params',
-                              'param_types'])
+SignalQuery = namedtuple('SignalQuery',
+                         ['signal_id',
+                          'signal_name',
+                          'itype',
+                          'signal_flags',
+                          'return_type',
+                          # n_params',
+                          'param_types'])
 
-    # signal_query needs to use a static method until the following bugs are fixed:
-    # https://bugzilla.gnome.org/show_bug.cgi?id=687550
-    # https://bugzilla.gnome.org/show_bug.cgi?id=687545
-    # https://bugzilla.gnome.org/show_bug.cgi?id=687541
+
+def signal_query(id_or_name, type_=None):
     if type_ is not None:
         id_or_name = signal_lookup(id_or_name, type_)
 
-    res = _gobject.signal_query(id_or_name)
+    res = GObjectModule.signal_query(id_or_name)
     if res is None:
         return None
 
-    # Return a named tuple which allows indexing like the static bindings
-    # along with field like access of the gi struct.
-    # Note however that the n_params was not returned from the static bindings.
-    return SignalQuery(*res)
+    if res.signal_id == 0:
+        return None
+
+    # Return a named tuple to allows indexing which is compatible with the
+    # static bindings along with field like access of the gi struct.
+    # Note however that the n_params was not returned from the static bindings
+    # so we must skip over it.
+    return SignalQuery(res.signal_id, res.signal_name, res.itype,
+                       res.signal_flags, res.return_type,
+                       tuple(res.param_types))
 
 __all__.append('signal_query')
 
