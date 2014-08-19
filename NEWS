@@ -1,3 +1,18 @@
+3.13.90 18-Aug-2014
+        - Support array lengths on struct fields (Simon Feltman) (#688792)
+        - Fast path Python property get access (Simon Feltman) (#723872)
+        - Unify accessing properties through props and get_property()
+          (Simon Feltman) (#726999)
+        - Refactor boxed wrapper memory management strategy
+          (Simon Feltman) (#726999)
+        - Replace GObject.signal_query with introspected version
+          (Simon Feltman) (#688792)
+        - Fix memory leak with unboxed caller allocated structs (Simon Feltman)
+        - tests: Add failing tests for GObject sub-class doc-strings
+          (Piotr Iwaniuk) (#731452)
+        - Don't mask GObject sub-class doc strings in meta-class
+          (Tobias Mueller) (#731452)
+
 3.13.4  14-Aug-2014
         - Marshaling cache refactor and cache usage in vfuncs
           (Garrett Regier) (#727004)
