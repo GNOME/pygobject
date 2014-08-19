@@ -51,37 +51,29 @@ ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
-AC_MSG_CHECKING([for some Win32 platform])
+AC_MSG_CHECKING([for build time linking with Python (Darwin and Win32)])
 case "$host" in
   *-*-mingw*|*-*-cygwin*)
-    platform_win32=yes
+    os_win32=yes
+    link_python_libs=yes
     OS_EXT=dll
     ;;
   *-*-darwin*)
+    os_win32=no
+    link_python_libs=yes
     OS_EXT=dylib
     ;;
   *)
-    platform_win32=no
+    os_win32=no
+    link_python_libs=no
     OS_EXT=so
     ;;
 esac
-AC_MSG_RESULT([$platform_win32])
-AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
+AC_MSG_RESULT([$link_python_libs])
+AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
 
 AC_SUBST(OS_EXT)
 AC_DEFINE_UNQUOTED(OS_EXT, "$OS_EXT", [Define shared library extension])
-
-AC_MSG_CHECKING([for native Win32])
-case "$host" in
-  *-*-mingw*)
-    os_win32=yes
-    ;;
-  *)
-    os_win32=no
-    ;;
-esac
-AC_MSG_RESULT([$os_win32])
-AM_CONDITIONAL(OS_WIN32, test "$os_win32" = "yes")
 
 LT_PREREQ([2.2.6])
 LT_INIT([dlopen win32-dll disable-static])
@@ -126,8 +118,8 @@ PYTHON_SO=`$PYTHON -c "import distutils.sysconfig, sys; get = distutils.sysconfi
 AC_SUBST(PYTHON_SO)
 
 AM_CHECK_PYTHON_HEADERS(, AC_MSG_ERROR([Python headers not found]))
-if test "x$os_win32" = "xyes"; then
-  AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows requires Python modules to be explicitly linked to libpython.]))
+if test "x$link_python_libs" = "xyes"; then
+  AM_CHECK_PYTHON_LIBS(, AC_MSG_ERROR([Python libs not found. Windows and Darwin require Python modules to be explicitly linked to libpython.]))
 fi
 
 AC_MSG_CHECKING([for PySignal_SetWakeupFd in Python.h])
