@@ -371,7 +371,8 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
-        if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
+        if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON &&
+                state->arg_values[i].v_pointer) {
             state->arg_pointers[i].v_pointer = state->arg_values[i].v_pointer;
             state->arg_values[i] = *(GIArgument *) state->arg_values[i].v_pointer;
         }
