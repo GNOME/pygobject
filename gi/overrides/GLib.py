@@ -24,7 +24,7 @@ import warnings
 import sys
 
 from ..module import get_introspection_module
-from .._gi import (variant_new_tuple, variant_type_from_string, source_new,
+from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
 from ..overrides import override, deprecated
 from gi import PyGIDeprecationWarning, version_info
@@ -243,6 +243,10 @@ class Variant(GLib.Variant):
         v.format_string = format_string
         return v
 
+    @staticmethod
+    def new_tuple(*elements):
+        return GLib.Variant.new_tuple(elements)
+
     def __del__(self):
         self.unref()
 
@@ -457,16 +461,10 @@ class Variant(GLib.Variant):
         return res
 
 
-@classmethod
-def new_tuple(cls, *elements):
-    return variant_new_tuple(elements)
-
-
 def get_string(self):
     value, length = GLib.Variant.get_string(self)
     return value
 
-setattr(Variant, 'new_tuple', new_tuple)
 setattr(Variant, 'get_string', get_string)
 
 __all__.append('Variant')
