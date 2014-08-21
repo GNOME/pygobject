@@ -1117,6 +1117,14 @@ class TestGList(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.glist_int_none_in, None)
 
+    def test_glist_int_none_in_error_getitem(self):
+
+        class FailingSequence(Sequence):
+            def __getitem__(self, key):
+                raise Exception
+
+        self.assertRaises(Exception, GIMarshallingTests.glist_int_none_in, FailingSequence((-1, 0, 1, 2)))
+
     def test_glist_uint32_none_in(self):
         GIMarshallingTests.glist_uint32_none_in(Sequence((0, GObject.G_MAXUINT32)))
 
@@ -1163,6 +1171,14 @@ class TestGSList(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.gslist_int_none_in, 42)
         self.assertRaises(TypeError, GIMarshallingTests.gslist_int_none_in, None)
+
+    def test_gslist_int_none_in_error_getitem(self):
+
+        class FailingSequence(Sequence):
+            def __getitem__(self, key):
+                raise Exception
+
+        self.assertRaises(Exception, GIMarshallingTests.gslist_int_none_in, FailingSequence((-1, 0, 1, 2)))
 
     def test_gslist_utf8_none_in(self):
         GIMarshallingTests.gslist_utf8_none_in(Sequence(('0', '1', '2')))

@@ -82,7 +82,7 @@ err:
             PyGIMarshalCleanupFunc cleanup = sequence_cache->item_cache->from_py_cleanup;
         }
         */
-        Py_DECREF (py_item);
+        Py_XDECREF (py_item);
         g_list_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
@@ -160,7 +160,7 @@ err:
         }
         */
 
-        Py_DECREF (py_item);
+        Py_XDECREF (py_item);
         g_slist_free (list_);
         _PyGI_ERROR_PREFIX ("Item %i: ", i);
         return FALSE;
