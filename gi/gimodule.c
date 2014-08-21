@@ -470,44 +470,6 @@ _wrap_pyg_has_vfunc_implementation (PyObject *self, PyObject *args)
 #endif
 
 static PyObject *
-_wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
-{
-    PyObject *py_values;
-    GVariant **values = NULL;
-    GVariant *variant = NULL;
-    PyObject *py_variant = NULL;
-    PyObject *py_type;
-    gssize i;
-
-    if (!PyArg_ParseTuple (args, "O!:variant_new_tuple",
-                           &PyTuple_Type, &py_values)) {
-        return NULL;
-    }
-
-    py_type = _pygi_type_import_by_name ("GLib", "Variant");
-
-    values = g_newa (GVariant*, PyTuple_Size (py_values));
-
-    for (i = 0; i < PyTuple_Size (py_values); i++) {
-        PyObject *value = PyTuple_GET_ITEM (py_values, i);
-
-        if (!PyObject_IsInstance (value, py_type)) {
-            PyErr_Format (PyExc_TypeError, "argument %" G_GSSIZE_FORMAT " is not a GLib.Variant", i);
-            return NULL;
-        }
-
-        values[i] = pyg_pointer_get (value, GVariant);
-    }
-
-    variant = g_variant_new_tuple (values, PyTuple_Size (py_values));
-    g_variant_ref_sink (variant);
-
-    py_variant = _pygi_struct_new ( (PyTypeObject *) py_type, variant, FALSE);
-
-    return py_variant;
-}
-
-static PyObject *
 _wrap_pyg_variant_type_from_string (PyObject *self, PyObject *args)
 {
     char *type_string;
@@ -617,7 +579,6 @@ static PyMethodDef _gi_functions[] = {
 
     { "register_interface_info", (PyCFunction) _wrap_pyg_register_interface_info, METH_VARARGS },
     { "hook_up_vfunc_implementation", (PyCFunction) _wrap_pyg_hook_up_vfunc_implementation, METH_VARARGS },
-    { "variant_new_tuple", (PyCFunction) _wrap_pyg_variant_new_tuple, METH_VARARGS },
     { "variant_type_from_string", (PyCFunction) _wrap_pyg_variant_type_from_string, METH_VARARGS },
     { "source_new", (PyCFunction) _wrap_pyg_source_new, METH_NOARGS },
     { "source_set_callback", (PyCFunction) pyg_source_set_callback, METH_VARARGS },
