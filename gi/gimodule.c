@@ -500,6 +500,7 @@ _wrap_pyg_variant_new_tuple (PyObject *self, PyObject *args)
     }
 
     variant = g_variant_new_tuple (values, PyTuple_Size (py_values));
+    g_variant_ref_sink (variant);
 
     py_variant = _pygi_struct_new ( (PyTypeObject *) py_type, variant, FALSE);
 

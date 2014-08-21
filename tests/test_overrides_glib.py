@@ -1,6 +1,7 @@
 # -*- Mode: Python; py-indent-offset: 4 -*-
 # vim: tabstop=4 shiftwidth=4 expandtab
 
+import gc
 import unittest
 
 import gi
@@ -60,6 +61,12 @@ class TestGVariant(unittest.TestCase):
         variant = GLib.Variant('((si)(ub))', (('hello', -1), (42, True)))
         self.assertEqual(variant.get_type_string(), '((si)(ub))')
         self.assertEqual(variant.unpack(), (('hello', -1), (_long(42), True)))
+
+    def test_new_tuple_sink(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=735166
+        variant = GLib.Variant.new_tuple(GLib.Variant.new_tuple())
+        del variant
+        gc.collect()
 
     def test_create_dictionary(self):
         variant = GLib.Variant('a{si}', {})
