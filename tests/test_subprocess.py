@@ -120,6 +120,23 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(out, b'hello world!\n')
         self.assertEqual(err, b'')
 
+    def test_spawn_async_with_pipes(self):
+        res, pid, stdin, stdout, stderr = GLib.spawn_async_with_pipes(
+            working_directory=None,
+            argv=['cat'],
+            envp=None,
+            flags=GLib.SpawnFlags.SEARCH_PATH)
+
+        os.write(stdin, b'hello world!\n')
+        os.close(stdin)
+        out = os.read(stdout, 50)
+        os.close(stdout)
+        err = os.read(stderr, 50)
+        os.close(stderr)
+        GLib.spawn_close_pid(pid)
+        self.assertEqual(out, b'hello world!\n')
+        self.assertEqual(err, b'')
+
     def test_spawn_async_envp(self):
         pid, stdin, stdout, stderr = GLib.spawn_async(
             ['sh', '-c', 'echo $TEST_VAR'], ['TEST_VAR=moo!'],

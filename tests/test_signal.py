@@ -765,7 +765,7 @@ class TestSignalDecorator(unittest.TestCase):
         obj.emit('unnamed')
         self.assertEqual(self.unnamedCalled, True)
 
-    def NOtest_overridden_signal(self):
+    def test_overridden_signal(self):
         # Test that the pushed signal is called in with super and the override
         # which should both increment the "value" to 3
         obj = self.DecoratedOverride()
