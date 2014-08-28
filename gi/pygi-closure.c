@@ -552,6 +552,13 @@ _pygi_closure_handle (ffi_cif *cif,
     gboolean success;
     PyGIInvokeState state = { 0, };
 
+    /* Ignore closures when Python is not initialized. This can happen in cases
+     * where calling Python implemented vfuncs can happen at shutdown time.
+     * See: https://bugzilla.gnome.org/show_bug.cgi?id=722562 */
+    if (!Py_IsInitialized()) {
+        return;
+    }
+
     /* Lock the GIL as we are coming into this code without the lock and we
       may be executing python code */
     py_state = PyGILState_Ensure ();
