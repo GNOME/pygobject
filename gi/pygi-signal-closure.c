@@ -109,16 +109,19 @@ pygi_signal_closure_marshal(GClosure *closure,
         } else if (i < sig_info_highest_arg) {
             GIArgInfo arg_info;
             GITypeInfo type_info;
+            GITypeTag type_tag;
             GIArgument arg = { 0, };
             PyObject *item = NULL;
             gboolean free_array = FALSE;
+            gboolean pass_struct_by_ref = FALSE;
 
             g_callable_info_load_arg(signal_info, i - 1, &arg_info);
             g_arg_info_load_type(&arg_info, &type_info);
 
             arg = _pygi_argument_from_g_value(&param_values[i], &type_info);
-            
-            if (g_type_info_get_tag (&type_info) == GI_TYPE_TAG_ARRAY) {
+
+            type_tag = g_type_info_get_tag (&type_info);
+            if (type_tag == GI_TYPE_TAG_ARRAY) {
                 /* Skip the self argument of param_values */
                 arg.v_pointer = _pygi_argument_to_array (&arg,
                                                          _pygi_argument_array_length_marshal,
@@ -127,13 +130,39 @@ pygi_signal_closure_marshal(GClosure *closure,
                                                          &type_info,
                                                          &free_array);
             }
-            
-            item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_NOTHING);
-            
+
+            /* Hack to ensure struct output args are passed-by-reference allowing
+             * callback implementors to modify the struct values. This is needed
+             * for keeping backwards compatibility and should be removed in future
+             * versions which support signal output arguments as return values.
+             * See: https://bugzilla.gnome.org/show_bug.cgi?id=735486
+             */
+            if (type_tag == GI_TYPE_TAG_INTERFACE &&
+                    g_arg_info_get_direction (&arg_info) == GI_DIRECTION_OUT) {
+                GIBaseInfo *info = g_type_info_get_interface (&type_info);
+                GIInfoType info_type = g_base_info_get_type (info);
+
+                if (info_type == GI_INFO_TYPE_STRUCT) {
+                    GType gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
+                    if (g_type_is_a (gtype, G_TYPE_BOXED)) {
+                        pass_struct_by_ref = TRUE;
+                    }
+                }
+
+                g_base_info_unref (info);
+            }
+
+            if (pass_struct_by_ref) {
+                item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_EVERYTHING);
+                ((PyGBoxed *)item)->free_on_dealloc = FALSE;
+
+            } else {
+                item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_NOTHING);
+            }
+
             if (free_array) {
                 g_array_free (arg.v_pointer, FALSE);
             }
-            
 
             if (item == NULL) {
                 goto out;

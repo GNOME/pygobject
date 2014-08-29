@@ -701,6 +701,30 @@ class TestSignals(unittest.TestCase):
             self.assertIsInstance(win._alloc_value, Gdk.Rectangle)
             self.assertTrue(win._alloc_error is None, win._alloc_error)
 
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=735693
+    def test_overlay_child_position(self):
+        def get_child_position(overlay, widget, rect, user_data=None):
+            rect.x = 1
+            rect.y = 2
+            rect.width = 3
+            rect.height = 4
+            return True
+
+        overlay = Gtk.Overlay()
+        overlay.connect('get-child-position', get_child_position)
+
+        rect = Gdk.Rectangle()
+        rect.x = -1
+        rect.y = -1
+        rect.width = -1
+        rect.height = -1
+
+        overlay.emit('get-child-position', None, rect)
+        self.assertEqual(rect.x, 1)
+        self.assertEqual(rect.y, 2)
+        self.assertEqual(rect.width, 3)
+        self.assertEqual(rect.height, 4)
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestBuilder(unittest.TestCase):
