@@ -148,7 +148,7 @@ def _generate_callable_info_doc(info):
     # Build return + output argument strings
     out_args_strs = []
     return_hint = _get_pytype_hint(info.get_return_type())
-    if not info.skip_return and return_hint and return_hint not in hint_blacklist:
+    if not info.skip_return() and return_hint and return_hint not in hint_blacklist:
         if info.may_return_null():
             argstr += ' or None'
         out_args_strs.append(return_hint)

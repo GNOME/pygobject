@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
                           'flags:Gio.FileCopyFlags, ' \
                           'cancellable:Gio.Cancellable=None, ' \
                           'progress_callback:Gio.FileProgressCallback=None, ' \
-                          'progress_callback_data=None)'
+                          'progress_callback_data=None) -> bool'
 
         self.assertEqual(Gio.File.copy.__doc__, g_file_copy_doc)
 
@@ -57,7 +57,11 @@ class Test(unittest.TestCase):
         # This tests implicit array length args along with skipping a
         # boolean return
         self.assertEqual(GIMarshallingTests.init_function.__doc__,
-                         'init_function(argv:list=None) -> argv:list')
+                         'init_function(argv:list=None) -> bool, argv:list')
+
+    def test_boolean_return(self):
+        self.assertEqual(GIMarshallingTests.boolean_return_true.__doc__,
+                         'boolean_return_true() -> bool')
 
     def test_class_doc_constructors(self):
         doc = GIMarshallingTests.Object.__doc__
