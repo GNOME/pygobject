@@ -78,8 +78,9 @@ class Test(unittest.TestCase):
 
     @unittest.skipUnless(has_cairo, 'built without cairo support')
     def test_private_struct_constructors(self):
+        # Structs without a size or constructor should have no constructor docs.
         doc = Regress.TestBoxedPrivate.__doc__
-        self.assertTrue('TestBoxedPrivate()' not in doc)
+        self.assertEqual(doc, '')
 
     def test_array_inout_etc(self):
         self.assertEqual(GIMarshallingTests.array_inout_etc.__doc__,

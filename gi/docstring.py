@@ -172,7 +172,8 @@ def _generate_callable_info_doc(info):
 
 
 def _generate_class_info_doc(info):
-    doc = '\n:Constructors:\n\n::\n\n'  # start with \n to avoid auto indent of other lines
+    header = '\n:Constructors:\n\n::\n\n'  # start with \n to avoid auto indent of other lines
+    doc = ''
 
     if isinstance(info, StructInfo):
         # Don't show default constructor for disguised (0 length) structs
@@ -185,7 +186,10 @@ def _generate_class_info_doc(info):
         if method_info.is_constructor():
             doc += '    ' + _generate_callable_info_doc(method_info) + '\n'
 
-    return doc
+    if doc:
+        return header + doc
+    else:
+        return ''
 
 
 def _generate_doc_dispatch(info):
