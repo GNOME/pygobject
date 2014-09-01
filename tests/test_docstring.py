@@ -63,6 +63,10 @@ class Test(unittest.TestCase):
         self.assertEqual(GIMarshallingTests.boolean_return_true.__doc__,
                          'boolean_return_true() -> bool')
 
+    def test_may_return_none(self):
+        self.assertEqual(Gio.File.get_basename.__doc__,
+                         'get_basename(self) -> str or None')
+
     def test_class_doc_constructors(self):
         doc = GIMarshallingTests.Object.__doc__
         self.assertTrue('new(int_:int)' in doc)
