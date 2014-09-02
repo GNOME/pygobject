@@ -134,6 +134,16 @@ class GtkDemoApp(Gtk.Application):
         self.window.set_default_size(600, 400)
         self.setup_default_icon()
 
+        self.header_bar = Gtk.HeaderBar(show_close_button=True,
+                                        subtitle='Foobar')
+        self.window.set_titlebar(self.header_bar)
+
+        stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.SLIDE_LEFT_RIGHT,
+                          homogeneous=True)
+        switcher = Gtk.StackSwitcher(stack=stack, halign=Gtk.Align.CENTER)
+
+        self.header_bar.set_custom_title(switcher)
+
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
                        homogeneous=False,
                        spacing=0)
@@ -141,18 +151,7 @@ class GtkDemoApp(Gtk.Application):
 
         tree = self.create_tree()
         hbox.pack_start(child=tree, expand=False, fill=False, padding=0)
-
-        # Right vbox contains info/source panels
-        right_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
-                             homogeneous=False,
-                             spacing=0)
-        hbox.pack_start(child=right_vbox, expand=True, fill=True, padding=0)
-
-        stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.SLIDE_LEFT_RIGHT,
-                          homogeneous=True)
-        switcher = Gtk.StackSwitcher(stack=stack)
-        right_vbox.pack_start(child=switcher, expand=False, fill=False, padding=0)
-        right_vbox.pack_start(child=stack, expand=True, fill=True, padding=0)
+        hbox.pack_start(child=stack, expand=True, fill=True, padding=0)
 
         text_widget, info_buffer = self.create_text_view()
         stack.add_titled(text_widget, name='info', title='Info')
