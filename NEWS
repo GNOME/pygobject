@@ -1,3 +1,18 @@
+3.13.91 01-Sep-2014
+        - docs: Fix return types in auto-generated doc strings (Simon Feltman)
+        - Special case signal output arguments which are structs as
+          pass-by-reference (Simon Feltman) (#735486)
+        - Ignore closure callbacks when Python is not initialized
+          (Simon Feltman) (#722562)
+        - Change boxed init with args to warn instead of raise
+          (Christoph Reiter) (#727810)
+        - Fix crash in GList/GSList marshaling error handling path.
+          (Christoph Reiter) (#735201)
+        - Fix reference counting problems with GLib.Variant.new_tuple()
+          (Simon Feltman) (#735166)
+        - Skip marshalling NULL output arguments in Python closures
+          (Simon Feltman) (#735090)
+
 3.13.90 18-Aug-2014
         - Support array lengths on struct fields (Simon Feltman) (#688792)
         - Fast path Python property get access (Simon Feltman) (#723872)
