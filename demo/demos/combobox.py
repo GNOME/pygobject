@@ -147,7 +147,7 @@ class ComboboxApp:
         Gtk.Container.remove(combo, combo.get_child())
         combo.add(entry)
 
-         # A combobox with string IDs
+        # A combobox with string IDs
 
         frame = Gtk.Frame(label='String IDs')
         vbox.pack_start(frame, False, False, 0)

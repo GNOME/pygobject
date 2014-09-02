@@ -55,7 +55,6 @@ class ClipboardApp:
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
 
-        #FIXME: have the button constuctor take a stock_id
         # create button
         button = Gtk.Button.new_from_stock(Gtk.STOCK_COPY)
         hbox.pack_start(button, False, False, 0)
@@ -71,7 +70,6 @@ class ClipboardApp:
         # create secondary entry
         entry = Gtk.Entry()
         hbox.pack_start(entry, True, True, 0)
-        #FIXME: have the button constuctor take a stock_id
         # create button
         button = Gtk.Button.new_from_stock(Gtk.STOCK_PASTE)
         hbox.pack_start(button, False, False, 0)
@@ -133,7 +131,7 @@ class ClipboardApp:
         ebox.connect('button-press-event', self.button_press, image)
 
         # tell the clipboard manager to make data persistent
-        #FIXME: Allow sending strings a Atoms and convert in PyGI
+        # FIXME: Allow sending strings a Atoms and convert in PyGI
         atom = Gdk.atom_intern('CLIPBOARD', True)
         clipboard = Gtk.Clipboard.get(atom)
         clipboard.set_can_store(None)
@@ -208,13 +206,11 @@ class ClipboardApp:
 
         self.menu = Gtk.Menu()
 
-        #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_COPY, None)
         item.connect('activate', self.copy_image, data)
         item.show()
         self.menu.append(item)
 
-        #FIXME: default constructor should take a stock property
         item = Gtk.ImageMenuItem.new_from_stock(Gtk.STOCK_PASTE, None)
         item.connect('activate', self.paste_image, data)
         item.show()

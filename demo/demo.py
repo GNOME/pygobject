@@ -101,7 +101,7 @@ class DemoTreeStore(Gtk.TreeStore):
         return sorted(demo_file_list, key=str.lower)
 
     def _get_parent_node(self, name):
-        if not name in self._parent_nodes.keys():
+        if name not in self._parent_nodes.keys():
             node = self.append(None, (name, None, Pango.Style.NORMAL))
             self._parent_nodes[name] = node
 

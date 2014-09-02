@@ -47,7 +47,7 @@ class EntryBufferApp:
         # create a buffer
         buffer = Gtk.EntryBuffer()
 
-        #create our first entry
+        # create our first entry
         entry = Gtk.Entry(buffer=buffer)
         vbox.pack_start(entry, False, False, 0)
 
