@@ -1858,6 +1858,25 @@ class TestTextBuffer(unittest.TestCase):
         self.assertEqual(start.get_offset(), 6)
         self.assertEqual(end.get_offset(), 11)
 
+    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=736175
+    def test_insert_text_signal_location_modification(self):
+        # Regression test for: https://bugzilla.gnome.org/show_bug.cgi?id=736175
+
+        def callback(buffer, location, text, length):
+            location.assign(buffer.get_end_iter())
+
+        buffer = Gtk.TextBuffer()
+        buffer.set_text('first line\n')
+        buffer.connect('insert-text', callback)
+
+        # attempt insertion at the beginning of the buffer, the callback will
+        # modify the insert location to the end.
+        buffer.place_cursor(buffer.get_start_iter())
+        buffer.insert_at_cursor('second line\n')
+
+        self.assertEqual(buffer.get_property('text'),
+                         'first line\nsecond line\n')
+
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestContainer(unittest.TestCase):
