@@ -1036,6 +1036,8 @@ array_success:
                 {
                     GType g_type;
                     PyObject *py_type;
+                    gboolean is_foreign = (info_type == GI_INFO_TYPE_STRUCT) &&
+                                          (g_struct_info_is_foreign ((GIStructInfo *) info));
 
                     g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
                     py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
@@ -1055,7 +1057,7 @@ array_success:
                                                      py_type,
                                                      transfer,
                                                      FALSE, /*copy_reference*/
-                                                     g_struct_info_is_foreign (info),
+                                                     is_foreign,
                                                      g_type_info_is_pointer (type_info));
 
                     Py_DECREF (py_type);
@@ -1382,6 +1384,8 @@ _pygi_argument_to_object (GIArgument  *arg,
                 {
                     PyObject *py_type;
                     GType g_type = g_registered_type_info_get_g_type ( (GIRegisteredTypeInfo *) info);
+                    gboolean is_foreign = (info_type == GI_INFO_TYPE_STRUCT) &&
+                                          (g_struct_info_is_foreign ((GIStructInfo *) info));
 
                     /* Special case variant and none to force loading from py module. */
                     if (g_type == G_TYPE_VARIANT || g_type == G_TYPE_NONE) {
@@ -1396,7 +1400,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                                                             py_type,
                                                             transfer,
                                                             FALSE, /*is_allocated*/
-                                                            g_struct_info_is_foreign (info));
+                                                            is_foreign);
 
                     Py_XDECREF (py_type);
                     break;
@@ -1703,7 +1707,8 @@ _pygi_argument_release (GIArgument   *arg,
                         if (direction == GI_DIRECTION_IN && transfer == GI_TRANSFER_NOTHING) {
                             g_closure_unref (arg->v_pointer);
                         }
-                    } else if (g_struct_info_is_foreign ( (GIStructInfo*) info)) {
+                    } else if (info_type == GI_INFO_TYPE_STRUCT &&
+                               g_struct_info_is_foreign ((GIStructInfo*) info)) {
                         if (direction == GI_DIRECTION_OUT && transfer == GI_TRANSFER_EVERYTHING) {
                             pygi_struct_foreign_release (info, arg->v_pointer);
                         }

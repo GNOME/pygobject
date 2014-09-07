@@ -528,7 +528,6 @@ arg_struct_from_py_setup (PyGIArgCache     *arg_cache,
                           GITransfer        transfer)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
 
     if (g_struct_info_is_gtype_struct ((GIStructInfo*)iface_info)) {
         arg_cache->from_py_marshaller = arg_type_class_from_py_marshal;
@@ -560,7 +559,6 @@ arg_struct_to_py_setup (PyGIArgCache     *arg_cache,
                         GIArgInfo        *arg_info)
 {
     PyGIInterfaceCache *iface_cache = (PyGIInterfaceCache *)arg_cache;
-    iface_cache->is_foreign = g_struct_info_is_foreign ( (GIStructInfo*)iface_info);
 
     /* HACK to force GtkTreeModel:iter_next() and iter_previous() vfunc implementations
      * to receive their Gtk.TreeIter argument as pass-by-reference. We create a new
@@ -615,6 +613,7 @@ pygi_arg_struct_new_from_info (GITypeInfo      *type_info,
                                GIInterfaceInfo *iface_info)
 {
     PyGIArgCache *cache = NULL;
+    PyGIInterfaceCache *iface_cache;
 
     cache = pygi_arg_interface_new_from_info (type_info,
                                               arg_info,
@@ -623,6 +622,10 @@ pygi_arg_struct_new_from_info (GITypeInfo      *type_info,
                                               iface_info);
     if (cache == NULL)
         return NULL;
+
+    iface_cache = (PyGIInterfaceCache *)cache;
+    iface_cache->is_foreign = (g_base_info_get_type ((GIBaseInfo *) iface_info) == GI_INFO_TYPE_STRUCT) &&
+                              (g_struct_info_is_foreign ((GIStructInfo*) iface_info));
 
     if (direction & PYGI_DIRECTION_FROM_PYTHON) {
         arg_struct_from_py_setup (cache, iface_info, transfer);
