@@ -17,7 +17,7 @@ from .helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi.overrides
 import gi.types
-from gi._compat import cmp
+from gi._compat import cmp, PY3
 from gi.repository import GLib, GObject
 
 try:
@@ -2611,6 +2611,34 @@ class TestTextBuffer(unittest.TestCase):
                                         None)
         self.assertEqual(start.get_offset(), 6)
         self.assertEqual(end.get_offset(), 11)
+
+    def test_comparison_operators(self):
+        buffer = Gtk.TextBuffer()
+        buffer.set_text('some text')
+
+        start = buffer.get_start_iter()
+        end = buffer.get_end_iter()
+
+        self.assertTrue(start == buffer.get_start_iter())
+        self.assertTrue(start != end)
+
+        self.assertTrue(start < end)
+        self.assertTrue(start <= end)
+        self.assertTrue(start <= start)
+
+        self.assertTrue(end > start)
+        self.assertTrue(end >= start)
+        self.assertTrue(end >= end)
+
+        if PY3:
+            with pytest.raises(TypeError):
+                start < object()
+            with pytest.raises(TypeError):
+                start > object()
+        else:
+            assert start < object()
+            assert not start > object()
+        assert not start == object()
 
     def test_insert_text_signal_location_modification(self):
         # Regression test for: https://bugzilla.gnome.org/show_bug.cgi?id=736175

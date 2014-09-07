@@ -21,6 +21,7 @@
 
 import sys
 import warnings
+from functools import total_ordering
 
 if sys.version_info[0] == 2:
     import collections as abc
@@ -790,9 +791,22 @@ TextBuffer = override(TextBuffer)
 __all__.append('TextBuffer')
 
 
+@total_ordering
 class TextIter(Gtk.TextIter):
     forward_search = strip_boolean_result(Gtk.TextIter.forward_search)
     backward_search = strip_boolean_result(Gtk.TextIter.backward_search)
+
+    def __eq__(self, other):
+        try:
+            return self.compare(other) == 0
+        except TypeError:
+            return NotImplemented
+
+    def __lt__(self, other):
+        try:
+            return self.compare(other) < 0
+        except TypeError:
+            return NotImplemented
 
 
 TextIter = override(TextIter)
