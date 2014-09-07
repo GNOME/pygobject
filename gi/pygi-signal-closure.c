@@ -79,6 +79,8 @@ pygi_signal_closure_marshal(GClosure *closure,
     GISignalInfo *signal_info;
     gint n_sig_info_args;
     gint sig_info_highest_arg;
+    GSList *list_item = NULL;
+    GSList *pass_by_ref_structs = NULL;
 
     state = PyGILState_Ensure();
 
@@ -131,20 +133,28 @@ pygi_signal_closure_marshal(GClosure *closure,
                                                          &free_array);
             }
 
-            /* Hack to ensure struct output args are passed-by-reference allowing
+            /* Hack to ensure struct arguments are passed-by-reference allowing
              * callback implementors to modify the struct values. This is needed
              * for keeping backwards compatibility and should be removed in future
              * versions which support signal output arguments as return values.
              * See: https://bugzilla.gnome.org/show_bug.cgi?id=735486
+             *
+             * Note the logic here must match the logic path taken in _pygi_argument_to_object.
              */
-            if (type_tag == GI_TYPE_TAG_INTERFACE &&
-                    g_arg_info_get_direction (&arg_info) == GI_DIRECTION_OUT) {
+            if (type_tag == GI_TYPE_TAG_INTERFACE) {
                 GIBaseInfo *info = g_type_info_get_interface (&type_info);
                 GIInfoType info_type = g_base_info_get_type (info);
 
-                if (info_type == GI_INFO_TYPE_STRUCT) {
+                if (info_type == GI_INFO_TYPE_STRUCT ||
+                        info_type == GI_INFO_TYPE_BOXED ||
+                        info_type == GI_INFO_TYPE_UNION) {
+
                     GType gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
-                    if (g_type_is_a (gtype, G_TYPE_BOXED)) {
+                    gboolean is_foreign = (info_type == GI_INFO_TYPE_STRUCT) &&
+                                          (g_struct_info_is_foreign ((GIStructInfo *) info));
+
+                    if (!is_foreign && !g_type_is_a (gtype, G_TYPE_VALUE) &&
+                            g_type_is_a (gtype, G_TYPE_BOXED)) {
                         pass_struct_by_ref = TRUE;
                     }
                 }
@@ -153,8 +163,12 @@ pygi_signal_closure_marshal(GClosure *closure,
             }
 
             if (pass_struct_by_ref) {
+                /* transfer everything will ensure the struct is not copied when wrapped. */
                 item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_EVERYTHING);
-                ((PyGBoxed *)item)->free_on_dealloc = FALSE;
+                if (item && PyObject_IsInstance (item, (PyObject *) &PyGIBoxed_Type)) {
+                    ((PyGBoxed *)item)->free_on_dealloc = FALSE;
+                    pass_by_ref_structs = g_slist_prepend (pass_by_ref_structs, item);
+                }
 
             } else {
                 item = _pygi_argument_to_object (&arg, &type_info, GI_TRANSFER_NOTHING);
@@ -196,7 +210,24 @@ pygi_signal_closure_marshal(GClosure *closure,
     }
     Py_DECREF(ret);
 
+    /* Run through the list of structs which have been passed by reference and
+     * check if they are being held longer than the duration of the callback
+     * execution. This is determined if the ref count is greater than 1.
+     * A single ref is held by the argument list and any more would mean the callback
+     * stored a ref somewhere else. In this case we make an internal copy of
+     * the boxed struct so Python can own the memory to it.
+     */
+    list_item = pass_by_ref_structs;
+    while (list_item) {
+        PyObject *item = list_item->data;
+        if (item->ob_refcnt > 1) {
+            _pygi_boxed_copy_in_place ((PyGIBoxed *)item);
+        }
+        list_item = g_slist_next (list_item);
+    }
+
  out:
+    g_slist_free (pass_by_ref_structs);
     Py_DECREF(params);
     PyGILState_Release(state);
 }

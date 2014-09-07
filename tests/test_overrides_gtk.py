@@ -1858,7 +1858,6 @@ class TestTextBuffer(unittest.TestCase):
         self.assertEqual(start.get_offset(), 6)
         self.assertEqual(end.get_offset(), 11)
 
-    @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=736175
     def test_insert_text_signal_location_modification(self):
         # Regression test for: https://bugzilla.gnome.org/show_bug.cgi?id=736175
 

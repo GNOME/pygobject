@@ -206,6 +206,26 @@ _pygi_boxed_get_free_on_dealloc(PyGIBoxed *self, void *closure)
   return PyBool_FromLong( ((PyGBoxed *)self)->free_on_dealloc );
 }
 
+/**
+ * _pygi_boxed_copy_in_place:
+ *
+ * Replace the boxed pointer held by this wrapper with a boxed copy
+ * freeing the previously held pointer (when free_on_dealloc is TRUE).
+ * This can be used in cases where Python is passed a reference which
+ * it does not own and the wrapper is held by the Python program
+ * longer than the duration of a callback it was passed to.
+ */
+void
+_pygi_boxed_copy_in_place (PyGIBoxed *self)
+{
+    PyGBoxed *pygboxed = (PyGBoxed *)self;
+    gpointer copy = g_boxed_copy (pygboxed->gtype, pyg_boxed_get_ptr (self));
+
+    boxed_del (self);
+    pyg_boxed_set_ptr (pygboxed, copy);
+    pygboxed->free_on_dealloc = TRUE;
+}
+
 static PyGetSetDef pygi_boxed_getsets[] = {
     { "_free_on_dealloc", (getter)_pygi_boxed_get_free_on_dealloc, (setter)0 },
     { NULL, 0, 0 }

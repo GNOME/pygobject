@@ -1206,6 +1206,33 @@ class TestIntrospectedSignals(unittest.TestCase):
         self.assertEqual(obj.emit('sig-with-array-prop', [1, 2, GObject.G_MAXUINT]), None)
         self.assertEqual(obj.callback_arr, [1, 2, GObject.G_MAXUINT])
 
+    def test_held_struct_ref(self):
+        held_structs = []
+
+        def callback(obj, struct):
+            # The struct held by Python will become a copy after this callback exits.
+            struct.some_int = 42
+            struct.some_int8 = 42
+            held_structs.append(struct)
+
+        struct = Regress.TestSimpleBoxedA()
+        obj = Regress.TestObj()
+
+        self.assertEqual(struct.some_int, 0)
+        self.assertEqual(struct.some_int8, 0)
+
+        obj.connect('test-with-static-scope-arg', callback)
+        obj.emit('test-with-static-scope-arg', struct)
+
+        # The held struct will be a copy of the modified struct.
+        self.assertEqual(len(held_structs), 1)
+        held_struct = held_structs[0]
+        self.assertEqual(held_struct.some_int, 42)
+        self.assertEqual(held_struct.some_int8, 42)
+
+        # Boxed equality checks pointers by default.
+        self.assertNotEqual(struct, held_struct)
+
 
 class _ConnectObjectTestBase(object):
     # Notes:

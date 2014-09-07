@@ -34,6 +34,8 @@ PyObject * _pygi_boxed_new (PyTypeObject *pytype,
 void * _pygi_boxed_alloc (GIBaseInfo *info,
                           gsize *size);
 
+void _pygi_boxed_copy_in_place  (PyGIBoxed *self);
+
 void _pygi_boxed_register_types (PyObject *m);
 
 G_END_DECLS
