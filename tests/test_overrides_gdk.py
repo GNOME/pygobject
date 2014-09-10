@@ -70,6 +70,18 @@ class TestGdk(unittest.TestCase):
         event.type = Gdk.EventType.SCROLL
         self.assertRaises(AttributeError, lambda: getattr(event, 'foo_bar'))
 
+    def test_event_touch(self):
+        event = Gdk.Event.new(Gdk.EventType.TOUCH_BEGIN)
+        self.assertEqual(event.type, Gdk.EventType.TOUCH_BEGIN)
+
+        # emulating_pointer is unique to touch events
+        self.assertFalse(event.emulating_pointer)
+        self.assertFalse(event.touch.emulating_pointer)
+
+        event.emulating_pointer = True
+        self.assertTrue(event.emulating_pointer)
+        self.assertTrue(event.touch.emulating_pointer)
+
     def test_event_setattr(self):
         event = Gdk.Event.new(Gdk.EventType.DRAG_MOTION)
         event.x_root, event.y_root = 0, 5

@@ -190,6 +190,10 @@ class Event(Gdk.Event):
         Gdk.EventType.DROP_FINISHED: 'dnd',
         Gdk.EventType.CLIENT_EVENT: 'client',
         Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
+        Gdk.EventType.TOUCH_BEGIN: 'touch',
+        Gdk.EventType.TOUCH_UPDATE: 'touch',
+        Gdk.EventType.TOUCH_END: 'touch',
+        Gdk.EventType.TOUCH_CANCEL: 'touch',
     }
 
     if Gdk._version == '2.0':
@@ -228,6 +232,7 @@ event_member_classes = ['EventAny',
                         'EventVisibility',
                         'EventMotion',
                         'EventButton',
+                        'EventTouch',
                         'EventScroll',
                         'EventKey',
                         'EventCrossing',
