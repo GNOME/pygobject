@@ -149,13 +149,30 @@ check.gdb:
 check.nemiver:
 	EXEC_NAME="nemiver" $(MAKE) check
 
+# Note G_SLICE in these check variations is intended to clobber the default set in RUN_TESTS_ENV_VARS
 check.valgrind:
-	EXEC_NAME="G_SLICE=always-malloc valgrind --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
+	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	" \
+	$(MAKE) check
 
 check.valgrindlog:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc valgrind --child-silent-after-fork=yes --log-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.log --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
+	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	--child-silent-after-fork=yes \
+	--log-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.log \
+	" \
+	$(MAKE) check
 
 check.valgrindxml:
 	mkdir -p $(top_builddir)/tmp
-	EXEC_NAME="G_SLICE=always-malloc valgrind --child-silent-after-fork=yes --xml=yes --xml-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.xml --leak-check=full --show-possibly-lost=no --suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp" G_DEBUG=gc-friendly $(MAKE) check
+	EXEC_NAME="G_SLICE=always-malloc G_DEBUG=gc-friendly \
+	valgrind --leak-check=full --show-possibly-lost=no --num-callers=20 \
+	--suppressions=$(top_srcdir)/tests/$(PYTHON_BASENAME).supp \
+	--child-silent-after-fork=yes \
+	--xml=yes --xml-file=$(top_builddir)/tmp/`git rev-parse HEAD | cut -c1-8`-$$TEST_NAMES.xml \
+	" \
+	$(MAKE) check
