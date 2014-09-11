@@ -395,14 +395,22 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(result, ['regress'])
         result = None
 
-    def test_strv(self):
+    def test_strv_out(self):
         self.assertEqual(Everything.test_strv_out(), ['thanks', 'for', 'all', 'the', 'fish'])
+
+    def test_strv_out_c(self):
         self.assertEqual(Everything.test_strv_out_c(), ['thanks', 'for', 'all', 'the', 'fish'])
+
+    def test_strv_out_container(self):
         self.assertEqual(Everything.test_strv_out_container(), ['1', '2', '3'])
+
+    def test_strv_outarg(self):
         self.assertEqual(Everything.test_strv_outarg(), ['1', '2', '3'])
 
+    def test_strv_in_gvalue(self):
         self.assertEqual(Everything.test_strv_in_gvalue(), ['one', 'two', 'three'])
 
+    def test_strv_in(self):
         Everything.test_strv_in(['1', '2', '3'])
 
     def test_glist(self):
