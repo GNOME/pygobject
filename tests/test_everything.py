@@ -356,41 +356,68 @@ class TestEverything(unittest.TestCase):
         # test that there are no duplicates returned
         self.assertEqual(len(attr_list), len(set(attr_list)))
 
-    def test_array(self):
+    def test_array_int_in_empty(self):
         self.assertEqual(Everything.test_array_int_in([]), 0)
+
+    def test_array_int_in(self):
         self.assertEqual(Everything.test_array_int_in([1, 5, -2]), 4)
+
+    def test_array_int_out(self):
         self.assertEqual(Everything.test_array_int_out(), [0, 1, 2, 3, 4])
+
+    def test_array_int_full_out(self):
         self.assertEqual(Everything.test_array_int_full_out(), [0, 1, 2, 3, 4])
+
+    def test_array_int_none_out(self):
         self.assertEqual(Everything.test_array_int_none_out(), [1, 2, 3, 4, 5])
+
+    def test_array_int_inout(self):
         self.assertEqual(Everything.test_array_int_inout([1, 5, 42, -8]), [6, 43, -7])
 
+    def test_array_int_inout_empty(self):
+        self.assertEqual(Everything.test_array_int_inout([]), [])
+
+    def test_array_gint8_in(self):
         if sys.version_info >= (3, 0):
             self.assertEqual(Everything.test_array_gint8_in(b'\x01\x03\x05'), 9)
         self.assertEqual(Everything.test_array_gint8_in([1, 3, 5, -50]), -41)
+
+    def test_array_gint16_in(self):
         self.assertEqual(Everything.test_array_gint16_in([256, 257, -1000, 10000]), 9513)
+
+    def test_array_gint32_in(self):
         self.assertEqual(Everything.test_array_gint32_in([30000, 1, -2]), 29999)
+
+    def test_array_gint64_in(self):
         self.assertEqual(Everything.test_array_gint64_in([2 ** 33, 2 ** 34]), 2 ** 33 + 2 ** 34)
 
+    def test_array_gtype_in(self):
         self.assertEqual(Everything.test_array_gtype_in(
             [GObject.TYPE_STRING, GObject.TYPE_UINT64, GObject.TYPE_VARIANT]),
             '[gchararray,guint64,GVariant,]')
 
-    def test_array_fixed_size(self):
+    def test_array_fixed_size_int_in(self):
         # fixed length of 5
         self.assertEqual(Everything.test_array_fixed_size_int_in([1, 2, -10, 5, 3]), 1)
+
+    def test_array_fixed_size_int_in_error(self):
         self.assertRaises(ValueError, Everything.test_array_fixed_size_int_in, [1, 2, 3, 4])
         self.assertRaises(ValueError, Everything.test_array_fixed_size_int_in, [1, 2, 3, 4, 5, 6])
 
+    def test_array_fixed_size_int_out(self):
         self.assertEqual(Everything.test_array_fixed_size_int_out(), [0, 1, 2, 3, 4])
+
+    def test_array_fixed_size_int_return(self):
         self.assertEqual(Everything.test_array_fixed_size_int_return(), [0, 1, 2, 3, 4])
 
-    def test_ptrarray(self):
-        # transfer container
+    def test_garray_container_return(self):
+        # GPtrArray transfer container
         result = Everything.test_garray_container_return()
         self.assertEqual(result, ['regress'])
         result = None
 
-        # transfer full
+    def test_garray_full_return(self):
+        # GPtrArray transfer full
         result = Everything.test_garray_full_return()
         self.assertEqual(result, ['regress'])
         result = None
