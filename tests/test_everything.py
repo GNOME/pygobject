@@ -33,6 +33,12 @@ else:
     UNICHAR = "♥"
 
 
+const_str = b'const \xe2\x99\xa5 utf8'
+if sys.version_info >= (3, 0):
+    const_str = const_str.decode('UTF-8')
+noconst_str = 'non' + const_str
+
+
 class RawGList(ctypes.Structure):
     _fields_ = [('data', ctypes.c_void_p),
                 ('next', ctypes.c_void_p),
@@ -221,27 +227,34 @@ class TestEverything(unittest.TestCase):
         timeout = v.lookup_value('timeout', None)
         self.assertEqual(timeout.get_int32(), 10)
 
-    def test_string(self):
-        const_str = b'const \xe2\x99\xa5 utf8'
-        if sys.version_info >= (3, 0):
-            const_str = const_str.decode('UTF-8')
-        noconst_str = 'non' + const_str
-
+    def test_utf8_const_return(self):
         self.assertEqual(Everything.test_utf8_const_return(), const_str)
+
+    def test_utf8_nonconst_return(self):
         self.assertEqual(Everything.test_utf8_nonconst_return(), noconst_str)
+
+    def test_utf8_out(self):
         self.assertEqual(Everything.test_utf8_out(), noconst_str)
 
+    def test_utf8_const_in(self):
         Everything.test_utf8_const_in(const_str)
+
+    def test_utf8_inout(self):
         self.assertEqual(Everything.test_utf8_inout(const_str), noconst_str)
 
+    def test_filename_return(self):
         self.assertEqual(Everything.test_filename_return(), ['åäö', '/etc/fstab'])
 
+    def test_int_out_utf8(self):
         # returns g_utf8_strlen() in out argument
         self.assertEqual(Everything.test_int_out_utf8(''), 0)
         self.assertEqual(Everything.test_int_out_utf8('hello world'), 11)
         self.assertEqual(Everything.test_int_out_utf8('åäö'), 3)
 
+    def test_utf8_out_out(self):
         self.assertEqual(Everything.test_utf8_out_out(), ('first', 'second'))
+
+    def test_utf8_out_nonconst_return(self):
         self.assertEqual(Everything.test_utf8_out_nonconst_return(), ('first', 'second'))
 
     def test_enum(self):
