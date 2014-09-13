@@ -266,3 +266,32 @@ class TestGApplication(unittest.TestCase):
         self.assertEqual(res, 42)
         self.assertSequenceEqual(app.args, ['spam'])
         self.assertSequenceEqual(app.local_args, ['spam', 'eggs'])
+
+    @unittest.skipUnless(hasattr(Gio.Application, 'add_main_option'),
+                         'Requires newer version of GLib')
+    def test_add_main_option(self):
+        stored_options = []
+
+        def on_handle_local_options(app, options):
+            stored_options.append(options)
+            return 0  # Return 0 if options have been handled
+
+        def on_activate(app):
+            pass
+
+        app = Gio.Application()
+        app.add_main_option(long_name='string',
+                            short_name=b's',
+                            flags=0,
+                            arg=GLib.OptionArg.STRING,
+                            description='some string')
+
+        app.connect('activate', on_activate)
+        app.connect('handle-local-options', on_handle_local_options)
+        app.run(['app', '-s', 'test string'])
+
+        self.assertEqual(len(stored_options), 1)
+        options = stored_options[0]
+        self.assertTrue(options.contains('string'))
+        self.assertEqual(options.lookup_value('string').unpack(),
+                         'test string')
