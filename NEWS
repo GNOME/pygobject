@@ -1,3 +1,10 @@
+3.13.92 15-Sep-2014
+        - tests: Add test for Gio.Application.add_main_option() (Simon Feltman)
+        - tests: Split up various test cases (Simon Feltman) (#735193)
+        - Fix invalid read error in argument cleanup code (Simon Feltman)
+        - Fix memory management problems with struct arguments to signals
+          (Simon Feltman) (#736175)
+
 3.13.91 01-Sep-2014
         - docs: Fix return types in auto-generated doc strings (Simon Feltman)
         - Special case signal output arguments which are structs as
