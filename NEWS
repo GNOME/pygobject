@@ -1,3 +1,6 @@
+3.14.0  22-Sep-2014
+        - configure.ac: pre release version bump to 3.14.0 (Simon Feltman)
+
 3.13.92 15-Sep-2014
         - tests: Add test for Gio.Application.add_main_option() (Simon Feltman)
         - tests: Split up various test cases (Simon Feltman) (#735193)
