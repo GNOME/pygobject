@@ -197,7 +197,7 @@ struct _PyGICallableCache
                                      GICallableInfo *callable_info);
 };
 
-typedef struct _PyGIFunctionCache {
+struct _PyGIFunctionCache {
     PyGICallableCache callable_cache;
 
     /* An invoker with ffi_cif already setup */
@@ -207,13 +207,13 @@ typedef struct _PyGIFunctionCache {
                          PyGIInvokeState *state,
                          PyObject *py_args,
                          PyObject *py_kwargs);
-} PyGIFunctionCache;
+} ;
 
-typedef struct _PyGIVFuncCache {
+struct _PyGIVFuncCache {
     PyGIFunctionWithInstanceCache fwi_cache;
 
     GIBaseInfo *info;
-} PyGIVFuncCache;
+};
 
 
 gboolean
