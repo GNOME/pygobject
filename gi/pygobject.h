@@ -25,7 +25,7 @@ struct _PyGClosure {
 typedef enum {
     PYGOBJECT_USING_TOGGLE_REF = 1 << 0,
     PYGOBJECT_IS_FLOATING_REF = 1 << 1,
-    PYGOBJECT_GOBJECT_WAS_FLOATING = 1 << 2,
+    PYGOBJECT_GOBJECT_WAS_FLOATING = 1 << 2
 } PyGObjectFlags;
 
   /* closures is just an alias for what is found in the
