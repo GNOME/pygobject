@@ -14,7 +14,8 @@ except ImportError:
     Regress = None
 
 
-class TestRegistry(unittest.TestCase):
+class TestOverrides(unittest.TestCase):
+
     def test_non_gi(self):
         class MyClass:
             pass
@@ -30,6 +31,29 @@ class TestRegistry(unittest.TestCase):
         # Regress override is in tests/gi/overrides, separate from gi/overrides
         # https://bugzilla.gnome.org/show_bug.cgi?id=680913
         self.assertEqual(Regress.REGRESS_OVERRIDE, 42)
+
+    def test_load_overrides(self):
+        mod = gi.module.get_introspection_module('GIMarshallingTests')
+        mod_override = gi.overrides.load_overrides(mod)
+        self.assertTrue(mod_override is not mod)
+        self.assertTrue(mod_override._introspection_module is mod)
+        self.assertEqual(mod_override.OVERRIDES_CONSTANT, 7)
+        self.assertEqual(mod.OVERRIDES_CONSTANT, 42)
+
+    def test_load_no_overrides(self):
+        mod_key = "gi.overrides.GIMarshallingTests"
+        had_mod = mod_key in sys.modules
+        old_mod = sys.modules.get(mod_key)
+        try:
+            # this makes override import fail
+            sys.modules[mod_key] = None
+            mod = gi.module.get_introspection_module('GIMarshallingTests')
+            mod_override = gi.overrides.load_overrides(mod)
+            self.assertTrue(mod_override is mod)
+        finally:
+            del sys.modules[mod_key]
+            if had_mod:
+                sys.modules[mod_key] = old_mod
 
 
 class TestModule(unittest.TestCase):
@@ -48,12 +72,6 @@ class TestModule(unittest.TestCase):
         mod1 = gi.module.get_introspection_module(mod_name)
         mod2 = gi.module.get_introspection_module(mod_name)
         self.assertTrue(mod1 is mod2)
-
-        # Using a DynamicModule will use get_introspection_module internally
-        # in its _load method.
-        mod_overridden = gi.module.DynamicModule(mod_name)
-        mod_overridden._load()
-        self.assertTrue(mod1 is mod_overridden._introspection_module)
 
         # Restore the previous cache
         gi.module._introspection_modules = old_modules

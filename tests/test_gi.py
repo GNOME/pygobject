@@ -2203,10 +2203,6 @@ class TestPythonGObject(unittest.TestCase):
         object_ = self.SubObject(int=1)
         self.assertEqual(object_.vfunc_return_value_only(), 2121)
 
-    def test_dynamic_module(self):
-        from gi.module import DynamicModule
-        self.assertTrue(isinstance(GObject, DynamicModule))
-
     def test_subobject_non_vfunc_do_method(self):
         class PythonObjectWithNonVFuncDoMethod(object):
             def do_not_a_vfunc(self):

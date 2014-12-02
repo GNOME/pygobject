@@ -24,10 +24,13 @@ from __future__ import absolute_import
 import sys
 
 from ._gi import Repository
-from .module import DynamicModule
+from .module import get_introspection_module
+from .overrides import load_overrides
 
 
 repository = Repository.get_default()
+
+# only for backwards compatibility
 modules = {}
 
 
@@ -57,13 +60,11 @@ class DynamicImporter(object):
             return sys.modules[fullname]
 
         path, namespace = fullname.rsplit('.', 1)
-        dynamic_module = DynamicModule(namespace)
-        modules[namespace] = dynamic_module
+        introspection_module = get_introspection_module(namespace)
+        dynamic_module = load_overrides(introspection_module)
 
         dynamic_module.__file__ = '<%s>' % fullname
         dynamic_module.__loader__ = self
-
         sys.modules[fullname] = dynamic_module
-        dynamic_module._load()
 
         return dynamic_module

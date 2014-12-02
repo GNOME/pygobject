@@ -1,5 +1,7 @@
 import types
 import warnings
+import importlib
+import sys
 
 from gi import PyGIDeprecationWarning
 from gi._gi import CallableInfo
@@ -11,8 +13,6 @@ from gi._constants import \
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
-registry = None
-
 
 def wraps(wrapped):
     def assign(wrapper):
@@ -22,40 +22,75 @@ def wraps(wrapped):
     return assign
 
 
-class _Registry(dict):
-    def __setitem__(self, key, value):
-        """We do checks here to make sure only submodules of the override
-        module are added.  Key and value should be the same object and come
-        from the gi.override module.
+class OverridesProxyModule(types.ModuleType):
+    """Wraps a introspection module and contains all overrides"""
 
-        We add the override to the dict as "override_module.name".  For instance
-        if we were overriding Gtk.Button you would retrive it as such:
-        registry['Gtk.Button']
-        """
-        if not key == value:
-            raise KeyError('You have tried to modify the registry.  This should only be done by the override decorator')
+    def __init__(self, introspection_module):
+        super(OverridesProxyModule, self).__init__(
+            introspection_module.__name__)
+        self._introspection_module = introspection_module
 
+    def __getattr__(self, name):
+        return getattr(self._introspection_module, name)
+
+    def __dir__(self):
+        result = set(dir(self.__class__))
+        result.update(self.__dict__.keys())
+        result.update(dir(self._introspection_module))
+        return sorted(result)
+
+    def __repr__(self):
+        return "<%s %r>" % (type(self).__name__, self._introspection_module)
+
+
+def load_overrides(introspection_module):
+    """Loads overrides for an introspection module.
+
+    Either returns the same module again in case there are no overrides or a
+    proxy module including overrides. Doesn't cache the result.
+    """
+
+    namespace = introspection_module.__name__.rsplit(".", 1)[-1]
+    module_key = 'gi.repository.' + namespace
+
+    # We use sys.modules so overrides can import from gi.repository
+    # but restore everything at the end so this doesn't have any side effects
+    has_old = module_key in sys.modules
+    old_module = sys.modules.get(module_key)
+
+    proxy = OverridesProxyModule(introspection_module)
+    sys.modules[module_key] = proxy
+
+    # backwards compat:
+    # gedit uses gi.importer.modules['Gedit']._introspection_module
+    from ..importer import modules
+    assert hasattr(proxy, "_introspection_module")
+    modules[namespace] = proxy
+
+    try:
         try:
-            info = getattr(value, '__info__')
-        except AttributeError:
-            raise TypeError('Can not override a type %s, which is not in a gobject introspection typelib' % value.__name__)
+            override_mod = importlib.import_module('gi.overrides.' + namespace)
+        except ImportError:
+            return introspection_module
+    finally:
+        del modules[namespace]
+        del sys.modules[module_key]
+        if has_old:
+            sys.modules[module_key] = old_module
 
-        if not value.__module__.startswith('gi.overrides'):
-            raise KeyError('You have tried to modify the registry outside of the overrides module. '
-                           'This is not allowed (%s, %s)' % (value, value.__module__))
+    override_all = []
+    if hasattr(override_mod, "__all__"):
+        override_all = override_mod.__all__
 
-        g_type = info.get_g_type()
-        assert g_type != TYPE_NONE
-        if g_type != TYPE_INVALID:
-            g_type.pytype = value
+    for var in override_all:
+        try:
+            item = getattr(override_mod, var)
+        except (AttributeError, TypeError):
+            # Gedit puts a non-string in __all__, so catch TypeError here
+            continue
+        setattr(proxy, var, item)
 
-            # strip gi.overrides from module name
-            module = value.__module__[13:]
-            key = "%s.%s" % (module, value.__name__)
-            super(_Registry, self).__setitem__(key, value)
-
-    def register(self, override_class):
-        self[override_class] = override_class
+    return proxy
 
 
 class overridefunc(object):
@@ -63,23 +98,47 @@ class overridefunc(object):
     def __init__(self, func):
         if not isinstance(func, CallableInfo):
             raise TypeError("func must be a gi function, got %s" % func)
-        from ..importer import modules
+
         module_name = func.__module__.rsplit('.', 1)[-1]
-        self.module = modules[module_name]._introspection_module
+        self.module = sys.modules["gi.repository." + module_name]
 
     def __call__(self, func):
         setattr(self.module, func.__name__, func)
         return func
 
-registry = _Registry()
-
 
 def override(type_):
-    """Decorator for registering an override"""
+    """Decorator for registering an override.
+
+    Other than objects added to __all__, these can get referenced in the same
+    override module via the gi.repository module (get_parent_for_object() does
+    for example), so they have to be added to the module immediately.
+    """
+
     if isinstance(type_, (types.FunctionType, CallableInfo)):
         return overridefunc(type_)
     else:
-        registry.register(type_)
+        try:
+            info = getattr(type_, '__info__')
+        except AttributeError:
+            raise TypeError(
+                'Can not override a type %s, which is not in a gobject '
+                'introspection typelib' % type_.__name__)
+
+        if not type_.__module__.startswith('gi.overrides'):
+            raise KeyError(
+                'You have tried override outside of the overrides module. '
+                'This is not allowed (%s, %s)' % (type_, type_.__module__))
+
+        g_type = info.get_g_type()
+        assert g_type != TYPE_NONE
+        if g_type != TYPE_INVALID:
+            g_type.pytype = type_
+
+        namespace = type_.__module__.rsplit(".", 1)[-1]
+        module = sys.modules["gi.repository." + namespace]
+        setattr(module, type_.__name__, type_)
+
         return type_
 
 
