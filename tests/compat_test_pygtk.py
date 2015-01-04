@@ -3,6 +3,7 @@
 
 import unittest
 import contextlib
+import base64
 
 from gi.repository import GLib
 
@@ -143,8 +144,16 @@ class TestGTKCompat(unittest.TestCase):
         gtk.gdk.Pixbuf()
 
     def test_pixbuf_loader(self):
+        # load a 1x1 pixel PNG from memory
+        data = base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP4n8Dw'
+                                'HwAGIAJf85Z3XgAAAABJRU5ErkJggg==')
         loader = gtk.gdk.PixbufLoader('png')
+        loader.write(data)
         loader.close()
+
+        pixbuf = loader.get_pixbuf()
+        self.assertEqual(pixbuf.get_width(), 1)
+        self.assertEqual(pixbuf.get_height(), 1)
 
     def test_pixbuf_formats(self):
         formats = gtk.gdk.pixbuf_get_formats()
