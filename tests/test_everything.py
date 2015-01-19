@@ -1096,6 +1096,15 @@ class TestBoxed(unittest.TestCase):
         self.assertTrue(boxed42_2.equals(boxed42))
         self.assertTrue(boxed42.equals(boxed42))
 
+    def test_boxed_b_constructor(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            boxed = Everything.TestBoxedB(42, 47)
+            self.assertTrue(issubclass(warn[0].category, TypeError))
+
+        self.assertEqual(boxed.some_int8, 0)
+        self.assertEqual(boxed.some_long, 0)
+
     def test_boxed_c_equality(self):
         boxed = Everything.TestBoxedC()
         # TestBoxedC uses refcounting, so we know that

@@ -313,6 +313,10 @@ def mro(C):
     return bases
 
 
+def nothing(*args, **kwargs):
+    pass
+
+
 class StructMeta(type, MetaClassHelper):
     """Meta class used for GI Struct based types."""
 
@@ -330,8 +334,12 @@ class StructMeta(type, MetaClassHelper):
         for method_info in cls.__info__.get_methods():
             if method_info.is_constructor() and \
                     method_info.__name__ == 'new' and \
-                    not method_info.get_arguments():
+                    (not method_info.get_arguments() or
+                     cls.__info__.get_size() == 0):
                 cls.__new__ = staticmethod(method_info)
+                # Boxed will raise an exception
+                # if arguments are given to __init__
+                cls.__init__ = nothing
                 break
 
     @property

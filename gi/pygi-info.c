@@ -2167,9 +2167,16 @@ _wrap_g_union_info_get_methods (PyGIBaseInfo *self)
     return _make_infos_tuple (self, g_union_info_get_n_methods, g_union_info_get_method);
 }
 
+static PyObject *
+_wrap_g_union_info_get_size (PyGIBaseInfo *self)
+{
+    return PYGLIB_PyLong_FromSize_t (g_union_info_get_size (self->info));
+}
+
 static PyMethodDef _PyGIUnionInfo_methods[] = {
     { "get_fields", (PyCFunction) _wrap_g_union_info_get_fields, METH_NOARGS },
     { "get_methods", (PyCFunction) _wrap_g_union_info_get_methods, METH_NOARGS },
+    { "get_size", (PyCFunction) _wrap_g_union_info_get_size, METH_NOARGS },
     { NULL, NULL, 0 }
 };
 
