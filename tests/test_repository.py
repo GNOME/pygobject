@@ -23,6 +23,10 @@
 import unittest
 import collections
 
+import gi
+
+gi.require_version('GIRepository', '2.0')
+
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject
@@ -49,8 +53,14 @@ def find_child_info(info, getter_name, name):
 
 class Test(unittest.TestCase):
     def setUp(self):
+        repo.require('GLib')
         repo.require('GObject')
         repo.require('GIMarshallingTests')
+
+    def test_repo_get_dependencies(self):
+        self.assertRaises(TypeError, repo.get_dependencies)
+        self.assertEqual(repo.get_dependencies("GLib"), [])
+        self.assertEqual(repo.get_dependencies("GObject"), ["GLib-2.0"])
 
     def test_arg_info(self):
         func_info = repo.find_by_name('GIMarshallingTests', 'array_fixed_out_struct')

@@ -1,9 +1,11 @@
 import unittest
 
 try:
-    from gi.repository import Atk, Gdk, Gtk
+    import gi
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk, Atk, Gdk
     (Atk, Gdk)  # pyflakes
-except:
+except (ValueError, ImportError):
     Gdk = None
 
 

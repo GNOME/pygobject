@@ -10,15 +10,18 @@ import warnings
 
 from compathelper import _unicode, _bytes
 
+import gi
 import gi.overrides
 import gi.types
 from gi.repository import GLib, GObject
 
 try:
-    from gi.repository import GdkPixbuf, Gdk, Gtk
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import Gtk, GdkPixbuf, Gdk
     Gtk  # pyflakes
     PyGTKDeprecationWarning = Gtk.PyGTKDeprecationWarning
-except ImportError:
+except (ValueError, ImportError):
     Gtk = None
     PyGTKDeprecationWarning = None
 

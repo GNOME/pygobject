@@ -6,6 +6,7 @@ import unittest
 
 import gi.overrides
 import gi.module
+import gi.importer
 
 try:
     from gi.repository import Regress
@@ -116,3 +117,24 @@ class TestImporter(unittest.TestCase):
             self.assertTrue('introspection typelib' not in exception_string)
         else:
             self.assertTrue('introspection typelib' in exception_string)
+
+    def test__get_all_dependencies(self):
+        get_all_dependencies = gi.importer._get_all_dependencies
+
+        self.assertEqual(
+            get_all_dependencies("Regress"),
+            ['Gio-2.0', 'GObject-2.0', 'GLib-2.0', 'cairo-1.0'])
+
+    def test_require_version_warning(self):
+        check = gi.importer._check_require_version
+
+        # make sure it doesn't fail at least
+        with check("GLib", 1):
+            from gi.repository import GLib
+            GLib
+
+        # make sure the exception propagates
+        with self.assertRaises(ImportError):
+            with check("InvalidGObjectRepositoryModuleName", 1):
+                from gi.repository import InvalidGObjectRepositoryModuleName
+                InvalidGObjectRepositoryModuleName

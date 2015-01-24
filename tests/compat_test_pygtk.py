@@ -5,13 +5,18 @@ import unittest
 import contextlib
 import base64
 
+import gi
 from gi.repository import GLib
 
 try:
+    try:
+        gi.require_version("Gtk", "3.0")
+    except ValueError as e:
+        raise ImportError(e)
+    from gi.repository import Gtk
     from gi.repository import Pango
     from gi.repository import Atk
     from gi.repository import Gdk
-    from gi.repository import Gtk
     (Atk, Gtk, Pango)  # pyflakes
 
     import pygtkcompat

@@ -6,6 +6,7 @@ import struct
 import types
 import unittest
 
+import gi
 from gi.repository import GObject
 from gi.repository.GObject import GType, new, PARAM_READWRITE, \
     PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
@@ -22,13 +23,15 @@ from gi.repository.GObject import \
 
 from gi.repository import Gio
 from gi.repository import GLib
+gi.require_version('GIMarshallingTests', '1.0')
 from gi.repository import GIMarshallingTests
 from gi import _propertyhelper as propertyhelper
 
 try:
+    gi.require_version('Regress', '1.0')
     from gi.repository import Regress
     has_regress = True
-except ImportError:
+except (ValueError, ImportError):
     has_regress = False
 
 if sys.version_info < (3, 0):
