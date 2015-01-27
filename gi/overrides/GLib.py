@@ -26,7 +26,7 @@ import sys
 from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
                    source_set_callback, io_channel_read)
-from ..overrides import override, deprecated
+from ..overrides import override, deprecated, deprecated_attr
 from gi import PyGIDeprecationWarning, version_info
 
 GLib = get_introspection_module('GLib')
@@ -481,8 +481,10 @@ __all__.append('markup_escape_text')
 # backwards compatible names from old static bindings
 for n in ['DESKTOP', 'DOCUMENTS', 'DOWNLOAD', 'MUSIC', 'PICTURES',
           'PUBLIC_SHARE', 'TEMPLATES', 'VIDEOS']:
-    globals()['USER_DIRECTORY_' + n] = getattr(GLib.UserDirectory, 'DIRECTORY_' + n)
-    __all__.append('USER_DIRECTORY_' + n)
+    attr = 'USER_DIRECTORY_' + n
+    deprecated_attr("GLib", attr, "GLib.UserDirectory.DIRECTORY_" + n)
+    globals()[attr] = getattr(GLib.UserDirectory, 'DIRECTORY_' + n)
+    __all__.append(attr)
 
 for n in ['ERR', 'HUP', 'IN', 'NVAL', 'OUT', 'PRI']:
     globals()['IO_' + n] = getattr(GLib.IOCondition, n)
@@ -490,30 +492,42 @@ for n in ['ERR', 'HUP', 'IN', 'NVAL', 'OUT', 'PRI']:
 
 for n in ['APPEND', 'GET_MASK', 'IS_READABLE', 'IS_SEEKABLE',
           'MASK', 'NONBLOCK', 'SET_MASK']:
-    globals()['IO_FLAG_' + n] = getattr(GLib.IOFlags, n)
-    __all__.append('IO_FLAG_' + n)
+    attr = 'IO_FLAG_' + n
+    deprecated_attr("GLib", attr, "GLib.IOFlags." + n)
+    globals()[attr] = getattr(GLib.IOFlags, n)
+    __all__.append(attr)
+
 # spelling for the win
 IO_FLAG_IS_WRITEABLE = GLib.IOFlags.IS_WRITABLE
+deprecated_attr("GLib", "IO_FLAG_IS_WRITEABLE", "GLib.IOFlags.IS_WRITABLE")
 __all__.append('IO_FLAG_IS_WRITEABLE')
 
 for n in ['AGAIN', 'EOF', 'ERROR', 'NORMAL']:
-    globals()['IO_STATUS_' + n] = getattr(GLib.IOStatus, n)
-    __all__.append('IO_STATUS_' + n)
+    attr = 'IO_STATUS_' + n
+    globals()[attr] = getattr(GLib.IOStatus, n)
+    deprecated_attr("GLib", attr, "GLib.IOStatus." + n)
+    __all__.append(attr)
 
 for n in ['CHILD_INHERITS_STDIN', 'DO_NOT_REAP_CHILD', 'FILE_AND_ARGV_ZERO',
           'LEAVE_DESCRIPTORS_OPEN', 'SEARCH_PATH', 'STDERR_TO_DEV_NULL',
           'STDOUT_TO_DEV_NULL']:
-    globals()['SPAWN_' + n] = getattr(GLib.SpawnFlags, n)
-    __all__.append('SPAWN_' + n)
+    attr = 'SPAWN_' + n
+    globals()[attr] = getattr(GLib.SpawnFlags, n)
+    deprecated_attr("GLib", attr, "GLib.SpawnFlags." + n)
+    __all__.append(attr)
 
 for n in ['HIDDEN', 'IN_MAIN', 'REVERSE', 'NO_ARG', 'FILENAME', 'OPTIONAL_ARG',
           'NOALIAS']:
-    globals()['OPTION_FLAG_' + n] = getattr(GLib.OptionFlags, n)
-    __all__.append('OPTION_FLAG_' + n)
+    attr = 'OPTION_FLAG_' + n
+    globals()[attr] = getattr(GLib.OptionFlags, n)
+    deprecated_attr("GLib", attr, "GLib.OptionFlags." + n)
+    __all__.append(attr)
 
 for n in ['UNKNOWN_OPTION', 'BAD_VALUE', 'FAILED']:
-    globals()['OPTION_ERROR_' + n] = getattr(GLib.OptionError, n)
-    __all__.append('OPTION_ERROR_' + n)
+    attr = 'OPTION_ERROR_' + n
+    deprecated_attr("GLib", attr, "GLib.OptionError." + n)
+    globals()[attr] = getattr(GLib.OptionError, n)
+    __all__.append(attr)
 
 
 class MainLoop(GLib.MainLoop):
@@ -901,5 +915,9 @@ if not hasattr(GLib, 'unix_signal_add_full'):
 # obsolete constants for backwards compatibility
 glib_version = (GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)
 __all__.append('glib_version')
+deprecated_attr("GLib", "glib_version",
+                "(GLib.MAJOR_VERSION, GLib.MINOR_VERSION, GLib.MICRO_VERSION)")
+
 pyglib_version = version_info
 __all__.append('pyglib_version')
+deprecated_attr("GLib", "pyglib_version", "gi.version_info")

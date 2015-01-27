@@ -27,7 +27,7 @@ from collections import namedtuple
 
 import gi.overrides
 import gi.module
-from gi.overrides import override
+from gi.overrides import override, deprecated_attr
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
@@ -56,10 +56,11 @@ for name in ['markup_escape_text', 'get_application_name',
              'idle_add', 'timeout_add', 'timeout_add_seconds',
              'io_add_watch', 'child_watch_add', 'get_current_time',
              'spawn_async']:
-    globals()[name] = gi.overrides.deprecated(getattr(GLib, name), 'GLib.' + name)
+    globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
-# constants are also deprecated, but cannot mark them as such
+# deprecated constants
 for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'PRIORITY_HIGH_IDLE', 'PRIORITY_LOW',
              'IO_IN', 'IO_OUT', 'IO_PRI', 'IO_ERR', 'IO_HUP', 'IO_NVAL',
@@ -77,25 +78,21 @@ for name in ['PRIORITY_DEFAULT', 'PRIORITY_DEFAULT_IDLE', 'PRIORITY_HIGH',
              'OPTION_FLAG_NOALIAS', 'OPTION_ERROR_UNKNOWN_OPTION',
              'OPTION_ERROR_BAD_VALUE', 'OPTION_ERROR_FAILED', 'OPTION_REMAINING',
              'glib_version']:
-    globals()[name] = getattr(GLib, name)
+    with warnings.catch_warnings():
+        # TODO: this uses deprecated Glib attributes, silence for now
+        warnings.simplefilter('ignore', PyGIDeprecationWarning)
+        globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
     __all__.append(name)
 
 
-G_MININT8 = GLib.MININT8
-G_MAXINT8 = GLib.MAXINT8
-G_MAXUINT8 = GLib.MAXUINT8
-G_MININT16 = GLib.MININT16
-G_MAXINT16 = GLib.MAXINT16
-G_MAXUINT16 = GLib.MAXUINT16
-G_MININT32 = GLib.MININT32
-G_MAXINT32 = GLib.MAXINT32
-G_MAXUINT32 = GLib.MAXUINT32
-G_MININT64 = GLib.MININT64
-G_MAXINT64 = GLib.MAXINT64
-G_MAXUINT64 = GLib.MAXUINT64
-__all__ += ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
-            'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
-            'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']
+for name in ['G_MININT8', 'G_MAXINT8', 'G_MAXUINT8', 'G_MININT16',
+             'G_MAXINT16', 'G_MAXUINT16', 'G_MININT32', 'G_MAXINT32',
+             'G_MAXUINT32', 'G_MININT64', 'G_MAXINT64', 'G_MAXUINT64']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GLib, new_name)
+    deprecated_attr("GObject", name, "GLib." + new_name)
+    __all__.append(name)
 
 # these are not currently exported in GLib gir, presumably because they are
 # platform dependent; so get them from our static bindings
@@ -145,38 +142,44 @@ __all__ += ['TYPE_INVALID', 'TYPE_NONE', 'TYPE_INTERFACE', 'TYPE_CHAR',
 
 
 # Deprecated, use GLib directly
-Pid = GLib.Pid
-GError = GLib.GError
-OptionGroup = GLib.OptionGroup
-OptionContext = GLib.OptionContext
-__all__ += ['Pid', 'GError', 'OptionGroup', 'OptionContext']
+for name in ['Pid', 'GError', 'OptionGroup', 'OptionContext']:
+    globals()[name] = getattr(GLib, name)
+    deprecated_attr("GObject", name, "GLib." + name)
+    __all__.append(name)
 
 
 # Deprecated, use: GObject.ParamFlags.* directly
-PARAM_CONSTRUCT = GObjectModule.ParamFlags.CONSTRUCT
-PARAM_CONSTRUCT_ONLY = GObjectModule.ParamFlags.CONSTRUCT_ONLY
-PARAM_LAX_VALIDATION = GObjectModule.ParamFlags.LAX_VALIDATION
-PARAM_READABLE = GObjectModule.ParamFlags.READABLE
-PARAM_WRITABLE = GObjectModule.ParamFlags.WRITABLE
+for name in ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
+             'PARAM_READABLE', 'PARAM_WRITABLE']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GObjectModule.ParamFlags, new_name)
+    deprecated_attr("GObject", name, "GObject.ParamFlags." + new_name)
+    __all__.append(name)
+
 # PARAM_READWRITE should come from the gi module but cannot due to:
 # https://bugzilla.gnome.org/show_bug.cgi?id=687615
-PARAM_READWRITE = PARAM_READABLE | PARAM_WRITABLE
-__all__ += ['PARAM_CONSTRUCT', 'PARAM_CONSTRUCT_ONLY', 'PARAM_LAX_VALIDATION',
-            'PARAM_READABLE', 'PARAM_WRITABLE', 'PARAM_READWRITE']
+PARAM_READWRITE = GObjectModule.ParamFlags.READABLE | \
+    GObjectModule.ParamFlags.WRITABLE
+__all__.append("PARAM_READWRITE")
+
+# READWRITE is part of ParamFlags since glib 2.42. Only mark PARAM_READWRITE as
+# deprecated in case ParamFlags.READWRITE is available. Also include the glib
+# version in the warning so it's clear that this needs a newer glib, unlike
+# the other ParamFlags related deprecations.
+# https://bugzilla.gnome.org/show_bug.cgi?id=726037
+if hasattr(GObjectModule.ParamFlags, "READWRITE"):
+    deprecated_attr("GObject", "PARAM_READWRITE",
+                    "GObject.ParamFlags.READWRITE (glib 2.42+)")
 
 
 # Deprecated, use: GObject.SignalFlags.* directly
-SIGNAL_ACTION = GObjectModule.SignalFlags.ACTION
-SIGNAL_DETAILED = GObjectModule.SignalFlags.DETAILED
-SIGNAL_NO_HOOKS = GObjectModule.SignalFlags.NO_HOOKS
-SIGNAL_NO_RECURSE = GObjectModule.SignalFlags.NO_RECURSE
-SIGNAL_RUN_CLEANUP = GObjectModule.SignalFlags.RUN_CLEANUP
-SIGNAL_RUN_FIRST = GObjectModule.SignalFlags.RUN_FIRST
-SIGNAL_RUN_LAST = GObjectModule.SignalFlags.RUN_LAST
-__all__ += ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
-            'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
-            'SIGNAL_RUN_LAST']
-
+for name in ['SIGNAL_ACTION', 'SIGNAL_DETAILED', 'SIGNAL_NO_HOOKS',
+             'SIGNAL_NO_RECURSE', 'SIGNAL_RUN_CLEANUP', 'SIGNAL_RUN_FIRST',
+             'SIGNAL_RUN_LAST']:
+    new_name = name.split("_", 1)[-1]
+    globals()[name] = getattr(GObjectModule.SignalFlags, new_name)
+    deprecated_attr("GObject", name, "GObject.SignalFlags." + new_name)
+    __all__.append(name)
 
 # Static types
 GBoxed = _gobject.GBoxed
@@ -705,4 +708,5 @@ SignalOverride = signalhelper.SignalOverride
 # Deprecated naming "property" available for backwards compatibility.
 # Keep this at the end of the file to avoid clobbering the builtin.
 property = Property
+deprecated_attr("GObject", "property", "GObject.Property")
 __all__ += ['Property', 'Signal', 'SignalOverride', 'property']

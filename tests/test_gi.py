@@ -2789,6 +2789,76 @@ class TestDeprecation(unittest.TestCase):
             self.assertTrue(issubclass(warn[0].category, DeprecationWarning))
             self.assertEqual(str(warn[0].message), "GLib.strcasecmp is deprecated")
 
+    def test_deprecated_attribute_compat(self):
+        # test if the deprecation descriptor behaves like an instance attribute
+
+        # save the descriptor
+        desc = type(GLib).__dict__["IO_STATUS_ERROR"]
+
+        # the descriptor raises AttributeError for itself
+        self.assertFalse(hasattr(type(GLib), "IO_STATUS_ERROR"))
+
+        self.assertTrue(hasattr(GLib, "IO_STATUS_ERROR"))
+
+        try:
+            # check if replacing works
+            GLib.IO_STATUS_ERROR = "foo"
+            self.assertEqual(GLib.IO_STATUS_ERROR, "foo")
+        finally:
+            # restore descriptor
+            try:
+                del GLib.IO_STATUS_ERROR
+            except AttributeError:
+                pass
+            setattr(type(GLib), "IO_STATUS_ERROR", desc)
+
+        try:
+            # check if deleting works
+            del GLib.IO_STATUS_ERROR
+            self.assertFalse(hasattr(GLib, "IO_STATUS_ERROR"))
+        finally:
+            # restore descriptor
+            try:
+                del GLib.IO_STATUS_ERROR
+            except AttributeError:
+                pass
+            setattr(type(GLib), "IO_STATUS_ERROR", desc)
+
+    def test_deprecated_attribute_warning(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            self.assertEqual(GLib.IO_STATUS_ERROR, GLib.IOStatus.ERROR)
+            GLib.IO_STATUS_ERROR
+            GLib.IO_STATUS_ERROR
+            self.assertEqual(len(warn), 3)
+            self.assertTrue(
+                issubclass(warn[0].category, PyGIDeprecationWarning))
+            self.assertRegexpMatches(
+                str(warn[0].message),
+                ".*GLib.IO_STATUS_ERROR.*GLib.IOStatus.ERROR.*")
+
+    def test_deprecated_attribute_warning_coverage(self):
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            GObject.markup_escape_text
+            GObject.PRIORITY_DEFAULT
+            GObject.GError
+            GObject.PARAM_CONSTRUCT
+            GObject.SIGNAL_ACTION
+            GObject.property
+            GObject.IO_STATUS_ERROR
+            GObject.G_MAXUINT64
+            GLib.IO_STATUS_ERROR
+            GLib.SPAWN_SEARCH_PATH
+            GLib.OPTION_FLAG_HIDDEN
+            GLib.IO_FLAG_IS_WRITEABLE
+            GLib.IO_FLAG_NONBLOCK
+            GLib.USER_DIRECTORY_DESKTOP
+            GLib.OPTION_ERROR_BAD_VALUE
+            GLib.glib_version
+            GLib.pyglib_version
+            self.assertEqual(len(warn), 17)
+
     def test_deprecated_init_no_keywords(self):
         def init(self, **kwargs):
             self.assertDictEqual(kwargs, {'a': 1, 'b': 2, 'c': 3})
