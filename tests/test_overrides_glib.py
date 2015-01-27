@@ -494,3 +494,10 @@ class TestGVariant(unittest.TestCase):
         # with override constructor
         v = GLib.Variant('(is)', (1, 'somestring'))
         self.assertEqual(str(v), "(1, 'somestring')")
+
+
+class TestConstants(unittest.TestCase):
+
+    def test_basic_types_limits(self):
+        self.assertTrue(isinstance(GLib.MINFLOAT, float))
+        self.assertTrue(isinstance(GLib.MAXLONG, (int, _long)))

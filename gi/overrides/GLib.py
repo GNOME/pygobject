@@ -40,6 +40,7 @@ __all__.append('option')
 
 # Types and functions still needed from static bindings
 from gi._gi import _glib
+from gi._gi import _gobject
 from gi._error import GError
 
 Error = GError
@@ -527,6 +528,17 @@ for n in ['UNKNOWN_OPTION', 'BAD_VALUE', 'FAILED']:
     attr = 'OPTION_ERROR_' + n
     deprecated_attr("GLib", attr, "GLib.OptionError." + n)
     globals()[attr] = getattr(GLib.OptionError, n)
+    __all__.append(attr)
+
+
+# these are not currently exported in GLib gir, presumably because they are
+# platform dependent; so get them from our static bindings
+for name in ['G_MINFLOAT', 'G_MAXFLOAT', 'G_MINDOUBLE', 'G_MAXDOUBLE',
+             'G_MINSHORT', 'G_MAXSHORT', 'G_MAXUSHORT', 'G_MININT', 'G_MAXINT',
+             'G_MAXUINT', 'G_MINLONG', 'G_MAXLONG', 'G_MAXULONG', 'G_MAXSIZE',
+             'G_MINSSIZE', 'G_MAXSSIZE', 'G_MINOFFSET', 'G_MAXOFFSET']:
+    attr = name.split("_", 1)[-1]
+    globals()[attr] = getattr(_gobject, name)
     __all__.append(attr)
 
 
