@@ -322,7 +322,7 @@ class TestEverything(unittest.TestCase):
             Everything.test_int8()
         except TypeError:
             (e_type, e) = sys.exc_info()[:2]
-            self.assertEqual(e.args, ("test_int8() takes exactly 1 argument (0 given)",))
+            self.assertEqual(e.args, ("Regress.test_int8() takes exactly 1 argument (0 given)",))
 
     def test_gtypes(self):
         gchararray_gtype = GObject.type_from_name('gchararray')

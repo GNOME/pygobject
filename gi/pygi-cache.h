@@ -158,6 +158,8 @@ typedef struct _PyGIInterfaceCache
 struct _PyGICallableCache
 {
     const gchar *name;
+    const gchar *container_name;
+    const gchar *namespace;
 
     PyGICallingContext calling_context;
 
@@ -264,6 +266,9 @@ pygi_arg_cache_free      (PyGIArgCache *cache);
 
 void
 pygi_callable_cache_free    (PyGICallableCache *cache);
+
+gchar *
+pygi_callable_cache_get_full_name (PyGICallableCache *cache);
 
 PyGIFunctionCache *
 pygi_function_cache_new     (GICallableInfo *info);

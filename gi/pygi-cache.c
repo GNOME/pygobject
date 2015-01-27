@@ -657,6 +657,7 @@ _callable_cache_init (PyGICallableCache *cache,
                       GICallableInfo *callable_info)
 {
     gint n_args;
+    GIBaseInfo *container;
 
     if (cache->deinit == NULL)
         cache->deinit = _callable_cache_deinit_real;
@@ -665,18 +666,27 @@ _callable_cache_init (PyGICallableCache *cache,
         cache->generate_args_cache = _callable_cache_generate_args_cache_real;
 
     cache->name = g_base_info_get_name ((GIBaseInfo *) callable_info);
+    cache->namespace = g_base_info_get_namespace ((GIBaseInfo *) callable_info);
+    container = g_base_info_get_container ((GIBaseInfo *) callable_info);
+    cache->container_name = NULL;
+    /* https://bugzilla.gnome.org/show_bug.cgi?id=709456 */
+    if (container != NULL && g_base_info_get_type (container) != GI_INFO_TYPE_TYPE) {
+        cache->container_name = g_base_info_get_name (container);
+    }
     cache->throws = g_callable_info_can_throw_gerror ((GIBaseInfo *) callable_info);
 
     if (g_base_info_is_deprecated (callable_info)) {
         const gchar *deprecated = g_base_info_get_attribute (callable_info, "deprecated");
         gchar *warning;
+        gchar *full_name = pygi_callable_cache_get_full_name (cache);
         if (deprecated != NULL)
-            warning = g_strdup_printf ("%s.%s is deprecated: %s",
-                                       g_base_info_get_namespace (callable_info), cache->name,
+            warning = g_strdup_printf ("%s is deprecated: %s",
+                                       full_name,
                                        deprecated);
         else
-            warning = g_strdup_printf ("%s.%s is deprecated",
-                                       g_base_info_get_namespace (callable_info), cache->name);
+            warning = g_strdup_printf ("%s is deprecated",
+                                       full_name);
+        g_free (full_name);
         PyErr_WarnEx (PyExc_DeprecationWarning, warning, 0);
         g_free (warning);
     }
@@ -694,6 +704,23 @@ _callable_cache_init (PyGICallableCache *cache,
     }
 
     return TRUE;
+}
+
+gchar *
+pygi_callable_cache_get_full_name (PyGICallableCache *cache)
+{
+    if (cache->container_name != NULL) {
+        return g_strjoin (".",
+                          cache->namespace,
+                          cache->container_name,
+                          cache->name,
+                          NULL);
+    } else {
+        return g_strjoin (".",
+                          cache->namespace,
+                          cache->name,
+                          NULL);
+    }
 }
 
 void
@@ -845,11 +872,13 @@ _constructor_cache_invoke_real (PyGIFunctionCache *function_cache,
 
     constructor_class = PyTuple_GetItem (py_args, 0);
     if (constructor_class == NULL) {
+        gchar *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Clear ();
         PyErr_Format (PyExc_TypeError,
                       "Constructors require the class to be passed in as an argument, "
                       "No arguments passed to the %s constructor.",
-                      ((PyGICallableCache *) function_cache)->name);
+                      full_name);
+        g_free (full_name);
 
         return FALSE;
     }

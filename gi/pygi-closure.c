@@ -777,10 +777,12 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
         if (user_data_cache != NULL) {
             state->arg_values[destroy_cache->c_arg_index].v_pointer = _pygi_invoke_closure_free;
         } else {
+            char *full_name = pygi_callable_cache_get_full_name (callable_cache);
             gchar *msg = g_strdup_printf("Callables passed to %s will leak references because "
                                          "the method does not support a user_data argument. "
                                          "See: https://bugzilla.gnome.org/show_bug.cgi?id=685598",
-                                         callable_cache->name);
+                                         full_name);
+            g_free (full_name);
             if (PyErr_WarnEx(PyExc_RuntimeWarning, msg, 2)) {
                 g_free(msg);
                 _pygi_invoke_closure_free(closure);

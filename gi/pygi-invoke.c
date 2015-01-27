@@ -26,7 +26,7 @@
 #include "pygi-error.h"
 
 static gboolean
-_check_for_unexpected_kwargs (const gchar *function_name,
+_check_for_unexpected_kwargs (PyGICallableCache *cache,
                               GHashTable  *arg_name_hash,
                               PyObject    *py_kwargs)
 {
@@ -54,11 +54,13 @@ _check_for_unexpected_kwargs (const gchar *function_name,
          * found which maps to index 0 for our hash lookup.
          */
         if (!g_hash_table_lookup_extended (arg_name_hash, PyBytes_AsString(key), NULL, NULL)) {
+            char *full_name = pygi_callable_cache_get_full_name (cache);
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got an unexpected keyword argument '%.400s'",
-                          function_name,
+                          full_name,
                           PyBytes_AsString (key));
             Py_DECREF (key);
+            g_free (full_name);
             return FALSE;
         }
 
@@ -84,7 +86,6 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     Py_ssize_t n_py_args, n_py_kwargs, i;
     guint n_expected_args;
     GSList *l;
-    const gchar *function_name = cache->name;
 
     n_py_args = PyTuple_GET_SIZE (py_args);
     if (py_kwargs == NULL)
@@ -100,24 +101,28 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     }
 
     if (cache->user_data_varargs_index < 0 && n_expected_args < n_py_args) {
+        char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%.200s() takes exactly %d %sargument%s (%zd given)",
-                      function_name,
+                      full_name,
                       n_expected_args,
                       n_py_kwargs > 0 ? "non-keyword " : "",
                       n_expected_args == 1 ? "" : "s",
                       n_py_args);
+        g_free (full_name);
         return NULL;
     }
 
     if (cache->user_data_varargs_index >= 0 && n_py_kwargs > 0 && n_expected_args < n_py_args) {
+        char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%.200s() cannot use variable user data arguments with keyword arguments",
-                      function_name);
+                      full_name);
+        g_free (full_name);
         return NULL;
     }
 
-    if (n_py_kwargs > 0 && !_check_for_unexpected_kwargs (function_name,
+    if (n_py_kwargs > 0 && !_check_for_unexpected_kwargs (cache,
                                                           cache->arg_name_hash,
                                                           py_kwargs)) {
         return NULL;
@@ -183,24 +188,28 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
                 Py_INCREF (_PyGIDefaultArgPlaceholder);
                 PyTuple_SET_ITEM (combined_py_args, i, _PyGIDefaultArgPlaceholder);
             } else {
+                char *full_name = pygi_callable_cache_get_full_name (cache);
                 PyErr_Format (PyExc_TypeError,
                               "%.200s() takes exactly %d %sargument%s (%zd given)",
-                              function_name,
+                              full_name,
                               n_expected_args,
                               n_py_kwargs > 0 ? "non-keyword " : "",
                               n_expected_args == 1 ? "" : "s",
                               n_py_args);
+                g_free (full_name);
 
                 Py_DECREF (combined_py_args);
                 return NULL;
             }
         } else if (kw_arg_item != NULL && py_arg_item != NULL) {
+            char *full_name = pygi_callable_cache_get_full_name (cache);
             PyErr_Format (PyExc_TypeError,
                           "%.200s() got multiple values for keyword argument '%.200s'",
-                          function_name,
+                          full_name,
                           arg_name);
 
             Py_DECREF (combined_py_args);
+            g_free (full_name);
             return NULL;
         }
     }
@@ -362,11 +371,13 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
     gssize i;
 
     if (state->n_py_in_args > cache->n_py_args) {
+        char *full_name = pygi_callable_cache_get_full_name (cache);
         PyErr_Format (PyExc_TypeError,
                       "%s() takes exactly %zd argument(s) (%zd given)",
-                      cache->name,
+                      full_name,
                       cache->n_py_args,
                       state->n_py_in_args);
+        g_free (full_name);
         return FALSE;
     }
 
@@ -387,11 +398,13 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
                     continue;
 
                 if (arg_cache->py_arg_index >= state->n_py_in_args) {
+                    char *full_name = pygi_callable_cache_get_full_name (cache);
                     PyErr_Format (PyExc_TypeError,
                                   "%s() takes exactly %zd argument(s) (%zd given)",
-                                   cache->name,
+                                   full_name,
                                    cache->n_py_args,
                                    state->n_py_in_args);
+                    g_free (full_name);
 
                     /* clean up all of the args we have already marshalled,
                      * since invoke will not be called
@@ -410,11 +423,13 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
             case PYGI_DIRECTION_BIDIRECTIONAL:
                 if (arg_cache->meta_type != PYGI_META_ARG_TYPE_CHILD) {
                     if (arg_cache->py_arg_index >= state->n_py_in_args) {
+                        char *full_name = pygi_callable_cache_get_full_name (cache);
                         PyErr_Format (PyExc_TypeError,
                                       "%s() takes exactly %zd argument(s) (%zd given)",
-                                       cache->name,
+                                       full_name,
                                        cache->n_py_args,
                                        state->n_py_in_args);
+                        g_free (full_name);
                         pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                           cache,
                                                                           i);
@@ -446,9 +461,11 @@ _invoke_marshal_in_args (PyGIInvokeState *state, PyGIFunctionCache *function_cac
                     state->args[i] = c_arg;
 
                     if (!_caller_alloc (arg_cache, c_arg)) {
+                        char *full_name = pygi_callable_cache_get_full_name (cache);
                         PyErr_Format (PyExc_TypeError,
                                       "Could not caller allocate argument %zd of callable %s",
-                                      i, cache->name);
+                                      i, full_name);
+                        g_free (full_name);
                         pygi_marshal_cleanup_args_from_py_parameter_fail (state,
                                                                           cache,
                                                                           i);
