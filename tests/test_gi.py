@@ -1089,7 +1089,19 @@ class TestGByteArray(unittest.TestCase):
         self.assertEqual(b'\x001\xFF3', GIMarshallingTests.bytearray_full_return())
 
     def test_bytearray_none_in(self):
-        GIMarshallingTests.bytearray_none_in(b'\x00\x31\xFF\x33')
+        b = b'\x00\x31\xFF\x33'
+        ba = GLib.ByteArray.new_take(b)
+
+        # b should always have the same value even
+        # though the generated GByteArray is being modified
+        GIMarshallingTests.bytearray_none_in(b)
+        GIMarshallingTests.bytearray_none_in(b)
+
+        # The GByteArray is just a bytes
+        # thus it will not reflect any changes
+        GIMarshallingTests.bytearray_none_in(ba)
+        GIMarshallingTests.bytearray_none_in(ba)
+        #self.assertEqual(ba, b'\x00\x31\x00\x33')
 
 
 class TestGList(unittest.TestCase):

@@ -191,6 +191,7 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
     GArray *array_ = NULL;
     PyGISequenceCache *sequence_cache = (PyGISequenceCache *)arg_cache;
     PyGIArgGArray *array_cache = (PyGIArgGArray *)arg_cache;
+    GITransfer cleanup_transfer = arg_cache->transfer;
 
 
     if (py_arg == Py_None) {
@@ -234,7 +235,21 @@ _pygi_marshal_from_py_array (PyGIInvokeState   *state,
 
     if (sequence_cache->item_cache->type_tag == GI_TYPE_TAG_UINT8 &&
         PYGLIB_PyBytes_Check (py_arg)) {
-        memcpy(array_->data, PYGLIB_PyBytes_AsString (py_arg), length);
+        gchar *data = PYGLIB_PyBytes_AsString (py_arg);
+
+        /* Avoid making a copy if the data
+         * is not transferred to the C function
+         * and cannot not be modified by it.
+         */
+        if (array_cache->array_type == GI_ARRAY_TYPE_C &&
+            arg_cache->transfer == GI_TRANSFER_NOTHING &&
+            !array_cache->is_zero_terminated) {
+            g_free (array_->data);
+            array_->data = data;
+            cleanup_transfer = GI_TRANSFER_EVERYTHING;
+        } else {
+            memcpy (array_->data, data, length);
+        }
         array_->len = length;
         if (array_cache->is_zero_terminated) {
             /* If array_ has been created with zero_termination, space for the
@@ -385,7 +400,7 @@ array_success:
          */
         arg->v_pointer = array_->data;
 
-        if (arg_cache->transfer == GI_TRANSFER_EVERYTHING) {
+        if (cleanup_transfer == GI_TRANSFER_EVERYTHING) {
             g_array_free (array_, FALSE);
             *cleanup_data = NULL;
         } else {
@@ -394,10 +409,10 @@ array_success:
     } else {
         arg->v_pointer = array_;
 
-        if (arg_cache->transfer == GI_TRANSFER_NOTHING) {
+        if (cleanup_transfer == GI_TRANSFER_NOTHING) {
             /* Free everything in cleanup. */
             *cleanup_data = array_;
-        } else if (arg_cache->transfer == GI_TRANSFER_CONTAINER) {
+        } else if (cleanup_transfer == GI_TRANSFER_CONTAINER) {
             /* Make a shallow copy so we can free the elements later in cleanup
              * because it is possible invoke will free the list before our cleanup. */
             *cleanup_data = is_ptr_array ?
