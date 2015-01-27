@@ -500,7 +500,8 @@ class SigPropClass(GObject.GObject):
                                   (GObject.TYPE_INT,))}
 
     __gproperties__ = {
-        'foo': (str, None, None, '', GObject.PARAM_WRITABLE | GObject.PARAM_CONSTRUCT),
+        'foo': (str, None, None, '',
+                GObject.ParamFlags.WRITABLE | GObject.ParamFlags.CONSTRUCT),
         }
 
     signal_emission_failed = False
@@ -577,11 +578,11 @@ class _TestCMarshaller:
         rv = self.obj.emit("test-int64", 102030405)
         self.assertEqual(rv, 102030405)
 
-        rv = self.obj.emit("test-int64", GObject.G_MAXINT64)
-        self.assertEqual(rv, GObject.G_MAXINT64 - 1)
+        rv = self.obj.emit("test-int64", GLib.MAXINT64)
+        self.assertEqual(rv, GLib.MAXINT64 - 1)
 
-        rv = self.obj.emit("test-int64", GObject.G_MININT64)
-        self.assertEqual(rv, GObject.G_MININT64)
+        rv = self.obj.emit("test-int64", GLib.MININT64)
+        self.assertEqual(rv, GLib.MININT64)
 
     def test_string(self):
         rv = self.obj.emit("test-string", "str")
@@ -634,34 +635,34 @@ class _TestCMarshaller:
         self.assertAlmostEqual(rv, 1.234, 4)
 
         # explicit int64
-        v = GObject.Value(GObject.TYPE_INT64, GObject.G_MAXINT64)
+        v = GObject.Value(GObject.TYPE_INT64, GLib.MAXINT64)
         rv = self.obj.emit("test-gvalue", v)
-        self.assertEqual(rv, GObject.G_MAXINT64)
+        self.assertEqual(rv, GLib.MAXINT64)
 
         # explicit uint64
-        v = GObject.Value(GObject.TYPE_UINT64, GObject.G_MAXUINT64)
+        v = GObject.Value(GObject.TYPE_UINT64, GLib.MAXUINT64)
         rv = self.obj.emit("test-gvalue", v)
-        self.assertEqual(rv, GObject.G_MAXUINT64)
+        self.assertEqual(rv, GLib.MAXUINT64)
 
     @unittest.expectedFailure  # https://bugzilla.gnome.org/show_bug.cgi?id=705291
     def test_gvalue_implicit_int64(self):
         # implicit int64
-        rv = self.obj.emit("test-gvalue", GObject.G_MAXINT64)
-        self.assertEqual(rv, GObject.G_MAXINT64)
+        rv = self.obj.emit("test-gvalue", GLib.MAXINT64)
+        self.assertEqual(rv, GLib.MAXINT64)
 
         # implicit uint64
-        rv = self.obj.emit("test-gvalue", GObject.G_MAXUINT64)
-        self.assertEqual(rv, GObject.G_MAXUINT64)
+        rv = self.obj.emit("test-gvalue", GLib.MAXUINT64)
+        self.assertEqual(rv, GLib.MAXUINT64)
 
     def test_gvalue_ret(self):
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT),
-                         GObject.G_MAXINT)
+                         GLib.MAXINT)
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT),
-                         GObject.G_MAXUINT)
+                         GLib.MAXUINT)
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_INT64),
-                         GObject.G_MAXINT64)
+                         GLib.MAXINT64)
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_UINT64),
-                         GObject.G_MAXUINT64)
+                         GLib.MAXUINT64)
         self.assertEqual(self.obj.emit("test-gvalue-ret", GObject.TYPE_STRING),
                          "hello")
 
@@ -871,75 +872,75 @@ class _ConnectDataTestBase(object):
         return callback_args[0]
 
     def test_0(self):
-        obj, value = self.run_connect_test([GObject.G_MAXINT64], user_data=[])
+        obj, value = self.run_connect_test([GLib.MAXINT64], user_data=[])
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
 
     def test_1(self):
-        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'])
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_after_0(self):
-        obj, value = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value = self.run_connect_test([GLib.MAXINT64],
                                            user_data=[],
                                            flags=GObject.ConnectFlags.AFTER)
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
 
     def test_after_1(self):
-        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'],
                                                  flags=GObject.ConnectFlags.AFTER)
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_swaped_0(self):
         # Swapped only works with a single user data argument.
         with self.assertRaises(ValueError):
-            self.run_connect_test([GObject.G_MAXINT64],
+            self.run_connect_test([GLib.MAXINT64],
                                   user_data=[],
                                   flags=GObject.ConnectFlags.SWAPPED)
 
     def test_swaped_1(self):
         # Notice obj and data are reversed in the return.
-        data, value, obj = self.run_connect_test([GObject.G_MAXINT64],
+        data, value, obj = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'],
                                                  flags=GObject.ConnectFlags.SWAPPED)
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_swaped_2(self):
         # Swapped only works with a single user data argument.
         with self.assertRaises(ValueError):
-            self.run_connect_test([GObject.G_MAXINT64],
+            self.run_connect_test([GLib.MAXINT64],
                                   user_data=[1, 2],
                                   flags=GObject.ConnectFlags.SWAPPED)
 
     def test_after_and_swapped_0(self):
         # Swapped only works with a single user data argument.
         with self.assertRaises(ValueError):
-            self.run_connect_test([GObject.G_MAXINT64],
+            self.run_connect_test([GLib.MAXINT64],
                                   user_data=[],
                                   flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
 
     def test_after_and_swapped_1(self):
         # Notice obj and data are reversed in the return.
-        data, value, obj = self.run_connect_test([GObject.G_MAXINT64],
+        data, value, obj = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'],
                                                  flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
         self.assertIsInstance(obj, self.Object)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_after_and_swapped_2(self):
         # Swapped only works with a single user data argument.
         with self.assertRaises(ValueError):
-            self.run_connect_test([GObject.G_MAXINT64],
+            self.run_connect_test([GLib.MAXINT64],
                                   user_data=[],
                                   flags=GObject.ConnectFlags.AFTER | GObject.ConnectFlags.SWAPPED)
 
@@ -1129,9 +1130,9 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         obj.callback_i = None
         obj.connect('sig-with-int64-prop', callback)
-        rv = obj.emit('sig-with-int64-prop', GObject.G_MAXINT64)
-        self.assertEqual(rv, GObject.G_MAXINT64)
-        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+        rv = obj.emit('sig-with-int64-prop', GLib.MAXINT64)
+        self.assertEqual(rv, GLib.MAXINT64)
+        self.assertEqual(obj.callback_i, GLib.MAXINT64)
 
     def test_uint64_param_from_py(self):
         obj = Regress.TestObj()
@@ -1142,9 +1143,9 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         obj.callback_i = None
         obj.connect('sig-with-uint64-prop', callback)
-        rv = obj.emit('sig-with-uint64-prop', GObject.G_MAXUINT64)
-        self.assertEqual(rv, GObject.G_MAXUINT64)
-        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+        rv = obj.emit('sig-with-uint64-prop', GLib.MAXUINT64)
+        self.assertEqual(rv, GLib.MAXUINT64)
+        self.assertEqual(obj.callback_i, GLib.MAXUINT64)
 
     def test_int64_param_from_c(self):
         obj = Regress.TestObj()
@@ -1157,7 +1158,7 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         obj.connect('sig-with-int64-prop', callback)
         obj.emit_sig_with_int64()
-        self.assertEqual(obj.callback_i, GObject.G_MAXINT64)
+        self.assertEqual(obj.callback_i, GLib.MAXINT64)
 
     def test_uint64_param_from_c(self):
         obj = Regress.TestObj()
@@ -1170,7 +1171,7 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         obj.connect('sig-with-uint64-prop', callback)
         obj.emit_sig_with_uint64()
-        self.assertEqual(obj.callback_i, GObject.G_MAXUINT64)
+        self.assertEqual(obj.callback_i, GLib.MAXUINT64)
 
     def test_intarray_ret(self):
         obj = Regress.TestObj()
@@ -1203,8 +1204,8 @@ class TestIntrospectedSignals(unittest.TestCase):
 
         obj.connect('sig-with-array-prop', callback)
         obj.callback_arr = None
-        self.assertEqual(obj.emit('sig-with-array-prop', [1, 2, GObject.G_MAXUINT]), None)
-        self.assertEqual(obj.callback_arr, [1, 2, GObject.G_MAXUINT])
+        self.assertEqual(obj.emit('sig-with-array-prop', [1, 2, GLib.MAXUINT]), None)
+        self.assertEqual(obj.callback_arr, [1, 2, GLib.MAXUINT])
 
     def test_held_struct_ref(self):
         held_structs = []
@@ -1261,46 +1262,46 @@ class _ConnectObjectTestBase(object):
         return callback_args[0]
 
     def test_0(self):
-        obj, value = self.run_connect_test([GObject.G_MAXINT64], user_data=[])
+        obj, value = self.run_connect_test([GLib.MAXINT64], user_data=[])
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
 
     def test_1(self):
-        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'])
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_2(self):
-        obj, value, data1, data2 = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data1, data2 = self.run_connect_test([GLib.MAXINT64],
                                                          user_data=['mydata1', 'mydata2'])
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data1, 'mydata1')
         self.assertEqual(data2, 'mydata2')
 
     def test_after_0(self):
-        obj, value = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value = self.run_connect_test([GLib.MAXINT64],
                                            user_data=[],
                                            flags=GObject.ConnectFlags.AFTER)
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
 
     def test_after_1(self):
-        obj, value, data = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data = self.run_connect_test([GLib.MAXINT64],
                                                  user_data=['mydata'],
                                                  flags=GObject.ConnectFlags.AFTER)
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data, 'mydata')
 
     def test_after_2(self):
-        obj, value, data1, data2 = self.run_connect_test([GObject.G_MAXINT64],
+        obj, value, data1, data2 = self.run_connect_test([GLib.MAXINT64],
                                                          user_data=['mydata1', 'mydata2'],
                                                          flags=GObject.ConnectFlags.AFTER)
         self.assertIsInstance(obj, self.SwapObject)
-        self.assertEqual(value, GObject.G_MAXINT64)
+        self.assertEqual(value, GLib.MAXINT64)
         self.assertEqual(data1, 'mydata1')
         self.assertEqual(data2, 'mydata2')
 

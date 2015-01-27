@@ -7,7 +7,8 @@ class PyGObject(GObject.GObject):
         'label': (GObject.TYPE_STRING,
                   'label property',
                   'the label of the object',
-                  'default', GObject.PARAM_READWRITE),
+                  'default',
+                  GObject.ParamFlags.READABLE | GObject.ParamFlags.WRITABLE),
         }
 
     def __init__(self):

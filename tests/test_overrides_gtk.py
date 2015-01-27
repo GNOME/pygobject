@@ -908,8 +908,8 @@ class TestTreeModel(unittest.TestCase):
                                                 i % 2,
                                                 bool(i % 2),
                                                 i,
-                                                GObject.G_MAXULONG,
-                                                GObject.G_MININT64,
+                                                GLib.MAXULONG,
+                                                GLib.MININT64,
                                                 0xffffffffffffffff,
                                                 254,
                                                 _bytes('a')
@@ -930,8 +930,8 @@ class TestTreeModel(unittest.TestCase):
                        7, i % 2,
                        8, bool(i % 2),
                        9, i,
-                       10, GObject.G_MAXULONG,
-                       11, GObject.G_MININT64,
+                       10, GLib.MAXULONG,
+                       11, GLib.MININT64,
                        12, 0xffffffffffffffff,
                        13, 254,
                        14, _bytes('a'))
@@ -950,8 +950,8 @@ class TestTreeModel(unittest.TestCase):
                                 7: i % 2,
                                 8: bool(i % 2),
                                 9: i,
-                                10: GObject.G_MAXULONG,
-                                11: GObject.G_MININT64,
+                                10: GLib.MAXULONG,
+                                11: GLib.MININT64,
                                 12: 0xffffffffffffffff,
                                 13: 254,
                                 14: _bytes('a')})
@@ -971,8 +971,8 @@ class TestTreeModel(unittest.TestCase):
                                 i % 2,
                                 bool(i % 2),
                                 i,
-                                GObject.G_MAXULONG,
-                                GObject.G_MININT64,
+                                GLib.MAXULONG,
+                                GLib.MININT64,
                                 0xffffffffffffffff,
                                 254,
                                 _bytes('a')))
@@ -1011,9 +1011,9 @@ class TestTreeModel(unittest.TestCase):
             uint_ = tree_store.get_value(treeiter, 9)
             self.assertEqual(uint_, i)
             ulong_ = tree_store.get_value(treeiter, 10)
-            self.assertEqual(ulong_, GObject.G_MAXULONG)
+            self.assertEqual(ulong_, GLib.MAXULONG)
             int64_ = tree_store.get_value(treeiter, 11)
-            self.assertEqual(int64_, GObject.G_MININT64)
+            self.assertEqual(int64_, GLib.MININT64)
             uint64_ = tree_store.get_value(treeiter, 12)
             self.assertEqual(uint64_, 0xffffffffffffffff)
             uchar_ = tree_store.get_value(treeiter, 13)

@@ -149,5 +149,8 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(out, b'moo!\n')
 
     def test_backwards_compat_flags(self):
-        self.assertEqual(GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-                         GLib.SPAWN_DO_NOT_REAP_CHILD)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            self.assertEqual(GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+                             GLib.SPAWN_DO_NOT_REAP_CHILD)

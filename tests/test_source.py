@@ -4,7 +4,7 @@ import gc
 import unittest
 import warnings
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
 
@@ -138,9 +138,9 @@ class TestSource(unittest.TestCase):
             self.assertEqual(GLib.source_remove(s), False)
 
             # accepts large source IDs (they are unsigned)
-            self.assertEqual(GLib.source_remove(GObject.G_MAXINT32), False)
-            self.assertEqual(GLib.source_remove(GObject.G_MAXINT32 + 1), False)
-            self.assertEqual(GLib.source_remove(GObject.G_MAXUINT32), False)
+            self.assertEqual(GLib.source_remove(GLib.MAXINT32), False)
+            self.assertEqual(GLib.source_remove(GLib.MAXINT32 + 1), False)
+            self.assertEqual(GLib.source_remove(GLib.MAXUINT32), False)
         finally:
             GLib.log_set_always_fatal(old_mask)
 

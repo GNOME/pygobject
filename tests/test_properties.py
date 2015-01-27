@@ -8,8 +8,7 @@ import unittest
 
 import gi
 from gi.repository import GObject
-from gi.repository.GObject import GType, new, PARAM_READWRITE, \
-    PARAM_CONSTRUCT, PARAM_READABLE, PARAM_WRITABLE, PARAM_CONSTRUCT_ONLY
+from gi.repository.GObject import ParamFlags, GType, new
 from gi.repository.GObject import \
     TYPE_INT, TYPE_UINT, TYPE_LONG, TYPE_ULONG, TYPE_INT64, \
     TYPE_UINT64, TYPE_GTYPE, TYPE_INVALID, TYPE_NONE, TYPE_STRV, \
@@ -17,9 +16,9 @@ from gi.repository.GObject import \
     TYPE_DOUBLE, TYPE_POINTER, TYPE_BOXED, TYPE_PARAM, TYPE_OBJECT, \
     TYPE_STRING, TYPE_PYOBJECT, TYPE_VARIANT
 
-from gi.repository.GObject import \
-    G_MININT, G_MAXINT, G_MAXUINT, G_MINLONG, G_MAXLONG, G_MAXULONG, \
-    G_MAXUINT64, G_MAXINT64, G_MININT64
+from gi.repository.GLib import \
+    MININT, MAXINT, MAXUINT, MINLONG, MAXLONG, MAXULONG, \
+    MAXUINT64, MAXINT64, MININT64
 
 from gi.repository import Gio
 from gi.repository import GLib
@@ -48,38 +47,49 @@ class PropertyObject(GObject.GObject):
     normal = GObject.Property(type=str)
     construct = GObject.Property(
         type=str,
-        flags=PARAM_READWRITE | PARAM_CONSTRUCT, default='default')
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT,
+        default='default')
+
     construct_only = GObject.Property(
         type=str,
-        flags=PARAM_READWRITE | PARAM_CONSTRUCT_ONLY)
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT_ONLY)
+
     uint64 = GObject.Property(
-        type=TYPE_UINT64, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=TYPE_UINT64,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
     enum = GObject.Property(
         type=Gio.SocketType, default=Gio.SocketType.STREAM)
 
     boxed = GObject.Property(
-        type=GLib.Regex, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=GLib.Regex,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
     flags = GObject.Property(
-        type=GIMarshallingTests.Flags, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
+        type=GIMarshallingTests.Flags,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT,
         default=GIMarshallingTests.Flags.VALUE1)
 
     gtype = GObject.Property(
-        type=TYPE_GTYPE, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=TYPE_GTYPE,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
     strings = GObject.Property(
-        type=TYPE_STRV, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=TYPE_STRV,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
     variant = GObject.Property(
-        type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=TYPE_VARIANT,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
     variant_def = GObject.Property(
-        type=TYPE_VARIANT, flags=PARAM_READWRITE | PARAM_CONSTRUCT,
+        type=TYPE_VARIANT,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT,
         default=GLib.Variant('i', 42))
 
     interface = GObject.Property(
-        type=Gio.File, flags=PARAM_READWRITE | PARAM_CONSTRUCT)
+        type=Gio.File,
+        flags=ParamFlags.READABLE | ParamFlags.WRITABLE | ParamFlags.CONSTRUCT)
 
 
 if has_regress:
@@ -210,7 +220,7 @@ class TestPropertyObject(unittest.TestCase):
                 __gproperties__ = {
                     'time': (TYPE_UINT64, 'Time', 'Time',
                              _long(0), (1 << 64) - 1, _long(0),
-                             PARAM_READABLE)
+                             ParamFlags.READABLE)
                     }
         except OverflowError:
             (etype, ex) = sys.exc_info()[2:]
@@ -443,7 +453,7 @@ class TestPropertyObject(unittest.TestCase):
             d = {}
             for key, (gtype, min, max) in types_.items():
                 d[key] = (gtype, 'blurb', 'desc', min, max, 0,
-                          PARAM_READABLE | PARAM_WRITABLE)
+                          ParamFlags.READABLE | ParamFlags.WRITABLE)
             return d
 
         class RangeCheck(GObject.GObject):
@@ -645,12 +655,12 @@ class TestProperty(unittest.TestCase):
 
     def test_range(self):
         types_ = [
-            (TYPE_INT, G_MININT, G_MAXINT),
-            (TYPE_UINT, 0, G_MAXUINT),
-            (TYPE_LONG, G_MINLONG, G_MAXLONG),
-            (TYPE_ULONG, 0, G_MAXULONG),
-            (TYPE_INT64, G_MININT64, G_MAXINT64),
-            (TYPE_UINT64, 0, G_MAXUINT64),
+            (TYPE_INT, MININT, MAXINT),
+            (TYPE_UINT, 0, MAXUINT),
+            (TYPE_LONG, MINLONG, MAXLONG),
+            (TYPE_ULONG, 0, MAXULONG),
+            (TYPE_INT64, MININT64, MAXINT64),
+            (TYPE_UINT64, 0, MAXUINT64),
             ]
 
         for gtype, min, max in types_:
@@ -969,24 +979,24 @@ class CPropertiesTestBase(object):
 
     def test_char(self):
         self.assertEqual(self.get_prop(self.obj, 'some-char'), 0)
-        self.set_prop(self.obj, 'some-char', GObject.G_MAXINT8)
-        self.assertEqual(self.get_prop(self.obj, 'some-char'), GObject.G_MAXINT8)
+        self.set_prop(self.obj, 'some-char', GLib.MAXINT8)
+        self.assertEqual(self.get_prop(self.obj, 'some-char'), GLib.MAXINT8)
 
         obj = GIMarshallingTests.PropertiesObject(some_char=-42)
         self.assertEqual(self.get_prop(obj, 'some-char'), -42)
 
     def test_uchar(self):
         self.assertEqual(self.get_prop(self.obj, 'some-uchar'), 0)
-        self.set_prop(self.obj, 'some-uchar', GObject.G_MAXUINT8)
-        self.assertEqual(self.get_prop(self.obj, 'some-uchar'), GObject.G_MAXUINT8)
+        self.set_prop(self.obj, 'some-uchar', GLib.MAXUINT8)
+        self.assertEqual(self.get_prop(self.obj, 'some-uchar'), GLib.MAXUINT8)
 
         obj = GIMarshallingTests.PropertiesObject(some_uchar=42)
         self.assertEqual(self.get_prop(obj, 'some-uchar'), 42)
 
     def test_int(self):
         self.assertEqual(self.get_prop(self.obj, 'some_int'), 0)
-        self.set_prop(self.obj, 'some-int', GObject.G_MAXINT)
-        self.assertEqual(self.get_prop(self.obj, 'some_int'), GObject.G_MAXINT)
+        self.set_prop(self.obj, 'some-int', GLib.MAXINT)
+        self.assertEqual(self.get_prop(self.obj, 'some_int'), GLib.MAXINT)
 
         obj = GIMarshallingTests.PropertiesObject(some_int=-42)
         self.assertEqual(self.get_prop(obj, 'some-int'), -42)
@@ -998,8 +1008,8 @@ class CPropertiesTestBase(object):
 
     def test_uint(self):
         self.assertEqual(self.get_prop(self.obj, 'some_uint'), 0)
-        self.set_prop(self.obj, 'some-uint', GObject.G_MAXUINT)
-        self.assertEqual(self.get_prop(self.obj, 'some_uint'), GObject.G_MAXUINT)
+        self.set_prop(self.obj, 'some-uint', GLib.MAXUINT)
+        self.assertEqual(self.get_prop(self.obj, 'some_uint'), GLib.MAXUINT)
 
         obj = GIMarshallingTests.PropertiesObject(some_uint=42)
         self.assertEqual(self.get_prop(obj, 'some-uint'), 42)
@@ -1011,8 +1021,8 @@ class CPropertiesTestBase(object):
 
     def test_long(self):
         self.assertEqual(self.get_prop(self.obj, 'some_long'), 0)
-        self.set_prop(self.obj, 'some-long', GObject.G_MAXLONG)
-        self.assertEqual(self.get_prop(self.obj, 'some_long'), GObject.G_MAXLONG)
+        self.set_prop(self.obj, 'some-long', GLib.MAXLONG)
+        self.assertEqual(self.get_prop(self.obj, 'some_long'), GLib.MAXLONG)
 
         obj = GIMarshallingTests.PropertiesObject(some_long=-42)
         self.assertEqual(self.get_prop(obj, 'some-long'), -42)
@@ -1024,8 +1034,8 @@ class CPropertiesTestBase(object):
 
     def test_ulong(self):
         self.assertEqual(self.get_prop(self.obj, 'some_ulong'), 0)
-        self.set_prop(self.obj, 'some-ulong', GObject.G_MAXULONG)
-        self.assertEqual(self.get_prop(self.obj, 'some_ulong'), GObject.G_MAXULONG)
+        self.set_prop(self.obj, 'some-ulong', GLib.MAXULONG)
+        self.assertEqual(self.get_prop(self.obj, 'some_ulong'), GLib.MAXULONG)
 
         obj = GIMarshallingTests.PropertiesObject(some_ulong=42)
         self.assertEqual(self.get_prop(obj, 'some-ulong'), 42)
@@ -1037,24 +1047,24 @@ class CPropertiesTestBase(object):
 
     def test_int64(self):
         self.assertEqual(self.get_prop(self.obj, 'some-int64'), 0)
-        self.set_prop(self.obj, 'some-int64', GObject.G_MAXINT64)
-        self.assertEqual(self.get_prop(self.obj, 'some-int64'), GObject.G_MAXINT64)
+        self.set_prop(self.obj, 'some-int64', GLib.MAXINT64)
+        self.assertEqual(self.get_prop(self.obj, 'some-int64'), GLib.MAXINT64)
 
         obj = GIMarshallingTests.PropertiesObject(some_int64=-4200000000000000)
         self.assertEqual(self.get_prop(obj, 'some-int64'), -4200000000000000)
 
     def test_uint64(self):
         self.assertEqual(self.get_prop(self.obj, 'some-uint64'), 0)
-        self.set_prop(self.obj, 'some-uint64', GObject.G_MAXUINT64)
-        self.assertEqual(self.get_prop(self.obj, 'some-uint64'), GObject.G_MAXUINT64)
+        self.set_prop(self.obj, 'some-uint64', GLib.MAXUINT64)
+        self.assertEqual(self.get_prop(self.obj, 'some-uint64'), GLib.MAXUINT64)
 
         obj = GIMarshallingTests.PropertiesObject(some_uint64=4200000000000000)
         self.assertEqual(self.get_prop(obj, 'some-uint64'), 4200000000000000)
 
     def test_float(self):
         self.assertEqual(self.get_prop(self.obj, 'some-float'), 0)
-        self.set_prop(self.obj, 'some-float', GObject.G_MAXFLOAT)
-        self.assertEqual(self.get_prop(self.obj, 'some-float'), GObject.G_MAXFLOAT)
+        self.set_prop(self.obj, 'some-float', GLib.MAXFLOAT)
+        self.assertEqual(self.get_prop(self.obj, 'some-float'), GLib.MAXFLOAT)
 
         obj = GIMarshallingTests.PropertiesObject(some_float=42.42)
         self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.42, 4)
@@ -1069,8 +1079,8 @@ class CPropertiesTestBase(object):
 
     def test_double(self):
         self.assertEqual(self.get_prop(self.obj, 'some-double'), 0)
-        self.set_prop(self.obj, 'some-double', GObject.G_MAXDOUBLE)
-        self.assertEqual(self.get_prop(self.obj, 'some-double'), GObject.G_MAXDOUBLE)
+        self.set_prop(self.obj, 'some-double', GLib.MAXDOUBLE)
+        self.assertEqual(self.get_prop(self.obj, 'some-double'), GLib.MAXDOUBLE)
 
         obj = GIMarshallingTests.PropertiesObject(some_double=42.42)
         self.assertAlmostEqual(self.get_prop(obj, 'some-double'), 42.42)
@@ -1120,7 +1130,7 @@ class CPropertiesTestBase(object):
     def test_boxed_glist(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), [])
 
-        l = [GObject.G_MININT, 42, GObject.G_MAXINT]
+        l = [GLib.MININT, 42, GLib.MAXINT]
         self.set_prop(self.obj, 'some-boxed-glist', l)
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-glist'), l)
         self.set_prop(self.obj, 'some-boxed-glist', [])
@@ -1141,7 +1151,7 @@ class CPropertiesTestBase(object):
 
     @unittest.expectedFailure
     def test_boxed_glist_ctor(self):
-        l = [GObject.G_MININT, 42, GObject.G_MAXINT]
+        l = [GLib.MININT, 42, GLib.MAXINT]
         obj = GIMarshallingTests.PropertiesObject(some_boxed_glist=l)
         self.assertEqual(self.get_prop(obj, 'some-boxed-glist'), l)
 

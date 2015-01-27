@@ -101,8 +101,8 @@ class TestBoolean(unittest.TestCase):
 
 class TestInt8(unittest.TestCase):
 
-    MAX = GObject.G_MAXINT8
-    MIN = GObject.G_MININT8
+    MAX = GLib.MAXINT8
+    MIN = GLib.MININT8
 
     def test_int8_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.int8_return_max())
@@ -134,7 +134,7 @@ class TestInt8(unittest.TestCase):
 
 class TestUInt8(unittest.TestCase):
 
-    MAX = GObject.G_MAXUINT8
+    MAX = GLib.MAXUINT8
 
     def test_uint8_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.uint8_return())
@@ -160,8 +160,8 @@ class TestUInt8(unittest.TestCase):
 
 class TestInt16(unittest.TestCase):
 
-    MAX = GObject.G_MAXINT16
-    MIN = GObject.G_MININT16
+    MAX = GLib.MAXINT16
+    MIN = GLib.MININT16
 
     def test_int16_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.int16_return_max())
@@ -193,7 +193,7 @@ class TestInt16(unittest.TestCase):
 
 class TestUInt16(unittest.TestCase):
 
-    MAX = GObject.G_MAXUINT16
+    MAX = GLib.MAXUINT16
 
     def test_uint16_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.uint16_return())
@@ -219,8 +219,8 @@ class TestUInt16(unittest.TestCase):
 
 class TestInt32(unittest.TestCase):
 
-    MAX = GObject.G_MAXINT32
-    MIN = GObject.G_MININT32
+    MAX = GLib.MAXINT32
+    MIN = GLib.MININT32
 
     def test_int32_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.int32_return_max())
@@ -252,7 +252,7 @@ class TestInt32(unittest.TestCase):
 
 class TestUInt32(unittest.TestCase):
 
-    MAX = GObject.G_MAXUINT32
+    MAX = GLib.MAXUINT32
 
     def test_uint32_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.uint32_return())
@@ -337,8 +337,8 @@ class TestUInt64(unittest.TestCase):
 
 class TestShort(unittest.TestCase):
 
-    MAX = GObject.G_MAXSHORT
-    MIN = GObject.G_MINSHORT
+    MAX = GLib.MAXSHORT
+    MIN = GLib.MINSHORT
 
     def test_short_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.short_return_max())
@@ -370,7 +370,7 @@ class TestShort(unittest.TestCase):
 
 class TestUShort(unittest.TestCase):
 
-    MAX = GObject.G_MAXUSHORT
+    MAX = GLib.MAXUSHORT
 
     def test_ushort_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ushort_return())
@@ -396,8 +396,8 @@ class TestUShort(unittest.TestCase):
 
 class TestInt(unittest.TestCase):
 
-    MAX = GObject.G_MAXINT
-    MIN = GObject.G_MININT
+    MAX = GLib.MAXINT
+    MIN = GLib.MININT
 
     def test_int_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.int_return_max())
@@ -430,7 +430,7 @@ class TestInt(unittest.TestCase):
 
 class TestUInt(unittest.TestCase):
 
-    MAX = GObject.G_MAXUINT
+    MAX = GLib.MAXUINT
 
     def test_uint_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.uint_return())
@@ -456,8 +456,8 @@ class TestUInt(unittest.TestCase):
 
 class TestLong(unittest.TestCase):
 
-    MAX = GObject.G_MAXLONG
-    MIN = GObject.G_MINLONG
+    MAX = GLib.MAXLONG
+    MIN = GLib.MINLONG
 
     def test_long_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.long_return_max())
@@ -489,7 +489,7 @@ class TestLong(unittest.TestCase):
 
 class TestULong(unittest.TestCase):
 
-    MAX = GObject.G_MAXULONG
+    MAX = GLib.MAXULONG
 
     def test_ulong_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ulong_return())
@@ -515,8 +515,8 @@ class TestULong(unittest.TestCase):
 
 class TestSSize(unittest.TestCase):
 
-    MAX = GObject.G_MAXLONG
-    MIN = GObject.G_MINLONG
+    MAX = GLib.MAXLONG
+    MIN = GLib.MINLONG
 
     def test_ssize_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.ssize_return_max())
@@ -548,7 +548,7 @@ class TestSSize(unittest.TestCase):
 
 class TestSize(unittest.TestCase):
 
-    MAX = GObject.G_MAXULONG
+    MAX = GLib.MAXULONG
 
     def test_size_return(self):
         self.assertEqual(self.MAX, GIMarshallingTests.size_return())
@@ -590,8 +590,8 @@ class TestTimet(unittest.TestCase):
 
 class TestFloat(unittest.TestCase):
 
-    MAX = GObject.G_MAXFLOAT
-    MIN = GObject.G_MINFLOAT
+    MAX = GLib.MAXFLOAT
+    MIN = GLib.MINFLOAT
 
     def test_float_return(self):
         self.assertAlmostEqual(self.MAX, GIMarshallingTests.float_return())
@@ -610,8 +610,8 @@ class TestFloat(unittest.TestCase):
 
 class TestDouble(unittest.TestCase):
 
-    MAX = GObject.G_MAXDOUBLE
-    MIN = GObject.G_MINDOUBLE
+    MAX = GLib.MAXDOUBLE
+    MIN = GLib.MINDOUBLE
 
     def test_double_return(self):
         self.assertAlmostEqual(self.MAX, GIMarshallingTests.double_return())
@@ -962,7 +962,7 @@ class TestGArray(unittest.TestCase):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.garray_int_none_return())
 
     def test_garray_uint64_none_return(self):
-        self.assertEqual([0, GObject.G_MAXUINT64], GIMarshallingTests.garray_uint64_none_return())
+        self.assertEqual([0, GLib.MAXUINT64], GIMarshallingTests.garray_uint64_none_return())
 
     def test_garray_utf8_none_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.garray_utf8_none_return())
@@ -982,7 +982,7 @@ class TestGArray(unittest.TestCase):
         self.assertRaises(TypeError, GIMarshallingTests.garray_int_none_in, None)
 
     def test_garray_uint64_none_in(self):
-        GIMarshallingTests.garray_uint64_none_in(Sequence([0, GObject.G_MAXUINT64]))
+        GIMarshallingTests.garray_uint64_none_in(Sequence([0, GLib.MAXUINT64]))
 
     def test_garray_utf8_none_in(self):
         GIMarshallingTests.garray_utf8_none_in(Sequence(['0', '1', '2']))
@@ -1109,7 +1109,7 @@ class TestGList(unittest.TestCase):
         self.assertEqual([-1, 0, 1, 2], GIMarshallingTests.glist_int_none_return())
 
     def test_glist_uint32_none_return(self):
-        self.assertEqual([0, GObject.G_MAXUINT32], GIMarshallingTests.glist_uint32_none_return())
+        self.assertEqual([0, GLib.MAXUINT32], GIMarshallingTests.glist_uint32_none_return())
 
     def test_glist_utf8_none_return(self):
         self.assertEqual(['0', '1', '2'], GIMarshallingTests.glist_utf8_none_return())
@@ -1137,7 +1137,7 @@ class TestGList(unittest.TestCase):
         self.assertRaises(Exception, GIMarshallingTests.glist_int_none_in, FailingSequence((-1, 0, 1, 2)))
 
     def test_glist_uint32_none_in(self):
-        GIMarshallingTests.glist_uint32_none_in(Sequence((0, GObject.G_MAXUINT32)))
+        GIMarshallingTests.glist_uint32_none_in(Sequence((0, GLib.MAXUINT32)))
 
     def test_glist_utf8_none_in(self):
         GIMarshallingTests.glist_utf8_none_in(Sequence(('0', '1', '2')))
@@ -1280,7 +1280,7 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(value.get_int(), 24)
 
     def test_gvalue_int64_in(self):
-        value = GObject.Value(GObject.TYPE_INT64, GObject.G_MAXINT64)
+        value = GObject.Value(GObject.TYPE_INT64, GLib.MAXINT64)
         GIMarshallingTests.gvalue_int64_in(value)
 
     def test_gvalue_in_with_type(self):
@@ -1300,7 +1300,7 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(42, GIMarshallingTests.gvalue_out())
 
     def test_gvalue_int64_out(self):
-        self.assertEqual(GObject.G_MAXINT64, GIMarshallingTests.gvalue_int64_out())
+        self.assertEqual(GLib.MAXINT64, GIMarshallingTests.gvalue_int64_out())
 
     def test_gvalue_out_caller_allocates(self):
         self.assertEqual(42, GIMarshallingTests.gvalue_out_caller_allocates())
@@ -2798,7 +2798,9 @@ class TestDeprecation(unittest.TestCase):
         # the descriptor raises AttributeError for itself
         self.assertFalse(hasattr(type(GLib), "IO_STATUS_ERROR"))
 
-        self.assertTrue(hasattr(GLib, "IO_STATUS_ERROR"))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+            self.assertTrue(hasattr(GLib, "IO_STATUS_ERROR"))
 
         try:
             # check if replacing works

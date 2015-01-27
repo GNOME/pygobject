@@ -63,112 +63,112 @@ class TestEverything(unittest.TestCase):
         self.assertEqual(Everything.test_boolean_false(False), False)
 
     def test_int8(self):
-        self.assertEqual(Everything.test_int8(GObject.G_MAXINT8),
-                         GObject.G_MAXINT8)
-        self.assertEqual(Everything.test_int8(GObject.G_MININT8),
-                         GObject.G_MININT8)
-        self.assertRaises(OverflowError, Everything.test_int8, GObject.G_MAXINT8 + 1)
+        self.assertEqual(Everything.test_int8(GLib.MAXINT8),
+                         GLib.MAXINT8)
+        self.assertEqual(Everything.test_int8(GLib.MININT8),
+                         GLib.MININT8)
+        self.assertRaises(OverflowError, Everything.test_int8, GLib.MAXINT8 + 1)
 
-        self.assertEqual(Everything.test_uint8(GObject.G_MAXUINT8),
-                         GObject.G_MAXUINT8)
+        self.assertEqual(Everything.test_uint8(GLib.MAXUINT8),
+                         GLib.MAXUINT8)
         self.assertEqual(Everything.test_uint8(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint8, -1)
-        self.assertRaises(OverflowError, Everything.test_uint8, GObject.G_MAXUINT8 + 1)
+        self.assertRaises(OverflowError, Everything.test_uint8, GLib.MAXUINT8 + 1)
 
     def test_int16(self):
-        self.assertEqual(Everything.test_int16(GObject.G_MAXINT16),
-                         GObject.G_MAXINT16)
-        self.assertEqual(Everything.test_int16(GObject.G_MININT16),
-                         GObject.G_MININT16)
-        self.assertRaises(OverflowError, Everything.test_int16, GObject.G_MAXINT16 + 1)
+        self.assertEqual(Everything.test_int16(GLib.MAXINT16),
+                         GLib.MAXINT16)
+        self.assertEqual(Everything.test_int16(GLib.MININT16),
+                         GLib.MININT16)
+        self.assertRaises(OverflowError, Everything.test_int16, GLib.MAXINT16 + 1)
 
-        self.assertEqual(Everything.test_uint16(GObject.G_MAXUINT16),
-                         GObject.G_MAXUINT16)
+        self.assertEqual(Everything.test_uint16(GLib.MAXUINT16),
+                         GLib.MAXUINT16)
         self.assertEqual(Everything.test_uint16(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint16, -1)
-        self.assertRaises(OverflowError, Everything.test_uint16, GObject.G_MAXUINT16 + 1)
+        self.assertRaises(OverflowError, Everything.test_uint16, GLib.MAXUINT16 + 1)
 
     def test_int32(self):
-        self.assertEqual(Everything.test_int32(GObject.G_MAXINT32),
-                         GObject.G_MAXINT32)
-        self.assertEqual(Everything.test_int32(GObject.G_MININT32),
-                         GObject.G_MININT32)
-        self.assertRaises(OverflowError, Everything.test_int32, GObject.G_MAXINT32 + 1)
+        self.assertEqual(Everything.test_int32(GLib.MAXINT32),
+                         GLib.MAXINT32)
+        self.assertEqual(Everything.test_int32(GLib.MININT32),
+                         GLib.MININT32)
+        self.assertRaises(OverflowError, Everything.test_int32, GLib.MAXINT32 + 1)
 
-        self.assertEqual(Everything.test_uint32(GObject.G_MAXUINT32),
-                         GObject.G_MAXUINT32)
+        self.assertEqual(Everything.test_uint32(GLib.MAXUINT32),
+                         GLib.MAXUINT32)
         self.assertEqual(Everything.test_uint32(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint32, -1)
-        self.assertRaises(OverflowError, Everything.test_uint32, GObject.G_MAXUINT32 + 1)
+        self.assertRaises(OverflowError, Everything.test_uint32, GLib.MAXUINT32 + 1)
 
     def test_int64(self):
-        self.assertEqual(Everything.test_int64(GObject.G_MAXINT64),
-                         GObject.G_MAXINT64)
-        self.assertEqual(Everything.test_int64(GObject.G_MININT64),
-                         GObject.G_MININT64)
-        self.assertRaises(OverflowError, Everything.test_int64, GObject.G_MAXINT64 + 1)
+        self.assertEqual(Everything.test_int64(GLib.MAXINT64),
+                         GLib.MAXINT64)
+        self.assertEqual(Everything.test_int64(GLib.MININT64),
+                         GLib.MININT64)
+        self.assertRaises(OverflowError, Everything.test_int64, GLib.MAXINT64 + 1)
 
-        self.assertEqual(Everything.test_uint64(GObject.G_MAXUINT64),
-                         GObject.G_MAXUINT64)
+        self.assertEqual(Everything.test_uint64(GLib.MAXUINT64),
+                         GLib.MAXUINT64)
         self.assertEqual(Everything.test_uint64(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint64, -1)
-        self.assertRaises(OverflowError, Everything.test_uint64, GObject.G_MAXUINT64 + 1)
+        self.assertRaises(OverflowError, Everything.test_uint64, GLib.MAXUINT64 + 1)
 
     def test_int(self):
-        self.assertEqual(Everything.test_int(GObject.G_MAXINT),
-                         GObject.G_MAXINT)
-        self.assertEqual(Everything.test_int(GObject.G_MININT),
-                         GObject.G_MININT)
-        self.assertRaises(OverflowError, Everything.test_int, GObject.G_MAXINT + 1)
+        self.assertEqual(Everything.test_int(GLib.MAXINT),
+                         GLib.MAXINT)
+        self.assertEqual(Everything.test_int(GLib.MININT),
+                         GLib.MININT)
+        self.assertRaises(OverflowError, Everything.test_int, GLib.MAXINT + 1)
 
-        self.assertEqual(Everything.test_uint(GObject.G_MAXUINT),
-                         GObject.G_MAXUINT)
+        self.assertEqual(Everything.test_uint(GLib.MAXUINT),
+                         GLib.MAXUINT)
         self.assertEqual(Everything.test_uint(0), 0)
         self.assertRaises(OverflowError, Everything.test_uint, -1)
-        self.assertRaises(OverflowError, Everything.test_uint, GObject.G_MAXUINT + 1)
+        self.assertRaises(OverflowError, Everything.test_uint, GLib.MAXUINT + 1)
 
     def test_short(self):
-        self.assertEqual(Everything.test_short(GObject.G_MAXSHORT),
-                         GObject.G_MAXSHORT)
-        self.assertEqual(Everything.test_short(GObject.G_MINSHORT),
-                         GObject.G_MINSHORT)
-        self.assertRaises(OverflowError, Everything.test_short, GObject.G_MAXSHORT + 1)
+        self.assertEqual(Everything.test_short(GLib.MAXSHORT),
+                         GLib.MAXSHORT)
+        self.assertEqual(Everything.test_short(GLib.MINSHORT),
+                         GLib.MINSHORT)
+        self.assertRaises(OverflowError, Everything.test_short, GLib.MAXSHORT + 1)
 
-        self.assertEqual(Everything.test_ushort(GObject.G_MAXUSHORT),
-                         GObject.G_MAXUSHORT)
+        self.assertEqual(Everything.test_ushort(GLib.MAXUSHORT),
+                         GLib.MAXUSHORT)
         self.assertEqual(Everything.test_ushort(0), 0)
         self.assertRaises(OverflowError, Everything.test_ushort, -1)
-        self.assertRaises(OverflowError, Everything.test_ushort, GObject.G_MAXUSHORT + 1)
+        self.assertRaises(OverflowError, Everything.test_ushort, GLib.MAXUSHORT + 1)
 
     def test_long(self):
-        self.assertEqual(Everything.test_long(GObject.G_MAXLONG),
-                         GObject.G_MAXLONG)
-        self.assertEqual(Everything.test_long(GObject.G_MINLONG),
-                         GObject.G_MINLONG)
-        self.assertRaises(OverflowError, Everything.test_long, GObject.G_MAXLONG + 1)
+        self.assertEqual(Everything.test_long(GLib.MAXLONG),
+                         GLib.MAXLONG)
+        self.assertEqual(Everything.test_long(GLib.MINLONG),
+                         GLib.MINLONG)
+        self.assertRaises(OverflowError, Everything.test_long, GLib.MAXLONG + 1)
 
-        self.assertEqual(Everything.test_ulong(GObject.G_MAXULONG),
-                         GObject.G_MAXULONG)
+        self.assertEqual(Everything.test_ulong(GLib.MAXULONG),
+                         GLib.MAXULONG)
         self.assertEqual(Everything.test_ulong(0), 0)
         self.assertRaises(OverflowError, Everything.test_ulong, -1)
-        self.assertRaises(OverflowError, Everything.test_ulong, GObject.G_MAXULONG + 1)
+        self.assertRaises(OverflowError, Everything.test_ulong, GLib.MAXULONG + 1)
 
     def test_size(self):
-        self.assertEqual(Everything.test_ssize(GObject.G_MAXSSIZE),
-                         GObject.G_MAXSSIZE)
-        self.assertEqual(Everything.test_ssize(GObject.G_MINSSIZE),
-                         GObject.G_MINSSIZE)
-        self.assertRaises(OverflowError, Everything.test_ssize, GObject.G_MAXSSIZE + 1)
+        self.assertEqual(Everything.test_ssize(GLib.MAXSSIZE),
+                         GLib.MAXSSIZE)
+        self.assertEqual(Everything.test_ssize(GLib.MINSSIZE),
+                         GLib.MINSSIZE)
+        self.assertRaises(OverflowError, Everything.test_ssize, GLib.MAXSSIZE + 1)
 
-        self.assertEqual(Everything.test_size(GObject.G_MAXSIZE),
-                         GObject.G_MAXSIZE)
+        self.assertEqual(Everything.test_size(GLib.MAXSIZE),
+                         GLib.MAXSIZE)
         self.assertEqual(Everything.test_size(0), 0)
         self.assertRaises(OverflowError, Everything.test_size, -1)
-        self.assertRaises(OverflowError, Everything.test_size, GObject.G_MAXSIZE + 1)
+        self.assertRaises(OverflowError, Everything.test_size, GLib.MAXSIZE + 1)
 
     def test_timet(self):
         self.assertEqual(Everything.test_timet(42), 42)
-        self.assertRaises(OverflowError, Everything.test_timet, GObject.G_MAXUINT64 + 1)
+        self.assertRaises(OverflowError, Everything.test_timet, GLib.MAXUINT64 + 1)
 
     def test_unichar(self):
         self.assertEqual("c", Everything.test_unichar("c"))
@@ -180,25 +180,25 @@ class TestEverything(unittest.TestCase):
         self.assertRaises(TypeError, Everything.test_unichar, "morethanonechar")
 
     def test_float(self):
-        self.assertEqual(Everything.test_float(GObject.G_MAXFLOAT),
-                         GObject.G_MAXFLOAT)
-        self.assertEqual(Everything.test_float(GObject.G_MINFLOAT),
-                         GObject.G_MINFLOAT)
-        self.assertRaises(OverflowError, Everything.test_float, GObject.G_MAXFLOAT * 2)
+        self.assertEqual(Everything.test_float(GLib.MAXFLOAT),
+                         GLib.MAXFLOAT)
+        self.assertEqual(Everything.test_float(GLib.MINFLOAT),
+                         GLib.MINFLOAT)
+        self.assertRaises(OverflowError, Everything.test_float, GLib.MAXFLOAT * 2)
 
     def test_double(self):
-        self.assertEqual(Everything.test_double(GObject.G_MAXDOUBLE),
-                         GObject.G_MAXDOUBLE)
-        self.assertEqual(Everything.test_double(GObject.G_MINDOUBLE),
-                         GObject.G_MINDOUBLE)
+        self.assertEqual(Everything.test_double(GLib.MAXDOUBLE),
+                         GLib.MAXDOUBLE)
+        self.assertEqual(Everything.test_double(GLib.MINDOUBLE),
+                         GLib.MINDOUBLE)
 
         (two, three) = Everything.test_multi_double_args(2.5)
         self.assertAlmostEqual(two, 5.0)
         self.assertAlmostEqual(three, 7.5)
 
     def test_value(self):
-        self.assertEqual(Everything.test_int_value_arg(GObject.G_MAXINT), GObject.G_MAXINT)
-        self.assertEqual(Everything.test_value_return(GObject.G_MAXINT), GObject.G_MAXINT)
+        self.assertEqual(Everything.test_int_value_arg(GLib.MAXINT), GLib.MAXINT)
+        self.assertEqual(Everything.test_value_return(GLib.MAXINT), GLib.MAXINT)
 
     def test_variant(self):
         v = Everything.test_gvariant_i()

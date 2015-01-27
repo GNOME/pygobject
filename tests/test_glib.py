@@ -38,11 +38,14 @@ class TestGLib(unittest.TestCase):
     def test_xdg_dirs(self):
         d = GLib.get_user_data_dir()
         self.assertTrue('/' in d, d)
-        d = GLib.get_user_special_dir(GLib.USER_DIRECTORY_DESKTOP)
+        d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC)
         self.assertTrue('/' in d, d)
-        # also works with backwards compatible enum names
-        self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
-                         GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            # also works with backwards compatible enum names
+            self.assertEqual(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC),
+                             GLib.get_user_special_dir(GLib.USER_DIRECTORY_MUSIC))
 
         for d in GLib.get_system_config_dirs():
             self.assertTrue('/' in d, d)
@@ -215,16 +218,22 @@ https://my.org/q?x=1&y=2
                                      (cmd.stdout, GLib.IOCondition.IN, b'world\n')])
 
     def test_glib_version(self):
-        (major, minor, micro) = GLib.glib_version
-        self.assertGreaterEqual(major, 2)
-        self.assertGreaterEqual(minor, 0)
-        self.assertGreaterEqual(micro, 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            (major, minor, micro) = GLib.glib_version
+            self.assertGreaterEqual(major, 2)
+            self.assertGreaterEqual(minor, 0)
+            self.assertGreaterEqual(micro, 0)
 
     def test_pyglib_version(self):
-        (major, minor, micro) = GLib.pyglib_version
-        self.assertGreaterEqual(major, 3)
-        self.assertGreaterEqual(minor, 0)
-        self.assertGreaterEqual(micro, 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            (major, minor, micro) = GLib.pyglib_version
+            self.assertGreaterEqual(major, 3)
+            self.assertGreaterEqual(minor, 0)
+            self.assertGreaterEqual(micro, 0)
 
     def test_timezone_constructor(self):
         timezone = GLib.TimeZone("+05:21")

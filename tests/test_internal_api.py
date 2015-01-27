@@ -40,8 +40,8 @@ class TestGValueConversion(unittest.TestCase):
         self.assertEqual(testhelper.test_value(0), 0)
         self.assertEqual(testhelper.test_value(5), 5)
         self.assertEqual(testhelper.test_value(-5), -5)
-        self.assertEqual(testhelper.test_value(GObject.G_MAXINT32), GObject.G_MAXINT32)
-        self.assertEqual(testhelper.test_value(GObject.G_MININT32), GObject.G_MININT32)
+        self.assertEqual(testhelper.test_value(GLib.MAXINT32), GLib.MAXINT32)
+        self.assertEqual(testhelper.test_value(GLib.MININT32), GLib.MININT32)
 
     def test_str(self):
         self.assertEqual(testhelper.test_value('hello'), 'hello')

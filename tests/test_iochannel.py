@@ -415,10 +415,13 @@ second line
         self.assertEqual(cb_reads, [b'a', b'b'])
 
     def test_backwards_compat_flags(self):
-        self.assertEqual(GLib.IOCondition.IN, GLib.IO_IN)
-        self.assertEqual(GLib.IOFlags.NONBLOCK, GLib.IO_FLAG_NONBLOCK)
-        self.assertEqual(GLib.IOFlags.IS_SEEKABLE, GLib.IO_FLAG_IS_SEEKABLE)
-        self.assertEqual(GLib.IOStatus.NORMAL, GLib.IO_STATUS_NORMAL)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PyGIDeprecationWarning)
+
+            self.assertEqual(GLib.IOCondition.IN, GLib.IO_IN)
+            self.assertEqual(GLib.IOFlags.NONBLOCK, GLib.IO_FLAG_NONBLOCK)
+            self.assertEqual(GLib.IOFlags.IS_SEEKABLE, GLib.IO_FLAG_IS_SEEKABLE)
+            self.assertEqual(GLib.IOStatus.NORMAL, GLib.IO_STATUS_NORMAL)
 
 if __name__ == '__main__':
     unittest.main()
