@@ -40,7 +40,7 @@ else:
     TEST_UTF8 = "♥"
     UNICODE_UTF8 = TEST_UTF8
 
-from compathelper import _long
+from compathelper import _long, _unicode
 from helper import capture_glib_warnings, capture_output
 
 
@@ -1108,6 +1108,12 @@ class CPropertiesTestBase(object):
 
         obj = GIMarshallingTests.PropertiesObject(some_strv=['hello', 'world'])
         self.assertEqual(self.get_prop(obj, 'some-strv'), ['hello', 'world'])
+
+        # unicode on py2
+        obj = GIMarshallingTests.PropertiesObject(some_strv=[_unicode('foo')])
+        self.assertEqual(self.get_prop(obj, 'some-strv'), [_unicode('foo')])
+        self.assertRaises(TypeError, self.set_prop, self.obj, 'some-strv',
+                          [_unicode('foo'), 1])
 
     def test_boxed_struct(self):
         self.assertEqual(self.get_prop(self.obj, 'some-boxed-struct'), None)
