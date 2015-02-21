@@ -120,10 +120,12 @@ class TestImporter(unittest.TestCase):
 
     def test__get_all_dependencies(self):
         get_all_dependencies = gi.importer._get_all_dependencies
+        deps = set(get_all_dependencies("Regress"))
 
-        self.assertEqual(
-            get_all_dependencies("Regress"),
-            ['Gio-2.0', 'GObject-2.0', 'GLib-2.0', 'cairo-1.0'])
+        self.assertTrue('Gio-2.0' in deps)
+        self.assertTrue('GObject-2.0' in deps)
+        self.assertTrue('GLib-2.0' in deps)
+        self.assertTrue('cairo-1.0' in deps)
 
     def test_require_version_warning(self):
         check = gi.importer._check_require_version
