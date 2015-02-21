@@ -118,8 +118,11 @@ pyg_option_group_dealloc(PyGOptionGroup *self)
     {
         GOptionGroup *tmp = self->group;
         self->group = NULL;
-	if (tmp)
+	if (tmp) {
+	    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	    g_option_group_free(tmp);
+	    G_GNUC_END_IGNORE_DEPRECATIONS
+	}
     }
 
     PyObject_Del(self);
