@@ -1101,7 +1101,6 @@ class TestGByteArray(unittest.TestCase):
         # thus it will not reflect any changes
         GIMarshallingTests.bytearray_none_in(ba)
         GIMarshallingTests.bytearray_none_in(ba)
-        #self.assertEqual(ba, b'\x00\x31\x00\x33')
 
 
 class TestGList(unittest.TestCase):
