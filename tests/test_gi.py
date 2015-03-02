@@ -17,6 +17,7 @@ from io import StringIO, BytesIO
 
 import gi
 import gi.overrides
+from gi import PyGIWarning
 from gi import PyGIDeprecationWarning
 from gi.repository import GObject, GLib, Gio
 
@@ -2771,6 +2772,20 @@ class TestProjectVersion(unittest.TestCase):
         self.assertRaises(ValueError, gi.check_version, "99.0.0")
         gi.check_version((3, 3, 5))
         gi.check_version("3.3.5")
+
+
+class TestGIWarning(unittest.TestCase):
+
+    def test_warning(self):
+        ignored_by_default = (DeprecationWarning, PendingDeprecationWarning,
+                              ImportWarning)
+
+        with warnings.catch_warnings(record=True) as warn:
+            warnings.simplefilter('always')
+            warnings.warn("test", PyGIWarning)
+            self.assertTrue(issubclass(warn[0].category, Warning))
+            # We don't want PyGIWarning get ignored by default
+            self.assertFalse(issubclass(warn[0].category, ignored_by_default))
 
 
 class TestDeprecation(unittest.TestCase):

@@ -32,6 +32,7 @@
 
 #include <pyglib-python-compat.h>
 
+PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
 
@@ -637,6 +638,8 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
 
+    PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
+
     /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
      * for unstable (odd minor version) and use DeprecationWarning for
      * stable (even minor version). This is so PyGObject deprecations
@@ -654,6 +657,9 @@ PYGLIB_MODULE_START(_gi, "_gi")
      * for values not supplied by the caller but support a GI default.
      */
     _PyGIDefaultArgPlaceholder = PyObject_New(PyObject, &PyType_Type);
+
+    Py_INCREF (PyGIWarning);
+    PyModule_AddObject (module, "PyGIWarning", PyGIWarning);
 
     Py_INCREF(PyGIDeprecationWarning);
     PyModule_AddObject(module, "PyGIDeprecationWarning", PyGIDeprecationWarning);

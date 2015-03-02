@@ -28,6 +28,7 @@ from contextlib import contextmanager
 
 import gi
 from ._gi import Repository
+from ._gi import PyGIWarning
 from .module import get_introspection_module
 from .overrides import load_overrides
 
@@ -119,7 +120,7 @@ def _check_require_version(namespace, stacklevel):
             "Use gi.require_version('%(namespace)s', '%(version)s') before "
             "import to ensure that the right version gets loaded."
             % {"namespace": namespace, "version": version},
-            ImportWarning, stacklevel=stacklevel)
+            PyGIWarning, stacklevel=stacklevel)
 
 
 class DynamicImporter(object):
