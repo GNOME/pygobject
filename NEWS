@@ -1,3 +1,5 @@
+3.16.0  24-Mar-2015
+
 3.15.91 05-Mar-2015
         - tests: Don't use deprecated override attributes
           (Christoph Reiter) (#743514)
