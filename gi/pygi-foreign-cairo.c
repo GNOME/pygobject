@@ -28,7 +28,7 @@
 #include <pycairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #else
-#include <pycairo/py3cairo.h>
+#include <py3cairo.h>
 #endif
 
 #include <cairo-gobject.h>
