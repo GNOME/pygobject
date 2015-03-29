@@ -42,18 +42,6 @@ gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
 void _pygi_hash_pointer_to_arg (GIArgument *arg,
                                 GITypeTag   type_tag);
 
-gint _pygi_g_type_interface_check_object (GIBaseInfo *info,
-                                          PyObject   *object);
-
-gint _pygi_g_type_info_check_object (GITypeInfo *type_info,
-                                     PyObject   *object,
-                                     gboolean   allow_none);
-
-gint _pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
-                                                gboolean              is_instance,
-                                                PyObject             *object);
-
-
 GArray* _pygi_argument_to_array (GIArgument  *arg,
                                  PyGIArgArrayLengthPolicy array_length_policy,
                                  void        *user_data1,

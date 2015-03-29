@@ -1812,6 +1812,81 @@ out:
     return array_len;
 }
 
+static gint
+_pygi_g_registered_type_info_check_object (GIRegisteredTypeInfo *info,
+                                           gboolean              is_instance,
+                                           PyObject             *object)
+{
+    gint retval;
+
+    GType g_type;
+    PyObject *py_type;
+    gchar *type_name_expected = NULL;
+    GIInfoType interface_type;
+
+    interface_type = g_base_info_get_type (info);
+    if ( (interface_type == GI_INFO_TYPE_STRUCT) &&
+            (g_struct_info_is_foreign ( (GIStructInfo*) info))) {
+        /* TODO: Could we check is the correct foreign type? */
+        return 1;
+    }
+
+    g_type = g_registered_type_info_get_g_type (info);
+    if (g_type != G_TYPE_NONE) {
+        py_type = _pygi_type_get_from_g_type (g_type);
+    } else {
+        py_type = _pygi_type_import_by_gi_info ( (GIBaseInfo *) info);
+    }
+
+    if (py_type == NULL) {
+        return 0;
+    }
+
+    g_assert (PyType_Check (py_type));
+
+    if (is_instance) {
+        retval = PyObject_IsInstance (object, py_type);
+        if (!retval) {
+            type_name_expected = _pygi_g_base_info_get_fullname (
+                                     (GIBaseInfo *) info);
+        }
+    } else {
+        if (!PyObject_Type (py_type)) {
+            type_name_expected = "type";
+            retval = 0;
+        } else if (!PyType_IsSubtype ( (PyTypeObject *) object,
+                                       (PyTypeObject *) py_type)) {
+            type_name_expected = _pygi_g_base_info_get_fullname (
+                                     (GIBaseInfo *) info);
+            retval = 0;
+        } else {
+            retval = 1;
+        }
+    }
+
+    Py_DECREF (py_type);
+
+    if (!retval) {
+        PyTypeObject *object_type;
+
+        if (type_name_expected == NULL) {
+            return -1;
+        }
+
+        object_type = (PyTypeObject *) PyObject_Type (object);
+        if (object_type == NULL) {
+            return -1;
+        }
+
+        PyErr_Format (PyExc_TypeError, "Must be %s, not %s",
+                      type_name_expected, object_type->tp_name);
+
+        g_free (type_name_expected);
+    }
+
+    return retval;
+}
+
 static PyObject *
 _wrap_g_field_info_get_value (PyGIBaseInfo *self,
                               PyObject     *args)
@@ -1964,21 +2039,6 @@ _wrap_g_field_info_set_value (PyGIBaseInfo *self,
     }
 
     field_type_info = g_field_info_get_type ( (GIFieldInfo *) self->info);
-
-    /* Check the value. */
-    {
-        gboolean retval;
-
-        retval = _pygi_g_type_info_check_object (field_type_info, py_value, TRUE);
-        if (retval < 0) {
-            goto out;
-        }
-
-        if (!retval) {
-            _PyGI_ERROR_PREFIX ("argument 2: ");
-            goto out;
-        }
-    }
 
     /* Set the field's value. */
     /* A few types are not handled by g_field_info_set_field, so do it here. */

@@ -35,8 +35,8 @@ class TestFields(unittest.TestCase):
 
         self.assertRaises(TypeError, setattr, s, "some_int8", b"ab")
         self.assertRaises(TypeError, setattr, s, "some_int8", None)
-        self.assertRaises(ValueError, setattr, s, "some_int8", 128)
-        self.assertRaises(ValueError, setattr, s, "some_int8", -129)
+        self.assertRaises(OverflowError, setattr, s, "some_int8", 128)
+        self.assertRaises(OverflowError, setattr, s, "some_int8", -129)
 
         s.some_int8 = 3.6
         self.assertEqual(s.some_int8, 3)
@@ -51,8 +51,10 @@ class TestFields(unittest.TestCase):
 
         self.assertRaises(TypeError, setattr, s, "some_int", b"a")
         self.assertRaises(TypeError, setattr, s, "some_int", None)
-        self.assertRaises(ValueError, setattr, s, "some_int", GLib.MAXINT + 1)
-        self.assertRaises(ValueError, setattr, s, "some_int", GLib.MININT - 1)
+        self.assertRaises(
+            OverflowError, setattr, s, "some_int", GLib.MAXINT + 1)
+        self.assertRaises(
+            OverflowError, setattr, s, "some_int", GLib.MININT - 1)
 
         s.some_int = 3.6
         self.assertEqual(s.some_int, 3)
@@ -67,8 +69,8 @@ class TestFields(unittest.TestCase):
 
         self.assertRaises(TypeError, setattr, s, "long_", b"a")
         self.assertRaises(TypeError, setattr, s, "long_", None)
-        self.assertRaises(ValueError, setattr, s, "long_", GLib.MAXLONG + 1)
-        self.assertRaises(ValueError, setattr, s, "long_", GLib.MINLONG - 1)
+        self.assertRaises(OverflowError, setattr, s, "long_", GLib.MAXLONG + 1)
+        self.assertRaises(OverflowError, setattr, s, "long_", GLib.MINLONG - 1)
 
         s.long_ = 3.6
         self.assertEqual(s.long_, 3)
