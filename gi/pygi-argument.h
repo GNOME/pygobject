@@ -74,8 +74,6 @@ void _pygi_argument_release (GIArgument   *arg,
                              GITransfer   transfer,
                              GIDirection  direction);
 
-void _pygi_argument_init (void);
-
 gboolean pygi_argument_to_gssize (GIArgument *arg_in,
                                   GITypeTag  type_tag,
                                   gssize *gssize_out);

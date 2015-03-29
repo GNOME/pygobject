@@ -25,7 +25,6 @@
 #include <string.h>
 #include <time.h>
 
-#include <datetime.h>
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
@@ -1854,11 +1853,5 @@ _pygi_argument_release (GIArgument   *arg,
             break;
         }
     }
-}
-
-void
-_pygi_argument_init (void)
-{
-    PyDateTime_IMPORT;
 }
 

@@ -636,7 +636,6 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_struct_register_types (module);
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
-    _pygi_argument_init ();
 
     /* Use RuntimeWarning as the base class of PyGIDeprecationWarning
      * for unstable (odd minor version) and use DeprecationWarning for
