@@ -190,14 +190,19 @@ class Event(Gdk.Event):
         Gdk.EventType.DROP_FINISHED: 'dnd',
         Gdk.EventType.CLIENT_EVENT: 'client',
         Gdk.EventType.VISIBILITY_NOTIFY: 'visibility',
-        Gdk.EventType.TOUCH_BEGIN: 'touch',
-        Gdk.EventType.TOUCH_UPDATE: 'touch',
-        Gdk.EventType.TOUCH_END: 'touch',
-        Gdk.EventType.TOUCH_CANCEL: 'touch',
     }
 
     if Gdk._version == '2.0':
         _UNION_MEMBERS[Gdk.EventType.NO_EXPOSE] = 'no_expose'
+
+    if hasattr(Gdk.EventType, 'TOUCH_BEGIN'):
+        _UNION_MEMBERS.update(
+            {
+                Gdk.EventType.TOUCH_BEGIN: 'touch',
+                Gdk.EventType.TOUCH_UPDATE: 'touch',
+                Gdk.EventType.TOUCH_END: 'touch',
+                Gdk.EventType.TOUCH_CANCEL: 'touch',
+            })
 
     def __getattr__(self, name):
         real_event = getattr(self, '_UNION_MEMBERS').get(self.type)
@@ -232,7 +237,6 @@ event_member_classes = ['EventAny',
                         'EventVisibility',
                         'EventMotion',
                         'EventButton',
-                        'EventTouch',
                         'EventScroll',
                         'EventKey',
                         'EventCrossing',
@@ -249,6 +253,10 @@ event_member_classes = ['EventAny',
 
 if Gdk._version == '2.0':
     event_member_classes.append('EventNoExpose')
+
+if hasattr(Gdk, 'EventTouch'):
+    event_member_classes.append('EventTouch')
+
 
 # whitelist all methods that have a success return we want to mask
 gsuccess_mask_funcs = ['get_state',
