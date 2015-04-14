@@ -1,3 +1,7 @@
+3.16.1  13-Apr-2015
+        - overrides: Conditionalize touch override support in Gdk
+          (Simon Feltman) (#747717)
+
 3.16.0  24-Mar-2015
 
 3.15.91 05-Mar-2015
