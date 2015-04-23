@@ -117,6 +117,13 @@ def load_overrides(introspection_module):
         if has_old:
             sys.modules[module_key] = old_module
 
+    # backwards compat: for gst-python/gstmodule.c,
+    # which tries to access Gst.Fraction through
+    # Gst._overrides_module.Fraction. We assign the proxy instead as that
+    # contains all overridden classes like Fraction during import anyway and
+    # there is no need to keep the real override module alive.
+    proxy._overrides_module = proxy
+
     override_all = []
     if hasattr(override_mod, "__all__"):
         override_all = override_mod.__all__
