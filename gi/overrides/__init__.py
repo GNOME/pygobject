@@ -2,6 +2,7 @@ import types
 import warnings
 import importlib
 import sys
+from pkgutil import get_loader
 
 from gi import PyGIDeprecationWarning
 from gi._gi import CallableInfo
@@ -107,10 +108,22 @@ def load_overrides(introspection_module):
     modules[namespace] = proxy
 
     try:
+        override_package_name = 'gi.overrides.' + namespace
+
+        # http://bugs.python.org/issue14710
         try:
-            override_mod = importlib.import_module('gi.overrides.' + namespace)
-        except ImportError:
+            override_loader = get_loader(override_package_name)
+
+        except AttributeError:
+            override_loader = None
+
+        # Avoid checking for an ImportError, an override might
+        # depend on a missing module thus causing an ImportError
+        if override_loader is None:
             return introspection_module
+
+        override_mod = importlib.import_module(override_package_name)
+
     finally:
         del modules[namespace]
         del sys.modules[module_key]
