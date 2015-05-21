@@ -382,7 +382,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
     case G_TYPE_UINT:
     {
         if (PYGLIB_PyLong_Check(obj)) {
-            guint val;
+            gulong val;
 
             /* check that number is not negative */
             if (PyLong_AsLongLong(obj) < 0)
@@ -390,7 +390,7 @@ pyg_value_from_pyobject_with_error(GValue *value, PyObject *obj)
 
             val = PyLong_AsUnsignedLong(obj);
             if (val <= G_MAXUINT)
-                g_value_set_uint(value, val);
+                g_value_set_uint(value, (guint) val);
             else
                 return -1;
         } else {
