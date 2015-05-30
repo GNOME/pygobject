@@ -126,10 +126,14 @@ if Gdk._version == '2.0':
     Rectangle = override(Rectangle)
     __all__.append('Rectangle')
 else:
-    from gi.repository import cairo as _cairo
-    Rectangle = _cairo.RectangleInt
+    # Newer GTK+/gobject-introspection (3.17.x) include GdkRectangle in the
+    # typelib. See https://bugzilla.gnome.org/show_bug.cgi?id=748832 and
+    # https://bugzilla.gnome.org/show_bug.cgi?id=748833
+    if not hasattr(Gdk, 'Rectangle'):
+        from gi.repository import cairo as _cairo
+        Rectangle = _cairo.RectangleInt
 
-    __all__.append('Rectangle')
+        __all__.append('Rectangle')
 
 if Gdk._version == '2.0':
     class Drawable(Gdk.Drawable):
