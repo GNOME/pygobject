@@ -64,6 +64,14 @@ class TestType(unittest.TestCase):
         self.assertTrue(issubclass(GLib.Error, RuntimeError))
 
 
+class ObjectWithVFuncException(GIMarshallingTests.Object):
+    def do_vfunc_meth_with_err(self, x):
+        if x == 42:
+            return True
+
+        raise GLib.Error('unexpected value %d' % x, 'mydomain', 42)
+
+
 class TestMarshalling(unittest.TestCase):
     def test_array_in_crash(self):
         # Previously there was a bug in invoke, in which C arrays were unwrapped
@@ -110,6 +118,20 @@ class TestMarshalling(unittest.TestCase):
         self.assertEqual(e.domain, GIMarshallingTests.CONSTANT_GERROR_DOMAIN)
         self.assertEqual(e.code, GIMarshallingTests.CONSTANT_GERROR_CODE)
         self.assertEqual(e.message, GIMarshallingTests.CONSTANT_GERROR_MESSAGE)
+
+    def test_vfunc_no_exception(self):
+        obj = ObjectWithVFuncException()
+        self.assertTrue(obj.vfunc_meth_with_error(42))
+
+    def test_vfunc_gerror_exception(self):
+        obj = ObjectWithVFuncException()
+        with self.assertRaises(GLib.Error) as context:
+            obj.vfunc_meth_with_error(-1)
+
+        e = context.exception
+        self.assertEqual(e.message, 'unexpected value -1')
+        self.assertEqual(e.domain, 'mydomain')
+        self.assertEqual(e.code, 42)
 
 
 if __name__ == '__main__':
