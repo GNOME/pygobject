@@ -170,6 +170,9 @@ struct _PyGICallableCache
     GHashTable *arg_name_hash;
     gboolean throws;
 
+    /* Index of user_data arg passed to a callable. */
+    gssize user_data_index;
+
     /* Index of user_data arg that can eat variable args passed to a callable. */
     gssize user_data_varargs_index;
 

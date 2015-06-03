@@ -489,6 +489,8 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     callable_cache->return_cache = return_cache;
     g_base_info_unref (return_info);
 
+    callable_cache->user_data_index = -1;
+
     for (i = 0, arg_index = callable_cache->args_offset;
          arg_index < _pygi_callable_cache_args_len (callable_cache);
          i++, arg_index++) {
@@ -498,7 +500,9 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
 
         arg_info = g_callable_info_get_arg (callable_info, i);
 
+        /* This only happens when dealing with callbacks */
         if (g_arg_info_get_closure (arg_info) == i) {
+            callable_cache->user_data_index = i;
 
             arg_cache = pygi_arg_cache_alloc ();
             _pygi_callable_cache_set_arg (callable_cache, arg_index, arg_cache);
@@ -1114,6 +1118,26 @@ pygi_closure_cache_new (GICallableInfo *info)
         len_arg_cache = g_ptr_array_index (callable_cache->args_cache,
                                            garray_cache->len_arg_index);
         len_arg_cache->meta_type = PYGI_META_ARG_TYPE_PARENT;
+    }
+
+    /* Prevent guessing multiple user data arguments.
+     * This is required because some versions of GI
+     * do not recognize user_data/data arguments correctly.
+     */
+    if (callable_cache->user_data_index == -1) {
+        for (i = 0; i < _pygi_callable_cache_args_len (callable_cache); i++) {
+            PyGIArgCache *arg_cache;
+
+            arg_cache = g_ptr_array_index (callable_cache->args_cache, i);
+
+            if (arg_cache->direction == PYGI_DIRECTION_TO_PYTHON &&
+                arg_cache->type_tag == GI_TYPE_TAG_VOID &&
+                arg_cache->is_pointer) {
+
+                callable_cache->user_data_index = i;
+                break;
+            }
+        }
     }
 
     return closure_cache;

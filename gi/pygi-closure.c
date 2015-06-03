@@ -370,17 +370,13 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
 
     for (i = 0; i < _pygi_callable_cache_args_len (cache); i++) {
         PyGIArgCache *arg_cache;
-        PyGIDirection direction;
 
         arg_cache = g_ptr_array_index (cache->args_cache, i);
-        direction = arg_cache->direction;
 
-        if (direction & PYGI_DIRECTION_TO_PYTHON) {
+        if (arg_cache->direction & PYGI_DIRECTION_TO_PYTHON) {
             PyObject *value;
 
-            if (direction == PYGI_DIRECTION_TO_PYTHON &&
-                    arg_cache->type_tag == GI_TYPE_TAG_VOID &&
-                    arg_cache->is_pointer) {
+            if (cache->user_data_index == i) {
                 if (state->user_data == NULL) {
                     /* user_data can be NULL for connect functions which don't accept
                      * user_data or as the default for user_data in the middle of function
