@@ -208,79 +208,75 @@ _pygi_closure_convert_ffi_arguments (PyGICallableCache *cache,
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
             g_args[i].v_pointer = * (gpointer *) args[i];
-        } else {
-            switch (arg_cache->type_tag) {
-                case GI_TYPE_TAG_BOOLEAN:
-                    g_args[i].v_boolean = * (gboolean *) args[i];
-                    break;
-                case GI_TYPE_TAG_INT8:
-                    g_args[i].v_int8 = * (gint8 *) args[i];
-                    break;
-                case GI_TYPE_TAG_UINT8:
-                    g_args[i].v_uint8 = * (guint8 *) args[i];
-                    break;
-                case GI_TYPE_TAG_INT16:
-                    g_args[i].v_int16 = * (gint16 *) args[i];
-                    break;
-                case GI_TYPE_TAG_UINT16:
-                    g_args[i].v_uint16 = * (guint16 *) args[i];
-                    break;
-                case GI_TYPE_TAG_INT32:
-                    g_args[i].v_int32 = * (gint32 *) args[i];
-                    break;
-                case GI_TYPE_TAG_UINT32:
-                    g_args[i].v_uint32 = * (guint32 *) args[i];
-                    break;
-                case GI_TYPE_TAG_INT64:
-                    g_args[i].v_int64 = * (glong *) args[i];
-                    break;
-                case GI_TYPE_TAG_UINT64:
-                    g_args[i].v_uint64 = * (glong *) args[i];
-                    break;
-                case GI_TYPE_TAG_FLOAT:
-                    g_args[i].v_float = * (gfloat *) args[i];
-                    break;
-                case GI_TYPE_TAG_DOUBLE:
-                    g_args[i].v_double = * (gdouble *) args[i];
-                    break;
-                case GI_TYPE_TAG_UTF8:
-                    g_args[i].v_string = * (gchar **) args[i];
-                    break;
-                case GI_TYPE_TAG_INTERFACE:
-                {
-                    GIBaseInfo *interface;
-                    GIInfoType interface_type;
+            continue;
+        }
 
-                    interface = ((PyGIInterfaceCache *) arg_cache)->interface_info;
-                    interface_type = g_base_info_get_type (interface);
+        switch (arg_cache->type_tag) {
+            case GI_TYPE_TAG_BOOLEAN:
+                g_args[i].v_boolean = * (gboolean *) args[i];
+                break;
+            case GI_TYPE_TAG_INT8:
+                g_args[i].v_int8 = * (gint8 *) args[i];
+                break;
+            case GI_TYPE_TAG_UINT8:
+                g_args[i].v_uint8 = * (guint8 *) args[i];
+                break;
+            case GI_TYPE_TAG_INT16:
+                g_args[i].v_int16 = * (gint16 *) args[i];
+                break;
+            case GI_TYPE_TAG_UINT16:
+                g_args[i].v_uint16 = * (guint16 *) args[i];
+                break;
+            case GI_TYPE_TAG_INT32:
+                g_args[i].v_int32 = * (gint32 *) args[i];
+                break;
+            case GI_TYPE_TAG_UINT32:
+                g_args[i].v_uint32 = * (guint32 *) args[i];
+                break;
+            case GI_TYPE_TAG_INT64:
+                g_args[i].v_int64 = * (glong *) args[i];
+                break;
+            case GI_TYPE_TAG_UINT64:
+                g_args[i].v_uint64 = * (glong *) args[i];
+                break;
+            case GI_TYPE_TAG_FLOAT:
+                g_args[i].v_float = * (gfloat *) args[i];
+                break;
+            case GI_TYPE_TAG_DOUBLE:
+                g_args[i].v_double = * (gdouble *) args[i];
+                break;
+            case GI_TYPE_TAG_UTF8:
+                g_args[i].v_string = * (gchar **) args[i];
+                break;
+            case GI_TYPE_TAG_INTERFACE:
+            {
+                GIBaseInfo *interface;
+                GIInfoType interface_type;
 
-                    if (interface_type == GI_INFO_TYPE_OBJECT ||
-                            interface_type == GI_INFO_TYPE_INTERFACE) {
-                        g_args[i].v_pointer = * (gpointer *) args[i];
-                        break;
-                    } else if (interface_type == GI_INFO_TYPE_ENUM ||
-                               interface_type == GI_INFO_TYPE_FLAGS) {
-                        g_args[i].v_uint = * (guint *) args[i];
-                        break;
-                    } else if (interface_type == GI_INFO_TYPE_STRUCT ||
-                               interface_type == GI_INFO_TYPE_CALLBACK) {
-                        g_args[i].v_pointer = * (gpointer *) args[i];
-                        break;
-                    }
-                }
-                case GI_TYPE_TAG_ERROR:
-                case GI_TYPE_TAG_GHASH:
-                case GI_TYPE_TAG_GLIST:
-                case GI_TYPE_TAG_GSLIST:
-                case GI_TYPE_TAG_ARRAY:
-                case GI_TYPE_TAG_VOID:
+                interface = ((PyGIInterfaceCache *) arg_cache)->interface_info;
+                interface_type = g_base_info_get_type (interface);
+
+                if (interface_type == GI_INFO_TYPE_ENUM) {
+                    g_args[i].v_int = * (gint *) args[i];
+                } else if (interface_type == GI_INFO_TYPE_FLAGS) {
+                    g_args[i].v_uint = * (guint *) args[i];
+                } else {
                     g_args[i].v_pointer = * (gpointer *) args[i];
-                    break;
-                default:
-                    g_warning ("Unhandled type tag %s",
-                               g_type_tag_to_string (arg_cache->type_tag));
-                    g_args[i].v_pointer = 0;
+                }
+                break;
             }
+            case GI_TYPE_TAG_ERROR:
+            case GI_TYPE_TAG_GHASH:
+            case GI_TYPE_TAG_GLIST:
+            case GI_TYPE_TAG_GSLIST:
+            case GI_TYPE_TAG_ARRAY:
+            case GI_TYPE_TAG_VOID:
+                g_args[i].v_pointer = * (gpointer *) args[i];
+                break;
+            default:
+                g_warning ("Unhandled type tag %s",
+                           g_type_tag_to_string (arg_cache->type_tag));
+                g_args[i].v_pointer = 0;
         }
     }
 
