@@ -32,6 +32,7 @@
 #include "pygi-invoke.h"
 #include "pygi-cache.h"
 #include "pygi-source.h"
+#include "pygi-resulttuple.h"
 
 G_BEGIN_DECLS
 #if PY_VERSION_HEX >= 0x03000000

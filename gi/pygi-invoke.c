@@ -553,8 +553,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
     PyGICallableCache *cache = (PyGICallableCache *) function_cache;
     PyObject *py_out = NULL;
     PyObject *py_return = NULL;
-    gssize total_out_args = cache->n_to_py_args;
-    gboolean has_return = FALSE;
+    gssize n_out_args = cache->n_to_py_args - cache->n_to_py_child_args;
 
     if (cache->return_cache) {
         if (!cache->return_cache->is_skipped) {
@@ -566,12 +565,6 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
                 pygi_marshal_cleanup_args_return_fail (state,
                                                        cache);
                 return NULL;
-            }
-
-
-            if (cache->return_cache->type_tag != GI_TYPE_TAG_VOID) {
-                total_out_args++;
-                has_return = TRUE;
             }
         } else {
             if (cache->return_cache->transfer == GI_TRANSFER_EVERYTHING) {
@@ -588,9 +581,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
         }
     }
 
-    total_out_args -= cache->n_to_py_child_args;
-
-    if (cache->n_to_py_args - cache->n_to_py_child_args  == 0) {
+    if (n_out_args == 0) {
         if (cache->return_cache->is_skipped && state->error == NULL) {
             /* we skip the return value and have no (out) arguments to return,
              * so py_return should be NULL. But we must not return NULL,
@@ -602,7 +593,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
         }
 
         py_out = py_return;
-    } else if (total_out_args == 1) {
+    } else if (!cache->has_return && n_out_args == 1) {
         /* if we get here there is one out arg an no return */
         PyGIArgCache *arg_cache = (PyGIArgCache *)cache->to_py_args->data;
         py_out = arg_cache->to_py_marshaller (state,
@@ -617,16 +608,26 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
         }
 
     } else {
+        /* return a tuple */
         gssize py_arg_index = 0;
         GSList *cache_item = cache->to_py_args;
-        /* return a tuple */
-        py_out = PyTuple_New (total_out_args);
-        if (has_return) {
+        gssize tuple_len = cache->has_return + n_out_args;
+
+        py_out = pygi_resulttuple_new (cache->resulttuple_type, tuple_len);
+
+        if (py_out == NULL) {
+            pygi_marshal_cleanup_args_to_py_parameter_fail (state,
+                                                            cache,
+                                                            py_arg_index);
+            return NULL;
+        }
+
+        if (cache->has_return) {
             PyTuple_SET_ITEM (py_out, py_arg_index, py_return);
             py_arg_index++;
         }
 
-        for(; py_arg_index < total_out_args; py_arg_index++) {
+        for (; py_arg_index < tuple_len; py_arg_index++) {
             PyGIArgCache *arg_cache = (PyGIArgCache *)cache_item->data;
             PyObject *py_obj = arg_cache->to_py_marshaller (state,
                                                             cache,
@@ -634,7 +635,7 @@ _invoke_marshal_out_args (PyGIInvokeState *state, PyGIFunctionCache *function_ca
                                                             state->args[arg_cache->c_arg_index].arg_pointer.v_pointer);
 
             if (py_obj == NULL) {
-                if (has_return)
+                if (cache->has_return)
                     py_arg_index--;
 
                 pygi_marshal_cleanup_args_to_py_parameter_fail (state,

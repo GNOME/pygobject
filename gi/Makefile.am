@@ -78,6 +78,8 @@ _gi_la_SOURCES = \
 	pygi-source.h \
 	pygi-argument.c \
 	pygi-argument.h \
+	pygi-resulttuple.c \
+	pygi-resulttuple.h \
 	pygi-type.c \
 	pygi-type.h \
 	pygi-boxed.c \

@@ -465,6 +465,9 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
     PyGIArgCache *return_cache;
     PyGIDirection return_direction;
 	gssize last_explicit_arg_index;
+    PyObject *tuple_names;
+    GSList *arg_cache_item;
+    PyTypeObject* resulttuple_type;
 
     /* Return arguments are always considered out */
     return_direction = _pygi_get_direction (callable_cache, GI_DIRECTION_OUT);
@@ -641,6 +644,36 @@ _callable_cache_generate_args_cache_real (PyGICallableCache *callable_cache,
         }
     }
 
+    if (!return_cache->is_skipped && return_cache->type_tag != GI_TYPE_TAG_VOID) {
+        callable_cache->has_return = TRUE;
+    }
+
+    tuple_names = PyList_New (0);
+    if (callable_cache->has_return) {
+        PyList_Append (tuple_names, Py_None);
+    }
+
+    arg_cache_item = callable_cache->to_py_args;
+    while (arg_cache_item) {
+        const gchar *arg_name = ((PyGIArgCache *)arg_cache_item->data)->arg_name;
+        PyObject *arg_string = PYGLIB_PyUnicode_FromString (arg_name);
+        PyList_Append (tuple_names, arg_string);
+        Py_DECREF (arg_string);
+        arg_cache_item = arg_cache_item->next;
+    }
+
+    /* No need to create a tuple type if there aren't multiple values */
+    if (PyList_Size (tuple_names) > 1) {
+        resulttuple_type = pygi_resulttuple_new_type (tuple_names);
+        if (resulttuple_type == NULL) {
+            Py_DECREF (tuple_names);
+            return FALSE;
+        } else {
+            callable_cache->resulttuple_type = resulttuple_type;
+        }
+    }
+    Py_DECREF (tuple_names);
+
     return TRUE;
 }
 
@@ -651,6 +684,7 @@ _callable_cache_deinit_real (PyGICallableCache *cache)
     g_slist_free (cache->arg_name_list);
     g_hash_table_destroy (cache->arg_name_hash);
     g_ptr_array_unref (cache->args_cache);
+    Py_XDECREF (cache->resulttuple_type);
 
     if (cache->return_cache != NULL)
         pygi_arg_cache_free (cache->return_cache);

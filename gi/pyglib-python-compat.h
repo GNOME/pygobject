@@ -48,6 +48,7 @@
 #define PYGLIB_PyUnicode_Type PyString_Type
 #define PYGLIB_PyUnicode_InternFromString PyString_InternFromString
 #define PYGLIB_PyUnicode_InternInPlace PyString_InternInPlace
+#define PYGLIB_PyUnicode_Format PyString_Format
 
 #define PYGLIB_PyBytes_FromString PyString_FromString
 #define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
@@ -61,6 +62,7 @@
 #define PYGLIB_PyLong_FromSsize_t PyInt_FromSsize_t
 #define PYGLIB_PyLong_FromSize_t PyInt_FromSize_t
 #define PYGLIB_PyLong_AsLong  PyInt_AsLong
+#define PYGLIB_PyLong_AsSsize_t  PyInt_AsSsize_t
 #define PYGLIB_PyLongObject PyIntObject
 #define PYGLIB_PyLong_Type PyInt_Type
 #define PYGLIB_PyLong_AS_LONG PyInt_AS_LONG
@@ -166,11 +168,14 @@ PyTypeObject symbol = {                                 \
 #define PYGLIB_PyUnicode_Type PyUnicode_Type
 #define PYGLIB_PyUnicode_InternFromString PyUnicode_InternFromString
 #define PYGLIB_PyUnicode_InternInPlace PyUnicode_InternInPlace
+#define PYGLIB_PyUnicode_Format PyUnicode_Format
 
 #define PYGLIB_PyLong_Check PyLong_Check
 #define PYGLIB_PyLong_FromLong PyLong_FromLong
+#define PYGLIB_PyLong_FromSsize_t PyLong_FromSsize_t
 #define PYGLIB_PyLong_FromSize_t PyLong_FromSize_t
 #define PYGLIB_PyLong_AsLong PyLong_AsLong
+#define PYGLIB_PyLong_AsSsize_t PyLong_AsSsize_t
 #define PYGLIB_PyLong_AS_LONG(o) PyLong_AS_LONG((PyObject*)(o))
 #define PYGLIB_PyLongObject PyLongObject
 #define PYGLIB_PyLong_Type PyLong_Type

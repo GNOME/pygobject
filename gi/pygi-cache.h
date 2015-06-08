@@ -183,6 +183,12 @@ struct _PyGICallableCache
      * This is used for the length of PyGIInvokeState.out_values */
     gssize n_to_py_args;
 
+    /* If the callable return value gets used */
+    gboolean has_return;
+
+    /* The type used for returning multiple values or NULL */
+    PyTypeObject* resulttuple_type;
+
     /* Number of out args for g_function_info_invoke that will be skipped
      * when marshaling to Python due to them being implicitly available
      * (list/array length).

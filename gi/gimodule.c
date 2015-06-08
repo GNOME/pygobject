@@ -664,6 +664,7 @@ PYGLIB_MODULE_START(_gi, "_gi")
     _pygi_struct_register_types (module);
     _pygi_boxed_register_types (module);
     _pygi_ccallback_register_types (module);
+    pygi_resulttuple_register_types (module);
 
     PyGIWarning = PyErr_NewException ("gi.PyGIWarning", PyExc_Warning, NULL);
 
