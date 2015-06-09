@@ -84,7 +84,7 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
 {
     PyObject *combined_py_args = NULL;
     Py_ssize_t n_py_args, n_py_kwargs, i;
-    guint n_expected_args;
+    guint n_expected_args = cache->n_py_args;
     GSList *l;
 
     n_py_args = PyTuple_GET_SIZE (py_args);
@@ -94,7 +94,6 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
         n_py_kwargs = PyDict_Size (py_kwargs);
 
     /* Fast path, we already have the exact number of args and not kwargs. */
-    n_expected_args = g_slist_length (cache->arg_name_list);
     if (n_py_kwargs == 0 && n_py_args == n_expected_args && cache->user_data_varargs_index < 0) {
         Py_INCREF (py_args);
         return py_args;
