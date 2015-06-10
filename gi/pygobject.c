@@ -722,8 +722,6 @@ pygobject_new_with_interfaces(GType gtype)
     PyObject *dict;
     PyTypeObject *py_parent_type;
     PyObject *bases;
-    PyObject *modules, *module;
-    gchar *type_name, *mod_name, *gtype_name;
 
     state = pyglib_gil_state_ensure();
 
@@ -739,32 +737,14 @@ pygobject_new_with_interfaces(GType gtype)
     /* set up __doc__ descriptor on type */
     PyDict_SetItemString(dict, "__doc__", pyg_object_descr_doc_get());
 
-    /* generate the pygtk module name and extract the base type name */
-    gtype_name = (gchar*)g_type_name(gtype);
-    if (g_str_has_prefix(gtype_name, "Gtk")) {
-	mod_name = "gtk";
-	gtype_name += 3;
-	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
-    } else if (g_str_has_prefix(gtype_name, "Gdk")) {
-	mod_name = "gtk.gdk";
-	gtype_name += 3;
-	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
-    } else if (g_str_has_prefix(gtype_name, "Atk")) {
-	mod_name = "atk";
-	gtype_name += 3;
-	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
-    } else if (g_str_has_prefix(gtype_name, "Pango")) {
-	mod_name = "pango";
-	gtype_name += 5;
-	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
-    } else {
-	mod_name = "__main__";
-	type_name = g_strconcat(mod_name, ".", gtype_name, NULL);
-    }
+    /* Something special to point out that it's not accessible through
+     * gi.repository */
+    o = PYGLIB_PyUnicode_FromString ("__gi__");
+    PyDict_SetItemString (dict, "__module__", o);
+    Py_DECREF (o);
 
     type = (PyTypeObject*)PyObject_CallFunction((PyObject *) Py_TYPE(py_parent_type),
-                                                "sNN", type_name, bases, dict);
-    g_free(type_name);
+                                                "sNN", g_type_name (gtype), bases, dict);
 
     if (type == NULL) {
 	PyErr_Print();
@@ -795,12 +775,6 @@ pygobject_new_with_interfaces(GType gtype)
 	g_warning ("couldn't make the type `%s' ready", type->tp_name);
         pyglib_gil_state_release(state);
 	return NULL;
-    }
-    /* insert type name in module dict */
-    modules = PyImport_GetModuleDict();
-    if ((module = PyDict_GetItemString(modules, mod_name)) != NULL) {
-        if (PyObject_SetAttrString(module, gtype_name, (PyObject *)type) < 0)
-            PyErr_Clear();
     }
 
     /* stash a pointer to the python class with the GType */
@@ -1126,15 +1100,32 @@ pygobject_hash(PyGObject *self)
 static PyObject *
 pygobject_repr(PyGObject *self)
 {
-    gchar buf[256];
+    PyObject *module, *repr;
+    gchar *module_str, *namespace;
 
-    g_snprintf(buf, sizeof(buf),
-	       "<%s object at 0x%lx (%s at 0x%lx)>",
-	       Py_TYPE(self)->tp_name,
-	       (long)self,
-	       self->obj ? G_OBJECT_TYPE_NAME(self->obj) : "uninitialized",
-               (long)self->obj);
-    return PYGLIB_PyUnicode_FromString(buf);
+    module = PyObject_GetAttrString ((PyObject *)self, "__module__");
+    if (module == NULL)
+        return NULL;
+
+    if (!PYGLIB_PyUnicode_Check (module)) {
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    module_str = PYGLIB_PyUnicode_AsString (module);
+    namespace = g_strrstr (module_str, ".");
+    if (namespace == NULL) {
+        namespace = module_str;
+    } else {
+        namespace += 1;
+    }
+
+    repr = PYGLIB_PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
+                                        namespace, Py_TYPE (self)->tp_name, self,
+                                        self->obj ? G_OBJECT_TYPE_NAME (self->obj) : "uninitialized",
+                                        self->obj);
+    Py_DECREF (module);
+    return repr;
 }
 
 

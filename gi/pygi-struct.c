@@ -159,6 +159,28 @@ _pygi_struct_new (PyTypeObject *type,
     return (PyObject *) self;
 }
 
+static PyObject *
+_struct_repr(PyGIStruct *self)
+{
+    PyObject* repr;
+    GIBaseInfo *info;
+    PyGPointer *pointer = (PyGPointer *)self;
+
+    info = _struct_get_info ((PyObject *)self);
+    if (info == NULL)
+        return NULL;
+
+    repr = PYGLIB_PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
+                                        g_base_info_get_namespace (info),
+                                        g_base_info_get_name (info),
+                                        self, g_type_name (pointer->gtype),
+                                        pointer->pointer);
+
+    g_base_info_unref (info);
+
+    return repr;
+}
+
 void
 _pygi_struct_register_types (PyObject *m)
 {
@@ -168,6 +190,7 @@ _pygi_struct_register_types (PyObject *m)
     PyGIStruct_Type.tp_init = (initproc) _struct_init;
     PyGIStruct_Type.tp_dealloc = (destructor) _struct_dealloc;
     PyGIStruct_Type.tp_flags = (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE);
+    PyGIStruct_Type.tp_repr = (reprfunc)_struct_repr;
 
     if (PyType_Ready (&PyGIStruct_Type))
         return;

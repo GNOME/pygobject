@@ -1930,6 +1930,27 @@ class TestStructure(unittest.TestCase):
 
         self.assertRaises(TypeError, GIMarshallingTests.Union.method)
 
+    def test_repr(self):
+        self.assertRegexpMatches(
+            repr(GIMarshallingTests.PointerStruct()),
+            "<GIMarshallingTests.PointerStruct object at 0x[^\s]+ "
+            "\(void at 0x[^\s]+\)>")
+
+        self.assertRegexpMatches(
+            repr(GIMarshallingTests.SimpleStruct()),
+            "<GIMarshallingTests.SimpleStruct object at 0x[^\s]+ "
+            "\(void at 0x[^\s]+\)>")
+
+        self.assertRegexpMatches(
+            repr(GIMarshallingTests.Union()),
+            "<GIMarshallingTests.Union object at 0x[^\s]+ "
+            "\(GIMarshallingTestsUnion at 0x[^\s]+\)>")
+
+        self.assertRegexpMatches(
+            repr(GIMarshallingTests.BoxedStruct()),
+            "<GIMarshallingTests.BoxedStruct object at 0x[^\s]+ "
+            "\(GIMarshallingTestsBoxedStruct at 0x[^\s]+\)>")
+
 
 class TestGObject(unittest.TestCase):
 
@@ -2059,6 +2080,18 @@ class TestGObject(unittest.TestCase):
 
         self.assertEqual(object_.__grefcount__, 1)
         self.assertEqual(new_object.__grefcount__, 1)
+
+    def test_repr(self):
+        self.assertRegexpMatches(
+            repr(GIMarshallingTests.Object(int=42)),
+            "<GIMarshallingTests.Object object at 0x[^\s]+ "
+            "\(GIMarshallingTestsObject at 0x[^\s]+\)>")
+
+    def test_nongir_repr(self):
+        self.assertRegexpMatches(
+            repr(Gio.File.new_for_path("")),
+            "<__gi__.GLocalFile object at 0x[^\s]+ "
+            "\(GLocalFile at 0x[^\s]+\)>")
 
 # FIXME: Doesn't actually return the same object.
 #    def test_object_inout_same(self):

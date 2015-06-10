@@ -68,13 +68,34 @@ pyg_boxed_hash(PyGBoxed *self)
 }
 
 static PyObject *
-pyg_boxed_repr(PyGBoxed *self)
+pyg_boxed_repr(PyGBoxed *boxed)
 {
-    gchar buf[128];
+    PyObject *module, *repr, *self = (PyObject *)boxed;
+    gchar *module_str, *namespace;
 
-    g_snprintf(buf, sizeof(buf), "<%s at 0x%lx>", g_type_name(self->gtype),
-	       (long)pyg_boxed_get_ptr (self));
-    return PYGLIB_PyUnicode_FromString(buf);
+    module = PyObject_GetAttrString (self, "__module__");
+    if (module == NULL)
+        return NULL;
+
+    if (!PYGLIB_PyUnicode_Check (module)) {
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    module_str = PYGLIB_PyUnicode_AsString (module);
+    namespace = g_strrstr (module_str, ".");
+    if (namespace == NULL) {
+        namespace = module_str;
+    } else {
+        namespace += 1;
+    }
+
+    repr = PYGLIB_PyUnicode_FromFormat ("<%s.%s object at %p (%s at %p)>",
+                                        namespace, Py_TYPE (self)->tp_name,
+                                        self, g_type_name (boxed->gtype),
+                                        pyg_boxed_get_ptr (boxed));
+    Py_DECREF (module);
+    return repr;
 }
 
 static int
