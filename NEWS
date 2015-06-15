@@ -1,3 +1,19 @@
+3.17.1  15-Jun-2015
+        - Add gi.PyGIWarning used when import version is not specified
+          (Christoph Reiter) (#727379)
+        - Remove Gdk.Rectangle alias with newer gobject-introspection and GTK+
+          (Christoph Reiter) (#749625)
+        - overrides: Provide _overrides_module attribute
+          (Christoph Reiter) (#736678)
+        - overrides: Conditionalize touch override support in Gdk
+          (Simon Feltman) (#747717)
+        - Field setters: Remove unneeded type/range checks and unused code
+          (Christoph Reiter) (#746985)
+        - pygi-argument: Remove unused imports/includes
+          (Christoph Reiter) (#746985)
+        - Improve test coverage for field setters/getters
+          (Christoph Reiter) (#746985)
+
 3.16.0  24-Mar-2015
 
 3.15.91 05-Mar-2015
