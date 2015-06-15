@@ -1,3 +1,7 @@
+3.16.2  15-Jun-2015
+        - overrides: Provide _overrides_module attribute
+          (Christoph Reiter) (#736678)
+
 3.16.1  13-Apr-2015
         - overrides: Conditionalize touch override support in Gdk
           (Simon Feltman) (#747717)
