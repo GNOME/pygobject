@@ -2,11 +2,9 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
-import contextlib
 import base64
 
 import gi
-from gi.repository import GLib
 
 try:
     try:
@@ -32,14 +30,7 @@ try:
 except ImportError:
     Gtk = None
 
-
-@contextlib.contextmanager
-def ignore_glib_warnings():
-    """Temporarily change GLib logging to not bail on warnings."""
-    old_mask = GLib.log_set_always_fatal(
-        GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-    yield
-    GLib.log_set_always_fatal(old_mask)
+from helper import capture_gi_deprecation_warnings, capture_glib_warnings
 
 
 @unittest.skipUnless(Gtk, 'Gtk not available')
@@ -81,12 +72,13 @@ class TestGTKCompat(unittest.TestCase):
 
     def test_style(self):
         widget = gtk.Button()
-        self.assertTrue(isinstance(widget.style.base[gtk.STATE_NORMAL],
-                                   gtk.gdk.Color))
+        with capture_gi_deprecation_warnings():
+            self.assertTrue(isinstance(widget.style.base[gtk.STATE_NORMAL],
+                                       gtk.gdk.Color))
 
     def test_alignment(self):
         # Creation of pygtk.Alignment causes hard warnings, ignore this in testing.
-        with ignore_glib_warnings():
+        with capture_glib_warnings(allow_warnings=True):
             a = gtk.Alignment()
 
         self.assertEqual(a.props.xalign, 0.0)
@@ -119,12 +111,8 @@ class TestGTKCompat(unittest.TestCase):
         liststore.append((2, 'Two'))
         liststore.append((3, 'Three'))
         # might cause a Pango warning, do not break on this
-        old_mask = GLib.log_set_always_fatal(
-            GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with capture_glib_warnings(allow_warnings=True):
             combo = gtk.ComboBoxEntry(model=liststore)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
         combo.set_text_column(1)
         combo.set_active(0)
         self.assertEqual(combo.get_text_column(), 1)
@@ -143,7 +131,8 @@ class TestGTKCompat(unittest.TestCase):
 
     def test_size_request(self):
         box = gtk.Box()
-        self.assertEqual(box.size_request(), [0, 0])
+        with capture_gi_deprecation_warnings():
+            self.assertEqual(box.size_request(), [0, 0])
 
     def test_pixbuf(self):
         gtk.gdk.Pixbuf()

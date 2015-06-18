@@ -2,7 +2,6 @@
 # vim: tabstop=4 shiftwidth=4 expandtab
 
 import unittest
-import warnings
 
 import gi.overrides
 from gi import PyGIDeprecationWarning
@@ -12,6 +11,8 @@ try:
     Gdk  # pyflakes
 except ImportError:
     Gdk = None
+
+from helper import capture_glib_deprecation_warnings
 
 
 @unittest.skipUnless(Gdk, 'Gdk not available')
@@ -29,7 +30,8 @@ class TestGdk(unittest.TestCase):
         self.assertEqual(color.red, 100)
         self.assertEqual(color.green, 200)
         self.assertEqual(color.blue, 300)
-        self.assertEqual(color, Gdk.Color(100, 200, 300))
+        with capture_glib_deprecation_warnings():
+            self.assertEqual(color, Gdk.Color(100, 200, 300))
         self.assertNotEqual(color, Gdk.Color(1, 2, 3))
 
     def test_color_floats(self):
@@ -122,9 +124,11 @@ class TestGdk(unittest.TestCase):
 
     def test_cursor(self):
         self.assertEqual(Gdk.Cursor, gi.overrides.Gdk.Cursor)
-        c = Gdk.Cursor(Gdk.CursorType.WATCH)
+        with capture_glib_deprecation_warnings():
+            c = Gdk.Cursor(Gdk.CursorType.WATCH)
         self.assertNotEqual(c, None)
-        c = Gdk.Cursor(cursor_type=Gdk.CursorType.WATCH)
+        with capture_glib_deprecation_warnings():
+            c = Gdk.Cursor(cursor_type=Gdk.CursorType.WATCH)
         self.assertNotEqual(c, None)
 
         display_manager = Gdk.DisplayManager.get()
@@ -136,8 +140,7 @@ class TestGdk(unittest.TestCase):
                                            5,
                                            10)
 
-        with warnings.catch_warnings(record=True) as warn:
-            warnings.simplefilter('always')
+        with capture_glib_deprecation_warnings() as warn:
             c = Gdk.Cursor(display,
                            test_pixbuf,
                            y=0, x=0)
@@ -166,7 +169,8 @@ class TestGdk(unittest.TestCase):
                          '<flags GDK_META_MASK | GDK_RELEASE_MASK of type GdkModifierType>')
 
     def test_color_parse(self):
-        c = Gdk.color_parse('#00FF80')
+        with capture_glib_deprecation_warnings():
+            c = Gdk.color_parse('#00FF80')
         self.assertEqual(c.red, 0)
         self.assertEqual(c.green, 65535)
         self.assertEqual(c.blue, 32896)

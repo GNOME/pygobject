@@ -9,6 +9,7 @@ from gi.repository import GObject, GLib
 from gi import _signalhelper as signalhelper
 import testhelper
 from compathelper import _long
+from helper import capture_glib_warnings, capture_gi_deprecation_warnings
 
 try:
     import cairo
@@ -83,13 +84,9 @@ class TestGSignalsError(unittest.TestCase):
         def foo():
             class Foo(GObject.GObject):
                 __gsignals__ = {'not-exists': 'override'}
-        # do not stumble over the warning thrown by GLib
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL |
-                                             GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+
+        with capture_glib_warnings(allow_warnings=True):
             self.assertRaises(TypeError, foo)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
         gc.collect()
 
 
@@ -373,15 +370,10 @@ class TestClosures(unittest.TestCase):
             self.count += 1
 
     def _callback_invalid_stop_emission_name(self, obj, prop):
-        # We expect a GLib warning but there currently is no way to test that
-        # This can at least make sure we don't crash
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL |
-                                             GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with capture_glib_warnings(allow_warnings=True) as warn:
             obj.stop_emission_by_name('notasignal::baddetail')
-        finally:
-            GLib.log_set_always_fatal(old_mask)
             self.emission_error = True
+            self.assertTrue(warn)
 
     def test_disconnect_by_func(self):
         e = E()
@@ -416,7 +408,8 @@ class TestClosures(unittest.TestCase):
         e = E()
 
         e.connect('notify::prop', self._callback_invalid_stop_emission_name)
-        e.set_property('prop', 1234)
+        with capture_glib_warnings():
+            e.set_property('prop', 1234)
         self.assertTrue(self.emission_error)
 
     def test_handler_block(self):
@@ -1256,7 +1249,8 @@ class _ConnectObjectTestBase(object):
         else:
             connect_func = obj.connect_object
 
-        connect_func('sig-with-int64-prop', callback, swap_obj, *user_data)
+        with capture_gi_deprecation_warnings():
+            connect_func('sig-with-int64-prop', callback, swap_obj, *user_data)
         obj.emit('sig-with-int64-prop', *emit_args)
         self.assertEqual(len(callback_args), 1)
         return callback_args[0]

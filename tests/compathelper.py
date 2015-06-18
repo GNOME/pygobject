@@ -1,4 +1,5 @@
 import sys
+import collections
 
 if sys.version_info >= (3, 0):
     '''
@@ -62,8 +63,15 @@ if sys.version_info >= (3, 0):
     '''
 
     _unicode = lambda s: str(s)
+
+    callable = lambda x: isinstance(x, collections.Callable)
+    from io import StringIO
+    StringIO
 else:
     _long = long
     _basestring = basestring
     _bytes = str
     _unicode = lambda s: unicode(s, 'UTF-8')
+    callable = callable
+    from StringIO import StringIO
+    StringIO

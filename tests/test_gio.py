@@ -6,6 +6,8 @@ import unittest
 import gi.overrides
 from gi.repository import GLib, Gio
 
+from helper import ignore_gi_deprecation_warnings
+
 
 class TestGio(unittest.TestCase):
     def test_file_enumerator(self):
@@ -120,6 +122,7 @@ class TestGSettings(unittest.TestCase):
         self.assertEqual(bool(empty), True)
         self.assertEqual(empty.keys(), [])
 
+    @ignore_gi_deprecation_warnings
     def test_change_event(self):
         changed_log = []
         change_event_log = []

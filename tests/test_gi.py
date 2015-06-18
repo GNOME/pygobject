@@ -24,6 +24,7 @@ from gi.repository import GObject, GLib, Gio
 from gi.repository import GIMarshallingTests
 
 from compathelper import _bytes, _unicode
+from helper import capture_exceptions
 
 if sys.version_info < (3, 0):
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
@@ -2305,7 +2306,10 @@ class TestPythonGObject(unittest.TestCase):
 
     def test_exception_in_vfunc_return_value(self):
         obj = self.ErrorObject()
-        self.assertEqual(obj.vfunc_return_value_only(), 0)
+        with capture_exceptions() as exc:
+            self.assertEqual(obj.vfunc_return_value_only(), 0)
+        self.assertEqual(len(exc), 1)
+        self.assertEqual(exc[0].type, ValueError)
 
     @unittest.skipUnless(hasattr(GIMarshallingTests, 'callback_owned_boxed'),
                          'requires newer version of GI')

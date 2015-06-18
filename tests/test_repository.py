@@ -30,7 +30,6 @@ gi.require_version('GIRepository', '2.0')
 import gi._gi as GIRepository
 from gi.module import repository as repo
 from gi.repository import GObject
-from gi.repository import GLib
 from gi.repository import GIMarshallingTests
 from gi.repository import GIRepository as IntrospectedRepository
 
@@ -40,6 +39,8 @@ try:
     has_cairo = True
 except ImportError:
     has_cairo = False
+
+from helper import capture_glib_warnings
 
 
 def find_child_info(info, getter_name, name):
@@ -339,26 +340,20 @@ class Test(unittest.TestCase):
         # also raise a RuntimeError.
         GIMarshallingTests.NoTypeFlags  # cause flags registration
         info = repo.find_by_name('GIMarshallingTests', 'NoTypeFlags')
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with capture_glib_warnings(allow_warnings=True):
             self.assertRaises(RuntimeError,
                               GIRepository.flags_register_new_gtype_and_add,
                               info)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
     def test_enum_double_registration_error(self):
         # a warning is printed for double registration and pygobject will
         # also raise a RuntimeError.
         GIMarshallingTests.Enum  # cause enum registration
         info = repo.find_by_name('GIMarshallingTests', 'Enum')
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with capture_glib_warnings(allow_warnings=True):
             self.assertRaises(RuntimeError,
                               GIRepository.enum_register_new_gtype_and_add,
                               info)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
     def test_enums(self):
         self.assertTrue(hasattr(GIRepository, 'Direction'))

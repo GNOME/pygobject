@@ -41,6 +41,7 @@ else:
     UNICODE_UTF8 = TEST_UTF8
 
 from compathelper import _long
+from helper import capture_glib_warnings, capture_output
 
 
 class PropertyObject(GObject.GObject):
@@ -550,14 +551,17 @@ class TestProperty(unittest.TestCase):
                 raise ValueError('something bad happend')
 
         o = C()
-        with self.assertRaisesRegex(ValueError, 'something bad happend'):
-            o.prop
 
-        with self.assertRaisesRegex(ValueError, 'something bad happend'):
-            o.get_property('prop')
+        # silence exception printed to stderr
+        with capture_output():
+            with self.assertRaisesRegex(ValueError, 'something bad happend'):
+                o.prop
 
-        with self.assertRaisesRegex(ValueError, 'something bad happend'):
-            o.props.prop
+            with self.assertRaisesRegex(ValueError, 'something bad happend'):
+                o.get_property('prop')
+
+            with self.assertRaisesRegex(ValueError, 'something bad happend'):
+                o.props.prop
 
     def test_custom_setter(self):
         class C(GObject.GObject):
@@ -690,8 +694,7 @@ class TestProperty(unittest.TestCase):
 
         # we test known-bad values here which cause Gtk-WARNING logs.
         # Explicitly allow these for this test.
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_CRITICAL)
-        try:
+        with capture_glib_warnings(allow_warnings=True):
             o = C()
             self.assertEqual(o.prop_int, 1)
 
@@ -714,8 +717,6 @@ class TestProperty(unittest.TestCase):
 
             o.prop_float = 10.51
             self.assertEqual(o.prop_float, 7.75)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
     def test_multiple_instances(self):
         class C(GObject.GObject):

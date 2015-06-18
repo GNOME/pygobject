@@ -26,6 +26,9 @@ try:
 except:
     Gtk = None
 
+from helper import capture_exceptions
+
+
 if sys.version_info < (3, 0):
     UNICHAR = "\xe2\x99\xa5"
     PY2_UNICODE_UNICHAR = unicode(UNICHAR, 'UTF-8')
@@ -624,7 +627,10 @@ class TestCallbacks(unittest.TestCase):
         # note that we do NOT expect the ZeroDivisionError to be propagated
         # through from the callback, as it crosses the Python<->C boundary
         # twice. (See GNOME #616279)
-        Everything.test_simple_callback(callback)
+        with capture_exceptions() as exc:
+            Everything.test_simple_callback(callback)
+        self.assertTrue(exc)
+        self.assertEqual(exc[0].type, ZeroDivisionError)
 
     def test_double_callback_exception(self):
         """
@@ -643,7 +649,10 @@ class TestCallbacks(unittest.TestCase):
         # note that we do NOT expect the ZeroDivisionError to be propagated
         # through from the callback, as it crosses the Python<->C boundary
         # twice. (See GNOME #616279)
-        Everything.test_simple_callback(callback)
+        with capture_exceptions() as exc:
+            Everything.test_simple_callback(callback)
+        self.assertTrue(exc)
+        self.assertEqual(exc[0].type, ZeroDivisionError)
 
     def test_return_value_callback(self):
         TestCallbacks.called = False
@@ -1050,17 +1059,16 @@ class TestClosures(unittest.TestCase):
         def callback(variant):
             return 'no_variant'
 
-        # reset last error
-        sys.last_type = None
-
-        # this does not directly raise an exception (see
-        # https://bugzilla.gnome.org/show_bug.cgi?id=616279)
-        result = Everything.test_closure_variant(callback, GLib.Variant('i', 42))
+        with capture_exceptions() as exc:
+            # this does not directly raise an exception (see
+            # https://bugzilla.gnome.org/show_bug.cgi?id=616279)
+            result = Everything.test_closure_variant(callback, GLib.Variant('i', 42))
         # ... but the result shouldn't be a string
         self.assertEqual(result, None)
         # and the error should be shown
-        self.assertEqual(sys.last_type, TypeError)
-        self.assertTrue('return value' in str(sys.last_value), sys.last_value)
+        self.assertEqual(len(exc), 1)
+        self.assertEqual(exc[0].type, TypeError)
+        self.assertTrue('return value' in str(exc[0].value), exc[0].value)
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')

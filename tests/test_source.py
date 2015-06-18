@@ -7,6 +7,8 @@ import warnings
 from gi.repository import GLib
 from gi import PyGIDeprecationWarning
 
+from helper import capture_glib_warnings
+
 
 class Idle(GLib.Idle):
     def __init__(self, loop):
@@ -132,8 +134,8 @@ class TestSource(unittest.TestCase):
         self.assertEqual(GLib.source_remove(s), True)
 
         # Removing sources not found cause critical
-        old_mask = GLib.log_set_always_fatal(GLib.LogLevelFlags.LEVEL_ERROR)
-        try:
+        with capture_glib_warnings(allow_criticals=True):
+
             # s is now removed, should fail now
             self.assertEqual(GLib.source_remove(s), False)
 
@@ -141,8 +143,6 @@ class TestSource(unittest.TestCase):
             self.assertEqual(GLib.source_remove(GLib.MAXINT32), False)
             self.assertEqual(GLib.source_remove(GLib.MAXINT32 + 1), False)
             self.assertEqual(GLib.source_remove(GLib.MAXUINT32), False)
-        finally:
-            GLib.log_set_always_fatal(old_mask)
 
     def test_recurse_property(self):
         s = GLib.Idle()

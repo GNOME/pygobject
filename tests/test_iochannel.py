@@ -49,7 +49,7 @@ second line
         self.assertEqual(_unicode(ch.readline()), 'À demain!')
         self.assertEqual(ch.get_buffer_condition(), 0)
         self.assertEqual(ch.readline(), '')
-        ch.close()
+        ch.shutdown(True)
 
     def test_file_readline_latin1(self):
         ch = GLib.IOChannel(filename=self.testlatin1, mode='r')
@@ -59,7 +59,7 @@ second line
         self.assertEqual(ch.readline(), 'second line\n')
         self.assertEqual(ch.readline(), '\n')
         self.assertEqual(_unicode(ch.readline()), 'À demain!')
-        ch.close()
+        ch.shutdown(True)
 
     def test_file_iter(self):
         items = []
@@ -68,7 +68,7 @@ second line
             items.append(item)
         self.assertEqual(len(items), 4)
         self.assertEqual(_unicode(items[0]), 'hello ♥ world\n')
-        ch.close()
+        ch.shutdown(True)
 
     def test_file_readlines(self):
         ch = GLib.IOChannel(filename=self.testutf8)
@@ -117,11 +117,11 @@ second line
         ch = GLib.IOChannel(filename=self.testout, mode='w')
         ch.set_encoding('latin1')
         ch.write('hellø world\n')
-        ch.close()
+        ch.shutdown(True)
         ch = GLib.IOChannel(filename=self.testout, mode='a')
         ch.set_encoding('latin1')
         ch.write('À demain!')
-        ch.close()
+        ch.shutdown(True)
 
         with open(self.testout, 'rb') as f:
             self.assertEqual(f.read().decode('latin1'), 'hellø world\nÀ demain!')
@@ -129,7 +129,7 @@ second line
     def test_file_writelines(self):
         ch = GLib.IOChannel(filename=self.testout, mode='w')
         ch.writelines(['foo', 'bar\n', 'baz\n', 'end'])
-        ch.close()
+        ch.shutdown(True)
 
         with open(self.testout, 'r') as f:
             self.assertEqual(f.read(), 'foobar\nbaz\nend')
@@ -163,9 +163,9 @@ second line
         # closing flushes
         writer.set_buffered(True)
         writer.write('ghi')
-        writer.close()
+        writer.shutdown(True)
         self.assertEqual(reader.read(), b'ghi')
-        reader.close()
+        reader.shutdown(True)
 
     def test_fd_read(self):
         (r, w) = os.pipe()
@@ -184,7 +184,7 @@ second line
         os.close(w)
         self.assertEqual(ch.read(), b'\x03\x04')
 
-        ch.close()
+        ch.shutdown(True)
 
     def test_fd_write(self):
         (r, w) = os.pipe()
@@ -199,7 +199,7 @@ second line
         # now test blocking case, after closing the write end
         fcntl.fcntl(r, fcntl.F_SETFL, fcntl.fcntl(r, fcntl.F_GETFL) & ~os.O_NONBLOCK)
         ch.write(b'\x03\x04')
-        ch.close()
+        ch.shutdown(True)
         self.assertEqual(os.read(r, 10), b'\x03\x04')
         os.close(r)
 

@@ -75,6 +75,7 @@ testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
 all: $(check_LTLIBRARIES:.la=.$(OS_EXT))
 
 EXTRA_DIST = \
+	helper.py \
 	compathelper.py \
 	runtests.py \
 	runtests-windows.py \

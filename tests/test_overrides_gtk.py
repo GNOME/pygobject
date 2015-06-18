@@ -9,6 +9,7 @@ import sys
 import warnings
 
 from compathelper import _unicode, _bytes
+from helper import ignore_gi_deprecation_warnings, capture_glib_warnings
 
 import gi
 import gi.overrides
@@ -58,16 +59,8 @@ def realized(widget):
         Gtk.main_iteration()
 
 
-@contextlib.contextmanager
-def ignore_glib_warnings():
-    """Temporarily change GLib logging to not bail on warnings."""
-    old_mask = GLib.log_set_always_fatal(
-        GLib.LogLevelFlags.LEVEL_CRITICAL | GLib.LogLevelFlags.LEVEL_ERROR)
-    yield
-    GLib.log_set_always_fatal(old_mask)
-
-
 @unittest.skipUnless(Gtk, 'Gtk not available')
+@ignore_gi_deprecation_warnings
 class TestGtk(unittest.TestCase):
     def test_container(self):
         box = Gtk.Box()
@@ -319,7 +312,7 @@ class TestGtk(unittest.TestCase):
 
     def test_file_chooser_dialog(self):
         # might cause a GVFS warning, do not break on this
-        with ignore_glib_warnings():
+        with capture_glib_warnings(allow_warnings=True):
             dialog = Gtk.FileChooserDialog(title='file chooser dialog test',
                                            action=Gtk.FileChooserAction.SAVE)
 
@@ -332,7 +325,7 @@ class TestGtk(unittest.TestCase):
 
     def test_file_chooser_dialog_default_action(self):
         # might cause a GVFS warning, do not break on this
-        with ignore_glib_warnings():
+        with capture_glib_warnings(allow_warnings=True):
             dialog = Gtk.FileChooserDialog(title='file chooser dialog test')
 
         action = dialog.get_property('action')
@@ -375,7 +368,7 @@ class TestGtk(unittest.TestCase):
         self.assertTrue(isinstance(button, Gtk.Widget))
 
         # Using stock items causes hard warning in devel versions of GTK+.
-        with ignore_glib_warnings():
+        with capture_glib_warnings(allow_warnings=True):
             button = Gtk.Button.new_from_stock(Gtk.STOCK_CLOSE)
 
         self.assertEqual(Gtk.STOCK_CLOSE, button.get_label())
@@ -594,7 +587,7 @@ class TestGtk(unittest.TestCase):
         # PyGTK compat
 
         # Using stock items causes hard warning in devel versions of GTK+.
-        with ignore_glib_warnings():
+        with capture_glib_warnings(allow_warnings=True):
             button = Gtk.ToolButton()
             self.assertEqual(button.props.stock_id, None)
 
@@ -858,6 +851,7 @@ class TestBuilder(unittest.TestCase):
         self.assertEqual(signal_checker.after_sentinel, 2)
 
 
+@ignore_gi_deprecation_warnings
 @unittest.skipUnless(Gtk, 'Gtk not available')
 class TestTreeModel(unittest.TestCase):
     def test_tree_model_sort(self):
