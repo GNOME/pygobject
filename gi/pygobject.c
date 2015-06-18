@@ -82,10 +82,12 @@ pygobject_data_free(PyGObjectData *data)
      * free the memory. */
     PyGILState_STATE state;
     PyThreadState *_save = NULL;
+    gboolean state_saved = FALSE;
 
     GSList *closures, *tmp;
 
     if (Py_IsInitialized()) {
+	state_saved = TRUE;
 	state = pyglib_gil_state_ensure();
 	Py_DECREF(data->type);
 	/* We cannot use Py_BEGIN_ALLOW_THREADS here because this is inside
@@ -112,7 +114,7 @@ pygobject_data_free(PyGObjectData *data)
 
     g_free(data);
 
-    if (Py_IsInitialized()) {
+    if (state_saved && Py_IsInitialized ()) {
 	Py_BLOCK_THREADS; /* Restores _save */
 	pyglib_gil_state_release(state);
     }
