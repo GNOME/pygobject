@@ -38,7 +38,7 @@ class TestGLib(unittest.TestCase):
     def test_xdg_dirs(self):
         d = GLib.get_user_data_dir()
         self.assertTrue('/' in d, d)
-        d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_MUSIC)
+        d = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP)
         self.assertTrue('/' in d, d)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', PyGIDeprecationWarning)
