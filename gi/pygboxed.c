@@ -189,7 +189,7 @@ pyg_register_boxed(PyObject *dict, const gchar *class_name,
  * wrapper will be freed when the wrapper is deallocated.  If
  * @copy_boxed is True, then @own_ref must also be True.
  *
- * Returns: the boxed wrapper.
+ * Returns: the boxed wrapper or %NULL and sets an exception.
  */
 PyObject *
 pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
@@ -217,6 +217,12 @@ pyg_boxed_new(GType boxed_type, gpointer boxed, gboolean copy_boxed,
 
     if (!tp)
 	tp = (PyTypeObject *)&PyGBoxed_Type; /* fallback */
+
+    if (!PyType_IsSubtype (tp, &PyGBoxed_Type)) {
+        PyErr_Format (PyExc_RuntimeError, "%s isn't a GBoxed", tp->tp_name);
+        pyglib_gil_state_release (state);
+        return NULL;
+    }
 
     self = (PyGBoxed *)tp->tp_alloc(tp, 0);
 

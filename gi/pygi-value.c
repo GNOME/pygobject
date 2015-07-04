@@ -834,13 +834,13 @@ pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboole
  * This function creates/returns a Python wrapper object that
  * represents the GValue passed as an argument.
  *
- * Returns: a PyObject representing the value.
+ * Returns: a PyObject representing the value or %NULL and sets an exception.
  */
 PyObject *
 pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
 {
-    gchar buf[128];
     PyObject *pyobj;
+    const gchar *type_name;
     GType fundamental = G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value));
 
     /* HACK: special case char and uchar to return PyBytes intstead of integers
@@ -865,9 +865,14 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
         return pyobj;
     }
 
-    g_snprintf(buf, sizeof(buf), "unknown type %s",
-               g_type_name(G_VALUE_TYPE(value)));
-    PyErr_SetString(PyExc_TypeError, buf);
+    if (!PyErr_Occurred ()) {
+        type_name = g_type_name (G_VALUE_TYPE (value));
+        if (type_name == NULL) {
+            type_name = "(null)";
+        }
+        PyErr_Format (PyExc_TypeError, "unknown type %s", type_name);
+    }
+
     return NULL;
 }
 

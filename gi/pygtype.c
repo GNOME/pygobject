@@ -704,7 +704,16 @@ pyg_closure_marshal(GClosure *closure,
 
 	    /* error condition */
 	    if (!item) {
-		goto out;
+            if (!PyErr_Occurred ())
+                PyErr_SetString (PyExc_TypeError,
+                                 "can't convert parameter to desired type");
+
+            if (pc->exception_handler)
+                pc->exception_handler (return_value, n_param_values, param_values);
+            else
+                PyErr_Print();
+
+            goto out;
 	    }
 	    PyTuple_SetItem(params, i, item);
 	}
