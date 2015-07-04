@@ -31,6 +31,11 @@ _pygi_struct_new (PyTypeObject *type,
                   gpointer      pointer,
                   gboolean      free_on_dealloc);
 
+PyObject *
+_pygi_struct_new_from_g_type (GType g_type,
+                              gpointer      pointer,
+                              gboolean      free_on_dealloc);
+
 void _pygi_struct_register_types (PyObject *m);
 
 G_END_DECLS

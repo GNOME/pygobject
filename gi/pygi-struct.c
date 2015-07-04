@@ -132,6 +132,38 @@ _struct_init (PyObject *self,
 
 PYGLIB_DEFINE_TYPE("gi.Struct", PyGIStruct_Type, PyGIStruct);
 
+
+PyObject *
+_pygi_struct_new_from_g_type (GType g_type,
+                              gpointer      pointer,
+                              gboolean      free_on_dealloc)
+{
+    PyGIStruct *self;
+    PyTypeObject *type;
+
+    type = (PyTypeObject *)pygi_type_import_by_g_type (g_type);
+
+    if (!type)
+        type = (PyTypeObject *)&PyGIStruct_Type; /* fallback */
+
+    if (!PyType_IsSubtype (type, &PyGIStruct_Type)) {
+        PyErr_SetString (PyExc_TypeError, "must be a subtype of gi.Struct");
+        return NULL;
+    }
+
+    self = (PyGIStruct *) type->tp_alloc (type, 0);
+    if (self == NULL) {
+        return NULL;
+    }
+
+    pyg_pointer_set_ptr (self, pointer);
+    ( (PyGPointer *) self)->gtype = g_type;
+    self->free_on_dealloc = free_on_dealloc;
+
+    return (PyObject *) self;
+}
+
+
 PyObject *
 _pygi_struct_new (PyTypeObject *type,
                   gpointer      pointer,

@@ -18,6 +18,7 @@
 
 #include <Python.h>
 #include "pygi-value.h"
+#include "pygi-struct.h"
 #include "pyglib-python-compat.h"
 #include "pygobject-private.h"
 #include "pygtype.h"
@@ -810,7 +811,7 @@ pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboole
             Py_INCREF(Py_None);
             return Py_None;
         }
-        return pyg_boxed_new(G_TYPE_VARIANT, g_variant_ref(v), FALSE, FALSE);
+        return _pygi_struct_new_from_g_type (G_TYPE_VARIANT, g_variant_ref(v), FALSE);
     }
     default:
     {
