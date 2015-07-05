@@ -465,6 +465,12 @@ class TestEverything(unittest.TestCase):
         Everything.test_glist_nothing_in(['1', '2', '3'])
         Everything.test_glist_nothing_in2(['1', '2', '3'])
 
+    @unittest.skipUnless(hasattr(Everything, 'test_glist_gtype_container_in'),
+                         'Requires newer version of GI')
+    def test_glist_gtype(self):
+        Everything.test_glist_gtype_container_in(
+            [Everything.TestObj, Everything.TestSubObj])
+
     def test_gslist(self):
         self.assertEqual(Everything.test_gslist_nothing_return(), ['1', '2', '3'])
         self.assertEqual(Everything.test_gslist_nothing_return2(), ['1', '2', '3'])
