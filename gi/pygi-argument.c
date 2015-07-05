@@ -95,6 +95,9 @@ _pygi_hash_pointer_to_arg (GIArgument *arg,
         case GI_TYPE_TAG_UINT32:
             arg->v_uint32 = GPOINTER_TO_UINT (arg->v_pointer);
             break;
+        case GI_TYPE_TAG_GTYPE:
+            arg->v_size = GPOINTER_TO_SIZE (arg->v_pointer);
+            break;
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_INTERFACE:
@@ -121,6 +124,8 @@ _pygi_arg_to_hash_pointer (const GIArgument *arg,
             return GINT_TO_POINTER (arg->v_int32);
         case GI_TYPE_TAG_UINT32:
             return GINT_TO_POINTER (arg->v_uint32);
+        case GI_TYPE_TAG_GTYPE:
+            return GSIZE_TO_POINTER (arg->v_size);
         case GI_TYPE_TAG_UTF8:
         case GI_TYPE_TAG_FILENAME:
         case GI_TYPE_TAG_INTERFACE:
