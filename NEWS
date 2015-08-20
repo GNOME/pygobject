@@ -1,3 +1,17 @@
+3.17.90 19-Aug-2015
+        - Allow passing unicode lists to GStrv properties on Python 2
+          (Christoph Reiter) (#744745)
+        - Avoid a silent long to int truncation (Rui Matos) (#749698)
+        - Handle gtype marshalling (Mathieu Bridon) (#749696)
+        - pygi-foreign-cairo.c: fix include for py3cairo.h
+          (Daniel Hahler) (#746742)
+        - tests: Silence various error messages and warnings
+          (Christoph Reiter) (#751156)
+        - Fix test regression when xdg-user-dirs is not installed
+          (Christoph Reiter) (#751299)
+        - Explicitly check if an override exists instead of ImportError
+          (Garrett Regier) (#749532)
+
 3.17.1  15-Jun-2015
         - Add gi.PyGIWarning used when import version is not specified
           (Christoph Reiter) (#727379)
