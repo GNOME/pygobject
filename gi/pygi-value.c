@@ -775,9 +775,10 @@ pygi_value_to_py_structured_type (const GValue *value, GType fundamental, gboole
             return pyg_value_as_pyobject(n_value, copy_boxed);
         } else if (holds_value_array) {
             GValueArray *array = (GValueArray *) g_value_get_boxed(value);
-            PyObject *ret = PyList_New(array->n_values);
+            Py_ssize_t n_values = array ? array->n_values : 0;
+            PyObject *ret = PyList_New(n_values);
             int i;
-            for (i = 0; i < array->n_values; ++i)
+            for (i = 0; i < n_values; ++i)
                 PyList_SET_ITEM(ret, i, pyg_value_as_pyobject
                         (array->values + i, copy_boxed));
             return ret;

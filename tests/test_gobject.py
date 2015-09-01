@@ -669,5 +669,11 @@ class TestGValue(unittest.TestCase):
         value = GObject.Value(GObject.TYPE_OBJECT, obj)
         self.assertEqual(value.get_value(), obj)
 
+    def test_value_array(self):
+        value = GObject.Value(GObject.ValueArray)
+        self.assertEqual(value.g_type, GObject.type_from_name('GValueArray'))
+        value.set_value([32, 'foo_bar', 0.3])
+        self.assertEqual(value.get_value(), [32, 'foo_bar', 0.3])
+
 if __name__ == '__main__':
     unittest.main()
