@@ -63,6 +63,17 @@ class Test(unittest.TestCase):
         self.assertEqual(repo.get_dependencies("GLib"), [])
         self.assertEqual(repo.get_dependencies("GObject"), ["GLib-2.0"])
 
+    def test_repo_is_registered(self):
+        self.assertRaises(TypeError, repo.is_registered)
+        self.assertRaises(TypeError, repo.is_registered, None)
+        self.assertTrue(repo.is_registered("GIRepository"))
+        self.assertTrue(repo.is_registered("GIRepository", None))
+        self.assertTrue(isinstance(repo.is_registered("GIRepository"), bool))
+        self.assertTrue(repo.is_registered("GIRepository", "2.0"))
+        self.assertFalse(repo.is_registered("GIRepository", ""))
+        self.assertFalse(repo.is_registered("GIRepository", "99.0"))
+        self.assertFalse(repo.is_registered("GIRepository", "1.0"))
+
     def test_arg_info(self):
         func_info = repo.find_by_name('GIMarshallingTests', 'array_fixed_out_struct')
         args = func_info.get_arguments()
