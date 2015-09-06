@@ -108,6 +108,24 @@ _wrap_g_irepository_require (PyGIRepository *self,
 }
 
 static PyObject *
+_wrap_g_irepository_is_registered (PyGIRepository *self,
+                                   PyObject       *args,
+                                   PyObject       *kwargs)
+{
+    static char *kwlist[] = { "namespace", "version", NULL };
+    const char *namespace_;
+    const char *version = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s|z:Repository.is_registered",
+                                      kwlist, &namespace_, &version)) {
+        return NULL;
+    }
+
+    return PyBool_FromLong (g_irepository_is_registered (self->repository,
+                                                         namespace_, version));
+}
+
+static PyObject *
 _wrap_g_irepository_find_by_name (PyGIRepository *self,
                                   PyObject       *args,
                                   PyObject       *kwargs)
@@ -311,6 +329,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "get_version", (PyCFunction) _wrap_g_irepository_get_version, METH_VARARGS | METH_KEYWORDS },
     { "get_loaded_namespaces", (PyCFunction) _wrap_g_irepository_get_loaded_namespaces, METH_NOARGS },
     { "get_dependencies", (PyCFunction) _wrap_g_irepository_get_dependencies, METH_VARARGS | METH_KEYWORDS  },
+    { "is_registered", (PyCFunction) _wrap_g_irepository_is_registered, METH_VARARGS | METH_KEYWORDS  },
     { NULL, NULL, 0 }
 };
 
