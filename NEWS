@@ -1,3 +1,5 @@
+3.18.0  22-Sep-2015
+
 3.17.90 19-Aug-2015
         - Allow passing unicode lists to GStrv properties on Python 2
           (Christoph Reiter) (#744745)
