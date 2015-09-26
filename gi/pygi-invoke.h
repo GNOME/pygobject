@@ -38,6 +38,10 @@ PyObject *pygi_callable_info_invoke (GIBaseInfo *info, PyObject *py_args,
 PyObject *_wrap_g_callable_info_invoke (PyGIBaseInfo *self, PyObject *py_args,
                                         PyObject *kwargs);
 
+gboolean _pygi_invoke_arg_state_init (PyGIInvokeState *state);
+
+void _pygi_invoke_arg_state_free     (PyGIInvokeState *state);
+
 G_END_DECLS
 
 #endif /* __PYGI_INVOKE_H__ */

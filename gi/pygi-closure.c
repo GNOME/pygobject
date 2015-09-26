@@ -317,9 +317,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     state->args = NULL;
     state->error = NULL;
 
-    state->args = g_slice_alloc0 (state->n_args * sizeof (PyGIInvokeArgState));
-    if (state->args == NULL && state->n_args != 0) {
-        PyErr_NoMemory();
+    if (!_pygi_invoke_arg_state_init (state)) {
         return FALSE;
     }
 
@@ -332,7 +330,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 static void
 _invoke_state_clear (PyGIInvokeState *state)
 {
-    g_slice_free1 (state->n_args * sizeof (PyGIInvokeArgState), state->args);
+    _pygi_invoke_arg_state_free (state);
     Py_XDECREF (state->py_in_args);
 }
 

@@ -216,6 +216,59 @@ _py_args_combine_and_check_length (PyGICallableCache *cache,
     return combined_py_args;
 }
 
+/* To reduce calls to g_slice_*() we (1) allocate all the memory depended on
+ * the argument count in one go and (2) keep one version per argument count
+ * around for faster reuse.
+ */
+
+#define PyGI_INVOKE_ARG_STATE_SIZE(n)   (n * (sizeof (PyGIInvokeArgState) + sizeof (GIArgument *)))
+#define PyGI_INVOKE_ARG_STATE_N_MAX     10
+static gpointer free_arg_state[PyGI_INVOKE_ARG_STATE_N_MAX];
+
+/**
+ * _pygi_invoke_arg_state_init:
+ * Sets PyGIInvokeState.args and PyGIInvokeState.ffi_args.
+ * On error returns FALSE and sets an exception.
+ */
+gboolean
+_pygi_invoke_arg_state_init (PyGIInvokeState *state) {
+
+    gpointer mem;
+
+    if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX && (mem = free_arg_state[state->n_args]) != NULL) {
+        free_arg_state[state->n_args] = NULL;
+        memset (mem, 0, PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
+    } else {
+        mem = g_slice_alloc0 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args));
+    }
+
+    if (mem == NULL && state->n_args != 0) {
+        PyErr_NoMemory();
+        return FALSE;
+    }
+
+    if (mem != NULL) {
+        state->args = mem;
+        state->ffi_args = (gpointer)((gchar *)mem + state->n_args * sizeof (PyGIInvokeArgState));
+    }
+
+    return TRUE;
+}
+
+/**
+ * _pygi_invoke_arg_state_free:
+ * Frees PyGIInvokeState.args and PyGIInvokeState.ffi_args
+ */
+void
+_pygi_invoke_arg_state_free(PyGIInvokeState *state) {
+    if (state->n_args < PyGI_INVOKE_ARG_STATE_N_MAX && free_arg_state[state->n_args] == NULL) {
+        free_arg_state[state->n_args] = state->args;
+        return;
+    }
+
+    g_slice_free1 (PyGI_INVOKE_ARG_STATE_SIZE (state->n_args), state->args);
+}
+
 static gboolean
 _invoke_state_init_from_cache (PyGIInvokeState *state,
                                PyGIFunctionCache *function_cache,
@@ -245,13 +298,9 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     }
     state->n_py_in_args = PyTuple_Size (state->py_in_args);
 
-    state->args = g_slice_alloc0 (state->n_args * (sizeof (PyGIInvokeArgState) + sizeof (GIArgument *)));
-    if (state->args == NULL && state->n_args != 0) {
-        PyErr_NoMemory();
+    if (!_pygi_invoke_arg_state_init (state)) {
         return FALSE;
     }
-
-    state->ffi_args = (gpointer)((char*)state->args + state->n_args * sizeof (PyGIInvokeArgState));
 
     state->error = NULL;
 
@@ -268,7 +317,7 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
 static void
 _invoke_state_clear (PyGIInvokeState *state, PyGIFunctionCache *function_cache)
 {
-    g_slice_free1 (state->n_args * (sizeof (PyGIInvokeArgState) + sizeof (GIArgument *)), state->args);
+    _pygi_invoke_arg_state_free (state);
     Py_XDECREF (state->py_in_args);
 }
 
