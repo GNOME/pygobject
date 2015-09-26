@@ -7,6 +7,22 @@
 
 G_BEGIN_DECLS
 
+typedef struct _PyGIInvokeArgState
+{
+    /* Holds memory for the C value of arguments marshaled "to" or "from" Python. */
+    GIArgument arg_value;
+
+    /* Holds pointers to values in arg_values or a caller allocated chunk of
+     * memory via arg_pointer.v_pointer.
+     */
+    GIArgument arg_pointer;
+
+    /* Holds from_py marshaler cleanup data. */
+    gpointer arg_cleanup_data;
+
+} PyGIInvokeArgState;
+
+
 typedef struct _PyGIInvokeState
 {
     PyObject *py_in_args;
@@ -19,23 +35,13 @@ typedef struct _PyGIInvokeState
 
     /* List of arguments passed to ffi. Elements can point directly to values held in
      * arg_values for "in/from Python" or indirectly via arg_pointers for
-     * "out/inout/to Python". In the latter case, the arg_pointers[x]->v_pointer
+     * "out/inout/to Python". In the latter case, the args[x].arg_pointer.v_pointer
      * member points to memory for the value storage.
      */
-    GIArgument **args;
+    GIArgument **ffi_args;
 
-    /* Holds memory for the C value of arguments marshaled "to" or "from" Python. */
-    GIArgument *arg_values;
-
-    /* Holds pointers to values in arg_values or a caller allocated chunk of
-     * memory via arg_pointers[x].v_pointer.
-     */
-    GIArgument *arg_pointers;
-
-    /* Array of pointers allocated to the same length as args which holds from_py
-     * marshaler cleanup data.
-     */
-    gpointer *args_cleanup_data;
+    /* Array of size n_args containing per argument state */
+    PyGIInvokeArgState *args;
 
     /* Memory to receive the result of the C ffi function call. */
     GIArgument return_arg;

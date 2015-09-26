@@ -197,7 +197,7 @@ _pygi_closure_assign_pyobj_to_out_argument (gpointer out_arg,
 }
 
 static void
-_pygi_closure_convert_ffi_arguments (PyGIInvokeState *state,
+_pygi_closure_convert_ffi_arguments (PyGIInvokeArgState *state,
                                      PyGICallableCache *cache,
                                      void **args)
 {
@@ -207,52 +207,52 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeState *state,
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
-            state->arg_values[i].v_pointer = * (gpointer *) args[i];
-            
-            if (state->arg_values[i].v_pointer == NULL)
+            state[i].arg_value.v_pointer = * (gpointer *) args[i];
+
+            if (state[i].arg_value.v_pointer == NULL)
                 continue;
 
-            state->arg_pointers[i].v_pointer = state->arg_values[i].v_pointer;
-            state->arg_values[i] = *(GIArgument *) state->arg_values[i].v_pointer;
+            state[i].arg_pointer.v_pointer = state[i].arg_value.v_pointer;
+            state[i].arg_value = *(GIArgument *) state[i].arg_value.v_pointer;
             continue;
         }
 
         switch (arg_cache->type_tag) {
             case GI_TYPE_TAG_BOOLEAN:
-                state->arg_values[i].v_boolean = * (gboolean *) args[i];
+                state[i].arg_value.v_boolean = * (gboolean *) args[i];
                 break;
             case GI_TYPE_TAG_INT8:
-                state->arg_values[i].v_int8 = * (gint8 *) args[i];
+                state[i].arg_value.v_int8 = * (gint8 *) args[i];
                 break;
             case GI_TYPE_TAG_UINT8:
-                state->arg_values[i].v_uint8 = * (guint8 *) args[i];
+                state[i].arg_value.v_uint8 = * (guint8 *) args[i];
                 break;
             case GI_TYPE_TAG_INT16:
-                state->arg_values[i].v_int16 = * (gint16 *) args[i];
+                state[i].arg_value.v_int16 = * (gint16 *) args[i];
                 break;
             case GI_TYPE_TAG_UINT16:
-                state->arg_values[i].v_uint16 = * (guint16 *) args[i];
+                state[i].arg_value.v_uint16 = * (guint16 *) args[i];
                 break;
             case GI_TYPE_TAG_INT32:
-                state->arg_values[i].v_int32 = * (gint32 *) args[i];
+                state[i].arg_value.v_int32 = * (gint32 *) args[i];
                 break;
             case GI_TYPE_TAG_UINT32:
-                state->arg_values[i].v_uint32 = * (guint32 *) args[i];
+                state[i].arg_value.v_uint32 = * (guint32 *) args[i];
                 break;
             case GI_TYPE_TAG_INT64:
-                state->arg_values[i].v_int64 = * (glong *) args[i];
+                state[i].arg_value.v_int64 = * (glong *) args[i];
                 break;
             case GI_TYPE_TAG_UINT64:
-                state->arg_values[i].v_uint64 = * (glong *) args[i];
+                state[i].arg_value.v_uint64 = * (glong *) args[i];
                 break;
             case GI_TYPE_TAG_FLOAT:
-                state->arg_values[i].v_float = * (gfloat *) args[i];
+                state[i].arg_value.v_float = * (gfloat *) args[i];
                 break;
             case GI_TYPE_TAG_DOUBLE:
-                state->arg_values[i].v_double = * (gdouble *) args[i];
+                state[i].arg_value.v_double = * (gdouble *) args[i];
                 break;
             case GI_TYPE_TAG_UTF8:
-                state->arg_values[i].v_string = * (gchar **) args[i];
+                state[i].arg_value.v_string = * (gchar **) args[i];
                 break;
             case GI_TYPE_TAG_INTERFACE:
             {
@@ -263,11 +263,11 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeState *state,
                 interface_type = g_base_info_get_type (interface);
 
                 if (interface_type == GI_INFO_TYPE_ENUM) {
-                    state->arg_values[i].v_int = * (gint *) args[i];
+                    state[i].arg_value.v_int = * (gint *) args[i];
                 } else if (interface_type == GI_INFO_TYPE_FLAGS) {
-                    state->arg_values[i].v_uint = * (guint *) args[i];
+                    state[i].arg_value.v_uint = * (guint *) args[i];
                 } else {
-                    state->arg_values[i].v_pointer = * (gpointer *) args[i];
+                    state[i].arg_value.v_pointer = * (gpointer *) args[i];
                 }
                 break;
             }
@@ -277,19 +277,19 @@ _pygi_closure_convert_ffi_arguments (PyGIInvokeState *state,
             case GI_TYPE_TAG_GSLIST:
             case GI_TYPE_TAG_ARRAY:
             case GI_TYPE_TAG_VOID:
-                state->arg_values[i].v_pointer = * (gpointer *) args[i];
+                state[i].arg_value.v_pointer = * (gpointer *) args[i];
                 break;
             default:
                 g_warning ("Unhandled type tag %s",
                            g_type_tag_to_string (arg_cache->type_tag));
-                state->arg_values[i].v_pointer = 0;
+                state[i].arg_value.v_pointer = 0;
         }
     }
 
     if (cache->throws) {
         gssize error_index = _pygi_callable_cache_args_len (cache);
 
-        state->arg_values[error_index].v_pointer = * (gpointer *) args[error_index];
+        state[error_index].arg_value.v_pointer = * (gpointer *) args[error_index];
     }
 }
 
@@ -317,35 +317,22 @@ _invoke_state_init_from_cache (PyGIInvokeState *state,
     state->args = NULL;
     state->error = NULL;
 
-    state->args_cleanup_data = g_slice_alloc0 (state->n_args * sizeof (gpointer));
-    if (state->args_cleanup_data == NULL && state->n_args != 0) {
+    state->args = g_slice_alloc0 (state->n_args * sizeof (PyGIInvokeArgState));
+    if (state->args == NULL && state->n_args != 0) {
         PyErr_NoMemory();
         return FALSE;
     }
 
-    state->arg_values = g_slice_alloc0 (state->n_args * sizeof (GIArgument));
-    if (state->arg_values == NULL && state->n_args != 0) {
-        PyErr_NoMemory ();
-        return FALSE;
-    }
+    state->ffi_args = NULL;
 
-    state->arg_pointers = g_slice_alloc0 (state->n_args * sizeof (GIArgument));
-    if (state->arg_pointers == NULL && state->n_args != 0) {
-        PyErr_NoMemory ();
-        return FALSE;
-    }
-
-    _pygi_closure_convert_ffi_arguments (state, cache, args);
+    _pygi_closure_convert_ffi_arguments (state->args, cache, args);
     return TRUE;
 }
 
 static void
 _invoke_state_clear (PyGIInvokeState *state)
 {
-    g_slice_free1 (state->n_args * sizeof (gpointer), state->args_cleanup_data);
-    g_slice_free1 (state->n_args * sizeof (GIArgument), state->arg_values);
-    g_slice_free1 (state->n_args * sizeof (GIArgument), state->arg_pointers);
-
+    g_slice_free1 (state->n_args * sizeof (PyGIInvokeArgState), state->args);
     Py_XDECREF (state->py_in_args);
 }
 
@@ -403,7 +390,7 @@ _pygi_closure_convert_arguments (PyGIInvokeState *state,
                 value = arg_cache->to_py_marshaller (state,
                                                      cache,
                                                      arg_cache,
-                                                     &state->arg_values[i]);
+                                                     &state->args[i].arg_value);
 
                 if (value == NULL) {
                     pygi_marshal_cleanup_args_to_py_parameter_fail (state,
@@ -446,7 +433,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                                                            cache->return_cache,
                                                            item,
                                                            &state->return_arg,
-                                                           &state->args_cleanup_data[0]);
+                                                           &state->args[0].arg_cleanup_data);
 
         if (!success) {
             pygi_marshal_cleanup_args_return_fail (state,
@@ -466,7 +453,7 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
             PyObject *item = py_retval;
 
             if (arg_cache->type_tag == GI_TYPE_TAG_ERROR) {
-                * (GError **) state->arg_pointers[i].v_pointer = NULL;
+                * (GError **) state->args[i].arg_pointer.v_pointer = NULL;
                 continue;
             }
 
@@ -483,8 +470,8 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                                                      cache,
                                                      arg_cache,
                                                      item,
-                                                     &state->arg_values[i],
-                                                     &state->args_cleanup_data[i_py_retval]);
+                                                     &state->args[i].arg_value,
+                                                     &state->args[i_py_retval].arg_cleanup_data);
 
             if (!success) {
                 pygi_marshal_cleanup_args_to_py_parameter_fail (state,
@@ -493,8 +480,8 @@ _pygi_closure_set_out_arguments (PyGIInvokeState *state,
                 return FALSE;
             }
 
-            _pygi_closure_assign_pyobj_to_out_argument (state->arg_pointers[i].v_pointer,
-                                                        &state->arg_values[i], arg_cache);
+            _pygi_closure_assign_pyobj_to_out_argument (state->args[i].arg_pointer.v_pointer,
+                                                        &state->args[i].arg_value, arg_cache);
 
             i_py_retval++;
         }
@@ -520,14 +507,14 @@ _pygi_closure_clear_retvals (PyGIInvokeState *state,
         PyGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
 
         if (arg_cache->direction & PYGI_DIRECTION_FROM_PYTHON) {
-            _pygi_closure_assign_pyobj_to_out_argument (state->arg_pointers[i].v_pointer,
+            _pygi_closure_assign_pyobj_to_out_argument (state->args[i].arg_pointer.v_pointer,
                                                         &arg, arg_cache);
         }
     }
 
     if (cache->throws) {
         gssize error_index = state->n_args - 1;
-        GError **error = (GError **) state->arg_values[error_index].v_pointer;
+        GError **error = (GError **) state->args[error_index].arg_value.v_pointer;
 
         if (error != NULL) {
             pygi_gerror_exception_check (error);
@@ -763,7 +750,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
      * The return trip to python will marshal this back and pull the python user data out.
      */
     if (user_data_cache != NULL) {
-        state->arg_values[user_data_cache->c_arg_index].v_pointer = closure;
+        state->args[user_data_cache->c_arg_index].arg_value.v_pointer = closure;
     }
 
     /* Setup a GDestroyNotify callback if this method supports it along with
@@ -779,7 +766,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
 
     if (destroy_cache) {
         if (user_data_cache != NULL) {
-            state->arg_values[destroy_cache->c_arg_index].v_pointer = _pygi_invoke_closure_free;
+            state->args[destroy_cache->c_arg_index].arg_value.v_pointer = _pygi_invoke_closure_free;
         } else {
             char *full_name = pygi_callable_cache_get_full_name (callable_cache);
             gchar *msg = g_strdup_printf("Callables passed to %s will leak references because "
@@ -793,7 +780,7 @@ _pygi_marshal_from_py_interface_callback (PyGIInvokeState   *state,
                 return FALSE;
             }
             g_free(msg);
-            state->arg_values[destroy_cache->c_arg_index].v_pointer = _pygi_destroy_notify_dummy;
+            state->args[destroy_cache->c_arg_index].arg_value.v_pointer = _pygi_destroy_notify_dummy;
         }
     }
 
@@ -819,10 +806,10 @@ _pygi_marshal_to_py_interface_callback (PyGIInvokeState   *state,
     destroy_notify_index = callback_cache->destroy_notify_index;
 
     if (user_data_index != -1)
-        user_data = state->arg_values[user_data_index].v_pointer;
+        user_data = state->args[user_data_index].arg_value.v_pointer;
 
     if (destroy_notify_index != -1)
-        destroy_notify = state->arg_values[destroy_notify_index].v_pointer;
+        destroy_notify = state->args[destroy_notify_index].arg_value.v_pointer;
 
     return _pygi_ccallback_new (arg->v_pointer,
                                 user_data,

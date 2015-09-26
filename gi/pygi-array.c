@@ -386,7 +386,7 @@ array_success:
         PyGIArgCache *child_cache =
             _pygi_callable_cache_get_arg (callable_cache, array_cache->len_arg_index);
 
-        if (!gi_argument_from_py_ssize_t (&state->arg_values[child_cache->c_arg_index],
+        if (!gi_argument_from_py_ssize_t (&state->args[child_cache->c_arg_index].arg_value,
                                           length,
                                           child_cache->type_tag)) {
             goto err;
@@ -530,7 +530,7 @@ _pygi_marshal_to_py_array (PyGIInvokeState   *state,
                 len = g_strv_length ((gchar **)arg->v_pointer);
             }
         } else {
-            GIArgument *len_arg = &state->arg_values[array_cache->len_arg_index];
+            GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
             PyGIArgCache *arg_cache = _pygi_callable_cache_get_arg (callable_cache,
                                                                     array_cache->len_arg_index);
 
@@ -686,7 +686,7 @@ _wrap_c_array (PyGIInvokeState   *state,
     } else if (array_cache->is_zero_terminated) {
         len = g_strv_length ((gchar **)data);
     } else if (array_cache->len_arg_index >= 0) {
-        GIArgument *len_arg = &state->arg_values[array_cache->len_arg_index];
+        GIArgument *len_arg = &state->args[array_cache->len_arg_index].arg_value;
         len = len_arg->v_long;
     }
 
