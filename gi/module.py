@@ -117,6 +117,8 @@ class IntrospectionModule(object):
     These members are then cached on this introspection module.
     """
     def __init__(self, namespace, version=None):
+        """Might raise gi._gi.RepositoryError"""
+
         repository.require(namespace, version)
         self._namespace = namespace
         self._version = version
@@ -263,6 +265,8 @@ def get_introspection_module(namespace):
     """
     :Returns:
         An object directly wrapping the gi module without overrides.
+
+    Might raise gi._gi.RepositoryError
     """
     if namespace in _introspection_modules:
         return _introspection_modules[namespace]

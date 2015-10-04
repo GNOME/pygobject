@@ -28,7 +28,7 @@ import importlib
 from contextlib import contextmanager
 
 import gi
-from ._gi import Repository
+from ._gi import Repository, RepositoryError
 from ._gi import PyGIWarning
 from .module import get_introspection_module
 from .overrides import load_overrides
@@ -116,7 +116,10 @@ class DynamicImporter(object):
         else:
             stacklevel = 4
         with _check_require_version(namespace, stacklevel=stacklevel):
-            introspection_module = get_introspection_module(namespace)
+            try:
+                introspection_module = get_introspection_module(namespace)
+            except RepositoryError as e:
+                raise ImportError(e)
             # Import all dependencies first so their init functions
             # (gdk_init, ..) in overrides get called.
             # https://bugzilla.gnome.org/show_bug.cgi?id=656314
