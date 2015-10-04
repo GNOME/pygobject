@@ -24,11 +24,20 @@ import warnings
 
 from ..overrides import override, strip_boolean_result
 from ..module import get_introspection_module
-from gi import PyGIDeprecationWarning
+from gi import PyGIDeprecationWarning, require_version
 
 Gdk = get_introspection_module('Gdk')
 
 __all__ = []
+
+
+# https://bugzilla.gnome.org/show_bug.cgi?id=673396
+try:
+    require_version("GdkX11", Gdk._version)
+    from gi.repository import GdkX11
+    GdkX11  # pyflakes
+except (ValueError, ImportError):
+    pass
 
 
 class Color(Gdk.Color):
