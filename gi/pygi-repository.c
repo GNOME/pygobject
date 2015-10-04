@@ -319,6 +319,40 @@ _wrap_g_irepository_get_dependencies (PyGIRepository *self,
     return py_namespaces;
 }
 
+
+static PyObject *
+_wrap_g_irepository_get_immediate_dependencies (PyGIRepository *self,
+                                                PyObject       *args,
+                                                PyObject       *kwargs)
+{
+    static char *kwlist[] = { "namespace", NULL };
+    const char *namespace_;
+    char **namespaces;
+    PyObject *py_namespaces;
+    gssize i;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs,
+                                      "s:Repository.get_immediate_dependencies",
+                                      kwlist, &namespace_)) {
+        return NULL;
+    }
+
+    py_namespaces = PyList_New (0);
+    namespaces = g_irepository_get_immediate_dependencies (self->repository,
+                                                           namespace_);
+
+    for (i = 0; namespaces[i] != NULL; i++) {
+        PyObject *py_namespace = PYGLIB_PyUnicode_FromString (namespaces[i]);
+        PyList_Append (py_namespaces, py_namespace);
+        Py_DECREF (py_namespace);
+    }
+
+    g_strfreev (namespaces);
+
+    return py_namespaces;
+}
+
+
 static PyMethodDef _PyGIRepository_methods[] = {
     { "enumerate_versions", (PyCFunction) _wrap_g_irepository_enumerate_versions, METH_VARARGS | METH_KEYWORDS },
     { "get_default", (PyCFunction) _wrap_g_irepository_get_default, METH_STATIC | METH_NOARGS },
@@ -329,6 +363,7 @@ static PyMethodDef _PyGIRepository_methods[] = {
     { "get_version", (PyCFunction) _wrap_g_irepository_get_version, METH_VARARGS | METH_KEYWORDS },
     { "get_loaded_namespaces", (PyCFunction) _wrap_g_irepository_get_loaded_namespaces, METH_NOARGS },
     { "get_dependencies", (PyCFunction) _wrap_g_irepository_get_dependencies, METH_VARARGS | METH_KEYWORDS  },
+    { "get_immediate_dependencies", (PyCFunction) _wrap_g_irepository_get_immediate_dependencies, METH_VARARGS | METH_KEYWORDS  },
     { "is_registered", (PyCFunction) _wrap_g_irepository_is_registered, METH_VARARGS | METH_KEYWORDS  },
     { NULL, NULL, 0 }
 };

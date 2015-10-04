@@ -24,6 +24,7 @@
 from __future__ import absolute_import
 import sys
 import warnings
+import importlib
 from contextlib import contextmanager
 
 import gi
@@ -93,7 +94,11 @@ class DynamicImporter(object):
         if path != self.path:
             return
 
-        if repository.enumerate_versions(namespace):
+        # is_registered() is faster than enumerate_versions() and
+        # in the common case of a namespace getting loaded before its
+        # dependencies, is_registered() returns True for all dependencies.
+        if repository.is_registered(namespace) or \
+                repository.enumerate_versions(namespace):
             return self
         else:
             raise ImportError('cannot import name %s, '
@@ -112,6 +117,11 @@ class DynamicImporter(object):
             stacklevel = 4
         with _check_require_version(namespace, stacklevel=stacklevel):
             introspection_module = get_introspection_module(namespace)
+            # Import all dependencies first so their init functions
+            # (gdk_init, ..) in overrides get called.
+            # https://bugzilla.gnome.org/show_bug.cgi?id=656314
+            for dep in repository.get_immediate_dependencies(namespace):
+                importlib.import_module('gi.repository.' + dep.split("-")[0])
             dynamic_module = load_overrides(introspection_module)
 
         dynamic_module.__file__ = '<%s>' % fullname

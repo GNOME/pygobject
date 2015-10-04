@@ -77,6 +77,19 @@ class TestModule(unittest.TestCase):
         # Restore the previous cache
         gi.module._introspection_modules = old_modules
 
+    def test_module_dependency_loading(self):
+        # Difficult to because this generally need to run in isolation to make
+        # sure GIMarshallingTests has not yet been loaded. But we can do this with:
+        #  make check TEST_NAMES=test_import_machinery.TestModule.test_module_dependency_loading
+        if 'gi.repository.Gio' in sys.modules:
+            return
+
+        from gi.repository import GIMarshallingTests
+        GIMarshallingTests  # PyFlakes
+
+        self.assertIn('gi.repository.Gio', sys.modules)
+        self.assertIn('gi.repository.GIMarshallingTests', sys.modules)
+
     def test_static_binding_protection(self):
         # Importing old static bindings once gi has been imported should not
         # crash but instead give back a dummy module which produces RuntimeErrors
