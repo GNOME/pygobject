@@ -18,7 +18,6 @@
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import inspect
 
 from ._gi import _gobject
 
@@ -220,6 +219,8 @@ def get_signal_annotations(func):
     return_type = None
 
     if hasattr(func, '__annotations__'):
+        # import inspect only when needed because it takes ~10 msec to load
+        import inspect
         spec = inspect.getfullargspec(func)
         arg_types = tuple(spec.annotations[arg] for arg in spec.args
                           if arg in spec.annotations)
