@@ -184,3 +184,12 @@ class TestGdk(unittest.TestCase):
 
         rgba = Gdk.RGBA(red=1.0, green=0.8, blue=0.6, alpha=0.4)
         self.assertEqual(eval(repr(rgba)), rgba)
+
+    def test_rectangle_functions(self):
+        # https://bugzilla.gnome.org/show_bug.cgi?id=756364
+        a = Gdk.Rectangle()
+        b = Gdk.Rectangle()
+        self.assertTrue(isinstance(Gdk.rectangle_union(a, b), Gdk.Rectangle))
+        intersect, rect = Gdk.rectangle_intersect(a, b)
+        self.assertTrue(isinstance(rect, Gdk.Rectangle))
+        self.assertTrue(isinstance(intersect, bool))
