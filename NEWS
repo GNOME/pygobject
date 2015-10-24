@@ -1,3 +1,9 @@
+3.18.1  23-Oct-2015
+        - Fix Gdk.rectangle_intersect/rectangle_union missing with GTK+ 3.18 (Christoph Reiter) (#756364)
+        - pep8: ignore new errors reported by pep8 1.6 (Christoph Reiter)
+        - Don't emit require_version warning if namespace was loaded previously using g_irepository_require (Christoph Reiter) (#754491)
+        - configure.ac: post release version bump to 3.18.1 (Garrett Regier)
+
 3.18.0  22-Sep-2015
 
 3.17.90 19-Aug-2015
