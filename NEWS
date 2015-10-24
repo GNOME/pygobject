@@ -1,3 +1,6 @@
+3.18.2  24-Oct-2015
+        - configure.ac: post release version bump to 3.18.2 (Christoph Reiter)
+
 3.18.1  23-Oct-2015
         - Fix Gdk.rectangle_intersect/rectangle_union missing with GTK+ 3.18 (Christoph Reiter) (#756364)
         - pep8: ignore new errors reported by pep8 1.6 (Christoph Reiter)
