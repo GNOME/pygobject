@@ -44,7 +44,9 @@ AC_SUBST(PYGOBJECT_MICRO_VERSION, pygobject_micro_version)
 
 AC_CONFIG_HEADERS(config.h)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
-AM_INIT_AUTOMAKE([1.11.1 foreign no-dist-gzip dist-xz])
+# 1.12.6 to get a py-compile supporting newer Python 3 versions.
+# See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=8847
+AM_INIT_AUTOMAKE([1.12.6 foreign no-dist-gzip dist-xz])
 
 dnl put the ACLOCAL flags in the makefile
 ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
