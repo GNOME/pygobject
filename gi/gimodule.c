@@ -36,6 +36,33 @@ PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
 
+
+/* Returns a new flag/enum type or %NULL */
+static PyObject *
+flags_enum_from_gtype (GType g_type,
+                       PyObject * (add_func) (PyObject *, const char *,
+                                              const char *, GType))
+{
+    PyObject *new_type;
+    GIRepository *repository;
+    GIBaseInfo *info;
+    const gchar *type_name;
+
+    repository = g_irepository_get_default ();
+    info = g_irepository_find_by_gtype (repository, g_type);
+    if (info != NULL) {
+        type_name = g_base_info_get_name (info);
+        new_type = add_func (NULL, type_name, NULL, g_type);
+        g_base_info_unref (info);
+    } else {
+        type_name = g_type_name (g_type);
+        new_type = add_func (NULL, type_name, NULL, g_type);
+    }
+
+    return new_type;
+}
+
+
 static PyObject *
 _wrap_pyg_enum_add (PyObject *self,
                     PyObject *args,
@@ -56,7 +83,7 @@ _wrap_pyg_enum_add (PyObject *self,
         return NULL;
     }
 
-    return pyg_enum_add (NULL, g_type_name (g_type), NULL, g_type);
+    return flags_enum_from_gtype (g_type, pyg_enum_add);
 }
 
 static PyObject *
@@ -152,7 +179,7 @@ _wrap_pyg_enum_register_new_gtype_and_add (PyObject *self,
     }
 
     g_free (full_name);
-    return pyg_enum_add (NULL, g_type_name (g_type), NULL, g_type);
+    return pyg_enum_add (NULL, type_name, NULL, g_type);
 }
 
 static PyObject *
@@ -175,7 +202,7 @@ _wrap_pyg_flags_add (PyObject *self,
         return NULL;
     }
 
-    return pyg_flags_add (NULL, g_type_name (g_type), NULL, g_type);
+    return flags_enum_from_gtype (g_type, pyg_flags_add);
 }
 
 static PyObject *
@@ -271,7 +298,7 @@ _wrap_pyg_flags_register_new_gtype_and_add (PyObject *self,
     }
 
     g_free (full_name);
-    return pyg_flags_add (NULL, g_type_name (g_type), NULL, g_type);
+    return pyg_flags_add (NULL, type_name, NULL, g_type);
 }
 
 static void

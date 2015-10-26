@@ -71,29 +71,50 @@ pyg_enum_richcompare(PyGEnum *self, PyObject *other, int op)
 static PyObject *
 pyg_enum_repr(PyGEnum *self)
 {
-  GEnumClass *enum_class;
-  const char *value;
-  guint index;
-  static char tmp[256];
-  long l;
+    PyObject *module;
+    GEnumClass *enum_class;
+    const char *value;
+    guint index;
+    char *namespace, *module_str;
+    static char tmp[256];
+    long l;
 
-  enum_class = g_type_class_ref(self->gtype);
-  g_assert(G_IS_ENUM_CLASS(enum_class));
+    module = PyObject_GetAttrString ((PyObject *)self, "__module__");
+    if (module == NULL)
+        return NULL;
 
-  l = PYGLIB_PyLong_AS_LONG(self);
-  for (index = 0; index < enum_class->n_values; index++) 
-      if (l == enum_class->values[index].value)
-          break;
+    if (!PYGLIB_PyUnicode_Check (module)) {
+        Py_DECREF (module);
+        return NULL;
+    }
 
-  value = enum_class->values[index].value_name;
-  if (value)
-      sprintf(tmp, "<enum %s of type %s>", value, g_type_name(self->gtype));
-  else
-      sprintf(tmp, "<enum %ld of type %s>", PYGLIB_PyLong_AS_LONG(self), g_type_name(self->gtype));
+    enum_class = g_type_class_ref(self->gtype);
+    g_assert(G_IS_ENUM_CLASS(enum_class));
 
-  g_type_class_unref(enum_class);
+    l = PYGLIB_PyLong_AS_LONG(self);
+    for (index = 0; index < enum_class->n_values; index++)
+        if (l == enum_class->values[index].value)
+            break;
 
-  return PYGLIB_PyUnicode_FromString(tmp);
+    module_str = PYGLIB_PyUnicode_AsString (module);
+    namespace = g_strrstr (module_str, ".");
+    if (namespace == NULL) {
+        namespace = module_str;
+    } else {
+        namespace += 1;
+    }
+
+    value = enum_class->values[index].value_name;
+    if (value)
+        sprintf(tmp, "<enum %s of type %s.%s>", value,
+                namespace, Py_TYPE (self)->tp_name);
+    else
+        sprintf(tmp, "<enum %ld of type %s.%s>", PYGLIB_PyLong_AS_LONG(self),
+                namespace, Py_TYPE (self)->tp_name);
+    Py_DECREF (module);
+    g_type_class_unref(enum_class);
+
+    return PYGLIB_PyUnicode_FromString(tmp);
 }
 
 static PyObject *

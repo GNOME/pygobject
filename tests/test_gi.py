@@ -1544,6 +1544,16 @@ class TestEnum(unittest.TestCase):
                           gi._gi.enum_add,
                           GIMarshallingTests.NoTypeFlags.__gtype__)
 
+    def test_type_module_name(self):
+        self.assertEqual(GIMarshallingTests.Enum.__name__, "Enum")
+        self.assertEqual(GIMarshallingTests.Enum.__module__,
+                         "gi.repository.GIMarshallingTests")
+
+    def test_repr(self):
+        self.assertEqual(repr(GIMarshallingTests.Enum.VALUE3),
+                         "<enum GI_MARSHALLING_TESTS_ENUM_VALUE3 of type "
+                         "GIMarshallingTests.Enum>")
+
 
 class TestEnumVFuncResults(unittest.TestCase):
     class EnumTester(GIMarshallingTests.Object):
@@ -1604,6 +1614,16 @@ class TestGEnum(unittest.TestCase):
         self.assertTrue(isinstance(genum, GIMarshallingTests.GEnum))
         self.assertEqual(genum, GIMarshallingTests.GEnum.VALUE1)
 
+    def test_type_module_name(self):
+        self.assertEqual(GIMarshallingTests.GEnum.__name__, "GEnum")
+        self.assertEqual(GIMarshallingTests.GEnum.__module__,
+                         "gi.repository.GIMarshallingTests")
+
+    def test_repr(self):
+        self.assertEqual(repr(GIMarshallingTests.GEnum.VALUE3),
+                         "<enum GI_MARSHALLING_TESTS_GENUM_VALUE3 of type "
+                         "GIMarshallingTests.GEnum>")
+
 
 class TestGFlags(unittest.TestCase):
 
@@ -1657,6 +1677,16 @@ class TestGFlags(unittest.TestCase):
         self.assertTrue(isinstance(flags, GIMarshallingTests.Flags))
         self.assertEqual(flags, GIMarshallingTests.Flags.VALUE1)
 
+    def test_type_module_name(self):
+        self.assertEqual(GIMarshallingTests.Flags.__name__, "Flags")
+        self.assertEqual(GIMarshallingTests.Flags.__module__,
+                         "gi.repository.GIMarshallingTests")
+
+    def test_repr(self):
+        self.assertEqual(repr(GIMarshallingTests.Flags.VALUE2),
+                         "<flags GI_MARSHALLING_TESTS_FLAGS_VALUE2 of type "
+                         "GIMarshallingTests.Flags>")
+
 
 class TestNoTypeFlags(unittest.TestCase):
 
@@ -1705,6 +1735,17 @@ class TestNoTypeFlags(unittest.TestCase):
     def test_flags_gtype_name_is_namespaced(self):
         self.assertEqual(GIMarshallingTests.NoTypeFlags.__gtype__.name,
                          'PyGIMarshallingTestsNoTypeFlags')
+
+    def test_type_module_name(self):
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.__name__,
+                         "NoTypeFlags")
+        self.assertEqual(GIMarshallingTests.NoTypeFlags.__module__,
+                         "gi.repository.GIMarshallingTests")
+
+    def test_repr(self):
+        self.assertEqual(repr(GIMarshallingTests.NoTypeFlags.VALUE2),
+                         "<flags GI_MARSHALLING_TESTS_NO_TYPE_FLAGS_VALUE2 of "
+                         "type GIMarshallingTests.NoTypeFlags>")
 
 
 class TestStructure(unittest.TestCase):
