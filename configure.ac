@@ -241,15 +241,6 @@ if test "x$GCC" = "xyes"; then
   JH_ADD_CFLAG([-Werror=unused-variable])
   JH_ADD_CFLAG([-fno-strict-aliasing])
   JH_ADD_CFLAG([-Werror=declaration-after-statement])
-
-  case $host_os in
-  solaris*)
-    ;;
-  *)
-    JH_ADD_CFLAG([-std=c90])
-    ;;
-  esac
-
 fi
 
 CFLAGS="$CFLAGS $WARN_CFLAGS $CODE_COVERAGE_CFLAGS"
