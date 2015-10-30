@@ -131,3 +131,7 @@ class TestImporter(unittest.TestCase):
             with check("InvalidGObjectRepositoryModuleName", 1):
                 from gi.repository import InvalidGObjectRepositoryModuleName
                 InvalidGObjectRepositoryModuleName
+
+    def test_get_import_stacklevel(self):
+        gi.importer.get_import_stacklevel(import_hook=True)
+        gi.importer.get_import_stacklevel(import_hook=False)
