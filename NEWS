@@ -1,3 +1,23 @@
+3.19.1  30-Oct-2015
+        - Use a named tuple for returning multiple values (Christoph Reiter) (#727374)
+        - enum/flags: use gir info for type names and __repr__ instead of the gtype name (Christoph Reiter) (#657915)
+        - Improve and unify __repr__ format for PyGObject, PyGBoxed and PyGIStruct (Christoph Reiter) (#657915)
+        - Don't leak internal RepositoryError on import. (Christoph Reiter) (#756033)
+        - Import dependencies when importing typelibs from gi.repository (Christoph Reiter) (#656314)
+        - Fix Gdk.rectangle_intersect/rectangle_union missing with GTK+ 3.18 (Christoph Reiter) (#756364)
+        - Don't import inspect at module level (Christoph Reiter)
+        - invoke state: add a free memory cache for PyGIInvokeArgState (Christoph Reiter) (#750658)
+        - invoke/closure: reduce g_slice_alloc usage (Christoph Reiter) (#750658)
+        - pep8: ignore new errors reported by pep8 1.6 (Christoph Reiter)
+        - Bump g-i dependency to latest stable (Garrett Regier)
+        - Avoid calling g_slist_length() during invoke (Garrett Regier)
+        - Simplify closure_convert_arguments() (Garrett Regier)
+        - Remove a level of indentation in convert_ffi_arguments() (Garrett Regier)
+        - Prevent passing the user data multiple times to callbacks (Garrett Regier) (#750347)
+        - Support throwing exceptions in closures (Garrett Regier) (#710671)
+        - Don't emit require_version warning if namespace was loaded previously using g_irepository_require (Christoph Reiter) (#754491)
+        - configure.ac: post release version bump to 3.19.1 (Garrett Regier)
+
 3.18.0  22-Sep-2015
 
 3.17.90 19-Aug-2015
