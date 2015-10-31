@@ -1,3 +1,10 @@
+3.19.2  31-Oct-2015
+        - tests: Fix failure due to new GTK+ warning regarding size_allocate()
+          (Simon Feltman)
+        - Fix build warnings regarding _POSIX_C_SOURCE redefinition
+          (Simon Feltman)
+        - Drop -std=c90 for now (Matthias Clasen)
+
 3.19.1  30-Oct-2015
         - Use a named tuple for returning multiple values (Christoph Reiter) (#727374)
         - enum/flags: use gir info for type names and __repr__ instead of the gtype name (Christoph Reiter) (#657915)
