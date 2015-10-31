@@ -22,6 +22,7 @@
 #  include <config.h>
 #endif
 
+#include <Python.h>
 #include <gobject/gvaluecollector.h>
 #include <girepository.h>
 #include <pyglib.h>

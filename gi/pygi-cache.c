@@ -18,6 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Python.h>
 #include <girepository.h>
 
 #include "pyglib.h"
@@ -1176,4 +1177,3 @@ pygi_closure_cache_new (GICallableInfo *info)
 
     return closure_cache;
 }
-

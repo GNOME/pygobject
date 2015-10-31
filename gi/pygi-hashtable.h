@@ -20,8 +20,8 @@
 #ifndef __PYGI_HASHTABLE_H__
 #define __PYGI_HASHTABLE_H__
 
-#include <girepository.h>
 #include "pygi-cache.h"
+#include <girepository.h>
 
 G_BEGIN_DECLS
 

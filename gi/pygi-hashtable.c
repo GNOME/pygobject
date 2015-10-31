@@ -18,6 +18,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Python.h>
 #include "pygi-hashtable.h"
 #include "pygi-argument.h"
 #include "pygi-private.h"

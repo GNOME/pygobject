@@ -16,6 +16,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Python.h>
 #include "pygi-value.h"
 #include "pyglib-python-compat.h"
 #include "pygobject-private.h"
