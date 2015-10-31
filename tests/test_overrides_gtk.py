@@ -692,6 +692,7 @@ class TestSignals(unittest.TestCase):
 
         with realized(win):
             win.show()
+            win.get_preferred_size()
             win.size_allocate(rect)
             self.assertTrue(win._alloc_called)
             self.assertIsInstance(win._alloc_value, Gdk.Rectangle)
