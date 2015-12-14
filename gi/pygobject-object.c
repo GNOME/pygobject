@@ -1923,7 +1923,9 @@ pygobject_emit(PyGObject *self, PyObject *args)
     if (query.return_type != G_TYPE_NONE)
 	g_value_init(&ret, query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
     
+    Py_BEGIN_ALLOW_THREADS;
     g_signal_emitv(params, signal_id, detail, &ret);
+    Py_END_ALLOW_THREADS;
 
     for (i = 0; i < query.n_params + 1; i++)
 	g_value_unset(&params[i]);
