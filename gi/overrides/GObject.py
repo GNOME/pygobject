@@ -22,6 +22,8 @@
 # USA
 
 import warnings
+import threading
+
 from collections import namedtuple
 
 import gi.overrides
@@ -210,6 +212,8 @@ __all__ += ['features', 'list_properties', 'new',
 
 
 class Value(GObjectModule.Value):
+    del_lock = threading.Lock()
+
     def __init__(self, value_type=None, py_value=None):
         GObjectModule.Value.__init__(self)
         if value_type is not None:
@@ -218,11 +222,12 @@ class Value(GObjectModule.Value):
                 self.set_value(py_value)
 
     def __del__(self):
-        if self._free_on_dealloc and self.g_type != TYPE_INVALID:
-            self.unset()
+        with self.del_lock:
+            if self._free_on_dealloc and self.g_type != TYPE_INVALID:
+                self.unset()
 
-        # We must call base class __del__() after unset.
-        super(Value, self).__del__()
+            # We must call base class __del__() after unset.
+            super(Value, self).__del__()
 
     def set_boxed(self, boxed):
         # Workaround the introspection marshalers inability to know
