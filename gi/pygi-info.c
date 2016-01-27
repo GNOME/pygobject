@@ -1971,6 +1971,19 @@ _wrap_g_field_info_get_value (PyGIBaseInfo *self,
         }
     }
 
+
+    if (pointer == NULL) {
+       PyObject *pyth_module, *pyth_func;
+
+       /* See if we can get a full traceback */
+       pyth_module = PyImport_ImportModule("traceback");
+       assert(pyth_module != NULL);
+
+       printf("DALEK: Dumping stack trace while accessing '%s' field\n", g_base_info_get_name (self->info));
+       pyth_func = PyObject_GetAttrString(pyth_module, "print_stack");
+       PyObject_CallFunctionObjArgs(pyth_func, NULL);
+    }
+
     if (!g_field_info_get_field ( (GIFieldInfo *) self->info, pointer, &value)) {
         PyErr_SetString (PyExc_RuntimeError, "unable to get the value");
         goto out;
