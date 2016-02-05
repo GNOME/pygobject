@@ -2,7 +2,14 @@ CLEANFILES =
 check_LTLIBRARIES = libgimarshallingtests.la
 test_typelibs = GIMarshallingTests-1.0.typelib
 
-nodist_libgimarshallingtests_la_SOURCES = $(GI_DATADIR)/tests/gimarshallingtests.c $(GI_DATADIR)/tests/gimarshallingtests.h
+nodist_libgimarshallingtests_la_SOURCES = \
+	$(GI_DATADIR)/tests/gimarshallingtests.c \
+	$(GI_DATADIR)/tests/gimarshallingtests.h
+
+dist_libgimarshallingtests_la_SOURCES = \
+	$(srcdir)/gimarshallingtestsextra.c \
+	$(srcdir)/gimarshallingtestsextra.h
+
 libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
 libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS) -no-undefined
 
@@ -17,7 +24,9 @@ GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 	--library=libgimarshallingtests.la \
 	--libtool="$(top_builddir)/libtool" \
 	--output $@ \
-	$(nodist_libgimarshallingtests_la_SOURCES)
+	$(nodist_libgimarshallingtests_la_SOURCES) \
+	$(dist_libgimarshallingtests_la_SOURCES)
+
 GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) g-ir-compiler $< -o $@
 

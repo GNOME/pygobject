@@ -133,6 +133,12 @@ class TestMarshalling(unittest.TestCase):
         self.assertEqual(e.domain, 'mydomain')
         self.assertEqual(e.code, 42)
 
+    def tests_compare_two_gerrors_in_gvalue(self):
+        error = GLib.Error.new_literal(1, "error", 1)
+        error1 = GLib.Error.new_literal(1, "error", 1)
+
+        GIMarshallingTests.compare_two_gerrors_in_gvalue(error, error1)
+
 
 if __name__ == '__main__':
     unittest.main()
