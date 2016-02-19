@@ -612,9 +612,13 @@ static PyMethodDef testhelper_functions[] = {
 
 PYGLIB_MODULE_START(testhelper, "testhelper")
 {
+  PyObject *gobject_module;
   PyObject *m, *d;
-  
-  pygobject_init(-1, -1, -1);
+
+
+  if ((gobject_module = pygobject_init(-1, -1, -1)) == NULL)
+    return NULL;
+  Py_DECREF (gobject_module);
 
   d = PyModule_GetDict(module);
 
