@@ -1,3 +1,12 @@
+3.19.90 20-Feb-2016
+        - tests: Set the active style context state before retrieving values
+          (Simon Feltman)
+        - tests: Fix crash with empty drag source icon names
+          (Simon Feltman) (#762392)
+        - Try to import GdkX11 in Gdk overrides (Christoph Reiter) (#673396)
+        - Fix import warnings pointing to the wrong code with CPython 3.3/3.5
+          (Christoph Reiter) (#757184)
+
 3.19.2  31-Oct-2015
         - tests: Fix failure due to new GTK+ warning regarding size_allocate()
           (Simon Feltman)
