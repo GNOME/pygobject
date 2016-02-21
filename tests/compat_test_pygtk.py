@@ -73,6 +73,7 @@ class TestGTKCompat(unittest.TestCase):
     def test_style(self):
         widget = gtk.Button()
         with capture_gi_deprecation_warnings():
+            widget.get_style_context().set_state(gtk.STATE_NORMAL)
             self.assertTrue(isinstance(widget.style.base[gtk.STATE_NORMAL],
                                        gtk.gdk.Color))
 
