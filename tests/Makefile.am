@@ -1,6 +1,18 @@
 CLEANFILES =
-check_LTLIBRARIES = libgimarshallingtests.la
+test_ltlibraries = libgimarshallingtests.la
 test_typelibs = GIMarshallingTests-1.0.typelib
+extension_ltlibraries =
+
+common_ldflags = \
+	-avoid-version \
+	-rpath $(abs_builddir) \
+	-shared
+
+# Note for Python extensions we need to use .so on Mac OSX, not .dylib
+extension_ldflags = \
+	$(common_ldflags) \
+	-module \
+	-shrext $(PYTHON_SO)
 
 nodist_libgimarshallingtests_la_SOURCES = \
 	$(GI_DATADIR)/tests/gimarshallingtests.c \
@@ -12,11 +24,8 @@ dist_libgimarshallingtests_la_SOURCES = \
 
 # We don't control the source so don't pass WARN_CFLAGS etc
 libgimarshallingtests_la_CFLAGS = $(GLIB_CFLAGS)
-libgimarshallingtests_la_LDFLAGS = -module -avoid-version $(GLIB_LIBS) -no-undefined
-
-# This is a hack to make sure a shared library is built
-libgimarshallingtests.la: $(libgimarshallingtests_la_OBJECTS) $(libgimarshallingtests_la_DEPENDENCIES)
-	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(libgimarshallingtests_la_LDFLAGS) $(libgimarshallingtests_la_OBJECTS) $(libgimarhallingtests_la_LIBADD) $(LIBS)
+libgimarshallingtests_la_LDFLAGS = $(common_ldflags)
+libgimarshallingtests_la_LIBADD = $(GLIB_LIBS)
 
 GIMarshallingTests-1.0.gir: libgimarshallingtests.la Makefile
 	$(AM_V_GEN) $(INTROSPECTION_SCANNER) --include=Gio-2.0 \
@@ -32,21 +41,18 @@ GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) $(INTROSPECTION_COMPILER) $< -o $@
 
 # regress.c needs cairo
-check_LTLIBRARIES += libregress.la
+test_ltlibraries += libregress.la
 test_typelibs += Regress-1.0.typelib
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
 # We don't control the source so don't pass WARN_CFLAGS etc
 if ENABLE_CAIRO
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
-libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(CAIRO_LIBS) -no-undefined
+libregress_la_LIBADD = $(GIO_LIBS) $(CAIRO_LIBS)
 else
 libregress_la_CFLAGS = $(GIO_CFLAGS) -D_GI_DISABLE_CAIRO
-libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) -no-undefined
+libregress_la_LIBADD = $(GIO_LIBS) $(CAIRO_LIBS)
 endif
-
-
-libregress.la: $(libregress_la_OBJECTS) $(libregress_la_DEPENDENCIES)
-	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(libregress_la_LDFLAGS) $(libregress_la_OBJECTS) $(libregress_la_LIBADD) $(LIBS)
+libregress_la_LDFLAGS = $(common_ldflags)
 
 # g-i doesn't ship these as shared libraries anymore; we build them here
 Regress-1.0.gir: libregress.la Makefile
@@ -60,34 +66,32 @@ Regress-1.0.gir: libregress.la Makefile
 Regress-1.0.typelib: Regress-1.0.gir Makefile
 	$(AM_V_GEN) $(INTROSPECTION_COMPILER) $< -o $@
 
-
 gschemas.compiled: org.gnome.test.gschema.xml
 	glib-compile-schemas --targetdir=. --schema-file=$<
 
 CLEANFILES += Regress-1.0.gir Regress-1.0.typelib GIMarshallingTests-1.0.gir GIMarshallingTests-1.0.typelib gschemas.compiled
 
-check_LTLIBRARIES += testhelper.la
+extension_ltlibraries += testhelper.la
 
 testhelper_la_CFLAGS = $(CODE_COVERAGE_CFLAGS) $(WARN_CFLAGS) -I$(top_srcdir)/gi $(PYTHON_INCLUDES) $(GLIB_CFLAGS)
 testhelper_la_CPPFLAGS = $(CODE_COVERAGE_CPPFLAGS)
-testhelper_la_LDFLAGS = $(WARN_LDFLAGS) -module -avoid-version -no-undefined $(PYTHON_LIBS)
-testhelper_la_LIBADD = $(CODE_COVERAGE_LIBS) $(GLIB_LIBS)
+testhelper_la_LDFLAGS = $(WARN_LDFLAGS) $(extension_ldflags)
+testhelper_la_LIBADD = $(CODE_COVERAGE_LIBS) $(GLIB_LIBS) $(PYTHON_LIBS)
+
 testhelper_la_SOURCES = \
 	testhelpermodule.c \
 	test-floating.c \
 	test-thread.c \
 	test-unknown.c
 
-# This is a hack to make sure a shared library is built
-testhelper.la: $(testhelper_la_OBJECTS) $(testhelper_la_DEPENDENCIES)
-	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(testhelper_la_LDFLAGS) $(testhelper_la_OBJECTS) $(testhelper_la_LIBADD) $(LIBS)
+check_LTLIBRARIES = $(test_ltlibraries) $(extension_ltlibraries)
 
+target_libraries = \
+	$(test_ltlibraries:.la=.$(OS_EXT)) \
+	$(extension_ltlibraries:.la=$(PYTHON_SO))
 
-.la.$(OS_EXT):
+$(target_libraries):
 	test -L $@ || $(LN_S) .libs/$@ $@
-
-
-all: $(check_LTLIBRARIES:.la=.$(OS_EXT))
 
 EXTRA_DIST = \
 	helper.py \
@@ -139,7 +143,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 clean-local:
-	rm -f $(check_LTLIBRARIES:.la=.$(OS_EXT)) file.txt~
+	rm -f $(target_libraries) file.txt~
 
 RUN_TESTS_ENV_VARS= \
 	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
@@ -153,7 +157,7 @@ RUN_TESTS_ENV_VARS= \
 
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
-check-local: $(check_LTLIBRARIES:.la=.$(OS_EXT)) $(test_typelibs) gschemas.compiled
+check-local: $(target_libraries) $(test_typelibs) gschemas.compiled
 	$(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
 	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
 	exit $$rc
