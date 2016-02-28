@@ -29,7 +29,7 @@ static PyObject *PyGError = NULL;
 static PyObject *exception_table = NULL;
 
 /**
- * pygi_error_marshal:
+ * pygi_error_marshal_to_py:
  * @error: a pointer to the GError.
  *
  * Checks to see if @error has been set.  If @error has been set, then a
@@ -38,7 +38,7 @@ static PyObject *exception_table = NULL;
  * Returns: a GLib.GError Python exception object, or NULL.
  */
 PyObject *
-pygi_error_marshal (GError **error)
+pygi_error_marshal_to_py (GError **error)
 {
     PyGILState_STATE state;
     PyObject *exc_type;
@@ -97,7 +97,7 @@ pygi_error_check (GError **error)
 
     state = pyglib_gil_state_ensure();
 
-    exc_instance = pygi_error_marshal (error);
+    exc_instance = pygi_error_marshal_to_py (error);
     PyErr_SetObject(PyGError, exc_instance);
     Py_DECREF(exc_instance);
     g_clear_error(error);
@@ -235,7 +235,7 @@ _pygi_marshal_to_py_gerror (PyGIInvokeState   *state,
     GError *error = arg->v_pointer;
     PyObject *py_obj = NULL;
 
-    py_obj = pygi_error_marshal (&error);
+    py_obj = pygi_error_marshal_to_py (&error);
 
     if (arg_cache->transfer == GI_TRANSFER_EVERYTHING && error != NULL) {
         g_error_free (error);

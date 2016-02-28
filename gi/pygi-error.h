@@ -29,7 +29,7 @@ G_BEGIN_DECLS
 
 gboolean      pygi_error_check              (GError **error);
 
-PyObject*     pygi_error_marshal            (GError **error);
+PyObject*     pygi_error_marshal_to_py      (GError **error);
 
 gboolean      pygi_gerror_exception_check   (GError **error);
 
