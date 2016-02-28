@@ -495,6 +495,36 @@ class TestGVariant(unittest.TestCase):
         v = GLib.Variant('(is)', (1, 'somestring'))
         self.assertEqual(str(v), "(1, 'somestring')")
 
+    def test_parse_error(self):
+        # This test doubles as a test for GLib.Error marshaling.
+        source_str = 'abc'
+        with self.assertRaises(GLib.Error) as context:
+            GLib.Variant.parse(None, source_str, None, None)
+        e = context.exception
+        text = GLib.Variant.parse_error_print_context(e, source_str)
+        self.assertTrue(source_str in text)
+
+    def test_parse_error_exceptions(self):
+        source_str = 'abc'
+        self.assertRaisesRegexp(TypeError, 'Must be GLib.Error, not int',
+                                GLib.Variant.parse_error_print_context,
+                                42, source_str)
+
+        gerror = GLib.Error(message=42)  # not a string
+        self.assertRaisesRegexp(ValueError, ".*must have a 'message'.*",
+                                GLib.Variant.parse_error_print_context,
+                                gerror, source_str)
+
+        gerror = GLib.Error(domain=42)  # not a string
+        self.assertRaisesRegexp(ValueError, ".*must have a 'domain'.*",
+                                GLib.Variant.parse_error_print_context,
+                                gerror, source_str)
+
+        gerror = GLib.Error(code='not an int')
+        self.assertRaisesRegexp(ValueError, ".*must have a 'code' int.*",
+                                GLib.Variant.parse_error_print_context,
+                                gerror, source_str)
+
 
 class TestConstants(unittest.TestCase):
 

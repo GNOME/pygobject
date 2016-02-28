@@ -31,6 +31,9 @@ gboolean      pygi_error_check              (GError **error);
 
 PyObject*     pygi_error_marshal_to_py      (GError **error);
 
+gboolean      pygi_error_marshal_from_py    (PyObject  *pyerr,
+                                             GError   **error);
+
 gboolean      pygi_gerror_exception_check   (GError **error);
 
 PyObject*     pygi_register_exception_for_domain (gchar *name,
