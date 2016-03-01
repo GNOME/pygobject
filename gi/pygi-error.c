@@ -23,9 +23,10 @@
 #include "pyglib.h"
 #include "pygi-private.h"
 #include "pygi-error.h"
+#include "pygtype.h"
 
 
-static PyObject *PyGError = NULL;
+PyObject *PyGError = NULL;
 static PyObject *exception_table = NULL;
 
 /**
@@ -346,6 +347,31 @@ pygi_arg_gerror_new_from_info (GITypeInfo   *type_info,
     }
 }
 
+static PyObject *
+pygerror_from_gvalue (const GValue *value)
+{
+    GError *gerror = (GError *) g_value_get_boxed (value);
+    PyObject *pyerr = pygi_error_marshal_to_py (&gerror);
+    if (pyerr == NULL) {
+        Py_RETURN_NONE;
+    } else {
+        return pyerr;
+    }
+}
+
+static int
+pygerror_to_gvalue (GValue *value, PyObject *pyerror)
+{
+    GError *gerror = NULL;
+
+    if (pygi_error_marshal_from_py (pyerror, &gerror)) {
+        g_value_take_boxed (value, gerror);
+        return 0;
+    }
+
+    return -1;
+}
+
 void
 pygi_error_register_types (PyObject *module)
 {
@@ -356,5 +382,9 @@ pygi_error_register_types (PyObject *module)
 
     /* Stash a reference to the Python implemented gi._error.GError. */
     PyGError = PyObject_GetAttrString (error_module, "GError");
+
+    pyg_register_gtype_custom (G_TYPE_ERROR,
+                               pygerror_from_gvalue,
+                               pygerror_to_gvalue);
 }
 

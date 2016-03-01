@@ -675,5 +675,22 @@ class TestGValue(unittest.TestCase):
         value.set_value([32, 'foo_bar', 0.3])
         self.assertEqual(value.get_value(), [32, 'foo_bar', 0.3])
 
+    def test_gerror_boxing(self):
+        error = GLib.Error('test message', domain='mydomain', code=42)
+        value = GObject.Value(GLib.Error, error)
+        self.assertEqual(value.g_type, GObject.type_from_name('GError'))
+
+        unboxed = value.get_value()
+        self.assertEqual(unboxed.message, error.message)
+        self.assertEqual(unboxed.domain, error.domain)
+        self.assertEqual(unboxed.code, error.code)
+
+    def test_gerror_novalue(self):
+        error = GLib.Error('test message', domain='mydomain', code=42)
+        value = GObject.Value(GLib.Error)
+        self.assertEqual(value.g_type, GObject.type_from_name('GError'))
+        self.assertEqual(value.get_value(), None)
+
+
 if __name__ == '__main__':
     unittest.main()

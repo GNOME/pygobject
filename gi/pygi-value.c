@@ -874,6 +874,7 @@ pyg_value_as_pyobject (const GValue *value, gboolean copy_boxed)
     }
 
     return NULL;
+
 }
 
 

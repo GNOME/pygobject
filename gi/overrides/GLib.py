@@ -74,6 +74,7 @@ def gerror_new_literal(domain, message, code):
 # Monkey patch methods that rely on GLib introspection to be loaded at runtime.
 Error.__name__ = 'Error'
 Error.__module__ = 'GLib'
+Error.__gtype__ = GLib.Error.__gtype__
 Error.matches = gerror_matches
 Error.new_literal = staticmethod(gerror_new_literal)
 
