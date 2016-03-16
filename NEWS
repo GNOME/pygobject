@@ -1,3 +1,5 @@
+3.19.92 15-Mar-2016
+
 3.19.91 01-Mar-2016
         - Fix marshaling of GError stored in GValue
           (Simon Feltman) (Thibault Saunier) (#761592)
