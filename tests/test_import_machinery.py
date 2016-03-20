@@ -145,6 +145,12 @@ class TestImporter(unittest.TestCase):
                 from gi.repository import InvalidGObjectRepositoryModuleName
                 InvalidGObjectRepositoryModuleName
 
+    def test_require_versions(self):
+        import gi
+        gi.require_versions({'GLib': '2.0', 'Gio': '2.0', 'GObject': '2.0'})
+        from gi.repository import GLib
+        GLib
+
     def test_get_import_stacklevel(self):
         gi.importer.get_import_stacklevel(import_hook=True)
         gi.importer.get_import_stacklevel(import_hook=False)

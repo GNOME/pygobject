@@ -85,6 +85,22 @@ def check_version(version):
 
 
 def require_version(namespace, version):
+    """ Ensures the correct versions are loaded when importing `gi` modules.
+
+    :param namespace: The name of module to require.
+    :type namespace: str
+    :param version: The version of module to require.
+    :type version: str
+    :raises ValueError: If module/version is already loaded, already required, or unavailable.
+
+    :Example:
+
+    .. code-block:: python
+
+        import gi
+        gi.require_version('Gtk', '3.0')
+
+    """
     repository = Repository.get_default()
 
     if namespace in repository.get_loaded_namespaces():
@@ -106,6 +122,23 @@ def require_version(namespace, version):
                          (namespace, version))
 
     _versions[namespace] = version
+
+
+def require_versions(requires):
+    """ Utility function for consolidating multiple `gi.require_version()` calls.
+
+    :param requires: The names and versions of modules to require.
+    :type requires: dict
+
+    :Example:
+
+    .. code-block:: python
+
+        import gi
+        gi.require_versions({'Gtk': '3.0', 'GLib': '2.0', 'Gio': '2.0'})
+    """
+    for module_name, module_version in requires.items():
+        require_version(module_name, module_version)
 
 
 def get_required_version(namespace):
