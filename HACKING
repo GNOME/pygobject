@@ -34,4 +34,4 @@ Tests
 'make check TEST_NAMES="test_gi.TestUtf8.test_utf8_full_return"' executes the test_gi.TestUtf8.test_utf8_full_return test
 'make check.gdb' executes all the tests in a gdb session
 'make check.valgrind' executes all the tests in valgrind
-
+'make check.quality' executes pyflakes and pep8 tests
