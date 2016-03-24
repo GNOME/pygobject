@@ -686,7 +686,7 @@ class TestGValue(unittest.TestCase):
         self.assertEqual(unboxed.code, error.code)
 
     def test_gerror_novalue(self):
-        error = GLib.Error('test message', domain='mydomain', code=42)
+        GLib.Error('test message', domain='mydomain', code=42)
         value = GObject.Value(GLib.Error)
         self.assertEqual(value.g_type, GObject.type_from_name('GError'))
         self.assertEqual(value.get_value(), None)
