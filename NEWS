@@ -1,3 +1,10 @@
+3.21.0  24-Apr-2016
+        - gi: Add require_versions() function (Dustin Falgout) (#761141)
+        - test_gerror_novalue: Don't assign the error to a variable
+          (Iain Lane) (#764165)
+        - build: Do not enable code coverage based on lcov
+          (Emmanuele Bassi) (#764075)
+
 3.20.0  21-Mar-2016
 
 3.19.92 15-Mar-2016
