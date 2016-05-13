@@ -22,6 +22,7 @@
 import signal
 import warnings
 import sys
+import socket
 
 from ..module import get_introspection_module
 from .._gi import (variant_type_from_string, source_new,
@@ -726,6 +727,9 @@ def _io_add_watch_get_args(channel, priority_, condition, *cb_and_user_data, **k
     if isinstance(channel, int):
         func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
         real_channel = GLib.IOChannel.unix_new(channel)
+    elif isinstance(channel, socket.socket) and sys.platform == 'win32':
+        func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
+        real_channel = GLib.IOChannel.win32_new_socket(channel.fileno())
     elif hasattr(channel, 'fileno'):
         # backwards compatibility: Allow calling with Python file
         func_fdtransform = lambda _, cond, *data: callback(channel, cond, *data)
