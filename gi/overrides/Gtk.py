@@ -1079,8 +1079,11 @@ class TreeModelRow(object):
             for i in range(start, stop, step):
                 alist.append(self.model.get_value(self.iter, i))
             return alist
+        elif isinstance(key, tuple):
+            return [self[k] for k in key]
         else:
-            raise TypeError("indices must be integers, not %s" % type(key).__name__)
+            raise TypeError("indices must be integers, slice or tuple, not %s"
+                            % type(key).__name__)
 
     def __setitem__(self, key, value):
         if isinstance(key, int):
@@ -1099,8 +1102,16 @@ class TreeModelRow(object):
 
             for i, v in enumerate(indexList):
                 self.model.set_value(self.iter, v, value[i])
+        elif isinstance(key, tuple):
+            if len(key) != len(value):
+                raise ValueError(
+                    "attempt to assign sequence of size %d to sequence of size %d"
+                    % (len(value), len(key)))
+            for k, v in zip(key, value):
+                self[k] = v
         else:
-            raise TypeError("index must be an integer or slice, not %s" % type(key).__name__)
+            raise TypeError("indices must be an integer, slice or tuple, not %s"
+                            % type(key).__name__)
 
     def _convert_negative_index(self, index):
         new_index = self.model.get_n_columns() + index

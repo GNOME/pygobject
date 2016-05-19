@@ -1587,6 +1587,52 @@ class TestTreeModel(unittest.TestCase):
 
         self.assertRaises(TypeError, set_row3)
 
+    def test_tree_row_sequence(self):
+        model = Gtk.ListStore(int, str, float)
+        model.append([1, "one", -0.1])
+
+        self.assertEqual([1, "one", -0.1], model[0][0, 1, 2])
+        self.assertEqual([1, "one"], model[0][0, 1])
+        self.assertEqual(["one", -0.1], model[0][1, 2])
+        self.assertEqual("one", model[0][1])
+        self.assertEqual([1, -0.1], model[0][0, 2])
+        self.assertEqual([-0.1, 1], model[0][2, 0])
+
+        model[0][0, 1, 2] = (2, "two", -0.2)
+        self.assertEqual([2, "two", -0.2], model[0][0, 1, 2])
+
+        model[0][0, 1] = (3, "three")
+        self.assertEqual([3, "three"], model[0][0, 1])
+
+        model[0][1, 2] = ("four", -0.4)
+        self.assertEqual(["four", -0.4], model[0][1, 2])
+
+        model[0][0, 2] = (5, -0.5)
+        self.assertEqual([5, -0.5], model[0][0, 2])
+
+        model[0][0, 1, 2] = (6, "six", -0.6)
+        self.assertEqual([-0.6, 6, "six"], model[0][2, 0, 1])
+
+        def set_row1():
+            model[0][4, 5] = ("shouldn't", "work",)
+
+        self.assertRaises(IndexError, set_row1)
+
+        def set_row2():
+            model[0][0, 1] = (0, "zero", 0)
+
+        self.assertRaises(ValueError, set_row2)
+
+        def set_row3():
+            model[0][0, 1] = ("shouldn't", 0)
+
+        self.assertRaises(TypeError, set_row3)
+
+        def set_row4():
+            model[0][0, "two"] = (0, "zero")
+
+        self.assertRaises(TypeError, set_row4)
+
     def test_tree_model_set_value_to_none(self):
         # Tests allowing the usage of None to set an empty value on a model.
         store = Gtk.ListStore(str)
