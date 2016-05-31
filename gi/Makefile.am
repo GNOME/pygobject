@@ -95,7 +95,6 @@ _gi_la_SOURCES = \
 	pygi-property.h \
 	pygi-signal-closure.c \
 	pygi-signal-closure.h \
-	pygobject-external.h \
 	pygi-invoke.c \
 	pygi-invoke.h \
 	pygi-invoke-state-struct.h \
