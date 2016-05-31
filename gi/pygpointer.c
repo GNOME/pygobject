@@ -26,7 +26,6 @@
 #include "pygobject-private.h"
 #include "pygpointer.h"
 
-#include "pygi.h"
 #include "pygi-type.h"
 
 

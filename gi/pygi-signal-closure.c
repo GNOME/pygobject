@@ -16,8 +16,10 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-private.h"
+#include "pygi-signal-closure.h"
 #include "pygi-value.h"
+#include "pygi-argument.h"
+#include "pygi-boxed.h"
 
 static GISignalInfo *
 _pygi_lookup_signal_from_g_type (GType g_type,

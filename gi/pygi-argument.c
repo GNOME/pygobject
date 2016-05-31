@@ -19,20 +19,31 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-private.h"
-#include "pygobject-private.h"
-
 #include <string.h>
 #include <time.h>
+
+#include "pygobject-private.h"
 
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
 
+#include "pygi-argument.h"
+#include "pygi-info.h"
 #include "pygi-value.h"
 #include "pygi-basictype.h"
 #include "pygi-object.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-error.h"
+#include "pygi-foreign.h"
+#include "pygi-type.h"
+#include "pygi-util.h"
+
+/* Redefine g_array_index because we want it to return the i-th element, casted
+ * to the type t, of the array a, and not the i-th element of the array a
+ * casted to the type t. */
+#define _g_array_index(a,t,i) \
+    *(t *)((a)->data + g_array_get_element_size(a) * (i))
+
 
 gboolean
 pygi_argument_to_gssize (GIArgument *arg_in,

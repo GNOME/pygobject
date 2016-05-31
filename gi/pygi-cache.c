@@ -35,6 +35,8 @@
 #include "pygi-object.h"
 #include "pygi-struct-marshal.h"
 #include "pygi-enum-marshal.h"
+#include "pygi-resulttuple.h"
+#include "pygi-invoke.h"
 
 
 /* _arg_info_default_value

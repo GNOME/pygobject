@@ -21,8 +21,9 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygi-private.h"
+#include "pygi-property.h"
 #include "pygi-value.h"
+#include "pygi-argument.h"
 #include "pygparamspec.h"
 
 #include <girepository.h>

@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
- 
- #include "pygi-marshal-cleanup.h"
- #include <glib.h>
+
+#include "pygi-marshal-cleanup.h"
+#include "pygi-foreign.h"
+#include <glib.h>
+
 static inline void
 _cleanup_caller_allocates (PyGIInvokeState    *state,
                            PyGIArgCache       *cache,

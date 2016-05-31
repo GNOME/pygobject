@@ -24,11 +24,18 @@
 #include "pyglib-private.h"
 #include "pygobject-private.h"
 #include "pyginterface.h"
-#include "pygi-private.h"
-#include "pygi.h"
+#include "pygi-repository.h"
 #include "pyglib.h"
 #include "pygi-error.h"
 #include "pygi-foreign.h"
+#include "pygi-resulttuple.h"
+#include "pygi-source.h"
+#include "pygi-ccallback.h"
+#include "pygi-closure.h"
+#include "pygi-type.h"
+#include "pygi-boxed.h"
+#include "pygi-info.h"
+#include "pygi-struct.h"
 
 #include <pyglib-python-compat.h>
 

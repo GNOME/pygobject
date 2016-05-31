@@ -24,7 +24,7 @@
 
 #include <girepository.h>
 
-#include "pygi-private.h"
+#include "pygi-info.h"
 #include "pygi-invoke-state-struct.h"
 
 G_BEGIN_DECLS

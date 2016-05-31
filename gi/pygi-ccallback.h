@@ -21,8 +21,19 @@
 #define __PYGI_CCLOSURE_H__
 
 #include <Python.h>
+#include "pygi-cache.h"
 
 G_BEGIN_DECLS
+
+typedef struct {
+    PyObject_HEAD
+    GCallback callback;
+    GIFunctionInfo *info;
+    gpointer user_data;
+    GIScopeType scope;
+    GDestroyNotify destroy_notify_func;
+    PyGICCallbackCache *cache;
+} PyGICCallback;
 
 extern PyTypeObject PyGICCallback_Type;
 

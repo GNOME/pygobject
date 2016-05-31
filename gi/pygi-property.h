@@ -27,7 +27,7 @@
 #include <Python.h>
 #include <girepository.h>
 
-#include "pygobject.h"
+#include "pygobject-private.h"
 
 PyObject *
 pygi_get_property_value (PyGObject *instance,

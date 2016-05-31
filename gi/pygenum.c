@@ -24,8 +24,8 @@
 #endif
 
 #include <pyglib.h>
+#include "pyglib-python-compat.h"
 #include "pygobject-private.h"
-#include "pygi.h"
 #include "pygi-type.h"
 
 #include "pygenum.h"

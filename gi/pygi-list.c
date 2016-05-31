@@ -21,7 +21,7 @@
 #include <Python.h>
 #include "pygi-list.h"
 #include "pygi-argument.h"
-#include "pygi-private.h"
+#include "pygi-util.h"
 
 typedef PyGISequenceCache PyGIArgGList;
 

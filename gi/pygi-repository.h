@@ -21,8 +21,14 @@
 #define __PYGI_REPOSITORY_H__
 
 #include <Python.h>
+#include <girepository.h>
 
 G_BEGIN_DECLS
+
+typedef struct {
+    PyObject_HEAD
+    GIRepository *repository;
+} PyGIRepository;
 
 /* Private */
 

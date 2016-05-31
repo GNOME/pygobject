@@ -21,8 +21,16 @@
 #define __PYGI_BOXED_H__
 
 #include <Python.h>
+#include <girepository.h>
+#include "pygobject-private.h"
 
 G_BEGIN_DECLS
+
+typedef struct {
+    PyGBoxed base;
+    gboolean slice_allocated;
+    gsize size;
+} PyGIBoxed;
 
 extern PyTypeObject PyGIBoxed_Type;
 

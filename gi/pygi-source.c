@@ -25,7 +25,9 @@
 
 #include "pygobject-private.h"
 
-#include "pygi-private.h"
+#include "pygi-info.h"
+#include "pygi-boxed.h"
+#include "pygi-type.h"
 #include "pyglib.h"
 #include "pyglib-private.h"
 #include "pygi-source.h"

@@ -21,9 +21,9 @@
  */
 
 #include "pyglib.h"
-#include "pygi-private.h"
 #include "pygi-error.h"
 #include "pygtype.h"
+#include <pyglib-python-compat.h>
 
 
 PyObject *PyGError = NULL;

@@ -24,7 +24,8 @@
 #ifndef __PYGI_SIGNAL_CLOSURE_H__
 #define __PYGI_SIGNAL_CLOSURE_H__
 
-#include "pygobject.h"
+#include <girepository.h>
+#include "pygobject-private.h"
 
 G_BEGIN_DECLS
 

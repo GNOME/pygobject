@@ -24,6 +24,11 @@
 #include "pygi-invoke.h"
 #include "pygi-marshal-cleanup.h"
 #include "pygi-error.h"
+#include "pygi-resulttuple.h"
+#include "pygi-foreign.h"
+#include "pygi-boxed.h"
+
+extern PyObject *_PyGIDefaultArgPlaceholder;
 
 static gboolean
 _check_for_unexpected_kwargs (PyGICallableCache *cache,

@@ -88,8 +88,7 @@ _gi_la_SOURCES = \
 	pygi-closure.h \
 	pygi-ccallback.c \
 	pygi-ccallback.h \
-	pygi.h \
-	pygi-private.h \
+	pygi-util.h \
 	pygi-property.c \
 	pygi-property.h \
 	pygi-signal-closure.c \

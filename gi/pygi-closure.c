@@ -17,11 +17,14 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygi-private.h"
 #include "pygi-closure.h"
 #include "pygi-error.h"
 #include "pygi-marshal-cleanup.h"
+#include "pygi-invoke.h"
+#include "pygi-ccallback.h"
+#include "pygi-info.h"
 
+extern PyObject *_PyGIDefaultArgPlaceholder;
 
 typedef struct _PyGICallbackCache
 {

@@ -24,11 +24,9 @@
 #endif
 
 #include <pyglib.h>
+#include "pygi-type.h"
 #include "pygobject-private.h"
 #include "pygflags.h"
-
-#include "pygi.h"
-#include "pygi-type.h"
 
 GQuark pygflags_class_key;
 
