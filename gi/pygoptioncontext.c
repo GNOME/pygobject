@@ -23,7 +23,6 @@
 #endif
 
 #include <pyglib.h>
-#include "pyglib-private.h"
 #include "pygoptioncontext.h"
 #include "pygi-error.h"
 

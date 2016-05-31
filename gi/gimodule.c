@@ -21,7 +21,7 @@
  * USA
  */
 
-#include "pyglib-private.h"
+#include "pyglib.h"
 #include "pygobject-private.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"

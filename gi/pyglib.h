@@ -24,6 +24,8 @@
 
 #include <glib.h>
 
+#include <pyglib-python-compat.h>
+
 G_BEGIN_DECLS
 
 typedef void (*PyGLibThreadsEnabledFunc) (void);
@@ -53,6 +55,10 @@ PyObject* _pyglib_generic_long_richcompare(long a, long b, int op);
 	return;                                         \
     PyDict_SetItemString(d, name, (PyObject *)&type);
 
+gboolean _pyglib_handler_marshal(gpointer user_data);
+void _pyglib_destroy_notify(gpointer user_data);
+
+extern PyObject *pyglib__glib_module_create (void);
 
 G_END_DECLS
 

@@ -24,7 +24,6 @@
 #include <Python.h>
 #include <pythread.h>
 #include "pyglib.h"
-#include "pyglib-private.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 

@@ -26,7 +26,6 @@
 #include <Python.h>
 #include <glib.h>
 #include "pyglib.h"
-#include "pyglib-private.h"
 #include "pygoptioncontext.h"
 #include "pygoptiongroup.h"
 #include "pygspawn.h"

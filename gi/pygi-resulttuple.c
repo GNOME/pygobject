@@ -18,7 +18,7 @@
  */
 
 #include "pygi-resulttuple.h"
-#include "pyglib-private.h"
+#include "pyglib.h"
 
 static char repr_format_key[] = "__repr_format";
 static char tuple_indices_key[] = "__tuple_indices";

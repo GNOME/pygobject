@@ -29,7 +29,6 @@
 #include "pygi-boxed.h"
 #include "pygi-type.h"
 #include "pyglib.h"
-#include "pyglib-private.h"
 #include "pygi-source.h"
 
 typedef struct

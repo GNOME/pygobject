@@ -62,7 +62,6 @@ _gi_la_SOURCES = \
 	pygspawn.h \
 	pyglib.c \
 	pyglib.h \
-	pyglib-private.h \
 	pyglib-python-compat.h \
 	gimodule.c \
 	pygi-repository.c \

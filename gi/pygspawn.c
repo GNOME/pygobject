@@ -23,7 +23,6 @@
 #include <glib.h>
 
 #include "pyglib.h"
-#include "pyglib-private.h"
 
 #include "pygspawn.h"
 #include "pygi-error.h"
