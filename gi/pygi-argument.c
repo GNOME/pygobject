@@ -22,10 +22,12 @@
 #include <string.h>
 #include <time.h>
 
-#include "pygobject-private.h"
+#include "pygobject-internal.h"
 
 #include <pyglib-python-compat.h>
 #include <pyglib.h>
+#include <pygenum.h>
+#include <pygflags.h>
 
 #include "pygi-argument.h"
 #include "pygi-info.h"

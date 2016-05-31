@@ -27,7 +27,7 @@
 #include <girepository.h>
 #include <pyglib.h>
 #include <pythread.h>
-#include "pygobject-private.h"
+#include "gobjectmodule.h"
 #include "pygboxed.h"
 #include "pygenum.h"
 #include "pygflags.h"
@@ -36,6 +36,7 @@
 #include "pygpointer.h"
 #include "pygtype.h"
 #include "pygoptiongroup.h"
+#include "pygobject-object.h"
 
 #include "pygi-value.h"
 #include "pygi-error.h"
@@ -47,6 +48,7 @@ static gboolean log_handlers_disabled = FALSE;
 static void pyg_flags_add_constants(PyObject *module, GType flags_type,
 				    const gchar *strip_prefix);
 
+static int pyg_type_register(PyTypeObject *class, const char *type_name);
 
 /* -------------- GDK threading hooks ---------------------------- */
 
@@ -72,7 +74,7 @@ _pyg_set_thread_block_funcs (PyGThreadBlockFunc block_threads_func,
  * A function that can be used as a GDestroyNotify callback that will
  * call Py_DECREF on the data.
  */
-void
+static void
 pyg_destroy_notify(gpointer user_data)
 {
     PyObject *obj = (PyObject *)user_data;
@@ -1098,7 +1100,7 @@ pyg_type_add_interfaces(PyTypeObject *class, GType instance_type,
     }
 }
 
-int
+static int
 pyg_type_register(PyTypeObject *class, const char *type_name)
 {
     PyObject *gtype;
@@ -1388,33 +1390,6 @@ pyg_object_new (PyGObject *self, PyObject *args, PyObject *kwargs)
         self = NULL;
 
     return (PyObject *) self;
-}
-
-gboolean
-pyg_handler_marshal(gpointer user_data)
-{
-    PyObject *tuple, *ret;
-    gboolean res;
-    PyGILState_STATE state;
-
-    g_return_val_if_fail(user_data != NULL, FALSE);
-
-    state = pyglib_gil_state_ensure();
-
-    tuple = (PyObject *)user_data;
-    ret = PyObject_CallObject(PyTuple_GetItem(tuple, 0),
-			      PyTuple_GetItem(tuple, 1));
-    if (!ret) {
-	PyErr_Print();
-	res = FALSE;
-    } else {
-	res = PyObject_IsTrue(ret);
-	Py_DECREF(ret);
-    }
-
-    pyglib_gil_state_release(state);
-
-    return res;
 }
 
 static int
@@ -1795,27 +1770,6 @@ pyg_parse_constructor_args(GType        obj_type,
     g_type_class_unref(oclass);
     *nparams = param_i;
     return TRUE;
-}
-
-PyObject *
-pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
-{
-    PyObject *result;
-    gboolean t;
-
-    switch (op) {
-    case Py_EQ: t = PYGLIB_PyLong_AS_LONG(v) == PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_NE: t = PYGLIB_PyLong_AS_LONG(v) != PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_LE: t = PYGLIB_PyLong_AS_LONG(v) <= PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_GE: t = PYGLIB_PyLong_AS_LONG(v) >= PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_LT: t = PYGLIB_PyLong_AS_LONG(v) <  PYGLIB_PyLong_AS_LONG(w); break;
-    case Py_GT: t = PYGLIB_PyLong_AS_LONG(v) >  PYGLIB_PyLong_AS_LONG(w); break;
-    default: g_assert_not_reached();
-    }
-
-    result = t ? Py_True : Py_False;
-    Py_INCREF(result);
-    return result;
 }
 
 static void

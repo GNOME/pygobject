@@ -25,8 +25,10 @@
 
 #include <pyglib.h>
 #include "pygi-type.h"
-#include "pygobject-private.h"
+#include "pygi-util.h"
+#include "pygtype.h"
 #include "pygflags.h"
+#include "pygboxed.h"
 
 GQuark pygflags_class_key;
 

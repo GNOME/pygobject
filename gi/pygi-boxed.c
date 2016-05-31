@@ -21,7 +21,8 @@
 
 #include "pygi-boxed.h"
 #include "pygi-info.h"
-#include "pygobject-private.h"
+#include "pygboxed.h"
+#include "pygtype.h"
 
 #include <girepository.h>
 #include <pyglib-python-compat.h>

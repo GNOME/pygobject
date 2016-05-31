@@ -21,7 +21,7 @@
 #define __PYGI_STRUCT_H__
 
 #include <Python.h>
-#include <pygobject-private.h>
+#include <pygobject-internal.h>
 
 G_BEGIN_DECLS
 

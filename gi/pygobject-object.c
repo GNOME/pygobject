@@ -23,9 +23,12 @@
 #endif
 
 #include <pyglib.h>
-#include "pygobject-private.h"
+#include "pygobject-object.h"
 #include "pyginterface.h"
 #include "pygparamspec.h"
+#include "pygtype.h"
+#include "pygboxed.h"
+#include "gobjectmodule.h"
 
 #include "pygi-value.h"
 #include "pygi-type.h"
@@ -53,6 +56,26 @@ GQuark pygobject_wrapper_key;
 GQuark pygobject_has_updated_constructor_key;
 GQuark pygobject_instance_data_key;
 
+GClosure *
+gclosure_from_pyfunc(PyGObject *object, PyObject *func)
+{
+    GSList *l;
+    PyGObjectData *inst_data;
+    inst_data = pyg_object_peek_inst_data(object->obj);
+    if (inst_data) {
+        for (l = inst_data->closures; l; l = l->next) {
+            PyGClosure *pyclosure = l->data;
+            int res = PyObject_RichCompareBool(pyclosure->callback, func, Py_EQ);
+            if (res == -1) {
+                PyErr_Clear(); /* Is there anything else to do? */
+            } else if (res) {
+                return (GClosure*)pyclosure;
+            }
+        }
+    }
+    return NULL;
+}
+
 /* Copied from glib. gobject uses hyphens in property names, but in Python
  * we can only represent hyphens as underscores. Convert underscores to
  * hyphens for glib compatibility. */
@@ -75,7 +98,7 @@ canonicalize_key (gchar *key)
 
 /* -------------- class <-> wrapper manipulation --------------- */
 
-void
+static void
 pygobject_data_free(PyGObjectData *data)
 {
     /* This function may be called after the python interpreter has already

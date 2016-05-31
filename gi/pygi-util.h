@@ -1,7 +1,13 @@
 #ifndef __PYGI_UTIL_H__
 #define __PYGI_UTIL_H__
 
+#include <glib.h>
+#include "pygobject-internal.h"
+#include <pyglib-python-compat.h>
+
 G_BEGIN_DECLS
+
+PyObject * pyg_integer_richcompare(PyObject *v, PyObject *w, int op);
 
 #if PY_VERSION_HEX >= 0x03000000
 

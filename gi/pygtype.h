@@ -23,6 +23,18 @@
 
 #include <glib-object.h>
 #include <Python.h>
+#include "pygobject-internal.h"
+
+#define PYGOBJECT_REGISTER_GTYPE(d, type, name, gtype)      \
+  {                                                         \
+    PyObject *o;					    \
+    PYGLIB_REGISTER_TYPE(d, type, name);                    \
+    PyDict_SetItemString(type.tp_dict, "__gtype__",         \
+			 o=pyg_type_wrapper_new(gtype));    \
+    Py_DECREF(o);                                           \
+}
+
+extern PyTypeObject PyGTypeWrapper_Type;
 
 typedef PyObject *(* fromvaluefunc)(const GValue *value);
 typedef int (*tovaluefunc)(GValue *value, PyObject *obj);
@@ -34,10 +46,23 @@ typedef struct {
 
 PyGTypeMarshal *pyg_type_lookup(GType type);
 
+gboolean pyg_gtype_is_custom (GType gtype);
+
 void pyg_register_gtype_custom(GType gtype,
                                fromvaluefunc from_func,
                                tovaluefunc to_func);
 
 void pygobject_type_register_types(PyObject *d);
 
+PyObject *pyg_object_descr_doc_get(void);
+PyObject *pyg_type_wrapper_new (GType type);
+GType     pyg_type_from_object_strict (PyObject *obj, gboolean strict);
+GType     pyg_type_from_object (PyObject *obj);
+
+int pyg_pyobj_to_unichar_conv (PyObject* py_obj, void* ptr);
+
+GClosure *pyg_closure_new(PyObject *callback, PyObject *extra_args, PyObject *swap_data);
+GClosure *pyg_signal_class_closure_get(void);
+void      pyg_closure_set_exception_handler(GClosure *closure,
+                                            PyClosureExceptionHandler handler);
 #endif /* __PYGOBJECT_TYPE_H__ */

@@ -25,10 +25,12 @@
 
 #include <pyglib.h>
 #include "pyglib-python-compat.h"
-#include "pygobject-private.h"
 #include "pygi-type.h"
+#include "pygi-util.h"
 
+#include "pygtype.h"
 #include "pygenum.h"
+#include "pygboxed.h"
 
 GQuark pygenum_class_key;
 

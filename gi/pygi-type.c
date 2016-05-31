@@ -19,7 +19,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pygobject-private.h"
+#include "pygtype.h"
 #include "pygi-type.h"
 
 #include <pyglib-python-compat.h>

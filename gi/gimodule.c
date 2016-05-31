@@ -21,11 +21,16 @@
  * USA
  */
 
+#include <glib-object.h>
+
 #include "pyglib.h"
-#include "pygobject-private.h"
 #include "pyginterface.h"
 #include "pygi-repository.h"
 #include "pyglib.h"
+#include "pygtype.h"
+#include "pygenum.h"
+#include "pygboxed.h"
+#include "pygflags.h"
 #include "pygi-error.h"
 #include "pygi-foreign.h"
 #include "pygi-resulttuple.h"
@@ -43,6 +48,9 @@ PyObject *PyGIWarning;
 PyObject *PyGIDeprecationWarning;
 PyObject *_PyGIDefaultArgPlaceholder;
 
+
+/* Defined by PYGLIB_MODULE_START */
+extern PyObject *pyglib__gobject_module_create (void);
 
 /* Returns a new flag/enum type or %NULL */
 static PyObject *

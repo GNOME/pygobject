@@ -22,6 +22,7 @@
 #include <girepository.h>
 
 #include "pyglib.h"
+#include "pygtype.h"
 #include "pygi-info.h"
 #include "pygi-cache.h"
 #include "pygi-marshal-cleanup.h"

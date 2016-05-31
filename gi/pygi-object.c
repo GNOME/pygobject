@@ -23,7 +23,7 @@
 #include <pyglib-python-compat.h>
 
 #include "pygi-object.h"
-#include "pygobject-private.h"
+#include "pygobject-object.h"
 #include "pygparamspec.h"
 
 /*

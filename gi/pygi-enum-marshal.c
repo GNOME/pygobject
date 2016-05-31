@@ -23,8 +23,9 @@
 #include <pyglib-python-compat.h>
 
 #include "pygi-enum-marshal.h"
-#include "pygobject-private.h"
 #include "pygi-type.h"
+#include "pygenum.h"
+#include "pygflags.h"
 
 static gboolean
 gi_argument_from_c_long (GIArgument *arg_out,

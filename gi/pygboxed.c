@@ -22,9 +22,11 @@
 #  include <config.h>
 #endif
 
+#include <glib-object.h>
+
 #include <pyglib.h>
-#include "pygobject-private.h"
 #include "pygboxed.h"
+#include "pygtype.h"
 
 #include "pygi-type.h"
 

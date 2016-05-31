@@ -23,10 +23,11 @@
 #endif
 
 #include <Python.h>
+#include <glib-object.h>
 #include "pyglib.h"
-#include "pygobject-private.h"
 
 #include "pyginterface.h"
+#include "pygtype.h"
 
 GQuark pyginterface_type_key;
 GQuark pyginterface_info_key;

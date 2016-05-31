@@ -21,9 +21,9 @@
 #include <Python.h>
 #include <pyglib-python-compat.h>
 
+#include "pygtype.h"
 #include "pygi-basictype.h"
 #include "pygi-argument.h"
-#include "pygobject-private.h"
 
 #ifdef G_OS_WIN32
 #include <math.h>

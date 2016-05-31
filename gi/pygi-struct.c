@@ -23,7 +23,8 @@
 #include "pygi-foreign.h"
 #include "pygi-info.h"
 #include "pygi-type.h"
-#include "pygobject-private.h"
+#include "pygtype.h"
+#include "pygpointer.h"
 
 #include <girepository.h>
 #include <pyglib-python-compat.h>

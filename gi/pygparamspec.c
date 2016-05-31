@@ -24,8 +24,11 @@
 #endif
 
 #include <pyglib.h>
+#include <glib-object.h>
 
-#include "pygobject-private.h"
+#include "pygenum.h"
+#include "pygflags.h"
+#include "pygtype.h"
 #include "pygparamspec.h"
 
 PYGLIB_DEFINE_TYPE("gobject.GParamSpec", PyGParamSpec_Type, PyGParamSpec);

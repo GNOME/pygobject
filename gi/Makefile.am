@@ -36,6 +36,7 @@ pygi_LTLIBRARIES = _gi.la
 
 _gi_la_SOURCES = \
 	gobjectmodule.c \
+	gobjectmodule.h \
 	pygboxed.c \
 	pygboxed.h \
 	pygenum.c \
@@ -44,9 +45,10 @@ _gi_la_SOURCES = \
 	pygflags.h \
 	pyginterface.c \
 	pyginterface.h \
-	pygobject.c \
 	pygobject.h \
-	pygobject-private.h \
+	pygobject-internal.h \
+	pygobject-object.c \
+	pygobject-object.h \
 	pygparamspec.c \
 	pygparamspec.h \
 	pygpointer.c \
@@ -87,6 +89,7 @@ _gi_la_SOURCES = \
 	pygi-closure.h \
 	pygi-ccallback.c \
 	pygi-ccallback.h \
+	pygi-util.c \
 	pygi-util.h \
 	pygi-property.c \
 	pygi-property.h \

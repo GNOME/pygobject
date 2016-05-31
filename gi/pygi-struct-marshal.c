@@ -29,6 +29,9 @@
 #include "pygi-type.h"
 #include "pygi-boxed.h"
 #include "pygi-info.h"
+#include "pygpointer.h"
+#include "pygboxed.h"
+#include "pygtype.h"
 
 /*
  * _is_union_member - check to see if the py_arg is actually a member of the

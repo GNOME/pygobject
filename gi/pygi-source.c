@@ -23,12 +23,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "pygobject-private.h"
-
 #include "pygi-info.h"
 #include "pygi-boxed.h"
 #include "pygi-type.h"
 #include "pyglib.h"
+#include "pygboxed.h"
 #include "pygi-source.h"
 
 typedef struct

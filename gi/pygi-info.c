@@ -26,7 +26,7 @@
 #include "pygi-type.h"
 #include "pygi-argument.h"
 #include "pygi-util.h"
-#include "pygobject-private.h"
+#include "pygtype.h"
 
 #include <pyglib-python-compat.h>
 
