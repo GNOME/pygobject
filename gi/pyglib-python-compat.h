@@ -54,6 +54,7 @@
 #define PYGLIB_PyBytes_FromStringAndSize PyString_FromStringAndSize
 #define PYGLIB_PyBytes_Resize _PyString_Resize
 #define PYGLIB_PyBytes_AsString PyString_AsString
+#define PYGLIB_PyBytes_AsStringAndSize PyString_AsStringAndSize
 #define PYGLIB_PyBytes_Size PyString_Size
 #define PYGLIB_PyBytes_Check PyString_Check
 
@@ -189,6 +190,7 @@ PyTypeObject symbol = {                                 \
 #define PYGLIB_PyBytes_FromStringAndSize PyBytes_FromStringAndSize
 #define PYGLIB_PyBytes_Resize(o, len) _PyBytes_Resize(o, len)
 #define PYGLIB_PyBytes_AsString PyBytes_AsString
+#define PYGLIB_PyBytes_AsStringAndSize PyBytes_AsStringAndSize
 #define PYGLIB_PyBytes_Size PyBytes_Size
 #define PYGLIB_PyBytes_Check PyBytes_Check
 

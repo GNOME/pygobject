@@ -23,10 +23,10 @@ from gi.repository import GObject, GLib, Gio
 
 from gi.repository import GIMarshallingTests
 
-from compathelper import _bytes, _unicode
+from compathelper import _bytes, _unicode, PY2, PY3
 from helper import capture_exceptions
 
-if sys.version_info < (3, 0):
+if PY2:
     CONSTANT_UTF8 = "const \xe2\x99\xa5 utf8"
     PY2_UNICODE_UTF8 = unicode(CONSTANT_UTF8, 'UTF-8')
     CHAR_255 = '\xff'
@@ -724,8 +724,152 @@ class TestFilename(unittest.TestCase):
         self.assertTrue(os.path.isdir(dirname))
         os.rmdir(dirname)
 
-    def test_filename_type_error(self):
-        self.assertRaises(TypeError, GLib.file_get_contents, 23)
+    def test_wrong_types(self):
+        self.assertRaises(TypeError, GIMarshallingTests.filename_copy, 23)
+        self.assertRaises(TypeError, GIMarshallingTests.filename_copy, [])
+
+    def test_null(self):
+        self.assertTrue(GIMarshallingTests.filename_copy(None) is None)
+        self.assertRaises(TypeError, GIMarshallingTests.filename_exists, None)
+
+    def test_round_trip(self):
+        self.assertEqual(GIMarshallingTests.filename_copy(u"foo"), "foo")
+        self.assertEqual(GIMarshallingTests.filename_copy(b"foo"), "foo")
+
+    def test_contains_null(self):
+        self.assertRaises(
+            (ValueError, TypeError),
+            GIMarshallingTests.filename_copy, b"foo\x00")
+        self.assertRaises(
+            (ValueError, TypeError),
+            GIMarshallingTests.filename_copy, u"foo\x00")
+
+    def test_as_is_py2(self):
+        if not PY2:
+            return
+
+        values = [
+            b"foo",
+            b"\xff\xff",
+            b"\xc3\xb6\xc3\xa4\xc3\xbc",
+            b"\xed\xa0\xbd",
+            b"\xf0\x90\x80\x81",
+        ]
+
+        for v in values:
+            self.assertEqual(GIMarshallingTests.filename_copy(v), v)
+            self.assertEqual(GIMarshallingTests.filename_to_glib_repr(v), v)
+
+    def test_win32_surrogates(self):
+        if os.name != "nt":
+            return
+
+        copy = GIMarshallingTests.filename_copy
+        glib_repr = GIMarshallingTests.filename_to_glib_repr
+
+        if PY3:
+            self.assertEqual(copy(u"\ud83d"), u"\ud83d")
+            self.assertEqual(copy(u"\x61\uDC00"), u"\x61\uDC00")
+            self.assertEqual(copy(u"\uD800\uDC01"), u"\U00010001")
+            self.assertEqual(copy(u"\uD83D\x20\uDCA9"), u"\uD83D\x20\uDCA9")
+        else:
+            self.assertEqual(copy(u"\ud83d"), u"\ud83d".encode("utf-8"))
+            self.assertEqual(copy(u"\uD800\uDC01").decode("utf-8"),
+                             u"\U00010001")
+
+        self.assertEqual(glib_repr(u"\ud83d"), b"\xed\xa0\xbd")
+        self.assertEqual(glib_repr(u"\uD800\uDC01"), b"\xf0\x90\x80\x81")
+
+        self.assertEqual(
+            glib_repr(u"\uD800\uDBFF"), b"\xED\xA0\x80\xED\xAF\xBF")
+        self.assertEqual(
+            glib_repr(u"\uD800\uE000"), b"\xED\xA0\x80\xEE\x80\x80")
+        self.assertEqual(
+            glib_repr(u"\uD7FF\uDC00"), b"\xED\x9F\xBF\xED\xB0\x80")
+        self.assertEqual(glib_repr(u"\x61\uDC00"), b"\x61\xED\xB0\x80")
+        self.assertEqual(glib_repr(u"\uDC00"), b"\xED\xB0\x80")
+
+    def test_win32_bytes_py3(self):
+        if not (os.name == "nt" and PY3):
+            return
+
+        values = [
+            b"foo",
+            b"\xff\xff",
+            b"\xc3\xb6\xc3\xa4\xc3\xbc",
+            b"\xed\xa0\xbd",
+            b"\xf0\x90\x80\x81",
+        ]
+
+        for v in values:
+            try:
+                uni = v.decode(sys.getfilesystemencoding(), "surrogatepass")
+            except UnicodeDecodeError:
+                continue
+            self.assertEqual(GIMarshallingTests.filename_copy(v), uni)
+
+    def test_unix_various(self):
+        if os.name == "nt":
+            return
+
+        copy = GIMarshallingTests.filename_copy
+        glib_repr = GIMarshallingTests.filename_to_glib_repr
+
+        if PY3:
+            str_path = copy(b"\xff\xfe")
+            self.assertTrue(isinstance(str_path, str))
+            self.assertEqual(str_path, os.fsdecode(b"\xff\xfe"))
+            self.assertEqual(copy(str_path), str_path)
+            self.assertEqual(glib_repr(b"\xff\xfe"), b"\xff\xfe")
+            self.assertEqual(glib_repr(str_path), b"\xff\xfe")
+
+            # if getfilesystemencoding is ASCII, then we should fail like
+            # os.fsencode
+            try:
+                byte_path = os.fsencode(u"ä")
+            except UnicodeEncodeError:
+                self.assertRaises(UnicodeEncodeError, copy, u"ä")
+            else:
+                self.assertEqual(copy(u"ä"), u"ä")
+                self.assertEqual(glib_repr(u"ä"), byte_path)
+        else:
+            self.assertTrue(isinstance(copy(b"\xff\xfe"), bytes))
+            self.assertEqual(copy(u"foo"), b"foo")
+            self.assertTrue(isinstance(copy(u"foo"), bytes))
+            try:
+                byte_path = u"ä".encode(sys.getfilesystemencoding())
+            except UnicodeEncodeError:
+                self.assertRaises(UnicodeEncodeError, copy, u"ä")
+            else:
+                self.assertEqual(copy(u"ä"), byte_path)
+                self.assertEqual(glib_repr(u"ä"), byte_path)
+
+    @unittest.skip("glib can't handle non-unicode paths")
+    def test_win32_surrogates_exists(self):
+        if os.name != "nt":
+            return
+
+        path = os.path.join(self.workdir, u"\ud83d")
+        with open(path, "wb"):
+            self.assertTrue(os.path.exists(path))
+            self.assertTrue(GIMarshallingTests.filename_exists(path))
+        os.unlink(path)
+
+    def test_path_exists_various_types(self):
+        wd = self.workdir
+        wdb = os.fsencode(wd) if PY3 else wd
+
+        paths = [(wdb, b"foo-1"), (wd, u"foo-2"), (wd, u"öäü-3")]
+        if PY3:
+            paths.append((wd, os.fsdecode(b"\xff\xfe-4")))
+
+        if os.name != "nt":
+            paths.append((wdb, b"\xff\xfe-5"))
+
+        for (d, path) in paths:
+            path = os.path.join(d, path)
+            with open(path, "wb"):
+                self.assertTrue(GIMarshallingTests.filename_exists(path))
 
 
 class TestArray(unittest.TestCase):

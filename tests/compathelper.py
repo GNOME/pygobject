@@ -1,6 +1,8 @@
 import sys
 import collections
 
+PY2 = PY3 = False
+
 if sys.version_info >= (3, 0):
     '''
     for tests that need to test long values in python 2
@@ -67,6 +69,7 @@ if sys.version_info >= (3, 0):
     callable = lambda x: isinstance(x, collections.Callable)
     from io import StringIO
     StringIO
+    PY3 = True
 else:
     _long = long
     _basestring = basestring
@@ -75,3 +78,4 @@ else:
     callable = callable
     from StringIO import StringIO
     StringIO
+    PY2 = True

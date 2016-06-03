@@ -17,6 +17,7 @@
  */
 
 #include "gimarshallingtestsextra.h"
+#include <string.h>
 
 void
 gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1)
@@ -78,6 +79,19 @@ gi_marshalling_tests_ghashtable_enum_none_return (void)
 gchar *
 gi_marshalling_tests_filename_copy (gchar *path_in)
 {
+  return g_strdup (path_in);
+}
+
+/**
+ * gi_marshalling_tests_filename_to_glib_repr:
+ * @path_in: (type filename) (nullable)
+ *
+ * Returns: (array length=len) (element-type guint8)
+ */
+gchar *
+gi_marshalling_tests_filename_to_glib_repr (gchar *path_in, gsize *len)
+{
+  *len = strlen(path_in);
   return g_strdup (path_in);
 }
 

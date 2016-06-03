@@ -35,5 +35,6 @@ GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);
 
 gchar * gi_marshalling_tests_filename_copy (gchar *path_in);
 gboolean gi_marshalling_tests_filename_exists (gchar *path);
+gchar * gi_marshalling_tests_filename_to_glib_repr (gchar *path_in, gsize *len);
 
 #endif /* EXTRA_TESTS */

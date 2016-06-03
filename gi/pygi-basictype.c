@@ -246,50 +246,164 @@ _pygi_marshal_from_py_utf8 (PyObject          *py_arg,
     return TRUE;
 }
 
-static gboolean
-_pygi_marshal_from_py_filename (PyObject          *py_arg,
-                                GIArgument        *arg,
-                                gpointer          *cleanup_data)
+G_GNUC_UNUSED static gboolean
+_pygi_marshal_from_py_filename_unix (PyObject          *py_arg,
+                                     GIArgument        *arg,
+                                     gpointer          *cleanup_data)
 {
-    gchar *string_;
-    GError *error = NULL;
-    PyObject *tmp = NULL;
+    gchar *filename;
 
     if (py_arg == Py_None) {
         arg->v_pointer = NULL;
         return TRUE;
     }
 
-    if (PyUnicode_Check (py_arg)) {
-        tmp = PyUnicode_AsUTF8String (py_arg);
-        if (!tmp)
+    if (PYGLIB_PyBytes_Check (py_arg)) {
+        char *buffer;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
             return FALSE;
 
-        string_ = PYGLIB_PyBytes_AsString (tmp);
-    }
+        filename = g_strdup (buffer);
+    } else if (PyUnicode_Check (py_arg)) {
+        PyObject *bytes;
+        char *buffer;
+
 #if PY_VERSION_HEX < 0x03000000
-    else if (PyString_Check (py_arg)) {
-        string_ = PyString_AsString (py_arg);
-    }
+        bytes = PyUnicode_AsEncodedString (py_arg, Py_FileSystemDefaultEncoding,
+                                           NULL);
+#else
+        bytes = PyUnicode_EncodeFSDefault (py_arg);
 #endif
-    else {
-        PyErr_Format (PyExc_TypeError, "Must be string, not %s",
+
+        if (!bytes)
+            return FALSE;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
+            Py_DECREF (bytes);
+            return FALSE;
+        }
+
+        filename = g_strdup (buffer);
+        Py_DECREF (bytes);
+    } else {
+        PyErr_Format (PyExc_TypeError, "Must be bytes, not %s",
                       py_arg->ob_type->tp_name);
         return FALSE;
     }
 
-    arg->v_string = g_filename_from_utf8 (string_, -1, NULL, NULL, &error);
-    Py_XDECREF (tmp);
+    arg->v_string = filename;
+    *cleanup_data = filename;
+    return TRUE;
+}
 
-    if (arg->v_string == NULL) {
-        PyErr_SetString (PyExc_Exception, error->message);
-        g_error_free (error);
-        /* TODO: Convert the error to an exception. */
-        return FALSE;
+G_GNUC_UNUSED static gboolean
+_pygi_marshal_from_py_filename_win32 (PyObject          *py_arg,
+                                      GIArgument        *arg,
+                                      gpointer          *cleanup_data)
+{
+    gchar *filename;
+
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
     }
 
-    *cleanup_data = arg->v_string;
+#if PY_VERSION_HEX < 0x03000000
+    if (PYGLIB_PyBytes_Check (py_arg)) {
+        char *buffer;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
+            return FALSE;
+
+        filename = g_strdup (buffer);
+    } else if (PyUnicode_Check (py_arg)) {
+        PyObject *bytes;
+        char *buffer;
+
+        bytes = PyUnicode_AsUTF8String (py_arg);
+        if (!bytes)
+            return FALSE;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
+            Py_DECREF (bytes);
+            return FALSE;
+        }
+
+        filename = g_strdup (buffer);
+        Py_DECREF (bytes);
+    } else {
+        PyErr_Format (PyExc_TypeError, "Must be unicode, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+#else
+    if (PYGLIB_PyBytes_Check (py_arg)) {
+        PyObject *uni_arg;
+        gboolean result;
+        char *buffer;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (py_arg, &buffer, NULL) == -1)
+            return FALSE;
+
+        uni_arg = PyUnicode_DecodeFSDefault (buffer);
+        if (!uni_arg)
+            return FALSE;
+        result = _pygi_marshal_from_py_filename_win32 (uni_arg, arg, cleanup_data);
+        Py_DECREF (uni_arg);
+        return result;
+    } else if (PyUnicode_Check (py_arg)) {
+        PyObject *bytes, *temp_uni;
+        char *buffer;
+
+        /* The roundtrip merges lone surrogates, so we get the same output as
+         * with Py 2. Requires 3.4+ because of https://bugs.python.org/issue27971
+         * Separated lone surrogates can occur when concatenating two paths.
+         */
+        bytes = PyUnicode_AsEncodedString (py_arg, "utf-16-le", "surrogatepass");
+        if (!bytes)
+            return FALSE;
+        temp_uni = PyUnicode_FromEncodedObject (bytes, "utf-16-le", "surrogatepass");
+        Py_DECREF (bytes);
+        if (!temp_uni)
+            return FALSE;
+        /* glib uses utf-8, so encode to that and allow surrogates so we can
+         * represent all possible path values
+         */
+        bytes = PyUnicode_AsEncodedString (temp_uni, "utf-8", "surrogatepass");
+        Py_DECREF (temp_uni);
+        if (!bytes)
+            return FALSE;
+
+        if (PYGLIB_PyBytes_AsStringAndSize (bytes, &buffer, NULL) == -1) {
+            Py_DECREF (bytes);
+            return FALSE;
+        }
+
+        filename = g_strdup (buffer);
+        Py_DECREF (bytes);
+    } else {
+        PyErr_Format (PyExc_TypeError, "Must be str, not %s",
+                      py_arg->ob_type->tp_name);
+        return FALSE;
+    }
+#endif
+
+    arg->v_string = filename;
+    *cleanup_data = filename;
     return TRUE;
+}
+
+static gboolean
+_pygi_marshal_from_py_filename (PyObject          *py_arg,
+                                GIArgument        *arg,
+                                gpointer          *cleanup_data)
+{
+#ifdef G_OS_WIN32
+    return _pygi_marshal_from_py_filename_win32 (py_arg, arg, cleanup_data);
+#else
+    return _pygi_marshal_from_py_filename_unix (py_arg, arg, cleanup_data);
+#endif
 }
 
 static gboolean
@@ -617,23 +731,23 @@ _pygi_marshal_to_py_utf8 (GIArgument *arg)
 static PyObject *
 _pygi_marshal_to_py_filename (GIArgument *arg)
 {
-    gchar *string = NULL;
-    PyObject *py_obj = NULL;
-    GError *error = NULL;
+    PyObject *py_obj;
 
     if (arg->v_string == NULL) {
         Py_RETURN_NONE;
     }
 
-    string = g_filename_to_utf8 (arg->v_string, -1, NULL, NULL, &error);
-    if (string == NULL) {
-        PyErr_SetString (PyExc_Exception, error->message);
-        /* TODO: Convert the error to an exception. */
-        return NULL;
-    }
-
-    py_obj = PYGLIB_PyUnicode_FromString (string);
-    g_free (string);
+#if PY_VERSION_HEX < 0x03000000
+    /* On PY2 we return str as is */
+    py_obj = PyString_FromString (arg->v_string);
+#else
+#ifdef G_OS_WIN32
+    py_obj = PyUnicode_DecodeUTF8 (arg->v_string, strlen(arg->v_string),
+                                   "surrogatepass");
+#else
+    py_obj = PyUnicode_DecodeFSDefault (arg->v_string);
+#endif
+#endif
 
     return py_obj;
 }

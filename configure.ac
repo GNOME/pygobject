@@ -13,7 +13,7 @@ AC_PREREQ([2.68])
 #   $ ./configure --with-python=~/my-patched-python/python
 
 m4_define(python_min_ver, 2.7)
-m4_define(python3_min_ver, 3.1)
+m4_define(python3_min_ver, 3.2)
 
 dnl the pygobject version number
 m4_define(pygobject_major_version, 3)
