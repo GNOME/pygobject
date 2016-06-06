@@ -621,11 +621,11 @@ class _TestCMarshaller:
         # explicit float
         v = GObject.Value(GObject.TYPE_FLOAT, 1.234)
         rv = self.obj.emit("test-gvalue", v)
-        self.assertAlmostEqual(rv, 1.234, 4)
+        self.assertAlmostEqual(rv, 1.234, places=4)
 
         # implicit float
         rv = self.obj.emit("test-gvalue", 1.234)
-        self.assertAlmostEqual(rv, 1.234, 4)
+        self.assertAlmostEqual(rv, 1.234, places=4)
 
         # explicit int64
         v = GObject.Value(GObject.TYPE_INT64, GLib.MAXINT64)

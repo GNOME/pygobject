@@ -1068,15 +1068,15 @@ class CPropertiesTestBase(object):
         self.assertEqual(self.get_prop(self.obj, 'some-float'), GLib.MAXFLOAT)
 
         obj = GIMarshallingTests.PropertiesObject(some_float=42.42)
-        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.42, 4)
+        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.42, places=4)
 
         obj = GIMarshallingTests.PropertiesObject(some_float=42)
-        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.0, 4)
+        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.0, places=4)
 
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-float', 'foo')
         self.assertRaises(TypeError, self.set_prop, self.obj, 'some-float', None)
 
-        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.0, 4)
+        self.assertAlmostEqual(self.get_prop(obj, 'some-float'), 42.0, places=4)
 
     def test_double(self):
         self.assertEqual(self.get_prop(self.obj, 'some-double'), 0)
