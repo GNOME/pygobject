@@ -14,11 +14,14 @@ try:
 except ImportError:
     has_cairo = False
 
+has_region = has_cairo and hasattr(cairo, "Region")
+
 try:
-    from gi.repository import Gtk
-    Gtk  # pyflakes
+    from gi.repository import Gtk, Gdk
+    Gtk, Gdk  # pyflakes
 except:
     Gtk = None
+    Gdk = None
 
 from gi.repository import GObject
 
@@ -64,6 +67,27 @@ class Test(unittest.TestCase):
         self.assertRaises(ImportError, gi.require_foreign, 'invalid_module')
         self.assertRaises(ImportError, gi.require_foreign, 'invalid_module', 'invalid_symbol')
         self.assertRaises(ImportError, gi.require_foreign, 'cairo', 'invalid_symbol')
+
+
+@unittest.skipUnless(has_cairo, 'built without cairo support')
+@unittest.skipUnless(has_region, 'built without cairo.Region support')
+@unittest.skipUnless(Gdk, 'Gdk not available')
+class TestRegion(unittest.TestCase):
+
+    def test_region_to_py(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        context.paint()
+        region = Gdk.cairo_region_create_from_surface(surface)
+        r = region.get_extents()
+        self.assertEqual((r.height, r.width), (10, 10))
+
+    def test_region_from_py(self):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        context = cairo.Context(surface)
+        region = cairo.Region(cairo.RectangleInt(0, 0, 42, 42))
+        Gdk.cairo_region(context, region)
+        self.assertTrue("42" in repr(list(context.copy_path())))
 
 
 @unittest.skipUnless(has_cairo, 'built without cairo support')

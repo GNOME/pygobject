@@ -367,6 +367,49 @@ cairo_pattern_from_gvalue (const GValue *value)
     return PycairoPattern_FromPattern (pattern, NULL);
 }
 
+#if PY_VERSION_HEX >= 0x03000000 && defined(PycairoRegion_Type)
+
+static PyObject *
+cairo_region_to_arg (PyObject        *value,
+                     GIInterfaceInfo *interface_info,
+                     GITransfer       transfer,
+                     GIArgument      *arg)
+{
+    cairo_region_t *region;
+
+    g_assert (transfer == GI_TRANSFER_NOTHING);
+
+    region = ( (PycairoRegion*) value)->region;
+    if (!region) {
+        PyErr_SetString (PyExc_ValueError, "Region instance wrapping a NULL region");
+        return NULL;
+    }
+
+    arg->v_pointer = region;
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+cairo_region_from_arg (GIInterfaceInfo *interface_info,
+                       GITransfer transfer,
+                       gpointer data)
+{
+    cairo_region_t *region = (cairo_region_t*) data;
+
+    if (transfer == GI_TRANSFER_NOTHING)
+        cairo_region_reference (region);
+
+    return PycairoRegion_FromRegion (region);
+}
+
+static PyObject *
+cairo_region_release (GIBaseInfo *base_info,
+                      gpointer    struct_)
+{
+    cairo_region_destroy ( (cairo_region_t*) struct_);
+    Py_RETURN_NONE;
+}
+#endif
 
 static PyMethodDef _gi_cairo_functions[] = { {0,} };
 PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
@@ -405,6 +448,14 @@ PYGLIB_MODULE_START(_gi_cairo, "_gi_cairo")
                                   cairo_font_options_to_arg,
                                   cairo_font_options_from_arg,
                                   cairo_font_options_release);
+
+#if PY_VERSION_HEX >= 0x03000000 && defined(PycairoRegion_Type)
+    pygi_register_foreign_struct ("cairo",
+                                  "Region",
+                                  cairo_region_to_arg,
+                                  cairo_region_from_arg,
+                                  cairo_region_release);
+#endif
 
     pyg_register_gtype_custom (CAIRO_GOBJECT_TYPE_CONTEXT,
                                cairo_context_from_gvalue,
