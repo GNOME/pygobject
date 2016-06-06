@@ -181,6 +181,7 @@ pygi_signal_closure_marshal(GClosure *closure,
             }
 
             if (item == NULL) {
+                PyErr_Print ();
                 goto out;
             }
             PyTuple_SetItem(params, i, item);
