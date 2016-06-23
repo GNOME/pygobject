@@ -67,3 +67,6 @@ Makefile.in
 /tags
 /xmldocs.make
 /tmp/*
+/build/
+/dist/
+/pygobject.egg-info/
