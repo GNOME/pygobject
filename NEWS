@@ -1,3 +1,16 @@
+3.21.91 25-Aug-2016
+        - Allow installing with pip (Mathieu Bridon) (#767988)
+        - Skip a test with older glib (Christoph Reiter) (#740301)
+        - Fix a test with Python 3.1/3.2 (Arfrever Frehtes Taifersar Arahesis, Christoph Reiter) (#740324)
+        - tests: Use places kwarg for assertAlmostEqual (Arfrever Frehtes Taifersar Arahesis, Christoph Reiter) (#740337)
+        - Print exception if marshalling a signal argument fails (Christoph Reiter) (#748198)
+        - overrides: allow treemodel sequence shorthands (Marinus Schraal) (#766580)
+        - Remove pygobject-external.h (Christoph Reiter) (#767084)
+        - Remove pygobject-private.h and rename pygobject.c to pygobject-object.c (Christoph Reiter) (#767084)
+        - Merge pyglib-private.h into pyglib.h (Christoph Reiter) (#767084)
+        - Remove pygi.h and pygi-private.h (Christoph Reiter) (#767084)
+        - configure.ac: post-release version bump to 3.21.1 (Simon Feltman)
+
 3.21.0  24-Apr-2016
         - gi: Add require_versions() function (Dustin Falgout) (#761141)
         - test_gerror_novalue: Don't assign the error to a variable
