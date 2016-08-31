@@ -37,10 +37,10 @@ gssize _pygi_argument_array_length_marshal (gsize length_arg_index,
                                             void *user_data2);
 
 gpointer _pygi_arg_to_hash_pointer (const GIArgument *arg,
-                                    GITypeTag         type_tag);
+                                    GITypeInfo       *type_info);
 
 void _pygi_hash_pointer_to_arg (GIArgument *arg,
-                                GITypeTag   type_tag);
+                                GITypeInfo *type_info);
 
 GArray* _pygi_argument_to_array (GIArgument  *arg,
                                  PyGIArgArrayLengthPolicy array_length_policy,

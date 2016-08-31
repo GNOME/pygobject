@@ -85,10 +85,33 @@ pygi_argument_to_gssize (GIArgument *arg_in,
     }
 }
 
+static GITypeTag
+_pygi_get_storage_type (GITypeInfo *type_info)
+{
+    GITypeTag type_tag = g_type_info_get_tag (type_info);
+
+    if (type_tag == GI_TYPE_TAG_INTERFACE) {
+        GIBaseInfo *interface = g_type_info_get_interface (type_info);
+        switch (g_base_info_get_type (interface)) {
+            case GI_INFO_TYPE_ENUM:
+            case GI_INFO_TYPE_FLAGS:
+                type_tag = g_enum_info_get_storage_type ((GIEnumInfo *)interface);
+                break;
+            default:
+                /* FIXME: we might have something to do for other types */
+                break;
+        }
+        g_base_info_unref (interface);
+    }
+    return type_tag;
+}
+
 void
 _pygi_hash_pointer_to_arg (GIArgument *arg,
-                           GITypeTag  type_tag)
+                           GITypeInfo *type_info)
 {
+    GITypeTag type_tag = _pygi_get_storage_type (type_info);
+
     switch (type_tag) {
         case GI_TYPE_TAG_INT8:
             arg->v_int8 = GPOINTER_TO_INT (arg->v_pointer);
@@ -122,8 +145,10 @@ _pygi_hash_pointer_to_arg (GIArgument *arg,
 
 gpointer
 _pygi_arg_to_hash_pointer (const GIArgument *arg,
-                           GITypeTag        type_tag)
+                           GITypeInfo       *type_info)
 {
+    GITypeTag type_tag = _pygi_get_storage_type (type_info);
+
     switch (type_tag) {
         case GI_TYPE_TAG_INT8:
             return GINT_TO_POINTER (arg->v_int8);
@@ -631,7 +656,7 @@ list_item_error:
                 }
 
                 g_hash_table_insert (hash_table, key.v_pointer,
-                                     _pygi_arg_to_hash_pointer (&value, g_type_info_get_tag (value_type_info)));
+                                     _pygi_arg_to_hash_pointer (&value, value_type_info));
                 continue;
 
 hash_table_item_error:
@@ -925,7 +950,7 @@ _pygi_argument_to_object (GIArgument  *arg,
                     break;
                 }
 
-                _pygi_hash_pointer_to_arg (&value, g_type_info_get_tag (value_type_info));
+                _pygi_hash_pointer_to_arg (&value, value_type_info);
                 py_value = _pygi_argument_to_object (&value, value_type_info, item_transfer);
                 if (py_value == NULL) {
                     Py_DECREF (py_key);

@@ -35,3 +35,36 @@ gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1)
   g_assert_cmpint (error->code, ==, error1->code);
   g_assert_cmpstr (error->message, ==, error1->message);
 }
+
+/**
+ * gi_marshalling_tests_ghashtable_enum_none_in:
+ * @hash_table: (element-type gint GIMarshallingTestsExtraEnum) (transfer none):
+ */
+void
+gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table)
+{
+  g_assert_cmpint (GPOINTER_TO_INT (g_hash_table_lookup (hash_table, GINT_TO_POINTER (1))), ==, GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE1);
+  g_assert_cmpint (GPOINTER_TO_INT (g_hash_table_lookup (hash_table, GINT_TO_POINTER (2))), ==, GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE2);
+  g_assert_cmpint (GPOINTER_TO_INT (g_hash_table_lookup (hash_table, GINT_TO_POINTER (3))), ==, GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE3);
+}
+
+/**
+ * gi_marshalling_tests_ghashtable_enum_none_return:
+ *
+ * Returns: (element-type gint GIMarshallingTestsExtraEnum) (transfer none):
+ */
+GHashTable *
+gi_marshalling_tests_ghashtable_enum_none_return (void)
+{
+  static GHashTable *hash_table = NULL;
+
+  if (hash_table == NULL)
+    {
+      hash_table = g_hash_table_new (NULL, NULL);
+      g_hash_table_insert (hash_table, GINT_TO_POINTER (1), GINT_TO_POINTER (GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE1));
+      g_hash_table_insert (hash_table, GINT_TO_POINTER (2), GINT_TO_POINTER (GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE2));
+      g_hash_table_insert (hash_table, GINT_TO_POINTER (3), GINT_TO_POINTER (GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE3));
+    }
+
+  return hash_table;
+}

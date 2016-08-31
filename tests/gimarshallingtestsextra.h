@@ -21,6 +21,16 @@
 
 #include <glib-object.h>
 
+typedef enum
+{
+  GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE1,
+  GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE2,
+  GI_MARSHALLING_TESTS_EXTRA_ENUM_VALUE3 = 42
+} GIMarshallingTestsExtraEnum;
+
+
 void gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1);
+void gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table);
+GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);
 
 #endif /* EXTRA_TESTS */

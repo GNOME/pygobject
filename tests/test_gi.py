@@ -1265,6 +1265,17 @@ class TestGHashTable(unittest.TestCase):
         self.assertEqual({'-1': '1', '0': '0', '1': '1'},
                          GIMarshallingTests.ghashtable_utf8_full_inout(i))
 
+    def test_ghashtable_enum_none_in(self):
+        GIMarshallingTests.ghashtable_enum_none_in({1: GIMarshallingTests.ExtraEnum.VALUE1,
+                                                    2: GIMarshallingTests.ExtraEnum.VALUE2,
+                                                    3: GIMarshallingTests.ExtraEnum.VALUE3})
+
+    def test_ghashtable_enum_none_return(self):
+        self.assertEqual({1: GIMarshallingTests.ExtraEnum.VALUE1,
+                          2: GIMarshallingTests.ExtraEnum.VALUE2,
+                          3: GIMarshallingTests.ExtraEnum.VALUE3},
+                         GIMarshallingTests.ghashtable_enum_none_return())
+
 
 class TestGValue(unittest.TestCase):
 
