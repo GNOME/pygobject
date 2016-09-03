@@ -135,7 +135,6 @@ EXTRA_DIST = \
 clean-local:
 	rm -f $(check_LTLIBRARIES:.la=.$(OS_EXT)) file.txt~
 
-DBUS_LAUNCH=$(shell which dbus-launch)
 RUN_TESTS_ENV_VARS= \
 	PYTHONPATH=$(top_builddir):$(top_builddir)/tests:$${PYTHONPATH:+:$$PYTHONPATH} \
 	LD_LIBRARY_PATH=$(builddir)/.libs:$$LD_LIBRARY_PATH \
@@ -149,10 +148,8 @@ RUN_TESTS_ENV_VARS= \
 # pygtkcompat tests need to be run in a separate process as they
 # clobber global name space
 check-local: $(check_LTLIBRARIES:.la=.$(OS_EXT)) $(test_typelibs) gschemas.compiled
-	export `$(DBUS_LAUNCH)` && \
-	$(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
-	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
-	kill $$DBUS_SESSION_BUS_PID; \
+	$(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd $(srcdir)/runtests.py; rc=$$?; \
+	[ "$$rc" -ne 0 ] || [ -n "$$TEST_NAMES" ] || { TEST_NAMES=compat_test_pygtk $(RUN_TESTS_ENV_VARS) dbus-run-session -- $(EXEC_NAME) $(PYTHON) -Wd -Werror::PendingDeprecationWarning -Werror::DeprecationWarning -Werror::RuntimeWarning $(srcdir)/runtests.py; rc=$$?; }; \
 	exit $$rc
 
 check.gdb:
