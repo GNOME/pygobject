@@ -33,4 +33,7 @@ void gi_marshalling_tests_compare_two_gerrors_in_gvalue (GValue *v, GValue *v1);
 void gi_marshalling_tests_ghashtable_enum_none_in (GHashTable *hash_table);
 GHashTable * gi_marshalling_tests_ghashtable_enum_none_return (void);
 
+gchar * gi_marshalling_tests_filename_copy (gchar *path_in);
+gboolean gi_marshalling_tests_filename_exists (gchar *path);
+
 #endif /* EXTRA_TESTS */

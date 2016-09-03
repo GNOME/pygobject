@@ -68,3 +68,25 @@ gi_marshalling_tests_ghashtable_enum_none_return (void)
 
   return hash_table;
 }
+
+/**
+ * gi_marshalling_tests_filename_copy:
+ * @path_in: (type filename) (nullable)
+ *
+ * Returns: (type filename) (nullable)
+ */
+gchar *
+gi_marshalling_tests_filename_copy (gchar *path_in)
+{
+  return g_strdup (path_in);
+}
+
+/**
+ * gi_marshalling_tests_filename_exists:
+ * @path: (type filename)
+ */
+gboolean
+gi_marshalling_tests_filename_exists (gchar *path)
+{
+  return g_file_test (path, G_FILE_TEST_EXISTS);
+}

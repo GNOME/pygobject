@@ -255,6 +255,11 @@ _pygi_marshal_from_py_filename (PyObject          *py_arg,
     GError *error = NULL;
     PyObject *tmp = NULL;
 
+    if (py_arg == Py_None) {
+        arg->v_pointer = NULL;
+        return TRUE;
+    }
+
     if (PyUnicode_Check (py_arg)) {
         tmp = PyUnicode_AsUTF8String (py_arg);
         if (!tmp)

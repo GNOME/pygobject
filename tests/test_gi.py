@@ -710,6 +710,10 @@ class TestFilename(unittest.TestCase):
         self.assertEqual(result, True)
         self.assertEqual(contents, b'hello world!\n\x01\x02')
 
+    def test_filename_in_nullable(self):
+        self.assertTrue(GIMarshallingTests.filename_copy(None) is None)
+        self.assertRaises(TypeError, GIMarshallingTests.filename_exists, None)
+
     def test_filename_out(self):
         self.assertRaises(GLib.GError, GLib.Dir.make_tmp, 'test')
 
