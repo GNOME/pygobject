@@ -1,3 +1,10 @@
+3.21.92 11-Sep-2016
+        - Handle nullable filename parameters (Christoph Reiter) (#770821)
+        - Fix list/hashtable enum <-> hash conversion on 64-bit big endian (Aurelien Jarno) (#770608)
+        - Allow passing sockets to io_add_watch on win32 (Lukas K) (#766396)
+        - tests: use dbus-run-session instead of dbus-launch to run tests (Michael Biebl) (#770798)
+        - configure.ac: post-release version bump to 3.21.92 (Christoph Reiter)
+
 3.21.91 25-Aug-2016
         - Allow installing with pip (Mathieu Bridon) (#767988)
         - Skip a test with older glib (Christoph Reiter) (#740301)
