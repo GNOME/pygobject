@@ -1852,6 +1852,18 @@ class TestTextBuffer(unittest.TestCase):
         self.assertTrue(sel[1].equal(end))
 
         buffer.set_text('')
+        buffer.insert_with_tags(buffer.get_start_iter(), 'HelloHello')
+        start, end = buffer.get_bounds()
+        text = buffer.get_text(start, end, False)
+        self.assertEqual(text, 'HelloHello')
+
+        buffer.set_text('')
+        buffer.insert_with_tags_by_name(buffer.get_start_iter(), 'HelloHello')
+        start, end = buffer.get_bounds()
+        text = buffer.get_text(start, end, False)
+        self.assertEqual(text, 'HelloHello')
+
+        buffer.set_text('')
         buffer.insert_with_tags(buffer.get_start_iter(), 'HelloHello', tag)
         (start, end) = buffer.get_bounds()
         self.assertTrue(start.begins_tag(tag))

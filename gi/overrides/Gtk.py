@@ -745,9 +745,6 @@ class TextBuffer(Gtk.TextBuffer):
             self.apply_tag(tag, start, iter)
 
     def insert_with_tags_by_name(self, iter, text, *tags):
-        if not tags:
-            return
-
         tag_objs = []
 
         for tag in tags:
