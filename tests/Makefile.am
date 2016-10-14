@@ -32,13 +32,18 @@ GIMarshallingTests-1.0.typelib: GIMarshallingTests-1.0.gir Makefile
 	$(AM_V_GEN) $(INTROSPECTION_COMPILER) $< -o $@
 
 # regress.c needs cairo
-if ENABLE_CAIRO
 check_LTLIBRARIES += libregress.la
 test_typelibs += Regress-1.0.typelib
 nodist_libregress_la_SOURCES = $(GI_DATADIR)/tests/regress.c $(GI_DATADIR)/tests/regress.h
 # We don't control the source so don't pass WARN_CFLAGS etc
+if ENABLE_CAIRO
 libregress_la_CFLAGS = $(GIO_CFLAGS) $(CAIRO_CFLAGS)
 libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) $(CAIRO_LIBS) -no-undefined
+else
+libregress_la_CFLAGS = $(GIO_CFLAGS) -D_GI_DISABLE_CAIRO
+libregress_la_LDFLAGS = -module -avoid-version $(GIO_LIBS) -no-undefined
+endif
+
 
 libregress.la: $(libregress_la_OBJECTS) $(libregress_la_DEPENDENCIES)
 	$(AM_V_GEN) $(LINK) -rpath $(pkgpyexecdir) $(libregress_la_LDFLAGS) $(libregress_la_OBJECTS) $(libregress_la_LIBADD) $(LIBS)
@@ -54,8 +59,6 @@ Regress-1.0.gir: libregress.la Makefile
 	$(nodist_libregress_la_SOURCES)
 Regress-1.0.typelib: Regress-1.0.gir Makefile
 	$(AM_V_GEN) $(INTROSPECTION_COMPILER) $< -o $@
-
-endif # ENABLE_CAIRO
 
 
 gschemas.compiled: org.gnome.test.gschema.xml
