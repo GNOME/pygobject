@@ -375,7 +375,7 @@ pygerror_to_gvalue (GValue *value, PyObject *pyerror)
 void
 pygi_error_register_types (PyObject *module)
 {
-    PyObject *error_module = PyImport_ImportModule ("gi._error");
+    PyObject *error_module = PYGLIB_PyImport_ImportModule ("gi._error");
     if (!error_module) {
         return;
     }
